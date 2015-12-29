@@ -84,7 +84,7 @@ public class Permissions {
 				MCPlayer mcp = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				if (mcp != null && !mcp.getName().equals(args[0].val())) {
 					if (!Static.hasCHPermission(getName(), environment)) {
-						throw new ConfigRuntimeException("You do not have permission to use the " + getName() + " function.",
+						throw ConfigRuntimeException.BuildException("You do not have permission to use the " + getName() + " function.",
 								Exceptions.ExceptionType.InsufficientPermissionException, t);
 					}
 				}

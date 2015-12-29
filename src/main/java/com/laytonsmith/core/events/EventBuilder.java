@@ -90,7 +90,7 @@ public final class EventBuilder {
                     }
                 }
                 if(constructor == null){
-                    throw new ConfigRuntimeException("Cannot find an acceptable constructor that follows the format:"
+                    throw ConfigRuntimeException.BuildException("Cannot find an acceptable constructor that follows the format:"
                             + " public " + bindableEvent.getClass().getSimpleName() + "(" + o.getClass().getSimpleName() + " event)."
                             + " Please notify the plugin author of this error.", null, Target.UNKNOWN);
                 }

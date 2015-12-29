@@ -48,7 +48,7 @@ public class CSlice extends CArray {
             start = Long.parseLong(sstart.trim());
             finish = Long.parseLong(sfinish.trim());
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Expecting integer in a slice, but was given \"" + sstart + "\" and \"" + sfinish + "\"", Exceptions.ExceptionType.CastException,  t);
+            throw ConfigRuntimeException.BuildException("Expecting integer in a slice, but was given \"" + sstart + "\" and \"" + sfinish + "\"", Exceptions.ExceptionType.CastException,  t);
         }
 		calculateCaches();
     }
@@ -109,14 +109,14 @@ public class CSlice extends CArray {
 
 	@Override
 	public void set(Construct index, Construct c, Target t) {
-		throw new ConfigRuntimeException("CSlices cannot set values", Exceptions.ExceptionType.CastException, t);
+		throw ConfigRuntimeException.BuildException("CSlices cannot set values", Exceptions.ExceptionType.CastException, t);
 	}
 
 	@Override
 	public Construct get(Construct index, Target t) {
 		long i = Static.getInt(index, t);
 		if(i > max){
-			throw new ConfigRuntimeException("Index out of bounds. Index: " + i + " Size: " + max, Exceptions.ExceptionType.RangeException, t);
+			throw ConfigRuntimeException.BuildException("Index out of bounds. Index: " + i + " Size: " + max, Exceptions.ExceptionType.RangeException, t);
 		}
 		return new CInt(start + (direction * i), t);
 	}

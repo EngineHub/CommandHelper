@@ -448,7 +448,7 @@ public class VehicleEvents {
 
 			MCEntity e = Static.getEntity(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
 			if (!(e instanceof MCVehicle)) {
-				throw new ConfigRuntimeException("The id was not a vehicle",
+				throw ConfigRuntimeException.BuildException("The id was not a vehicle",
 						ExceptionType.BadEntityException, Target.UNKNOWN);
 			}
 

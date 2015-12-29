@@ -376,7 +376,7 @@ public class BukkitBlockEvents {
 		@Override
 		public void setItem(MCItemStack item) {
 			if (item == null || item.getType().getName() == "AIR") {
-				throw new ConfigRuntimeException("Due to Bukkit's handling of this event, the item cannot be set to null."
+				throw ConfigRuntimeException.BuildException("Due to Bukkit's handling of this event, the item cannot be set to null."
 						+ " Until they change this, workaround by cancelling the event and manipulating the block"
 						+ " using inventory functions.", ExceptionType.IllegalArgumentException, Target.UNKNOWN);
 			} else {

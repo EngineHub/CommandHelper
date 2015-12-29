@@ -107,7 +107,7 @@ public class Meta {
 		@Override
 		public Construct exec(Target t, final Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[1].nval() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
-				throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
+				throw ConfigRuntimeException.BuildException("The first character of the command must be a forward slash (i.e. '/give')",
 						ExceptionType.FormatException, t);
 			}
 			String cmd = args[1].val().substring(1);
@@ -130,7 +130,7 @@ public class Meta {
 				}
 				if(cmd.equalsIgnoreCase("interpreter-on")){
 					//This isn't allowed for security reasons.
-					throw new ConfigRuntimeException("/interpreter-on cannot be run from runas for security reasons.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("/interpreter-on cannot be run from runas for security reasons.", ExceptionType.FormatException, t);
 				}
 				Static.getServer().runasConsole(cmd);
 			} else {
@@ -152,7 +152,7 @@ public class Meta {
 					//m.chat(cmd);
 					Static.getServer().dispatchCommand(m, cmd);
 				} else {
-					throw new ConfigRuntimeException("The player " + args[0].val() + " is not online",
+					throw ConfigRuntimeException.BuildException("The player " + args[0].val() + " is not online",
 							ExceptionType.PlayerOfflineException, t);
 				}
 			}
@@ -209,7 +209,7 @@ public class Meta {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
-				throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
+				throw ConfigRuntimeException.BuildException("The first character of the command must be a forward slash (i.e. '/give')",
 						ExceptionType.FormatException, t);
 			}
 			String cmd = args[0].val().substring(1);
@@ -336,7 +336,7 @@ public class Meta {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
-				throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
+				throw ConfigRuntimeException.BuildException("The first character of the command must be a forward slash (i.e. '/give')",
 						ExceptionType.FormatException, t);
 			}
 			String cmd = args[0].val().substring(1);
@@ -353,7 +353,7 @@ public class Meta {
 			try{
 				Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
 			} catch(Exception ex){
-				throw new ConfigRuntimeException("While running the command: \"" + cmd + "\""
+				throw ConfigRuntimeException.BuildException("While running the command: \"" + cmd + "\""
 						+ " the plugin threw an unexpected exception (turn on debug mode to see the full"
 						+ " stacktrace): " + ex.getMessage() + "\n\nThis is not a bug in " + Implementation.GetServerType().getBranding()
 						+ " but in the plugin that provides the command.", 

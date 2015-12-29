@@ -236,7 +236,7 @@ public class Debug {
                 try {
                     Static.LogDebug(MethodScriptFileLocations.getDefault().getConfigDirectory(), args[0].val(), LogLevel.DEBUG);
                 } catch (IOException ex) {
-                    throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
+                    throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t, ex);
                 }
             }
             return CVoid.VOID;
@@ -570,7 +570,7 @@ public class Debug {
 			try{
 				HeapDumper.dumpHeap(file.getAbsolutePath(), true);
 			} catch(Throwable tt){
-				throw new ConfigRuntimeException("Could not create a heap dump: " + tt.getMessage(), ExceptionType.PluginInternalException, t, tt);
+				throw ConfigRuntimeException.BuildException("Could not create a heap dump: " + tt.getMessage(), ExceptionType.PluginInternalException, t, tt);
 			}
 			return CVoid.VOID;
 		}

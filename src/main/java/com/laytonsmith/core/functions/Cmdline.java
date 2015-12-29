@@ -618,7 +618,7 @@ public class Cmdline {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(!Static.InCmdLine(environment)){
-				throw new ConfigRuntimeException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
 			}
 			boolean mask = true;
 			if(args.length > 1){
@@ -636,7 +636,7 @@ public class Cmdline {
 				reader.setExpandEvents(false);
 				return new CString(reader.readLine(Static.MCToANSIColors(prompt), cha), t);
 			} catch (IOException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t);
 			} finally {
 				if(reader != null){
 					reader.shutdown();
@@ -703,7 +703,7 @@ public class Cmdline {
 				StreamUtils.GetSystemOut().println(c);
 				return new CString(c, t);
 			} catch (IOException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t);
 			} finally {
 				if(reader != null){
 					reader.shutdown();
@@ -757,7 +757,7 @@ public class Cmdline {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(!Static.InCmdLine(environment)){
-				throw new ConfigRuntimeException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
 			}
 
 			String prompt = args[0].val();
@@ -768,7 +768,7 @@ public class Cmdline {
 				String line = reader.readLine(Static.MCToANSIColors(prompt));
 				return new CString(line, t);
 			} catch (IOException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t);
 			} finally {
 				if(reader != null){
 					reader.shutdown();
@@ -872,7 +872,7 @@ public class Cmdline {
 				try {
 					new jline.console.ConsoleReader().clearScreen();
 				} catch (IOException ex) {
-					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+					throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t);
 				}
 			}
 			return CVoid.VOID;
@@ -923,10 +923,10 @@ public class Cmdline {
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(!Static.InCmdLine(environment)){
 				if(!Prefs.AllowShellCommands()){
-					throw new ConfigRuntimeException("Shell commands are not allowed. Enable them in preferences.ini.", ExceptionType.InsufficientPermissionException, t);
+					throw ConfigRuntimeException.BuildException("Shell commands are not allowed. Enable them in preferences.ini.", ExceptionType.InsufficientPermissionException, t);
 				}
 				if(environment.getEnv(GlobalEnv.class).GetDynamicScriptingMode() && !Prefs.AllowDynamicShell()){
-					throw new ConfigRuntimeException("Shell commands are disabled from dynamic sources.", ExceptionType.InsufficientPermissionException, t);
+					throw ConfigRuntimeException.BuildException("Shell commands are disabled from dynamic sources.", ExceptionType.InsufficientPermissionException, t);
 				}
 			}
 			String[] command;
@@ -1027,7 +1027,7 @@ public class Cmdline {
 			try {
 				cmd.start();
 			} catch (IOException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t);
 			}
 
 			Runnable run = new Runnable() {
@@ -1142,10 +1142,10 @@ public class Cmdline {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(!Static.InCmdLine(environment)){
 				if(!Prefs.AllowShellCommands()){
-					throw new ConfigRuntimeException("Shell commands are not allowed. Enable them in preferences.ini.", ExceptionType.InsufficientPermissionException, t);
+					throw ConfigRuntimeException.BuildException("Shell commands are not allowed. Enable them in preferences.ini.", ExceptionType.InsufficientPermissionException, t);
 				}
 				if(environment.getEnv(GlobalEnv.class).GetDynamicScriptingMode() && !Prefs.AllowDynamicShell()){
-					throw new ConfigRuntimeException("Shell commands are disabled from dynamic sources.", ExceptionType.InsufficientPermissionException, t);
+					throw ConfigRuntimeException.BuildException("Shell commands are disabled from dynamic sources.", ExceptionType.InsufficientPermissionException, t);
 				}
 			}
 			String[] command;
@@ -1195,7 +1195,7 @@ public class Cmdline {
 				try{
 					if(exitCode != expectedExitCode){
 						err.flush();
-						throw new ConfigRuntimeException(serr.toString(), ExceptionType.ShellException, t);
+						throw ConfigRuntimeException.BuildException(serr.toString(), ExceptionType.ShellException, t);
 					} else {
 						out.flush();
 						return new CString(sout.toString(), t);
@@ -1205,7 +1205,7 @@ public class Cmdline {
 					err.close();
 				}
 			} catch (IOException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t);
 			} catch(InterruptedException ex){
 				throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
 			}
@@ -1274,10 +1274,10 @@ public class Cmdline {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(!Static.InCmdLine(environment)){
-				throw new ConfigRuntimeException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
 			}
 			if(System.console() != null){
-				throw new ConfigRuntimeException(getName() + " can only be used in TTY mode.", ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " can only be used in TTY mode.", ExceptionType.IOException, t);
 			}
 			boolean binary = false;
 			if(args.length > 0){
@@ -1308,7 +1308,7 @@ public class Cmdline {
 					return new CString(b.toString(), t);
 				}
 			} catch (IOException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			}
 		}
 
@@ -1368,7 +1368,7 @@ public class Cmdline {
 				}
 			}
 			if(root == null){
-				throw new ConfigRuntimeException("Running in interpreted mode. pwd() is not available.", ExceptionType.ShellException, t);
+				throw ConfigRuntimeException.BuildException("Running in interpreted mode. pwd() is not available.", ExceptionType.ShellException, t);
 			} else {
 				try {
 					String ret = root.getCanonicalPath();
@@ -1429,7 +1429,7 @@ public class Cmdline {
 			requireCmdlineMode(environment, this, t);
 			File cd = Static.GetFileFromArgument(args.length == 0 ? null : args[0].val(), environment, t, new File(System.getProperty("user.home")));
 			if(!cd.exists()){
-				throw new ConfigRuntimeException("No such file or directory: " + cd.getPath(), ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException("No such file or directory: " + cd.getPath(), ExceptionType.IOException, t);
 			}
 			environment.getEnv(GlobalEnv.class).SetRootFolder(cd);
 			return CVoid.VOID;
@@ -1486,7 +1486,7 @@ public class Cmdline {
 					ca.push(new CString(f.getName(), t), t);
 				}
 			} else {
-				throw new ConfigRuntimeException("No such file or directory: " + cwd.getPath(),
+				throw ConfigRuntimeException.BuildException("No such file or directory: " + cwd.getPath(),
 						ExceptionType.IOException, t);
 			}
 			return ca;
@@ -1592,7 +1592,7 @@ public class Cmdline {
 				int i = new jline.console.ConsoleReader().getTerminal().getWidth();
 				return new CInt(i, t);
 			} catch (IOException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t, ex);
 			}
 		}
 
@@ -1680,7 +1680,7 @@ public class Cmdline {
 	 */
 	public static void requireCmdlineMode(Environment environment, Function f, Target t) throws ConfigRuntimeException {
 		if(!Static.InCmdLine(environment)){
-			throw new ConfigRuntimeException(f.getName() + " cannot be used outside of cmdline mode.",
+			throw ConfigRuntimeException.BuildException(f.getName() + " cannot be used outside of cmdline mode.",
 					ExceptionType.InsufficientPermissionException, t);
 		}
 	}

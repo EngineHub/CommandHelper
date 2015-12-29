@@ -173,7 +173,7 @@ public class EntityManagement {
 				if (args.length == 3) {
 					w = Static.getServer().getWorld(args[0].val());
 					if (w == null) {
-						throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+						throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
 					}
 					try {
 						int x = Static.getInt32(args[1], t);
@@ -197,7 +197,7 @@ public class EntityManagement {
 					} else {
 						w = Static.getServer().getWorld(args[0].val());
 						if (w == null) {
-							throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+							throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
 						}
 						for (MCEntity e : w.getEntities()) {
 							ret.push(new CString(e.getUniqueId().toString(), t), t);
@@ -455,7 +455,7 @@ public class EntityManagement {
 			if (ent == null) {
 				return CVoid.VOID;
 			} else if (ent instanceof MCHumanEntity) {
-				throw new ConfigRuntimeException("Cannot remove human entity (" + ent.getUniqueId() + ")!",
+				throw ConfigRuntimeException.BuildException("Cannot remove human entity (" + ent.getUniqueId() + ")!",
 						ExceptionType.BadEntityException, t);
 			} else {
 				ent.remove();
@@ -518,7 +518,7 @@ public class EntityManagement {
 			if (ent instanceof MCAgeable){
 				return CBoolean.get(((MCAgeable)ent).getCanBreed());
 			} else {
-				throw new ConfigRuntimeException("Entity ID must be from an ageable entity!", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("Entity ID must be from an ageable entity!", ExceptionType.BadEntityException, t);
 			}
 		}
 
@@ -545,7 +545,7 @@ public class EntityManagement {
 			if (ent instanceof MCAgeable){
 				((MCAgeable)ent).setCanBreed(breed);
 			} else {
-				throw new ConfigRuntimeException("Entity ID must be from an ageable entity!", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("Entity ID must be from an ageable entity!", ExceptionType.BadEntityException, t);
 			}
 
 			return CVoid.VOID;
@@ -600,7 +600,7 @@ public class EntityManagement {
 			int age = Static.getInt32(args[1], t);
 
 			if (age < 1) {
-				throw new ConfigRuntimeException("Entity age can't be less than 1 server tick.", ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("Entity age can't be less than 1 server tick.", ExceptionType.RangeException, t);
 			}
 
 			MCEntity ent = Static.getEntity(args[0], t);
@@ -641,7 +641,7 @@ public class EntityManagement {
 				MCAgeable mob = ((MCAgeable) ent);
 				return new CInt(mob.getAge(), t);
 			} else {
-				throw new ConfigRuntimeException("The specified entity does not age", ExceptionType.UnageableMobException, t);
+				throw ConfigRuntimeException.BuildException("The specified entity does not age", ExceptionType.UnageableMobException, t);
 			}
 		}
 
@@ -682,7 +682,7 @@ public class EntityManagement {
 				mob.setAgeLock(lock);
 				return CVoid.VOID;
 			} else {
-				throw new ConfigRuntimeException("The specified entity does not age", ExceptionType.UnageableMobException, t);
+				throw ConfigRuntimeException.BuildException("The specified entity does not age", ExceptionType.UnageableMobException, t);
 			}
 		}
 
@@ -842,7 +842,7 @@ public class EntityManagement {
 				}
 
 				if (shooter_id == null && from == null) {
-					throw new ConfigRuntimeException("Could not find an entity or location matching " + args[0] + "!",
+					throw ConfigRuntimeException.BuildException("Could not find an entity or location matching " + args[0] + "!",
 							ExceptionType.FormatException, t);
 				}
 			} else {
@@ -869,7 +869,7 @@ public class EntityManagement {
 				}
 
 				if (target_id == null && to == null) {
-					throw new ConfigRuntimeException("Could not find an entity or location matching " + args[2] + " for target!",
+					throw ConfigRuntimeException.BuildException("Could not find an entity or location matching " + args[2] + " for target!",
 							ExceptionType.FormatException, t);
 				}
 			}
@@ -894,13 +894,13 @@ public class EntityManagement {
 					try {
 						projectile_shoot = MCProjectileType.valueOf(args[1].val().toUpperCase());
 					} catch (IllegalArgumentException badEnum) {
-						throw new ConfigRuntimeException(args[1] + " is not a valid Projectile", ExceptionType.FormatException, t);
+						throw ConfigRuntimeException.BuildException(args[1] + " is not a valid Projectile", ExceptionType.FormatException, t);
 					}
 				} else {
 					try {
 						entity_shoot = MCEntityType.valueOf(args[1].val().toUpperCase());
 					} catch (IllegalArgumentException badEnum) {
-						throw new ConfigRuntimeException(args[1] + " is not a valid entity type", ExceptionType.BadEntityTypeException, t);
+						throw ConfigRuntimeException.BuildException(args[1] + " is not a valid entity type", ExceptionType.BadEntityTypeException, t);
 					}
 				}
 			} else {
@@ -912,7 +912,7 @@ public class EntityManagement {
 			}
 
 			if (args.length < 3 && shooter_id == null) {
-				throw new ConfigRuntimeException("You must specify target location if you want shoot from location, not entity.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("You must specify target location if you want shoot from location, not entity.", ExceptionType.FormatException, t);
 			}
 
 			if (shooter_id != null && to == null) {
@@ -984,7 +984,7 @@ public class EntityManagement {
 			List<String> types = new ArrayList<String>();
 
 			if (!(args[0] instanceof CArray)) {
-				throw new ConfigRuntimeException("Expecting an array at parameter 1 of entities_in_radius",
+				throw ConfigRuntimeException.BuildException("Expecting an array at parameter 1 of entities_in_radius",
 						ExceptionType.BadEntityException, t);
 			}
 
@@ -1043,7 +1043,7 @@ public class EntityManagement {
 				try {
 					entityType = MCEntityType.valueOf(type.toUpperCase());
 				} catch (IllegalArgumentException e) {
-					throw new ConfigRuntimeException(String.format("Wrong entity type: %s", type),
+					throw ConfigRuntimeException.BuildException(String.format("Wrong entity type: %s", type),
 							ExceptionType.BadEntityException, t);
 				}
 
@@ -1133,7 +1133,7 @@ public class EntityManagement {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCEntityEquipment eq = le.getEquipment();
 			if (eq == null) {
-				throw new ConfigRuntimeException("Entities of type \"" + le.getType() + "\" do not have equipment.",
+				throw ConfigRuntimeException.BuildException("Entities of type \"" + le.getType() + "\" do not have equipment.",
 						ExceptionType.BadEntityTypeException, t);
 			}
 			Map<MCEquipmentSlot, MCItemStack> eqmap = le.getEquipment().getAllEquipment();
@@ -1173,7 +1173,7 @@ public class EntityManagement {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCEntityEquipment ee = le.getEquipment();
 			if (ee == null) {
-				throw new ConfigRuntimeException("Entities of type \"" + le.getType() + "\" do not have equipment.",
+				throw ConfigRuntimeException.BuildException("Entities of type \"" + le.getType() + "\" do not have equipment.",
 						ExceptionType.BadEntityTypeException, t);
 			}
 			Map<MCEquipmentSlot, MCItemStack> eq = ee.getAllEquipment();
@@ -1361,7 +1361,7 @@ public class EntityManagement {
 			try {
 				return new CString(le.getCustomName(), t);
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), ExceptionType.CastException, t);
 			}
 		}
 
@@ -1385,7 +1385,7 @@ public class EntityManagement {
 			try {
 				le.setCustomName(args[1].val());
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), ExceptionType.CastException, t);
 			}
 			return CVoid.VOID;
 		}
@@ -1428,7 +1428,7 @@ public class EntityManagement {
 				} else if (cs instanceof MCBlockCommandSender){
 					l = ((MCBlockCommandSender) cs).getBlock().getRelative(MCBlockFace.UP).getLocation();
 				} else {
-					throw new ConfigRuntimeException("A physical commandsender must exist or location must be explicit.",
+					throw ConfigRuntimeException.BuildException("A physical commandsender must exist or location must be explicit.",
 							ExceptionType.PlayerOfflineException, t);
 				}
 			}
@@ -1438,7 +1438,7 @@ public class EntityManagement {
 			try {
 				entType = MCEntityType.valueOf(args[0].val().toUpperCase());
 				if (entType == null) {
-					throw new ConfigRuntimeException(
+					throw ConfigRuntimeException.BuildException(
 							"Could not find the entity type internal object (are you running in cmdline mode?)",
 							ExceptionType.NotFoundException, t);
 				}
@@ -1609,7 +1609,7 @@ public class EntityManagement {
 				return new CDouble(((MCMinecart) e).getMaxSpeed(), t);
 			}
 
-			throw new ConfigRuntimeException("Given entity must be a boat or minecart.",
+			throw ConfigRuntimeException.BuildException("Given entity must be a boat or minecart.",
 					ExceptionType.BadEntityTypeException, t);
 		}
 
@@ -1646,7 +1646,7 @@ public class EntityManagement {
 			} else if(e instanceof MCMinecart) {
 				((MCMinecart) e).setMaxSpeed(speed);
 			} else {
-				throw new ConfigRuntimeException("Given entity must be a boat or minecart.",
+				throw ConfigRuntimeException.BuildException("Given entity must be a boat or minecart.",
 						ExceptionType.BadEntityTypeException, t);
 			}
 
@@ -1672,7 +1672,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntityEquipment eq = Static.getLivingEntity(args[0], t).getEquipment();
 			if (eq.getHolder() instanceof MCPlayer) {
-				throw new ConfigRuntimeException(getName() + " does not work on players.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " does not work on players.", ExceptionType.BadEntityException, t);
 			}
 			CArray ret = CArray.GetAssociativeArray(t);
 			for (Map.Entry<MCEquipmentSlot, Float> ent : eq.getAllDropChances().entrySet()) {
@@ -1701,7 +1701,7 @@ public class EntityManagement {
 			MCEntityEquipment ee = Static.getLivingEntity(args[0], t).getEquipment();
 			Map<MCEquipmentSlot, Float> eq = ee.getAllDropChances();
 			if (ee.getHolder() instanceof MCPlayer) {
-				throw new ConfigRuntimeException(getName() + " does not work on players.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " does not work on players.", ExceptionType.BadEntityException, t);
 			}
 			if (args[1] instanceof CNull) {
 				for (Map.Entry<MCEquipmentSlot, Float> ent : eq.entrySet()) {
@@ -1744,7 +1744,7 @@ public class EntityManagement {
 			try {
 				return CBoolean.get(Static.getEntity(args[0], t).isCustomNameVisible());
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), ExceptionType.CastException, t);
 			}
 		}
 
@@ -1769,7 +1769,7 @@ public class EntityManagement {
 			try {
 				Static.getEntity(args[0], t).setCustomNameVisible(Static.getBoolean(args[1]));
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), ExceptionType.CastException, t);
 			}
 			return CVoid.VOID;
 		}
@@ -1894,7 +1894,7 @@ public class EntityManagement {
 					return new CString(((MCPainting)e).getArt().name(), t);
 				}
 			}
-			throw new ConfigRuntimeException("There is no painting at the specified location", ExceptionType.BadEntityException, t);
+			throw ConfigRuntimeException.BuildException("There is no painting at the specified location", ExceptionType.BadEntityException, t);
 		}
 
 		@Override
@@ -1949,7 +1949,7 @@ public class EntityManagement {
 			try{
 				art = MCArt.valueOf(args[1].val());
 			} catch(IllegalArgumentException e){
-				throw new ConfigRuntimeException("Invalid type: " + args[1].val(), ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Invalid type: " + args[1].val(), ExceptionType.FormatException, t);
 			}
 			//If there's already a painting there, just use that one. Otherwise, spawn a new one.
 
@@ -2178,7 +2178,7 @@ public class EntityManagement {
 			if (args.length >= 2) {
 				CArray givenTransparents = Static.getArray(args[1], t);
 				if (givenTransparents.inAssociativeMode()) {
-					throw new ConfigRuntimeException("The array must not be associative.", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("The array must not be associative.", ExceptionType.CastException, t);
 				}
 				transparents = new HashSet<Byte>();
 				for (Construct blockID : givenTransparents.asList()) {
@@ -2576,7 +2576,7 @@ public class EntityManagement {
 		}
 
 		private static void throwException(String index, Target t) throws ConfigRuntimeException {
-			throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+			throw ConfigRuntimeException.BuildException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
 		}
 
 		@Override
@@ -2595,7 +2595,7 @@ public class EntityManagement {
 							case entity_spec.KEY_ARROW_KNOCKBACK:
 								int k = Static.getInt32(specArray.get(index, t), t);
 								if (k < 0) {
-									throw new ConfigRuntimeException("Knockback can not be negative.", ExceptionType.RangeException, t);
+									throw ConfigRuntimeException.BuildException("Knockback can not be negative.", ExceptionType.RangeException, t);
 								} else {
 									arrow.setKnockbackStrength(k);
 								}
@@ -2734,7 +2734,7 @@ public class EntityManagement {
 								try {
 									hook.setBiteChance(Static.getDouble(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("The chance must be between 0.0 and 1.0", ExceptionType.RangeException, t);
+									throw ConfigRuntimeException.BuildException("The chance must be between 0.0 and 1.0", ExceptionType.RangeException, t);
 								}
 								break;
 							default:
@@ -2761,21 +2761,21 @@ public class EntityManagement {
 								try {
 									horse.setColor(MCHorseColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid horse color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid horse color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_STYLE:
 								try {
 									horse.setPattern(MCHorsePattern.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid horse style: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid horse style: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_VARIANT:
 								try {
 									horse.setVariant(MCHorseVariant.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid horse variant: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid horse variant: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_CHEST:
@@ -2785,14 +2785,14 @@ public class EntityManagement {
 								try {
 									horse.setJumpStrength(Static.getDouble(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("The jump strength must be between 0.0 and 2.0", ExceptionType.RangeException, t);
+									throw ConfigRuntimeException.BuildException("The jump strength must be between 0.0 and 2.0", ExceptionType.RangeException, t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
 									horse.setDomestication(Static.getInt32(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("The domestication level can not be higher than the max domestication level.", ExceptionType.RangeException, t);
+									throw ConfigRuntimeException.BuildException("The domestication level can not be higher than the max domestication level.", ExceptionType.RangeException, t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_MAXDOMESTICATION:
@@ -2837,7 +2837,7 @@ public class EntityManagement {
 								try {
 									frame.setRotation(MCRotation.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid rotation type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid rotation type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							default:
@@ -2904,7 +2904,7 @@ public class EntityManagement {
 								try {
 									ocelot.setCatType(MCOcelotType.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid ocelot type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid ocelot type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							case entity_spec.KEY_OCELOT_SITTING:
@@ -2923,7 +2923,7 @@ public class EntityManagement {
 								try {
 									painting.setArt(MCArt.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid art type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid art type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							default:
@@ -2984,7 +2984,7 @@ public class EntityManagement {
 								try {
 									rabbit.setRabbitType(MCRabbitType.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid rabbit type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid rabbit type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							default:
@@ -3000,7 +3000,7 @@ public class EntityManagement {
 								try {
 									sheep.setColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid sheep color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid sheep color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							case entity_spec.KEY_SHEEP_SHEARED:
@@ -3019,7 +3019,7 @@ public class EntityManagement {
 								try {
 									skeleton.setSkeletonType(MCSkeletonType.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid skeleton type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid skeleton type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							default:
@@ -3047,7 +3047,7 @@ public class EntityManagement {
 								try {
 									villager.setProfession(MCProfession.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid profession: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid profession: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							default:
@@ -3081,7 +3081,7 @@ public class EntityManagement {
 								try {
 									wolf.setCollarColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid collar color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid collar color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
 								}
 								break;
 							case entity_spec.KEY_WOLF_SITTING:
@@ -3147,7 +3147,7 @@ public class EntityManagement {
 					return CNull.NULL;
 				}
 			} else {
-				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
 			}
 		}
 	}
@@ -3173,13 +3173,13 @@ public class EntityManagement {
 				if (args[1] instanceof CNull) {
 					((MCProjectile) entity).setShooter(null);
 				} else if (args[1] instanceof CArray) {
-					throw new ConfigRuntimeException("Setting a block as a shooter is not yet supported",
+					throw ConfigRuntimeException.BuildException("Setting a block as a shooter is not yet supported",
 							ExceptionType.FormatException, t);
 				} else {
 					((MCProjectile) entity).setShooter(Static.getLivingEntity(args[1], t));
 				}
 			} else {
-				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
 			}
 
 			return CVoid.VOID;
@@ -3206,7 +3206,7 @@ public class EntityManagement {
 			if (entity instanceof MCProjectile) {
 				return CBoolean.get(((MCProjectile) entity).doesBounce());
 			} else {
-				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
 			}
 		}
 	}
@@ -3231,7 +3231,7 @@ public class EntityManagement {
 			if (entity instanceof MCProjectile) {
 				((MCProjectile) entity).setBounce(Static.getBoolean(args[1]));
 			} else {
-				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
 			}
 
 			return CVoid.VOID;
@@ -3252,7 +3252,7 @@ public class EntityManagement {
 			MCEntity entity = Static.getEntity(args[0], t);
 
 			if (!(entity instanceof MCLivingEntity)) {
-				throw new ConfigRuntimeException("The entity id provided doesn't"
+				throw ConfigRuntimeException.BuildException("The entity id provided doesn't"
 					+ " belong to a living entity", ExceptionType.BadEntityTypeException, t);
 			}
 

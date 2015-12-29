@@ -39,7 +39,7 @@ public class CMutablePrimitive extends CArray implements Sizable {
 	 */
 	public void set(Construct value, Target t){
 		if(value instanceof CArray){
-			throw new ConfigRuntimeException("mutable_primitives can only store primitive values.", Exceptions.ExceptionType.FormatException, t);
+			throw ConfigRuntimeException.BuildException("mutable_primitives can only store primitive values.", Exceptions.ExceptionType.FormatException, t);
 		}
 		this.value = value;
 	}
@@ -133,7 +133,7 @@ public class CMutablePrimitive extends CArray implements Sizable {
 
 	@Override
 	public void set(Construct index, Construct c, Target t) {
-		throw new ConfigRuntimeException("mutable_primitives cannot have values set in them", Exceptions.ExceptionType.CastException, t);
+		throw ConfigRuntimeException.BuildException("mutable_primitives cannot have values set in them", Exceptions.ExceptionType.CastException, t);
 	}
 
 

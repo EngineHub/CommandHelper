@@ -56,7 +56,7 @@ public class ExecutionQueue {
 			final CClosure c;
 			String queue = null;
 			if(!(args[0] instanceof CClosure)){
-				throw new ConfigRuntimeException("Parameter 1 to " + getName() + " must be a closure.", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Parameter 1 to " + getName() + " must be a closure.", ExceptionType.CastException, t);
 			}
 			c = ((CClosure)args[0]);
 			if(args.length == 2){
@@ -136,7 +136,7 @@ public class ExecutionQueue {
 			final CClosure c;
 			String queue = null;
 			if(!(args[0] instanceof CClosure)){
-				throw new ConfigRuntimeException("Parameter 1 to " + getName() + " must be a closure.", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Parameter 1 to " + getName() + " must be a closure.", ExceptionType.CastException, t);
 			}
 			c = ((CClosure)args[0]);
 			if(args.length == 2){

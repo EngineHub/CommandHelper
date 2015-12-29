@@ -115,7 +115,7 @@ public class Reflection {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length < 1) {
-				throw new ConfigRuntimeException("Not enough parameters was sent to " + getName(), ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("Not enough parameters was sent to " + getName(), ExceptionType.InsufficientArgumentsException, t);
 			}
 
 			String param = args[0].val();
@@ -145,7 +145,7 @@ public class Reflection {
 					try {
 						return new CString(t.file().getCanonicalPath().replace('\\', '/'), t);
 					} catch (IOException ex) {
-						throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+						throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t);
 					}
 				}
 			} else if ("col".equalsIgnoreCase(param)) {
@@ -192,7 +192,7 @@ public class Reflection {
 				return a;
 			}
 
-			throw new ConfigRuntimeException("The arguments passed to " + getName() + " are incorrect. Please check them and try again.",
+			throw ConfigRuntimeException.BuildException("The arguments passed to " + getName() + " are incorrect. Please check them and try again.",
 					ExceptionType.FormatException, t);
 		}
 
@@ -243,25 +243,25 @@ public class Reflection {
 			try {
 				docField = DocField.getValue(args[1].val());
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException("Invalid docField provided: " + args[1].val(), ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Invalid docField provided: " + args[1].val(), ExceptionType.FormatException, t);
 			}
 			//For now, we have special handling, since functions are actually the only thing that will work,
 			//but eventually this will be a generic interface.
 			if (element.startsWith("@")) {
 				IVariable var = environment.getEnv(GlobalEnv.class).GetVarList().get(element, t);
 				if (var == null) {
-					throw new ConfigRuntimeException("Invalid variable provided: " + element + " does not exist in the current scope", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Invalid variable provided: " + element + " does not exist in the current scope", ExceptionType.FormatException, t);
 				}
 			} else if (element.startsWith("_")) {
 				if (!environment.getEnv(GlobalEnv.class).GetProcs().containsKey(element)) {
-					throw new ConfigRuntimeException("Invalid procedure name provided: " + element + " does not exist in the current scope", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Invalid procedure name provided: " + element + " does not exist in the current scope", ExceptionType.FormatException, t);
 				}
 			} else {
 				try {
 					Function f = (Function) FunctionList.getFunction(new CFunction(element, t));
 					return new CString(formatFunctionDoc(f.docs(), docField), t);
 				} catch (ConfigCompileException ex) {
-					throw new ConfigRuntimeException("Unknown function: " + element, ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Unknown function: " + element, ExceptionType.FormatException, t);
 				}
 			}
 			return CNull.NULL;

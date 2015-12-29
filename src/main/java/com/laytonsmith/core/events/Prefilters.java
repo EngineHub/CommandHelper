@@ -120,7 +120,7 @@ public final class Prefilters {
 							&& exp.val().charAt(0) == '(' && exp.val().charAt(exp.val().length() - 1) == ')'){
 						ExpressionMatch(exp, key, actualValue);
 					} else {
-						throw new ConfigRuntimeException("Prefilter expecting expression type, and \""
+						throw ConfigRuntimeException.BuildException("Prefilter expecting expression type, and \""
 								+ exp.val() + "\" does not follow expression format. "
 								+ "(Did you surround it in parenthesis?)",
 								ExceptionType.FormatException, exp.getTarget());
@@ -132,7 +132,7 @@ public final class Prefilters {
 							&& regex.charAt(0) == '/' && regex.charAt(regex.length() - 1) == '/'){
 						RegexMatch(regex, actualValue);
 					} else {
-						throw new ConfigRuntimeException("Prefilter expecting regex type, and \""
+						throw ConfigRuntimeException.BuildException("Prefilter expecting regex type, and \""
 								+ regex + "\" does not follow regex format",
 								ExceptionType.FormatException, map.get(key).getTarget());
 					}
@@ -203,7 +203,7 @@ public final class Prefilters {
 			eClazz = Class.forName(eClass);
 			errClazz = Class.forName(errClass);
 		} catch (ClassNotFoundException cnf) {
-			throw new ConfigRuntimeException("You are missing a required dependency: " + eClass,
+			throw ConfigRuntimeException.BuildException("You are missing a required dependency: " + eClass,
 					ExceptionType.PluginInternalException, expression.getTarget(), cnf);
 		}
 		try {
@@ -223,10 +223,10 @@ public final class Prefilters {
 			}
 		} catch (ReflectionUtils.ReflectionException rex) {
 			if (rex.getCause().getClass().isAssignableFrom(errClazz)) {
-				throw new ConfigRuntimeException("Your expression was invalidly formatted",
+				throw ConfigRuntimeException.BuildException("Your expression was invalidly formatted",
 						ExceptionType.PluginInternalException, expression.getTarget(), rex.getCause());
 			} else {
-				throw new ConfigRuntimeException(rex.getMessage(), ExceptionType.PluginInternalException,
+				throw ConfigRuntimeException.BuildException(rex.getMessage(), ExceptionType.PluginInternalException,
 						expression.getTarget(), rex.getCause());
 			}
 		}

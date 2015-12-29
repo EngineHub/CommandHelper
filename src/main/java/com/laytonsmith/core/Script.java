@@ -173,7 +173,7 @@ public class Script {
                 for (String group : groups) {
                     if (group.startsWith("-") && ((MCPlayer)p).inGroup(group.substring(1))) {
                         //negative permission
-                        throw new ConfigRuntimeException("You do not have permission to use that command", ExceptionType.InsufficientPermissionException,
+                        throw ConfigRuntimeException.BuildException("You do not have permission to use that command", ExceptionType.InsufficientPermissionException,
                                 Target.UNKNOWN);
                     } else if (((MCPlayer)p).inGroup(group)) {
                         //They do have permission.
@@ -278,7 +278,7 @@ public class Script {
                     //Not really a function, so we can't put it in Function.
                     Procedure p = getProc(m.val());
                     if (p == null) {
-                        throw new ConfigRuntimeException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.getTarget());
+                        throw ConfigRuntimeException.BuildException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.getTarget());
                     }
                     Environment newEnv = env;
                     try{
@@ -306,7 +306,7 @@ public class Script {
 					if (f.isRestricted()) {
 						boolean perm = Static.hasCHPermission(f.getName(), env);
 						if (!perm) {
-							throw new ConfigRuntimeException("You do not have permission to use the " + f.getName() + " function.",
+							throw ConfigRuntimeException.BuildException("You do not have permission to use the " + f.getName() + " function.",
 									ExceptionType.InsufficientPermissionException, m.getTarget());
 						}
 					}
@@ -340,7 +340,7 @@ public class Script {
 								|| ca[i] instanceof CString || ca[i] instanceof CVoid
 								|| ca[i] instanceof IVariable || ca[i] instanceof CEntry || ca[i] instanceof CLabel)
 								&& (!f.getName().equals("__autoconcat__") && (ca[i] instanceof CLabel))) {
-							throw new ConfigRuntimeException("Invalid Construct ("
+							throw ConfigRuntimeException.BuildException("Invalid Construct ("
 									+ ca[i].getClass() + ") being passed as an argument to a function ("
 									+ f.getName() + ")", null, m.getTarget());
 						}

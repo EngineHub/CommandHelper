@@ -48,7 +48,7 @@ public class Crypto {
 			String hash = StringUtils.toHex(hmac).toLowerCase();
 			return new CString(hash, t);
 		} catch (NoSuchAlgorithmException | InvalidKeyException ex) {
-			throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
+			throw ConfigRuntimeException.BuildException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
 		}
 	}
 
@@ -175,7 +175,7 @@ public class Crypto {
                 String hash = StringUtils.toHex(digest.digest()).toLowerCase();
                 return new CString(hash, t);
             } catch (NoSuchAlgorithmException ex) {
-                throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
+                throw ConfigRuntimeException.BuildException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
             }
         }
         
@@ -242,7 +242,7 @@ public class Crypto {
                 String hash = StringUtils.toHex(digest.digest()).toLowerCase();
                 return new CString(hash, t);
             } catch (NoSuchAlgorithmException ex) {
-                throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
+                throw ConfigRuntimeException.BuildException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
             }
         }
         
@@ -308,7 +308,7 @@ public class Crypto {
                 String hash = StringUtils.toHex(digest.digest()).toLowerCase();
                 return new CString(hash, t);
             } catch (NoSuchAlgorithmException ex) {
-                throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
+                throw ConfigRuntimeException.BuildException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
             }
         }
         

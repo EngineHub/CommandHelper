@@ -22,7 +22,7 @@ public class CDouble extends CNumber implements Cloneable{
         try{
             val = Double.parseDouble(value);
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Could not cast " + value + " to double", ExceptionType.FormatException, t);
+            throw ConfigRuntimeException.BuildException("Could not cast " + value + " to double", ExceptionType.FormatException, t);
         }
     }
 

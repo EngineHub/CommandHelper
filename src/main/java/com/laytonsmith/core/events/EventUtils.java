@@ -53,7 +53,7 @@ public final class EventUtils {
 		for (Set<BoundEvent> s : event_handles.values()) {
 			for (BoundEvent bb : s) {
 				if (bb.getId().equals(b.getId())) {
-					throw new ConfigRuntimeException("Cannot have duplicate IDs defined."
+					throw ConfigRuntimeException.BuildException("Cannot have duplicate IDs defined."
 							+ " (Tried to define an event handler with id \"" + b.getId() + "\" at " + b.getTarget() + ","
 							+ " but it has already been defined at " + bb.getTarget() + ")",
 							Exceptions.ExceptionType.BindException, b.getTarget());
@@ -156,7 +156,7 @@ public final class EventUtils {
 								// The event will stay null, and be caught below
 							}
 							if(convertedEvent == null){
-								throw new ConfigRuntimeException(eventName + " doesn't support the use of trigger() yet.", Exceptions.ExceptionType.BindException, t);
+								throw ConfigRuntimeException.BuildException(eventName + " doesn't support the use of trigger() yet.", Exceptions.ExceptionType.BindException, t);
 							} else if (driver.matches(b.getPrefilter(), convertedEvent)) {
 								toRun.add(b);
 							}
@@ -253,7 +253,7 @@ public final class EventUtils {
 				} catch (FunctionReturnException ex) {
 					//We also know how to deal with this
 				} catch (EventException ex) {
-					throw new ConfigRuntimeException(ex.getMessage(), null, Target.UNKNOWN);
+					throw ConfigRuntimeException.BuildException(ex.getMessage(), null, Target.UNKNOWN);
 				} catch (ConfigRuntimeException ex) {
 					//An exception has bubbled all the way up
 					ConfigRuntimeException.HandleUncaughtException(ex, b.getEnvironment());

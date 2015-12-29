@@ -166,7 +166,7 @@ public class PluginMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if (messenger == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the internal Messenger object (are you running in cmdline mode?)",
 						ExceptionType.NotFoundException, t);
 			}
@@ -175,7 +175,7 @@ public class PluginMeta {
 			if (!messenger.isIncomingChannelRegistered(channel)) {
 				messenger.registerIncomingPluginChannel(channel);
 			} else {
-				throw new ConfigRuntimeException("The channel '" + channel + "' is already registered.", ExceptionType.PluginChannelException, t);
+				throw ConfigRuntimeException.BuildException("The channel '" + channel + "' is already registered.", ExceptionType.PluginChannelException, t);
 			}
 			
 			return CVoid.VOID;
@@ -225,7 +225,7 @@ public class PluginMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if (messenger == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the internal Messenger object (are you running in cmdline mode?)",
 						ExceptionType.NotFoundException, t);
 			}
@@ -234,7 +234,7 @@ public class PluginMeta {
 			if (messenger.isIncomingChannelRegistered(channel)) {
 				messenger.unregisterIncomingPluginChannel(channel);
 			} else {
-				throw new ConfigRuntimeException("The channel '" + channel + "' is not registered.", ExceptionType.PluginChannelException, t);
+				throw ConfigRuntimeException.BuildException("The channel '" + channel + "' is not registered.", ExceptionType.PluginChannelException, t);
 			}
 			
 			return CVoid.VOID;
@@ -283,7 +283,7 @@ public class PluginMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if (messenger == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the internal Messenger object (are you running in cmdline mode?)",
 						ExceptionType.NotFoundException, t);
 			}
@@ -334,7 +334,7 @@ public class PluginMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if (messenger == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the internal Messenger object (are you running in cmdline mode?)",
 						ExceptionType.NotFoundException, t);
 			}

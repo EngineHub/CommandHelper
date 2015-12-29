@@ -44,7 +44,7 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess{
             int i = (int)Integer.parseInt(index);
             return new CString(this.val().charAt(i), t);
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Expecting numerical index, but recieved " + index, Exceptions.ExceptionType.FormatException, t);
+            throw ConfigRuntimeException.BuildException("Expecting numerical index, but recieved " + index, Exceptions.ExceptionType.FormatException, t);
         }
     }
 

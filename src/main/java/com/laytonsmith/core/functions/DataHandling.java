@@ -235,7 +235,7 @@ public class DataHandling {
 			if(args.length == 3){
 				offset = 1;
 				if(!(args[offset] instanceof IVariable)){
-					throw new ConfigRuntimeException(getName() +
+					throw ConfigRuntimeException.BuildException(getName() +
 							" with 3 arguments only accepts an ivariable as the second argument.",
 							ExceptionType.CastException, t);
 				}
@@ -254,7 +254,7 @@ public class DataHandling {
 			} else {
 				offset = 0;
 				if(!(args[offset] instanceof IVariable)){
-					throw new ConfigRuntimeException(getName() +
+					throw ConfigRuntimeException.BuildException(getName() +
 							" with 2 arguments only accepts an ivariable as the second argument.",
 							ExceptionType.CastException, t);
 				}
@@ -541,7 +541,7 @@ public class DataHandling {
 
 			Construct counter = parent.eval(assign, env);
 			if (!(counter instanceof IVariable)) {
-				throw new ConfigRuntimeException("First parameter of for must be an ivariable", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("First parameter of for must be an ivariable", ExceptionType.CastException, t);
 			}
 			int _continue = 0;
 			while (true) {
@@ -624,7 +624,7 @@ public class DataHandling {
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if(nodes.length < 3){
-				throw new ConfigRuntimeException("Insufficient arguments passed to " + getName(), ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("Insufficient arguments passed to " + getName(), ExceptionType.InsufficientArgumentsException, t);
 			}
 			ParseTree array = nodes[0];
 			ParseTree key = null;
@@ -641,7 +641,7 @@ public class DataHandling {
 			if (key != null) {
 				ik = parent.eval(key, env);
 				if (!(ik instanceof IVariable)) {
-					throw new ConfigRuntimeException("Parameter 2 of " + getName() + " must be an ivariable", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Parameter 2 of " + getName() + " must be an ivariable", ExceptionType.CastException, t);
 				}
 			}
 			Construct iv = parent.eval(value, env);
@@ -655,10 +655,10 @@ public class DataHandling {
 				}
 			}
 			if (!(arr instanceof ArrayAccess)) {
-				throw new ConfigRuntimeException("Parameter 1 of " + getName() + " must be an array or array like data structure", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Parameter 1 of " + getName() + " must be an array or array like data structure", ExceptionType.CastException, t);
 			}
 			if (!(iv instanceof IVariable)) {
-				throw new ConfigRuntimeException("Parameter " + (2 + offset) + " of " + getName() + " must be an ivariable", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Parameter " + (2 + offset) + " of " + getName() + " must be an ivariable", ExceptionType.CastException, t);
 			}
 			ArrayAccess one = (ArrayAccess) arr;
 			IVariable kkey = (IVariable) ik;
@@ -2156,13 +2156,13 @@ public class DataHandling {
 					Construct cons = parent.eval(nodes[i], env);
 					env.getEnv(GlobalEnv.class).ClearFlag("no-check-duplicate-assign");
 					if (i == 0 && cons instanceof IVariable) {
-						throw new ConfigRuntimeException("Anonymous Procedures are not allowed", ExceptionType.InvalidProcedureException, t);
+						throw ConfigRuntimeException.BuildException("Anonymous Procedures are not allowed", ExceptionType.InvalidProcedureException, t);
 					} else {
 						if (i == 0 && !(cons instanceof IVariable)) {
 							name = cons.val();
 						} else {
 							if (!(cons instanceof IVariable)) {
-								throw new ConfigRuntimeException("You must use IVariables as the arguments", ExceptionType.InvalidProcedureException, t);
+								throw ConfigRuntimeException.BuildException("You must use IVariables as the arguments", ExceptionType.InvalidProcedureException, t);
 							} else {
 								IVariable ivar = null;
 								try {
@@ -2170,7 +2170,7 @@ public class DataHandling {
 									if (c instanceof IVariable) {
 										String varName = ((IVariable) c).getName();
 										if (varNames.contains(varName)) {
-											throw new ConfigRuntimeException("Same variable name defined twice in " + name, ExceptionType.InvalidProcedureException, t);
+											throw ConfigRuntimeException.BuildException("Same variable name defined twice in " + name, ExceptionType.InvalidProcedureException, t);
 										}
 										varNames.add(varName);
 									}
@@ -2452,7 +2452,7 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length < 1) {
-				throw new ConfigRuntimeException("Expecting at least one argument to " + getName(), ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("Expecting at least one argument to " + getName(), ExceptionType.InsufficientArgumentsException, t);
 			}
 			Procedure proc = env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val());
 			if (proc != null) {
@@ -2466,7 +2466,7 @@ public class DataHandling {
 				}
 				return proc.execute(vars, newEnv, t);
 			}
-			throw new ConfigRuntimeException("Unknown procedure \"" + args[0].val() + "\"",
+			throw ConfigRuntimeException.BuildException("Unknown procedure \"" + args[0].val() + "\"",
 					ExceptionType.InvalidProcedureException, t);
 		}
 
@@ -2478,7 +2478,7 @@ public class DataHandling {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.size() < 1) {
-				throw new ConfigRuntimeException("Expecting at least one argument to " + getName(), ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("Expecting at least one argument to " + getName(), ExceptionType.InsufficientArgumentsException, t);
 			}
 			if (children.get(0).isConst()) {
 				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Hardcoding procedure name in " + getName() + ", which is inefficient."
@@ -2629,7 +2629,7 @@ public class DataHandling {
 			if (args[0] instanceof CArray) {
 				return CBoolean.get(((CArray) args[0]).inAssociativeMode());
 			} else {
-				throw new ConfigRuntimeException(this.getName() + " expects argument 1 to be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects argument 1 to be an array", ExceptionType.CastException, t);
 			}
 		}
 
@@ -2752,7 +2752,7 @@ public class DataHandling {
 			} else if(args[0] instanceof CArray){
 				key = GetNamespace((CArray) args[0], t);
 			} else {
-				throw new ConfigRuntimeException("Argument 1 in " + this.getName() + " must be a string or array.",
+				throw ConfigRuntimeException.BuildException("Argument 1 in " + this.getName() + " must be a string or array.",
 						ExceptionType.IllegalArgumentException, t);
 			}
 			Construct c = Globals.GetGlobalConstruct(key);
@@ -2821,7 +2821,7 @@ public class DataHandling {
 			} else if(args[0] instanceof CArray){
 				key = GetNamespace((CArray) args[0], t);
 			} else {
-				throw new ConfigRuntimeException("Argument 1 in " + this.getName() + " must be a string or array.",
+				throw ConfigRuntimeException.BuildException("Argument 1 in " + this.getName() + " must be a string or array.",
 						ExceptionType.IllegalArgumentException, t);
 			}
 			Construct c = args[1];
@@ -2945,7 +2945,7 @@ public class DataHandling {
 				Construct ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
 				if (!(ret instanceof IVariable)) {
-					throw new ConfigRuntimeException("Arguments sent to " + getName() + " barring the last) must be ivariables", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Arguments sent to " + getName() + " barring the last) must be ivariables", ExceptionType.CastException, t);
 				}
 				names[i] = ((IVariable) ret).getName();
 				try {
@@ -3048,7 +3048,7 @@ public class DataHandling {
 				Construct ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
 				if (!(ret instanceof IVariable)) {
-					throw new ConfigRuntimeException("Arguments sent to " + getName() + " barring the last) must be ivariables", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Arguments sent to " + getName() + " barring the last) must be ivariables", ExceptionType.CastException, t);
 				}
 				names[i] = ((IVariable) ret).getName();
 				try {
@@ -3166,7 +3166,7 @@ public class DataHandling {
 					return e.getReturn();
 				}
 			} else {
-				throw new ConfigRuntimeException("Only a closure (created from the closure function) can be sent to execute()", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Only a closure (created from the closure function) can be sent to execute()", ExceptionType.CastException, t);
 			}
 			return CVoid.VOID;
 		}
@@ -3717,14 +3717,14 @@ public class DataHandling {
 				}
 				return new CString(b.toString(), t);
 			} catch (ConfigCompileException e) {
-				throw new ConfigRuntimeException("Could not compile eval'd code: " + e.getMessage(), ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Could not compile eval'd code: " + e.getMessage(), ExceptionType.FormatException, t);
 			} catch(ConfigCompileGroupException ex){
 				StringBuilder b = new StringBuilder();
 				b.append("Could not compile eval'd code: ");
 				for(ConfigCompileException e : ex.getList()){
 					b.append(e.getMessage()).append("\n");
 				}
-				throw new ConfigRuntimeException(b.toString(), ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(b.toString(), ExceptionType.FormatException, t);
 			} finally {
 				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(oldDynamicScriptMode);
 			}

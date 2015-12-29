@@ -267,7 +267,7 @@ public class Scheduling {
 				delay = Static.getInt(args[1], t);
 			}
 			if (!(args[1 + offset] instanceof CClosure)) {
-				throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
 			}
 			final CClosure c = (CClosure) args[1 + offset];
 			final AtomicInteger ret = new AtomicInteger(-1);
@@ -356,7 +356,7 @@ public class Scheduling {
 			final TaskManager taskManager = environment.getEnv(GlobalEnv.class).GetTaskManager();
 			long time = Static.getInt(args[0], t);
 			if (!(args[1] instanceof CClosure)) {
-				throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
 			}
 			final CClosure c = (CClosure) args[1];
 			final AtomicInteger ret = new AtomicInteger(-1);
@@ -463,7 +463,7 @@ public class Scheduling {
 			} else if (args.length == 1) {
 				StaticLayer.ClearFutureRunnable(Static.getInt32(args[0], t));
 			} else {
-				throw new ConfigRuntimeException("No id was passed to clear_task, and it's not running inside a task either.", ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("No id was passed to clear_task, and it's not running inside a task either.", ExceptionType.InsufficientArgumentsException, t);
 			}
 			return CVoid.VOID;
 		}
@@ -572,7 +572,7 @@ public class Scheduling {
 					locale = Static.GetLocale(countryCode);
 				}
 				if(locale == null) {
-					throw new ConfigRuntimeException("The given locale was not found on your system: "
+					throw ConfigRuntimeException.BuildException("The given locale was not found on your system: "
 							+ countryCode, ExceptionType.FormatException, t);
 				}
 			}

@@ -100,13 +100,13 @@ public class World {
 				world = args[0].val();
 			} else {
 				if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() == null){
-					throw new ConfigRuntimeException("A world must be specified in a context with no player.", ExceptionType.InvalidWorldException, t);
+					throw ConfigRuntimeException.BuildException("A world must be specified in a context with no player.", ExceptionType.InvalidWorldException, t);
 				}
 				world = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld().getName();
 			}
 			MCWorld w = Static.getServer().getWorld(world);
 			if (w == null) {
-				throw new ConfigRuntimeException("The specified world \"" + world + "\" is not a valid world.", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("The specified world \"" + world + "\" is not a valid world.", ExceptionType.InvalidWorldException, t);
 			}
 			return ObjectGenerator.GetGenerator().location(w.getSpawnLocation(), false);
 		}
@@ -154,7 +154,7 @@ public class World {
 				z = Static.getInt32(args[3], t);
 			}
 			if (w == null) {
-				throw new ConfigRuntimeException("Invalid world given.", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("Invalid world given.", ExceptionType.InvalidWorldException, t);
 			}
 			w.setSpawnLocation(x, y, z);
 			return CVoid.VOID;
@@ -243,7 +243,7 @@ public class World {
 					z = l.getBlockZ();
 				} else {
 					if (m == null) {
-						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+						throw ConfigRuntimeException.BuildException("No world specified", ExceptionType.InvalidWorldException, t);
 					}
 					world = m.getWorld();
 					x = Static.getInt32(args[0], t);
@@ -253,7 +253,7 @@ public class World {
 				//world, x and z provided
 				world = Static.getServer().getWorld(args[0].val());
 				if (world == null) {
-					throw new ConfigRuntimeException("World " + args[0].val() + " does not exist.",
+					throw ConfigRuntimeException.BuildException("World " + args[0].val() + " does not exist.",
 							ExceptionType.InvalidWorldException, t);
 				}
 				x = Static.getInt32(args[1], t);
@@ -299,7 +299,7 @@ public class World {
  				if (args[1] instanceof CArray) {
  					world = Static.getServer().getWorld(args[0].val());
 					if (world == null) {
-						throw new ConfigRuntimeException("The given world (" + args[0].val() + ") does not exist.",
+						throw ConfigRuntimeException.BuildException("The given world (" + args[0].val() + ") does not exist.",
 								ExceptionType.InvalidWorldException, t);
 					}
  					MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, t);
@@ -307,7 +307,7 @@ public class World {
  					z = l.getBlockZ();
  				} else {
  					if (m == null) {
- 						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+ 						throw ConfigRuntimeException.BuildException("No world specified", ExceptionType.InvalidWorldException, t);
  					}
  					world = m.getWorld();
  					x = Static.getInt32(args[0], t);
@@ -317,7 +317,7 @@ public class World {
  				//world, x and z provided
  				world = Static.getServer().getWorld(args[0].val());
 				if (world == null) {
-					throw new ConfigRuntimeException("The given world (" + args[0].val() + ") does not exist.",
+					throw ConfigRuntimeException.BuildException("The given world (" + args[0].val() + ") does not exist.",
 							ExceptionType.InvalidWorldException, t);
 				}
  				x = Static.getInt32(args[1], t);
@@ -388,7 +388,7 @@ public class World {
  					z = l.getBlockZ();
  				} else {
  					if (m == null) {
- 						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+ 						throw ConfigRuntimeException.BuildException("No world specified", ExceptionType.InvalidWorldException, t);
  					}
  					world = m.getWorld();
  					x = Static.getInt32(args[0], t);
@@ -401,7 +401,7 @@ public class World {
  				z = Static.getInt32(args[2], t);
  			}
 			if (world == null) { // Happends when m is a fake console or null command sender.
-				throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("No world specified", ExceptionType.InvalidWorldException, t);
 			}
  			world.unloadChunk(x, z);
  			return CVoid.VOID;
@@ -457,16 +457,16 @@ public class World {
  				world = Static.getServer().getWorld(args[0].val());
  			} else {
 				if (m == null) {
- 					throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+ 					throw ConfigRuntimeException.BuildException("No world specified", ExceptionType.InvalidWorldException, t);
  				}
  				world = m.getWorld();
 			}
 			if (world == null) { // Happends when m is a fake console or null command sender.
-				throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("No world specified", ExceptionType.InvalidWorldException, t);
 			}
  			MCChunk[] chunks = world.getLoadedChunks();
 			if (chunks == null) { // Happends when m is a fake player.
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 					"Could not find the chunk objects of the world (are you running in cmdline mode?)",
 					ExceptionType.NotFoundException, t);
 			}
@@ -563,7 +563,7 @@ public class World {
 				if (args[0] instanceof CArray) {
 					world = Static.getServer().getWorld(args[1].val());
 					if (world == null) {
-						throw new ConfigRuntimeException("World " + args[1].val() + " does not exist.",
+						throw ConfigRuntimeException.BuildException("World " + args[1].val() + " does not exist.",
 								ExceptionType.InvalidWorldException, t);
 					}
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
@@ -572,7 +572,7 @@ public class World {
 					z = l.getChunk().getZ();
 				} else {
 					if (m == null) {
-						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+						throw ConfigRuntimeException.BuildException("No world specified", ExceptionType.InvalidWorldException, t);
 					}
 
 					world = m.getWorld();
@@ -585,7 +585,7 @@ public class World {
 				z = Static.getInt32(args[1], t);
 				world = Static.getServer().getWorld(args[2].val());
 				if (world == null) {
-					throw new ConfigRuntimeException("World " + args[2].val() + " does not exist.",
+					throw ConfigRuntimeException.BuildException("World " + args[2].val() + " does not exist.",
 							ExceptionType.InvalidWorldException, t);
 				}
 			}
@@ -652,7 +652,7 @@ public class World {
 				if (args[0] instanceof CArray) {
 					world = Static.getServer().getWorld(args[1].val());
 					if (world == null) {
-						throw new ConfigRuntimeException("The given world (" + args[1].val() + ") does not exist.",
+						throw ConfigRuntimeException.BuildException("The given world (" + args[1].val() + ") does not exist.",
 								ExceptionType.InvalidWorldException, t);
 					}
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
@@ -660,7 +660,7 @@ public class World {
 					z = l.getChunk().getZ();
 				} else {
 					if (m == null) {
-						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+						throw ConfigRuntimeException.BuildException("No world specified", ExceptionType.InvalidWorldException, t);
 					}
 					world = m.getWorld();
 					x = Static.getInt32(args[0], t);
@@ -672,7 +672,7 @@ public class World {
 				z = Static.getInt32(args[1], t);
 				world = Static.getServer().getWorld(args[2].val());
 				if (world == null) {
-					throw new ConfigRuntimeException("The given world (" + args[2].val() + ") does not exist.",
+					throw ConfigRuntimeException.BuildException("The given world (" + args[2].val() + ") does not exist.",
 							ExceptionType.InvalidWorldException, t);
 				}
 			}
@@ -763,7 +763,7 @@ public class World {
 				w = Static.getServer().getWorld(args[0].val());
 			}
 			if (w == null) {
-				throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("No world specified", ExceptionType.InvalidWorldException, t);
 			}
 			long time = 0;
 			String stime = (args.length == 1 ? args[0] : args[1]).val().toLowerCase();
@@ -787,10 +787,10 @@ public class World {
 					hour = 0;
 				}
 				if (hour > 24) {
-					throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Invalid time provided", ExceptionType.FormatException, t);
 				}
 				if (minute > 59) {
-					throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Invalid time provided", ExceptionType.FormatException, t);
 				}
 				hour -= 6;
 				hour = hour % 24;
@@ -801,7 +801,7 @@ public class World {
 			try {
 				Long.valueOf(stime);
 			} catch (NumberFormatException e) {
-				throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Invalid time provided", ExceptionType.FormatException, t);
 			}
 			time = Long.parseLong(stime);
 			w.setTime(time);
@@ -858,7 +858,7 @@ public class World {
 				w = Static.getServer().getWorld(args[0].val());
 			}
 			if (w == null) {
-				throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("No world specified", ExceptionType.InvalidWorldException, t);
 			}
 			return new CInt(w.getTime(), t);
 		}
@@ -890,13 +890,13 @@ public class World {
 				try {
 					type = MCWorldType.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException e) {
-					throw new ConfigRuntimeException(args[1].val() + " is not a valid world type. Must be one of: " + StringUtils.Join(MCWorldType.values(), ", "), ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException(args[1].val() + " is not a valid world type. Must be one of: " + StringUtils.Join(MCWorldType.values(), ", "), ExceptionType.FormatException, t);
 				}
 				MCWorldEnvironment environment;
 				try {
 					environment = MCWorldEnvironment.valueOf(args[2].val().toUpperCase());
 				} catch (IllegalArgumentException e) {
-					throw new ConfigRuntimeException(args[2].val() + " is not a valid environment type. Must be one of: " + StringUtils.Join(MCWorldEnvironment.values(), ", "), ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException(args[2].val() + " is not a valid environment type. Must be one of: " + StringUtils.Join(MCWorldEnvironment.values(), ", "), ExceptionType.FormatException, t);
 				}
 				creator.type(type).environment(environment);
 			}
@@ -1013,7 +1013,7 @@ public class World {
 				Static.AssertPlayerNonNull(p, t);
 				l = p.getLocation();
 				if (l == null) {
-					throw new ConfigRuntimeException(
+					throw ConfigRuntimeException.BuildException(
 							"Could not find the location of the given player (are you running in cmdline mode?)",
 							ExceptionType.NotFoundException, t);
 				}
@@ -1024,12 +1024,12 @@ public class World {
 				if (args[0] instanceof CArray) {
 					l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				} else {
-					throw new ConfigRuntimeException("expecting argument 1 of get_chunk_loc to be a location array"
+					throw ConfigRuntimeException.BuildException("expecting argument 1 of get_chunk_loc to be a location array"
 							, ExceptionType.FormatException, t);
 				}
 			} else {
 				if (p == null) {
-					throw new ConfigRuntimeException("expecting a player context for get_chunk_loc when used without arguments"
+					throw ConfigRuntimeException.BuildException("expecting a player context for get_chunk_loc when used without arguments"
 							, ExceptionType.InsufficientArgumentsException, t);
 				}
 			}
@@ -1104,10 +1104,10 @@ public class World {
 					vect = (CArray)args[2];
 
 					if (vect.size() < 3) {
-						throw new ConfigRuntimeException("Argument 3 of spawn_falling_block must have 3 items", ExceptionType.FormatException, t);
+						throw ConfigRuntimeException.BuildException("Argument 3 of spawn_falling_block must have 3 items", ExceptionType.FormatException, t);
 					}
 				} else {
-					throw new ConfigRuntimeException("Expected array for argument 3 of spawn_falling_block", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Expected array for argument 3 of spawn_falling_block", ExceptionType.FormatException, t);
 				}
 			}
 
@@ -1173,7 +1173,7 @@ public class World {
 				Construct... args) throws ConfigRuntimeException {
 			MCWorld w = Static.getServer().getWorld(args[0].val());
 			if (w == null) {
-				throw new ConfigRuntimeException("Unknown world: " + args[0],
+				throw ConfigRuntimeException.BuildException("Unknown world: " + args[0],
 						ExceptionType.InvalidWorldException, t);
 			}
 			CArray ret = CArray.GetAssociativeArray(t);
@@ -1234,7 +1234,7 @@ public class World {
 			}
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if (world == null) {
-				throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
 			}
 			return CBoolean.get(Static.getServer().unloadWorld(world, save));
 		}
@@ -1303,7 +1303,7 @@ public class World {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if (world == null) {
-				throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
 			}
 			return new CString(world.getDifficulty().toString(), t);
 		}
@@ -1355,7 +1355,7 @@ public class World {
 				try {
 					difficulty = MCDifficulty.valueOf(args[0].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
-					throw new ConfigRuntimeException("The difficulty \"" + args[0].val() + "\" does not exist.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("The difficulty \"" + args[0].val() + "\" does not exist.", ExceptionType.FormatException, t);
 				}
 				for (MCWorld world : Static.getServer().getWorlds()) {
 					world.setDifficulty(difficulty);
@@ -1363,12 +1363,12 @@ public class World {
 			} else {
 				MCWorld world = Static.getServer().getWorld(args[0].val());
 				if (world == null) {
-					throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+					throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
 				}
 				try {
 					difficulty = MCDifficulty.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
-					throw new ConfigRuntimeException("The difficulty \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("The difficulty \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
 				}
 				world.setDifficulty(difficulty);
 			}
@@ -1418,7 +1418,7 @@ public class World {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if (world == null) {
-				throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
 			}
 			return CBoolean.get(world.getPVP());
 		}
@@ -1472,7 +1472,7 @@ public class World {
 			} else {
 				MCWorld world = Static.getServer().getWorld(args[0].val());
 				if (world == null) {
-					throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+					throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
 				}
 				world.setPVP(Static.getBoolean(args[1]));
 			}
@@ -1524,7 +1524,7 @@ public class World {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if (world == null) {
-				throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
 			}
 			if (args.length == 1) {
 				CArray gameRules = CArray.GetAssociativeArray(t);
@@ -1537,7 +1537,7 @@ public class World {
 				try {
 					gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
-					throw new ConfigRuntimeException("The gamerule \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("The gamerule \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
 				}
 				return CBoolean.get(world.getGameRuleValue(gameRule));
 			}
@@ -1590,7 +1590,7 @@ public class World {
 				try {
 					gameRule = MCGameRule.valueOf(args[0].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
-					throw new ConfigRuntimeException("The gamerule \"" + args[0].val() + "\" does not exist.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("The gamerule \"" + args[0].val() + "\" does not exist.", ExceptionType.FormatException, t);
 				}
 				boolean value = Static.getBoolean(args[1]);
 				for (MCWorld world : Static.getServer().getWorlds()) {
@@ -1600,11 +1600,11 @@ public class World {
 				try {
 					gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
-					throw new ConfigRuntimeException("The gamerule \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("The gamerule \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
 				}
 				MCWorld world = Static.getServer().getWorld(args[0].val());
 				if (world == null) {
-					throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+					throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
 				}
 				world.setGameRuleValue(gameRule, Static.getBoolean(args[2]));
 			}
@@ -1664,7 +1664,7 @@ public class World {
 			int distance = Static.getInt32(args[2], t);
 
 			if (distance <= 0) {
-				throw new ConfigRuntimeException("Distance must be greater than 0.", ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("Distance must be greater than 0.", ExceptionType.RangeException, t);
 			}
 
 			MCLocation shifted_from = from;

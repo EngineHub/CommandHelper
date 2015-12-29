@@ -64,12 +64,12 @@ public class Commands {
 			MCServer s = Static.getServer();
 			MCCommandMap map = s.getCommandMap();
 			if (map == null) {
-				throw new ConfigRuntimeException(this.getName() + " is not supported in this mode (CommandMap not found).",
+				throw ConfigRuntimeException.BuildException(this.getName() + " is not supported in this mode (CommandMap not found).",
 						ExceptionType.NotFoundException, t);
 			}
 			MCCommand cmd = map.getCommand(args[0].val());
 			if (cmd == null) {
-				throw new ConfigRuntimeException("Command not found, did you forget to register it?",
+				throw ConfigRuntimeException.BuildException("Command not found, did you forget to register it?",
 						ExceptionType.NotFoundException, t);
 			}
 			customExec(t, environment, cmd, args[1]);
@@ -88,7 +88,7 @@ public class Commands {
 				onTabComplete.remove(cmd.getName());
 				onTabComplete.put(cmd.getName(), (CClosure) arg);
 			} else {
-				throw new ConfigRuntimeException("At this time, only closures are accepted as tabcompleters",
+				throw ConfigRuntimeException.BuildException("At this time, only closures are accepted as tabcompleters",
 						ExceptionType.FormatException, t);
 			}
 		}
@@ -140,12 +140,12 @@ public class Commands {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if (map == null) {
-				throw new ConfigRuntimeException(this.getName() + " is not supported in this mode (CommandMap not found).",
+				throw ConfigRuntimeException.BuildException(this.getName() + " is not supported in this mode (CommandMap not found).",
 						ExceptionType.NotFoundException, t);
 			}
 			MCCommand cmd = map.getCommand(args[0].val());
 			if (cmd == null) {
-				throw new ConfigRuntimeException("Command not found, did you forget to register it?",
+				throw ConfigRuntimeException.BuildException("Command not found, did you forget to register it?",
 						ExceptionType.NotFoundException, t);
 			}
 			return CBoolean.get(map.unregister(cmd));
@@ -195,7 +195,7 @@ public class Commands {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if (map == null) {
-				throw new ConfigRuntimeException(this.getName() + " is not supported in this mode (CommandMap not found).",
+				throw ConfigRuntimeException.BuildException(this.getName() + " is not supported in this mode (CommandMap not found).",
 						ExceptionType.NotFoundException, t);
 			}
 			MCCommand cmd = map.getCommand(args[0].val().toLowerCase());
@@ -240,7 +240,7 @@ public class Commands {
 				}
 				return CBoolean.get(success);
 			} else {
-				throw new ConfigRuntimeException("Arg 2 was expected to be an array.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Arg 2 was expected to be an array.", ExceptionType.FormatException, t);
 			}
 		}
 
@@ -334,12 +334,12 @@ public class Commands {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if (map == null) {
-				throw new ConfigRuntimeException(this.getName() + " is not supported in this mode (CommandMap not found).",
+				throw ConfigRuntimeException.BuildException(this.getName() + " is not supported in this mode (CommandMap not found).",
 						ExceptionType.NotFoundException, t);
 			}
 			MCCommand cmd = map.getCommand(args[0].val());
 			if (cmd == null) {
-				throw new ConfigRuntimeException("Command not found did you forget to register it?",
+				throw ConfigRuntimeException.BuildException("Command not found did you forget to register it?",
 						ExceptionType.NotFoundException, t);
 			}
 			customExec(t, environment, cmd, args[1]);
@@ -358,7 +358,7 @@ public class Commands {
 				onCommand.remove(cmd.getName());
 				onCommand.put(cmd.getName(), (CClosure) arg);
 			} else {
-				throw new ConfigRuntimeException("At this time, only closures are accepted as command executors.",
+				throw ConfigRuntimeException.BuildException("At this time, only closures are accepted as command executors.",
 						ExceptionType.FormatException, t);
 			}
 		}

@@ -441,7 +441,7 @@ public class Scoreboards {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard newBoard = Static.getServer().getNewScoreboard();
 			if (newBoard == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not create scoreboard, the server returned a null scoreboard"
 						+ " (Are you running in cmdline mode?)", ExceptionType.NullPointerException, t);
 			}

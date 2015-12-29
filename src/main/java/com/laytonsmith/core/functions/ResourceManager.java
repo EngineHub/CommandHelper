@@ -116,7 +116,7 @@ public class ResourceManager {
 				case XML_DOCUMENT:
 					try {
 						if(data == null){
-							throw new ConfigRuntimeException("data cannot be empty", ExceptionType.NullPointerException, t);
+							throw ConfigRuntimeException.BuildException("data cannot be empty", ExceptionType.NullPointerException, t);
 						}
 						resource = new CResource<XMLDocument>(new XMLDocument(data.val()), t);
 					} catch (SAXException ex) {
@@ -192,7 +192,7 @@ public class ResourceManager {
 					resources.remove(resource.getId());
 					return CVoid.VOID;
 				} else {
-					throw new ConfigRuntimeException("That resource is not a valid resource.", ExceptionType.NotFoundException, t);
+					throw ConfigRuntimeException.BuildException("That resource is not a valid resource.", ExceptionType.NotFoundException, t);
 				}
 			} else {
 				throw new Exceptions.CastException("Expected a resource", t);

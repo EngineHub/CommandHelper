@@ -143,7 +143,7 @@ public class ObjectGenerator {
      */
     public MCLocation location(Construct c, MCWorld w, Target t) {
         if (!(c instanceof CArray)) {
-            throw new ConfigRuntimeException("Expecting an array, received " + c.getCType(), ExceptionType.FormatException, t);
+            throw ConfigRuntimeException.BuildException("Expecting an array, received " + c.getCType(), ExceptionType.FormatException, t);
         }
         CArray array = (CArray) c;
         MCWorld world = w;
@@ -180,7 +180,7 @@ public class ObjectGenerator {
                 yaw = (float) Static.getNumber(array.get(4, t), t);
                 pitch = (float) Static.getNumber(array.get(5, t), t);
             } else {
-                throw new ConfigRuntimeException("Expecting a Location array, but the array did not meet the format specifications", ExceptionType.FormatException, t);
+                throw ConfigRuntimeException.BuildException("Expecting a Location array, but the array did not meet the format specifications", ExceptionType.FormatException, t);
             }
         } else {
 			if (array.containsKey("x")) {
@@ -204,7 +204,7 @@ public class ObjectGenerator {
 		}
 		//If world is still null at this point, it's an error
 		if (world == null) {
-			throw new ConfigRuntimeException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
+			throw ConfigRuntimeException.BuildException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
 		}
         return StaticLayer.GetLocation(world, x, y, z, yaw, pitch);
     }
@@ -266,7 +266,7 @@ public class ObjectGenerator {
             return EmptyItem();
         }
         if (!(i instanceof CArray)) {
-            throw new ConfigRuntimeException("Expected an array!", ExceptionType.FormatException, t);
+            throw ConfigRuntimeException.BuildException("Expected an array!", ExceptionType.FormatException, t);
         }
         CArray item = (CArray) i;
 		MCMaterial mat = null;
@@ -286,10 +286,10 @@ public class ObjectGenerator {
 			}
 			mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(item.get("type", t), t));
 		} else {
-			throw new ConfigRuntimeException("Could not find item type!", ExceptionType.FormatException, t);
+			throw ConfigRuntimeException.BuildException("Could not find item type!", ExceptionType.FormatException, t);
 		}
 		if (mat == null) {
-			throw new ConfigRuntimeException("A material type could not be found based on the given id.",
+			throw ConfigRuntimeException.BuildException("A material type could not be found based on the given id.",
 					ExceptionType.NotFoundException, t);
 		}
 		if (item.containsKey("data")) {
@@ -309,7 +309,7 @@ public class ObjectGenerator {
                     throw new NullPointerException();
                 }
             } catch (Exception e) {
-                throw new ConfigRuntimeException("Could not get enchantment data from given information.", ExceptionType.FormatException, t, e);
+                throw ConfigRuntimeException.BuildException("Could not get enchantment data from given information.", ExceptionType.FormatException, t, e);
             }
 
             for (String index : enchantArray.stringKeySet()) {
@@ -325,18 +325,18 @@ public class ObjectGenerator {
                         selevel = enchantment.get("elevel", t).val();
                     }
                     if (setype == null || selevel == null) {
-                        throw new ConfigRuntimeException("Could not get enchantment data from given information.", ExceptionType.FormatException, t);
+                        throw ConfigRuntimeException.BuildException("Could not get enchantment data from given information.", ExceptionType.FormatException, t);
                     }
                     int elevel = 0;
                     try {
                         elevel = Integer.parseInt(selevel);
                     } catch (NumberFormatException e) {
-                        throw new ConfigRuntimeException("Could not get enchantment data from given information.", ExceptionType.FormatException, t);
+                        throw ConfigRuntimeException.BuildException("Could not get enchantment data from given information.", ExceptionType.FormatException, t);
                     }
                     MCEnchantment etype = StaticLayer.GetEnchantmentByName(setype);
                     enchants.put(etype, elevel);
                 } catch (ClassCastException e) {
-                    throw new ConfigRuntimeException("Could not get enchantment data from given information.", ExceptionType.FormatException, t, e);
+                    throw ConfigRuntimeException.BuildException("Could not get enchantment data from given information.", ExceptionType.FormatException, t, e);
                 }
             }
         }
@@ -498,7 +498,7 @@ public class ObjectGenerator {
 	public MCItemMeta itemMeta(Construct c, MCMaterial mat, Target t) throws ConfigRuntimeException {
 		MCItemFactory itemFactory = Static.getServer().getItemFactory();
 		if (itemFactory == null) {
-			throw new ConfigRuntimeException(
+			throw ConfigRuntimeException.BuildException(
 					"Could not find the internal MCItemFactory object (are you running in cmdline mode?)",
 					ExceptionType.NotFoundException, t);
 		}
@@ -794,7 +794,7 @@ public class ObjectGenerator {
 		try {
 			return StaticLayer.GetConvertor().GetColor(red, green, blue);
 		} catch(IllegalArgumentException ex){
-			throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.RangeException, t, ex);
+			throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.RangeException, t, ex);
 		}
 	}
 
@@ -895,7 +895,7 @@ public class ObjectGenerator {
 			// fulfilling the todo?
 			return v;
 		} else {
-			throw new ConfigRuntimeException("Expecting an array, received " + c.getCType(), ExceptionType.FormatException, t);
+			throw ConfigRuntimeException.BuildException("Expecting an array, received " + c.getCType(), ExceptionType.FormatException, t);
 		}
 	}
 
@@ -918,12 +918,12 @@ public class ObjectGenerator {
 				MCEnchantment etype = StaticLayer.GetConvertor().GetEnchantmentByName(ea.get("etype", t).val());
 				int elevel = Static.getInt32(ea.get("elevel", t), t);
 				if (etype == null) {
-					throw new ConfigRuntimeException("Unknown enchantment type at " + key,
+					throw ConfigRuntimeException.BuildException("Unknown enchantment type at " + key,
 							ExceptionType.EnchantmentException, t);
 				}
 				ret.put(etype, elevel);
 			} catch (ClassCastException cce) {
-				throw new ConfigRuntimeException("Expected an array at index " + key, ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Expected an array at index " + key, ExceptionType.FormatException, t);
 			}
 		}
 		return ret;
@@ -1011,7 +1011,7 @@ public class ObjectGenerator {
 		try {
 			return StaticLayer.GetMaterial(name.toUpperCase());
 		} catch (IllegalArgumentException exception) {
-			throw new ConfigRuntimeException("Unknown material type: " + name, ExceptionType.FormatException, t);
+			throw ConfigRuntimeException.BuildException("Unknown material type: " + name, ExceptionType.FormatException, t);
 		}
 	}
 
@@ -1031,7 +1031,7 @@ public class ObjectGenerator {
 					try {
 						recipeType = MCRecipeType.valueOf(recipe.get("type", t).val());
 					} catch (IllegalArgumentException e) {
-						throw new ConfigRuntimeException("Invalid recipe type.", ExceptionType.FormatException, t);
+						throw ConfigRuntimeException.BuildException("Invalid recipe type.", ExceptionType.FormatException, t);
 					}
 
 					MCRecipe ret;
@@ -1049,15 +1049,15 @@ public class ObjectGenerator {
 										shape[i] = row.val();
 										i++;
 									} else {
-										throw new ConfigRuntimeException("Shape array is invalid.", ExceptionType.FormatException, t);
+										throw ConfigRuntimeException.BuildException("Shape array is invalid.", ExceptionType.FormatException, t);
 									}
 								}
 							} else {
-								throw new ConfigRuntimeException("Shape array is invalid.", ExceptionType.FormatException, t);
+								throw ConfigRuntimeException.BuildException("Shape array is invalid.", ExceptionType.FormatException, t);
 							}
 							((MCShapedRecipe) ret).setShape(shape);
 						} else {
-							throw new ConfigRuntimeException("Could not find recipe shape array.", ExceptionType.FormatException, t);
+							throw ConfigRuntimeException.BuildException("Could not find recipe shape array.", ExceptionType.FormatException, t);
 						}
 
 						if(recipe.containsKey("ingredients") && (recipe.get("ingredients", t) instanceof CArray)) {
@@ -1085,15 +1085,15 @@ public class ObjectGenerator {
 										type = 0;
 										data = 0;
 									} else {
-										throw new ConfigRuntimeException("Item type was not found", ExceptionType.FormatException, t);
+										throw ConfigRuntimeException.BuildException("Item type was not found", ExceptionType.FormatException, t);
 									}
 									((MCShapedRecipe) ret).setIngredient(key.charAt(0), type, data);
 								}
 							} else {
-								throw new ConfigRuntimeException("Ingredients array is invalid.", ExceptionType.FormatException, t);
+								throw ConfigRuntimeException.BuildException("Ingredients array is invalid.", ExceptionType.FormatException, t);
 							}
 						} else {
-							throw new ConfigRuntimeException("Could not find recipe ingredient array.", ExceptionType.FormatException, t);
+							throw ConfigRuntimeException.BuildException("Could not find recipe ingredient array.", ExceptionType.FormatException, t);
 						}
 						return ret;
 
@@ -1116,15 +1116,15 @@ public class ObjectGenerator {
 											type = Integer.valueOf(item.val());
 										}
 									} else {
-										throw new ConfigRuntimeException("Item type was not found", ExceptionType.FormatException, t);
+										throw ConfigRuntimeException.BuildException("Item type was not found", ExceptionType.FormatException, t);
 									}
 									((MCShapelessRecipe) ret).addIngredient(type, data, 1);
 								}
 							} else {
-								throw new ConfigRuntimeException("Ingredients array is invalid.", ExceptionType.FormatException, t);
+								throw ConfigRuntimeException.BuildException("Ingredients array is invalid.", ExceptionType.FormatException, t);
 							}
 						} else {
-							throw new ConfigRuntimeException("Could not find recipe ingredient array.", ExceptionType.FormatException, t);
+							throw ConfigRuntimeException.BuildException("Could not find recipe ingredient array.", ExceptionType.FormatException, t);
 						}
 						return ret;
 
@@ -1134,20 +1134,20 @@ public class ObjectGenerator {
 						if (recipe.containsKey("input") && (recipe.get("input", t) instanceof CArray)) {
 							((MCFurnaceRecipe) ret).setInput(item(recipe.get("input", t), t));
 						} else {
-							throw new ConfigRuntimeException("Could not find input item array.", ExceptionType.FormatException, t);
+							throw ConfigRuntimeException.BuildException("Could not find input item array.", ExceptionType.FormatException, t);
 						}
 						return ret;
 					default:
-						throw new ConfigRuntimeException("Could not find valid recipe type.", ExceptionType.FormatException, t);
+						throw ConfigRuntimeException.BuildException("Could not find valid recipe type.", ExceptionType.FormatException, t);
 					}
 				} else {
-						throw new ConfigRuntimeException("Could not find recipe type.", ExceptionType.FormatException, t);
+						throw ConfigRuntimeException.BuildException("Could not find recipe type.", ExceptionType.FormatException, t);
 				}
 			} else {
-				throw new ConfigRuntimeException("Could not find result item array.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Could not find result item array.", ExceptionType.FormatException, t);
 			}
 		} else {
-			throw new ConfigRuntimeException("Expected array but recieved " + c, ExceptionType.CastException, t);
+			throw ConfigRuntimeException.BuildException("Expected array but recieved " + c, ExceptionType.CastException, t);
 		}
 	}
 

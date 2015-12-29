@@ -40,7 +40,7 @@ public class IncludeCache {
                     CHLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Compilation succeeded, adding to cache.", t);
                     IncludeCache.add(file, tree);
                 } catch (ConfigCompileException ex) {
-                    throw new ConfigRuntimeException("There was a compile error when trying to include the script at " + file
+                    throw ConfigRuntimeException.BuildException("There was a compile error when trying to include the script at " + file
                             + "\n" + ex.getMessage() + " :: " + file.getName() + ":" + ex.getLineNum(),
                             Exceptions.ExceptionType.IncludeException, t);
 				} catch(ConfigCompileGroupException ex){
@@ -49,13 +49,13 @@ public class IncludeCache {
 					for(ConfigCompileException e : ex.getList()){
 						b.append(e.getMessage()).append(" :: ").append(e.getFile().getName()).append(":").append(e.getLineNum());
 					}
-					throw new ConfigRuntimeException(b.toString(), Exceptions.ExceptionType.IncludeException, t);
+					throw ConfigRuntimeException.BuildException(b.toString(), Exceptions.ExceptionType.IncludeException, t);
                 } catch (IOException ex) {
-                    throw new ConfigRuntimeException("The script at " + file + " could not be found or read in.",
+                    throw ConfigRuntimeException.BuildException("The script at " + file + " could not be found or read in.",
                             Exceptions.ExceptionType.IOException, t);
                 }
             } else {
-                throw new ConfigRuntimeException("The script cannot access " + file + " due to restrictions imposed by the base-dir setting.",
+                throw ConfigRuntimeException.BuildException("The script cannot access " + file + " due to restrictions imposed by the base-dir setting.",
                         Exceptions.ExceptionType.SecurityException, t);
             }
         }

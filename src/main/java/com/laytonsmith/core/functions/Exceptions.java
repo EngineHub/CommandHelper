@@ -369,7 +369,7 @@ public class Exceptions {
 				if (pivar instanceof IVariable) {
 					ivar = (IVariable) pivar;
 				} else {
-					throw new ConfigRuntimeException("Expected argument 2 to be an IVariable", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Expected argument 2 to be an IVariable", ExceptionType.CastException, t);
 				}
 			}
 			List<String> interest = new ArrayList<String>();
@@ -383,7 +383,7 @@ public class Exceptions {
 						interest.add(ca.get(i, t).val());
 					}
 				} else {
-					throw new ConfigRuntimeException("Expected argument 4 to be a string, or an array of strings.",
+					throw ConfigRuntimeException.BuildException("Expected argument 4 to be a string, or an array of strings.",
 							ExceptionType.CastException, t);
 				}
 			}
@@ -392,7 +392,7 @@ public class Exceptions {
 				try {
 					ExceptionType.valueOf(in);
 				} catch (IllegalArgumentException e) {
-					throw new ConfigRuntimeException("Invalid exception type passed to try():" + in,
+					throw ConfigRuntimeException.BuildException("Invalid exception type passed to try():" + in,
 							ExceptionType.FormatException, t);
 				}
 			}
@@ -504,10 +504,10 @@ public class Exceptions {
 				if(c == null){
 					throw ConfigRuntimeException.CreateUncatchableException(args[1].val(), t);
 				} else {
-					throw new ConfigRuntimeException(args[1].val(), c, t);
+					throw ConfigRuntimeException.BuildException(args[1].val(), c, t);
 				}
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException("Expected a valid exception type", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Expected a valid exception type", ExceptionType.FormatException, t);
 			}
 		}
 	}

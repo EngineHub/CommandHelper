@@ -81,7 +81,7 @@ public class Weather {
 					ent = w.strikeLightningEffect(StaticLayer.GetLocation(w, x, y + 1, z)).getUniqueId();
 				}
 			} else {
-				throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("World was not specified", ExceptionType.InvalidWorldException, t);
 			}
 
 			return new CString(ent.toString(), t);
@@ -142,7 +142,7 @@ public class Weather {
 				} else if (args[1] instanceof CInt) {
 					duration = Static.getInt32(args[1], t);
 				} else {
-					throw new ConfigRuntimeException("", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("", ExceptionType.FormatException, t);
 				}
 			}
 			if (args.length == 3) {
@@ -155,7 +155,7 @@ public class Weather {
 					w.setWeatherDuration(duration);
 				}
 			} else {
-				throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("World was not specified", ExceptionType.InvalidWorldException, t);
 			}
 			return CVoid.VOID;
 		}
@@ -222,7 +222,7 @@ public class Weather {
 			if (w != null) {
 				w.setThundering(Static.getBoolean(args[0]));
 			} else {
-				throw new ConfigRuntimeException("No existing world specified!", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("No existing world specified!", ExceptionType.InvalidWorldException, t);
 			}
 			if (args.length == 3) {
 				w.setThunderDuration(Static.getInt32(args[2], t));
@@ -285,7 +285,7 @@ public class Weather {
 			if (w != null) {
 				return CBoolean.get(w.isStorming());
 			} else {
-				throw new ConfigRuntimeException("No existing world specified!", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("No existing world specified!", ExceptionType.InvalidWorldException, t);
 			}
 		}
 
@@ -343,7 +343,7 @@ public class Weather {
 			if (w != null) {
 				return CBoolean.get(w.isThundering());
 			} else {
-				throw new ConfigRuntimeException("No existing world specified!", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("No existing world specified!", ExceptionType.InvalidWorldException, t);
 			}
 		}
 

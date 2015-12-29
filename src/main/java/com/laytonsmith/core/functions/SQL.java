@@ -155,7 +155,7 @@ public class SQL {
 					profile = profiles.getProfileById(args[0].val());
 				}
 				if(!(profile instanceof SQLProfile)){
-					throw new ConfigRuntimeException("Profile must be an SQL type profile, but found \"" + profile.getType() + "\"", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Profile must be an SQL type profile, but found \"" + profile.getType() + "\"", ExceptionType.CastException, t);
 				}
 				String query = args[1].val();
 				Construct[] params = new Construct[args.length - 2];
@@ -179,7 +179,7 @@ public class SQL {
 						if (params[i] == null) {
 							try {
 								if (ps.getParameterMetaData().isNullable(i + 1) == ParameterMetaData.parameterNoNulls) {
-									throw new ConfigRuntimeException("Parameter " + (i + 1) + " cannot be set to null. Check your parameters and try again.", ExceptionType.SQLException, t);
+									throw ConfigRuntimeException.BuildException("Parameter " + (i + 1) + " cannot be set to null. Check your parameters and try again.", ExceptionType.SQLException, t);
 								}
 							} catch(SQLException ex){
 								//Ignored. This appears to be able to happen in various cases, but in the case where it *does* work, we don't want
@@ -200,12 +200,12 @@ public class SQL {
 							} else if (params[i] instanceof CBoolean) {
 								ps.setBoolean(i + 1, Static.getBoolean(params[i]));
 							}else{
-								throw new ConfigRuntimeException("The type " + params[i].getClass().getSimpleName()
+								throw ConfigRuntimeException.BuildException("The type " + params[i].getClass().getSimpleName()
 										+ " of parameter " + (i + 1) + " is not supported."
 										, ExceptionType.CastException, t);
 							}
 						} catch (ClassCastException ex) {
-							throw new ConfigRuntimeException("Could not cast parameter " + (i + 1) + " to "
+							throw ConfigRuntimeException.BuildException("Could not cast parameter " + (i + 1) + " to "
 									+ ps.getParameterMetaData().getParameterTypeName(i + 1) + " from "
 									+ params[i].getClass().getSimpleName() + "."
 									, ExceptionType.CastException, t, ex);
@@ -254,7 +254,7 @@ public class SQL {
 										|| columnType == Types.BIT) {
 									value = CBoolean.get(rs.getBoolean(i));
 								} else {
-									throw new ConfigRuntimeException("SQL returned a unhandled column type "
+									throw ConfigRuntimeException.BuildException("SQL returned a unhandled column type "
 											+ md.getColumnTypeName(i) + " for column " + md.getColumnName(i) + "."
 											, ExceptionType.CastException, t);
 								}
@@ -288,7 +288,7 @@ public class SQL {
 					}
 				}
 			} catch (Profiles.InvalidProfileException | SQLException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.SQLException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.SQLException, t, ex);
 			}
 		}
 
@@ -462,7 +462,7 @@ public class SQL {
 			startup();
 			Construct arg = args[args.length - 1];
 			if(!(arg instanceof CClosure)){
-				throw new ConfigRuntimeException("The last argument to " + getName() + " must be a closure.", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("The last argument to " + getName() + " must be a closure.", ExceptionType.CastException, t);
 			}
 			final CClosure closure = ((CClosure)arg);
 			final Construct[] newArgs = new Construct[args.length - 1];

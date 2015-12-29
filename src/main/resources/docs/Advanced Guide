@@ -32,7 +32,7 @@ the remainder of the line is ignored by the compiler. <code>//</code> is preferr
 <code>#</code> is not deprecated, nor will it ever be. The only exception to this preference is when using a
 hashbang for cmdline code.
 
-Block comments start with </code>/*</code> and end with </code>*/</code> This causes the compiler to ignore everything
+Block comments start with <code>/*</code> and end with <code>*/</code> This causes the compiler to ignore everything
 within the comment block, including newlines.
 
 Smart comments are like block comments, but start with <code>/**</code> (two asterisks) instead. They are currently

@@ -131,7 +131,7 @@ public class InventoryManagement {
             }
             MCPlayerInventory inv = m.getInventory();
 			if (inv == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)",
 						Exceptions.ExceptionType.NotFoundException, t);
 			}
@@ -160,7 +160,7 @@ public class InventoryManagement {
             } else if(slot.equals(103)){
                 is = inv.getHelmet();
             } else {
-                throw new ConfigRuntimeException("Slot index must be 0-35, or 100-103", Exceptions.ExceptionType.RangeException, t);
+                throw ConfigRuntimeException.BuildException("Slot index must be 0-35, or 100-103", Exceptions.ExceptionType.RangeException, t);
             }
             return ObjectGenerator.GetGenerator().item(is, t);
         }
@@ -250,7 +250,7 @@ public class InventoryManagement {
 			} else {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				if (p == null) {
-					throw new ConfigRuntimeException(
+					throw ConfigRuntimeException.BuildException(
 							"You have to specify a player when running " + this.getName() + " from console.",
 							ExceptionType.InsufficientArgumentsException, t);
 				}
@@ -472,7 +472,7 @@ public class InventoryManagement {
                 throw ConfigRuntimeException.CreateUncatchableException("The old format for set_pinv has been deprecated. Please update your script.", t);
             }
             if(!(arg instanceof CArray)){
-                throw new ConfigRuntimeException("Expecting an array as argument " + (args.length==1?"1":"2"), Exceptions.ExceptionType.CastException, t);
+                throw ConfigRuntimeException.BuildException("Expecting an array as argument " + (args.length==1?"1":"2"), Exceptions.ExceptionType.CastException, t);
             }
             CArray array = (CArray)arg;
 			Static.AssertPlayerNonNull(m, t);
@@ -569,7 +569,7 @@ public class InventoryManagement {
             MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
             MCPlayerInventory inv = p.getInventory();
 			if (inv == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)",
 						Exceptions.ExceptionType.NotFoundException, t);
 			}
@@ -653,7 +653,7 @@ public class InventoryManagement {
             MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
             MCPlayerInventory inv = p.getInventory();
 			if (inv == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)",
 						Exceptions.ExceptionType.NotFoundException, t);
 			}
@@ -764,7 +764,7 @@ public class InventoryManagement {
 			try {
 				h = p.getInventory().addItem(is);
 			} catch(IllegalArgumentException e) {
-				throw new ConfigRuntimeException("Item value is invalid", ExceptionType.IllegalArgumentException, t);
+				throw ConfigRuntimeException.BuildException("Item value is invalid", ExceptionType.IllegalArgumentException, t);
 			}
 
 			p.updateInventory();
@@ -833,7 +833,7 @@ public class InventoryManagement {
 			Static.AssertPlayerNonNull(p, t);
             MCPlayerInventory inv = p.getInventory();
 			if (inv == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)",
 						Exceptions.ExceptionType.NotFoundException, t);
 			}
@@ -951,7 +951,7 @@ public class InventoryManagement {
 			try {
 				h = p.getEnderChest().addItem(is);
 			} catch(IllegalArgumentException e) {
-				throw new ConfigRuntimeException("Item value is invalid", ExceptionType.IllegalArgumentException, t);
+				throw ConfigRuntimeException.BuildException("Item value is invalid", ExceptionType.IllegalArgumentException, t);
 			}
 
 			if (h.isEmpty()) {
@@ -1018,7 +1018,7 @@ public class InventoryManagement {
 			Static.AssertPlayerNonNull(p, t);
 			MCInventory inv = p.getEnderChest();
 			if (inv == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the enderchest inventory of the given player (are you running in cmdline mode?)",
 						Exceptions.ExceptionType.NotFoundException, t);
 			}
@@ -1124,7 +1124,7 @@ public class InventoryManagement {
 			}
 
 			if (!(arg instanceof CArray)) {
-				throw new ConfigRuntimeException("Expecting an array as argument " + (args.length == 1 ? "1" : "2"), Exceptions.ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Expecting an array as argument " + (args.length == 1 ? "1" : "2"), Exceptions.ExceptionType.CastException, t);
 			}
 
 			CArray array = (CArray) arg;
@@ -1139,7 +1139,7 @@ public class InventoryManagement {
 						index = Integer.parseInt(key);
 					} catch (NumberFormatException e) {
 						if (key.isEmpty()) {
-							throw new ConfigRuntimeException("Slot index must be 0-26", Exceptions.ExceptionType.RangeException, t);
+							throw ConfigRuntimeException.BuildException("Slot index must be 0-26", Exceptions.ExceptionType.RangeException, t);
 						} else {
 							throw e;
 						}
@@ -1230,7 +1230,7 @@ public class InventoryManagement {
 				m = Static.GetPlayer(args[0], t);
 			} else if (args.length == 2) {
 				if (args[1] instanceof CNull) {
-					throw new ConfigRuntimeException("Slot index must be 0-26", Exceptions.ExceptionType.RangeException, t);
+					throw ConfigRuntimeException.BuildException("Slot index must be 0-26", Exceptions.ExceptionType.RangeException, t);
 				} else {
 					index = Static.getInt32(args[1], t);
 				}
@@ -1257,12 +1257,12 @@ public class InventoryManagement {
 		private Construct getInvSlot(MCPlayer m, Integer slot, Target t) {
 			MCInventory inv = m.getEnderChest();
 			if (inv == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the enderchest inventory of the given player (are you running in cmdline mode?)",
 						Exceptions.ExceptionType.NotFoundException, t);
 			}
 			if (slot < 0 || slot > 26) {
-				throw new ConfigRuntimeException("Slot index must be 0-26", Exceptions.ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("Slot index must be 0-26", Exceptions.ExceptionType.RangeException, t);
 			}
 			MCItemStack is = inv.getItem(slot);
 			return ObjectGenerator.GetGenerator().item(is, t);
@@ -1616,7 +1616,7 @@ public class InventoryManagement {
 				index = Static.getInt32(args[1], t);
 
 				if (index < 0 || index >= size) {
-					throw new ConfigRuntimeException("Slot index must be 0-" + (size - 1), Exceptions.ExceptionType.RangeException, t);
+					throw ConfigRuntimeException.BuildException("Slot index must be 0-" + (size - 1), Exceptions.ExceptionType.RangeException, t);
 				}
 			}
 
@@ -1691,7 +1691,7 @@ public class InventoryManagement {
 			Integer size = inventory.getSize();
 
 			if (!(args[1] instanceof CArray)) {
-				throw new ConfigRuntimeException("Expecting an array as argument 2", Exceptions.ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Expecting an array as argument 2", Exceptions.ExceptionType.CastException, t);
 			}
 
 			CArray array = (CArray) args[1];
@@ -1782,7 +1782,7 @@ public class InventoryManagement {
 			try {
 				h = inventory.addItem(is);
 			} catch(IllegalArgumentException e){
-				throw new ConfigRuntimeException("Item value is invalid", ExceptionType.IllegalArgumentException, t);
+				throw ConfigRuntimeException.BuildException("Item value is invalid", ExceptionType.IllegalArgumentException, t);
 			}
 
 			if (h.isEmpty()) {
@@ -1917,7 +1917,7 @@ public class InventoryManagement {
 					if(sender instanceof MCPlayer) {
 						player = (MCPlayer) sender;
 					} else {
-						throw new ConfigRuntimeException("The command sender is not online (are you running this from console?).",
+						throw ConfigRuntimeException.BuildException("The command sender is not online (are you running this from console?).",
 								Exceptions.ExceptionType.PlayerOfflineException, t);
 					}
 					break;
@@ -1927,7 +1927,7 @@ public class InventoryManagement {
 					break;
 				}
 				default: {
-					throw new ConfigRuntimeException("Wrong number of arguments passed to " + this.getName(),
+					throw ConfigRuntimeException.BuildException("Wrong number of arguments passed to " + this.getName(),
 							Exceptions.ExceptionType.FormatException, t);
 				}
 			}
@@ -1936,17 +1936,17 @@ public class InventoryManagement {
 			try {
 				slot = Integer.parseInt(args[args.length - 1].val());
 			} catch(NumberFormatException e) {
-				throw new ConfigRuntimeException("Slot number must be an integer in range of [0-8].",
+				throw ConfigRuntimeException.BuildException("Slot number must be an integer in range of [0-8].",
 							Exceptions.ExceptionType.FormatException, t);
 			}
 			if(slot < 0 || slot > 8) {
-				throw new ConfigRuntimeException("Slot number must be an integer in range of [0-8].",
+				throw ConfigRuntimeException.BuildException("Slot number must be an integer in range of [0-8].",
 						Exceptions.ExceptionType.RangeException, t);
 			}
 			
 			MCPlayerInventory pinv = player.getInventory();
 			if (pinv == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)",
 						Exceptions.ExceptionType.NotFoundException, t);
 			}
@@ -2004,7 +2004,7 @@ public class InventoryManagement {
 					if(sender instanceof MCPlayer) {
 						player = (MCPlayer) sender;
 					} else {
-						throw new ConfigRuntimeException("The command sender is not online (are you running this from console?).",
+						throw ConfigRuntimeException.BuildException("The command sender is not online (are you running this from console?).",
 								Exceptions.ExceptionType.PlayerOfflineException, t);
 					}
 					break;
@@ -2014,14 +2014,14 @@ public class InventoryManagement {
 					break;
 				}
 				default: {
-					throw new ConfigRuntimeException("Wrong number of arguments passed to " + this.getName(),
+					throw ConfigRuntimeException.BuildException("Wrong number of arguments passed to " + this.getName(),
 							Exceptions.ExceptionType.FormatException, t);
 				}
 			}
 			
 			MCPlayerInventory pinv = player.getInventory();
 			if (pinv == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)",
 						Exceptions.ExceptionType.NotFoundException, t);
 			}

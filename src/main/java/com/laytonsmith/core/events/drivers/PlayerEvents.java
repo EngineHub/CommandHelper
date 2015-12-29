@@ -1525,7 +1525,7 @@ public class PlayerEvents {
                         }
                         e.setRecipients(list);
                     } else {
-                        throw new ConfigRuntimeException("recipients must be an array", Exceptions.ExceptionType.CastException, value.getTarget());
+                        throw ConfigRuntimeException.BuildException("recipients must be an array", Exceptions.ExceptionType.CastException, value.getTarget());
                     }
                 }
 				if("format".equals(key)){
@@ -1640,7 +1640,7 @@ public class PlayerEvents {
                         }
                         e.setRecipients(list);
                     } else {
-                        throw new ConfigRuntimeException("recipients must be an array", Exceptions.ExceptionType.CastException, value.getTarget());
+                        throw ConfigRuntimeException.BuildException("recipients must be an array", Exceptions.ExceptionType.CastException, value.getTarget());
                     }
                 }
 				if("format".equals(key)){
@@ -2103,7 +2103,7 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
+			throw ConfigRuntimeException.BuildException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
 		}
 
 		@Override
@@ -2164,7 +2164,7 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
+			throw ConfigRuntimeException.BuildException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
 		}
 
 		@Override
@@ -2409,7 +2409,7 @@ public class PlayerEvents {
 				} else if (key.equalsIgnoreCase("pages")) {
 					CArray pageArray = Static.getArray(value, value.getTarget());
 					if (pageArray.inAssociativeMode()) {
-						throw new ConfigRuntimeException("The page array must not be associative.", ExceptionType.CastException, pageArray.getTarget());
+						throw ConfigRuntimeException.BuildException("The page array must not be associative.", ExceptionType.CastException, pageArray.getTarget());
 					} else {
 						List<String> pages = new ArrayList<String>();
 						for (Construct page : pageArray.asList()) {

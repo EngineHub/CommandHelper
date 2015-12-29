@@ -109,7 +109,7 @@ public class Regex {
 						ret.set(key, (String)ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
 					}
 				} catch(ReflectionUtils.ReflectionException ex){
-					throw new ConfigRuntimeException("Named captures are only supported with Java 7.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Named captures are only supported with Java 7.", ExceptionType.FormatException, t);
 				}
             }
             return ret;
@@ -207,7 +207,7 @@ public class Regex {
 						ret.set(key, (String)ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
 					}
 				} catch(ReflectionUtils.ReflectionException e){
-					throw new ConfigRuntimeException("Named captures are only supported with Java 7.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Named captures are only supported with Java 7.", ExceptionType.FormatException, t);
 				}
                 fret.push(ret, t);
             }
@@ -608,7 +608,7 @@ public class Regex {
                 } else if(sflags.toLowerCase().charAt(i) == 's'){
                     flags |= java.util.regex.Pattern.DOTALL;
                 } else {
-                    throw new ConfigRuntimeException("Unrecognized flag: " + sflags.toLowerCase().charAt(i), ExceptionType.FormatException, t);
+                    throw ConfigRuntimeException.BuildException("Unrecognized flag: " + sflags.toLowerCase().charAt(i), ExceptionType.FormatException, t);
                 }
             }
         } else {
@@ -617,7 +617,7 @@ public class Regex {
         try{
             return Pattern.compile(regex, flags);
         } catch(PatternSyntaxException e){
-            throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
+            throw ConfigRuntimeException.BuildException(e.getMessage(), ExceptionType.FormatException, t);
         }
     }
 	

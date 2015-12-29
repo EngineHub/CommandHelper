@@ -21,7 +21,7 @@ public class CInt extends CNumber implements Cloneable{
         try{
             val = Long.parseLong(value);
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Could not parse " + value + " as an integer", ExceptionType.FormatException, t);
+            throw ConfigRuntimeException.BuildException("Could not parse " + value + " as an integer", ExceptionType.FormatException, t);
         }
     }
 

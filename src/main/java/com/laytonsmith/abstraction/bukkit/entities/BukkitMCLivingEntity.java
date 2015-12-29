@@ -337,7 +337,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	@Override
 	public MCLivingEntity getTarget(Target t) {
 		if (!(le instanceof Creature)) {
-			throw new ConfigRuntimeException("This type of mob does not have a target API", 
+			throw ConfigRuntimeException.BuildException("This type of mob does not have a target API", 
 					ExceptionType.BadEntityException, t);
 		}
 		LivingEntity target = ((Creature) le).getTarget();
@@ -347,7 +347,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	@Override
 	public void setTarget(MCLivingEntity target, Target t) {
 		if (!(le instanceof Creature)) {
-			throw new ConfigRuntimeException("This type of mob does not have a target API", 
+			throw ConfigRuntimeException.BuildException("This type of mob does not have a target API", 
 					ExceptionType.BadEntityException, t);
 		}
 		((Creature) le).setTarget(target == null ? null : ((BukkitMCLivingEntity) target).asLivingEntity());

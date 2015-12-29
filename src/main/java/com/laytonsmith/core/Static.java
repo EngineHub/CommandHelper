@@ -382,7 +382,7 @@ public final class Static {
 
 	public static void checkPlugin(String name, Target t) throws ConfigRuntimeException {
 		if (Static.getServer().getPluginManager().getPlugin(name) == null) {
-			throw new ConfigRuntimeException("Needed plugin " + name + " not found!",
+			throw ConfigRuntimeException.BuildException("Needed plugin " + name + " not found!",
 					ExceptionType.InvalidPluginException, t);
 		}
 	}
@@ -424,7 +424,7 @@ public final class Static {
 			return CClassType.VOID;
 		}
 		if (INVALID_HEX.matcher(val).matches()) {
-			throw new ConfigRuntimeException("Hex numbers must only contain digits 0-9, and the letters A-F, but \"" + val + "\" was found.",
+			throw ConfigRuntimeException.BuildException("Hex numbers must only contain digits 0-9, and the letters A-F, but \"" + val + "\" was found.",
 					ExceptionType.FormatException, t);
 		}
 		if (VALID_HEX.matcher(val).matches()) {
@@ -432,7 +432,7 @@ public final class Static {
 			return new CInt(Long.parseLong(val.substring(2), 16), t);
 		}
 		if (INVALID_BINARY.matcher(val).matches()) {
-			throw new ConfigRuntimeException("Binary numbers must only contain digits 0 and 1, but \"" + val + "\" was found.",
+			throw ConfigRuntimeException.BuildException("Binary numbers must only contain digits 0 and 1, but \"" + val + "\" was found.",
 					ExceptionType.FormatException, t);
 		}
 		if (VALID_BINARY.matcher(val).matches()) {
@@ -440,7 +440,7 @@ public final class Static {
 			return new CInt(Long.parseLong(val.substring(2), 2), t);
 		}
 		if (INVALID_OCTAL.matcher(val).matches()){
-			throw new ConfigRuntimeException("Octal numbers must only contain digits 0-7, but \"" + val + "\" was found.",
+			throw ConfigRuntimeException.BuildException("Octal numbers must only contain digits 0-7, but \"" + val + "\" was found.",
 					ExceptionType.FormatException, t);
 		}
 		if (VALID_OCTAL.matcher(val).matches()){
@@ -497,7 +497,7 @@ public final class Static {
 			if (m instanceof MCPlayer) {
 				MCPlayer p = (MCPlayer) m;
 				if (!p.isOnline()) {
-					throw new ConfigRuntimeException("The player " + p.getName() + " is not online",
+					throw ConfigRuntimeException.BuildException("The player " + p.getName() + " is not online",
 							ExceptionType.PlayerOfflineException, t);
 				}
 			}
@@ -572,7 +572,7 @@ public final class Static {
 					data = (short) Integer.parseInt(sData[1]);
 				}
 			} catch (NumberFormatException e) {
-			throw new ConfigRuntimeException("Item value passed to " + functionName + " is invalid: " + notation,
+			throw ConfigRuntimeException.BuildException("Item value passed to " + functionName + " is invalid: " + notation,
 					ExceptionType.FormatException, t);
 		}
 
@@ -630,12 +630,12 @@ public final class Static {
 				}
 				return UUID.fromString(matcher.replaceAll("$1-$2-$3-$4-$5"));
 			} else {
-				throw new ConfigRuntimeException("A UUID is expected to be 32 or 36 characters,"
+				throw ConfigRuntimeException.BuildException("A UUID is expected to be 32 or 36 characters,"
 						+ " but the given string was " + subject.length() + " characters.",
 						ExceptionType.LengthException, t);
 			}
 		} catch (IllegalArgumentException iae) {
-			throw new ConfigRuntimeException("A UUID length string was given, but was not a valid UUID.",
+			throw ConfigRuntimeException.BuildException("A UUID length string was given, but was not a valid UUID.",
 					ExceptionType.IllegalArgumentException, t);
 		}
 	}
@@ -666,7 +666,7 @@ public final class Static {
 				ofp = getServer().getOfflinePlayer(GetUUID(search, t));
 			} catch (ConfigRuntimeException cre) {
 				if (cre.getExceptionType().equals(ExceptionType.LengthException)) {
-					throw new ConfigRuntimeException("The given string was the wrong size to identify a player."
+					throw ConfigRuntimeException.BuildException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(),
 							ExceptionType.LengthException, t);
 				} else {
@@ -691,7 +691,7 @@ public final class Static {
 		MCCommandSender m;
 
 		if (player == null) {
-			throw new ConfigRuntimeException("No player was specified!", ExceptionType.PlayerOfflineException, t);
+			throw ConfigRuntimeException.BuildException("No player was specified!", ExceptionType.PlayerOfflineException, t);
 		}
 
 		if (player.length() > 0 && player.length() <= 16) {
@@ -701,7 +701,7 @@ public final class Static {
 				m = getServer().getPlayer(GetUUID(player, t));
 			} catch (ConfigRuntimeException cre) {
 				if (cre.getExceptionType().equals(ExceptionType.LengthException)) {
-					throw new ConfigRuntimeException("The given string was the wrong size to identify a player."
+					throw ConfigRuntimeException.BuildException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(),
 							ExceptionType.LengthException, t);
 				} else {
@@ -710,16 +710,16 @@ public final class Static {
 			}
 		}
 		if (m == null) {
-			throw new ConfigRuntimeException("The specified player (" + player + ") is not online",
+			throw ConfigRuntimeException.BuildException("The specified player (" + player + ") is not online",
 					ExceptionType.PlayerOfflineException, t);
 		}
 		if (!(m instanceof MCPlayer)) {
-			throw new ConfigRuntimeException("Expecting a player name, but \"" + player + "\" was found.",
+			throw ConfigRuntimeException.BuildException("Expecting a player name, but \"" + player + "\" was found.",
 					ExceptionType.PlayerOfflineException, t);
 		}
 		MCPlayer p = (MCPlayer) m;
 		if (!p.isOnline()) {
-			throw new ConfigRuntimeException("The specified player (" + player + ") is not online",
+			throw ConfigRuntimeException.BuildException("The specified player (" + player + ") is not online",
 					ExceptionType.PlayerOfflineException, t);
 		}
 		return p;
@@ -753,7 +753,7 @@ public final class Static {
 			}
 		}
 		if (m == null || (m instanceof MCPlayer && (!((MCPlayer) m).isOnline() && !injectedPlayers.containsKey(player)))) {
-			throw new ConfigRuntimeException("The specified player (" + player + ") is not online", ExceptionType.PlayerOfflineException, t);
+			throw ConfigRuntimeException.BuildException("The specified player (" + player + ") is not online", ExceptionType.PlayerOfflineException, t);
 		}
 		return m;
 	}
@@ -775,7 +775,7 @@ public final class Static {
 		if (player != null) {
 			return player;
 		} else {
-			throw new ConfigRuntimeException("The passed arguments induce that the function must be run by a player.", ExceptionType.PlayerOfflineException, t);
+			throw ConfigRuntimeException.BuildException("The passed arguments induce that the function must be run by a player.", ExceptionType.PlayerOfflineException, t);
 		}
 	}
 
@@ -802,7 +802,7 @@ public final class Static {
 				}
 			}
 		}
-		throw new ConfigRuntimeException("That entity (ID " + id + ") does not exist.", ExceptionType.BadEntityException, t);
+		throw ConfigRuntimeException.BuildException("That entity (ID " + id + ") does not exist.", ExceptionType.BadEntityException, t);
 	}
 
 	public static MCEntity getEntity(Construct id, Target t) {
@@ -828,7 +828,7 @@ public final class Static {
 				}
 			}
 		}
-		throw new ConfigRuntimeException("That entity (UUID " + id + ") does not exist.", ExceptionType.BadEntityException, t);
+		throw ConfigRuntimeException.BuildException("That entity (UUID " + id + ") does not exist.", ExceptionType.BadEntityException, t);
 	}
 
 	/**
@@ -845,13 +845,13 @@ public final class Static {
 					try {
 						return (MCLivingEntity) StaticLayer.GetCorrectEntity(e);
 					} catch (ClassCastException cce) {
-						throw new ConfigRuntimeException("The entity found was misinterpreted by the converter, this is"
+						throw ConfigRuntimeException.BuildException("The entity found was misinterpreted by the converter, this is"
 								+ " a developer mistake, please file a ticket.", ExceptionType.BadEntityException, t);
 					}
 				}
 			}
 		}
-		throw new ConfigRuntimeException("That entity (" + id + ") does not exist or is not alive.", ExceptionType.BadEntityException, t);
+		throw ConfigRuntimeException.BuildException("That entity (" + id + ") does not exist or is not alive.", ExceptionType.BadEntityException, t);
 	}
 
 	/**
@@ -869,13 +869,13 @@ public final class Static {
 					try {
 						return (MCLivingEntity) StaticLayer.GetCorrectEntity(e);
 					} catch (ClassCastException cce) {
-						throw new ConfigRuntimeException("The entity found was misinterpreted by the converter, this is"
+						throw ConfigRuntimeException.BuildException("The entity found was misinterpreted by the converter, this is"
 								+ " a developer mistake, please file a ticket.", ExceptionType.BadEntityException, t);
 					}
 				}
 			}
 		}
-		throw new ConfigRuntimeException(
+		throw ConfigRuntimeException.BuildException(
 				"That entity (" + id + ") does not exist or is not alive.", ExceptionType.BadEntityException, t);
 	}
 
@@ -912,7 +912,7 @@ public final class Static {
 		if (world != null) {
 			return world;
 		} else {
-			throw new ConfigRuntimeException("Unknown world:" + name + ".", ExceptionType.InvalidWorldException, t);
+			throw ConfigRuntimeException.BuildException("Unknown world:" + name + ".", ExceptionType.InvalidWorldException, t);
 		}
 	}
 
@@ -941,7 +941,7 @@ public final class Static {
 		if (plugin != null) {
 			return plugin;
 		} else {
-			throw new ConfigRuntimeException("Unknown plugin:" + name + ".", ExceptionType.InvalidPluginException, t);
+			throw ConfigRuntimeException.BuildException("Unknown plugin:" + name + ".", ExceptionType.InvalidPluginException, t);
 		}
 	}
 
@@ -972,7 +972,7 @@ public final class Static {
 					return Static.getWorld(construct, t);
 			}
 		} else {
-			throw new ConfigRuntimeException("An array or a string was expected, but " + construct.val()
+			throw ConfigRuntimeException.BuildException("An array or a string was expected, but " + construct.val()
 					+ " was found.", ExceptionType.CastException, t);
 		}
 	}
@@ -1244,7 +1244,7 @@ public final class Static {
 
 	public static void AssertPlayerNonNull(MCPlayer p, Target t) throws ConfigRuntimeException {
 		if (p == null) {
-			throw new ConfigRuntimeException("No player was specified!", ExceptionType.PlayerOfflineException, t);
+			throw ConfigRuntimeException.BuildException("No player was specified!", ExceptionType.PlayerOfflineException, t);
 		}
 	}
 
@@ -1296,7 +1296,7 @@ public final class Static {
 	public static void AssertNonCNull(Target t, Construct... args) throws ConfigRuntimeException {
 		for (Construct arg : args) {
 			if (arg instanceof CNull) {
-				throw new ConfigRuntimeException("Argument was null, and nulls are not allowed.", ExceptionType.NullPointerException, t);
+				throw ConfigRuntimeException.BuildException("Argument was null, and nulls are not allowed.", ExceptionType.NullPointerException, t);
 			}
 		}
 	}
@@ -1340,7 +1340,7 @@ public final class Static {
 		if (env != null && InCmdLine(env)) {
 			return new File(env.getEnv(GlobalEnv.class).GetRootFolder(), arg);
 		} else if (t.file() == null) {
-			throw new ConfigRuntimeException("Unable to receive a non-absolute file with an unknown target", ExceptionType.IOException, t);
+			throw ConfigRuntimeException.BuildException("Unable to receive a non-absolute file with an unknown target", ExceptionType.IOException, t);
 		} else {
 			return new File(t.file().getParent(), arg);
 		}
@@ -1382,7 +1382,7 @@ public final class Static {
 			typeof todesired = type.getAnnotation(typeof.class);
 			String toactual = value.typeof();
 			if (todesired != null) {
-				throw new ConfigRuntimeException("Argument " + (argNumber + 1) + " of " + func.getName() + " was expected to be a "
+				throw ConfigRuntimeException.BuildException("Argument " + (argNumber + 1) + " of " + func.getName() + " was expected to be a "
 						+ todesired.value() + ", but " + toactual + " \"" + value.val() + "\" was found.", ExceptionType.CastException, t);
 			} else {
 				//If the typeof annotation isn't present, this is a programming error.

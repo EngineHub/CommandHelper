@@ -209,7 +209,7 @@ public class CArray extends Construct implements ArrayAccess{
 			Collections.reverse(array);
 			regenValue(new HashSet<CArray>());
 		} else {
-			throw new ConfigRuntimeException("Cannot reverse an associative array.", ExceptionType.CastException, getTarget());
+			throw ConfigRuntimeException.BuildException("Cannot reverse an associative array.", ExceptionType.CastException, getTarget());
 		}
 	}
 
@@ -323,7 +323,7 @@ public class CArray extends Construct implements ArrayAccess{
             try {
                 int indx = Static.getInt32(index, t);
                 if (indx > next_index || indx < 0) {
-                    throw new ConfigRuntimeException("", ExceptionType.IndexOverflowException, Target.UNKNOWN);
+                    throw ConfigRuntimeException.BuildException("", ExceptionType.IndexOverflowException, Target.UNKNOWN);
                 } else if(indx == next_index){
                     this.push(c, t);
                 } else {
@@ -371,7 +371,7 @@ public class CArray extends Construct implements ArrayAccess{
             try {
                 return array.get(Static.getInt32(index, t));
             } catch (IndexOutOfBoundsException e) {
-                throw new ConfigRuntimeException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, t, e);
+                throw ConfigRuntimeException.BuildException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, t, e);
             }
         } else {
             if(associative_array.containsKey(normalizeConstruct(index))){
@@ -384,7 +384,7 @@ public class CArray extends Construct implements ArrayAccess{
 				//Create this so we can at least attach a stacktrace.
 				@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
 				IndexOutOfBoundsException ioobe = new IndexOutOfBoundsException();
-                throw new ConfigRuntimeException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, t, ioobe);
+                throw ConfigRuntimeException.BuildException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, t, ioobe);
             }
         }
     }
@@ -600,7 +600,7 @@ public class CArray extends Construct implements ArrayAccess{
 
     private String normalizeConstruct(Construct c){
         if(c instanceof CArray){
-            throw new ConfigRuntimeException("Arrays cannot be used as the key in an associative array", ExceptionType.CastException, c.getTarget());
+            throw ConfigRuntimeException.BuildException("Arrays cannot be used as the key in an associative array", ExceptionType.CastException, c.getTarget());
         } else if(c instanceof CString || c instanceof CInt){
             return c.val();
         } else if(c instanceof CNull){
@@ -649,9 +649,9 @@ public class CArray extends Construct implements ArrayAccess{
                 ret = array.remove(Integer.parseInt(c));
 				next_index--;
             } catch(NumberFormatException e){
-                throw new ConfigRuntimeException("Expecting an integer, but received \"" + c + "\" (were you expecting an associative array? This array is a normal array.)", ExceptionType.CastException, construct.getTarget());
+                throw ConfigRuntimeException.BuildException("Expecting an integer, but received \"" + c + "\" (were you expecting an associative array? This array is a normal array.)", ExceptionType.CastException, construct.getTarget());
             } catch(IndexOutOfBoundsException e){
-                throw new ConfigRuntimeException("Cannot remove the value at '" + c + "', as no such index exists in the array", ExceptionType.RangeException, construct.getTarget());
+                throw ConfigRuntimeException.BuildException("Cannot remove the value at '" + c + "', as no such index exists in the array", ExceptionType.RangeException, construct.getTarget());
             }
         } else {
             ret = associative_array.remove(c);
@@ -827,11 +827,11 @@ public class CArray extends Construct implements ArrayAccess{
                         c = o2;
                     }
                     if(c instanceof CArray){
-                        throw new ConfigRuntimeException("Cannot sort an array of arrays.", ExceptionType.CastException, CArray.this.getTarget());
+                        throw ConfigRuntimeException.BuildException("Cannot sort an array of arrays.", ExceptionType.CastException, CArray.this.getTarget());
                     }
                     if(!(c instanceof CBoolean || c instanceof CString || c instanceof CInt ||
                             c instanceof CDouble || c instanceof CNull)){
-                        throw new ConfigRuntimeException("Unsupported type being sorted: " + c.getCType(), ExceptionType.FormatException, CArray.this.getTarget());
+                        throw ConfigRuntimeException.BuildException("Unsupported type being sorted: " + c.getCType(), ExceptionType.FormatException, CArray.this.getTarget());
                     }
                 }
                 if(o1 instanceof CNull || o2 instanceof CNull){

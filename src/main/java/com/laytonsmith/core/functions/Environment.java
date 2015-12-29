@@ -96,7 +96,7 @@ public class Environment {
 			}
 			if (args.length < 3) {
 				if (!(args[0] instanceof CArray)) {
-					throw new ConfigRuntimeException("get_block_at expects param 1 to be an array",
+					throw ConfigRuntimeException.BuildException("get_block_at expects param 1 to be an array",
 							ExceptionType.CastException, t);
 				}
 				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
@@ -107,7 +107,7 @@ public class Environment {
 				if (args.length == 2) {
 					w = Static.getServer().getWorld(args[1].val());
 					if (w == null) {
-						throw new ConfigRuntimeException("The specified world " + args[1].val() + " doesn't exist",
+						throw ConfigRuntimeException.BuildException("The specified world " + args[1].val() + " doesn't exist",
 								ExceptionType.InvalidWorldException, t);
 					}
 				}
@@ -118,17 +118,17 @@ public class Environment {
 				if (args.length == 4) {
 					w = Static.getServer().getWorld(args[3].val());
 					if (w == null) {
-						throw new ConfigRuntimeException("The specified world " + args[4].val() + " doesn't exist",
+						throw ConfigRuntimeException.BuildException("The specified world " + args[4].val() + " doesn't exist",
 								ExceptionType.InvalidWorldException, t);
 					}
 				}
 			}
 			if (w == null) {
-				throw new ConfigRuntimeException("No world was provided", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("No world was provided", ExceptionType.InvalidWorldException, t);
 			}
 			MCBlock b = w.getBlockAt(x, y, z);
 			if (b == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the block in " + this.getName() + " (are you running in cmdline mode?)",
 						ExceptionType.NotFoundException, t);
 			}
@@ -195,7 +195,7 @@ public class Environment {
 			}
 			if (args.length < 4) {
 				if (!(args[0] instanceof CArray)) {
-					throw new ConfigRuntimeException("set_block_at expects param 1 to be an array",
+					throw ConfigRuntimeException.BuildException("set_block_at expects param 1 to be an array",
 							ExceptionType.CastException, t);
 				}
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
@@ -216,11 +216,11 @@ public class Environment {
 				if (args.length >= 5) {
 					w = Static.getServer().getWorld(args[4].val());
 					if (w == null) {
-						throw new ConfigRuntimeException("The specified world " + args[4].val() + " doesn't exist",
+						throw ConfigRuntimeException.BuildException("The specified world " + args[4].val() + " doesn't exist",
 								ExceptionType.InvalidWorldException, t);
 					}
 				} else if (w == null) {
-					throw new ConfigRuntimeException("No world was provided",
+					throw ConfigRuntimeException.BuildException("No world was provided",
 							ExceptionType.InvalidWorldException, t);
 				}
 				if (args.length == 6) {
@@ -237,12 +237,12 @@ public class Environment {
 				}
 				data = Integer.parseInt(dataAndMeta[0]); // Throws NumberFormatException.
 			} catch(NumberFormatException e) {
-				throw new ConfigRuntimeException("id must be formatted as such: 'x:y' where x and y are integers",
+				throw ConfigRuntimeException.BuildException("id must be formatted as such: 'x:y' where x and y are integers",
 						ExceptionType.FormatException, t);
 			}
 			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
 			if (mat == null || !mat.isBlock()) {
-				throw new ConfigRuntimeException("Not a block ID: " + data
+				throw ConfigRuntimeException.BuildException("Not a block ID: " + data
 						+ ". Attempting to set an invalid id can corrupt chunks!", ExceptionType.CastException, t);
 			}
 			b.setTypeAndData(data, meta, physics);
@@ -347,7 +347,7 @@ public class Environment {
 				s.setLine(3, line4);
 				return CVoid.VOID;
 			} else {
-				throw new ConfigRuntimeException("The block at the specified location is not a sign", ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("The block at the specified location is not a sign", ExceptionType.RangeException, t);
 			}
 		}
 	}
@@ -407,7 +407,7 @@ public class Environment {
 				CString line4 = new CString(s.getLine(3), t);
 				return new CArray(t, line1, line2, line3, line4);
 			} else {
-				throw new ConfigRuntimeException("The block at the specified location is not a sign", ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("The block at the specified location is not a sign", ExceptionType.RangeException, t);
 			}
 		}
 	}
@@ -574,15 +574,15 @@ public class Environment {
 			try {
 				bt = MCBiomeType.valueOf(args[args.length - 1].val());
 				if (bt == null) {
-					throw new ConfigRuntimeException(
+					throw ConfigRuntimeException.BuildException(
 							"Could not find the internal biome type object (are you running in cmdline mode?)",
 							ExceptionType.NotFoundException, t);
 				}
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException("The biome type \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("The biome type \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
 			}
 			if (w == null) {
-				throw new ConfigRuntimeException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
 			}
 			w.setBiome(x, z, bt);
 			return CVoid.VOID;
@@ -652,11 +652,11 @@ public class Environment {
 				}
 			}
 			if (w == null) {
-				throw new ConfigRuntimeException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
 			}
 			MCBiomeType bt = w.getBiome(x, z);
 			if (bt == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the biome type (are you running in cmdline mode?)",
 						ExceptionType.NotFoundException, t);
 			}
@@ -736,11 +736,11 @@ public class Environment {
 				w = Static.getServer().getWorld(world);
 			}
 			if (w == null) {
-				throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, t);
 			}
 			MCBlock highestBlock = w.getHighestBlockAt((int) java.lang.Math.floor(x), (int) java.lang.Math.floor(z));
 			if (highestBlock == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the highest block in " + this.getName() + " (are you running in cmdline mode?)",
 						ExceptionType.NotFoundException, t);
 			}
@@ -810,12 +810,12 @@ public class Environment {
 			}
 
 			if (size > 100) {
-				throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?",
+				throw ConfigRuntimeException.BuildException("A bit excessive, don't you think? Let's scale that back some, huh?",
 						ExceptionType.RangeException, t);
 			}
 
 			if (!(args[0] instanceof CArray)) {
-				throw new ConfigRuntimeException("Expecting an array at parameter 1 of explosion",
+				throw ConfigRuntimeException.BuildException("Expecting an array at parameter 1 of explosion",
 						ExceptionType.CastException, t);
 			}
 
@@ -827,7 +827,7 @@ public class Environment {
 
 			if (w == null) {
 				if (!(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer)) {
-					throw new ConfigRuntimeException(this.getName() + " needs a world in the location array, or a player so it can take the current world of that player.", ExceptionType.PlayerOfflineException, t);
+					throw ConfigRuntimeException.BuildException(this.getName() + " needs a world in the location array, or a player so it can take the current world of that player.", ExceptionType.PlayerOfflineException, t);
 				}
 
 				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -1181,7 +1181,7 @@ public class Environment {
 					case "burnable":
 						return CBoolean.get(b.isBurnable());
 					default:
-						throw new ConfigRuntimeException("Invalid argument for block info", ExceptionType.FormatException, t);
+						throw ConfigRuntimeException.BuildException("Invalid argument for block info", ExceptionType.FormatException, t);
 				}
 			}
 			CArray array = CArray.GetAssociativeArray(t);
@@ -1328,7 +1328,7 @@ public class Environment {
 				try {
 					mode = CheckMode.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException e) {
-					throw new ConfigRuntimeException("Invalid checkMode: " + args[1].val() + ".",
+					throw ConfigRuntimeException.BuildException("Invalid checkMode: " + args[1].val() + ".",
 							ExceptionType.FormatException, t);
 				}
 			} else {
@@ -1349,7 +1349,7 @@ public class Environment {
 					break;
 				}
 				default: { // Should not be able to run.
-					throw new ConfigRuntimeException("Invalid checkMode: " + args[1].val() + ".",
+					throw ConfigRuntimeException.BuildException("Invalid checkMode: " + args[1].val() + ".",
 							ExceptionType.FormatException, t);
 				}
 			}
@@ -1465,7 +1465,7 @@ public class Environment {
 				try {
 					treeType = MCTreeType.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
-					throw new ConfigRuntimeException("The tree type \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("The tree type \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
 				}
 			}
 			MCPlayer psender = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -1520,7 +1520,7 @@ public class Environment {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				return new CString(cb.getCommand(), t);
 			} else {
-				throw new ConfigRuntimeException("The block at the specified location is not a command block",
+				throw ConfigRuntimeException.BuildException("The block at the specified location is not a command block",
 						ExceptionType.FormatException, t);
 			}
 		}
@@ -1571,7 +1571,7 @@ public class Environment {
 			String cmd = null;
 			if(args.length == 2 && !(args[1] instanceof CNull)) {
 				if(!(args[1] instanceof CString)) {
-					throw new ConfigRuntimeException("Parameter 2 of " + getName() + " must be a string or null",
+					throw ConfigRuntimeException.BuildException("Parameter 2 of " + getName() + " must be a string or null",
 							ExceptionType.CastException, t);
 				}
 				cmd = args[1].val();
@@ -1583,7 +1583,7 @@ public class Environment {
 				cb.setCommand(cmd);
 				return CVoid.VOID;
 			} else {
-				throw new ConfigRuntimeException("The block at the specified location is not a command block",
+				throw ConfigRuntimeException.BuildException("The block at the specified location is not a command block",
 						ExceptionType.FormatException, t);
 			}
 		}
@@ -1635,7 +1635,7 @@ public class Environment {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				return new CString(cb.getName(), t);
 			} else {
-				throw new ConfigRuntimeException("The block at the specified location is not a command block",
+				throw ConfigRuntimeException.BuildException("The block at the specified location is not a command block",
 						ExceptionType.FormatException, t);
 			}
 		}
@@ -1686,7 +1686,7 @@ public class Environment {
 			String name = null;
 			if(args.length == 2 && !(args[1] instanceof CNull)) {
 				if(!(args[1] instanceof CString)) {
-					throw new ConfigRuntimeException("Parameter 2 of " + getName() + " must be a string or null",
+					throw ConfigRuntimeException.BuildException("Parameter 2 of " + getName() + " must be a string or null",
 							ExceptionType.CastException, t);
 				}
 				name = args[1].val();
@@ -1698,7 +1698,7 @@ public class Environment {
 				cb.setName(name);
 				return CVoid.VOID;
 			} else {
-				throw new ConfigRuntimeException("The block at the specified location is not a command block",
+				throw ConfigRuntimeException.BuildException("The block at the specified location is not a command block",
 						ExceptionType.FormatException, t);
 			}
 		}

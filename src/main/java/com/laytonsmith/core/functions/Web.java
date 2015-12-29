@@ -148,7 +148,7 @@ public class Web {
 				domain = cookie.get("domain", t).val();
 				path = cookie.get("path", t).val();
 			} else {
-				throw new ConfigRuntimeException("The name, value, domain, and path keys are required"
+				throw ConfigRuntimeException.BuildException("The name, value, domain, and path keys are required"
 						+ " in all cookies.", ExceptionType.FormatException, t);
 			}
 			if(cookie.containsKey("expiration")){
@@ -309,7 +309,7 @@ public class Web {
 						throw new Exceptions.CastException("Expecting the success parameter to be a closure.", t);
 					}
 				} else {
-					throw new ConfigRuntimeException("Missing the success parameter, which is required.", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Missing the success parameter, which is required.", ExceptionType.CastException, t);
 				}
 				if(csettings.containsKey("error")){
 					if(csettings.get("error", t) instanceof CClosure){
@@ -339,7 +339,7 @@ public class Web {
 					try{
 						type = Proxy.Type.valueOf(proxySettings.get("type", t).val());
 					} catch(IllegalArgumentException e){
-						throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
+						throw ConfigRuntimeException.BuildException(e.getMessage(), ExceptionType.FormatException, t, e);
 					}
 					proxyURL = proxySettings.get("url", t).val();
 					port = Static.getInt32(proxySettings.get("port", t), t);
@@ -397,7 +397,7 @@ public class Web {
 							}
 						});
 					} catch(IOException e){
-						final ConfigRuntimeException ex = new ConfigRuntimeException((e instanceof UnknownHostException?"Unknown host: ":"")
+						final ConfigRuntimeException ex = ConfigRuntimeException.BuildException((e instanceof UnknownHostException?"Unknown host: ":"")
 								+ e.getMessage(), ExceptionType.IOException, t);
 						if(error != null){
 							StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
@@ -706,10 +706,10 @@ public class Web {
 				try {
 					p = environment.getEnv(GlobalEnv.class).getProfiles().getProfileById(profileName);
 				} catch(Profiles.InvalidProfileException ex){
-					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.FormatException, t, ex);
+					throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.FormatException, t, ex);
 				}
 				if(!(p instanceof EmailProfile)){
-					throw new ConfigRuntimeException("Profile type is expected to be \"email\", but \"" + p.getType() + "\"  was found.", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Profile type is expected to be \"email\", but \"" + p.getType() + "\"  was found.", ExceptionType.CastException, t);
 				}
 				Map<String, Object> data = ((EmailProfile)p).getMap();
 				for(String key : data.keySet()){
@@ -810,7 +810,7 @@ public class Web {
 								type = Message.RecipientType.BCC;
 								break;
 							default:
-								throw new ConfigRuntimeException("Recipient type must be one of either: TO, CC, or BCC, but \"" + stype + "\" was found.", ExceptionType.FormatException, t);
+								throw ConfigRuntimeException.BuildException("Recipient type must be one of either: TO, CC, or BCC, but \"" + stype + "\" was found.", ExceptionType.FormatException, t);
 						}
 						address = ArgumentValidation.getItemFromArray(ca, "address", t, null).val();
 					} else {
@@ -911,9 +911,9 @@ public class Web {
 
 			} catch(MessagingException ex){
 				if(ex.getCause() instanceof SocketTimeoutException){
-					throw new ConfigRuntimeException(ex.getCause().getMessage(), ExceptionType.IOException, t, ex);
+					throw ConfigRuntimeException.BuildException(ex.getCause().getMessage(), ExceptionType.IOException, t, ex);
 				}
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.PluginInternalException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.PluginInternalException, t, ex);
 			}
 			return CVoid.VOID;
 		}
@@ -931,7 +931,7 @@ public class Web {
 				CByteArray cb = (CByteArray)c;
 				return cb.asByteArrayCopy();
 			} else {
-				throw new ConfigRuntimeException("Only strings and byte_arrays may be added as attachments' content.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Only strings and byte_arrays may be added as attachments' content.", ExceptionType.FormatException, t);
 			}
 		}
 

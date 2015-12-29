@@ -184,7 +184,7 @@ public class Echoes {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args.length < 2){
-                throw new ConfigRuntimeException("You must send at least 2 arguments to tmsg", ExceptionType.InsufficientArgumentsException, t);
+                throw ConfigRuntimeException.BuildException("You must send at least 2 arguments to tmsg", ExceptionType.InsufficientArgumentsException, t);
             }
 			MCCommandSender p;
 			if (Static.getConsoleName().equals(args[0].val())) {
@@ -193,7 +193,7 @@ public class Echoes {
 				p = Static.GetPlayer(args[0], t);
 			}
             if(p == null){
-                throw new ConfigRuntimeException("The player " + args[0].val() + " is not online", ExceptionType.PlayerOfflineException, t);
+                throw ConfigRuntimeException.BuildException("The player " + args[0].val() + " is not online", ExceptionType.PlayerOfflineException, t);
             }
             StringBuilder b = new StringBuilder();
             for(int i = 1; i < args.length; i++){
@@ -432,7 +432,7 @@ public class Echoes {
 			if(p != null){
 				p.chat(args[0].val());
 			} else {
-				throw new ConfigRuntimeException("Console cannot chat. Use something like broadcast() instead.", ExceptionType.PlayerOfflineException, t);
+				throw ConfigRuntimeException.BuildException("Console cannot chat. Use something like broadcast() instead.", ExceptionType.PlayerOfflineException, t);
 			}
             return CVoid.VOID;
         }
@@ -549,7 +549,7 @@ public class Echoes {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CNull){
-                throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.NullPointerException, t);
+                throw ConfigRuntimeException.BuildException("Trying to broadcast null won't work", ExceptionType.NullPointerException, t);
             }
             final MCServer server = Static.getServer();
             String permission = null;

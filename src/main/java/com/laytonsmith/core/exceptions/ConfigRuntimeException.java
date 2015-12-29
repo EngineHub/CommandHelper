@@ -1,6 +1,3 @@
-
-
-
 package com.laytonsmith.core.exceptions;
 
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
@@ -26,222 +23,235 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * A ConfigRuntimeException is the base class for user level exceptions.
  */
 public class ConfigRuntimeException extends RuntimeException {
 
-    List<StackTraceElement> stackTraceTrail = new ArrayList<>();
+	List<StackTraceElement> stackTraceTrail = new ArrayList<>();
 
-    /**
-     * Creates a new instance of <code>ConfigRuntimeException</code> without detail message.
-     */
-    protected ConfigRuntimeException() {
-    }
+	/**
+	 * Creates a new instance of <code>ConfigRuntimeException</code> without
+	 * detail message.
+	 */
+	protected ConfigRuntimeException() {
+	}
 
 	/**
 	 * Sets the environment of the exception.
+	 *
 	 * @param env
 	 */
-    public void setEnv(Environment env) {
-        this.env = env;
-    }
-
-    /**
-     * This returns the environment that was set when the exception was thrown.
-     * It may be null, though that's due to an incomplete swapover, and should be
-     * fixed.
-     */
-    public Environment getEnv(){
-        return this.env;
-    }
+	public void setEnv(Environment env) {
+		this.env = env;
+	}
 
 	/**
-	 * Sets the file that the exception occurred in. If f is null, the
-	 * file is not set.
+	 * This returns the environment that was set when the exception was thrown.
+	 * It may be null, though that's due to an incomplete swapover, and should
+	 * be fixed.
+	 */
+	public Environment getEnv() {
+		return this.env;
+	}
+
+	/**
+	 * Sets the file that the exception occurred in. If f is null, the file is
+	 * not set.
+	 *
 	 * @param f
 	 */
-    public void setFile(File f) {
-        if(file == null){
-            file = f;
-        }
-    }
+	public void setFile(File f) {
+		if (file == null) {
+			file = f;
+		}
+	}
 
 	/**
 	 * Sets the line number that the exception occurred in. If line_num is -1,
 	 * nothing is set.
+	 *
 	 * @param line_num
 	 */
-    public void setLineNum(int line_num) {
-        if(this.line_num == -1){
-            this.line_num = line_num;
-        }
-    }
+	public void setLineNum(int line_num) {
+		if (this.line_num == -1) {
+			this.line_num = line_num;
+		}
+	}
 
 	/**
-	 * Sets the column that the exception occurred in. If column is -1,
-	 * nothing is set.
+	 * Sets the column that the exception occurred in. If column is -1, nothing
+	 * is set.
+	 *
 	 * @param column
 	 */
-    public void setColumn(int column){
-        if(this.column == -1){
-            this.column = column;
-        }
-    }
+	public void setColumn(int column) {
+		if (this.column == -1) {
+			this.column = column;
+		}
+	}
 
 	/**
 	 * Appends a stack trace frame to this exception. Stack trace frames should
 	 * only be
+	 *
 	 * @param t
 	 * @param nextTarget
 	 */
-    public void addStackTraceTrail(StackTraceElement t, Target nextTarget){
-		if(t == null){
+	public void addStackTraceTrail(StackTraceElement t, Target nextTarget) {
+		if (t == null) {
 			stackTraceTrail.add(new StackTraceElement("<<main code>>", target));
 		} else {
 			stackTraceTrail.add(t);
 			target = nextTarget;
 		}
-    }
+	}
 
 	/**
 	 * A reaction is a pre-programmed response to the exception bubbling all the
 	 * way up. One of these reaction types must be set by user code (or defaults
 	 * to REPORT), and the correct action will occur.
 	 */
-    public static enum Reaction{
-        /**
-         * This exception should be ignored, because a handler dealt with it
-         * as desired. The plugin is no longer responsible for dealing with this
-         * exception
-         */
-        IGNORE,
-        /**
-         * No handler knew how to deal with this exception, or they chose not
-         * to handle it. The plugin should handle it by using the default action
-         * for an uncaught exception
-         */
-        REPORT,
-        /**
-         * A handler knew how to deal with this exception, and furthermore, it escalated
-         * it to a more serious category. Though the behavior may be undefined, the
-         * plugin should pass the exception up further.
-         */
-        FATAL
-    }
+	public static enum Reaction {
+		/**
+		 * This exception should be ignored, because a handler dealt with it as
+		 * desired. The plugin is no longer responsible for dealing with this
+		 * exception
+		 */
+		IGNORE,
+		/**
+		 * No handler knew how to deal with this exception, or they chose not to
+		 * handle it. The plugin should handle it by using the default action
+		 * for an uncaught exception
+		 */
+		REPORT,
+		/**
+		 * A handler knew how to deal with this exception, and furthermore, it
+		 * escalated it to a more serious category. Though the behavior may be
+		 * undefined, the plugin should pass the exception up further.
+		 */
+		FATAL
+	}
 
-    /**
-     * If a exception bubbles all the way up to the top, this should be called first,
-     * to see what reaction the plugin should take. Generally speaking, you'll want to
-	 * use {@link #HandleUncaughtException} instead of this, though if you need to take custom action, you
-	 * can determine the user's preferred reaction with this method.
-     * @param e
-     * @return
-     */
-    public static Reaction GetReaction(ConfigRuntimeException e, Environment env){
-        //If there is an exception handler, call it to see what it says.
+	/**
+	 * If a exception bubbles all the way up to the top, this should be called
+	 * first, to see what reaction the plugin should take. Generally speaking,
+	 * you'll want to use {@link #HandleUncaughtException} instead of this,
+	 * though if you need to take custom action, you can determine the user's
+	 * preferred reaction with this method.
+	 *
+	 * @param e
+	 * @return
+	 */
+	public static Reaction GetReaction(ConfigRuntimeException e, Environment env) {
+		//If there is an exception handler, call it to see what it says.
 		Reaction reaction = Reaction.REPORT;
-		if(e.getExceptionType() == null){
+		if (e.getExceptionType() == null) {
 			//Uncatchable, so return the default
 			return reaction;
 		}
-		if(env.getEnv(GlobalEnv.class).GetExceptionHandler() != null){
+		if (env.getEnv(GlobalEnv.class).GetExceptionHandler() != null) {
 			CClosure c = env.getEnv(GlobalEnv.class).GetExceptionHandler();
 			CArray ex = ObjectGenerator.GetGenerator().exception(e, Target.UNKNOWN);
 			Construct ret = CNull.NULL;
-			try{
+			try {
 				c.execute(new Construct[]{ex});
-			} catch(FunctionReturnException retException){
+			} catch (FunctionReturnException retException) {
 				ret = retException.getReturn();
 			}
-			if(ret instanceof CNull || Prefs.ScreamErrors()){
+			if (ret instanceof CNull || Prefs.ScreamErrors()) {
 				reaction = Reaction.REPORT;
 			} else {
-				if(Static.getBoolean(ret)){
+				if (Static.getBoolean(ret)) {
 					reaction = Reaction.IGNORE;
 				} else {
 					reaction = Reaction.FATAL;
 				}
 			}
 		}
-        return reaction;
-    }
+		return reaction;
+	}
 
 	/**
-	 * Compile errors are always handled with the default mechanism, but
-	 * to standardize error handling, this method must be used.
+	 * Compile errors are always handled with the default mechanism, but to
+	 * standardize error handling, this method must be used.
+	 *
 	 * @param e
 	 * @param optionalMessage
 	 * @param player
 	 */
-	public static void HandleUncaughtException(ConfigCompileException e, String optionalMessage, MCPlayer player){
-		if(optionalMessage != null){
+	public static void HandleUncaughtException(ConfigCompileException e, String optionalMessage, MCPlayer player) {
+		if (optionalMessage != null) {
 			DoWarning(optionalMessage);
 		}
 		DoReport(e, player);
 	}
 
-	public static void HandleUncaughtException(ConfigCompileGroupException e, MCPlayer player){
-		for(ConfigCompileException ce : e.getList()){
+	public static void HandleUncaughtException(ConfigCompileGroupException e, MCPlayer player) {
+		for (ConfigCompileException ce : e.getList()) {
 			HandleUncaughtException(ce, null, player);
 		}
 	}
 
-	public static void HandleUncaughtException(ConfigCompileGroupException e, String optionalMessage, MCPlayer player){
+	public static void HandleUncaughtException(ConfigCompileGroupException e, String optionalMessage, MCPlayer player) {
 		DoWarning(optionalMessage);
 		HandleUncaughtException(e, player);
 	}
 
-    /**
-     * If there's nothing special you want to do with the exception, you can send it
-     * here, and it will take the default action for an uncaught exception.
-     * @param e
-     * @param r
-     */
-    public static void HandleUncaughtException(ConfigRuntimeException e, Environment env){
-        HandleUncaughtException(e, GetReaction(e, env));
-    }
+	/**
+	 * If there's nothing special you want to do with the exception, you can
+	 * send it here, and it will take the default action for an uncaught
+	 * exception.
+	 *
+	 * @param e
+	 * @param r
+	 */
+	public static void HandleUncaughtException(ConfigRuntimeException e, Environment env) {
+		HandleUncaughtException(e, GetReaction(e, env));
+	}
 
-    /**
-     * If there's nothing special you want to do with the exception, you can send it
-     * here, and it will take the default action for an uncaught exception.
-     * @param e
-     * @param r
-     */
-    private static void HandleUncaughtException(ConfigRuntimeException e, Reaction r){
+	/**
+	 * If there's nothing special you want to do with the exception, you can
+	 * send it here, and it will take the default action for an uncaught
+	 * exception.
+	 *
+	 * @param e
+	 * @param r
+	 */
+	private static void HandleUncaughtException(ConfigRuntimeException e, Reaction r) {
 		//This is the top of the stack chain, so finalize the stack trace at this point
 		e.addStackTraceTrail(null, Target.UNKNOWN);
-        if(r == Reaction.IGNORE){
-            //Welp, you heard the man.
-            CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.DEBUG, "An exception bubbled to the top, but was instructed by an event handler to not cause output.", e.getTarget());
-        } else if(r == ConfigRuntimeException.Reaction.REPORT){
-            ConfigRuntimeException.DoReport(e);
-        } else if(r == ConfigRuntimeException.Reaction.FATAL){
-            ConfigRuntimeException.DoReport(e);
-            //Well, here goes nothing
-            throw e;
-        }
-    }
+		if (r == Reaction.IGNORE) {
+			//Welp, you heard the man.
+			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.DEBUG, "An exception bubbled to the top, but was instructed by an event handler to not cause output.", e.getTarget());
+		} else if (r == ConfigRuntimeException.Reaction.REPORT) {
+			ConfigRuntimeException.DoReport(e);
+		} else if (r == ConfigRuntimeException.Reaction.FATAL) {
+			ConfigRuntimeException.DoReport(e);
+			//Well, here goes nothing
+			throw e;
+		}
+	}
 
-    /**
-     * If the Reaction returned by GetReaction is to report the exception,
-	 * this function should be used to standardize the report format. If the error message
-     * wouldn't be very useful by itself, or if a hint is desired, an optional message
-     * may be provided (null otherwise).
-     * @param e
-     * @param optionalMessage
-     */
-    private static void DoReport(String message, String exceptionType, List<StackTraceElement> stacktrace, MCPlayer currentPlayer){
-        String type = exceptionType;
-        if(exceptionType == null){
-            type = "FATAL";
-        }
+	/**
+	 * If the Reaction returned by GetReaction is to report the exception, this
+	 * function should be used to standardize the report format. If the error
+	 * message wouldn't be very useful by itself, or if a hint is desired, an
+	 * optional message may be provided (null otherwise).
+	 *
+	 * @param e
+	 * @param optionalMessage
+	 */
+	private static void DoReport(String message, String exceptionType, List<StackTraceElement> stacktrace, MCPlayer currentPlayer) {
+		String type = exceptionType;
+		if (exceptionType == null) {
+			type = "FATAL";
+		}
 		List<StackTraceElement> st = new ArrayList<StackTraceElement>(stacktrace);
-		if(message == null){
+		if (message == null) {
 			message = "";
 		}
-		if(!"".equals(message.trim())){
+		if (!"".equals(message.trim())) {
 			message = ": " + message;
 		}
 		Target top = Target.UNKNOWN;
@@ -251,9 +261,9 @@ public class ConfigRuntimeException extends RuntimeException {
 		log.append(type).append(message).append("\n");
 		console.append(TermColors.RED).append(type).append(TermColors.WHITE).append(message).append("\n");
 		player.append(MCChatColor.RED).append(type).append(MCChatColor.WHITE).append(message).append("\n");
-		for(StackTraceElement e : st){
+		for (StackTraceElement e : st) {
 			Target t = e.getDefinedAt();
-			if(top == Target.UNKNOWN){
+			if (top == Target.UNKNOWN) {
 				top = t;
 			}
 			String proc = e.getProcedureName();
@@ -262,7 +272,7 @@ public class ConfigRuntimeException extends RuntimeException {
 			int column = t.col();
 			String filepath;
 			String simplepath;
-			if(file == null){
+			if (file == null) {
 				filepath = simplepath = "Unknown Source";
 			} else {
 				filepath = file.getPath();
@@ -271,7 +281,7 @@ public class ConfigRuntimeException extends RuntimeException {
 
 			log.append("\t").append(proc).append(":").append(filepath).append(":")
 					.append(line)/*.append(".")
-					.append(column)*/.append("\n");
+					 .append(column)*/.append("\n");
 			console.append("\t").append(TermColors.GREEN).append(proc)
 					.append(TermColors.WHITE).append(":")
 					.append(TermColors.YELLOW).append(filepath)
@@ -287,29 +297,29 @@ public class ConfigRuntimeException extends RuntimeException {
 
 		//Log
 		//Don't log to screen though, since we're ALWAYS going to do that ourselves.
-		CHLog.GetLogger().Log("COMPILE ERROR".equals(exceptionType)?CHLog.Tags.COMPILER:CHLog.Tags.RUNTIME,
+		CHLog.GetLogger().Log("COMPILE ERROR".equals(exceptionType) ? CHLog.Tags.COMPILER : CHLog.Tags.RUNTIME,
 				LogLevel.ERROR, log.toString(), top, false);
 		//Console
 		StreamUtils.GetSystemOut().println(console.toString() + TermColors.reset());
 		//Player
-		if(currentPlayer != null){
+		if (currentPlayer != null) {
 			currentPlayer.sendMessage(player.toString());
 		}
-    }
+	}
 
-    private static void DoReport(ConfigRuntimeException e){
-        MCPlayer p = null;
-        if(e.getEnv() != null && e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer() != null){
-            p = e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer();
-        }
-        DoReport(e.getMessage(), e.getExceptionType()!=null?e.getExceptionType().toString():"FatalRuntimeException", e.stackTraceTrail, p);
-		if(Prefs.DebugMode()){
-			if(e.getCause() != null){
+	private static void DoReport(ConfigRuntimeException e) {
+		MCPlayer p = null;
+		if (e.getEnv() != null && e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+			p = e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer();
+		}
+		DoReport(e.getMessage(), e.getExceptionType() != null ? e.getExceptionType().toString() : "FatalRuntimeException", e.stackTraceTrail, p);
+		if (Prefs.DebugMode()) {
+			if (e.getCause() != null) {
 				//This is more of a system level exception, so if debug mode is on, we also want to print this stack trace
 				StreamUtils.GetSystemErr().println("The previous MethodScript error had an attached cause:");
 				e.getCause().printStackTrace(StreamUtils.GetSystemErr());
 			}
-			if(e.getTarget().equals(Target.UNKNOWN)){
+			if (e.getTarget().equals(Target.UNKNOWN)) {
 				//This should never happen, but there are still some hard to track
 				//down bugs that cause this. If it does happen, we want to print out
 				//a stacktrace from here, which *might* assist in fixing the error
@@ -318,98 +328,149 @@ public class ConfigRuntimeException extends RuntimeException {
 				StreamUtils.GetSystemErr().println(StackTraceUtils.GetStacktrace(new Exception()));
 			}
 		}
-    }
+	}
 
-    private static void DoReport(ConfigCompileException e, MCPlayer player){
+	private static void DoReport(ConfigCompileException e, MCPlayer player) {
 		List<StackTraceElement> st = new ArrayList<StackTraceElement>();
 		st.add(0, new StackTraceElement("", e.getTarget()));
-        DoReport(e.getMessage(), "COMPILE ERROR", st, player);
-    }
+		DoReport(e.getMessage(), "COMPILE ERROR", st, player);
+	}
 
+	/**
+	 * Shorthand for DoWarning(exception, null, true);
+	 *
+	 * @param e
+	 */
+	public static void DoWarning(Exception e) {
+		DoWarning(e, null, true);
+	}
 
-    /**
-     * Shorthand for DoWarning(exception, null, true);
-     * @param e
-     */
-    public static void DoWarning(Exception e){
-        DoWarning(e, null, true);
-    }
+	/**
+	 * Shorthand for DoWarning(null, message, true);
+	 *
+	 * @param optionalMessage
+	 */
+	public static void DoWarning(String optionalMessage) {
+		DoWarning(null, optionalMessage, true);
+	}
 
-    /**
-     * Shorthand for DoWarning(null, message, true);
-     * @param optionalMessage
-     */
-    public static void DoWarning(String optionalMessage){
-        DoWarning(null, optionalMessage, true);
-    }
-
-    /**
-     * To standardize the warning messages displayed, this function should
-     * be used. It checks the preference setting for warnings to see if
-     * the warning should be shown to begin with, if checkPref is true. The exception
-     * is simply used to get an error message, and is otherwise unused. If the exception
-     * is a ConfigRuntimeException, it is displayed specially (including line number
-     * and file)
-     * @param e
-     * @param optionalMessage
-     * @throws NullPointerException If both the exception and message are null (or empty)
-     */
-    public static void DoWarning(Exception e, String optionalMessage, boolean checkPrefs){
-        if(e == null && (optionalMessage == null || optionalMessage.isEmpty())){
-            throw new NullPointerException("Both the exception and the message cannot be empty");
-        }
-        if(!checkPrefs || Prefs.ShowWarnings()){
-            String exceptionMessage = "";
+	/**
+	 * To standardize the warning messages displayed, this function should be
+	 * used. It checks the preference setting for warnings to see if the warning
+	 * should be shown to begin with, if checkPref is true. The exception is
+	 * simply used to get an error message, and is otherwise unused. If the
+	 * exception is a ConfigRuntimeException, it is displayed specially
+	 * (including line number and file)
+	 *
+	 * @param e
+	 * @param optionalMessage
+	 * @throws NullPointerException If both the exception and message are null
+	 * (or empty)
+	 */
+	public static void DoWarning(Exception e, String optionalMessage, boolean checkPrefs) {
+		if (e == null && (optionalMessage == null || optionalMessage.isEmpty())) {
+			throw new NullPointerException("Both the exception and the message cannot be empty");
+		}
+		if (!checkPrefs || Prefs.ShowWarnings()) {
+			String exceptionMessage = "";
 			Target t = Target.UNKNOWN;
-            if(e instanceof ConfigRuntimeException){
-                ConfigRuntimeException cre = (ConfigRuntimeException)e;
-                exceptionMessage = MCChatColor.YELLOW + cre.getMessage()
-                + MCChatColor.WHITE + " :: " + MCChatColor.GREEN
-                + cre.getExceptionType() + MCChatColor.WHITE + ":"
-                + MCChatColor.YELLOW + cre.getFile() + MCChatColor.WHITE + ":"
-                + MCChatColor.AQUA + cre.getLineNum();
+			if (e instanceof ConfigRuntimeException) {
+				ConfigRuntimeException cre = (ConfigRuntimeException) e;
+				exceptionMessage = MCChatColor.YELLOW + cre.getMessage()
+						+ MCChatColor.WHITE + " :: " + MCChatColor.GREEN
+						+ cre.getExceptionType() + MCChatColor.WHITE + ":"
+						+ MCChatColor.YELLOW + cre.getFile() + MCChatColor.WHITE + ":"
+						+ MCChatColor.AQUA + cre.getLineNum();
 				t = cre.getTarget();
-            } else if(e != null){
-                exceptionMessage = MCChatColor.YELLOW + e.getMessage();
-            }
-            String message = exceptionMessage + MCChatColor.WHITE + optionalMessage;
-            CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, Static.MCToANSIColors(message) + TermColors.reset(), t);
-            //Warnings are not shown to players ever
-        }
-    }
+			} else if (e != null) {
+				exceptionMessage = MCChatColor.YELLOW + e.getMessage();
+			}
+			String message = exceptionMessage + MCChatColor.WHITE + optionalMessage;
+			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, Static.MCToANSIColors(message) + TermColors.reset(), t);
+			//Warnings are not shown to players ever
+		}
+	}
 
+	private ExceptionType ex;
+	private int line_num = -1;
+	private File file;
+	private int column = -1;
+	private Environment env;
+	private Target target;
 
-    private ExceptionType ex;
-    private int line_num = -1;
-    private File file;
-    private int column = -1;
-    private Environment env;
-    private Target target;
-    /**
-     * Creates a new ConfigRuntimeException. If the exception is intended to be uncatchable,
-	 * use {@link #CreateUncatchableException} instead.
-     * @param msg The message to be displayed
-     * @param ex The type of exception this is, as seen by user level code
-     * @param t The code target this exception is being thrown from
-     */
-    public ConfigRuntimeException(String msg, ExceptionType ex, Target t){
-        this(msg, ex, t, null);
-    }
+	/**
+	 * Creates a new ConfigRuntimeException. If the exception is intended to be
+	 * uncatchable, use {@link #CreateUncatchableException} instead.
+	 *
+	 * @param msg The message to be displayed
+	 * @param ex The type of exception this is, as seen by user level code
+	 * @param t The code target this exception is being thrown from
+	 * @return An exception of the appropriate subclass
+	 */
+	public static ConfigRuntimeException BuildException(String msg, ExceptionType ex, Target t) {
+		return BuildException(msg, ex, t, null);
+	}
 
-    public ConfigRuntimeException(String msg, ExceptionType ex, Target t, Throwable cause){
-        super(msg, cause);
-		if(ex == null){
+	/**
+	 * Creates a new ConfigRuntimeException. If the exception is intended to be
+	 * uncatchable, use {@link #CreateUncatchableException(java.lang.String, com.laytonsmith.core.constructs.Target, java.lang.Throwable) }
+	 * instead.
+	 * @param msg The message to be displayed
+	 * @param ex The type of exception this is, as seen by user level code
+	 * @param t The code target this exception is being thrown from
+	 * @param cause The chained cause. This is not used for normal execution, but is helpful
+	 * when debugging errors. Where exceptions are triggered by Java code (as opposed to organic
+	 * MethodScript errors) this version should always be preferred.
+	 * @return An exception of the appropriate subclass
+	 */
+	public static ConfigRuntimeException BuildException(String msg, ExceptionType ex, Target t, Throwable cause) {
+		// TODO: Eventually, the exception system should be built out more, and this will be used to build out
+		// the exception mechanism to use actual java types. For now, this just creates an intermediate step, so that
+		// the rollout can be done in smaller steps. This works just the same as using new CRE.
+		return new ConfigRuntimeException(msg, ex, t, cause);
+	}
+
+	/**
+	 * Creates a new ConfigRuntimeException. If the exception is intended to be
+	 * uncatchable, use {@link #CreateUncatchableException} instead.
+	 *
+	 * @param msg The message to be displayed
+	 * @param ex The type of exception this is, as seen by user level code
+	 * @param t The code target this exception is being thrown from
+	 * @deprecated Use the {@link #BuildException(java.lang.String, com.laytonsmith.core.functions.Exceptions.ExceptionType, com.laytonsmith.core.constructs.Target) } method instead.
+	 */
+	@Deprecated
+	public ConfigRuntimeException(String msg, ExceptionType ex, Target t) {
+		this(msg, ex, t, null);
+	}
+
+	/**
+	 * Creates a new ConfigRuntimeException. If the exception is intended to be
+	 * uncatchable, use {@link #CreateUncatchableException(java.lang.String, com.laytonsmith.core.constructs.Target, java.lang.Throwable) }
+	 * instead.
+	 * @param msg The message to be displayed
+	 * @param ex The type of exception this is, as seen by user level code
+	 * @param t The code target this exception is being thrown from
+	 * @param cause The chained cause. This is not used for normal execution, but is helpful
+	 * when debugging errors. Where exceptions are triggered by Java code (as opposed to organic
+	 * MethodScript errors) this version should always be preferred.
+	 * @deprecated Use the {@link #BuildException(java.lang.String, com.laytonsmith.core.functions.Exceptions.ExceptionType, com.laytonsmith.core.constructs.Target, java.lang.Throwable) } method instead.
+	 */
+	@Deprecated
+	public ConfigRuntimeException(String msg, ExceptionType ex, Target t, Throwable cause) {
+		super(msg, cause);
+		if (ex == null) {
 			throw new NullPointerException("Use CreateUncatchableException instead.");
 		}
-        createException(ex, t);
-    }
+		createException(ex, t);
+	}
 
-	private void createException(ExceptionType ex, Target t){
-        this.ex = ex;
-        this.line_num = t.line();
-        this.file = t.file();
-        this.column = t.col();
-        this.target = t;
+	private void createException(ExceptionType ex, Target t) {
+		this.ex = ex;
+		this.line_num = t.line();
+		this.file = t.file();
+		this.column = t.col();
+		this.target = t;
 	}
 
 //    public ConfigRuntimeException(String msg, ExceptionType ex, int line_num){
@@ -418,109 +479,117 @@ public class ConfigRuntimeException extends RuntimeException {
 //    public ConfigRuntimeException(String msg, int line_num){
 //        this(msg, null, line_num, null);
 //    }
-
-
 	/**
-	 * Creates an uncatchable exception. This should rarely be used. An uncatchable
-	 * exception is one where the user code is unable to catch the exception, and the
-	 * type of the exception is null. Generally, this should only be used for completely
-	 * fatal errors, for instance, a break/continue being used in top level code, or
-	 * other user errors that would be compile errors, except the facilities aren't
-	 * there yet for catching such an error in the compiler, or for errors in MethodScript
-	 * itself.
+	 * Creates an uncatchable exception. This should rarely be used. An
+	 * uncatchable exception is one where the user code is unable to catch the
+	 * exception, and the type of the exception is null. Generally, this should
+	 * only be used for completely fatal errors, for instance, a break/continue
+	 * being used in top level code, or other user errors that would be compile
+	 * errors, except the facilities aren't there yet for catching such an error
+	 * in the compiler, or for errors in MethodScript itself.
+	 *
 	 * @param msg
 	 * @param t
 	 * @return Returns an uncatchable exception.
 	 */
-	public static ConfigRuntimeException CreateUncatchableException(String msg, Target t){
+	public static ConfigRuntimeException CreateUncatchableException(String msg, Target t) {
 		return new ConfigRuntimeException(msg, t, null);
 	}
 
 	/**
-	 * Creates an uncatchable exception with a cause. This should rarely be used. An uncatchable
-	 * exception is one where the user code is unable to catch the exception, and the
-	 * type of the exception is null. Generally, this should only be used for completely
-	 * fatal errors, for instance, a break/continue being used in top level code, or
-	 * other user errors that would be compile errors, except the facilities aren't
-	 * there yet for catching such an error in the compiler, or for errors in MethodScript
+	 * Creates an uncatchable exception with a cause. This should rarely be
+	 * used. An uncatchable exception is one where the user code is unable to
+	 * catch the exception, and the type of the exception is null. Generally,
+	 * this should only be used for completely fatal errors, for instance, a
+	 * break/continue being used in top level code, or other user errors that
+	 * would be compile errors, except the facilities aren't there yet for
+	 * catching such an error in the compiler, or for errors in MethodScript
 	 * itself.
+	 *
 	 * @param msg
 	 * @param t
 	 * @param cause
 	 * @return Returns an uncatchable exception
 	 */
-	public static ConfigRuntimeException CreateUncatchableException(String msg, Target t, Throwable cause){
+	public static ConfigRuntimeException CreateUncatchableException(String msg, Target t, Throwable cause) {
 		return new ConfigRuntimeException(msg, t, cause);
 	}
 
-    private ConfigRuntimeException(String msg, Target t, Throwable cause){
+	private ConfigRuntimeException(String msg, Target t, Throwable cause) {
 		super(msg, cause);
-        createException(null, t);
-    }
+		createException(null, t);
+	}
 
 	/**
 	 * Gets the exception type. This may be null in cases where an uncatchable
 	 * exception is created.
+	 *
 	 * @return
 	 */
-    public ExceptionType getExceptionType(){
-        return this.ex;
-    }
+	public ExceptionType getExceptionType() {
+		return this.ex;
+	}
 
 	/**
 	 * Gets the line number that this exception is triggered at.
+	 *
 	 * @return
 	 */
-    public int getLineNum(){
-        return this.line_num;
-    }
+	public int getLineNum() {
+		return this.line_num;
+	}
 
 	/**
 	 * Gets the file this exception is triggered in.
+	 *
 	 * @return
 	 */
-    public File getFile(){
-        return this.file;
-    }
+	public File getFile() {
+		return this.file;
+	}
 
 	/**
 	 * Gets the column that this exception is triggered at.
+	 *
 	 * @return
 	 */
-    public int getCol(){
-        return this.column;
-    }
+	public int getCol() {
+		return this.column;
+	}
 
 	/**
 	 * Gets the code target for this exception.
+	 *
 	 * @return
 	 */
-    public Target getTarget(){
-        return this.target;
-    }
+	public Target getTarget() {
+		return this.target;
+	}
 
 	/**
 	 * Gets the shorter name of the file, or null if no file has been set.
+	 *
 	 * @return
 	 */
-    public String getSimpleFile(){
-        if(this.file != null){
-            return this.file.getName();
-        } else {
-            return null;
-        }
-    }
+	public String getSimpleFile() {
+		if (this.file != null) {
+			return this.file.getName();
+		} else {
+			return null;
+		}
+	}
 
 	/**
 	 * A stacktrace contains 1 or more stack trace elements. A new stacktrace
 	 * element is added each time an exception bubbles up past a procedure.
 	 */
-	public static class StackTraceElement{
+	public static class StackTraceElement {
 		private final String procedureName;
 		private final Target definedAt;
 
 		/**
 		 * Creates a new StackTraceElement.
+		 *
 		 * @param procedureName The name of the procedure
 		 * @param definedAt The code target where the procedure is defined at.
 		 */
@@ -531,6 +600,7 @@ public class ConfigRuntimeException extends RuntimeException {
 
 		/**
 		 * Gets the name of the procedure.
+		 *
 		 * @return
 		 */
 		public String getProcedureName() {
@@ -539,6 +609,7 @@ public class ConfigRuntimeException extends RuntimeException {
 
 		/**
 		 * Gets the code target where the procedure is defined at.
+		 *
 		 * @return
 		 */
 		public Target getDefinedAt() {
@@ -550,6 +621,6 @@ public class ConfigRuntimeException extends RuntimeException {
 			return procedureName + " (Defined at " + definedAt + ")";
 		}
 
-
 	}
+
 }

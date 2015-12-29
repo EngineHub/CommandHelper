@@ -358,7 +358,7 @@ public class EntityEvents {
 		public BindableEvent convert(CArray manualObject, Target t) {
 			MCEntity p = Static.getEntity(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
 			if (!(p instanceof MCProjectile)) {
-				throw new ConfigRuntimeException("The id was not a projectile",
+				throw ConfigRuntimeException.BuildException("The id was not a projectile",
 						ExceptionType.BadEntityException, Target.UNKNOWN);
 			}
 			return EventBuilder.instantiate(MCProjectileHitEvent.class, p);
@@ -619,7 +619,7 @@ public class EntityEvents {
 						value = new CArray(Target.UNKNOWN);
 					}
 					if(!(value instanceof CArray)){
-						throw new ConfigRuntimeException("drops must be an array, or null", Exceptions.ExceptionType.CastException, value.getTarget());
+						throw ConfigRuntimeException.BuildException("drops must be an array, or null", Exceptions.ExceptionType.CastException, value.getTarget());
 					}
 					e.clearDrops();
 					CArray drops = (CArray) value;

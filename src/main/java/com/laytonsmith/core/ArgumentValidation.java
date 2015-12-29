@@ -40,7 +40,7 @@ public class ArgumentValidation {
 		if (object.containsKey(key)) {
 			return object.get(key, t);
 		} else if (defaultItem == null) {
-			throw new ConfigRuntimeException("Expected the key \"" + key + "\" to be present, but it was not found.", Exceptions.ExceptionType.FormatException, t);
+			throw ConfigRuntimeException.BuildException("Expected the key \"" + key + "\" to be present, but it was not found.", Exceptions.ExceptionType.FormatException, t);
 		} else {
 			return defaultItem;
 		}
@@ -58,7 +58,7 @@ public class ArgumentValidation {
 		if (construct instanceof CArray) {
 			return ((CArray) construct);
 		} else {
-			throw new ConfigRuntimeException("Expecting array, but received " + construct.val(), Exceptions.ExceptionType.CastException, t);
+			throw ConfigRuntimeException.BuildException("Expecting array, but received " + construct.val(), Exceptions.ExceptionType.CastException, t);
 		}
 	}
 
@@ -82,7 +82,7 @@ public class ArgumentValidation {
 		if (clazz.isAssignableFrom(construct.getClass())) {
 			return (T) construct;
 		} else {
-			throw new ConfigRuntimeException("Expecting " + expectedClassName + " but receieved " + construct.val() + " instead.", Exceptions.ExceptionType.CastException, t);
+			throw ConfigRuntimeException.BuildException("Expecting " + expectedClassName + " but receieved " + construct.val() + " instead.", Exceptions.ExceptionType.CastException, t);
 		}
 	}
 
@@ -104,7 +104,7 @@ public class ArgumentValidation {
 		} else {
 			String expectedClassName = clazz.getAnnotation(typeof.class).value();
 			String actualClassName = construct.getClass().getAnnotation(typeof.class).value();
-			throw new ConfigRuntimeException("Expecting " + expectedClassName + " but receieved " + construct.val()
+			throw ConfigRuntimeException.BuildException("Expecting " + expectedClassName + " but receieved " + construct.val()
 					+ " (" + actualClassName + ") instead.", Exceptions.ExceptionType.CastException, t);
 		}
 	}
@@ -135,7 +135,7 @@ public class ArgumentValidation {
 			try {
 				d = Double.parseDouble(c.val());
 			} catch (NumberFormatException e) {
-				throw new ConfigRuntimeException("Expecting a number, but received \"" + c.val() + "\" instead",
+				throw ConfigRuntimeException.BuildException("Expecting a number, but received \"" + c.val() + "\" instead",
 						Exceptions.ExceptionType.CastException, t);
 			}
 		} else if (c instanceof CBoolean) {
@@ -145,7 +145,7 @@ public class ArgumentValidation {
 				d = 0;
 			}
 		} else {
-			throw new ConfigRuntimeException("Expecting a number, but received \"" + c.val() + "\" instead",
+			throw ConfigRuntimeException.BuildException("Expecting a number, but received \"" + c.val() + "\" instead",
 					Exceptions.ExceptionType.CastException, t);
 		}
 		return d;
@@ -195,7 +195,7 @@ public class ArgumentValidation {
 		try {
 			return getNumber(c, t);
 		} catch (ConfigRuntimeException e) {
-			throw new ConfigRuntimeException("Expecting a double, but received " + c.val() + " instead",
+			throw ConfigRuntimeException.BuildException("Expecting a double, but received " + c.val() + " instead",
 					Exceptions.ExceptionType.CastException, t);
 		}
 	}
@@ -251,7 +251,7 @@ public class ArgumentValidation {
 			try {
 				i = Long.parseLong(c.val());
 			} catch (NumberFormatException e) {
-				throw new ConfigRuntimeException("Expecting an integer, but received \"" + c.val() + "\" instead",
+				throw ConfigRuntimeException.BuildException("Expecting an integer, but received \"" + c.val() + "\" instead",
 						Exceptions.ExceptionType.CastException, t);
 			}
 		}
