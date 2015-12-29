@@ -341,19 +341,19 @@ public class DataHandlingTest {
     }
 	
 	@Test
-    public void testExportImportIvarValue() throws Exception{
-        when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
-        SRun("assign(@key, 'key1')"
+	public void testExportImportArrayNameSpace() throws Exception{
+		when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
+		SRun("assign(@key, array('custom', 'key1'))"
 				+ "assign(@value, 'key1Value')"
-                + "export(@key, @value)"
-                + "msg(import('key1'))", fakePlayer);
-        verify(fakePlayer).sendMessage("key1Value");
-		SRun("assign(@key, 'key2')"
+				+ "export(@key, @value)"
+				+ "msg(import('custom.key1'))", fakePlayer);
+		verify(fakePlayer).sendMessage("key1Value");
+		SRun("assign(@key, array('custom', 'key2'))"
 				+ "assign(@value, 'key2Value')"
-                + "export('key2', @value)"
-                + "msg(import(@key))", fakePlayer);
-        verify(fakePlayer).sendMessage("key2Value");
-    }
+				+ "export('custom.key2', @value)"
+				+ "msg(import(@key))", fakePlayer);
+		verify(fakePlayer).sendMessage("key2Value");
+	}
 
     @Test(timeout = 10000)
     public void testIsBoolean() throws Exception {
