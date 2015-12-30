@@ -2,12 +2,9 @@ package com.laytonsmith.core.compiler.keywords;
 
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.Keyword;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.IVariable;
-import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.util.List;
 
@@ -19,7 +16,6 @@ public class TryKeyword extends Keyword {
 
 	// TODO dynamically name this once the class exists.
 	private static final String COMPLEX_TRY = "complex_try";
-	private static final String DEFAULT_EXCEPTION_TYPE = "Exception";
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
@@ -107,10 +103,6 @@ public class TryKeyword extends Keyword {
 		list.add(keywordPosition, complex_try);
 
 		return keywordPosition;
-	}
-
-	private Construct getData(List<ParseTree> list, int index){
-		return list.get(index).getData();
 	}
 
 	private boolean nodeIsCatchKeyword(ParseTree node){
