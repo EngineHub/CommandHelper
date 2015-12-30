@@ -831,7 +831,7 @@ public final class MethodScriptCompiler {
 				throw new ConfigCompileException("Did not expect a multiline start symbol here, are you missing a multiline end symbol above this line?", thisToken.target);
 			}
 			if (thisToken.val().equals(">>>") && !prevToken.type.equals(TType.ALIAS_END)) {
-				throw new ConfigCompileException("Multiline symbol must follow the alias_end token", thisToken.target);
+				throw new ConfigCompileException("Multiline symbol must follow the alias_end (=) symbol", thisToken.target);
 			}
 
 			//If we're not in a multiline construct, or we are in it and it's not a newline, add
