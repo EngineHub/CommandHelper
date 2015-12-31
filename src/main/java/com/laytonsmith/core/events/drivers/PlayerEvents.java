@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.enums.MCFishingState;
+import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.api;
@@ -2082,7 +2083,9 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{newmode: <macro> gamemode being changed to | player: <macro>}"
+			return "{newmode: <macro> gamemode being changed to, one of "
+					+ StringUtils.Join(MCGameMode.values(), ", ", ", or ", " or ")
+					+ " | player: <macro>}"
 					+ " Fires when something causes a player's gamemode to change. Cancelling the event will"
 					+ " cancel the change. The mode itself cannot be modified."
 					+ " {player: player whose mode is changing | newmode}"
