@@ -20,6 +20,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -63,7 +64,7 @@ public class Threading {
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			if(!(args[1] instanceof CClosure)){
-				throw new Exceptions.CastException("Expected closure for arg 2", t);
+				throw new CRECastException("Expected closure for arg 2", t);
 			}
 			final CClosure closure = (CClosure) args[1];
 			new Thread(new Runnable() {

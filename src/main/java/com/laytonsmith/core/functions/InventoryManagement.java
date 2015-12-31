@@ -25,6 +25,8 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.Map;
@@ -1302,7 +1304,7 @@ public class InventoryManagement {
 				MCItemStack is = inv.getItem(slot);
 				return ObjectGenerator.GetGenerator().item(is, t);
 			} catch(ArrayIndexOutOfBoundsException e){
-				throw new Exceptions.RangeException("Index out of bounds for the inventory type.", t);
+				throw new CRERangeException("Index out of bounds for the inventory type.", t);
 			}
 		}
 
@@ -1366,7 +1368,7 @@ public class InventoryManagement {
 				inv.setItem(slot, is);
 				return CVoid.VOID;
 			} catch(ArrayIndexOutOfBoundsException e){
-				throw new Exceptions.RangeException("Index out of bounds for the inventory type.", t);
+				throw new CRERangeException("Index out of bounds for the inventory type.", t);
 			}
 		}
 
@@ -2101,7 +2103,7 @@ public class InventoryManagement {
 			inv = StaticLayer.GetConvertor().GetEntityInventory(entity);
 		}
 		if(inv == null){
-			throw new Exceptions.FormatException("The entity or location specified is not capable of having an inventory.", t);
+			throw new CREFormatException("The entity or location specified is not capable of having an inventory.", t);
 		} else {
 			return inv;
 		}

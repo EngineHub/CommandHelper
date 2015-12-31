@@ -13,6 +13,7 @@ import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
@@ -191,7 +192,7 @@ public class Procedure implements Cloneable {
 				if(c instanceof CNull || InstanceofUtil.isInstanceof(c, varIndex.get(i).getDefinedType()) || varIndex.get(i).getDefinedType().equals(CClassType.AUTO)){
 					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varIndex.get(i).getDefinedType(), varname, c, c.getTarget()));
 				} else {
-					throw new Exceptions.CastException("Procedure \"" + name + "\" expects a value of type "
+					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ varIndex.get(i).getDefinedType().val() + " in argument " + (i + 1) + ", but"
 							+ " a value of type " + c.typeof() + " was found instead.", c.getTarget());
 				}
@@ -219,7 +220,7 @@ public class Procedure implements Cloneable {
         } catch (FunctionReturnException e) {
             Construct ret = e.getReturn();
 			if(!InstanceofUtil.isInstanceof(ret, returnType)){
-				throw new Exceptions.CastException("Expected procedure \"" + name + "\" to return a value of type " + returnType.val()
+				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type " + returnType.val()
 						 + " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 			}
 			return ret;
@@ -234,7 +235,7 @@ public class Procedure implements Cloneable {
 		}
 		// If we got here, then there was no return value. This is fine, but only for returnType void or auto.
 		if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CClassType.VOID))){
-			throw new Exceptions.CastException("Expecting procedure \"" + name + "\" to return a value of type " + returnType.val() + ","
+			throw new CRECastException("Expecting procedure \"" + name + "\" to return a value of type " + returnType.val() + ","
 					+ " but no value was returned.", tree.getTarget());
 		}
         return CVoid.VOID;

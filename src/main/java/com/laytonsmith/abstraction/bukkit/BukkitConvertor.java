@@ -62,6 +62,7 @@ import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.functions.Exceptions;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -606,7 +607,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
-	public MCColor GetColor(String colorName, Target t) throws Exceptions.FormatException {
+	public MCColor GetColor(String colorName, Target t) throws CREFormatException {
 		return ConvertorHelper.GetColor(colorName, t);
 	}
 

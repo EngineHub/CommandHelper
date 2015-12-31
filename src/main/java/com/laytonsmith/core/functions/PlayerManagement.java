@@ -41,6 +41,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -600,7 +601,7 @@ public class PlayerManagement {
 						trans.add(Static.getInt16(ta.get(i, t), t));
 					}
 				} else {
-					throw new Exceptions.FormatException("An array was expected for argument 2 but received " + args[1], t);
+					throw new CREFormatException("An array was expected for argument 2 but received " + args[1], t);
 				}
 			}
 			Static.AssertPlayerNonNull(p, t);

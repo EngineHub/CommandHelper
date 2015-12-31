@@ -8,19 +8,20 @@ import com.laytonsmith.core.constructs.Target;
 /**
  * 
  */
-@typeof("ShellException")
-public class CREShellException extends CREException {
-	public CREShellException(String msg, Target t) {
+@typeof("Error")
+public class CREError extends CREThrowable {
+	public CREError(String msg, Target t) {
 		super(msg, t);
 	}
 
-	public CREShellException(String msg, Target t, Throwable cause) {
+	public CREError(String msg, Target t, Throwable cause) {
 		super(msg, t, cause);
 	}
 
 	@Override
 	public String docs() {
-		return "Thrown if a shell exception occurs.";
+		return "Indicates a serious error occurred. Errors are not caught by the no clause"
+				+ " exception catching mechanism, however can be caught manually.";
 	}
 
 	@Override

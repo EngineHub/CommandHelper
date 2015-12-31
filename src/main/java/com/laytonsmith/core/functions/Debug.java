@@ -19,6 +19,7 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -271,7 +272,7 @@ public class Debug {
 				}
 				return CVoid.VOID;
 			} else {
-				throw new Exceptions.CastException("Expecting an ivar, but recieved " + args[0].getCType() + " instead", t);
+				throw new CRECastException("Expecting an ivar, but recieved " + args[0].getCType() + " instead", t);
 			}
 			//TODO: Once Prefs are no longer static, check to see if debug mode is on during compilation, and
 			//if so, remove this function entirely

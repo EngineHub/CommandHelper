@@ -27,6 +27,9 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -580,7 +583,7 @@ public class Scheduling {
 			try{
 				dateFormat = new SimpleDateFormat(args[0].toString(), locale);
 			} catch(IllegalArgumentException ex){
-				throw new Exceptions.FormatException(ex.getMessage(), t);
+				throw new CREFormatException(ex.getMessage(), t);
 			}
 			dateFormat.setTimeZone(timezone);
 			return new CString(dateFormat.format(now), t);
@@ -633,7 +636,7 @@ public class Scheduling {
 				Date d = dateFormat.parse(args[1].val());
 				return new CInt(d.getTime(), t);
 			} catch(IllegalArgumentException | ParseException ex){
-				throw new Exceptions.FormatException(ex.getMessage(), t);
+				throw new CREFormatException(ex.getMessage(), t);
 			}
 		}
 
@@ -719,10 +722,10 @@ public class Scheduling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			//First things first, check the format of the arguments.
 			if(!(args[0] instanceof CString)){
-				throw new Exceptions.CastException("Expected string for argument 1 in " + getName(), t);
+				throw new CRECastException("Expected string for argument 1 in " + getName(), t);
 			}
 			if(!(args[1] instanceof CClosure)){
-				throw new Exceptions.CastException("Expected closure for argument 2 in " + getName(), t);
+				throw new CRECastException("Expected closure for argument 2 in " + getName(), t);
 			}
 			CronFormat format = validateFormat(args[0].val(), t);
 			format.job = ((CClosure)args[1]);
@@ -888,12 +891,12 @@ public class Scheduling {
 			}
 			//Check for invalid characters
 			if(format.matches("[^a-z0-9\\*\\-,@/]")){
-				throw new Exceptions.FormatException("Invalid characters found in format for " + getName() + ": \"" + format + "\". Check your format and try again.", t);
+				throw new CREFormatException("Invalid characters found in format for " + getName() + ": \"" + format + "\". Check your format and try again.", t);
 			}
 			//Now split into the segments.
 			String[] sformat = format.split(" ");
 			if(sformat.length != 5){
-				throw new Exceptions.FormatException("Expected 5 segments in " + getName() + ", but " + StringUtils.PluralTemplateHelper(sformat.length, "%d was", "%d were") + " found.", t);
+				throw new CREFormatException("Expected 5 segments in " + getName() + ", but " + StringUtils.PluralTemplateHelper(sformat.length, "%d was", "%d were") + " found.", t);
 			}
 			String min = sformat[0];
 			String hour = sformat[1];
@@ -935,7 +938,7 @@ public class Scheduling {
 						Integer maxRange = Integer.parseInt(rangeMatcher.group(2));
 						Range r = new Range(minRange, maxRange);
 						if(!r.isAscending()){
-							throw new Exceptions.FormatException("Ranges must be min to max, and not the same value in format for " + getName(), t);
+							throw new CREFormatException("Ranges must be min to max, and not the same value in format for " + getName(), t);
 						}
 						List<Integer> rr = r.getRange();
 						for(int j = 0; j < rr.size(); j++){
@@ -973,15 +976,15 @@ public class Scheduling {
 					} catch (NumberFormatException ex){
 						//Any unexpected strings would show up here. The expected string values would have already
 						//been replaced with a number, so this should work if there are no errors.
-						throw new Exceptions.FormatException("Unknown string passed in format for " + getName() + " \"" + s + "\"", t);
+						throw new CREFormatException("Unknown string passed in format for " + getName() + " \"" + s + "\"", t);
 					}
 				}
 				Collections.sort(list);
 				if(!range.contains(list.get(0))){
-					throw new Exceptions.FormatException("Expecting value to be within the range " + range + " in format for " + getName() + ", but the value was " + list.get(0), t);
+					throw new CREFormatException("Expecting value to be within the range " + range + " in format for " + getName() + ", but the value was " + list.get(0), t);
 				}
 				if(!range.contains(list.get(list.size() - 1))){
-					throw new Exceptions.FormatException("Expecting value to be within the range " + range + " in format for " + getName() + ", but the value was " + list.get(list.size() - 1), t);
+					throw new CREFormatException("Expecting value to be within the range " + range + " in format for " + getName() + ", but the value was " + list.get(list.size() - 1), t);
 				}
 				Set<Integer> set = new TreeSet<Integer>(list);
 				switch(i){
@@ -1083,10 +1086,10 @@ public class Scheduling {
 				id = (int)Static.getInt(args[0], t);
 			}
 			if(id == null){
-				throw new Exceptions.RangeException("No task ID provided, and not running from within a cron task.", t);
+				throw new CRERangeException("No task ID provided, and not running from within a cron task.", t);
 			}
 			if(!set_cron.stopJob(id)){
-				throw new Exceptions.RangeException("Task ID invalid", t);
+				throw new CRERangeException("Task ID invalid", t);
 			}
 			return CVoid.VOID;
 		}

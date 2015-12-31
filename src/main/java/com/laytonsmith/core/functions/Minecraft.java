@@ -51,6 +51,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.drivers.ServerEvents;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -234,7 +235,7 @@ public class Minecraft {
 						i2 = Integer.parseInt(split[1]);
 					} catch (NumberFormatException e) {
 					} catch (ArrayIndexOutOfBoundsException e){
-						throw new Exceptions.FormatException("Incorrect format for the item notation: " + args[0].val(), t);
+						throw new CREFormatException("Incorrect format for the item notation: " + args[0].val(), t);
 					}
 				}
 			} else if (args[0] instanceof CArray) {
@@ -1117,7 +1118,7 @@ public class Minecraft {
 				String type = ((MCCreatureSpawner)location.getBlock().getState()).getSpawnedType().name();
 				return new CString(type, t);
 			} else {
-				throw new Exceptions.FormatException("The block at " + location.toString() + " is not a spawner block", t);
+				throw new CREFormatException("The block at " + location.toString() + " is not a spawner block", t);
 			}
 		}
 
@@ -1181,7 +1182,7 @@ public class Minecraft {
 				((MCCreatureSpawner)location.getBlock().getState()).setSpawnedType(type);
 				return CVoid.VOID;
 			} else {
-				throw new Exceptions.FormatException("The block at " + location.toString() + " is not a spawner block", t);
+				throw new CREFormatException("The block at " + location.toString() + " is not a spawner block", t);
 			}
 		}
 
@@ -1271,7 +1272,7 @@ public class Minecraft {
 				try{
 					type = MCFireworkType.valueOf(options.get("type", t).val().toUpperCase());
 				} catch(IllegalArgumentException e){
-					throw new Exceptions.FormatException("Invalid type: " + options.get("type", t).val(), t);
+					throw new CREFormatException("Invalid type: " + options.get("type", t).val(), t);
 				}
 			}
 

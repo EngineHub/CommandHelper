@@ -6,6 +6,7 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
@@ -187,7 +188,7 @@ public class CClosure extends Construct {
 				// Check the return type of the closure to see if it matches the defined type
 				Construct ret = ex.getReturn();
 				if(!InstanceofUtil.isInstanceof(ret, returnType)){
-					throw new Exceptions.CastException("Expected closure to return a value of type " + returnType.val()
+					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
 							 + " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 				}
 				// Now rethrow it
@@ -197,7 +198,7 @@ public class CClosure extends Construct {
 			}
 			// If we got here, then there was no return type. This is fine, but only for returnType void or auto.
 			if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CClassType.VOID))){
-				throw new Exceptions.CastException("Expecting closure to return a value of type " + returnType.val() + ","
+				throw new CRECastException("Expecting closure to return a value of type " + returnType.val() + ","
 						+ " but no value was returned.", node.getTarget());
 			}
         }

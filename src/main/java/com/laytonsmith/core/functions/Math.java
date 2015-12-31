@@ -24,6 +24,9 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -2050,7 +2053,7 @@ public class Math {
 				precision = Static.getInt32(args[1], t);
 			}
 			if(precision < 0){
-				throw new Exceptions.RangeException("precision cannot be less than 0, was " + precision, t);
+				throw new CRERangeException("precision cannot be less than 0, was " + precision, t);
 			}
 			number = number * java.lang.Math.pow(10, precision);
 			number = java.lang.Math.round(number);
@@ -2129,7 +2132,7 @@ public class Math {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String expr = args[0].val().trim();
 			if("".equals(expr)){
-				throw new Exceptions.FormatException("Expression may not be empty", t);
+				throw new CREFormatException("Expression may not be empty", t);
 			}
 			CArray vars = null;
 			if (args.length == 2 && args[1] instanceof CArray) {
@@ -2275,7 +2278,7 @@ public class Math {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			double val = Static.getDouble(args[0], t);
 			if(val <= 0){
-				throw new Exceptions.RangeException("val was <= 0", t);
+				throw new CRERangeException("val was <= 0", t);
 			}
 			double r;
 			if(args.length == 1){
@@ -2398,7 +2401,7 @@ public class Math {
 					return new CInt((Integer)c.getValue(), t);
 				}
 			} catch(IllegalArgumentException ex){
-				throw new Exceptions.CastException("No constant with the value " + args[0].val() + " exists.", t);
+				throw new CRECastException("No constant with the value " + args[0].val() + " exists.", t);
 			}
 		}
 

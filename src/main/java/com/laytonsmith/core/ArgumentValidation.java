@@ -2,6 +2,8 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
@@ -219,7 +221,7 @@ public class ArgumentValidation {
 		double l = getDouble(c, t);
 		float f = (float) l;
 		if (Math.abs(f - l) > delta) {
-			throw new Exceptions.RangeException("Expecting a 32 bit float, but a larger value was found: " + l, t);
+			throw new CRERangeException("Expecting a 32 bit float, but a larger value was found: " + l, t);
 		}
 		return f;
 	}
@@ -275,7 +277,7 @@ public class ArgumentValidation {
 		long l = getInt(c, t);
 		int i = (int) l;
 		if (i != l) {
-			throw new Exceptions.RangeException("Expecting a 32 bit integer, but a larger value was found: " + l, t);
+			throw new CRERangeException("Expecting a 32 bit integer, but a larger value was found: " + l, t);
 		}
 		return i;
 	}
@@ -298,7 +300,7 @@ public class ArgumentValidation {
 		long l = getInt(c, t);
 		short s = (short) l;
 		if (s != l) {
-			throw new Exceptions.RangeException("Expecting a 16 bit integer, but a larger value was found: " + l, t);
+			throw new CRERangeException("Expecting a 16 bit integer, but a larger value was found: " + l, t);
 		}
 		return s;
 	}
@@ -321,7 +323,7 @@ public class ArgumentValidation {
 		long l = getInt(c, t);
 		byte b = (byte) l;
 		if (b != l) {
-			throw new Exceptions.RangeException("Expecting an 8 bit integer, but a larger value was found: " + l, t);
+			throw new CRERangeException("Expecting an 8 bit integer, but a larger value was found: " + l, t);
 		}
 		return b;
 	}
@@ -368,7 +370,7 @@ public class ArgumentValidation {
 		} else if (c instanceof CNull) {
 			return new CByteArray(t, 0);
 		} else {
-			throw new Exceptions.CastException("Expecting byte array, but found " + c.typeof() + " instead.", t);
+			throw new CRECastException("Expecting byte array, but found " + c.typeof() + " instead.", t);
 		}
 	}
 
@@ -376,7 +378,7 @@ public class ArgumentValidation {
 		if(c instanceof CClassType){
 			return (CClassType) c;
 		} else {
-			throw new Exceptions.CastException("Expecting a ClassType, but found " + c.typeof() + " instead.", t);
+			throw new CRECastException("Expecting a ClassType, but found " + c.typeof() + " instead.", t);
 		}
 	}
 

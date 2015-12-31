@@ -30,6 +30,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -348,7 +349,7 @@ public class Meta {
 				}
 			}
 			if(cmd.equalsIgnoreCase("interpreter-on")){
-				throw new Exceptions.FormatException("/interpreter-on cannot be run as apart of an alias for security reasons.", t);
+				throw new CREFormatException("/interpreter-on cannot be run as apart of an alias for security reasons.", t);
 			}
 			try{
 				Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
@@ -654,7 +655,7 @@ public class Meta {
 			String player = args[0].val();
 			String cmd = args[1].val();
 			if(!cmd.startsWith("/")){
-				throw new Exceptions.FormatException("Command must begin with a /", t);
+				throw new CREFormatException("Command must begin with a /", t);
 			}
 			cmd = cmd.substring(1);
 			

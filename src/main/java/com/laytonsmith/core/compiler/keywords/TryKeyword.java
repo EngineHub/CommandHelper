@@ -63,7 +63,7 @@ public class TryKeyword extends Keyword {
 		
 		// We can have any number of catch statements after the try, so we loop through until we run out.
 		for(int i = keywordPosition; i < list.size(); i++){
-			if(!nodeIsCatchKeyword(list.get(i))){
+			if(!nodeIsCatchKeyword(list.get(i)) && !nodeIsFinallyKeyword(list.get(i))){
 				// End of the chain, stop processing.
 				break;
 			}
@@ -82,12 +82,12 @@ public class TryKeyword extends Keyword {
 				complex_try.addChild(n.getChildAt(0));
 				complex_try.addChild(getArgumentOrNull(list.get(i + 1)));
 			} else {
-				// We have something like catch { }. In this case, this must be the final
-				// catch statement, and we need to verify that there isn't a catch following it.
+				// We have something like finally { }. In this case, this must be the final
+				// clause statement, and we need to verify that there isn't a catch following it.
 				if(list.size() > i + 2){
 					if(nodeIsCatchKeyword(list.get(i + 2))){
-						throw new ConfigCompileException("A catch with no datatype (try { } ... catch { }) must be the final"
-								+ " catch clause in the try/catch statement", list.get(i + 2).getTarget());
+						throw new ConfigCompileException("A finally block must be the final"
+								+ " clause in the try/[catch]/finally statement", list.get(i + 2).getTarget());
 					}
 				}
 				// Passed the inspection.
@@ -106,10 +106,11 @@ public class TryKeyword extends Keyword {
 	}
 
 	private boolean nodeIsCatchKeyword(ParseTree node){
-		return
-				(node.getData() instanceof CKeyword ||
-				node.getData() instanceof CFunction)
-				&& node.getData().val().equals("catch");
+		return node.getData() instanceof CFunction && node.getData().val().equals("catch");
+	}
+
+	private boolean nodeIsFinallyKeyword(ParseTree node){
+		return node.getData() instanceof CKeyword && node.getData().val().equals("finally");
 	}
 
 }

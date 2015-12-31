@@ -19,6 +19,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.functions.Exceptions;
@@ -262,7 +263,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
                         env.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
                     }
                 } catch(ConfigRuntimeException e){
-                    if(!e.getExceptionType().equals(Exceptions.ExceptionType.PlayerOfflineException)){
+                    if(!(e instanceof CREPlayerOfflineException)){
                         throw e;
                     }
                     //else we just leave the player to be null. It either doesn't matter here,

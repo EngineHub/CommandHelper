@@ -61,6 +61,8 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
+import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
@@ -262,12 +264,11 @@ public class StaticTest {
                     f.exec(Target.UNKNOWN, env, con);
                 } catch (CancelCommandException e) {
                 } catch (ConfigRuntimeException e) {
-                    if (e.getExceptionType() != null) {
-                        if (f.thrown() == null || !Arrays.asList(f.thrown()).contains(e.getExceptionType())) {
+						String name = AbstractCREException.getExceptionName(e);
+                        if (f.thrown() == null || !Arrays.asList(f.thrown()).contains(name)) {
                             fail("The documentation for " + f.getName() + " doesn't state that it can throw a "
-                                    + e.getExceptionType() + ", but it did.");
+                                    + name + ", but it did.");
                         }
-                    } //else it's uncatchable, which while it probably shouldn't happen often, it can.
                 } catch (Throwable e) {
                     if (e instanceof LoopBreakException && !f.getName().equals("break")) {
                         fail("Only break() can throw LoopBreakExceptions");
@@ -838,7 +839,7 @@ public class StaticTest {
 		}
 
 		@Override
-		public MCColor GetColor(String colorName, Target t) throws Exceptions.FormatException {
+		public MCColor GetColor(String colorName, Target t) throws CREFormatException {
 			return ConvertorHelper.GetColor(colorName, t);
 		}
 

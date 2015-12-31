@@ -17,6 +17,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.HashMap;
@@ -228,7 +229,7 @@ public class Enchantments {
 			}
 			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull ? null : Static.getInt32(args[1 - offset], t));
 			if (is == null) {
-				throw new Exceptions.CastException("There is no item at slot " + args[1 - offset], t);
+				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
 //            if (args[1 - offset] instanceof CNull) {
 //                is = m.getItemInHand();
@@ -320,7 +321,7 @@ public class Enchantments {
 			Static.AssertPlayerNonNull(m, t);
 			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull?null:Static.getInt32(args[1 - offset], t));
 			if (is == null) {
-				throw new Exceptions.CastException("There is no item at slot " + args[1 - offset], t);
+				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
 //            if (args[1 - offset] instanceof CNull) {
 //                is = m.getItemInHand();
@@ -405,7 +406,7 @@ public class Enchantments {
 			}
 			MCItemStack is = m.getItemAt(slot instanceof CNull ? null : Static.getInt32(slot, t));
 			if (is == null) {
-				throw new Exceptions.CastException("There is no item at slot " + slot, t);
+				throw new CRECastException("There is no item at slot " + slot, t);
 			}
 //            if(slot instanceof CNull){
 //                is = m.getItemInHand();

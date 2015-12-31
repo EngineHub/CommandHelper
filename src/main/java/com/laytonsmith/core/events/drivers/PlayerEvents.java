@@ -39,6 +39,7 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.events.drivers.EntityEvents.entity_death;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
@@ -1532,7 +1533,7 @@ public class PlayerEvents {
 					try{
 						e.setFormat(value.nval());
 					} catch(UnknownFormatConversionException|IllegalFormatConversionException ex){
-						throw new Exceptions.FormatException(ex.getMessage(), Target.UNKNOWN);
+						throw new CREFormatException(ex.getMessage(), Target.UNKNOWN);
 					}
 				}
                 return true;
@@ -1647,7 +1648,7 @@ public class PlayerEvents {
 					try{
 						e.setFormat(value.nval());
 					} catch(UnknownFormatConversionException|IllegalFormatConversionException ex){
-						throw new Exceptions.FormatException(ex.getMessage(), Target.UNKNOWN);
+						throw new CREFormatException(ex.getMessage(), Target.UNKNOWN);
 					}
 				}
                 return true;
@@ -2048,7 +2049,7 @@ public class PlayerEvents {
 				if (key.equals("chance")) {
 					double chance = Static.getDouble(value, Target.UNKNOWN);
 					if (chance > 1.0 || chance < 0.0) {
-						throw new Exceptions.FormatException("Chance must be between 0.0 and 1.0", Target.UNKNOWN);
+						throw new CREFormatException("Chance must be between 0.0 and 1.0", Target.UNKNOWN);
 					}
 					e.getHook().setBiteChance(chance);
 					return true;

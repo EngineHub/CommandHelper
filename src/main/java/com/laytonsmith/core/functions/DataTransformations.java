@@ -12,6 +12,8 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -64,7 +66,7 @@ public class DataTransformations {
 			try {
 				return new CString(Construct.json_encode(ca, t), t);
 			} catch (MarshalException ex) {
-				throw new Exceptions.CastException(ex.getMessage(), t);
+				throw new CRECastException(ex.getMessage(), t);
 			}
 		}
 
@@ -114,7 +116,7 @@ public class DataTransformations {
 			try {
 				return Construct.json_decode(s, t);
 			} catch (MarshalException ex) {
-				throw new Exceptions.FormatException("The input JSON string is improperly formatted. Check your formatting and try again.", t, ex);
+				throw new CREFormatException("The input JSON string is improperly formatted. Check your formatting and try again.", t, ex);
 			}
 		}
 
@@ -230,7 +232,7 @@ public class DataTransformations {
 				cause = ex;
 			}
 			if(!(ret instanceof Map) && !(ret instanceof Collection)){
-				throw new Exceptions.FormatException("Improperly formatted YML", t, cause);
+				throw new CREFormatException("Improperly formatted YML", t, cause);
 			}
 			return Construct.GetConstruct(ret);
 		}
@@ -285,7 +287,7 @@ public class DataTransformations {
 				comment = args[1].val();
 			}
 			if(!arr.inAssociativeMode()){
-				throw new Exceptions.CastException("Expecting an associative array", t);
+				throw new CRECastException("Expecting an associative array", t);
 			}
 			for(String key : arr.stringKeySet()){
 				Construct c = arr.get(key, t);
@@ -293,7 +295,7 @@ public class DataTransformations {
 				if(c instanceof CNull){
 					val = "";
 				} else if(c instanceof CArray){
-					throw new Exceptions.CastException("Arrays cannot be encoded with ini_encode.", t);
+					throw new CRECastException("Arrays cannot be encoded with ini_encode.", t);
 				} else {
 					val = c.val();
 				}
@@ -362,7 +364,7 @@ public class DataTransformations {
 			try {
 				props.load(reader);
 			} catch (IOException ex) {
-				throw new Exceptions.FormatException(ex.getMessage(), t);
+				throw new CREFormatException(ex.getMessage(), t);
 			}
 			CArray arr = CArray.GetAssociativeArray(t);
 			for(String key : props.stringPropertyNames()){
@@ -427,12 +429,12 @@ public class DataTransformations {
 			try {
 				doc = new XMLDocument(args[0].val());
 			} catch (SAXException ex) {
-				throw new Exceptions.FormatException("Malformed XML.", t, ex);
+				throw new CREFormatException("Malformed XML.", t, ex);
 			}
 			try {
 				return Static.resolveConstruct(doc.getNode(args[1].val()), t);
 			} catch (XPathExpressionException ex) {
-				throw new Exceptions.FormatException(ex.getMessage(), t, ex);
+				throw new CREFormatException(ex.getMessage(), t, ex);
 			}
 		}
 

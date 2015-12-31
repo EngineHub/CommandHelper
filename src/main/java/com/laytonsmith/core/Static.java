@@ -39,6 +39,7 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
@@ -665,7 +666,7 @@ public final class Static {
 			try {
 				ofp = getServer().getOfflinePlayer(GetUUID(search, t));
 			} catch (ConfigRuntimeException cre) {
-				if (cre.getExceptionType().equals(ExceptionType.LengthException)) {
+				if (cre instanceof CRELengthException) {
 					throw ConfigRuntimeException.BuildException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(),
 							ExceptionType.LengthException, t);
@@ -700,7 +701,7 @@ public final class Static {
 			try {
 				m = getServer().getPlayer(GetUUID(player, t));
 			} catch (ConfigRuntimeException cre) {
-				if (cre.getExceptionType().equals(ExceptionType.LengthException)) {
+				if (cre instanceof CRELengthException) {
 					throw ConfigRuntimeException.BuildException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(),
 							ExceptionType.LengthException, t);

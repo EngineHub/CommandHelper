@@ -22,6 +22,8 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -82,7 +84,7 @@ public class ItemMeta {
 				is = p.getItemAt(Static.getInt32(slot, t));
 			}
 			if (is == null) {
-				throw new Exceptions.CastException("There is no item at slot " + slot, t);
+				throw new CRECastException("There is no item at slot " + slot, t);
 			}
 			return ObjectGenerator.GetGenerator().itemMeta(is, t);
 		}
@@ -175,7 +177,7 @@ public class ItemMeta {
 				is = p.getItemAt(Static.getInt32(slot, t));
 			}
 			if (is == null) {
-				throw new Exceptions.CastException("There is no item at slot " + slot, t);
+				throw new CRECastException("There is no item at slot " + slot, t);
 			}
 			is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(meta, is.getType(), t));
 			return CVoid.VOID;
@@ -270,13 +272,13 @@ public class ItemMeta {
 			Static.AssertPlayerNonNull(p, t);
 			MCItemStack is = p.getItemAt(slot);
 			if (is == null) {
-				throw new Exceptions.CastException("There is no item at slot " + slot, t);
+				throw new CRECastException("There is no item at slot " + slot, t);
 			}
 			MCItemMeta im = is.getItemMeta();
 			if(im instanceof MCLeatherArmorMeta){
 				return ObjectGenerator.GetGenerator().color(((MCLeatherArmorMeta)im).getColor(), t);
 			} else {
-				throw new Exceptions.CastException("The item at slot " + slot + " is not leather armor.", t);
+				throw new CRECastException("The item at slot " + slot + " is not leather armor.", t);
 			}
 		}
 
@@ -333,27 +335,27 @@ public class ItemMeta {
 				if (args[2] instanceof CArray) {
 					color = (CArray)args[2];
 				} else {
-					throw new Exceptions.FormatException("Expected an array but recieved " + args[2] + " instead.", t);
+					throw new CREFormatException("Expected an array but recieved " + args[2] + " instead.", t);
 				}
 			} else {
 				slot = Static.getInt32(args[0], t);
 				if (args[1] instanceof CArray) {
 					color = (CArray)args[1];
 				} else {
-					throw new Exceptions.FormatException("Expected an array but recieved " + args[1] + " instead.", t);
+					throw new CREFormatException("Expected an array but recieved " + args[1] + " instead.", t);
 				}
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCItemStack is = p.getItemAt(slot);
 			if (is == null) {
-				throw new Exceptions.CastException("There is no item at slot " + slot, t);
+				throw new CRECastException("There is no item at slot " + slot, t);
 			}
 			MCItemMeta im = is.getItemMeta();
 			if(im instanceof MCLeatherArmorMeta){
 				((MCLeatherArmorMeta)im).setColor(ObjectGenerator.GetGenerator().color(color, t));
 				is.setItemMeta(im);
 			} else {
-				throw new Exceptions.CastException("The item at slot " + slot + " is not leather armor", t);
+				throw new CRECastException("The item at slot " + slot + " is not leather armor", t);
 			}
 			return CVoid.VOID;
 		}

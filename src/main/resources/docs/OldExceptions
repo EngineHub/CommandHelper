@@ -1,0 +1,92 @@
+
+Exceptions are thrown by various functions at runtime. Since MScript is not yet strongly typed, 
+it is not possible to catch all errors at compile time. Due to this, it is useful to be able 
+to programmatically determine if a function failed. To this end, since version 3.1.2, 
+MScript has the {{function|try}} function. This function takes 3 or 4 arguments:
+%%CODE|
+try(try_code, ivar, catch_code, [interested_types])
+%%
+If you are familiar with other programming languages' try-catch mechanisms, then this 
+construct will be familiar. The code at <code>try_code</code> is run normally. If any 
+function in the code causes an exception to be thrown, execution will halt, and program 
+flow will start at <code>catch_code</code>. The exception thrown will be stored in 
+<code>ivar</code>, so that you can programmatically examine the cause of the exception. 
+Many times, you are only interested in a certain type of exception. This is where the optional 
+<code>interested_types</code> variable comes in. If omitted, all exceptions are caught. 
+If provided, it may be a single string, or an array of strings, where the provided values 
+are one or more of the exception types listed below. There are a select few errors that can 
+be caused by runtime issues which cannot be caught, but by far, most runtime issues can be 
+caught in a try function. In addition, you can trigger an exception being thrown with the 
+{{function|throw}} function.
+%%CODE|
+throw(exception_type, msg)
+%%
+<code>throw</code> accepts any valid exception type listed below, as well as a message. 
+The line number will automatically be added. This exception is then passed up the chain, 
+just as if any other function had thrown the exception. If the exception type is null, 
+this exception is uncatchable, however, it is best practice to use the {{function|die}} 
+function if you intend on killing a script.
+
+If an exception is passed all the way to the root of the script, and the interpreter has to 
+catch the exception, the script will terminate, and the default message will be logged to 
+console, and displayed to the user. In most cases, this may be enough. Also, in general, 
+exceptions have been massively improved, all exceptions give a much more detailed error 
+message, and also provide a line number to assist in debugging your scripts. Also note 
+that if debug-mode is on, ALL exceptions that are thrown will log to the console, even if 
+they are caught. This can help debug a potential problem with your script. The API has been 
+updated to include a list of possible exceptions that can be thrown by a function, and a 
+list of what the exception types are, and what might cause them to be thrown are listed below. 
+Please note that it is entirely possible that an exception being thrown was not noted in the 
+API -- this is a bug in the documentation. Please report it so that it can be corrected. Also 
+note that it is possible for the try function itself to throw an exception, if the arguments 
+are not of the proper type. Though it is possible to further catch those exceptions, it 
+probably means that your code is poorly designed.
+
+==Example==
+When accepting user input, it is important to verify that their input is valid. Using 
+exceptions allows you to easily catch errors in their input.
+%%CODE|
+/test $index= >>>
+    # Assign an array to the variable @a
+    assign(@a, array('0', '1', '2'))
+    # array_get can possibly throw an IndexOverflowException, or a CastException
+    try(
+        msg(array_get(@a, $index))
+    , @ex, 
+        # The zeroth element in the exception tells us the exception type.
+        # That is important to get here, so we display proper error messages
+        if(equals(array_get(@ex, 0), IndexOverflowException)
+          , die('That index is not valid')
+          , die('Please enter an actual number')
+        )
+    # We could have left this blank, but this allows us to more precisely filter our exceptions
+    , array(IndexOverflowException, CastException))
+<<<
+%%
+
+==Non-Exception data validation==
+
+In addition to exception handling in 3.1.2, several functions have been added that allow you 
+to validate data without using the try-catch framework. Make note of the existence of the 
+following functions:
+*{{function|array_index_exists}}
+*{{function|is_array}}
+*{{function|is_boolean}}
+*{{function|is_double}}
+*{{function|is_integer}}
+*{{function|is_null}}
+*{{function|is_string}}
+*{{function|typeof}}
+
+among others.
+
+These functions will allow you to validate that the data entered is in fact of the specified 
+type, or can be cast to the specified type.
+
+==Exception Types==
+Both the spelling and capitalization are important when using the name of an exception. The 
+proper format is displayed in the header of each section.
+
+%%EXCEPTION_TYPES%%
+
+{{LearningTrail}}

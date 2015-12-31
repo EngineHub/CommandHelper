@@ -573,9 +573,7 @@ public class EventBinding {
 				try {
 					success = e.modifyEvent(parameter, value, environment.getEnv(GlobalEnv.class).GetEvent().getUnderlyingEvent());
 				} catch (ConfigRuntimeException ex) {
-					ex.setFile(t.file());
-					ex.setLineNum(t.line());
-					ex.setColumn(t.col());
+					ex.setTarget(t);
 					throw ex;
 				}
 			} else {

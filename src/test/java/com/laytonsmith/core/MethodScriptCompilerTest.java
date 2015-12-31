@@ -715,7 +715,7 @@ public class MethodScriptCompilerTest {
         try{
             SRun(script, fakePlayer);
         } catch(ConfigRuntimeException e){
-            assertEquals(3, e.getLineNum());
+            assertEquals(3, e.getTarget().line());
         }
 
     }
@@ -731,7 +731,7 @@ public class MethodScriptCompilerTest {
         try{
             SRun(script, fakePlayer);
         } catch(ConfigRuntimeException e){
-            assertEquals(5, e.getLineNum());
+            assertEquals(5, e.getTarget().line());
         }
     }
 

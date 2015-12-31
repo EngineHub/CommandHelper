@@ -36,6 +36,8 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
@@ -214,7 +216,7 @@ public class Web {
 			try {
 				url = new URL(args[0].val());
 			} catch (MalformedURLException ex) {
-				throw new Exceptions.FormatException(ex.getMessage(), t);
+				throw new CREFormatException(ex.getMessage(), t);
 			}
 			final RequestSettings settings = new RequestSettings();
 			final CClosure success;
@@ -230,7 +232,7 @@ public class Web {
 					try{
 						settings.setMethod(HTTPMethod.valueOf(csettings.get("method", t).val()));
 					} catch(IllegalArgumentException e){
-						throw new Exceptions.FormatException(e.getMessage(), t);
+						throw new CREFormatException(e.getMessage(), t);
 					}
 				}
 				boolean useDefaultHeaders = true;
@@ -288,7 +290,7 @@ public class Web {
 					} else {
 						settings.setRawParameter(csettings.get("params", t).val());
 						if(settings.getMethod() != HTTPMethod.POST && settings.getMethod() != HTTPMethod.PUT){
-							throw new Exceptions.FormatException("You must set the method to POST or PUT to use raw params.", t);
+							throw new CREFormatException("You must set the method to POST or PUT to use raw params.", t);
 						}
 					}
 				}
@@ -306,7 +308,7 @@ public class Web {
 					if(csettings.get("success", t) instanceof CClosure){
 						success = (CClosure) csettings.get("success", t);
 					} else {
-						throw new Exceptions.CastException("Expecting the success parameter to be a closure.", t);
+						throw new CRECastException("Expecting the success parameter to be a closure.", t);
 					}
 				} else {
 					throw ConfigRuntimeException.BuildException("Missing the success parameter, which is required.", ExceptionType.CastException, t);
@@ -315,7 +317,7 @@ public class Web {
 					if(csettings.get("error", t) instanceof CClosure){
 						error = (CClosure) csettings.get("error", t);
 					} else {
-						throw new Exceptions.CastException("Expecting the error parameter to be a closure.", t);
+						throw new CRECastException("Expecting the error parameter to be a closure.", t);
 					}
 				} else {
 					error = null;

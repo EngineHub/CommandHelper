@@ -8,23 +8,25 @@ import com.laytonsmith.core.constructs.Target;
 /**
  * 
  */
-@typeof("ShellException")
-public class CREShellException extends CREException {
-	public CREShellException(String msg, Target t) {
+@typeof("Exception")
+public class CREException extends CREThrowable {
+
+	public CREException(String msg, Target t){
 		super(msg, t);
 	}
 
-	public CREShellException(String msg, Target t, Throwable cause) {
+	public CREException(String msg, Target t, Throwable cause){
 		super(msg, t, cause);
 	}
 
 	@Override
 	public String docs() {
-		return "Thrown if a shell exception occurs.";
+		return "A generic exception. All normal exceptions extend this type.";
 	}
 
 	@Override
 	public Version since() {
 		return CHVersion.V3_3_1;
 	}
+
 }

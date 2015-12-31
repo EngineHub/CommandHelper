@@ -85,6 +85,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -345,7 +346,7 @@ public class EntityManagement {
 			if (args[1] instanceof CArray) {
 				l = ObjectGenerator.GetGenerator().location((CArray) args[1], e.getWorld(), t);
 			} else {
-				throw new Exceptions.FormatException("An array was expected but recieved " + args[1], t);
+				throw new CREFormatException("An array was expected but recieved " + args[1], t);
 			}
 			return CBoolean.get(e.teleport(l));
 		}
@@ -1186,11 +1187,11 @@ public class EntityManagement {
 					try {
 						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ObjectGenerator.GetGenerator().item(ea.get(key, t), t));
 					} catch (IllegalArgumentException iae) {
-						throw new Exceptions.FormatException("Not an equipment slot: " + key, t);
+						throw new CREFormatException("Not an equipment slot: " + key, t);
 					}
 				}
 			} else {
-				throw new Exceptions.FormatException("Expected argument 2 to be an array", t);
+				throw new CREFormatException("Expected argument 2 to be an array", t);
 			}
 			ee.setAllEquipment(eq);
 			return CVoid.VOID;
@@ -1298,7 +1299,7 @@ public class EntityManagement {
 			MCEntity ent = Static.getEntity(args[0], t);
 			int setTicks = (int) Static.msToTicks(Static.getInt(args[1], t)*1000);
 			if (setTicks < 0) {
-				throw new Exceptions.FormatException("Seconds cannot be less than 0", t);
+				throw new CREFormatException("Seconds cannot be less than 0", t);
 			}
 			ent.setFireTicks(setTicks);
 			return CVoid.VOID;
@@ -1328,7 +1329,7 @@ public class EntityManagement {
 			try {
 				mee = MCEntityEffect.valueOf(args[1].val().toUpperCase());
 			} catch (IllegalArgumentException iae) {
-				throw new Exceptions.FormatException("Unknown effect at arg 2.", t);
+				throw new CREFormatException("Unknown effect at arg 2.", t);
 			}
 			ent.playEffect(mee);
 			return CVoid.VOID;
@@ -1443,10 +1444,10 @@ public class EntityManagement {
 							ExceptionType.NotFoundException, t);
 				}
 				if (!entType.isSpawnable()) {
-					throw new Exceptions.FormatException("Unspawnable entitytype: " + args[0].val(), t);
+					throw new CREFormatException("Unspawnable entitytype: " + args[0].val(), t);
 				}
 			} catch (IllegalArgumentException iae) {
-				throw new Exceptions.FormatException("Unknown entitytype: " + args[0].val(), t);
+				throw new CREFormatException("Unknown entitytype: " + args[0].val(), t);
 			}
 			for (int i = 0; i < qty; i++) {
 				switch (entType.getAbstracted()) {
@@ -1515,7 +1516,7 @@ public class EntityManagement {
 				rider = Static.getEntity(args[1], t);
 			}
 			if ((horse == null && rider == null) || horse == rider) {
-				throw new Exceptions.FormatException("Horse and rider cannot be the same entity", t);
+				throw new CREFormatException("Horse and rider cannot be the same entity", t);
 			} else if (horse == null) {
 				success = rider.leaveVehicle();
 			} else if (rider == null) {
@@ -1713,11 +1714,11 @@ public class EntityManagement {
 					try {
 						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), Static.getDouble32(ea.get(key, t), t));
 					} catch (IllegalArgumentException iae) {
-						throw new Exceptions.FormatException("Not an equipment slot: " + key, t);
+						throw new CREFormatException("Not an equipment slot: " + key, t);
 					}
 				}
 			} else {
-				throw new Exceptions.FormatException("Expected argument 2 to be an array", t);
+				throw new CREFormatException("Expected argument 2 to be an array", t);
 			}
 			ee.setAllDropChances(eq);
 			return CVoid.VOID;

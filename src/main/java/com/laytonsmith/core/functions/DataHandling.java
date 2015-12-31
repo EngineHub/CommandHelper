@@ -47,6 +47,10 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -967,7 +971,7 @@ public class DataHandling {
 			Construct data = parent.seval(array, env);
 
 			if (!(data instanceof CArray) && !(data instanceof CSlice)) {
-				throw new Exceptions.CastException(getName() + " expects an array for parameter 1", t);
+				throw new CRECastException(getName() + " expects an array for parameter 1", t);
 			}
 
 			if (((CArray) data).isEmpty()) {
@@ -2238,7 +2242,7 @@ public class DataHandling {
 					//Yup! It worked. It's a const proc.
 					return c;
 				} catch (ConfigRuntimeException e) {
-					if (e.getExceptionType() == ExceptionType.InvalidProcedureException) {
+					if (e instanceof CREInvalidProcedureException) {
 						//This is the only valid exception that doesn't strictly mean it's a bad
 						//call.
 						return null;
@@ -2496,7 +2500,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ca = Static.getArray(args[1], t);
 			if (ca.inAssociativeMode()) {
-				throw new Exceptions.CastException("Expected the array passed to " + getName() + " to be non-associative.", t);
+				throw new CRECastException("Expected the array passed to " + getName() + " to be non-associative.", t);
 			}
 			Construct[] args2 = new Construct[(int) ca.size() + 1];
 			args2[0] = args[0];
@@ -3458,7 +3462,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int radix = Static.getInt32(args[1], t);
 			if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
-				throw new Exceptions.RangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
+				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}
 			return new CString(Long.toString(Static.getInt(args[0], t), radix), t);
 		}
@@ -3531,13 +3535,13 @@ public class DataHandling {
 			String value = args[0].val();
 			int radix = Static.getInt32(args[1], t);
 			if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
-				throw new Exceptions.RangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
+				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}
 			long ret;
 			try {
 				ret = Long.parseLong(value, radix);
 			} catch (NumberFormatException ex) {
-				throw new Exceptions.FormatException("The input string: \"" + value + "\" is improperly formatted. (Perhaps you're using a character greater than"
+				throw new CREFormatException("The input string: \"" + value + "\" is improperly formatted. (Perhaps you're using a character greater than"
 						+ " the radix specified?)", t);
 			}
 			return new CInt(ret, t);
@@ -3700,7 +3704,7 @@ public class DataHandling {
 				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(true);
 				Construct script = parent.seval(node, env);
 				if(script instanceof CClosure){
-					throw new Exceptions.CastException("Closures cannot be eval'd directly. Use execute() instead.", t);
+					throw new CRECastException("Closures cannot be eval'd directly. Use execute() instead.", t);
 				}
 				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true));
 				StringBuilder b = new StringBuilder();

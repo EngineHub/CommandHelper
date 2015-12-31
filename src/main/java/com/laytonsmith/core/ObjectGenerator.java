@@ -40,6 +40,8 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -531,7 +533,7 @@ public class ObjectGenerator {
 						}
 						meta.setLore(ll);
 					} else {
-						throw new Exceptions.FormatException("Lore was expected to be an array or a string.", t);
+						throw new CREFormatException("Lore was expected to be an array or a string.", t);
 					}
 				}
 
@@ -556,7 +558,7 @@ public class ObjectGenerator {
 						} else if(colors instanceof CArray){
 							ccolors = (CArray) colors;
 						} else {
-							throw new Exceptions.FormatException("Expecting an array or string for colors parameter, but found " + colors.typeof(), t);
+							throw new CREFormatException("Expecting an array or string for colors parameter, but found " + colors.typeof(), t);
 						}
 						for(Construct color : ccolors.asList()){
 							MCColor mccolor;
@@ -565,7 +567,7 @@ public class ObjectGenerator {
 							} else if(color instanceof CArray){
 								mccolor = color((CArray)color, t);
 							} else {
-								throw new Exceptions.FormatException("Expecting individual color to be an array or string, but found " + color.typeof(), t);
+								throw new CREFormatException("Expecting individual color to be an array or string, but found " + color.typeof(), t);
 							}
 							builder.addColor(mccolor);
 						}
@@ -581,7 +583,7 @@ public class ObjectGenerator {
 						} else if(colors instanceof CArray){
 							ccolors = (CArray) colors;
 						} else {
-							throw new Exceptions.FormatException("Expecting an array or string for fade parameter, but found " + colors.typeof(), t);
+							throw new CREFormatException("Expecting an array or string for fade parameter, but found " + colors.typeof(), t);
 						}
 						for(Construct color : ccolors.asList()){
 							MCColor mccolor;
@@ -590,7 +592,7 @@ public class ObjectGenerator {
 							} else if(color instanceof CArray){
 								mccolor = color((CArray)color, t);
 							} else {
-								throw new Exceptions.FormatException("Expecting individual color to be an array or string, but found " + color.typeof(), t);
+								throw new CREFormatException("Expecting individual color to be an array or string, but found " + color.typeof(), t);
 							}
 							builder.addColor(mccolor);
 						}
@@ -599,7 +601,7 @@ public class ObjectGenerator {
 						try {
 							builder.setType(MCFireworkType.valueOf(fwdata.get("type", t).val()));
 						} catch(IllegalArgumentException ex){
-							throw new Exceptions.FormatException(ex.getMessage(), t, ex);
+							throw new CREFormatException(ex.getMessage(), t, ex);
 						}
 					}
 					builder.createFireworkMeta(fmeta);
@@ -612,7 +614,7 @@ public class ObjectGenerator {
 							meta.addEnchant(ench.getKey(), ench.getValue(), true);
 						}
 					} else {
-						throw new Exceptions.FormatException("Enchants field was expected to be an array of Enchantment arrays", t);
+						throw new CREFormatException("Enchants field was expected to be an array of Enchantment arrays", t);
 					}
 				}
 				if (ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
@@ -626,7 +628,7 @@ public class ObjectGenerator {
 						} else if (ci instanceof CArray) {
 							((MCLeatherArmorMeta) meta).setColor(color((CArray) ci, t));
 						} else {
-							throw new Exceptions.FormatException("Color was expected to be an array.", t);
+							throw new CREFormatException("Color was expected to be an array.", t);
 						}
 					}
 				}
@@ -655,7 +657,7 @@ public class ObjectGenerator {
 							}
 							((MCBookMeta) meta).setPages(pl);
 						} else {
-							throw new Exceptions.FormatException("Pages field was expected to be an array.", t);
+							throw new CREFormatException("Pages field was expected to be an array.", t);
 						}
 					}
 				}
@@ -677,7 +679,7 @@ public class ObjectGenerator {
 								((MCEnchantmentStorageMeta) meta).addStoredEnchant(ench.getKey(), ench.getValue(), true);
 							}
 						} else {
-							throw new Exceptions.FormatException("Stored field was expected to be an array of Enchantment arrays", t);
+							throw new CREFormatException("Stored field was expected to be an array of Enchantment arrays", t);
 						}
 					}
 				}
@@ -690,7 +692,7 @@ public class ObjectGenerator {
 										e.getSecondsRemaining(), e.isAmbient(), true, t);
 							}
 						} else {
-							throw new Exceptions.FormatException("Effects was expected to be an array of potion arrays.", t);
+							throw new CREFormatException("Effects was expected to be an array of potion arrays.", t);
 						}
 					}
 					if (ma.containsKey("main")) {
@@ -720,25 +722,21 @@ public class ObjectGenerator {
 							meta.addItemFlags(MCItemFlag.valueOf(flag.getValue().toUpperCase()));
 						}
 					} else {
-						throw new Exceptions.FormatException("Itemflags was expected to be an array of flags.", t);
+						throw new CREFormatException("Itemflags was expected to be an array of flags.", t);
 					}
 				}
 			} catch(Exception ex) {
-				throw new Exceptions.FormatException("Could not get ItemMeta from the given information.", t, ex);
+				throw new CREFormatException("Could not get ItemMeta from the given information.", t, ex);
 			}
 		} else {
-			throw new Exceptions.FormatException("An array was expected but recieved " + c + " instead.", t);
+			throw new CREFormatException("An array was expected but recieved " + c + " instead.", t);
 		}
 		return meta;
 	}
 
     public CArray exception(ConfigRuntimeException e, Target t) {
-		CArray ex = new CArray(t);
-		ex.push(new CString(e.getExceptionType().toString(), t), t);
-		ex.push(new CString(e.getMessage(), t), t);
-		ex.push(new CString((e.getFile() != null ? e.getFile().getAbsolutePath() : "null"), t), t);
-		ex.push(new CInt(e.getLineNum(), t), t);
-		return ex;
+		AbstractCREException ex = AbstractCREException.getAbstractCREException(e);
+		return ex.getExceptionObject();
     }
 
 	/**
@@ -954,7 +952,7 @@ public class ObjectGenerator {
 				if (effect.containsKey("id")) {
 					potionID = Static.getInt32(effect.get("id", t), t);
 				} else {
-					throw new Exceptions.FormatException("No potion ID was given at index " + key, t);
+					throw new CREFormatException("No potion ID was given at index " + key, t);
 				}
 				if (effect.containsKey("strength")) {
 					strength = Static.getInt32(effect.get("strength", t), t);
@@ -970,7 +968,7 @@ public class ObjectGenerator {
 				}
 				ret.add(new MCLivingEntity.MCEffect(potionID, strength, seconds, ambient, particles));
 			} else {
-				throw new Exceptions.FormatException("Expected a potion array at index" + key, t);
+				throw new CREFormatException("Expected a potion array at index" + key, t);
 			}
 		}
 		return ret;

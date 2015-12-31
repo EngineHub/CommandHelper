@@ -27,6 +27,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -1537,7 +1538,7 @@ public class Cmdline {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			requireCmdlineMode(environment, this, t);
 			if(!(args[0] instanceof CClosure)){
-				throw new Exceptions.CastException("Expecting a closure for argument 1 of " + getName(), t);
+				throw new CRECastException("Expecting a closure for argument 1 of " + getName(), t);
 			}
 			environment.getEnv(GlobalEnv.class).SetCustom("cmdline_prompt", args[0]);
 			return CVoid.VOID;

@@ -31,6 +31,8 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -1096,7 +1098,7 @@ public class StringHandling {
 					//Character, parse as string, and verify it's of length 1
 					String s = arg.val();
 					if (s.length() > 1) {
-						throw new Exceptions.FormatException("Expecting a string of length one in argument " + (i + 1) + " in " + getName()
+						throw new CREFormatException("Expecting a string of length one in argument " + (i + 1) + " in " + getName()
 								+ "but \"" + s + "\" was found instead.", t);
 					}
 					o = s.charAt(0);
@@ -1533,7 +1535,7 @@ public class StringHandling {
 			try {
 				return CByteArray.wrap(val.getBytes(encoding), t);
 			} catch (UnsupportedEncodingException ex) {
-				throw new Exceptions.FormatException("Unknown encoding type \"" + encoding + "\"", t);
+				throw new CREFormatException("Unknown encoding type \"" + encoding + "\"", t);
 			}
 		}
 
@@ -1589,7 +1591,7 @@ public class StringHandling {
 			try {
 				return new CString(new String(ba.asByteArrayCopy(), encoding), t);
 			} catch (UnsupportedEncodingException ex) {
-				throw new Exceptions.FormatException("Unknown encoding type \"" + encoding + "\"", t);
+				throw new CREFormatException("Unknown encoding type \"" + encoding + "\"", t);
 			}
 		}
 
@@ -1727,7 +1729,7 @@ public class StringHandling {
 			try{
 				return new CString(new String(Character.toChars(Static.getInt32(args[0], t))), t);
 			} catch(IllegalArgumentException ex){
-				throw new Exceptions.RangeException("Code point out of range: " + args[0].val(), t);
+				throw new CRERangeException("Code point out of range: " + args[0].val(), t);
 			}
 		}
 
@@ -1790,7 +1792,7 @@ public class StringHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args[0].val().toCharArray().length == 0){
-				throw new Exceptions.RangeException("Empty string cannot be converted to unicode.", t);
+				throw new CRERangeException("Empty string cannot be converted to unicode.", t);
 			}
 			int i = Character.codePointAt(args[0].val().toCharArray(), 0);
 			return new CInt(i, t);

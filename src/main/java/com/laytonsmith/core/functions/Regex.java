@@ -19,6 +19,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -295,9 +296,9 @@ public class Regex {
             try {
             	ret = pattern.matcher(subject).replaceAll(replacement);
             } catch (IndexOutOfBoundsException e) {
-            	throw new Exceptions.FormatException("Expecting a regex group at parameter 1 of reg_replace", t);
+            	throw new CREFormatException("Expecting a regex group at parameter 1 of reg_replace", t);
             } catch(IllegalArgumentException e){
-				throw new Exceptions.FormatException(e.getMessage(), t);
+				throw new CREFormatException(e.getMessage(), t);
 			}
             
             return new CString(ret, t);

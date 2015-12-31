@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.functions.Exceptions;
 
 /**
@@ -10,11 +11,11 @@ import com.laytonsmith.core.functions.Exceptions;
  */
 public class ConvertorHelper {
 
-	public static MCColor GetColor(String colorName, Target t) throws Exceptions.FormatException {
+	public static MCColor GetColor(String colorName, Target t) throws CREFormatException {
 		if(MCColor.STANDARD_COLORS.containsKey(colorName.toUpperCase())){
 			 return MCColor.STANDARD_COLORS.get(colorName.toUpperCase());
 		} else {
-			throw new Exceptions.FormatException("Unknown color type: " + colorName, t);
+			throw new CREFormatException("Unknown color type: " + colorName, t);
 		}
 	}
 

@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.functions.Exceptions;
 
 import java.util.List;
@@ -191,7 +192,7 @@ public interface Convertor {
 	 * @param t
 	 * @return
 	 */
-	public MCColor GetColor(String colorName, Target t) throws Exceptions.FormatException;
+	public MCColor GetColor(String colorName, Target t) throws CREFormatException;
 
 	/**
 	 * Returns a pattern object

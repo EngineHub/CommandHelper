@@ -8,7 +8,9 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -17,24 +19,33 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.FunctionReturnException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -44,50 +55,6 @@ public class Exceptions {
 
 	public static String docs() {
 		return "This class contains functions related to Exception handling in MethodScript";
-	}
-	
-	public static class CastException extends ConfigRuntimeException {
-
-		public CastException(String msg, Target t) {
-			super(msg, ExceptionType.CastException, t);
-		}
-
-		public CastException(String msg, Target t, Throwable cause) {
-			super(msg, ExceptionType.CastException, t, cause);
-		}				
-	}
-	
-	public static class FormatException extends ConfigRuntimeException {
-
-		public FormatException(String msg, Target t) {
-			super(msg, ExceptionType.FormatException, t);
-		}
-
-		public FormatException(String msg, Target t, Throwable cause) {
-			super(msg, ExceptionType.FormatException, t, cause);
-		}
-	}
-	
-	public static class RangeException extends ConfigRuntimeException {
-
-		public RangeException(String msg, Target t) {
-			super(msg, ExceptionType.RangeException, t);
-		}
-
-		public RangeException(String msg, Target t, Throwable cause) {
-			super(msg, ExceptionType.RangeException, t, cause);
-		}
-	}
-	
-	public static class LengthException extends ConfigRuntimeException {
-
-		public LengthException(String msg, Target t) {
-			super(msg, ExceptionType.LengthException, t);
-		}
-
-		public LengthException(String msg, Target t, Throwable cause) {
-			super(msg, ExceptionType.LengthException, t, cause);
-		}
 	}
 
 	@MEnum("ExceptionType")
@@ -406,12 +373,13 @@ public class Exceptions {
 			try {
 				that.eval(tryCode, env);
 			} catch (ConfigRuntimeException e) {
+				String name = AbstractCREException.getExceptionName(e);
 				if (Prefs.DebugMode()) {
 					StreamUtils.GetSystemOut().println("[" + Implementation.GetServerType().getBranding() + "]:"
-							+ " Exception thrown (debug mode on) -> " + e.getMessage() + " :: " + e.getExceptionType() + ":" 
-							+ e.getFile() + ":" + e.getLineNum());
+							+ " Exception thrown (debug mode on) -> " + e.getMessage() + " :: " + name + ":"
+							+ e.getTarget().file() + ":" + e.getTarget().line());
 				}
-				if (e.getExceptionType() != null && (interest.isEmpty() || interest.contains(e.getExceptionType().toString()))) {
+				if (name != null && (interest.isEmpty() || interest.contains(name))) {
 					if (catchCode != null) {
 						CArray ex = ObjectGenerator.GetGenerator().exception(e, t);
 						if (ivar != null) {
@@ -548,7 +516,7 @@ public class Exceptions {
 					return old;
 				}
 			} else {
-				throw new CastException("Expecting arg 1 of " + getName() + " to be a Closure, but it was " + args[0].val(), t);
+				throw new CRECastException("Expecting arg 1 of " + getName() + " to be a Closure, but it was " + args[0].val(), t);
 			}
 		}
 
@@ -629,7 +597,62 @@ public class Exceptions {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			// TODO
+			boolean exceptionCaught = false;
+			ConfigRuntimeException caughtException = null;
+			try {
+				parent.eval(nodes[0], env);
+			} catch (ConfigRuntimeException ex){
+				if(!(ex instanceof AbstractCREException)){
+					// This should never actually happen, but we want to protect
+					// against errors, and continue to throw this one up the chain
+					throw ex;
+				}
+				AbstractCREException e = AbstractCREException.getAbstractCREException(ex);
+				CClassType exceptionType = new CClassType(e.getExceptionType(), t);
+				for(int i = 1; i < nodes.length - 1; i+=2){
+					ParseTree assign = nodes[i];
+					CClassType clauseType = ((CClassType)assign.getChildAt(0).getData());
+					if(exceptionType.unsafeDoesExtend(clauseType)){
+						try {
+							// We need to define the exception in the variable table
+							IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
+							IVariable var = (IVariable)assign.getChildAt(1).getData();
+							// This should eventually be changed to be of the appropriate type. Unfortunately, that will
+							// require reworking basically everything. We need all functions to accept Mixed, instead of Construct.
+							// This will have to do in the meantime.
+							varList.set(new IVariable(new CClassType("array", t), var.getName(), e.getExceptionObject(), t));
+							parent.eval(nodes[i + 1], env);
+							varList.remove(var.getName());
+						} catch (ConfigRuntimeException | FunctionReturnException newEx){
+							if(newEx instanceof ConfigRuntimeException){
+								caughtException = (ConfigRuntimeException)newEx;
+							}
+							exceptionCaught = true;
+						}
+						return CVoid.VOID;
+					}
+				}
+				// No clause caught it. Continue to throw the exception up the chain
+				caughtException = ex;
+				exceptionCaught = true;
+				throw ex;
+			} finally {
+				if(nodes.length % 2 == 0){
+					// There is a finally clause. Run that here.
+					try {
+						parent.eval(nodes[nodes.length - 1], env);
+					} catch(ConfigRuntimeException | FunctionReturnException ex){
+						if(exceptionCaught && (Prefs.ScreamErrors() || Prefs.DebugMode())){
+							CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Exception was thrown and"
+									+ " unhandled in any catch clause,"
+									+ " but is being hidden by a new exception being thrown in the finally clause.", t);
+							ConfigRuntimeException.HandleUncaughtException(caughtException, env);
+						}
+						throw ex;
+					}
+				}
+			}
+
 			return CVoid.VOID;
 		}
 
@@ -655,8 +678,50 @@ public class Exceptions {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			//TODO
-			return super.optimizeDynamic(t, children, fileOptions); //To change body of generated methods, choose Tools | Templates.
+			List<CClassType> types = new ArrayList<>();
+			for(int i = 1; i < children.size() - 1; i+=2){
+				// TODO: Eh.. should probably move this check into the keyword, since techincally
+				// catch(Exception @e = null) { } would work.
+				ParseTree assign = children.get(i);
+				types.add((CClassType)assign.getChildAt(0).getData());
+				if(CFunction.IsFunction(assign, DataHandling.assign.class)) {
+					// assign() will validate params 0 and 1
+					CClassType type = ((CClassType)assign.getChildAt(0).getData());
+					if(!type.unsafeDoesExtend(new CClassType("Throwable", t))){
+						throw new ConfigCompileException("The type defined in a catch clause must extend the"
+								+ " Throwable class.", t);
+					}
+					if(!(assign.getChildAt(2).getData() instanceof CNull)){
+						throw new ConfigCompileException("Assignments are not allowed in catch clauses", t);
+					}
+					continue;
+				}
+				throw new ConfigCompileException("Expecting a variable declaration, but instead "
+						+ assign.getData().val() + " was found", t);
+			}
+			for(int i = 0; i < types.size(); i++){
+				CClassType t1 = types.get(i);
+				for(int j = i + 1; j < types.size(); j++){
+					CClassType t2 = types.get(j);
+					try {
+						if(t1.doesExtend(t2) || t2.doesExtend(t1)){
+							String spot1 = t1.val();
+							String spot2 = t2.val();
+							if(t2.doesExtend(t1)){
+								// Reverse the error message so it makes more sense
+								spot1 = t2.val();
+								spot2 = t1.val();
+							}
+							throw new ConfigCompileException("Duplicate catch clauses found. Only one clause may"
+									+ " catch exceptions of a particular type, but we found that " + spot1 + " has"
+									+ " a duplicate signature of " + spot2, t);
+						}
+					} catch (ClassNotFoundException ex) {
+						throw new ConfigCompileException("Unknown type: " + ex.getMessage(), t);
+					}
+				}
+			}
+			return null;
 		}
 
 		@Override

@@ -15,6 +15,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -357,7 +358,7 @@ public class Crypto {
 				String hash = BCrypt.hashpw(args[0].val(), BCrypt.gensalt(log_rounds));
 				return new CString(hash, t);
 			} catch(IllegalArgumentException ex){
-				throw new Exceptions.RangeException(ex.getMessage(), t);
+				throw new CRERangeException(ex.getMessage(), t);
 			}
         }
 

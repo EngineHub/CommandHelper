@@ -16,6 +16,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -90,7 +91,7 @@ public class Persistence {
 			try {
 				value = Construct.json_encode(args[args.length - 1], t);
 			} catch (MarshalException e) {
-				throw new Exceptions.FormatException(e.getMessage(), t);
+				throw new CREFormatException(e.getMessage(), t);
 			}
 			char pc = '.';
 			for (int i = 0; i < key.length(); i++) {

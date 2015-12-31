@@ -52,6 +52,7 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
@@ -706,7 +707,7 @@ public class EntityEvents {
 				try {
 					type = MCMobs.valueOf(value.val());
 				} catch (IllegalArgumentException iae) {
-					throw new Exceptions.FormatException(value.val() + " is not a valid mob type.", Target.UNKNOWN);
+					throw new CREFormatException(value.val() + " is not a valid mob type.", Target.UNKNOWN);
 				}
 				e.setType(type);
 			}

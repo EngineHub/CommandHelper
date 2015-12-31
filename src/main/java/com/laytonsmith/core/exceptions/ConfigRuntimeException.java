@@ -18,6 +18,37 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityTypeException;
+import com.laytonsmith.core.exceptions.CRE.CREBindException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
+import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
+import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidPluginException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
+import com.laytonsmith.core.exceptions.CRE.CRELengthException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginChannelException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
+import com.laytonsmith.core.exceptions.CRE.CRESQLException;
+import com.laytonsmith.core.exceptions.CRE.CREScoreboardException;
+import com.laytonsmith.core.exceptions.CRE.CRESecurityException;
+import com.laytonsmith.core.exceptions.CRE.CREShellException;
+import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
+import com.laytonsmith.core.exceptions.CRE.CREUnageableMobException;
+import com.laytonsmith.core.exceptions.CRE.CREUntameableMobException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
@@ -28,7 +59,7 @@ import java.util.List;
  */
 public class ConfigRuntimeException extends RuntimeException {
 
-	List<StackTraceElement> stackTraceTrail = new ArrayList<>();
+	protected List<StackTraceElement> stackTraceTrail = new ArrayList<>();
 
 	/**
 	 * Creates a new instance of <code>ConfigRuntimeException</code> without
@@ -53,42 +84,6 @@ public class ConfigRuntimeException extends RuntimeException {
 	 */
 	public Environment getEnv() {
 		return this.env;
-	}
-
-	/**
-	 * Sets the file that the exception occurred in. If f is null, the file is
-	 * not set.
-	 *
-	 * @param f
-	 */
-	public void setFile(File f) {
-		if (file == null) {
-			file = f;
-		}
-	}
-
-	/**
-	 * Sets the line number that the exception occurred in. If line_num is -1,
-	 * nothing is set.
-	 *
-	 * @param line_num
-	 */
-	public void setLineNum(int line_num) {
-		if (this.line_num == -1) {
-			this.line_num = line_num;
-		}
-	}
-
-	/**
-	 * Sets the column that the exception occurred in. If column is -1, nothing
-	 * is set.
-	 *
-	 * @param column
-	 */
-	public void setColumn(int column) {
-		if (this.column == -1) {
-			this.column = column;
-		}
 	}
 
 	/**
@@ -146,10 +141,6 @@ public class ConfigRuntimeException extends RuntimeException {
 	public static Reaction GetReaction(ConfigRuntimeException e, Environment env) {
 		//If there is an exception handler, call it to see what it says.
 		Reaction reaction = Reaction.REPORT;
-		if (e.getExceptionType() == null) {
-			//Uncatchable, so return the default
-			return reaction;
-		}
 		if (env.getEnv(GlobalEnv.class).GetExceptionHandler() != null) {
 			CClosure c = env.getEnv(GlobalEnv.class).GetExceptionHandler();
 			CArray ex = ObjectGenerator.GetGenerator().exception(e, Target.UNKNOWN);
@@ -312,7 +303,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		if (e.getEnv() != null && e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 			p = e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer();
 		}
-		DoReport(e.getMessage(), e.getExceptionType() != null ? e.getExceptionType().toString() : "FatalRuntimeException", e.stackTraceTrail, p);
+		DoReport(e.getMessage(), AbstractCREException.getExceptionName(e), e.stackTraceTrail, p);
 		if (Prefs.DebugMode()) {
 			if (e.getCause() != null) {
 				//This is more of a system level exception, so if debug mode is on, we also want to print this stack trace
@@ -378,9 +369,9 @@ public class ConfigRuntimeException extends RuntimeException {
 				ConfigRuntimeException cre = (ConfigRuntimeException) e;
 				exceptionMessage = MCChatColor.YELLOW + cre.getMessage()
 						+ MCChatColor.WHITE + " :: " + MCChatColor.GREEN
-						+ cre.getExceptionType() + MCChatColor.WHITE + ":"
-						+ MCChatColor.YELLOW + cre.getFile() + MCChatColor.WHITE + ":"
-						+ MCChatColor.AQUA + cre.getLineNum();
+						+ AbstractCREException.getExceptionName(cre) + MCChatColor.WHITE + ":"
+						+ MCChatColor.YELLOW + cre.target.file() + MCChatColor.WHITE + ":"
+						+ MCChatColor.AQUA + cre.target.line();
 				t = cre.getTarget();
 			} else if (e != null) {
 				exceptionMessage = MCChatColor.YELLOW + e.getMessage();
@@ -391,30 +382,33 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
 	}
 
-	private ExceptionType ex;
-	private int line_num = -1;
-	private File file;
-	private int column = -1;
 	private Environment env;
 	private Target target;
 
 	/**
-	 * Creates a new ConfigRuntimeException. If the exception is intended to be
-	 * uncatchable, use {@link #CreateUncatchableException} instead.
+	 * Creates a new ConfigRuntimeException. This method is partially deprecated.
+	 * It should not be used for new code, and it should eventually be phased out, however
+	 * there will be a very long deprecation period. Instead, instantiate an exception
+	 * of type {@link AbstractCREException}.
 	 *
 	 * @param msg The message to be displayed
 	 * @param ex The type of exception this is, as seen by user level code
 	 * @param t The code target this exception is being thrown from
 	 * @return An exception of the appropriate subclass
+	 * @deprecated Instead, instantiate an exception
+	 * of type {@link AbstractCREException}.
 	 */
+	@Deprecated
 	public static ConfigRuntimeException BuildException(String msg, ExceptionType ex, Target t) {
 		return BuildException(msg, ex, t, null);
 	}
 
 	/**
-	 * Creates a new ConfigRuntimeException. If the exception is intended to be
-	 * uncatchable, use {@link #CreateUncatchableException(java.lang.String, com.laytonsmith.core.constructs.Target, java.lang.Throwable) }
-	 * instead.
+	 * Creates a new ConfigRuntimeException. This method is partially deprecated.
+	 * It should not be used for new code, and it should eventually be phased out, however
+	 * there will be a very long deprecation period. Instead, instantiate an exception
+	 * of type {@link AbstractCREException}.
+	 *
 	 * @param msg The message to be displayed
 	 * @param ex The type of exception this is, as seen by user level code
 	 * @param t The code target this exception is being thrown from
@@ -422,12 +416,74 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * when debugging errors. Where exceptions are triggered by Java code (as opposed to organic
 	 * MethodScript errors) this version should always be preferred.
 	 * @return An exception of the appropriate subclass
+	 * @deprecated Instead, instantiate an exception
+	 * of type {@link AbstractCREException}.
 	 */
+	@Deprecated
 	public static ConfigRuntimeException BuildException(String msg, ExceptionType ex, Target t, Throwable cause) {
-		// TODO: Eventually, the exception system should be built out more, and this will be used to build out
-		// the exception mechanism to use actual java types. For now, this just creates an intermediate step, so that
-		// the rollout can be done in smaller steps. This works just the same as using new CRE.
-		return new ConfigRuntimeException(msg, ex, t, cause);
+		switch(ex){
+			case BadEntityException:
+				return new CREBadEntityException(msg, t, cause);
+			case BadEntityTypeException:
+				return new CREBadEntityTypeException(msg, t, cause);
+			case BindException:
+				return new CREBindException(msg, t, cause);
+			case CastException:
+				return new CRECastException(msg, t, cause);
+			case EnchantmentException:
+				return new CREEnchantmentException(msg, t, cause);
+			case FormatException:
+				return new CREFormatException(msg, t, cause);
+			case IOException:
+				return new CREIOException(msg, t, cause);
+			case IllegalArgumentException:
+				return new CREIllegalArgumentException(msg, t, cause);
+			case IncludeException:
+				return new CREIncludeException(msg, t, cause);
+			case IndexOverflowException:
+				return new CREIndexOverflowException(msg, t, cause);
+			case InsufficientArgumentsException:
+				return new CREInsufficientArgumentsException(msg, t, cause);
+			case InsufficientPermissionException:
+				return new CREInsufficientPermissionException(msg, t, cause);
+			case InvalidPluginException:
+				return new CREInvalidPluginException(msg, t, cause);
+			case InvalidProcedureException:
+				return new CREInvalidProcedureException(msg, t, cause);
+			case InvalidWorldException:
+				return new CREInvalidWorldException(msg, t, cause);
+			case LengthException:
+				return new CRELengthException(msg, t, cause);
+			case NotFoundException:
+				return new CRENotFoundException(msg, t, cause);
+			case NullPointerException:
+				return new CRENullPointerException(msg, t, cause);
+			case PlayerOfflineException:
+				return new CREPlayerOfflineException(msg, t, cause);
+			case PluginChannelException:
+				return new CREPluginChannelException(msg, t, cause);
+			case PluginInternalException:
+				return new CREPluginInternalException(msg, t, cause);
+			case RangeException:
+				return new CRERangeException(msg, t, cause);
+			case ReadOnlyException:
+				return new CREReadOnlyException(msg, t, cause);
+			case SQLException:
+				return new CRESQLException(msg, t, cause);
+			case ScoreboardException:
+				return new CREScoreboardException(msg, t, cause);
+			case SecurityException:
+				return new CRESecurityException(msg, t, cause);
+			case ShellException:
+				return new CREShellException(msg, t, cause);
+			case StackOverflowError:
+				return new CREStackOverflowError(msg, t, cause);
+			case UnageableMobException:
+				return new CREUnageableMobException(msg, t, cause);
+			case UntameableMobException:
+				return new CREUntameableMobException(msg, t, cause);
+		}
+		throw new Error("Unexpected exception type");
 	}
 
 	/**
@@ -435,13 +491,12 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * uncatchable, use {@link #CreateUncatchableException} instead.
 	 *
 	 * @param msg The message to be displayed
-	 * @param ex The type of exception this is, as seen by user level code
 	 * @param t The code target this exception is being thrown from
 	 * @deprecated Use the {@link #BuildException(java.lang.String, com.laytonsmith.core.functions.Exceptions.ExceptionType, com.laytonsmith.core.constructs.Target) } method instead.
 	 */
 	@Deprecated
-	public ConfigRuntimeException(String msg, ExceptionType ex, Target t) {
-		this(msg, ex, t, null);
+	public ConfigRuntimeException(String msg, Target t) {
+		this(msg, t, null);
 	}
 
 	/**
@@ -449,7 +504,6 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * uncatchable, use {@link #CreateUncatchableException(java.lang.String, com.laytonsmith.core.constructs.Target, java.lang.Throwable) }
 	 * instead.
 	 * @param msg The message to be displayed
-	 * @param ex The type of exception this is, as seen by user level code
 	 * @param t The code target this exception is being thrown from
 	 * @param cause The chained cause. This is not used for normal execution, but is helpful
 	 * when debugging errors. Where exceptions are triggered by Java code (as opposed to organic
@@ -457,19 +511,16 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @deprecated Use the {@link #BuildException(java.lang.String, com.laytonsmith.core.functions.Exceptions.ExceptionType, com.laytonsmith.core.constructs.Target, java.lang.Throwable) } method instead.
 	 */
 	@Deprecated
-	public ConfigRuntimeException(String msg, ExceptionType ex, Target t, Throwable cause) {
+	public ConfigRuntimeException(String msg, Target t, Throwable cause) {
 		super(msg, cause);
-		if (ex == null) {
-			throw new NullPointerException("Use CreateUncatchableException instead.");
-		}
-		createException(ex, t);
+		createException(t);
 	}
 
-	private void createException(ExceptionType ex, Target t) {
-		this.ex = ex;
-		this.line_num = t.line();
-		this.file = t.file();
-		this.column = t.col();
+	private void createException(Target t) {
+		this.target = t;
+	}
+
+	public void setTarget(Target t){
 		this.target = t;
 	}
 
@@ -515,48 +566,6 @@ public class ConfigRuntimeException extends RuntimeException {
 		return new ConfigRuntimeException(msg, t, cause);
 	}
 
-	private ConfigRuntimeException(String msg, Target t, Throwable cause) {
-		super(msg, cause);
-		createException(null, t);
-	}
-
-	/**
-	 * Gets the exception type. This may be null in cases where an uncatchable
-	 * exception is created.
-	 *
-	 * @return
-	 */
-	public ExceptionType getExceptionType() {
-		return this.ex;
-	}
-
-	/**
-	 * Gets the line number that this exception is triggered at.
-	 *
-	 * @return
-	 */
-	public int getLineNum() {
-		return this.line_num;
-	}
-
-	/**
-	 * Gets the file this exception is triggered in.
-	 *
-	 * @return
-	 */
-	public File getFile() {
-		return this.file;
-	}
-
-	/**
-	 * Gets the column that this exception is triggered at.
-	 *
-	 * @return
-	 */
-	public int getCol() {
-		return this.column;
-	}
-
 	/**
 	 * Gets the code target for this exception.
 	 *
@@ -572,8 +581,8 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @return
 	 */
 	public String getSimpleFile() {
-		if (this.file != null) {
-			return this.file.getName();
+		if (this.target.file() != null) {
+			return this.target.file().getName();
 		} else {
 			return null;
 		}

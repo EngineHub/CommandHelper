@@ -31,6 +31,9 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -899,19 +902,19 @@ public class Environment {
 			try {
 				i = MCInstrument.valueOf(args[instrumentOffset].val().toUpperCase().trim());
 			} catch (IllegalArgumentException e) {
-				throw new Exceptions.FormatException("Instrument provided is not a valid type, required one of: " + StringUtils.Join(MCInstrument.values(), ", ", ", or "), t);
+				throw new CREFormatException("Instrument provided is not a valid type, required one of: " + StringUtils.Join(MCInstrument.values(), ", ", ", or "), t);
 			}
 			MCTone tone = null;
 			if (args[noteOffset] instanceof CArray) {
 				int octave = Static.getInt32(((CArray) args[noteOffset]).get("octave", t), t);
 				if (octave < 0 || octave > 2) {
-					throw new Exceptions.RangeException("The octave must be 0, 1, or 2, but was " + octave, t);
+					throw new CRERangeException("The octave must be 0, 1, or 2, but was " + octave, t);
 				}
 				String ttone = ((CArray) args[noteOffset]).get("tone", t).val().toUpperCase().trim();
 				try {
 					tone = MCTone.valueOf(ttone.trim().replaceAll("#", ""));
 				} catch (IllegalArgumentException e) {
-					throw new Exceptions.FormatException("Expected the tone parameter to be one of: "
+					throw new CREFormatException("Expected the tone parameter to be one of: "
 							+ StringUtils.Join(MCTone.values(), ", ", ", or ") + " but it was " + ttone, t);
 				}
 				boolean sharped = false;
@@ -921,10 +924,10 @@ public class Environment {
 				try{
 					n = StaticLayer.GetConvertor().GetNote(octave, tone, sharped);
 				} catch(IllegalArgumentException e){
-					throw new Exceptions.FormatException(e.getMessage(), t);
+					throw new CREFormatException(e.getMessage(), t);
 				}
 			} else {
-				throw new Exceptions.CastException("Expected an array for note parameter, but " + args[noteOffset] + " found instead", t);
+				throw new CRECastException("Expected an array for note parameter, but " + args[noteOffset] + " found instead", t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			p.playNote(l, i, n);
@@ -987,7 +990,7 @@ public class Environment {
 			float volume = 1, pitch = 1;
 
 			if (!(args[1] instanceof CArray))
-				throw new Exceptions.FormatException("An array was expected but recieved " + args[1], t);
+				throw new CREFormatException("An array was expected but recieved " + args[1], t);
 
 			CArray sa = (CArray) args[1];
 
@@ -995,10 +998,10 @@ public class Environment {
 				try {
 					sound = MCSound.valueOf(sa.get("sound", t).val().toUpperCase());
 				} catch (IllegalArgumentException iae) {
-					throw new Exceptions.FormatException("Sound name '" + sa.get("sound", t).val() + "' is invalid.", t);
+					throw new CREFormatException("Sound name '" + sa.get("sound", t).val() + "' is invalid.", t);
 				}
 			} else {
-				throw new Exceptions.FormatException("Sound field was missing.", t);
+				throw new CREFormatException("Sound field was missing.", t);
 			}
 
 			if (sa.containsKey("volume"))
@@ -1084,12 +1087,12 @@ public class Environment {
 			float volume = 1, pitch = 1;
 
 			if (!(args[1] instanceof CArray))
-				throw new Exceptions.FormatException("An array was expected but recieved " + args[1], t);
+				throw new CREFormatException("An array was expected but recieved " + args[1], t);
 
 			CArray sa = (CArray) args[1];
 
 			if (!sa.containsKey("sound"))
-				throw new Exceptions.FormatException("Sound field was missing.", t);
+				throw new CREFormatException("Sound field was missing.", t);
 
 			path = sa.get("sound", t).val();
 

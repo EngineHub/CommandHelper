@@ -28,6 +28,9 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -185,7 +188,7 @@ public class ArrayHandling {
 					try {
 						if (!ca.inAssociativeMode()) {
 							if(index instanceof CNull){
-								throw new Exceptions.CastException("Expected a number, but recieved null instead", t);
+								throw new CRECastException("Expected a number, but recieved null instead", t);
 							}
 							long iindex = Static.getInt(index, t);
 							if (iindex < 0) {
@@ -197,7 +200,7 @@ public class ArrayHandling {
 							return ca.get(index, t);
 						}
 					} catch (ConfigRuntimeException e) {
-						if (e.getExceptionType() == ExceptionType.IndexOverflowException) {
+						if (e instanceof CREIndexOverflowException) {
 							if(defaultConstruct != null){
 								return defaultConstruct;
 							}
@@ -240,7 +243,7 @@ public class ArrayHandling {
 							try{
 							b.append(val.charAt((int) i));
 							} catch(StringIndexOutOfBoundsException e){
-								throw new Exceptions.RangeException("String bounds out of range. Tried to get character at index " + i + ", but indicies only go up to " + (val.length() - 1), t);
+								throw new CRERangeException("String bounds out of range. Tried to get character at index " + i + ", but indicies only go up to " + (val.length() - 1), t);
 							}
 						}
 						return new CString(b.toString(), t);
@@ -251,7 +254,7 @@ public class ArrayHandling {
 					try {
 						return new CString(args[0].val().charAt(Static.getInt32(index, t)), t);
 					} catch (ConfigRuntimeException e) {
-						if (e.getExceptionType() == ExceptionType.CastException) {
+						if (e instanceof CRECastException) {
 							if(args[0] instanceof CArray){
 								throw ConfigRuntimeException.BuildException("Expecting an integer index for the array, but found \"" + index
 										+ "\". (Array is not associative, and cannot accept string keys here.)", ExceptionType.CastException, t);
@@ -541,7 +544,7 @@ public class ArrayHandling {
 					}
 				}
 			} catch(IllegalArgumentException e){
-				throw new Exceptions.CastException(e.getMessage(), t);
+				throw new CRECastException(e.getMessage(), t);
 			} catch(IndexOutOfBoundsException ex){
 				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IndexOverflowException, t);
 			}
@@ -1418,7 +1421,7 @@ public class ArrayHandling {
 			if(sortType == null){
 				// It's a custom sort, which we have implemented below.
 				if(ca.isAssociative()){
-					throw new Exceptions.CastException("Associative arrays may not be sorted using a custom comparator.", t);
+					throw new CRECastException("Associative arrays may not be sorted using a custom comparator.", t);
 				}
 				CArray sorted = customSort(ca, customSort, t);
 				//Clear it out and re-apply the values, so this is in place.
@@ -2176,10 +2179,10 @@ public class ArrayHandling {
 			ArrayAccess array;
 			CClosure closure;
 			if(!(args[0] instanceof ArrayAccess)){
-				throw new Exceptions.CastException("Expecting an array for argument 1", t);
+				throw new CRECastException("Expecting an array for argument 1", t);
 			}
 			if(!(args[1] instanceof CClosure)){
-				throw new Exceptions.CastException("Expecting a closure for argument 2", t);
+				throw new CRECastException("Expecting a closure for argument 2", t);
 			}
 			array = (ArrayAccess) args[0];
 			closure = (CClosure) args[1];
