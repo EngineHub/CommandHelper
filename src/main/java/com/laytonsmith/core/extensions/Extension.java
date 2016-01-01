@@ -1,6 +1,8 @@
 package com.laytonsmith.core.extensions;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.core.AliasCore;
+
 import java.io.File;
 
 /**
@@ -52,18 +54,9 @@ public interface Extension {
 	 * Called just before the logic in /reloadaliases is called. Won't be called
 	 * if /reloadaliases's help function is called.
 	 *
-	 * @param reloadGlobals
-	 * @param reloadTimeouts
-	 * @param reloadExecutionQueue
-	 * @param reloadPersistenceConfig
-	 * @param reloadPreferences
-	 * @param reloadProfiler
-	 * @param reloadScripts
-	 * @param reloadExtensions
+	 * @param options
 	 */
-	void onPreReloadAliases(boolean reloadGlobals, boolean reloadTimeouts, boolean reloadExecutionQueue, 
-			boolean reloadPersistenceConfig, boolean reloadPreferences, boolean reloadProfiler, 
-			boolean reloadScripts, boolean reloadExtensions);
+	void onPreReloadAliases(AliasCore.ReloadOptions options);
 
 	/**
 	 * Called when server is shutting down, or during a /reloadaliases call.
