@@ -745,30 +745,6 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments = {CommandHelperEnvironment.class})
-	@hide("Deprecated in favor of pkill")
-	@Deprecated
-	public static class kill extends pkill implements Optimizable {
-
-		@Override
-		public String getName() {
-			return "kill";
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "kill is deprecated, in favor of the more conventionally named pkill. Please change"
-					+ " all usages of kill() to pkill() ", t);
-			return null;
-		}
-
-	}
-
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
 	public static class pgroup extends AbstractFunction {
 
@@ -1094,30 +1070,6 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(m, t);
 			return new CString(m.getWorld().getName(), t);
 		}
-	}
-
-	@api
-	@hide("Deprecated in favor of pkick")
-	@Deprecated
-	public static class kick extends pkick implements Optimizable {
-
-		@Override
-		public String getName() {
-			return "kick";
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "kick is deprecated, in favor of the more conventionally named pkick. Please change"
-					+ " all usages of kick() to pkick() ", t);
-			return null;
-		}
-
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -3156,39 +3108,6 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	@hide("Deprecated in favor of set_pflight")
-	@Deprecated
-	public static class pset_flight extends set_pflight implements Optimizable {
-
-		@Override
-		public String getName() {
-			return "pset_flight";
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return super.exec(t, environment, args);
-		}
-
-		@Override
-		public String docs() {
-			return super.docs() + " DEPRECATED(use set_pflight instead)";
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Use of pset_flight is deprecated, change it to set_pflight before the next release", t);
-			return null;
-		}
-
-	}
-
-	@api(environments = {CommandHelperEnvironment.class})
 	@seealso({set_pflying.class})
 	public static class set_pflight extends AbstractFunction {
 
@@ -3256,39 +3175,6 @@ public class PlayerManagement {
 		} catch (IOException ex) {
 			Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
 		}
-	}
-
-	@api(environments = {CommandHelperEnvironment.class})
-	@hide("Deprecated in favor of set_ptime")
-	@Deprecated
-	public static class pset_time extends set_ptime implements Optimizable {
-
-		@Override
-		public String getName() {
-			return "pset_time";
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return super.exec(t, environment, args);
-		}
-
-		@Override
-		public String docs() {
-			return super.docs() + " DEPRECATED(use set_ptime instead)";
-		}
-
-		@Override
-		public Set<Optimizable.OptimizationOption> optimizationOptions() {
-			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Use of pset_time is deprecated, change it to set_ptime before the next release", t);
-			return null;
-		}
-
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
