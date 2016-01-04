@@ -295,7 +295,7 @@ public class FileHandling {
 					if(exception == null){
 						cex = CNull.NULL;
 					} else {
-						cex = ObjectGenerator.GetGenerator().exception(exception, t);
+						cex = ObjectGenerator.GetGenerator().exception(exception, environment, t);
 					}
 					StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 

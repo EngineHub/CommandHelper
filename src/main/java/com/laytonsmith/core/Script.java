@@ -38,6 +38,7 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopBreakException;
 import com.laytonsmith.core.exceptions.LoopContinueException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.extensions.Extension;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
@@ -273,195 +274,208 @@ public class Script {
 		//environment does, and setting it this way taints the environment.
         CurrentEnv.getEnv(GlobalEnv.class).SetLabel(this.label);
         if (m.getCType() == ConstructType.FUNCTION) {
-                env.getEnv(GlobalEnv.class).SetScript(this);
-                if (m.val().charAt(0) == '_' && m.val().charAt(1) != '_') {
-                    //Not really a function, so we can't put it in Function.
-                    Procedure p = getProc(m.val());
-                    if (p == null) {
-                        throw ConfigRuntimeException.BuildException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.getTarget());
-                    }
-                    Environment newEnv = env;
-                    try{
-                        newEnv = env.clone();
-                    } catch(CloneNotSupportedException e){}
-					ProfilePoint pp = env.getEnv(GlobalEnv.class).GetProfiler().start(m.val() + " execution", LogLevel.INFO);
-                    Construct ret;
-					try {
-						ret = p.cexecute(c.getChildren(), newEnv, m.getTarget());
-					} finally {
-						pp.stop();
+				StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+				boolean addedRootStackElement = false;
+				try {
+					// If it's an unknown target, this is not user generated code, and we want to skip adding the element here.
+					if(stManager.isStackEmpty() && !m.getTarget().equals(Target.UNKNOWN)){
+						stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<main code>>", m.getTarget()));
+						addedRootStackElement = true;
 					}
-					return ret;
-                }
-                final Function f;
-                try{
-                    f = (Function)FunctionList.getFunction(m);
-                } catch(ConfigCompileException e){
-                    //Turn it into a config runtime exception. This shouldn't ever happen though.
-                    throw ConfigRuntimeException.CreateUncatchableException("Unable to find function " + m.val(), m.getTarget());
-                }
-
-				ArrayList<Construct> args = new ArrayList<Construct>();
-                try{
-					if (f.isRestricted()) {
-						boolean perm = Static.hasCHPermission(f.getName(), env);
-						if (!perm) {
-							throw ConfigRuntimeException.BuildException("You do not have permission to use the " + f.getName() + " function.",
-									ExceptionType.InsufficientPermissionException, m.getTarget());
+					env.getEnv(GlobalEnv.class).SetScript(this);
+					if (m.val().charAt(0) == '_' && m.val().charAt(1) != '_') {
+						//Not really a function, so we can't put it in Function.
+						Procedure p = getProc(m.val());
+						if (p == null) {
+							throw ConfigRuntimeException.BuildException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.getTarget());
 						}
-					}
-
-					if(f.useSpecialExec()){
-						ProfilePoint p = null;
-						if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())){
-							p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessageS(c.getChildren()), f.profileAt());
-						}
+						Environment newEnv = env;
+						try{
+							newEnv = env.clone();
+						} catch(CloneNotSupportedException e){}
+						ProfilePoint pp = env.getEnv(GlobalEnv.class).GetProfiler().start(m.val() + " execution", LogLevel.INFO);
 						Construct ret;
 						try {
-							ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[]{}));
+							ret = p.cexecute(c.getChildren(), newEnv, m.getTarget());
 						} finally {
-							if(p != null){
-								p.stop();
-							}
+							pp.stop();
 						}
 						return ret;
 					}
-
-					for (ParseTree c2 : c.getChildren()) {
-						args.add(eval(c2, env));
-					}
-					Object[] a = args.toArray();
-					Construct[] ca = new Construct[a.length];
-					for (int i = 0; i < a.length; i++) {
-						ca[i] = (Construct) a[i];
-						//CArray, CBoolean, CDouble, CInt, CNull, CString, CVoid, CEntry, CLabel (only to sconcat).
-						if (!(ca[i] instanceof CArray || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
-								|| ca[i] instanceof CInt || ca[i] instanceof CNull
-								|| ca[i] instanceof CString || ca[i] instanceof CVoid
-								|| ca[i] instanceof IVariable || ca[i] instanceof CEntry || ca[i] instanceof CLabel)
-								&& (!f.getName().equals("__autoconcat__") && (ca[i] instanceof CLabel))) {
-							throw ConfigRuntimeException.BuildException("Invalid Construct ("
-									+ ca[i].getClass() + ") being passed as an argument to a function ("
-									+ f.getName() + ")", null, m.getTarget());
-						}
-						while(f.preResolveVariables() && ca[i] instanceof IVariable){
-							IVariable cur = (IVariable)ca[i];
-							ca[i] = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
-						}
-					}
-
-					{
-						//It takes a moment to generate the toString of some things, so lets not do it
-						//if we actually aren't going to profile
-						ProfilePoint p = null;
-						if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())){
-							p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessage(ca), f.profileAt());
-						}
-						Construct ret;
-						try {
-							ret = f.exec(m.getTarget(), env, ca);
-						} finally {
-							if(p != null){
-								p.stop();
-							}
-						}
-						return ret;
-					}
-				//We want to catch and rethrow the ones we know how to catch, and then
-				//catch and report anything else.
-				} catch(ConfigRuntimeException | ProgramFlowManipulationException e){
-					throw e;
-				} catch(InvalidEnvironmentException e){
-					if(!e.isDataSet()){
-						e.setData(f.getName());
-					}
-					throw e;
-				} catch(Exception e){
-					String version = "Unknown";
+					final Function f;
 					try{
-						version = Main.loadSelfVersion();
-					} catch(Exception ex){
-						//Ignored
+						f = (Function)FunctionList.getFunction(m);
+					} catch(ConfigCompileException e){
+						//Turn it into a config runtime exception. This shouldn't ever happen though.
+						throw ConfigRuntimeException.CreateUncatchableException("Unable to find function " + m.val(), m.getTarget());
 					}
-					String brand = Implementation.GetServerType().getBranding();
-					outer: for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()){
-						for(FunctionBase b : tracker.getFunctions()){
-							if(b.getName().equals(f.getName())){
-								//This extension provided the function, so its the culprit. Report this
-								//name instead of the core plugin's name.
-								for(Extension extension : tracker.getExtensions()){
-									brand = extension.getName();
-									break outer;
+
+					ArrayList<Construct> args = new ArrayList<Construct>();
+					try{
+						if (f.isRestricted()) {
+							boolean perm = Static.hasCHPermission(f.getName(), env);
+							if (!perm) {
+								throw ConfigRuntimeException.BuildException("You do not have permission to use the " + f.getName() + " function.",
+										ExceptionType.InsufficientPermissionException, m.getTarget());
+							}
+						}
+
+						if(f.useSpecialExec()){
+							ProfilePoint p = null;
+							if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())){
+								p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessageS(c.getChildren()), f.profileAt());
+							}
+							Construct ret;
+							try {
+								ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[]{}));
+							} finally {
+								if(p != null){
+									p.stop();
+								}
+							}
+							return ret;
+						}
+
+						for (ParseTree c2 : c.getChildren()) {
+							args.add(eval(c2, env));
+						}
+						Object[] a = args.toArray();
+						Construct[] ca = new Construct[a.length];
+						for (int i = 0; i < a.length; i++) {
+							ca[i] = (Construct) a[i];
+							//CArray, CBoolean, CDouble, CInt, CNull, CString, CVoid, CEntry, CLabel (only to sconcat).
+							if (!(ca[i] instanceof CArray || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
+									|| ca[i] instanceof CInt || ca[i] instanceof CNull
+									|| ca[i] instanceof CString || ca[i] instanceof CVoid
+									|| ca[i] instanceof IVariable || ca[i] instanceof CEntry || ca[i] instanceof CLabel)
+									&& (!f.getName().equals("__autoconcat__") && (ca[i] instanceof CLabel))) {
+								throw ConfigRuntimeException.BuildException("Invalid Construct ("
+										+ ca[i].getClass() + ") being passed as an argument to a function ("
+										+ f.getName() + ")", null, m.getTarget());
+							}
+							while(f.preResolveVariables() && ca[i] instanceof IVariable){
+								IVariable cur = (IVariable)ca[i];
+								ca[i] = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
+							}
+						}
+
+						{
+							//It takes a moment to generate the toString of some things, so lets not do it
+							//if we actually aren't going to profile
+							ProfilePoint p = null;
+							if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())){
+								p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessage(ca), f.profileAt());
+							}
+							Construct ret;
+							try {
+								ret = f.exec(m.getTarget(), env, ca);
+							} finally {
+								if(p != null){
+									p.stop();
+								}
+							}
+							return ret;
+						}
+					//We want to catch and rethrow the ones we know how to catch, and then
+					//catch and report anything else.
+					} catch(ConfigRuntimeException | ProgramFlowManipulationException e){
+						throw e;
+					} catch(InvalidEnvironmentException e){
+						if(!e.isDataSet()){
+							e.setData(f.getName());
+						}
+						throw e;
+					} catch(Exception e){
+						String version = "Unknown";
+						try{
+							version = Main.loadSelfVersion();
+						} catch(Exception ex){
+							//Ignored
+						}
+						String brand = Implementation.GetServerType().getBranding();
+						outer: for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()){
+							for(FunctionBase b : tracker.getFunctions()){
+								if(b.getName().equals(f.getName())){
+									//This extension provided the function, so its the culprit. Report this
+									//name instead of the core plugin's name.
+									for(Extension extension : tracker.getExtensions()){
+										brand = extension.getName();
+										break outer;
+									}
 								}
 							}
 						}
-					}
-					String emsg = TermColors.RED + "Uh oh! You've found an error in " + TermColors.CYAN + brand + TermColors.RED
-							 + ".\nThis is an error caused while running your code, so you may be able to find a workaround,"
-							+ " but is ultimately an error in " + brand
-							+ " itself.\nThe line of code that caused the error was this:\n" + TermColors.WHITE;
-					List<String> args2 = new ArrayList<>();
-					Map<String, String> vars = new HashMap<>();
+						String emsg = TermColors.RED + "Uh oh! You've found an error in " + TermColors.CYAN + brand + TermColors.RED
+								 + ".\nThis is an error caused while running your code, so you may be able to find a workaround,"
+								+ " but is ultimately an error in " + brand
+								+ " itself.\nThe line of code that caused the error was this:\n" + TermColors.WHITE;
+						List<String> args2 = new ArrayList<>();
+						Map<String, String> vars = new HashMap<>();
 
-					for(Construct cc : args){
-						if(cc instanceof IVariable){
-							Construct ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable)cc).getName(), cc.getTarget()).ival();
-							String vval = ccc.val();
-							if(ccc instanceof CString){
-								vval = ccc.asString().getQuote();
+						for(Construct cc : args){
+							if(cc instanceof IVariable){
+								Construct ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable)cc).getName(), cc.getTarget()).ival();
+								String vval = ccc.val();
+								if(ccc instanceof CString){
+									vval = ccc.asString().getQuote();
+								}
+								vars.put(((IVariable)cc).getName(), vval);
 							}
-							vars.put(((IVariable)cc).getName(), vval);
-						}
-						if(cc == null){
-							args2.add("java-null");
-						} else if(cc instanceof CString){
-							args2.add(cc.asString().getQuote());
-						} else if(cc instanceof IVariable){
-							args2.add(((IVariable)cc).getName());
-						} else {
-							args2.add(cc.val());
-						}
-					}
-					//Server might not be available in this platform, so let's be sure to ignore those exceptions
-					String modVersion = "Unsupported platform";
-					try{
-						modVersion = StaticLayer.GetConvertor().GetServer().getAPIVersion();
-					} catch(Exception ex){
-						modVersion = Implementation.GetServerType().name();
-					}
-					if(!vars.isEmpty()){
-						emsg += StringUtils.Join(vars, " = ", "\n") + "\n";
-					}
-					String extensionData = "";
-					for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()){
-						for(Extension extension : tracker.getExtensions()){
-							try {
-								extensionData += TermColors.CYAN + extension.getName() + TermColors.RED
-										+ " (version " + TermColors.RESET + extension.getVersion() + TermColors.RED + ");\n";
-							} catch(AbstractMethodError ex){
-								// This happens with an old style extensions. Just skip it.
-								extensionData += TermColors.CYAN + "Unknown Extension" + TermColors.RED
-										+ " (unknown version);\n";
+							if(cc == null){
+								args2.add("java-null");
+							} else if(cc instanceof CString){
+								args2.add(cc.asString().getQuote());
+							} else if(cc instanceof IVariable){
+								args2.add(((IVariable)cc).getName());
+							} else {
+								args2.add(cc.val());
 							}
 						}
+						//Server might not be available in this platform, so let's be sure to ignore those exceptions
+						String modVersion = "Unsupported platform";
+						try{
+							modVersion = StaticLayer.GetConvertor().GetServer().getAPIVersion();
+						} catch(Exception ex){
+							modVersion = Implementation.GetServerType().name();
+						}
+						if(!vars.isEmpty()){
+							emsg += StringUtils.Join(vars, " = ", "\n") + "\n";
+						}
+						String extensionData = "";
+						for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()){
+							for(Extension extension : tracker.getExtensions()){
+								try {
+									extensionData += TermColors.CYAN + extension.getName() + TermColors.RED
+											+ " (version " + TermColors.RESET + extension.getVersion() + TermColors.RED + ");\n";
+								} catch(AbstractMethodError ex){
+									// This happens with an old style extensions. Just skip it.
+									extensionData += TermColors.CYAN + "Unknown Extension" + TermColors.RED
+											+ " (unknown version);\n";
+								}
+							}
+						}
+						if(extensionData.equals("")){
+							extensionData = "No extensions are loaded.\n";
+						}
+						emsg += f.getName() + "(";
+						emsg += StringUtils.Join(args2, ", ");
+						emsg += ")\n" + TermColors.RED + "on or around "
+								+ TermColors.YELLOW + m.getTarget().file() + TermColors.WHITE + ":" + TermColors.CYAN + m.getTarget().line() + TermColors.RED
+								+ ".\nPlease report this error to the developers, and be sure to include the version numbers:\n"
+								+ TermColors.CYAN + "Server " + TermColors.RED + "version: " + TermColors.RESET + modVersion + TermColors.RED + ";\n"
+								+ TermColors.CYAN + Implementation.GetServerType().getBranding() + TermColors.RED + " version: " + TermColors.RESET
+									+ version + TermColors.RED + ";\n"
+								+ "Loaded extensions and versions:\n"
+								+ extensionData
+								+ "Here's the stacktrace:\n" + TermColors.RESET;
+						emsg += Static.GetStacktraceString(e);
+						Static.getLogger().log(Level.SEVERE, emsg);
+						throw new CancelCommandException(null, Target.UNKNOWN);
 					}
-					if(extensionData.equals("")){
-						extensionData = "No extensions are loaded.\n";
+				} finally {
+					if(addedRootStackElement && stManager.isStackSingle()){
+						stManager.popStackTraceElement();
 					}
-					emsg += f.getName() + "(";
-					emsg += StringUtils.Join(args2, ", ");
-					emsg += ")\n" + TermColors.RED + "on or around "
-							+ TermColors.YELLOW + m.getTarget().file() + TermColors.WHITE + ":" + TermColors.CYAN + m.getTarget().line() + TermColors.RED
-							+ ".\nPlease report this error to the developers, and be sure to include the version numbers:\n"
-							+ TermColors.CYAN + "Server " + TermColors.RED + "version: " + TermColors.RESET + modVersion + TermColors.RED + ";\n"
-							+ TermColors.CYAN + Implementation.GetServerType().getBranding() + TermColors.RED + " version: " + TermColors.RESET
-								+ version + TermColors.RED + ";\n"
-							+ "Loaded extensions and versions:\n"
-							+ extensionData
-							+ "Here's the stacktrace:\n" + TermColors.RESET;
-					emsg += Static.GetStacktraceString(e);
-					Static.getLogger().log(Level.SEVERE, emsg);
-					throw new CancelCommandException(null, Target.UNKNOWN);
 				}
         } else if (m.getCType() == ConstructType.VARIABLE) {
             return new CString(m.val(), m.getTarget());

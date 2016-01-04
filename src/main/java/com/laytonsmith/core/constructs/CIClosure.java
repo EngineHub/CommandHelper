@@ -12,6 +12,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.functions.Exceptions;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,8 @@ public class CIClosure extends CClosure {
 		if(node == null){
 			return;
 		}
+		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<iclosure>>", getTarget()));
         try {
             Environment environment;
             synchronized (this) {
@@ -79,12 +82,16 @@ public class CIClosure extends CClosure {
             try {
                 MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class).GetScript());
             } catch (LoopManipulationException e){
+				// Not normal, but pop anyways
+				stManager.popStackTraceElement();
 				//This shouldn't ever happen.
 				LoopManipulationException lme = ((LoopManipulationException)e);
 				Target t = lme.getTarget();
 				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A " + lme.getName() + "() bubbled up to the top of"
 						+ " a closure, which is unexpected behavior.", t), environment);
 			} catch (FunctionReturnException ex){
+				// Normal. Pop element
+				stManager.popStackTraceElement();
 				// Check the return type of the closure to see if it matches the defined type
 				Construct ret = ex.getReturn();
 				if(!InstanceofUtil.isInstanceof(ret, returnType)){
@@ -94,7 +101,14 @@ public class CIClosure extends CClosure {
 				// Now rethrow it
 				throw ex;
 			} catch (CancelCommandException e){
+				stManager.popStackTraceElement();
 				// die()
+			} catch(ConfigRuntimeException ex){
+				stManager.markElement();
+				throw ex;
+			} catch(Throwable t){
+				stManager.popStackTraceElement();
+				throw t;
 			}
 			// If we got here, then there was no return type. This is fine, but only for returnType void or auto.
 			if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CClassType.VOID))){

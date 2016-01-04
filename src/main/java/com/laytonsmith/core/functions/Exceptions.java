@@ -39,8 +39,10 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.exceptions.StackTraceManager;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -381,7 +383,7 @@ public class Exceptions {
 				}
 				if (name != null && (interest.isEmpty() || interest.contains(name))) {
 					if (catchCode != null) {
-						CArray ex = ObjectGenerator.GetGenerator().exception(e, t);
+						CArray ex = ObjectGenerator.GetGenerator().exception(e, env, t);
 						if (ivar != null) {
 							ivar.setIval(ex);
 							env.getEnv(GlobalEnv.class).GetVarList().set(ivar);
@@ -599,6 +601,7 @@ public class Exceptions {
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			boolean exceptionCaught = false;
 			ConfigRuntimeException caughtException = null;
+			StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 			try {
 				parent.eval(nodes[0], env);
 			} catch (ConfigRuntimeException ex){
@@ -620,7 +623,7 @@ public class Exceptions {
 							// This should eventually be changed to be of the appropriate type. Unfortunately, that will
 							// require reworking basically everything. We need all functions to accept Mixed, instead of Construct.
 							// This will have to do in the meantime.
-							varList.set(new IVariable(new CClassType("array", t), var.getName(), e.getExceptionObject(), t));
+							varList.set(new IVariable(new CClassType("array", t), var.getName(), e.getExceptionObject(stManager), t));
 							parent.eval(nodes[i + 1], env);
 							varList.remove(var.getName());
 						} catch (ConfigRuntimeException | FunctionReturnException newEx){
@@ -651,6 +654,9 @@ public class Exceptions {
 						throw ex;
 					}
 				}
+				if(!exceptionCaught){
+					stManager.popAllMarkedElements();
+				}
 			}
 
 			return CVoid.VOID;
@@ -673,7 +679,7 @@ public class Exceptions {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return CHVersion.V3_3_2;
 		}
 
 		@Override
@@ -737,6 +743,58 @@ public class Exceptions {
 		@Override
 		public boolean useSpecialExec() {
 			return true;
+		}
+
+	}
+
+	@api
+	public static class get_stack_trace extends AbstractFunction {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			StackTraceManager stManager = environment.getEnv(GlobalEnv.class).GetStackTraceManager();
+			List<ConfigRuntimeException.StackTraceElement> elements = stManager.getUnmarkedStackTrace();
+			CArray ret = new CArray(t);
+			for(ConfigRuntimeException.StackTraceElement e : elements){
+				ret.push(e.getObjectFor());
+			}
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_stack_trace";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Returns an array of stack trace elements. This is the same stack trace that would be generated"
+					+ " if one were to throw an exception, then catch it.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
 		}
 
 	}

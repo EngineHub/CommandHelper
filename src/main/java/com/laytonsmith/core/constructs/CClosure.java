@@ -12,6 +12,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.functions.Exceptions;
 import java.util.ArrayList;
 import java.util.List;
@@ -136,6 +137,8 @@ public class CClosure extends Construct {
 		if(node == null){
 			return;
 		}
+		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
         try {
             Environment environment;
             synchronized (this) {
@@ -179,6 +182,8 @@ public class CClosure extends Construct {
             try {
                 MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class).GetScript());
             } catch (LoopManipulationException e){
+				// Not normal, but pop anyways.
+				stManager.popStackTraceElement();
 				//This shouldn't ever happen.
 				LoopManipulationException lme = ((LoopManipulationException)e);
 				Target t = lme.getTarget();
@@ -186,6 +191,8 @@ public class CClosure extends Construct {
 						+ " a closure, which is unexpected behavior.", t), environment);
 			} catch (FunctionReturnException ex){
 				// Check the return type of the closure to see if it matches the defined type
+				// Normal execution.
+				stManager.popStackTraceElement();
 				Construct ret = ex.getReturn();
 				if(!InstanceofUtil.isInstanceof(ret, returnType)){
 					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
@@ -194,8 +201,18 @@ public class CClosure extends Construct {
 				// Now rethrow it
 				throw ex;
 			} catch (CancelCommandException e){
+				stManager.popStackTraceElement();
 				// die()
+			} catch(ConfigRuntimeException ex){
+				stManager.markElement();
+				throw ex;
+			} catch(Throwable t){
+				// Not sure. Pop and re-throw.
+				stManager.popStackTraceElement();
+				throw t;
 			}
+			// Normal execution.
+			stManager.popStackTraceElement();
 			// If we got here, then there was no return type. This is fine, but only for returnType void or auto.
 			if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CClassType.VOID))){
 				throw new CRECastException("Expecting closure to return a value of type " + returnType.val() + ","

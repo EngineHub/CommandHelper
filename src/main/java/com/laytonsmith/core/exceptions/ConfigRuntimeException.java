@@ -12,6 +12,7 @@ import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -51,6 +52,7 @@ import com.laytonsmith.core.exceptions.CRE.CREUnageableMobException;
 import com.laytonsmith.core.exceptions.CRE.CREUntameableMobException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -143,7 +145,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		Reaction reaction = Reaction.REPORT;
 		if (env.getEnv(GlobalEnv.class).GetExceptionHandler() != null) {
 			CClosure c = env.getEnv(GlobalEnv.class).GetExceptionHandler();
-			CArray ex = ObjectGenerator.GetGenerator().exception(e, Target.UNKNOWN);
+			CArray ex = ObjectGenerator.GetGenerator().exception(e, env, Target.UNKNOWN);
 			Construct ret = CNull.NULL;
 			try {
 				c.execute(new Construct[]{ex});
@@ -198,7 +200,7 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @param r
 	 */
 	public static void HandleUncaughtException(ConfigRuntimeException e, Environment env) {
-		HandleUncaughtException(e, GetReaction(e, env));
+		HandleUncaughtException(e, env, GetReaction(e, env));
 	}
 
 	/**
@@ -209,16 +211,16 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @param e
 	 * @param r
 	 */
-	private static void HandleUncaughtException(ConfigRuntimeException e, Reaction r) {
+	private static void HandleUncaughtException(ConfigRuntimeException e, Environment env, Reaction r) {
 		//This is the top of the stack chain, so finalize the stack trace at this point
 		e.addStackTraceTrail(null, Target.UNKNOWN);
 		if (r == Reaction.IGNORE) {
 			//Welp, you heard the man.
 			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.DEBUG, "An exception bubbled to the top, but was instructed by an event handler to not cause output.", e.getTarget());
 		} else if (r == ConfigRuntimeException.Reaction.REPORT) {
-			ConfigRuntimeException.DoReport(e);
+			ConfigRuntimeException.DoReport(e, env);
 		} else if (r == ConfigRuntimeException.Reaction.FATAL) {
-			ConfigRuntimeException.DoReport(e);
+			ConfigRuntimeException.DoReport(e, env);
 			//Well, here goes nothing
 			throw e;
 		}
@@ -238,7 +240,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		if (exceptionType == null) {
 			type = "FATAL";
 		}
-		List<StackTraceElement> st = new ArrayList<StackTraceElement>(stacktrace);
+		List<StackTraceElement> st = new ArrayList<>(stacktrace);
 		if (message == null) {
 			message = "";
 		}
@@ -298,12 +300,12 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
 	}
 
-	private static void DoReport(ConfigRuntimeException e) {
+	private static void DoReport(ConfigRuntimeException e, Environment env) {
 		MCPlayer p = null;
 		if (e.getEnv() != null && e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 			p = e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer();
 		}
-		DoReport(e.getMessage(), AbstractCREException.getExceptionName(e), e.stackTraceTrail, p);
+		DoReport(e.getMessage(), AbstractCREException.getExceptionName(e), env.getEnv(GlobalEnv.class).GetStackTraceManager().getCurrentStackTrace(), p);
 		if (Prefs.DebugMode()) {
 			if (e.getCause() != null) {
 				//This is more of a system level exception, so if debug mode is on, we also want to print this stack trace
@@ -628,6 +630,19 @@ public class ConfigRuntimeException extends RuntimeException {
 		@Override
 		public String toString() {
 			return procedureName + " (Defined at " + definedAt + ")";
+		}
+
+		public CArray getObjectFor(){
+			CArray element = new CArray(Target.UNKNOWN);
+			element.set("id", getProcedureName());
+			try {
+				element.set("file", getDefinedAt().file().getCanonicalPath());
+			} catch (IOException ex) {
+				// This shouldn't happen, but if it does, we want to fall back to something marginally useful
+				element.set("file", getDefinedAt().file().getAbsolutePath());
+			}
+			element.set("line", new CInt(getDefinedAt().line(), Target.UNKNOWN), Target.UNKNOWN);
+			return element;
 		}
 
 	}

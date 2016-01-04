@@ -93,7 +93,7 @@ try {
 	@stackTrace = @e['stackTrace'];
 	msg(colorize("&c@classType&f: @message"));
 	foreach(@element in @stackTrace){
-		@procedureName = @element['procedureName'];
+		@procedureName = @element['id']; // This could be a procedure or a closure, or a few other things
 		@file = @element['file'];
 		@line = @element['line'];
 		msg(colorize("\t&a@procedureName&f:&6@file&f:&b@line"));

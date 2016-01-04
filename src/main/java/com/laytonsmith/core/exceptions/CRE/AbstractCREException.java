@@ -10,6 +10,7 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.IOException;
@@ -84,27 +85,17 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * Returns a standardized CArray given this exception.
 	 * @return
 	 */
-	public CArray getExceptionObject(){
-		if(exceptionObject == null){
-			CArray ret = new CArray(Target.UNKNOWN);
-			ret.set("classType", new CClassType(this.getName(), Target.UNKNOWN), Target.UNKNOWN);
-			ret.set("message", this.getMessage());
-			CArray stackTrace = new CArray(Target.UNKNOWN);
-			ret.set("stackTrace", stackTrace, Target.UNKNOWN);
-			for(StackTraceElement e : this.stackTraceTrail){
-				CArray element = new CArray(Target.UNKNOWN);
-				element.set("procedureName", e.getProcedureName());
-				try {
-					element.set("file", e.getDefinedAt().file().getCanonicalPath());
-				} catch (IOException ex) {
-					// This shouldn't happen, but if it does, we want to fall back to something marginally useful
-					element.set("file", e.getDefinedAt().file().getAbsolutePath());
-				}
-				element.set("line", new CInt(e.getDefinedAt().line(), Target.UNKNOWN), Target.UNKNOWN);
-			}
-			exceptionObject = ret;
+	public CArray getExceptionObject(StackTraceManager stManager){
+		CArray ret = new CArray(Target.UNKNOWN);
+		ret.set("classType", new CClassType(this.getName(), Target.UNKNOWN), Target.UNKNOWN);
+		ret.set("message", this.getMessage());
+		CArray stackTrace = new CArray(Target.UNKNOWN);
+		ret.set("stackTrace", stackTrace, Target.UNKNOWN);
+		for(StackTraceElement e : stManager.getCurrentStackTrace()){
+			CArray element = e.getObjectFor();
+			stackTrace.push(element);
 		}
-		return exceptionObject;
+		return ret;
 	}
 
 	/**

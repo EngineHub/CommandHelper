@@ -18,6 +18,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
+import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -199,7 +200,8 @@ public class Procedure implements Cloneable {
             }
         }
         env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(new CClassType("array", Target.UNKNOWN), "@arguments", arguments, Target.UNKNOWN));
-
+		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
         try {
 			if(tree.getData() instanceof CFunction
 					&& "sconcat".equals(tree.getData().val())){
@@ -218,6 +220,8 @@ public class Procedure implements Cloneable {
 				fakeScript.eval(tree, env);
 			}
         } catch (FunctionReturnException e) {
+			// Normal exit
+			stManager.popStackTraceElement();
             Construct ret = e.getReturn();
 			if(!InstanceofUtil.isInstanceof(ret, returnType)){
 				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type " + returnType.val()
@@ -225,14 +229,24 @@ public class Procedure implements Cloneable {
 			}
 			return ret;
 		} catch(LoopManipulationException ex){
+			// Not exactly normal, but pop anyways
+			stManager.popStackTraceElement();
 			// These cannot bubble up past procedure calls. This will eventually be
 			// a compile error.
 			throw ConfigRuntimeException.CreateUncatchableException("Loop manipulation operations (e.g. break() or continue()) cannot"
 					+ " bubble up past procedures.", t);
         } catch(ConfigRuntimeException e){
+			// Irregular. Mark this element.
+			stManager.markElement();
 			e.addStackTraceTrail(new ConfigRuntimeException.StackTraceElement("proc " + name, e.getTarget()), t);
 			throw e;
+		} catch(Throwable th){
+			// Not sure. Pop, but rethrow
+			stManager.popStackTraceElement();
+			throw th;
 		}
+		// Normal exit, but no return.
+		stManager.popStackTraceElement();
 		// If we got here, then there was no return value. This is fine, but only for returnType void or auto.
 		if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CClassType.VOID))){
 			throw new CRECastException("Expecting procedure \"" + name + "\" to return a value of type " + returnType.val() + ","

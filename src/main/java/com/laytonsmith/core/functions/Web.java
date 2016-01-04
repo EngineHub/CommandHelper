@@ -406,7 +406,7 @@ public class Web {
 
 								@Override
 								public void run() {
-									executeFinish(error, ObjectGenerator.GetGenerator().exception(ex, t), t, environment);
+									executeFinish(error, ObjectGenerator.GetGenerator().exception(ex, environment, t), t, environment);
 								}
 							});
 						} else {

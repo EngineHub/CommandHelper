@@ -40,6 +40,8 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -734,9 +736,9 @@ public class ObjectGenerator {
 		return meta;
 	}
 
-    public CArray exception(ConfigRuntimeException e, Target t) {
+    public CArray exception(ConfigRuntimeException e, Environment env, Target t) {
 		AbstractCREException ex = AbstractCREException.getAbstractCREException(e);
-		return ex.getExceptionObject();
+		return ex.getExceptionObject(env.getEnv(GlobalEnv.class).GetStackTraceManager());
     }
 
 	/**

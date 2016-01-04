@@ -477,7 +477,7 @@ public class SQL {
 					try{
 						returnValue = new query().exec(t, environment, newArgs);
 					} catch(ConfigRuntimeException ex){
-						exception = ObjectGenerator.GetGenerator().exception(ex, t);
+						exception = ObjectGenerator.GetGenerator().exception(ex, environment, t);
 					}
 					final Construct cret = returnValue;
 					final Construct cex = exception;
