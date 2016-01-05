@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.abstraction.AbstractConvertor;
@@ -128,7 +129,7 @@ public class StaticTest {
         boolean runQualityTestsOnly = false;
 
         MCServer fakeServer = StaticTest.GetFakeServer();
-        MCPlayer fakePlayer = StaticTest.GetOnlinePlayer("wraithguard01", fakeServer);
+        MCPlayer fakePlayer = StaticTest.GetOnlinePlayer("Player01", fakeServer);
 
         //make sure that these functions don't throw an exception. Any other results
         //are fine
@@ -395,11 +396,11 @@ public class StaticTest {
 
     public static MCPlayer GetOnlinePlayer(){
         MCServer s = GetFakeServer();
-        return GetOnlinePlayer("wraithguard01", s);
+        return GetOnlinePlayer("Player01", s);
     }
 
     public static MCPlayer GetOnlinePlayer(MCServer s){
-        return GetOnlinePlayer("wraithguard01", s);
+        return GetOnlinePlayer("Player01", s);
     }
 
     public static MCPlayer GetOnlinePlayer(String name, MCServer s){
@@ -894,6 +895,7 @@ public class StaticTest {
      * If the value isn't there, the test fails automatically.
      * @param in The object to look in, or the Class object for static varibles.
      * @param name The name of the variable to get.
+	 * @param expected The type of the value that you expect to be. This is the type that will be returned.
      * @return
      */
     public static <T> T GetPrivate(Object in, String name, Class<T> expected){
@@ -903,9 +905,9 @@ public class StaticTest {
 	/**
 	 * Sets the value of a private (or any other variable for that matter) data member contained in the object provided.
 	 * @param in Either the class of the object (for static variables) or an instance of the object.
-	 * @param name
-	 * @param value
-	 * @param expected S
+	 * @param name The name of the field
+	 * @param value The actual value to set
+	 * @param expected The type of the value that you expect to be in the code.
 	 */
     public static void SetPrivate(Object in, String name, Object value, Class expected){
         GetSetPrivate(in, name, value, true, expected);
@@ -956,5 +958,15 @@ public class StaticTest {
         }
         return (T)ret;
     }
+
+	/**
+	 *  Installs a fake logger. Returns the proxied object.
+	 * @return
+	 */
+	public static CHLog InstallFakeLogger(){
+		CHLog l = mock(CHLog.class);
+		SetPrivate(CHLog.class, "instance", l, CHLog.class);
+		return l;
+	}
 
 }

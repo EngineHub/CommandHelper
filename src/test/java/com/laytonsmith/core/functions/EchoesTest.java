@@ -91,17 +91,17 @@ public class EchoesTest {
     @Test(timeout = 10000)
     public void testChatas() throws CancelCommandException, ConfigCompileException {
         //TODO: Can't get this to work right, though it does work in game
-//        String script = "chatas('wraithguard02', 'Hello World!')";
-//        Player wraithguard02 = GetOnlinePlayer("wraithguard02", fakeServer);
-//        Player op = GetOp("wraithguard", fakeServer);
+//        String script = "chatas('Player02', 'Hello World!')";
+//        Player Player02 = GetOnlinePlayer("Player02", fakeServer);
+//        Player op = GetOp("Player", fakeServer);
 //        Run(script, op);
-//        verify(wraithguard02).chat("Hello World!");
+//        verify(Player02).chat("Hello World!");
 //        Echoes.chatas a = new Echoes.chatas();
-//        Player wraithguard01 = GetOnlinePlayer("wraithguard02", fakeServer);
+//        Player Player01 = GetOnlinePlayer("Player02", fakeServer);
 //        when(fakePlayer.getServer()).thenReturn(fakeServer);
-//        when(fakeServer.getPlayer("wraithguard01")).thenReturn(wraithguard01);
-//        a.exec(Target.UNKNOWN, fakePlayer, C.onstruct("wraithguard02"), C.onstruct("Hello World!"));
-//        verify(wraithguard01).chat("Hello World!");
+//        when(fakeServer.getPlayer("Player01")).thenReturn(Player01);
+//        a.exec(Target.UNKNOWN, fakePlayer, C.onstruct("Player02"), C.onstruct("Hello World!"));
+//        verify(Player01).chat("Hello World!");
     }
 
     @Test

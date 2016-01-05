@@ -4,8 +4,8 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.functions.Exceptions;
 import java.util.List;
 
 /**
@@ -14,8 +14,7 @@ import java.util.List;
 @Keyword.keyword("try")
 public class TryKeyword extends Keyword {
 
-	// TODO dynamically name this once the class exists.
-	private static final String COMPLEX_TRY = "complex_try";
+	private static final String COMPLEX_TRY = new Exceptions.complex_try().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
@@ -56,8 +55,8 @@ public class TryKeyword extends Keyword {
 		// For now, we won't allow try {}, so this must be followed by a catch keyword. This restriction is somewhat artificial, and
 		// if we want to remove it in the future, we can do so by removing this code block.
 		{
-			if(!(list.size() > keywordPosition && nodeIsCatchKeyword(list.get(keywordPosition)))){
-				throw new ConfigCompileException("Expecting \"catch\" keyword to follow try, but none found", list.get(keywordPosition + 1).getTarget());
+			if(!(list.size() > keywordPosition && (nodeIsCatchKeyword(list.get(keywordPosition)) || nodeIsFinallyKeyword(list.get(keywordPosition))))){
+				throw new ConfigCompileException("Expecting \"catch\" or \"finally\" keyword to follow try, but none found", list.get(keywordPosition + 1).getTarget());
 			}
 		}
 		

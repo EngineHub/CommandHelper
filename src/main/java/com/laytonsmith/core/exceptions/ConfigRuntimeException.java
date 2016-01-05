@@ -636,9 +636,17 @@ public class ConfigRuntimeException extends RuntimeException {
 			CArray element = new CArray(Target.UNKNOWN);
 			element.set("id", getProcedureName());
 			try {
-				element.set("file", getDefinedAt().file().getCanonicalPath());
+				String name = "Unknown file";
+				if(getDefinedAt().file() != null){
+					name = getDefinedAt().file().getCanonicalPath();
+				}
+				element.set("file", name);
 			} catch (IOException ex) {
 				// This shouldn't happen, but if it does, we want to fall back to something marginally useful
+				String name = "Unknown file";
+				if(getDefinedAt().file() != null){
+					name = getDefinedAt().file().getAbsolutePath();
+				}
 				element.set("file", getDefinedAt().file().getAbsolutePath());
 			}
 			element.set("line", new CInt(getDefinedAt().line(), Target.UNKNOWN), Target.UNKNOWN);

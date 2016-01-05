@@ -19,7 +19,7 @@ import java.util.List;
  * is to use the preferences file and output to the debug log file.
  * 
  */
-public final class CHLog {
+public class CHLog {
     
     private CHLog(){}
     
@@ -70,6 +70,7 @@ public final class CHLog {
     }
     
 	private static File root = null;
+	// Do not rename this field, it is used reflectively in tests
 	private static CHLog instance = null;
     
 	public static CHLog GetLogger(){

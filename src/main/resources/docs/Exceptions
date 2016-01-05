@@ -101,7 +101,9 @@ try {
 }
 %%
 
-The above example demonstrates the complex usage of the exception object.
+The above example demonstrates the complex usage of the exception object. In addition, it's worth noting that if you are
+having trouble with code, you could get a stacktrace by throwing and catching a custom exception, however, it's more
+straightforward to use {{function|get_stack_trace}}
 
 == The Throwable type ==
 
