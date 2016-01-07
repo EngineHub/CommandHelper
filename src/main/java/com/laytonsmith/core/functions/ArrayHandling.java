@@ -2817,12 +2817,12 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "@array = array(2, 4, 8);\n"
-						+ "@arrayHasOdds = array_every(@array, closure(@value){\n"
+						+ "@arrayHasOdds = array_some(@array, closure(@value){\n"
 						+ "\treturn(@value % 2 == 1);\n"
 						+ "});\n"
 						+ "msg(@arrayHasOdds);"),
-				new ExampleScript("Basic usage, with false condition", "@array = array(2, 3, 4);\n"
-						+ "@arrayHasOdds = array_every(@array, closure(@value){\n"
+				new ExampleScript("Basic usage, with true condition", "@array = array(2, 3, 4);\n"
+						+ "@arrayHasOdds = array_some(@array, closure(@value){\n"
 						+ "\treturn(@value % 2 == 1);\n"
 						+ "});\n"
 						+ "msg(@arrayHasOdds);")
