@@ -55,9 +55,7 @@ import com.laytonsmith.core.UpgradeLog;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
-import com.laytonsmith.persistence.ReadOnlyException;
 import org.bukkit.Server;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
@@ -81,10 +79,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -368,7 +363,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				CommandHelperFileLocations.getDefault().getLocalPackagesDirectory(),
 				CommandHelperFileLocations.getDefault().getPreferencesFile(),
 				new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), main_file), this);
-		ac.reload(null, null);
+		ac.reload(null, null, true);
 
 		//Clear out our hostname cache
 		hostnameLookupCache = new ConcurrentHashMap<>();
@@ -537,7 +532,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			if (sender instanceof Player) {
 				player = new BukkitMCPlayer((Player) sender);
 			}
-			ac.reload(player, args);
+			ac.reload(player, args, false);
 			return true;
 		} else if (cmdName.equalsIgnoreCase("commandhelper")) {
 			return args.length >= 1 && args[0].equalsIgnoreCase("null");
