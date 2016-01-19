@@ -891,6 +891,12 @@
 				</plugins>
 			</build>
 		</profile>
+		<profile>
+			<id>fail-on-test-failures</id>
+			<properties>
+				<maven.test.failure.ignore>false</maven.test.failure.ignore>
+			</properties>
+		</profile>
 	</profiles>
 	<pluginRepositories>
 		<pluginRepository>
