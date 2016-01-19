@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
@@ -17,6 +18,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.SimpleDocumentation;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
@@ -28,18 +30,22 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
+import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -421,7 +427,7 @@ public class Exceptions {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{1, 2, 3};
 		}
 
 		@Override
@@ -437,9 +443,8 @@ public class Exceptions {
 				}
 			}
 			
-			return "nothing {exceptionType, msg} This function causes an exception to be thrown. If the exception type is null,"
-					+ " it will be uncatchable. Otherwise, exceptionType may be any valid exception type."
-					+ exceptions;
+			return "nothing {exceptionType, msg, [causedBy] | exception} This function causes an exception to be thrown. exceptionType may be any valid exception type."
+					+ "\n\nThe core exception types are: " + exceptions + "\n\nThere may be other exception types as well, refer to the documentation of any extensions you have installed.";
 		}
 
 		@Override
@@ -472,18 +477,32 @@ public class Exceptions {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			try {
-				ExceptionType c = null;
-				if (!(args[0] instanceof CNull)) {
-					c = ExceptionType.valueOf(args[0].val());
-				}
-				if(c == null){
-					throw ConfigRuntimeException.CreateUncatchableException(args[1].val(), t);
-				} else {
-					throw ConfigRuntimeException.BuildException(args[1].val(), c, t);
-				}
-			} catch (IllegalArgumentException e) {
-				throw ConfigRuntimeException.BuildException("Expected a valid exception type", ExceptionType.FormatException, t);
+			if(args.length == 1){
+				// Exception type
+				throw new UnsupportedOperationException();
+			} else {
+					if (args[0] instanceof CNull) {
+						CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR, "Uncatchable exceptions are no longer supported.", t);
+						throw new CRECastException("An exception type must be specified", t);
+					}
+					Class<Mixed> c;
+					try {
+						c = NativeTypeList.getNativeClass(args[0].val());
+					} catch (ClassNotFoundException ex) {
+						throw ConfigRuntimeException.BuildException("Expected a valid exception type, but found \"" + args[0].val() + "\"", ExceptionType.FormatException, t);
+					}
+					List<Class> classes = new ArrayList<>();
+					List<Object> arguments = new ArrayList<>();
+					classes.add(String.class);
+					classes.add(Target.class);
+					arguments.add(args[1].val());
+					arguments.add(t);
+					if(args.length == 3){
+						classes.add(Throwable.class);
+						arguments.add(new CRECausedByWrapper(Static.getArray(args[2], t)));
+					}
+					CREThrowable throwable = (CREThrowable)ReflectionUtils.newInstance(c, classes.toArray(new Class[classes.size()]), arguments.toArray());
+					throw throwable;
 			}
 		}
 	}
@@ -578,6 +597,7 @@ public class Exceptions {
 	public static class complex_try extends AbstractFunction implements Optimizable {
 
 		/** Please do not change this name or make it final, it is used reflectively for testing */
+		@SuppressWarnings("FieldMayBeFinal")
 		private static boolean doScreamError = false;
 
 		@Override
@@ -634,6 +654,7 @@ public class Exceptions {
 								caughtException = (ConfigRuntimeException)newEx;
 							}
 							exceptionCaught = true;
+							throw newEx;
 						}
 						return CVoid.VOID;
 					}
@@ -648,7 +669,7 @@ public class Exceptions {
 					try {
 						parent.eval(nodes[nodes.length - 1], env);
 					} catch(ConfigRuntimeException | FunctionReturnException ex){
-						if(doScreamError || (exceptionCaught && (Prefs.ScreamErrors() || Prefs.DebugMode()))){
+						if(exceptionCaught && (doScreamError || Prefs.ScreamErrors() || Prefs.DebugMode())){
 							CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Exception was thrown and"
 									+ " unhandled in any catch clause,"
 									+ " but is being hidden by a new exception being thrown in the finally clause.", t);

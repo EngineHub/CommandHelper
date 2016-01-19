@@ -1,5 +1,6 @@
 package com.laytonsmith.core.exceptions;
 
+import com.laytonsmith.core.constructs.Target;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -111,6 +112,16 @@ public class StackTraceManager {
 	 */
 	public boolean isStackSingle(){
 		return elements.size() == 1;
+	}
+
+	/**
+	 * Sets the current element's target. This should be changed at every new element execution.
+	 * @param target 
+	 */
+	public void setCurrentTarget(Target target) {
+		if(!isStackEmpty()){
+			elements.peek().setDefinedAt(target);
+		}
 	}
 
 }

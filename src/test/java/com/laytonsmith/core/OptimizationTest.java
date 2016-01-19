@@ -281,13 +281,6 @@ public class OptimizationTest {
 		assertEquals("assign(@b,subtract(dec(@a),2))", optimize("@b = dec(@a)- 2"));
 	}
 
-	@Test public void testTryCatchKeyword() throws Exception {
-		assertEquals("complex_try(noop(),noop())", optimize("try { noop(); } catch { noop(); }"));
-		// The remainder of these tests should be written once the feature is complete
-		//assertEquals("complex_try(noop(),noop())", optimize("try { noop(); } catch(IOException @e) { noop(); }"));
-	}
-
-
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws Exception{
 //        //In this test, there's no way it won't ever be 'hi', so do a replacement (we still need to keep

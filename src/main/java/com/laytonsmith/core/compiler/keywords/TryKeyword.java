@@ -56,7 +56,7 @@ public class TryKeyword extends Keyword {
 		// if we want to remove it in the future, we can do so by removing this code block.
 		{
 			if(!(list.size() > keywordPosition && (nodeIsCatchKeyword(list.get(keywordPosition)) || nodeIsFinallyKeyword(list.get(keywordPosition))))){
-				throw new ConfigCompileException("Expecting \"catch\" or \"finally\" keyword to follow try, but none found", list.get(keywordPosition + 1).getTarget());
+				throw new ConfigCompileException("Expecting \"catch\" or \"finally\" keyword to follow try, but none found", complex_try.getTarget());
 			}
 		}
 		

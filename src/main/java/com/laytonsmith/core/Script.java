@@ -282,6 +282,7 @@ public class Script {
 						stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<main code>>", m.getTarget()));
 						addedRootStackElement = true;
 					}
+					stManager.setCurrentTarget(c.getTarget());
 					env.getEnv(GlobalEnv.class).SetScript(this);
 					if (m.val().charAt(0) == '_' && m.val().charAt(1) != '_') {
 						//Not really a function, so we can't put it in Function.

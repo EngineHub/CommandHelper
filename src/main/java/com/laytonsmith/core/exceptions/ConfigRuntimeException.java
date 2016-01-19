@@ -24,6 +24,7 @@ import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityTypeException;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
 import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
@@ -235,7 +236,7 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @param e
 	 * @param optionalMessage
 	 */
-	private static void DoReport(String message, String exceptionType, List<StackTraceElement> stacktrace, MCPlayer currentPlayer) {
+	private static void DoReport(String message, String exceptionType, ConfigRuntimeException ex, List<StackTraceElement> stacktrace, MCPlayer currentPlayer) {
 		String type = exceptionType;
 		if (exceptionType == null) {
 			type = "FATAL";
@@ -247,18 +248,36 @@ public class ConfigRuntimeException extends RuntimeException {
 		if (!"".equals(message.trim())) {
 			message = ": " + message;
 		}
+		
 		Target top = Target.UNKNOWN;
-		StringBuilder log = new StringBuilder();
-		StringBuilder console = new StringBuilder();
-		StringBuilder player = new StringBuilder();
-		log.append(type).append(message).append("\n");
-		console.append(TermColors.RED).append(type).append(TermColors.WHITE).append(message).append("\n");
-		player.append(MCChatColor.RED).append(type).append(MCChatColor.WHITE).append(message).append("\n");
 		for (StackTraceElement e : st) {
 			Target t = e.getDefinedAt();
 			if (top == Target.UNKNOWN) {
 				top = t;
 			}
+		}
+		StringBuilder log = new StringBuilder();
+		StringBuilder console = new StringBuilder();
+		StringBuilder player = new StringBuilder();
+
+		//Log
+		//Don't log to screen though, since we're ALWAYS going to do that ourselves.
+		CHLog.GetLogger().Log("COMPILE ERROR".equals(exceptionType) ? CHLog.Tags.COMPILER : CHLog.Tags.RUNTIME,
+				LogLevel.ERROR, log.toString(), top, false);
+		//Console
+		StreamUtils.GetSystemOut().println(console.toString() + TermColors.reset());
+		//Player
+		if (currentPlayer != null) {
+			currentPlayer.sendMessage(player.toString());
+		}
+	}
+	
+	private static void PrintMessage(StringBuilder log, StringBuilder console, StringBuilder player, String type, String message, Throwable ex, List<StackTraceElement> st){
+		log.append(type).append(message).append("\n");
+		console.append(TermColors.RED).append(type).append(TermColors.WHITE).append(message).append("\n");
+		player.append(MCChatColor.RED).append(type).append(MCChatColor.WHITE).append(message).append("\n");
+		for (StackTraceElement e : st) {
+			Target t = e.getDefinedAt();
 			String proc = e.getProcedureName();
 			File file = t.file();
 			int line = t.line();
@@ -287,16 +306,8 @@ public class ConfigRuntimeException extends RuntimeException {
 					.append(MCChatColor.AQUA).append(line)/*.append(".").append(column)*/.append("\n");
 
 		}
-
-		//Log
-		//Don't log to screen though, since we're ALWAYS going to do that ourselves.
-		CHLog.GetLogger().Log("COMPILE ERROR".equals(exceptionType) ? CHLog.Tags.COMPILER : CHLog.Tags.RUNTIME,
-				LogLevel.ERROR, log.toString(), top, false);
-		//Console
-		StreamUtils.GetSystemOut().println(console.toString() + TermColors.reset());
-		//Player
-		if (currentPlayer != null) {
-			currentPlayer.sendMessage(player.toString());
+		if(ex.getCause() instanceof CRECausedByWrapper){
+			CArray causedBy = ((CRECausedByWrapper) ex.getCause()).getException();
 		}
 	}
 
@@ -305,9 +316,9 @@ public class ConfigRuntimeException extends RuntimeException {
 		if (e.getEnv() != null && e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 			p = e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer();
 		}
-		DoReport(e.getMessage(), AbstractCREException.getExceptionName(e), env.getEnv(GlobalEnv.class).GetStackTraceManager().getCurrentStackTrace(), p);
+		DoReport(e.getMessage(), AbstractCREException.getExceptionName(e), e, env.getEnv(GlobalEnv.class).GetStackTraceManager().getCurrentStackTrace(), p);
 		if (Prefs.DebugMode()) {
-			if (e.getCause() != null) {
+			if (e.getCause() != null && !(e.getCause() instanceof CRECausedByWrapper)) {
 				//This is more of a system level exception, so if debug mode is on, we also want to print this stack trace
 				StreamUtils.GetSystemErr().println("The previous MethodScript error had an attached cause:");
 				e.getCause().printStackTrace(StreamUtils.GetSystemErr());
@@ -326,7 +337,7 @@ public class ConfigRuntimeException extends RuntimeException {
 	private static void DoReport(ConfigCompileException e, MCPlayer player) {
 		List<StackTraceElement> st = new ArrayList<StackTraceElement>();
 		st.add(0, new StackTraceElement("", e.getTarget()));
-		DoReport(e.getMessage(), "COMPILE ERROR", st, player);
+		DoReport(e.getMessage(), "COMPILE ERROR", null, st, player);
 	}
 
 	/**
@@ -596,7 +607,7 @@ public class ConfigRuntimeException extends RuntimeException {
 	 */
 	public static class StackTraceElement {
 		private final String procedureName;
-		private final Target definedAt;
+		private Target definedAt;
 
 		/**
 		 * Creates a new StackTraceElement.
@@ -651,6 +662,14 @@ public class ConfigRuntimeException extends RuntimeException {
 			}
 			element.set("line", new CInt(getDefinedAt().line(), Target.UNKNOWN), Target.UNKNOWN);
 			return element;
+		}
+
+		/**
+		 * In general, only the core elements should change this
+		 * @param target 
+		 */
+		void setDefinedAt(Target target) {
+			definedAt = target;
 		}
 
 	}
