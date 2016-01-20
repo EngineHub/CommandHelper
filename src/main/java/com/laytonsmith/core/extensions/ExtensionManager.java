@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.AnnotationMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
@@ -12,11 +11,9 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.annotations.shutdown;
-import com.laytonsmith.annotations.startup;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
+import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Prefs;
@@ -32,7 +29,6 @@ import com.laytonsmith.core.functions.FunctionBase;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -48,10 +44,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * 
- */
 public class ExtensionManager {
 	private static final Map<URL, ExtensionTracker> extensions = new HashMap<>();
 	private static final List<File> locations = new ArrayList<>();
@@ -550,6 +542,7 @@ public class ExtensionManager {
 	 */
 	public static void Cleanup() {
 		// Shutdown and release all the extensions
+		Shutdown();
 		for (ExtensionTracker trk : extensions.values()) {
 			trk.shutdownTracker();
 		}
@@ -587,16 +580,14 @@ public class ExtensionManager {
 	}
 
 	/**
-	 * This should be run each time the "startup" of the runtime occurs. It
-	 * registers its own shutdown hook.
+	 * This should be run each time the "startup" of the runtime occurs or extensions are reloaded.
 	 */
-	@SuppressWarnings("deprecation")
-	public static void Startup() {
-		for (ExtensionTracker trk : extensions.values()) {
-			for (Extension ext : trk.getExtensions()) {
+	public static void Startup(){
+		for(ExtensionTracker trk : extensions.values()) {
+			for(Extension ext : trk.getExtensions()) {
 				try {
 					ext.onStartup();
-				} catch (Throwable e) {
+				} catch(Throwable e){
 					Logger log = Static.getLogger();
 					log.log(Level.SEVERE, ext.getClass().getName()
 							+ "'s onStartup caused an exception:");
@@ -604,82 +595,31 @@ public class ExtensionManager {
 				}
 			}
 		}
+	}
 
-		// Deprecated. Soon to be removed!
-		for (MethodMirror mm : ClassDiscovery.getDefaultInstance().getMethodsWithAnnotation(startup.class)) {
-			if (!mm.getParams().isEmpty()) {
-				//Error, but skip this one, don't throw an exception ourselves, just log it.
-				Static.getLogger().log(Level.SEVERE, "Method annotated with @" 
-						+ startup.class.getSimpleName() + " takes parameters;"
-						+ " it should not.");
-			} else if (!mm.getModifiers().isStatic()) {
-				CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR,
-						"Method " + mm.getDeclaringClass() + "#" + mm.getName()
-						+ " is not static, but it should be.", Target.UNKNOWN);
-			} else {
+	/**
+	 * This should be run each time the "shutdown" of the runtime occurs or extensions are reloaded.
+	 */
+	public static void Shutdown(){
+		for(ExtensionTracker trk : extensions.values()) {
+			for(Extension ext : trk.getExtensions()) {
 				try {
-					Method m = mm.loadMethod(ClassDiscovery.getDefaultInstance().getDefaultClassLoader(), true);
-					m.setAccessible(true);
-					m.invoke(null, (Object[]) null);
-				} catch (Throwable e) {
-					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR,
-							"Method " + mm.getDeclaringClass() + "#"
-							+ mm.getName() + " threw an exception during runtime:\n"
-							+ StackTraceUtils.GetStacktrace(e), Target.UNKNOWN);
+					ext.onShutdown();
+				} catch(Throwable e){
+					Logger log = Static.getLogger();
+					log.log(Level.SEVERE, ext.getClass().getName()
+							+ "'s onShutdown caused an exception:");
+					log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
 				}
 			}
 		}
-
-		StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
-
-			@Override
-			public void run() {
-				for (ExtensionTracker trk : extensions.values()) {
-					for (Extension ext : trk.getExtensions()) {
-						try {
-							ext.onShutdown();
-						} catch (Throwable e) {
-							Logger log = Static.getLogger();
-							log.log(Level.SEVERE, ext.getClass().getName()
-									+ "'s onShutdown caused an exception:");
-							log.log(Level.SEVERE, StackTraceUtils.GetStacktrace(e));
-						}
-					}
-				}
-				
-				// Deprecated. Soon to be removed!
-				for (MethodMirror mm : ClassDiscovery.getDefaultInstance().getMethodsWithAnnotation(shutdown.class)) {
-					if (!mm.getParams().isEmpty()) {
-						//Error, but skip this one, don't throw an exception ourselves, just log it.
-						CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR,
-								"Method annotated with @" + shutdown.class.getSimpleName()
-								+ " takes parameters; it should not. (Found in "
-								+ mm.getDeclaringClass() + "#" + mm.getName() + ")", Target.UNKNOWN);
-					} else {
-						try {
-							Method m = mm.loadMethod(ClassDiscovery.getDefaultInstance().getDefaultClassLoader(), true);
-							m.setAccessible(true);
-							m.invoke(null);
-						} catch (Throwable e) {
-							CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR, "Method " + mm.getDeclaringClass() + "#" + mm.getName() + " threw an exception during runtime:\n" + StackTraceUtils.GetStacktrace(e), Target.UNKNOWN);
-						}
-					}
-				}
-			}
-		});
 	}
 
-	public static void PreReloadAliases(boolean reloadGlobals, boolean reloadTimeouts,
-			boolean reloadExecutionQueue, boolean reloadPersistenceConfig,
-			boolean reloadPreferences, boolean reloadProfiler,
-			boolean reloadScripts, boolean reloadExtensions) {
+	public static void PreReloadAliases(AliasCore.ReloadOptions options) {
 		for (ExtensionTracker trk : extensions.values()) {
 			for (Extension ext: trk.getExtensions()) {
 				try {
-					ext.onPreReloadAliases(reloadGlobals,
-						reloadTimeouts, reloadExecutionQueue,
-						reloadPersistenceConfig, reloadPreferences,
-						reloadProfiler, reloadScripts, reloadExtensions);
+					ext.onPreReloadAliases(options);
 				} catch (Throwable e) {
 					Logger log = Static.getLogger();
 					log.log(Level.SEVERE, ext.getClass().getName()
@@ -809,8 +749,8 @@ public class ExtensionManager {
         Set<FunctionBase> retn = new HashSet<>();
 		
 		for (ExtensionTracker trk: extensions.values()) {
-			for(String name : trk.functions.get(platform).keySet()){
-				retn.add(trk.functions.get(platform).get(name));
+			for(FunctionBase func : trk.functions.get(platform).values()){
+				retn.add(func);
 			}
 		}
 		

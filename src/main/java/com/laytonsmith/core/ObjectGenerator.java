@@ -304,16 +304,14 @@ public class ObjectGenerator {
 		}
 
         if (item.containsKey("enchants")) {
-            CArray enchantArray = null;
+            CArray enchantArray;
             try {
-                if (item.containsKey("enchants")) {
-                    enchantArray = (CArray) item.get("enchants", t);
-                }
+				enchantArray = (CArray) item.get("enchants", t);
                 if (enchantArray == null) {
                     throw new NullPointerException();
                 }
             } catch (Exception e) {
-                throw ConfigRuntimeException.BuildException("Could not get enchantment data from given information.", ExceptionType.FormatException, t, e);
+                throw new CREFormatException("Enchants value must be an array of enchantment arrays.", t);
             }
 
             for (String index : enchantArray.stringKeySet()) {
@@ -324,23 +322,26 @@ public class ObjectGenerator {
                     if (enchantment.containsKey("etype")) {
                         setype = enchantment.get("etype", t).val();
                     }
-
                     if (enchantment.containsKey("elevel")) {
                         selevel = enchantment.get("elevel", t).val();
                     }
                     if (setype == null || selevel == null) {
-                        throw ConfigRuntimeException.BuildException("Could not get enchantment data from given information.", ExceptionType.FormatException, t);
+                        throw new CREFormatException("An enchantment array must have an etype and elevel.", t);
                     }
                     int elevel = 0;
                     try {
                         elevel = Integer.parseInt(selevel);
                     } catch (NumberFormatException e) {
-                        throw ConfigRuntimeException.BuildException("Could not get enchantment data from given information.", ExceptionType.FormatException, t);
+						throw new CREFormatException("Expecting enchantment array elevel to be an integer but got \""
+								+ selevel + "\" instead.", t);
                     }
                     MCEnchantment etype = StaticLayer.GetEnchantmentByName(setype);
+					if(etype == null){
+						throw new CREFormatException("Invalid enchantment array etype: \"" + setype + "\".", t);
+					}
                     enchants.put(etype, elevel);
                 } catch (ClassCastException e) {
-                    throw ConfigRuntimeException.BuildException("Could not get enchantment data from given information.", ExceptionType.FormatException, t, e);
+                    throw new CREFormatException("Enchants value must be an array of enchantment arrays.", t);
                 }
             }
         }
