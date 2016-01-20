@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCColor;
-import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
@@ -51,10 +50,18 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.drivers.ServerEvents;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
+import com.laytonsmith.core.exceptions.CRE.CRELengthException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.CRE.CREUntameableMobException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -161,8 +168,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -203,8 +210,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -287,8 +294,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -319,7 +326,7 @@ public class Minecraft {
 				} catch (NumberFormatException e) {
 				}
 			}
-			throw ConfigRuntimeException.BuildException("Improper value passed to max_stack. Expecting a number, or an item array, but received \"" + args[0].val() + "\"", ExceptionType.CastException, t);
+			throw ConfigRuntimeException.BuildException("Improper value passed to max_stack. Expecting a number, or an item array, but received \"" + args[0].val() + "\"", CRECastException.class, t);
 		}
 
 		@Override
@@ -365,10 +372,10 @@ public class Minecraft {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException,
-				ExceptionType.FormatException, ExceptionType.PlayerOfflineException,
-				ExceptionType.InvalidWorldException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class,
+				CREFormatException.class, CREPlayerOfflineException.class,
+				CREInvalidWorldException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -399,7 +406,7 @@ public class Minecraft {
 				qty = Static.getInt32(args[1], t);
 				if (qty > 50) {
 					throw ConfigRuntimeException.BuildException("A bit excessive, don't you think? Let's scale that back some, huh?",
-							ExceptionType.RangeException, t);
+							CRERangeException.class, t);
 				}
 			}
 			MCLocation l;
@@ -409,19 +416,19 @@ public class Minecraft {
 			} else if (p != null) {
 				l = p.getLocation();
 			} else {
-				throw ConfigRuntimeException.BuildException("Invalid sender!", ExceptionType.PlayerOfflineException, t);
+				throw ConfigRuntimeException.BuildException("Invalid sender!", CREPlayerOfflineException.class, t);
 			}
 			
 			if (l == null) { // Happends when executed by a fake player.
 				throw ConfigRuntimeException.BuildException(
 					"Could not find the location of the player (are you running in cmdline mode?)",
-					ExceptionType.NotFoundException, t);
+					CRENotFoundException.class, t);
 			}
 			
 			try{
 				return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll(" ", "")), secondary, qty, l, t);
 			} catch(IllegalArgumentException e){
-				throw ConfigRuntimeException.BuildException("Invalid mob name: " + mob, ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Invalid mob name: " + mob, CREFormatException.class, t);
 			}
 		}
 	}
@@ -448,9 +455,9 @@ public class Minecraft {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.LengthException,
-					ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
+					CREBadEntityException.class};
 		}
 
 		@Override
@@ -498,7 +505,7 @@ public class Minecraft {
 				}
 				return CVoid.VOID;
 			} else {
-				throw ConfigRuntimeException.BuildException("The specified entity is not tameable", ExceptionType.UntameableMobException, t);
+				throw ConfigRuntimeException.BuildException("The specified entity is not tameable", CREUntameableMobException.class, t);
 			}
 		}
 	}
@@ -523,9 +530,9 @@ public class Minecraft {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.LengthException,
-					ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
+					CREBadEntityException.class};
 		}
 
 		@Override
@@ -556,7 +563,7 @@ public class Minecraft {
 					return CNull.NULL;
 				}
 			} else {
-				throw ConfigRuntimeException.BuildException("The specified entity is not tameable", ExceptionType.UntameableMobException, t);
+				throw ConfigRuntimeException.BuildException("The specified entity is not tameable", CREUntameableMobException.class, t);
 			}
 		}
 	}
@@ -580,8 +587,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREBadEntityException.class};
 		}
 
 		@Override
@@ -637,8 +644,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -667,19 +674,19 @@ public class Minecraft {
 				try {
 					data = Integer.parseInt(preEff.substring(preEff.indexOf(':') + 1));
 				} catch (NumberFormatException ex) {
-					throw ConfigRuntimeException.BuildException("Effect data expected an integer", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Effect data expected an integer", CRECastException.class, t);
 				}
 				preEff = preEff.substring(0, preEff.indexOf(':'));
 			}
 			try {
 				e = MCEffect.valueOf(preEff.toUpperCase());
 			} catch (IllegalArgumentException ex) {
-				throw ConfigRuntimeException.BuildException("The effect type " + args[1].val() + " is not valid", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("The effect type " + args[1].val() + " is not valid", CREFormatException.class, t);
 			}
 			if (e.equals(MCEffect.STEP_SOUND)) {
 				MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
 				if (mat == null || !mat.isBlock()) {
-					throw ConfigRuntimeException.BuildException("This effect requires a valid BlockID", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("This effect requires a valid BlockID", CREFormatException.class, t);
 				}
 			}
 			if (args.length == 3) {
@@ -711,9 +718,9 @@ public class Minecraft {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException,
-					ExceptionType.RangeException, ExceptionType.LengthException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREBadEntityException.class,
+					CRERangeException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -737,7 +744,7 @@ public class Minecraft {
 			double percent = Static.getDouble(args[1], t);
 			if (percent < 0 || percent > 100) {
 				throw ConfigRuntimeException.BuildException("Health was expected to be a percentage between 0 and 100",
-						ExceptionType.RangeException, t);
+						CRERangeException.class, t);
 			} else {
 				e.setHealth(percent / 100.0 * e.getMaxHealth());
 			}
@@ -765,8 +772,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREBadEntityException.class};
 		}
 
 		@Override
@@ -830,9 +837,9 @@ public class Minecraft {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException,
-				ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class,
+				CRENotFoundException.class};
 		}
 
 		@Override
@@ -862,7 +869,7 @@ public class Minecraft {
 
 			if (index < -1 || index > 16) {
 				throw ConfigRuntimeException.BuildException(this.getName() + " expects the index to be between -1 and 16 (inclusive)",
-						ExceptionType.RangeException, t);
+						CRERangeException.class, t);
 			}
 
 			ArrayList<Construct> retVals = new ArrayList<Construct>();
@@ -920,7 +927,7 @@ public class Minecraft {
 				if (plugManager == null) {
 					throw ConfigRuntimeException.BuildException(this.getName()
 							+ " could not receive the server plugins. Are you running in cmdline mode?",
-							ExceptionType.NotFoundException, t);
+							CRENotFoundException.class, t);
 				}
 				List<MCPlugin> plugs = plugManager.getPlugins();
 
@@ -996,8 +1003,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -1051,8 +1058,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -1091,8 +1098,8 @@ public class Minecraft {
 	public static class get_spawner_type extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -1149,8 +1156,8 @@ public class Minecraft {
 	public static class set_spawner_type extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -1176,7 +1183,7 @@ public class Minecraft {
 				type = MCEntityType.valueOf(args[1].val().toUpperCase());
 			} catch (IllegalArgumentException iae) {
 				throw ConfigRuntimeException.BuildException("Not a registered entity type: " + args[1].val(),
-						ExceptionType.BadEntityException, t);
+						CREBadEntityException.class, t);
 			}
 			if(location.getBlock().getState() instanceof MCCreatureSpawner){
 				((MCCreatureSpawner)location.getBlock().getState()).setSpawnedType(type);
@@ -1214,8 +1221,8 @@ public class Minecraft {
 	public static class launch_firework extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -1253,7 +1260,7 @@ public class Minecraft {
 			if(options.containsKey("strength")){
 				strength = Static.getInt32(options.get("strength", t), t);
 				if (strength < 0 || strength > 128) {
-					throw ConfigRuntimeException.BuildException("Strength must be between 0 and 128", ExceptionType.RangeException, t);
+					throw ConfigRuntimeException.BuildException("Strength must be between 0 and 128", CRERangeException.class, t);
 				}
 			}
 			if(options.containsKey("flicker")){
@@ -1404,8 +1411,8 @@ public class Minecraft {
 	public static class send_texturepack extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -1455,8 +1462,8 @@ public class Minecraft {
 	public static class send_resourcepack extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -1506,8 +1513,8 @@ public class Minecraft {
 	public static class get_ip_bans extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -1556,8 +1563,8 @@ public class Minecraft {
 	public static class set_ip_banned extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -1609,8 +1616,8 @@ public class Minecraft {
 	public static class material_info extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1685,8 +1692,8 @@ public class Minecraft {
 		}
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException, ExceptionType.InvalidWorldException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CRECastException.class, CREFormatException.class, CREPlayerOfflineException.class, CREInvalidWorldException.class};
         }
 
 		@Override
@@ -1713,7 +1720,7 @@ public class Minecraft {
 					l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getEyeLocation();
 					natural = false;
 				} else {
-					throw ConfigRuntimeException.BuildException("Invalid sender!", ExceptionType.PlayerOfflineException, t);
+					throw ConfigRuntimeException.BuildException("Invalid sender!", CREPlayerOfflineException.class, t);
 				}
 				if (args[0] instanceof CNull) {
 					return CNull.NULL; // The item is null, this means we are dropping air.
@@ -1767,8 +1774,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -1809,8 +1816,8 @@ public class Minecraft {
 	public static class monitor_redstone extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override

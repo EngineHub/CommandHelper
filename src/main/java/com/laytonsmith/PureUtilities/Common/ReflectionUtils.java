@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -404,5 +402,23 @@ public class ReflectionUtils {
 		return true;
 	}
 
+	/**
+	 * Instantiates a class without calling its constructor. In general, the object
+	 * will be in an unknown state. This method should not generally be relied on, and
+	 * only used in limited cases.
+	 * @param cls The class to instantiate
+	 * @return The newly instantiated object.
+	 * @throws RuntimeException If the underlying code throws an InstantiationException, it is
+	 * wrapped and re-thrown in a RuntimeException.
+	 */
+	public static Object instantiateUnsafe(Class cls) throws RuntimeException{
+		sun.misc.Unsafe unsafe = (sun.misc.Unsafe) ReflectionUtils.get(sun.misc.Unsafe.class, "theUnsafe");
+		try {
+			return unsafe.allocateInstance(cls);
+		} catch(InstantiationException ex){
+			// I mean, why not, we're already abusing things.
+			throw new RuntimeException(ex);
+		}
+	}
 
 }

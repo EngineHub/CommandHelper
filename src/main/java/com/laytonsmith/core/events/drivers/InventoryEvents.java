@@ -33,10 +33,11 @@ import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.CRE.CREBindException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.Map;
 
 /**
@@ -95,7 +96,7 @@ public class InventoryEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.BuildException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
+			throw ConfigRuntimeException.BuildException("Unsupported Operation", CREBindException.class, Target.UNKNOWN);
 		}
 
 		@Override
@@ -640,14 +641,14 @@ public class InventoryEvents {
 								if (CexpCosts.get(i, Target.UNKNOWN) instanceof CInt) {
 									ExpCosts[i] = (int) ((CInt) CexpCosts.get(i, Target.UNKNOWN)).getInt();
 								} else {
-									throw ConfigRuntimeException.BuildException("Expected an intger at index " + i + "!", ExceptionType.FormatException, Target.UNKNOWN);
+									throw ConfigRuntimeException.BuildException("Expected an intger at index " + i + "!", CREFormatException.class, Target.UNKNOWN);
 								}
 							}
 						} else {
-							throw ConfigRuntimeException.BuildException("Expected a normal array!", ExceptionType.FormatException, Target.UNKNOWN);
+							throw ConfigRuntimeException.BuildException("Expected a normal array!", CREFormatException.class, Target.UNKNOWN);
 						}
 					} else {
-						throw ConfigRuntimeException.BuildException("Expected an array!", ExceptionType.FormatException, Target.UNKNOWN);
+						throw ConfigRuntimeException.BuildException("Expected an array!", CREFormatException.class, Target.UNKNOWN);
 					}
 				}
 			}
@@ -817,7 +818,7 @@ public class InventoryEvents {
 						return true;
 					} else {
 						throw ConfigRuntimeException.BuildException("Expected an array but recieved " + value,
-								ExceptionType.CastException, Target.UNKNOWN);
+								CRECastException.class, Target.UNKNOWN);
 					}
 				}
 			} */

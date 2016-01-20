@@ -31,12 +31,17 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
+import com.laytonsmith.core.exceptions.CRE.CRELengthException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
  *
@@ -71,9 +76,9 @@ public class Environment {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
-				ExceptionType.LengthException, ExceptionType.InvalidWorldException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class,
+				CRELengthException.class, CREInvalidWorldException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -100,7 +105,7 @@ public class Environment {
 			if (args.length < 3) {
 				if (!(args[0] instanceof CArray)) {
 					throw ConfigRuntimeException.BuildException("get_block_at expects param 1 to be an array",
-							ExceptionType.CastException, t);
+							CRECastException.class, t);
 				}
 				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = loc.getBlockX();
@@ -111,7 +116,7 @@ public class Environment {
 					w = Static.getServer().getWorld(args[1].val());
 					if (w == null) {
 						throw ConfigRuntimeException.BuildException("The specified world " + args[1].val() + " doesn't exist",
-								ExceptionType.InvalidWorldException, t);
+								CREInvalidWorldException.class, t);
 					}
 				}
 			} else {
@@ -122,18 +127,18 @@ public class Environment {
 					w = Static.getServer().getWorld(args[3].val());
 					if (w == null) {
 						throw ConfigRuntimeException.BuildException("The specified world " + args[4].val() + " doesn't exist",
-								ExceptionType.InvalidWorldException, t);
+								CREInvalidWorldException.class, t);
 					}
 				}
 			}
 			if (w == null) {
-				throw ConfigRuntimeException.BuildException("No world was provided", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("No world was provided", CREInvalidWorldException.class, t);
 			}
 			MCBlock b = w.getBlockAt(x, y, z);
 			if (b == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not find the block in " + this.getName() + " (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			return new CString(b.getTypeId() + ":" + b.getData(), t);
 		}
@@ -168,9 +173,9 @@ public class Environment {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException,
-					ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class,
+					CREFormatException.class, CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -199,7 +204,7 @@ public class Environment {
 			if (args.length < 4) {
 				if (!(args[0] instanceof CArray)) {
 					throw ConfigRuntimeException.BuildException("set_block_at expects param 1 to be an array",
-							ExceptionType.CastException, t);
+							CRECastException.class, t);
 				}
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = l.getBlockX();
@@ -220,11 +225,11 @@ public class Environment {
 					w = Static.getServer().getWorld(args[4].val());
 					if (w == null) {
 						throw ConfigRuntimeException.BuildException("The specified world " + args[4].val() + " doesn't exist",
-								ExceptionType.InvalidWorldException, t);
+								CREInvalidWorldException.class, t);
 					}
 				} else if (w == null) {
 					throw ConfigRuntimeException.BuildException("No world was provided",
-							ExceptionType.InvalidWorldException, t);
+							CREInvalidWorldException.class, t);
 				}
 				if (args.length == 6) {
 					physics = Static.getBoolean(args[2]);
@@ -241,12 +246,12 @@ public class Environment {
 				data = Integer.parseInt(dataAndMeta[0]); // Throws NumberFormatException.
 			} catch(NumberFormatException e) {
 				throw ConfigRuntimeException.BuildException("id must be formatted as such: 'x:y' where x and y are integers",
-						ExceptionType.FormatException, t);
+						CREFormatException.class, t);
 			}
 			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
 			if (mat == null || !mat.isBlock()) {
 				throw ConfigRuntimeException.BuildException("Not a block ID: " + data
-						+ ". Attempting to set an invalid id can corrupt chunks!", ExceptionType.CastException, t);
+						+ ". Attempting to set an invalid id can corrupt chunks!", CRECastException.class, t);
 			}
 			b.setTypeAndData(data, meta, physics);
 
@@ -282,8 +287,8 @@ public class Environment {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -350,7 +355,7 @@ public class Environment {
 				s.setLine(3, line4);
 				return CVoid.VOID;
 			} else {
-				throw ConfigRuntimeException.BuildException("The block at the specified location is not a sign", ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("The block at the specified location is not a sign", CRERangeException.class, t);
 			}
 		}
 	}
@@ -375,8 +380,8 @@ public class Environment {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -410,7 +415,7 @@ public class Environment {
 				CString line4 = new CString(s.getLine(3), t);
 				return new CArray(t, line1, line2, line3, line4);
 			} else {
-				throw ConfigRuntimeException.BuildException("The block at the specified location is not a sign", ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("The block at the specified location is not a sign", CRERangeException.class, t);
 			}
 		}
 	}
@@ -434,8 +439,8 @@ public class Environment {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -485,8 +490,8 @@ public class Environment {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -537,9 +542,9 @@ public class Environment {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
-				ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class,
+				CRENotFoundException.class};
 		}
 
 		@Override
@@ -579,13 +584,13 @@ public class Environment {
 				if (bt == null) {
 					throw ConfigRuntimeException.BuildException(
 							"Could not find the internal biome type object (are you running in cmdline mode?)",
-							ExceptionType.NotFoundException, t);
+							CRENotFoundException.class, t);
 				}
 			} catch (IllegalArgumentException e) {
-				throw ConfigRuntimeException.BuildException("The biome type \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("The biome type \"" + args[1].val() + "\" does not exist.", CREFormatException.class, t);
 			}
 			if (w == null) {
-				throw ConfigRuntimeException.BuildException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("The specified world doesn't exist, or no world was provided", CREInvalidWorldException.class, t);
 			}
 			w.setBiome(x, z, bt);
 			return CVoid.VOID;
@@ -618,9 +623,9 @@ public class Environment {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
-				ExceptionType.InvalidWorldException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class,
+				CREInvalidWorldException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -655,13 +660,13 @@ public class Environment {
 				}
 			}
 			if (w == null) {
-				throw ConfigRuntimeException.BuildException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("The specified world doesn't exist, or no world was provided", CREInvalidWorldException.class, t);
 			}
 			MCBiomeType bt = w.getBiome(x, z);
 			if (bt == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not find the biome type (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			return new CString(bt.name(), t);
 		}
@@ -693,10 +698,10 @@ public class Environment {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
-				ExceptionType.LengthException, ExceptionType.InvalidWorldException,
-				ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class,
+				CRELengthException.class, CREInvalidWorldException.class,
+				CRENotFoundException.class};
 		}
 
 		@Override
@@ -739,13 +744,13 @@ public class Environment {
 				w = Static.getServer().getWorld(world);
 			}
 			if (w == null) {
-				throw ConfigRuntimeException.BuildException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("The specified world " + world + " doesn't exist", CREInvalidWorldException.class, t);
 			}
 			MCBlock highestBlock = w.getHighestBlockAt((int) java.lang.Math.floor(x), (int) java.lang.Math.floor(z));
 			if (highestBlock == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not find the highest block in " + this.getName() + " (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			return ObjectGenerator.GetGenerator().location(highestBlock.getLocation(), false);
 		}
@@ -779,8 +784,8 @@ public class Environment {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class, CRELengthException.class, CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -814,12 +819,12 @@ public class Environment {
 
 			if (size > 100) {
 				throw ConfigRuntimeException.BuildException("A bit excessive, don't you think? Let's scale that back some, huh?",
-						ExceptionType.RangeException, t);
+						CRERangeException.class, t);
 			}
 
 			if (!(args[0] instanceof CArray)) {
 				throw ConfigRuntimeException.BuildException("Expecting an array at parameter 1 of explosion",
-						ExceptionType.CastException, t);
+						CRECastException.class, t);
 			}
 
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
@@ -830,7 +835,7 @@ public class Environment {
 
 			if (w == null) {
 				if (!(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer)) {
-					throw ConfigRuntimeException.BuildException(this.getName() + " needs a world in the location array, or a player so it can take the current world of that player.", ExceptionType.PlayerOfflineException, t);
+					throw ConfigRuntimeException.BuildException(this.getName() + " needs a world in the location array, or a player so it can take the current world of that player.", CREPlayerOfflineException.class, t);
 				}
 
 				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -851,9 +856,9 @@ public class Environment {
 	public static class play_note extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException,
-						ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class,
+						CREFormatException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -964,10 +969,10 @@ public class Environment {
 	public static class play_sound extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException,
-					ExceptionType.CastException, ExceptionType.FormatException,
-					ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class,
+					CRECastException.class, CREFormatException.class,
+					CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -1061,10 +1066,10 @@ public class Environment {
 	public static class play_named_sound extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException,
-					ExceptionType.CastException, ExceptionType.FormatException,
-					ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class,
+					CRECastException.class, CREFormatException.class,
+					CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -1152,8 +1157,8 @@ public class Environment {
 	public static class get_block_info extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1184,7 +1189,7 @@ public class Environment {
 					case "burnable":
 						return CBoolean.get(b.isBurnable());
 					default:
-						throw ConfigRuntimeException.BuildException("Invalid argument for block info", ExceptionType.FormatException, t);
+						throw ConfigRuntimeException.BuildException("Invalid argument for block info", CREFormatException.class, t);
 				}
 			}
 			CArray array = CArray.GetAssociativeArray(t);
@@ -1228,9 +1233,9 @@ public class Environment {
 	public static class get_light_at extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InvalidWorldException,
-					ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInvalidWorldException.class,
+					CREFormatException.class};
 		}
 
 		@Override
@@ -1280,9 +1285,9 @@ public class Environment {
 	public static class is_block_powered extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InvalidWorldException,
-					ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInvalidWorldException.class,
+					CREFormatException.class};
 		}
 
 		@Override
@@ -1332,7 +1337,7 @@ public class Environment {
 					mode = CheckMode.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException e) {
 					throw ConfigRuntimeException.BuildException("Invalid checkMode: " + args[1].val() + ".",
-							ExceptionType.FormatException, t);
+							CREFormatException.class, t);
 				}
 			} else {
 				mode = CheckMode.BOTH; // Default to BOTH to make it backwards compatible.
@@ -1353,7 +1358,7 @@ public class Environment {
 				}
 				default: { // Should not be able to run.
 					throw ConfigRuntimeException.BuildException("Invalid checkMode: " + args[1].val() + ".",
-							ExceptionType.FormatException, t);
+							CREFormatException.class, t);
 				}
 			}
 			return CBoolean.get(ret);
@@ -1370,9 +1375,9 @@ public class Environment {
 	public static class get_block_power extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InvalidWorldException,
-					ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInvalidWorldException.class,
+					CREFormatException.class};
 		}
 
 		@Override
@@ -1434,8 +1439,8 @@ public class Environment {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREBadEntityException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1468,7 +1473,7 @@ public class Environment {
 				try {
 					treeType = MCTreeType.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
-					throw ConfigRuntimeException.BuildException("The tree type \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("The tree type \"" + args[1].val() + "\" does not exist.", CREFormatException.class, t);
 				}
 			}
 			MCPlayer psender = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -1491,8 +1496,8 @@ public class Environment {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1524,7 +1529,7 @@ public class Environment {
 				return new CString(cb.getCommand(), t);
 			} else {
 				throw ConfigRuntimeException.BuildException("The block at the specified location is not a command block",
-						ExceptionType.FormatException, t);
+						CREFormatException.class, t);
 			}
 		}
 	}
@@ -1543,8 +1548,8 @@ public class Environment {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1575,7 +1580,7 @@ public class Environment {
 			if(args.length == 2 && !(args[1] instanceof CNull)) {
 				if(!(args[1] instanceof CString)) {
 					throw ConfigRuntimeException.BuildException("Parameter 2 of " + getName() + " must be a string or null",
-							ExceptionType.CastException, t);
+							CRECastException.class, t);
 				}
 				cmd = args[1].val();
 			}
@@ -1587,7 +1592,7 @@ public class Environment {
 				return CVoid.VOID;
 			} else {
 				throw ConfigRuntimeException.BuildException("The block at the specified location is not a command block",
-						ExceptionType.FormatException, t);
+						CREFormatException.class, t);
 			}
 		}
 	}
@@ -1606,8 +1611,8 @@ public class Environment {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1639,7 +1644,7 @@ public class Environment {
 				return new CString(cb.getName(), t);
 			} else {
 				throw ConfigRuntimeException.BuildException("The block at the specified location is not a command block",
-						ExceptionType.FormatException, t);
+						CREFormatException.class, t);
 			}
 		}
 	}
@@ -1658,8 +1663,8 @@ public class Environment {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1690,7 +1695,7 @@ public class Environment {
 			if(args.length == 2 && !(args[1] instanceof CNull)) {
 				if(!(args[1] instanceof CString)) {
 					throw ConfigRuntimeException.BuildException("Parameter 2 of " + getName() + " must be a string or null",
-							ExceptionType.CastException, t);
+							CRECastException.class, t);
 				}
 				name = args[1].val();
 			}
@@ -1702,7 +1707,7 @@ public class Environment {
 				return CVoid.VOID;
 			} else {
 				throw ConfigRuntimeException.BuildException("The block at the specified location is not a command block",
-						ExceptionType.FormatException, t);
+						CREFormatException.class, t);
 			}
 		}
 	}

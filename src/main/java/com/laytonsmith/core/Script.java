@@ -30,6 +30,8 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.InvalidEnvironmentException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -42,7 +44,6 @@ import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.extensions.Extension;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -174,7 +175,7 @@ public class Script {
                 for (String group : groups) {
                     if (group.startsWith("-") && ((MCPlayer)p).inGroup(group.substring(1))) {
                         //negative permission
-                        throw ConfigRuntimeException.BuildException("You do not have permission to use that command", ExceptionType.InsufficientPermissionException,
+                        throw ConfigRuntimeException.BuildException("You do not have permission to use that command", CREInsufficientPermissionException.class,
                                 Target.UNKNOWN);
                     } else if (((MCPlayer)p).inGroup(group)) {
                         //They do have permission.
@@ -288,7 +289,7 @@ public class Script {
 						//Not really a function, so we can't put it in Function.
 						Procedure p = getProc(m.val());
 						if (p == null) {
-							throw ConfigRuntimeException.BuildException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.getTarget());
+							throw ConfigRuntimeException.BuildException("Unknown procedure \"" + m.val() + "\"", CREInvalidProcedureException.class, m.getTarget());
 						}
 						Environment newEnv = env;
 						try{
@@ -317,7 +318,7 @@ public class Script {
 							boolean perm = Static.hasCHPermission(f.getName(), env);
 							if (!perm) {
 								throw ConfigRuntimeException.BuildException("You do not have permission to use the " + f.getName() + " function.",
-										ExceptionType.InsufficientPermissionException, m.getTarget());
+										CREInsufficientPermissionException.class, m.getTarget());
 							}
 						}
 

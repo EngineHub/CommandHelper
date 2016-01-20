@@ -18,8 +18,12 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -198,8 +202,8 @@ public class Enchantments {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.EnchantmentException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREEnchantmentException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -225,7 +229,7 @@ public class Enchantments {
 				m = Static.GetPlayer(args[0].val(), t);
 				offset = 0;
 			} else if (m == null) {
-				throw ConfigRuntimeException.BuildException("Invalid sender!", ExceptionType.PlayerOfflineException, t);
+				throw ConfigRuntimeException.BuildException("Invalid sender!", CREPlayerOfflineException.class, t);
 			}
 			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull ? null : Static.getInt32(args[1 - offset], t));
 			if (is == null) {
@@ -253,17 +257,17 @@ public class Enchantments {
 			for (String key : enchantArray.stringKeySet()) {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
 				if (e == null) {
-					throw ConfigRuntimeException.BuildException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
+					throw ConfigRuntimeException.BuildException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", CREEnchantmentException.class, t);
 				}
 				if (e.canEnchantItem(is)) {
 					int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
 					if (e.getMaxLevel() >= level && level > 0) {
 						is.addEnchantment(e, level);
 					} else {
-						throw ConfigRuntimeException.BuildException("Level must be greater than 0, and less than " + e.getMaxLevel() + " but was " + level, ExceptionType.RangeException, t);
+						throw ConfigRuntimeException.BuildException("Level must be greater than 0, and less than " + e.getMaxLevel() + " but was " + level, CRERangeException.class, t);
 					}
 				} else {
-					throw ConfigRuntimeException.BuildException(enchantArray.get(key, t).val().toUpperCase() + " cannot be applied to this item", ExceptionType.EnchantmentException, t);
+					throw ConfigRuntimeException.BuildException(enchantArray.get(key, t).val().toUpperCase() + " cannot be applied to this item", CREEnchantmentException.class, t);
 				}
 			}
 			return CVoid.VOID;
@@ -291,8 +295,8 @@ public class Enchantments {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.EnchantmentException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREEnchantmentException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -344,7 +348,7 @@ public class Enchantments {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
 				if (e == null) {
 					throw ConfigRuntimeException.BuildException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid"
-							+ " enchantment type", ExceptionType.EnchantmentException, t);
+							+ " enchantment type", CREEnchantmentException.class, t);
 				}
 				is.removeEnchantment(e);
 			}
@@ -372,8 +376,8 @@ public class Enchantments {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRECastException.class};
 		}
 
 		@Override
@@ -401,7 +405,7 @@ public class Enchantments {
 			} else {
 				slot = args[0];
 				if (m == null) {
-					throw ConfigRuntimeException.BuildException("Invalid sender!", ExceptionType.PlayerOfflineException, t);
+					throw ConfigRuntimeException.BuildException("Invalid sender!", CREPlayerOfflineException.class, t);
 				}
 			}
 			MCItemStack is = m.getItemAt(slot instanceof CNull ? null : Static.getInt32(slot, t));
@@ -449,8 +453,8 @@ public class Enchantments {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.EnchantmentException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREEnchantmentException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -477,7 +481,7 @@ public class Enchantments {
 				return CBoolean.get(e.canEnchantItem(is));
 			} catch (NullPointerException e) {
 				throw ConfigRuntimeException.BuildException(args[0].val().toUpperCase() + " is not a known enchantment type.",
-						ExceptionType.EnchantmentException, t);
+						CREEnchantmentException.class, t);
 			}
 		}
 	}
@@ -502,8 +506,8 @@ public class Enchantments {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.EnchantmentException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREEnchantmentException.class};
 		}
 
 		@Override
@@ -529,7 +533,7 @@ public class Enchantments {
 				return new CInt(e.getMaxLevel(), t);
 			} catch (NullPointerException e) {
 				throw ConfigRuntimeException.BuildException(args[0].val().toUpperCase() + " is not a known enchantment type.",
-						ExceptionType.EnchantmentException, t);
+						CREEnchantmentException.class, t);
 			}
 		}
 	}
@@ -556,8 +560,8 @@ public class Enchantments {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -616,8 +620,8 @@ public class Enchantments {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -650,7 +654,7 @@ public class Enchantments {
 	public static class enchantment_list extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 

@@ -16,12 +16,12 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.profiler.ProfilePoint;
 
 import java.net.URL;
@@ -114,7 +114,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 			} catch(FunctionReturnException ex){
 				//We simply allow this to end the event execution
 			} catch(ProgramFlowManipulationException ex){
-				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.BuildException("Unexpected control flow operation used.", Exceptions.ExceptionType.FormatException, ex.getTarget()), env);
+				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.BuildException("Unexpected control flow operation used.", CREFormatException.class, ex.getTarget()), env);
 			}
 		} finally {
 			if(event != null){

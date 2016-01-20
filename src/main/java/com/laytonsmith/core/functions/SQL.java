@@ -3,7 +3,6 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.Convertor;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
@@ -33,8 +32,10 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CRESQLException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.database.SQLProfile;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -75,8 +76,8 @@ public class SQL {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.SQLException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRESQLException.class};
 		}
 
 		@Override
@@ -155,7 +156,7 @@ public class SQL {
 					profile = profiles.getProfileById(args[0].val());
 				}
 				if(!(profile instanceof SQLProfile)){
-					throw ConfigRuntimeException.BuildException("Profile must be an SQL type profile, but found \"" + profile.getType() + "\"", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Profile must be an SQL type profile, but found \"" + profile.getType() + "\"", CRECastException.class, t);
 				}
 				String query = args[1].val();
 				Construct[] params = new Construct[args.length - 2];
@@ -179,7 +180,7 @@ public class SQL {
 						if (params[i] == null) {
 							try {
 								if (ps.getParameterMetaData().isNullable(i + 1) == ParameterMetaData.parameterNoNulls) {
-									throw ConfigRuntimeException.BuildException("Parameter " + (i + 1) + " cannot be set to null. Check your parameters and try again.", ExceptionType.SQLException, t);
+									throw ConfigRuntimeException.BuildException("Parameter " + (i + 1) + " cannot be set to null. Check your parameters and try again.", CRESQLException.class, t);
 								}
 							} catch(SQLException ex){
 								//Ignored. This appears to be able to happen in various cases, but in the case where it *does* work, we don't want
@@ -202,13 +203,13 @@ public class SQL {
 							}else{
 								throw ConfigRuntimeException.BuildException("The type " + params[i].getClass().getSimpleName()
 										+ " of parameter " + (i + 1) + " is not supported."
-										, ExceptionType.CastException, t);
+										, CRECastException.class, t);
 							}
 						} catch (ClassCastException ex) {
 							throw ConfigRuntimeException.BuildException("Could not cast parameter " + (i + 1) + " to "
 									+ ps.getParameterMetaData().getParameterTypeName(i + 1) + " from "
 									+ params[i].getClass().getSimpleName() + "."
-									, ExceptionType.CastException, t, ex);
+									, CRECastException.class, t, ex);
 						}
 					}
 					boolean isResultSet = ps.execute();
@@ -256,7 +257,7 @@ public class SQL {
 								} else {
 									throw ConfigRuntimeException.BuildException("SQL returned a unhandled column type "
 											+ md.getColumnTypeName(i) + " for column " + md.getColumnName(i) + "."
-											, ExceptionType.CastException, t);
+											, CRECastException.class, t);
 								}
 								if(rs.wasNull()){
 									// Since mscript can assign null to primitives, we
@@ -288,7 +289,7 @@ public class SQL {
 					}
 				}
 			} catch (Profiles.InvalidProfileException | SQLException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.SQLException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CRESQLException.class, t, ex);
 			}
 		}
 
@@ -443,8 +444,8 @@ public class SQL {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -462,7 +463,7 @@ public class SQL {
 			startup();
 			Construct arg = args[args.length - 1];
 			if(!(arg instanceof CClosure)){
-				throw ConfigRuntimeException.BuildException("The last argument to " + getName() + " must be a closure.", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("The last argument to " + getName() + " must be a closure.", CRECastException.class, t);
 			}
 			final CClosure closure = ((CClosure)arg);
 			final Construct[] newArgs = new Construct[args.length - 1];

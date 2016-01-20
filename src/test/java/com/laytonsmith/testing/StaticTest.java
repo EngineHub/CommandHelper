@@ -5,7 +5,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.abstraction.AbstractConvertor;
@@ -41,6 +40,7 @@ import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.CHLog;
@@ -62,6 +62,7 @@ import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
@@ -70,7 +71,6 @@ import com.laytonsmith.core.exceptions.LoopBreakException;
 import com.laytonsmith.core.exceptions.LoopContinueException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.BasicLogic.equals;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import org.mockito.Mockito;
@@ -271,12 +271,12 @@ public class StaticTest {
 						return;
 					}
 					String name = AbstractCREException.getExceptionName(e);
-						// This eventually needs to be changed. It should return class
-						// objects instead, but for now, it returns an enum. This will
-						// be a large change.
-						List<String> expectedNames = new ArrayList<>();
-					for (Exceptions.ExceptionType tt : f.thrown()) {
-						expectedNames.add(tt.toString());
+					// This eventually needs to be changed. It should return class
+					// objects instead, but for now, it returns an enum. This will
+					// be a large change.
+					List<String> expectedNames = new ArrayList<>();
+					for (Class<? extends CREThrowable> tt : f.thrown()) {
+						expectedNames.add(tt.getAnnotation(typeof.class).value());
 					}
 					if (f.thrown() == null || !expectedNames.contains(name)) {
 						fail("The documentation for " + f.getName() + " doesn't state that it can throw a "
@@ -605,6 +605,7 @@ public class StaticTest {
 
 	/**
 	 * This installs a fake server frontend. You must have already included
+	 *
 	 * @PrepareForTest(Static.class) in the calling test code, which will allow
 	 * the proper static methods to be mocked.
 	 */

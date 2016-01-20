@@ -14,8 +14,8 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
@@ -338,7 +338,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public MCLivingEntity getTarget(Target t) {
 		if (!(le instanceof Creature)) {
 			throw ConfigRuntimeException.BuildException("This type of mob does not have a target API", 
-					ExceptionType.BadEntityException, t);
+					CREBadEntityException.class, t);
 		}
 		LivingEntity target = ((Creature) le).getTarget();
 		return target == null ? null : new BukkitMCLivingEntity(target);
@@ -348,7 +348,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public void setTarget(MCLivingEntity target, Target t) {
 		if (!(le instanceof Creature)) {
 			throw ConfigRuntimeException.BuildException("This type of mob does not have a target API", 
-					ExceptionType.BadEntityException, t);
+					CREBadEntityException.class, t);
 		}
 		((Creature) le).setTarget(target == null ? null : ((BukkitMCLivingEntity) target).asLivingEntity());
 	}

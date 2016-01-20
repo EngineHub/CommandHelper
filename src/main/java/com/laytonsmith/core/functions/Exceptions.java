@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Version;
@@ -9,6 +10,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
@@ -38,22 +40,19 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
-import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * 
@@ -63,214 +62,6 @@ public class Exceptions {
 
 	public static String docs() {
 		return "This class contains functions related to Exception handling in MethodScript";
-	}
-
-	@MEnum("ExceptionType")
-	public enum ExceptionType implements SimpleDocumentation {
-
-		/**
-		 * This exception is thrown if a value cannot be cast into an
-		 * appropriate type. Functions that require a numeric value, for
-		 * instance, would throw this if the string "hi" were passed in.
-		 */
-		CastException("This exception is thrown if a value cannot be cast into an"
-			+ " appropriate type. Functions that require a numeric value, for"
-			+ " instance, would throw this if the string \"hi\" were passed in.", CHVersion.V3_3_1),
-		/**
-		 * This exception is thrown if a value is requested from an array that
-		 * is above the highest index of the array, or a negative number.
-		 */
-		IndexOverflowException("This exception is thrown if a value is requested from an array that"
-			+ " is above the highest index of the array, or a negative number.", CHVersion.V3_3_1),
-		/**
-		 * This exception is thrown if a function expected a numeric value to be
-		 * in a particular range, and it wasn't
-		 */
-		RangeException("This exception is thrown if a function expected a numeric value to be"
-			+ " in a particular range, and it wasn't", CHVersion.V3_3_1),
-		/**
-		 * This exception is thrown if a function expected the length of
-		 * something to be a particular value, but it was not.
-		 */
-		LengthException("This exception is thrown if a function expected the length of"
-			+ " something to be a particular value, but it was not.", CHVersion.V3_3_1),
-		/**
-		 * This exception is thrown if the user running the command does not
-		 * have permission to run the function
-		 */
-		InsufficientPermissionException("This exception is thrown if the user running the command does not"
-			+ " have permission to run the function", CHVersion.V3_3_1),
-		/**
-		 * This exception is thrown if a function expected an online player, but
-		 * that player was offline, or the command is being run from somewhere
-		 * not in game, and the function was trying to use the current player.
-		 */
-		PlayerOfflineException("This exception is thrown if a function expected an online player, but"
-			+ " that player was offline, or the command is being run from somewhere"
-			+ " not in game, and the function was trying to use the current player.", CHVersion.V3_3_1),
-		/**
-		 * Some var arg functions may require at least a certain number of
-		 * arguments to be passed to the function
-		 */
-		InsufficientArgumentsException("Some var arg functions may require at least a certain number of"
-			+ " arguments to be passed to the function", CHVersion.V3_3_1),
-		/**
-		 * This exception is thrown if a function expected a string to be
-		 * formatted in a particular way, but it could not interpret the given
-		 * value.
-		 */
-		FormatException("This exception is thrown if a function expected a string to be"
-			+ " formatted in a particular way, but it could not interpret the given"
-			+ " value.", CHVersion.V3_3_1),
-		/**
-		 * This exception is thrown if a procedure is used without being
-		 * defined, or if a procedure name does not follow proper naming
-		 * conventions.
-		 */
-		InvalidProcedureException("This exception is thrown if a procedure is used without being"
-			+ " defined, or if a procedure name does not follow proper naming"
-			+ " conventions.", CHVersion.V3_3_1),
-		/**
-		 * This exception is thrown if there is a problem with an include. This
-		 * is thrown if there is a compile error in the included script.
-		 */
-		IncludeException("This exception is thrown if there is a problem with an include. This"
-			+ " is thrown if there is a compile error in the included script.", CHVersion.V3_3_1),
-		/**
-		 * This exception is thrown if a script tries to read or write to a
-		 * location of the filesystem that is not allowed.
-		 */
-		SecurityException("This exception is thrown if a script tries to read or write to a"
-			+ " location of the filesystem that is not allowed.", CHVersion.V3_3_1),
-		/**
-		 * This exception is thrown if a file cannot be read or written to.
-		 */
-		IOException("This exception is thrown if a file cannot be read or written to.", CHVersion.V3_3_1),
-		/**
-		 * This exception is thrown if a function uses an external plugin, and
-		 * that plugin is not loaded, or otherwise unusable.
-		 */
-		InvalidPluginException("This exception is thrown if a function uses an external plugin, and"
-			+ " that plugin is not loaded, or otherwise unusable.", CHVersion.V3_3_1),
-		/**
-		 * This exception is thrown when a plugin is loaded, but a call to the
-		 * plugin failed, usually for some reason specific to the plugin. Check
-		 * the error message for more details about this error.
-		 */
-		PluginInternalException("This exception is thrown when a plugin is loaded, but a call to the"
-			+ " plugin failed, usually for some reason specific to the plugin. Check"
-			+ " the error message for more details about this error.", CHVersion.V3_3_1),
-		/**
-		 * If a function requests a world, and the world given doesn't exist,
-		 * this is thrown
-		 */
-		InvalidWorldException("If a function requests a world, and the world given doesn't exist,"
-			+ " this is thrown", CHVersion.V3_3_1),
-		/**
-		 * This exception is thrown if an error occurs when trying to bind() an
-		 * event, or if a event framework related error occurs.
-		 */
-		BindException("This exception is thrown if an error occurs when trying to bind() an"
-			+ " event, or if a event framework related error occurs.", CHVersion.V3_3_1),
-		/**
-		 * If an enchantment is added to an item that isn't supported, this is
-		 * thrown.
-		 */
-		EnchantmentException("If an enchantment is added to an item that isn't supported, this is thrown.", CHVersion.V3_3_1),
-		/**
-		 * If an age function is called on an unageable mob, this
-		 * exception is thrown
-		 */
-		UnageableMobException("If an age function is called on an unageable mob, this "
-			+ "exception is thrown.", CHVersion.V3_3_1),
-		/**
-		 * If an untameable mob is attempted to be tamed, this exception is
-		 * thrown
-		 */
-		UntameableMobException("If an untameable mob is attempted to be tamed, this exception is"
-			+ " thrown", CHVersion.V3_3_1),
-		/**
-		 * If a null is sent, but not expected, this exception is thrown.
-		 */
-		NullPointerException("If a null is sent, but not expected, this exception is thrown.", CHVersion.V3_3_1), 
-		/**
-		 * Thrown if an entity is looked up by id, but doesn't exist.
-		 */
-		BadEntityException("Thrown if an entity is looked up by id, but doesn't exist.", CHVersion.V3_3_1),
-		/**
-		 * Thrown if an entity has the wrong type than expected.
-		 */
-		BadEntityTypeException("Thrown if an entity has the wrong type.", CHVersion.V3_3_1),
-		/**
-		 * Thrown if a field was read only, but a write operation was attempted.
-		 */
-		ReadOnlyException("Thrown if a field was read only, but a write operation was attempted.", CHVersion.V3_3_1),
-		/**
-		 * Thrown if a scoreboard error occurs, such as attempting to create a
-		 * team or objective with a name that is already in use,
-		 * or trying to access one that doesn't exist. 
-		 */
-		ScoreboardException("Thrown if a scoreboard error occurs, such as attempting to create a"
-				+ " team or objective with a name that is already in use,"
-				+ " or trying to access one that doesn't exist.", CHVersion.V3_3_1),
-		/**
-		 * Thrown if trying to register a plugin channel that is already registered, 
-		 * or unregister one that isn't registered.
-		 */
-		PluginChannelException("Thrown if trying to register a plugin channel that is"
-				+ " already registered, or unregister one that isn't registered.", 
-				CHVersion.V3_3_1),
-		/**
-		 * Thrown if data was not found, but expected.
-		 */
-		NotFoundException("Thrown if data was not found, but expected.", CHVersion.V3_3_1),
-		
-		/**
-		 * Thrown if a stack overflow error happens. This can occur if a 
-		 * function recurses too deeply.
-		 */
-		StackOverflowError("Thrown if a stack overflow error happens. This can occur if a"
-				+ " function recurses too deeply.", CHVersion.V3_3_1),
-		
-		/**
-		 * Thrown if a shell exception occurs.
-		 */
-		ShellException("Thrown if a shell exception occurs.", CHVersion.V3_3_1),
-		
-		/**
-		 * Thrown if an SQL related exception occurs.
-		 */
-		SQLException("Thrown if an SQL related exception occurs.", CHVersion.V3_3_1),
-
-		/**
-		 * Thrown if an argument was illegal in the given context.
-		 */
-		IllegalArgumentException("Thrown if an argument was illegal in the given context.", CHVersion.V3_3_1)
-
-		;
-		
-		private String docs;
-		private CHVersion since;
-		private ExceptionType(String docs, CHVersion since){
-			this.docs = docs;
-			this.since = since;
-		}
-
-		@Override
-		public String getName() {
-			return name();
-		}
-
-		@Override
-		public String docs() {
-			return docs;
-		}
-
-		@Override
-		public CHVersion since() {
-			return since;
-		}
-		
 	}
 
 	@api(environments=CommandHelperEnvironment.class)
@@ -303,8 +94,8 @@ public class Exceptions {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -350,7 +141,7 @@ public class Exceptions {
 				if (pivar instanceof IVariable) {
 					ivar = (IVariable) pivar;
 				} else {
-					throw ConfigRuntimeException.BuildException("Expected argument 2 to be an IVariable", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Expected argument 2 to be an IVariable", CRECastException.class, t);
 				}
 			}
 			List<String> interest = new ArrayList<String>();
@@ -365,16 +156,16 @@ public class Exceptions {
 					}
 				} else {
 					throw ConfigRuntimeException.BuildException("Expected argument 4 to be a string, or an array of strings.",
-							ExceptionType.CastException, t);
+							CRECastException.class, t);
 				}
 			}
 
 			for (String in : interest) {
 				try {
-					ExceptionType.valueOf(in);
-				} catch (IllegalArgumentException e) {
+					NativeTypeList.getNativeClass(in);
+				} catch (ClassNotFoundException e) {
 					throw ConfigRuntimeException.BuildException("Invalid exception type passed to try():" + in,
-							ExceptionType.FormatException, t);
+							CREFormatException.class, t);
 				}
 			}
 
@@ -432,15 +223,11 @@ public class Exceptions {
 
 		@Override
 		public String docs() {
-			List<ExceptionType> e = Arrays.asList(Exceptions.ExceptionType.values());
+			Set<Class<CREThrowable>> e = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class);
 			String exceptions = "\nValid Exceptions: ";
-			for (int i = 0; i < e.size(); i++) {
-				String exceptionType = e.get(i).getName();
-				if(i == e.size() - 1) {
-					exceptions = exceptions + exceptionType;
-				} else {
-					exceptions = exceptions + exceptionType + ", ";
-				}
+			for (Class<CREThrowable> c : e) {
+				String exceptionType = c.getAnnotation(typeof.class).value();
+				exceptions = exceptions + exceptionType + ", ";
 			}
 			
 			return "nothing {exceptionType, msg, [causedBy] | exception} This function causes an exception to be thrown. exceptionType may be any valid exception type."
@@ -448,8 +235,8 @@ public class Exceptions {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -489,7 +276,7 @@ public class Exceptions {
 					try {
 						c = NativeTypeList.getNativeClass(args[0].val());
 					} catch (ClassNotFoundException ex) {
-						throw ConfigRuntimeException.BuildException("Expected a valid exception type, but found \"" + args[0].val() + "\"", ExceptionType.FormatException, t);
+						throw ConfigRuntimeException.BuildException("Expected a valid exception type, but found \"" + args[0].val() + "\"", CREFormatException.class, t);
 					}
 					List<Class> classes = new ArrayList<>();
 					List<Object> arguments = new ArrayList<>();
@@ -512,8 +299,8 @@ public class Exceptions {
 	public static class set_uncaught_exception_handler extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -601,8 +388,8 @@ public class Exceptions {
 		private static boolean doScreamError = false;
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -764,7 +551,7 @@ public class Exceptions {
 	public static class get_stack_trace extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 

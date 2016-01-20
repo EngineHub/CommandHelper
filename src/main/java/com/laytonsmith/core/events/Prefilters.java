@@ -12,9 +12,10 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 import java.util.Map;
 
@@ -123,7 +124,7 @@ public final class Prefilters {
 						throw ConfigRuntimeException.BuildException("Prefilter expecting expression type, and \""
 								+ exp.val() + "\" does not follow expression format. "
 								+ "(Did you surround it in parenthesis?)",
-								ExceptionType.FormatException, exp.getTarget());
+								CREFormatException.class, exp.getTarget());
 					}
 					break;
 				case REGEX:
@@ -134,7 +135,7 @@ public final class Prefilters {
 					} else {
 						throw ConfigRuntimeException.BuildException("Prefilter expecting regex type, and \""
 								+ regex + "\" does not follow regex format",
-								ExceptionType.FormatException, map.get(key).getTarget());
+								CREFormatException.class, map.get(key).getTarget());
 					}
 					break;
 				case MACRO:
@@ -204,7 +205,7 @@ public final class Prefilters {
 			errClazz = Class.forName(errClass);
 		} catch (ClassNotFoundException cnf) {
 			throw ConfigRuntimeException.BuildException("You are missing a required dependency: " + eClass,
-					ExceptionType.PluginInternalException, expression.getTarget(), cnf);
+					CREPluginInternalException.class, expression.getTarget(), cnf);
 		}
 		try {
 			Object e = ReflectionUtils.invokeMethod(eClazz, null, "compile",
@@ -224,9 +225,9 @@ public final class Prefilters {
 		} catch (ReflectionUtils.ReflectionException rex) {
 			if (rex.getCause().getClass().isAssignableFrom(errClazz)) {
 				throw ConfigRuntimeException.BuildException("Your expression was invalidly formatted",
-						ExceptionType.PluginInternalException, expression.getTarget(), rex.getCause());
+						CREPluginInternalException.class, expression.getTarget(), rex.getCause());
 			} else {
-				throw ConfigRuntimeException.BuildException(rex.getMessage(), ExceptionType.PluginInternalException,
+				throw ConfigRuntimeException.BuildException(rex.getMessage(), CREPluginInternalException.class,
 						expression.getTarget(), rex.getCause());
 			}
 		}

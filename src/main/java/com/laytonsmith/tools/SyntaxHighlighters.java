@@ -7,10 +7,12 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.events.Event;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Function;
 import java.lang.reflect.Constructor;
@@ -152,8 +154,8 @@ public class SyntaxHighlighters {
                 base.add(d.getName());
             }
         } else if(datalist.equalsIgnoreCase("exceptions")){
-            for(Exceptions.ExceptionType e : Exceptions.ExceptionType.values()){
-                base.add(e.name());
+            for(Class<? extends CREThrowable> c : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class)){
+                base.add(c.getAnnotation(typeof.class).value());
             }
         } else if(datalist.equalsIgnoreCase("types")){
 			base.addAll(NativeTypeList.getNativeTypeList());

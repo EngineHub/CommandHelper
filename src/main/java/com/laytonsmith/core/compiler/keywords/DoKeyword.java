@@ -3,11 +3,9 @@ package com.laytonsmith.core.compiler.keywords;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CFunction;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.DataHandling;
-import com.laytonsmith.core.functions.Compiler;
 import java.util.List;
 
 /**

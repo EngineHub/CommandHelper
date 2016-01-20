@@ -38,14 +38,15 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,8 +70,6 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.activation.CommandMap;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -87,7 +86,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import org.apache.commons.codec.binary.Base64;
 
 /**
  *
@@ -151,7 +149,7 @@ public class Web {
 				path = cookie.get("path", t).val();
 			} else {
 				throw ConfigRuntimeException.BuildException("The name, value, domain, and path keys are required"
-						+ " in all cookies.", ExceptionType.FormatException, t);
+						+ " in all cookies.", CREFormatException.class, t);
 			}
 			if(cookie.containsKey("expiration")){
 				expiration = Static.getInt(cookie.get("expiration", t), t);
@@ -196,8 +194,8 @@ public class Web {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -311,7 +309,7 @@ public class Web {
 						throw new CRECastException("Expecting the success parameter to be a closure.", t);
 					}
 				} else {
-					throw ConfigRuntimeException.BuildException("Missing the success parameter, which is required.", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Missing the success parameter, which is required.", CRECastException.class, t);
 				}
 				if(csettings.containsKey("error")){
 					if(csettings.get("error", t) instanceof CClosure){
@@ -341,7 +339,7 @@ public class Web {
 					try{
 						type = Proxy.Type.valueOf(proxySettings.get("type", t).val());
 					} catch(IllegalArgumentException e){
-						throw ConfigRuntimeException.BuildException(e.getMessage(), ExceptionType.FormatException, t, e);
+						throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t, e);
 					}
 					proxyURL = proxySettings.get("url", t).val();
 					port = Static.getInt32(proxySettings.get("port", t), t);
@@ -400,7 +398,7 @@ public class Web {
 						});
 					} catch(IOException e){
 						final ConfigRuntimeException ex = ConfigRuntimeException.BuildException((e instanceof UnknownHostException?"Unknown host: ":"")
-								+ e.getMessage(), ExceptionType.IOException, t);
+								+ e.getMessage(), CREIOException.class, t);
 						if(error != null){
 							StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
@@ -517,8 +515,8 @@ public class Web {
 	public static class http_clear_session_cookies extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -566,8 +564,8 @@ public class Web {
 	public static class url_encode extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -623,8 +621,8 @@ public class Web {
 	public static class url_decode extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -680,8 +678,8 @@ public class Web {
 	public static class email extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PluginInternalException, ExceptionType.IOException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREPluginInternalException.class, CREIOException.class};
 		}
 
 		@Override
@@ -708,10 +706,10 @@ public class Web {
 				try {
 					p = environment.getEnv(GlobalEnv.class).getProfiles().getProfileById(profileName);
 				} catch(Profiles.InvalidProfileException ex){
-					throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.FormatException, t, ex);
+					throw ConfigRuntimeException.BuildException(ex.getMessage(), CREFormatException.class, t, ex);
 				}
 				if(!(p instanceof EmailProfile)){
-					throw ConfigRuntimeException.BuildException("Profile type is expected to be \"email\", but \"" + p.getType() + "\"  was found.", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Profile type is expected to be \"email\", but \"" + p.getType() + "\"  was found.", CRECastException.class, t);
 				}
 				Map<String, Object> data = ((EmailProfile)p).getMap();
 				for(String key : data.keySet()){
@@ -812,7 +810,7 @@ public class Web {
 								type = Message.RecipientType.BCC;
 								break;
 							default:
-								throw ConfigRuntimeException.BuildException("Recipient type must be one of either: TO, CC, or BCC, but \"" + stype + "\" was found.", ExceptionType.FormatException, t);
+								throw ConfigRuntimeException.BuildException("Recipient type must be one of either: TO, CC, or BCC, but \"" + stype + "\" was found.", CREFormatException.class, t);
 						}
 						address = ArgumentValidation.getItemFromArray(ca, "address", t, null).val();
 					} else {
@@ -913,9 +911,9 @@ public class Web {
 
 			} catch(MessagingException ex){
 				if(ex.getCause() instanceof SocketTimeoutException){
-					throw ConfigRuntimeException.BuildException(ex.getCause().getMessage(), ExceptionType.IOException, t, ex);
+					throw ConfigRuntimeException.BuildException(ex.getCause().getMessage(), CREIOException.class, t, ex);
 				}
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.PluginInternalException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREPluginInternalException.class, t, ex);
 			}
 			return CVoid.VOID;
 		}
@@ -933,7 +931,7 @@ public class Web {
 				CByteArray cb = (CByteArray)c;
 				return cb.asByteArrayCopy();
 			} else {
-				throw ConfigRuntimeException.BuildException("Only strings and byte_arrays may be added as attachments' content.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Only strings and byte_arrays may be added as attachments' content.", CREFormatException.class, t);
 			}
 		}
 

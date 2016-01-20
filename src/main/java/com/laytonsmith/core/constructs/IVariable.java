@@ -1,8 +1,8 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions;
 
 /**
  *
@@ -32,11 +32,11 @@ public class IVariable extends Construct implements Cloneable {
 		if(!type.equals(CClassType.AUTO) && !(value instanceof CNull)){
 			if(!InstanceofUtil.isInstanceof(value, type.val())){
 				throw ConfigRuntimeException.BuildException(name + " is of type " + type.val() + ", but a value of type "
-						+ value.typeof() + " was assigned to it.", Exceptions.ExceptionType.CastException, t);
+						+ value.typeof() + " was assigned to it.", CRECastException.class, t);
 			}
 		}
 		if(type.equals(CClassType.VOID)){
-			throw ConfigRuntimeException.BuildException("Variables may not be of type void", Exceptions.ExceptionType.CastException, t);
+			throw ConfigRuntimeException.BuildException("Variables may not be of type void", CRECastException.class, t);
 		}
 		this.type = type;
 		if(value == null){

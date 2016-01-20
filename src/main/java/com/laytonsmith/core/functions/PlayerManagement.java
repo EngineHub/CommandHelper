@@ -41,11 +41,22 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
+import com.laytonsmith.core.exceptions.CRE.CRELengthException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -123,8 +134,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -147,8 +158,8 @@ public class PlayerManagement {
 	public static class puuid extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -177,13 +188,13 @@ public class PlayerManagement {
 			}
 			if (pl == null) {
 				throw ConfigRuntimeException.BuildException("No matching player could be found.",
-						ExceptionType.PlayerOfflineException, t);
+						CREPlayerOfflineException.class, t);
 			}
 			UUID uuid = pl.getUniqueID();
 			if (uuid == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not find the UUID of the player (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			String uuidStr = uuid.toString();
 			return new CString(dashless ? uuidStr.replace("-", "") : uuidStr, t);
@@ -235,7 +246,7 @@ public class PlayerManagement {
 			} else {
 				MCWorld world = Static.getServer().getWorld(args[0].val());
 				if (world == null) {
-					throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+					throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), CREInvalidWorldException.class, t);
 				}
 				for (MCPlayer player : world.getPlayers()) {
 					if(player.isOnline()){
@@ -252,8 +263,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -325,7 +336,7 @@ public class PlayerManagement {
 			} else {
 				if (!(args[0] instanceof CArray)) {
 					throw ConfigRuntimeException.BuildException("Expecting an array at parameter 1 of players_in_radius",
-							ExceptionType.CastException, t);
+							CRECastException.class, t);
 				}
 
 				loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
@@ -349,9 +360,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
-				ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class,
+				CREPlayerOfflineException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -396,7 +407,7 @@ public class PlayerManagement {
 			if (location == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not find the location of the player (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			location.setY(location.getY() - 1);
 			return ObjectGenerator.GetGenerator().location(location);
@@ -409,8 +420,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -451,10 +462,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException,
-				ExceptionType.PlayerOfflineException, ExceptionType.FormatException,
-				ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class,
+				CREPlayerOfflineException.class, CREFormatException.class,
+				CRENotFoundException.class};
 		}
 
 		@Override
@@ -494,7 +505,7 @@ public class PlayerManagement {
 
 				} else {
 					throw ConfigRuntimeException.BuildException("Expecting an array at parameter 1 of set_ploc",
-							ExceptionType.CastException, t);
+							CRECastException.class, t);
 				}
 			} else if (args.length == 2) {
 				if (args[1] instanceof CArray) {
@@ -506,7 +517,7 @@ public class PlayerManagement {
 					z = l.getZ();
 				} else {
 					throw ConfigRuntimeException.BuildException("Expecting parameter 2 to be an array in set_ploc",
-							ExceptionType.CastException, t);
+							CRECastException.class, t);
 				}
 			} else if (args.length == 3) {
 				if (p instanceof MCPlayer) {
@@ -531,10 +542,10 @@ public class PlayerManagement {
 			if (l == null) {
 				throw ConfigRuntimeException.BuildException(
 					"Could not find the location of the player (are you running in cmdline mode?)",
-					ExceptionType.NotFoundException, t);
+					CRENotFoundException.class, t);
 			}
 			if (!l.getWorld().exists()) {
-				throw ConfigRuntimeException.BuildException("The world specified does not exist.", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("The world specified does not exist.", CREInvalidWorldException.class, t);
 			}
 			return CBoolean.get(m.teleport(StaticLayer.GetLocation(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch())));
 		}
@@ -563,9 +574,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException,
-					ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.PluginInternalException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRERangeException.class,
+					CREFormatException.class, CRECastException.class, CREPluginInternalException.class};
 		}
 
 		@Override
@@ -611,10 +622,10 @@ public class PlayerManagement {
 			} catch (IllegalStateException ise) {
 				throw ConfigRuntimeException.BuildException("The server's method of finding the target block has failed."
 						+ " There is nothing that can be done about this except standing somewhere else.",
-						ExceptionType.PluginInternalException, t);
+						CREPluginInternalException.class, t);
 			}
 			if (b == null) {
-				throw ConfigRuntimeException.BuildException("No block in sight, or block too far", ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("No block in sight, or block too far", CRERangeException.class, t);
 			} else {
 				return ObjectGenerator.GetGenerator().location(b.getLocation(), false);
 			}
@@ -643,8 +654,8 @@ public class PlayerManagement {
 	public static class ptarget_space extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -725,8 +736,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -806,8 +817,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -861,9 +872,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException,
-				ExceptionType.CastException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRERangeException.class,
+				CRECastException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -902,7 +913,7 @@ public class PlayerManagement {
 			int maxIndex = 20;
 			if (index < -1 || index > maxIndex) {
 				throw ConfigRuntimeException.BuildException(this.getName() + " expects the index to be between -1 and " + maxIndex,
-						ExceptionType.RangeException, t);
+						CRERangeException.class, t);
 			}
 			ArrayList<Construct> retVals = new ArrayList<Construct>();
 			if (index == 0 || index == -1) {
@@ -915,7 +926,7 @@ public class PlayerManagement {
 				if (loc == null) {
 					throw ConfigRuntimeException.BuildException(
 							"Could not find the location of the player (are you running in cmdline mode?)",
-							ExceptionType.NotFoundException, t);
+							CRENotFoundException.class, t);
 				}
 				retVals.add(new CArray(t,
 						new CDouble(loc.getX(), t),
@@ -1061,8 +1072,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -1140,8 +1151,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -1203,8 +1214,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -1262,8 +1273,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -1326,9 +1337,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException,
-				ExceptionType.CastException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRERangeException.class,
+				CRECastException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -1386,14 +1397,14 @@ public class PlayerManagement {
 					if (loc == null) {
 						throw ConfigRuntimeException.BuildException(
 								"Could not find the location of the given player (are you running in cmdline mode?)",
-								ExceptionType.NotFoundException, t);
+								CRENotFoundException.class, t);
 					}
 					pitch = loc.getPitch();
 				}
 				int g = Static.getInt32(args[0], t);
 				if (g < 0 || g > 3) {
 					throw ConfigRuntimeException.BuildException("The F specifed must be from 0 to 3",
-							ExceptionType.RangeException, t);
+							CRERangeException.class, t);
 				}
 				yaw = g * 90;
 			} else if (args.length == 2) {
@@ -1414,7 +1425,7 @@ public class PlayerManagement {
 					int g = Static.getInt32(args[1], t);
 					if (g < 0 || g > 3) {
 						throw ConfigRuntimeException.BuildException("The F specifed must be from 0 to 3",
-								ExceptionType.RangeException, t);
+								CRERangeException.class, t);
 					}
 					yaw = g * 90;
 				}
@@ -1428,14 +1439,14 @@ public class PlayerManagement {
 			//Error check our data
 			if (pitch > 90 || pitch < -90) {
 				throw ConfigRuntimeException.BuildException("pitch must be between -90 and 90",
-						ExceptionType.RangeException, t);
+						CRERangeException.class, t);
 			}
 			Static.AssertPlayerNonNull(toSet, t);
 			MCLocation l = toSet.getLocation();
 			if (l == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not find the location of the player (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			l = l.clone();
 			l.setPitch(pitch);
@@ -1471,9 +1482,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException,
-					ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class,
+					CRENotFoundException.class};
 		}
 
 		@Override
@@ -1507,7 +1518,7 @@ public class PlayerManagement {
 			if (gm == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not find the gamemode of the given player (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			String mode = gm.name();
 			return new CString(mode, t);
@@ -1533,8 +1544,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1571,7 +1582,7 @@ public class PlayerManagement {
 			try {
 				gm = MCGameMode.valueOf(mode.toUpperCase());
 			} catch (IllegalArgumentException e) {
-				throw ConfigRuntimeException.BuildException("Mode must be either " + StringUtils.Join(MCGameMode.values(), ", ", ", or "), ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Mode must be either " + StringUtils.Join(MCGameMode.values(), ", ", ", or "), CREFormatException.class, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setGameMode(gm);
@@ -1599,8 +1610,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -1652,8 +1663,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -1710,8 +1721,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRECastException.class};
 		}
 
 		@Override
@@ -1769,8 +1780,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -1822,8 +1833,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -1880,8 +1891,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -1934,9 +1945,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException,
-					ExceptionType.RangeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class,
+					CRERangeException.class};
 		}
 
 		@Override
@@ -1969,7 +1980,7 @@ public class PlayerManagement {
 				xp = Static.getInt32(args[0], t);
 			}
 			if(xp < 0) {
-				throw ConfigRuntimeException.BuildException("Experience can't be negative", ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("Experience can't be negative", CRERangeException.class, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			int score = m.getTotalExperience();
@@ -2000,8 +2011,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -2053,8 +2064,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRECastException.class};
 		}
 
 		@Override
@@ -2120,9 +2131,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException,
-						ExceptionType.RangeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRECastException.class,
+						CRERangeException.class};
 		}
 
 		@Override
@@ -2150,7 +2161,7 @@ public class PlayerManagement {
 			//player data to fix.
 			if (effect < 1 || effect > m.getMaxEffect()) {
 				throw ConfigRuntimeException.BuildException("Invalid effect ID recieved, must be from 1-" + m.getMaxEffect(),
-						ExceptionType.RangeException, t);
+						CRERangeException.class, t);
 			}
 
 			int strength = Static.getInt32(args[2], t);
@@ -2192,8 +2203,8 @@ public class PlayerManagement {
 	public static class get_peffect extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -2259,8 +2270,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -2295,7 +2306,7 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(m, t);
 			if (health < 0 || health > m.getMaxHealth()) {
 				throw ConfigRuntimeException.BuildException("Health must be between 0 and the player's max health (currently "
-						+ m.getMaxHealth() + " for " + m.getName() + ").", ExceptionType.RangeException, t);
+						+ m.getMaxHealth() + " for " + m.getName() + ").", CRERangeException.class, t);
 			}
 			m.setHealth(health);
 			return CVoid.VOID;
@@ -2323,8 +2334,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -2388,8 +2399,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -2440,8 +2451,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENotFoundException.class};
 		}
 
 		@Override
@@ -2466,7 +2477,7 @@ public class PlayerManagement {
 			if (pl == null) {
 				throw ConfigRuntimeException.BuildException(
 						this.getName() + " could not get the offline player (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			pl.setWhitelisted(whitelist);
 			return CVoid.VOID;
@@ -2504,8 +2515,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENotFoundException.class};
 		}
 
 		@Override
@@ -2529,7 +2540,7 @@ public class PlayerManagement {
 			if (pl == null) {
 				throw ConfigRuntimeException.BuildException(
 						this.getName() + " could not get the offline player (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			return CBoolean.get(pl.isBanned());
 		}
@@ -2558,8 +2569,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENotFoundException.class};
 		}
 
 		@Override
@@ -2583,7 +2594,7 @@ public class PlayerManagement {
 			if (pl == null) {
 				throw ConfigRuntimeException.BuildException(
 						this.getName() + " could not get the offline player (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			boolean ban = Static.getBoolean(args[1]);
 			pl.setBanned(ban);
@@ -2610,8 +2621,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRERangeException.class, CRECastException.class};
 		}
 
 		@Override
@@ -2646,7 +2657,7 @@ public class PlayerManagement {
 			}
 
 			if(speed < -1 || speed > 1) {
-				throw ConfigRuntimeException.BuildException("Speed must be between -1 and 1", ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("Speed must be between -1 and 1", CRERangeException.class, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 
@@ -2674,8 +2685,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -2731,8 +2742,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRERangeException.class, CRECastException.class};
 		}
 
 		@Override
@@ -2767,7 +2778,7 @@ public class PlayerManagement {
 			}
 
 			if(speed < -1 || speed > 1) {
-				throw ConfigRuntimeException.BuildException("Speed must be between -1 and 1", ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("Speed must be between -1 and 1", CRERangeException.class, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 
@@ -2795,8 +2806,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -2853,8 +2864,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -2902,8 +2913,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -2932,7 +2943,7 @@ public class PlayerManagement {
 				l = ObjectGenerator.GetGenerator().location(args[1], null, t);
 			}
 			if (m == null) {
-				throw ConfigRuntimeException.BuildException("That player is not online", ExceptionType.PlayerOfflineException, t);
+				throw ConfigRuntimeException.BuildException("That player is not online", CREPlayerOfflineException.class, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			MCLocation old = m.getCompassTarget();
@@ -2960,8 +2971,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -3011,8 +3022,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -3062,8 +3073,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRECastException.class};
 		}
 
 		@Override
@@ -3125,8 +3136,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -3208,8 +3219,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -3321,8 +3332,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -3376,10 +3387,10 @@ public class PlayerManagement {
 					hour = 0;
 				}
 				if (hour > 24) {
-					throw ConfigRuntimeException.BuildException("Invalid time provided", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Invalid time provided", CREFormatException.class, t);
 				}
 				if (minute > 59) {
-					throw ConfigRuntimeException.BuildException("Invalid time provided", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Invalid time provided", CREFormatException.class, t);
 				}
 				hour -= 6;
 				hour = hour % 24;
@@ -3390,7 +3401,7 @@ public class PlayerManagement {
 			try {
 				Long.valueOf(stime);
 			} catch (NumberFormatException e) {
-				throw ConfigRuntimeException.BuildException("Invalid time provided", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Invalid time provided", CREFormatException.class, t);
 			}
 			time = Long.parseLong(stime);
 			p.setPlayerTime(time, relative);
@@ -3418,8 +3429,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -3470,8 +3481,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -3508,8 +3519,8 @@ public class PlayerManagement {
 	public static class phas_storm extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -3558,8 +3569,8 @@ public class PlayerManagement {
 	public static class set_pstorm extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -3618,8 +3629,8 @@ public class PlayerManagement {
 	public static class set_list_name extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.LengthException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -3644,7 +3655,7 @@ public class PlayerManagement {
 			}
 			if (listName != null && listName.length() > 16) {
 				throw ConfigRuntimeException.BuildException("set_list_name([player,] name) expects name to be 16 characters or less",
-						Exceptions.ExceptionType.LengthException, t);
+						CRELengthException.class, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setPlayerListName(listName);
@@ -3680,8 +3691,8 @@ public class PlayerManagement {
 	public static class get_list_name extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -3748,8 +3759,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -3774,7 +3785,7 @@ public class PlayerManagement {
 			if (velocity == null) {
 				throw ConfigRuntimeException.BuildException(
 						"The players velocity could not be found (Are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			vector.set("magnitude", new CDouble(velocity.length(), t), t);
 			vector.set("x", new CDouble(velocity.X(), t), t);
@@ -3793,8 +3804,8 @@ public class PlayerManagement {
 	public static class set_pvelocity extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -3828,7 +3839,7 @@ public class PlayerManagement {
 						y = l.getY();
 						z = l.getZ();
 					} else {
-						throw ConfigRuntimeException.BuildException("Expecting an array, but \"" + args[offset].val() + "\" was given.", ExceptionType.CastException, t);
+						throw ConfigRuntimeException.BuildException("Expecting an array, but \"" + args[offset].val() + "\" was given.", CRECastException.class, t);
 					}
 					break;
 				}
@@ -3890,8 +3901,8 @@ public class PlayerManagement {
 	public static class psend_sign_text extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -3921,7 +3932,7 @@ public class PlayerManagement {
 				//Lines are in an array
 				CArray lineArray = Static.getArray(args[1 + offset], t);
 				if(lineArray.size() != 4) {
-					throw ConfigRuntimeException.BuildException("Line array must have 4 elements.", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Line array must have 4 elements.", CRECastException.class, t);
 				}
 				lines[0] = lineArray.get(0, t).val();
 				lines[1] = lineArray.get(1, t).val();
@@ -3965,8 +3976,8 @@ public class PlayerManagement {
 	public static class psend_block_change extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -4020,8 +4031,8 @@ public class PlayerManagement {
 	public static class phunger extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -4069,8 +4080,8 @@ public class PlayerManagement {
 	public static class set_phunger extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CREPlayerOfflineException.class, CRECastException.class};
 		}
 
 		@Override
@@ -4122,8 +4133,8 @@ public class PlayerManagement {
 	public static class psaturation extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -4171,8 +4182,8 @@ public class PlayerManagement {
 	public static class set_psaturation extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CREPlayerOfflineException.class, CRECastException.class};
 		}
 
 		@Override
@@ -4242,12 +4253,12 @@ public class PlayerManagement {
 				player = Static.GetUser(args[0].val(), t);
 			} else if (player == null) {
 				throw ConfigRuntimeException.BuildException(this.getName() + " requires a player as first argument when ran from console",
-						ExceptionType.InsufficientArgumentsException, t);
+						CREInsufficientArgumentsException.class, t);
 			}
 			if (player == null) {
 				throw ConfigRuntimeException.BuildException(
 						this.getName() + " failed to get an offline player (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			MCLocation loc = player.getBedSpawnLocation();
 			if (loc == null) {
@@ -4264,8 +4275,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientArgumentsException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -4306,10 +4317,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException,
-					ExceptionType.PlayerOfflineException, ExceptionType.FormatException,
-					ExceptionType.NullPointerException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class,
+					CREPlayerOfflineException.class, CREFormatException.class,
+					CRENullPointerException.class};
 		}
 
 		@Override
@@ -4346,7 +4357,7 @@ public class PlayerManagement {
 					locationIndex = 0;
 				} else {
 					throw ConfigRuntimeException.BuildException("Expecting an array in set_pbed_location",
-							ExceptionType.CastException, t);
+							CRECastException.class, t);
 				}
 			} else if (args.length == 2) {
 				if (args[1] instanceof CArray) {
@@ -4360,7 +4371,7 @@ public class PlayerManagement {
 					forced = Static.getBoolean(args[1]);
 				} else {
 					throw ConfigRuntimeException.BuildException("Expecting an array in set_pbed_location",
-							ExceptionType.CastException, t);
+							CRECastException.class, t);
 				}
 			} else if (args.length == 3) {
 				if (args[1] instanceof CArray) {
@@ -4404,7 +4415,7 @@ public class PlayerManagement {
 				if (l == null) {
 					throw ConfigRuntimeException.BuildException(
 							"The given player has a null location (are you running from cmdline mode?)",
-							ExceptionType.NullPointerException , t);
+							CRENullPointerException.class , t);
 				}
 				l.setX(Static.getNumber(args[locationIndex], t));
 				l.setY(Static.getNumber(args[locationIndex + 1], t) + 1);
@@ -4435,8 +4446,8 @@ public class PlayerManagement {
 			}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -4489,8 +4500,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 	}
 
 		@Override
@@ -4524,8 +4535,8 @@ public class PlayerManagement {
 	public static class get_offline_players extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -4583,8 +4594,8 @@ public class PlayerManagement {
 	public static class phas_played extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -4638,8 +4649,8 @@ public class PlayerManagement {
 	public static class pfirst_played extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -4701,8 +4712,8 @@ public class PlayerManagement {
 	public static class plast_played extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -4762,8 +4773,8 @@ public class PlayerManagement {
 	public static class get_player_from_entity_id extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -4811,8 +4822,8 @@ public class PlayerManagement {
 	public static class save_players extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -4872,8 +4883,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.IllegalArgumentException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -4899,7 +4910,7 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(p, t);
 			if(!p.getAllowFlight()) {
 				throw ConfigRuntimeException.BuildException("Player must have the ability to fly. Set with set_pflight()",
-						ExceptionType.IllegalArgumentException, t);
+						CREIllegalArgumentException.class, t);
 			}
 			// This is needed in order for the player to enter flight mode whilst standing on the ground.
 			if(flight
@@ -4942,8 +4953,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.IllegalArgumentException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -4967,7 +4978,7 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(p, t);
 			if(p.getGameMode() != MCGameMode.SPECTATOR) {
 				throw ConfigRuntimeException.BuildException("Player must be in spectator mode.",
-						ExceptionType.IllegalArgumentException, t);
+						CREIllegalArgumentException.class, t);
 			}
 			MCEntity e = p.getSpectatorTarget();
 			if(e == null) {
@@ -5003,9 +5014,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.IllegalArgumentException,
-					ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREIllegalArgumentException.class,
+					CREBadEntityException.class};
 		}
 
 		@Override
@@ -5031,7 +5042,7 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(p, t);
 			if(p.getGameMode() != MCGameMode.SPECTATOR) {
 				throw ConfigRuntimeException.BuildException("Player must be in spectator mode.",
-						ExceptionType.IllegalArgumentException, t);
+						CREIllegalArgumentException.class, t);
 			}
 			if(args[offset] instanceof CNull) {
 				p.setSpectatorTarget(null);

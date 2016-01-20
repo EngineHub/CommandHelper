@@ -14,14 +14,13 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.functions.DataHandling;
-import com.laytonsmith.core.functions.Exceptions;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -68,7 +67,7 @@ public class Procedure implements Cloneable {
         }
         this.tree = tree;
         if (!this.name.matches("^_[a-zA-Z0-9]+[a-zA-Z_0-9]*")) {
-            throw ConfigRuntimeException.BuildException("Procedure names must start with an underscore, and may only contain letters, underscores, and digits. (Found " + this.name + ")", ExceptionType.FormatException, t);
+            throw ConfigRuntimeException.BuildException("Procedure names must start with an underscore, and may only contain letters, underscores, and digits. (Found " + this.name + ")", CREFormatException.class, t);
         }
         //Let's look through the tree now, and see if this is possibly constant or not.
         //If it is, it may or may not help us during compilation, but if it's not,

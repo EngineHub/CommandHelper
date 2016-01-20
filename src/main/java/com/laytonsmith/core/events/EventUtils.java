@@ -7,11 +7,11 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.BoundEvent.Priority;
+import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import com.laytonsmith.core.functions.Exceptions;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -56,7 +56,7 @@ public final class EventUtils {
 					throw ConfigRuntimeException.BuildException("Cannot have duplicate IDs defined."
 							+ " (Tried to define an event handler with id \"" + b.getId() + "\" at " + b.getTarget() + ","
 							+ " but it has already been defined at " + bb.getTarget() + ")",
-							Exceptions.ExceptionType.BindException, b.getTarget());
+							CREBindException.class, b.getTarget());
 				}
 			}
 		}
@@ -156,7 +156,7 @@ public final class EventUtils {
 								// The event will stay null, and be caught below
 							}
 							if(convertedEvent == null){
-								throw ConfigRuntimeException.BuildException(eventName + " doesn't support the use of trigger() yet.", Exceptions.ExceptionType.BindException, t);
+								throw ConfigRuntimeException.BuildException(eventName + " doesn't support the use of trigger() yet.", CREBindException.class, t);
 							} else if (driver.matches(b.getPrefilter(), convertedEvent)) {
 								toRun.add(b);
 							}

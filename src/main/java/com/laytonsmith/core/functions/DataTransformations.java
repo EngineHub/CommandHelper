@@ -14,9 +14,9 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -46,8 +46,8 @@ public class DataTransformations {
 	public static class json_encode extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -96,8 +96,8 @@ public class DataTransformations {
 	public static class json_decode extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -147,8 +147,8 @@ public class DataTransformations {
 	public static class yml_encode extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -176,7 +176,7 @@ public class DataTransformations {
 			try{
 				return new CString(yaml.dump(Construct.GetPOJO(ca)), t);
 			} catch(ClassCastException ex){
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CRECastException.class, t);
 			}
 		}
 
@@ -206,8 +206,8 @@ public class DataTransformations {
 	public static class yml_decode extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -264,8 +264,8 @@ public class DataTransformations {
 	public static class ini_encode extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class};
 		}
 
 		@Override
@@ -343,8 +343,8 @@ public class DataTransformations {
 	public static class ini_decode extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -409,8 +409,8 @@ public class DataTransformations {
 	public static class xml_read extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -465,7 +465,7 @@ public class DataTransformations {
 	public static class xml_write extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 

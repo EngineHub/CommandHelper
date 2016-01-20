@@ -3,10 +3,8 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
-import com.laytonsmith.core.constructs.Target;
 import java.util.HashMap;
 import java.util.Map;
 

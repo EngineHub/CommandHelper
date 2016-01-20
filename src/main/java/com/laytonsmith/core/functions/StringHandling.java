@@ -6,14 +6,11 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
-import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
@@ -31,12 +28,15 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.Sizable;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
@@ -75,8 +75,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -170,8 +170,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -292,8 +292,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -375,8 +375,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -429,8 +429,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -486,8 +486,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -543,8 +543,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -600,8 +600,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -662,8 +662,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -685,7 +685,7 @@ public class StringHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (!(args[0] instanceof CString)) {
 				throw ConfigRuntimeException.BuildException(this.getName() + " expects a string as first argument, but type "
-						+ args[0].typeof() + " was found.", ExceptionType.FormatException, t);
+						+ args[0].typeof() + " was found.", CREFormatException.class, t);
 			}
 			return new CString(args[0].val().toUpperCase(), t);
 		}
@@ -725,8 +725,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -748,7 +748,7 @@ public class StringHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (!(args[0] instanceof CString)) {
 				throw ConfigRuntimeException.BuildException(this.getName() + " expects a string as first argument, but type "
-						+ args[0].typeof() + " was found.", ExceptionType.FormatException, t);
+						+ args[0].typeof() + " was found.", CREFormatException.class, t);
 			}
 			return new CString(args[0].val().toLowerCase(), t);
 		}
@@ -791,8 +791,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CRECastException.class};
 		}
 
 		@Override
@@ -824,7 +824,7 @@ public class StringHandling {
 				return new CString(s.substring(begin, end), t);
 			} catch (IndexOutOfBoundsException e) {
 				throw ConfigRuntimeException.BuildException("The indices given are not valid for string '" + args[0].val() + "'",
-						ExceptionType.RangeException, t);
+						CRERangeException.class, t);
 			}
 		}
 
@@ -866,8 +866,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.NullPointerException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENullPointerException.class};
 		}
 
 		@Override
@@ -932,8 +932,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1012,10 +1012,10 @@ public class StringHandling {
 	public static class lsprintf extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException,
-						ExceptionType.InsufficientArgumentsException,
-						ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class,
+						CREInsufficientArgumentsException.class,
+						CRECastException.class};
 		}
 
 		@Override
@@ -1031,7 +1031,7 @@ public class StringHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args.length < 2) {
-				throw ConfigRuntimeException.BuildException(getName() + " expects 2 or more arguments", ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " expects 2 or more arguments", CREInsufficientArgumentsException.class, t);
 			}
 			int numArgs = args.length;
 			
@@ -1045,7 +1045,7 @@ public class StringHandling {
 			}
 			if(locale == null) {
 				throw ConfigRuntimeException.BuildException("The given locale was not found on your system: "
-						+ countryCode, ExceptionType.FormatException, t);
+						+ countryCode, CREFormatException.class, t);
 			}
 			
 			// Handle the formatting.
@@ -1055,18 +1055,18 @@ public class StringHandling {
 			try{
 				parsed = parse(formatString, t);
 			} catch(IllegalFormatException e){
-				throw ConfigRuntimeException.BuildException(e.getMessage(), ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t);
 			}
 			if (requiredArgs(parsed) != numArgs - 2) {
 				throw ConfigRuntimeException.BuildException("The specified format string: \"" + formatString + "\""
 						+ " expects " + requiredArgs(parsed) + " argument(s), but " + (numArgs - 2) + " were provided.",
-						ExceptionType.InsufficientArgumentsException, t);
+						CREInsufficientArgumentsException.class, t);
 			}
 
 			List<Construct> flattenedArgs = new ArrayList<Construct>();
 			if (numArgs == 3 && args[2] instanceof CArray) {
 				if (((CArray) args[2]).inAssociativeMode()) {
-					throw ConfigRuntimeException.BuildException("If the second argument to " + getName() + " is an array, it may not be associative.", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("If the second argument to " + getName() + " is an array, it may not be associative.", CRECastException.class, t);
 				} else {
 					for (int i = 0; i < ((CArray) args[2]).size(); i++) {
 						flattenedArgs.add(((CArray) args[2]).get(i, t));
@@ -1273,7 +1273,7 @@ public class StringHandling {
 					List<FormatString> parsed = parse(children.get(1).getData().val(), t);
 					if (requiredArgs(parsed) != children.size() - 2) {
 						throw ConfigRuntimeException.BuildException("The specified format string: \"" + children.get(1).getData().val() + "\""
-								+ " expects " + requiredArgs(parsed) + " argument(s), but " + (children.size() - 2) + " were provided.", ExceptionType.InsufficientArgumentsException, t);
+								+ " expects " + requiredArgs(parsed) + " argument(s), but " + (children.size() - 2) + " were provided.", CREInsufficientArgumentsException.class, t);
 					}
 					//If the arguments are constant, we can actually check them too
 					for(int i = 2; i < children.size(); i++){
@@ -1284,7 +1284,7 @@ public class StringHandling {
 						}
 					}
 				} catch (IllegalFormatException e) {
-					throw ConfigRuntimeException.BuildException(e.getMessage(), ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t);
 				}
 				return me;
 			} else {
@@ -1362,7 +1362,7 @@ public class StringHandling {
 			} catch(ReflectionException e){
 				if(e.getCause() instanceof InvocationTargetException){
 					Throwable th = e.getCause().getCause();
-					throw ConfigRuntimeException.BuildException("A format exception was thrown for the argument \"" + format + "\": " + th.getClass().getSimpleName() + ": " + th.getMessage(), ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("A format exception was thrown for the argument \"" + format + "\": " + th.getClass().getSimpleName() + ": " + th.getMessage(), CREFormatException.class, t);
 				} else {
 					//This is unexpected
 					throw ConfigRuntimeException.CreateUncatchableException(e.getMessage(), t);
@@ -1511,8 +1511,8 @@ public class StringHandling {
 	public static class string_get_bytes extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1567,8 +1567,8 @@ public class StringHandling {
 	public static class string_from_bytes extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1622,8 +1622,8 @@ public class StringHandling {
 	public static class string_append extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1639,7 +1639,7 @@ public class StringHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args.length < 2){
-				throw ConfigRuntimeException.BuildException(getName() + " must have 2 arguments at minimum", ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " must have 2 arguments at minimum", CREInsufficientArgumentsException.class, t);
 			}
 			CResource m = (CResource) args[0];
 			StringBuffer buf = ResourceManager.GetResource(m, StringBuffer.class, t);
@@ -1710,8 +1710,8 @@ public class StringHandling {
 	@api public static class char_from_unicode extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -1775,8 +1775,8 @@ public class StringHandling {
 	@api public static class unicode_from_char extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -1831,8 +1831,8 @@ public class StringHandling {
 	@api public static class levenshtein extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override

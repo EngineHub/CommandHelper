@@ -17,11 +17,13 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.ReadOnlyException;
@@ -70,8 +72,8 @@ public class Persistence {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.IOException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREIOException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -100,20 +102,20 @@ public class Persistence {
 					pc = key.charAt(i - 1);
 				}
 				if ((i == 0 || i == key.length() - 1 || pc == '.') && c == '.') {
-					throw ConfigRuntimeException.BuildException("Periods may only be used as seperators between namespaces.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Periods may only be used as seperators between namespaces.", CREFormatException.class, t);
 				}
 				if (c != '_' && c != '.' && !Character.isLetterOrDigit(c)) {
 					throw ConfigRuntimeException.BuildException("Param 1 in store_value must only contain letters, digits, underscores, or dots, (which denote namespaces).",
-							ExceptionType.FormatException, t);
+							CREFormatException.class, t);
 				}
 			}
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Storing: " + key + " -> " + value, t);
 			try {
 				env.getEnv(GlobalEnv.class).GetPersistenceNetwork().set(env.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + key).split("\\."), value);
 			} catch(IllegalArgumentException e){
-				throw ConfigRuntimeException.BuildException(e.getMessage(), ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t);
 			} catch (Exception ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
 			}
 			return CVoid.VOID;
 		}
@@ -152,8 +154,8 @@ public class Persistence {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIOException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -176,9 +178,9 @@ public class Persistence {
 				try {
 					obj = env.getEnv(GlobalEnv.class).GetPersistenceNetwork().get(("storage." + namespace).split("\\."));
 				} catch (DataSourceException ex) {
-					throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t, ex);
+					throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
 				} catch(IllegalArgumentException e){
-					throw ConfigRuntimeException.BuildException(e.getMessage(), ExceptionType.FormatException, t, e);
+					throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t, e);
 				}
 				if (obj == null) {
 					return CNull.NULL;
@@ -232,8 +234,8 @@ public class Persistence {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIOException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -265,9 +267,9 @@ public class Persistence {
 			try {
 				list = p.getNamespace(keyChain.toArray(new String[keyChain.size()]));
 			} catch (DataSourceException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
 			} catch(IllegalArgumentException e){
-				throw ConfigRuntimeException.BuildException(e.getMessage(), ExceptionType.FormatException, t, e);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t, e);
 			}
 			CArray ca = CArray.GetAssociativeArray(t);
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, list.size() + " value(s) are being returned", t);
@@ -314,8 +316,8 @@ public class Persistence {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIOException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -338,9 +340,9 @@ public class Persistence {
 			try {
 				return CBoolean.get(env.getEnv(GlobalEnv.class).GetPersistenceNetwork().hasKey(("storage." + GetNamespace(args, null, getName(), t)).split("\\.")));
 			} catch (DataSourceException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
 			} catch(IllegalArgumentException e){
-				throw ConfigRuntimeException.BuildException(e.getMessage(), ExceptionType.FormatException, t, e);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t, e);
 			}
 		}
 
@@ -370,8 +372,8 @@ public class Persistence {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIOException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -396,13 +398,13 @@ public class Persistence {
 			try {
 				environment.getEnv(GlobalEnv.class).GetPersistenceNetwork().clearKey(environment.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + namespace).split("\\."));
 			} catch (DataSourceException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
 			} catch (ReadOnlyException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
 			} catch (IOException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
 			} catch(IllegalArgumentException e){
-				throw ConfigRuntimeException.BuildException(e.getMessage(), ExceptionType.FormatException, t, e);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t, e);
 			}
 			return CVoid.VOID;
 		}
@@ -424,7 +426,7 @@ public class Persistence {
 	 */
 	private static String GetNamespace(Construct[] args, Integer exclude, String name, Target t) {
 		if (exclude != null && args.length < 2 || exclude == null && args.length < 1) {
-			throw ConfigRuntimeException.BuildException(name + " was not provided with enough arguments. Check the documentation, and try again.", ExceptionType.InsufficientArgumentsException, t);
+			throw ConfigRuntimeException.BuildException(name + " was not provided with enough arguments. Check the documentation, and try again.", CREInsufficientArgumentsException.class, t);
 		}
 		boolean first = true;
 		StringBuilder b = new StringBuilder();

@@ -29,12 +29,13 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.taskmanager.CoreTaskType;
 import com.laytonsmith.core.taskmanager.TaskManager;
@@ -97,8 +98,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -142,8 +143,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -190,8 +191,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -246,8 +247,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -270,7 +271,7 @@ public class Scheduling {
 				delay = Static.getInt(args[1], t);
 			}
 			if (!(args[1 + offset] instanceof CClosure)) {
-				throw ConfigRuntimeException.BuildException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " expects a closure to be sent as the second argument", CRECastException.class, t);
 			}
 			final CClosure c = (CClosure) args[1 + offset];
 			final AtomicInteger ret = new AtomicInteger(-1);
@@ -340,8 +341,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -359,7 +360,7 @@ public class Scheduling {
 			final TaskManager taskManager = environment.getEnv(GlobalEnv.class).GetTaskManager();
 			long time = Static.getInt(args[0], t);
 			if (!(args[1] instanceof CClosure)) {
-				throw ConfigRuntimeException.BuildException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " expects a closure to be sent as the second argument", CRECastException.class, t);
 			}
 			final CClosure c = (CClosure) args[1];
 			final AtomicInteger ret = new AtomicInteger(-1);
@@ -445,8 +446,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInsufficientArgumentsException.class};
 		}
 
 		@Override
@@ -466,7 +467,7 @@ public class Scheduling {
 			} else if (args.length == 1) {
 				StaticLayer.ClearFutureRunnable(Static.getInt32(args[0], t));
 			} else {
-				throw ConfigRuntimeException.BuildException("No id was passed to clear_task, and it's not running inside a task either.", ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("No id was passed to clear_task, and it's not running inside a task either.", CREInsufficientArgumentsException.class, t);
 			}
 			return CVoid.VOID;
 		}
@@ -537,8 +538,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -576,7 +577,7 @@ public class Scheduling {
 				}
 				if(locale == null) {
 					throw ConfigRuntimeException.BuildException("The given locale was not found on your system: "
-							+ countryCode, ExceptionType.FormatException, t);
+							+ countryCode, CREFormatException.class, t);
 				}
 			}
 			SimpleDateFormat dateFormat;
@@ -614,8 +615,8 @@ public class Scheduling {
 	public static class parse_date extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -704,8 +705,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1065,8 +1066,8 @@ public class Scheduling {
 	public static class clear_cron extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CRECastException.class};
 		}
 
 		@Override

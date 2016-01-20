@@ -18,9 +18,11 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,8 +47,8 @@ public class Commands {
 	public static class set_tabcompleter extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -65,12 +67,12 @@ public class Commands {
 			MCCommandMap map = s.getCommandMap();
 			if (map == null) {
 				throw ConfigRuntimeException.BuildException(this.getName() + " is not supported in this mode (CommandMap not found).",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			MCCommand cmd = map.getCommand(args[0].val());
 			if (cmd == null) {
 				throw ConfigRuntimeException.BuildException("Command not found, did you forget to register it?",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			customExec(t, environment, cmd, args[1]);
 			return CVoid.VOID;
@@ -89,7 +91,7 @@ public class Commands {
 				onTabComplete.put(cmd.getName(), (CClosure) arg);
 			} else {
 				throw ConfigRuntimeException.BuildException("At this time, only closures are accepted as tabcompleters",
-						ExceptionType.FormatException, t);
+						CREFormatException.class, t);
 			}
 		}
 
@@ -122,8 +124,8 @@ public class Commands {
 	public static class unregister_command extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENotFoundException.class};
 		}
 
 		@Override
@@ -141,12 +143,12 @@ public class Commands {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if (map == null) {
 				throw ConfigRuntimeException.BuildException(this.getName() + " is not supported in this mode (CommandMap not found).",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			MCCommand cmd = map.getCommand(args[0].val());
 			if (cmd == null) {
 				throw ConfigRuntimeException.BuildException("Command not found, did you forget to register it?",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			return CBoolean.get(map.unregister(cmd));
 		}
@@ -176,9 +178,9 @@ public class Commands {
 	public static class register_command extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException,
-					ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class,
+					CRENotFoundException.class};
 		}
 
 		@Override
@@ -196,7 +198,7 @@ public class Commands {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if (map == null) {
 				throw ConfigRuntimeException.BuildException(this.getName() + " is not supported in this mode (CommandMap not found).",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			MCCommand cmd = map.getCommand(args[0].val().toLowerCase());
 			boolean isnew = false;
@@ -240,7 +242,7 @@ public class Commands {
 				}
 				return CBoolean.get(success);
 			} else {
-				throw ConfigRuntimeException.BuildException("Arg 2 was expected to be an array.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Arg 2 was expected to be an array.", CREFormatException.class, t);
 			}
 		}
 
@@ -316,8 +318,8 @@ public class Commands {
 	public static class set_executor extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -335,12 +337,12 @@ public class Commands {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if (map == null) {
 				throw ConfigRuntimeException.BuildException(this.getName() + " is not supported in this mode (CommandMap not found).",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			MCCommand cmd = map.getCommand(args[0].val());
 			if (cmd == null) {
 				throw ConfigRuntimeException.BuildException("Command not found did you forget to register it?",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			customExec(t, environment, cmd, args[1]);
 			return CVoid.VOID;
@@ -359,7 +361,7 @@ public class Commands {
 				onCommand.put(cmd.getName(), (CClosure) arg);
 			} else {
 				throw ConfigRuntimeException.BuildException("At this time, only closures are accepted as command executors.",
-						ExceptionType.FormatException, t);
+						CREFormatException.class, t);
 			}
 		}
 
@@ -391,8 +393,8 @@ public class Commands {
 	public static class get_commands extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[0];
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -462,8 +464,8 @@ public class Commands {
 	public static class clear_commands extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[0];
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override

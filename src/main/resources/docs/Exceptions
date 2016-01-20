@@ -168,4 +168,10 @@ try {
 There is an old, now deprecated usage as well, see the article [[CommandHelper/Staged/OldExceptions|here]]
 for information on how to use it. For new code, however, the new format should always be used.
 
+== Known Exception Types ==
+
+Exception types can be added by extension authors, but here is a list (and documentation) for all known exceptions.
+
+%%EXCEPTION_TYPES%%
+
 {{LearningTrail}}

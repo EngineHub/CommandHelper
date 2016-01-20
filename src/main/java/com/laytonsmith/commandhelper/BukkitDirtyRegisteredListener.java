@@ -2,7 +2,6 @@
 
 package com.laytonsmith.commandhelper;
 
-import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;

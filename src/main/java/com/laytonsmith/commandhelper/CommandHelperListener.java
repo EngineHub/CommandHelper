@@ -26,22 +26,17 @@ import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.InternalException;
 import com.laytonsmith.core.Prefs;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.persistence.DataSourceException;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

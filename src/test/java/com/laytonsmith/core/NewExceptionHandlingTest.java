@@ -14,7 +14,6 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static org.mockito.Mockito.*;
-import org.mockito.verification.VerificationMode;
 
 /**
  * 

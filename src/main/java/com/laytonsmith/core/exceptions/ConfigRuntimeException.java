@@ -1,5 +1,6 @@
 package com.laytonsmith.core.exceptions;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.TermColors;
@@ -20,38 +21,8 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
-import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
-import com.laytonsmith.core.exceptions.CRE.CREBadEntityTypeException;
-import com.laytonsmith.core.exceptions.CRE.CREBindException;
-import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
-import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
-import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.exceptions.CRE.CREIOException;
-import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
-import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
-import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
-import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
-import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
-import com.laytonsmith.core.exceptions.CRE.CREInvalidPluginException;
-import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
-import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
-import com.laytonsmith.core.exceptions.CRE.CRELengthException;
-import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
-import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
-import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
-import com.laytonsmith.core.exceptions.CRE.CREPluginChannelException;
-import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
-import com.laytonsmith.core.exceptions.CRE.CRERangeException;
-import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
-import com.laytonsmith.core.exceptions.CRE.CRESQLException;
-import com.laytonsmith.core.exceptions.CRE.CREScoreboardException;
-import com.laytonsmith.core.exceptions.CRE.CRESecurityException;
-import com.laytonsmith.core.exceptions.CRE.CREShellException;
-import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
-import com.laytonsmith.core.exceptions.CRE.CREUnageableMobException;
-import com.laytonsmith.core.exceptions.CRE.CREUntameableMobException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -402,17 +373,17 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * Creates a new ConfigRuntimeException. This method is partially deprecated.
 	 * It should not be used for new code, and it should eventually be phased out, however
 	 * there will be a very long deprecation period. Instead, instantiate an exception
-	 * of type {@link AbstractCREException}.
+	 * of type {@link CREThrowable}.
 	 *
 	 * @param msg The message to be displayed
 	 * @param ex The type of exception this is, as seen by user level code
 	 * @param t The code target this exception is being thrown from
 	 * @return An exception of the appropriate subclass
 	 * @deprecated Instead, instantiate an exception
-	 * of type {@link AbstractCREException}.
+	 * of type {@link CREThrowable}.
 	 */
 	@Deprecated
-	public static ConfigRuntimeException BuildException(String msg, ExceptionType ex, Target t) {
+	public static ConfigRuntimeException BuildException(String msg, Class<? extends CREThrowable> ex, Target t) {
 		return BuildException(msg, ex, t, null);
 	}
 
@@ -420,7 +391,7 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * Creates a new ConfigRuntimeException. This method is partially deprecated.
 	 * It should not be used for new code, and it should eventually be phased out, however
 	 * there will be a very long deprecation period. Instead, instantiate an exception
-	 * of type {@link AbstractCREException}.
+	 * of type {@link CREThrowable}.
 	 *
 	 * @param msg The message to be displayed
 	 * @param ex The type of exception this is, as seen by user level code
@@ -430,73 +401,11 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * MethodScript errors) this version should always be preferred.
 	 * @return An exception of the appropriate subclass
 	 * @deprecated Instead, instantiate an exception
-	 * of type {@link AbstractCREException}.
+	 * of type {@link CREThrowable}.
 	 */
 	@Deprecated
-	public static ConfigRuntimeException BuildException(String msg, ExceptionType ex, Target t, Throwable cause) {
-		switch(ex){
-			case BadEntityException:
-				return new CREBadEntityException(msg, t, cause);
-			case BadEntityTypeException:
-				return new CREBadEntityTypeException(msg, t, cause);
-			case BindException:
-				return new CREBindException(msg, t, cause);
-			case CastException:
-				return new CRECastException(msg, t, cause);
-			case EnchantmentException:
-				return new CREEnchantmentException(msg, t, cause);
-			case FormatException:
-				return new CREFormatException(msg, t, cause);
-			case IOException:
-				return new CREIOException(msg, t, cause);
-			case IllegalArgumentException:
-				return new CREIllegalArgumentException(msg, t, cause);
-			case IncludeException:
-				return new CREIncludeException(msg, t, cause);
-			case IndexOverflowException:
-				return new CREIndexOverflowException(msg, t, cause);
-			case InsufficientArgumentsException:
-				return new CREInsufficientArgumentsException(msg, t, cause);
-			case InsufficientPermissionException:
-				return new CREInsufficientPermissionException(msg, t, cause);
-			case InvalidPluginException:
-				return new CREInvalidPluginException(msg, t, cause);
-			case InvalidProcedureException:
-				return new CREInvalidProcedureException(msg, t, cause);
-			case InvalidWorldException:
-				return new CREInvalidWorldException(msg, t, cause);
-			case LengthException:
-				return new CRELengthException(msg, t, cause);
-			case NotFoundException:
-				return new CRENotFoundException(msg, t, cause);
-			case NullPointerException:
-				return new CRENullPointerException(msg, t, cause);
-			case PlayerOfflineException:
-				return new CREPlayerOfflineException(msg, t, cause);
-			case PluginChannelException:
-				return new CREPluginChannelException(msg, t, cause);
-			case PluginInternalException:
-				return new CREPluginInternalException(msg, t, cause);
-			case RangeException:
-				return new CRERangeException(msg, t, cause);
-			case ReadOnlyException:
-				return new CREReadOnlyException(msg, t, cause);
-			case SQLException:
-				return new CRESQLException(msg, t, cause);
-			case ScoreboardException:
-				return new CREScoreboardException(msg, t, cause);
-			case SecurityException:
-				return new CRESecurityException(msg, t, cause);
-			case ShellException:
-				return new CREShellException(msg, t, cause);
-			case StackOverflowError:
-				return new CREStackOverflowError(msg, t, cause);
-			case UnageableMobException:
-				return new CREUnageableMobException(msg, t, cause);
-			case UntameableMobException:
-				return new CREUntameableMobException(msg, t, cause);
-		}
-		throw new Error("Unexpected exception type");
+	public static ConfigRuntimeException BuildException(String msg, Class<? extends CREThrowable> ex, Target t, Throwable cause) {
+		return ReflectionUtils.newInstance(ex, new Class[]{String.class, Target.class, Throwable.class}, new Object[]{msg, t, cause});
 	}
 
 	/**

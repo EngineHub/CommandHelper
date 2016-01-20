@@ -8,7 +8,6 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -29,8 +28,13 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -39,7 +43,6 @@ import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.DataHandling.array;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -77,12 +80,12 @@ public class ArrayHandling {
 			if (args[0] instanceof CArray && !(args[0] instanceof CMutablePrimitive)) {
 				return new CInt(((CArray) args[0]).size(), t);
 			}
-			throw ConfigRuntimeException.BuildException("Argument 1 of array_size must be an array", ExceptionType.CastException, t);
+			throw ConfigRuntimeException.BuildException("Argument 1 of array_size must be an array", CRECastException.class, t);
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -154,7 +157,7 @@ public class ArrayHandling {
 					if (((CSlice) index).getStart() == 0 && ((CSlice) index).getFinish() == -1) {
 						return ca.deepClone(t);
 					} else if(ca.inAssociativeMode()) {
-						throw ConfigRuntimeException.BuildException("Array slices are not allowed with an associative array", ExceptionType.CastException, t);
+						throw ConfigRuntimeException.BuildException("Array slices are not allowed with an associative array", CRECastException.class, t);
 					}
 					
 					//It's a range
@@ -182,7 +185,7 @@ public class ArrayHandling {
 						}
 						return na;
 					} catch (NumberFormatException e) {
-						throw ConfigRuntimeException.BuildException("Ranges must be integer numbers, i.e., [0..5]", ExceptionType.CastException, t);
+						throw ConfigRuntimeException.BuildException("Ranges must be integer numbers, i.e., [0..5]", CRECastException.class, t);
 					}
 				} else {
 					try {
@@ -248,7 +251,7 @@ public class ArrayHandling {
 						}
 						return new CString(b.toString(), t);
 					} catch (NumberFormatException e) {
-						throw ConfigRuntimeException.BuildException("Ranges must be integer numbers, i.e., [0..5]", ExceptionType.CastException, t);
+						throw ConfigRuntimeException.BuildException("Ranges must be integer numbers, i.e., [0..5]", CRECastException.class, t);
 					}
 				} else {
 					try {
@@ -257,25 +260,25 @@ public class ArrayHandling {
 						if (e instanceof CRECastException) {
 							if(args[0] instanceof CArray){
 								throw ConfigRuntimeException.BuildException("Expecting an integer index for the array, but found \"" + index
-										+ "\". (Array is not associative, and cannot accept string keys here.)", ExceptionType.CastException, t);
+										+ "\". (Array is not associative, and cannot accept string keys here.)", CRECastException.class, t);
 							} else {
-								throw ConfigRuntimeException.BuildException("Expecting an array, but \"" + args[0] + "\" was found.", ExceptionType.CastException, t);
+								throw ConfigRuntimeException.BuildException("Expecting an array, but \"" + args[0] + "\" was found.", CRECastException.class, t);
 							}
 						} else {
 							throw e;
 						}
 					} catch (StringIndexOutOfBoundsException e) {
-						throw ConfigRuntimeException.BuildException("No index at " + index, ExceptionType.RangeException, t);
+						throw ConfigRuntimeException.BuildException("No index at " + index, CRERangeException.class, t);
 					}
 				}
 			} else {
-				throw ConfigRuntimeException.BuildException("Argument 1 of array_get must be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Argument 1 of array_get must be an array", CRECastException.class, t);
 			}
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.IndexOverflowException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -307,7 +310,7 @@ public class ArrayHandling {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			if(args.length == 0) {
-				throw ConfigRuntimeException.BuildException("Argument 1 of array_get must be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Argument 1 of array_get must be an array", CRECastException.class, t);
 			}
 			if (args[0] instanceof ArrayAccess) {
 				ArrayAccess aa = (ArrayAccess) args[0];
@@ -369,12 +372,12 @@ public class ArrayHandling {
 			Construct index = parent.seval(nodes[1], env);
 			Construct value = parent.seval(nodes[2], env);
 			if(!(array instanceof CArray)){
-				throw ConfigRuntimeException.BuildException("Argument 1 of array_set must be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Argument 1 of array_set must be an array", CRECastException.class, t);
 			}
 			try {
 				((CArray)array).set(index, value, t);
 			} catch (IndexOutOfBoundsException e) {
-				throw ConfigRuntimeException.BuildException("The index " + index.asString().getQuote() + " is out of bounds", ExceptionType.IndexOverflowException, t);
+				throw ConfigRuntimeException.BuildException("The index " + index.asString().getQuote() + " is out of bounds", CREIndexOverflowException.class, t);
 			}
 			return value;
 		}
@@ -385,16 +388,16 @@ public class ArrayHandling {
 				try {
 					((CArray) args[0]).set(args[1], args[2], t);
 				} catch (IndexOutOfBoundsException e) {
-					throw ConfigRuntimeException.BuildException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, t);
+					throw ConfigRuntimeException.BuildException("The index " + args[1].val() + " is out of bounds", CREIndexOverflowException.class, t);
 				}
 				return args[2];
 			}
-			throw ConfigRuntimeException.BuildException("Argument 1 of array_set must be an array", ExceptionType.CastException, t);
+			throw ConfigRuntimeException.BuildException("Argument 1 of array_set must be an array", CRECastException.class, t);
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.IndexOverflowException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -445,7 +448,7 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length < 2) {
-				throw ConfigRuntimeException.BuildException("At least 2 arguments must be provided to array_push", ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("At least 2 arguments must be provided to array_push", CREInsufficientArgumentsException.class, t);
 			}
 			if (args[0] instanceof CArray) {
 				CArray array = (CArray)args[0];
@@ -461,12 +464,12 @@ public class ArrayHandling {
 				}
 				return CVoid.VOID;
 			}
-			throw ConfigRuntimeException.BuildException("Argument 1 of array_push must be an array", ExceptionType.CastException, t);
+			throw ConfigRuntimeException.BuildException("Argument 1 of array_push must be an array", CRECastException.class, t);
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -508,8 +511,8 @@ public class ArrayHandling {
 	public static class array_insert extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.IndexOverflowException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
@@ -546,7 +549,7 @@ public class ArrayHandling {
 			} catch(IllegalArgumentException e){
 				throw new CRECastException(e.getMessage(), t);
 			} catch(IndexOutOfBoundsException ex){
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IndexOverflowException, t);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIndexOverflowException.class, t);
 			}
 			return CVoid.VOID;
 		}
@@ -613,13 +616,13 @@ public class ArrayHandling {
 				}
 				return CBoolean.FALSE;
 			} else {
-				throw ConfigRuntimeException.BuildException("Argument 1 of array_contains must be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Argument 1 of array_contains must be an array", CRECastException.class, t);
 			}
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -679,8 +682,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -709,7 +712,7 @@ public class ArrayHandling {
 				}
 				return CBoolean.FALSE;
 			} else {
-				throw ConfigRuntimeException.BuildException("Argument 1 of array_contains_ic must be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Argument 1 of array_contains_ic must be an array", CRECastException.class, t);
 			}
 		}
 
@@ -747,8 +750,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -783,7 +786,7 @@ public class ArrayHandling {
 					return CBoolean.get(ca.containsKey(args[1].val()));
 				}
 			} else {
-				throw ConfigRuntimeException.BuildException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Expecting argument 1 to be an array", CRECastException.class, t);
 			}
 		}
 
@@ -825,8 +828,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -857,7 +860,7 @@ public class ArrayHandling {
 					original.push(fill, t);
 				}
 			} else {
-				throw ConfigRuntimeException.BuildException("Argument 1 must be an array, and argument 2 must be an integer in array_resize", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Argument 1 must be an array, and argument 2 must be an integer in array_resize", CRECastException.class, t);
 			}
 			return (CArray)args[0];
 		}
@@ -892,8 +895,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -975,8 +978,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1005,7 +1008,7 @@ public class ArrayHandling {
 				}
 				return ca2;
 			} else {
-				throw ConfigRuntimeException.BuildException(this.getName() + " expects arg 1 to be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects arg 1 to be an array", CRECastException.class, t);
 			}
 		}
 
@@ -1043,8 +1046,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1072,7 +1075,7 @@ public class ArrayHandling {
 				}
 				return ca2;
 			} else {
-				throw ConfigRuntimeException.BuildException(this.getName() + " expects arg 1 to be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects arg 1 to be an array", CRECastException.class, t);
 			}
 		}
 
@@ -1111,8 +1114,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientArgumentsException.class, CRECastException.class};
 		}
 
 		@Override
@@ -1134,7 +1137,7 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray newArray = new CArray(t);
 			if (args.length < 2) {
-				throw ConfigRuntimeException.BuildException("array_merge must be called with at least two parameters", ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("array_merge must be called with at least two parameters", CREInsufficientArgumentsException.class, t);
 			}
 			for (Construct arg : args) {
 				if (arg instanceof ArrayAccess) {
@@ -1153,7 +1156,7 @@ public class ArrayHandling {
 						}
 					}
 				} else {
-					throw ConfigRuntimeException.BuildException("All arguments to array_merge must be arrays", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("All arguments to array_merge must be arrays", CRECastException.class, t);
 				}
 			}
 			return newArray;
@@ -1196,8 +1199,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException, ExceptionType.PluginInternalException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CRECastException.class, CREPluginInternalException.class};
 		}
 
 		@Override
@@ -1264,8 +1267,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1281,7 +1284,7 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (!(args[0] instanceof ArrayAccess)) {
-				throw ConfigRuntimeException.BuildException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Expecting argument 1 to be an array", CRECastException.class, t);
 			}
 			StringBuilder b = new StringBuilder();
 			ArrayAccess ca = (ArrayAccess) args[0];
@@ -1338,8 +1341,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1380,8 +1383,8 @@ public class ArrayHandling {
 	public static class array_sort extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1397,7 +1400,7 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (!(args[0] instanceof CArray)) {
-				throw ConfigRuntimeException.BuildException("The first parameter to array_sort must be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("The first parameter to array_sort must be an array", CRECastException.class, t);
 			}
 			CArray ca = (CArray) args[0];
 			CArray.SortType sortType = CArray.SortType.REGULAR;
@@ -1416,7 +1419,7 @@ public class ArrayHandling {
 				}
 			} catch (IllegalArgumentException e) {
 				throw ConfigRuntimeException.BuildException("The sort type must be one of either: " + StringUtils.Join(CArray.SortType.values(), ", ", " or "),
-						ExceptionType.FormatException, t);
+						CREFormatException.class, t);
 			}
 			if(sortType == null){
 				// It's a custom sort, which we have implemented below.
@@ -1479,7 +1482,7 @@ public class ArrayHandling {
 							value = -1;
 						}
 					} else {
-						throw ConfigRuntimeException.BuildException("The custom closure did not return a value. It must always return true, false, or null.", ExceptionType.CastException, t);
+						throw ConfigRuntimeException.BuildException("The custom closure did not return a value. It must always return true, false, or null.", CRECastException.class, t);
 					}
 					if(value <= 0){
 						result.push(left.get(0, t), t);
@@ -1610,8 +1613,8 @@ public class ArrayHandling {
 
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1669,8 +1672,8 @@ public class ArrayHandling {
 	@api public static class array_remove_values extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1737,8 +1740,8 @@ public class ArrayHandling {
 	@api public static class array_indexes extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1754,7 +1757,7 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(!(args[0] instanceof CArray)){
-				throw ConfigRuntimeException.BuildException("Expected parameter 1 to be an array, but was " + args[0].val(), ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Expected parameter 1 to be an array, but was " + args[0].val(), CRECastException.class, t);
 			}
 			return ((CArray)args[0]).indexesOf(args[1]);
 		}
@@ -1800,8 +1803,8 @@ public class ArrayHandling {
 	@api public static class array_index extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1860,8 +1863,8 @@ public class ArrayHandling {
 	public static class array_last_index extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1920,8 +1923,8 @@ public class ArrayHandling {
 	public static class array_reverse extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1976,8 +1979,8 @@ public class ArrayHandling {
 	@api public static class array_rand extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CRECastException.class};
 		}
 
 		@Override
@@ -2004,10 +2007,10 @@ public class ArrayHandling {
 				number = Static.getInt(args[1], t);
 			}
 			if(number < 1){
-				throw ConfigRuntimeException.BuildException("number may not be less than 1.", ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("number may not be less than 1.", CRERangeException.class, t);
 			}
 			if(number > Integer.MAX_VALUE){
-				throw ConfigRuntimeException.BuildException("Overflow detected. Number cannot be larger than " + Integer.MAX_VALUE, ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("Overflow detected. Number cannot be larger than " + Integer.MAX_VALUE, CRERangeException.class, t);
 			}
 			if(args.length > 2){
 				getKeys = Static.getBoolean(args[2]);
@@ -2075,8 +2078,8 @@ public class ArrayHandling {
 		private final static equals equals = new equals();
 		private final static BasicLogic.sequals sequals = new BasicLogic.sequals();
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2160,8 +2163,8 @@ public class ArrayHandling {
 	public static class array_filter extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2275,8 +2278,8 @@ public class ArrayHandling {
 	public static class array_deep_clone extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInsufficientArgumentsException.class};
 		}
 
 		@Override
@@ -2292,10 +2295,10 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args.length != 1) {
-				throw ConfigRuntimeException.BuildException("Expecting exactly one argument", ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("Expecting exactly one argument", CREInsufficientArgumentsException.class, t);
 			}
 			if(!(args[0] instanceof CArray)) {
-				throw ConfigRuntimeException.BuildException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Expecting argument 1 to be an array", CRECastException.class, t);
 			}
 			return ((CArray) args[0]).deepClone(t);
 		}
@@ -2343,8 +2346,8 @@ public class ArrayHandling {
 	public static class array_shallow_clone extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInsufficientArgumentsException.class};
 		}
 
 		@Override
@@ -2360,10 +2363,10 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args.length != 1) {
-				throw ConfigRuntimeException.BuildException("Expecting exactly one argument", ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("Expecting exactly one argument", CREInsufficientArgumentsException.class, t);
 			}
 			if(!(args[0] instanceof CArray)) {
-				throw ConfigRuntimeException.BuildException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Expecting argument 1 to be an array", CRECastException.class, t);
 			}
 			CArray array = (CArray) args[0];
 			CArray shallowClone = (array.isAssociative() ? CArray.GetAssociativeArray(t) : new CArray(t));
@@ -2415,8 +2418,8 @@ public class ArrayHandling {
 	public static class array_iterate extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2489,8 +2492,8 @@ public class ArrayHandling {
 	public static class array_reduce extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.IllegalArgumentException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -2524,12 +2527,12 @@ public class ArrayHandling {
 				} catch(FunctionReturnException ex){
 					lastValue = ex.getReturn();
 					if(lastValue instanceof CVoid){
-						throw ConfigRuntimeException.BuildException("The closure passed to " + getName() + " cannot return void.", ExceptionType.IllegalArgumentException, t);
+						throw ConfigRuntimeException.BuildException("The closure passed to " + getName() + " cannot return void.", CREIllegalArgumentException.class, t);
 					}
 					hadReturn = true;
 				}
 				if(!hadReturn){
-					throw ConfigRuntimeException.BuildException("The closure passed to " + getName() + " must return a value, but one was not returned.", ExceptionType.IllegalArgumentException, t);
+					throw ConfigRuntimeException.BuildException("The closure passed to " + getName() + " must return a value, but one was not returned.", CREIllegalArgumentException.class, t);
 				}
 			}
 			return lastValue;
@@ -2582,8 +2585,8 @@ public class ArrayHandling {
 	public static class array_reduce_right extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.IllegalArgumentException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -2617,12 +2620,12 @@ public class ArrayHandling {
 				} catch(FunctionReturnException ex){
 					lastValue = ex.getReturn();
 					if(lastValue instanceof CVoid){
-						throw ConfigRuntimeException.BuildException("The closure passed to " + getName() + " cannot return void.", ExceptionType.IllegalArgumentException, t);
+						throw ConfigRuntimeException.BuildException("The closure passed to " + getName() + " cannot return void.", CREIllegalArgumentException.class, t);
 					}
 					hadReturn = true;
 				}
 				if(!hadReturn){
-					throw ConfigRuntimeException.BuildException("The closure passed to " + getName() + " must return a value, but one was not returned.", ExceptionType.IllegalArgumentException, t);
+					throw ConfigRuntimeException.BuildException("The closure passed to " + getName() + " must return a value, but one was not returned.", CREIllegalArgumentException.class, t);
 				}
 			}
 			return lastValue;
@@ -2676,8 +2679,8 @@ public class ArrayHandling {
 	public static class array_every extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2706,7 +2709,7 @@ public class ArrayHandling {
 					}
 				}
 				if(!hasReturn){
-					throw ConfigRuntimeException.BuildException("The closure passed to " + getName() + " must return a boolean.", ExceptionType.IllegalArgumentException, t);
+					throw ConfigRuntimeException.BuildException("The closure passed to " + getName() + " must return a boolean.", CREIllegalArgumentException.class, t);
 				}
 			}
 			return CBoolean.TRUE;
@@ -2757,8 +2760,8 @@ public class ArrayHandling {
 	public static class array_some extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2787,7 +2790,7 @@ public class ArrayHandling {
 					}
 				}
 				if(!hasReturn){
-					throw ConfigRuntimeException.BuildException("The closure passed to " + getName() + " must return a boolean.", ExceptionType.IllegalArgumentException, t);
+					throw ConfigRuntimeException.BuildException("The closure passed to " + getName() + " must return a boolean.", CREIllegalArgumentException.class, t);
 				}
 			}
 			return CBoolean.FALSE;
@@ -2838,8 +2841,8 @@ public class ArrayHandling {
 	public static class array_map extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.IllegalArgumentException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -2867,7 +2870,7 @@ public class ArrayHandling {
 					newArray.set(c, ex.getReturn(), t);
 				}
 				if(!hasReturn){
-					throw ConfigRuntimeException.BuildException("The closure passed to " + getName() + " must return a value.", ExceptionType.IllegalArgumentException, t);
+					throw ConfigRuntimeException.BuildException("The closure passed to " + getName() + " must return a value.", CREIllegalArgumentException.class, t);
 				}
 			}
 

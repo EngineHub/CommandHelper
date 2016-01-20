@@ -3,9 +3,9 @@ package com.laytonsmith.core;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 
 import java.util.regex.Pattern;
@@ -42,7 +42,7 @@ public class ArgumentValidation {
 		if (object.containsKey(key)) {
 			return object.get(key, t);
 		} else if (defaultItem == null) {
-			throw ConfigRuntimeException.BuildException("Expected the key \"" + key + "\" to be present, but it was not found.", Exceptions.ExceptionType.FormatException, t);
+			throw ConfigRuntimeException.BuildException("Expected the key \"" + key + "\" to be present, but it was not found.", CREFormatException.class, t);
 		} else {
 			return defaultItem;
 		}
@@ -60,7 +60,7 @@ public class ArgumentValidation {
 		if (construct instanceof CArray) {
 			return ((CArray) construct);
 		} else {
-			throw ConfigRuntimeException.BuildException("Expecting array, but received " + construct.val(), Exceptions.ExceptionType.CastException, t);
+			throw ConfigRuntimeException.BuildException("Expecting array, but received " + construct.val(), CRECastException.class, t);
 		}
 	}
 
@@ -84,7 +84,7 @@ public class ArgumentValidation {
 		if (clazz.isAssignableFrom(construct.getClass())) {
 			return (T) construct;
 		} else {
-			throw ConfigRuntimeException.BuildException("Expecting " + expectedClassName + " but receieved " + construct.val() + " instead.", Exceptions.ExceptionType.CastException, t);
+			throw ConfigRuntimeException.BuildException("Expecting " + expectedClassName + " but receieved " + construct.val() + " instead.", CRECastException.class, t);
 		}
 	}
 
@@ -107,7 +107,7 @@ public class ArgumentValidation {
 			String expectedClassName = clazz.getAnnotation(typeof.class).value();
 			String actualClassName = construct.getClass().getAnnotation(typeof.class).value();
 			throw ConfigRuntimeException.BuildException("Expecting " + expectedClassName + " but receieved " + construct.val()
-					+ " (" + actualClassName + ") instead.", Exceptions.ExceptionType.CastException, t);
+					+ " (" + actualClassName + ") instead.", CRECastException.class, t);
 		}
 	}
 
@@ -138,7 +138,7 @@ public class ArgumentValidation {
 				d = Double.parseDouble(c.val());
 			} catch (NumberFormatException e) {
 				throw ConfigRuntimeException.BuildException("Expecting a number, but received \"" + c.val() + "\" instead",
-						Exceptions.ExceptionType.CastException, t);
+						CRECastException.class, t);
 			}
 		} else if (c instanceof CBoolean) {
 			if (((CBoolean) c).getBoolean()) {
@@ -148,7 +148,7 @@ public class ArgumentValidation {
 			}
 		} else {
 			throw ConfigRuntimeException.BuildException("Expecting a number, but received \"" + c.val() + "\" instead",
-					Exceptions.ExceptionType.CastException, t);
+					CRECastException.class, t);
 		}
 		return d;
 	}
@@ -198,7 +198,7 @@ public class ArgumentValidation {
 			return getNumber(c, t);
 		} catch (ConfigRuntimeException e) {
 			throw ConfigRuntimeException.BuildException("Expecting a double, but received " + c.val() + " instead",
-					Exceptions.ExceptionType.CastException, t);
+					CRECastException.class, t);
 		}
 	}
 
@@ -254,7 +254,7 @@ public class ArgumentValidation {
 				i = Long.parseLong(c.val());
 			} catch (NumberFormatException e) {
 				throw ConfigRuntimeException.BuildException("Expecting an integer, but received \"" + c.val() + "\" instead",
-						Exceptions.ExceptionType.CastException, t);
+						CRECastException.class, t);
 			}
 		}
 		return i;

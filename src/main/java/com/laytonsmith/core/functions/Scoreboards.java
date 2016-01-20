@@ -5,7 +5,6 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCScoreboard;
-import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCTeam;
 import com.laytonsmith.abstraction.enums.MCCriteria;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
@@ -26,9 +25,11 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CREScoreboardException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -198,8 +199,8 @@ public class Scoreboards {
 		 * @return Array containing only {@link ExceptionType#CREScoreboardException}
 		 */
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.ScoreboardException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREScoreboardException.class};
 		}
 	}
 
@@ -207,8 +208,8 @@ public class Scoreboards {
 	public static class get_pscoreboard extends SBFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.ScoreboardException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREScoreboardException.class};
 		}
 
 		@Override
@@ -247,8 +248,8 @@ public class Scoreboards {
 	public static class set_pscoreboard extends SBFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.ScoreboardException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREScoreboardException.class};
 		}
 
 		@Override
@@ -280,8 +281,8 @@ public class Scoreboards {
 	public static class get_scoreboards extends SBFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -430,8 +431,8 @@ public class Scoreboards {
 	public static class create_scoreboard extends SBFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.NullPointerException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENullPointerException.class};
 		}
 		
 		@Override
@@ -440,7 +441,7 @@ public class Scoreboards {
 			if (newBoard == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not create scoreboard, the server returned a null scoreboard"
-						+ " (Are you running in cmdline mode?)", ExceptionType.NullPointerException, t);
+						+ " (Are you running in cmdline mode?)", CRENullPointerException.class, t);
 			}
 			addBoard(args[0].val(), newBoard, t);
 			return CVoid.VOID;
@@ -467,8 +468,8 @@ public class Scoreboards {
 	public static class create_objective extends SBFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREScoreboardException.class};
 		}
 
 		@Override
@@ -520,8 +521,8 @@ public class Scoreboards {
 	public static class create_team extends SBFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREScoreboardException.class};
 		}
 
 		@Override
@@ -562,9 +563,9 @@ public class Scoreboards {
 	public static class set_objective_display extends SBFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.LengthException,
-					ExceptionType.ScoreboardException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRELengthException.class,
+					CREScoreboardException.class};
 		}
 
 		@Override
@@ -636,8 +637,8 @@ public class Scoreboards {
 	public static class set_team_display extends SBFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREScoreboardException.class};
 		}
 
 		@Override
@@ -723,8 +724,8 @@ public class Scoreboards {
 	public static class team_add_player extends SBFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREScoreboardException.class};
 		}
 
 		@Override
@@ -947,8 +948,8 @@ public class Scoreboards {
 	public static class set_pscore extends SBFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.ScoreboardException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREScoreboardException.class};
 		}
 
 		@Override
@@ -1013,8 +1014,8 @@ public class Scoreboards {
 	public static class set_team_options extends SBFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.ScoreboardException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREScoreboardException.class, CREFormatException.class};
 		}
 
 		@Override

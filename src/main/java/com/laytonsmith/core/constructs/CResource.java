@@ -2,7 +2,6 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.annotations.typeof;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**

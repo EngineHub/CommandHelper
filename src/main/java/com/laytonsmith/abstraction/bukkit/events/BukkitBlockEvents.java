@@ -40,8 +40,8 @@ import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import org.bukkit.Note;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.*;
@@ -378,7 +378,7 @@ public class BukkitBlockEvents {
 			if (item == null || item.getType().getName() == "AIR") {
 				throw ConfigRuntimeException.BuildException("Due to Bukkit's handling of this event, the item cannot be set to null."
 						+ " Until they change this, workaround by cancelling the event and manipulating the block"
-						+ " using inventory functions.", ExceptionType.IllegalArgumentException, Target.UNKNOWN);
+						+ " using inventory functions.", CREIllegalArgumentException.class, Target.UNKNOWN);
 			} else {
 				bde.setItem(((BukkitMCItemStack) item).asItemStack());
 			}

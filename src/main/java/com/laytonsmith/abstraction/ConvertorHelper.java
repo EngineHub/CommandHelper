@@ -2,7 +2,6 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.functions.Exceptions;
 
 /**
  * Some methods in Convertor can be abstract regardless of the server implementation,
