@@ -44,14 +44,12 @@ public class BukkitInventoryListener implements Listener{
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onInvOpen(InventoryOpenEvent event) {
 		BukkitMCInventoryOpenEvent ioe = new BukkitInventoryEvents.BukkitMCInventoryOpenEvent(event);
-		EventUtils.TriggerExternal(ioe);
 		EventUtils.TriggerListener(Driver.INVENTORY_OPEN, "inventory_open", ioe);
 	}
 	
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onInvClose(InventoryCloseEvent event) {
 		BukkitMCInventoryCloseEvent ice = new BukkitInventoryEvents.BukkitMCInventoryCloseEvent(event);
-		EventUtils.TriggerExternal(ice);
 		EventUtils.TriggerListener(Driver.INVENTORY_CLOSE, "inventory_close", ice);
 	}
 	

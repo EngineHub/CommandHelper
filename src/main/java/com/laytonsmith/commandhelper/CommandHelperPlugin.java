@@ -363,7 +363,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				CommandHelperFileLocations.getDefault().getLocalPackagesDirectory(),
 				CommandHelperFileLocations.getDefault().getPreferencesFile(),
 				new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), main_file), this);
-		ac.reload(null, null);
+		ac.reload(null, null, true);
 
 		//Clear out our hostname cache
 		hostnameLookupCache = new ConcurrentHashMap<>();
@@ -532,7 +532,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			if (sender instanceof Player) {
 				player = new BukkitMCPlayer((Player) sender);
 			}
-			ac.reload(player, args);
+			ac.reload(player, args, false);
 			return true;
 		} else if (cmdName.equalsIgnoreCase("commandhelper")) {
 			return args.length >= 1 && args[0].equalsIgnoreCase("null");
