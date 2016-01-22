@@ -571,7 +571,7 @@ public class Exceptions {
 			List<ConfigRuntimeException.StackTraceElement> elements = stManager.getUnmarkedStackTrace();
 			CArray ret = new CArray(t);
 			for(ConfigRuntimeException.StackTraceElement e : elements){
-				ret.push(e.getObjectFor());
+				ret.push(e.getObjectFor(), Target.UNKNOWN);
 			}
 			return ret;
 		}

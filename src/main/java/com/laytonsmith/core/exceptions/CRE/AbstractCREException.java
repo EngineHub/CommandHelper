@@ -91,7 +91,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		ret.set("stackTrace", stackTrace, Target.UNKNOWN);
 		for(StackTraceElement e : stManager.getCurrentStackTrace()){
 			CArray element = e.getObjectFor();
-			stackTrace.push(element);
+			stackTrace.push(element, Target.UNKNOWN);
 		}
 		return ret;
 	}
