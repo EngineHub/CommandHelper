@@ -695,17 +695,19 @@ public class MethodScriptCompilerTest {
         MethodScriptCompiler.compile(MethodScriptCompiler.lex("2 / 0", null, true));
     }
 
-    @Test public void testLineNumberCorrectInException1() throws Exception{
-        String script =
-                "try(\n" //Line 1
-                + "assign(@a, array(1, 2))\n" //Line 2
-                + "\n" //Line 3
-                + "assign(@d, @a[@b])\n" //Line 4
-                + "\n" //Line 5
-                + ", @e, msg(@e[3]))\n"; //Line 6
-        SRun(script, fakePlayer);
-        verify(fakePlayer).sendMessage("4");
-    }
+	// If people complain that the old format is broken, I can see about re-adding this. For now,
+	// this is covered in the other exception handler test
+//    @Test public void testLineNumberCorrectInException1() throws Exception{
+//        String script =
+//                "try(\n" //Line 1
+//                + "assign(@a, array(1, 2))\n" //Line 2
+//                + "\n" //Line 3
+//                + "assign(@d, @a[2])\n" //Line 4
+//                + "\n" //Line 5
+//                + ", @e, msg(@e))\n"; //Line 6
+//        SRun(script, fakePlayer);
+//        verify(fakePlayer).sendMessage("4");
+//    }
 
     @Test public void testLineNumberCorrectInException2() throws Exception{
         String script =
