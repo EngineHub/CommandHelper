@@ -972,7 +972,7 @@ public class Cmdline {
 			final CClosure _exit = exit;
 			final MutableObject<StringBuilder> sbout = new MutableObject(new StringBuilder());
 			final MutableObject<StringBuilder> sberr = new MutableObject(new StringBuilder());
-			cmd.setSystemOut(new BufferedOutputStream(new OutputStream() {
+			cmd.setSystemOut(new OutputStream() {
 				@Override
 				public void write(int b) throws IOException {
 					if(_stdout == null){
@@ -997,8 +997,8 @@ public class Cmdline {
 						sbout.getObject().append(c);
 					}
 				}
-			}));
-			cmd.setSystemErr(new BufferedOutputStream(new OutputStream() {
+			});
+			cmd.setSystemErr(new OutputStream() {
 				@Override
 				public void write(int b) throws IOException {
 					if(_stderr == null){
@@ -1023,7 +1023,7 @@ public class Cmdline {
 						sberr.getObject().append(c);
 					}
 				}
-			}));
+			});
 			try {
 				cmd.start();
 			} catch (IOException ex) {
