@@ -13,6 +13,7 @@ import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -235,9 +236,10 @@ public class Procedure implements Cloneable {
 			throw ConfigRuntimeException.CreateUncatchableException("Loop manipulation operations (e.g. break() or continue()) cannot"
 					+ " bubble up past procedures.", t);
         } catch(ConfigRuntimeException e){
-			// Irregular. Mark this element.
-			stManager.markElement();
-			e.addStackTraceTrail(new ConfigRuntimeException.StackTraceElement("proc " + name, e.getTarget()), t);
+			if(e instanceof AbstractCREException){
+				((AbstractCREException)e).freezeStackTraceElements(stManager);
+			}
+			stManager.popStackTraceElement();
 			throw e;
 		} catch(Throwable th){
 			// Not sure. Pop, but rethrow

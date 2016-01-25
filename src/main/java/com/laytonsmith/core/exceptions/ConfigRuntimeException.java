@@ -33,8 +33,6 @@ import java.util.List;
  */
 public class ConfigRuntimeException extends RuntimeException {
 
-	protected List<StackTraceElement> stackTraceTrail = new ArrayList<>();
-
 	/**
 	 * Creates a new instance of <code>ConfigRuntimeException</code> without
 	 * detail message.
@@ -58,22 +56,6 @@ public class ConfigRuntimeException extends RuntimeException {
 	 */
 	public Environment getEnv() {
 		return this.env;
-	}
-
-	/**
-	 * Appends a stack trace frame to this exception. Stack trace frames should
-	 * only be
-	 *
-	 * @param t
-	 * @param nextTarget
-	 */
-	public void addStackTraceTrail(StackTraceElement t, Target nextTarget) {
-		if (t == null) {
-			stackTraceTrail.add(new StackTraceElement("<<main code>>", target));
-		} else {
-			stackTraceTrail.add(t);
-			target = nextTarget;
-		}
 	}
 
 	/**
@@ -184,8 +166,6 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @param r
 	 */
 	private static void HandleUncaughtException(ConfigRuntimeException e, Environment env, Reaction r) {
-		//This is the top of the stack chain, so finalize the stack trace at this point
-		e.addStackTraceTrail(null, Target.UNKNOWN);
 		if (r == Reaction.IGNORE) {
 			//Welp, you heard the man.
 			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.DEBUG, "An exception bubbled to the top, but was instructed by an event handler to not cause output.", e.getTarget());
@@ -207,6 +187,7 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @param e
 	 * @param optionalMessage
 	 */
+	@SuppressWarnings("ThrowableResultIgnored")
 	private static void DoReport(String message, String exceptionType, ConfigRuntimeException ex, List<StackTraceElement> stacktrace, MCPlayer currentPlayer) {
 		String type = exceptionType;
 		if (exceptionType == null) {
@@ -230,7 +211,38 @@ public class ConfigRuntimeException extends RuntimeException {
 		StringBuilder log = new StringBuilder();
 		StringBuilder console = new StringBuilder();
 		StringBuilder player = new StringBuilder();
+		PrintMessage(log, console, player, type, message, ex, st);
+		if(ex != null){
+			// Otherwise, a CCE
+			if(ex.getCause() != null){
+				ex = (ConfigRuntimeException) ex.getCause();
+			}
+			while(ex instanceof CRECausedByWrapper) {
+				Target t = ex.getTarget();
+				log.append("Caused by:\n");
+				console.append(TermColors.CYAN).append("Caused by:\n");
+				player.append(MCChatColor.AQUA).append("Caused by:\n");
+				CArray exception = ((CRECausedByWrapper) ex).getException();
+				CArray stackTrace = Static.getArray(exception.get("stackTrace", t), t);
+				List<StackTraceElement> newSt = new ArrayList<>();
+				for(Construct consElement : stackTrace.asList()){
+					CArray element = Static.getArray(consElement, t);
+					int line = Static.getInt32(element.get("line", t), t);
+					File file = new File(element.get("file", t).val());
+					int col = 0; // This will need updating eventually
+					Target stElementTarget = new Target(line, file, col);
+					newSt.add(new StackTraceElement(element.get("id", t).val(), stElementTarget));
+				}
 
+				String nType = exception.get("classType", t).val();
+				String nMessage = exception.get("message", t).val();
+				if (!"".equals(nMessage.trim())) {
+					nMessage = ": " + nMessage;
+				}
+				PrintMessage(log, console, player, nType, nMessage, ex, newSt);
+				ex = (ConfigRuntimeException) ex.getCause();
+			}
+		}
 		//Log
 		//Don't log to screen though, since we're ALWAYS going to do that ourselves.
 		CHLog.GetLogger().Log("COMPILE ERROR".equals(exceptionType) ? CHLog.Tags.COMPILER : CHLog.Tags.RUNTIME,
@@ -277,9 +289,6 @@ public class ConfigRuntimeException extends RuntimeException {
 					.append(MCChatColor.AQUA).append(line)/*.append(".").append(column)*/.append("\n");
 
 		}
-		if(ex.getCause() instanceof CRECausedByWrapper){
-			CArray causedBy = ((CRECausedByWrapper) ex.getCause()).getException();
-		}
 	}
 
 	private static void DoReport(ConfigRuntimeException e, Environment env) {
@@ -287,7 +296,11 @@ public class ConfigRuntimeException extends RuntimeException {
 		if (e.getEnv() != null && e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 			p = e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer();
 		}
-		DoReport(e.getMessage(), AbstractCREException.getExceptionName(e), e, env.getEnv(GlobalEnv.class).GetStackTraceManager().getCurrentStackTrace(), p);
+		List<StackTraceElement> st = new ArrayList<>();
+		if(e instanceof AbstractCREException){
+			st = ((AbstractCREException)e).getCREStackTrace();
+		}
+		DoReport(e.getMessage(), AbstractCREException.getExceptionName(e), e, st, p);
 		if (Prefs.DebugMode()) {
 			if (e.getCause() != null && !(e.getCause() instanceof CRECausedByWrapper)) {
 				//This is more of a system level exception, so if debug mode is on, we also want to print this stack trace

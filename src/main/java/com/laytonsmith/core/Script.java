@@ -30,6 +30,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.InvalidEnvironmentException;
+import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -277,6 +278,7 @@ public class Script {
         if (m.getCType() == ConstructType.FUNCTION) {
 				StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 				boolean addedRootStackElement = false;
+				boolean caughtException = false;
 				try {
 					// If it's an unknown target, this is not user generated code, and we want to skip adding the element here.
 					if(stManager.isStackEmpty() && !m.getTarget().equals(Target.UNKNOWN)){
@@ -381,6 +383,10 @@ public class Script {
 					//We want to catch and rethrow the ones we know how to catch, and then
 					//catch and report anything else.
 					} catch(ConfigRuntimeException | ProgramFlowManipulationException e){
+						if(e instanceof AbstractCREException){
+							((AbstractCREException)e).freezeStackTraceElements(stManager);
+							caughtException = true;
+						}
 						throw e;
 					} catch(InvalidEnvironmentException e){
 						if(!e.isDataSet()){

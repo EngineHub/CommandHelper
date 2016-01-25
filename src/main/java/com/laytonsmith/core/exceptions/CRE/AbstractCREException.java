@@ -1,18 +1,25 @@
 package com.laytonsmith.core.exceptions.CRE;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -21,6 +28,8 @@ import java.util.Set;
 public abstract class AbstractCREException extends ConfigRuntimeException implements Documentation, Mixed, ArrayAccess {
 
 	private final static Class[] EMPTY_CLASS = new Class[0];
+
+	private List<StackTraceElement> stackTrace = null;
 
 	public AbstractCREException(String msg, Target t){
 		super(msg, t);
@@ -83,16 +92,52 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * Returns a standardized CArray given this exception.
 	 * @return
 	 */
-	public CArray getExceptionObject(StackTraceManager stManager){
+	public CArray getExceptionObject(){
 		CArray ret = new CArray(Target.UNKNOWN);
 		ret.set("classType", new CClassType(this.getName(), Target.UNKNOWN), Target.UNKNOWN);
 		ret.set("message", this.getMessage());
 		CArray stackTrace = new CArray(Target.UNKNOWN);
 		ret.set("stackTrace", stackTrace, Target.UNKNOWN);
-		for(StackTraceElement e : stManager.getCurrentStackTrace()){
+		for(StackTraceElement e : this.getCREStackTrace()){
 			CArray element = e.getObjectFor();
 			stackTrace.push(element, Target.UNKNOWN);
 		}
+		ret.set("causedBy", getCausedBy(this.getCause()), Target.UNKNOWN);
+		return ret;
+	}
+	
+	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
+	public static AbstractCREException getFromCArray(CArray exception, Target t) throws ClassNotFoundException {
+		String classType = exception.get("classType", t).val();
+		Class<Mixed> clzz = NativeTypeList.getNativeClass(classType);
+		Throwable cause = null;
+		if(exception.get("causedBy", t) instanceof CArray){
+			// It has a cause
+			cause = new CRECausedByWrapper((CArray)exception.get("causedBy", t));
+		}
+		String message = exception.get("message", t).val();
+		List<StackTraceElement> st = new ArrayList<>();
+		for(Construct consStElement : Static.getArray(exception.get("stackTrace", t), t).asList()){
+			CArray stElement = Static.getArray(consStElement, t);
+			int line = Static.getInt32(stElement.get("line", t), t);
+			File f = new File(stElement.get("file", t).val());
+			int col = 0; // 
+			st.add(new StackTraceElement(stElement.get("id", t).val(), new Target(line, f, col)));
+		}
+		// Now we have parsed everything into POJOs
+		Class[] types = new Class[]{String.class, Target.class, Throwable.class};
+		Object[] args = new Object[]{message, t, cause};
+		AbstractCREException ex = (AbstractCREException) ReflectionUtils.newInstance(clzz, types, args);
+		ex.stackTrace = st;
+		return ex;
+	}
+	
+	private static Construct getCausedBy(Throwable causedBy){
+		if(causedBy == null){
+			return CNull.NULL;
+		}
+		CRECausedByWrapper cre = (CRECausedByWrapper) causedBy;
+		CArray ret = cre.getException();
 		return ret;
 	}
 
@@ -167,6 +212,16 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		AbstractCREException obj = (AbstractCREException)super.clone();
 
 		return obj;
+	}
+	
+	public void freezeStackTraceElements(StackTraceManager manager){
+		if(this.stackTrace == null){
+			this.stackTrace = manager.getCurrentStackTrace();
+		}
+	}
+	
+	public List<StackTraceElement> getCREStackTrace(){
+		return new ArrayList<>(this.stackTrace);
 	}
 
 }

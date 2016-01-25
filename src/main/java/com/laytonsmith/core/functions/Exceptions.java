@@ -5,7 +5,6 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
@@ -19,7 +18,6 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
-import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
@@ -49,7 +47,6 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -266,7 +263,8 @@ public class Exceptions {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length == 1){
 				// Exception type
-				throw new UnsupportedOperationException();
+				// We need to reverse the excpetion into an object
+				throw ObjectGenerator.GetGenerator().exception(Static.getArray(args[0], t), t);
 			} else {
 					if (args[0] instanceof CNull) {
 						CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR, "Uncatchable exceptions are no longer supported.", t);
@@ -411,7 +409,6 @@ public class Exceptions {
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			boolean exceptionCaught = false;
 			ConfigRuntimeException caughtException = null;
-			StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 			try {
 				parent.eval(nodes[0], env);
 			} catch (ConfigRuntimeException ex){
@@ -433,7 +430,7 @@ public class Exceptions {
 							// This should eventually be changed to be of the appropriate type. Unfortunately, that will
 							// require reworking basically everything. We need all functions to accept Mixed, instead of Construct.
 							// This will have to do in the meantime.
-							varList.set(new IVariable(new CClassType("array", t), var.getName(), e.getExceptionObject(stManager), t));
+							varList.set(new IVariable(new CClassType("array", t), var.getName(), e.getExceptionObject(), t));
 							parent.eval(nodes[i + 1], env);
 							varList.remove(var.getName());
 						} catch (ConfigRuntimeException | FunctionReturnException newEx){
@@ -464,9 +461,6 @@ public class Exceptions {
 						}
 						throw ex;
 					}
-				}
-				if(!exceptionCaught){
-					stManager.popAllMarkedElements();
 				}
 			}
 
@@ -568,7 +562,7 @@ public class Exceptions {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			StackTraceManager stManager = environment.getEnv(GlobalEnv.class).GetStackTraceManager();
-			List<ConfigRuntimeException.StackTraceElement> elements = stManager.getUnmarkedStackTrace();
+			List<ConfigRuntimeException.StackTraceElement> elements = stManager.getCurrentStackTrace();
 			CArray ret = new CArray(t);
 			for(ConfigRuntimeException.StackTraceElement e : elements){
 				ret.push(e.getObjectFor(), Target.UNKNOWN);

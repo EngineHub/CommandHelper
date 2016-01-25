@@ -742,8 +742,12 @@ public class ObjectGenerator {
 
     public CArray exception(ConfigRuntimeException e, Environment env, Target t) {
 		AbstractCREException ex = AbstractCREException.getAbstractCREException(e);
-		return ex.getExceptionObject(env.getEnv(GlobalEnv.class).GetStackTraceManager());
+		return ex.getExceptionObject();
     }
+	
+	public AbstractCREException exception(CArray exception, Target t){
+		return AbstractCREException.getFromCArray(exception, t);
+	}
 
 	/**
 	 * Returns a CArray given an MCColor. It will be in the format

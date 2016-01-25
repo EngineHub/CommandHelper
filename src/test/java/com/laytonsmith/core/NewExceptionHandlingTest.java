@@ -66,7 +66,7 @@ public class NewExceptionHandlingTest {
 				/* 3 */ + "} catch(IOException @e){ \n"
 				/* 4 */ + "msg(@e); \n"
 				/* 5 */ + "}", fakePlayer);
-		verify(fakePlayer).sendMessage("{classType: IOException, message: message, stackTrace: {{file: Unknown file, id: <<main code>>, line: 2}}}");
+		verify(fakePlayer).sendMessage("{causedBy: null, classType: IOException, message: message, stackTrace: {{file: Unknown file, id: <<main code>>, line: 2}}}");
 	}
 
 	@Test public void testExceptionObjectCorrect2() throws Exception {
@@ -86,7 +86,7 @@ public class NewExceptionHandlingTest {
 				/* 12 */ + "} catch(IOException @e){\n"
 				/* 13 */ + "msg(@e);\n"
 				/* 14 */ + "}", fakePlayer);
-		verify(fakePlayer).sendMessage("{classType: IOException, message: message, stackTrace:"
+		verify(fakePlayer).sendMessage("{causedBy: null, classType: IOException, message: message, stackTrace:"
 				+ " {"
 				+ "{file: Unknown file, id: proc _c, line: 8}, "
 				+ "{file: Unknown file, id: proc _b, line: 5}, "
@@ -112,7 +112,7 @@ public class NewExceptionHandlingTest {
 				/* 12 */ + "} catch(RangeException @e){\n"
 				/* 13 */ + "msg(@e);\n"
 				/* 14 */ + "}", fakePlayer);
-		verify(fakePlayer).sendMessage("{classType: RangeException, message: Division by 0!, stackTrace:"
+		verify(fakePlayer).sendMessage("{causedBy: null, classType: RangeException, message: Division by 0!, stackTrace:"
 				+ " {"
 				+ "{file: Unknown file, id: proc _c, line: 8}, "
 				+ "{file: Unknown file, id: proc _b, line: 5}, "
@@ -209,6 +209,59 @@ public class NewExceptionHandlingTest {
 	@Test(expected = ConfigCompileException.class)
 	public void testTryAloneFails() throws Exception {
 		SRun("try{ }", fakePlayer);
+	}
+	
+	@Test
+	public void testCausedBy() throws Exception {
+		SRun(
+			/* 01 */ "proc _a(){\n"
+			/* 02 */ + "		throw(IOException, 'original');\n"
+			/* 03 */ + "}\n"
+			/* 04 */ + "proc _b(){\n"
+			/* 05 */ + "		_a();\n"
+			/* 06 */ + "}\n"
+			/* 07 */ + "try {\n"
+			/* 08 */ + "		try {\n"
+			/* 09 */ + "			_b();\n"
+			/* 10 */ + "		} catch(IOException @e){\n"
+			/* 11 */ + "			throw(CastException, 'new', @e);\n"
+			/* 12 */ + "		}\n"
+			/* 13 */ + "} catch(CastException @e){\n"
+			/* 14 */ + "		msg(@e);\n"
+			/* 15 */ + "}\n"
+			, fakePlayer);
+		verify(fakePlayer).sendMessage(
+				"{"
+					+ "causedBy: {"
+						+ "causedBy: null, "
+						+ "classType: IOException, "
+						+ "message: original, "
+						+ "stackTrace: {"
+							+ "{"
+								+ "file: Unknown file, "
+								+ "id: proc _a, "
+								+ "line: 2"
+							+ "}, {"
+								+ "file: Unknown file, "
+								+ "id: proc _b, "
+								+ "line: 5"
+							+ "}, {"
+								+ "file: Unknown file, "
+								+ "id: <<main code>>, "
+								+ "line: 9"
+							+ "}"
+						+ "}"
+					+ "}, "
+					+ "classType: CastException, "
+					+ "message: new, "
+					+ "stackTrace: {"
+						+ "{"
+							+ "file: Unknown file, "
+							+ "id: <<main code>>, "
+							+ "line: 11"
+						+ "}"
+					+ "}"
+				+ "}");
 	}
 
 }

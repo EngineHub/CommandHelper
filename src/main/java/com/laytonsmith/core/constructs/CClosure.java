@@ -6,6 +6,7 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -203,7 +204,10 @@ public class CClosure extends Construct {
 				stManager.popStackTraceElement();
 				// die()
 			} catch(ConfigRuntimeException ex){
-				stManager.markElement();
+				if(ex instanceof AbstractCREException){
+					((AbstractCREException)ex).freezeStackTraceElements(stManager);
+				}
+				stManager.popStackTraceElement();
 				throw ex;
 			} catch(Throwable t){
 				// Not sure. Pop and re-throw.
