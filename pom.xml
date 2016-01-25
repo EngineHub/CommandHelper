@@ -336,6 +336,12 @@
 			<groupId>org.java.net.substance</groupId>
 			<artifactId>substance</artifactId>
 			<version>6.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>asm</groupId>
+					<artifactId>asm-all</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- MCStats (this appears to no longer be working)
 		<dependency>
@@ -349,16 +355,10 @@
 			<type>jar</type>
 			<version>1.9</version>
 		</dependency>
-		<!-- If ASM doesn't end up working out, this could also be used
 		<dependency>
-			<groupId>org.apache.bcel</groupId>
-			<artifactId>bcel</artifactId>
-			<version>6.0-SNAPSHOT</version>
-		</dependency>-->
-		<dependency>
-			<groupId>asm</groupId>
+			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm-all</artifactId>
-			<version>3.3.1</version>
+			<version>5.0.4</version>
 		</dependency>
 		<dependency>
 			<groupId>jline</groupId>
@@ -504,7 +504,7 @@
 									<include>mysql:mysql-connector-java:jar:*</include>
 									<include>commons-codec:commons-codec:jar:*</include>
 									<!--<include>org.apache.bcel:bcel:jar:*</include>-->
-									<include>asm:asm-all:jar:*</include>
+									<include>org.ow2.asm:asm-all:jar:*</include>
 									<include>jline:jline:jar:*</include>
 									<include>javax.mail:mail:jar:*</include>
 									<include>javax.activation:activation:jar:*</include>
@@ -674,7 +674,7 @@
 									</includes>
 								</filter>-->
 								<filter>
-									<artifact>asm:asm-all:jar:*</artifact>
+									<artifact>org.ow2.asm:asm-all:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>

@@ -1,6 +1,7 @@
 package com.laytonsmith.PureUtilities.ClassLoading;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirrorVisitor;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassReferenceMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.FieldMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
@@ -33,6 +34,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+
+import org.objectweb.asm.ClassReader;
 
 /**
  * This class contains methods for dynamically determining things about Classes,
@@ -301,8 +304,10 @@ public class ClassDiscovery {
 						try {
 							stream = FileUtil.readAsStream(new File(rootLocationFile,
 									f.getAbsolutePath().replaceFirst(Pattern.quote(new File(root).getAbsolutePath() + File.separator), "")));
-							ClassMirror cm = new ClassMirror(stream, new URL(url));
-							mirrors.add(cm);
+							ClassReader reader = new ClassReader(stream);
+							ClassMirrorVisitor mirrorVisitor = new ClassMirrorVisitor();
+							reader.accept(mirrorVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+							mirrors.add(mirrorVisitor.getMirror(new URL(url)));
 						} catch (IOException ex) {
 							Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 						} finally {
@@ -334,8 +339,10 @@ public class ClassDiscovery {
 						public void handle(String filename, InputStream in) {
 							if (!filename.matches(".*\\$(?:\\d)*\\.class") && filename.endsWith(".class")) {
 								try {
-									ClassMirror cm = new ClassMirror(in, rootLocationFile.toURI().toURL());
-									mirrors.add(cm);
+									ClassReader reader = new ClassReader(in);
+									ClassMirrorVisitor mirrorVisitor = new ClassMirrorVisitor();
+									reader.accept(mirrorVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+									mirrors.add(mirrorVisitor.getMirror(rootLocationFile.toURI().toURL()));
 								} catch (IOException ex) {
 									Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 								}

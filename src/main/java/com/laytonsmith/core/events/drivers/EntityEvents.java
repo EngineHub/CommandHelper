@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
+import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
@@ -731,7 +732,8 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{id: <macro> The entityID | type: <macro> The type of entity being damaged | cause: <macro>"
+			return "{id: <macro> The entityID | type: <macro> The type of entity being damaged"
+				+ " | cause: <macro> One of " + StringUtils.Join(MCDamageCause.values(), ", ", ", or ", " or ")
 				+ " | world: <string match>} Fires when any loaded entity takes damage."
 				+ " {type: The type of entity the got damaged | id: The entityID of the victim"
 				+ " | player: the player who got damaged (only present if type is PLAYER) | world | location"
