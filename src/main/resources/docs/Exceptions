@@ -163,6 +163,44 @@ try {
 }
 %%
 
+== Caused By, and rethrowing ==
+Exceptions might need to be rethrown. This is supported by {{function|throw}}. For instance:
+
+%%CODE|
+try {
+	throw(IOException, 'message');
+} catch(IOException @e){
+	if(/* some condition is true */){
+		// We don't care about this exception
+	} else {
+		throw(@e);
+	}
+}
+%%
+
+This can be used if you want to conditionally handle the exception, but continue to throw the exception up the
+chain in other cases. 
+
+You may find that you have to throw an exception due to another exception. To do this, you may also used the Caused By mechanism. This will
+cause the exception to chain. This is also supported with {{function|throw}}.
+
+%%CODE|
+try {
+	try {
+		throw(IOException, 'ioexception');
+	} catch(IOException @e){
+		throw(CastException, 'castexception', @e);
+	}
+} catch(CastException @e){
+	msg(@e['causedBy']); // This will be the IOException
+}
+%%
+
+This can be useful for times that you need to throw another exception from within the catch block, but don't want to hide
+the original exception, or when you need to otherwise wrap the original exception. It is quite useful to know what exception
+originally caused this chain. This can be accessed from the <code>causedBy</code> index in the exception object.
+
+
 == Old usage ==
 
 There is an old, now deprecated usage as well, see the article [[CommandHelper/Staged/OldExceptions|here]]
