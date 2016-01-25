@@ -50,6 +50,8 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -262,9 +264,13 @@ public class Exceptions {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length == 1){
-				// Exception type
-				// We need to reverse the excpetion into an object
-				throw ObjectGenerator.GetGenerator().exception(Static.getArray(args[0], t), t);
+				try {
+					// Exception type
+					// We need to reverse the excpetion into an object
+					throw ObjectGenerator.GetGenerator().exception(Static.getArray(args[0], t), t);
+				} catch (ClassNotFoundException ex) {
+					throw new CRECastException(ex.getMessage(), t);
+				}
 			} else {
 					if (args[0] instanceof CNull) {
 						CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR, "Uncatchable exceptions are no longer supported.", t);

@@ -745,7 +745,7 @@ public class ObjectGenerator {
 		return ex.getExceptionObject();
     }
 	
-	public AbstractCREException exception(CArray exception, Target t){
+	public AbstractCREException exception(CArray exception, Target t) throws ClassNotFoundException{
 		return AbstractCREException.getFromCArray(exception, t);
 	}
 
