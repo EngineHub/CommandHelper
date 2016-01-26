@@ -490,7 +490,7 @@ public class Exceptions {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return CHVersion.V3_3_1;
 		}
 
 		@Override
@@ -594,7 +594,7 @@ public class Exceptions {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return CHVersion.V3_3_1;
 		}
 
 	}
