@@ -118,6 +118,14 @@ public class ArrayHandlingTest {
         assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(1)));
         assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(55)));
     }
+	
+	@Test(timeout = 10000)
+    public void testArraySContains() throws CancelCommandException {
+        ArrayHandling.array_scontains a = new ArrayHandling.array_scontains();
+        assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(1)));
+        assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(55)));
+		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct("1")));
+    }
 
     @Test(expected = Exception.class, timeout = 10000)
     public void testArrayContainsEx() throws CancelCommandException {
