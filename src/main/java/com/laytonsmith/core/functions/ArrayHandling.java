@@ -35,6 +35,7 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
+import com.laytonsmith.core.functions.BasicLogic.sequals;
 import com.laytonsmith.core.functions.DataHandling.array;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
@@ -586,7 +587,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	@seealso({array_index_exists.class})
+	@seealso({array_index_exists.class, array_scontains.class})
 	public static class array_contains extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -601,17 +602,16 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
-				CArray ca = (CArray) args[0];
-				for(Construct key : ca.keySet()){
-					if(new equals().exec(t, env, ca.get(key, t), args[1]).getBoolean()){
-						return CBoolean.TRUE;
-					}
-				}
-				return CBoolean.FALSE;
-			} else {
-				throw ConfigRuntimeException.BuildException("Argument 1 of array_contains must be an array", ExceptionType.CastException, t);
+			if(!(args[0] instanceof CArray)) {
+				throw ConfigRuntimeException.BuildException("Argument 1 of " + this.getName() + " must be an array", ExceptionType.CastException, t);
 			}
+			CArray ca = (CArray) args[0];
+			for(Construct key : ca.keySet()){
+				if(new equals().exec(t, env, ca.get(key, t), args[1]).getBoolean()){
+					return CBoolean.TRUE;
+				}
+			}
+			return CBoolean.FALSE;
 		}
 
 		@Override
@@ -658,6 +658,7 @@ public class ArrayHandling {
 	}
 
 	@api
+	@seealso({array_contains.class})
 	public static class array_contains_ic extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -706,7 +707,7 @@ public class ArrayHandling {
 				}
 				return CBoolean.FALSE;
 			} else {
-				throw ConfigRuntimeException.BuildException("Argument 1 of array_contains_ic must be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Argument 1 of " + this.getName() + " must be an array", ExceptionType.CastException, t);
 			}
 		}
 
@@ -716,6 +717,79 @@ public class ArrayHandling {
 				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'A')"),
 				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'a')"),
 				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'd')"),
+			};
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.NO_SIDE_EFFECTS);
+		}
+	}
+
+	@api
+	@seealso({array_index_exists.class, array_contains.class})
+	public static class array_scontains extends AbstractFunction implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "array_scontains";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			if(!(args[0] instanceof CArray)) {
+				throw ConfigRuntimeException.BuildException("Argument 1 of " + this.getName() + " must be an array", ExceptionType.CastException, t);
+			}
+			CArray ca = (CArray) args[0];
+			for(Construct key : ca.keySet()){
+				if(new sequals().exec(t, env, ca.get(key, t), args[1]).getBoolean()){
+					return CBoolean.TRUE;
+				}
+			}
+			return CBoolean.FALSE;
+		}
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {array, testValue} Checks if the array contains a value of the same datatype and value as testValue."
+					+ " For associative arrays, only the values are searched, the keys are ignored."
+					+ " If you need to check for the existance of a particular key, use array_index_exists().";
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates finding a value", "array_scontains(array(0, 1, 2), 2)"),
+				new ExampleScript("Demonstrates not finding a value because of a value mismatch", "array_scontains(array(0, 1, 2), 5)"),
+				new ExampleScript("Demonstrates not finding a value because of a type mismatch", "array_scontains(array(0, 1, 2), '2')"),
+				new ExampleScript("Demonstrates finding a value listed multiple times", "array_scontains(array(1, 1, 1), 1)"),
+				new ExampleScript("Demonstrates finding a string", "array_scontains(array('a', 'b', 'c'), 'b')"),
+				new ExampleScript("Demonstrates finding a value in an associative array", "array_scontains(array('a': 1, 'b': 2), 2)")
 			};
 		}
 
