@@ -609,7 +609,7 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if(!(args[0] instanceof CArray)) {
-				throw ConfigRuntimeException.BuildException("Argument 1 of " + this.getName() + " must be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Argument 1 of " + this.getName() + " must be an array", CRECastException.class, t);
 			}
 			CArray ca = (CArray) args[0];
 			for(Construct key : ca.keySet()){
@@ -713,7 +713,7 @@ public class ArrayHandling {
 				}
 				return CBoolean.FALSE;
 			} else {
-				throw ConfigRuntimeException.BuildException("Argument 1 of " + this.getName() + " must be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Argument 1 of " + this.getName() + " must be an array", CRECastException.class, t);
 			}
 		}
 
@@ -749,7 +749,7 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if(!(args[0] instanceof CArray)) {
-				throw ConfigRuntimeException.BuildException("Argument 1 of " + this.getName() + " must be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Argument 1 of " + this.getName() + " must be an array", CRECastException.class, t);
 			}
 			CArray ca = (CArray) args[0];
 			for(Construct key : ca.keySet()){
@@ -761,8 +761,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
