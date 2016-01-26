@@ -22,9 +22,13 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Map;
@@ -73,8 +77,8 @@ public class Echoes {
         }
 
 		@Override
-        public ExceptionType[] thrown(){
-            return new ExceptionType[]{};
+        public Class<? extends CREThrowable>[] thrown(){
+            return new Class[]{};
         }
 
 		@Override
@@ -144,8 +148,8 @@ public class Echoes {
         }
         
 		@Override
-        public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        public Class<? extends CREThrowable>[] thrown(){
+            return new Class[]{CREPlayerOfflineException.class};
         }
 
 		@Override
@@ -184,7 +188,7 @@ public class Echoes {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args.length < 2){
-                throw ConfigRuntimeException.BuildException("You must send at least 2 arguments to tmsg", ExceptionType.InsufficientArgumentsException, t);
+                throw ConfigRuntimeException.BuildException("You must send at least 2 arguments to tmsg", CREInsufficientArgumentsException.class, t);
             }
 			MCCommandSender p;
 			if (Static.getConsoleName().equals(args[0].val())) {
@@ -193,7 +197,7 @@ public class Echoes {
 				p = Static.GetPlayer(args[0], t);
 			}
             if(p == null){
-                throw ConfigRuntimeException.BuildException("The player " + args[0].val() + " is not online", ExceptionType.PlayerOfflineException, t);
+                throw ConfigRuntimeException.BuildException("The player " + args[0].val() + " is not online", CREPlayerOfflineException.class, t);
             }
             StringBuilder b = new StringBuilder();
             for(int i = 1; i < args.length; i++){
@@ -215,8 +219,8 @@ public class Echoes {
             return "void {player, msg, [...]} Displays a message on the specified players screen, similar to msg, but targets a specific user.";
         }
 		@Override
-        public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.InsufficientArgumentsException};
+        public Class<? extends CREThrowable>[] thrown(){
+            return new Class[]{CREPlayerOfflineException.class, CREInsufficientArgumentsException.class};
         }
 
 		@Override
@@ -342,8 +346,8 @@ public class Echoes {
         }
         
 		@Override
-        public ExceptionType[] thrown(){
-            return new ExceptionType[]{};
+        public Class<? extends CREThrowable>[] thrown(){
+            return new Class[]{};
         }
 
 		@Override
@@ -388,8 +392,8 @@ public class Echoes {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{};
         }
 
 		@Override
@@ -432,7 +436,7 @@ public class Echoes {
 			if(p != null){
 				p.chat(args[0].val());
 			} else {
-				throw ConfigRuntimeException.BuildException("Console cannot chat. Use something like broadcast() instead.", ExceptionType.PlayerOfflineException, t);
+				throw ConfigRuntimeException.BuildException("Console cannot chat. Use something like broadcast() instead.", CREPlayerOfflineException.class, t);
 			}
             return CVoid.VOID;
         }
@@ -444,8 +448,8 @@ public class Echoes {
         }
         
 		@Override
-        public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        public Class<? extends CREThrowable>[] thrown(){
+            return new Class[]{CREPlayerOfflineException.class};
         }
 
 		@Override
@@ -483,8 +487,8 @@ public class Echoes {
         }
         
 		@Override
-        public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        public Class<? extends CREThrowable>[] thrown(){
+            return new Class[]{CREPlayerOfflineException.class};
         }
 
 		@Override
@@ -531,8 +535,8 @@ public class Echoes {
         }
         
 		@Override
-        public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.NullPointerException};
+        public Class<? extends CREThrowable>[] thrown(){
+            return new Class[]{CRENullPointerException.class};
         }
 
 		@Override
@@ -549,7 +553,7 @@ public class Echoes {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CNull){
-                throw ConfigRuntimeException.BuildException("Trying to broadcast null won't work", ExceptionType.NullPointerException, t);
+                throw ConfigRuntimeException.BuildException("Trying to broadcast null won't work", CRENullPointerException.class, t);
             }
             final MCServer server = Static.getServer();
             String permission = null;
@@ -591,8 +595,8 @@ public class Echoes {
         }
         
 		@Override
-        public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.CastException};
+        public Class<? extends CREThrowable>[] thrown(){
+            return new Class[]{CRECastException.class};
         }
 
 		@Override
@@ -632,7 +636,7 @@ public class Echoes {
 	public static class colorize extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 

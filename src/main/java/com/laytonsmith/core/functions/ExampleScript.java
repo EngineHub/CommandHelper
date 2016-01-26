@@ -14,6 +14,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -245,7 +246,11 @@ public class ExampleScript {
 				}
 			});
 		} catch(ConfigRuntimeException e){
-			thrown = "\n(Throws " + e.getExceptionType().name() + ": " + e.getMessage() + ")";
+			String name = e.getClass().getName();
+			if(e instanceof AbstractCREException){
+				name = ((AbstractCREException)e).getName();
+			}
+			thrown = "\n(Throws " + name + ": " + e.getMessage() + ")";
 		}
 		String playerOut = playerOutput.toString().trim();
 		String finalOut = finalOutput.toString().trim();

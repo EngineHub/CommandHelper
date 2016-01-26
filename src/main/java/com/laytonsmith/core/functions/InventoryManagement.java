@@ -25,8 +25,16 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CRELengthException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.Map;
 
 /**
@@ -67,10 +75,10 @@ public class InventoryManagement {
         }
 
 		@Override
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException,
-				Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.RangeException,
-				Exceptions.ExceptionType.NotFoundException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREPlayerOfflineException.class,
+				CRECastException.class, CRERangeException.class,
+				CRENotFoundException.class};
         }
 
 		@Override
@@ -133,7 +141,7 @@ public class InventoryManagement {
 			if (inv == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)",
-						Exceptions.ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			
             if(slot.equals(36)){
@@ -160,7 +168,7 @@ public class InventoryManagement {
             } else if(slot.equals(103)){
                 is = inv.getHelmet();
             } else {
-                throw ConfigRuntimeException.BuildException("Slot index must be 0-35, or 100-103", Exceptions.ExceptionType.RangeException, t);
+                throw ConfigRuntimeException.BuildException("Slot index must be 0-35, or 100-103", CRERangeException.class, t);
             }
             return ObjectGenerator.GetGenerator().item(is, t);
         }
@@ -170,8 +178,8 @@ public class InventoryManagement {
     public static class close_pinv extends AbstractFunction {
 
 		@Override
-        public Exceptions.ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREPlayerOfflineException.class};
         }
 
 		@Override
@@ -226,9 +234,9 @@ public class InventoryManagement {
     public static class pworkbench extends AbstractFunction {
 
 		@Override
-        public Exceptions.ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException,
-				ExceptionType.InsufficientArgumentsException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREPlayerOfflineException.class,
+				CREInsufficientArgumentsException.class};
         }
 
 		@Override
@@ -252,7 +260,7 @@ public class InventoryManagement {
 				if (p == null) {
 					throw ConfigRuntimeException.BuildException(
 							"You have to specify a player when running " + this.getName() + " from console.",
-							ExceptionType.InsufficientArgumentsException, t);
+							CREInsufficientArgumentsException.class, t);
 				}
 			}
 
@@ -287,8 +295,8 @@ public class InventoryManagement {
 	public static class show_enderchest extends AbstractFunction {
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -351,8 +359,8 @@ public class InventoryManagement {
     public static class penchanting extends AbstractFunction {
 
 		@Override
-        public Exceptions.ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREPlayerOfflineException.class};
         }
 
 		@Override
@@ -437,8 +445,8 @@ public class InventoryManagement {
         }
 
 		@Override
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREPlayerOfflineException.class, CRECastException.class, CREFormatException.class};
         }
 
 		@Override
@@ -469,10 +477,10 @@ public class InventoryManagement {
             } else if(args.length == 1){
                 arg = args[0];
             } else {
-                throw ConfigRuntimeException.CreateUncatchableException("The old format for set_pinv has been deprecated. Please update your script.", t);
+                throw ConfigRuntimeException.BuildException("The old format for set_pinv has been deprecated. Please update your script.", CREFormatException.class, t);
             }
             if(!(arg instanceof CArray)){
-                throw ConfigRuntimeException.BuildException("Expecting an array as argument " + (args.length==1?"1":"2"), Exceptions.ExceptionType.CastException, t);
+                throw ConfigRuntimeException.BuildException("Expecting an array as argument " + (args.length==1?"1":"2"), CRECastException.class, t);
             }
             CArray array = (CArray)arg;
 			Static.AssertPlayerNonNull(m, t);
@@ -541,9 +549,9 @@ public class InventoryManagement {
         }
 
 		@Override
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.FormatException,
-                Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.NotFoundException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREPlayerOfflineException.class, CREFormatException.class,
+                CRECastException.class, CRENotFoundException.class};
         }
 
 		@Override
@@ -571,7 +579,7 @@ public class InventoryManagement {
 			if (inv == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)",
-						Exceptions.ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			
             int total = 0;
@@ -625,9 +633,9 @@ public class InventoryManagement {
         }
 
 		@Override
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
-                Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.NotFoundException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CRECastException.class, CREFormatException.class,
+                CREPlayerOfflineException.class, CRENotFoundException.class};
         }
 
 		@Override
@@ -655,7 +663,7 @@ public class InventoryManagement {
 			if (inv == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)",
-						Exceptions.ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
             CArray ca = new CArray(t);
             for(int i = 0; i < 36; i++){
@@ -715,10 +723,10 @@ public class InventoryManagement {
         }
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
-					ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException,
-					ExceptionType.IllegalArgumentException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class,
+					CREPlayerOfflineException.class, CRENotFoundException.class,
+					CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -764,7 +772,7 @@ public class InventoryManagement {
 			try {
 				h = p.getInventory().addItem(is);
 			} catch(IllegalArgumentException e) {
-				throw ConfigRuntimeException.BuildException("Item value is invalid", ExceptionType.IllegalArgumentException, t);
+				throw ConfigRuntimeException.BuildException("Item value is invalid", CREIllegalArgumentException.class, t);
 			}
 
 			p.updateInventory();
@@ -804,9 +812,9 @@ public class InventoryManagement {
         }
 
 		@Override
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.PlayerOfflineException,
-                Exceptions.ExceptionType.FormatException, Exceptions.ExceptionType.NotFoundException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CRECastException.class, CREPlayerOfflineException.class,
+                CREFormatException.class, CRENotFoundException.class};
         }
 
 		@Override
@@ -835,7 +843,7 @@ public class InventoryManagement {
 			if (inv == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)",
-						Exceptions.ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			
             for(int i = 35; i >= 0; i--){
@@ -901,10 +909,10 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
-					ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException,
-					ExceptionType.IllegalArgumentException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class,
+					CREPlayerOfflineException.class, CRENotFoundException.class,
+					CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -951,7 +959,7 @@ public class InventoryManagement {
 			try {
 				h = p.getEnderChest().addItem(is);
 			} catch(IllegalArgumentException e) {
-				throw ConfigRuntimeException.BuildException("Item value is invalid", ExceptionType.IllegalArgumentException, t);
+				throw ConfigRuntimeException.BuildException("Item value is invalid", CREIllegalArgumentException.class, t);
 			}
 
 			if (h.isEmpty()) {
@@ -988,9 +996,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.PlayerOfflineException,
-				Exceptions.ExceptionType.FormatException, Exceptions.ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class,
+				CREFormatException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -1020,7 +1028,7 @@ public class InventoryManagement {
 			if (inv == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not find the enderchest inventory of the given player (are you running in cmdline mode?)",
-						Exceptions.ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			
 			for (int i = 26; i >= 0; i--) {
@@ -1085,8 +1093,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1124,7 +1132,7 @@ public class InventoryManagement {
 			}
 
 			if (!(arg instanceof CArray)) {
-				throw ConfigRuntimeException.BuildException("Expecting an array as argument " + (args.length == 1 ? "1" : "2"), Exceptions.ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Expecting an array as argument " + (args.length == 1 ? "1" : "2"), CRECastException.class, t);
 			}
 
 			CArray array = (CArray) arg;
@@ -1139,7 +1147,7 @@ public class InventoryManagement {
 						index = Integer.parseInt(key);
 					} catch (NumberFormatException e) {
 						if (key.isEmpty()) {
-							throw ConfigRuntimeException.BuildException("Slot index must be 0-26", Exceptions.ExceptionType.RangeException, t);
+							throw ConfigRuntimeException.BuildException("Slot index must be 0-26", CRERangeException.class, t);
 						} else {
 							throw e;
 						}
@@ -1189,10 +1197,10 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException,
-				Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.RangeException,
-				Exceptions.ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class,
+				CRECastException.class, CRERangeException.class,
+				CRENotFoundException.class};
 		}
 
 		@Override
@@ -1230,7 +1238,7 @@ public class InventoryManagement {
 				m = Static.GetPlayer(args[0], t);
 			} else if (args.length == 2) {
 				if (args[1] instanceof CNull) {
-					throw ConfigRuntimeException.BuildException("Slot index must be 0-26", Exceptions.ExceptionType.RangeException, t);
+					throw ConfigRuntimeException.BuildException("Slot index must be 0-26", CRERangeException.class, t);
 				} else {
 					index = Static.getInt32(args[1], t);
 				}
@@ -1259,10 +1267,10 @@ public class InventoryManagement {
 			if (inv == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not find the enderchest inventory of the given player (are you running in cmdline mode?)",
-						Exceptions.ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			if (slot < 0 || slot > 26) {
-				throw ConfigRuntimeException.BuildException("Slot index must be 0-26", Exceptions.ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("Slot index must be 0-26", CRERangeException.class, t);
 			}
 			MCItemStack is = inv.getItem(slot);
 			return ObjectGenerator.GetGenerator().item(is, t);
@@ -1273,9 +1281,9 @@ public class InventoryManagement {
 	public static class get_inventory_item extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
-                    ExceptionType.LengthException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class,
+                    CRELengthException.class};
 		}
 
 		@Override
@@ -1302,7 +1310,7 @@ public class InventoryManagement {
 				MCItemStack is = inv.getItem(slot);
 				return ObjectGenerator.GetGenerator().item(is, t);
 			} catch(ArrayIndexOutOfBoundsException e){
-				throw new Exceptions.RangeException("Index out of bounds for the inventory type.", t);
+				throw new CRERangeException("Index out of bounds for the inventory type.", t);
 			}
 		}
 
@@ -1336,9 +1344,9 @@ public class InventoryManagement {
 	public static class set_inventory_item extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
-                    ExceptionType.LengthException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class,
+                    CRELengthException.class};
 		}
 
 		@Override
@@ -1366,7 +1374,7 @@ public class InventoryManagement {
 				inv.setItem(slot, is);
 				return CVoid.VOID;
 			} catch(ArrayIndexOutOfBoundsException e){
-				throw new Exceptions.RangeException("Index out of bounds for the inventory type.", t);
+				throw new CRERangeException("Index out of bounds for the inventory type.", t);
 			}
 		}
 
@@ -1397,9 +1405,9 @@ public class InventoryManagement {
 	public static class get_inventory_type extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
-                    ExceptionType.LengthException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class,
+                    CRELengthException.class};
 		}
 
 		@Override
@@ -1453,9 +1461,9 @@ public class InventoryManagement {
 	public static class get_inventory_size extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
-                    ExceptionType.LengthException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class,
+                    CRELengthException.class};
 		}
 
 		@Override
@@ -1505,8 +1513,8 @@ public class InventoryManagement {
 	public static class pinv_open extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -1584,9 +1592,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException,
-                    ExceptionType.FormatException, ExceptionType.LengthException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class,
+                    CREFormatException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -1616,7 +1624,7 @@ public class InventoryManagement {
 				index = Static.getInt32(args[1], t);
 
 				if (index < 0 || index >= size) {
-					throw ConfigRuntimeException.BuildException("Slot index must be 0-" + (size - 1), Exceptions.ExceptionType.RangeException, t);
+					throw ConfigRuntimeException.BuildException("Slot index must be 0-" + (size - 1), CRERangeException.class, t);
 				}
 			}
 
@@ -1664,9 +1672,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
-                    ExceptionType.LengthException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class,
+                    CRELengthException.class};
 		}
 
 		@Override
@@ -1691,7 +1699,7 @@ public class InventoryManagement {
 			Integer size = inventory.getSize();
 
 			if (!(args[1] instanceof CArray)) {
-				throw ConfigRuntimeException.BuildException("Expecting an array as argument 2", Exceptions.ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Expecting an array as argument 2", CRECastException.class, t);
 			}
 
 			CArray array = (CArray) args[1];
@@ -1744,9 +1752,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
-                    ExceptionType.LengthException, ExceptionType.IllegalArgumentException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class,
+                    CRELengthException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -1782,7 +1790,7 @@ public class InventoryManagement {
 			try {
 				h = inventory.addItem(is);
 			} catch(IllegalArgumentException e){
-				throw ConfigRuntimeException.BuildException("Item value is invalid", ExceptionType.IllegalArgumentException, t);
+				throw ConfigRuntimeException.BuildException("Item value is invalid", CREIllegalArgumentException.class, t);
 			}
 
 			if (h.isEmpty()) {
@@ -1818,9 +1826,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
-                    ExceptionType.LengthException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class,
+                    CRELengthException.class};
 		}
 
 		@Override
@@ -1893,9 +1901,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, Exceptions.ExceptionType.PlayerOfflineException,
-					Exceptions.ExceptionType.FormatException, Exceptions.ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CREPlayerOfflineException.class,
+					CREFormatException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -1918,7 +1926,7 @@ public class InventoryManagement {
 						player = (MCPlayer) sender;
 					} else {
 						throw ConfigRuntimeException.BuildException("The command sender is not online (are you running this from console?).",
-								Exceptions.ExceptionType.PlayerOfflineException, t);
+								CREPlayerOfflineException.class, t);
 					}
 					break;
 				}
@@ -1928,7 +1936,7 @@ public class InventoryManagement {
 				}
 				default: {
 					throw ConfigRuntimeException.BuildException("Wrong number of arguments passed to " + this.getName(),
-							Exceptions.ExceptionType.FormatException, t);
+							CREFormatException.class, t);
 				}
 			}
 			
@@ -1937,18 +1945,18 @@ public class InventoryManagement {
 				slot = Integer.parseInt(args[args.length - 1].val());
 			} catch(NumberFormatException e) {
 				throw ConfigRuntimeException.BuildException("Slot number must be an integer in range of [0-8].",
-							Exceptions.ExceptionType.FormatException, t);
+							CREFormatException.class, t);
 			}
 			if(slot < 0 || slot > 8) {
 				throw ConfigRuntimeException.BuildException("Slot number must be an integer in range of [0-8].",
-						Exceptions.ExceptionType.RangeException, t);
+						CRERangeException.class, t);
 			}
 			
 			MCPlayerInventory pinv = player.getInventory();
 			if (pinv == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)",
-						Exceptions.ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			pinv.setHeldItemSlot(slot);
 			return CVoid.VOID;
@@ -1980,9 +1988,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException,
-				Exceptions.ExceptionType.FormatException, Exceptions.ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class,
+				CREFormatException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -2005,7 +2013,7 @@ public class InventoryManagement {
 						player = (MCPlayer) sender;
 					} else {
 						throw ConfigRuntimeException.BuildException("The command sender is not online (are you running this from console?).",
-								Exceptions.ExceptionType.PlayerOfflineException, t);
+								CREPlayerOfflineException.class, t);
 					}
 					break;
 				}
@@ -2015,7 +2023,7 @@ public class InventoryManagement {
 				}
 				default: {
 					throw ConfigRuntimeException.BuildException("Wrong number of arguments passed to " + this.getName(),
-							Exceptions.ExceptionType.FormatException, t);
+							CREFormatException.class, t);
 				}
 			}
 			
@@ -2023,7 +2031,7 @@ public class InventoryManagement {
 			if (pinv == null) {
 				throw ConfigRuntimeException.BuildException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)",
-						Exceptions.ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			int slot = pinv.getHeldItemSlot();
 			return new CInt(slot, t);
@@ -2057,8 +2065,8 @@ public class InventoryManagement {
 //                    + " will be filled in the hotbar.";
 //        }
 //
-//        public ExceptionType[] thrown() {
-//            return new ExceptionType[]{};
+//        public Class<? extends CREThrowable>[] thrown() {
+//            return new Class[]{};
 //        }
 //
 //        public boolean isRestricted() {
@@ -2101,7 +2109,7 @@ public class InventoryManagement {
 			inv = StaticLayer.GetConvertor().GetEntityInventory(entity);
 		}
 		if(inv == null){
-			throw new Exceptions.FormatException("The entity or location specified is not capable of having an inventory.", t);
+			throw new CREFormatException("The entity or location specified is not capable of having an inventory.", t);
 		} else {
 			return inv;
 		}

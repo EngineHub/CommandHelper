@@ -30,11 +30,14 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.persistence.DataSourceException;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -42,7 +45,6 @@ import java.lang.reflect.Proxy;
 import java.util.jar.JarFile;
 import java.util.Locale;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 
 /**
@@ -57,8 +59,8 @@ public class Meta {
 	@api
 	public static class first_load extends AbstractFunction {
 
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		public boolean isRestricted() {
@@ -108,7 +110,7 @@ public class Meta {
 		public Construct exec(Target t, final Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[1].nval() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
 				throw ConfigRuntimeException.BuildException("The first character of the command must be a forward slash (i.e. '/give')",
-						ExceptionType.FormatException, t);
+						CREFormatException.class, t);
 			}
 			String cmd = args[1].val().substring(1);
 			if (args[0] instanceof CArray) {
@@ -130,7 +132,7 @@ public class Meta {
 				}
 				if(cmd.equalsIgnoreCase("interpreter-on")){
 					//This isn't allowed for security reasons.
-					throw ConfigRuntimeException.BuildException("/interpreter-on cannot be run from runas for security reasons.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("/interpreter-on cannot be run from runas for security reasons.", CREFormatException.class, t);
 				}
 				Static.getServer().runasConsole(cmd);
 			} else {
@@ -153,15 +155,15 @@ public class Meta {
 					Static.getServer().dispatchCommand(m, cmd);
 				} else {
 					throw ConfigRuntimeException.BuildException("The player " + args[0].val() + " is not online",
-							ExceptionType.PlayerOfflineException, t);
+							CREPlayerOfflineException.class, t);
 				}
 			}
 			return CVoid.VOID;
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -192,8 +194,8 @@ public class Meta {
 	public static class sudo extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -210,7 +212,7 @@ public class Meta {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
 				throw ConfigRuntimeException.BuildException("The first character of the command must be a forward slash (i.e. '/give')",
-						ExceptionType.FormatException, t);
+						CREFormatException.class, t);
 			}
 			String cmd = args[0].val().substring(1);
 			//If the command sender is null, then just try to run() this. It's unclear to me what
@@ -337,7 +339,7 @@ public class Meta {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
 				throw ConfigRuntimeException.BuildException("The first character of the command must be a forward slash (i.e. '/give')",
-						ExceptionType.FormatException, t);
+						CREFormatException.class, t);
 			}
 			String cmd = args[0].val().substring(1);
 			if (Prefs.DebugMode()) {
@@ -348,7 +350,7 @@ public class Meta {
 				}
 			}
 			if(cmd.equalsIgnoreCase("interpreter-on")){
-				throw new Exceptions.FormatException("/interpreter-on cannot be run as apart of an alias for security reasons.", t);
+				throw new CREFormatException("/interpreter-on cannot be run as apart of an alias for security reasons.", t);
 			}
 			try{
 				Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
@@ -357,7 +359,7 @@ public class Meta {
 						+ " the plugin threw an unexpected exception (turn on debug mode to see the full"
 						+ " stacktrace): " + ex.getMessage() + "\n\nThis is not a bug in " + Implementation.GetServerType().getBranding()
 						+ " but in the plugin that provides the command.", 
-						ExceptionType.PluginInternalException, t, ex);
+						CREPluginInternalException.class, t, ex);
 			}
 			return CVoid.VOID;
 		}
@@ -369,8 +371,8 @@ public class Meta {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PluginInternalException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREPluginInternalException.class};
 		}
 
 		@Override
@@ -393,8 +395,8 @@ public class Meta {
 	public static class is_alias extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIOException.class};
 		}
 
 		@Override
@@ -467,8 +469,8 @@ public class Meta {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -525,8 +527,8 @@ public class Meta {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -602,8 +604,8 @@ public class Meta {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -635,8 +637,8 @@ public class Meta {
 	public static class capture_runas extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -654,7 +656,7 @@ public class Meta {
 			String player = args[0].val();
 			String cmd = args[1].val();
 			if(!cmd.startsWith("/")){
-				throw new Exceptions.FormatException("Command must begin with a /", t);
+				throw new CREFormatException("Command must begin with a /", t);
 			}
 			cmd = cmd.substring(1);
 			
@@ -693,7 +695,7 @@ public class Meta {
 	public static class get_command_block extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -743,8 +745,8 @@ public class Meta {
 	public static class psetop extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -802,8 +804,8 @@ public class Meta {
 		private final static is_alias is_alias = new is_alias();
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -861,7 +863,7 @@ public class Meta {
 	public static class noop extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -906,7 +908,7 @@ public class Meta {
 	public static class get_locales extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -969,7 +971,7 @@ public class Meta {
 	public static class engine_build_date extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -1024,7 +1026,7 @@ public class Meta {
 	public static class build_date extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -1069,8 +1071,8 @@ public class Meta {
 	public static class get_script_environment extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override

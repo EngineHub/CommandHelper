@@ -46,7 +46,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 *
 	 * @param target
 	 */
-	void setTarget(Target target) {
+	public void setTarget(Target target) {
 		this.target = target;
 	}
 

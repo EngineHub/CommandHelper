@@ -53,11 +53,12 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import com.laytonsmith.core.functions.Exceptions;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -360,7 +361,7 @@ public class EntityEvents {
 			MCEntity p = Static.getEntity(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
 			if (!(p instanceof MCProjectile)) {
 				throw ConfigRuntimeException.BuildException("The id was not a projectile",
-						ExceptionType.BadEntityException, Target.UNKNOWN);
+						CREBadEntityException.class, Target.UNKNOWN);
 			}
 			return EventBuilder.instantiate(MCProjectileHitEvent.class, p);
 		}
@@ -620,7 +621,7 @@ public class EntityEvents {
 						value = new CArray(Target.UNKNOWN);
 					}
 					if(!(value instanceof CArray)){
-						throw ConfigRuntimeException.BuildException("drops must be an array, or null", Exceptions.ExceptionType.CastException, value.getTarget());
+						throw ConfigRuntimeException.BuildException("drops must be an array, or null", CRECastException.class, value.getTarget());
 					}
 					e.clearDrops();
 					CArray drops = (CArray) value;
@@ -707,7 +708,7 @@ public class EntityEvents {
 				try {
 					type = MCMobs.valueOf(value.val());
 				} catch (IllegalArgumentException iae) {
-					throw new Exceptions.FormatException(value.val() + " is not a valid mob type.", Target.UNKNOWN);
+					throw new CREFormatException(value.val() + " is not a valid mob type.", Target.UNKNOWN);
 				}
 				e.setType(type);
 			}

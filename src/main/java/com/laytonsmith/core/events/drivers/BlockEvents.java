@@ -39,10 +39,10 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import com.laytonsmith.core.functions.Exceptions;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -1135,7 +1135,7 @@ public class BlockEvents {
 					}
 				} catch(IllegalArgumentException ex){
 					throw ConfigRuntimeException.BuildException("No " + key + " with the value " + value + " exists",
-							Exceptions.ExceptionType.IllegalArgumentException, Target.UNKNOWN, ex);
+							CREIllegalArgumentException.class, Target.UNKNOWN, ex);
 				}
 			}
 			return false;

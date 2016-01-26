@@ -27,9 +27,14 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
+import com.laytonsmith.core.exceptions.CRE.CREShellException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -63,8 +68,8 @@ public class Cmdline {
     public static class sys_out extends AbstractFunction {
 
 		@Override
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{};
         }
 
 		@Override
@@ -127,8 +132,8 @@ public class Cmdline {
     public static class sys_err extends AbstractFunction {
 
 		@Override
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{};
+        public Class[] thrown() {
+            return new Class[]{};
         }
 
 		@Override
@@ -190,8 +195,8 @@ public class Cmdline {
 	public static class print_out extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -245,8 +250,8 @@ public class Cmdline {
 	public static class print_err extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -299,7 +304,7 @@ public class Cmdline {
     public static class exit extends AbstractFunction implements Optimizable {
 
 		@Override
-        public Exceptions.ExceptionType[] thrown() {
+        public Class<? extends CREThrowable>[] thrown() {
             return null;
         }
 
@@ -366,7 +371,7 @@ public class Cmdline {
     public static class sys_properties extends AbstractFunction {
 
 		@Override
-        public ExceptionType[] thrown() {
+        public Class<? extends CREThrowable>[] thrown() {
             return null;
         }
 
@@ -454,7 +459,7 @@ public class Cmdline {
     public static class get_env extends AbstractFunction {
 
 		@Override
-        public ExceptionType[] thrown() {
+        public Class<? extends CREThrowable>[] thrown() {
             return null;
         }
 
@@ -507,7 +512,7 @@ public class Cmdline {
     public static class set_env extends AbstractFunction {
 
 		@Override
-        public ExceptionType[] thrown() {
+        public Class<? extends CREThrowable>[] thrown() {
             return null;
         }
 
@@ -601,8 +606,8 @@ public class Cmdline {
 	public static class prompt_pass extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientPermissionException, ExceptionType.IOException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientPermissionException.class, CREIOException.class};
 		}
 
 		@Override
@@ -618,7 +623,7 @@ public class Cmdline {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(!Static.InCmdLine(environment)){
-				throw ConfigRuntimeException.BuildException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " cannot be used outside of cmdline mode.", CREInsufficientPermissionException.class, t);
 			}
 			boolean mask = true;
 			if(args.length > 1){
@@ -636,7 +641,7 @@ public class Cmdline {
 				reader.setExpandEvents(false);
 				return new CString(reader.readLine(Static.MCToANSIColors(prompt), cha), t);
 			} catch (IOException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t);
 			} finally {
 				if(reader != null){
 					reader.shutdown();
@@ -674,8 +679,8 @@ public class Cmdline {
 	public static class prompt_char extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientPermissionException, ExceptionType.IOException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientPermissionException.class, CREIOException.class};
 		}
 
 		@Override
@@ -703,7 +708,7 @@ public class Cmdline {
 				StreamUtils.GetSystemOut().println(c);
 				return new CString(c, t);
 			} catch (IOException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t);
 			} finally {
 				if(reader != null){
 					reader.shutdown();
@@ -740,8 +745,8 @@ public class Cmdline {
 	public static class prompt_line extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientPermissionException, ExceptionType.IOException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientPermissionException.class, CREIOException.class};
 		}
 
 		@Override
@@ -757,7 +762,7 @@ public class Cmdline {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(!Static.InCmdLine(environment)){
-				throw ConfigRuntimeException.BuildException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " cannot be used outside of cmdline mode.", CREInsufficientPermissionException.class, t);
 			}
 
 			String prompt = args[0].val();
@@ -768,7 +773,7 @@ public class Cmdline {
 				String line = reader.readLine(Static.MCToANSIColors(prompt));
 				return new CString(line, t);
 			} catch (IOException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t);
 			} finally {
 				if(reader != null){
 					reader.shutdown();
@@ -805,8 +810,8 @@ public class Cmdline {
 	public static class sys_beep extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientPermissionException, ExceptionType.PluginInternalException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientPermissionException.class, CREPluginInternalException.class};
 		}
 
 		@Override
@@ -852,7 +857,7 @@ public class Cmdline {
 	public static class clear_screen extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -872,7 +877,7 @@ public class Cmdline {
 				try {
 					new jline.console.ConsoleReader().clearScreen();
 				} catch (IOException ex) {
-					throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t);
+					throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t);
 				}
 			}
 			return CVoid.VOID;
@@ -905,8 +910,8 @@ public class Cmdline {
 	public static class shell_adv extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientPermissionException, ExceptionType.IOException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientPermissionException.class, CREIOException.class};
 		}
 
 		@Override
@@ -923,10 +928,10 @@ public class Cmdline {
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(!Static.InCmdLine(environment)){
 				if(!Prefs.AllowShellCommands()){
-					throw ConfigRuntimeException.BuildException("Shell commands are not allowed. Enable them in preferences.ini.", ExceptionType.InsufficientPermissionException, t);
+					throw ConfigRuntimeException.BuildException("Shell commands are not allowed. Enable them in preferences.ini.", CREInsufficientPermissionException.class, t);
 				}
 				if(environment.getEnv(GlobalEnv.class).GetDynamicScriptingMode() && !Prefs.AllowDynamicShell()){
-					throw ConfigRuntimeException.BuildException("Shell commands are disabled from dynamic sources.", ExceptionType.InsufficientPermissionException, t);
+					throw ConfigRuntimeException.BuildException("Shell commands are disabled from dynamic sources.", CREInsufficientPermissionException.class, t);
 				}
 			}
 			String[] command;
@@ -1027,7 +1032,7 @@ public class Cmdline {
 			try {
 				cmd.start();
 			} catch (IOException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t);
 			}
 
 			Runnable run = new Runnable() {
@@ -1124,8 +1129,8 @@ public class Cmdline {
 	public static class shell extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientPermissionException, ExceptionType.ShellException, ExceptionType.IOException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientPermissionException.class, CREShellException.class, CREIOException.class};
 		}
 
 		@Override
@@ -1142,10 +1147,10 @@ public class Cmdline {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(!Static.InCmdLine(environment)){
 				if(!Prefs.AllowShellCommands()){
-					throw ConfigRuntimeException.BuildException("Shell commands are not allowed. Enable them in preferences.ini.", ExceptionType.InsufficientPermissionException, t);
+					throw ConfigRuntimeException.BuildException("Shell commands are not allowed. Enable them in preferences.ini.", CREInsufficientPermissionException.class, t);
 				}
 				if(environment.getEnv(GlobalEnv.class).GetDynamicScriptingMode() && !Prefs.AllowDynamicShell()){
-					throw ConfigRuntimeException.BuildException("Shell commands are disabled from dynamic sources.", ExceptionType.InsufficientPermissionException, t);
+					throw ConfigRuntimeException.BuildException("Shell commands are disabled from dynamic sources.", CREInsufficientPermissionException.class, t);
 				}
 			}
 			String[] command;
@@ -1195,7 +1200,7 @@ public class Cmdline {
 				try{
 					if(exitCode != expectedExitCode){
 						err.flush();
-						throw ConfigRuntimeException.BuildException(serr.toString(), ExceptionType.ShellException, t);
+						throw ConfigRuntimeException.BuildException(serr.toString(), CREShellException.class, t);
 					} else {
 						out.flush();
 						return new CString(sout.toString(), t);
@@ -1205,7 +1210,7 @@ public class Cmdline {
 					err.close();
 				}
 			} catch (IOException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t);
 			} catch(InterruptedException ex){
 				throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
 			}
@@ -1257,8 +1262,8 @@ public class Cmdline {
 	public static class read_pipe_input extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.InsufficientPermissionException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIOException.class, CREInsufficientPermissionException.class};
 		}
 
 		@Override
@@ -1274,10 +1279,10 @@ public class Cmdline {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(!Static.InCmdLine(environment)){
-				throw ConfigRuntimeException.BuildException(getName() + " cannot be used outside of cmdline mode.", ExceptionType.InsufficientPermissionException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " cannot be used outside of cmdline mode.", CREInsufficientPermissionException.class, t);
 			}
 			if(System.console() != null){
-				throw ConfigRuntimeException.BuildException(getName() + " can only be used in TTY mode.", ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " can only be used in TTY mode.", CREIOException.class, t);
 			}
 			boolean binary = false;
 			if(args.length > 0){
@@ -1308,7 +1313,7 @@ public class Cmdline {
 					return new CString(b.toString(), t);
 				}
 			} catch (IOException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
 			}
 		}
 
@@ -1341,8 +1346,8 @@ public class Cmdline {
 	public static class pwd extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.ShellException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREShellException.class};
 		}
 
 		@Override
@@ -1368,7 +1373,7 @@ public class Cmdline {
 				}
 			}
 			if(root == null){
-				throw ConfigRuntimeException.BuildException("Running in interpreted mode. pwd() is not available.", ExceptionType.ShellException, t);
+				throw ConfigRuntimeException.BuildException("Running in interpreted mode. pwd() is not available.", CREShellException.class, t);
 			} else {
 				try {
 					String ret = root.getCanonicalPath();
@@ -1410,8 +1415,8 @@ public class Cmdline {
 	public static class cd extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.InsufficientPermissionException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIOException.class, CREInsufficientPermissionException.class};
 		}
 
 		@Override
@@ -1429,7 +1434,7 @@ public class Cmdline {
 			requireCmdlineMode(environment, this, t);
 			File cd = Static.GetFileFromArgument(args.length == 0 ? null : args[0].val(), environment, t, new File(System.getProperty("user.home")));
 			if(!cd.exists()){
-				throw ConfigRuntimeException.BuildException("No such file or directory: " + cd.getPath(), ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException("No such file or directory: " + cd.getPath(), CREIOException.class, t);
 			}
 			environment.getEnv(GlobalEnv.class).SetRootFolder(cd);
 			return CVoid.VOID;
@@ -1462,8 +1467,8 @@ public class Cmdline {
 	public static class ls extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientPermissionException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientPermissionException.class};
 		}
 
 		@Override
@@ -1487,7 +1492,7 @@ public class Cmdline {
 				}
 			} else {
 				throw ConfigRuntimeException.BuildException("No such file or directory: " + cwd.getPath(),
-						ExceptionType.IOException, t);
+						CREIOException.class, t);
 			}
 			return ca;
 		}
@@ -1519,8 +1524,8 @@ public class Cmdline {
 	public static class set_cmdline_prompt extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientPermissionException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInsufficientPermissionException.class};
 		}
 
 		@Override
@@ -1537,7 +1542,7 @@ public class Cmdline {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			requireCmdlineMode(environment, this, t);
 			if(!(args[0] instanceof CClosure)){
-				throw new Exceptions.CastException("Expecting a closure for argument 1 of " + getName(), t);
+				throw new CRECastException("Expecting a closure for argument 1 of " + getName(), t);
 			}
 			environment.getEnv(GlobalEnv.class).SetCustom("cmdline_prompt", args[0]);
 			return CVoid.VOID;
@@ -1571,8 +1576,8 @@ public class Cmdline {
 	public static class get_terminal_width extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientPermissionException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientPermissionException.class};
 		}
 
 		@Override
@@ -1592,7 +1597,7 @@ public class Cmdline {
 				int i = new jline.console.ConsoleReader().getTerminal().getWidth();
 				return new CInt(i, t);
 			} catch (IOException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), ExceptionType.IOException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
 			}
 		}
 
@@ -1623,7 +1628,7 @@ public class Cmdline {
 	public static class user extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -1681,7 +1686,7 @@ public class Cmdline {
 	public static void requireCmdlineMode(Environment environment, Function f, Target t) throws ConfigRuntimeException {
 		if(!Static.InCmdLine(environment)){
 			throw ConfigRuntimeException.BuildException(f.getName() + " cannot be used outside of cmdline mode.",
-					ExceptionType.InsufficientPermissionException, t);
+					CREInsufficientPermissionException.class, t);
 		}
 	}
 

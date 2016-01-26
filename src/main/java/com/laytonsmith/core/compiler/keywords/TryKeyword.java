@@ -4,8 +4,8 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.functions.Exceptions;
 import java.util.List;
 
 /**
@@ -14,8 +14,7 @@ import java.util.List;
 @Keyword.keyword("try")
 public class TryKeyword extends Keyword {
 
-	// TODO dynamically name this once the class exists.
-	private static final String COMPLEX_TRY = "complex_try";
+	private static final String COMPLEX_TRY = new Exceptions.complex_try().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
@@ -56,14 +55,14 @@ public class TryKeyword extends Keyword {
 		// For now, we won't allow try {}, so this must be followed by a catch keyword. This restriction is somewhat artificial, and
 		// if we want to remove it in the future, we can do so by removing this code block.
 		{
-			if(!(list.size() > keywordPosition && nodeIsCatchKeyword(list.get(keywordPosition)))){
-				throw new ConfigCompileException("Expecting \"catch\" keyword to follow try, but none found", list.get(keywordPosition + 1).getTarget());
+			if(!(list.size() > keywordPosition && (nodeIsCatchKeyword(list.get(keywordPosition)) || nodeIsFinallyKeyword(list.get(keywordPosition))))){
+				throw new ConfigCompileException("Expecting \"catch\" or \"finally\" keyword to follow try, but none found", complex_try.getTarget());
 			}
 		}
 		
 		// We can have any number of catch statements after the try, so we loop through until we run out.
 		for(int i = keywordPosition; i < list.size(); i++){
-			if(!nodeIsCatchKeyword(list.get(i))){
+			if(!nodeIsCatchKeyword(list.get(i)) && !nodeIsFinallyKeyword(list.get(i))){
 				// End of the chain, stop processing.
 				break;
 			}
@@ -82,12 +81,12 @@ public class TryKeyword extends Keyword {
 				complex_try.addChild(n.getChildAt(0));
 				complex_try.addChild(getArgumentOrNull(list.get(i + 1)));
 			} else {
-				// We have something like catch { }. In this case, this must be the final
-				// catch statement, and we need to verify that there isn't a catch following it.
+				// We have something like finally { }. In this case, this must be the final
+				// clause statement, and we need to verify that there isn't a catch following it.
 				if(list.size() > i + 2){
 					if(nodeIsCatchKeyword(list.get(i + 2))){
-						throw new ConfigCompileException("A catch with no datatype (try { } ... catch { }) must be the final"
-								+ " catch clause in the try/catch statement", list.get(i + 2).getTarget());
+						throw new ConfigCompileException("A finally block must be the final"
+								+ " clause in the try/[catch]/finally statement", list.get(i + 2).getTarget());
 					}
 				}
 				// Passed the inspection.
@@ -106,10 +105,11 @@ public class TryKeyword extends Keyword {
 	}
 
 	private boolean nodeIsCatchKeyword(ParseTree node){
-		return
-				(node.getData() instanceof CKeyword ||
-				node.getData() instanceof CFunction)
-				&& node.getData().val().equals("catch");
+		return node.getData() instanceof CFunction && node.getData().val().equals("catch");
+	}
+
+	private boolean nodeIsFinallyKeyword(ParseTree node){
+		return node.getData() instanceof CKeyword && node.getData().val().equals("finally");
 	}
 
 }

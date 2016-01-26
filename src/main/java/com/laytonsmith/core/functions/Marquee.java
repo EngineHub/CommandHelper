@@ -10,8 +10,9 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -32,8 +33,8 @@ public class Marquee {
 	@api public static class marquee extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -66,7 +67,7 @@ public class Marquee {
 			if(args[4 + offset] instanceof CClosure){
 				callback = ((CClosure)args[4 + offset]);
 			} else {
-				throw new Exceptions.CastException("Expected argument " + (4 + offset + 1) + " to be a closure, but was not.", t);
+				throw new CRECastException("Expected argument " + (4 + offset + 1) + " to be a closure, but was not.", t);
 			}
 			final com.laytonsmith.PureUtilities.Marquee m = new com.laytonsmith.PureUtilities.Marquee(text, stringWidth, delayTime, new com.laytonsmith.PureUtilities.Marquee.MarqueeCallback() {
 
@@ -137,8 +138,8 @@ public class Marquee {
 	@api public static class marquee_stop extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override

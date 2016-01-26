@@ -823,6 +823,56 @@
 					</reportPlugins>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.1.201405082137</version>
+				<configuration>
+					<excludes>
+						<!-- Application starter -->
+						<exclude>ac/simons/biking2/Application.class</exclude>
+						<!-- Configuration -->
+						<exclude>ac/simons/biking2/config/*</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<id>pre-unit-test</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>post-unit-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<!--  implmentation is needed only for Maven 2  -->
+								<rule implementation="org.jacoco.maven.RuleConfiguration">
+									<element>BUNDLE</element>
+									<limits>
+										<limit implementation="org.jacoco.report.check.Limit">
+											<counter>INSTRUCTION</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.01</minimum>
+										</limit>
+										<!--  implmentation is needed only for Maven 2  -->
+										<limit implementation="org.jacoco.report.check.Limit">
+											<counter>COMPLEXITY</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.01</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 	<profiles>
@@ -840,6 +890,12 @@
 					</plugin>
 				</plugins>
 			</build>
+		</profile>
+		<profile>
+			<id>fail-on-test-failures</id>
+			<properties>
+				<maven.test.failure.ignore>false</maven.test.failure.ignore>
+			</properties>
 		</profile>
 	</profiles>
 	<pluginRepositories>

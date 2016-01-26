@@ -31,9 +31,9 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -281,10 +281,10 @@ public class RandomTests {
 		} catch (ClassNotFoundException cnf) {
 			/* Not much we can really do about this during testing.
 			throw ConfigRuntimeException.BuildException("You are missing a required dependency: " + eClass,
-					ExceptionType.PluginInternalException, Target.UNKNOWN);*/
+					CREPluginInternalException.class, Target.UNKNOWN);*/
 		} catch (ReflectionUtils.ReflectionException rex) {
 			throw ConfigRuntimeException.BuildException("Your expression was invalidly formatted",
-					ExceptionType.PluginInternalException, Target.UNKNOWN, rex.getCause());
+					CREPluginInternalException.class, Target.UNKNOWN, rex.getCause());
 		}
 	}
 

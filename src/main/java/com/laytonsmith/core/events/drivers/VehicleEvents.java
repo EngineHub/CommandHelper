@@ -31,10 +31,10 @@ import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -449,7 +449,7 @@ public class VehicleEvents {
 			MCEntity e = Static.getEntity(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
 			if (!(e instanceof MCVehicle)) {
 				throw ConfigRuntimeException.BuildException("The id was not a vehicle",
-						ExceptionType.BadEntityException, Target.UNKNOWN);
+						CREBadEntityException.class, Target.UNKNOWN);
 			}
 
 			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), e.getWorld(), manualObject.getTarget());

@@ -4,8 +4,8 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
  *
@@ -22,7 +22,7 @@ public class CDouble extends CNumber implements Cloneable{
         try{
             val = Double.parseDouble(value);
         } catch(NumberFormatException e){
-            throw ConfigRuntimeException.BuildException("Could not cast " + value + " to double", ExceptionType.FormatException, t);
+            throw ConfigRuntimeException.BuildException("Could not cast " + value + " to double", CREFormatException.class, t);
         }
     }
 

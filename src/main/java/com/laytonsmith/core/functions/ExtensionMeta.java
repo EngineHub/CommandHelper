@@ -16,11 +16,11 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.net.URL;
 import java.util.EnumSet;
 import java.util.List;
@@ -41,8 +41,8 @@ public class ExtensionMeta {
 	public static class function_exists extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -132,8 +132,8 @@ public class ExtensionMeta {
 	public static class event_exists extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -198,8 +198,8 @@ public class ExtensionMeta {
 	public static class extension_exists extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -267,8 +267,8 @@ public class ExtensionMeta {
 	public static class extension_info extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override

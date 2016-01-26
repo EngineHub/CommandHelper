@@ -24,6 +24,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -639,8 +640,8 @@ public class Compiler {
 	public static class smart_string extends AbstractFunction implements Optimizable {
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
 		}
 
 		@Override

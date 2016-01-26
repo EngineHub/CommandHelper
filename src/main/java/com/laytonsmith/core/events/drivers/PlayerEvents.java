@@ -40,11 +40,12 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.events.drivers.EntityEvents.entity_death;
+import com.laytonsmith.core.exceptions.CRE.CREBindException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import com.laytonsmith.core.functions.Exceptions;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.StringHandling;
 
 import java.util.ArrayList;
@@ -1526,14 +1527,14 @@ public class PlayerEvents {
                         }
                         e.setRecipients(list);
                     } else {
-                        throw ConfigRuntimeException.BuildException("recipients must be an array", Exceptions.ExceptionType.CastException, value.getTarget());
+                        throw ConfigRuntimeException.BuildException("recipients must be an array", CRECastException.class, value.getTarget());
                     }
                 }
 				if("format".equals(key)){
 					try{
 						e.setFormat(value.nval());
 					} catch(UnknownFormatConversionException|IllegalFormatConversionException ex){
-						throw new Exceptions.FormatException(ex.getMessage(), Target.UNKNOWN);
+						throw new CREFormatException(ex.getMessage(), Target.UNKNOWN);
 					}
 				}
                 return true;
@@ -1641,14 +1642,14 @@ public class PlayerEvents {
                         }
                         e.setRecipients(list);
                     } else {
-                        throw ConfigRuntimeException.BuildException("recipients must be an array", Exceptions.ExceptionType.CastException, value.getTarget());
+                        throw ConfigRuntimeException.BuildException("recipients must be an array", CRECastException.class, value.getTarget());
                     }
                 }
 				if("format".equals(key)){
 					try{
 						e.setFormat(value.nval());
 					} catch(UnknownFormatConversionException|IllegalFormatConversionException ex){
-						throw new Exceptions.FormatException(ex.getMessage(), Target.UNKNOWN);
+						throw new CREFormatException(ex.getMessage(), Target.UNKNOWN);
 					}
 				}
                 return true;
@@ -2049,7 +2050,7 @@ public class PlayerEvents {
 				if (key.equals("chance")) {
 					double chance = Static.getDouble(value, Target.UNKNOWN);
 					if (chance > 1.0 || chance < 0.0) {
-						throw new Exceptions.FormatException("Chance must be between 0.0 and 1.0", Target.UNKNOWN);
+						throw new CREFormatException("Chance must be between 0.0 and 1.0", Target.UNKNOWN);
 					}
 					e.getHook().setBiteChance(chance);
 					return true;
@@ -2106,7 +2107,7 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.BuildException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
+			throw ConfigRuntimeException.BuildException("Unsupported Operation", CREBindException.class, Target.UNKNOWN);
 		}
 
 		@Override
@@ -2167,7 +2168,7 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.BuildException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
+			throw ConfigRuntimeException.BuildException("Unsupported Operation", CREBindException.class, Target.UNKNOWN);
 		}
 
 		@Override
@@ -2412,7 +2413,7 @@ public class PlayerEvents {
 				} else if (key.equalsIgnoreCase("pages")) {
 					CArray pageArray = Static.getArray(value, value.getTarget());
 					if (pageArray.inAssociativeMode()) {
-						throw ConfigRuntimeException.BuildException("The page array must not be associative.", ExceptionType.CastException, pageArray.getTarget());
+						throw ConfigRuntimeException.BuildException("The page array must not be associative.", CRECastException.class, pageArray.getTarget());
 					} else {
 						List<String> pages = new ArrayList<String>();
 						for (Construct page : pageArray.asList()) {

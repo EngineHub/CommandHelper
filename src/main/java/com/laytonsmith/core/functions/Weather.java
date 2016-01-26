@@ -18,9 +18,13 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
+import com.laytonsmith.core.exceptions.CRE.CRELengthException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 import java.util.UUID;
 
@@ -47,8 +51,8 @@ public class Weather {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class, CREInvalidWorldException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -81,7 +85,7 @@ public class Weather {
 					ent = w.strikeLightningEffect(StaticLayer.GetLocation(w, x, y + 1, z)).getUniqueId();
 				}
 			} else {
-				throw ConfigRuntimeException.BuildException("World was not specified", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("World was not specified", CREInvalidWorldException.class, t);
 			}
 
 			return new CString(ent.toString(), t);
@@ -142,7 +146,7 @@ public class Weather {
 				} else if (args[1] instanceof CInt) {
 					duration = Static.getInt32(args[1], t);
 				} else {
-					throw ConfigRuntimeException.BuildException("", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("", CREFormatException.class, t);
 				}
 			}
 			if (args.length == 3) {
@@ -155,7 +159,7 @@ public class Weather {
 					w.setWeatherDuration(duration);
 				}
 			} else {
-				throw ConfigRuntimeException.BuildException("World was not specified", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("World was not specified", CREInvalidWorldException.class, t);
 			}
 			return CVoid.VOID;
 		}
@@ -169,9 +173,9 @@ public class Weather {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
-					ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class,
+					CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -194,8 +198,8 @@ public class Weather {
 	public static class set_thunder extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class, CRECastException.class};
 		}
 
 		@Override
@@ -222,7 +226,7 @@ public class Weather {
 			if (w != null) {
 				w.setThundering(Static.getBoolean(args[0]));
 			} else {
-				throw ConfigRuntimeException.BuildException("No existing world specified!", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("No existing world specified!", CREInvalidWorldException.class, t);
 			}
 			if (args.length == 3) {
 				w.setThunderDuration(Static.getInt32(args[2], t));
@@ -257,8 +261,8 @@ public class Weather {
 	public static class has_storm extends AbstractFunction {
 		
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -285,7 +289,7 @@ public class Weather {
 			if (w != null) {
 				return CBoolean.get(w.isStorming());
 			} else {
-				throw ConfigRuntimeException.BuildException("No existing world specified!", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("No existing world specified!", CREInvalidWorldException.class, t);
 			}
 		}
 
@@ -315,8 +319,8 @@ public class Weather {
 	public static class has_thunder extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -343,7 +347,7 @@ public class Weather {
 			if (w != null) {
 				return CBoolean.get(w.isThundering());
 			} else {
-				throw ConfigRuntimeException.BuildException("No existing world specified!", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("No existing world specified!", CREInvalidWorldException.class, t);
 			}
 		}
 

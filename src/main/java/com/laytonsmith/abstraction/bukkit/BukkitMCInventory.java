@@ -11,7 +11,7 @@ import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHLog.Tags;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -53,7 +53,7 @@ public class BukkitMCInventory implements MCInventory {
 						+ " This is the fault of the server and can't be helped by "
 						+ Implementation.GetServerType().getBranding() + ".", Target.UNKNOWN);
 			} else {
-				throw new Exceptions.RangeException("No slot " + slot + " exists in the given inventory", Target.UNKNOWN);
+				throw new CRERangeException("No slot " + slot + " exists in the given inventory", Target.UNKNOWN);
 			}
 			return null;
 		}
@@ -70,7 +70,7 @@ public class BukkitMCInventory implements MCInventory {
 						+ " This is the fault of the server and can't be helped by "
 						+ Implementation.GetServerType().getBranding() + ".", Target.UNKNOWN);
 			} else {
-				throw new Exceptions.RangeException("No slot " + slot + " exists in the given inventory", Target.UNKNOWN);
+				throw new CRERangeException("No slot " + slot + " exists in the given inventory", Target.UNKNOWN);
 			}
 		}
 		if(this.i.getHolder() instanceof Player){

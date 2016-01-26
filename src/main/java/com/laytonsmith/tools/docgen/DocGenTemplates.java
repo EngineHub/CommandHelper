@@ -9,14 +9,15 @@ import com.laytonsmith.PureUtilities.MSP.Burst;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.datasource;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.Scheduling;
@@ -52,7 +53,7 @@ public class DocGenTemplates {
 
 	public static void main(String[] args){
 		Implementation.setServerType(Implementation.Type.SHELL);
-		StreamUtils.GetSystemOut().println(Generate("Federation"));
+		StreamUtils.GetSystemOut().println(Generate("Exceptions"));
 	}
 
 	public static String Generate(String forPage){
@@ -288,7 +289,11 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String ... args) {
 			StringBuilder b = new StringBuilder();
-			for(SimpleDocumentation d : ExceptionType.values()){
+			Set<Class<CREThrowable>> set = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class);
+			for(Class<CREThrowable> c : set){
+				// This is suuuuuuper evil, but we don't want to have to deal with the exception constructors, we're
+				// just after the documentation stuff.				
+				SimpleDocumentation d = (SimpleDocumentation) ReflectionUtils.instantiateUnsafe(c);
 				b.append("===").append(d.getName()).append("===\n");
 				b.append(d.docs());
 				b.append("\n\nSince: ").append(d.since().toString()).append("\n\n");

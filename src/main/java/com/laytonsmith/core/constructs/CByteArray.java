@@ -3,8 +3,9 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Sizes;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Sizable;
 import java.io.UnsupportedEncodingException;
@@ -487,17 +488,17 @@ public class CByteArray extends CArray implements Sizable, ArrayAccess {
 
 		@Override
 		public void reverse() {
-			throw new ROException();
+			throw new CREByteArrayReadOnlyException();
 		}
 
 		@Override
 		public void push(Construct c, Integer i, Target t) {
-			throw new ROException();
+			throw new CREByteArrayReadOnlyException();
 		}
 
 		@Override
 		public void set(Construct index, Construct c, Target t) {
-			throw new ROException();
+			throw new CREByteArrayReadOnlyException();
 		}
 
 		@Override
@@ -506,7 +507,7 @@ public class CByteArray extends CArray implements Sizable, ArrayAccess {
 			try{
 				return new CInt(backing[i], t);
 			} catch(ArrayIndexOutOfBoundsException e){
-				throw new Exceptions.RangeException("Index out of range. Found " + i + ", but array length is only " + backing.length, t);
+				throw new CRERangeException("Index out of range. Found " + i + ", but array length is only " + backing.length, t);
 			}
 		}
 
@@ -544,9 +545,10 @@ public class CByteArray extends CArray implements Sizable, ArrayAccess {
 			throw new Error("This error should not happen. Please report this bug to the developers");
 		}
 
-		public class ROException extends ConfigRuntimeException{
-			public ROException(){
-				super("Arrays copied from ByteArrays are read only", Exceptions.ExceptionType.ReadOnlyException, CArrayByteBacking.this.getTarget());
+		@typeof("ByteArrayReadOnlyException")
+		public class CREByteArrayReadOnlyException extends CREReadOnlyException{
+			public CREByteArrayReadOnlyException(){
+				super("Arrays copied from ByteArrays are read only", CArrayByteBacking.this.getTarget());
 			}
 		}
 

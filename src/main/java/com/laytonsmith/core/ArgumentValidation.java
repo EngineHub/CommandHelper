@@ -2,8 +2,10 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 
 import java.util.regex.Pattern;
@@ -40,7 +42,7 @@ public class ArgumentValidation {
 		if (object.containsKey(key)) {
 			return object.get(key, t);
 		} else if (defaultItem == null) {
-			throw ConfigRuntimeException.BuildException("Expected the key \"" + key + "\" to be present, but it was not found.", Exceptions.ExceptionType.FormatException, t);
+			throw ConfigRuntimeException.BuildException("Expected the key \"" + key + "\" to be present, but it was not found.", CREFormatException.class, t);
 		} else {
 			return defaultItem;
 		}
@@ -58,7 +60,7 @@ public class ArgumentValidation {
 		if (construct instanceof CArray) {
 			return ((CArray) construct);
 		} else {
-			throw ConfigRuntimeException.BuildException("Expecting array, but received " + construct.val(), Exceptions.ExceptionType.CastException, t);
+			throw ConfigRuntimeException.BuildException("Expecting array, but received " + construct.val(), CRECastException.class, t);
 		}
 	}
 
@@ -82,7 +84,7 @@ public class ArgumentValidation {
 		if (clazz.isAssignableFrom(construct.getClass())) {
 			return (T) construct;
 		} else {
-			throw ConfigRuntimeException.BuildException("Expecting " + expectedClassName + " but receieved " + construct.val() + " instead.", Exceptions.ExceptionType.CastException, t);
+			throw ConfigRuntimeException.BuildException("Expecting " + expectedClassName + " but receieved " + construct.val() + " instead.", CRECastException.class, t);
 		}
 	}
 
@@ -105,7 +107,7 @@ public class ArgumentValidation {
 			String expectedClassName = clazz.getAnnotation(typeof.class).value();
 			String actualClassName = construct.getClass().getAnnotation(typeof.class).value();
 			throw ConfigRuntimeException.BuildException("Expecting " + expectedClassName + " but receieved " + construct.val()
-					+ " (" + actualClassName + ") instead.", Exceptions.ExceptionType.CastException, t);
+					+ " (" + actualClassName + ") instead.", CRECastException.class, t);
 		}
 	}
 
@@ -136,7 +138,7 @@ public class ArgumentValidation {
 				d = Double.parseDouble(c.val());
 			} catch (NumberFormatException e) {
 				throw ConfigRuntimeException.BuildException("Expecting a number, but received \"" + c.val() + "\" instead",
-						Exceptions.ExceptionType.CastException, t);
+						CRECastException.class, t);
 			}
 		} else if (c instanceof CBoolean) {
 			if (((CBoolean) c).getBoolean()) {
@@ -146,7 +148,7 @@ public class ArgumentValidation {
 			}
 		} else {
 			throw ConfigRuntimeException.BuildException("Expecting a number, but received \"" + c.val() + "\" instead",
-					Exceptions.ExceptionType.CastException, t);
+					CRECastException.class, t);
 		}
 		return d;
 	}
@@ -196,7 +198,7 @@ public class ArgumentValidation {
 			return getNumber(c, t);
 		} catch (ConfigRuntimeException e) {
 			throw ConfigRuntimeException.BuildException("Expecting a double, but received " + c.val() + " instead",
-					Exceptions.ExceptionType.CastException, t);
+					CRECastException.class, t);
 		}
 	}
 
@@ -219,7 +221,7 @@ public class ArgumentValidation {
 		double l = getDouble(c, t);
 		float f = (float) l;
 		if (Math.abs(f - l) > delta) {
-			throw new Exceptions.RangeException("Expecting a 32 bit float, but a larger value was found: " + l, t);
+			throw new CRERangeException("Expecting a 32 bit float, but a larger value was found: " + l, t);
 		}
 		return f;
 	}
@@ -252,7 +254,7 @@ public class ArgumentValidation {
 				i = Long.parseLong(c.val());
 			} catch (NumberFormatException e) {
 				throw ConfigRuntimeException.BuildException("Expecting an integer, but received \"" + c.val() + "\" instead",
-						Exceptions.ExceptionType.CastException, t);
+						CRECastException.class, t);
 			}
 		}
 		return i;
@@ -275,7 +277,7 @@ public class ArgumentValidation {
 		long l = getInt(c, t);
 		int i = (int) l;
 		if (i != l) {
-			throw new Exceptions.RangeException("Expecting a 32 bit integer, but a larger value was found: " + l, t);
+			throw new CRERangeException("Expecting a 32 bit integer, but a larger value was found: " + l, t);
 		}
 		return i;
 	}
@@ -298,7 +300,7 @@ public class ArgumentValidation {
 		long l = getInt(c, t);
 		short s = (short) l;
 		if (s != l) {
-			throw new Exceptions.RangeException("Expecting a 16 bit integer, but a larger value was found: " + l, t);
+			throw new CRERangeException("Expecting a 16 bit integer, but a larger value was found: " + l, t);
 		}
 		return s;
 	}
@@ -321,7 +323,7 @@ public class ArgumentValidation {
 		long l = getInt(c, t);
 		byte b = (byte) l;
 		if (b != l) {
-			throw new Exceptions.RangeException("Expecting an 8 bit integer, but a larger value was found: " + l, t);
+			throw new CRERangeException("Expecting an 8 bit integer, but a larger value was found: " + l, t);
 		}
 		return b;
 	}
@@ -368,7 +370,7 @@ public class ArgumentValidation {
 		} else if (c instanceof CNull) {
 			return new CByteArray(t, 0);
 		} else {
-			throw new Exceptions.CastException("Expecting byte array, but found " + c.typeof() + " instead.", t);
+			throw new CRECastException("Expecting byte array, but found " + c.typeof() + " instead.", t);
 		}
 	}
 
@@ -376,7 +378,7 @@ public class ArgumentValidation {
 		if(c instanceof CClassType){
 			return (CClassType) c;
 		} else {
-			throw new Exceptions.CastException("Expecting a ClassType, but found " + c.typeof() + " instead.", t);
+			throw new CRECastException("Expecting a ClassType, but found " + c.typeof() + " instead.", t);
 		}
 	}
 

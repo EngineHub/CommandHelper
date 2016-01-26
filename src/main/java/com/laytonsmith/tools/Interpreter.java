@@ -61,12 +61,12 @@ import com.laytonsmith.core.environments.InvalidEnvironmentException;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.CmdlineEvents;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
@@ -902,7 +902,7 @@ public final class Interpreter {
 		}
 
 		@Override
-		public MCColor GetColor(String colorName, Target t) throws Exceptions.FormatException {
+		public MCColor GetColor(String colorName, Target t) throws CREFormatException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 

@@ -1,7 +1,6 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.Common.UIUtils;
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.tools.docgen.DocGenUI;
 import com.laytonsmith.tools.pnviewer.PNViewer;
 import java.awt.event.ActionEvent;
@@ -13,8 +12,6 @@ import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.ListModel;
-import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 

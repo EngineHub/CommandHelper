@@ -24,8 +24,13 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.BoundEvent;
+import com.laytonsmith.core.exceptions.CRE.CREBindException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import org.bukkit.event.Cancellable;
 
 /**
@@ -55,7 +60,7 @@ public class Sandbox {
 //            return "void {plugin, cmd} ";
 //        }
 //
-//        public ExceptionType[] thrown() {
+//        public Class<? extends CREThrowable>[] thrown() {
 //            return null;
 //        }
 //
@@ -150,8 +155,8 @@ public class Sandbox {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.BindException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREBindException.class};
         }
 
 		@Override
@@ -172,7 +177,7 @@ public class Sandbox {
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
             if (original == null) {
-                throw ConfigRuntimeException.BuildException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, t);
+                throw ConfigRuntimeException.BuildException("is_cancelled cannot be called outside an event handler", CREBindException.class, t);
             }
             if (original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable
                     && original.getUnderlyingEvent() instanceof org.bukkit.event.Event) {
@@ -206,9 +211,9 @@ public class Sandbox {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.EnchantmentException,
-				ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CRECastException.class, CREEnchantmentException.class,
+				CREPlayerOfflineException.class, CRENotFoundException.class};
         }
 
 		@Override
@@ -243,7 +248,7 @@ public class Sandbox {
 				if (pinv == null) {
 					throw ConfigRuntimeException.BuildException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 				}
                 is = pinv.getItem(slot);
             }
@@ -263,7 +268,7 @@ public class Sandbox {
             for (String key : enchantArray.stringKeySet()) {
                 MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
                 if (e == null) {
-                    throw ConfigRuntimeException.BuildException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
+                    throw ConfigRuntimeException.BuildException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", CREEnchantmentException.class, t);
                 }
                 int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
 
@@ -296,8 +301,8 @@ public class Sandbox {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREPlayerOfflineException.class};
         }
 
 		@Override
@@ -356,8 +361,8 @@ public class Sandbox {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREPlayerOfflineException.class};
         }
 
 		@Override
