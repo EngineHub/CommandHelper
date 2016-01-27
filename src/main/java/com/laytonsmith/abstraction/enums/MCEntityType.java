@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
@@ -15,10 +14,99 @@ import java.util.Set;
 
 /**
  *
- * 
+ *
  */
 @MDynamicEnum("EntityType")
-public abstract class MCEntityType extends DynamicEnum {
+public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MCVanillaEntityType,Concrete> {
+
+	// To be filled by the implementer
+	protected static Map<String, MCEntityType> mappings;
+	protected static Map<MCVanillaEntityType, MCEntityType> vanilla;
+
+	public static MCEntityType NULL = null;
+
+	protected Class<? extends MCEntity> wrapperClass;
+
+	public MCEntityType(MCVanillaEntityType abstractedType, Concrete concreteType) {
+		super(abstractedType, concreteType);
+	}
+
+	/**
+	 * Utility method for spawn_entity
+	 *
+	 * @return whether the implemented api can spawn this entity
+	 */
+	public abstract boolean isSpawnable();
+
+	@Override
+	public MCVanillaEntityType getAbstracted() {
+		return super.getAbstracted();
+	}
+
+	public Class<? extends MCEntity> getWrapperClass() {
+		return wrapperClass;
+	}
+
+	public static MCEntityType valueOf(String test) throws IllegalArgumentException {
+		if (mappings == null) {
+			return null;
+		}
+		MCEntityType ret = mappings.get(test);
+		if (ret == null) {
+			throw new IllegalArgumentException("Unknown entity type: " + test);
+		}
+		return ret;
+	}
+
+	public static MCEntityType valueOfVanillaType(MCVanillaEntityType type) {
+		if (vanilla == null) {
+			return null;
+		}
+		return vanilla.get(type);
+	}
+
+	/**
+	 * @return Names of available entity types
+	 */
+	public static Set<String> types() {
+		if (NULL == null) { // docs mode
+			Set<String> dummy = new HashSet<>();
+			for (final MCVanillaEntityType t : MCVanillaEntityType.values()) {
+				dummy.add(t.name());
+			}
+			return dummy;
+		}
+		return mappings.keySet();
+	}
+
+	/**
+	 * @return Our own EntityType list
+	 */
+	public static Collection<MCEntityType> values() {
+		if (NULL == null) { // docs mode
+			ArrayList<MCEntityType> dummy = new ArrayList<>();
+			for (final MCVanillaEntityType t : MCVanillaEntityType.values()) {
+				dummy.add(new MCEntityType<Object>(t, null) {
+					@Override
+					public String name() {
+						return t.name();
+					}
+
+					@Override
+					public String concreteName() {
+						return t.name();
+					}
+
+					@Override
+					public boolean isSpawnable() {
+						return t.isSpawnable();
+					}
+				});
+			}
+			return dummy;
+		}
+		return mappings.values();
+	}
 
 	@MEnum("VanillaEntityType")
 	public enum MCVanillaEntityType {
@@ -41,8 +129,8 @@ public abstract class MCEntityType extends DynamicEnum {
 		ENDERMITE(true, MCVersion.MC1_8),
 		ENDER_CRYSTAL(true),
 		ENDER_DRAGON(true),
+		ENDER_EYE(false),
 		ENDER_PEARL(false),
-		ENDER_SIGNAL(false),
 		EXPERIENCE_ORB(true),
 		/**
 		 * Spawn with world.spawnFallingBlock()
@@ -89,7 +177,6 @@ public abstract class MCEntityType extends DynamicEnum {
 		SNOWMAN(true),
 		SQUID(true),
 		SPIDER(true),
-		// These don't have an entity ID in nms.EntityTypes.
 		SPLASH_POTION(true),
 		THROWN_EXP_BOTTLE(true),
 		WEATHER(false),
@@ -132,96 +219,5 @@ public abstract class MCEntityType extends DynamicEnum {
 		public boolean existsInCurrent() {
 			return Static.getServer().getMinecraftVersion().ordinal() >= version.ordinal();
 		}
-	}
-
-	// To be filled by the implementer
-	protected static Map<String, MCEntityType> mappings;
-	protected static Map<MCVanillaEntityType, MCEntityType> vanilla;
-	protected static Map<MCVanillaEntityType, Class<? extends MCEntity>> classList;
-
-	public static MCEntityType NULL = null;
-
-	public MCEntityType(MCVanillaEntityType abstractedType) {
-		abstracted = abstractedType;
-	}
-
-	// Instance variable;
-	protected MCVanillaEntityType abstracted;
-
-	/**
-	 * @return always returns the concrete name
-	 */
-	public abstract String concreteName();
-
-	public abstract Object getConcrete();
-
-	/**
-	 * Utility method for spawn_entity
-	 * @return whether the implemented api can spawn this entity
-	 */
-	public abstract boolean isSpawnable();
-
-	public MCVanillaEntityType getAbstracted() {
-		return abstracted;
-	}
-
-	public static MCEntityType valueOf(String test) {
-		MCEntityType ret = mappings.get(test);
-		if (ret == null) {
-			throw new IllegalArgumentException("Unknown entity type: " + test);
-		}
-		return ret;
-	}
-
-	public static MCEntityType valueOfVanillaType(MCVanillaEntityType type) {
-		return vanilla.get(type);
-	}
-
-	/**
-	 * @return Names of available entity types
-	 */
-	public static Set<String> types() {
-		if (NULL == null) { // docs mode
-			Set<String> dummy = new HashSet<>();
-			for (final MCVanillaEntityType t : MCVanillaEntityType.values()) {
-				dummy.add(t.name());
-			}
-			return dummy;
-		}
-		return mappings.keySet();
-	}
-
-	/**
-	 * @return Our own EntityType list
-	 */
-	public static Collection<MCEntityType> values() {
-		if (NULL == null) { // docs mode
-			ArrayList<MCEntityType> dummy = new ArrayList<>();
-			for (final MCVanillaEntityType t : MCVanillaEntityType.values()) {
-				dummy.add(new MCEntityType(t) {
-					@Override
-					public String name() {
-						return t.name();
-					}
-
-					@Override
-					public String concreteName() {
-						return t.name();
-					}
-
-					@Override
-					public Object getConcrete() {
-						return null;
-					}
-
-					@Override
-					public boolean isSpawnable() {
-						return t.isSpawnable();
-					}
-				});
-			}
-			return dummy;
-		}
-		return mappings.values();
 	}
 }

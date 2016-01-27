@@ -14,5 +14,9 @@ public class PrefilterNonMatchException extends Exception {
      */
     public PrefilterNonMatchException() {
     }
-    
+
+    @Override
+    public Throwable fillInStackTrace(){
+        return this;
+    }
 }

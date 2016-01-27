@@ -3,7 +3,8 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static org.junit.Assert.assertEquals;
@@ -77,10 +78,15 @@ public class ArrayTest {
     }
 
     @Test public void testArrayKeyNormalization() throws Exception{
-        assertEquals("{false: 0}", SRun("array(false: 0)", fakePlayer));
-        assertEquals("{true: 1}", SRun("array(true: 1)", fakePlayer));
-        assertEquals("{null: empty}", SRun("array(null: empty)", fakePlayer));
+        assertEquals("{0: 0}", SRun("array(false: 0)", fakePlayer));
+        assertEquals("{false: 0}", SRun("array('false': 0)", fakePlayer));
+        assertEquals("{1: 1}", SRun("array(true: 1)", fakePlayer));
+        assertEquals("{true: 1}", SRun("array('true': 1)", fakePlayer));
+        assertEquals("{: empty}", SRun("array(null: empty)", fakePlayer));
+        assertEquals("{null: empty}", SRun("array('null': empty)", fakePlayer));
         assertEquals("{2.3: 2.3}", SRun("array(2.3: 2.3)", fakePlayer));
+        assertEquals("{0.3: 0.3}", SRun("array(.3: .3)", fakePlayer));
+        assertEquals("{.3: 0.3}", SRun("array('.3': .3)", fakePlayer));
     }
 
     @Test public void testArrayKeys() throws Exception{
@@ -358,10 +364,9 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("blarg");
     }
 
-    @Test public void testArrayUsageBeforeDefined() throws Exception{
-        SRun("try(@a[1], msg('success')) msg('end')", fakePlayer);
-        verify(fakePlayer).sendMessage("success");
-        verify(fakePlayer).sendMessage("end");
+    @Test(expected = CREIndexOverflowException.class)
+	public void testArrayUsageBeforeDefined() throws Exception{
+        SRun("@a[1]", fakePlayer);
     }
 
     @Test public void testDirectSquareBracketUsage() throws Exception{

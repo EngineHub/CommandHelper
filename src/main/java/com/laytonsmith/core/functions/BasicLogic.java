@@ -5,6 +5,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -27,11 +28,14 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.LoopBreakException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -93,8 +97,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -226,8 +230,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientArgumentsException.class};
 		}
 
 		@Override
@@ -258,7 +262,7 @@ public class BasicLogic {
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if (nodes.length < 2) {
-				throw new ConfigRuntimeException("ifelse expects at least 2 arguments", ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("ifelse expects at least 2 arguments", CREInsufficientArgumentsException.class, t);
 			}
 			for (int i = 0; i <= nodes.length - 2; i += 2) {
 				ParseTree statement = nodes[i];
@@ -342,8 +346,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientArgumentsException.class};
 		}
 
 		@Override
@@ -545,7 +549,7 @@ public class BasicLogic {
 							//	code()
 							//would be turned into array(1, 2), code() in the
 							//old style.
-							conditions.push(((CLabel) c2.getData()).cVal());
+							conditions.push(((CLabel) c2.getData()).cVal(), t);
 							inCase = true;
 							i++;
 							continue;
@@ -630,7 +634,7 @@ public class BasicLogic {
 						if (child.getData().isDynamic()) {
 							throw new ConfigCompileException(notConstant, child.getTarget());
 						}
-						data.push(child.getData());
+						data.push(child.getData(), t);
 					}
 					children.set(i, new ParseTree(data, children.get(i).getFileOptions()));
 				}
@@ -685,7 +689,7 @@ public class BasicLogic {
 					if (!(data instanceof CArray) || data instanceof CSlice) {
 						//Put it in an array to make the rest of this parsing easier.
 						data = new CArray(t);
-						((CArray) data).push(children.get(i).getData());
+						((CArray) data).push(children.get(i).getData(), t);
 					}
 					for (Construct value : ((CArray) data).asList()) {
 						if (value instanceof CSlice) {
@@ -768,7 +772,7 @@ public class BasicLogic {
 		@Override
 		public CBoolean exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args.length <= 1) {
-				throw new ConfigRuntimeException("At least two arguments must be passed to equals", ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("At least two arguments must be passed to equals", CREInsufficientArgumentsException.class, t);
 			}
 			boolean referenceMatch = true;
 			for (int i = 0; i < args.length - 1; i++) {
@@ -782,8 +786,7 @@ public class BasicLogic {
 			}
 			if(Static.anyNulls(args)){
 				boolean equals = true;
-				for(int i = 0; i < args.length; i++){
-					Construct c = args[i];
+				for(Construct c : args){
 					if(!(c instanceof CNull)){
 						equals = false;
 					}
@@ -817,24 +820,30 @@ public class BasicLogic {
 				}
 			}
 			try {
+				// Validate that these are numbers, so that getNumber doesn't throw an exception.
+				if(!ArgumentValidation.isNumber(args[0])) {
+					return CBoolean.FALSE;
+				}
 				boolean equals = true;
 				for (int i = 1; i < args.length; i++) {
+					if(!ArgumentValidation.isNumber(args[i])) {
+						return CBoolean.FALSE;
+					}
 					double arg1 = Static.getNumber(args[i - 1], t);
 					double arg2 = Static.getNumber(args[i], t);
 					if (arg1 != arg2) {
-						equals = false;
-						break;
+						return CBoolean.FALSE;
 					}
 				}
-				return CBoolean.get(equals);
+				return CBoolean.TRUE;
 			} catch (ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientArgumentsException.class};
 		}
 
 		@Override
@@ -902,8 +911,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -924,7 +933,7 @@ public class BasicLogic {
 		@Override
 		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
-				throw new ConfigRuntimeException(this.getName() + " expects 2 arguments.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects 2 arguments.", CREFormatException.class, t);
 			}
 			if (args[1].getClass().equals(args[0].getClass())) {
 				if(args[0] instanceof CString && args[1] instanceof CString){
@@ -976,7 +985,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -1041,8 +1050,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -1104,8 +1113,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientArgumentsException.class};
 		}
 
 		@Override
@@ -1126,7 +1135,7 @@ public class BasicLogic {
 		@Override
 		public CBoolean exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length <= 1) {
-				throw new ConfigRuntimeException("At least two arguments must be passed to equals_ic", ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("At least two arguments must be passed to equals_ic", CREInsufficientArgumentsException.class, t);
 			}
 			if (Static.anyBooleans(args)) {
 				boolean equals = true;
@@ -1154,16 +1163,22 @@ public class BasicLogic {
 				}
 			}
 			try {
+				// Validate that these are numbers, so that getNumber doesn't throw an exception.
+				if(!ArgumentValidation.isNumber(args[0])) {
+					return CBoolean.FALSE;
+				}
 				boolean equals = true;
 				for (int i = 1; i < args.length; i++) {
+					if(!ArgumentValidation.isNumber(args[i])) {
+						return CBoolean.FALSE;
+					}
 					double arg1 = Static.getNumber(args[i - 1], t);
 					double arg2 = Static.getNumber(args[i], t);
 					if (arg1 != arg2) {
-						equals = false;
-						break;
+						return CBoolean.FALSE;
 					}
 				}
-				return CBoolean.get(equals);
+				return CBoolean.TRUE;
 			} catch (ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
@@ -1183,6 +1198,75 @@ public class BasicLogic {
 				new ExampleScript("Basic usage", "equals_ic('test', 'TEST')"),
 				new ExampleScript("Basic usage", "equals_ic('completely', 'DIFFERENT')"),};
 		}
+	}
+
+	@api
+	public static class sequals_ic extends AbstractFunction implements Optimizable {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Construct v1 = args[0];
+			Construct v2 = args[1];
+			if(!v2.getClass().equals(v1.getClass())){
+				return CBoolean.FALSE;
+			}
+			return new equals_ic().exec(t, environment, v1, v2);
+		}
+
+		@Override
+		public String getName() {
+			return "sequals_ic";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {value1, value2} Returns true if the values are the same type, as well as equal, according to equals_ic."
+					+ " Generally, equals_ic will suffice, because usually you will be comparing two strings, however, this function"
+					+ " may be useful in various other cases, perhaps where the datatypes are unknown, but could be strings.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
+			);
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "sequals_ic(1, 1)"),
+				new ExampleScript("False result", "sequals_ic('1', 1)"),
+				new ExampleScript("False result", "sequals_ic('false', true)")
+			};
+		}
+
 	}
 
 	@api
@@ -1206,8 +1290,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -1250,8 +1334,8 @@ public class BasicLogic {
 	public static class ref_equals extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -1330,7 +1414,7 @@ public class BasicLogic {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
-				throw new ConfigRuntimeException(this.getName() + " expects 2 arguments.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects 2 arguments.", CREFormatException.class, t);
 			}
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
@@ -1338,8 +1422,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1397,7 +1481,7 @@ public class BasicLogic {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
-				throw new ConfigRuntimeException(this.getName() + " expects 2 arguments.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects 2 arguments.", CREFormatException.class, t);
 			}
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
@@ -1405,8 +1489,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1464,7 +1548,7 @@ public class BasicLogic {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
-				throw new ConfigRuntimeException(this.getName() + " expects 2 arguments.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects 2 arguments.", CREFormatException.class, t);
 			}
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
@@ -1472,8 +1556,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1532,7 +1616,7 @@ public class BasicLogic {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
-				throw new ConfigRuntimeException(this.getName() + " expects 2 arguments.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects 2 arguments.", CREFormatException.class, t);
 			}
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
@@ -1540,8 +1624,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1621,8 +1705,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1756,8 +1840,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1868,14 +1952,14 @@ public class BasicLogic {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 1) {
-				throw new ConfigRuntimeException(this.getName() + " expects 1 argument.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects 1 argument.", CREFormatException.class, t);
 			}
 			return CBoolean.get(!Static.getBoolean(args[0]));
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1936,8 +2020,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1958,7 +2042,7 @@ public class BasicLogic {
 		@Override
 		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
-				throw new ConfigRuntimeException(this.getName() + " expects 2 arguments.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects 2 arguments.", CREFormatException.class, t);
 			}
 			boolean val1 = Static.getBoolean(args[0]);
 			boolean val2 = Static.getBoolean(args[1]);
@@ -2000,8 +2084,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2061,8 +2145,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2122,8 +2206,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2144,7 +2228,7 @@ public class BasicLogic {
 		@Override
 		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
-				throw new ConfigRuntimeException(this.getName() + " expects 2 arguments.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects 2 arguments.", CREFormatException.class, t);
 			}
 			return new xor().exec(t, environment, args).not();
 		}
@@ -2183,8 +2267,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInsufficientArgumentsException.class};
 		}
 
 		@Override
@@ -2205,7 +2289,7 @@ public class BasicLogic {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
-				throw new ConfigRuntimeException(this.getName() + " expects at least 2 arguments.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects at least 2 arguments.", CREFormatException.class, t);
 			}
 			long val = Static.getInt(args[0], t);
 			for (int i = 1; i < args.length; i++) {
@@ -2259,8 +2343,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInsufficientArgumentsException.class};
 		}
 
 		@Override
@@ -2281,7 +2365,7 @@ public class BasicLogic {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
-				throw new ConfigRuntimeException(this.getName() + " expects at least 2 arguments.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects at least 2 arguments.", CREFormatException.class, t);
 			}
 			long val = Static.getInt(args[0], t);
 			for (int i = 1; i < args.length; i++) {
@@ -2337,8 +2421,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInsufficientArgumentsException.class};
 		}
 
 		@Override
@@ -2359,7 +2443,7 @@ public class BasicLogic {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
-				throw new ConfigRuntimeException(this.getName() + " expects at least 2 arguments.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects at least 2 arguments.", CREFormatException.class, t);
 			}
 			long val = Static.getInt(args[0], t);
 			for (int i = 1; i < args.length; i++) {
@@ -2411,8 +2495,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2433,7 +2517,7 @@ public class BasicLogic {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args.length != 1) {
-				throw new ConfigRuntimeException(this.getName() + " expects 1 argument.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects 1 argument.", CREFormatException.class, t);
 			}
 			return new CInt(~Static.getInt(args[0], t), t);
 		}
@@ -2472,8 +2556,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2494,7 +2578,7 @@ public class BasicLogic {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
-				throw new ConfigRuntimeException(this.getName() + " expects 2 arguments.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects 2 arguments.", CREFormatException.class, t);
 			}
 			long value = Static.getInt(args[0], t);
 			long toShift = Static.getInt(args[1], t);
@@ -2535,8 +2619,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2557,7 +2641,7 @@ public class BasicLogic {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
-				throw new ConfigRuntimeException(this.getName() + " expects 2 arguments.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects 2 arguments.", CREFormatException.class, t);
 			}
 			long value = Static.getInt(args[0], t);
 			long toShift = Static.getInt(args[1], t);
@@ -2600,8 +2684,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2622,7 +2706,7 @@ public class BasicLogic {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
-				throw new ConfigRuntimeException(this.getName() + " expects 2 arguments.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects 2 arguments.", CREFormatException.class, t);
 			}
 			long value = Static.getInt(args[0], t);
 			long toShift = Static.getInt(args[1], t);
@@ -2649,7 +2733,7 @@ public class BasicLogic {
 	public static class compile_error extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -2698,7 +2782,7 @@ public class BasicLogic {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.isEmpty()) {
-				throw new ConfigRuntimeException(this.getName() + " expects at least 1 argument.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects at least 1 argument.", CREFormatException.class, t);
 			}
 			if(!children.get(0).isConst()){
 				throw new ConfigCompileException(getName() + "'s argument must be a hardcoded string.", t);
@@ -2709,7 +2793,7 @@ public class BasicLogic {
 		@Override
 		public void link(Target t, List<ParseTree> children) throws ConfigCompileException {
 			if(children.isEmpty()) {
-				throw new ConfigRuntimeException(this.getName() + " expects at least 1 argument.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects at least 1 argument.", CREFormatException.class, t);
 			}
 			throw new ConfigCompileException(children.get(0).getData().val(), t);
 		}

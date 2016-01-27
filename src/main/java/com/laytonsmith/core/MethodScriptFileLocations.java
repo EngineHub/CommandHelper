@@ -34,10 +34,10 @@ public class MethodScriptFileLocations extends FileLocations {
 	public File getJarFile(){
 		if(MethodScriptFileLocations.class.getProtectionDomain().getCodeSource().getLocation() == null){
 			//This can happen if we're not running from a jar. Instead, we have to get the folder location.
-			URL url = MethodScriptFileLocations.class.getResource("/" + MethodScriptFileLocations.class.getName().replace(".", "/") + ".class");
+			URL url = MethodScriptFileLocations.class.getResource("/" + MethodScriptFileLocations.class.getName().replace('.', '/') + ".class");
 			String s = url.toString();
 			s = s.replaceFirst("file:", "");
-			s = StringUtils.replaceLast(s, Pattern.quote(MethodScriptFileLocations.class.getName().replace(".", "/") + ".class"), "");
+			s = StringUtils.replaceLast(s, Pattern.quote(MethodScriptFileLocations.class.getName().replace('.', '/') + ".class"), "");
 			return new File(s);
 		} else {
 			try {
@@ -137,18 +137,6 @@ public class MethodScriptFileLocations extends FileLocations {
 	 */
 	public File getProfilerConfigFile(){
 		return new File(getPreferencesDirectory(), "profiler.ini");
-	}
-
-	/**
-	 * Returns the SQL profiles config file location.
-	 * @return
-	 * @deprecated Use {@link #getProfilesFile()} instead, as the method name is
-	 * more accurate, since the profiles file contains profiles for other features,
-	 * not necessarily SQL.
-	 */
-	@Deprecated
-	public File getSQLProfilesFile(){
-		return getProfilesFile();
 	}
 
 	/**

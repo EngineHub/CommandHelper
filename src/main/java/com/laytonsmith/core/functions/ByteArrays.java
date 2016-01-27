@@ -3,8 +3,10 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
@@ -13,10 +15,14 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.UnsupportedEncodingException;
 import java.nio.BufferUnderflowException;
+import java.nio.ByteOrder;
 
 /**
  * 
@@ -39,8 +45,8 @@ public class ByteArrays {
 	public static class byte_array extends ba {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -117,9 +123,9 @@ public class ByteArrays {
 			try {
 				return new CInt(ba.getByte(pos), t);
 			} catch(IndexOutOfBoundsException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			} catch(BufferUnderflowException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
 
@@ -141,9 +147,9 @@ public class ByteArrays {
 			try{
 				return new CString(ba.getChar(pos), t);
 			} catch(IndexOutOfBoundsException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			} catch(BufferUnderflowException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
 
@@ -165,9 +171,9 @@ public class ByteArrays {
 			try{
 				return new CInt(ba.getShort(pos), t);
 			} catch(IndexOutOfBoundsException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			} catch(BufferUnderflowException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
 
@@ -189,9 +195,9 @@ public class ByteArrays {
 			try{
 				return new CInt(ba.getInt(pos), t);
 			} catch(IndexOutOfBoundsException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			} catch(BufferUnderflowException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
 
@@ -213,9 +219,9 @@ public class ByteArrays {
 			try {
 				return new CInt(ba.getLong(pos), t);
 			} catch (IndexOutOfBoundsException e) {
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			} catch (BufferUnderflowException e) {
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
 
@@ -237,9 +243,9 @@ public class ByteArrays {
 			try {
 				return new CDouble(ba.getFloat(pos), t);
 			} catch (IndexOutOfBoundsException e) {
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			} catch (BufferUnderflowException e) {
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
 
@@ -261,9 +267,9 @@ public class ByteArrays {
 			try {
 				return new CDouble(ba.getDouble(pos), t);
 			} catch(IndexOutOfBoundsException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			} catch(BufferUnderflowException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
 
@@ -294,9 +300,9 @@ public class ByteArrays {
 			try {
 				return ba.getBytes(size, pos);
 			} catch(IndexOutOfBoundsException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			} catch(BufferUnderflowException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
 
@@ -322,13 +328,13 @@ public class ByteArrays {
 			try{
 				return new CString(ba.readUTF8String(pos, encoding), t);
 			} catch(UnsupportedEncodingException e){
-				throw new Exceptions.FormatException(e.getMessage(), t);
+				throw new CREFormatException(e.getMessage(), t);
 			} catch(IndexOutOfBoundsException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			} catch(BufferUnderflowException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			} catch(NegativeArraySizeException e){
-				throw new Exceptions.FormatException("Invalid data", t);
+				throw new CREFormatException("Invalid data", t);
 			}
 		}
 
@@ -521,9 +527,9 @@ public class ByteArrays {
 			try{
 				ba.writeUTF8String(s, pos, encoding);
 			} catch(IndexOutOfBoundsException e){
-				throw new Exceptions.RangeException(e.getMessage(), t);
+				throw new CRERangeException(e.getMessage(), t);
 			} catch(UnsupportedEncodingException e){
-				throw new Exceptions.FormatException(e.getMessage(), t);
+				throw new CREFormatException(e.getMessage(), t);
 			}
 			return CVoid.VOID;
 		}
@@ -536,6 +542,105 @@ public class ByteArrays {
 					+ " strings written in this manner are compatible with ba_get_string. The encoding may be set, but defaults to UTF-8.";
 		}
 		
+	}
+
+	@api
+	@seealso({ba_is_little_endian.class})
+	public static class ba_set_little_endian extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = Static.getByteArray(args[0], t);
+			boolean setLittle = Static.getBoolean(args[1]);
+			ba.setOrder(setLittle ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "ba_set_little_endian";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {byte_array, setLittleEndian} Sets the byte order that the specified byte array will use"
+					+ " for all future gets/sets. By default, a byte array is Big Endian. If setLittleEndian is true,"
+					+ " the byte array will be set to little endian, otherwise it will be set to big endian.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+	}
+
+	@api
+	@seealso({ba_set_little_endian.class})
+	public static class ba_is_little_endian extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = Static.getByteArray(args[0], t);
+			return CBoolean.get(ba.getOrder() == ByteOrder.LITTLE_ENDIAN);
+		}
+
+		@Override
+		public String getName() {
+			return "ba_is_little_endian";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {byte_array} Returns true if this byte array is little endian. By default, byte arrays are big endian,"
+					+ " but this may be changed with ba_set_little_endian.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
 	}
 	
 	private static CByteArray getBA(Construct [] args, Target t){
@@ -561,8 +666,8 @@ public class ByteArrays {
 	private static abstract class ba extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -598,8 +703,8 @@ public class ByteArrays {
 	public static abstract class ba_get extends ba {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 		@Override

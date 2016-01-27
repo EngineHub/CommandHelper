@@ -1,7 +1,9 @@
 package com.laytonsmith.abstraction;
 
-public interface MCFireball extends MCProjectile {
-	public MVector3D getDirection();
+import com.laytonsmith.PureUtilities.Vector3D;
 
-	public void setDirection(MVector3D vector);
+public interface MCFireball extends MCProjectile {
+	public Vector3D getDirection();
+
+	public void setDirection(Vector3D vector);
 }

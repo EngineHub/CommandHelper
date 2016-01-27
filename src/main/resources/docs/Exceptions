@@ -1,88 +1,214 @@
+Exceptions can be thrown by various functions at runtime. This indicates that there was some issue with the
+input data. There is a straightforward way to deal with these errors however, using a try/catch block.
 
-Exceptions are thrown by various functions at runtime. Since MScript is not yet strongly typed, 
-it is not possible to catch all errors at compile time. Due to this, it is useful to be able 
-to programmatically determine if a function failed. To this end, since version 3.1.2, 
-MScript has the {{function|try}} function. This function takes 3 or 4 arguments:
-%%CODE|
-try(try_code, ivar, catch_code, [interested_types])
-%%
-If you are familiar with other programming languages' try-catch mechanisms, then this 
-construct will be familiar. The code at <code>try_code</code> is run normally. If any 
-function in the code causes an exception to be thrown, execution will halt, and program 
-flow will start at <code>catch_code</code>. The exception thrown will be stored in 
-<code>ivar</code>, so that you can programmatically examine the cause of the exception. 
-Many times, you are only interested in a certain type of exception. This is where the optional 
-<code>interested_types</code> variable comes in. If omitted, all exceptions are caught. 
-If provided, it may be a single string, or an array of strings, where the provided values 
-are one or more of the exception types listed below. There are a select few errors that can 
-be caused by runtime issues which cannot be caught, but by far, most runtime issues can be 
-caught in a try function. In addition, you can trigger an exception being thrown with the 
-{{function|throw}} function.
-%%CODE|
-throw(exception_type, msg)
-%%
-<code>throw</code> accepts any valid exception type listed below, as well as a message. 
-The line number will automatically be added. This exception is then passed up the chain, 
-just as if any other function had thrown the exception. If the exception type is null, 
-this exception is uncatchable, however, it is best practice to use the {{function|die}} 
-function if you intend on killing a script.
+== Example ==
 
-If an exception is passed all the way to the root of the script, and the interpreter has to 
-catch the exception, the script will terminate, and the default message will be logged to 
-console, and displayed to the user. In most cases, this may be enough. Also, in general, 
-exceptions have been massively improved, all exceptions give a much more detailed error 
-message, and also provide a line number to assist in debugging your scripts. Also note 
-that if debug-mode is on, ALL exceptions that are thrown will log to the console, even if 
-they are caught. This can help debug a potential problem with your script. The API has been 
-updated to include a list of possible exceptions that can be thrown by a function, and a 
-list of what the exception types are, and what might cause them to be thrown are listed below. 
-Please note that it is entirely possible that an exception being thrown was not noted in the 
-API -- this is a bug in the documentation. Please report it so that it can be corrected. Also 
-note that it is possible for the try function itself to throw an exception, if the arguments 
-are not of the proper type. Though it is possible to further catch those exceptions, it 
-probably means that your code is poorly designed.
+A good example is code that takes a user input. Assume that we want to validate that the user has provided us
+with an integer like string. We might write the following:
 
-==Example==
-When accepting user input, it is important to verify that their input is valid. Using 
-exceptions allows you to easily catch errors in their input.
 %%CODE|
-/test $index= >>>
-    # Assign an array to the variable @a
-    assign(@a, array('0', '1', '2'))
-    # array_get can possibly throw an IndexOverflowException, or a CastException
-    try(
-        msg(array_get(@a, $index))
-    , @ex, 
-        # The zeroth element in the exception tells us the exception type.
-        # That is important to get here, so we display proper error messages
-        if(equals(array_get(@ex, 0), IndexOverflowException)
-          , die('That index is not valid')
-          , die('Please enter an actual number')
-        )
-    # We could have left this blank, but this allows us to more precisely filter our exceptions
-    , array(IndexOverflowException, CastException))
-<<<
+@userInput = _getUserInput();
+@value = integer(@userInput);
+_doSomethingWithTheValue(@value);
 %%
 
-==Non-Exception data validation==
+In this case, if the user input procedure returns <code>'2'</code>, then the code will work as intended. If it
+returns <code>'string'</code> however, it will throw an exception. As it stands, with no exception handling in
+place, you would see a similar error to this:
 
-In addition to exception handling in 3.1.2, several functions have been added that allow you 
-to validate data without using the try-catch framework. Make note of the existence of the 
-following functions:
-*{{function|array_index_exists}}
-*{{function|is_array}}
-*{{function|is_boolean}}
-*{{function|is_double}}
-*{{function|is_integer}}
-*{{function|is_null}}
-*{{function|is_string}}
+<pre>
+CastException: Expecting a double, but received string instead
+        <<main code>>:Interpreter:2
+</pre>
 
-These functions will allow you to validate that the data entered is in fact of the specified 
-type, or can be cast to the specified type.
+This is the default exception handling mechanism. It prints out the exception type, exception message, and a
+stacktrace. But perhaps we want to print a custom message to the user. In this case, we can trap the exception
+using a try/catch block, and handle it in a custom way. In this case, we want to "catch" the CastException that
+is "thrown".
 
-==Exception Types==
-Both the spelling and capitalization are important when using the name of an exception. The 
-proper format is displayed in the header of each section.
+%%CODE|
+try {
+	@userInput = _getUserInput();
+	@value = integer(@userInput); // Can throw CastException
+	_doSomethingWithTheValue(@value);
+} catch(CastException @e){
+	// This will run if integer(@userInput) throws a CastException
+	msg("The value must be an integer");
+}
+%%
+
+This will message the user if the value is not correct, using a custom error message.
+
+== Multicatch ==
+
+Sometimes, a block of code might throw multiple types of exceptions, and we want to handle each type differently.
+Perhaps our <code>_doSomethingWithTheValue</code> procedure was capable of throwing an IOException. We ''could'' wrap
+the entire block in a second try catch block, but there's an easier way, using multicatch.
+
+%%CODE|
+try {
+	@userInput = _getUserInput();
+	@value = integer(@userInput); // Can throw CastException
+	_doSomethingWithTheValue(@value); // Can throw IOException
+} catch(CastException @e) {
+	msg("The value must be an integer");
+} catch(IOException @e) {
+	msg("There was an error with the disk, and your request could not be completed.");
+}
+%%
+
+Each catch block will only run if the exception thrown matches the type. If an exception is thrown that doesn't
+match any of the types, it will continue up the stack as if there were no try/catch in place at that point.
+
+=== Catch clause specificity ===
+
+When an exception is thrown, the catch clauses are checked one by one, in declaration order, for exception matches.
+This means that you should order your catch clauses from most specific to least specific. Consider the following code:
+
+%%CODE|
+try {
+	code();
+} catch(Exception @e){
+	msg("Will catch the exception");
+} catch(IOException @e){
+	msg("Will never run, because the catch-Exception clause will always catch the exception first, because"
+		. " IOException extends Exception");
+}
+%%
+
+Be sure to always order your catch clauses appropriately.
+
+== The exception object ==
+
+The exception that is thrown is an associative array that has some perhaps useful information in it, such as the exception
+message, line number, and things like that. Here is an implementation of the default handling, except it is being handled
+from within the script.
+
+%%CODE|
+try {
+	code();
+} catch(CastException @e) {
+	@classType = @e['classType'];
+	@message = @e['message'];
+	@stackTrace = @e['stackTrace'];
+	msg(colorize("&c@classType&f: @message"));
+	foreach(@element in @stackTrace){
+		@procedureName = @element['id']; // This could be a procedure or a closure, or a few other things
+		@file = @element['file'];
+		@line = @element['line'];
+		msg(colorize("\t&a@procedureName&f:&6@file&f:&b@line"));
+	}
+}
+%%
+
+The above example demonstrates the complex usage of the exception object. In addition, it's worth noting that if you are
+having trouble with code, you could get a stacktrace by throwing and catching a custom exception, however, it's more
+straightforward to use {{function|get_stack_trace}}
+
+== The Throwable type ==
+
+All exceptions extend the Exception type, which further extends the Throwable type. Another type of Throwable is
+a the Error type (and subclasses). If you specifically catch Errors, they can be caught, but this is not recommended,
+as it usually indicates a very severe error. While it is possible to directly catch a Throwable of any type, you should
+generally not catch that, and instead catch specific types that you are interested in, or Exception, if need be.
+
+== Throwing your own exceptions ==
+
+You may also throw your own exceptions. See the documentation for {{functions|throw}} for more information.
+
+== finally clause ==
+
+Sometimes you may want to run code after the try block, regardless of what happens in the try block, including successful
+invocation of the code, an exception being thrown and further exceptions being thrown from the catch block,
+or simply return()ing in the try block. The finally clause
+can be used to accomplish this. The finally clause must come after all catch clauses, but may be used even if no
+catch clauses are defined (this is called a try/finally block). This is most useful for cleanup that needs to happen
+regardless of how the code exited.
+
+There are three specific examples that this might be useful for:
+
+
+# If code within the `try` block exits via `return`
+# If code within a catch block either rethrows the caught exception, or--accidentally or intentionally--ends up throwing a new one.
+# If the code within the `try` block encounters an exception for which there is no catch.
+
+Take the following examples:
+
+%%CODE|
+try {
+	@value = codeThatOpensAResource();
+	return(@value);
+} finally {
+	cleanUpResource();
+}
+%%
+
+%%CODE|
+try {
+	code();
+} catch(Exception @e) {
+	throw(IOException, "Another exception");
+} finally {
+	// This section still runs
+}
+%%
+
+%%CODE|
+try {
+	codeThatThrowsANullPointerException();
+} catch(IOException @e) {
+	// This block won't be run in this case
+} finally {
+	// This code runs anyways, though the NPE will be thrown further up
+}
+%%
+
+== Caused By, and rethrowing ==
+Exceptions might need to be rethrown. This is supported by {{function|throw}}. For instance:
+
+%%CODE|
+try {
+	throw(IOException, 'message');
+} catch(IOException @e){
+	if(/* some condition is true */){
+		// We don't care about this exception
+	} else {
+		throw(@e);
+	}
+}
+%%
+
+This can be used if you want to conditionally handle the exception, but continue to throw the exception up the
+chain in other cases. 
+
+You may find that you have to throw an exception due to another exception. To do this, you may also used the Caused By mechanism. This will
+cause the exception to chain. This is also supported with {{function|throw}}.
+
+%%CODE|
+try {
+	try {
+		throw(IOException, 'ioexception');
+	} catch(IOException @e){
+		throw(CastException, 'castexception', @e);
+	}
+} catch(CastException @e){
+	msg(@e['causedBy']); // This will be the IOException
+}
+%%
+
+This can be useful for times that you need to throw another exception from within the catch block, but don't want to hide
+the original exception, or when you need to otherwise wrap the original exception. It is quite useful to know what exception
+originally caused this chain. This can be accessed from the <code>causedBy</code> index in the exception object.
+
+
+== Old usage ==
+
+There is an old, now deprecated usage as well, see the article [[CommandHelper/Staged/OldExceptions|here]]
+for information on how to use it. For new code, however, the new format should always be used.
+
+== Known Exception Types ==
+
+Exception types can be added by extension authors, but here is a list (and documentation) for all known exceptions.
 
 %%EXCEPTION_TYPES%%
 

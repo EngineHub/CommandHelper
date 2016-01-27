@@ -23,7 +23,6 @@ public class CommandHelperMessageListener implements PluginMessageListener {
 	@Override
 	public void onPluginMessageReceived(final String channel, final Player player, final byte[] bytes) {
 		BukkitMCPluginIncomingMessageEvent event = new BukkitMCPluginIncomingMessageEvent(player, channel, bytes);
-		EventUtils.TriggerExternal(event);
 		EventUtils.TriggerListener(Driver.PLUGIN_MESSAGE_RECEIVED, "plugin_message_received", event);
 	}
 }

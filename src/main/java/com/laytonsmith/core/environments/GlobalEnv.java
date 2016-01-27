@@ -12,6 +12,7 @@ import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.events.BoundEvent;
+import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManager;
@@ -23,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * A global environment is always available at runtime, and contains the objects that the
@@ -58,6 +60,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private boolean interrupt = false;
 	private final List<ArrayAccess.ArrayAccessIterator> arrayAccessList = Collections.synchronizedList(new ArrayList<ArrayAccess.ArrayAccessIterator>());
 	private final MutableObject<TaskManager> taskManager = new MutableObject<>();
+	private final WeakHashMap<Thread, StackTraceManager> stackTraceManager = new WeakHashMap<>();
 
 	/**
 	 * Creates a new GlobalEnvironment. All fields in the constructor are required, and cannot be null.
@@ -181,10 +184,26 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		} else {
 			clone.procs = new HashMap<>();
 		}
-		if (iVariableList != null) {
+		if (cloneVars && iVariableList != null) {
 			clone.iVariableList = (IVariableList) iVariableList.clone();
+		} else if(!cloneVars){
+			clone.iVariableList = new IVariableList();
 		}
 		return clone;
+	}
+
+	private boolean cloneVars = true;
+	/**
+	 * Determines whether or not, when cloning this environment, the variable list should be cloned
+	 * as well.
+	 * @param set
+	 */
+	public void setCloneVars(boolean set){
+		this.cloneVars = set;
+	}
+
+	public boolean getCloneVars(){
+		return this.cloneVars;
 	}
 
 	/**
@@ -343,5 +362,16 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 			}
 		}
 		return list;
+	}
+
+	/**
+	 * Returns the StacKTraceManager for the currently running thread.
+	 * @return
+	 */
+	public StackTraceManager GetStackTraceManager(){
+		if(!stackTraceManager.containsKey(Thread.currentThread())){
+			stackTraceManager.put(Thread.currentThread(), new StackTraceManager());
+		}
+		return stackTraceManager.get(Thread.currentThread());
 	}
 }

@@ -20,13 +20,14 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.concurrent.Callable;
 
 /**
@@ -45,8 +46,8 @@ public class Threading {
 	public static class x_new_thread extends AbstractFunction {
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -63,7 +64,7 @@ public class Threading {
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			if(!(args[1] instanceof CClosure)){
-				throw new Exceptions.CastException("Expected closure for arg 2", t);
+				throw new CRECastException("Expected closure for arg 2", t);
 			}
 			final CClosure closure = (CClosure) args[1];
 			new Thread(new Runnable() {
@@ -140,8 +141,8 @@ public class Threading {
 	public static class x_get_current_thread extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -194,8 +195,8 @@ public class Threading {
 	public static class x_run_on_main_thread_later extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -257,8 +258,8 @@ public class Threading {
 	public static class x_run_on_main_thread_now extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override

@@ -1,46 +1,19 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Geometry.Point3D;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBookMeta;
-import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.enums.MCFishingState;
+import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
-import com.laytonsmith.abstraction.events.MCChatTabCompleteEvent;
-import com.laytonsmith.abstraction.events.MCExpChangeEvent;
-import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
-import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
-import com.laytonsmith.abstraction.events.MCPlayerBedEvent;
-import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
-import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
-import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
-import com.laytonsmith.abstraction.events.MCPlayerEditBookEvent;
-import com.laytonsmith.abstraction.events.MCPlayerFishEvent;
-import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
-import com.laytonsmith.abstraction.events.MCPlayerItemConsumeEvent;
-import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
-import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
-import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
-import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
-import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
-import com.laytonsmith.abstraction.events.MCPlayerPreLoginEvent;
-import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
-import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
-import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
-import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
-import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
-import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
-import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
+import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -67,12 +40,14 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.events.drivers.EntityEvents.entity_death;
+import com.laytonsmith.core.exceptions.CRE.CREBindException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import com.laytonsmith.core.functions.Exceptions;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.StringHandling;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -81,11 +56,7 @@ import java.util.IllegalFormatConversionException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.UnknownFormatConversionException;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -661,6 +632,7 @@ public class PlayerEvents {
                     + "can specify the kick message by modifying 'kickmsg'. "
                     + "{player: The player's name | uuid: The player's unique id | "
 					+ "kickmsg: The default kick message | ip: the player's IP address | "
+					+ "hostname: The hostname used to reach the server | "
 					+ "result: the default response to their logging in}"
                     + "{kickmsg|result}"
                     + "{player|kickmsg|ip|result}";
@@ -699,6 +671,7 @@ public class PlayerEvents {
 				//TODO: The event.getResult needs to be enum'd
                 map.put("result", new CString(event.getResult(), Target.UNKNOWN));
                 map.put("kickmsg", new CString(event.getKickMessage(), Target.UNKNOWN));
+                map.put("hostname", new CString(event.getHostname(), Target.UNKNOWN));
 
                 return map;
             } else{
@@ -1524,7 +1497,7 @@ public class PlayerEvents {
                 map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
                 CArray ca = new CArray(Target.UNKNOWN);
                 for(MCPlayer recipient : event.getRecipients()){
-                    ca.push(new CString(recipient.getName(), Target.UNKNOWN));
+                    ca.push(new CString(recipient.getName(), Target.UNKNOWN), Target.UNKNOWN);
                 }
 				map.put("format", new CString(event.getFormat(), Target.UNKNOWN));
                 map.put("recipients", ca);
@@ -1554,14 +1527,14 @@ public class PlayerEvents {
                         }
                         e.setRecipients(list);
                     } else {
-                        throw new ConfigRuntimeException("recipients must be an array", Exceptions.ExceptionType.CastException, value.getTarget());
+                        throw ConfigRuntimeException.BuildException("recipients must be an array", CRECastException.class, value.getTarget());
                     }
                 }
 				if("format".equals(key)){
 					try{
 						e.setFormat(value.nval());
 					} catch(UnknownFormatConversionException|IllegalFormatConversionException ex){
-						throw new Exceptions.FormatException(ex.getMessage(), Target.UNKNOWN);
+						throw new CREFormatException(ex.getMessage(), Target.UNKNOWN);
 					}
 				}
                 return true;
@@ -1639,7 +1612,7 @@ public class PlayerEvents {
                 map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
                 CArray ca = new CArray(Target.UNKNOWN);
                 for(MCPlayer recipient : event.getRecipients()){
-                    ca.push(new CString(recipient.getName(), Target.UNKNOWN));
+                    ca.push(new CString(recipient.getName(), Target.UNKNOWN), Target.UNKNOWN);
                 }
 				map.put("format", new CString(event.getFormat(), Target.UNKNOWN));
                 map.put("recipients", ca);
@@ -1669,14 +1642,14 @@ public class PlayerEvents {
                         }
                         e.setRecipients(list);
                     } else {
-                        throw new ConfigRuntimeException("recipients must be an array", Exceptions.ExceptionType.CastException, value.getTarget());
+                        throw ConfigRuntimeException.BuildException("recipients must be an array", CRECastException.class, value.getTarget());
                     }
                 }
 				if("format".equals(key)){
 					try{
 						e.setFormat(value.nval());
 					} catch(UnknownFormatConversionException|IllegalFormatConversionException ex){
-						throw new Exceptions.FormatException(ex.getMessage(), Target.UNKNOWN);
+						throw new CREFormatException(ex.getMessage(), Target.UNKNOWN);
 					}
 				}
                 return true;
@@ -1866,157 +1839,25 @@ public class PlayerEvents {
 
     }
 
+	private static final Set<Integer> thresholdList = new HashSet<>();
+
+	public static Set<Integer> GetThresholdList(){
+		return thresholdList;
+												}
+
+	private static final Map<Integer, Map<String, MCLocation>> lastPlayerLocations = new HashMap<>();
+
+	public static Map<String, MCLocation> GetLastLocations(Integer i){
+		if (!lastPlayerLocations.containsKey(i)) {
+			HashMap<String, MCLocation> newLocation = new HashMap<>();
+			lastPlayerLocations.put(i, newLocation);
+			return newLocation;
+												}
+		return(lastPlayerLocations.get(i));
+												}
+
 	@api
 	public static class player_move extends AbstractEvent{
-
-		/*
-		 * TODO:
-		 * 1. See if the same event can be fired with different from fields, so that
-		 * one move only causes one "chain" of handlers to be fired.
-		 * 2. Tie this into player teleport events. Probably set a prefilter that determines
-		 * whether or not a teleport should count as a movement or not.
-		 * 3. Remember to change also vehicle_move, if needed.
-		 */
-
-		private static Thread thread = null;
-		private Set<Integer> thresholdList = new HashSet<Integer>();
-		private Map<Integer, Map<String, MCLocation>> thresholds = new HashMap<Integer, Map<String, MCLocation>>();
-
-		@Override
-		public void bind(BoundEvent event) {
-			Map<String, Construct> prefilters = event.getPrefilter();
-			if(prefilters.containsKey("threshold")){
-				int i = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
-				thresholdList.add(i);
-			}
-			if(thread == null){
-				thresholdList.add(1);
-				thread = new Thread(new Runnable() {
-
-					@Override
-					public void run() {
-						outerLoop: while(true){
-							if(thread != Thread.currentThread()){
-								//If it's a different thread, kill it.
-								return;
-							}
-							for(final MCPlayer p : Static.getServer().getOnlinePlayers()){
-								final MCLocation current = p.asyncGetLocation();
-								Point3D currentPoint = new Point3D(current.getX(), current.getY(), current.getZ());
-								//We need to loop through all the thresholds
-								//and see if any of the points meet them. If so,
-								//we know we need to fire the event. If none of them
-								//match, carry on with the next player. As soon as
-								//one matches though, we can't quit the loop, because
-								//we have to set all the thresholds.
-								thresholdLoop: for(final Integer i : thresholdList){
-									if(thresholds.containsKey(i) && thresholds.get(i).containsKey(p.getName())){
-										final MCLocation last = thresholds.get(i).get(p.getName());
-										if(!p.getWorld().getName().equals(last.getWorld().getName())){
-											//They moved worlds. simply put their new location in here, then
-											//continue.
-											thresholds.get(i).put(p.getName(), p.getLocation());
-											continue thresholdLoop;
-										}
-										Point3D lastPoint = new Point3D(last.getX(), last.getY(), last.getZ());
-										double distance = lastPoint.distance(currentPoint);
-										if(distance > i){
-											//We've met the threshold.
-											//Well, we're still not sure. To run the prefilters on this thread,
-											//we're gonna simulate a prefilter match now. We have to run this manually,
-											//because each bind could have a different threshold, and it will be expecting
-											//THIS from location. Other binds will be expecting other from locations.
-											final MCPlayerMoveEvent fakeEvent = new MCPlayerMoveEvent() {
-												boolean cancelled = false;
-												@Override
-												public MCPlayer getPlayer() {
-													return p;
-												}
-
-												@Override
-												public int getThreshold() {
-													return i;
-												}
-
-												@Override
-												public MCLocation getFrom() {
-													return last;
-												}
-
-												@Override
-												public MCLocation getTo() {
-													return current;
-												}
-
-												@Override
-												public Object _GetObject() {
-													return null;
-												}
-
-												@Override
-												public void setCancelled(boolean state) {
-													cancelled = state;
-												}
-
-												@Override
-												public boolean isCancelled() {
-													return cancelled;
-												}
-											};
-											//We need to run the prefilters on this thread, so we have
-											//to do this all by hand.
-											final SortedSet<BoundEvent> toRun = EventUtils.GetMatchingEvents(Driver.PLAYER_MOVE, player_move.this.getName(), fakeEvent, player_move.this);
-											//Ok, now the events to be run need to actually be run on the main server thread, so let's run that now.
-											try {
-												StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>(){
-
-													@Override
-													public Object call() throws Exception {
-														EventUtils.FireListeners(toRun, player_move.this, fakeEvent);
-														return null;
-													}
-												});
-											} catch (Exception ex) {
-												Logger.getLogger(PlayerEvents.class.getName()).log(Level.SEVERE, null, ex);
-											}
-											if(fakeEvent.isCancelled()){
-												//Put them back at the from location
-												p.teleport(last);
-											} else {
-												thresholds.get(i).put(p.getName(), current);
-											}
-										}
-									} else {
-										//If there is no location here, just put the current location in there.
-										if(!thresholds.containsKey(i)){
-											thresholds.put(i, new HashMap<String, MCLocation>());
-										}
-										thresholds.get(i).put(p.getName(), p.asyncGetLocation());
-									}
-								}
-							}
-							synchronized(player_move.this){
-								try {
-									//Throttle this thread just a little
-									player_move.this.wait(10);
-								} catch (InterruptedException ex) {
-									//
-								}
-							}
-						}
-					}
-				}, Implementation.GetServerType().getBranding() + "PlayerMoveEventRunner");
-				thread.start();
-				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
-
-					@Override
-					public void run() {
-						thresholdList.clear();
-						thread = null;
-					}
-				});
-			}
-		}
 
 		@Override
 		public String getName() {
@@ -2026,60 +1867,69 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{player: <macro> The player that moved. Switching worlds does not trigger this event. "
+					+ "| world: <string match> The world the player moved in."
 					+ "| from: <location match> This should be a location array (x, y, z, world)."
 					+ "| to: <location match> The location the player is now in. This should be a location array as well."
 					+ "| threshold: <custom> The minimum distance the player must have travelled before the event"
 					+ " will be triggered. This is based on the 3D distance, and is measured in block units.}"
-                    + " This event is fired off AFTER a player has moved. This is a read only event because of this,"
-					+ " however, the determination logic is run asynchronously from the main server thread, so general"
-					+ " detection of a movement will not cause any lag, beyond lag caused by any other thread. Prefilters"
-					+ " are extremely important to use however, because the prefilter code is also run asynchronously,"
-					+ " however your code is not, and therefore, is slower. It is also advisable to use a threshold,"
-					+ " so you are not firing an event every time a player moves. A threshold of 5 or 10 will likely"
-					+ " be sufficient for all use cases, and should considerably reduce server thread resources. Though this"
-					+ " event is read only, you can \"cancel\" the event by moving the player back to the from location,"
-					+ " or otherwise \"change\" the location by using set_ploc(). Note that on a server with"
-					+ " lots of players, this \"stride\" distance, that is, the distance a player will have moved"
-					+ " before the event picks it up will be greater. The movement detection thread is slightly"
-					+ " throttled."
-                    + "{player | from: The location the player is coming from | to: The location the player is now in}"
+                    + " This event is fired off after a player has moved a certain distance. Due to the high frequency"
+					+ " of this event, prefilters are extremely important to use -- especially a threshold -- so that"
+					+ " the script doesn't run every time."
+                    + "{player | world | from: The location the player is coming from | to: The location the player is now in}"
                     + "{}"
                     + "{}";
 		}
 
 		@Override
-		public void cancel(BindableEvent o, boolean state) {
-			if(o instanceof MCPlayerMoveEvent){
-				((MCPlayerMoveEvent)o).setCancelled(state);
-			}
+		public void hook() {
+			thresholdList.clear();
+			lastPlayerLocations.clear();
 		}
 
 		@Override
-		public boolean isCancellable(BindableEvent o) {
-			return true;
+		public void bind(BoundEvent event) {
+			int threshold = 1;
+			Map<String, Construct> prefilters = event.getPrefilter();
+			if(prefilters.containsKey("threshold")) {
+				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
+			}
+			thresholdList.add(threshold);
 		}
 
 		@Override
-		public boolean isCancelled(BindableEvent o) {
-			if(o instanceof MCPlayerMoveEvent){
-				return ((MCPlayerMoveEvent)o).isCancelled();
-			} else {
-				return false;
+		public void unbind(BoundEvent event) {
+			int threshold = 1;
+			Map<String, Construct> prefilters = event.getPrefilter();
+			if(prefilters.containsKey("threshold")) {
+				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
 			}
+			for (BoundEvent b : EventUtils.GetEvents(event.getDriver())) {
+				if (b.getId().equals(event.getId())) {
+					continue;
+				}
+				if (b.getPrefilter().containsKey("threshold")) {
+					if(threshold == Static.getInt(b.getPrefilter().get("threshold"), Target.UNKNOWN)) {
+						return;
+					}
+				}
+			}
+			thresholdList.remove(threshold);
+			lastPlayerLocations.remove(threshold);
 		}
-
-
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerMoveEvent){
 				MCPlayerMoveEvent event = (MCPlayerMoveEvent)e;
-				if(!event.getFrom().getWorld().getName().equals(event.getTo().getWorld().getName())){
+				if(prefilter.containsKey("threshold")) {
+					if(Static.getInt(prefilter.get("threshold"), Target.UNKNOWN) != event.getThreshold()) {
 					return false;
 				}
-				if(prefilter.containsKey("threshold")) {
-					Prefilters.match(prefilter, "threshold", event.getThreshold(), PrefilterType.MATH_MATCH);
 				} else if(event.getThreshold() != 1) {
+					return false;
+				}
+				if(prefilter.containsKey("world")
+						&& !prefilter.get("world").val().equals(event.getFrom().getWorld().getName())) {
 					return false;
 				}
 				Prefilters.match(prefilter, "from", event.getFrom(), PrefilterType.LOCATION_MATCH);
@@ -2098,14 +1948,13 @@ public class PlayerEvents {
 			return EventBuilder.instantiate(MCPlayerMoveEvent.class, p, from, to);
 		}
 
-
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			if (e instanceof MCPlayerMoveEvent) {
                 MCPlayerMoveEvent event = (MCPlayerMoveEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
-                //Fill in the event parameters
+				Map<String, Construct> map = new HashMap<>();
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
+				map.put("world", new CString(event.getFrom().getWorld().getName(), Target.UNKNOWN));
                 map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
                 map.put("to", ObjectGenerator.GetGenerator().location(event.getTo()));
                 return map;
@@ -2179,11 +2028,11 @@ public class PlayerEvents {
 				Map<String, Construct> ret = evaluate_helper(event);
 				ret.put("world", new CString(event.getPlayer().getWorld().getName(), t));
 				ret.put("state", new CString(event.getState().name(), t));
-				ret.put("hook", new CInt(event.getHook().getEntityId(), t));
+				ret.put("hook", new CString(event.getHook().getUniqueId().toString(), t));
 				ret.put("xp", new CInt(event.getExpToDrop(), t));
 				Construct caught = CNull.NULL;
-				if (event.getCaught() instanceof MCEntity) {
-					caught = new CInt(event.getCaught().getEntityId(), t);
+				if (event.getCaught() != null) {
+					caught = new CString(event.getCaught().getUniqueId().toString(), t);
 				}
 				ret.put("caught", caught);
 				ret.put("chance", new CDouble(event.getHook().getBiteChance(), t));
@@ -2201,7 +2050,7 @@ public class PlayerEvents {
 				if (key.equals("chance")) {
 					double chance = Static.getDouble(value, Target.UNKNOWN);
 					if (chance > 1.0 || chance < 0.0) {
-						throw new Exceptions.FormatException("Chance must be between 0.0 and 1.0", Target.UNKNOWN);
+						throw new CREFormatException("Chance must be between 0.0 and 1.0", Target.UNKNOWN);
 					}
 					e.getHook().setBiteChance(chance);
 					return true;
@@ -2235,7 +2084,9 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{newmode: <macro> gamemode being changed to | player: <macro>}"
+			return "{newmode: <macro> gamemode being changed to, one of "
+					+ StringUtils.Join(MCGameMode.values(), ", ", ", or ", " or ")
+					+ " | player: <macro>}"
 					+ " Fires when something causes a player's gamemode to change. Cancelling the event will"
 					+ " cancel the change. The mode itself cannot be modified."
 					+ " {player: player whose mode is changing | newmode}"
@@ -2256,7 +2107,7 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
+			throw ConfigRuntimeException.BuildException("Unsupported Operation", CREBindException.class, Target.UNKNOWN);
 		}
 
 		@Override
@@ -2317,7 +2168,7 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
+			throw ConfigRuntimeException.BuildException("Unsupported Operation", CREBindException.class, Target.UNKNOWN);
 		}
 
 		@Override
@@ -2330,7 +2181,7 @@ public class PlayerEvents {
 				ret.put("last", new CString(event.getLastToken(), t));
 				CArray completions = new CArray(t);
 				for (String c : event.getTabCompletions()) {
-					completions.push(new CString(c, t));
+					completions.push(new CString(c, t), t);
 				}
 				ret.put("completions", completions);
 				return ret;
@@ -2493,7 +2344,7 @@ public class PlayerEvents {
 				MCPlayerEditBookEvent playerEditBookEvent = (MCPlayerEditBookEvent) event;
 				Map<String, Construct> mapEvent = evaluate_helper(event);
 				MCBookMeta oldBookMeta = playerEditBookEvent.getPreviousBookMeta();
-				CArray oldBookArray = new CArray(Target.UNKNOWN);
+				CArray oldBookArray = CArray.GetAssociativeArray(Target.UNKNOWN);
 				if (oldBookMeta.hasTitle()) {
 					oldBookArray.set("title", new CString(oldBookMeta.getTitle(), Target.UNKNOWN), Target.UNKNOWN);
 				} else {
@@ -2507,7 +2358,7 @@ public class PlayerEvents {
 				if (oldBookMeta.hasPages()) {
 					CArray pages = new CArray(Target.UNKNOWN);
 					for (String page : oldBookMeta.getPages()) {
-						pages.push(new CString(page, Target.UNKNOWN));
+						pages.push(new CString(page, Target.UNKNOWN), Target.UNKNOWN);
 					}
 					oldBookArray.set("author", pages, Target.UNKNOWN);
 				} else {
@@ -2515,7 +2366,7 @@ public class PlayerEvents {
 				}
 				mapEvent.put("oldbook", oldBookArray);
 				MCBookMeta newBookMeta = playerEditBookEvent.getNewBookMeta();
-				CArray newBookArray = new CArray(Target.UNKNOWN);
+				CArray newBookArray = CArray.GetAssociativeArray(Target.UNKNOWN);
 				if (newBookMeta.hasTitle()) {
 					newBookArray.set("title", new CString(newBookMeta.getTitle(), Target.UNKNOWN), Target.UNKNOWN);
 				} else {
@@ -2529,7 +2380,7 @@ public class PlayerEvents {
 				if (newBookMeta.hasPages()) {
 					CArray pages = new CArray(Target.UNKNOWN);
 					for (String page : newBookMeta.getPages()) {
-						pages.push(new CString(page, Target.UNKNOWN));
+						pages.push(new CString(page, Target.UNKNOWN), Target.UNKNOWN);
 					}
 					newBookArray.set("pages", pages, Target.UNKNOWN);
 				} else {
@@ -2562,7 +2413,7 @@ public class PlayerEvents {
 				} else if (key.equalsIgnoreCase("pages")) {
 					CArray pageArray = Static.getArray(value, value.getTarget());
 					if (pageArray.inAssociativeMode()) {
-						throw new ConfigRuntimeException("The page array must not be associative.", ExceptionType.CastException, pageArray.getTarget());
+						throw ConfigRuntimeException.BuildException("The page array must not be associative.", CRECastException.class, pageArray.getTarget());
 					} else {
 						List<String> pages = new ArrayList<String>();
 						for (Construct page : pageArray.asList()) {

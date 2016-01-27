@@ -15,6 +15,7 @@ array {entityID} Returns an associative array containing all the data of the giv
 * %KEY_ARMORSTAND_ARMS%: Whether or not the ArmorStand has arms. Defaults to false.
 * %KEY_ARMORSTAND_BASEPLATE%: Whether or not the ArmorStand has a base plate. Defaults to true.
 * %KEY_ARMORSTAND_GRAVITY%: If the ArmorStand has gravity (falls) or not (floats in midair). Defaults to true.
+* %KEY_ARMORSTAND_MARKER%: Whether or not it has a tiny collision box and disables interaction. Defaults to false.
 * %KEY_ARMORSTAND_SMALLSIZE%: Whether or not the ArmorStand is scaled to child-size. Defaults to false.
 * %KEY_ARMORSTAND_VISIBLE%: Whether or not the ArmorStand is visible. Defaults to true.
 * %KEY_ARMORSTAND_POSES%: An array where the keys are body parts, and the values are 3D vector arrays.
@@ -120,7 +121,11 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_PRIMED_TNT_FUSETICKS%: The number of ticks until the explosion.
 * %KEY_PRIMED_TNT_SOURCE%: The source of the primed TNT. Not editable.
-|- 
+|-
+| RABBIT
+|
+* %KEY_RABBIT_TYPE%: The type of the rabbit (can be %RABBIT_TYPE%).
+|-
 | SHEEP
 | 
 * %KEY_SHEEP_COLOR%: The color of the sheep (can be %DYE_COLOR%).

@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities.Web;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -38,7 +39,7 @@ public final class WebUtility {
 	public static void main(String[] args) throws Exception {
 		CookieJar stash = new CookieJar();
 		HTTPResponse resp = GetPage(new URL("http://www.google.com/"), HTTPMethod.GET, null, null, stash, true, 60000);
-		System.out.println(stash.getCookies(new URL("http://www.google.com")));
+		StreamUtils.GetSystemOut().println(stash.getCookies(new URL("http://www.google.com")));
 	}
 
 	private WebUtility() {

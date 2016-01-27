@@ -31,10 +31,13 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.events.EventUtils;
+import com.laytonsmith.core.exceptions.CRE.CREBindException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -74,8 +77,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BindException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBindException.class};
 		}
 
 		@Override
@@ -106,7 +109,7 @@ public class EventBinding {
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if (nodes.length < 5) {
-				throw new ConfigRuntimeException("bind accepts 5 or more parameters", ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("bind accepts 5 or more parameters", CREInsufficientArgumentsException.class, t);
 			}
 			Construct name = parent.seval(nodes[0], env);
 			Construct options = parent.seval(nodes[1], env);
@@ -116,11 +119,10 @@ public class EventBinding {
 			for (int a = 0; a < nodes.length - 5; a++) {
 				Construct var = parent.eval(nodes[4 + a], env);
 				if (!(var instanceof IVariable)) {
-					throw new ConfigRuntimeException("The custom parameters must be ivariables", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("The custom parameters must be ivariables", CRECastException.class, t);
 				}
 				IVariable cur = (IVariable) var;
-				((IVariable) var).setIval(env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival());
-				custom_params.set((IVariable) var);
+				custom_params.set(env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()));
 			}
 			Environment newEnv = env;
 			try {
@@ -132,13 +134,13 @@ public class EventBinding {
 
 			//Check to see if our arguments are correct
 			if (!(options instanceof CNull || options instanceof CArray)) {
-				throw new ConfigRuntimeException("The options must be an array or null", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("The options must be an array or null", CRECastException.class, t);
 			}
 			if (!(prefilter instanceof CNull || prefilter instanceof CArray)) {
-				throw new ConfigRuntimeException("The prefilters must be an array or null", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("The prefilters must be an array or null", CRECastException.class, t);
 			}
 			if (!(event_obj instanceof IVariable)) {
-				throw new ConfigRuntimeException("The event object must be an IVariable", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("The event object must be an IVariable", CRECastException.class, t);
 			}
 			CString id;
 			if (options instanceof CNull) {
@@ -155,7 +157,7 @@ public class EventBinding {
 				id = new CString(be.getId(), t);
 				event = EventList.getEvent(be.getEventName());
 			} catch (EventException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.BindException, t);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREBindException.class, t);
 			}
 
 			//Set up our bind counter, but only if the event is supposed to be added to the counter
@@ -192,7 +194,7 @@ public class EventBinding {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.size() < 5) {
-				throw new ConfigRuntimeException("bind accepts 5 or more parameters", ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("bind accepts 5 or more parameters", CREInsufficientArgumentsException.class, t);
 			}
 			if (!children.get(0).isConst()) {
 				// This ability may be removed in the future, to allow for better compilation checks of event type, once objects are added.
@@ -235,8 +237,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -280,8 +282,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BindException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBindException.class};
 		}
 
 		@Override
@@ -308,7 +310,7 @@ public class EventBinding {
 			} else {
 				//We are cancelling this event. If we are not in an event, throw an exception
 				if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
-					throw new ConfigRuntimeException("No event ID specified, and not running inside an event", ExceptionType.BindException, t);
+					throw ConfigRuntimeException.BuildException("No event ID specified, and not running inside an event", CREBindException.class, t);
 				}
 				id = environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent().getId();
 			}
@@ -353,8 +355,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BindException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBindException.class};
 		}
 
 		@Override
@@ -381,7 +383,7 @@ public class EventBinding {
 
 			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
 			if (original == null) {
-				throw new ConfigRuntimeException("cancel cannot be called outside an event handler", ExceptionType.BindException, t);
+				throw ConfigRuntimeException.BuildException("cancel cannot be called outside an event handler", CREBindException.class, t);
 			}
 			if (original.getUnderlyingEvent() != null && original.isCancellable()) {
 				original.setCancelled(cancelled);
@@ -410,8 +412,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BindException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBindException.class};
 		}
 
 		@Override
@@ -433,7 +435,7 @@ public class EventBinding {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
 			if (original == null) {
-				throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, t);
+				throw ConfigRuntimeException.BuildException("is_cancelled cannot be called outside an event handler", CREBindException.class, t);
 			}
 			boolean result = false;
 			if (original.getUnderlyingEvent() != null && original.isCancellable()) {
@@ -467,8 +469,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -494,7 +496,7 @@ public class EventBinding {
 			} else if (args[1] instanceof CArray) {
 				obj = (CArray) args[1];
 			} else {
-				throw new ConfigRuntimeException("The eventObject must be null, or an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("The eventObject must be null, or an array", CRECastException.class, t);
 			}
 			boolean serverWide = false;
 			if (args.length == 3) {
@@ -534,8 +536,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BindException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREBindException.class};
 		}
 
 		@Override
@@ -562,11 +564,11 @@ public class EventBinding {
 				throwOnFailure = Static.getBoolean(args[3]);
 			}
 			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
-				throw new ConfigRuntimeException(this.getName() + " must be called from within an event handler", ExceptionType.BindException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " must be called from within an event handler", CREBindException.class, t);
 			}
 			Event e = environment.getEnv(GlobalEnv.class).GetEvent().getEventDriver();
 			if (environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent().getPriority().equals(Priority.MONITOR)) {
-				throw new ConfigRuntimeException("Monitor level handlers may not modify an event!", ExceptionType.BindException, t);
+				throw ConfigRuntimeException.BuildException("Monitor level handlers may not modify an event!", CREBindException.class, t);
 			}
 			ActiveEvent active = environment.getEnv(GlobalEnv.class).GetEvent();
 			boolean success = false;
@@ -574,16 +576,14 @@ public class EventBinding {
 				try {
 					success = e.modifyEvent(parameter, value, environment.getEnv(GlobalEnv.class).GetEvent().getUnderlyingEvent());
 				} catch (ConfigRuntimeException ex) {
-					ex.setFile(t.file());
-					ex.setLineNum(t.line());
-					ex.setColumn(t.col());
+					ex.setTarget(t);
 					throw ex;
 				}
 			} else {
 				success = false;
 			}
 			if (throwOnFailure && !success) {
-				throw new ConfigRuntimeException("Event parameter is already locked!", ExceptionType.BindException, t);
+				throw ConfigRuntimeException.BuildException("Event parameter is already locked!", CREBindException.class, t);
 			}
 			return CBoolean.get(success);
 		}
@@ -609,8 +609,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BindException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBindException.class};
 		}
 
 		@Override
@@ -626,7 +626,7 @@ public class EventBinding {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
-				throw new ConfigRuntimeException("lock must be called from within an event handler", ExceptionType.BindException, t);
+				throw ConfigRuntimeException.BuildException("lock must be called from within an event handler", CREBindException.class, t);
 			}
 
 			BoundEvent.ActiveEvent e = environment.getEnv(GlobalEnv.class).GetEvent();
@@ -680,8 +680,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BindException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBindException.class};
 		}
 
 		@Override
@@ -697,7 +697,7 @@ public class EventBinding {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
-				throw new ConfigRuntimeException("is_locked may only be called from inside an event handler", ExceptionType.BindException, t);
+				throw ConfigRuntimeException.BuildException("is_locked may only be called from inside an event handler", CREBindException.class, t);
 			}
 			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetEvent().isLocked(args[0].val()));
 		}
@@ -729,8 +729,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BindException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBindException.class};
 		}
 
 		@Override
@@ -746,7 +746,7 @@ public class EventBinding {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
-				throw new ConfigRuntimeException("consume may only be called from an event handler!", ExceptionType.BindException, t);
+				throw ConfigRuntimeException.BuildException("consume may only be called from an event handler!", CREBindException.class, t);
 			}
 			environment.getEnv(GlobalEnv.class).GetEvent().consume();
 			return CVoid.VOID;
@@ -780,8 +780,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BindException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBindException.class};
 		}
 
 		@Override
@@ -797,7 +797,7 @@ public class EventBinding {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
-				throw new ConfigRuntimeException("is_consumed must be called from within an event handler", ExceptionType.BindException, t);
+				throw ConfigRuntimeException.BuildException("is_consumed must be called from within an event handler", CREBindException.class, t);
 			}
 			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetEvent().isConsumed());
 		}
@@ -834,8 +834,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BindException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBindException.class};
 		}
 
 		@Override
@@ -851,11 +851,11 @@ public class EventBinding {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
-				throw new ConfigRuntimeException("event_meta must be called from within an event handler!", ExceptionType.BindException, t);
+				throw ConfigRuntimeException.BuildException("event_meta must be called from within an event handler!", CREBindException.class, t);
 			}
 			CArray history = new CArray(t);
 			for (String entry : environment.getEnv(GlobalEnv.class).GetEvent().getHistory()) {
-				history.push(new CString(entry, t));
+				history.push(new CString(entry, t), t);
 			}
 			return history;
 		}
@@ -870,8 +870,8 @@ public class EventBinding {
 	public static class has_bind extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override

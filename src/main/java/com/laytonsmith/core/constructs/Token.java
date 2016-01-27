@@ -47,6 +47,7 @@ public class Token {
         IVARIABLE(TokenVariant.IDENTIFIER),
 		FINAL_VAR(TokenVariant.IDENTIFIER),
 		LIT(TokenVariant.IDENTIFIER, TokenVariant.ATOMIC_LIT),
+		DOT(TokenVariant.IDENTIFIER),
 		SMART_STRING(TokenVariant.IDENTIFIER, TokenVariant.ATOMIC_LIT),
 		BARE_STRING(TokenVariant.IDENTIFIER, TokenVariant.ATOMIC_LIT),
 		ROOT(),

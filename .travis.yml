@@ -1,0 +1,7 @@
+language: java
+notifications:
+  irc: 
+    channels:
+      - "irc.esper.net#CommandHelper"
+sudo: false
+install: mvn test -Pfail-on-test-failures

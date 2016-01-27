@@ -15,10 +15,12 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -48,7 +50,7 @@ public class Crypto {
 			String hash = StringUtils.toHex(hmac).toLowerCase();
 			return new CString(hash, t);
 		} catch (NoSuchAlgorithmException | InvalidKeyException ex) {
-			throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
+			throw ConfigRuntimeException.BuildException("An error occured while trying to hash your data", CREPluginInternalException.class, t, ex);
 		}
 	}
 
@@ -71,8 +73,8 @@ public class Crypto {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{};
         }
 
 		@Override
@@ -149,8 +151,8 @@ public class Crypto {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PluginInternalException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREPluginInternalException.class};
         }
 
 		@Override
@@ -175,7 +177,7 @@ public class Crypto {
                 String hash = StringUtils.toHex(digest.digest()).toLowerCase();
                 return new CString(hash, t);
             } catch (NoSuchAlgorithmException ex) {
-                throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
+                throw ConfigRuntimeException.BuildException("An error occured while trying to hash your data", CREPluginInternalException.class, t, ex);
             }
         }
         
@@ -216,8 +218,8 @@ public class Crypto {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PluginInternalException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREPluginInternalException.class};
         }
 
 		@Override
@@ -242,7 +244,7 @@ public class Crypto {
                 String hash = StringUtils.toHex(digest.digest()).toLowerCase();
                 return new CString(hash, t);
             } catch (NoSuchAlgorithmException ex) {
-                throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
+                throw ConfigRuntimeException.BuildException("An error occured while trying to hash your data", CREPluginInternalException.class, t, ex);
             }
         }
         
@@ -282,8 +284,8 @@ public class Crypto {
         }
 
 	@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PluginInternalException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREPluginInternalException.class};
         }
 
 	@Override
@@ -308,7 +310,7 @@ public class Crypto {
                 String hash = StringUtils.toHex(digest.digest()).toLowerCase();
                 return new CString(hash, t);
             } catch (NoSuchAlgorithmException ex) {
-                throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
+                throw ConfigRuntimeException.BuildException("An error occured while trying to hash your data", CREPluginInternalException.class, t, ex);
             }
         }
         
@@ -333,8 +335,8 @@ public class Crypto {
     @api public static class bcrypt extends AbstractFunction{
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CRECastException.class, CRERangeException.class};
         }
 
 		@Override
@@ -357,7 +359,7 @@ public class Crypto {
 				String hash = BCrypt.hashpw(args[0].val(), BCrypt.gensalt(log_rounds));
 				return new CString(hash, t);
 			} catch(IllegalArgumentException ex){
-				throw new Exceptions.RangeException(ex.getMessage(), t);
+				throw new CRERangeException(ex.getMessage(), t);
 			}
         }
 
@@ -397,7 +399,7 @@ public class Crypto {
     @api public static class check_bcrypt extends AbstractFunction{
 
 		@Override
-        public ExceptionType[] thrown() {
+        public Class<? extends CREThrowable>[] thrown() {
             return null;
         }
 
@@ -452,8 +454,8 @@ public class Crypto {
 	public static class base64_encode extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -507,8 +509,8 @@ public class Crypto {
 	public static class base64_decode extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -577,8 +579,8 @@ public class Crypto {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PluginInternalException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPluginInternalException.class};
 		}
 
 		@Override
@@ -636,8 +638,8 @@ public class Crypto {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PluginInternalException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPluginInternalException.class};
 		}
 
 		@Override
@@ -695,8 +697,8 @@ public class Crypto {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PluginInternalException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPluginInternalException.class};
 		}
 
 		@Override

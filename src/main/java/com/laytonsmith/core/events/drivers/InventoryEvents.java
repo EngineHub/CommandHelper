@@ -33,10 +33,11 @@ import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.CRE.CREBindException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.Map;
 
 /**
@@ -71,7 +72,8 @@ public class InventoryEvents {
 					+ " | slot: the number of the slot | rawslot: the number of the slot in whole inventory window | slottype"
 					+ " | slotitem | inventorytype | inventorysize: number of slots in opened inventory | cursoritem"
 					+ " | inventory: all the items in the (top) inventory | clicktype | action}"
-					+ " {slotitem: the item currently in the clicked slot | cursoritem: the item on the cursor}"
+					+ " {slotitem: the item currently in the clicked slot | cursoritem: the item on the cursor (may cause"
+					+ " unexpected behavior)}"
 					+ " {}";
 		}
 
@@ -94,7 +96,7 @@ public class InventoryEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new ConfigRuntimeException("Unsupported Operation", ExceptionType.BindException, Target.UNKNOWN);
+			throw ConfigRuntimeException.BuildException("Unsupported Operation", CREBindException.class, Target.UNKNOWN);
 		}
 
 		@Override
@@ -106,7 +108,7 @@ public class InventoryEvents {
 				map.put("player", new CString(e.getWhoClicked().getName(), Target.UNKNOWN));
 				CArray viewers = new CArray(Target.UNKNOWN);
 				for (MCHumanEntity viewer : e.getViewers()) {
-					viewers.push(new CString(viewer.getName(), Target.UNKNOWN));
+					viewers.push(new CString(viewer.getName(), Target.UNKNOWN), Target.UNKNOWN);
 				}
 				map.put("viewers", viewers);
 
@@ -229,13 +231,13 @@ public class InventoryEvents {
 
 				CArray slots = new CArray(Target.UNKNOWN);
 				for (Integer slot : e.getInventorySlots()) {
-					slots.push(new CInt(slot.intValue(), Target.UNKNOWN));
+					slots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN);
 				}
 				map.put("slots", slots);
 
 				CArray rawSlots = new CArray(Target.UNKNOWN);
 				for (Integer slot : e.getRawSlots()) {
-					rawSlots.push(new CInt(slot.intValue(), Target.UNKNOWN));
+					rawSlots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN);
 				}
 				map.put("rawslots", rawSlots);
 
@@ -594,7 +596,7 @@ public class InventoryEvents {
 
 				for (int i = 0; i < expCosts.length; i++) {
 					int j = expCosts[i];
-					expCostsCArray.push(new CInt(j, Target.UNKNOWN), i);
+					expCostsCArray.push(new CInt(j, Target.UNKNOWN), i, Target.UNKNOWN);
 				}
 
 				map.put("expcosts", expCostsCArray);
@@ -639,14 +641,14 @@ public class InventoryEvents {
 								if (CexpCosts.get(i, Target.UNKNOWN) instanceof CInt) {
 									ExpCosts[i] = (int) ((CInt) CexpCosts.get(i, Target.UNKNOWN)).getInt();
 								} else {
-									throw new ConfigRuntimeException("Expected an intger at index " + i + "!", ExceptionType.FormatException, Target.UNKNOWN);
+									throw ConfigRuntimeException.BuildException("Expected an intger at index " + i + "!", CREFormatException.class, Target.UNKNOWN);
 								}
 							}
 						} else {
-							throw new ConfigRuntimeException("Expected a normal array!", ExceptionType.FormatException, Target.UNKNOWN);
+							throw ConfigRuntimeException.BuildException("Expected a normal array!", CREFormatException.class, Target.UNKNOWN);
 						}
 					} else {
-						throw new ConfigRuntimeException("Expected an array!", ExceptionType.FormatException, Target.UNKNOWN);
+						throw ConfigRuntimeException.BuildException("Expected an array!", CREFormatException.class, Target.UNKNOWN);
 					}
 				}
 			}
@@ -766,7 +768,7 @@ public class InventoryEvents {
 				Target t = Target.UNKNOWN;
 				CArray viewers = new CArray(t);
 				for (MCHumanEntity v : e.getViewers()) {
-					viewers.push(new CString(v.getName(), t));
+					viewers.push(new CString(v.getName(), t), t);
 				}
 				ret.put("viewers", viewers);
 				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(e.getRecipe(), t));
@@ -815,8 +817,8 @@ public class InventoryEvents {
 						e.getInventory().setMatrix(repl);
 						return true;
 					} else {
-						throw new ConfigRuntimeException("Expected an array but recieved " + value,
-								ExceptionType.CastException, Target.UNKNOWN);
+						throw ConfigRuntimeException.BuildException("Expected an array but recieved " + value,
+								CRECastException.class, Target.UNKNOWN);
 					}
 				}
 			} */

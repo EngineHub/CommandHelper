@@ -13,8 +13,12 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.HashMap;
 import java.util.Map;
 import org.xml.sax.SAXException;
@@ -75,7 +79,7 @@ public class ResourceManager {
 		if(type.isAssignableFrom(resource.getResource().getClass())){
 			return (T) resource.getResource();
 		} else {
-			throw new Exceptions.CastException("Unexpected resource type. Expected resource of type "
+			throw new CRECastException("Unexpected resource type. Expected resource of type "
 					+ ResourceTypes.getResourceByType(type).name() + " but found "
 					+ ResourceTypes.getResourceByType(resource.getResource().getClass()).name() + " instead.", t);
 		}
@@ -85,8 +89,8 @@ public class ResourceManager {
 	public static class res_create_resource extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -106,7 +110,7 @@ public class ResourceManager {
 			try{
 				type = ResourceTypes.valueOf(args[0].val());
 			} catch(IllegalArgumentException e){
-				throw new Exceptions.FormatException(e.getMessage(), t);
+				throw new CREFormatException(e.getMessage(), t);
 			}
 			if(args.length > 1){
 				data = args[1];
@@ -116,11 +120,11 @@ public class ResourceManager {
 				case XML_DOCUMENT:
 					try {
 						if(data == null){
-							throw new ConfigRuntimeException("data cannot be empty", ExceptionType.NullPointerException, t);
+							throw ConfigRuntimeException.BuildException("data cannot be empty", CRENullPointerException.class, t);
 						}
 						resource = new CResource<XMLDocument>(new XMLDocument(data.val()), t);
 					} catch (SAXException ex) {
-						throw new Exceptions.FormatException(ex.getMessage(), t);
+						throw new CREFormatException(ex.getMessage(), t);
 					}
 					break;
 				case STRING_BUILDER:
@@ -170,8 +174,8 @@ public class ResourceManager {
 	@api
 	public static class res_free_resource extends AbstractFunction {
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -192,10 +196,10 @@ public class ResourceManager {
 					resources.remove(resource.getId());
 					return CVoid.VOID;
 				} else {
-					throw new ConfigRuntimeException("That resource is not a valid resource.", ExceptionType.NotFoundException, t);
+					throw ConfigRuntimeException.BuildException("That resource is not a valid resource.", CRENotFoundException.class, t);
 				}
 			} else {
-				throw new Exceptions.CastException("Expected a resource", t);
+				throw new CRECastException("Expected a resource", t);
 			}
 		}
 

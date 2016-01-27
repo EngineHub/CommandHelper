@@ -1,6 +1,7 @@
 
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import java.awt.Color;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -43,11 +44,11 @@ public final class TermColors {
         if(SYSTEM.equals(SYS.WINDOWS)){
             //Fuck you windows.
             for(int i = 0; i < 50; i++){
-                System.out.println();
+                StreamUtils.GetSystemOut().println();
             }
         } else {           
-            System.out.print("\u001b[2J");
-            System.out.flush();
+            StreamUtils.GetSystemOut().print("\u001b[2J");
+            StreamUtils.GetSystemOut().flush();
         }
     }
     
@@ -195,7 +196,7 @@ public final class TermColors {
             }
         }
 		if(type.equals("reset")){
-			return "\033[0m";
+			return "\033[m";
 		}
         return "";
     }
@@ -245,8 +246,8 @@ public final class TermColors {
     }
     
     public static void p(CharSequence c) {
-        System.out.print(c);
-        System.out.flush();
+        StreamUtils.GetSystemOut().print(c);
+        StreamUtils.GetSystemOut().flush();
     }
 
     public static void pl() {
@@ -258,7 +259,7 @@ public final class TermColors {
             scanner = new Scanner(System.in);
         }
         p(">" + MAGENTA);
-        System.out.flush();
+        StreamUtils.GetSystemOut().flush();
         String ret = scanner.nextLine();
         p(WHITE);
         return ret;
@@ -266,7 +267,7 @@ public final class TermColors {
 
     private static Scanner scanner;
     public static void pl(CharSequence c) {
-        System.out.println(c + WHITE);
+        StreamUtils.GetSystemOut().println(c + WHITE);
     }
 	
 	/**

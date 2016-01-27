@@ -3,6 +3,7 @@
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.Documentation;
@@ -15,12 +16,12 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.profiler.ProfilePoint;
 
 import java.net.URL;
@@ -53,7 +54,17 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      */
 	@Override
     public void bind(BoundEvent event) {
-        throw new UnsupportedOperationException("Not supported yet.");
+
+    }
+
+	/**
+	 * If the event needs to run special code when a player unbinds the event, it
+	 * can be done here. By default, an UnsupportedOperationException is thrown,
+	 * but is caught and ignored.
+	 */
+	@Override
+	public void unbind(BoundEvent event) {
+
     }
 
     /**
@@ -98,12 +109,12 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 				MethodScriptCompiler.execute(tree, env, null, null);
 			} catch(CancelCommandException ex){
 				if(ex.getMessage() != null && !ex.getMessage().equals("")){
-					System.out.println(ex.getMessage());
+					StreamUtils.GetSystemOut().println(ex.getMessage());
 				}
 			} catch(FunctionReturnException ex){
 				//We simply allow this to end the event execution
 			} catch(ProgramFlowManipulationException ex){
-				ConfigRuntimeException.HandleUncaughtException(new ConfigRuntimeException("Unexpected control flow operation used.", Exceptions.ExceptionType.FormatException, ex.getTarget()), env);
+				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.BuildException("Unexpected control flow operation used.", CREFormatException.class, ex.getTarget()), env);
 			}
 		} finally {
 			if(event != null){
@@ -247,18 +258,6 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 			c = c.getDeclaringClass();
 		} while(c != null);
 		return false;
-	}
-
-	/**
-	 *
-	 * @param manualObject
-	 * @return
-	 * @deprecated The new signature, with a target provided is required to be implemented.
-	 */
-	@Deprecated
-	public BindableEvent convert(CArray manualObject) {
-		//TODO: Remove this function after 6/1/14
-		return this.convert(manualObject, Target.UNKNOWN);
 	}
 
 }

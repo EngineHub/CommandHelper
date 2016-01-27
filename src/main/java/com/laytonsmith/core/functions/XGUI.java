@@ -14,8 +14,8 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.awt.Color;
 import java.awt.Window;
 import java.util.HashMap;
@@ -56,8 +56,8 @@ public class XGUI {
 	public static class x_create_window extends AbstractFunction {
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -126,8 +126,8 @@ public class XGUI {
 	public static class x_show_window extends AbstractFunction {
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -180,8 +180,8 @@ public class XGUI {
 	public static class x_set_window_pixel extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override

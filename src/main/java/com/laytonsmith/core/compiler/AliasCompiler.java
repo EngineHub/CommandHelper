@@ -1,5 +1,6 @@
 package com.laytonsmith.core.compiler;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.io.File;
@@ -15,7 +16,7 @@ public class AliasCompiler {
 
 	public static void main(String [] args) throws Exception {
 		List<AliasToken> list = new AliasLexer("/c /* = */ = /** hi */ code", null).parse();
-		System.out.println(list);
+		StreamUtils.GetSystemOut().println(list);
 	}
 
 	public static List<AliasToken> lex(String script, File file) throws ConfigCompileException{

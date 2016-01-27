@@ -2,7 +2,6 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.testing.StaticTest;
 import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
@@ -221,7 +220,11 @@ public class OptimizationTest {
 
 	//tests the new switch syntax
 	@Test public void testSwitch1() throws Exception {
-		assertEquals("switch(@a,array(1,2),msg('1, 2'),array(3..4),sconcat(msg('3'),msg('4')),msg('default'))",
+		assertEquals("switch(@a,array(1,2),msg('1, 2'),"
+				+ "array(3..4),sconcat(msg('3'),msg('4')),"
+				+ "array(false),msg('false'),"
+				+ "array(0.07),msg(0.07),"
+				+ "msg('default'))",
 				optimize("switch(@a){"
 						+ "	case 1:"
 						+ "	case 2:"
@@ -229,6 +232,10 @@ public class OptimizationTest {
 						+ "	case 3..4:"
 						+ "		msg('3');"
 						+ "		msg('4');"
+						+ "	case false:"
+						+ "		msg('false');"
+						+ "	case 00.07:"
+						+ "		msg(00.07);"
 						+ "	case 'ignored':"
 						+ "	default:"
 						+ "		msg('default');"
@@ -242,7 +249,37 @@ public class OptimizationTest {
 				+ "		msg('invalid');"
 				+ "}");
 	}
-
+	
+	// Tests "-" signs in front of values to negate them.
+	@Test public void testMinusWithoutValueInFront() throws Exception{
+		assertEquals("assign(@b,neg(@a))", optimize("@b = -@a"));
+		assertEquals("assign(@b,neg(@a))", optimize("@b = - @a"));
+		
+		assertEquals("assign(@b,array(neg(@a)))", optimize("@b = array(-@a)"));
+		assertEquals("assign(@b,array(neg(@a)))", optimize("@b = array(- @a)"));
+		
+		assertEquals("assign(@b,neg(array_get(@a,1)))", optimize("@b = -@a[1]"));
+		assertEquals("assign(@b,neg(array_get(@a,1)))", optimize("@b = - @a[1]"));
+		
+		assertEquals("assign(@b,neg(dec(@a)))", optimize("@b = -dec(@a)"));
+		assertEquals("assign(@b,neg(dec(@a)))", optimize("@b = - dec(@a)"));
+		
+		assertEquals("assign(@b,neg(array_get(array(1,2,3),1)))", optimize("@b = -array(1,2,3)[1]"));
+		
+		assertEquals("assign(@b,neg(array_get(array_get(array_get(array(array(array(2))),0),0),0)))", optimize("@b = -array(array(array(2)))[0][0][0]"));
+		
+		assertEquals("assign(@b,neg(array_get(array_get(array_get(array(array(array(2))),neg(array_get(array(1,0),1))),0),0)))",
+				optimize("@b = -array(array(array(2)))[-array(1,0)[1]][0][0]"));
+		
+		// Test behaviour where the value should not be negated.
+		assertEquals("assign(@c,subtract(@a,@b))", optimize("@c = @a - @b"));
+		assertEquals("assign(@c,subtract(array_get(@a,0),@b))", optimize("@c = @a[0] - @b"));
+		assertEquals("assign(@c,subtract(abs(@a),@b))", optimize("@c = abs(@a) - @b"));
+		assertEquals("assign(@c,subtract(if(@bool,2,3),@b))", optimize("@c = if(@bool) {2} else {3} - @b"));
+		
+		assertEquals("assign(@b,subtract(dec(@a),2))", optimize("@b = dec(@a)-2"));
+		assertEquals("assign(@b,subtract(dec(@a),2))", optimize("@b = dec(@a)- 2"));
+	}
 
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws Exception{

@@ -10,8 +10,9 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRESecurityException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -60,8 +61,8 @@ public class Performance {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.SecurityException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CRESecurityException.class};
         }
 
 		@Override
@@ -81,7 +82,7 @@ public class Performance {
 		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             if(!Prefs.AllowProfiling()){
-                throw new ConfigRuntimeException("allow-profiling is currently off, you must set it to true in your preferences.", ExceptionType.SecurityException, t);
+                throw ConfigRuntimeException.BuildException("allow-profiling is currently off, you must set it to true in your preferences.", CRESecurityException.class, t);
             }
             PERFORMANCE_LOGGING = Static.getBoolean(args[0]);
             return CVoid.VOID;

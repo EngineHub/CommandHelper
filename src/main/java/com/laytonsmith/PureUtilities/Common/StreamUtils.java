@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,5 +123,31 @@ public class StreamUtils {
 	 */
 	public static InputStream GetInputStream(String contents, String encoding) throws UnsupportedEncodingException{		
 		return new ByteArrayInputStream(contents.getBytes(encoding));
+	}
+
+	/**
+	 * Returns System.out, but wrapped in a UTF-8 capable output stream. This is required, because
+	 * higher order characters cannot print by default in Java.
+	 * @return A new PrintStream object, based on System.out
+	 */
+	public static PrintStream GetSystemOut(){
+		try {
+			return new PrintStream(System.out, true, "UTF-8");
+		} catch (UnsupportedEncodingException ex) {
+			throw new Error(ex);
+		}
+	}
+
+	/**
+	 * Returns System.err, but wrapped in a UTF-8 capable output stream. This is required, because
+	 * higher order characters cannot print by default in Java.
+	 * @return A new PrintStream object, based on System.err
+	 */
+	public static PrintStream GetSystemErr(){
+		try {
+			return new PrintStream(System.err, true, "UTF-8");
+		} catch (UnsupportedEncodingException ex) {
+			throw new Error(ex);
+		}
 	}
 }

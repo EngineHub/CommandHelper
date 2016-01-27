@@ -1,11 +1,16 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.MCOfflinePlayer;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCTeam;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.laytonsmith.abstraction.enums.MCNameTagVisibility;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCNameTagVisibility;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Team;
 
 public class BukkitMCTeam implements MCTeam {
@@ -16,8 +21,14 @@ public class BukkitMCTeam implements MCTeam {
 	}
 
 	@Override
-	public void addPlayer(MCOfflinePlayer player) {
-		t.addPlayer((OfflinePlayer) player.getHandle());
+	public void addEntry(String entry) {
+		if(ReflectionUtils.hasMethod(t.getClass(), "addEntry", null, String.class)){
+			t.addEntry(entry);
+		} else {
+			// Probably 1.8.5 or prior
+			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
+			ReflectionUtils.invokeMethod(t, "addPlayer", player);
+		}
 	}
 
 	@Override
@@ -41,10 +52,23 @@ public class BukkitMCTeam implements MCTeam {
 	}
 
 	@Override
-	public Set<MCOfflinePlayer> getPlayers() {
-		Set<MCOfflinePlayer> ret = new HashSet<MCOfflinePlayer>();
-		for (OfflinePlayer o : t.getPlayers()) {
-			ret.add(new BukkitMCOfflinePlayer(o));
+	public MCNameTagVisibility getNameTagVisibility() {
+		NameTagVisibility ntv = t.getNameTagVisibility();
+		return BukkitMCNameTagVisibility.getConvertor().getAbstractedEnum(ntv);
+	}
+
+	@Override
+	public Set<String> getEntries() {
+		Set<String> ret = new HashSet<String>();
+		if(ReflectionUtils.hasMethod(t.getClass(), "getEntries", null)){
+			for (String e : t.getEntries()) {
+				ret.add(e);
+			}
+		} else {
+			// Probably 1.8.5 or prior
+			for (OfflinePlayer o : (Set<OfflinePlayer>) ReflectionUtils.invokeMethod(t, "getPlayers")) {
+				ret.add(o.getName());
+			}
 		}
 		return ret;
 	}
@@ -70,13 +94,25 @@ public class BukkitMCTeam implements MCTeam {
 	}
 
 	@Override
-	public boolean hasPlayer(MCOfflinePlayer player) {
-		return t.hasPlayer((OfflinePlayer) player.getHandle());
+	public boolean hasEntry(String entry) {
+		if(ReflectionUtils.hasMethod(t.getClass(), "hasEntry", null, String.class)){
+			return t.hasEntry(entry);
+		} else {
+			// Probably 1.8.5 or prior
+			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
+			return (boolean) ReflectionUtils.invokeMethod(t, "hasPlayer", player);
+		}
 	}
 
 	@Override
-	public boolean removePlayer(MCOfflinePlayer player) {
-		return t.removePlayer((OfflinePlayer) player.getHandle());
+	public boolean removeEntry(String entry) {
+		if(ReflectionUtils.hasMethod(t.getClass(), "removeEntry", null, String.class)){
+			return t.removeEntry(entry);
+		} else {
+			// Probably 1.8.5 or prior
+			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
+			return (boolean) ReflectionUtils.invokeMethod(t, "removePlayer", player);
+		}
 	}
 
 	@Override
@@ -92,6 +128,11 @@ public class BukkitMCTeam implements MCTeam {
 	@Override
 	public void setDisplayName(String displayName) {
 		t.setDisplayName(displayName);
+	}
+
+	@Override
+	public void setNameTagVisibility(MCNameTagVisibility visibility) {
+		t.setNameTagVisibility(BukkitMCNameTagVisibility.getConvertor().getConcreteEnum(visibility));
 	}
 
 	@Override

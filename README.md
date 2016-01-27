@@ -1,6 +1,8 @@
 CommandHelper
 =============
 
+[![Build Status](https://travis-ci.org/EngineHub/CommandHelper.svg?branch=master)](https://travis-ci.org/EngineHub/CommandHelper)
+
 CommandHelper adds simple command aliases, complex macros,
 and the ability to script your own commands and events into Minecraft,
 using the MethodScript scripting language.

@@ -3,6 +3,7 @@ package com.laytonsmith.PureUtilities.Common.Annotations;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.MustUseOverride;
 import java.lang.reflect.Method;
@@ -78,7 +79,7 @@ public class CheckOverrides extends AbstractProcessor {
 				}
 
 				if (c != null && !c.isInterface()) {
-					//System.out.println("Dealing with " + c.getName() + ".." + element.toString());
+					//StreamUtils.GetSystemOut().println("Dealing with " + c.getName() + ".." + element.toString());
 					//We have to do a bit of massaging to turn "method(java.lang.String[], java.lang.String)
 					//into a Method object.
 					Matcher m = METHOD_SIGNATURE.matcher(element.toString());
@@ -98,7 +99,7 @@ public class CheckOverrides extends AbstractProcessor {
 							inner = removeGenerics(inner);
 							args = StringUtils.trimSplit(inner, ",");
 						}
-						//System.out.println("Args length: " + args.length);
+						//StreamUtils.GetSystemOut().println("Args length: " + args.length);
 						argTypes = new Class[args.length];
 						for (int i = 0; i < args.length; i++) {
 							try {
@@ -240,7 +241,7 @@ public class CheckOverrides extends AbstractProcessor {
 						.append(StringUtils.Join(stringMethodsInError, StringUtils.nl));
 				processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, b.toString());
 			} else {
-				System.out.println("No @Override annotations were found to be missing.");
+				StreamUtils.GetSystemOut().println("No @Override annotations were found to be missing.");
 			}
 		}
 		return false;

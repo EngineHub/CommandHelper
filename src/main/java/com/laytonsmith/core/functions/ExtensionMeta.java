@@ -16,11 +16,11 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.net.URL;
 import java.util.EnumSet;
 import java.util.List;
@@ -41,8 +41,8 @@ public class ExtensionMeta {
 	public static class function_exists extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -132,8 +132,8 @@ public class ExtensionMeta {
 	public static class event_exists extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -198,8 +198,8 @@ public class ExtensionMeta {
 	public static class extension_exists extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -267,8 +267,8 @@ public class ExtensionMeta {
 	public static class extension_info extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -285,7 +285,7 @@ public class ExtensionMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
 
-			CArray retn = new CArray(t);
+			CArray retn = CArray.GetAssociativeArray(t);
 
 			if (args.length == 0) {
 				for (URL url: trackers.keySet()) {
@@ -293,7 +293,7 @@ public class ExtensionMeta {
 					CArray trkdata;
 
 					if (!retn.containsKey(trk.getIdentifier())) {
-						trkdata = new CArray(t);
+						trkdata = CArray.GetAssociativeArray(t);
 					} else {
 						trkdata = (CArray) retn.get(trk.getIdentifier(), t);
 					}
@@ -310,7 +310,7 @@ public class ExtensionMeta {
 					}
 					for (FunctionBase func: trk.getFunctions()) {
 						if (!funcs.contains(func.getName())) {
-							funcs.push(new CString(func.getName(), t));
+							funcs.push(new CString(func.getName(), t), t);
 						}
 					}
 					funcs.sort(CArray.SortType.STRING_IC);
@@ -323,7 +323,7 @@ public class ExtensionMeta {
 						events = (CArray) trkdata.get("events", t);
 					}
 					for (Event event: trk.getEvents()) {
-						events.push(new CString(event.getName(), t));
+						events.push(new CString(event.getName(), t), t);
 					}
 					events.sort(CArray.SortType.STRING_IC);
 					trkdata.set("events", events, t);
@@ -346,7 +346,7 @@ public class ExtensionMeta {
 						CArray functions = (retn.containsKey("functions")) ? (CArray) retn.get("functions", t) : new CArray(t);
 						for (FunctionBase function : tracker.getFunctions()) {
 							if (!functions.contains(function.getName())) {
-								functions.push(new CString(function.getName(), t));
+								functions.push(new CString(function.getName(), t), t);
 							}
 						}
 						functions.sort(CArray.SortType.STRING_IC);
@@ -354,7 +354,7 @@ public class ExtensionMeta {
 						CArray events = (retn.containsKey("events")) ? (CArray) retn.get("events", t) : new CArray(t);
 						for (Event event : tracker.getEvents()) {
 							if (!events.contains(event.getName())) {
-								events.push(new CString(event.getName(), t));
+								events.push(new CString(event.getName(), t), t);
 							}
 						}
 						events.sort(CArray.SortType.STRING_IC);

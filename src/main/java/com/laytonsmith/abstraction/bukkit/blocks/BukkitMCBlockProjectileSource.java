@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.bukkit.blocks;
 
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCProjectile;
-import com.laytonsmith.abstraction.MVector3D;
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
@@ -40,10 +40,10 @@ public class BukkitMCBlockProjectileSource implements MCBlockProjectileSource {
 	}
 
 	@Override
-	public MCProjectile launchProjectile(MCProjectileType projectile, MVector3D init) {
+	public MCProjectile launchProjectile(MCProjectileType projectile, Vector3D init) {
 		EntityType et = EntityType.valueOf(projectile.name());
 		Class<? extends Entity> c = et.getEntityClass();
-		Vector vector = new Vector(init.x, init.y, init.z);
+		Vector vector = new Vector(init.X(), init.Y(), init.Z());
 		Projectile proj = bps.launchProjectile(c.asSubclass(Projectile.class), vector);
 
 		MCEntity e = BukkitConvertor.BukkitGetCorrectEntity(proj);

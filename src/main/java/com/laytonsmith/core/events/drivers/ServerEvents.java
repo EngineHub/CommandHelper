@@ -25,9 +25,12 @@ import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -94,7 +97,7 @@ public class ServerEvents {
 				ret.put("maxplayers", new CInt(event.getMaxPlayers(), t));
 				CArray players = new CArray(t);
 				for (MCPlayer player : event.getPlayers()) {
-					players.push(new CString(player.getName(), t));
+					players.push(new CString(player.getName(), t), t);
 				}
 				ret.put("list", players);
 				return ret;
@@ -149,7 +152,8 @@ public class ServerEvents {
 		public String docs() {
 			return "{}"
 					+ " This will fire if a tab completer has not been set for a command registered with"
-					+ " register_command(), or if the set tab completer doesn't return an array."
+					+ " register_command(), or if the set tab completer doesn't return an array. If completions are "
+					+ " not modified, registered commands will tab complete online player names."
 					+ " {command: The command name that was registered. | alias: The alias the player entered to run"
 					+ " the command. | args: The given arguments after the alias. | completions: The available"
 					+ " completions for the last argument. | sender: The player that ran the command. }"
@@ -159,10 +163,7 @@ public class ServerEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if (event instanceof MCCommandTabCompleteEvent) {
-				return true;
-			}
-			return false;
+			return event instanceof MCCommandTabCompleteEvent;
 		}
 
 		@Override
@@ -178,14 +179,16 @@ public class ServerEvents {
 				Map<String, Construct> ret = evaluate_helper(event);
 				ret.put("sender", new CString(e.getCommandSender().getName(), t));
 				CArray comp = new CArray(t);
-				for (String c : e.getCompletions()) {
-					comp.push(new CString(c, t));
+				if(e.getCompletions() != null){
+					for (String c : e.getCompletions()) {
+						comp.push(new CString(c, t), t);
+					}
 				}
 				ret.put("completions", comp);
 				ret.put("command", new CString(e.getCommand().getName(), t));
 				CArray args = new CArray(t);
 				for (String a : e.getArguments()) {
-						args.push(new CString(a, t));
+						args.push(new CString(a, t), t);
 				}
 				ret.put("args", args);
 				ret.put("alias", new CString(e.getAlias(), t));
@@ -206,16 +209,17 @@ public class ServerEvents {
 				MCCommandTabCompleteEvent e = (MCCommandTabCompleteEvent) event;
 				if ("completions".equals(key)) {
 					if (value instanceof CArray) {
-						e.getCompletions().clear();
+						List<String> comp = new ArrayList<>();
 						if (((CArray) value).inAssociativeMode()) {
 							for (Construct k : ((CArray) value).keySet()) {
-								e.getCompletions().add(((CArray) value).get(k, Target.UNKNOWN).val());
+								comp.add(((CArray) value).get(k, Target.UNKNOWN).val());
 							}
 						} else {
 							for (Construct v : ((CArray) value).asList()) {
-								e.getCompletions().add(v.val());
+								comp.add(v.val());
 							}
 						}
+						e.setCompletions(comp);
 						return true;
 					}
 				}

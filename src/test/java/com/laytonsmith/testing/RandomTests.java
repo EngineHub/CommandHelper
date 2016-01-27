@@ -2,6 +2,7 @@ package com.laytonsmith.testing;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCLocation;
@@ -30,9 +31,9 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -161,7 +162,7 @@ public class RandomTests {
 				b.append(key).append(" threw: ").append(uhohs.get(key)).append("\n");
 			}
 			String output = ("There was/were " + uhohs.size() + " boilerplate failure(s). Output:\n" + b.toString());
-			System.out.println(output);
+			StreamUtils.GetSystemOut().println(output);
 			fail(output);
 		}
 	}
@@ -189,16 +190,17 @@ public class RandomTests {
 	@Test
 	public void testJSONEscapeString() throws MarshalException {
 		CArray ca = new CArray(Target.UNKNOWN);
-		ca.push(C.Int(1));
-		ca.push(C.Double(2.2));
-		ca.push(C.String("string"));
-		ca.push(C.String("\"Quote\""));
-		ca.push(C.Boolean(true));
-		ca.push(C.Boolean(false));
-		ca.push(C.Null());
-		ca.push(C.Void());
-		ca.push(new Command("/Command", Target.UNKNOWN));
-		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)));
+		final Target t = Target.UNKNOWN;
+		ca.push(C.Int(1), t);
+		ca.push(C.Double(2.2), t);
+		ca.push(C.String("string"), t);
+		ca.push(C.String("\"Quote\""), t);
+		ca.push(C.Boolean(true), t);
+		ca.push(C.Boolean(false), t);
+		ca.push(C.Null(), t);
+		ca.push(C.Void(), t);
+		ca.push(new Command("/Command", Target.UNKNOWN), t);
+		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)), t);
 		//[1, 2.2, "string", "\"Quote\"", true, false, null, "", "/Command", [1]]
 		assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]", Construct.json_encode(ca, Target.UNKNOWN));
 	}
@@ -206,16 +208,16 @@ public class RandomTests {
 	@Test
 	public void testJSONDecodeString() throws MarshalException {
 		CArray ca = new CArray(Target.UNKNOWN);
-		ca.push(C.Int(1));
-		ca.push(C.Double(2.2));
-		ca.push(C.String("string"));
-		ca.push(C.String("\"Quote\""));
-		ca.push(C.Boolean(true));
-		ca.push(C.Boolean(false));
-		ca.push(C.Null());
-		ca.push(C.Void());
-		ca.push(new Command("/Command", Target.UNKNOWN));
-		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)));
+		ca.push(C.Int(1), Target.UNKNOWN);
+		ca.push(C.Double(2.2), Target.UNKNOWN);
+		ca.push(C.String("string"), Target.UNKNOWN);
+		ca.push(C.String("\"Quote\""), Target.UNKNOWN);
+		ca.push(C.Boolean(true), Target.UNKNOWN);
+		ca.push(C.Boolean(false), Target.UNKNOWN);
+		ca.push(C.Null(), Target.UNKNOWN);
+		ca.push(C.Void(), Target.UNKNOWN);
+		ca.push(new Command("/Command", Target.UNKNOWN), Target.UNKNOWN);
+		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)), Target.UNKNOWN);
 		StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]", Target.UNKNOWN));
 	}
 
@@ -278,11 +280,11 @@ public class RandomTests {
 			assertEquals(16, d, 0.00001);
 		} catch (ClassNotFoundException cnf) {
 			/* Not much we can really do about this during testing.
-			throw new ConfigRuntimeException("You are missing a required dependency: " + eClass,
-					ExceptionType.PluginInternalException, Target.UNKNOWN);*/
+			throw ConfigRuntimeException.BuildException("You are missing a required dependency: " + eClass,
+					CREPluginInternalException.class, Target.UNKNOWN);*/
 		} catch (ReflectionUtils.ReflectionException rex) {
-			throw new ConfigRuntimeException("Your expression was invalidly formatted",
-					ExceptionType.PluginInternalException, Target.UNKNOWN, rex.getCause());
+			throw ConfigRuntimeException.BuildException("Your expression was invalidly formatted",
+					CREPluginInternalException.class, Target.UNKNOWN, rex.getCause());
 		}
 	}
 

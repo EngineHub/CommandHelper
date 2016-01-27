@@ -6,12 +6,10 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.events.BukkitMiscEvents;
 import com.laytonsmith.abstraction.events.MCRedstoneChangedEvent;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.ServerEvents;
 import java.util.Map;
-import java.util.Set;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -33,7 +31,6 @@ public class BukkitServerListener implements Listener{
 	@EventHandler(priority= EventPriority.LOWEST)
 	public void onPing(ServerListPingEvent event) {
 		BukkitMiscEvents.BukkitMCServerPingEvent pe = new BukkitMiscEvents.BukkitMCServerPingEvent(event);
-		EventUtils.TriggerExternal(pe);
 		EventUtils.TriggerListener(Driver.SERVER_PING, "server_ping", pe);
 	}
 

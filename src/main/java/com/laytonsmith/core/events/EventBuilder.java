@@ -1,6 +1,7 @@
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.Target;
@@ -58,7 +59,7 @@ public final class EventBuilder {
                 }
             }
             if(method == null){
-                System.err.println("UNABLE TO CACHE A CONSTRUCTOR FOR " + clazz.getSimpleName()
+                StreamUtils.GetSystemErr().println("UNABLE TO CACHE A CONSTRUCTOR FOR " + clazz.getSimpleName()
                          + ". Manual triggering will be impossible, and errors will occur"
                         + " if an attempt is made. Did you forget to add"
                         + " public static <Event> _instantiate(...) to " + clazz.getSimpleName() + "?");
@@ -89,7 +90,7 @@ public final class EventBuilder {
                     }
                 }
                 if(constructor == null){
-                    throw new ConfigRuntimeException("Cannot find an acceptable constructor that follows the format:"
+                    throw ConfigRuntimeException.BuildException("Cannot find an acceptable constructor that follows the format:"
                             + " public " + bindableEvent.getClass().getSimpleName() + "(" + o.getClass().getSimpleName() + " event)."
                             + " Please notify the plugin author of this error.", null, Target.UNKNOWN);
                 }

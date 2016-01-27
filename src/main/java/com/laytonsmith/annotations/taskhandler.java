@@ -1,6 +1,5 @@
 package com.laytonsmith.annotations;
 
-import com.laytonsmith.core.taskmanager.TaskType;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

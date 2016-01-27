@@ -1,6 +1,7 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCHanging;
@@ -11,9 +12,9 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
+import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
@@ -52,11 +53,13 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import com.laytonsmith.core.functions.Exceptions;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -112,7 +115,7 @@ public class EntityEvents {
 				MCItemDespawnEvent event = (MCItemDespawnEvent) e;
 				Map<String, Construct> ret = evaluate_helper(event);
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
-				ret.put("id", new CInt(event.getEntity().getEntityId(), t));
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
 				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t));
 				return ret;
 			} else {
@@ -176,7 +179,7 @@ public class EntityEvents {
 				MCItemSpawnEvent event = (MCItemSpawnEvent) e;
 				Map<String, Construct> ret = evaluate_helper(event);
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
-				ret.put("id", new CInt(event.getEntity().getEntityId(), t));
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
 				ret.put("item", ObjectGenerator.GetGenerator().item(event.getEntity().getItemStack(), t));
 				return ret;
 			} else {
@@ -238,7 +241,7 @@ public class EntityEvents {
 						}
 						return false;
 					}
-					Prefilters.match(prefilter, "id", e.getEntity().getEntityId(), PrefilterType.MACRO);
+					Prefilters.match(prefilter, "id", e.getEntity().getUniqueId().toString(), PrefilterType.MACRO);
 				}
 				if (prefilter.containsKey("type")) {
 					if (e.getEntity() == null) {
@@ -267,13 +270,13 @@ public class EntityEvents {
 				Map<String, Construct> ret = evaluate_helper(e);
 				CArray blocks = new CArray(t);
 				for (MCBlock b : e.getBlocks()) {
-					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation()));
+					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation()), t);
 				}
 				ret.put("blocks", blocks);
 				Construct entity = CNull.NULL;
 				Construct entitytype = CNull.NULL;
 				if (e.getEntity() != null) {
-					entity = new CInt(e.getEntity().getEntityId(), t);
+					entity = new CString(e.getEntity().getUniqueId().toString(), t);
 					entitytype = new CString(e.getEntity().getType().name(), t);
 				}
 				ret.put("id", entity);
@@ -346,7 +349,7 @@ public class EntityEvents {
 				BindableEvent event) throws PrefilterNonMatchException {
 			if (event instanceof MCProjectileHitEvent) {
 				MCProjectileHitEvent e = (MCProjectileHitEvent) event;
-				Prefilters.match(prefilter, "id", e.getEntity().getEntityId(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "id", e.getEntity().getUniqueId().toString(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "type", e.getEntityType().name(), PrefilterType.MACRO);
 				return true;
 			}
@@ -355,11 +358,10 @@ public class EntityEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			int id = Static.getInt32(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
-			MCEntity p = Static.getEntity(id, Target.UNKNOWN);
+			MCEntity p = Static.getEntity(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
 			if (!(p instanceof MCProjectile)) {
-				throw new ConfigRuntimeException("The id was not a projectile",
-						ExceptionType.BadEntityException, Target.UNKNOWN);
+				throw ConfigRuntimeException.BuildException("The id was not a projectile",
+						CREBadEntityException.class, Target.UNKNOWN);
 			}
 			return EventBuilder.instantiate(MCProjectileHitEvent.class, p);
 		}
@@ -372,7 +374,7 @@ public class EntityEvents {
 				MCProjectileHitEvent e = (MCProjectileHitEvent) event;
 				Map<String, Construct> ret = evaluate_helper(e);
 				MCProjectile pro = e.getEntity();
-				ret.put("id", new CInt(pro.getEntityId(), t));
+				ret.put("id", new CString(pro.getUniqueId().toString(), t));
 				ret.put("type", new CString(pro.getType().name(), t));
 				CArray loc = ObjectGenerator.GetGenerator().location(pro.getLocation());
 				ret.put("location", loc);
@@ -381,7 +383,7 @@ public class EntityEvents {
 					ret.put("shooter", ObjectGenerator.GetGenerator().location(
 							((MCBlockProjectileSource) shooter).getBlock().getLocation()));
 				} else if (shooter instanceof MCEntity) {
-					ret.put("shooter", new CInt(((MCEntity) shooter).getEntityId(), t));
+					ret.put("shooter", new CString(((MCEntity) shooter).getUniqueId().toString(), t));
 				} else {
 					ret.put("shooter", CNull.NULL);
 				}
@@ -406,8 +408,7 @@ public class EntityEvents {
 					if (value instanceof CNull) {
 						le = null;
 					} else {
-						int id = Static.getInt32(value, Target.UNKNOWN);
-						le = Static.getLivingEntity(id, Target.UNKNOWN);
+						le = Static.getLivingEntity(value, Target.UNKNOWN);
 					}
 					e.getEntity().setShooter(le);
 				}
@@ -489,12 +490,12 @@ public class EntityEvents {
 				MCProjectileLaunchEvent projectileLaunchEvent = (MCProjectileLaunchEvent) event;
 				Map<String, Construct> mapEvent = evaluate_helper(event);
 				MCProjectile projectile = projectileLaunchEvent.getEntity();
-				mapEvent.put("id", new CInt(projectile.getEntityId(), Target.UNKNOWN));
+				mapEvent.put("id", new CString(projectile.getUniqueId().toString(), Target.UNKNOWN));
 				mapEvent.put("type", new CString(projectileLaunchEvent.getEntityType().name(), Target.UNKNOWN));
 				MCProjectileSource shooter = projectile.getShooter();
 				if (shooter instanceof MCEntity) {
 					MCEntity es = (MCEntity) shooter;
-					mapEvent.put("shooter", new CInt(es.getEntityId(), Target.UNKNOWN));
+					mapEvent.put("shooter", new CString(es.getUniqueId().toString(), Target.UNKNOWN));
 					mapEvent.put("shootertype", new CString(es.getType().name(), Target.UNKNOWN));
 					if (es instanceof MCPlayer) {
 						mapEvent.put("player", new CString(((MCPlayer) es).getName(), Target.UNKNOWN));
@@ -559,7 +560,7 @@ public class EntityEvents {
 				throws PrefilterNonMatchException {
 			if (e instanceof MCEntityDeathEvent) {
 				MCEntityDeathEvent event = (MCEntityDeathEvent) e;
-				Prefilters.match(prefilter, "id", event.getEntity().getEntityId(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "id", event.getEntity().getUniqueId().toString(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.MACRO);
 				return true;
 			}
@@ -576,15 +577,15 @@ public class EntityEvents {
 				throws EventException {
 			if (event instanceof MCEntityDeathEvent) {
 				MCEntityDeathEvent e = (MCEntityDeathEvent) event;
-				Target t = Target.UNKNOWN;
+				final Target t = Target.UNKNOWN;
 				MCLivingEntity dead = e.getEntity();
 				Map<String, Construct> map = evaluate_helper(event);
 				CArray drops = new CArray(t);
 				for(MCItemStack is : e.getDrops()){
-					drops.push(ObjectGenerator.GetGenerator().item(is, t));
+					drops.push(ObjectGenerator.GetGenerator().item(is, t), t);
 				}
 				map.put("type", new CString(dead.getType().name(), t));
-				map.put("id", new CInt(dead.getEntityId(), t));
+				map.put("id", new CString(dead.getUniqueId().toString(), t));
 				map.put("drops", drops);
 				map.put("xp", new CInt(e.getDroppedExp(), t));
 				CArray cod = CArray.GetAssociativeArray(t);
@@ -620,7 +621,7 @@ public class EntityEvents {
 						value = new CArray(Target.UNKNOWN);
 					}
 					if(!(value instanceof CArray)){
-						throw new ConfigRuntimeException("drops must be an array, or null", Exceptions.ExceptionType.CastException, value.getTarget());
+						throw ConfigRuntimeException.BuildException("drops must be an array, or null", CRECastException.class, value.getTarget());
 					}
 					e.clearDrops();
 					CArray drops = (CArray) value;
@@ -683,7 +684,7 @@ public class EntityEvents {
 				Map<String, Construct> map = evaluate_helper(e);
 
 				map.put("type", new CString(e.getEntity().getType().name(), Target.UNKNOWN));
-				map.put("id", new CInt(e.getEntity().getEntityId(), Target.UNKNOWN));
+				map.put("id", new CString(e.getEntity().getUniqueId().toString(), Target.UNKNOWN));
 				map.put("reason", new CString(e.getSpawnReason().name(), Target.UNKNOWN));
 				map.put("location", ObjectGenerator.GetGenerator().location(e.getLocation()));
 
@@ -707,7 +708,7 @@ public class EntityEvents {
 				try {
 					type = MCMobs.valueOf(value.val());
 				} catch (IllegalArgumentException iae) {
-					throw new Exceptions.FormatException(value.val() + " is not a valid mob type.", Target.UNKNOWN);
+					throw new CREFormatException(value.val() + " is not a valid mob type.", Target.UNKNOWN);
 				}
 				e.setType(type);
 			}
@@ -731,15 +732,17 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{id: <macro> The entityID | type: <macro> The type of entity being damaged | cause: <macro>"
+			return "{id: <macro> The entityID | type: <macro> The type of entity being damaged"
+				+ " | cause: <macro> One of " + StringUtils.Join(MCDamageCause.values(), ", ", ", or ", " or ")
 				+ " | world: <string match>} Fires when any loaded entity takes damage."
 				+ " {type: The type of entity the got damaged | id: The entityID of the victim"
 				+ " | player: the player who got damaged (only present if type is PLAYER) | world | location"
-				+ " | cause: The type of damage | amount | damager: If the source of damage is a player this will"
-				+ " contain their name, otherwise it will be the entityID of the damager (only available when"
-				+ " an entity causes damage) | shooter: The name of the player who shot, otherwise the entityID"
+				+ " | cause: The type of damage | amount | finalamount: health entity will lose after modifiers"
+				+ " | damager: If the source of damage is a player this will contain their name, otherwise it will be"
+				+ " the entityID of the damager (only available when an entity causes damage)"
+				+ " | shooter: The name of the player who shot, otherwise the entityID"
 				+ " (only available when damager is a projectile)}"
-				+ " {amount: the amount of damage recieved (in half hearts)}"
+				+ " {amount: raw amount of damage (in half hearts)}"
 				+ " {}";
 		}
 
@@ -748,7 +751,7 @@ public class EntityEvents {
 				throws PrefilterNonMatchException {
 			if(event instanceof MCEntityDamageEvent){
 				MCEntityDamageEvent e = (MCEntityDamageEvent) event;
-				Prefilters.match(prefilter, "id", e.getEntity().getEntityId(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(prefilter, "id", e.getEntity().getUniqueId().toString(), Prefilters.PrefilterType.MACRO);
 				Prefilters.match(prefilter, "type", e.getEntity().getType().name(), Prefilters.PrefilterType.MACRO);
 				Prefilters.match(prefilter, "cause", e.getCause().name(), Prefilters.PrefilterType.MACRO);
 				Prefilters.match(prefilter, "world", e.getEntity().getWorld().getName(), Prefilters.PrefilterType.STRING_MATCH);
@@ -845,7 +848,7 @@ public class EntityEvents {
 
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("clicked", new CString(event.getEntity().getType().name(), Target.UNKNOWN));
-				map.put("id", new CInt(event.getEntity().getEntityId(),Target.UNKNOWN));
+				map.put("id", new CString(event.getEntity().getUniqueId().toString(), Target.UNKNOWN));
 
 				String data = "";
 				if(event.getEntity() instanceof MCPlayer) {
@@ -904,10 +907,10 @@ public class EntityEvents {
 			if(event instanceof MCPlayerInteractAtEntityEvent){
 				MCPlayerInteractAtEntityEvent e = (MCPlayerInteractAtEntityEvent) event;
 				Prefilters.match(prefilter, "clicked", e.getEntity().getType().name(), Prefilters.PrefilterType.MACRO);
-				MVector3D position = e.getClickedPosition();
-				Prefilters.match(prefilter, "x", position.x, Prefilters.PrefilterType.EXPRESSION);
-				Prefilters.match(prefilter, "y", position.y, Prefilters.PrefilterType.EXPRESSION);
-				Prefilters.match(prefilter, "z", position.z, Prefilters.PrefilterType.EXPRESSION);
+				Vector3D position = e.getClickedPosition();
+				Prefilters.match(prefilter, "x", position.X(), Prefilters.PrefilterType.EXPRESSION);
+				Prefilters.match(prefilter, "y", position.Y(), Prefilters.PrefilterType.EXPRESSION);
+				Prefilters.match(prefilter, "z", position.Z(), Prefilters.PrefilterType.EXPRESSION);
 				return true;
 			}
 			return false;
@@ -927,7 +930,7 @@ public class EntityEvents {
 
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("clicked", new CString(event.getEntity().getType().name(), Target.UNKNOWN));
-				map.put("id", new CInt(event.getEntity().getEntityId(),Target.UNKNOWN));
+				map.put("id", new CString(event.getEntity().getUniqueId().toString(), Target.UNKNOWN));
 				map.put("position", ObjectGenerator.GetGenerator().vector(event.getClickedPosition(), Target.UNKNOWN));
 
 				String data = "";
@@ -1013,7 +1016,7 @@ public class EntityEvents {
 
                 map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
                 map.put("item", ObjectGenerator.GetGenerator().item(event.getItemDrop().getItemStack(), Target.UNKNOWN));
-                map.put("id", new CInt(event.getItemDrop().getEntityId(), Target.UNKNOWN));
+				map.put("id", new CString(event.getItemDrop().getUniqueId().toString(), Target.UNKNOWN));
 
                 return map;
             } else {
@@ -1084,7 +1087,7 @@ public class EntityEvents {
 
                 //Fill in the event parameters
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
-				map.put("id", new CInt(event.getItem().getEntityId(), Target.UNKNOWN));
+				map.put("id", new CString(event.getItem().getUniqueId().toString(), Target.UNKNOWN));
 				map.put("item", ObjectGenerator.GetGenerator().item(event.getItem().getItemStack(), Target.UNKNOWN));
 				map.put("remaining", new CInt(event.getRemaining(), Target.UNKNOWN));
 
@@ -1135,13 +1138,13 @@ public class EntityEvents {
 		@Override
 		public String docs() {
 			return "{id: <macro> The entityID | damager: <string match>} "
-            		+ "This event is called when a player is damaged by another entity."
-                    + "{player: The player being damaged | damager: The type of entity causing damage | "
-            		+ "amount: amount of damage caused | cause: the cause of damage | "
-                    + "data: the attacking player's name or the shooter if damager is a projectile | "
-            		+ "id: EntityID of the damager | location} "
-                    + "{amount} "
-                    + "{player|amount|damager|cause|data|id}";
+					+ "This event is called when a player is damaged by another entity."
+					+ "{player: The player being damaged | damager: The type of entity causing damage"
+					+ " | amount: raw amount of damage caused | finalamount: health player will lose after modifiers"
+					+ " | cause: the cause of damage | data: the attacking player's name or the shooter if damager is a"
+					+ " projectile | id: EntityID of the damager | location} "
+					+ "{amount} "
+					+ "{player|amount|damager|cause|data|id}";
 		}
 
 		@Override
@@ -1149,7 +1152,7 @@ public class EntityEvents {
 				throws PrefilterNonMatchException {
 			if (e instanceof MCEntityDamageByEntityEvent) {
 				MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
-				Prefilters.match(prefilter, "id", event.getDamager().getEntityId(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "id", event.getDamager().getUniqueId().toString(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "damager", event.getDamager().getType().name(), PrefilterType.MACRO);
 				return event.getEntity() instanceof MCPlayer;
 			}
@@ -1165,21 +1168,22 @@ public class EntityEvents {
 		public Map<String, Construct> evaluate(BindableEvent e)
 				throws EventException {
 			if(e instanceof MCEntityDamageByEntityEvent){
-                MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+				MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
+				Map<String, Construct> map = evaluate_helper(e);
 				Target t = Target.UNKNOWN;
 
-                // Guaranteed to be a player via matches
-                String name = ((MCPlayer)event.getEntity()).getName();
-                map.put("player", new CString(name, t));
-                String dtype = event.getDamager().getType().name();
-                map.put("damager",  new CString(dtype, t));
-                map.put("cause",  new CString(event.getCause().name(), t));
-                map.put("amount",  new CDouble(event.getDamage(), t));
-                map.put("id", new CInt(event.getDamager().getEntityId(), t));
+				// Guaranteed to be a player via matches
+				String name = ((MCPlayer)event.getEntity()).getName();
+				map.put("player", new CString(name, t));
+				String dtype = event.getDamager().getType().name();
+				map.put("damager",  new CString(dtype, t));
+				map.put("cause",  new CString(event.getCause().name(), t));
+				map.put("amount",  new CDouble(event.getDamage(), t));
+				map.put("finalamount", new CDouble(event.getFinalDamage(), t));
+				map.put("id", new CString(event.getDamager().getUniqueId().toString(), t));
 				map.put("location", ObjectGenerator.GetGenerator().location(event.getEntity().getLocation()));
 
-                Construct data = CNull.NULL;
+				Construct data = CNull.NULL;
 				if(event.getDamager() instanceof MCPlayer) {
 					data = new CString(((MCPlayer)event.getDamager()).getName(), t);
 				} else if (event.getDamager() instanceof MCProjectile) {
@@ -1294,7 +1298,7 @@ public class EntityEvents {
 
                 String type = ete.getEntityType().name();
                 map.put("mobtype", new CString(type, Target.UNKNOWN));
-                map.put("id", new CInt(ete.getEntity().getEntityId(), Target.UNKNOWN));
+				map.put("id", new CString(ete.getEntity().getUniqueId().toString(), Target.UNKNOWN));
 
                 return map;
             } else {
@@ -1376,7 +1380,7 @@ public class EntityEvents {
 				MCEntityEnterPortalEvent event = (MCEntityEnterPortalEvent) e;
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(event);
-				ret.put("id", new CInt(event.getEntity().getEntityId(), t));
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
 				ret.put("type", new CString(event.getEntity().getType().name(), t));
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
 				ret.put("block", new CInt(event.getLocation().getBlock().getTypeId(), t));
@@ -1448,7 +1452,7 @@ public class EntityEvents {
 				MCEntityChangeBlockEvent event = (MCEntityChangeBlockEvent) e;
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(event);
-				ret.put("entity", new CInt(event.getEntity().getEntityId(), t));
+				ret.put("entity", new CString(event.getEntity().getUniqueId().toString(), t));
 				ret.put("from", new CInt(event.getBlock().getTypeId(), t));
 				ret.put("data", new CInt(event.getData(), t));
 				ret.put("to", new CInt(event.getTo().getType(), t));
@@ -1518,7 +1522,7 @@ public class EntityEvents {
 				MCEntityInteractEvent event = (MCEntityInteractEvent) e;
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(event);
-				ret.put("entity", new CInt(event.getEntity().getEntityId(), t));
+				ret.put("entity", new CString(event.getEntity().getUniqueId().toString(), t));
 				ret.put("block", new CInt(event.getBlock().getTypeId(), t));
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 				return ret;
@@ -1548,9 +1552,10 @@ public class EntityEvents {
 		if (event != null) {
 			MCEntity victim = event.getEntity();
 			map.put("type", new CString(victim.getType().name(), Target.UNKNOWN));
-			map.put("id", new CInt(victim.getEntityId(), Target.UNKNOWN));
+			map.put("id", new CString(victim.getUniqueId().toString(), Target.UNKNOWN));
 			map.put("cause", new CString(event.getCause().name(), Target.UNKNOWN));
 			map.put("amount", new CDouble(event.getDamage(), Target.UNKNOWN));
+			map.put("finalamount", new CDouble(event.getFinalDamage(), Target.UNKNOWN));
 			map.put("world", new CString(event.getEntity().getWorld().getName(), Target.UNKNOWN));
 			map.put("location", ObjectGenerator.GetGenerator().location(event.getEntity().getLocation()));
 
@@ -1559,14 +1564,14 @@ public class EntityEvents {
 				if (damager instanceof MCPlayer) {
 					map.put("damager", new CString(((MCPlayer) damager).getName(), Target.UNKNOWN));
 				} else {
-					map.put("damager", new CInt(damager.getEntityId(), Target.UNKNOWN));
+					map.put("damager", new CString(damager.getUniqueId().toString(), Target.UNKNOWN));
 				}
 				if (damager instanceof MCProjectile) {
 					MCProjectileSource shooter = ((MCProjectile) damager).getShooter();
 					if (shooter instanceof MCPlayer) {
 						map.put("shooter", new CString(((MCPlayer) shooter).getName(), Target.UNKNOWN));
 					} else if (shooter instanceof MCEntity) {
-						map.put("shooter", new CInt(((MCEntity) shooter).getEntityId(), Target.UNKNOWN));
+						map.put("shooter", new CString(((MCEntity) shooter).getUniqueId().toString(), Target.UNKNOWN));
 					} else if (shooter instanceof MCBlockProjectileSource) {
 						map.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation()));
   					}
@@ -1632,13 +1637,13 @@ public class EntityEvents {
 				MCHangingBreakEvent hangingBreakEvent = (MCHangingBreakEvent) event;
 				Map<String, Construct> mapEvent = evaluate_helper(event);
 				MCHanging hanging = hangingBreakEvent.getEntity();
-				mapEvent.put("id", new CInt(hanging.getEntityId(), Target.UNKNOWN));
+				mapEvent.put("id", new CString(hanging.getUniqueId().toString(), Target.UNKNOWN));
 				mapEvent.put("type", new CString(hanging.getType().name(), Target.UNKNOWN));
 				mapEvent.put("location", ObjectGenerator.GetGenerator().location(hanging.getLocation()));
 				mapEvent.put("cause", new CString(hangingBreakEvent.getCause().name(), Target.UNKNOWN));
 				MCEntity remover = hangingBreakEvent.getRemover();
 				if (remover != null) {
-					mapEvent.put("remover", new CInt(remover.getEntityId(), Target.UNKNOWN));
+					mapEvent.put("remover", new CString(remover.getUniqueId().toString(), Target.UNKNOWN));
 					if (remover instanceof MCPlayer) {
 						mapEvent.put("player", new CString(((MCPlayer) remover).getName(), Target.UNKNOWN));
 					} else {

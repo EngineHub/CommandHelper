@@ -10,20 +10,20 @@ public class MainSandbox {
 //		long start;
 //		start = System.currentTimeMillis();
 //		ClassDiscoveryURLCache cdc = new ClassDiscoveryURLCache(url);
-//		System.out.println((System.currentTimeMillis() - start) + "ms for first one");
+//		StreamUtils.GetSystemOut().println((System.currentTimeMillis() - start) + "ms for first one");
 //		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 //		cdc.writeDescriptor(baos);
 //		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 //		start = System.currentTimeMillis();
 //		cdc = new ClassDiscoveryURLCache(url, bais);
-//		System.out.println((System.currentTimeMillis() - start) + "ms for second one");
-//		System.out.println(StringUtils.HumanReadableByteCount(baos.size()));
+//		StreamUtils.GetSystemOut().println((System.currentTimeMillis() - start) + "ms for second one");
+//		StreamUtils.GetSystemOut().println(StringUtils.HumanReadableByteCount(baos.size()));
 //		baos = new ByteArrayOutputStream();
 //		ZipOutputStream zip = new ZipOutputStream(baos);
 //		zip.putNextEntry(new ZipEntry("root"));
 //		cdc.writeDescriptor(zip);
 //		zip.close();
-//		System.out.println(StringUtils.HumanReadableByteCount(baos.toByteArray().length));
+//		StreamUtils.GetSystemOut().println(StringUtils.HumanReadableByteCount(baos.toByteArray().length));
 		
 //		//URI information
 //		String[] uris = new String[]{"yml:user@remote:22:abcd:path/to/remote/file"
@@ -31,17 +31,17 @@ public class MainSandbox {
 //		"sqlite://../../file.db?query"};
 //		for (String s : uris) {
 //			java.net.URI uri = new java.net.URI(s);
-//			System.out.println("For the URI " + uri.toString() + ", the following are set:");
-//			System.out.println("Scheme: " + uri.getScheme());
-//			System.out.println("Scheme specific part: " + uri.getSchemeSpecificPart());
-//			System.out.println("Authority: " + uri.getAuthority());
-//			System.out.println("User info: " + uri.getUserInfo());
-//			System.out.println("Host: " + uri.getHost());
-//			System.out.println("Port: " + uri.getPort());
-//			System.out.println("Path: " + uri.getPath());
-//			System.out.println("Query: " + uri.getQuery());
-//			System.out.println("Fragment: " + uri.getFragment());
-//			System.out.println("\n\n***********************************\n\n");
+//			StreamUtils.GetSystemOut().println("For the URI " + uri.toString() + ", the following are set:");
+//			StreamUtils.GetSystemOut().println("Scheme: " + uri.getScheme());
+//			StreamUtils.GetSystemOut().println("Scheme specific part: " + uri.getSchemeSpecificPart());
+//			StreamUtils.GetSystemOut().println("Authority: " + uri.getAuthority());
+//			StreamUtils.GetSystemOut().println("User info: " + uri.getUserInfo());
+//			StreamUtils.GetSystemOut().println("Host: " + uri.getHost());
+//			StreamUtils.GetSystemOut().println("Port: " + uri.getPort());
+//			StreamUtils.GetSystemOut().println("Path: " + uri.getPath());
+//			StreamUtils.GetSystemOut().println("Query: " + uri.getQuery());
+//			StreamUtils.GetSystemOut().println("Fragment: " + uri.getFragment());
+//			StreamUtils.GetSystemOut().println("\n\n***********************************\n\n");
 //		}
 		
 		//Execution queue usage
@@ -61,11 +61,11 @@ public class MainSandbox {
 //									case 1: space = "     "; break;
 //									case 2: space = "          "; break;
 //								}
-//								System.err.println("In Queue " + space + j + ": " + k);
+//								StreamUtils.GetSystemErr().println("In Queue " + space + j + ": " + k);
 //							}
 //						});
 //					}
-//					System.err.println("Finished queueing up events for queue " + j);
+//					StreamUtils.GetSystemErr().println("Finished queueing up events for queue " + j);
 //				}
 //			}, "Thread-" + i).start();
 //		}
@@ -110,17 +110,17 @@ public class MainSandbox {
 //		}
 //		long stopSplit = System.currentTimeMillis();
 //		
-//		System.out.println("reg_split took " + (stopRegSplit - startRegSplit) + "ms under " + times + " iterations.");
-//		System.out.println("split took " + (stopSplit - startSplit) + "ms under " + times + " iterations.");
+//		StreamUtils.GetSystemOut().println("reg_split took " + (stopRegSplit - startRegSplit) + "ms under " + times + " iterations.");
+//		StreamUtils.GetSystemOut().println("split took " + (stopSplit - startSplit) + "ms under " + times + " iterations.");
 //		InetAddress i1 = InetAddress.getByName("173.194.37.72");
-//		System.out.println("i1.toString(): " + i1.toString());
-//		System.out.println("i1.getHostAddress(): " + i1.getHostAddress());
+//		StreamUtils.GetSystemOut().println("i1.toString(): " + i1.toString());
+//		StreamUtils.GetSystemOut().println("i1.getHostAddress(): " + i1.getHostAddress());
 //		InetAddress i2 = InetAddress.getByName("173.194.37.72");
-//		System.out.println("i2.toString(): " + i2.toString());
-//		System.out.println("i2.getHostAddress(): " + i2.getHostAddress());
-//		System.out.println("i2.getHostName(): " + i2.getHostName());
-//		System.out.println("i2.toString(): " + i2.toString());
-//		System.out.println("i2.getHostAddress(): " + i2.getHostAddress());
+//		StreamUtils.GetSystemOut().println("i2.toString(): " + i2.toString());
+//		StreamUtils.GetSystemOut().println("i2.getHostAddress(): " + i2.getHostAddress());
+//		StreamUtils.GetSystemOut().println("i2.getHostName(): " + i2.getHostName());
+//		StreamUtils.GetSystemOut().println("i2.toString(): " + i2.toString());
+//		StreamUtils.GetSystemOut().println("i2.getHostAddress(): " + i2.getHostAddress());
 		
 //		DB.CConnection conn = DB.CConnection.GetConnection(DB.SupportedDBConnectors.MYSQL, "localhost", "test", 3306, "", "");
 //		DB db = new MySQLProfile();
@@ -128,15 +128,15 @@ public class MainSandbox {
 //		Object o = db.query("SELECT * FROM test;");
 //		Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/test?generateSimpleParameterMetadata=true");
 //		PreparedStatement ps = conn.prepareStatement("SELECT * FROM test WHERE c1=?");
-//		System.out.println(ps.getParameterMetaData().getParameterType(1));
+//		StreamUtils.GetSystemOut().println(ps.getParameterMetaData().getParameterType(1));
 //		System.exit(0);
 //		if(o instanceof ResultSet){
 //			ResultSet rs = (ResultSet)o;
 //			while(rs.next()){
 //				ResultSetMetaData rsmd = rs.getMetaData();
-//				System.out.println(rsmd.getColumnCount());
+//				StreamUtils.GetSystemOut().println(rsmd.getColumnCount());
 //				for(int i = 1; i <= rsmd.getColumnCount(); i++){
-//					System.out.println(rsmd.getColumnName(i));
+//					StreamUtils.GetSystemOut().println(rsmd.getColumnName(i));
 //				}
 //			}
 //		}

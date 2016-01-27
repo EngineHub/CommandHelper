@@ -17,6 +17,7 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCNote;
+import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPluginMeta;
 import com.laytonsmith.abstraction.MCRecipe;
@@ -25,6 +26,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
@@ -45,16 +47,24 @@ import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitServerListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitVehicleListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitWeatherListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitWorldListener;
+import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
+import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPatternShape;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -62,10 +72,12 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.block.banner.Pattern;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Ageable;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
 import org.bukkit.entity.Entity;
@@ -84,9 +96,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
-import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -162,7 +174,8 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCMaterial getMaterial(int id) {
-		return new BukkitMCMaterial(Material.getMaterial(id));
+		Material mat = Material.getMaterial(id);
+		return mat == null ? null : new BukkitMCMaterial(mat);
 	}
 
 	@Override
@@ -306,52 +319,68 @@ public class BukkitConvertor extends AbstractConvertor {
 			return null;
 		}
 
-		Class<? extends MCEntity> clazz = BukkitMCEntityType.getWrapperClass(be.getType());
-		if (clazz != null) {
-			return ReflectionUtils.newInstance(clazz, new Class[]{Entity.class}, new Object[]{be});
+		BukkitMCEntityType type = BukkitMCEntityType.valueOfConcrete(be.getType());
+		if (type.getWrapperClass() != null) {
+			return ReflectionUtils.newInstance(type.getWrapperClass(), new Class[]{Entity.class}, new Object[]{be});
 		}
 
 		if (be instanceof Hanging) {
+			type.setWrapperClass(BukkitMCHanging.class);
 			return new BukkitMCHanging(be);
 		}
 
 		if (be instanceof Minecart) {
 			// Must come before Vehicle
+			type.setWrapperClass(BukkitMCMinecart.class);
 			return new BukkitMCMinecart(be);
 		}
 
 		if (be instanceof Projectile) {
+			type.setWrapperClass(BukkitMCProjectile.class);
 			return new BukkitMCProjectile(be);
 		}
 
 		if (be instanceof Tameable) {
-			// Must come before LivingEntity
+			// Must come before Ageable
+			type.setWrapperClass(BukkitMCTameable.class);
 			return new BukkitMCTameable(be);
+		}
+
+		if (be instanceof Ageable) {
+			// Must come before LivingEntity
+			type.setWrapperClass(BukkitMCAgeable.class);
+			return new BukkitMCAgeable(be);
 		}
 
 		if (be instanceof HumanEntity) {
 			// Must come before LivingEntity
+			type.setWrapperClass(BukkitMCHumanEntity.class);
 			return new BukkitMCHumanEntity(be);
 		}
 
 		if (be instanceof ComplexEntityPart) {
+			type.setWrapperClass(BukkitMCComplexEntityPart.class);
 			return new BukkitMCComplexEntityPart(be);
 		}
 
 		if (be instanceof ComplexLivingEntity) {
 			// Must come before LivingEntity
+			type.setWrapperClass(BukkitMCComplexLivingEntity.class);
 			return new BukkitMCComplexLivingEntity(be);
 		}
 
 		if (be instanceof LivingEntity) {
+			type.setWrapperClass(BukkitMCLivingEntity.class);
 			return new BukkitMCLivingEntity(be);
 		}
 
 		if (be instanceof Vehicle) {
+			type.setWrapperClass(BukkitMCVehicle.class);
 			return new BukkitMCVehicle(be);
 		}
 
 		// Handle generically if we can't find a more specific type
+		type.setWrapperClass(BukkitMCEntity.class);
 		return new BukkitMCEntity(be);
 	}
 
@@ -392,14 +421,14 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public static MCItemMeta BukkitGetCorrectMeta(ItemMeta im) {
+		if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8) && im instanceof BannerMeta) {
+			return new BukkitMCBannerMeta((BannerMeta) im);
+		}
 		if (im instanceof BookMeta) {
 			return new BukkitMCBookMeta((BookMeta) im);
 		}
 		if (im instanceof EnchantmentStorageMeta) {
 			return new BukkitMCEnchantmentStorageMeta((EnchantmentStorageMeta) im);
-		}
-		if (im instanceof FireworkEffectMeta) {
-
 		}
 		if (im instanceof FireworkMeta) {
 			return new BukkitMCFireworkMeta((FireworkMeta) im);
@@ -417,20 +446,8 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
-	public MCInventory GetEntityInventory(int entityID) {
-		Entity entity = null;
-		outer:
-		for (World w : Bukkit.getWorlds()) {
-			for (Entity e : w.getEntities()) {
-				if (e.getEntityId() == entityID) {
-					entity = e;
-					break outer;
-				}
-			}
-		}
-		if (entity == null) {
-			return null;
-		}
+	public MCInventory GetEntityInventory(MCEntity e) {
+		Entity entity = ((BukkitMCEntity) e).getHandle();
 		if (entity instanceof InventoryHolder) {
 			if (entity instanceof Player) {
 				return new BukkitMCPlayerInventory(((Player) entity).getInventory());
@@ -484,53 +501,15 @@ public class BukkitConvertor extends AbstractConvertor {
 		return new BukkitMCNote(octave, tone, sharp);
 	}
 
-	private static int maxBlockID = -1;
-	private static int maxItemID = -1;
-	private static int maxRecordID = -1;
-
-	@Override
-	public synchronized int getMaxBlockID() {
-		if (maxBlockID == -1) {
-			calculateIDs();
-		}
-		return maxBlockID;
-	}
-
-	@Override
-	public synchronized int getMaxItemID() {
-		if (maxItemID == -1) {
-			calculateIDs();
-		}
-		return maxItemID;
-	}
-
-	@Override
-	public synchronized int getMaxRecordID() {
-		if (maxRecordID == -1) {
-			calculateIDs();
-		}
-		return maxRecordID;
-	}
-
-	private void calculateIDs() {
-		maxBlockID = 0;
-		maxItemID = 256;
-		maxRecordID = 2256;
-		for (Material m : Material.values()) {
-			int mID = m.getId();
-			if (mID >= maxRecordID) {
-				maxRecordID = mID;
-			} else if (mID >= maxItemID) {
-				maxItemID = mID;
-			} else if (mID >= maxBlockID) {
-				maxBlockID = mID;
-			}
-		}
-	}
-
 	@Override
 	public MCColor GetColor(int red, int green, int blue) {
 		return BukkitMCColor.GetMCColor(Color.fromRGB(red, green, blue));
+	}
+
+	@Override
+	public MCPattern GetPattern(MCDyeColor color, MCPatternShape shape) {
+		return new BukkitMCPattern(new Pattern(BukkitMCDyeColor.getConvertor().getConcreteEnum(color),
+				BukkitMCPatternShape.getConvertor().getConcreteEnum(shape)));
 	}
 
 	@Override
@@ -629,7 +608,21 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
-	public MCColor GetColor(String colorName, Target t) throws Exceptions.FormatException {
+	public MCColor GetColor(String colorName, Target t) throws CREFormatException {
 		return ConvertorHelper.GetColor(colorName, t);
+	}
+
+	@Override
+	public String GetUser(Environment env) {
+		MCCommandSender cs = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+		if(cs == null){
+			return null;
+		} else {
+			String name = cs.getName();
+			if("CONSOLE".equals(name)){
+				name = "~console";
+			}
+			return name;
+		}
 	}
 }

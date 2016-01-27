@@ -7,11 +7,11 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.BoundEvent.Priority;
+import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import com.laytonsmith.core.functions.Exceptions;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -53,19 +53,16 @@ public final class EventUtils {
 		for (Set<BoundEvent> s : event_handles.values()) {
 			for (BoundEvent bb : s) {
 				if (bb.getId().equals(b.getId())) {
-					throw new ConfigRuntimeException("Cannot have duplicate IDs defined."
+					throw ConfigRuntimeException.BuildException("Cannot have duplicate IDs defined."
 							+ " (Tried to define an event handler with id \"" + b.getId() + "\" at " + b.getTarget() + ","
 							+ " but it has already been defined at " + bb.getTarget() + ")",
-							Exceptions.ExceptionType.BindException, b.getTarget());
+							CREBindException.class, b.getTarget());
 				}
 			}
 		}
 		SortedSet<BoundEvent> set = event_handles.get(event.driver());
 		set.add(b);
-		try {
-			event.bind(b);
-		} catch (UnsupportedOperationException e) {
-		}
+		event.bind(b);
 	}
 
 	/**
@@ -82,6 +79,7 @@ public final class EventUtils {
 			while (i.hasNext()) {
 				BoundEvent b = i.next();
 				if (b.getId().equals(id)) {
+					b.getEventDriver().unbind(b);
 					i.remove();
 					return;
 				}
@@ -158,7 +156,7 @@ public final class EventUtils {
 								// The event will stay null, and be caught below
 							}
 							if(convertedEvent == null){
-								throw new ConfigRuntimeException(eventName + " doesn't support the use of trigger() yet.", Exceptions.ExceptionType.BindException, t);
+								throw ConfigRuntimeException.BuildException(eventName + " doesn't support the use of trigger() yet.", CREBindException.class, t);
 							} else if (driver.matches(b.getPrefilter(), convertedEvent)) {
 								toRun.add(b);
 							}
@@ -255,7 +253,7 @@ public final class EventUtils {
 				} catch (FunctionReturnException ex) {
 					//We also know how to deal with this
 				} catch (EventException ex) {
-					throw new ConfigRuntimeException(ex.getMessage(), null, Target.UNKNOWN);
+					throw ConfigRuntimeException.BuildException(ex.getMessage(), null, Target.UNKNOWN);
 				} catch (ConfigRuntimeException ex) {
 					//An exception has bubbled all the way up
 					ConfigRuntimeException.HandleUncaughtException(ex, b.getEnvironment());
@@ -279,7 +277,7 @@ public final class EventUtils {
 			Iterator<BoundEvent> i = set.iterator();
 			while (i.hasNext()) {
 				BoundEvent b = i.next();
-				ca.push(new CString(b.toString() + ":" + b.getFile() + ":" + b.getLineNum(), Target.UNKNOWN));
+				ca.push(new CString(b.toString() + ":" + b.getFile() + ":" + b.getLineNum(), Target.UNKNOWN), Target.UNKNOWN);
 			}
 		}
 		return ca;

@@ -1,10 +1,10 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import org.bukkit.Location;
@@ -134,8 +134,8 @@ public class BukkitMCLocation implements MCLocation {
 	}
 
 	@Override
-	public MCLocation add(MVector3D vec) {
-		return new BukkitMCLocation(l.add(new Vector(vec.x, vec.y, vec.z)));
+	public MCLocation add(Vector3D vec) {
+		return new BukkitMCLocation(l.add(new Vector(vec.X(), vec.Y(), vec.Z())));
 	}
 
 	@Override
@@ -149,8 +149,8 @@ public class BukkitMCLocation implements MCLocation {
 	}
 
 	@Override
-	public MVector3D toVector() {
-		return new MVector3D(l.getX(), l.getY(), l.getZ());
+	public Vector3D toVector() {
+		return new Vector3D(l.getX(), l.getY(), l.getZ());
 	}
 
 	@Override
@@ -159,8 +159,8 @@ public class BukkitMCLocation implements MCLocation {
 	}
 
 	@Override
-	public MCLocation subtract(MVector3D vec) {
-		return new BukkitMCLocation(l.subtract(new Vector(vec.x, vec.y, vec.z)));
+	public MCLocation subtract(Vector3D vec) {
+		return new BukkitMCLocation(l.subtract(new Vector(vec.X(), vec.Y(), vec.Z())));
 	}
 
 	@Override
@@ -184,7 +184,7 @@ public class BukkitMCLocation implements MCLocation {
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof BukkitMCLocation?l.equals(((BukkitMCLocation)obj).l):false);
+		return (obj instanceof BukkitMCLocation && l.equals(((BukkitMCLocation) obj).l));
 	}
 
 	@Override
@@ -198,8 +198,8 @@ public class BukkitMCLocation implements MCLocation {
 	}
 
 	@Override
-	public MVector3D getDirection() {
-		return new MVector3D(l.getDirection().getX(), l.getDirection().getY(), l.getDirection().getZ());
+	public Vector3D getDirection() {
+		return new Vector3D(l.getDirection().getX(), l.getDirection().getY(), l.getDirection().getZ());
 	}
 
 	@Override

@@ -157,7 +157,7 @@ public class ClassUtils {
 	public static String getJVMName(Class clazz){
 		//For arrays, .getName() is fine.
 		if(clazz.isArray()){
-			return clazz.getName().replace(".", "/");
+			return clazz.getName().replace('.', '/');
 		}
 		if(clazz == boolean.class){
 			return "Z";
@@ -176,7 +176,7 @@ public class ClassUtils {
 		} else if(clazz == char.class){
 			return "C";
 		} else {
-			return "L" + clazz.getName().replace(".", "/") + ";";
+			return "L" + clazz.getName().replace('.', '/') + ";";
 		}
 	}
 
@@ -231,7 +231,7 @@ public class ClassUtils {
 		} else if("V".equals(classname)){
 			return "void"; //special case
 		} else {
-			classname = classname.substring(1, classname.length() - 1).replace("/", ".").replace("$", ".");
+			classname = classname.substring(1, classname.length() - 1).replace('/', '.').replace('$', '.');
 		}
 		return classname + StringUtils.stringMultiply(arrayCount, "[]");
 	}

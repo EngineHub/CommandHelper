@@ -8,7 +8,6 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import static com.laytonsmith.testing.StaticTest.GetFakeServer;
 import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
 import static com.laytonsmith.testing.StaticTest.SRun;
@@ -57,9 +56,9 @@ public class MetaTest {
     @Test(timeout = 10000)
     public void testRunas1() throws Exception {
         String script =
-                "runas('wraithguard02', '/cmd yay')";
-        MCPlayer fakePlayer2 = GetOnlinePlayer("wraithguard02", fakeServer);
-        when(fakeServer.getPlayer("wraithguard02")).thenReturn(fakePlayer2);
+                "runas('Player02', '/cmd yay')";
+        MCPlayer fakePlayer2 = GetOnlinePlayer("Player02", fakeServer);
+        when(fakeServer.getPlayer("Player02")).thenReturn(fakePlayer2);
         when(fakePlayer.isOp()).thenReturn(true);
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
         //verify(fakePlayer2).performCommand("cmd yay");

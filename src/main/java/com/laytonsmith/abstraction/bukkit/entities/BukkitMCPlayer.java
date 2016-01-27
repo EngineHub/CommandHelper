@@ -14,12 +14,14 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlayerInventory;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.MCWeather;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
@@ -103,11 +105,6 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-    public int getFoodLevel() {
-        return p.getFoodLevel();
-    }
-
-	@Override
     public MCPlayerInventory getInventory() {
         if (p == null || p.getInventory() == null) {
             return null;
@@ -171,44 +168,37 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         return p.getFireTicks();
     }
 
-//    public int getTotalExperience() {
-//        return p.getTotalExperience();
-//    }
-
-    // Method from Essentials plugin:
-    // https://raw.github.com/essentials/Essentials/master/Essentials/src/net/ess3/craftbukkit/SetExpFix.java
-	//This method is required because the bukkit player.getTotalExperience() method, shows exp that has been 'spent'.
-	//Without this people would be able to use exp and then still sell it.
 	@Override
 	public int getTotalExperience()
 	{
-		int exp = (int)Math.round(getExpAtLevel(p) * p.getExp());
-		int currentLevel = p.getLevel();
-
-		while (currentLevel > 0)
-		{
-			currentLevel--;
-			exp += getExpAtLevel(currentLevel);
-		}
-		return exp;
+		return p.getTotalExperience();
 	}
 
-	private static int getExpAtLevel(final Player player)
-	{
-		return getExpAtLevel(player.getLevel());
+	@Override
+	public int getExpToLevel() {
+		return p.getExpToLevel();
 	}
 
-	private static int getExpAtLevel(final int level)
-	{
-		if (level > 29)
-		{
-			return 62 + (level - 30) * 7;
+	@Override
+	public int getExpAtLevel() {
+		int level = p.getLevel();
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
+			if (level > 30) {
+				return (int) (3.5 * Math.pow(level, 2) - 151.5 * level + 2220);
+			}
+			if(level > 15) {
+				return (int) (1.5 * Math.pow(level, 2) - 29.5 * level + 360);
+			}
+			return 17 * level;
+		} else {
+			if (level > 30) {
+				return (int) (4.5 * Math.pow(level, 2) - 162.5 * level + 2220);
+			}
+			if (level > 15) {
+				return (int) (2.5 * Math.pow(level, 2) - 40.5 * level + 360);
+			}
+			return (int) (Math.pow(level, 2) + 6 * level);
 		}
-		if (level > 15)
-		{
-			return 17 + (level - 15) * 3;
-		}
-		return 17;
 	}
 
 	@Override
@@ -382,11 +372,6 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		p.setFlying(flight);
 	}
 
-	@Override
-    public void setFoodLevel(int f) {
-        p.setFoodLevel(f);
-    }
-
     /*public void setHealth(int i) {
         if(i == 0){
             this.fireEntityDamageEvent(MCDamageCause.CUSTOM);
@@ -415,6 +400,28 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     }
 
 	@Override
+	public void setSpectatorTarget(MCEntity entity) {
+		if(!ReflectionUtils.hasMethod(p.getClass(), "setSpectatorTarget", null, Entity.class)){
+			// Probably 1.8.6 or prior
+			return;
+		}
+		if(entity == null) {
+			p.setSpectatorTarget(null);
+			return;
+		}
+		p.setSpectatorTarget((Entity) entity.getHandle());
+	}
+
+	@Override
+	public MCEntity getSpectatorTarget() {
+		if(!ReflectionUtils.hasMethod(p.getClass(), "getSpectatorTarget", null)){
+			// Probably 1.8.6 or prior
+			return null;
+		}
+		return BukkitConvertor.BukkitGetCorrectEntity(p.getSpectatorTarget());
+	}
+
+	@Override
     public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Server server = Bukkit.getServer();
 
@@ -425,19 +432,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         }
 
 		try {
-			Set opSet = null;
-			try{
-				//Probably 1.4.5
-				/*n.m.s.Server*/ Object nmsServer = ReflectionUtils.invokeMethod(server, "getServer");
-				/*o.b.c.ServerConfigurationManagerAbstract*/ Object obcServerConfigurationmanagerAbstract = ReflectionUtils.invokeMethod(nmsServer, "getServerConfigurationManager");
-				opSet = (Set) ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "ServerConfigurationManagerAbstract").loadClass(), obcServerConfigurationmanagerAbstract, "operators");
-			} catch(ReflectionUtils.ReflectionException e){
-				//Probably 1.4.6
-				Class nmsMinecraftServerClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "MinecraftServer").loadClass();
-				/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
-				/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
-				opSet = (Set)ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass(), nmsPlayerList, "operators");
-			}
+			//Probably 1.4.6
+			Class nmsMinecraftServerClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "MinecraftServer").loadClass();
+			/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
+			/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
+			Set opSet = (Set)ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass(), nmsPlayerList, "operators");
 
 			// since all Java objects pass by reference, we don't need to set field back to object
 			if (value) {
@@ -463,7 +462,13 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 					/*com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("com.mojang.authlib.GameProfile");
 				}
 				Object gameProfile = ReflectionUtils.invokeMethod(p, "getProfile");
-				Object opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class}, new Object[]{gameProfile, 4});
+				Object opListEntry;
+				try {
+					opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class}, new Object[]{gameProfile, 4});
+				} catch (ReflectionUtils.ReflectionException e) {
+					// Probably 1.8.6
+					opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class, boolean.class}, new Object[]{gameProfile, 4, false});
+				}
 				d.put(p.getUniqueId().toString(), opListEntry);
 			} else {
 				d.remove(p.getUniqueId().toString());
@@ -472,44 +477,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         p.recalculatePermissions();
     }
 
-//    public void setTotalExperience(int total) {
-//      p.setTotalExperience(0);
-//		p.setLevel(0);
-//		p.setExp(0);
-//		p.giveExp(total);
-//    }
-
-	// Method from Essentials plugin:
-	// https://raw.github.com/essentials/Essentials/master/Essentials/src/net/ess3/craftbukkit/SetExpFix.java
-	//This method is used to update both the recorded total experience and displayed total experience.
-	//We reset both types to prevent issues.
 	@Override
 	public void setTotalExperience(int total)
 	{
-        p.setExp(0);
-        p.setLevel(0);
-        p.setTotalExperience(0);
-
-		//This following code is technically redundant now, as bukkit now calulcates levels more or less correctly
-		//At larger numbers however... player.getExp(3000), only seems to give 2999, putting the below calculations off.
-		int amount = total;
-		while (amount > 0)
-		{
-			final int expToLevel = getExpAtLevel(p);
-			amount -= expToLevel;
-			if (amount >= 0)
-			{
-				// give until next level
-				p.giveExp(expToLevel);
-			}
-			else
-			{
-				// give the rest
-				amount += expToLevel;
-				p.giveExp(amount);
-				amount = 0;
-			}
-		}
+        p.setTotalExperience(total);
 	}
 
 	@Override
@@ -550,38 +521,38 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void sendBlockChange(MCLocation loc, int material, byte data) {
-		p.sendBlockChange(((Location)loc.getHandle()), material, data);
+		p.sendBlockChange(((Location) loc.getHandle()), material, data);
 	}
 
 	@Override
 	public void sendSignTextChange(MCLocation loc, String[] lines) {
-		p.sendSignChange(((Location)loc.getHandle()), lines);
+		p.sendSignChange(((Location) loc.getHandle()), lines);
 	}
 
 	@Override
 	public void playNote(MCLocation loc, MCInstrument instrument, MCNote note) {
-		p.playNote((Location)loc.getHandle(), BukkitMCInstrument.getConvertor().getConcreteEnum(instrument), (Note)note.getHandle());
+		p.playNote((Location) loc.getHandle(), BukkitMCInstrument.getConvertor().getConcreteEnum(instrument), (Note) note.getHandle());
 	}
 	
 	@Override
 	public void playSound(MCLocation l, MCSound sound, float volume, float pitch) {
-		p.playSound(((BukkitMCLocation) l).asLocation(), 
+		p.playSound(((BukkitMCLocation) l).asLocation(),
 				BukkitMCSound.getConvertor().getConcreteEnum(sound), volume, pitch);
 	}
 	
 	@Override
 	public void playSound(MCLocation l, String sound, float volume, float pitch) {
-		p.playSound(((BukkitMCLocation)l).asLocation(), sound, volume, pitch);
+		p.playSound(((BukkitMCLocation) l).asLocation(), sound, volume, pitch);
 	}
 
 	@Override
-	public int getHunger() {
+	public int getFoodLevel() {
 		return p.getFoodLevel();
 	}
 
 	@Override
-	public void setHunger(int h) {
-		p.setFoodLevel(h);
+	public void setFoodLevel(int f) {
+		p.setFoodLevel(f);
 	}
 
 	@Override
@@ -592,6 +563,16 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public void setSaturation(float s) {
 		p.setSaturation(s);
+	}
+
+	@Override
+	public float getExhaustion() {
+		return p.getExhaustion();
+	}
+
+	@Override
+	public void setExhaustion(float e) {
+		p.setExhaustion(e);
 	}
 
 	@Override
@@ -606,8 +587,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-	public void setBedSpawnLocation(MCLocation l) {
-		p.setBedSpawnLocation((Location)l.getHandle(), true);
+	public void setBedSpawnLocation(MCLocation l, boolean forced) {
+		p.setBedSpawnLocation((Location) l.getHandle(), forced);
 	}
 
 	@Override

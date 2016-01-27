@@ -10,7 +10,51 @@ introducing its own methodologies.
 Functions allow for very dynamic scripts to be run. There are many defined functions, including functions that provide 
 control flow functionality. For the full list of functions, see the [[CommandHelper/API|API]]. A function is identified
 by a literal string, followed by parenthesis. So in <code>func()</code>, "func" is the name of the function, and "("
-and ")" begin and end the function argument list (in this case, there are no arguments being passed in.)
+and ")" begin and end the function argument list (in this case, there are no arguments being passed in.) Functions
+can have zero, one, or two or more arguments passed to them. In the case of two or more arguments, each argument
+is separated by a comma. For instance:
+
+%%CODE|
+funcWithNoArgs();
+funcWithOneArg(1);
+funcWithTwoArgs(1, 2);
+funcWithThreeArgs(1, 2, 3);
+%%
+
+===Comments===
+
+Comments are a useful way to mark up your code for humans to read later. (With one exception) comments are ignored
+by the compiler, and you are free to put whatever information you wish in a comment. There are 4 ways to comment
+code.
+
+The <code>#</code> and <code>//</code> symbols are identical. They are line comments. When either is encountered,
+the remainder of the line is ignored by the compiler. <code>//</code> is preferred over <code>#</code>, however
+<code>#</code> is not deprecated, nor will it ever be. The only exception to this preference is when using a
+hashbang for cmdline code.
+
+Block comments start with <code>/*</code> and end with <code>*/</code> This causes the compiler to ignore everything
+within the comment block, including newlines.
+
+Smart comments are like block comments, but start with <code>/**</code> (two asterisks) instead. They are currently
+unused, but are reserved for future use. They are used for documentation generation functionality.
+
+%%CODE|
+code(); # line comment
+code(); // line comment
+code();
+/*
+ *
+ * block comment
+ *
+ */
+
+/**
+ * Smart comment. This would generally proceed a procedure or variable declaration,
+ * or similar structure. Note that the * at the beginning of this line is not necessary,
+ * however it serves to help the reader more easily see that this is also part of the comment block.
+ */
+
+%%
 
 ===Data Types===
 In a script, there are several types of data. The language is currently loosely typed however, so the string '2' is 

@@ -9,10 +9,10 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.List;
 
 /**
@@ -27,13 +27,12 @@ public interface Function extends FunctionBase, Documentation {
      * Returns the types of catchable exceptions this function can throw. (Uncatchable exceptions need not be listed)
      * @return An array of the exception enums, or null, if the function throws no catchable exceptions.
      */
-    public ExceptionType[] thrown();
+    public Class<? extends CREThrowable>[] thrown();
 
     /**
      * Whether or not a function needs to be checked against the permissions file, if there are possible security concerns
-     * with a user compiling, or running this function. If this function returns true, the permissions file will be checked for
-     * commandhelper.func.compile.&lt;function name&gt; upon compilation, and commandhelper.func.use.&lt;function name&gt; upon
-     * usage in game. Note that the config script is never barred from compiling any function.
+     * with a user running this function. If this function returns true, the permissions file will be checked for
+     * commandhelper.func.use.&lt;function name&gt; upon usage in game.
      * @return
      */
     public boolean isRestricted();

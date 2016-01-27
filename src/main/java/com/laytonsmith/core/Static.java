@@ -1,10 +1,10 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.DateUtils;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.XMLDocument;
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
@@ -38,8 +38,17 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidPluginException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
+import com.laytonsmith.core.exceptions.CRE.CRELengthException;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManager;
@@ -59,6 +68,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -113,26 +123,6 @@ public final class Static {
 	 */
 	public static CArray getArray(Construct construct, Target t) {
 		return ArgumentValidation.getArray(construct, t);
-	}
-
-	/**
-	 * Works like the other get* methods, but works in a more generic way for
-	 * other types of Constructs.
-	 *
-	 * @param <T> The type expected.
-	 * @param construct The generic object
-	 * @param t Code target
-	 * @param expectedClassName The expected class type, for use in the error
-	 * message if the construct is the wrong type.
-	 * @param clazz The type expected.
-	 * @return The properly cast object.
-	 * @deprecated Use
-	 * {@link #getObject(com.laytonsmith.core.constructs.Construct, com.laytonsmith.core.constructs.Target, java.lang.Class)}
-	 * instead, as that gets the expected class name automatically.
-	 */
-	@Deprecated
-	public static <T extends Construct> T getObject(Construct construct, Target t, String expectedClassName, Class<T> clazz) {
-		return ArgumentValidation.getObject(construct, t, expectedClassName, clazz);
 	}
 
 	/**
@@ -400,10 +390,20 @@ public final class Static {
 
 	public static void checkPlugin(String name, Target t) throws ConfigRuntimeException {
 		if (Static.getServer().getPluginManager().getPlugin(name) == null) {
-			throw new ConfigRuntimeException("Needed plugin " + name + " not found!",
-					ExceptionType.InvalidPluginException, t);
+			throw ConfigRuntimeException.BuildException("Needed plugin " + name + " not found!",
+					CREInvalidPluginException.class, t);
 		}
 	}
+
+	/**
+	 * Regex patterns
+	 */
+	private static final Pattern INVALID_HEX = Pattern.compile("0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*");
+	private static final Pattern VALID_HEX = Pattern.compile("0x[a-fA-F0-9]+");
+	private static final Pattern INVALID_BINARY = Pattern.compile("\"0b[0-1]*[^0-1]+[0-1]*\"");
+	private static final Pattern VALID_BINARY = Pattern.compile("0b[0-1]+");
+	private static final Pattern INVALID_OCTAL = Pattern.compile("0o[0-7]*[^0-7]+[0-7]*");
+	private static final Pattern VALID_OCTAL = Pattern.compile("0o[0-7]+");
 
 	/**
 	 * Given a string input, creates and returns a Construct of the appropriate
@@ -431,27 +431,27 @@ public final class Static {
 		if(val.equals("void")){
 			return CClassType.VOID;
 		}
-		if (val.matches("0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*")) {
-			throw new ConfigRuntimeException("Hex numbers must only contain digits 0-9, and the letters A-F, but \"" + val + "\" was found.",
-					ExceptionType.FormatException, t);
+		if (INVALID_HEX.matcher(val).matches()) {
+			throw ConfigRuntimeException.BuildException("Hex numbers must only contain digits 0-9, and the letters A-F, but \"" + val + "\" was found.",
+					CREFormatException.class, t);
 		}
-		if (val.matches("0x[a-fA-F0-9]+")) {
+		if (VALID_HEX.matcher(val).matches()) {
 			//Hex number
 			return new CInt(Long.parseLong(val.substring(2), 16), t);
 		}
-		if (val.matches("0b[0-1]*[^0-1]+[0-1]*")) {
-			throw new ConfigRuntimeException("Binary numbers must only contain digits 0 and 1, but \"" + val + "\" was found.",
-					ExceptionType.FormatException, t);
+		if (INVALID_BINARY.matcher(val).matches()) {
+			throw ConfigRuntimeException.BuildException("Binary numbers must only contain digits 0 and 1, but \"" + val + "\" was found.",
+					CREFormatException.class, t);
 		}
-		if (val.matches("0b[0-1]+")) {
+		if (VALID_BINARY.matcher(val).matches()) {
 			//Binary number
 			return new CInt(Long.parseLong(val.substring(2), 2), t);
 		}
-		if(val.matches("0o[0-7]*[^0-7]+[0-7]*")){
-			throw new ConfigRuntimeException("Octal numbers must only contain digits 0-7, but \"" + val + "\" was found.",
-					ExceptionType.FormatException, t);
+		if (INVALID_OCTAL.matcher(val).matches()){
+			throw ConfigRuntimeException.BuildException("Octal numbers must only contain digits 0-7, but \"" + val + "\" was found.",
+					CREFormatException.class, t);
 		}
-		if(val.matches("0o[0-7]+")){
+		if (VALID_OCTAL.matcher(val).matches()){
 			return new CInt(Long.parseLong(val.substring(2), 8), t);
 		}
 		try {
@@ -505,18 +505,18 @@ public final class Static {
 			if (m instanceof MCPlayer) {
 				MCPlayer p = (MCPlayer) m;
 				if (!p.isOnline()) {
-					throw new ConfigRuntimeException("The player " + p.getName() + " is not online",
-							ExceptionType.PlayerOfflineException, t);
+					throw ConfigRuntimeException.BuildException("The player " + p.getName() + " is not online",
+							CREPlayerOfflineException.class, t);
 				}
 			}
 			m.sendMessage(msg);
 		} else {
 			msg = Static.MCToANSIColors(msg);
-			if (msg.matches("(?sm).*\033.*")) {
+			if (msg.contains("\033")) {
 				//We have terminal colors, we need to reset them at the end
 				msg += TermColors.reset();
 			}
-			System.out.println(msg);
+			StreamUtils.GetSystemOut().println(msg);
 		}
 	}
 
@@ -572,19 +572,16 @@ public final class Static {
 	public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, Target t) {
 		int type = 0;
 		short data = 0;
-		MCItemStack is = null;
-		if (notation.matches("\\d*:\\d*")) {
+		MCItemStack is;
 			String[] sData = notation.split(":");
 			try {
-				type = (int) Integer.parseInt(sData[0]);
+			type = Integer.parseInt(sData[0]);
 				if (sData.length > 1) {
 					data = (short) Integer.parseInt(sData[1]);
 				}
 			} catch (NumberFormatException e) {
-				throw new ConfigRuntimeException("Item value passed to " + functionName + " is invalid: " + notation, ExceptionType.FormatException, t);
-			}
-		} else {
-			type = Static.getInt32(Static.resolveConstruct(notation, t), t);
+			throw ConfigRuntimeException.BuildException("Item value passed to " + functionName + " is invalid: " + notation,
+					CREFormatException.class, t);
 		}
 
 		is = StaticLayer.GetItemStack(type, qty);
@@ -641,14 +638,18 @@ public final class Static {
 				}
 				return UUID.fromString(matcher.replaceAll("$1-$2-$3-$4-$5"));
 			} else {
-				throw new ConfigRuntimeException("A UUID is expected to be 32 or 36 characters,"
+				throw ConfigRuntimeException.BuildException("A UUID is expected to be 32 or 36 characters,"
 						+ " but the given string was " + subject.length() + " characters.",
-						ExceptionType.LengthException, t);
+						CRELengthException.class, t);
 			}
 		} catch (IllegalArgumentException iae) {
-			throw new ConfigRuntimeException("A UUID length string was given, but was not a valid UUID.",
-					ExceptionType.IllegalArgumentException, t);
+			throw ConfigRuntimeException.BuildException("A UUID length string was given, but was not a valid UUID.",
+					CREIllegalArgumentException.class, t);
 		}
+	}
+
+	public static UUID GetUUID(Construct subject, Target t) {
+		return GetUUID(subject.val(), t);
 	}
 
 	public static MCOfflinePlayer GetUser(Construct search, Target t) {
@@ -672,10 +673,10 @@ public final class Static {
 			try {
 				ofp = getServer().getOfflinePlayer(GetUUID(search, t));
 			} catch (ConfigRuntimeException cre) {
-				if (cre.getExceptionType().equals(ExceptionType.LengthException)) {
-					throw new ConfigRuntimeException("The given string was the wrong size to identify a player."
+				if (cre instanceof CRELengthException) {
+					throw ConfigRuntimeException.BuildException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(),
-							ExceptionType.LengthException, t);
+							CRELengthException.class, t);
 				} else {
 					throw cre;
 				}
@@ -698,7 +699,7 @@ public final class Static {
 		MCCommandSender m;
 
 		if (player == null) {
-			throw new ConfigRuntimeException("No player was specified!", ExceptionType.PlayerOfflineException, t);
+			throw ConfigRuntimeException.BuildException("No player was specified!", CREPlayerOfflineException.class, t);
 		}
 
 		if (player.length() > 0 && player.length() <= 16) {
@@ -707,27 +708,27 @@ public final class Static {
 			try {
 				m = getServer().getPlayer(GetUUID(player, t));
 			} catch (ConfigRuntimeException cre) {
-				if (cre.getExceptionType().equals(ExceptionType.LengthException)) {
-					throw new ConfigRuntimeException("The given string was the wrong size to identify a player."
+				if (cre instanceof CRELengthException) {
+					throw ConfigRuntimeException.BuildException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(),
-							ExceptionType.LengthException, t);
+							CRELengthException.class, t);
 				} else {
 					throw cre;
 				}
 			}
 		}
 		if (m == null) {
-			throw new ConfigRuntimeException("The specified player (" + player + ") is not online",
-					ExceptionType.PlayerOfflineException, t);
+			throw ConfigRuntimeException.BuildException("The specified player (" + player + ") is not online",
+					CREPlayerOfflineException.class, t);
 		}
 		if (!(m instanceof MCPlayer)) {
-			throw new ConfigRuntimeException("Expecting a player name, but \"" + player + "\" was found.",
-					ExceptionType.PlayerOfflineException, t);
+			throw ConfigRuntimeException.BuildException("Expecting a player name, but \"" + player + "\" was found.",
+					CREPlayerOfflineException.class, t);
 		}
 		MCPlayer p = (MCPlayer) m;
 		if (!p.isOnline()) {
-			throw new ConfigRuntimeException("The specified player (" + player + ") is not online",
-					ExceptionType.PlayerOfflineException, t);
+			throw ConfigRuntimeException.BuildException("The specified player (" + player + ") is not online",
+					CREPlayerOfflineException.class, t);
 		}
 		return p;
 	}
@@ -760,7 +761,7 @@ public final class Static {
 			}
 		}
 		if (m == null || (m instanceof MCPlayer && (!((MCPlayer) m).isOnline() && !injectedPlayers.containsKey(player)))) {
-			throw new ConfigRuntimeException("The specified player (" + player + ") is not online", ExceptionType.PlayerOfflineException, t);
+			throw ConfigRuntimeException.BuildException("The specified player (" + player + ") is not online", CREPlayerOfflineException.class, t);
 		}
 		return m;
 	}
@@ -782,7 +783,7 @@ public final class Static {
 		if (player != null) {
 			return player;
 		} else {
-			throw new ConfigRuntimeException("The passed arguments induce that the function must be run by a player.", ExceptionType.PlayerOfflineException, t);
+			throw ConfigRuntimeException.BuildException("The passed arguments induce that the function must be run by a player.", CREPlayerOfflineException.class, t);
 		}
 	}
 
@@ -802,18 +803,22 @@ public final class Static {
 	 * @return
 	 */
 	public static MCEntity getEntity(int id, Target t) {
-		for (MCWorld w : Static.getServer().getWorlds()) {
+		for (MCWorld w : getServer().getWorlds()) {
 			for (MCEntity e : w.getEntities()) {
 				if (e.getEntityId() == id) {
 					return StaticLayer.GetCorrectEntity(e);
 				}
 			}
 		}
-		throw new ConfigRuntimeException("That entity (ID " + id + ") does not exist.", ExceptionType.BadEntityException, t);
+		throw ConfigRuntimeException.BuildException("That entity (ID " + id + ") does not exist.", CREBadEntityException.class, t);
 	}
 
 	public static MCEntity getEntity(Construct id, Target t) {
-		return getEntity(Static.getInt32(id, t), t);
+		return getEntityByUuid(GetUUID(id.val(), t), t);
+	}
+
+	public static MCLivingEntity getLivingEntity(Construct id, Target t) {
+		return getLivingByUUID(GetUUID(id.val(), t), t);
 	}
 
 	/**
@@ -824,21 +829,45 @@ public final class Static {
 	 * @return
 	 */
 	public static MCEntity getEntityByUuid(UUID id, Target t) {
-		for (MCWorld w : Static.getServer().getWorlds()) {
+		for (MCWorld w : getServer().getWorlds()) {
 			for (MCEntity e : w.getEntities()) {
 				if (e.getUniqueId().compareTo(id) == 0) {
 					return StaticLayer.GetCorrectEntity(e);
 				}
 			}
 		}
-		throw new ConfigRuntimeException("That entity (UUID " + id + ") does not exist.", ExceptionType.BadEntityException, t);
+		throw ConfigRuntimeException.BuildException("That entity (UUID " + id + ") does not exist.", CREBadEntityException.class, t);
 	}
 
 	/**
-	 * Returns the living entity with the specified id. If it doesn't exist or
+	 * Returns the living entity with the specified unique id. If it doesn't exist or
 	 * isn't living, a ConfigRuntimeException is thrown.
 	 *
 	 * @param id
+	 * @return
+	 */
+	public static MCLivingEntity getLivingByUUID(UUID id, Target t) {
+		for (MCWorld w : Static.getServer().getWorlds()) {
+			for (MCLivingEntity e : w.getLivingEntities()) {
+				if (e.getUniqueId().compareTo(id) == 0) {
+					try {
+						return (MCLivingEntity) StaticLayer.GetCorrectEntity(e);
+					} catch (ClassCastException cce) {
+						throw ConfigRuntimeException.BuildException("The entity found was misinterpreted by the converter, this is"
+								+ " a developer mistake, please file a ticket.", CREBadEntityException.class, t);
+					}
+				}
+			}
+		}
+		throw ConfigRuntimeException.BuildException("That entity (" + id + ") does not exist or is not alive.", CREBadEntityException.class, t);
+	}
+
+	/**
+	 * Returns the living entity with the specified id. If it doesn't exist or isn't living, a ConfigRuntimeException is
+	 * thrown.
+	 *
+	 * @param id
+	 *
 	 * @return
 	 */
 	public static MCLivingEntity getLivingEntity(int id, Target t) {
@@ -848,13 +877,14 @@ public final class Static {
 					try {
 						return (MCLivingEntity) StaticLayer.GetCorrectEntity(e);
 					} catch (ClassCastException cce) {
-						throw new ConfigRuntimeException("The entity found was misinterpreted by the converter, this is"
-								+ " a developer mistake, please file a ticket.", ExceptionType.BadEntityException, t);
+						throw ConfigRuntimeException.BuildException("The entity found was misinterpreted by the converter, this is"
+								+ " a developer mistake, please file a ticket.", CREBadEntityException.class, t);
 					}
 				}
 			}
 		}
-		throw new ConfigRuntimeException("That entity (" + id + ") does not exist or is not alive.", ExceptionType.BadEntityException, t);
+		throw ConfigRuntimeException.BuildException(
+				"That entity (" + id + ") does not exist or is not alive.", CREBadEntityException.class, t);
 	}
 
 	/**
@@ -890,7 +920,7 @@ public final class Static {
 		if (world != null) {
 			return world;
 		} else {
-			throw new ConfigRuntimeException("Unknown world:" + name + ".", ExceptionType.InvalidWorldException, t);
+			throw ConfigRuntimeException.BuildException("Unknown world:" + name + ".", CREInvalidWorldException.class, t);
 		}
 	}
 
@@ -919,7 +949,7 @@ public final class Static {
 		if (plugin != null) {
 			return plugin;
 		} else {
-			throw new ConfigRuntimeException("Unknown plugin:" + name + ".", ExceptionType.InvalidPluginException, t);
+			throw ConfigRuntimeException.BuildException("Unknown plugin:" + name + ".", CREInvalidPluginException.class, t);
 		}
 	}
 
@@ -942,9 +972,16 @@ public final class Static {
 		} else if (construct instanceof CArray) {
 			return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
 		} else if (construct instanceof CString) {
-			return Static.getWorld(construct, t);
+			switch (construct.val().length()) {
+				case 32:
+				case 36:
+					return Static.getEntity(construct, t);
+				default:
+					return Static.getWorld(construct, t);
+			}
 		} else {
-			throw new ConfigRuntimeException("An array, an int or a string was expected, but " + construct.val() + " was found.", ExceptionType.CastException, t);
+			throw ConfigRuntimeException.BuildException("An array or a string was expected, but " + construct.val()
+					+ " was found.", CRECastException.class, t);
 		}
 	}
 
@@ -1068,9 +1105,6 @@ public final class Static {
 		MCCommandSender commandSender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 		String label = env.getEnv(GlobalEnv.class).GetLabel();
 		boolean perm = false;
-		if (label != null && GLOBAL_PERMISSION.equals(label)) {
-			perm = true;
-		}
 		if (commandSender != null) {
 			if (commandSender.isOp()) {
 				perm = true;
@@ -1216,9 +1250,9 @@ public final class Static {
 		return hostCache.get(p.getName());
 	}
 
-	public static void AssertPlayerNonNull(MCPlayer p, Target t) {
+	public static void AssertPlayerNonNull(MCPlayer p, Target t) throws ConfigRuntimeException {
 		if (p == null) {
-			throw new ConfigRuntimeException("No player was specified!", ExceptionType.PlayerOfflineException, t);
+			throw ConfigRuntimeException.BuildException("No player was specified!", CREPlayerOfflineException.class, t);
 		}
 	}
 
@@ -1230,7 +1264,7 @@ public final class Static {
 		return ticks * 50;
 	}
 
-	public static void AssertNonNull(Object var, String message) {
+	public static void AssertNonNull(Object var, String message) throws NullPointerException {
 		if (var == null) {
 			throw new NullPointerException(message);
 		}
@@ -1246,21 +1280,15 @@ public final class Static {
 	 * @throws URISyntaxException
 	 */
 	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
-		File jarLocation;
-		if (Static.class.getProtectionDomain().getCodeSource().getLocation() != null) {
-			jarLocation = new File(Static.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
-		} else {
-			jarLocation = new File(".");
-		}
-		File platformFolder = new File(jarLocation, Implementation.GetServerType().getBranding() + "/");
+		File platformFolder = MethodScriptFileLocations.getDefault().getConfigDirectory();
 		Installer.Install(platformFolder);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(platformFolder);
 		PersistenceNetwork persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
-				new URI("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace("\\", "/")), options);
+				new URI("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/')), options);
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
 				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, platformFolder,
-				new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()), new TaskManager());
+				new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile()), new TaskManager());
 		gEnv.SetLabel(GLOBAL_PERMISSION);
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 	}
@@ -1276,7 +1304,7 @@ public final class Static {
 	public static void AssertNonCNull(Target t, Construct... args) throws ConfigRuntimeException {
 		for (Construct arg : args) {
 			if (arg instanceof CNull) {
-				throw new ConfigRuntimeException("Argument was null, and nulls are not allowed.", ExceptionType.NullPointerException, t);
+				throw ConfigRuntimeException.BuildException("Argument was null, and nulls are not allowed.", CRENullPointerException.class, t);
 			}
 		}
 	}
@@ -1304,7 +1332,7 @@ public final class Static {
 	 * @param arg
 	 * @return
 	 */
-	public static File GetFileFromArgument(String arg, Environment env, Target t, File def) {
+	public static File GetFileFromArgument(String arg, Environment env, Target t, File def) throws ConfigRuntimeException {
 		if (arg == null) {
 			return def;
 		}
@@ -1319,6 +1347,8 @@ public final class Static {
 		//If so, we use the root directory, not the target.
 		if (env != null && InCmdLine(env)) {
 			return new File(env.getEnv(GlobalEnv.class).GetRootFolder(), arg);
+		} else if (t.file() == null) {
+			throw ConfigRuntimeException.BuildException("Unable to receive a non-absolute file with an unknown target", CREIOException.class, t);
 		} else {
 			return new File(t.file().getParent(), arg);
 		}
@@ -1360,8 +1390,8 @@ public final class Static {
 			typeof todesired = type.getAnnotation(typeof.class);
 			String toactual = value.typeof();
 			if (todesired != null) {
-				throw new ConfigRuntimeException("Argument " + (argNumber + 1) + " of " + func.getName() + " was expected to be a "
-						+ todesired.value() + ", but " + toactual + " \"" + value.val() + "\" was found.", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Argument " + (argNumber + 1) + " of " + func.getName() + " was expected to be a "
+						+ todesired.value() + ", but " + toactual + " \"" + value.val() + "\" was found.", CRECastException.class, t);
 			} else {
 				//If the typeof annotation isn't present, this is a programming error.
 				throw new IllegalArgumentException("");
@@ -1406,7 +1436,7 @@ public final class Static {
 			boolean[] array = (boolean[]) object;
 			CArray r = new CArray(t);
 			for (boolean b : array) {
-				r.push(CBoolean.get(b));
+				r.push(CBoolean.get(b), t);
 			}
 			return r;
 		} else if (object instanceof byte[]) {
@@ -1415,48 +1445,48 @@ public final class Static {
 			char[] array = (char[]) object;
 			CArray r = new CArray(t);
 			for (char c : array) {
-				r.push(new CString(c, t));
+				r.push(new CString(c, t), t);
 			}
 			return r;
 		} else if (object instanceof short[]) {
 			short[] array = (short[]) object;
 			CArray r = new CArray(t);
 			for (short s : array) {
-				r.push(new CInt(s, t));
+				r.push(new CInt(s, t), t);
 			}
 			return r;
 		} else if (object instanceof int[]) {
 			int[] array = (int[]) object;
 			CArray r = new CArray(t);
 			for (int i : array) {
-				r.push(new CInt(i, t));
+				r.push(new CInt(i, t), t);
 			}
 			return r;
 		} else if (object instanceof long[]) {
 			long[] array = (long[]) object;
 			CArray r = new CArray(t);
 			for (long l : array) {
-				r.push(new CInt(l, t));
+				r.push(new CInt(l, t), t);
 			}
 			return r;
 		} else if (object instanceof float[]) {
 			float[] array = (float[]) object;
 			CArray r = new CArray(t);
 			for (float f : array) {
-				r.push(new CDouble(f, t));
+				r.push(new CDouble(f, t), t);
 			}
 			return r;
 		} else if (object instanceof double[]) {
 			double[] array = (double[]) object;
 			CArray r = new CArray(t);
 			for (double d : array) {
-				r.push(new CDouble(d, t));
+				r.push(new CDouble(d, t), t);
 			}
 			return r;
 		} else if (object instanceof Object[]) {
 			CArray r = new CArray(t);
 			for (Object o : (Object[]) object) {
-				r.push((o == object) ? r : getMSObject(o, t));
+				r.push((o == object) ? r : getMSObject(o, t), t);
 			}
 			return r;
 		} else if (object instanceof Collection) {
@@ -1563,5 +1593,19 @@ public final class Static {
 		} else {
 			return construct;
 		}
+	}
+
+	/**
+	 * Given a locale string, returns the java locale, or null if it can't be found.
+	 * @param fromLocaleString
+	 * @return
+	 */
+	public static Locale GetLocale(String fromLocaleString){
+		for(Locale loc : Locale.getAvailableLocales()) {
+			if(loc.toString().toLowerCase().equals(fromLocaleString.toLowerCase())) {
+				return loc;
+			}
+		}
+		return null;
 	}
 }

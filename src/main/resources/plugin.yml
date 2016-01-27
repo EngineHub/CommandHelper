@@ -1,26 +1,11 @@
 name: CommandHelper
 main: com.laytonsmith.commandhelper.CommandHelperPlugin
 version: "${project.version}"
-softdepend: [Vault]
 commands:
-    repeat:
-        description: Repeat the last command
-        usage: /<command>
-        aliases: .
-    alias:
-        description: Create an alias
-        usage: /<command> <alias>
-    delalias:
-        description: Remove an alias
-        usage: /<command> <name>
     reloadaliases:
         description: Reloads aliases
         usage: /<command>
         aliases: [reloadalias, recompile]
-    viewalias:
-        description: View all user defined aliases
-        usage: /<command>
-        aliases: viewaliases
     interpreter:
         description: Puts your chat into interpreter mode
         usage: /<command>

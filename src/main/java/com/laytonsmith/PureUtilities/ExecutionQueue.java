@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -243,8 +244,8 @@ public class ExecutionQueue {
 							if(uncaughtExceptionHandler != null){
 								uncaughtExceptionHandler.uncaughtException(Thread.currentThread(), t);
 							} else {
-								System.err.println("The queue \"" + queue + "\" threw an exception, and it was not handled.");
-								t.printStackTrace(System.err);
+								StreamUtils.GetSystemErr().println("The queue \"" + queue + "\" threw an exception, and it was not handled.");
+								t.printStackTrace(StreamUtils.GetSystemErr());
 							}
 						} finally {
 							if(dm != null){
@@ -261,6 +262,9 @@ public class ExecutionQueue {
 		queue = prepareLock(queue);
 		synchronized(locks.get(queue)){
 			Deque<Runnable> q = queues.get(queue);
+			if (q == null) {
+				throw new NoSuchElementException("The given queue does not exist.");
+			}
 			return q.removeFirst();
 		}
 	}

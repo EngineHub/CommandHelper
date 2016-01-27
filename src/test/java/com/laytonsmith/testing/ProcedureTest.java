@@ -1,7 +1,6 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import org.bukkit.plugin.Plugin;
 import org.junit.Before;
@@ -51,7 +50,7 @@ public class ProcedureTest {
     }
 
     @Test public void ensureOutOfScopeWorks() throws Exception{
-        SRun("assign(@lol, '42') proc(_blah, msg(cc('notlol' @lol))) _blah()", fakePlayer);
+        SRun("assign(@lol, '42') proc(_blah, msg('notlol'.@lol)) _blah()", fakePlayer);
         verify(fakePlayer).sendMessage("notlolnull");
     }
 

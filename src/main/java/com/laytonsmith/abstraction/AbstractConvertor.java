@@ -194,6 +194,9 @@ public abstract class AbstractConvertor implements Convertor{
 					task.run();
 					if(!repeater){
 						unregister();
+						synchronized(tasks){
+							tasks.remove(id);
+						}
 					}
 				}
 			}, initialDelay, interval);

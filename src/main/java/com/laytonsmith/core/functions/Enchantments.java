@@ -17,8 +17,13 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -197,8 +202,8 @@ public class Enchantments {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.EnchantmentException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREEnchantmentException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -223,10 +228,12 @@ public class Enchantments {
 			if (args.length == 4) {
 				m = Static.GetPlayer(args[0].val(), t);
 				offset = 0;
+			} else if (m == null) {
+				throw ConfigRuntimeException.BuildException("Invalid sender!", CREPlayerOfflineException.class, t);
 			}
-			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull?null:Static.getInt32(args[1 - offset], t));
+			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull ? null : Static.getInt32(args[1 - offset], t));
 			if (is == null) {
-				throw new Exceptions.CastException("There is no item at slot " + args[1 - offset], t);
+				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
 //            if (args[1 - offset] instanceof CNull) {
 //                is = m.getItemInHand();
@@ -236,31 +243,31 @@ public class Enchantments {
 //            }
 			CArray enchantArray = new CArray(t);
 			if (!(args[2 - offset] instanceof CArray)) {
-				enchantArray.push(args[2 - offset]);
+				enchantArray.push(args[2 - offset], t);
 			} else {
 				enchantArray = (CArray) args[2 - offset];
 			}
 
 			CArray levelArray = new CArray(t);
 			if (!(args[3 - offset] instanceof CArray)) {
-				levelArray.push(args[3 - offset]);
+				levelArray.push(args[3 - offset], t);
 			} else {
 				levelArray = (CArray) args[3 - offset];
 			}
 			for (String key : enchantArray.stringKeySet()) {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
 				if (e == null) {
-					throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
+					throw ConfigRuntimeException.BuildException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", CREEnchantmentException.class, t);
 				}
 				if (e.canEnchantItem(is)) {
 					int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
 					if (e.getMaxLevel() >= level && level > 0) {
 						is.addEnchantment(e, level);
 					} else {
-						throw new ConfigRuntimeException("Level must be greater than 0, and less than " + e.getMaxLevel() + " but was " + level, ExceptionType.RangeException, t);
+						throw ConfigRuntimeException.BuildException("Level must be greater than 0, and less than " + e.getMaxLevel() + " but was " + level, CRERangeException.class, t);
 					}
 				} else {
-					throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " cannot be applied to this item", ExceptionType.EnchantmentException, t);
+					throw ConfigRuntimeException.BuildException(enchantArray.get(key, t).val().toUpperCase() + " cannot be applied to this item", CREEnchantmentException.class, t);
 				}
 			}
 			return CVoid.VOID;
@@ -288,8 +295,8 @@ public class Enchantments {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.EnchantmentException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREEnchantmentException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -318,7 +325,7 @@ public class Enchantments {
 			Static.AssertPlayerNonNull(m, t);
 			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull?null:Static.getInt32(args[1 - offset], t));
 			if (is == null) {
-				throw new Exceptions.CastException("There is no item at slot " + args[1 - offset], t);
+				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
 //            if (args[1 - offset] instanceof CNull) {
 //                is = m.getItemInHand();
@@ -329,7 +336,7 @@ public class Enchantments {
 
 			CArray enchantArray = new CArray(t);
 			if (!(args[2 - offset] instanceof CArray) && !(args[2 - offset] instanceof CNull)) {
-				enchantArray.push(args[2 - offset]);
+				enchantArray.push(args[2 - offset], t);
 			} else if (args[2 - offset] instanceof CNull) {
 				for (MCEnchantment e : is.getEnchantments().keySet()) {
 					is.removeEnchantment(e);
@@ -340,8 +347,8 @@ public class Enchantments {
 			for (String key : enchantArray.stringKeySet()) {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
 				if (e == null) {
-					throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid"
-							+ " enchantment type", ExceptionType.EnchantmentException, t);
+					throw ConfigRuntimeException.BuildException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid"
+							+ " enchantment type", CREEnchantmentException.class, t);
 				}
 				is.removeEnchantment(e);
 			}
@@ -369,8 +376,8 @@ public class Enchantments {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRECastException.class};
 		}
 
 		@Override
@@ -397,10 +404,13 @@ public class Enchantments {
 				slot = args[1];
 			} else {
 				slot = args[0];
+				if (m == null) {
+					throw ConfigRuntimeException.BuildException("Invalid sender!", CREPlayerOfflineException.class, t);
+				}
 			}
-			MCItemStack is = m.getItemAt(slot instanceof CNull?null:Static.getInt32(slot, t));
+			MCItemStack is = m.getItemAt(slot instanceof CNull ? null : Static.getInt32(slot, t));
 			if (is == null) {
-				throw new Exceptions.CastException("There is no item at slot " + slot, t);
+				throw new CRECastException("There is no item at slot " + slot, t);
 			}
 //            if(slot instanceof CNull){
 //                is = m.getItemInHand();
@@ -413,8 +423,8 @@ public class Enchantments {
 			for (Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {
 				MCEnchantment e = entry.getKey();
 				Integer l = entry.getValue();
-				enchants.push(new CString(e.getName(), t));
-				levels.push(new CInt(l, t));
+				enchants.push(new CString(e.getName(), t), t);
+				levels.push(new CInt(l, t), t);
 			}
 
 			return new CArray(t, enchants, levels);
@@ -443,8 +453,8 @@ public class Enchantments {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.EnchantmentException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREEnchantmentException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -470,8 +480,8 @@ public class Enchantments {
 				MCItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), 1, t);
 				return CBoolean.get(e.canEnchantItem(is));
 			} catch (NullPointerException e) {
-				throw new ConfigRuntimeException(args[0].val().toUpperCase() + " is not a known enchantment type.",
-						ExceptionType.EnchantmentException, t);
+				throw ConfigRuntimeException.BuildException(args[0].val().toUpperCase() + " is not a known enchantment type.",
+						CREEnchantmentException.class, t);
 			}
 		}
 	}
@@ -496,8 +506,8 @@ public class Enchantments {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.EnchantmentException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREEnchantmentException.class};
 		}
 
 		@Override
@@ -522,8 +532,8 @@ public class Enchantments {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
 				return new CInt(e.getMaxLevel(), t);
 			} catch (NullPointerException e) {
-				throw new ConfigRuntimeException(args[0].val().toUpperCase() + " is not a known enchantment type.",
-						ExceptionType.EnchantmentException, t);
+				throw ConfigRuntimeException.BuildException(args[0].val().toUpperCase() + " is not a known enchantment type.",
+						CREEnchantmentException.class, t);
 			}
 		}
 	}
@@ -550,8 +560,8 @@ public class Enchantments {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -582,7 +592,7 @@ public class Enchantments {
 			CArray ca = new CArray(t);
 			for (MCEnchantment e : StaticLayer.GetEnchantmentValues()) {
 				if (e.canEnchantItem(is)) {
-					ca.push(new CString(e.getName(), t));
+					ca.push(new CString(e.getName(), t), t);
 				}
 			}
 			cache.put(args[0].val(), ca);
@@ -610,8 +620,8 @@ public class Enchantments {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -644,7 +654,7 @@ public class Enchantments {
 	public static class enchantment_list extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -663,7 +673,7 @@ public class Enchantments {
 			MCEnchantment[] enchantments = StaticLayer.GetEnchantmentValues();
 			CArray ret = new CArray(t);
 			for(MCEnchantment e : enchantments){
-				ret.push(new CString(e.getName(), t));
+				ret.push(new CString(e.getName(), t), t);
 			}
 			return ret;
 		}

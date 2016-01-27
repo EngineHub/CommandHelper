@@ -1,5 +1,7 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
@@ -16,10 +18,11 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.UserManager;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -27,14 +30,22 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.persistence.DataSourceException;
+import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.jar.JarFile;
+import java.util.Locale;
 import java.util.logging.Level;
+import java.util.zip.ZipEntry;
 
 /**
  * 
@@ -48,8 +59,8 @@ public class Meta {
 	@api
 	public static class first_load extends AbstractFunction {
 
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		public boolean isRestricted() {
@@ -98,8 +109,8 @@ public class Meta {
 		@Override
 		public Construct exec(Target t, final Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[1].nval() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
-				throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
-						ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("The first character of the command must be a forward slash (i.e. '/give')",
+						CREFormatException.class, t);
 			}
 			String cmd = args[1].val().substring(1);
 			if (args[0] instanceof CArray) {
@@ -121,7 +132,7 @@ public class Meta {
 				}
 				if(cmd.equalsIgnoreCase("interpreter-on")){
 					//This isn't allowed for security reasons.
-					throw new ConfigRuntimeException("/interpreter-on cannot be run from runas for security reasons.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("/interpreter-on cannot be run from runas for security reasons.", CREFormatException.class, t);
 				}
 				Static.getServer().runasConsole(cmd);
 			} else {
@@ -143,16 +154,16 @@ public class Meta {
 					//m.chat(cmd);
 					Static.getServer().dispatchCommand(m, cmd);
 				} else {
-					throw new ConfigRuntimeException("The player " + args[0].val() + " is not online",
-							ExceptionType.PlayerOfflineException, t);
+					throw ConfigRuntimeException.BuildException("The player " + args[0].val() + " is not online",
+							CREPlayerOfflineException.class, t);
 				}
 			}
 			return CVoid.VOID;
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -183,8 +194,8 @@ public class Meta {
 	public static class sudo extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -200,8 +211,8 @@ public class Meta {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
-				throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
-						ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("The first character of the command must be a forward slash (i.e. '/give')",
+						CREFormatException.class, t);
 			}
 			String cmd = args[0].val().substring(1);
 			//If the command sender is null, then just try to run() this. It's unclear to me what
@@ -284,7 +295,7 @@ public class Meta {
 					p.setOp(value);
 				} else {
 					Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName());
-					System.err.println("Extra information about the error: ");
+					StreamUtils.GetSystemErr().println("Extra information about the error: ");
 					e.printStackTrace();
 				}
 			}
@@ -327,8 +338,8 @@ public class Meta {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
-				throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
-						ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("The first character of the command must be a forward slash (i.e. '/give')",
+						CREFormatException.class, t);
 			}
 			String cmd = args[0].val().substring(1);
 			if (Prefs.DebugMode()) {
@@ -339,16 +350,16 @@ public class Meta {
 				}
 			}
 			if(cmd.equalsIgnoreCase("interpreter-on")){
-				throw new Exceptions.FormatException("/interpreter-on cannot be run as apart of an alias for security reasons.", t);
+				throw new CREFormatException("/interpreter-on cannot be run as apart of an alias for security reasons.", t);
 			}
 			try{
 				Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
 			} catch(Exception ex){
-				throw new ConfigRuntimeException("While running the command: \"" + cmd + "\""
+				throw ConfigRuntimeException.BuildException("While running the command: \"" + cmd + "\""
 						+ " the plugin threw an unexpected exception (turn on debug mode to see the full"
 						+ " stacktrace): " + ex.getMessage() + "\n\nThis is not a bug in " + Implementation.GetServerType().getBranding()
 						+ " but in the plugin that provides the command.", 
-						ExceptionType.PluginInternalException, t, ex);
+						CREPluginInternalException.class, t, ex);
 			}
 			return CVoid.VOID;
 		}
@@ -360,8 +371,8 @@ public class Meta {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PluginInternalException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREPluginInternalException.class};
 		}
 
 		@Override
@@ -384,8 +395,8 @@ public class Meta {
 	public static class is_alias extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIOException.class};
 		}
 
 		@Override
@@ -408,21 +419,6 @@ public class Meta {
 					return CBoolean.TRUE;
 				}
 			}
-
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (p instanceof MCPlayer) {
-				try {
-					// p might be null
-					for (Script s : UserManager.GetUserManager(p.getName()).getAllScripts(environment.getEnv(GlobalEnv.class).GetPersistenceNetwork())) {
-						if (s.match(args[0].val())) {
-							return CBoolean.TRUE;
-						}
-					}
-				} catch (DataSourceException ex) {
-					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
-				}
-			}
-
 			return CBoolean.FALSE;
 		}
 
@@ -473,8 +469,8 @@ public class Meta {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -501,7 +497,7 @@ public class Meta {
 			if (doRemoval) {
 				Static.getAliasCore().removePlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
 			}
-			boolean ret = Static.getAliasCore().alias(args[0].val(), env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), null);
+			boolean ret = Static.getAliasCore().alias(args[0].val(), env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
 			if (doRemoval) {
 				Static.getAliasCore().addPlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
 			}
@@ -531,8 +527,8 @@ public class Meta {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -608,8 +604,8 @@ public class Meta {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -641,8 +637,8 @@ public class Meta {
 	public static class capture_runas extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -660,7 +656,7 @@ public class Meta {
 			String player = args[0].val();
 			String cmd = args[1].val();
 			if(!cmd.startsWith("/")){
-				throw new Exceptions.FormatException("Command must begin with a /", t);
+				throw new CREFormatException("Command must begin with a /", t);
 			}
 			cmd = cmd.substring(1);
 			
@@ -699,7 +695,7 @@ public class Meta {
 	public static class get_command_block extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -749,8 +745,8 @@ public class Meta {
 	public static class psetop extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -808,8 +804,8 @@ public class Meta {
 		private final static is_alias is_alias = new is_alias();
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -861,5 +857,260 @@ public class Meta {
 			return CHVersion.V3_3_1;
 		}
 		
+	}
+
+	@api
+	public static class noop extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "noop";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{Integer.MAX_VALUE};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[...]} An operation that does nothing. Any arguments passed in are ignored entirely.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+	}
+	
+	@api
+	public static class get_locales extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public CArray exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray c = new CArray(t);
+			for(Locale l : Locale.getAvailableLocales()){
+				if(!l.getCountry().equals("")){
+					c.push(new CString(l.toString(), t), t);
+				}
+			}
+			new ArrayHandling.array_sort().exec(t, environment, c);
+			c = new ArrayHandling.array_unique().exec(t, environment, c);
+			return c;
+
+
+		}
+
+		@Override
+		public String getName() {
+			return "get_locales";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Returns a list of locales on this system.";
+
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "get_locales()")
+			};
+		}
+
+	}
+	
+	@api
+	public static class engine_build_date extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			JarFile jf;
+			try {
+				String jar = ClassDiscovery.GetClassContainer(Meta.class).toString();
+				jar = jar.replaceFirst("file:[\\|/]", "");
+				jf = new JarFile(jar);
+			} catch (IOException ex) {
+				return CNull.NULL;
+			}
+			ZipEntry manifest = jf.getEntry("META-INF/MANIFEST.MF");
+			long manifestTime = manifest.getTime();
+			return new CInt(manifestTime, t);
+		}
+
+		@Override
+		public String getName() {
+			return "engine_build_date";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "int {} Returns the compile date, in a millisecond unit time stamp, of when " + Implementation.GetServerType().getBranding() + " was compiled,"
+					+ " or null, if that can't be computed for various reasons.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api
+	public static class build_date extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CInt(environment.getEnv(GlobalEnv.class).GetScript().getCompileTime(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "build_date";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "int {} Returns the compile date of the current script, as a unix time stamp in milliseconds.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+
+	@api
+	public static class get_script_environment extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CResource<>(environment, t);
+		}
+
+		@Override
+		public String getName() {
+			return "get_script_environment";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "resource {} Returns a copy of the underlying engine's environment object. This is only useful to embedded scripting"
+					+ " engines that are attempting to call back into " + Implementation.GetServerType().getBranding() + ". The object returned"
+					+ " is a CResource.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
 	}
 }

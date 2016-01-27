@@ -259,6 +259,15 @@ changes are visible from outside the closure. However, in the second example, we
 and simply putting something else inside of it. This doesn't affect the outside code having a reference to the array
 though, it still is pointing to the same empty array it created earlier.
 
+== iclosures ==
+An iclosure is the same thing as a closure, except the variable scope is different. The variable scope works like a procedure;
+no variables from the parent scope are retained. An iclosure with no arguments passed to it, then, has no variables in scope
+(other than @arguments). This is useful as an optimization technique, when you have a closure in a large program, it has
+to copy all the references of all the currently in scope variables. If all the values you need are going to be passed into
+the closure, there's no point in doing all that copying. Instead, you can just use an iclosure, thus possibly reducing your
+memory footprint. An iclosure is identical to closures in all other ways, and they can be used in any case that a closure
+is required.
+
 == Serialization of closures ==
 
 Closures can be serialized too! They get output as a basic string, however, so it's important to note the

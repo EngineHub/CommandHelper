@@ -13,8 +13,27 @@ Also note that CommandHelper may still be backwards and forward compatible to a 
 ! scope="col" width="40%" | Milestone
 ! scope="col" width="50%" | Compatibility
 |-
-|
-|
+| [http://builds.enginehub.org/job/commandhelper/7014 #2895-]
+| [https://github.com/sk89q/commandhelper/commit/6304f912f0be41e3522e0ae4191b1319ef8a8b89 6304f91]
+| Should still be compatible with former build
+| Spigot 1.8.6
+|-
+| [http://builds.enginehub.org/job/commandhelper/6821 #2857-]
+| [https://github.com/sk89q/commandhelper/commit/f8953eb485a6689299381c8f644ea16fb92e9853 f8953eb]
+| Removed WorldEdit dependency (See SKCompat extension)
+|-
+| [http://builds.enginehub.org/job/commandhelper/6776 #2842-]
+| [https://github.com/sk89q/commandhelper/commit/4b485fd208f2b43d0e5bae71c74b48b212dc0140 4b485fd]
+| Removed vault dependency (See CHVault extension)
+|-
+| [http://builds.enginehub.org/job/commandhelper/6492 #2802-]
+| [https://github.com/sk89q/CommandHelper/commit/cc0f80e9983b13c2ff6f643fbbc441f8f86268e8 cc0f80e]
+| Updated to Spigot 1.8.
+* Vault 1.4
+| Spigot 1.8
+|-
+| [http://builds.enginehub.org/job/commandhelper/5115/ #2717-aca997c]
+| [https://github.com/sk89q/commandhelper/commit/aca997cf7a09f00a92cd46aefc3a8f44f478a3d5 aca997c]
 | Updated several dependencies:
 * jsch: 0.1.51
 * WorldEdit: 5.6.2

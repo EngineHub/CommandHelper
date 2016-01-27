@@ -57,7 +57,7 @@ public final class Installer {
 
 		if(!MethodScriptFileLocations.getDefault().getProfilesFile().exists()){
 			try {
-				FileUtil.write(StreamUtils.GetString(Installer.class.getResourceAsStream("/samp_profiles.xml"), "UTF-8"), MethodScriptFileLocations.getDefault().getSQLProfilesFile(), true);
+				FileUtil.write(StreamUtils.GetString(Installer.class.getResourceAsStream("/samp_profiles.xml"), "UTF-8"), MethodScriptFileLocations.getDefault().getProfilesFile(), true);
 			} catch (IOException ex) {
 				Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
 			}

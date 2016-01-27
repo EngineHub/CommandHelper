@@ -6,6 +6,7 @@ import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.KeywordList;
+import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CIdentifier;
 import com.laytonsmith.core.constructs.CInt;
@@ -28,6 +29,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Compiler;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
@@ -48,10 +50,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * The MethodScriptCompiler class handles the various stages of compilation and
@@ -65,6 +65,9 @@ public final class MethodScriptCompiler {
 
 	private MethodScriptCompiler() {
 	}
+
+	private static final Pattern VAR_PATTERN = Pattern.compile("\\$[a-zA-Z0-9_]+");
+	private static final Pattern IVAR_PATTERN = Pattern.compile("@[a-zA-Z0-9_]+");
 
 	/**
 	 * Lexes the script, and turns it into a token stream. This looks through the script
@@ -478,13 +481,16 @@ public final class MethodScriptCompiler {
 				i++;
 				continue;
 			}
-			if (c == '.' && !Character.isDigit(c2) && !state_in_quote) {
-				//if it's a number after this, it's a decimal
-				if (buf.length() > 0) {
+			if(c == '.' && !state_in_quote){
+				if (buf.length() > 0){
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 					buf = new StringBuilder();
 				}
-				token_list.add(new Token(TType.CONCAT, ".", target));
+				// Dots are resolved later, because order of operations actually matters here, depending on whether
+				// or not the previous token is a string or a number. But actually, it isn't about the previous token, it's
+				// about the previous construct, and we want to handle it in a more robust way, so we pass it along to
+				// the compiler stage.
+				token_list.add(new Token(TType.DOT, ".", target));
 				continue;
 			}
 			if (c == ':' && c2 == ':' && !state_in_quote) {
@@ -723,8 +729,9 @@ public final class MethodScriptCompiler {
 			Token prev1 = i - 1 >= 0 ? token_list.get(i - 1) : new Token(TType.UNKNOWN, "", t.target);
 			Token next = i + 1 < token_list.size() ? token_list.get(i + 1) : new Token(TType.UNKNOWN, "", t.target);
 
-			if (t.type == TType.UNKNOWN && prev1.type.isPlusMinus()
-					&& !prev2.type.isIdentifier()) {
+			if (t.type == TType.UNKNOWN && prev1.type.isPlusMinus() && !prev2.type.isIdentifier()
+					&& !prev2.type.equals(TType.FUNC_END)
+					&& !t.val().matches("(\\@|\\$)[a-zA-Z0-9_]+")) { // Last boolean makes -@b equal to - @b, instead of a string.
 				//It is a negative/positive number. Absorb the sign
 				t.value = prev1.value + t.value;
 				token_list.remove(i - 1);
@@ -732,15 +739,13 @@ public final class MethodScriptCompiler {
 			}
 
 			if (t.type.equals(TType.UNKNOWN)) {
-				if (t.val().matches("/.*")) {
+				if (t.val().charAt(0) == '/' && t.val().length() > 1) {
 					t.type = TType.COMMAND;
-				} else if (t.val().matches("\\\\")) {
-					t.type = TType.SEPERATOR;
-				} else if (t.val().matches("\\$[a-zA-Z0-9_]+")) {
+				} else if (VAR_PATTERN.matcher(t.val()).matches()) {
 					t.type = TType.VARIABLE;
-				} else if (t.val().matches("\\@[a-zA-Z0-9_]+")) {
+				} else if (IVAR_PATTERN.matcher(t.val()).matches()) {
 					t.type = TType.IVARIABLE;
-				} else if (t.val().matches("\\@.*[^a-zA-Z0-9_]+.*") || "@".equals(t.val())){
+				} else if (t.val().charAt(0) == '@') {
 					throw new ConfigCompileException("IVariables must match the regex: @[a-zA-Z0-9_]+", target);
 				} else if (t.val().equals("$")) {
 					t.type = TType.FINAL_VAR;
@@ -826,12 +831,12 @@ public final class MethodScriptCompiler {
 				throw new ConfigCompileException("Did not expect a multiline start symbol here, are you missing a multiline end symbol above this line?", thisToken.target);
 			}
 			if (thisToken.val().equals(">>>") && !prevToken.type.equals(TType.ALIAS_END)) {
-				throw new ConfigCompileException("Multiline symbol must follow the alias_end token", thisToken.target);
+				throw new ConfigCompileException("Multiline symbol must follow the alias_end (=) symbol", thisToken.target);
 			}
 
 			//If we're not in a multiline construct, or we are in it and it's not a newline, add
 			//it
-			if (!inside_multiline || (inside_multiline && !thisToken.type.equals(TType.NEWLINE))) {
+			if (!inside_multiline || !thisToken.type.equals(TType.NEWLINE)) {
 				tokens1_1.add(thisToken);
 			}
 		}
@@ -882,8 +887,8 @@ public final class MethodScriptCompiler {
 					}
 					Script s = new Script(left, right);
 					scripts.add(s);
-					left = new ArrayList();
-					right = new ArrayList();
+					left = new ArrayList<>();
+					right = new ArrayList<>();
 				} else {
 					right.add(t);
 				}
@@ -895,7 +900,7 @@ public final class MethodScriptCompiler {
 	/**
 	 * Compiles the token stream into a valid ParseTree. This also includes optimization
 	 * and reduction.
-	 * @param stream The token stream, as generated by {@link #lex()}
+	 * @param stream The token stream, as generated by {@link #lex(String, File, boolean) lex}
 	 * @return A fully compiled, optimized, and reduced parse tree. If {@code stream} is
 	 * null or empty, null is returned.
 	 * @throws ConfigCompileException If the script contains syntax errors. Additionally,
@@ -948,7 +953,10 @@ public final class MethodScriptCompiler {
 		 */
 		Stack<AtomicInteger> arrayStack = new Stack<>();
 		arrayStack.add(new AtomicInteger(-1));
-
+		
+		Stack<AtomicInteger> minusArrayStack = new Stack<>();
+		Stack<AtomicInteger> minusFuncStack = new Stack<>();
+		
 		int parens = 0;
 		Token t = null;
 
@@ -1008,32 +1016,24 @@ public final class MethodScriptCompiler {
 			}
 
 			//Associative array/label handling
-			if (next1.type.equals(TType.LABEL)) {
-				//If it's not an atomic identifier it's an error.
-				if(!t.type.isAtomicLit() && t.type != TType.IVARIABLE && t.type != TType.KEYWORD){
-					compilerErrors.add(new ConfigCompileException("Invalid label specified", t.getTarget()));
-				}
-				Construct val;
-				if(t.type == TType.IVARIABLE){
-					val = new IVariable(t.val(), t.target);
-				} else if(t.type == TType.KEYWORD){
-					val = new CKeyword(t.val(), t.target);
-				} else {
-					val = Static.resolveConstruct(t.val(), t.target);
-				}
-				tree.addChild(new ParseTree(new CLabel(val), fileOptions));
-				constructCount.peek().incrementAndGet();
-				continue;
-			}
 			if(t.type == TType.LABEL && tree.getChildren().size() > 0){
-				ParseTree cc = tree.getChildren().get(tree.getChildren().size() - 1);
-				if(cc.getData() instanceof CSlice){
-					//Special case where a slice is being used as a label.
-					//Replace the value in the tree with a label, then continue.
-					tree.removeChildAt(tree.getChildren().size() - 1);
-					tree.addChild(new ParseTree(new CLabel(cc.getData()), fileOptions));
-					continue;
+				//If it's not an atomic identifier it's an error.
+				if(!prev1.type.isAtomicLit() && prev1.type != TType.IVARIABLE && prev1.type != TType.KEYWORD){
+					ConfigCompileException error = new ConfigCompileException("Invalid label specified", t.getTarget());
+					if(prev1.type == TType.FUNC_END){
+						// This is a fairly common mistake, so we have special handling for this,
+						// because otherwise we would get a "Mismatched parenthesis" warning (which doesn't make sense),
+						// and potentially lots of other invalid errors down the line, so we go ahead
+						// and stop compilation at this point.
+						throw error;
+					}
+					compilerErrors.add(error);
 				}
+				// Wrap previous construct in a CLabel
+				ParseTree cc = tree.getChildren().get(tree.getChildren().size() - 1);
+				tree.removeChildAt(tree.getChildren().size() - 1);
+				tree.addChild(new ParseTree(new CLabel(cc.getData()), fileOptions));
+				continue;
 			}
 
 			//Array notation handling
@@ -1070,19 +1070,37 @@ public final class MethodScriptCompiler {
 				ParseTree arrayGet = new ParseTree(new CFunction("array_get", t.target), fileOptions);
 				arrayGet.addChild(myArray);
 				arrayGet.addChild(myIndex);
-				tree.addChild(arrayGet);
+				
+				// Check if the @var[...] had a negating "-" in front. If so, add a neg().
+				if (minusArrayStack.size() != 0 && arrayStack.size() + 1 == minusArrayStack.peek().get()) {
+					if (!next1.type.equals(TType.LSQUARE_BRACKET)) { // Wait if there are more array_get's comming.
+						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
+						negTree.addChild(arrayGet);
+						tree.addChild(negTree);
+						minusArrayStack.pop();
+					} else {
+						// Negate the next array_get instead, so just add this one to the tree.
+						tree.addChild(arrayGet);
+					}
+				} else {
+					tree.addChild(arrayGet);
+				}
 				constructCount.peek().set(constructCount.peek().get() - myIndex.numberOfChildren());
 				continue;
 			}
 
 			//Smart strings
 			if (t.type == TType.SMART_STRING) {
-				ParseTree function = new ParseTree(fileOptions);
-				function.setData(new CFunction(new Compiler.smart_string().getName(), t.target));
-				ParseTree string = new ParseTree(fileOptions);
-				string.setData(new CString(t.value, t.target));
-				function.addChild(string);
-				tree.addChild(function);
+				if(t.val().contains("@")) {
+					ParseTree function = new ParseTree(fileOptions);
+					function.setData(new CFunction(new Compiler.smart_string().getName(), t.target));
+					ParseTree string = new ParseTree(fileOptions);
+					string.setData(new CString(t.value, t.target));
+					function.addChild(string);
+					tree.addChild(function);
+				} else {
+					tree.addChild(new ParseTree(new CString(t.val(), t.target), fileOptions));
+				}
 				constructCount.peek().incrementAndGet();
 				continue;
 			}
@@ -1143,6 +1161,22 @@ public final class MethodScriptCompiler {
 				} catch (EmptyStackException e) {
 					throw new ConfigCompileException("Unexpected end parenthesis", t.target);
 				}
+				
+				// Handle "-func(args)" and "-func(args)[index]".
+				if (minusFuncStack.size() != 0 && minusFuncStack.peek().get() == parens + 1) {
+					if(next1.type.equals(TType.LSQUARE_BRACKET)) {
+						// Move the negation to the array_get which contains this function.
+						minusArrayStack.push(new AtomicInteger(arrayStack.size() + 1)); // +1 because the bracket isn't counted yet.
+					} else {
+						// Negate this function.
+						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
+						negTree.addChild(tree.getChildAt(tree.numberOfChildren() - 1));
+						tree.removeChildAt(tree.numberOfChildren() - 1);
+						tree.addChildAt(tree.numberOfChildren(), negTree);
+					}
+					minusFuncStack.pop();
+				}
+				
 			} else if (t.type.equals(TType.COMMA)) {
 				if (constructCount.peek().get() > 1) {
 					int stacks = constructCount.peek().get();
@@ -1208,14 +1242,13 @@ public final class MethodScriptCompiler {
 						}
 					} else if (next2.type.isSeparator() || next2.type.isKeyword()) {
 						//empty last
-						Token first = t;
 						String modifier = "";
 						if(prev1.type == TType.MINUS || prev1.type == TType.PLUS){
 							//The negative would have already been inserted into the tree
 							modifier = prev1.val();
 							tree.removeChildAt(tree.getChildren().size() - 1);
 						}
-						slice = new CSlice(modifier + first.value + "..", first.target);
+						slice = new CSlice(modifier + t.value + "..", t.target);
 					} else {
 						//both are provided
 						String modifier1 = "";
@@ -1252,6 +1285,15 @@ public final class MethodScriptCompiler {
 				Construct c = Static.resolveConstruct(t.val(), t.target);
 				if(c instanceof CString && fileOptions.isStrict()){
 					compilerErrors.add(new ConfigCompileException("Bare strings are not allowed in strict mode", t.target));
+				} else if(c instanceof CInt && next1.type == TType.DOT && next2.type == TType.LIT) {
+					// make CDouble here because otherwise Long.parseLong() will remove
+					// minus zero before decimals and leading zeroes after decimals
+					try {
+						c = new CDouble(Double.parseDouble(t.val() + '.' + next2.val()), t.target);
+						i += 2;
+					} catch (NumberFormatException e) {
+						// Not a double
+					}
 				}
 				tree.addChild(new ParseTree(c, fileOptions));
 				constructCount.peek().incrementAndGet();
@@ -1271,7 +1313,46 @@ public final class MethodScriptCompiler {
 				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if (t.type.isSymbol()) { //Logic and math symbols
-				tree.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.target), fileOptions));
+				
+				// Attempt to find "-@var" and change it to "neg(@var)" if it's not @a - @b. Else just add the symbol.
+				// Also handles "-function()" and "-@var[index]".
+				if (t.type.equals(TType.MINUS) && !prev1.type.isAtomicLit() && !prev1.type.equals(TType.IVARIABLE)
+						&& !prev1.type.equals(TType.VARIABLE) && !prev1.type.equals(TType.RCURLY_BRACKET)
+						&& !prev1.type.equals(TType.RSQUARE_BRACKET) && !prev1.type.equals(TType.FUNC_END)
+						&& (next1.type.equals(TType.IVARIABLE) || next1.type.equals(TType.VARIABLE) || next1.type.equals(TType.FUNC_NAME))) {
+					
+					// Check if we are negating a value from an array, function or variable.
+					if (next2.type.equals(TType.LSQUARE_BRACKET)) {
+						minusArrayStack.push(new AtomicInteger(arrayStack.size() + 1)); // +1 because the bracket isn't counted yet.
+					} else if (next1.type.equals(TType.FUNC_NAME)) {
+						minusFuncStack.push(new AtomicInteger(parens + 1)); // +1 because the function isn't counted yet.
+					} else {
+						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
+						negTree.addChild(new ParseTree(new IVariable(next1.value, next1.target), fileOptions));
+						tree.addChild(negTree);
+						constructCount.peek().incrementAndGet();
+						i++; // Skip the next variable as we've just handled it.
+					}
+				} else {
+					tree.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.target), fileOptions));
+					constructCount.peek().incrementAndGet();
+				}
+				
+			} else if (t.type == TType.DOT){
+				// Check for doubles that start with a decimal, otherwise concat
+				Construct c = null;
+				if(next1.type == TType.LIT && prev1.type != TType.STRING && prev1.type != TType.SMART_STRING) {
+					try {
+						c = new CDouble(Double.parseDouble('.' + next1.val()), t.target);
+						i++;
+					} catch (NumberFormatException e) {
+						// Not a double
+					}
+				}
+				if(c == null) {
+					c = new CSymbol(".", TType.CONCAT, t.target);
+				}
+				tree.addChild(new ParseTree(c, fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
 				tree.addChild(new ParseTree(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target), fileOptions));
@@ -1477,7 +1558,7 @@ public final class MethodScriptCompiler {
 		for(ParseTree child : tree.getChildren()){
 			if(child.getData() instanceof CFunction){
 				FunctionBase f = null;
-				if (!child.getData().val().matches("^_[^_].*")) {
+				if (child.getData().val().charAt(0) != '_' || child.getData().val().charAt(1) == '_') {
 					// This will throw an exception if the function doesn't exist.
 					try {
 						f = FunctionList.getFunction(child.getData());
@@ -1511,30 +1592,6 @@ public final class MethodScriptCompiler {
 		if (!(tree.getData() instanceof CFunction)) {
 			//There's no way to optimize something that's not a function
 			return;
-		}
-		//cc has to be inb4 other autoconcats, so sconcats on the lower level won't get run
-		if (tree.getData().val().equals("cc")) {
-			for (int i = 0; i < tree.getChildren().size(); i++) {
-				ParseTree node = tree.getChildAt(i);
-				if (node.getData().val().equals(__autoconcat__)) {
-					Compiler.__autoconcat__ func;
-					try {
-						func = (Compiler.__autoconcat__) FunctionList.getFunction(node.getData());
-					} catch (ConfigCompileException ex) {
-						compilerErrors.add(ex);
-						return;
-					}
-					try {
-						ParseTree tempNode = func.optimizeSpecial(node.getChildren(), false);
-						tree.setData(tempNode.getData());
-						tree.setChildren(tempNode.getChildren());
-					} catch (ConfigCompileException ex) {
-						compilerErrors.add(ex);
-					}
-					optimize(tree, procs, compilerErrors);
-					return;
-				}
-			}
 		}
 		//If it is a proc definition, we need to go ahead and see if we can add it to the const proc stack
 		if (tree.getData().val().equals("proc")) {
@@ -1782,7 +1839,15 @@ public final class MethodScriptCompiler {
 				try {
 					Construct result;
 					if (options.contains(OptimizationOption.CONSTANT_OFFLINE)) {
-						result = func.exec(tree.getData().getTarget(), null, constructs);
+						List<Integer> numArgsList = Arrays.asList(func.numArgs());
+						if (!numArgsList.contains(Integer.MAX_VALUE) &&
+								!numArgsList.contains(tree.getChildren().size())) {
+							compilerErrors.add(new ConfigCompileException("Incorrect number of arguments passed to "
+									+ tree.getData().val(), tree.getData().getTarget()));
+							result = null;
+						} else {
+							result = func.exec(tree.getData().getTarget(), null, constructs);
+						}
 					} else {
 						result = ((Optimizable) func).optimize(tree.getData().getTarget(), constructs);
 					}
@@ -1819,6 +1884,7 @@ public final class MethodScriptCompiler {
 			// conditions.
 			processKeywords(node);
 			if(node.getData() instanceof CKeyword
+					|| (node.getData() instanceof CLabel && ((CLabel) node.getData()).cVal() instanceof CKeyword)
 					|| (node.getData() instanceof CFunction && KeywordList.getKeywordByName(node.getData().val()) != null)){
 				// This looks a bit confusing, but is fairly straightforward. We want to process the child elements of all
 				// remaining nodes, so that subchildren that need processing will be finished, and our current tree level will
@@ -1926,14 +1992,12 @@ public final class MethodScriptCompiler {
 	}
 
 	public static void registerAutoIncludes(Environment env, Script s) {
-		File root = env.getEnv(GlobalEnv.class).GetRootFolder();
-		File auto_include = new File(root, "auto_include.ms");
-		if (auto_include.exists()) {
-			MethodScriptCompiler.execute(IncludeCache.get(auto_include, new Target(0, auto_include, 0)), env, null, s);
-		}
-
 		for (File f : Static.getAliasCore().autoIncludes) {
-			MethodScriptCompiler.execute(IncludeCache.get(f, new Target(0, f, 0)), env, null, s);
+			try {
+				MethodScriptCompiler.execute(IncludeCache.get(f, new Target(0, f, 0)), env, null, s);
+			} catch (ProgramFlowManipulationException e) {
+				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in auto include files.", e.getTarget()), env);
+			}
 		}
 	}
 }

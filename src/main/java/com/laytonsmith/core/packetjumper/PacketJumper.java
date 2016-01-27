@@ -2,10 +2,9 @@
 package com.laytonsmith.core.packetjumper;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Web.WebUtility;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.constructs.Construct;
-import java.io.IOException;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -49,7 +48,7 @@ public class PacketJumper {
 		}, "PacketJumperInitializer");
 		initializingThread.start();
 		for(PacketInfo p : getPacketInfo()){
-			System.out.println(p);
+			StreamUtils.GetSystemOut().println(p);
 		}
 	}
 	

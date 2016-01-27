@@ -11,6 +11,7 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -27,14 +28,18 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.PersistenceNetwork;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -96,8 +101,8 @@ public class Reflection {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.IOException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREIOException.class};
 		}
 
 		@Override
@@ -113,7 +118,7 @@ public class Reflection {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length < 1) {
-				throw new ConfigRuntimeException("Not enough parameters was sent to " + getName(), ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("Not enough parameters was sent to " + getName(), CREInsufficientArgumentsException.class, t);
 			}
 
 			String param = args[0].val();
@@ -126,7 +131,7 @@ public class Reflection {
 					//No name provided
 					CArray ca = new CArray(t);
 					for (String name : env.getEnv(GlobalEnv.class).GetVarList().keySet()) {
-						ca.push(new CString(name, t));
+						ca.push(new CString(name, t), t);
 					}
 					return ca;
 				} else if (args.length == 2) {
@@ -141,9 +146,9 @@ public class Reflection {
 					return new CString("Unknown (maybe the interpreter?)", t);
 				} else {
 					try {
-						return new CString(t.file().getCanonicalPath().replace("\\", "/"), t);
+						return new CString(t.file().getCanonicalPath().replace('\\', '/'), t);
 					} catch (IOException ex) {
-						throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+						throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t);
 					}
 				}
 			} else if ("col".equalsIgnoreCase(param)) {
@@ -163,25 +168,25 @@ public class Reflection {
 				if(args.length == 1){
 					//No name provided
 					for(Class<Enum> e : enums){
-						a.push(new CString(e.getAnnotation(MEnum.class).value(), t));
+						a.push(new CString(e.getAnnotation(MEnum.class).value(), t), t);
 					}
 					for (Class<DynamicEnum> d : dEnums) {
-						a.push(new CString(d.getAnnotation(MDynamicEnum.class).value(), t));
+						a.push(new CString(d.getAnnotation(MDynamicEnum.class).value(), t), t);
 					}
 				} else if(args.length == 2){
 					String enumName = args[1].val();
 					for(Class<Enum> e : enums){
 						if(e.getAnnotation(MEnum.class).value().equals(enumName)){
 							for(Enum ee : e.getEnumConstants()){
-								a.push(new CString(ee.name(), t));
+								a.push(new CString(ee.name(), t), t);
 							}
 							break;
 						}
 					}
 					for (Class<DynamicEnum> d : dEnums) {
 						if (d.getAnnotation(MDynamicEnum.class).value().equals(enumName)) {
-							for (DynamicEnum ee : (DynamicEnum[]) ReflectionUtils.invokeMethod(d, null, "values")) {
-								a.push(new CString(ee.name(), t));
+							for (DynamicEnum ee : (Collection<DynamicEnum>) ReflectionUtils.invokeMethod(d, null, "values")) {
+								a.push(new CString(ee.name(), t), t);
 							}
 							break;
 						}
@@ -190,8 +195,8 @@ public class Reflection {
 				return a;
 			}
 
-			throw new ConfigRuntimeException("The arguments passed to " + getName() + " are incorrect. Please check them and try again.",
-					ExceptionType.FormatException, t);
+			throw ConfigRuntimeException.BuildException("The arguments passed to " + getName() + " are incorrect. Please check them and try again.",
+					CREFormatException.class, t);
 		}
 
 		@Override
@@ -220,8 +225,8 @@ public class Reflection {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -241,25 +246,25 @@ public class Reflection {
 			try {
 				docField = DocField.getValue(args[1].val());
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException("Invalid docField provided: " + args[1].val(), ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Invalid docField provided: " + args[1].val(), CREFormatException.class, t);
 			}
 			//For now, we have special handling, since functions are actually the only thing that will work,
 			//but eventually this will be a generic interface.
 			if (element.startsWith("@")) {
 				IVariable var = environment.getEnv(GlobalEnv.class).GetVarList().get(element, t);
 				if (var == null) {
-					throw new ConfigRuntimeException("Invalid variable provided: " + element + " does not exist in the current scope", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Invalid variable provided: " + element + " does not exist in the current scope", CREFormatException.class, t);
 				}
 			} else if (element.startsWith("_")) {
 				if (!environment.getEnv(GlobalEnv.class).GetProcs().containsKey(element)) {
-					throw new ConfigRuntimeException("Invalid procedure name provided: " + element + " does not exist in the current scope", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Invalid procedure name provided: " + element + " does not exist in the current scope", CREFormatException.class, t);
 				}
 			} else {
 				try {
 					Function f = (Function) FunctionList.getFunction(new CFunction(element, t));
 					return new CString(formatFunctionDoc(f.docs(), docField), t);
 				} catch (ConfigCompileException ex) {
-					throw new ConfigRuntimeException("Unknown function: " + element, ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Unknown function: " + element, CREFormatException.class, t);
 				}
 			}
 			return CNull.NULL;
@@ -346,8 +351,8 @@ public class Reflection {
 	public static class get_functions extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -382,7 +387,7 @@ public class Reflection {
 			for (String cname : funcs.keySet()) {
 				CArray fnames = new CArray(t);
 				for (String fname : funcs.get(cname)) {
-					fnames.push(new CString(fname, t));
+					fnames.push(new CString(fname, t), t);
 				}
 				ret.set(new CString(cname, t), fnames, t);
 			}
@@ -416,8 +421,8 @@ public class Reflection {
 	public static class get_events extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -435,7 +440,7 @@ public class Reflection {
 				Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for (Event event : EventList.GetEvents()) {
-				ret.push(new CString(event.getName(), t));
+				ret.push(new CString(event.getName(), t), t);
 			}
 			ret.sort(CArray.SortType.STRING_IC);
 			return ret;
@@ -466,8 +471,8 @@ public class Reflection {
 	public static class get_aliases extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -484,7 +489,7 @@ public class Reflection {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for (Script s : Static.getAliasCore().getScripts()) {
-				ret.push(new CString(s.getSignature(), t));
+				ret.push(new CString(s.getSignature(), t), t);
 			}
 			ret.sort(CArray.SortType.STRING_IC);
 			return ret;
@@ -515,8 +520,8 @@ public class Reflection {
 	public static class reflect_value_source extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -558,5 +563,70 @@ public class Reflection {
 			return CHVersion.V3_3_1;
 		}
 		
+	}
+
+	@api
+	public static class get_procedures extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray ret = new CArray(t);
+			for (Map.Entry<String, Procedure> p : environment.getEnv(GlobalEnv.class).GetProcs().entrySet()) {
+				ret.push(new CString(p.getKey(), t), t);
+			}
+			ret.sort(CArray.SortType.STRING_IC);
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_procedures";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Returns an array of procedures callable in the current scope.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Simple example", "msg(get_procedures());\n"
+						+ "proc _testProc() {}\n"
+						+ "msg(get_procedures());"),
+				new ExampleScript("Example with procedures within procedures", "msg(get_procedures());\n"
+						+ "proc _testProc() {\n"
+						+ "\tproc _innerProc() {}\n"
+						+ "\tmsg(get_procedures());\n"
+						+ "}\n"
+						+ "_testProc();\n"
+						+ "msg(get_procedures());")
+			};
+		}
 	}
 }

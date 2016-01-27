@@ -13,8 +13,9 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.taskmanager.CoreTaskType;
 import com.laytonsmith.core.taskmanager.TaskHandler;
 import com.laytonsmith.core.taskmanager.TaskManager;
@@ -33,8 +34,8 @@ public class TaskHandling {
 	public static class tm_get_tasks extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -62,7 +63,7 @@ public class TaskHandling {
 					properties.set(prop, task.getPropertyData().get(prop).toString());
 				}
 				tt.set("properties", properties, t);
-				ret.push(tt);
+				ret.push(tt, t);
 			}
 			return ret;
 		}
@@ -117,8 +118,8 @@ public class TaskHandling {
 	public static class tm_kill_task extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override

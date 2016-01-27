@@ -2,7 +2,6 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import org.junit.After;
 import org.junit.AfterClass;

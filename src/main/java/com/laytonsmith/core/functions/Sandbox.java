@@ -1,12 +1,15 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPlayerInventory;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.commandhelper.BukkitDirtyRegisteredListener;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
@@ -21,8 +24,13 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.BoundEvent;
+import com.laytonsmith.core.exceptions.CRE.CREBindException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import org.bukkit.event.Cancellable;
 
 /**
@@ -52,7 +60,7 @@ public class Sandbox {
 //            return "void {plugin, cmd} ";
 //        }
 //
-//        public ExceptionType[] thrown() {
+//        public Class<? extends CREThrowable>[] thrown() {
 //            return null;
 //        }
 //
@@ -147,8 +155,8 @@ public class Sandbox {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.BindException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREBindException.class};
         }
 
 		@Override
@@ -169,7 +177,7 @@ public class Sandbox {
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
             if (original == null) {
-                throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, t);
+                throw ConfigRuntimeException.BuildException("is_cancelled cannot be called outside an event handler", CREBindException.class, t);
             }
             if (original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable
                     && original.getUnderlyingEvent() instanceof org.bukkit.event.Event) {
@@ -203,8 +211,9 @@ public class Sandbox {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.EnchantmentException, ExceptionType.PlayerOfflineException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CRECastException.class, CREEnchantmentException.class,
+				CREPlayerOfflineException.class, CRENotFoundException.class};
         }
 
 		@Override
@@ -229,30 +238,37 @@ public class Sandbox {
                 m = Static.GetPlayer(args[0].val(), t);
                 offset = 0;
             }
-            MCItemStack is = null;
+			Static.AssertPlayerNonNull(m, t);
+            MCItemStack is;
             if (args[1 - offset] instanceof CNull) {
                 is = m.getItemInHand();
             } else {
                 int slot = Static.getInt32(args[1 - offset], t);
-                is = m.getInventory().getItem(slot);
+				MCPlayerInventory pinv = m.getInventory();
+				if (pinv == null) {
+					throw ConfigRuntimeException.BuildException(
+						"Could not find the inventory of the given player (are you running in cmdline mode?)",
+						CRENotFoundException.class, t);
+				}
+                is = pinv.getItem(slot);
             }
             CArray enchantArray = new CArray(t);
             if (!( args[2 - offset] instanceof CArray )) {
-                enchantArray.push(args[2 - offset]);
+                enchantArray.push(args[2 - offset], t);
             } else {
                 enchantArray = (CArray) args[2 - offset];
             }
 
             CArray levelArray = new CArray(t);
             if (!( args[3 - offset] instanceof CArray )) {
-                levelArray.push(args[3 - offset]);
+                levelArray.push(args[3 - offset], t);
             } else {
                 levelArray = (CArray) args[3 - offset];
             }
             for (String key : enchantArray.stringKeySet()) {
                 MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
                 if (e == null) {
-                    throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
+                    throw ConfigRuntimeException.BuildException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", CREEnchantmentException.class, t);
                 }
                 int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
 
@@ -285,8 +301,8 @@ public class Sandbox {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREPlayerOfflineException.class};
         }
 
 		@Override
@@ -345,8 +361,8 @@ public class Sandbox {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREPlayerOfflineException.class};
         }
 
 		@Override
@@ -463,6 +479,56 @@ public class Sandbox {
 								"| *  ((*   *  /\n" +
 								" \\  *))  *  .'\n" +
 								"  '-.((*_.-'", t);
+		}
+
+	}
+
+	@api
+	@hide("This is an easter egg")
+	@noboilerplate
+	public static class norway extends DummyFunction {
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Function color = new Echoes.color();
+			String red = color.exec(t, environment, args.length == 3 ? args[0] : new CString("RED", t)).val();
+			String white = color.exec(t, environment, args.length == 3 ? args[1] : new CString("WHITE", t)).val();
+			String blue = color.exec(t, environment, args.length == 3 ? args[2] : new CString("BLUE", t)).val();
+			int multiplier = 2;
+			char c = '=';
+			String one = multiply(c, 1 * multiplier);
+			String two = multiply(c, 2 * multiplier);
+			String six = multiply(c, 6 * multiplier);
+			String seven = multiply(c, 7 * multiplier);
+			String twelve = multiply(c, 12 * multiplier);
+			String thirteen = multiply(c, 13 * multiplier);
+			String twentytwo = multiply(c, 22 * multiplier);
+			for(int i = 0; i < 6; ++i){
+				System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
+			}
+			System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
+			for(int i = 0; i < 2; ++i){
+				System.out.println(Static.MCToANSIColors(blue + twentytwo) + TermColors.RESET);
+			}
+			System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
+			for(int i = 0; i < 6; ++i){
+				System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
+			}
+
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 3};
+		}
+
+		public static String multiply(char c, int times){
+			StringBuilder b = new StringBuilder();
+			for(int i = 0; i < times; ++i){
+				b.append(c);
+			}
+			return b.toString();
 		}
 
 	}

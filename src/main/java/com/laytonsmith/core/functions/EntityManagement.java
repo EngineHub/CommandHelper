@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCAgeable;
 import com.laytonsmith.abstraction.MCArmorStand;
@@ -24,17 +25,16 @@ import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCTNT;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
-import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCArrow;
 import com.laytonsmith.abstraction.entities.MCBoat;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.entities.MCCreeper;
 import com.laytonsmith.abstraction.entities.MCEnderman;
+import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCFishHook;
 import com.laytonsmith.abstraction.entities.MCGuardian;
 import com.laytonsmith.abstraction.entities.MCHorse;
@@ -47,6 +47,7 @@ import com.laytonsmith.abstraction.entities.MCMinecart;
 import com.laytonsmith.abstraction.entities.MCOcelot;
 import com.laytonsmith.abstraction.entities.MCPig;
 import com.laytonsmith.abstraction.entities.MCPigZombie;
+import com.laytonsmith.abstraction.entities.MCRabbit;
 import com.laytonsmith.abstraction.entities.MCSheep;
 import com.laytonsmith.abstraction.entities.MCSkeleton;
 import com.laytonsmith.abstraction.entities.MCSlime;
@@ -64,6 +65,7 @@ import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
+import com.laytonsmith.abstraction.enums.MCRabbitType;
 import com.laytonsmith.abstraction.enums.MCRotation;
 import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.annotations.api;
@@ -83,9 +85,20 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityTypeException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
+import com.laytonsmith.core.exceptions.CRE.CRELengthException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.CRE.CREUnageableMobException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -123,8 +136,8 @@ public class EntityManagement {
 
 	public static abstract class EntityGetterFunction extends EntityFunction {
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREBadEntityException.class};
 		}
 
 		@Override
@@ -135,9 +148,9 @@ public class EntityManagement {
 
 	public static abstract class EntitySetterFunction extends EntityFunction {
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
-					ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRELengthException.class,
+					CREBadEntityException.class};
 		}
 
 		@Override
@@ -150,9 +163,9 @@ public class EntityManagement {
 	public static class all_entities extends EntityFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException,
-					ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class, CREFormatException.class,
+					CRECastException.class};
 		}
 
 		@Override
@@ -162,7 +175,7 @@ public class EntityManagement {
 			if (args.length == 0) {
 				for (MCWorld w : Static.getServer().getWorlds()) {
 					for (MCEntity e : w.getEntities()) {
-						ret.push(new CInt(e.getEntityId(), t));
+						ret.push(new CString(e.getUniqueId().toString(), t), t);
 					}
 				}
 			} else {
@@ -171,7 +184,7 @@ public class EntityManagement {
 				if (args.length == 3) {
 					w = Static.getServer().getWorld(args[0].val());
 					if (w == null) {
-						throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+						throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), CREInvalidWorldException.class, t);
 					}
 					try {
 						int x = Static.getInt32(args[1], t);
@@ -184,21 +197,21 @@ public class EntityManagement {
 						c = w.getChunkAt(ObjectGenerator.GetGenerator().location(l, w, t));
 					}
 					for (MCEntity e : c.getEntities()) {
-						ret.push(new CInt(e.getEntityId(), t));
+						ret.push(new CString(e.getUniqueId().toString(), t), t);
 					}
 				} else {
 					if (args[0] instanceof CArray) {
 						c = ObjectGenerator.GetGenerator().location(args[0], null, t).getChunk();
 						for (MCEntity e : c.getEntities()) {
-							ret.push(new CInt(e.getEntityId(), t));
+							ret.push(new CString(e.getUniqueId().toString(), t), t);
 						}
 					} else {
 						w = Static.getServer().getWorld(args[0].val());
 						if (w == null) {
-							throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+							throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), CREInvalidWorldException.class, t);
 						}
 						for (MCEntity e : w.getEntities()) {
-							ret.push(new CInt(e.getEntityId(), t));
+							ret.push(new CString(e.getUniqueId().toString(), t), t);
 						}
 					}
 				}
@@ -248,7 +261,7 @@ public class EntityManagement {
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity e;
 			try {
-				e = Static.getEntity(Static.getInt32(args[0], t), t);
+				e = Static.getEntity(args[0], t);
 			} catch (ConfigRuntimeException cre) {
 				return CBoolean.FALSE;
 			}
@@ -275,7 +288,7 @@ public class EntityManagement {
 			MCEntity e;
 
 			try {
-				e = Static.getEntity(Static.getInt32(args[0], t), t);
+				e = Static.getEntity(args[0], t);
 			} catch (ConfigRuntimeException cre) {
 				return CBoolean.FALSE;
 			}
@@ -300,7 +313,7 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity e = Static.getEntity(args[0], t);
 			return ObjectGenerator.GetGenerator().location(e.getLocation());
 		}
 
@@ -330,20 +343,20 @@ public class EntityManagement {
 	public static class set_entity_loc extends EntitySetterFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException,
-					ExceptionType.CastException, ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CREFormatException.class,
+					CRECastException.class, CREInvalidWorldException.class, CRELengthException.class};
 		}
 
 		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity e = Static.getEntity(args[0], t);
 			MCLocation l;
 			if (args[1] instanceof CArray) {
 				l = ObjectGenerator.GetGenerator().location((CArray) args[1], e.getWorld(), t);
 			} else {
-				throw new Exceptions.FormatException("An array was expected but recieved " + args[1], t);
+				throw new CREFormatException("An array was expected but recieved " + args[1], t);
 			}
 			return CBoolean.get(e.teleport(l));
 		}
@@ -383,7 +396,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 
-			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity e = Static.getEntity(args[0], t);
 			CArray va = ObjectGenerator.GetGenerator().vector(e.getVelocity(), t);
 			va.set("magnitude", new CDouble(e.getVelocity().length(), t), t);
 			return va;
@@ -414,10 +427,8 @@ public class EntityManagement {
 	public static class set_entity_velocity extends EntitySetterFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-
-			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
 			e.setVelocity(ObjectGenerator.GetGenerator().vector(args[1], t));
 			return CVoid.VOID;
 		}
@@ -450,14 +461,13 @@ public class EntityManagement {
 	public static class entity_remove extends EntityGetterFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity((int) Static.getInt(args[0], t), t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity(args[0], t);
 			if (ent == null) {
 				return CVoid.VOID;
 			} else if (ent instanceof MCHumanEntity) {
-				throw new ConfigRuntimeException("Cannot remove human entity (" + ent.getEntityId() + ")!",
-						ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("Cannot remove human entity (" + ent.getUniqueId() + ")!",
+						CREBadEntityException.class, t);
 			} else {
 				ent.remove();
 				return CVoid.VOID;
@@ -482,17 +492,15 @@ public class EntityManagement {
 	public static class entity_type extends EntityGetterFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity ent;
-			int id = Static.getInt32(args[0], t);
 			try {
-				ent = Static.getEntity(id, t);
+				ent = Static.getEntity(args[0], t);
 			} catch (ConfigRuntimeException cre) {
 				return CNull.NULL;
 			}
@@ -515,15 +523,13 @@ public class EntityManagement {
 	public static class get_entity_breedable extends EntityGetterFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
-			MCEntity ent = Static.getEntity(id, t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity(args[0], t);
 
 			if (ent instanceof MCAgeable){
 				return CBoolean.get(((MCAgeable)ent).getCanBreed());
 			} else {
-				throw new ConfigRuntimeException("Entity ID must be from an ageable entity!", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("Entity ID must be from an ageable entity!", CREBadEntityException.class, t);
 			}
 		}
 
@@ -542,17 +548,15 @@ public class EntityManagement {
 	public static class set_entity_breedable extends EntitySetterFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean breed = Static.getBoolean(args[1]);
 
-			MCEntity ent = Static.getEntity(id, t);
+			MCEntity ent = Static.getEntity(args[0], t);
 
 			if (ent instanceof MCAgeable){
 				((MCAgeable)ent).setCanBreed(breed);
 			} else {
-				throw new ConfigRuntimeException("Entity ID must be from an ageable entity!", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("Entity ID must be from an ageable entity!", CREBadEntityException.class, t);
 			}
 
 			return CVoid.VOID;
@@ -573,10 +577,8 @@ public class EntityManagement {
 	public static class get_entity_age extends EntityGetterFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
-			MCEntity ent = Static.getEntity(id, t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity(args[0], t);
 			if (ent == null) {
 				return CNull.NULL;
 			} else {
@@ -599,22 +601,20 @@ public class EntityManagement {
 	public static class set_entity_age extends EntitySetterFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException,
-					ExceptionType.RangeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREBadEntityException.class,
+					CRERangeException.class, CRELengthException.class};
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int age = Static.getInt32(args[1], t);
 
 			if (age < 1) {
-				throw new ConfigRuntimeException("Entity age can't be less than 1 server tick.", ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("Entity age can't be less than 1 server tick.", CRERangeException.class, t);
 			}
 
-			MCEntity ent = Static.getEntity(id, t);
+			MCEntity ent = Static.getEntity(args[0], t);
 			if (ent == null) {
 				return CNull.NULL;
 			} else {
@@ -638,23 +638,21 @@ public class EntityManagement {
 	public static class get_mob_age extends EntityGetterFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.UnageableMobException, ExceptionType.CastException,
-					ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREUnageableMobException.class, CRELengthException.class,
+					CREBadEntityException.class};
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
-			MCLivingEntity ent = Static.getLivingEntity(id, t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
 			if (ent == null) {
 				return CNull.NULL;
 			} else if (ent instanceof MCAgeable) {
 				MCAgeable mob = ((MCAgeable) ent);
 				return new CInt(mob.getAge(), t);
 			} else {
-				throw new ConfigRuntimeException("The specified entity does not age", ExceptionType.UnageableMobException, t);
+				throw ConfigRuntimeException.BuildException("The specified entity does not age", CREUnageableMobException.class, t);
 			}
 		}
 
@@ -674,21 +672,19 @@ public class EntityManagement {
 	public static class set_mob_age extends EntityFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.UnageableMobException, ExceptionType.CastException,
-					ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREUnageableMobException.class, CRECastException.class,
+					CREBadEntityException.class, CRELengthException.class};
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int age = Static.getInt32(args[1], t);
 			boolean lock = false;
 			if (args.length == 3) {
 				lock = (boolean) Static.getBoolean(args[2]);
 			}
-			MCLivingEntity ent = Static.getLivingEntity(id, t);
+			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
 			if (ent == null) {
 				return CNull.NULL;
 			} else if (ent instanceof MCAgeable) {
@@ -697,7 +693,7 @@ public class EntityManagement {
 				mob.setAgeLock(lock);
 				return CVoid.VOID;
 			} else {
-				throw new ConfigRuntimeException("The specified entity does not age", ExceptionType.UnageableMobException, t);
+				throw ConfigRuntimeException.BuildException("The specified entity does not age", CREUnageableMobException.class, t);
 			}
 		}
 
@@ -723,9 +719,8 @@ public class EntityManagement {
 	public static class get_mob_effects extends EntityGetterFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity mob = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
 			return ObjectGenerator.GetGenerator().potions(mob.getEffects(), t);
 		}
 
@@ -758,48 +753,53 @@ public class EntityManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{3, 4, 5};
+			return new Integer[]{3, 4, 5, 6};
 		}
 
 		@Override
 		public String docs() {
-			return "boolean {entityId, potionID, strength, [seconds], [ambient]} Effect is 1-23. Seconds defaults to 30."
-					+ " If the potionID is out of range, a RangeException is thrown, because out of range potion effects"
-					+ " cause the client to crash, fairly hardcore. See http://www.minecraftwiki.net/wiki/Potion_effects"
-					+ " for a complete list of potions that can be added. To remove an effect, set the seconds to 0."
-					+ " Strength is the number of levels to add to the base power (effect level 1). Ambient takes a boolean"
-					+ " of whether the particles should be less noticeable. The function returns true if the effect was"
-					+ " added or removed as desired, and false if it wasn't (however, this currently only will happen if"
-					+ " an effect is attempted to be removed, yet isn't already on the mob).";
+			return "boolean {entityId, potionID, strength, [seconds], [ambient], [particles]} Effect is 1-23. Seconds"
+					+ " defaults to 30. If the potionID is out of range, a RangeException is thrown, because out of"
+					+ " range potion effects cause the client to crash, fairly hardcore. See"
+					+ " http://www.minecraftwiki.net/wiki/Potion_effects for a complete list of potions that can be"
+					+ " added. To remove an effect, set the seconds to 0. Strength is the number of levels to add to the"
+					+ " base power (effect level 1). Ambient takes a boolean of whether the particles should be less"
+					+ " noticeable. Particles takes a boolean of whether the particles should be visible at all. The"
+					+ " function returns true if the effect was added or removed as desired, and false if it wasn't"
+					+ " (however, this currently only will happen if an effect is attempted to be removed, yet isn't"
+					+ " already on the mob).";
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
-					ExceptionType.BadEntityException, ExceptionType.RangeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREFormatException.class,
+					CREBadEntityException.class, CRERangeException.class};
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args)
-				throws ConfigRuntimeException {
-			MCLivingEntity mob = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
 
 			int effect = Static.getInt32(args[1], t);
 
 			int strength = Static.getInt32(args[2], t);
 			int seconds = 30;
 			boolean ambient = false;
+			boolean particles = true;
 			if (args.length >= 4) {
 				seconds = Static.getInt32(args[3], t);
 			}
 			if (args.length == 5) {
 				ambient = Static.getBoolean(args[4]);
 			}
+			if (args.length == 6) {
+				particles = Static.getBoolean(args[5]);
+			}
 
 			if (seconds == 0) {
 				return CBoolean.get(mob.removeEffect(effect));
 			} else {
-				mob.addEffect(effect, strength, seconds, ambient, t);
+				mob.addEffect(effect, strength, seconds, ambient, particles, t);
 				return CBoolean.TRUE;
 			}
 		}
@@ -809,27 +809,26 @@ public class EntityManagement {
 	public static class shoot_projectile extends EntityFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.BadEntityTypeException,
-				ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CREBadEntityTypeException.class,
+				CREFormatException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env,
-				Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 
 			MCLivingEntity shooter = null;
-			MCLivingEntity target = null;
+			MCLivingEntity target;
 
-			int shooter_id = 0;
-			int target_id = 0;
+			UUID shooter_id = null;
+			UUID target_id = null;
 
 			MCLocation from = null;
 			MCLocation to = null;
 
-			MCLocation shifted_from = null;
+			MCLocation shifted_from;
 
 			MCEntityType entity_shoot = null;
 			MCProjectileType projectile_shoot = null;
@@ -838,51 +837,51 @@ public class EntityManagement {
 
 			if (args.length >= 1) {
 				try {
-					shooter_id = Static.GetPlayer(args[0], t).getEntityId();
+					shooter_id = Static.GetPlayer(args[0], t).getUniqueId();
 				} catch (ConfigRuntimeException notPlayer) {
 					try {
-						shooter_id = Static.getInt32(args[0], t);
+						shooter_id = Static.GetUUID(args[0], t);
 					} catch (ConfigRuntimeException notEntIdEither) {
 					}
 				}
 
-				if (shooter_id == 0) {
+				if (shooter_id == null) {
 					try {
 						from = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
 					} catch (ConfigRuntimeException badLocation) {
 					}
 				}
 
-				if (shooter_id == 0 && from == null) {
-					throw new ConfigRuntimeException("Could not find an entity or location matching " + args[0] + "!",
-							ExceptionType.FormatException, t);
+				if (shooter_id == null && from == null) {
+					throw ConfigRuntimeException.BuildException("Could not find an entity or location matching " + args[0] + "!",
+							CREFormatException.class, t);
 				}
 			} else {
-				shooter_id = ((MCLivingEntity) p).getEntityId();
-				Static.AssertPlayerNonNull((MCPlayer) p, t);
+				Static.AssertPlayerNonNull(p, t);
+				shooter_id = p.getUniqueId();
 			}
 
 			if (args.length >= 3) {
 
 				try {
-					target_id = Static.GetPlayer(args[2], t).getEntityId();
+					target_id = Static.GetPlayer(args[2], t).getUniqueId();
 				} catch (ConfigRuntimeException notPlayer) {
 					try {
-						target_id = Static.getInt32(args[2], t);
+						target_id = Static.GetUUID(args[2], t);
 					} catch (ConfigRuntimeException notEntIdEither) {
 					}
 				}
 
-				if (target_id == 0) {
+				if (target_id == null) {
 					try {
 						to = ObjectGenerator.GetGenerator().location(args[2], null, t);
 					} catch (ConfigRuntimeException badLocation) {
 					}
 				}
 
-				if (target_id == 0 && to == null) {
-					throw new ConfigRuntimeException("Could not find an entity or location matching " + args[2] + " for target!",
-							ExceptionType.FormatException, t);
+				if (target_id == null && to == null) {
+					throw ConfigRuntimeException.BuildException("Could not find an entity or location matching " + args[2] + " for target!",
+							CREFormatException.class, t);
 				}
 			}
 
@@ -890,51 +889,51 @@ public class EntityManagement {
 				speed = Static.getDouble(args[3], t);
 			}
 
-			if (shooter_id > 0) {
-				shooter = Static.getLivingEntity(shooter_id, t);
+			if (shooter_id != null) {
+				shooter = Static.getLivingByUUID(shooter_id, t);
 				from = shooter.getEyeLocation();
 			}
 
-			if (target_id > 0) {
-				target = Static.getLivingEntity(target_id, t);
+			if (target_id != null) {
+				target = Static.getLivingByUUID(target_id, t);
 				to = target.getEyeLocation();
 			}
 
 			if (args.length >= 2) {
 
-				if (shooter_id > 0 && to == null) {
+				if (shooter_id != null && to == null) {
 					try {
 						projectile_shoot = MCProjectileType.valueOf(args[1].val().toUpperCase());
 					} catch (IllegalArgumentException badEnum) {
-						throw new ConfigRuntimeException(args[1] + " is not a valid Projectile", ExceptionType.FormatException, t);
+						throw ConfigRuntimeException.BuildException(args[1] + " is not a valid Projectile", CREFormatException.class, t);
 					}
 				} else {
 					try {
 						entity_shoot = MCEntityType.valueOf(args[1].val().toUpperCase());
 					} catch (IllegalArgumentException badEnum) {
-						throw new ConfigRuntimeException(args[1] + " is not a valid entity type", ExceptionType.BadEntityTypeException, t);
+						throw ConfigRuntimeException.BuildException(args[1] + " is not a valid entity type", CREBadEntityTypeException.class, t);
 					}
 				}
 			} else {
-				if (shooter_id > 0 && to == null) {
+				if (shooter_id != null && to == null) {
 					projectile_shoot = MCProjectileType.FIREBALL;
 				} else {
 					entity_shoot = MCEntityType.valueOfVanillaType(MCEntityType.MCVanillaEntityType.FIREBALL);
 				}
 			}
 
-			if (args.length < 3 && shooter_id == 0) {
-				throw new ConfigRuntimeException("You must specify target location if you want shoot from location, not entity.", ExceptionType.FormatException, t);
+			if (args.length < 3 && shooter_id == null) {
+				throw ConfigRuntimeException.BuildException("You must specify target location if you want shoot from location, not entity.", CREFormatException.class, t);
 			}
 
-			if (shooter_id > 0 && to == null) {
+			if (shooter_id != null && to == null) {
 				MCProjectile projectile = shooter.launchProjectile(projectile_shoot);
 
-				return new CInt(projectile.getEntityId(), t);
+				return new CString(projectile.getUniqueId().toString(), t);
 			} else {
-				MVector3D velocity = to.toVector().subtract(from.toVector()).normalize();
+				Vector3D velocity = to.toVector().subtract(from.toVector()).normalize();
 
-				if (shooter_id > 0) {
+				if (shooter_id != null) {
 					shifted_from = from.add(velocity);
 				} else {
 					shifted_from = from;
@@ -948,7 +947,7 @@ public class EntityManagement {
 					entity.setVelocity(velocity.multiply(speed));
 				}
 
-				return new CInt(entity.getEntityId(), t);
+				return new CString(entity.getUniqueId().toString(), t);
 			}
 		}
 
@@ -970,7 +969,7 @@ public class EntityManagement {
 					+ " If provide three arguments, with target (entityID, player name or location array), entity will"
 					+ " shoot to target location. Last, fourth argument, is double and specifies the speed"
 					+ " of projectile. Returns the EntityID of the entity. Valid entities types: "
-					+ StringUtils.Join(MCEntityType.MCVanillaEntityType.values(), ", ", ", or ", " or ");
+					+ StringUtils.Join(MCEntityType.types(), ", ", ", or ", " or ");
 		}
 	}
 
@@ -996,8 +995,8 @@ public class EntityManagement {
 			List<String> types = new ArrayList<String>();
 
 			if (!(args[0] instanceof CArray)) {
-				throw new ConfigRuntimeException("Expecting an array at parameter 1 of entities_in_radius",
-						ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("Expecting an array at parameter 1 of entities_in_radius",
+						CREBadEntityException.class, t);
 			}
 
 			loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
@@ -1020,7 +1019,7 @@ public class EntityManagement {
 			// http://forums.bukkit.org/threads/getnearbyentities-of-a-location.101499/#post-1341141
 			int chunkRadius = dist < 16 ? 1 : (dist - (dist % 16)) / 16;
 
-			Set<Integer> eSet = new HashSet<>();
+			Set<UUID> eSet = new HashSet<>();
 			for (int chX = 0 - chunkRadius; chX <= chunkRadius; chX++) {
 				for (int chZ = 0 - chunkRadius; chZ <= chunkRadius; chZ++) {
 					MCLocation nl = StaticLayer.GetLocation(loc.getWorld(), loc.getX()+(chX*16), loc.getY(), loc.getZ()+(chZ*16));
@@ -1031,15 +1030,15 @@ public class EntityManagement {
 						}
 						if (e.getLocation().distance(loc) <= dist && e.getLocation().getBlock() != loc.getBlock()) {
 							if (types.isEmpty() || types.contains(e.getType().name())) {
-								eSet.add(e.getEntityId());
+								eSet.add(e.getUniqueId());
 							}
 						}
 					}
 				}
 			}
 			CArray entities = new CArray(t);
-			for(int e : eSet){
-				entities.push(new CInt(e, t));
+			for (UUID e : eSet) {
+				entities.push(new CString(e.toString(), t), t);
 			}
 
 			return entities;
@@ -1055,8 +1054,8 @@ public class EntityManagement {
 				try {
 					entityType = MCEntityType.valueOf(type.toUpperCase());
 				} catch (IllegalArgumentException e) {
-					throw new ConfigRuntimeException(String.format("Wrong entity type: %s", type),
-							ExceptionType.BadEntityException, t);
+					throw ConfigRuntimeException.BuildException(String.format("Wrong entity type: %s", type),
+							CREBadEntityException.class, t);
 				}
 
 				newTypes.add(entityType.name());
@@ -1070,13 +1069,13 @@ public class EntityManagement {
 			return "array {location array, distance, [type] | location array, distance, [arrayTypes]} Returns an array of"
 					+ " all entities within the given radius. Set type argument to filter entities to a specific type. You"
 					+ " can pass an array of types. Valid types (case doesn't matter): "
-					+ StringUtils.Join(MCEntityType.MCVanillaEntityType.values(), ", ", ", or ", " or ");
+					+ StringUtils.Join(MCEntityType.types(), ", ", ", or ", " or ");
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException,
-					ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREBadEntityException.class,
+					CREFormatException.class};
 		}
 	}
 
@@ -1086,11 +1085,11 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			if (le.getTarget(t) == null) {
 				return CNull.NULL;
 			} else {
-				return new CInt(le.getTarget(t).getEntityId(), t);
+				return new CString(le.getTarget(t).getUniqueId().toString(), t);
 			}
 		}
 
@@ -1110,17 +1109,16 @@ public class EntityManagement {
 	public static class set_mob_target extends EntitySetterFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CRELengthException.class};
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCLivingEntity target = null;
 			if (!(args[1] instanceof CNull)) {
-				target = Static.getLivingEntity(Static.getInt32(args[1], t), t);
+				target = Static.getLivingEntity(args[1], t);
 			}
 			le.setTarget(target, t);
 			return CVoid.VOID;
@@ -1142,13 +1140,12 @@ public class EntityManagement {
 	public static class get_mob_equipment extends EntityGetterFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCEntityEquipment eq = le.getEquipment();
 			if (eq == null) {
-				throw new ConfigRuntimeException("Entities of type \"" + le.getType() + "\" do not have equipment.",
-						ExceptionType.BadEntityTypeException, t);
+				throw ConfigRuntimeException.BuildException("Entities of type \"" + le.getType() + "\" do not have equipment.",
+						CREBadEntityTypeException.class, t);
 			}
 			Map<MCEquipmentSlot, MCItemStack> eqmap = le.getEquipment().getAllEquipment();
 			CArray ret = CArray.GetAssociativeArray(t);
@@ -1183,13 +1180,12 @@ public class EntityManagement {
 	public static class set_mob_equipment extends EntitySetterFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCEntityEquipment ee = le.getEquipment();
 			if (ee == null) {
-				throw new ConfigRuntimeException("Entities of type \"" + le.getType() + "\" do not have equipment.",
-						ExceptionType.BadEntityTypeException, t);
+				throw ConfigRuntimeException.BuildException("Entities of type \"" + le.getType() + "\" do not have equipment.",
+						CREBadEntityTypeException.class, t);
 			}
 			Map<MCEquipmentSlot, MCItemStack> eq = ee.getAllEquipment();
 			if (args[1] instanceof CNull) {
@@ -1201,11 +1197,11 @@ public class EntityManagement {
 					try {
 						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ObjectGenerator.GetGenerator().item(ea.get(key, t), t));
 					} catch (IllegalArgumentException iae) {
-						throw new Exceptions.FormatException("Not an equipment slot: " + key, t);
+						throw new CREFormatException("Not an equipment slot: " + key, t);
 					}
 				}
 			} else {
-				throw new Exceptions.FormatException("Expected argument 2 to be an array", t);
+				throw new CREFormatException("Expected argument 2 to be an array", t);
 			}
 			ee.setAllEquipment(eq);
 			return CVoid.VOID;
@@ -1237,9 +1233,8 @@ public class EntityManagement {
 	public static class get_max_health extends EntityGetterFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			return new CDouble(le.getMaxHealth(), t);
 		}
 
@@ -1258,9 +1253,8 @@ public class EntityManagement {
 	public static class set_max_health extends EntitySetterFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			le.setMaxHealth(Static.getDouble(args[1], t));
 			return CVoid.VOID;
 		}
@@ -1289,7 +1283,7 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity ent = Static.getEntity(args[0], t);
 			return new CInt(Static.ticksToMs(ent.getFireTicks())/1000, t);
 		}
 
@@ -1312,10 +1306,10 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity ent = Static.getEntity(args[0], t);
 			int setTicks = (int) Static.msToTicks(Static.getInt(args[1], t)*1000);
 			if (setTicks < 0) {
-				throw new Exceptions.FormatException("Seconds cannot be less than 0", t);
+				throw new CREFormatException("Seconds cannot be less than 0", t);
 			}
 			ent.setFireTicks(setTicks);
 			return CVoid.VOID;
@@ -1339,14 +1333,13 @@ public class EntityManagement {
 	public static class play_entity_effect extends EntitySetterFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity(args[0], t);
 			MCEntityEffect mee;
 			try {
 				mee = MCEntityEffect.valueOf(args[1].val().toUpperCase());
 			} catch (IllegalArgumentException iae) {
-				throw new Exceptions.FormatException("Unknown effect at arg 2.", t);
+				throw new CREFormatException("Unknown effect at arg 2.", t);
 			}
 			ent.playEffect(mee);
 			return CVoid.VOID;
@@ -1375,11 +1368,11 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity le = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity le = Static.getEntity(args[0], t);
 			try {
 				return new CString(le.getCustomName(), t);
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), CRECastException.class, t);
 			}
 		}
 
@@ -1399,11 +1392,11 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity le = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity le = Static.getEntity(args[0], t);
 			try {
 				le.setCustomName(args[1].val());
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), CRECastException.class, t);
 			}
 			return CVoid.VOID;
 		}
@@ -1424,10 +1417,10 @@ public class EntityManagement {
 	public static class spawn_entity extends EntityFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
-					ExceptionType.BadEntityException, ExceptionType.InvalidWorldException,
-					ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class,
+					CREBadEntityException.class, CREInvalidWorldException.class,
+					CREPlayerOfflineException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -1446,8 +1439,8 @@ public class EntityManagement {
 				} else if (cs instanceof MCBlockCommandSender){
 					l = ((MCBlockCommandSender) cs).getBlock().getRelative(MCBlockFace.UP).getLocation();
 				} else {
-					throw new ConfigRuntimeException("A physical commandsender must exist or location must be explicit.",
-							ExceptionType.PlayerOfflineException, t);
+					throw ConfigRuntimeException.BuildException("A physical commandsender must exist or location must be explicit.",
+							CREPlayerOfflineException.class, t);
 				}
 			}
 			if (args.length >= 2) {
@@ -1455,16 +1448,21 @@ public class EntityManagement {
 			}
 			try {
 				entType = MCEntityType.valueOf(args[0].val().toUpperCase());
+				if (entType == null) {
+					throw ConfigRuntimeException.BuildException(
+							"Could not find the entity type internal object (are you running in cmdline mode?)",
+							CRENotFoundException.class, t);
+				}
 				if (!entType.isSpawnable()) {
-					throw new Exceptions.FormatException("Unspawnable entitytype: " + args[0].val(), t);
+					throw new CREFormatException("Unspawnable entitytype: " + args[0].val(), t);
 				}
 			} catch (IllegalArgumentException iae) {
-				throw new Exceptions.FormatException("Unknown entitytype: " + args[0].val(), t);
+				throw new CREFormatException("Unknown entitytype: " + args[0].val(), t);
 			}
 			for (int i = 0; i < qty; i++) {
 				switch (entType.getAbstracted()) {
 					case DROPPED_ITEM:
-						CArray c = new CArray(t);
+						CArray c = CArray.GetAssociativeArray(t);
 						c.set("type", new CInt(1, t), t);
 						c.set("qty", new CInt(qty, t), t);
 						MCItemStack is = ObjectGenerator.GetGenerator().item(c, t);
@@ -1477,7 +1475,7 @@ public class EntityManagement {
 					default:
 						ent = l.getWorld().spawn(l, entType);
 				}
-				ret.push(new CInt(ent.getEntityId(), t));
+				ret.push(new CString(ent.getUniqueId().toString(), t), t);
 			}
 			return ret;
 		}
@@ -1520,15 +1518,15 @@ public class EntityManagement {
 			if (args[0] instanceof CNull) {
 				horse = null;
 			} else {
-				horse = Static.getEntity(Static.getInt32(args[0], t), t);
+				horse = Static.getEntity(args[0], t);
 			}
 			if (args[1] instanceof CNull) {
 				rider = null;
 			} else {
-				rider = Static.getEntity(Static.getInt32(args[1], t), t);
+				rider = Static.getEntity(args[1], t);
 			}
 			if ((horse == null && rider == null) || horse == rider) {
-				throw new Exceptions.FormatException("Horse and rider cannot be the same entity", t);
+				throw new CREFormatException("Horse and rider cannot be the same entity", t);
 			} else if (horse == null) {
 				success = rider.leaveVehicle();
 			} else if (rider == null) {
@@ -1560,9 +1558,9 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
-			if (ent.getPassenger() instanceof MCEntity) {
-				return new CInt(ent.getPassenger().getEntityId(), t);
+			MCEntity ent = Static.getEntity(args[0], t);
+			if (ent.getPassenger() != null) {
+				return new CString(ent.getPassenger().getUniqueId().toString(), t);
 			}
 			return CNull.NULL;
 		}
@@ -1584,9 +1582,9 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity ent = Static.getEntity(args[0], t);
 			if (ent.isInsideVehicle()) {
-				return new CInt(ent.getVehicle().getEntityId(), t);
+				return new CString(ent.getVehicle().getUniqueId().toString(), t);
 			}
 			return CNull.NULL;
 		}
@@ -1606,15 +1604,15 @@ public class EntityManagement {
 	public static class get_entity_max_speed extends EntityGetterFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.BadEntityTypeException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CREBadEntityTypeException.class, CRELengthException.class};
 		}
 
 		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 
-			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity e = Static.getEntity(args[0], t);
 
 			if (e instanceof MCBoat) {
 				return new CDouble(((MCBoat) e).getMaxSpeed(), t);
@@ -1622,8 +1620,8 @@ public class EntityManagement {
 				return new CDouble(((MCMinecart) e).getMaxSpeed(), t);
 			}
 
-			throw new ConfigRuntimeException("Given entity must be a boat or minecart.",
-					ExceptionType.BadEntityTypeException, t);
+			throw ConfigRuntimeException.BuildException("Given entity must be a boat or minecart.",
+					CREBadEntityTypeException.class, t);
 		}
 
 		@Override
@@ -1642,24 +1640,25 @@ public class EntityManagement {
 	public static class set_entity_max_speed extends EntitySetterFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.BadEntityTypeException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CREBadEntityTypeException.class,
+					CRECastException.class, CRELengthException.class};
 		}
 
 		@Override
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 
-			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
-			CDouble speed = new CDouble(args[1].val(), t);
+			MCEntity e = Static.getEntity(args[0], t);
+			double speed = Static.getDouble(args[1], t);
 
 			if (e instanceof MCBoat) {
-				((MCBoat) e).setMaxSpeed(speed.getDouble());
+				((MCBoat) e).setMaxSpeed(speed);
 			} else if(e instanceof MCMinecart) {
-				((MCMinecart) e).setMaxSpeed(speed.getDouble());
+				((MCMinecart) e).setMaxSpeed(speed);
 			} else {
-				throw new ConfigRuntimeException("Given entity must be a boat or minecart.",
-						ExceptionType.BadEntityTypeException, t);
+				throw ConfigRuntimeException.BuildException("Given entity must be a boat or minecart.",
+						CREBadEntityTypeException.class, t);
 			}
 
 			return CVoid.VOID;
@@ -1682,11 +1681,11 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntityEquipment eq = Static.getLivingEntity(Static.getInt32(args[0], t), t).getEquipment();
+			MCEntityEquipment eq = Static.getLivingEntity(args[0], t).getEquipment();
 			if (eq.getHolder() instanceof MCPlayer) {
-				throw new ConfigRuntimeException(getName() + " does not work on players.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " does not work on players.", CREBadEntityException.class, t);
 			}
-			CArray ret = new CArray(t);
+			CArray ret = CArray.GetAssociativeArray(t);
 			for (Map.Entry<MCEquipmentSlot, Float> ent : eq.getAllDropChances().entrySet()) {
 				ret.set(ent.getKey().name(), new CDouble(ent.getValue(), t), t);
 			}
@@ -1710,10 +1709,10 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntityEquipment ee = Static.getLivingEntity(Static.getInt32(args[0], t), t).getEquipment();
+			MCEntityEquipment ee = Static.getLivingEntity(args[0], t).getEquipment();
 			Map<MCEquipmentSlot, Float> eq = ee.getAllDropChances();
 			if (ee.getHolder() instanceof MCPlayer) {
-				throw new ConfigRuntimeException(getName() + " does not work on players.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " does not work on players.", CREBadEntityException.class, t);
 			}
 			if (args[1] instanceof CNull) {
 				for (Map.Entry<MCEquipmentSlot, Float> ent : eq.entrySet()) {
@@ -1725,11 +1724,11 @@ public class EntityManagement {
 					try {
 						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), Static.getDouble32(ea.get(key, t), t));
 					} catch (IllegalArgumentException iae) {
-						throw new Exceptions.FormatException("Not an equipment slot: " + key, t);
+						throw new CREFormatException("Not an equipment slot: " + key, t);
 					}
 				}
 			} else {
-				throw new Exceptions.FormatException("Expected argument 2 to be an array", t);
+				throw new CREFormatException("Expected argument 2 to be an array", t);
 			}
 			ee.setAllDropChances(eq);
 			return CVoid.VOID;
@@ -1754,9 +1753,9 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
-				return CBoolean.get(Static.getEntity(Static.getInt32(args[0], t), t).isCustomNameVisible());
+				return CBoolean.get(Static.getEntity(args[0], t).isCustomNameVisible());
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), CRECastException.class, t);
 			}
 		}
 
@@ -1779,9 +1778,9 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
-				Static.getEntity(Static.getInt32(args[0], t), t).setCustomNameVisible(Static.getBoolean(args[1]));
+				Static.getEntity(args[0], t).setCustomNameVisible(Static.getBoolean(args[1]));
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), CRECastException.class, t);
 			}
 			return CVoid.VOID;
 		}
@@ -1804,7 +1803,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(Static.getLivingEntity(Static.getInt32(args[0], t), t).getCanPickupItems());
+			return CBoolean.get(Static.getLivingEntity(args[0], t).getCanPickupItems());
 		}
 
 		@Override
@@ -1823,7 +1822,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(Static.getInt32(args[0], t), t).setCanPickupItems(Static.getBoolean(args[1]));
+			Static.getLivingEntity(args[0], t).setCanPickupItems(Static.getBoolean(args[1]));
 			return CVoid.VOID;
 		}
 
@@ -1843,7 +1842,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(!Static.getLivingEntity(Static.getInt32(args[0], t), t).getRemoveWhenFarAway());
+			return CBoolean.get(!Static.getLivingEntity(args[0], t).getRemoveWhenFarAway());
 		}
 
 		@Override
@@ -1862,7 +1861,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(Static.getInt32(args[0], t), t).setRemoveWhenFarAway(!Static.getBoolean(args[1]));
+			Static.getLivingEntity(args[0], t).setRemoveWhenFarAway(!Static.getBoolean(args[1]));
 			return CVoid.VOID;
 		}
 
@@ -1880,8 +1879,8 @@ public class EntityManagement {
 	@api public static class get_art_at extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1906,7 +1905,7 @@ public class EntityManagement {
 					return new CString(((MCPainting)e).getArt().name(), t);
 				}
 			}
-			throw new ConfigRuntimeException("There is no painting at the specified location", ExceptionType.BadEntityException, t);
+			throw ConfigRuntimeException.BuildException("There is no painting at the specified location", CREBadEntityException.class, t);
 		}
 
 		@Override
@@ -1936,8 +1935,8 @@ public class EntityManagement {
 	@api public static class set_art_at extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -1961,7 +1960,7 @@ public class EntityManagement {
 			try{
 				art = MCArt.valueOf(args[1].val());
 			} catch(IllegalArgumentException e){
-				throw new ConfigRuntimeException("Invalid type: " + args[1].val(), ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Invalid type: " + args[1].val(), CREFormatException.class, t);
 			}
 			//If there's already a painting there, just use that one. Otherwise, spawn a new one.
 
@@ -2010,11 +2009,11 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			if (!le.isLeashed()) {
 				return CNull.NULL;
 			}
-			return new CInt(le.getLeashHolder().getEntityId(), t);
+			return new CString(le.getLeashHolder().getUniqueId().toString(), t);
 		}
 
 		@Override
@@ -2034,12 +2033,12 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCEntity holder;
 			if (args[1] instanceof CNull) {
 				holder = null;
 			} else {
-				holder = Static.getEntity(Static.getInt32(args[1], t), t);
+				holder = Static.getEntity(args[1], t);
 			}
 			le.setLeashHolder(holder);
 			return CVoid.VOID;
@@ -2064,7 +2063,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(Static.getEntity(Static.getInt32(args[0], t), t).isOnGround());
+			return CBoolean.get(Static.getEntity(args[0], t).isOnGround());
 		}
 
 		@Override
@@ -2093,7 +2092,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CInt(Static.getLivingEntity(Static.getInt32(args[0], t), t).getRemainingAir(), t);
+			return new CInt(Static.getLivingEntity(args[0], t).getRemainingAir(), t);
 		}
 	}
 
@@ -2112,7 +2111,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(Static.getInt32(args[0], t), t).setRemainingAir(Static.getInt32(args[1], t));
+			Static.getLivingEntity(args[0], t).setRemainingAir(Static.getInt32(args[1], t));
 			return CVoid.VOID;
 		}
 	}
@@ -2132,7 +2131,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CInt(Static.getLivingEntity(Static.getInt32(args[0], t), t).getMaximumAir(), t);
+			return new CInt(Static.getLivingEntity(args[0], t).getMaximumAir(), t);
 		}
 	}
 
@@ -2151,7 +2150,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(Static.getInt32(args[0], t), t).setMaximumAir(Static.getInt32(args[1], t));
+			Static.getLivingEntity(args[0], t).setMaximumAir(Static.getInt32(args[1], t));
 			return CVoid.VOID;
 		}
 	}
@@ -2170,8 +2169,9 @@ public class EntityManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class,
+					CREBadEntityException.class};
 		}
 
 		@Override
@@ -2183,13 +2183,13 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity entity = Static.getLivingEntity(Static.getInt32(args[0], t), t);
+			MCLivingEntity entity = Static.getLivingEntity(args[0], t);
 			HashSet<Byte> transparents = null;
 			int maxDistance = 512;
 			if (args.length >= 2) {
 				CArray givenTransparents = Static.getArray(args[1], t);
 				if (givenTransparents.inAssociativeMode()) {
-					throw new ConfigRuntimeException("The array must not be associative.", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("The array must not be associative.", CRECastException.class, t);
 				}
 				transparents = new HashSet<Byte>();
 				for (Construct blockID : givenTransparents.asList()) {
@@ -2201,7 +2201,7 @@ public class EntityManagement {
 			}
 			CArray lineOfSight = new CArray(t);
 			for (MCBlock block : entity.getLineOfSight(transparents, maxDistance)) {
-				lineOfSight.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false));
+				lineOfSight.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), t);
 			}
 			return lineOfSight;
 		}
@@ -2221,8 +2221,8 @@ public class EntityManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREBadEntityException.class};
 		}
 
 		@Override
@@ -2234,7 +2234,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(Static.getLivingEntity(Static.getInt32(args[0], t), t).hasLineOfSight(Static.getEntity(Static.getInt32(args[1], t), t)));
+			return CBoolean.get(Static.getLivingEntity(args[0], t).hasLineOfSight(Static.getEntity(args[1], t)));
 		}
 	}
 
@@ -2243,8 +2243,8 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity entity = Static.getEntityByUuid(UUID.fromString(args[0].val()), t);
-			return new CInt(entity.getEntityId(), t);
+			MCEntity entity = Static.getEntityByUuid(Static.GetUUID(args[0], t), t);
+			return new CString(entity.getUniqueId().toString(), t);
 		}
 
 		@Override
@@ -2264,7 +2264,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity entity = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity entity = Static.getEntity(args[0], t);
 			return new CString(entity.getUniqueId().toString(), t);
 		}
 
@@ -2301,6 +2301,7 @@ public class EntityManagement {
 			docs = docs.replace("%DYE_COLOR%", StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%SKELETON_TYPE%", StringUtils.Join(MCSkeletonType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PROFESSION%", StringUtils.Join(MCProfession.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%RABBIT_TYPE%", StringUtils.Join(MCRabbitType.values(), ", ", ", or ", " or "));
 			for (Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -2316,9 +2317,8 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
-			MCEntity entity = Static.getEntity(id, t);
-			CArray specArray = new CArray(t);
+			MCEntity entity = Static.getEntity(args[0], t);
+			CArray specArray = CArray.GetAssociativeArray(t);
 
 			switch (entity.getType().getAbstracted()) {
 				case ARROW:
@@ -2331,10 +2331,14 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_ARMORSTAND_ARMS, CBoolean.get(stand.hasArms()), t);
 					specArray.set(entity_spec.KEY_ARMORSTAND_BASEPLATE, CBoolean.get(stand.hasBasePlate()), t);
 					specArray.set(entity_spec.KEY_ARMORSTAND_GRAVITY, CBoolean.get(stand.hasGravity()), t);
+					Boolean marker = stand.isMarker();
+					if(marker != null) { // unsupported before 1.8.7
+						specArray.set(entity_spec.KEY_ARMORSTAND_MARKER, CBoolean.get(marker), t);
+					}
 					specArray.set(entity_spec.KEY_ARMORSTAND_SMALLSIZE, CBoolean.get(stand.isSmall()), t);
 					specArray.set(entity_spec.KEY_ARMORSTAND_VISIBLE, CBoolean.get(stand.isVisible()), t);
 					CArray poses = CArray.GetAssociativeArray(t);
-					Map<MCBodyPart, MVector3D> poseMap = stand.getAllPoses();
+					Map<MCBodyPart, Vector3D> poseMap = stand.getAllPoses();
 					for (MCBodyPart key : poseMap.keySet()) {
 						poses.set("pose" + key.name(), ObjectGenerator.GetGenerator().vector(poseMap.get(key), t), t);
 					}
@@ -2450,10 +2454,14 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_PRIMED_TNT_FUSETICKS, new CInt(tnt.getFuseTicks(), t), t);
 					MCEntity source = tnt.getSource();
 					if (source != null) {
-						specArray.set(entity_spec.KEY_PRIMED_TNT_SOURCE, new CInt(source.getEntityId(), t), t);
+						specArray.set(entity_spec.KEY_PRIMED_TNT_SOURCE, new CString(source.getUniqueId().toString(), t), t);
 					} else {
 						specArray.set(entity_spec.KEY_PRIMED_TNT_SOURCE, CNull.NULL, t);
 					}
+					break;
+				case RABBIT:
+					MCRabbit rabbit = (MCRabbit) entity;
+					specArray.set(entity_spec.KEY_RABBIT_TYPE, new CString(rabbit.getRabbitType().name(), t), t);
 					break;
 				case SHEEP:
 					MCSheep sheep = (MCSheep) entity;
@@ -2498,6 +2506,7 @@ public class EntityManagement {
 		private static final String KEY_ARMORSTAND_ARMS = "arms";
 		private static final String KEY_ARMORSTAND_BASEPLATE = "baseplate";
 		private static final String KEY_ARMORSTAND_GRAVITY = "gravity";
+		private static final String KEY_ARMORSTAND_MARKER = "marker";
 		private static final String KEY_ARMORSTAND_POSES = "poses";
 		private static final String KEY_ARMORSTAND_SMALLSIZE = "small";
 		private static final String KEY_ARMORSTAND_VISIBLE = "visible";
@@ -2534,6 +2543,7 @@ public class EntityManagement {
 		private static final String KEY_PIG_SADDLED = "saddled";
 		private static final String KEY_PIG_ZOMBIE_ANGRY = "angry";
 		private static final String KEY_PIG_ZOMBIE_ANGER = "anger";
+		private static final String KEY_RABBIT_TYPE = "type";
 		private static final String KEY_PRIMED_TNT_FUSETICKS = "fuseticks";
 		private static final String KEY_PRIMED_TNT_SOURCE = "source";
 		private static final String KEY_SHEEP_COLOR = "color";
@@ -2560,10 +2570,11 @@ public class EntityManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{
-					ExceptionType.CastException, ExceptionType.BadEntityException, ExceptionType.IndexOverflowException,
-					ExceptionType.IndexOverflowException, ExceptionType.RangeException, ExceptionType.FormatException
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{
+					CRECastException.class, CREBadEntityException.class, CREIndexOverflowException.class,
+					CREIndexOverflowException.class, CRERangeException.class, CREFormatException.class,
+					CRELengthException.class
 			};
 		}
 
@@ -2576,13 +2587,12 @@ public class EntityManagement {
 		}
 
 		private static void throwException(String index, Target t) throws ConfigRuntimeException {
-			throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+			throw ConfigRuntimeException.BuildException("Unknown or uneditable specification: " + index, CREIndexOverflowException.class, t);
 		}
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
-			MCEntity entity = Static.getEntity(id, t);
+			MCEntity entity = Static.getEntity(args[0], t);
 			CArray specArray = Static.getArray(args[1], t);
 
 			switch (entity.getType().getAbstracted()) {
@@ -2596,7 +2606,7 @@ public class EntityManagement {
 							case entity_spec.KEY_ARROW_KNOCKBACK:
 								int k = Static.getInt32(specArray.get(index, t), t);
 								if (k < 0) {
-									throw new ConfigRuntimeException("Knockback can not be negative.", ExceptionType.RangeException, t);
+									throw ConfigRuntimeException.BuildException("Knockback can not be negative.", CRERangeException.class, t);
 								} else {
 									arrow.setKnockbackStrength(k);
 								}
@@ -2619,6 +2629,9 @@ public class EntityManagement {
 							case entity_spec.KEY_ARMORSTAND_GRAVITY:
 								stand.setHasGravity(Static.getBoolean(specArray.get(index, t)));
 								break;
+							case entity_spec.KEY_ARMORSTAND_MARKER:
+								stand.setMarker(Static.getBoolean(specArray.get(index, t)));
+								break;
 							case entity_spec.KEY_ARMORSTAND_SMALLSIZE:
 								stand.setSmall(Static.getBoolean(specArray.get(index, t)));
 								break;
@@ -2626,7 +2639,7 @@ public class EntityManagement {
 								stand.setVisible(Static.getBoolean(specArray.get(index, t)));
 								break;
 							case entity_spec.KEY_ARMORSTAND_POSES:
-								Map<MCBodyPart, MVector3D> poseMap = stand.getAllPoses();
+								Map<MCBodyPart, Vector3D> poseMap = stand.getAllPoses();
 								if (specArray.get(index, t) instanceof CArray) {
 									CArray poseArray = (CArray) specArray.get(index, t);
 									for (MCBodyPart key : poseMap.keySet()) {
@@ -2640,7 +2653,7 @@ public class EntityManagement {
 								}
 								if (specArray.get(index, t) instanceof CNull) {
 									for (MCBodyPart key : poseMap.keySet()) {
-										poseMap.put(key, new MVector3D());
+										poseMap.put(key, Vector3D.ZERO);
 									}
 								}
 								stand.setAllPoses(poseMap);
@@ -2732,7 +2745,7 @@ public class EntityManagement {
 								try {
 									hook.setBiteChance(Static.getDouble(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("The chance must be between 0.0 and 1.0", ExceptionType.RangeException, t);
+									throw ConfigRuntimeException.BuildException("The chance must be between 0.0 and 1.0", CRERangeException.class, t);
 								}
 								break;
 							default:
@@ -2759,21 +2772,21 @@ public class EntityManagement {
 								try {
 									horse.setColor(MCHorseColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid horse color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid horse color: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_STYLE:
 								try {
 									horse.setPattern(MCHorsePattern.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid horse style: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid horse style: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_VARIANT:
 								try {
 									horse.setVariant(MCHorseVariant.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid horse variant: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid horse variant: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_CHEST:
@@ -2783,14 +2796,14 @@ public class EntityManagement {
 								try {
 									horse.setJumpStrength(Static.getDouble(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("The jump strength must be between 0.0 and 2.0", ExceptionType.RangeException, t);
+									throw ConfigRuntimeException.BuildException("The jump strength must be between 0.0 and 2.0", CRERangeException.class, t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
 									horse.setDomestication(Static.getInt32(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("The domestication level can not be higher than the max domestication level.", ExceptionType.RangeException, t);
+									throw ConfigRuntimeException.BuildException("The domestication level can not be higher than the max domestication level.", CRERangeException.class, t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_MAXDOMESTICATION:
@@ -2835,7 +2848,7 @@ public class EntityManagement {
 								try {
 									frame.setRotation(MCRotation.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid rotation type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid rotation type: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							default:
@@ -2902,7 +2915,7 @@ public class EntityManagement {
 								try {
 									ocelot.setCatType(MCOcelotType.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid ocelot type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid ocelot type: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							case entity_spec.KEY_OCELOT_SITTING:
@@ -2921,7 +2934,7 @@ public class EntityManagement {
 								try {
 									painting.setArt(MCArt.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid art type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid art type: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							default:
@@ -2974,6 +2987,22 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case RABBIT:
+					MCRabbit rabbit = (MCRabbit) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_RABBIT_TYPE:
+								try {
+									rabbit.setRabbitType(MCRabbitType.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw ConfigRuntimeException.BuildException("Invalid rabbit type: " + specArray.get(index, t).val(), CREFormatException.class, t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case SHEEP:
 					MCSheep sheep = (MCSheep) entity;
 					for (String index : specArray.stringKeySet()) {
@@ -2982,7 +3011,7 @@ public class EntityManagement {
 								try {
 									sheep.setColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid sheep color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid sheep color: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							case entity_spec.KEY_SHEEP_SHEARED:
@@ -3001,7 +3030,7 @@ public class EntityManagement {
 								try {
 									skeleton.setSkeletonType(MCSkeletonType.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid skeleton type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid skeleton type: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							default:
@@ -3029,7 +3058,7 @@ public class EntityManagement {
 								try {
 									villager.setProfession(MCProfession.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid profession: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid profession: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							default:
@@ -3063,7 +3092,7 @@ public class EntityManagement {
 								try {
 									wolf.setCollarColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid collar color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid collar color: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							case entity_spec.KEY_WOLF_SITTING:
@@ -3116,8 +3145,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
-			MCEntity entity = Static.getEntity(id, t);
+			MCEntity entity = Static.getEntity(args[0], t);
 
 			if (entity instanceof MCProjectile) {
 				MCProjectileSource shooter = ((MCProjectile) entity).getShooter();
@@ -3125,12 +3153,12 @@ public class EntityManagement {
 				if (shooter instanceof MCBlockProjectileSource) {
 					return ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation());
 				} else if (shooter instanceof MCEntity) {
-					return new CInt(((MCEntity) shooter).getEntityId(), t);
+					return new CString(((MCEntity) shooter).getUniqueId().toString(), t);
 				} else {
 					return CNull.NULL;
 				}
 			} else {
-				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("The given entity is not a projectile.", CREBadEntityException.class, t);
 			}
 		}
 	}
@@ -3150,24 +3178,19 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
-			MCEntity entity = Static.getEntity(id, t);
+			MCEntity entity = Static.getEntity(args[0], t);
 
 			if (entity instanceof MCProjectile) {
 				if (args[1] instanceof CNull) {
 					((MCProjectile) entity).setShooter(null);
-				} else if (args[1] instanceof CInt) {
-  					int id2 = Static.getInt32(args[1], t);
-  					((MCProjectile) entity).setShooter(Static.getLivingEntity(id2, t));
 				} else if (args[1] instanceof CArray) {
-					throw new ConfigRuntimeException("Setting a block as a shooter is not yet supported",
-							ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Setting a block as a shooter is not yet supported",
+							CREFormatException.class, t);
 				} else {
-					throw new ConfigRuntimeException("Unable to determine intended shooter from arg 2.",
-							ExceptionType.FormatException, t);
+					((MCProjectile) entity).setShooter(Static.getLivingEntity(args[1], t));
 				}
 			} else {
-				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("The given entity is not a projectile.", CREBadEntityException.class, t);
 			}
 
 			return CVoid.VOID;
@@ -3189,13 +3212,12 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
-			MCEntity entity = Static.getEntity(id, t);
+			MCEntity entity = Static.getEntity(args[0], t);
 
 			if (entity instanceof MCProjectile) {
 				return CBoolean.get(((MCProjectile) entity).doesBounce());
 			} else {
-				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("The given entity is not a projectile.", CREBadEntityException.class, t);
 			}
 		}
 	}
@@ -3215,13 +3237,12 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
-			MCEntity entity = Static.getEntity(id, t);
+			MCEntity entity = Static.getEntity(args[0], t);
 
 			if (entity instanceof MCProjectile) {
 				((MCProjectile) entity).setBounce(Static.getBoolean(args[1]));
 			} else {
-				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("The given entity is not a projectile.", CREBadEntityException.class, t);
 			}
 
 			return CVoid.VOID;
@@ -3232,27 +3253,25 @@ public class EntityManagement {
 	public static class damage_entity extends EntityFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException,
-				ExceptionType.BadEntityTypeException, ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class,
+				CREBadEntityTypeException.class, CREBadEntityException.class};
 		}
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
-			MCEntity entity = Static.getEntity(id, t);
+			MCEntity entity = Static.getEntity(args[0], t);
 
 			if (!(entity instanceof MCLivingEntity)) {
-				throw new ConfigRuntimeException("The entity id provided doesn't"
-					+ " belong to a living entity", ExceptionType.BadEntityTypeException, t);
+				throw ConfigRuntimeException.BuildException("The entity id provided doesn't"
+					+ " belong to a living entity", CREBadEntityTypeException.class, t);
 			}
 
 			MCLivingEntity living = (MCLivingEntity)entity;
 
 			double damage = Static.getDouble(args[1], t);
 			if (args.length == 3) {
-				int sourceid = Static.getInt32(args[2], t);
-				MCEntity source = Static.getEntity(sourceid, t);
+				MCEntity source = Static.getEntity(args[2], t);
 				living.damage(damage, source);
 			} else {
 				living.damage(damage);

@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCFireball;
-import com.laytonsmith.abstraction.MVector3D;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.util.Vector;
@@ -20,13 +20,13 @@ public class BukkitMCFireball extends BukkitMCProjectile implements MCFireball {
 	}
 
 	@Override
-	public MVector3D getDirection() {
-		return new MVector3D(f.getDirection().getX(), f.getDirection().getY(), f.getDirection().getZ());
+	public Vector3D getDirection() {
+		return new Vector3D(f.getDirection().getX(), f.getDirection().getY(), f.getDirection().getZ());
 	}
 
 	@Override
-	public void setDirection(MVector3D vector) {
-		f.setDirection(new Vector(vector.x, vector.y, vector.z));
+	public void setDirection(Vector3D vector) {
+		f.setDirection(new Vector(vector.X(), vector.Y(), vector.Z()));
 	}
 
 }

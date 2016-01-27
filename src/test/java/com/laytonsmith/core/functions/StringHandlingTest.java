@@ -10,6 +10,7 @@ import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static com.laytonsmith.testing.StaticTest.assertCEquals;
+import java.util.Locale;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -49,10 +50,11 @@ public class StringHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testConcat() {
+    public void testConcat() throws Exception {
         StringHandling.concat a = new StringHandling.concat();
         assertCEquals(C.onstruct("1234"), a.exec(Target.UNKNOWN, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(4)));
         assertCEquals(C.onstruct("astring"), a.exec(Target.UNKNOWN, null, C.onstruct("a"), C.onstruct("string")));
+		assertEquals("05", SRun("'0' . 5", null));
     }
 
     @Test(timeout = 10000)
@@ -142,6 +144,50 @@ public class StringHandlingTest {
 	}
 
 	@Test public void testStringFormat() throws Exception{
+		assertEquals("%", SRun("lsprintf('en_US', '%%')", null));
+		//ultra simple tests
+		assertEquals("1", SRun("lsprintf('en_US', '%d', 1)", null));
+		assertEquals("12", SRun("lsprintf('en_US', '%d%d', 1, 2)", null));
+		//simple test with array
+		assertEquals("12", SRun("lsprintf('en_US', '%d%d', array(1, 2))", null));
+		try{
+			SRun("lsprintf('en_US', '%d')", null);
+			fail("Expected lsprintf('en_US', '%d') to throw a compile exception");
+		} catch(ConfigCompileException e){
+			//pass
+		}
+
+		try{
+			SRun("lsprintf('en_US', '%d', 1, 1)", null);
+			fail("Expected lsprintf('en_US', '%d') to throw a compile exception");
+		} catch(ConfigCompileException e){
+			//pass
+		}
+
+		try{
+			SRun("lsprintf('en_US', '%c', 'toobig')", null);
+			fail("Expected lsprintf('en_US', '%c', 'toobig') to throw a compile exception");
+		} catch(ConfigCompileException|ConfigCompileGroupException e){
+			//pass
+		}
+
+		try{
+			SRun("lsprintf('en_US', '%0.3f', 1.1)", null);
+			fail("Expected lsprintf('en_US', '%0.3f', 1.1) to throw a compile exception");
+		} catch(ConfigCompileException e){
+			//pass
+		}
+
+		//A few advanced usages
+		assertEquals("004.000", SRun("lsprintf('en_US', '%07.3f', 4)", null));
+		assertEquals("004,000", SRun("lsprintf('no_NO', '%07.3f', 4)", null));
+
+		long s = System.currentTimeMillis();
+		assertEquals(String.format("%1$tm %1$te,%1$tY", s), SRun("lsprintf('en_US', '%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));
+
+	}
+	
+	@Test public void testStringFormat2() throws Exception{
 		assertEquals("%", SRun("sprintf('%%')", null));
 		//ultra simple tests
 		assertEquals("1", SRun("sprintf('%d', 1)", null));
@@ -177,7 +223,7 @@ public class StringHandlingTest {
 		}
 
 		//A few advanced usages
-		assertEquals("004.000", SRun("sprintf('%07.3f', 4)", null));
+		assertEquals(String.format(Locale.getDefault(), "%07.3f", 4.0), SRun("sprintf('%07.3f', 4)", null));
 
 		long s = System.currentTimeMillis();
 		assertEquals(String.format("%1$tm %1$te,%1$tY", s), SRun("sprintf('%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));

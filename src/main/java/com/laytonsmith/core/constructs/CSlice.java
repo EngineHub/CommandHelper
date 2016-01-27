@@ -2,10 +2,11 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.ArrayHandling;
-import com.laytonsmith.core.functions.Exceptions;
 import java.util.AbstractSet;
 import java.util.Iterator;
 import java.util.List;
@@ -48,7 +49,7 @@ public class CSlice extends CArray {
             start = Long.parseLong(sstart.trim());
             finish = Long.parseLong(sfinish.trim());
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Expecting integer in a slice, but was given \"" + sstart + "\" and \"" + sfinish + "\"", Exceptions.ExceptionType.CastException,  t);
+            throw ConfigRuntimeException.BuildException("Expecting integer in a slice, but was given \"" + sstart + "\" and \"" + sfinish + "\"", CRECastException.class,  t);
         }
 		calculateCaches();
     }
@@ -109,14 +110,14 @@ public class CSlice extends CArray {
 
 	@Override
 	public void set(Construct index, Construct c, Target t) {
-		throw new ConfigRuntimeException("CSlices cannot set values", Exceptions.ExceptionType.CastException, t);
+		throw ConfigRuntimeException.BuildException("CSlices cannot set values", CRECastException.class, t);
 	}
 
 	@Override
 	public Construct get(Construct index, Target t) {
 		long i = Static.getInt(index, t);
 		if(i > max){
-			throw new ConfigRuntimeException("Index out of bounds. Index: " + i + " Size: " + max, Exceptions.ExceptionType.RangeException, t);
+			throw ConfigRuntimeException.BuildException("Index out of bounds. Index: " + i + " Size: " + max, CRERangeException.class, t);
 		}
 		return new CInt(start + (direction * i), t);
 	}

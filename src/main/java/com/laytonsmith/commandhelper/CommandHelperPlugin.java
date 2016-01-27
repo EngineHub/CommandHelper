@@ -23,6 +23,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.SimpleVersion;
@@ -38,6 +39,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.AliasCore;
@@ -47,18 +49,13 @@ import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Prefs;
-import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.UpgradeLog;
-import com.laytonsmith.core.UserManager;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
-import com.laytonsmith.persistence.ReadOnlyException;
 import org.bukkit.Server;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
@@ -77,15 +74,12 @@ import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.TimedRegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.mcstats.Metrics;
+//import org.mcstats.Metrics;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -111,7 +105,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public Profiler profiler;
 	public final ExecutionQueue executionQueue = new MethodScriptExecutionQueue("CommandHelperExecutionQueue", "default");
 	public PersistenceNetwork persistenceNetwork;
-	public boolean firstLoad = true;
+	public Profiles profiles;
+	//public boolean firstLoad = true;
 	public long interpreterUnlockedUntil = 0;
 	private Thread loadingThread;
 	/**
@@ -129,7 +124,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 	 */
 	final CommandHelperServerListener serverListener =
 			new CommandHelperServerListener();
-	final Set<MCPlayer> commandRunning = new HashSet<MCPlayer>();
 
 	@Override
 	public void onLoad() {
@@ -223,14 +217,14 @@ public class CommandHelperPlugin extends JavaPlugin {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				try {
-					FileUtil.move(new File(cd, "sql-profiles.xml"), p.getSQLProfilesFile());
+					FileUtil.move(new File(cd, "sql-profiles.xml"), p.getProfilesFile());
 				} catch (IOException ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				new File(cd, "logs/debug/loggerPreferences.txt").delete();
 				leaveBreadcrumb(breadcrumb);
-				System.out.println("CommandHelper: Your preferences files have all been relocated to " + p.getPreferencesDirectory());
-				System.out.println("CommandHelper: The loggerPreferences.txt file has been deleted and re-created, as the defaults have changed.");
+				StreamUtils.GetSystemOut().println("CommandHelper: Your preferences files have all been relocated to " + p.getPreferencesDirectory());
+				StreamUtils.GetSystemOut().println("CommandHelper: The loggerPreferences.txt file has been deleted and re-created, as the defaults have changed.");
 			}
 		});
 
@@ -249,7 +243,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			public void run() {
 				try {
 					FileUtil.move(oldProfilesFile, MethodScriptFileLocations.getDefault().getProfilesFile());
-					System.out.println("CommandHelper: sql-profiles.xml has been renamed to " + MethodScriptFileLocations.getDefault().getProfilesFile().getName());
+					StreamUtils.GetSystemOut().println("CommandHelper: sql-profiles.xml has been renamed to " + MethodScriptFileLocations.getDefault().getProfilesFile().getName());
 				} catch (IOException ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -284,12 +278,10 @@ public class CommandHelperPlugin extends JavaPlugin {
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
 
-		System.out.println("[CommandHelper] Running initial class discovery,"
+		StreamUtils.GetSystemOut().println("[CommandHelper] Running initial class discovery,"
 				+ " this will probably take a few seconds...");
 		myServer = StaticLayer.GetServer();
-		BukkitMCEntityType.build();
-
-		System.out.println("[CommandHelper] Loading extensions in the background...");
+		StreamUtils.GetSystemOut().println("[CommandHelper] Loading extensions in the background...");
 
 		loadingThread = new Thread("extensionloader") {
 			@Override
@@ -297,15 +289,15 @@ public class CommandHelperPlugin extends JavaPlugin {
 				ExtensionManager.AddDiscoveryLocation(CommandHelperFileLocations.getDefault().getExtensionsDirectory());
 
 				if (OSUtils.GetOS() == OSUtils.OS.WINDOWS) {
-					// Using System.out here instead of the logger as the logger doesn't
+					// Using StreamUtils.GetSystemOut() here instead of the logger as the logger doesn't
 					// immediately print to the console.
-					System.out.println("[CommandHelper] Caching extensions...");
+					StreamUtils.GetSystemOut().println("[CommandHelper] Caching extensions...");
 					ExtensionManager.Cache(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory());
-					System.out.println("[CommandHelper] Extension caching complete.");
+					StreamUtils.GetSystemOut().println("[CommandHelper] Extension caching complete.");
 				}
 
 				ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
-				System.out.println("[CommandHelper] Extension loading complete.");
+				StreamUtils.GetSystemOut().println("[CommandHelper] Extension loading complete.");
 			}
 		};
 
@@ -318,7 +310,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		if(loadingThread.isAlive()){
-			System.out.println("[CommandHelper] Waiting for extension loading to complete...");
+			StreamUtils.GetSystemOut().println("[CommandHelper] Waiting for extension loading to complete...");
 
 			try {
 				loadingThread.join();
@@ -326,21 +318,24 @@ public class CommandHelperPlugin extends JavaPlugin {
 				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+		BukkitMCEntityType.build();
+		BukkitMCBiomeType.build();
 
 		//Metrics
-		try {
-			org.mcstats.Metrics m = new Metrics(this);
-			m.addCustomData(new Metrics.Plotter("Player count") {
-
-				@Override
-				public int getValue() {
-					return Static.getServer().getOnlinePlayers().size();
-				}
-			});
-			m.start();
-		} catch (IOException e) {
-			// Failed to submit the stats :-(
-		}
+		// MCStats no longer appears to be supported. If it comes back, this code can be re-added
+//		try {
+//			org.mcstats.Metrics m = new Metrics(this);
+//			m.addCustomData(new Metrics.Plotter("Player count") {
+//
+//				@Override
+//				public int getValue() {
+//					return Static.getServer().getOnlinePlayers().size();
+//				}
+//			});
+//			m.start();
+//		} catch (IOException e) {
+//			// Failed to submit the stats :-(
+//		}
 
 		try {
 			//This may seem redundant, but on a /reload, we want to refresh these
@@ -360,15 +355,15 @@ public class CommandHelperPlugin extends JavaPlugin {
 		String main_file = Prefs.MainFile();
 		boolean showSplashScreen = Prefs.ShowSplashScreen();
 		if (showSplashScreen) {
-			System.out.println(TermColors.reset());
-			//System.out.flush();
-			System.out.println("\n\n\n" + Static.Logo());
+			StreamUtils.GetSystemOut().println(TermColors.reset());
+			//StreamUtils.GetSystemOut().flush();
+			StreamUtils.GetSystemOut().println("\n\n\n" + Static.Logo());
 		}
 		ac = new AliasCore(new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), script_name),
 				CommandHelperFileLocations.getDefault().getLocalPackagesDirectory(),
 				CommandHelperFileLocations.getDefault().getPreferencesFile(),
 				new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), main_file), this);
-		ac.reload(null, null);
+		ac.reload(null, null, true);
 
 		//Clear out our hostname cache
 		hostnameLookupCache = new ConcurrentHashMap<>();
@@ -537,37 +532,28 @@ public class CommandHelperPlugin extends JavaPlugin {
 			if (sender instanceof Player) {
 				player = new BukkitMCPlayer((Player) sender);
 			}
-			ac.reload(player, args);
-//            if(ac.reload(player)){
-//                if(sender instanceof Player){
-//                    Static.SendMessage(player, MCChatColor.GOLD + "Command Helper scripts sucessfully recompiled.");
-//                }
-//                System.out.println(TermColors.YELLOW + "Command Helper scripts sucessfully recompiled." + TermColors.reset());
-//            } else{
-//                if(sender instanceof Player){
-//                    Static.SendMessage(player, MCChatColor.RED + "An error occured when trying to compile the script. Check the console for more information.");
-//                }
-//                System.out.println(TermColors.RED + "An error occured when trying to compile the script. Check the console for more information." + TermColors.reset());
-//            }
+			ac.reload(player, args, false);
 			return true;
-		} else if (cmdName.equals("commandhelper") && args.length >= 1 && args[0].equalsIgnoreCase("null")) {
-			return true;
+		} else if (cmdName.equalsIgnoreCase("commandhelper")) {
+			return args.length >= 1 && args[0].equalsIgnoreCase("null");
 		} else if (cmdName.equals("runalias")) {
 			//Hardcoded alias rebroadcast
+			if(args.length == 0){
+				return false;
+			}
+			String command = StringUtils.Join(args, " ");
 			if (sender instanceof Player) {
-				PlayerCommandPreprocessEvent pcpe = new PlayerCommandPreprocessEvent((Player) sender, StringUtils.Join(args, " "));
+				PlayerCommandPreprocessEvent pcpe = new PlayerCommandPreprocessEvent((Player) sender, command);
 				playerListener.onPlayerCommandPreprocess(pcpe);
 			} else if (sender instanceof ConsoleCommandSender) {
-				String cmd2 = Static.strJoin(args, " ");
-				if (cmd2.startsWith("/")) {
-					cmd2 = cmd2.substring(1);
+				if (command.startsWith("/")) {
+					command = command.substring(1);
 				}
-				ServerCommandEvent sce = new ServerCommandEvent((ConsoleCommandSender) sender, cmd2);
+				ServerCommandEvent sce = new ServerCommandEvent((ConsoleCommandSender) sender, command);
 				serverListener.onServerCommand(sce);
 			} else if(sender instanceof BlockCommandSender){
 				MCCommandSender s = new BukkitMCBlockCommandSender((BlockCommandSender)sender);
-				String cmd2 = StringUtils.Join(args, " ");
-				Static.getAliasCore().alias(cmd2, s, new ArrayList<Script>());
+				Static.getAliasCore().alias(command, s);
 			}
 			return true;
 		} else if(cmdName.equalsIgnoreCase("interpreter-on")){
@@ -575,22 +561,27 @@ public class CommandHelperPlugin extends JavaPlugin {
 				int interpreterTimeout = Prefs.InterpreterTimeout();
 				if(interpreterTimeout != 0){
 					interpreterUnlockedUntil = (interpreterTimeout * 60 * 1000) + System.currentTimeMillis();
-					sender.sendMessage("Inpterpreter mode unlocked for " + interpreterTimeout + " minute" + (interpreterTimeout==1?"":"s"));
+					sender.sendMessage("Inpterpreter mode unlocked for " + interpreterTimeout + " minute"
+							+ (interpreterTimeout==1?"":"s"));
 				}
 			} else {
 				sender.sendMessage("This command can only be run from console.");
 			}
 			return true;
-		} else if (sender instanceof Player && java.util.Arrays.asList(new String[]{"commandhelper", "repeat",
-				"viewalias", "delalias", "interpreter", "alias"}).contains(cmdName)) {
-			try {
-				return runCommand(new BukkitMCPlayer((Player) sender), cmdName, args);
-			} catch (DataSourceException ex) {
-				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
-			} catch (ReadOnlyException ex) {
-				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
-			} catch (IOException ex) {
-				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+		} else if (sender instanceof Player && cmdName.equalsIgnoreCase("interpreter")) {
+			if (!sender.hasPermission("commandhelper.interpreter")) {
+				sender.sendMessage(MCChatColor.RED + "You do not have permission to run that command");
+			} else if (!Prefs.EnableInterpreter()) {
+				sender.sendMessage(MCChatColor.RED + "The interpreter is currently disabled."
+						+ " Check your preferences file.");
+			} else if (Prefs.InterpreterTimeout() != 0 && interpreterUnlockedUntil < System.currentTimeMillis()) {
+				sender.sendMessage(MCChatColor.RED + "Interpreter mode is currently locked. Run \"interpreter-on\""
+						+ " console to unlock it. If you want to turn this off entirely, set the interpreter-timeout"
+						+ " option to 0 in " + CommandHelperFileLocations.getDefault().getPreferencesFile().getName());
+			} else {
+				interpreterListener.startInterpret(sender.getName());
+				sender.sendMessage(MCChatColor.YELLOW + "You are now in interpreter mode. Type a dash (-) on a"
+						+ " line by itself to exit, and >>> to enter multiline mode.");
 			}
 			return true;
 		} else {
@@ -598,148 +589,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 			MCCommand mccmd = new BukkitMCCommand(cmd);
 			return mccmd.handleCustomCommand(mcsender, commandLabel, args);
 		}
-	}
-
-	/**
-	 * Runs commands.
-	 *
-	 * @param player
-	 * @param cmd
-	 * @param args
-	 * @return
-	 */
-	private boolean runCommand(final MCPlayer player, String cmd, String[] args) throws DataSourceException, ReadOnlyException, IOException {
-		if (commandRunning.contains(player)) {
-			return true;
-		}
-
-		commandRunning.add(player);
-		UserManager um = UserManager.GetUserManager(player.getName());
-		// Repeat command
-		if (cmd.equals("repeat")) {
-			if (player.isOp() || player.hasPermission("commandhelper.repeat")
-					|| player.hasPermission("ch.repeat")) {
-				//Go ahead and remove them, so that they can repeat aliases. They can't get stuck in
-				//an infinite loop though, because the preprocessor won't try to fire off a repeat command
-				commandRunning.remove(player);
-				if (um.getLastCommand() != null) {
-					Static.SendMessage(player, MCChatColor.GRAY + um.getLastCommand());
-					execCommand(player, um.getLastCommand());
-				} else {
-					Static.SendMessage(player, MCChatColor.RED + "No previous command.");
-				}
-				return true;
-			} else {
-				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the repeat command");
-				commandRunning.remove(player);
-				return true;
-			}
-
-			// Save alias
-		} else if (cmd.equalsIgnoreCase("alias")) {
-			if (!player.hasPermission("commandhelper.useralias") && !player.hasPermission("ch.useralias")) {
-				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the alias command");
-				commandRunning.remove(player);
-				return true;
-			}
-
-			if (args.length > 0) {
-				String alias = CommandHelperPlugin.joinString(args, " ");
-				try {
-					int id = um.addAlias(alias, persistenceNetwork);
-					if (id > -1) {
-						Static.SendMessage(player, MCChatColor.YELLOW + "Alias added with id '" + id + "'");
-					}
-				} catch (ConfigCompileException ex) {
-					Static.SendMessage(player, "Your alias could not be added due to a compile error:\n" + MCChatColor.RED + ex.getMessage());
-				} catch (ConfigCompileGroupException e){
-					StringBuilder b = new StringBuilder();
-					b.append("Your alias could not be added due to compile errors:\n").append(MCChatColor.RED);
-					for(ConfigCompileException ex : e.getList()){
-						b.append(ex.getMessage());
-					}
-					Static.SendMessage(player, b.toString());
-				}
-			} else {
-				//Display a help message
-				Static.SendMessage(player, MCChatColor.GREEN + "Command usage: \n"
-						+ MCChatColor.GREEN + "/alias <alias> - adds an alias to your user defined list\n"
-						+ MCChatColor.GREEN + "/delalias <id> - deletes alias with id <id> from your user defined list\n"
-						+ MCChatColor.GREEN + "/viewalias - shows you all of your aliases");
-			}
-
-			commandRunning.remove(player);
-			return true;
-			//View all aliases for this user
-		} else if (cmd.equalsIgnoreCase("viewalias")) {
-			if (!player.hasPermission("commandhelper.useralias") && !player.hasPermission("ch.useralias")) {
-				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the viewalias command");
-				commandRunning.remove(player);
-				return true;
-			}
-			int page = 0;
-			try {
-				page = Integer.parseInt(args[0]);
-			} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-				//Meh. Index out of bounds, or number format exception. Whatever, show page 1
-			}
-			Static.SendMessage(player, um.getAllAliases(page, persistenceNetwork));
-			commandRunning.remove(player);
-			return true;
-			// Delete alias
-		} else if (cmd.equalsIgnoreCase("delalias")) {
-			if (!player.hasPermission("commandhelper.useralias") && !player.hasPermission("ch.useralias")) {
-				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the delalias command");
-				commandRunning.remove(player);
-				return true;
-			}
-			try {
-				ArrayList<String> deleted = new ArrayList<String>();
-				for (String arg : args) {
-					um.delAlias(Integer.parseInt(arg), persistenceNetwork);
-					deleted.add("#" + arg);
-				}
-				if (args.length > 1) {
-					String s = MCChatColor.YELLOW + "Aliases " + deleted.toString() + " were deleted";
-					Static.SendMessage(player, s);
-
-				} else {
-					Static.SendMessage(player, MCChatColor.YELLOW + "Alias #" + args[0] + " was deleted");
-				}
-			} catch (NumberFormatException e) {
-				Static.SendMessage(player, MCChatColor.RED + "The id must be a number");
-			} catch (ArrayIndexOutOfBoundsException e) {
-				Static.SendMessage(player, MCChatColor.RED + "Usage: /delalias <id> <id> ...");
-			}
-			commandRunning.remove(player);
-			return true;
-
-		} else if (cmd.equalsIgnoreCase("interpreter")) {
-			if (player.hasPermission("commandhelper.interpreter")) {
-				if (Prefs.EnableInterpreter()) {
-					if(Prefs.InterpreterTimeout() != 0){
-						if(interpreterUnlockedUntil < System.currentTimeMillis()){
-							player.sendMessage(MCChatColor.RED + "Interpreter mode is currently locked. Run \"interpreter-on\" from console to unlock it."
-									+ " If you want to turn this off entirely, set the interpreter-timeout option to 0 in "
-									+ CommandHelperFileLocations.getDefault().getPreferencesFile().getName());
-							commandRunning.remove(player);
-							return true;
-						}
-					}
-					interpreterListener.startInterpret(player.getName());
-					Static.SendMessage(player, MCChatColor.YELLOW + "You are now in interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"
-							+ " multiline mode.");
-				} else {
-					Static.SendMessage(player, MCChatColor.RED + "The interpreter is currently disabled. Check your preferences file.");
-				}
-			} else {
-				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to run that command");
-			}
-			commandRunning.remove(player);
-			return true;
-		}
-		commandRunning.remove(player);
-		return false;
 	}
 
 	/**

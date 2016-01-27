@@ -1,6 +1,7 @@
 
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -37,8 +38,8 @@ public class RunnableQueue {
 
 						@Override
 						public void uncaughtException(Thread t, Throwable e) {
-							System.err.println("The thread " + t.getName() + " threw an exception, and it was not handled.");
-							e.printStackTrace(System.err);
+							StreamUtils.GetSystemErr().println("The thread " + t.getName() + " threw an exception, and it was not handled.");
+							e.printStackTrace(StreamUtils.GetSystemErr());
 						}
 					});
 				}				

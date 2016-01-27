@@ -8,11 +8,9 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCConsoleCommandSender;
 import com.laytonsmith.abstraction.bukkit.events.BukkitMiscEvents;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.InternalException;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.event.EventHandler;
@@ -38,7 +36,7 @@ public class CommandHelperServerListener implements Listener{
         }
         boolean match = false;
         try {
-            match = Static.getAliasCore().alias("/" + event.getCommand(), player, new ArrayList<Script>());
+            match = Static.getAliasCore().alias("/" + event.getCommand(), player);
         } catch (InternalException e) {
             Static.getLogger().log(Level.SEVERE, e.getMessage());
         } catch (ConfigRuntimeException e) {

@@ -4,10 +4,10 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
-import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -24,6 +24,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -298,10 +299,23 @@ public class Compiler {
 							} else {
 								conversion = new ParseTree(new CFunction(((CSymbol) node.getData()).convert(), node.getTarget()), node.getFileOptions());
 							}
-							conversion.addChild(list.get(i + 1));
+							// We actually need to get all the remaining children, and shove them into an autoconcat
+							List<ParseTree> ac = new ArrayList<>();
 							list.set(i, conversion);
-							list.remove(i + 1);
-							i--;
+							for(int k = i + 1; k < list.size(); k++){
+								ParseTree m = list.get(k);
+								if(m.getData() instanceof CSymbol && ((CSymbol)m.getData()).isUnary()){
+									ac.add(m);
+									list.remove(k);
+									k--;
+									i--;
+									continue;
+								}
+								ac.add(m);
+								list.remove(k);
+								break;
+							}
+							conversion.addChild(optimizeSpecial(ac, returnSConcat));
 						}
 					}
 
@@ -520,6 +534,7 @@ public class Compiler {
 
 	@api
 	@hide("This is only used for testing unexpected error handling.")
+	@noboilerplate
 	public static class npe extends DummyFunction {
 
 		@Override
@@ -625,8 +640,8 @@ public class Compiler {
 	public static class smart_string extends AbstractFunction implements Optimizable {
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
 		}
 
 		@Override

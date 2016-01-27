@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -10,7 +11,6 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.MVector3D;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCGameRule;
@@ -31,9 +31,16 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -73,8 +80,8 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -99,13 +106,13 @@ public class World {
 				world = args[0].val();
 			} else {
 				if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() == null){
-					throw new ConfigRuntimeException("A world must be specified in a context with no player.", ExceptionType.InvalidWorldException, t);
+					throw ConfigRuntimeException.BuildException("A world must be specified in a context with no player.", CREInvalidWorldException.class, t);
 				}
 				world = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld().getName();
 			}
 			MCWorld w = Static.getServer().getWorld(world);
 			if (w == null) {
-				throw new ConfigRuntimeException("The specified world \"" + world + "\" is not a valid world.", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("The specified world \"" + world + "\" is not a valid world.", CREInvalidWorldException.class, t);
 			}
 			return ObjectGenerator.GetGenerator().location(w.getSpawnLocation(), false);
 		}
@@ -115,9 +122,9 @@ public class World {
 	public static class set_spawn extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException,
-						ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class,
+						CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -153,7 +160,7 @@ public class World {
 				z = Static.getInt32(args[3], t);
 			}
 			if (w == null) {
-				throw new ConfigRuntimeException("Invalid world given.", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("Invalid world given.", CREInvalidWorldException.class, t);
 			}
 			w.setSpawnLocation(x, y, z);
 			return CVoid.VOID;
@@ -202,8 +209,8 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -242,7 +249,7 @@ public class World {
 					z = l.getBlockZ();
 				} else {
 					if (m == null) {
-						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+						throw ConfigRuntimeException.BuildException("No world specified", CREInvalidWorldException.class, t);
 					}
 					world = m.getWorld();
 					x = Static.getInt32(args[0], t);
@@ -251,6 +258,10 @@ public class World {
 			} else {
 				//world, x and z provided
 				world = Static.getServer().getWorld(args[0].val());
+				if (world == null) {
+					throw ConfigRuntimeException.BuildException("World " + args[0].val() + " does not exist.",
+							CREInvalidWorldException.class, t);
+				}
 				x = Static.getInt32(args[1], t);
 				z = Static.getInt32(args[2], t);
 			}
@@ -263,8 +274,8 @@ public class World {
 	public static class load_chunk extends AbstractFunction {
 
  		@Override
- 		public ExceptionType[] thrown() {
- 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+ 		public Class<? extends CREThrowable>[] thrown() {
+ 			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
  		}
 
  		@Override
@@ -293,12 +304,16 @@ public class World {
  				//Either location array and world provided, or x and z. Test for array at pos 2
  				if (args[1] instanceof CArray) {
  					world = Static.getServer().getWorld(args[0].val());
+					if (world == null) {
+						throw ConfigRuntimeException.BuildException("The given world (" + args[0].val() + ") does not exist.",
+								CREInvalidWorldException.class, t);
+					}
  					MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, t);
  					x = l.getBlockX();
  					z = l.getBlockZ();
  				} else {
  					if (m == null) {
- 						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+ 						throw ConfigRuntimeException.BuildException("No world specified", CREInvalidWorldException.class, t);
  					}
  					world = m.getWorld();
  					x = Static.getInt32(args[0], t);
@@ -307,6 +322,10 @@ public class World {
  			} else {
  				//world, x and z provided
  				world = Static.getServer().getWorld(args[0].val());
+				if (world == null) {
+					throw ConfigRuntimeException.BuildException("The given world (" + args[0].val() + ") does not exist.",
+							CREInvalidWorldException.class, t);
+				}
  				x = Static.getInt32(args[1], t);
  				z = Static.getInt32(args[2], t);
  			}
@@ -340,8 +359,8 @@ public class World {
  	public static class unload_chunk extends AbstractFunction {
 
  		@Override
- 		public ExceptionType[] thrown() {
- 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+ 		public Class<? extends CREThrowable>[] thrown() {
+ 			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
  		}
 
  		@Override
@@ -375,7 +394,7 @@ public class World {
  					z = l.getBlockZ();
  				} else {
  					if (m == null) {
- 						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+ 						throw ConfigRuntimeException.BuildException("No world specified", CREInvalidWorldException.class, t);
  					}
  					world = m.getWorld();
  					x = Static.getInt32(args[0], t);
@@ -387,6 +406,9 @@ public class World {
  				x = Static.getInt32(args[1], t);
  				z = Static.getInt32(args[2], t);
  			}
+			if (world == null) { // Happends when m is a fake console or null command sender.
+				throw ConfigRuntimeException.BuildException("No world specified", CREInvalidWorldException.class, t);
+			}
  			world.unloadChunk(x, z);
  			return CVoid.VOID;
  		}
@@ -417,8 +439,9 @@ public class World {
 	public static class get_loaded_chunks extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class,
+				CREInvalidWorldException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -440,11 +463,19 @@ public class World {
  				world = Static.getServer().getWorld(args[0].val());
  			} else {
 				if (m == null) {
- 						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
- 					}
+ 					throw ConfigRuntimeException.BuildException("No world specified", CREInvalidWorldException.class, t);
+ 				}
  				world = m.getWorld();
 			}
+			if (world == null) { // Happends when m is a fake console or null command sender.
+				throw ConfigRuntimeException.BuildException("No world specified", CREInvalidWorldException.class, t);
+			}
  			MCChunk[] chunks = world.getLoadedChunks();
+			if (chunks == null) { // Happends when m is a fake player.
+				throw ConfigRuntimeException.BuildException(
+					"Could not find the chunk objects of the world (are you running in cmdline mode?)",
+					CRENotFoundException.class, t);
+			}
 			CArray ret = new CArray(t);
 			for (int i = 0; i < chunks.length; i++) {
 				CArray chunk = new CArray(t);
@@ -500,8 +531,8 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -537,13 +568,17 @@ public class World {
 				//Either location array and world provided, or x and z. Test for array at pos 1
 				if (args[0] instanceof CArray) {
 					world = Static.getServer().getWorld(args[1].val());
+					if (world == null) {
+						throw ConfigRuntimeException.BuildException("World " + args[1].val() + " does not exist.",
+								CREInvalidWorldException.class, t);
+					}
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
 
 					x = l.getChunk().getX();
 					z = l.getChunk().getZ();
 				} else {
 					if (m == null) {
-						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+						throw ConfigRuntimeException.BuildException("No world specified", CREInvalidWorldException.class, t);
 					}
 
 					world = m.getWorld();
@@ -555,6 +590,10 @@ public class World {
 				x = Static.getInt32(args[0], t);
 				z = Static.getInt32(args[1], t);
 				world = Static.getServer().getWorld(args[2].val());
+				if (world == null) {
+					throw ConfigRuntimeException.BuildException("World " + args[2].val() + " does not exist.",
+							CREInvalidWorldException.class, t);
+				}
 			}
 
 			return CBoolean.get(world.regenerateChunk(x, z));
@@ -581,8 +620,8 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -608,28 +647,28 @@ public class World {
 			MCWorld world;
 			int x;
 			int z;
-			long seed;
 			if (args.length == 1) {
 				//Location array provided
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
 				world = l.getWorld();
-				seed = world.getSeed();
 				x = l.getChunk().getX();
 				z = l.getChunk().getZ();
 			} else if (args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 1
 				if (args[0] instanceof CArray) {
 					world = Static.getServer().getWorld(args[1].val());
-					seed = world.getSeed();
+					if (world == null) {
+						throw ConfigRuntimeException.BuildException("The given world (" + args[1].val() + ") does not exist.",
+								CREInvalidWorldException.class, t);
+					}
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
 					x = l.getChunk().getX();
 					z = l.getChunk().getZ();
 				} else {
 					if (m == null) {
-						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+						throw ConfigRuntimeException.BuildException("No world specified", CREInvalidWorldException.class, t);
 					}
 					world = m.getWorld();
-					seed = world.getSeed();
 					x = Static.getInt32(args[0], t);
 					z = Static.getInt32(args[1], t);
 				}
@@ -638,9 +677,12 @@ public class World {
 				x = Static.getInt32(args[0], t);
 				z = Static.getInt32(args[1], t);
 				world = Static.getServer().getWorld(args[2].val());
-				seed = world.getSeed();
+				if (world == null) {
+					throw ConfigRuntimeException.BuildException("The given world (" + args[2].val() + ") does not exist.",
+							CREInvalidWorldException.class, t);
+				}
 			}
-			rnd.setSeed(seed
+			rnd.setSeed(world.getSeed()
 				+ x * x * 0x4c1906
 				+ x * 0x5ac0db
 				+ z * z * 0x4307a7L
@@ -698,8 +740,8 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -727,7 +769,7 @@ public class World {
 				w = Static.getServer().getWorld(args[0].val());
 			}
 			if (w == null) {
-				throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("No world specified", CREInvalidWorldException.class, t);
 			}
 			long time = 0;
 			String stime = (args.length == 1 ? args[0] : args[1]).val().toLowerCase();
@@ -751,10 +793,10 @@ public class World {
 					hour = 0;
 				}
 				if (hour > 24) {
-					throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Invalid time provided", CREFormatException.class, t);
 				}
 				if (minute > 59) {
-					throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Invalid time provided", CREFormatException.class, t);
 				}
 				hour -= 6;
 				hour = hour % 24;
@@ -765,7 +807,7 @@ public class World {
 			try {
 				Long.valueOf(stime);
 			} catch (NumberFormatException e) {
-				throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Invalid time provided", CREFormatException.class, t);
 			}
 			time = Long.parseLong(stime);
 			w.setTime(time);
@@ -793,8 +835,8 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -822,7 +864,7 @@ public class World {
 				w = Static.getServer().getWorld(args[0].val());
 			}
 			if (w == null) {
-				throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("No world specified", CREInvalidWorldException.class, t);
 			}
 			return new CInt(w.getTime(), t);
 		}
@@ -832,8 +874,8 @@ public class World {
 	public static class create_world extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class};
 		}
 
 		@Override
@@ -854,13 +896,13 @@ public class World {
 				try {
 					type = MCWorldType.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException e) {
-					throw new ConfigRuntimeException(args[1].val() + " is not a valid world type. Must be one of: " + StringUtils.Join(MCWorldType.values(), ", "), ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException(args[1].val() + " is not a valid world type. Must be one of: " + StringUtils.Join(MCWorldType.values(), ", "), CREFormatException.class, t);
 				}
 				MCWorldEnvironment environment;
 				try {
 					environment = MCWorldEnvironment.valueOf(args[2].val().toUpperCase());
 				} catch (IllegalArgumentException e) {
-					throw new ConfigRuntimeException(args[2].val() + " is not a valid environment type. Must be one of: " + StringUtils.Join(MCWorldEnvironment.values(), ", "), ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException(args[2].val() + " is not a valid environment type. Must be one of: " + StringUtils.Join(MCWorldEnvironment.values(), ", "), CREFormatException.class, t);
 				}
 				creator.type(type).environment(environment);
 			}
@@ -908,7 +950,7 @@ public class World {
 	public static class get_worlds extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -926,7 +968,7 @@ public class World {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray worlds = new CArray(t);
 			for(MCWorld w : Static.getServer().getWorlds()){
-				worlds.push(new CString(w.getName(), t));
+				worlds.push(new CString(w.getName(), t), t);
 			}
 			return worlds;
 		}
@@ -976,6 +1018,11 @@ public class World {
 				p = (MCPlayer)cs;
 				Static.AssertPlayerNonNull(p, t);
 				l = p.getLocation();
+				if (l == null) {
+					throw ConfigRuntimeException.BuildException(
+							"Could not find the location of the given player (are you running in cmdline mode?)",
+							CRENotFoundException.class, t);
+				}
 				w = l.getWorld();
 			}
 
@@ -983,13 +1030,13 @@ public class World {
 				if (args[0] instanceof CArray) {
 					l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				} else {
-					throw new ConfigRuntimeException("expecting argument 1 of get_chunk_loc to be a location array"
-							, ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("expecting argument 1 of get_chunk_loc to be a location array"
+							, CREFormatException.class, t);
 				}
 			} else {
 				if (p == null) {
-					throw new ConfigRuntimeException("expecting a player context for get_chunk_loc when used without arguments"
-							, ExceptionType.InsufficientArgumentsException, t);
+					throw ConfigRuntimeException.BuildException("expecting a player context for get_chunk_loc when used without arguments"
+							, CREInsufficientArgumentsException.class, t);
 				}
 			}
 
@@ -1011,8 +1058,9 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.InsufficientArgumentsException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREInsufficientArgumentsException.class,
+				CRENotFoundException.class};
 		}
 
 		@Override
@@ -1035,8 +1083,8 @@ public class World {
 	public static class spawn_falling_block extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -1062,10 +1110,10 @@ public class World {
 					vect = (CArray)args[2];
 
 					if (vect.size() < 3) {
-						throw new ConfigRuntimeException("Argument 3 of spawn_falling_block must have 3 items", ExceptionType.FormatException, t);
+						throw ConfigRuntimeException.BuildException("Argument 3 of spawn_falling_block must have 3 items", CREFormatException.class, t);
 					}
 				} else {
-					throw new ConfigRuntimeException("Expected array for argument 3 of spawn_falling_block", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Expected array for argument 3 of spawn_falling_block", CREFormatException.class, t);
 				}
 			}
 
@@ -1076,12 +1124,12 @@ public class World {
 				double y = Double.valueOf(vect.get(1, t).val());
 				double z = Double.valueOf(vect.get(2, t).val());
 
-				MVector3D v = new MVector3D(x, y, z);
+				Vector3D v = new Vector3D(x, y, z);
 
 				block.setVelocity(v);
 			}
 
-			return new CInt(block.getEntityId(), t);
+			return new CString(block.getUniqueId().toString(), t);
 		}
 
 		@Override
@@ -1112,8 +1160,8 @@ public class World {
 	public static class world_info extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -1131,15 +1179,16 @@ public class World {
 				Construct... args) throws ConfigRuntimeException {
 			MCWorld w = Static.getServer().getWorld(args[0].val());
 			if (w == null) {
-				throw new ConfigRuntimeException("Unknown world: " + args[0],
-						ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("Unknown world: " + args[0],
+						CREInvalidWorldException.class, t);
 			}
-			CArray ret = new CArray(t);
+			CArray ret = CArray.GetAssociativeArray(t);
 			ret.set("name", new CString(w.getName(), t), t);
 			ret.set("seed", new CInt(w.getSeed(), t), t);
 			ret.set("environment", new CString(w.getEnvironment().name(), t), t);
 			ret.set("generator", new CString(w.getGenerator(), t), t);
 			ret.set("worldtype", new CString(w.getWorldType().name(), t), t);
+			ret.set("sealevel", new CInt(w.getSeaLevel(), t), t);
 			return ret;
 		}
 
@@ -1156,7 +1205,7 @@ public class World {
 		@Override
 		public String docs() {
 			return "array {world} Returns an associative array of all the info needed to duplicate the world."
-					+ " The keys are name, seed, environment, generator, and worldtype.";
+					+ " The keys are name, seed, environment, generator, worldtype, and sealevel.";
 		}
 
 		@Override
@@ -1169,8 +1218,8 @@ public class World {
 	public static class unload_world extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -1191,7 +1240,7 @@ public class World {
 			}
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if (world == null) {
-				throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), CREInvalidWorldException.class, t);
 			}
 			return CBoolean.get(Static.getServer().unloadWorld(world, save));
 		}
@@ -1232,8 +1281,8 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -1260,7 +1309,7 @@ public class World {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if (world == null) {
-				throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), CREInvalidWorldException.class, t);
 			}
 			return new CString(world.getDifficulty().toString(), t);
 		}
@@ -1280,8 +1329,8 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1312,7 +1361,7 @@ public class World {
 				try {
 					difficulty = MCDifficulty.valueOf(args[0].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
-					throw new ConfigRuntimeException("The difficulty \"" + args[0].val() + "\" does not exist.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("The difficulty \"" + args[0].val() + "\" does not exist.", CREFormatException.class, t);
 				}
 				for (MCWorld world : Static.getServer().getWorlds()) {
 					world.setDifficulty(difficulty);
@@ -1320,12 +1369,12 @@ public class World {
 			} else {
 				MCWorld world = Static.getServer().getWorld(args[0].val());
 				if (world == null) {
-					throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+					throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), CREInvalidWorldException.class, t);
 				}
 				try {
 					difficulty = MCDifficulty.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
-					throw new ConfigRuntimeException("The difficulty \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("The difficulty \"" + args[1].val() + "\" does not exist.", CREFormatException.class, t);
 				}
 				world.setDifficulty(difficulty);
 			}
@@ -1347,8 +1396,8 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -1375,7 +1424,7 @@ public class World {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if (world == null) {
-				throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), CREInvalidWorldException.class, t);
 			}
 			return CBoolean.get(world.getPVP());
 		}
@@ -1395,8 +1444,8 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -1429,7 +1478,7 @@ public class World {
 			} else {
 				MCWorld world = Static.getServer().getWorld(args[0].val());
 				if (world == null) {
-					throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+					throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), CREInvalidWorldException.class, t);
 				}
 				world.setPVP(Static.getBoolean(args[1]));
 			}
@@ -1451,8 +1500,8 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1481,10 +1530,10 @@ public class World {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if (world == null) {
-				throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+				throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), CREInvalidWorldException.class, t);
 			}
 			if (args.length == 1) {
-				CArray gameRules = new CArray(t);
+				CArray gameRules = CArray.GetAssociativeArray(t);
 				for (MCGameRule gameRule : MCGameRule.values()) {
 					gameRules.set(new CString(gameRule.getGameRule(), t), CBoolean.get(world.getGameRuleValue(gameRule)), t);
 				}
@@ -1494,7 +1543,7 @@ public class World {
 				try {
 					gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
-					throw new ConfigRuntimeException("The gamerule \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("The gamerule \"" + args[1].val() + "\" does not exist.", CREFormatException.class, t);
 				}
 				return CBoolean.get(world.getGameRuleValue(gameRule));
 			}
@@ -1515,8 +1564,8 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1547,7 +1596,7 @@ public class World {
 				try {
 					gameRule = MCGameRule.valueOf(args[0].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
-					throw new ConfigRuntimeException("The gamerule \"" + args[0].val() + "\" does not exist.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("The gamerule \"" + args[0].val() + "\" does not exist.", CREFormatException.class, t);
 				}
 				boolean value = Static.getBoolean(args[1]);
 				for (MCWorld world : Static.getServer().getWorlds()) {
@@ -1557,11 +1606,11 @@ public class World {
 				try {
 					gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
-					throw new ConfigRuntimeException("The gamerule \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("The gamerule \"" + args[1].val() + "\" does not exist.", CREFormatException.class, t);
 				}
 				MCWorld world = Static.getServer().getWorld(args[0].val());
 				if (world == null) {
-					throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+					throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), CREInvalidWorldException.class, t);
 				}
 				world.setGameRuleValue(gameRule, Static.getBoolean(args[2]));
 			}
@@ -1583,9 +1632,9 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException,
-				ExceptionType.RangeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class, CREFormatException.class,
+				CRERangeException.class};
 		}
 
 		@Override
@@ -1621,12 +1670,12 @@ public class World {
 			int distance = Static.getInt32(args[2], t);
 
 			if (distance <= 0) {
-				throw new ConfigRuntimeException("Distance must be greater than 0.", ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("Distance must be greater than 0.", CRERangeException.class, t);
 			}
 
 			MCLocation shifted_from = from;
 
-			MVector3D velocity = to.toVector().subtract(from.toVector()).normalize();
+			Vector3D velocity = to.toVector().subtract(from.toVector()).normalize();
 
 			for (int i = 0; i < distance; i++) {
 				shifted_from = shifted_from.add(velocity);
@@ -1649,8 +1698,8 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1710,8 +1759,8 @@ public class World {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1759,8 +1808,8 @@ public class World {
 	public static class save_world extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -1806,8 +1855,8 @@ public class World {
 	public static class get_temperature extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override

@@ -1,5 +1,6 @@
 package com.laytonsmith.tools;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.TermColors;
@@ -66,7 +67,7 @@ public class Manager {
 	private static final File jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
 	private static final File chDirectory = new File(jarLocation, "CommandHelper");
 	private static PersistenceNetwork persistenceNetwork;
-	public static PrintStream out = System.out;
+	public static PrintStream out = StreamUtils.GetSystemOut();
 	public static final String[] options = new String[]{
 		"refactor", "print", "cleardb", "edit", "interpreter", "merge", "hidden-keys"
 	};
@@ -83,7 +84,7 @@ public class Manager {
 		CHLog.initialize(chDirectory);
 		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
 		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork,
-				chDirectory, new Profiles(MethodScriptFileLocations.getDefault().getSQLProfilesFile()),
+				chDirectory, new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile()),
 				new TaskManager());
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
@@ -127,7 +128,7 @@ public class Manager {
 				help(new String[]{});
 			}
 		} while (finished == false);
-		System.out.println(TermColors.reset());
+		StreamUtils.GetSystemOut().println(TermColors.reset());
 	}
 
 	public static void merge() {
@@ -752,7 +753,7 @@ public class Manager {
 			}
 		} catch(URISyntaxException | IOException | DataSourceException ex){
 			pl(RED + ex.getMessage());
-			ex.printStackTrace(System.err);
+			ex.printStackTrace(StreamUtils.GetSystemErr());
 		}
 	}
 

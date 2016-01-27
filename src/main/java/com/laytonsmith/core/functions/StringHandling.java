@@ -11,17 +11,16 @@ import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CByteArray;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -29,10 +28,15 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.Sizable;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
@@ -44,6 +48,7 @@ import java.util.HashSet;
 import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -54,93 +59,6 @@ public class StringHandling {
 
 	public static String docs() {
 		return "These class provides functions that allow strings to be manipulated";
-	}
-
-	@api
-	public static class cc extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "cc";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
-		}
-
-		@Override
-		public String docs() {
-			return "string {args...} The cousin to <strong>c</strong>on<strong>c</strong>at, this function does some magic under the covers"
-					+ " to remove the auto-concatenation effect in bare strings. Take the following example: cc(bare string) -> barestring";
-		}
-
-		@Override
-		public ExceptionType[] thrown() {
-			return null;
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public boolean preResolveVariables() {
-			return false;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CVoid.VOID;
-		}
-
-		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			//if any of the nodes are sconcat, move their children up a level
-			List<ParseTree> list = new ArrayList<ParseTree>();
-			for (ParseTree node : nodes) {
-				if (node.getData().val().equals("sconcat")) {
-					for (ParseTree sub : node.getChildren()) {
-						list.add(sub);
-					}
-				} else {
-					list.add(node);
-				}
-			}
-
-			StringBuilder b = new StringBuilder();
-			for (ParseTree node : list) {
-				Construct c = parent.seval(node, env);
-				b.append(c.val());
-			}
-			return new CString(b.toString(), t);
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		public ParseTree optimizeSpecial(Target target, List<ParseTree> children) {
-			throw new UnsupportedOperationException("Not yet implemented");
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{
-						new ExampleScript("", "cc('These' 'normally' 'have' 'spaces' 'between' 'them')"),};
-		}
 	}
 
 	@api
@@ -157,8 +75,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -193,6 +111,11 @@ public class StringHandling {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
+			for(ParseTree child : children){
+				if(child.getData() instanceof CLabel){
+					throw new ConfigCompileException("Invalid use of concatenation with label", child.getTarget());
+				}
+			}
 			return null;
 		}
 
@@ -247,8 +170,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -271,6 +194,11 @@ public class StringHandling {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
+			for(ParseTree child : children){
+				if(child.getData() instanceof CLabel){
+					throw new ConfigCompileException("Invalid use of concatenation with label", child.getTarget());
+				}
+			}
 			//Remove empty g or p children
 			Iterator<ParseTree> it = children.iterator();
 			while(it.hasNext()){
@@ -364,8 +292,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -447,8 +375,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -501,8 +429,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -558,8 +486,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -615,8 +543,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -672,8 +600,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -734,8 +662,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -755,6 +683,10 @@ public class StringHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			if (!(args[0] instanceof CString)) {
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects a string as first argument, but type "
+						+ args[0].typeof() + " was found.", CREFormatException.class, t);
+			}
 			return new CString(args[0].val().toUpperCase(), t);
 		}
 
@@ -793,8 +725,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -814,6 +746,10 @@ public class StringHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			if (!(args[0] instanceof CString)) {
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects a string as first argument, but type "
+						+ args[0].typeof() + " was found.", CREFormatException.class, t);
+			}
 			return new CString(args[0].val().toLowerCase(), t);
 		}
 
@@ -855,8 +791,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CRECastException.class};
 		}
 
 		@Override
@@ -887,8 +823,8 @@ public class StringHandling {
 				}
 				return new CString(s.substring(begin, end), t);
 			} catch (IndexOutOfBoundsException e) {
-				throw new ConfigRuntimeException("The indices given are not valid for string '" + args[0].val() + "'",
-						ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("The indices given are not valid for string '" + args[0].val() + "'",
+						CRERangeException.class, t);
 			}
 		}
 
@@ -930,8 +866,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.NullPointerException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENullPointerException.class};
 		}
 
 		@Override
@@ -996,8 +932,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1031,7 +967,7 @@ public class StringHandling {
 			if(split.length() == 0){
 				//Empty string, so special case.
 				for(int i = 0; i < string.length(); i++){
-					array.push(new CString(string.charAt(i), t));
+					array.push(new CString(string.charAt(i), t), t);
 				}
 				return array;
 			}
@@ -1040,16 +976,16 @@ public class StringHandling {
 				if (string.substring(i, i + split.length()).equals(split)) {
 					//Split point found
 					splitsFound++;
-					array.push(new CString(string.substring(sp, i), t));
+					array.push(new CString(string.substring(sp, i), t), t);
 					sp = i + split.length();
 					i += split.length() - 1;
 				}
 			}
 			if (sp != 0) {
-				array.push(new CString(string.substring(sp, string.length()), t));
+				array.push(new CString(string.substring(sp, string.length()), t), t);
 			} else {
 				//It was not found anywhere, so put the whole string in
-				array.push(args[1]);
+				array.push(args[1], t);
 			}
 			return array;
 		}
@@ -1072,13 +1008,14 @@ public class StringHandling {
 	}
 
 	@api
-	public static class sprintf extends AbstractFunction implements Optimizable {
+	@seealso({sprintf.class, Meta.get_locales.class})
+	public static class lsprintf extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException,
-						ExceptionType.InsufficientArgumentsException,
-						ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class,
+						CREInsufficientArgumentsException.class,
+						CRECastException.class};
 		}
 
 		@Override
@@ -1093,33 +1030,50 @@ public class StringHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length == 0) {
-				throw new ConfigRuntimeException(getName() + " expects 1 or more argument", ExceptionType.InsufficientArgumentsException, t);
+			if (args.length < 2) {
+				throw ConfigRuntimeException.BuildException(getName() + " expects 2 or more arguments", CREInsufficientArgumentsException.class, t);
 			}
-			String formatString = args[0].val();
-			Object[] params = new Object[args.length - 1];
+			int numArgs = args.length;
+			
+			// Get the Locale.
+			Locale locale = null;
+			String countryCode = args[0].nval();
+			if(countryCode == null){
+				locale = Locale.getDefault();
+			} else {
+				locale = Static.GetLocale(countryCode);
+			}
+			if(locale == null) {
+				throw ConfigRuntimeException.BuildException("The given locale was not found on your system: "
+						+ countryCode, CREFormatException.class, t);
+			}
+			
+			// Handle the formatting.
+			String formatString = args[1].val();
+			Object[] params = new Object[numArgs - 2];
 			List<FormatString> parsed;
 			try{
 				parsed = parse(formatString, t);
 			} catch(IllegalFormatException e){
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t);
 			}
-			if (requiredArgs(parsed) != args.length - 1) {
-				throw new ConfigRuntimeException("The specified format string: \"" + formatString + "\""
-						+ " expects " + requiredArgs(parsed) + " argument, but " + (args.length - 1) + " were provided.", ExceptionType.InsufficientArgumentsException, t);
+			if (requiredArgs(parsed) != numArgs - 2) {
+				throw ConfigRuntimeException.BuildException("The specified format string: \"" + formatString + "\""
+						+ " expects " + requiredArgs(parsed) + " argument(s), but " + (numArgs - 2) + " were provided.",
+						CREInsufficientArgumentsException.class, t);
 			}
 
 			List<Construct> flattenedArgs = new ArrayList<Construct>();
-			if (args.length == 2 && args[1] instanceof CArray) {
-				if (((CArray) args[1]).inAssociativeMode()) {
-					throw new ConfigRuntimeException("If the second argument to " + getName() + " is an array, it may not be associative.", ExceptionType.CastException, t);
+			if (numArgs == 3 && args[2] instanceof CArray) {
+				if (((CArray) args[2]).inAssociativeMode()) {
+					throw ConfigRuntimeException.BuildException("If the second argument to " + getName() + " is an array, it may not be associative.", CRECastException.class, t);
 				} else {
-					for (int i = 0; i < ((CArray) args[1]).size(); i++) {
-						flattenedArgs.add(((CArray) args[1]).get(i, t));
+					for (int i = 0; i < ((CArray) args[2]).size(); i++) {
+						flattenedArgs.add(((CArray) args[2]).get(i, t));
 					}
 				}
 			} else {
-				for (int i = 1; i < args.length; i++) {
+				for (int i = 2; i < numArgs; i++) {
 					flattenedArgs.add(args[i]);
 				}
 			}
@@ -1131,7 +1085,7 @@ public class StringHandling {
 				params[i] = convertArgument(arg, c, i, t);
 			}
 			//Ok, done.
-			return new CString(String.format(formatString, params), t);
+			return new CString(String.format(locale, formatString, params), t);
 		}
 
 		private Object convertArgument(Construct arg, Character c, int i, Target t) {
@@ -1144,7 +1098,7 @@ public class StringHandling {
 					//Character, parse as string, and verify it's of length 1
 					String s = arg.val();
 					if (s.length() > 1) {
-						throw new Exceptions.FormatException("Expecting a string of length one in argument " + (i + 1) + " in " + getName()
+						throw new CREFormatException("Expecting a string of length one in argument " + (i + 1) + " in " + getName()
 								+ "but \"" + s + "\" was found instead.", t);
 					}
 					o = s.charAt(0);
@@ -1284,17 +1238,24 @@ public class StringHandling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.isEmpty()) {
-				throw new ConfigCompileException(getName() + " expects 1 or more argument", t);
-			} else if (children.get(0).isConst()) {
-				ParseTree me = new ParseTree(new CFunction(getName(), t), children.get(0).getFileOptions());
+			if (children.size() < 2) {
+				throw new ConfigCompileException(getName() + " expects 2 or more argument", t);
+			}
+			if (children.get(0).isConst()){
+				String locale = children.get(0).getData().nval();
+				if(locale != null && Static.GetLocale(locale) == null){
+					throw new ConfigCompileException("The locale " + locale + " could not be found on this system", t);
+				}
+			}
+			if (children.get(1).isConst()) {
+				ParseTree me = new ParseTree(new CFunction(getName(), t), children.get(1).getFileOptions());
 				me.setChildren(children);
 				me.setOptimized(true); //After this run, we will be, anyways.
-				if(children.size() == 2 && children.get(1).getData() instanceof CFunction && ((CFunction)children.get(1).getData()).getFunction().getName().equals(new DataHandling.array().getName())){
+				if(children.size() == 3 && children.get(2).getData() instanceof CFunction && ((CFunction)children.get(2).getData()).getFunction().getName().equals(new DataHandling.array().getName())){
 					//Normally we can't do anything with a hardcoded array, it's considered dynamic. But in this case, we can at least pull up the arguments,
 					//because the array's size is constant, even if the arguments in it aren't.
-					ParseTree array = children.get(1);
-					children.remove(1);
+					ParseTree array = children.get(2);
+					children.remove(2);
 					boolean allIndexesStatic = true;
 					for(int i = 0; i < array.numberOfChildren(); i++){
 						ParseTree child = array.getChildAt(i);
@@ -1309,21 +1270,21 @@ public class StringHandling {
 				}
 				//We can check the format string and make sure it doesn't throw an IllegalFormatException.
 				try {
-					List<FormatString> parsed = parse(children.get(0).getData().val(), t);
-					if (requiredArgs(parsed) != children.size() - 1) {
-						throw new ConfigRuntimeException("The specified format string: \"" + children.get(0).getData().val() + "\""
-								+ " expects " + requiredArgs(parsed) + " argument, but " + (children.size() - 1) + " were provided.", ExceptionType.InsufficientArgumentsException, t);
+					List<FormatString> parsed = parse(children.get(1).getData().val(), t);
+					if (requiredArgs(parsed) != children.size() - 2) {
+						throw ConfigRuntimeException.BuildException("The specified format string: \"" + children.get(1).getData().val() + "\""
+								+ " expects " + requiredArgs(parsed) + " argument(s), but " + (children.size() - 2) + " were provided.", CREInsufficientArgumentsException.class, t);
 					}
 					//If the arguments are constant, we can actually check them too
-					for(int i = 1; i < children.size(); i++){
+					for(int i = 2; i < children.size(); i++){
 						//We skip the dynamic ones, but the constant ones we can know for sure
 						//if they are convertable or not.
 						if(children.get(i).isConst()){
-							convertArgument(children.get(i).getData(), parsed.get(i - 1).getExpectedType(), i + 1, t);
+							convertArgument(children.get(i).getData(), parsed.get(i - 2).getExpectedType(), i, t);
 						}
 					}
 				} catch (IllegalFormatException e) {
-					throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t);
 				}
 				return me;
 			} else {
@@ -1401,7 +1362,7 @@ public class StringHandling {
 			} catch(ReflectionException e){
 				if(e.getCause() instanceof InvocationTargetException){
 					Throwable th = e.getCause().getCause();
-					throw new ConfigRuntimeException("A format exception was thrown for the argument \"" + format + "\": " + th.getClass().getSimpleName() + ": " + th.getMessage(), ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("A format exception was thrown for the argument \"" + format + "\": " + th.getClass().getSimpleName() + ": " + th.getMessage(), CREFormatException.class, t);
 				} else {
 					//This is unexpected
 					throw ConfigRuntimeException.CreateUncatchableException(e.getMessage(), t);
@@ -1437,7 +1398,7 @@ public class StringHandling {
 
 		@Override
 		public String getName() {
-			return "sprintf";
+			return "lsprintf";
 		}
 
 		@Override
@@ -1447,9 +1408,12 @@ public class StringHandling {
 
 		@Override
 		public String docs() {
-			return "string {formatString, parameters... | formatString, array(parameters...)} Returns a string formatted to the"
-					+ " given formatString specification, using the parameters passed in. The formatString should be formatted"
-					+ " according to [http://docs.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax this standard],"
+			return "string {locale, formatString, parameters... | locale, formatString, array(parameters...)} Returns a string formatted to the"
+					+ " given formatString specification, using the parameters passed in. Locale should be a string in format,"
+					+ " for instance, en_US, nl_NL, no_NO... Which locales are available depends on your system. Use"
+					+ " null to use the system's locale."
+					+ " The formatString should be formatted according to"
+					+ " [http://docs.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax this standard],"
 					+ " with the caveat that the parameter types are automatically cast to the appropriate type, if possible."
 					+ " Calendar/time specifiers, (t and T) expect an integer which represents unix time, but are otherwise"
 					+ " valid. All format specifiers in the documentation are valid.";
@@ -1463,6 +1427,60 @@ public class StringHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE, OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "lsprintf('en_US', '%d', 1)"),
+				new ExampleScript("Multiple arguments", "lsprintf('en_US', '%d%d', 1, '2')"),
+				new ExampleScript("Multiple arguments in an array", "lsprintf('en_US', '%d%d', array(1, 2))"),
+				new ExampleScript("Compile error, missing parameters", "lsprintf('en_US', '%d')", true),
+				new ExampleScript("Other formatting: float with precision (using integer)", "lsprintf('en_US', '%07.3f', 4)"),
+				new ExampleScript("Other formatting: float with precision (with rounding)", "lsprintf('en_US', '%07.3f', 3.4567)"),
+				new ExampleScript("Other formatting: float with precision in a different locale (with rounding)", "lsprintf('nl_NL', '%07.3f', 3.4567)"),
+				new ExampleScript("Other formatting: time", "lsprintf('en_US', '%1$tm %1$te,%1$tY', time())", ":06 13,2013"),
+				new ExampleScript("Literal percent sign", "lsprintf('en_US', '%%')"),
+				new ExampleScript("Hexidecimal formatting", "lsprintf('en_US', '%x', 15)"),
+				new ExampleScript("Other formatting: character", "lsprintf('en_US', '%c', 's')"),
+				new ExampleScript("Other formatting: character (with capitalization)", "lsprintf('en_US', '%C', 's')"),
+				new ExampleScript("Other formatting: scientific notation", "lsprintf('en_US', '%e', '2345')"),
+				new ExampleScript("Other formatting: plain string", "lsprintf('en_US', '%s', 'plain string')"),
+				new ExampleScript("Other formatting: boolean", "lsprintf('en_US', '%b', 1)"),
+				new ExampleScript("Other formatting: boolean (with capitalization)", "lsprintf('en_US', '%B', 0)"),
+				new ExampleScript("Other formatting: hash code", "lsprintf('en_US', '%h', 'will be hashed')"),
+			};
+		}
+
+	}
+	
+	@api
+	@seealso(lsprintf.class)
+	public static class sprintf extends lsprintf implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "sprintf";
+		}
+
+		@Override
+		public String docs() {
+			return "string {formatString, parameters... | formatString, array(parameters...)} Returns a string formatted to the"
+					+ " given formatString specification, using the parameters passed in. The formatString should be formatted"
+					+ " according to [http://docs.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax this standard],"
+					+ " with the caveat that the parameter types are automatically cast to the appropriate type, if possible."
+					+ " Calendar/time specifiers, (t and T) expect an integer which represents unix time, but are otherwise"
+					+ " valid. All format specifiers in the documentation are valid. This works the same as lsprintf with the"
+					+ " locale set to \"DEFAULT\".";
+		}
+		
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() < 1){
+				throw new ConfigCompileException(getName() + " expects at least 1 argument", t);
+			}
+			children.add(0, new ParseTree(CNull.NULL, fileOptions)); // Add a default locale to the arguments.
+			return super.optimizeDynamic(t, children, fileOptions);
 		}
 
 		@Override
@@ -1488,15 +1506,13 @@ public class StringHandling {
 		}
 
 	}
-	// TODO: Add a sprintf_local function, which will allow for the locale to be changed, and change sprintf to simply call sprintf_locale with
-	// the default locale.
 
 	@api
 	public static class string_get_bytes extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1519,7 +1535,7 @@ public class StringHandling {
 			try {
 				return CByteArray.wrap(val.getBytes(encoding), t);
 			} catch (UnsupportedEncodingException ex) {
-				throw new Exceptions.FormatException("Unknown encoding type \"" + encoding + "\"", t);
+				throw new CREFormatException("Unknown encoding type \"" + encoding + "\"", t);
 			}
 		}
 
@@ -1551,8 +1567,8 @@ public class StringHandling {
 	public static class string_from_bytes extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1575,7 +1591,7 @@ public class StringHandling {
 			try {
 				return new CString(new String(ba.asByteArrayCopy(), encoding), t);
 			} catch (UnsupportedEncodingException ex) {
-				throw new Exceptions.FormatException("Unknown encoding type \"" + encoding + "\"", t);
+				throw new CREFormatException("Unknown encoding type \"" + encoding + "\"", t);
 			}
 		}
 
@@ -1606,8 +1622,8 @@ public class StringHandling {
 	public static class string_append extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1623,7 +1639,7 @@ public class StringHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args.length < 2){
-				throw new ConfigRuntimeException(getName() + " must have 2 arguments at minimum", ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " must have 2 arguments at minimum", CREInsufficientArgumentsException.class, t);
 			}
 			CResource m = (CResource) args[0];
 			StringBuffer buf = ResourceManager.GetResource(m, StringBuffer.class, t);
@@ -1694,8 +1710,8 @@ public class StringHandling {
 	@api public static class char_from_unicode extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -1713,7 +1729,7 @@ public class StringHandling {
 			try{
 				return new CString(new String(Character.toChars(Static.getInt32(args[0], t))), t);
 			} catch(IllegalArgumentException ex){
-				throw new Exceptions.RangeException("Code point out of range: " + args[0].val(), t);
+				throw new CRERangeException("Code point out of range: " + args[0].val(), t);
 			}
 		}
 
@@ -1759,8 +1775,8 @@ public class StringHandling {
 	@api public static class unicode_from_char extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -1776,7 +1792,7 @@ public class StringHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args[0].val().toCharArray().length == 0){
-				throw new Exceptions.RangeException("Empty string cannot be converted to unicode.", t);
+				throw new CRERangeException("Empty string cannot be converted to unicode.", t);
 			}
 			int i = Character.codePointAt(args[0].val().toCharArray(), 0);
 			return new CInt(i, t);
@@ -1815,8 +1831,8 @@ public class StringHandling {
 	@api public static class levenshtein extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override

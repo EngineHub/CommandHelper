@@ -4,10 +4,12 @@
  */
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -20,9 +22,13 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
  * 
@@ -34,19 +40,22 @@ public class ItemMeta {
 	
 	private static final String applicableItemMeta = "<ul>"
 			+ "<li>All items - display (string), lore (array of strings), enchants (array of enchantment arrays),"
-			+ " repair (int, repair cost)</li><li>Books - title (string), author (string), pages (array of strings)</li>"
+			+ " repair (int, repair cost),flags(array). Possible flags: "
+			+ StringUtils.Join(MCItemFlag.values(), ", ", " or ") + "</li>"
+			+ "<li>Books - title (string), author (string), pages (array of strings)</li>"
 			+ "<li>EnchantedBooks - stored (array of enchantment arrays (see Example))</li>"
 			+ "<li>Leather Armor - color (color array (see Example))</li>"
 			+ "<li>Skulls - owner (string) NOTE: the visual change only applies to player skulls</li>"
 			+ "<li>Potions - potions (array of potion arrays), main(int, the id of the main effect)</li>"
+			+ "<li>Banners - basecolor (string), patterns (array of pattern arrays)"
 			+ "</ul>";
 	
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_itemmeta extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRECastException.class};
 		}
 
 		@Override
@@ -77,7 +86,7 @@ public class ItemMeta {
 				is = p.getItemAt(Static.getInt32(slot, t));
 			}
 			if (is == null) {
-				throw new Exceptions.CastException("There is no item at slot " + slot, t);
+				throw new CRECastException("There is no item at slot " + slot, t);
 			}
 			return ObjectGenerator.GetGenerator().itemMeta(is, t);
 		}
@@ -123,7 +132,9 @@ public class ItemMeta {
 							"{display: null, enchants: {}, lore: null, owner: Herobrine}"),
 					new ExampleScript("Demonstrates a custom potion", "msg(get_itemmeta(null))", 
 							"{display: null, enchants: {}, lore: null, main: 8,"
-							+ " potions: {{ambient: true, id: 8, seconds: 180, strength: 5}}}")
+							+ " potions: {{ambient: true, id: 8, seconds: 180, strength: 5}}}"),
+					new ExampleScript("Demonstrates a custom banner", "msg(get_itemmeta(0))",
+							"{basecolor: WHITE, patterns: {{color: BLACK, shape: SKULL}, {color: RED, shape: CROSS}}}")
 			};
 		}
 		
@@ -133,8 +144,9 @@ public class ItemMeta {
 	public static class set_itemmeta extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREFormatException.class,
+				CRECastException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -167,7 +179,7 @@ public class ItemMeta {
 				is = p.getItemAt(Static.getInt32(slot, t));
 			}
 			if (is == null) {
-				throw new Exceptions.CastException("There is no item at slot " + slot, t);
+				throw new CRECastException("There is no item at slot " + slot, t);
 			}
 			is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(meta, is.getType(), t));
 			return CVoid.VOID;
@@ -216,8 +228,16 @@ public class ItemMeta {
 					new ExampleScript("Demonstrates a skull", "set_itemmeta(103, array(owner: 'Notch'))", 
 							"This puts Notch's skin on the skull you are wearing"),
 					new ExampleScript("Demonstrates making a custom potion", 
-							"set_itemmeta(5, array(potions: array(id: 8, strength: 4, seconds: 90, ambient: true)))", 
-							"Turns the potion in slot 5 into a Potion of Leaping V")
+							"set_itemmeta(5, array(potions: array(array(id: 8, strength: 4, seconds: 90, ambient: true))))",
+							"Turns the potion in slot 5 into a Potion of Leaping V"),
+					new ExampleScript("Demonstrates hiding a potion effect",
+							"set_itemmeta(4, array(flags: array(HIDE_POTION_EFFECTS)))",
+							"Hides the text indicating meta information for the item in slot 4."
+							+ " The flag HIDE_POTION_EFFECTS hides specific item meta like book meta, potion effects,"
+							+ " a music disc's author and name, firework meta, map meta, and stored enchantments."),
+					new ExampleScript("Demonstrates making a custom banner",
+							"set_itemmeta(0, array(basecolor: SILVER, patterns: array(array(color: BLACK, shape: SKULL))",
+							"This banner will be silver with a black skull.")
 			};
 		}
 		
@@ -227,8 +247,8 @@ public class ItemMeta {
 	public static class get_armor_color extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -254,13 +274,13 @@ public class ItemMeta {
 			Static.AssertPlayerNonNull(p, t);
 			MCItemStack is = p.getItemAt(slot);
 			if (is == null) {
-				throw new Exceptions.CastException("There is no item at slot " + slot, t);
+				throw new CRECastException("There is no item at slot " + slot, t);
 			}
 			MCItemMeta im = is.getItemMeta();
 			if(im instanceof MCLeatherArmorMeta){
 				return ObjectGenerator.GetGenerator().color(((MCLeatherArmorMeta)im).getColor(), t);
 			} else {
-				throw new Exceptions.CastException("The item at slot " + slot + " is not leather armor.", t);
+				throw new CRECastException("The item at slot " + slot + " is not leather armor.", t);
 			}
 		}
 
@@ -292,8 +312,8 @@ public class ItemMeta {
 	public static class set_armor_color extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -317,27 +337,27 @@ public class ItemMeta {
 				if (args[2] instanceof CArray) {
 					color = (CArray)args[2];
 				} else {
-					throw new Exceptions.FormatException("Expected an array but recieved " + args[2] + " instead.", t);
+					throw new CREFormatException("Expected an array but recieved " + args[2] + " instead.", t);
 				}
 			} else {
 				slot = Static.getInt32(args[0], t);
 				if (args[1] instanceof CArray) {
 					color = (CArray)args[1];
 				} else {
-					throw new Exceptions.FormatException("Expected an array but recieved " + args[1] + " instead.", t);
+					throw new CREFormatException("Expected an array but recieved " + args[1] + " instead.", t);
 				}
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCItemStack is = p.getItemAt(slot);
 			if (is == null) {
-				throw new Exceptions.CastException("There is no item at slot " + slot, t);
+				throw new CRECastException("There is no item at slot " + slot, t);
 			}
 			MCItemMeta im = is.getItemMeta();
 			if(im instanceof MCLeatherArmorMeta){
 				((MCLeatherArmorMeta)im).setColor(ObjectGenerator.GetGenerator().color(color, t));
 				is.setItemMeta(im);
 			} else {
-				throw new Exceptions.CastException("The item at slot " + slot + " is not leather armor", t);
+				throw new CRECastException("The item at slot " + slot + " is not leather armor", t);
 			}
 			return CVoid.VOID;
 		}
@@ -371,8 +391,8 @@ public class ItemMeta {
 	public static class is_leather_armor extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override

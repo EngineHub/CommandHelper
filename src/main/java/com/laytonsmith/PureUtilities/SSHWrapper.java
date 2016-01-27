@@ -120,13 +120,13 @@ public class SSHWrapper {
 
 					@Override
 					public boolean promptYesNo(String message) {
-						System.out.println(message + " (Automatically responding with 'Yes')");
+						StreamUtils.GetSystemOut().println(message + " (Automatically responding with 'Yes')");
 						return true;
 					}
 
 					@Override
 					public void showMessage(String message) {
-						System.out.println(message);
+						StreamUtils.GetSystemOut().println(message);
 					}
 				});
 				//10 second timeout

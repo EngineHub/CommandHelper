@@ -19,7 +19,7 @@ public class VirtualFile {
 	
 	public VirtualFile(String path){
 		String working = path;
-		working = working.replace("\\", "/");
+		working = working.replace('\\', '/');
 		for(String s : RESTRICTED_CHARS){
 			if(working.contains(s)){
 				throw new InvalidVirtualFile("VirtualFiles cannot contain the '" + s + "' character.");

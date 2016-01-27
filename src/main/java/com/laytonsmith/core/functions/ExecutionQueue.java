@@ -12,9 +12,10 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,8 +38,8 @@ public class ExecutionQueue {
 	public static class queue_push extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -56,7 +57,7 @@ public class ExecutionQueue {
 			final CClosure c;
 			String queue = null;
 			if(!(args[0] instanceof CClosure)){
-				throw new ConfigRuntimeException("Parameter 1 to " + getName() + " must be a closure.", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Parameter 1 to " + getName() + " must be a closure.", CRECastException.class, t);
 			}
 			c = ((CClosure)args[0]);
 			if(args.length == 2){
@@ -117,8 +118,8 @@ public class ExecutionQueue {
 	public static class queue_push_front extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -136,7 +137,7 @@ public class ExecutionQueue {
 			final CClosure c;
 			String queue = null;
 			if(!(args[0] instanceof CClosure)){
-				throw new ConfigRuntimeException("Parameter 1 to " + getName() + " must be a closure.", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Parameter 1 to " + getName() + " must be a closure.", CRECastException.class, t);
 			}
 			c = ((CClosure)args[0]);
 			if(args.length == 2){
@@ -197,8 +198,8 @@ public class ExecutionQueue {
 	public static class queue_remove extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -247,8 +248,8 @@ public class ExecutionQueue {
 	public static class queue_remove_front extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -298,8 +299,8 @@ public class ExecutionQueue {
 	public static class queue_clear extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -349,7 +350,7 @@ public class ExecutionQueue {
 	public static class queue_running extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -398,8 +399,8 @@ public class ExecutionQueue {
 	public static class queue_delay extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -460,8 +461,8 @@ public class ExecutionQueue {
 	public static class queue_delay_front extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override

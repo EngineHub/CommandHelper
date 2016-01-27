@@ -19,9 +19,11 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -66,8 +68,8 @@ public class Regex {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.FormatException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREFormatException.class};
         }
 
 		@Override
@@ -109,7 +111,7 @@ public class Regex {
 						ret.set(key, (String)ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
 					}
 				} catch(ReflectionUtils.ReflectionException ex){
-					throw new ConfigRuntimeException("Named captures are only supported with Java 7.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Named captures are only supported with Java 7.", CREFormatException.class, t);
 				}
             }
             return ret;
@@ -166,8 +168,8 @@ public class Regex {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.FormatException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREFormatException.class};
         }
 
 		@Override
@@ -207,9 +209,9 @@ public class Regex {
 						ret.set(key, (String)ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
 					}
 				} catch(ReflectionUtils.ReflectionException e){
-					throw new ConfigRuntimeException("Named captures are only supported with Java 7.", ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Named captures are only supported with Java 7.", CREFormatException.class, t);
 				}
-                fret.push(ret);
+                fret.push(ret, t);
             }
             return fret;
         }              
@@ -265,8 +267,8 @@ public class Regex {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.FormatException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREFormatException.class};
         }
 
 		@Override
@@ -295,9 +297,9 @@ public class Regex {
             try {
             	ret = pattern.matcher(subject).replaceAll(replacement);
             } catch (IndexOutOfBoundsException e) {
-            	throw new Exceptions.FormatException("Expecting a regex group at parameter 1 of reg_replace", t);
+            	throw new CREFormatException("Expecting a regex group at parameter 1 of reg_replace", t);
             } catch(IllegalArgumentException e){
-				throw new Exceptions.FormatException(e.getMessage(), t);
+				throw new CREFormatException(e.getMessage(), t);
 			}
             
             return new CString(ret, t);
@@ -374,8 +376,8 @@ public class Regex {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREFormatException.class, CRECastException.class};
         }
 
 		@Override
@@ -412,7 +414,7 @@ public class Regex {
             String [] rsplit = pattern.split(subject, limit + 1);
             CArray ret = new CArray(t);
             for(String split : rsplit){
-                ret.push(new CString(split, t));
+                ret.push(new CString(split, t), t);
             }
             return ret;
         }
@@ -471,8 +473,8 @@ public class Regex {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.FormatException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREFormatException.class};
         }
 
 		@Override
@@ -533,7 +535,7 @@ public class Regex {
     public static class reg_escape extends AbstractFunction implements Optimizable{
 
 		@Override
-        public ExceptionType[] thrown() {
+        public Class<? extends CREThrowable>[] thrown() {
             return null;
         }
 
@@ -608,7 +610,7 @@ public class Regex {
                 } else if(sflags.toLowerCase().charAt(i) == 's'){
                     flags |= java.util.regex.Pattern.DOTALL;
                 } else {
-                    throw new ConfigRuntimeException("Unrecognized flag: " + sflags.toLowerCase().charAt(i), ExceptionType.FormatException, t);
+                    throw ConfigRuntimeException.BuildException("Unrecognized flag: " + sflags.toLowerCase().charAt(i), CREFormatException.class, t);
                 }
             }
         } else {
@@ -617,7 +619,7 @@ public class Regex {
         try{
             return Pattern.compile(regex, flags);
         } catch(PatternSyntaxException e){
-            throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
+            throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t);
         }
     }
 	

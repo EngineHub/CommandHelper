@@ -4,6 +4,7 @@ package com.laytonsmith.abstraction;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCWeather;
+
 import java.net.InetSocketAddress;
 
 /**
@@ -32,8 +33,6 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 	
 	public void setFlySpeed(float speed);
 
-    public int getFoodLevel();
-
 	@Override
     public MCPlayerInventory getInventory();
 
@@ -51,7 +50,13 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
 	public MCScoreboard getScoreboard();
 
-    public int getTotalExperience();
+	public int getTotalExperience();
+
+	public int getExpToLevel();
+
+	public int getExpAtLevel();
+
+    public MCEntity getSpectatorTarget();
 
 	public float getWalkSpeed();
 	
@@ -86,8 +91,6 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
 	public void setFlying(boolean flight);
 
-    public void setFoodLevel(int f);
-
     public void setLevel(int xp);
 
     public void setPlayerListName(String listName);
@@ -99,6 +102,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
     public void setRemainingFireTicks(int i);
 
 	public void setScoreboard(MCScoreboard board);
+
+    public void setSpectatorTarget(MCEntity entity);
 
     public void setTempOp(Boolean value) throws Exception;
 
@@ -128,15 +133,19 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 	
 	public void playSound(MCLocation l, String sound, float volume, float pitch);
 
-	public int getHunger();
+    int getFoodLevel();
 
-	public void setHunger(int h);
+    void setFoodLevel(int f);
 
-	public float getSaturation();
+    float getSaturation();
 
-	public void setSaturation(float s);
+    void setSaturation(float s);
 
-	public void setBedSpawnLocation(MCLocation l);
+    float getExhaustion();
+
+    void setExhaustion(float e);
+
+	public void setBedSpawnLocation(MCLocation l, boolean forced);
 
 	public void sendPluginMessage(String channel, byte[] message);
 
