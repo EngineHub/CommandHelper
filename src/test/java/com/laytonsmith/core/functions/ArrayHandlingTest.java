@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -124,7 +125,7 @@ public class ArrayHandlingTest {
         ArrayHandling.array_scontains a = new ArrayHandling.array_scontains();
         assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(1)));
         assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(55)));
-		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct("1")));
+		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, new CString("2", Target.UNKNOWN)));
     }
 
     @Test(expected = Exception.class, timeout = 10000)
