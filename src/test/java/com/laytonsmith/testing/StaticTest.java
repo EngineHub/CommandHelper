@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.abstraction.AbstractConvertor;
@@ -293,13 +294,14 @@ public class StaticTest {
 						fail("Only return() can throw FunctionReturnExceptions");
 					}
 					if (e instanceof NullPointerException) {
-						if (!brokenJunk.contains(f.getName() + commandType)) {
-							System.err.println(f.getName() + " breaks if you send it the following while using a " + commandType + ": " + Arrays.deepToString(con));
-							System.err.println("Here is the first few stack trace lines:");
-							System.err.println("\t" + e.getStackTrace()[0].toString());
-							System.err.println("\t" + e.getStackTrace()[1].toString());
-							System.err.println("\t" + e.getStackTrace()[2].toString());
-							brokenJunk.add(f.getName() + commandType);
+						String error = (f.getName() + " breaks if you send it the following while using a " + commandType + ": " + Arrays.deepToString(con) + "\n");
+						error += ("Here is the first few stack trace lines:\n");
+						error += ("\t" + e.getStackTrace()[0].toString() + "\n");
+						error += ("\t" + e.getStackTrace()[1].toString() + "\n");
+						error += ("\t" + e.getStackTrace()[2].toString() + "\n");
+						System.err.println(StackTraceUtils.GetStacktrace(e));
+						if (!brokenJunk.contains(error)) {
+							brokenJunk.add(error);
 						}
 					}
 				}

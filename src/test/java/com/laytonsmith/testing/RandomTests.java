@@ -11,9 +11,11 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -34,6 +36,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
+import com.laytonsmith.core.functions.DummyFunction;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -74,7 +77,7 @@ public class RandomTests {
 		fakePlayer = StaticTest.GetOnlinePlayer();
 		StaticTest.InstallFakeConvertor(fakePlayer);
 	}
-	private static Set<String> testedFunctions = new TreeSet<String>();
+	private static final Set<String> testedFunctions = new TreeSet<>();
 
 	/**
 	 * This function automatically tests all the boilerplate portions of all
@@ -82,8 +85,9 @@ public class RandomTests {
 	 * that high quality test coverage can be measured.
 	 */
 	@Test
+	@SuppressWarnings({"ThrowableResultIgnored", "CallToPrintStackTrace"})
 	public void testAllBoilerplate() {
-		Map<String, Throwable> uhohs = new HashMap<String, Throwable>();
+		Map<String, Throwable> uhohs = new HashMap<>();
 		String[] requiredMethods = new String[]{"toString", "equals", "hashCode"};
 		//Ensure that all the abstraction objects overloaded
 		StaticTest.InstallFakeServerFrontend();
@@ -112,7 +116,7 @@ public class RandomTests {
 				uhohs.put(c.getName() + " " + required, new NoSuchMethodException(c.getSimpleName() + " does not define " + required));
 			}
 		}
-		Set<String> classDocs = new TreeSet<String>();
+		Set<String> classDocs = new TreeSet<>();
 
 		for (FunctionBase f : FunctionList.getFunctionList(null)) {
 			try {
@@ -125,6 +129,7 @@ public class RandomTests {
 				Class upper = f.getClass().getEnclosingClass();
 				if (upper == null) {
 					fail(f.getName() + " is not enclosed in an upper class.");
+					return;
 				}
 				try {
 					Method m = upper.getMethod("docs", new Class[]{});
@@ -137,24 +142,45 @@ public class RandomTests {
 					} catch (NullPointerException ex) {
 						fail(upper.getName() + "'s docs function should be static");
 					}
-				} catch (IllegalAccessException ex) {
-					Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
-				} catch (IllegalArgumentException ex) {
+				} catch (IllegalAccessException | IllegalArgumentException | SecurityException ex) {
 					Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (InvocationTargetException ex) {
 					fail(upper.getName() + " throws an exception!");
 				} catch (NoSuchMethodException ex) {
 					fail(upper.getName() + " does not include a class level documentation function.");
-				} catch (SecurityException ex) {
-					Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			} catch (Throwable t) {
 				uhohs.put(f.getClass().getName(), t);
 				t.printStackTrace();
 			}
 		}
+		
+		Set<Class> apiClasses = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
+		for(Class c : apiClasses){
+			// Verify that all classes that are @api classes have the valid functions required for proper documentation
+			// generation, as well as ultimately extend at minimum SimpleDocumentation.
+			if(DummyFunction.class.isAssignableFrom(c)){
+				// Skip this one. These are excused from the normal reporting requirements.
+				continue;
+			}
+			if(!SimpleDocumentation.class.isAssignableFrom(c)){
+				uhohs.put(c.getName(), new IllegalArgumentException(c.getName() + " must implement SimpleDocumentation"));
+			}
+			for(Method m : SimpleDocumentation.class.getDeclaredMethods()){
+				try {
+					c.getDeclaredMethod(m.getName(), m.getParameterTypes());
+				} catch (NoSuchMethodException ex) {
+					uhohs.put(c.getName() + " must implement " + m.getName() + "().", ex);
+				} catch (SecurityException ex) {
+					Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+		}
 		if (!StaticTest.brokenJunk.isEmpty()) {
 			System.err.println("There " + StringUtils.PluralTemplateHelper(StaticTest.brokenJunk.size(), "is %d test that has", "are %d tests that have") + " a failure in extreme circumstances.");
+			for(String s : StaticTest.brokenJunk){
+				uhohs.put(s, null);
+			}
 		}
 		if (!uhohs.isEmpty()) {
 			StringBuilder b = new StringBuilder();

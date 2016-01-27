@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
@@ -1023,6 +1024,7 @@ public class Meta {
 	}
 	
 	@api
+	@noboilerplate
 	public static class build_date extends AbstractFunction {
 
 		@Override

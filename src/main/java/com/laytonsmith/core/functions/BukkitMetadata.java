@@ -63,11 +63,6 @@ public class BukkitMetadata {
 					CREFormatException.class, CREInvalidPluginException.class, CRELengthException.class,
 					CREInvalidWorldException.class, CREPlayerOfflineException.class};
 		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_1;
-		}
 	}
 
 	@api
@@ -133,6 +128,11 @@ public class BukkitMetadata {
 				return values;
 			}
 		}
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -180,6 +180,11 @@ public class BukkitMetadata {
 				return CBoolean.FALSE;
 			}
 		}
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -225,6 +230,11 @@ public class BukkitMetadata {
 			metadatable.setMetadata(key, ObjectGenerator.GetGenerator().metadataValue(value, plugin));
 			return CVoid.VOID;
 		}
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -264,6 +274,11 @@ public class BukkitMetadata {
 				}
 			}
 			return CVoid.VOID;
+		}
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 }

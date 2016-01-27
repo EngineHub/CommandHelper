@@ -983,11 +983,7 @@ public class PlayerEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			return false;
 		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
+		
 	}
 
 	@api
@@ -1007,6 +1003,11 @@ public class PlayerEvents {
 		public String getName() {
 			return "player_enter_bed";
 		}
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -1025,6 +1026,11 @@ public class PlayerEvents {
 		@Override
 		public String getName() {
 			return "player_leave_bed";
+		}
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 

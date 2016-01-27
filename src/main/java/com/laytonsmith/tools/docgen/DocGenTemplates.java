@@ -33,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -108,6 +109,7 @@ public class DocGenTemplates {
 						+ ", or is not static. Please correct this error to use it as a template.");
 				}
 			} catch(Exception e){
+				System.out.println(e);
 				//Oh well, skip it.
 			}
 		}
@@ -289,7 +291,13 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String ... args) {
 			StringBuilder b = new StringBuilder();
-			Set<Class<CREThrowable>> set = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class);
+			SortedSet<Class<CREThrowable>> set = new TreeSet<>(new Comparator<Class<CREThrowable>>(){
+				@Override
+				public int compare(Class<CREThrowable> o1, Class<CREThrowable> o2) {
+					return o1.getCanonicalName().compareTo(o2.getCanonicalName());
+				}
+			});
+			set.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class));
 			for(Class<CREThrowable> c : set){
 				// This is suuuuuuper evil, but we don't want to have to deal with the exception constructors, we're
 				// just after the documentation stuff.				
@@ -302,7 +310,7 @@ public class DocGenTemplates {
 		}
 	};
 
-	private static final String githubBaseURL = "https://github.com/sk89q/commandhelper/tree/master/src/main/java";
+	private static final String githubBaseURL = "https://github.com/EngineHub/commandhelper/tree/master/src/main/java";
 
 	/**
 	 * Returns the fully qualified (and github linked) class name, given the package
