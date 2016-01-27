@@ -1,0 +1,906 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.sk89q</groupId>
+	<artifactId>commandhelper</artifactId>
+	<version>3.3.1-SNAPSHOT</version>
+	<name>CommandHelper</name>
+	<description>CommandHelper is a full blown scripting language built right into Minecraft</description>
+	<inceptionYear>2010</inceptionYear>
+	<organization>
+		<name>MethodScript Team</name>
+		<url>http://wiki.sk89q.com/CommandHelper</url>
+	</organization>
+	<developers>
+		<developer>
+			<id>ladycailin</id>
+			<name>LadyCailin</name>
+			<email>gmail: savannahcailin</email>
+			<url>http://www.laytonsmith.com#donations</url>
+			<roles>
+				<role>project manager</role>
+				<role>developer</role>
+				<role>tester</role>
+			</roles>
+			<timezone>-6</timezone>
+		</developer>
+		<developer>
+			<id>sk89q</id>
+			<name>sk89q</name>
+			<url>http://www.sk89q.com</url>
+			<roles>
+				<role>infrastructure maintainer</role>
+			</roles>
+			<timezone>-8</timezone>
+		</developer>
+	</developers>
+	<contributors>
+		<!-- If I left you out, let me know, and I'll gladly add you! Also, there are more
+		fields that can be filled out, if you want more information added in, I'll do that too -->
+		<contributor>
+			<name>opoq</name>
+			<roles>
+				<role>testing wench</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>EntityReborn</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>Deaygo</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>t3hk0d3</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>zml2008</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>albatrossen</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>jb_aero</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>ACzChef</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>MariuszT</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>PseudoKnight</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+	</contributors>
+	<issueManagement>
+		<system>sk89q's Youtrack</system>
+		<url>http://youtrack.sk89q.com/issues/CMDHELPER</url>
+	</issueManagement>
+	<ciManagement>
+		<system>TeamCity</system>
+		<url>http://builds.enginehub.org/job/commandhelper/</url>
+	</ciManagement>
+	<licenses>
+		<license>
+			<name>The MIT License</name>
+			<url>LICENSE.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<scm>
+		<connection>scm:git:git://github.com/sk89q/commandhelper.git</connection>
+		<url>https://github.com/sk89q/commandhelper</url>
+		<developerConnection>scm:git:git@github.com:sk89q/commandhelper.git</developerConnection>
+	</scm>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.test.failure.ignore>true</maven.test.failure.ignore>
+	</properties>
+	<repositories>
+		<!-- Repository for other dependencies of SK's -->
+		<repository>
+			<id>sk89q-mvn2</id>
+			<url>http://mvn2.sk89q.com/repo</url>
+		</repository>
+
+		<!-- Repository for Bukkit -->
+		<repository>
+			<id>spigot-repo</id>
+			<url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+		</repository>
+
+		<!-- Other repositories -->
+		<repository>
+			<id>maven-central</id>
+			<url>http://repo1.maven.org/maven2/</url>
+		</repository>
+		<!--repository>
+			<id>zml2008</id>
+			<url>http://files.zachsthings.com/repo/</url>
+		</repository-->
+
+		<!-- mcstats repo (this appears to no longer be working)
+		<repository>
+			<id>Plugin Metrics</id>
+			<url>http://repo.mcstats.org/content/repositories/public</url>
+		</repository>-->
+
+		<!-- Java Mail -->
+		<repository>
+			<id>Java.Net</id>
+			<url>http://download.java.net/maven/2/</url>
+		</repository>
+	</repositories>
+	<dependencies>
+		<!-- Please update the Compatibility docs page whenever
+			these dependencies are updated, or important dependencies are added.
+			You can check to see if all dependencies are up to date or not by
+			running: mvn versions:display-dependency-updates
+		-->
+
+		<!-- Bukkit -->
+		<dependency>
+			<groupId>org.spigotmc</groupId>
+			<artifactId>spigot-api</artifactId>
+			<version>1.8.8-R0.1-SNAPSHOT</version>
+		</dependency>
+
+		<!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+
+		<!-- BCrypt -->
+		<dependency>
+			<groupId>org.mindrot</groupId>
+			<artifactId>jBCrypt</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<!-- Used for potion effects
+		<dependency>
+		 <groupId>org.bukkit</groupId>
+		 <artifactId>minecraft-server</artifactId>
+		 <version>1.8.1</version>
+		 <type>jar</type>
+		</dependency> -->
+
+		<!-- Used for IRC hooks -->
+		<!--<dependency> NOT READY YET
+		 <groupId>org.jibble</groupId>
+		 <artifactId>pircbot</artifactId>
+		 <version>1.5.0</version>
+		 <scope>compile</scope>
+		</dependency>-->
+
+		<!-- Profiling library -->
+		<dependency>
+			<groupId>org.perf4j</groupId>
+			<artifactId>perf4j</artifactId>
+			<version>0.9.16</version>
+			<scope>compile</scope>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Database -->
+		<!-- SQLite -->
+		<dependency>
+			<groupId>org.xerial</groupId>
+			<artifactId>sqlite-jdbc</artifactId>
+			<version>3.7.15-M1</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Redis -->
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>2.5.1</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- MySQL -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.30</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- PostgreSQL -->
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>9.1-901-1.jdbc4</version>
+		</dependency>
+
+		<!-- Yaml parsing -->
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>1.13</version>
+		</dependency>
+
+		<!-- Apache commons IO -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
+
+		<!-- Evil-y things (currently not used) -->
+		<!--<dependency>
+		 <groupId>cglib</groupId>
+		 <artifactId>cglib</artifactId>
+		 <version>2.2.2</version>
+		 <scope>compile</scope>
+		 <type>jar</type>
+		</dependency>
+		<dependency>
+		 <groupId>org.javassist</groupId>
+		 <artifactId>javassist</artifactId>
+		 <version>3.15.0-GA</version>
+		 <type>jar</type>
+		</dependency>-->
+		<!-- Embedded SSH Client -->
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+			<version>0.1.51</version>
+		</dependency>
+
+		<!-- Charset detection library -->
+		<dependency>
+			<groupId>net.sourceforge.jchardet</groupId>
+			<artifactId>jchardet</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<!-- Test libraries -->
+		<!-- Hamcrest must come before powermock -->
+		<dependency>
+			<artifactId>hamcrest-core</artifactId>
+			<groupId>org.hamcrest</groupId>
+			<type>jar</type>
+			<version>1.3</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>1.9.5</version>
+			<scope>test</scope>
+		</dependency>
+		<!--<dependency>
+			<groupId>org.avaje</groupId>
+			<artifactId>ebean</artifactId>
+			<version>2.8.1</version>
+			<scope>test</scope>
+		</dependency>-->
+		<!-- This is neat and all, but too much trouble.
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<version>1.5.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito</artifactId>
+			<version>1.5.2</version>
+			<scope>test</scope>
+		</dependency>-->
+		<dependency>
+			<groupId>org.java.net.substance</groupId>
+			<artifactId>substance</artifactId>
+			<version>6.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>asm</groupId>
+					<artifactId>asm-all</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- MCStats (this appears to no longer be working)
+		<dependency>
+			<groupId>org.mcstats</groupId>
+			<artifactId>metrics</artifactId>
+			<version>1.2-SNAPSHOT</version>
+		</dependency> -->
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<type>jar</type>
+			<version>1.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-all</artifactId>
+			<version>5.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>jline</groupId>
+			<artifactId>jline</artifactId>
+			<version>2.11</version>
+		</dependency>
+		<!-- Java Mail -->
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.5.0-b01</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+	</dependencies>
+	<distributionManagement>
+		<site>
+			<id>sk89q-docs-upload</id>
+			<url>ftp://sk89q-maven-deploy/commandhelper/</url>
+		</site>
+		<repository>
+			<id>maven.sk89q.com</id>
+			<url>http://maven.sk89q.com/artifactory/libs-release-local</url>
+		</repository>
+		<snapshotRepository>
+			<id>maven.sk89q.com-snapshot</id>
+			<url>http://maven.sk89q.com/artifactory/libs-snapshot-local</url>
+		</snapshotRepository>
+	</distributionManagement>
+	<build>
+		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ftp</artifactId>
+				<version>1.0-beta-6</version>
+			</extension>
+		</extensions>
+
+		<!-- Resources -->
+		<resources>
+			<resource>
+				<targetPath>.</targetPath>
+				<filtering>true</filtering>
+				<directory>${basedir}/src/main/resources/</directory>
+				<includes>
+					<include>plugin.yml</include>
+				</includes>
+			</resource>
+			<resource>
+				<targetPath>.</targetPath>
+				<filtering>false</filtering>
+				<directory>${basedir}/src/main/resources/</directory>
+				<excludes>
+					<exclude>plugin.yml</exclude>
+				</excludes>
+			</resource>
+		</resources>
+		<testResources>
+			<testResource>
+				<targetPath>.</targetPath>
+				<directory>${basedir}/src/test/resources</directory>
+			</testResource>
+		</testResources>
+
+		<!-- Plugins -->
+		<plugins>
+			<!-- Compile plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<showDeprecation>true</showDeprecation>
+					<source>1.7</source>
+					<target>1.7</target>
+					<compilerArgument>-XDignore.symbol.file</compilerArgument>
+				</configuration>
+			</plugin>
+
+			<!-- JAR creation plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.1</version>
+				<configuration>
+					<archive>
+						<addMavenDescriptor>true</addMavenDescriptor>
+						<pomPropertiesFile>true</pomPropertiesFile>
+						<manifest>
+							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							<mainClass>com.laytonsmith.core.Main</mainClass>
+							<!--<mainClass>com.laytonsmith.core.MainSandbox</mainClass>-->
+						</manifest>
+						<manifestEntries>
+							<Class-Path>../bukkit.jar CommandHelper/bukkit.jar</Class-Path>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+
+			<!-- Shade plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<id>ShadedBundle</id>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<shadedArtifactAttached>false</shadedArtifactAttached>
+							<shadedClassifierName>Bundle</shadedClassifierName>
+							<minimizeJar>false</minimizeJar>
+							<!-- To add a new shaded dependency, there are three steps.
+								1. Add a reference to the artifact set
+								2. Add a relocation tag (usually recommended, though not always)
+								3. Add it to the filter list
+
+								You can copy existing structures over, and change the parameters on them.
+							-->
+							<artifactSet>
+								<includes>
+									<include>org.perf4j:perf4j:jar:*</include>
+									<include>log4j:log4j:jar:*</include>
+									<include>org.yaml:snakeyaml:jar:*</include>
+									<include>com.googlecode.json-simple:json-simple:jar:*</include>
+									<include>org.mindrot:jBCrypt:jar:*</include>
+									<include>com.jcraft:jsch:jar:*</include>
+									<include>org.apache.commons:commons-io:jar:*</include>
+									<include>org.xerial:sqlite-jdbc:jar:*</include>
+									<include>org.mcstats:metrics:jar:*</include>
+									<include>net.sourceforge.jchardet:jchardet:jar:*</include>
+									<include>redis.clients:jedis:jar:*</include>
+									<include>mysql:mysql-connector-java:jar:*</include>
+									<include>commons-codec:commons-codec:jar:*</include>
+									<!--<include>org.apache.bcel:bcel:jar:*</include>-->
+									<include>org.ow2.asm:asm-all:jar:*</include>
+									<include>jline:jline:jar:*</include>
+									<include>javax.mail:mail:jar:*</include>
+									<include>javax.activation:activation:jar:*</include>
+									<include>postgresql:postgresql:jar:*</include>
+								</includes>
+							</artifactSet>
+							<relocations>
+								<relocation>
+									<pattern>org.perf4j</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.perf4j</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.log4j</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.apache.log4j</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.yaml.snakeyaml</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.yaml.snakeyaml</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.json.simple</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.json.simple</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.mindrot.jbcrypt</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.mindrot.jbcrypt</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.jcraft.jsch</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.jcraft.jsch</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.commons.io</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.apache.commons.io</shadedPattern>
+								</relocation>
+								<!-- This doesn't work due to native libs or something. Will revist later.
+								<relocation>
+									<pattern>org.sqlite</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.sqlite</shadedPattern>
+								</relocation>
+								-->
+								<relocation>
+									<pattern>org.mcstats</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.mcstats</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.mozilla.intl.chardet</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.mozilla.intl.chardet</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>redis.clients</pattern>
+									<shadedPattern>com.laytonsmith.libs.redis.clients</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.mysql.jdbc</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.mysql.jdbc</shadedPattern>
+								</relocation>
+								<relocation> <!-- part of the mysql lib -->
+									<pattern>org.gjt.mm.mysql</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.gjt.mm.mysql</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.commons.codec</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.apache.commons.codec</shadedPattern>
+								</relocation>
+								<!--<relocation>
+									<pattern>org.apache.bcel</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.apache.bcel</shadedPattern>
+								</relocation>-->
+								<relocation>
+									<pattern>org.objectweb.asm</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.objectweb.asm</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>jline</pattern>
+									<shadedPattern>com.laytonsmith.libs.jline</shadedPattern>
+								</relocation>
+								<!-- Apparently this can't be relocated -->
+								<!--<relocation>
+									<pattern>org.fusesource</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.fusesource</shadedPattern>
+								</relocation>-->
+								<relocation>
+									<pattern>jaxax.mail</pattern>
+									<shadedPattern>com.laytonsmith.libs.javax.mail</shadedPattern>
+								</relocation>
+								<!-- Cannot relocate this due to a Class.forName in the JavaMail API.
+								<relocation>
+									<pattern>com.sun.mail</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.sun.mail</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>jaxax.activation</pattern>
+									<shadedPattern>com.laytonsmith.libs.javax.activation</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.sun.activation</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.sun.activation</shadedPattern>
+								</relocation>-->
+								<relocation>
+									<pattern>org.postgresql</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.postgresql</shadedPattern>
+								</relocation>
+							</relocations>
+							<filters>
+								<filter>
+									<artifact>org.xerial:sqlite-jdbc:jar:*</artifact>
+									<includes>
+										<include>native/**</include>
+										<include>org/ibex/**</include>
+										<include>org/sqlite/**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>org.apache.commons:commons-io:jar:*</artifact>
+									<includes>
+										<include>org/apache/commons/io/**</include>
+									</includes>
+								</filter>
+								<!-- Profiler -->
+								<filter>
+									<artifact>org.perf4j:perf4j:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>log4j:log4j:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>org.mcstats:metrics:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>net.sourceforge.jchardet:jchardet:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>redis.clients:jedis:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>mysql:mysql-connector-java:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>commons-codec:commons-codec:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<!--<filter>
+									<artifact>org.apache.bcel:bcel:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>-->
+								<filter>
+									<artifact>org.ow2.asm:asm-all:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>jline:jline:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>javax.mail:mail:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>javax.activation:activation:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>postgresql:postgresql:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+							</filters>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.2.1</version>
+				<executions>
+					<execution>
+						<id>cache-annotations</id>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<phase>process-classes</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>com.laytonsmith.PureUtilities.ClassLoading.Annotations.CacheAnnotations</mainClass>
+					<arguments>
+						<argument>${basedir}/target/classes</argument>
+						<argument>${basedir}/target/classes</argument>
+					</arguments>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.bsc.maven</groupId>
+				<artifactId>maven-processor-plugin</artifactId>
+				<version>2.2.4</version>
+				<executions>
+					<execution>
+						<id>process</id>
+						<goals>
+							<goal>process</goal>
+						</goals>
+						<phase>process-classes</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<outputDirectory>src/main/generated</outputDirectory>
+					<processors>
+						<processor>com.laytonsmith.PureUtilities.Common.Annotations.CheckOverrides</processor>
+						<processor>com.laytonsmith.core.extensions.ExtensionAnnotationProcessor</processor>
+						<processor>com.laytonsmith.core.MObjectAnnotationProcessor</processor>
+					</processors>
+				</configuration>
+			</plugin>
+
+			<!-- Getting rid of maven warnings by providing versions for the following plugins -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.4</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.6</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.1.2</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<includes>
+						<!-- Include the default test cases, since we're overwriting them -->
+						<include>**/*Test.java</include>
+						<include>**/Test*.java</include>
+						<include>**/*TestCase.java</include>
+
+						<!-- Include custom, none specific classes -->
+						<include>**/RandomTests.java</include>
+					</includes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.4</version>
+			</plugin>
+
+			<!-- Site / report generation -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<reportPlugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-project-info-reports-plugin</artifactId>
+							<version>2.5</version>
+							<reportSets>
+								<reportSet>
+									<reports>
+										<report>license</report>
+										<report>index</report>
+									</reports>
+								</reportSet>
+							</reportSets>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-javadoc-plugin</artifactId>
+							<version>2.8.1</version>
+						</plugin>
+						<plugin>
+							<groupId>org.codehaus.mojo</groupId>
+							<artifactId>cobertura-maven-plugin</artifactId>
+							<version>2.4</version>
+						</plugin>
+					</reportPlugins>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.1.201405082137</version>
+				<configuration>
+					<excludes>
+						<!-- Application starter -->
+						<exclude>ac/simons/biking2/Application.class</exclude>
+						<!-- Configuration -->
+						<exclude>ac/simons/biking2/config/*</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<id>pre-unit-test</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>post-unit-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<!--  implmentation is needed only for Maven 2  -->
+								<rule implementation="org.jacoco.maven.RuleConfiguration">
+									<element>BUNDLE</element>
+									<limits>
+										<limit implementation="org.jacoco.report.check.Limit">
+											<counter>INSTRUCTION</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.01</minimum>
+										</limit>
+										<!--  implmentation is needed only for Maven 2  -->
+										<limit implementation="org.jacoco.report.check.Limit">
+											<counter>COMPLEXITY</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.01</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<profiles>
+		<profile>
+			<id>provisional-build</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.9</version>
+						<configuration>
+							<skipTests>true</skipTests>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>fail-on-test-failures</id>
+			<properties>
+				<maven.test.failure.ignore>false</maven.test.failure.ignore>
+			</properties>
+		</profile>
+	</profiles>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>maven-annotation-plugin</id>
+			<url>http://maven-annotation-plugin.googlecode.com/svn/trunk/mavenrepo</url>
+		</pluginRepository>
+	</pluginRepositories>
+</project>
