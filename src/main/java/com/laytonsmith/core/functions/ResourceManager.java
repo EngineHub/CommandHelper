@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -21,6 +22,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import org.xml.sax.SAXException;
 
 /**
@@ -35,7 +37,8 @@ public class ResourceManager {
 	
 	public static enum ResourceTypes {
 		XML_DOCUMENT(XMLDocument.class),
-		STRING_BUILDER(StringBuffer.class);
+		STRING_BUILDER(StringBuffer.class),
+		RANDOM(Random.class);
 		private final Class<?> type;
 		private ResourceTypes(Class<?> type){
 			this.type = type;
@@ -55,7 +58,7 @@ public class ResourceManager {
 		}
 	}
 	
-	private static final Map<Long, CResource<?>> resources = new HashMap<Long, CResource<?>>();
+	private static final Map<Long, CResource<?>> resources = new HashMap<>();
 	static {
 		StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
@@ -130,7 +133,15 @@ public class ResourceManager {
 				case STRING_BUILDER:
 					resource = new CResource<StringBuffer>(new StringBuffer(), new CResource.ResourceToString() {
 
-				@Override
+						@Override
+						public String getString(CResource res) {
+							return res.getResource().toString();
+						}
+					}, t);
+					break;
+				case RANDOM:
+					resource = new CResource<>(new Random(Static.getInt(data, t)), new CResource.ResourceToString() {
+						@Override
 						public String getString(CResource res) {
 							return res.getResource().toString();
 						}
