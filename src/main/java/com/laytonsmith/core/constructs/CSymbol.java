@@ -1,5 +1,7 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.core.constructs.Token.TType;
+
 /**
  *
  * 
@@ -115,6 +117,14 @@ public class CSymbol extends Construct {
     public boolean isEquality() {
         return symbolType.isEquality();
     }
+	
+	public boolean isGenericStartSymbol(){
+		return symbolType.equals(TType.LT);
+	}
+	
+	public boolean isGenericEndSymbol(){
+		return symbolType.equals(TType.GT);
+	}
 
 //    public boolean isBitwiseAnd() {
 //        return symbolType.isBitwiseAnd();

@@ -363,7 +363,7 @@ public class Compiler {
 							list.remove(i + 1);
 							i--;
 						}
-					}
+					}					
 					//relational
 					for (int i = 0; i < list.size() - 1; i++) {
 						ParseTree node = list.get(i + 1);
