@@ -542,7 +542,7 @@ public class Sandbox {
 	public static class srand extends AbstractFunction {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{};
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
