@@ -43,7 +43,7 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl, Cloneab
 		while(stackIterator.hasPrevious()){
 			Set<IVariable> set = stackIterator.previous();
 			for(IVariable v : set){
-				if(v.getName().equals(name)){
+				if(v.getVariableName().equals(name)){
 					return v;
 				}
 			}

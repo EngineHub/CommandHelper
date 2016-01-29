@@ -1,6 +1,8 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -136,6 +138,16 @@ public class CMutablePrimitive extends CArray implements Sizable {
 		throw ConfigRuntimeException.BuildException("mutable_primitives cannot have values set in them", CRECastException.class, t);
 	}
 
+	@Override
+	public String docs() {
+		return "A mutible primitive is a special data type that allows you to store primitives by reference, instead of value.";
+	}
 
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
+	}
+
+	
 
 }

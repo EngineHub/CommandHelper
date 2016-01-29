@@ -122,7 +122,7 @@ public class EventBinding {
 					throw ConfigRuntimeException.BuildException("The custom parameters must be ivariables", CRECastException.class, t);
 				}
 				IVariable cur = (IVariable) var;
-				custom_params.set(env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()));
+				custom_params.set(env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget()));
 			}
 			Environment newEnv = env;
 			try {
@@ -152,7 +152,7 @@ public class EventBinding {
 			Event event;
 			try {
 				BoundEvent be = new BoundEvent(name.val(), (CArray) options, (CArray) prefilter,
-						((IVariable) event_obj).getName(), newEnv, tree, t);
+						((IVariable) event_obj).getVariableName(), newEnv, tree, t);
 				EventUtils.RegisterEvent(be);
 				id = new CString(be.getId(), t);
 				event = EventList.getEvent(be.getEventName());

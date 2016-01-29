@@ -24,7 +24,7 @@ public class IVariableList {
 	}
 
     public void set(IVariable v){
-        varList.put(v.getName(), v);
+        varList.put(v.getVariableName(), v);
     }
 
     public IVariable get(String name, Target t, boolean bypassAssignedCheck){
@@ -69,7 +69,7 @@ public class IVariableList {
             } else {
                 b.append(", ");
             }
-            b.append(iv.getName()).append(":").append("(").append(iv.ival().getClass().getSimpleName()).append(")").append(iv.ival().val());
+            b.append(iv.getVariableName()).append(":").append("(").append(iv.ival().getClass().getSimpleName()).append(")").append(iv.ival().val());
         }
         b.append("]");
         return b.toString();

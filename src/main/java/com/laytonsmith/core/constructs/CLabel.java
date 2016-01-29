@@ -8,7 +8,7 @@ import com.laytonsmith.core.constructs.Construct.ConstructType;
  *
  * 
  */
-public class CLabel extends Construct{
+public class CLabel extends Construct {
     Construct label;
     public CLabel(Construct value){
         super(value.val(), ConstructType.LABEL, value.getTarget()); 

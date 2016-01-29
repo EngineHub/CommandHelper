@@ -78,9 +78,9 @@ public class OptimizationUtilities {
             //strings
             return new StringBuilder().append("'").append(node.getData().val().replaceAll("\t", "\\t").replaceAll("\n", "\\n").replace("\\", "\\\\").replace("'", "\\'")).append("'").toString();
         } else if(node.getData() instanceof IVariable){
-            return ((IVariable)node.getData()).getName();
+            return ((IVariable)node.getData()).getVariableName();
 		} else if(node.getData() instanceof Variable){
-			return ((Variable)node.getData()).getName();
+			return ((Variable)node.getData()).getVariableName();
 		} else if(node.getData() instanceof CSlice){
 			return node.getData().val();
 		} else if(node.getData() instanceof CArray){

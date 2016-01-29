@@ -58,13 +58,13 @@ public class Procedure implements Cloneable {
         this.varList = new HashMap<>();
         for (IVariable var : varList) {
             try {
-                this.varList.put(var.getName(), var.clone());
+                this.varList.put(var.getVariableName(), var.clone());
             }
             catch (CloneNotSupportedException e) {
-                this.varList.put(var.getName(), var);
+                this.varList.put(var.getVariableName(), var);
             }
             this.varIndex.add(var);
-            this.originals.put(var.getName(), var.ival());
+            this.originals.put(var.getVariableName(), var.ival());
         }
         this.tree = tree;
         if (!this.name.matches("^_[a-zA-Z0-9]+[a-zA-Z_0-9]*")) {
@@ -189,7 +189,7 @@ public class Procedure implements Cloneable {
             Construct c = args.get(i);
             arguments.set(i, c, t);
             if (varIndex.size() > i) {
-                String varname = varIndex.get(i).getName();
+                String varname = varIndex.get(i).getVariableName();
 				if(c instanceof CNull || InstanceofUtil.isInstanceof(c, varIndex.get(i).getDefinedType()) || varIndex.get(i).getDefinedType().equals(CClassType.AUTO)){
 					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varIndex.get(i).getDefinedType(), varname, c, c.getTarget()));
 				} else {

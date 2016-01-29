@@ -198,7 +198,7 @@ public class Script {
                         }
                         ((Variable) tempNode).setVal(
                                 new CString(
-                                Static.resolveDollarVar(left_vars.get(((Variable) tempNode).getName()), vars).toString(), tempNode.getTarget()));
+                                Static.resolveDollarVar(left_vars.get(((Variable) tempNode).getVariableName()), vars).toString(), tempNode.getTarget()));
                     }
                 }
 
@@ -252,7 +252,7 @@ public class Script {
         Construct ret = eval(c, env);
         while(ret instanceof IVariable){
             IVariable cur = (IVariable)ret;
-            ret = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
+            ret = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget()).ival();
         }
         return ret;
     }
@@ -359,7 +359,7 @@ public class Script {
 							}
 							while(f.preResolveVariables() && ca[i] instanceof IVariable){
 								IVariable cur = (IVariable)ca[i];
-								ca[i] = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
+								ca[i] = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget()).ival();
 							}
 						}
 
@@ -422,19 +422,19 @@ public class Script {
 
 						for(Construct cc : args){
 							if(cc instanceof IVariable){
-								Construct ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable)cc).getName(), cc.getTarget()).ival();
+								Construct ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable)cc).getVariableName(), cc.getTarget()).ival();
 								String vval = ccc.val();
 								if(ccc instanceof CString){
 									vval = ccc.asString().getQuote();
 								}
-								vars.put(((IVariable)cc).getName(), vval);
+								vars.put(((IVariable)cc).getVariableName(), vval);
 							}
 							if(cc == null){
 								args2.add("java-null");
 							} else if(cc instanceof CString){
 								args2.add(cc.asString().getQuote());
 							} else if(cc instanceof IVariable){
-								args2.add(((IVariable)cc).getName());
+								args2.add(((IVariable)cc).getVariableName());
 							} else {
 								args2.add(cc.val());
 							}
@@ -582,19 +582,19 @@ public class Script {
         for (int j = 0; j < cleft.size(); j++) {
             try {
                 if (cleft.get(j).getCType() == ConstructType.VARIABLE) {
-                    if (((Variable) cleft.get(j)).getName().equals("$")) {
+                    if (((Variable) cleft.get(j)).getVariableName().equals("$")) {
                         for (int k = j; k < args.size(); k++) {
                             lastVar.append(args.get(k).trim()).append(" ");
                         }
-                        v = new Variable(((Variable) cleft.get(j)).getName(),
+                        v = new Variable(((Variable) cleft.get(j)).getVariableName(),
                                 lastVar.toString().trim(), Target.UNKNOWN);
                     } else {
-                        v = new Variable(((Variable) cleft.get(j)).getName(),
+                        v = new Variable(((Variable) cleft.get(j)).getVariableName(),
                                 args.get(j), Target.UNKNOWN);
                     }
                 }
             } catch (IndexOutOfBoundsException e) {
-                v = new Variable(((Variable) cleft.get(j)).getName(),
+                v = new Variable(((Variable) cleft.get(j)).getVariableName(),
                         ((Variable) cleft.get(j)).getDefault(), Target.UNKNOWN);
             }
             if (v != null) {

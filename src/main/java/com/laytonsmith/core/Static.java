@@ -483,7 +483,7 @@ public final class Static {
 		}
 		if (variable.getCType() == Construct.ConstructType.VARIABLE) {
 			for (Variable var : vars) {
-				if (var.getName().equals(((Variable) variable).getName())) {
+				if (var.getVariableName().equals(((Variable) variable).getVariableName())) {
 					return new CString(var.val(), var.getTarget());
 				}
 			}

@@ -1,6 +1,8 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CHVersion;
 
 /**
  * Represents a MethodScript boolean.
@@ -98,5 +100,15 @@ public final class CBoolean extends CPrimitive implements Cloneable{
 	@Override
 	public boolean isDynamic() {
 		return false;
+	}
+
+	@Override
+	public String docs() {
+		return "A boolean represents a true or false value.";
+	}
+
+	@Override
+	public Version since() {
+		return CHVersion.V3_0_1;
 	}
 }

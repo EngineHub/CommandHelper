@@ -1,6 +1,8 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.environments.Environment;
@@ -120,6 +122,17 @@ public class CIClosure extends CClosure {
         catch (CloneNotSupportedException ex) {
             Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
         }
+	}
+
+	@Override
+	public String docs() {
+		return "An iclosure is an isolated scope closure. This is more efficient than a regular closure, but it doesn't allow"
+				+ " for access of variables outside of the scope of the closure, other than values passed in.";
+	}
+
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
 	}
 
 }

@@ -1,7 +1,9 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CHVersion;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -81,6 +83,16 @@ public class CResource<T> extends Construct {
 	@Override
 	public boolean isDynamic() {
 		return true;
+	}
+
+	@Override
+	public String docs() {
+		return "A resource is a value that represents an underlying native object. The object cannot be accessed directly.";
+	}
+
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
 	}
 	
 	public static interface ResourceToString {

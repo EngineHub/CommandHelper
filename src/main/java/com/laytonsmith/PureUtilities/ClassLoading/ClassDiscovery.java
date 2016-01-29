@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -890,6 +891,46 @@ public class ClassDiscovery {
 		} catch (ClassNotFoundException ex) {
 			throw new NoClassDefFoundError();
 		}
+	}
+	
+	public Set<MethodMirror> getConstructorsWithAnnotation(Class<? extends Annotation> annotation){
+		Set<MethodMirror> set = new HashSet<>();
+		for(MethodMirror m : getMethodsWithAnnotation(annotation)){
+			if("<init>".equals(m.getName())){
+				set.add(m);
+			}
+		}
+		return set;
+	}
+	
+	public Set<Constructor> loadConstructorsWithAnnotation(Class<? extends Annotation> annotation){
+		return loadConstructorsWithAnnotation(annotation, getDefaultClassLoader(), true);
+	}
+	
+	public Set<Constructor> loadConstructorsWithAnnotation(Class<? extends Annotation> annotation, ClassLoader loader, boolean initialize){
+		Set<Constructor> set = new HashSet<>();
+		for(MethodMirror m : getConstructorsWithAnnotation(annotation)){
+			try {
+				Class c = m.getDeclaringClass().loadClass(loader, initialize);
+				outer: for(Constructor cc : c.getDeclaredConstructors()){
+					Class[] params = cc.getParameterTypes();
+					if(m.getParams().size() != params.length){
+						continue;
+					}
+					for(int i = 0; i < params.length; i++){
+						ClassReferenceMirror crm = m.getParams().get(i);
+						ClassReferenceMirror crm2 = new ClassReferenceMirror(ClassUtils.getJVMName(params[i]));
+						if(!crm.equals(crm2)){
+							continue outer;
+						}
+					}
+					set.add(cc);
+				}
+			} catch (ClassNotFoundException ex) {
+				throw new NoClassDefFoundError();
+			}
+		}
+		return set;
 	}
 
 	/**

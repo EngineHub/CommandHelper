@@ -441,9 +441,9 @@ public class Exceptions {
 							// This should eventually be changed to be of the appropriate type. Unfortunately, that will
 							// require reworking basically everything. We need all functions to accept Mixed, instead of Construct.
 							// This will have to do in the meantime.
-							varList.set(new IVariable(new CClassType("array", t), var.getName(), e.getExceptionObject(), t));
+							varList.set(new IVariable(new CClassType("array", t), var.getVariableName(), e.getExceptionObject(), t));
 							parent.eval(nodes[i + 1], env);
-							varList.remove(var.getName());
+							varList.remove(var.getVariableName());
 						} catch (ConfigRuntimeException | FunctionReturnException newEx){
 							if(newEx instanceof ConfigRuntimeException){
 								caughtException = (ConfigRuntimeException)newEx;

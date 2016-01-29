@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Preconditions;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
@@ -92,11 +93,16 @@ public class ClassMirrorVisitor extends ClassVisitor {
         };
     }
 
-    private static final Pattern INITIALIZER_PATTERN = Pattern.compile("<(cl)?init>");
+    private static final Pattern STATIC_INITIALIZER_PATTERN = Pattern.compile("<clinit>");
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        if (INITIALIZER_PATTERN.matcher(name).matches()) return null; // Ignore constructors and static initializers
+        if (STATIC_INITIALIZER_PATTERN.matcher(name).matches()) return null; // Ignore static initializers
+		if("<init>".matches(name)){
+			// We want to replace the V at the end with the parent class type.
+			// Yes, technically a constructor really does return void, but.. not really.
+			desc = StringUtils.replaceLast(desc, "V", classInfo.classReferenceMirror.getJVMName());
+		}
         List<ClassReferenceMirror> parameterMirrors = new ArrayList<>();
         for (Type type : Type.getArgumentTypes(desc)) {
             parameterMirrors.add(new ClassReferenceMirror(type.getDescriptor()));

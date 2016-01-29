@@ -1,7 +1,9 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CHVersion;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -171,6 +173,16 @@ public class CClassType extends Construct {
 		} catch (ClassNotFoundException ex) {
 			throw new Error(ex);
 		}
+	}
+
+	@Override
+	public String docs() {
+		return "A ClassType is a value that represents an object type. This includes primitives or other value types.";
+	}
+
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
 	}
 
 

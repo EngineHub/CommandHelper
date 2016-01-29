@@ -6,7 +6,7 @@ import com.laytonsmith.core.ParseTree;
  *
  * 
  */
-public class CBracket extends Construct{
+public class CBracket extends Construct {
 	ParseTree code;
 	
 	public CBracket(ParseTree code){
