@@ -141,5 +141,31 @@ public class MethodMirror extends AbstractElementMirror {
 		return StringUtils.Join(annotations, "\n") + (annotations.isEmpty()?"":"\n") + (modifiers.toString() 
 				+ " " + type).trim() + " " + name + "(" + StringUtils.Join(sParams, ", ") + "){}";
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof MethodMirror)){
+			return false;
+		}
+		if(!super.equals(obj)){
+			return false;
+		}
+		MethodMirror m = (MethodMirror)obj;
+		return 
+				this.params.equals(m.params)
+				&& this.isVararg == m.isVararg
+				&& this.isSynthetic == m.isSynthetic;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 5;
+		hash = 31 * hash + super.hashCode();
+		hash = 31 * hash + Objects.hashCode(this.params);
+		hash = 31 * hash + (this.isVararg ? 1 : 0);
+		hash = 31 * hash + (this.isSynthetic ? 1 : 0);
+		return hash;
+	}
+
 	
 }
