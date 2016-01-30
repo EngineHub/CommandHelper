@@ -500,18 +500,18 @@ public class CByteArray extends CArray implements Sizable, ArrayAccess {
 		}
 
 		@Override
-		public void reverse() {
-			throw new CREByteArrayReadOnlyException();
+		public void reverse(Target t) {
+			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
 		@Override
 		public void push(Construct c, Integer i, Target t) {
-			throw new CREByteArrayReadOnlyException();
+			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
 		@Override
 		public void set(Construct index, Construct c, Target t) {
-			throw new CREByteArrayReadOnlyException();
+			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
 		@Override
@@ -569,9 +569,14 @@ public class CByteArray extends CArray implements Sizable, ArrayAccess {
 		}
 
 		@typeof("ByteArrayReadOnlyException")
-		public class CREByteArrayReadOnlyException extends CREReadOnlyException{
-			public CREByteArrayReadOnlyException(){
-				super("Arrays copied from ByteArrays are read only", CArrayByteBacking.this.getTarget());
+		public static class CREByteArrayReadOnlyException extends CREReadOnlyException{
+			
+			public CREByteArrayReadOnlyException (java.lang.String msg, com.laytonsmith.core.constructs.Target t){
+				super(msg, t);
+			}
+			
+			public CREByteArrayReadOnlyException(String msg, Target t, Throwable ex){
+				super(msg, t, ex);
 			}
 
 			@Override

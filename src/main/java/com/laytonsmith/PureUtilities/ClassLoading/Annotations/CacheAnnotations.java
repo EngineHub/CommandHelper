@@ -4,7 +4,7 @@ package com.laytonsmith.PureUtilities.ClassLoading.Annotations;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryURLCache;
-import com.laytonsmith.PureUtilities.Common.Annotations.ConstructorCheckers;
+import com.laytonsmith.PureUtilities.Common.Annotations.AnnotationChecks;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.Implementation;
@@ -23,8 +23,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -51,7 +49,7 @@ public class CacheAnnotations {
 		ClassDiscovery.getDefaultInstance().addPreCache(cacheFile, cache);
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(cacheFile);
 		StreamUtils.GetSystemOut().println("-- Checking for custom compile errors --");
-		ConstructorCheckers.checkConstructors();
+		AnnotationChecks.checkForceImplementation();
 		
 		Implementation.setServerType(Implementation.Type.SHELL);
 		List<String> uhohs = new ArrayList<>();

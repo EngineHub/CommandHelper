@@ -2014,7 +2014,7 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CArray){
-				((CArray)args[0]).reverse();
+				((CArray)args[0]).reverse(t);
 			}
 			return CVoid.VOID;
 		}

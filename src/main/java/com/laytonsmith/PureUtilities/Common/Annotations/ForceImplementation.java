@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * at compile time.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.CONSTRUCTOR)
-public @interface MustIncludeConstructor {
+@Target({ElementType.CONSTRUCTOR, ElementType.METHOD})
+public @interface ForceImplementation {
 	
 }

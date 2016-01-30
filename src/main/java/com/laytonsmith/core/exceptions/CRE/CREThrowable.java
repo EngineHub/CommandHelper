@@ -1,6 +1,6 @@
 package com.laytonsmith.core.exceptions.CRE;
 
-import com.laytonsmith.PureUtilities.Common.Annotations.MustIncludeConstructor;
+import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
@@ -11,12 +11,12 @@ import com.laytonsmith.core.constructs.Target;
  */
 @typeof("Throwable")
 public class CREThrowable extends AbstractCREException {
-	@MustIncludeConstructor
+	@ForceImplementation
 	public CREThrowable(String msg, Target t) {
 		super(msg, t);
 	}
 
-	@MustIncludeConstructor
+	@ForceImplementation
 	public CREThrowable(String msg, Target t, Throwable cause) {
 		super(msg, t, cause);
 	}
