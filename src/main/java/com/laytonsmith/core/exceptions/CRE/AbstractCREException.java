@@ -221,6 +221,9 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 	
 	public List<StackTraceElement> getCREStackTrace(){
+		if(this.stackTrace == null){
+			return new ArrayList<>();
+		}
 		return new ArrayList<>(this.stackTrace);
 	}
 

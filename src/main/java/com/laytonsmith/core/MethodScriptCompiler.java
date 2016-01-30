@@ -1997,6 +1997,8 @@ public final class MethodScriptCompiler {
 				MethodScriptCompiler.execute(IncludeCache.get(f, new Target(0, f, 0)), env, null, s);
 			} catch (ProgramFlowManipulationException e) {
 				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in auto include files.", e.getTarget()), env);
+			} catch (ConfigRuntimeException e) {
+				ConfigRuntimeException.HandleUncaughtException(e, env);
 			}
 		}
 	}
