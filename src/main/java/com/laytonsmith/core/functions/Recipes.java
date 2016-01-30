@@ -40,11 +40,7 @@ public class Recipes {
 		public Boolean runAsync() {
 			return false;
 		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_1;
-		}
+		
 	}
 	
 	@api
@@ -73,6 +69,11 @@ public class Recipes {
 		@Override
 		public String docs() {
 			return "boolean {RecipeArray} Adds a recipe to the server and returns whether it was added or not. Please read http://wiki.sk89q.com/wiki/CommandHelper/Array_Formatting to see how the recipe array is formatted.";
+		}
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 	
@@ -112,6 +113,11 @@ public class Recipes {
 					"NOTE: Gets all recipes for result item regardless of meta and enchants, althogh the array has correct data.";
 		}
 		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 	
 	@api
@@ -148,6 +154,11 @@ public class Recipes {
 			return "array {} Gets all recipes on the server.";
 		}
 		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 	
 	@api
@@ -180,6 +191,11 @@ public class Recipes {
 			return "Void {} Clears all recipes.";
 		}
 		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 	
 	@api
@@ -210,6 +226,11 @@ public class Recipes {
 		@Override
 		public String docs() {
 			return "Void {} Resets all recipes to the default recipes.";
+		}
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
 		}
 		
 	}

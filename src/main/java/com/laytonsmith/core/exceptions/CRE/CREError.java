@@ -20,8 +20,7 @@ public class CREError extends CREThrowable {
 
 	@Override
 	public String docs() {
-		return "Indicates a serious error occurred. Errors are not caught by the no clause"
-				+ " exception catching mechanism, however can be caught manually.";
+		return "Indicates a serious error occurred. It is not recommended to catch Error directly, but instead catch a specific subtype.";
 	}
 
 	@Override

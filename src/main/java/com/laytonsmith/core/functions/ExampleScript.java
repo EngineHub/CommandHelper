@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
@@ -87,7 +88,7 @@ public class ExampleScript {
 		this.description = description;
 		this.originalScript = script;
 		try{
-			this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("Examples"), true));
+			this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File((OSUtils.GetOS() == OSUtils.OS.WINDOWS ? "C:\\" : "/") + "Examples.ms"), true));
 			this.output = output;
 		} catch(ConfigCompileException e){
 			if(intentionalCompileError){

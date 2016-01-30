@@ -188,13 +188,7 @@ public class Scoreboards {
 		public Boolean runAsync() {
 			return false;
 		}
-		/**
-		 * @return {@link CHVersion#V3_3_1}
-		 */
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
+		
 		/**
 		 * @return Array containing only {@link ExceptionType#CREScoreboardException}
 		 */
@@ -242,6 +236,11 @@ public class Scoreboards {
 					+ " If it is not already cached, it will be added using the player's name."
 					+ " Using this method, it should be possible to import scoreboards created by other plugins.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -274,6 +273,11 @@ public class Scoreboards {
 		public String docs() {
 			return "void {player, [scoreboard]} Sets the scoreboard to be used by a player."
 					+ " The scoreboard argument is the id of a registered scoreboard. " + DEF_MSG;
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -310,6 +314,11 @@ public class Scoreboards {
 			return "array {} Returns an array of the registered scoreboard ID's."
 					+ " The special scoreboard '"+ MAIN + "' represents the server's main"
 					+ " scoreboard which can be managed by the vanilla /scoreboard command.";
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -370,6 +379,11 @@ public class Scoreboards {
 					+ " If criteria is given, only objectives with that criteria will be returned."
 					+ " The arrays contain the keys name, displayname, slot, modifiable, and criteria.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -425,6 +439,11 @@ public class Scoreboards {
 					+ " which defaults to '" + MAIN + "' if not given. The arrays contain the keys name,"
 					+ " displayname, prefix, suffix, size, options, and players.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -461,6 +480,11 @@ public class Scoreboards {
 		public String docs() {
 			return "void {name} Creates a new scoreboard identified by the given name,"
 					+ " and stores it internally for later use. Throws an exception if the name is already in use.";
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -515,6 +539,11 @@ public class Scoreboards {
 					+ " Those values which are not 'dummy' are server-managed."
 					+ " Throws a LengthException if the name is more than 16 characters. " + DEF_MSG;
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -556,6 +585,11 @@ public class Scoreboards {
 			return "void {name, [scoreboard]} Adds a new team to the scoreboard,"
 					+ " throws a CREScoreboardException if a team already exists with the given name."
 					+ " Throws a LengthException if the team name is more than 16 characters. " + DEF_MSG;
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -630,6 +664,11 @@ public class Scoreboards {
 					+ " Null name resets it to the actual name, and null slot removes it from"
 					+ " all displays. Slot can be one of: " + StringUtils.Join(MCDisplaySlot.values(), ", ", ", or ")
 					+ ". Displayname can be a max of 32 characters, otherwise it throws a LengthException. " + DEF_MSG;
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -718,6 +757,11 @@ public class Scoreboards {
 					+ " all displays. Displayname can be a max of 32 characters,"
 					+ " prefix and suffix can only be 16, otherwise a LengthException is thrown. " + DEF_MSG;
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -760,6 +804,11 @@ public class Scoreboards {
 					+ " you to add fake players with up to 40 characters. (16 characters prior to 1.8.7) The player"
 					+ " will be removed from any other team on the same scoreboard. " + DEF_MSG;
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -790,6 +839,11 @@ public class Scoreboards {
 		public String docs() {
 			return "boolean {teamname, player, [scoreboard]} Attempts to remove a player from a team,"
 					+ " and returns true if successful, for false if the player was not part of the team." + DEF_MSG;
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -843,6 +897,11 @@ public class Scoreboards {
 					+ " and all tracked players currently online will be switched to the main scoreboard,"
 					+ " essentially removing all references to the board so it can be garbage-collected.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -876,6 +935,11 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "void {objectivename, [scoreboard]} Unregisters an objective from the scoreboard. " + DEF_MSG;
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -911,6 +975,11 @@ public class Scoreboards {
 		public String docs() {
 			return "void {teamname, [scoreboard]} Unregisters a team from the scoreboard. " + DEF_MSG;
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -941,6 +1010,11 @@ public class Scoreboards {
 		public String docs() {
 			return "int {objectiveName, player, [scoreboard]} Returns the player's score for the given objective."
 					+ " Works for offline players, so the name must be exact. " + DEF_MSG;
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -982,6 +1056,11 @@ public class Scoreboards {
 			return "void {objectiveName, name, int, [scoreboard]} Sets the player's score for the given objective."
 					+ " You can set scores for fake players with up to 40 characters. " + DEF_MSG;
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -1007,6 +1086,11 @@ public class Scoreboards {
 		public String docs() {
 			return "void {player, [scoreboard]} Resets all scores for a player tracked by the given scoreboard."
 					+ " This means they will not be show up on any displays. " + DEF_MSG;
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -1063,6 +1147,11 @@ public class Scoreboards {
 		public String docs() {
 			return "void {teamName, array, [scoreboard]} Sets various options about the team from an array,"
 					+ " checking for keys 'friendlyfire', 'friendlyinvisibles' and 'nametagvisibility'. " + DEF_MSG;
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 }

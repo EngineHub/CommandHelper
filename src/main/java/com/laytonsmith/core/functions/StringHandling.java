@@ -1464,6 +1464,12 @@ public class StringHandling {
 		}
 
 		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+
+		@Override
 		public String docs() {
 			return "string {formatString, parameters... | formatString, array(parameters...)} Returns a string formatted to the"
 					+ " given formatString specification, using the parameters passed in. The formatString should be formatted"

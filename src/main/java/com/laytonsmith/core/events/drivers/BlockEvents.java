@@ -1,6 +1,7 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -61,10 +62,6 @@ public class BlockEvents {
 	
 	// Stub for actual events below.
 	public static abstract class piston_event extends AbstractEvent {
-		@Override
-        public CHVersion since() {
-            return CHVersion.V3_3_1;
-        }
 		
 		@Override
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
@@ -175,6 +172,11 @@ public class BlockEvents {
 			
             return map;
         }
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
     }
 
     @api
@@ -219,6 +221,11 @@ public class BlockEvents {
 			
             return map;
         }
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
     }
 	
 	@api
