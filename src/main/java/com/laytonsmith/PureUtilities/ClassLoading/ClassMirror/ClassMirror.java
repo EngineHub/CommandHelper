@@ -345,7 +345,7 @@ public class ClassMirror<T> implements Serializable {
 			}
 			return mirrors;
 		}
-		return info.methods.toArray(new MethodMirror[info.methods.size()]);
+		return info.methods.toArray(new AbstractMethodMirror[info.methods.size()]);
 	}
 	
 	/**

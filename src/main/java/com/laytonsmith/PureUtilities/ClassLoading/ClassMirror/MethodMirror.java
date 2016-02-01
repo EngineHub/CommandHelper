@@ -1,11 +1,9 @@
 
 package com.laytonsmith.PureUtilities.ClassLoading.ClassMirror;
 
-import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * This class gathers information about a method, without actually loading 
@@ -20,7 +18,7 @@ public class MethodMirror extends AbstractMethodMirror {
 		super(parentClass, annotations, modifiers, type, name, params, isVararg, isSynthetic);
 	}
 	
-	public MethodMirror(Executable method){
+	public MethodMirror(Method method){
 		super(method);
 	}
 	

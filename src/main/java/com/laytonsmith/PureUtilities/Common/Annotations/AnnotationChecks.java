@@ -3,7 +3,7 @@ package com.laytonsmith.PureUtilities.Common.Annotations;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -65,10 +65,21 @@ public class AnnotationChecks {
 		}
 	}
 	
-	private static String getSignature(Executable executable){
+	private static String getSignature(Member executable){
 		List<String> l = new ArrayList<>();
-		for(Class cc : executable.getParameterTypes()){
-			l.add(cc.getName());
+//		for(Class cc : executable.getParameterTypes()){
+//			l.add(cc.getName());
+//		}
+		if(executable instanceof Method){
+			for(Class cc : ((Method)executable).getParameterTypes()){
+				l.add(cc.getName());
+			}
+		} else if(executable instanceof Constructor){
+			for(Class cc : ((Constructor)executable).getParameterTypes()){
+				l.add(cc.getName());
+			}
+		} else {
+			throw new Error("Unexpected executable type");
 		}
 		return StringUtils.Join(l, ", ");
 	}

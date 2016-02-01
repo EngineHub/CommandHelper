@@ -1,7 +1,8 @@
 package com.laytonsmith.PureUtilities.ClassLoading.ClassMirror;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import java.lang.reflect.Executable;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,7 +17,10 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 	private boolean isVararg = false;
 	private boolean isSynthetic = false;
 	
-	private Executable underlyingMethod = null;
+	/**
+	 * TODO: Once we switch to Java 1.8, this should be replaced by java.lang.reflect.Executable.
+	 */
+	private Member underlyingMethod = null;
 	
 	public AbstractMethodMirror(ClassReferenceMirror parentClass, List<AnnotationMirror> annotations, ModifierMirror modifiers, 
 			ClassReferenceMirror type, String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic){
@@ -26,7 +30,7 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 		this.isSynthetic = isSynthetic;
 	}
 	
-	public AbstractMethodMirror(Executable method){
+	public AbstractMethodMirror(Member method){
 		super(method);
 		this.underlyingMethod = method;
 		this.params = null;
@@ -48,7 +52,7 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 	public List<ClassReferenceMirror> getParams(){
 		if(underlyingMethod != null){
 			List<ClassReferenceMirror> list = new ArrayList<>();
-			for(Class p : underlyingMethod.getParameterTypes()){
+			for(Class p : ((Method)underlyingMethod).getParameterTypes()){
 				list.add(ClassReferenceMirror.fromClass(p));
 			}
 			return list;
@@ -62,7 +66,7 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 	 */
 	public boolean isVararg(){
 		if(underlyingMethod != null){
-			return underlyingMethod.isVarArgs();
+			return ((Method)underlyingMethod).isVarArgs();
 		}
 		return isVararg;
 	}
@@ -124,8 +128,8 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 	 * Returns the underlying executable (or null, if it was constructed artificially).
 	 * @return 
 	 */
-	protected Executable getExecutable(){
-		return underlyingMethod;
+	protected Member getExecutable(){
+		return (Member)underlyingMethod;
 	}
 	
 	/**
