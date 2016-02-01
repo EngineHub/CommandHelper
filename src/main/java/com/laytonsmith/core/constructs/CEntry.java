@@ -6,7 +6,7 @@ package com.laytonsmith.core.constructs;
  *
  * 
  */
-public class CEntry extends Construct{
+public class CEntry extends Construct {
     Construct ckey;
     Construct construct;
 

@@ -31,7 +31,7 @@ public class Variable extends Construct {
         return "var:" + name;
     }
 
-    public String getName() {
+    public String getVariableName() {
         return name;
     }
 

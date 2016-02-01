@@ -247,7 +247,7 @@ public class DataHandling {
 							" with 3 arguments only accepts an ivariable as the second argument.",
 							CRECastException.class, t);
 				}
-				name = ((IVariable) args[offset]).getName();
+				name = ((IVariable) args[offset]).getVariableName();
 				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag("no-check-duplicate-assign") == null){
 					if(env.getEnv(GlobalEnv.class).GetFlag("closure-warn-overwrite") != null){
 						CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR,
@@ -266,13 +266,13 @@ public class DataHandling {
 							" with 2 arguments only accepts an ivariable as the second argument.",
 							CRECastException.class, t);
 				}
-				name = ((IVariable) args[offset]).getName();
+				name = ((IVariable) args[offset]).getVariableName();
 				type = list.get(name, t, true).getDefinedType();
 			}
 			Construct c = args[offset + 1];
 			while(c instanceof IVariable){
 				IVariable cur = (IVariable) c;
-				c = list.get(cur.getName(), cur.getTarget()).ival();
+				c = list.get(cur.getVariableName(), cur.getTarget()).ival();
 			}
 			IVariable v = new IVariable(type, name, c, t);
 			list.set(v);
@@ -341,8 +341,8 @@ public class DataHandling {
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.get(0).getData() instanceof IVariable
 					&& children.get(1).getData() instanceof IVariable) {
-				if (((IVariable) children.get(0).getData()).getName().equals(
-						((IVariable) children.get(1).getData()).getName())) {
+				if (((IVariable) children.get(0).getData()).getVariableName().equals(
+						((IVariable) children.get(1).getData()).getVariableName())) {
 					CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Assigning a variable to itself", t);
 				}
 			}
@@ -691,10 +691,10 @@ public class DataHandling {
 					}
 					//If the key isn't null, set that in the variable table.
 					if (kkey != null) {
-						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getName(), c, t));
+						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getVariableName(), c, t));
 					}
 					//Set the value in the variable table
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getName(), one.get(c.val(), t), t));
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getVariableName(), one.get(c.val(), t), t));
 					try {
 						//Execute the code
 						parent.eval(code, env);
@@ -747,9 +747,9 @@ public class DataHandling {
 						//If the item is blacklisted, we skip it.
 						if (!iterator.isBlacklisted(current)) {
 							if (kkey != null) {
-								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getName(), new CInt(current, t), t));
+								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getVariableName(), new CInt(current, t), t));
 							}
-							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getName(), one.get(current, t), t));
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getVariableName(), one.get(current, t), t));
 							try {
 								parent.eval(code, env);
 							} catch (LoopBreakException e) {
@@ -2176,14 +2176,14 @@ public class DataHandling {
 								try {
 									Construct c = cons;
 									if (c instanceof IVariable) {
-										String varName = ((IVariable) c).getName();
+										String varName = ((IVariable) c).getVariableName();
 										if (varNames.contains(varName)) {
 											throw ConfigRuntimeException.BuildException("Same variable name defined twice in " + name, CREInvalidProcedureException.class, t);
 										}
 										varNames.add(varName);
 									}
 									while (c instanceof IVariable) {
-										c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t, true).ival();
+										c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getVariableName(), t, true).ival();
 									}
 									if (!thisNodeIsAssign) {
 										//This is required because otherwise a default value that's already in the environment
@@ -2191,7 +2191,7 @@ public class DataHandling {
 										//into this proc, if the call to the proc didn't have a value in this slot.
 										c = new CString("", t);
 									}
-									ivar = new IVariable(((IVariable)cons).getDefinedType(), ((IVariable) cons).getName(), c.clone(), t);
+									ivar = new IVariable(((IVariable)cons).getDefinedType(), ((IVariable) cons).getVariableName(), c.clone(), t);
 								} catch (CloneNotSupportedException ex) {
 									//
 								}
@@ -2955,7 +2955,7 @@ public class DataHandling {
 				if (!(ret instanceof IVariable)) {
 					throw ConfigRuntimeException.BuildException("Arguments sent to " + getName() + " barring the last) must be ivariables", CRECastException.class, t);
 				}
-				names[i] = ((IVariable) ret).getName();
+				names[i] = ((IVariable) ret).getVariableName();
 				try {
 					defaults[i] = ((IVariable) ret).ival().clone();
 					types[i] = ((IVariable)ret).getDefinedType();
@@ -3058,7 +3058,7 @@ public class DataHandling {
 				if (!(ret instanceof IVariable)) {
 					throw ConfigRuntimeException.BuildException("Arguments sent to " + getName() + " barring the last) must be ivariables", CRECastException.class, t);
 				}
-				names[i] = ((IVariable) ret).getName();
+				names[i] = ((IVariable) ret).getVariableName();
 				try {
 					defaults[i] = ((IVariable) ret).ival().clone();
 					types[i] = ((IVariable)ret).getDefinedType();

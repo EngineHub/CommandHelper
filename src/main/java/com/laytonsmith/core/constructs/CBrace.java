@@ -6,7 +6,7 @@ import com.laytonsmith.core.ParseTree;
  *
  * 
  */
-public class CBrace extends Construct{
+public class CBrace extends Construct {
 	
 	ParseTree code;
 	public CBrace(ParseTree code){

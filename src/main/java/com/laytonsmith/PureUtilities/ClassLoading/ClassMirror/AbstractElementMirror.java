@@ -4,7 +4,9 @@ package com.laytonsmith.PureUtilities.ClassLoading.ClassMirror;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,14 +61,31 @@ abstract class AbstractElementMirror implements Serializable {
 		Objects.requireNonNull(this.parent);
 	}
 	
-	protected AbstractElementMirror(Method method){
+	protected AbstractElementMirror(Member method){
 		Objects.requireNonNull(method);
-		this.type = ClassReferenceMirror.fromClass(method.getReturnType());
+		if(method instanceof Method){
+			this.type = ClassReferenceMirror.fromClass(((Method)method).getReturnType());
+		} else {
+			//It's a constructor. I hope.
+			this.type = ClassReferenceMirror.fromClass(((Constructor)method).getDeclaringClass());
+		}
 		this.modifiers = new ModifierMirror(method.getModifiers());
 		this.name = method.getName();
 		List<AnnotationMirror> list = new ArrayList<>();
-		for(Annotation a : method.getDeclaredAnnotations()){
-			list.add(new AnnotationMirror(a));
+		// TODO: After Java 1.8, switch this behavior
+//		for(Annotation a : method.getDeclaredAnnotations()){
+//			list.add(new AnnotationMirror(a));
+//		}
+		if(method instanceof Method){
+			for(Annotation a : ((Method)method).getDeclaredAnnotations()){
+				list.add(new AnnotationMirror(a));
+			}
+		} else if(method instanceof Constructor){
+			for(Annotation a : ((Constructor)method).getDeclaredAnnotations()){
+				list.add(new AnnotationMirror(a));
+			}
+		} else {
+			throw new Error("Unexpected method type");
 		}
 		this.annotations = list;
 		this.parent = ClassReferenceMirror.fromClass(method.getDeclaringClass());

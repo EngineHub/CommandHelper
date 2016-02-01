@@ -4,11 +4,6 @@ package com.laytonsmith.PureUtilities.ClassLoading.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.RetentionPolicy;
@@ -19,15 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
 
 /**
  * This class gathers information about a class, without actually loading 
@@ -324,6 +310,34 @@ public class ClassMirror<T> implements Serializable {
 	 * @return 
 	 */
 	public MethodMirror[] getMethods(){
+		List<MethodMirror> l = new ArrayList<>();
+		for(AbstractMethodMirror m : getAllMethods()){
+			if(m instanceof MethodMirror){
+				l.add((MethodMirror)m);
+			}
+		}
+		return l.toArray(new MethodMirror[l.size()]);
+	}
+	
+	/**
+	 * Returns the Constructors in this class.
+	 * @return 
+	 */
+	public ConstructorMirror[] getConstructors(){
+		List<ConstructorMirror> l = new ArrayList<>();
+		for(AbstractMethodMirror m : getAllMethods()){
+			if(m instanceof ConstructorMirror){
+				l.add((ConstructorMirror)m);
+			}
+		}
+		return l.toArray(new ConstructorMirror[l.size()]);
+	}
+	
+	/**
+	 * Returns all methods in this class, including constructors.
+	 * @return 
+	 */
+	public AbstractMethodMirror[] getAllMethods(){
 		if(underlyingClass != null){
 			MethodMirror[] mirrors = new MethodMirror[underlyingClass.getDeclaredMethods().length];
 			for(int i = 0; i < mirrors.length; i++){
@@ -331,7 +345,7 @@ public class ClassMirror<T> implements Serializable {
 			}
 			return mirrors;
 		}
-		return info.methods.toArray(new MethodMirror[info.methods.size()]);
+		return info.methods.toArray(new AbstractMethodMirror[info.methods.size()]);
 	}
 	
 	/**
@@ -363,9 +377,9 @@ public class ClassMirror<T> implements Serializable {
 	public MethodMirror getMethod(String name, ClassReferenceMirror... params) throws NoSuchMethodException {
 		List<ClassReferenceMirror> crmParams = new ArrayList<>();
 		crmParams.addAll(Arrays.asList(params));
-		for(MethodMirror m : getMethods()){
-			if(m.getName().equals(name) && m.getParams().equals(crmParams)){
-				return m;
+		for(AbstractMethodMirror m : getAllMethods()){
+			if(m instanceof MethodMirror && m.getName().equals(name) && m.getParams().equals(crmParams)){
+				return (MethodMirror)m;
 			}
 		}
 		throw new NoSuchMethodException("No method matching the signature " + name + "(" + StringUtils.Join(crmParams, ", ") + ") was found.");
@@ -531,6 +545,6 @@ public class ClassMirror<T> implements Serializable {
 		public boolean isEnum = false;
 		public ClassReferenceMirror classReferenceMirror;
 		public List<FieldMirror> fields = new ArrayList<>();
-		public List<MethodMirror> methods = new ArrayList<>();
+		public List<AbstractMethodMirror> methods = new ArrayList<>();
 	}
 }

@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.natives.interfaces;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -194,4 +195,11 @@ public interface ArrayAccess extends Mixed, Sizable {
 		}
 
 	}
+
+	@Override
+	public String docs();
+
+	@Override
+	public Version since();
+	
 }

@@ -1,7 +1,9 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -206,13 +208,14 @@ public class CArray extends Construct implements ArrayAccess{
 	/**
 	 * Reverses the array in place, if it is a normal array, otherwise, if associative, it throws
 	 * an exception.
+	 * @param t
 	 */
-	public void reverse(){
+	public void reverse(Target t){
 		if(!associative_mode){
 			Collections.reverse(array);
 			regenValue(new HashSet<CArray>());
 		} else {
-			throw ConfigRuntimeException.BuildException("Cannot reverse an associative array.", CRECastException.class, getTarget());
+			throw ConfigRuntimeException.BuildException("Cannot reverse an associative array.", CRECastException.class, t);
 		}
 	}
 
@@ -776,6 +779,16 @@ public class CArray extends Construct implements ArrayAccess{
     public Construct slice(int begin, int end, Target t) {
         return new ArrayHandling.array_get().exec(t, null, new CSlice(begin, end, t));
     }
+
+	@Override
+	public String docs() {
+		return "An array is a data type, which contains any number of other values.";
+	}
+
+	@Override
+	public Version since() {
+		return CHVersion.V3_0_1;
+	}
 
     public enum SortType{
         /**

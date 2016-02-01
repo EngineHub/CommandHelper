@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ObjectGenerator;
@@ -58,9 +59,16 @@ import java.util.logging.Logger;
 
 import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.SRun;
+import java.util.HashSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
+import static com.laytonsmith.testing.StaticTest.Run;
+import static com.laytonsmith.testing.StaticTest.SRun;
+import static com.laytonsmith.testing.StaticTest.Run;
+import static com.laytonsmith.testing.StaticTest.SRun;
+import static com.laytonsmith.testing.StaticTest.Run;
+import static com.laytonsmith.testing.StaticTest.SRun;
 
 /**
  *
@@ -155,27 +163,6 @@ public class RandomTests {
 			}
 		}
 		
-		Set<Class> apiClasses = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
-		for(Class c : apiClasses){
-			// Verify that all classes that are @api classes have the valid functions required for proper documentation
-			// generation, as well as ultimately extend at minimum SimpleDocumentation.
-			if(DummyFunction.class.isAssignableFrom(c)){
-				// Skip this one. These are excused from the normal reporting requirements.
-				continue;
-			}
-			if(!SimpleDocumentation.class.isAssignableFrom(c)){
-				uhohs.put(c.getName(), new IllegalArgumentException(c.getName() + " must implement SimpleDocumentation"));
-			}
-			for(Method m : SimpleDocumentation.class.getDeclaredMethods()){
-				try {
-					c.getDeclaredMethod(m.getName(), m.getParameterTypes());
-				} catch (NoSuchMethodException ex) {
-					uhohs.put(c.getName() + " must implement " + m.getName() + "().", ex);
-				} catch (SecurityException ex) {
-					Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}
-		}
 		if (!StaticTest.brokenJunk.isEmpty()) {
 			System.err.println("There " + StringUtils.PluralTemplateHelper(StaticTest.brokenJunk.size(), "is %d test that has", "are %d tests that have") + " a failure in extreme circumstances.");
 			for(String s : StaticTest.brokenJunk){

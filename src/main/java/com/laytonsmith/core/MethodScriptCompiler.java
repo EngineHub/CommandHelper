@@ -1955,11 +1955,11 @@ public final class MethodScriptCompiler {
 		if (vars != null) {
 			Map<String, Variable> varMap = new HashMap<>();
 			for (Variable v : vars) {
-				varMap.put(v.getName(), v);
+				varMap.put(v.getVariableName(), v);
 			}
 			for (Construct tempNode : root.getAllData()) {
 				if (tempNode instanceof Variable) {
-					Variable vv = varMap.get(((Variable) tempNode).getName());
+					Variable vv = varMap.get(((Variable) tempNode).getVariableName());
 					if(vv != null){
 						((Variable) tempNode).setVal(vv.getDefault());
 					} else {

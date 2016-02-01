@@ -45,7 +45,7 @@ public class Debug {
 //                try {
 //                    Static.LogDebug(message);
 //                } catch (IOException ex) {
-//                    Logger.getLogger(Debug.class.getName()).log(Level.SEVERE, null, ex);
+//                    Logger.getLogger(Debug.class.getVariableName()).log(Level.SEVERE, null, ex);
 //                }
 //            }
 //        }
@@ -69,7 +69,7 @@ public class Debug {
 //    @api
 //    public static class dump_listeners extends AbstractFunction {
 //
-//        public String getName() {
+//        public String getVariableName() {
 //            return "dump_listeners";
 //        }
 //
@@ -103,7 +103,7 @@ public class Debug {
 //
 //        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
-//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", CRESecurityException.class, t);
+//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //            }
 //            StringBuilder b = new StringBuilder("\n");
 //            if (args.length >= 1 && args[0] instanceof CNull) {
@@ -170,8 +170,8 @@ public class Debug {
 //                        Set<Method> parentSet = new HashSet(Arrays.asList(parent.getDeclaredMethods()));
 //                        for (Method m : l.getListener().getClass().getDeclaredMethods()) {
 //                            for (Method pm : parentSet) {
-//                                if (pm.getName().equals(m.getName()) && Arrays.equals(pm.getParameterTypes(), m.getParameterTypes())) {
-//                                    b.append("\t\t").append(m.getReturnType().getSimpleName()).append(" ").append(m.getName()).append("(").append(Static.strJoin(m.getParameterTypes(), ", ")).append(");\n");
+//                                if (pm.getVariableName().equals(m.getVariableName()) && Arrays.equals(pm.getParameterTypes(), m.getParameterTypes())) {
+//                                    b.append("\t\t").append(m.getReturnType().getSimpleName()).append(" ").append(m.getVariableName()).append("(").append(Static.strJoin(m.getParameterTypes(), ", ")).append(");\n");
 //                                }
 //                            }
 //                        }
@@ -269,8 +269,8 @@ public class Debug {
 			if(args[0] instanceof IVariable){
 				if(Prefs.DebugMode()){
 					IVariable ivar = (IVariable)args[0];
-					Construct val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar.getName(), t);
-					StreamUtils.GetSystemOut().println(ivar.getName() + ": " + val.val());
+					Construct val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar.getVariableName(), t);
+					StreamUtils.GetSystemOut().println(ivar.getVariableName() + ": " + val.val());
 				}
 				return CVoid.VOID;
 			} else {
@@ -312,7 +312,7 @@ public class Debug {
 //    @api
 //    public static class debug_log_events extends AbstractFunction {
 //
-//        public String getName() {
+//        public String getVariableName() {
 //            return "debug_log_events";
 //        }
 //
@@ -350,7 +350,7 @@ public class Debug {
 //
 //        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
-//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", CRESecurityException.class, t);
+//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //            }
 //            boolean on = Static.getBoolean(args[0]);
 //            int level = 1;
@@ -369,7 +369,7 @@ public class Debug {
 //    @api
 //    public static class set_debug_event_filter extends AbstractFunction {
 //
-//        public String getName() {
+//        public String getVariableName() {
 //            return "set_debug_event_filter";
 //        }
 //
@@ -404,7 +404,7 @@ public class Debug {
 //
 //        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
-//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", CRESecurityException.class, t);
+//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //            }
 //            Set<Event.Type> set = new HashSet<Event.Type>();
 //            if (args[0] instanceof CString) {
@@ -429,7 +429,7 @@ public class Debug {
 //                    }
 //                }
 //            } else {
-//                throw new ConfigRuntimeException("The parameter specified to " + this.getName() + " must be an array (or a single string). The filter array has not been changed.", CRECastException.class, t);
+//                throw new ConfigRuntimeException("The parameter specified to " + this.getVariableName() + " must be an array (or a single string). The filter array has not been changed.", CRECastException.class, t);
 //            }
 //            synchronized (EVENT_LOGGING_FILTER) {
 //                EVENT_LOGGING_FILTER.clear();
@@ -444,7 +444,7 @@ public class Debug {
 //    @api
 //    public static class set_debug_plugin_filter extends AbstractFunction {
 //
-//        public String getName() {
+//        public String getVariableName() {
 //            return "set_debug_plugin_filter";
 //        }
 //
@@ -481,7 +481,7 @@ public class Debug {
 //
 //        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
-//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", CRESecurityException.class, t);
+//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //            }
 //            if (args[0] instanceof CString) {
 //                EVENT_PLUGIN_FILTER.clear();
@@ -491,7 +491,7 @@ public class Debug {
 //                    EVENT_PLUGIN_FILTER.add(((CArray) args[0]).get(c, t).val().toUpperCase());
 //                }
 //            } else {
-//                throw new ConfigRuntimeException(this.getName() + " expects the argument to be a single string, or an array of strings.", CRECastException.class, t);
+//                throw new ConfigRuntimeException(this.getVariableName() + " expects the argument to be a single string, or an array of strings.", CRECastException.class, t);
 //            }
 //            return CVoid.VOID;
 //        }

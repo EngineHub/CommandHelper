@@ -9,6 +9,16 @@ import com.laytonsmith.core.constructs.Target;
 public class CRECausedByWrapper extends CREThrowable {
 	private final CArray exception;
 	
+	public CRECausedByWrapper(String msg, Target t){
+		super(msg, t);
+		throw new UnsupportedOperationException();
+	}
+	
+	public CRECausedByWrapper(String msg, Target t, Throwable ex){
+		super(msg, t, ex);
+		throw new UnsupportedOperationException();
+	}
+	
 	public CRECausedByWrapper(CArray exception){
 		super(null, Target.UNKNOWN);
 		this.exception = exception.clone();

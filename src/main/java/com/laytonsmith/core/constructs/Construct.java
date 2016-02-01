@@ -1,6 +1,8 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -440,4 +442,28 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		}
 		return ann.value();
 	}
+
+	/**
+	 * Overridden from {@link SimpleDocumentation}. This should just return the value
+	 * of the typeof annotation, unconditionally.
+	 * @return 
+	 */
+	@Override
+	public final String getName() {
+		typeof t = this.getClass().getAnnotation(typeof.class);
+		return t.value();
+	}
+
+	// We provide default instances of these methods, though they should in practice never run.
+	@Override
+	public String docs() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Version since() {
+		throw new UnsupportedOperationException();
+	}
+	
+	
 }

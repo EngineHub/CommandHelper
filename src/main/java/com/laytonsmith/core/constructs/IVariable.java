@@ -57,7 +57,7 @@ public class IVariable extends Construct implements Cloneable {
         return var_value;
     }
 
-    public String getName() {
+    public String getVariableName() {
         return name;
     }
 

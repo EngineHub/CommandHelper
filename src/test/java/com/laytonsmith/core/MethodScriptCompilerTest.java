@@ -30,6 +30,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static com.laytonsmith.testing.StaticTest.RunCommand;
+import static com.laytonsmith.testing.StaticTest.SRun;
 //import org.powermock.api.mockito.PowerMockito;
 //import org.powermock.core.classloader.annotations.PowerMockIgnore;
 //import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -569,7 +571,7 @@ public class MethodScriptCompilerTest {
 //    @Test public void testCompile11() throws Exception{
 //
 //        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
-//        when(CommandHelperPlugin.perms.hasPermission(fakePlayer.getName(), "ch.alias.safe")).thenReturn(true);
+//        when(CommandHelperPlugin.perms.hasPermission(fakePlayer.getVariableName(), "ch.alias.safe")).thenReturn(true);
 //        CommandHelperPlugin.myServer = fakeServer;
 //        when(fakeServer.getOnlinePlayers()).thenReturn(new MCPlayer[]{fakePlayer});
 //        String config = "safe:/test $var = >>>\n"
@@ -582,7 +584,7 @@ public class MethodScriptCompilerTest {
 //        assertTrue(s.match("/test 2"));
 //        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, Target.UNKNOWN)}), env, null);
 //        verify(fakePlayer).sendMessage("2");
-//        verify(CommandHelperPlugin.perms).hasPermission(fakePlayer.getName(), "ch.alias.safe");
+//        verify(CommandHelperPlugin.perms).hasPermission(fakePlayer.getVariableName(), "ch.alias.safe");
 //    }
 
     @Test public void testCompile12() throws Exception{

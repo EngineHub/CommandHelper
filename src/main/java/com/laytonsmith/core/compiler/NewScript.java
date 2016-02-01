@@ -35,11 +35,11 @@ public class NewScript {
 			if(c instanceof Variable){
 				Variable var = (Variable)c;
 				if(var.isOptional() && !var.getDefault().trim().equals("")){
-					b.append("[").append(var.getName()).append("='").append(var.getDefault()).append("']");
+					b.append("[").append(var.getVariableName()).append("='").append(var.getDefault()).append("']");
 				} else if(var.isOptional()){
-					b.append("[").append(var.getName()).append("]");
+					b.append("[").append(var.getVariableName()).append("]");
 				} else {
-					b.append(var.getName());
+					b.append(var.getVariableName());
 				}
 			} else {
 				b.append(c.val());

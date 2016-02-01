@@ -1,7 +1,9 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.environments.Environment;
@@ -76,7 +78,7 @@ public class CClosure extends Construct {
             // Convert: \ -> \\ and ' -> \'
             b.append("'").append(data.val().replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n").replace("'", "\\'")).append("'");
 		} else if(node.getData() instanceof IVariable){
-			b.append(((IVariable)node.getData()).getName());
+			b.append(((IVariable)node.getData()).getVariableName());
         } else {
             b.append(node.getData().val());
         }
@@ -231,4 +233,15 @@ public class CClosure extends Construct {
     public boolean isDynamic() {
         return false;
     }
+
+	@Override
+	public String docs() {
+		return "A closure is a data type that contains executable code. This is similar to a procedure, but the value is first class,"
+				+ " and can be stored in variables, and executed.";
+	}
+
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
+	}
 }

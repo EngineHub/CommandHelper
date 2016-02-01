@@ -1,6 +1,8 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
@@ -188,4 +190,13 @@ public class CSlice extends CArray {
 		}
 	}
 
+	@Override
+	public String docs() {
+		return "A slice is a value that represents a numeric range, either in the positive direction, or negative.";
+	}
+
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
+	}
 }

@@ -2,13 +2,15 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CHVersion;
 
 /**
  * 
  */
 @typeof("void")
-public final class CVoid extends Construct implements Cloneable{
+public final class CVoid extends Construct implements Cloneable {
     
 	/**
 	 * Void values do not normally need to be duplicated, since they are
@@ -65,5 +67,16 @@ public final class CVoid extends Construct implements Cloneable{
     public boolean isDynamic() {
         return false;
     }
+
+	@Override
+	public String docs() {
+		return "void isn't a datatype per se, but represents a lack of a datatype. Void values can't be assigned to variables,"
+				+ " or otherwise used.";
+	}
+
+	@Override
+	public Version since() {
+		return CHVersion.V3_0_1;
+	}
 
 }

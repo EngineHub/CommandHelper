@@ -160,7 +160,7 @@ public abstract class AbstractFunction implements Function {
 				}
 				b.append("'").append(val).append("'");
 			} else if (ccc instanceof IVariable) {
-				b.append(((IVariable) ccc).getName());
+				b.append(((IVariable) ccc).getVariableName());
 			} else {
 				b.append(ccc.val());
 			}
