@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +14,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 
+ * This class is run by maven at compile time, and checks to ensure that the various
+ * annotations referenced here are checked, and fail if any of the parameters are missing.
  */
 public class AnnotationChecks {
 
@@ -38,6 +40,21 @@ public class AnnotationChecks {
 				} else {
 					uhohs.add(c.getName() + " must implement the constructor with signature (" + getSignature(cons) + "), but doesn't.");
 				}
+			}
+		}
+		
+		Set<Method> set2 = ClassDiscovery.getDefaultInstance().loadMethodsWithAnnotation(ForceImplementation.class);
+		for(Method cons : set2){
+			Class superClass = cons.getDeclaringClass();
+			Set<Class> s = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(superClass);
+			checkImplements: for(Class c : s){
+				// c is the class we want to check to make sure it implements cons
+				for(Method cCons : c.getDeclaredMethods()){
+					if(cCons.getName().equals(cons.getName()) && Arrays.equals(cons.getParameterTypes(), cCons.getParameterTypes())){
+						continue checkImplements;
+					}
+				}
+				uhohs.add(c.getName() + " must implement the method with signature " + cons.getName() + "(" + getSignature(cons) + "), but doesn't.");
 			}
 		}
 		

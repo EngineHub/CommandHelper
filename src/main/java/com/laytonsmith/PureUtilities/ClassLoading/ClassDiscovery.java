@@ -1,8 +1,10 @@
 package com.laytonsmith.PureUtilities.ClassLoading;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.AbstractMethodMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirrorVisitor;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassReferenceMirror;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ConstructorMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.FieldMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
@@ -35,7 +37,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-
 import org.objectweb.asm.ClassReader;
 
 /**
@@ -141,6 +142,11 @@ public class ClassDiscovery {
 	 * cache, this is cleared.
 	 */
 	private final Map<Class<? extends Annotation>, Set<MethodMirror>> methodAnnotationCache = new HashMap<>();
+	/**
+	 * Cache for constructor annotations. Whenever a new URL is added to the URL cache,
+	 * this is cleared.
+	 */
+	private final Map<Class<? extends Annotation>, Set<ConstructorMirror>> constructorAnnotationCache = new HashMap<>();
 	/**
 	 * By default null, but this can be set per instance.
 	 */
@@ -357,8 +363,8 @@ public class ClassDiscovery {
 			} else {
 				throw new RuntimeException("Unknown url type: " + rootLocation);
 			}
-		} catch(Exception e){
-			e.printStackTrace();;
+		} catch(RuntimeException e){
+			e.printStackTrace(System.err);
 		} finally {
 			if(debug){
 				StreamUtils.GetSystemOut().println("Scans finished for " + rootLocation + ", taking " + (System.currentTimeMillis() - start) + " ms.");
@@ -469,6 +475,7 @@ public class ClassDiscovery {
 		classAnnotationCache.clear();
 		fieldAnnotationCache.clear();
 		methodAnnotationCache.clear();
+		constructorAnnotationCache.clear();
 		dirtyURLs.addAll(urlCache);
 	}
 
@@ -829,14 +836,11 @@ public class ClassDiscovery {
 		fieldAnnotationCache.put(annotation, mirrors);
 		return mirrors;
 	}
-
+	
 	/**
-	 * Returns a list of methods that have been annotated with the specified
-	 * annotation. This will work with annotations that have been declared with
-	 * the {@link RetentionPolicy#CLASS} property.
-	 *
+	 * Returns all methods, including constructors, with the specified annotations
 	 * @param annotation
-	 * @return
+	 * @return 
 	 */
 	public Set<MethodMirror> getMethodsWithAnnotation(Class<? extends Annotation> annotation) {
 		if (methodAnnotationCache.containsKey(annotation)) {
@@ -893,23 +897,47 @@ public class ClassDiscovery {
 		}
 	}
 	
-	public Set<MethodMirror> getConstructorsWithAnnotation(Class<? extends Annotation> annotation){
-		Set<MethodMirror> set = new HashSet<>();
-		for(MethodMirror m : getMethodsWithAnnotation(annotation)){
-			if("<init>".equals(m.getName())){
-				set.add(m);
+	/**
+	 * Returns all ConstructorMirrors with the given annotation.
+	 * @param annotation
+	 * @return 
+	 */
+	public Set<ConstructorMirror> getConstructorsWithAnnotation(Class<? extends Annotation> annotation){
+		if (constructorAnnotationCache.containsKey(annotation)) {
+			return new HashSet<>(constructorAnnotationCache.get(annotation));
+		}
+		doDiscovery();
+		Set<ConstructorMirror> mirrors = new HashSet<>();
+		for (ClassMirror m : getKnownClasses()) {
+			for (ConstructorMirror mm : m.getConstructors()) {
+				if (mm.hasAnnotation(annotation)) {
+					mirrors.add(mm);
+				}
 			}
 		}
-		return set;
+		constructorAnnotationCache.put(annotation, mirrors);
+		return mirrors;
 	}
 	
+	/**
+	 * Loads all Constructors with the given annotation.
+	 * @param annotation
+	 * @return 
+	 */
 	public Set<Constructor> loadConstructorsWithAnnotation(Class<? extends Annotation> annotation){
 		return loadConstructorsWithAnnotation(annotation, getDefaultClassLoader(), true);
 	}
 	
+	/**
+	 * Loads all Constructors with the given annotation, using the specified classloader.
+	 * @param annotation
+	 * @param loader
+	 * @param initialize
+	 * @return 
+	 */
 	public Set<Constructor> loadConstructorsWithAnnotation(Class<? extends Annotation> annotation, ClassLoader loader, boolean initialize){
 		Set<Constructor> set = new HashSet<>();
-		for(MethodMirror m : getConstructorsWithAnnotation(annotation)){
+		for(AbstractMethodMirror m : getConstructorsWithAnnotation(annotation)){
 			try {
 				Class c = m.getDeclaringClass().loadClass(loader, initialize);
 				outer: for(Constructor cc : c.getDeclaredConstructors()){

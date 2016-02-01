@@ -4,6 +4,8 @@ package com.laytonsmith.PureUtilities.ClassLoading.ClassMirror;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -59,9 +61,14 @@ abstract class AbstractElementMirror implements Serializable {
 		Objects.requireNonNull(this.parent);
 	}
 	
-	protected AbstractElementMirror(Method method){
+	protected AbstractElementMirror(Executable method){
 		Objects.requireNonNull(method);
-		this.type = ClassReferenceMirror.fromClass(method.getReturnType());
+		if(method instanceof Method){
+			this.type = ClassReferenceMirror.fromClass(((Method)method).getReturnType());
+		} else {
+			//It's a constructor. I hope.
+			this.type = ClassReferenceMirror.fromClass(((Constructor)method).getDeclaringClass());
+		}
 		this.modifiers = new ModifierMirror(method.getModifiers());
 		this.name = method.getName();
 		List<AnnotationMirror> list = new ArrayList<>();
