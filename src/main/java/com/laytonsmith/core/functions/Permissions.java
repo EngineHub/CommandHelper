@@ -11,8 +11,10 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
  * 
@@ -49,8 +51,8 @@ public class Permissions {
 		}
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{ExceptionType.InsufficientPermissionException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientPermissionException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -84,8 +86,8 @@ public class Permissions {
 				MCPlayer mcp = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				if (mcp != null && !mcp.getName().equals(args[0].val())) {
 					if (!Static.hasCHPermission(getName(), environment)) {
-						throw new ConfigRuntimeException("You do not have permission to use the " + getName() + " function.",
-								Exceptions.ExceptionType.InsufficientPermissionException, t);
+						throw ConfigRuntimeException.BuildException("You do not have permission to use the " + getName() + " function.",
+								CREInsufficientPermissionException.class, t);
 					}
 				}
 			}

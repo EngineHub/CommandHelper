@@ -27,11 +27,15 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.taskmanager.CoreTaskType;
 import com.laytonsmith.core.taskmanager.TaskManager;
@@ -94,8 +98,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -139,8 +143,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -187,8 +191,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -243,8 +247,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -267,7 +271,7 @@ public class Scheduling {
 				delay = Static.getInt(args[1], t);
 			}
 			if (!(args[1 + offset] instanceof CClosure)) {
-				throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " expects a closure to be sent as the second argument", CRECastException.class, t);
 			}
 			final CClosure c = (CClosure) args[1 + offset];
 			final AtomicInteger ret = new AtomicInteger(-1);
@@ -337,8 +341,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -356,7 +360,7 @@ public class Scheduling {
 			final TaskManager taskManager = environment.getEnv(GlobalEnv.class).GetTaskManager();
 			long time = Static.getInt(args[0], t);
 			if (!(args[1] instanceof CClosure)) {
-				throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " expects a closure to be sent as the second argument", CRECastException.class, t);
 			}
 			final CClosure c = (CClosure) args[1];
 			final AtomicInteger ret = new AtomicInteger(-1);
@@ -442,8 +446,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInsufficientArgumentsException.class};
 		}
 
 		@Override
@@ -463,7 +467,7 @@ public class Scheduling {
 			} else if (args.length == 1) {
 				StaticLayer.ClearFutureRunnable(Static.getInt32(args[0], t));
 			} else {
-				throw new ConfigRuntimeException("No id was passed to clear_task, and it's not running inside a task either.", ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("No id was passed to clear_task, and it's not running inside a task either.", CREInsufficientArgumentsException.class, t);
 			}
 			return CVoid.VOID;
 		}
@@ -534,8 +538,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -572,15 +576,15 @@ public class Scheduling {
 					locale = Static.GetLocale(countryCode);
 				}
 				if(locale == null) {
-					throw new ConfigRuntimeException("The given locale was not found on your system: "
-							+ countryCode, ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("The given locale was not found on your system: "
+							+ countryCode, CREFormatException.class, t);
 				}
 			}
 			SimpleDateFormat dateFormat;
 			try{
 				dateFormat = new SimpleDateFormat(args[0].toString(), locale);
 			} catch(IllegalArgumentException ex){
-				throw new Exceptions.FormatException(ex.getMessage(), t);
+				throw new CREFormatException(ex.getMessage(), t);
 			}
 			dateFormat.setTimeZone(timezone);
 			return new CString(dateFormat.format(now), t);
@@ -611,8 +615,8 @@ public class Scheduling {
 	public static class parse_date extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -633,7 +637,7 @@ public class Scheduling {
 				Date d = dateFormat.parse(args[1].val());
 				return new CInt(d.getTime(), t);
 			} catch(IllegalArgumentException | ParseException ex){
-				throw new Exceptions.FormatException(ex.getMessage(), t);
+				throw new CREFormatException(ex.getMessage(), t);
 			}
 		}
 
@@ -701,8 +705,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -719,10 +723,10 @@ public class Scheduling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			//First things first, check the format of the arguments.
 			if(!(args[0] instanceof CString)){
-				throw new Exceptions.CastException("Expected string for argument 1 in " + getName(), t);
+				throw new CRECastException("Expected string for argument 1 in " + getName(), t);
 			}
 			if(!(args[1] instanceof CClosure)){
-				throw new Exceptions.CastException("Expected closure for argument 2 in " + getName(), t);
+				throw new CRECastException("Expected closure for argument 2 in " + getName(), t);
 			}
 			CronFormat format = validateFormat(args[0].val(), t);
 			format.job = ((CClosure)args[1]);
@@ -888,12 +892,12 @@ public class Scheduling {
 			}
 			//Check for invalid characters
 			if(format.matches("[^a-z0-9\\*\\-,@/]")){
-				throw new Exceptions.FormatException("Invalid characters found in format for " + getName() + ": \"" + format + "\". Check your format and try again.", t);
+				throw new CREFormatException("Invalid characters found in format for " + getName() + ": \"" + format + "\". Check your format and try again.", t);
 			}
 			//Now split into the segments.
 			String[] sformat = format.split(" ");
 			if(sformat.length != 5){
-				throw new Exceptions.FormatException("Expected 5 segments in " + getName() + ", but " + StringUtils.PluralTemplateHelper(sformat.length, "%d was", "%d were") + " found.", t);
+				throw new CREFormatException("Expected 5 segments in " + getName() + ", but " + StringUtils.PluralTemplateHelper(sformat.length, "%d was", "%d were") + " found.", t);
 			}
 			String min = sformat[0];
 			String hour = sformat[1];
@@ -935,7 +939,7 @@ public class Scheduling {
 						Integer maxRange = Integer.parseInt(rangeMatcher.group(2));
 						Range r = new Range(minRange, maxRange);
 						if(!r.isAscending()){
-							throw new Exceptions.FormatException("Ranges must be min to max, and not the same value in format for " + getName(), t);
+							throw new CREFormatException("Ranges must be min to max, and not the same value in format for " + getName(), t);
 						}
 						List<Integer> rr = r.getRange();
 						for(int j = 0; j < rr.size(); j++){
@@ -973,15 +977,15 @@ public class Scheduling {
 					} catch (NumberFormatException ex){
 						//Any unexpected strings would show up here. The expected string values would have already
 						//been replaced with a number, so this should work if there are no errors.
-						throw new Exceptions.FormatException("Unknown string passed in format for " + getName() + " \"" + s + "\"", t);
+						throw new CREFormatException("Unknown string passed in format for " + getName() + " \"" + s + "\"", t);
 					}
 				}
 				Collections.sort(list);
 				if(!range.contains(list.get(0))){
-					throw new Exceptions.FormatException("Expecting value to be within the range " + range + " in format for " + getName() + ", but the value was " + list.get(0), t);
+					throw new CREFormatException("Expecting value to be within the range " + range + " in format for " + getName() + ", but the value was " + list.get(0), t);
 				}
 				if(!range.contains(list.get(list.size() - 1))){
-					throw new Exceptions.FormatException("Expecting value to be within the range " + range + " in format for " + getName() + ", but the value was " + list.get(list.size() - 1), t);
+					throw new CREFormatException("Expecting value to be within the range " + range + " in format for " + getName() + ", but the value was " + list.get(list.size() - 1), t);
 				}
 				Set<Integer> set = new TreeSet<Integer>(list);
 				switch(i){
@@ -1062,8 +1066,8 @@ public class Scheduling {
 	public static class clear_cron extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CRECastException.class};
 		}
 
 		@Override
@@ -1083,10 +1087,10 @@ public class Scheduling {
 				id = (int)Static.getInt(args[0], t);
 			}
 			if(id == null){
-				throw new Exceptions.RangeException("No task ID provided, and not running from within a cron task.", t);
+				throw new CRERangeException("No task ID provided, and not running from within a cron task.", t);
 			}
 			if(!set_cron.stopJob(id)){
-				throw new Exceptions.RangeException("Task ID invalid", t);
+				throw new CRERangeException("Task ID invalid", t);
 			}
 			return CVoid.VOID;
 		}

@@ -24,10 +24,15 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 
 import java.util.ArrayList;
@@ -80,8 +85,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -163,8 +168,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -236,8 +241,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -304,7 +309,7 @@ public class Math {
 			for (int i = 1; i < args.length; i++) {
 				double next = Static.getNumber(args[i], t);
 				if (next == 0) {
-					throw new ConfigRuntimeException("Division by 0!", ExceptionType.RangeException, t);
+					throw ConfigRuntimeException.BuildException("Division by 0!", CRERangeException.class, t);
 				}
 				tally /= next;
 			}
@@ -316,8 +321,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -381,8 +386,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -447,8 +452,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -522,8 +527,8 @@ public class Math {
 					} else if(!(array instanceof CArray)){
 						//It's an ArrayAccess type, but we can't use that here, so, throw our
 						//own exception.
-						throw new ConfigRuntimeException("Cannot increment/decrement a non-array array"
-								+ " accessed value. (The value passed in was \"" + array.val() + "\")", ExceptionType.CastException, t);
+						throw ConfigRuntimeException.BuildException("Cannot increment/decrement a non-array array"
+								+ " accessed value. (The value passed in was \"" + array.val() + "\")", CRECastException.class, t);
 					} else {
 						//Ok, we're good. Data types should all be correct.
 						CArray myArray = ((CArray)array);
@@ -539,7 +544,7 @@ public class Math {
 							}
 							new ArrayHandling.array_set().exec(t, env, array, index, new CInt(newVal, t));
 						} else {
-							throw new ConfigRuntimeException("Cannot increment/decrement a non numeric value.", ExceptionType.CastException, t);
+							throw ConfigRuntimeException.BuildException("Cannot increment/decrement a non numeric value.", CRECastException.class, t);
 						}
 					}
 					long valueToReturn;
@@ -588,13 +593,13 @@ public class Math {
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget());
 				}
 				value = Static.getInt(args[1], t);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget());
+				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget());
 				Construct newVal;
 				if (Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) + value, t);
@@ -604,7 +609,7 @@ public class Math {
 				if(v.ival() instanceof CMutablePrimitive){
 					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
 				}
-				v = new IVariable(v.getDefinedType(), v.getName(), newVal, t);
+				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
 			} else {
@@ -625,8 +630,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -705,13 +710,13 @@ public class Math {
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget());
 				}
 				value = Static.getInt(args[1], t);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget());
+				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget());
 				Construct newVal;
 				if (Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) + value, t);
@@ -727,7 +732,7 @@ public class Math {
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				v = new IVariable(v.getDefinedType(), v.getName(), newVal, t);
+				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
 			} else {
@@ -748,8 +753,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -835,13 +840,13 @@ public class Math {
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget());
 				}
 				value = Static.getInt(args[1], t);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget());
+				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget());
 				Construct newVal;
 				if (Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) - value, t);
@@ -851,7 +856,7 @@ public class Math {
 				if(v.ival() instanceof CMutablePrimitive){
 					newVal = ((CMutablePrimitive)v.ival()).setAndReturn(newVal, t);
 				}
-				v = new IVariable(v.getDefinedType(), v.getName(), newVal, t);
+				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
 			} else {
@@ -871,8 +876,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -953,13 +958,13 @@ public class Math {
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget());
 				}
 				value = Static.getInt(args[1], t);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget());
+				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget());
 				Construct newVal;
 				if (Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) - value, t);
@@ -975,7 +980,7 @@ public class Math {
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				v = new IVariable(v.getDefinedType(), v.getName(), newVal, t);
+				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
 			} else {
@@ -995,8 +1000,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1073,8 +1078,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CRECastException.class};
 		}
 
 		@Override
@@ -1101,15 +1106,15 @@ public class Math {
 					max = Static.getInt(args[1], t);
 				}
 				if (max > Integer.MAX_VALUE || min > Integer.MAX_VALUE) {
-					throw new ConfigRuntimeException("max and min must be below int max, defined as " + Integer.MAX_VALUE,
-							ExceptionType.RangeException,
+					throw ConfigRuntimeException.BuildException("max and min must be below int max, defined as " + Integer.MAX_VALUE,
+							CRERangeException.class,
 							t);
 				}
 
 				long range = max - min;
 				if (range <= 0) {
-					throw new ConfigRuntimeException("max - min must be greater than 0",
-							ExceptionType.RangeException, t);
+					throw ConfigRuntimeException.BuildException("max - min must be greater than 0",
+							CRERangeException.class, t);
 				}
 				long rand = java.lang.Math.abs(r.nextLong());
 				long i = (rand % (range)) + min;
@@ -1153,8 +1158,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1217,8 +1222,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1269,8 +1274,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1322,8 +1327,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CRECastException.class};
 		}
 
 		@Override
@@ -1345,7 +1350,7 @@ public class Math {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			double d = Static.getNumber(args[0], t);
 			if (d < 0) {
-				throw new ConfigRuntimeException("sqrt expects a number >= 0", ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("sqrt expects a number >= 0", CRERangeException.class, t);
 			}
 			double m = java.lang.Math.sqrt(d);
 			if (m == (int) m) {
@@ -1384,8 +1389,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInsufficientArgumentsException.class};
 		}
 
 		@Override
@@ -1406,8 +1411,8 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length == 0) {
-				throw new ConfigRuntimeException("You must send at least one parameter to min",
-						ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("You must send at least one parameter to min",
+						CREInsufficientArgumentsException.class, t);
 			}
 			double lowest = Double.POSITIVE_INFINITY;
 			List<Construct> list = new ArrayList<Construct>();
@@ -1467,8 +1472,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInsufficientArgumentsException.class};
 		}
 
 		@Override
@@ -1489,8 +1494,8 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length == 0) {
-				throw new ConfigRuntimeException("You must send at least one parameter to max",
-						ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("You must send at least one parameter to max",
+						CREInsufficientArgumentsException.class, t);
 			}
 			double highest = Double.NEGATIVE_INFINITY;
 			List<Construct> list = new ArrayList<Construct>();
@@ -1549,8 +1554,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1601,8 +1606,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1653,8 +1658,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1705,8 +1710,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1757,8 +1762,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1809,8 +1814,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1861,8 +1866,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1913,8 +1918,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1969,8 +1974,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2023,8 +2028,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -2050,7 +2055,7 @@ public class Math {
 				precision = Static.getInt32(args[1], t);
 			}
 			if(precision < 0){
-				throw new Exceptions.RangeException("precision cannot be less than 0, was " + precision, t);
+				throw new CRERangeException("precision cannot be less than 0, was " + precision, t);
 			}
 			number = number * java.lang.Math.pow(10, precision);
 			number = java.lang.Math.round(number);
@@ -2106,8 +2111,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.PluginInternalException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class, CREPluginInternalException.class};
 		}
 
 		@Override
@@ -2129,16 +2134,16 @@ public class Math {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String expr = args[0].val().trim();
 			if("".equals(expr)){
-				throw new Exceptions.FormatException("Expression may not be empty", t);
+				throw new CREFormatException("Expression may not be empty", t);
 			}
 			CArray vars = null;
 			if (args.length == 2 && args[1] instanceof CArray) {
 				vars = (CArray) args[1];
 			} else if (args.length == 2 && !(args[1] instanceof CArray)) {
-				throw new ConfigRuntimeException("The second argument of expr() should be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("The second argument of expr() should be an array", CRECastException.class, t);
 			}
 			if (vars != null && !vars.inAssociativeMode()) {
-				throw new ConfigRuntimeException("The array provided to expr() must be an associative array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("The array provided to expr() must be an associative array", CRECastException.class, t);
 			}
 			double[] da;
 			String[] varNames;
@@ -2159,7 +2164,7 @@ public class Math {
 				Expression e = Expression.compile(expr, varNames);
 				return new CDouble(e.evaluate(da), t);
 			} catch (ExpressionException ex) {
-				throw new ConfigRuntimeException("Your expression was invalidly formatted", ExceptionType.PluginInternalException, t, ex);
+				throw ConfigRuntimeException.BuildException("Your expression was invalidly formatted", CREPluginInternalException.class, t, ex);
 			}*/
 			String eClass = "com.sk89q.worldedit.internal.expression.Expression";
 			String errClass = "com.sk89q.worldedit.internal.expression.ExpressionException";
@@ -2168,8 +2173,8 @@ public class Math {
 				eClazz = Class.forName(eClass);
 				errClazz = Class.forName(errClass);
 			} catch (ClassNotFoundException cnf) {
-				throw new ConfigRuntimeException("You are missing a required dependency: " + eClass,
-						ExceptionType.PluginInternalException, t);
+				throw ConfigRuntimeException.BuildException("You are missing a required dependency: " + eClass,
+						CREPluginInternalException.class, t);
 			}
 			try {
 				Object e = ReflectionUtils.invokeMethod(eClazz, null, "compile",
@@ -2179,10 +2184,10 @@ public class Math {
 				return new CDouble((double) d, t);
 			} catch (ReflectionUtils.ReflectionException rex) {
 				if (rex.getCause().getClass().isAssignableFrom(errClazz)) {
-					throw new ConfigRuntimeException("Your expression was invalidly formatted",
-							ExceptionType.PluginInternalException, args[0].getTarget(), rex.getCause());
+					throw ConfigRuntimeException.BuildException("Your expression was invalidly formatted",
+							CREPluginInternalException.class, args[0].getTarget(), rex.getCause());
 				} else {
-					throw new ConfigRuntimeException(rex.getMessage(), ExceptionType.PluginInternalException,
+					throw ConfigRuntimeException.BuildException(rex.getMessage(), CREPluginInternalException.class,
 							args[0].getTarget(), rex.getCause());
 				}
 			}
@@ -2216,8 +2221,8 @@ public class Math {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2257,8 +2262,8 @@ public class Math {
 	public static class logarithm extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -2275,7 +2280,7 @@ public class Math {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			double val = Static.getDouble(args[0], t);
 			if(val <= 0){
-				throw new Exceptions.RangeException("val was <= 0", t);
+				throw new CRERangeException("val was <= 0", t);
 			}
 			double r;
 			if(args.length == 1){
@@ -2334,8 +2339,8 @@ public class Math {
 	public static class math_const extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2398,7 +2403,7 @@ public class Math {
 					return new CInt((Integer)c.getValue(), t);
 				}
 			} catch(IllegalArgumentException ex){
-				throw new Exceptions.CastException("No constant with the value " + args[0].val() + " exists.", t);
+				throw new CRECastException("No constant with the value " + args[0].val() + " exists.", t);
 			}
 		}
 

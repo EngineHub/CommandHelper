@@ -28,6 +28,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.mockito.Mockito.verify;
+import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
+import static com.laytonsmith.testing.StaticTest.SRun;
 
 /**
  *

@@ -9,14 +9,15 @@ import com.laytonsmith.PureUtilities.MSP.Burst;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.datasource;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.Scheduling;
@@ -32,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -52,7 +54,7 @@ public class DocGenTemplates {
 
 	public static void main(String[] args){
 		Implementation.setServerType(Implementation.Type.SHELL);
-		StreamUtils.GetSystemOut().println(Generate("Federation"));
+		StreamUtils.GetSystemOut().println(Generate("Exceptions"));
 	}
 
 	public static String Generate(String forPage){
@@ -107,6 +109,7 @@ public class DocGenTemplates {
 						+ ", or is not static. Please correct this error to use it as a template.");
 				}
 			} catch(Exception e){
+				System.out.println(e);
 				//Oh well, skip it.
 			}
 		}
@@ -143,7 +146,9 @@ public class DocGenTemplates {
 	 */
 	public static String DoTemplateReplacement(String template, Map<String, Generator> generators){
 		try {
-			Prefs.init(null);
+			if(Implementation.GetServerType() != Implementation.Type.BUKKIT){
+				Prefs.init(null);
+			}
 		} catch (IOException ex) {
 			Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -286,7 +291,17 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String ... args) {
 			StringBuilder b = new StringBuilder();
-			for(SimpleDocumentation d : ExceptionType.values()){
+			SortedSet<Class<CREThrowable>> set = new TreeSet<>(new Comparator<Class<CREThrowable>>(){
+				@Override
+				public int compare(Class<CREThrowable> o1, Class<CREThrowable> o2) {
+					return o1.getCanonicalName().compareTo(o2.getCanonicalName());
+				}
+			});
+			set.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class));
+			for(Class<CREThrowable> c : set){
+				// This is suuuuuuper evil, but we don't want to have to deal with the exception constructors, we're
+				// just after the documentation stuff.				
+				SimpleDocumentation d = (SimpleDocumentation) ReflectionUtils.instantiateUnsafe(c);
 				b.append("===").append(d.getName()).append("===\n");
 				b.append(d.docs());
 				b.append("\n\nSince: ").append(d.since().toString()).append("\n\n");
@@ -295,7 +310,7 @@ public class DocGenTemplates {
 		}
 	};
 
-	private static final String githubBaseURL = "https://github.com/sk89q/commandhelper/tree/master/src/main/java";
+	private static final String githubBaseURL = "https://github.com/EngineHub/commandhelper/tree/master/src/main/java";
 
 	/**
 	 * Returns the fully qualified (and github linked) class name, given the package
@@ -307,7 +322,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) {
 			Class c = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]).loadClass();
-			return "[" + githubBaseURL + "/" + c.getName().replace(".", "/") + ".java " + c.getName() + "]";
+			return "[" + githubBaseURL + "/" + c.getName().replace('.', '/') + ".java " + c.getName() + "]";
 		}
 	};
 
@@ -332,7 +347,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) {
 			Class c = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]).loadClass();
-			return "[" + githubBaseURL + "/" + c.getName().replace(".", "/") + ".java " + c.getSimpleName() + "]";
+			return "[" + githubBaseURL + "/" + c.getName().replace('.', '/') + ".java " + c.getSimpleName() + "]";
 		}
 	};
 
@@ -351,7 +366,7 @@ public class DocGenTemplates {
 				while(c.getEnclosingClass() != null){
 					c = c.getEnclosingClass();
 				}
-				return "[" + githubBaseURL + "/" + c.getName().replace(".", "/") + ".java " + b.getName() + "]";
+				return "[" + githubBaseURL + "/" + c.getName().replace('.', '/') + ".java " + b.getName() + "]";
 			} catch (ConfigCompileException ex) {
 				return "Unknown function: " + args[0];
 			}

@@ -401,7 +401,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void setSpectatorTarget(MCEntity entity) {
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8_7)) {
+		if(!ReflectionUtils.hasMethod(p.getClass(), "setSpectatorTarget", null, Entity.class)){
+			// Probably 1.8.6 or prior
 			return;
 		}
 		if(entity == null) {
@@ -413,7 +414,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public MCEntity getSpectatorTarget() {
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8_7)) {
+		if(!ReflectionUtils.hasMethod(p.getClass(), "getSpectatorTarget", null)){
+			// Probably 1.8.6 or prior
 			return null;
 		}
 		return BukkitConvertor.BukkitGetCorrectEntity(p.getSpectatorTarget());
@@ -430,19 +432,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         }
 
 		try {
-			Set opSet = null;
-			try{
-				//Probably 1.4.5
-				/*n.m.s.Server*/ Object nmsServer = ReflectionUtils.invokeMethod(server, "getServer");
-				/*o.b.c.ServerConfigurationManagerAbstract*/ Object obcServerConfigurationmanagerAbstract = ReflectionUtils.invokeMethod(nmsServer, "getServerConfigurationManager");
-				opSet = (Set) ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "ServerConfigurationManagerAbstract").loadClass(), obcServerConfigurationmanagerAbstract, "operators");
-			} catch(ReflectionUtils.ReflectionException e){
-				//Probably 1.4.6
-				Class nmsMinecraftServerClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "MinecraftServer").loadClass();
-				/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
-				/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
-				opSet = (Set)ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass(), nmsPlayerList, "operators");
-			}
+			//Probably 1.4.6
+			Class nmsMinecraftServerClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "MinecraftServer").loadClass();
+			/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
+			/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
+			Set opSet = (Set)ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass(), nmsPlayerList, "operators");
 
 			// since all Java objects pass by reference, we don't need to set field back to object
 			if (value) {

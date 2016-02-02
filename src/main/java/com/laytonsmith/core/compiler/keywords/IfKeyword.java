@@ -43,7 +43,7 @@ public class IfKeyword extends Keyword {
 				} catch(IndexOutOfBoundsException ex){
 					// Doesn't matter, we're apparently at the end of the stream
 				}
-				node.addChild(this.getArgumentOrNull(list.get(keywordPosition + 1)));
+				node.addChild(getArgumentOrNull(list.get(keywordPosition + 1)));
 				list.remove(keywordPosition + 1);
 			}
 

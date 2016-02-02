@@ -2,7 +2,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 
 /**
  * Only should be used for test functions, or other typically unreleased or
@@ -11,8 +11,8 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 public abstract class DummyFunction extends AbstractFunction{
 
 	@Override
-	public ExceptionType[] thrown() {
-		return ExceptionType.values();
+	public Class<? extends CREThrowable>[] thrown() {
+		return new Class[]{CREThrowable.class};
 	}
 
 	@Override

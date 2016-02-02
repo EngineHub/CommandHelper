@@ -47,6 +47,15 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
+import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
+import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -54,7 +63,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopBreakException;
 import com.laytonsmith.core.exceptions.LoopContinueException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 
 import java.io.File;
@@ -101,8 +109,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -160,7 +168,7 @@ public class DataHandling {
 	public static class associative_array extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -229,46 +237,51 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			IVariableList list = env.getEnv(GlobalEnv.class).GetVarList();
-			int offset = 0;
-			CClassType type = CClassType.AUTO;
+			int offset;
+			CClassType type;
 			String name;
 			if(args.length == 3){
 				offset = 1;
-				if(!(args[offset + 0] instanceof IVariable)) {
-					throw new ConfigRuntimeException(getName() + " with 3 arguments only accepts an ivariable as the second argument", ExceptionType.CastException, t);
+				if(!(args[offset] instanceof IVariable)){
+					throw ConfigRuntimeException.BuildException(getName() +
+							" with 3 arguments only accepts an ivariable as the second argument.",
+							CRECastException.class, t);
 				}
-				name = ((IVariable) args[offset + 0]).getName();
+				name = ((IVariable) args[offset]).getVariableName();
 				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag("no-check-duplicate-assign") == null){
 					if(env.getEnv(GlobalEnv.class).GetFlag("closure-warn-overwrite") != null){
-						CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, "The variable " + name + " is hiding another value of the"
+						CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR,
+								"The variable " + name + " is hiding another value of the"
 								+ " same name in the main scope.", t);
 					} else {
 						CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
-								+ list.get(name, t, true).getDefinedTarget() + " but is being redefined", t);
+								+ list.get(name, t, true).getDefinedTarget() + " but is being redefined.", t);
 					}
 				}
 				type = ArgumentValidation.getClassType(args[0], t);
-			}
-			name = ((IVariable) args[offset + 0]).getName();
-			Construct c = args[offset + 1];
-			while (c instanceof IVariable) {
-				IVariable cur = (IVariable) c;
-				c = list.get(cur.getName(), cur.getTarget()).ival();
-			}
-			if (args[offset + 0] instanceof IVariable) {
-				if(args.length == 2){
-					type = list.get(name, t, true).getDefinedType();
+			} else {
+				offset = 0;
+				if(!(args[offset] instanceof IVariable)){
+					throw ConfigRuntimeException.BuildException(getName() +
+							" with 2 arguments only accepts an ivariable as the second argument.",
+							CRECastException.class, t);
 				}
-				IVariable v = new IVariable(type, name, c, t);
-				list.set(v);
-				return v;
+				name = ((IVariable) args[offset]).getVariableName();
+				type = list.get(name, t, true).getDefinedType();
 			}
-			throw new ConfigRuntimeException(getName() + " only accepts an ivariable or array reference as the first argument", ExceptionType.CastException, t);
+			Construct c = args[offset + 1];
+			while(c instanceof IVariable){
+				IVariable cur = (IVariable) c;
+				c = list.get(cur.getVariableName(), cur.getTarget()).ival();
+			}
+			IVariable v = new IVariable(type, name, c, t);
+			list.set(v);
+			return v;
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -328,8 +341,8 @@ public class DataHandling {
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.get(0).getData() instanceof IVariable
 					&& children.get(1).getData() instanceof IVariable) {
-				if (((IVariable) children.get(0).getData()).getName().equals(
-						((IVariable) children.get(1).getData()).getName())) {
+				if (((IVariable) children.get(0).getData()).getVariableName().equals(
+						((IVariable) children.get(1).getData()).getVariableName())) {
 					CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Assigning a variable to itself", t);
 				}
 			}
@@ -402,8 +415,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -498,8 +511,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -536,7 +549,7 @@ public class DataHandling {
 
 			Construct counter = parent.eval(assign, env);
 			if (!(counter instanceof IVariable)) {
-				throw new ConfigRuntimeException("First parameter of for must be an ivariable", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("First parameter of for must be an ivariable", CRECastException.class, t);
 			}
 			int _continue = 0;
 			while (true) {
@@ -619,7 +632,7 @@ public class DataHandling {
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if(nodes.length < 3){
-				throw new ConfigRuntimeException("Insufficient arguments passed to " + getName(), ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("Insufficient arguments passed to " + getName(), CREInsufficientArgumentsException.class, t);
 			}
 			ParseTree array = nodes[0];
 			ParseTree key = null;
@@ -636,7 +649,7 @@ public class DataHandling {
 			if (key != null) {
 				ik = parent.eval(key, env);
 				if (!(ik instanceof IVariable)) {
-					throw new ConfigRuntimeException("Parameter 2 of " + getName() + " must be an ivariable", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Parameter 2 of " + getName() + " must be an ivariable", CRECastException.class, t);
 				}
 			}
 			Construct iv = parent.eval(value, env);
@@ -650,10 +663,10 @@ public class DataHandling {
 				}
 			}
 			if (!(arr instanceof ArrayAccess)) {
-				throw new ConfigRuntimeException("Parameter 1 of " + getName() + " must be an array or array like data structure", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Parameter 1 of " + getName() + " must be an array or array like data structure", CRECastException.class, t);
 			}
 			if (!(iv instanceof IVariable)) {
-				throw new ConfigRuntimeException("Parameter " + (2 + offset) + " of " + getName() + " must be an ivariable", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Parameter " + (2 + offset) + " of " + getName() + " must be an ivariable", CRECastException.class, t);
 			}
 			ArrayAccess one = (ArrayAccess) arr;
 			IVariable kkey = (IVariable) ik;
@@ -678,10 +691,10 @@ public class DataHandling {
 					}
 					//If the key isn't null, set that in the variable table.
 					if (kkey != null) {
-						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getName(), c, t));
+						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getVariableName(), c, t));
 					}
 					//Set the value in the variable table
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getName(), one.get(c.val(), t), t));
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getVariableName(), one.get(c.val(), t), t));
 					try {
 						//Execute the code
 						parent.eval(code, env);
@@ -734,9 +747,9 @@ public class DataHandling {
 						//If the item is blacklisted, we skip it.
 						if (!iterator.isBlacklisted(current)) {
 							if (kkey != null) {
-								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getName(), new CInt(current, t), t));
+								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getVariableName(), new CInt(current, t), t));
 							}
-							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getName(), one.get(current, t), t));
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getVariableName(), one.get(current, t), t));
 							try {
 								parent.eval(code, env);
 							} catch (LoopBreakException e) {
@@ -761,8 +774,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -962,7 +975,7 @@ public class DataHandling {
 			Construct data = parent.seval(array, env);
 
 			if (!(data instanceof CArray) && !(data instanceof CSlice)) {
-				throw new Exceptions.CastException(getName() + " expects an array for parameter 1", t);
+				throw new CRECastException(getName() + " expects an array for parameter 1", t);
 			}
 
 			if (((CArray) data).isEmpty()) {
@@ -1048,7 +1061,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -1127,7 +1140,7 @@ public class DataHandling {
 	public static class _dowhile extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -1241,8 +1254,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1333,8 +1346,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -1394,7 +1407,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -1455,7 +1468,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -1514,7 +1527,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -1574,7 +1587,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -1636,7 +1649,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -1699,7 +1712,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -1760,7 +1773,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -1820,7 +1833,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -1879,7 +1892,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -1939,8 +1952,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -2013,8 +2026,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2085,8 +2098,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -2151,26 +2164,26 @@ public class DataHandling {
 					Construct cons = parent.eval(nodes[i], env);
 					env.getEnv(GlobalEnv.class).ClearFlag("no-check-duplicate-assign");
 					if (i == 0 && cons instanceof IVariable) {
-						throw new ConfigRuntimeException("Anonymous Procedures are not allowed", ExceptionType.InvalidProcedureException, t);
+						throw ConfigRuntimeException.BuildException("Anonymous Procedures are not allowed", CREInvalidProcedureException.class, t);
 					} else {
 						if (i == 0 && !(cons instanceof IVariable)) {
 							name = cons.val();
 						} else {
 							if (!(cons instanceof IVariable)) {
-								throw new ConfigRuntimeException("You must use IVariables as the arguments", ExceptionType.InvalidProcedureException, t);
+								throw ConfigRuntimeException.BuildException("You must use IVariables as the arguments", CREInvalidProcedureException.class, t);
 							} else {
 								IVariable ivar = null;
 								try {
 									Construct c = cons;
 									if (c instanceof IVariable) {
-										String varName = ((IVariable) c).getName();
+										String varName = ((IVariable) c).getVariableName();
 										if (varNames.contains(varName)) {
-											throw new ConfigRuntimeException("Same variable name defined twice in " + name, ExceptionType.InvalidProcedureException, t);
+											throw ConfigRuntimeException.BuildException("Same variable name defined twice in " + name, CREInvalidProcedureException.class, t);
 										}
 										varNames.add(varName);
 									}
 									while (c instanceof IVariable) {
-										c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t, true).ival();
+										c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getVariableName(), t, true).ival();
 									}
 									if (!thisNodeIsAssign) {
 										//This is required because otherwise a default value that's already in the environment
@@ -2178,7 +2191,7 @@ public class DataHandling {
 										//into this proc, if the call to the proc didn't have a value in this slot.
 										c = new CString("", t);
 									}
-									ivar = new IVariable(((IVariable)cons).getDefinedType(), ((IVariable) cons).getName(), c.clone(), t);
+									ivar = new IVariable(((IVariable)cons).getDefinedType(), ((IVariable) cons).getVariableName(), c.clone(), t);
 								} catch (CloneNotSupportedException ex) {
 									//
 								}
@@ -2233,7 +2246,7 @@ public class DataHandling {
 					//Yup! It worked. It's a const proc.
 					return c;
 				} catch (ConfigRuntimeException e) {
-					if (e.getExceptionType() == ExceptionType.InvalidProcedureException) {
+					if (e instanceof CREInvalidProcedureException) {
 						//This is the only valid exception that doesn't strictly mean it's a bad
 						//call.
 						return null;
@@ -2286,7 +2299,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -2341,8 +2354,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IncludeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIncludeException.class};
 		}
 
 		@Override
@@ -2425,8 +2438,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidProcedureException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidProcedureException.class};
 		}
 
 		@Override
@@ -2447,7 +2460,7 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length < 1) {
-				throw new ConfigRuntimeException("Expecting at least one argument to " + getName(), ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("Expecting at least one argument to " + getName(), CREInsufficientArgumentsException.class, t);
 			}
 			Procedure proc = env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val());
 			if (proc != null) {
@@ -2461,8 +2474,8 @@ public class DataHandling {
 				}
 				return proc.execute(vars, newEnv, t);
 			}
-			throw new ConfigRuntimeException("Unknown procedure \"" + args[0].val() + "\"",
-					ExceptionType.InvalidProcedureException, t);
+			throw ConfigRuntimeException.BuildException("Unknown procedure \"" + args[0].val() + "\"",
+					CREInvalidProcedureException.class, t);
 		}
 
 		@Override
@@ -2473,7 +2486,7 @@ public class DataHandling {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.size() < 1) {
-				throw new ConfigRuntimeException("Expecting at least one argument to " + getName(), ExceptionType.InsufficientArgumentsException, t);
+				throw ConfigRuntimeException.BuildException("Expecting at least one argument to " + getName(), CREInsufficientArgumentsException.class, t);
 			}
 			if (children.get(0).isConst()) {
 				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Hardcoding procedure name in " + getName() + ", which is inefficient."
@@ -2491,7 +2504,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ca = Static.getArray(args[1], t);
 			if (ca.inAssociativeMode()) {
-				throw new Exceptions.CastException("Expected the array passed to " + getName() + " to be non-associative.", t);
+				throw new CRECastException("Expected the array passed to " + getName() + " to be non-associative.", t);
 			}
 			Construct[] args2 = new Construct[(int) ca.size() + 1];
 			args2[0] = args[0];
@@ -2502,8 +2515,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidProcedureException, ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidProcedureException.class, CRECastException.class};
 		}
 
 		@Override
@@ -2556,7 +2569,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -2600,8 +2613,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -2624,7 +2637,7 @@ public class DataHandling {
 			if (args[0] instanceof CArray) {
 				return CBoolean.get(((CArray) args[0]).inAssociativeMode());
 			} else {
-				throw new ConfigRuntimeException(this.getName() + " expects argument 1 to be an array", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(this.getName() + " expects argument 1 to be an array", CRECastException.class, t);
 			}
 		}
 
@@ -2664,8 +2677,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -2698,7 +2711,7 @@ public class DataHandling {
 
 	@api
 	@seealso({_export.class})
-	public static class _import extends AbstractFunction implements Optimizable {
+	public static class _import extends AbstractFunction {
 
 		@Override
 		public String getName() {
@@ -2707,32 +2720,26 @@ public class DataHandling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
+			return new Integer[]{1,2};
 		}
 
 		@Override
 		public String docs() {
-			return "mixed {key} This function imports a value from the global value"
-					+ " register. It looks for a value stored with the specified key, and"
-					+ " returns that value. Items can be stored with the export function."
-					+ " If the specified string key doesn't exist, null is returned."
-					+ " See the documentation on [[CommandHelper/import-export|imports/exports]]"
-					+ " for more information. import() is threadsafe.";
+			return "mixed {key, [default]} This function imports a value from the global value register. It looks for a"
+					+ " value stored with the specified key (using the export function), and returns that value."
+					+ " If specified key doesn't exist, it will return either null or the default value if specified."
+					+ " An array may be used as a key. It is converted into a string with the array values separated by"
+					+ " dots. import() is threadsafe.";
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIllegalArgumentException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
 		public boolean isRestricted() {
 			return true;
-		}
-
-		@Override
-		public boolean preResolveVariables() {
-			return false;
 		}
 
 		@Override
@@ -2747,47 +2754,31 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-//			if (args[0] instanceof IVariable) {
-//				//Mode 1
-//				IVariable var = (IVariable) args[0];
-//				environment.getEnv(GlobalEnv.class).GetVarList().set(Globals.GetGlobalIVar(var));
-//				return CVoid.VOID;
-//			} else {
-				//Mode 2
-				String key = GetNamespace(args, null, getName(), t);
-				return Globals.GetGlobalConstruct(key);
-//			}
+			String key;
+			if(args[0] instanceof CString){
+				key = args[0].val();
+			} else if(args[0] instanceof CArray){
+				key = GetNamespace((CArray) args[0], t);
+			} else {
+				throw ConfigRuntimeException.BuildException("Argument 1 in " + this.getName() + " must be a string or array.",
+						CREIllegalArgumentException.class, t);
+			}
+			Construct c = Globals.GetGlobalConstruct(key);
+			if(args.length == 2 && c instanceof CNull){
+				c = args[1];
+			}
+			return c;
 		}
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new _export().examples();
 		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() > 2) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Automatic creation of namespaces is deprecated, and WILL be removed in the future."
-						+ " Use import('my.namespace') instead of import('my', 'namespace')", t);
-			}
-//			if (children.get(0).getData() instanceof IVariable) {
-//				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "import(@ivar) usage is deprecated. Please use the @ivar = import('custom.name') format,"
-//						+ " as this feature WILL be removed in the future.", t);
-//			}
-			//Just a compiler warning
-			return null;
-		}
-
 	}
 
 	@api
 	@seealso({_import.class})
-	public static class _export extends AbstractFunction implements Optimizable {
+	public static class _export extends AbstractFunction {
 
 		@Override
 		public String getName() {
@@ -2796,33 +2787,28 @@ public class DataHandling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
+			return new Integer[]{2};
 		}
 
 		@Override
 		public String docs() {
 			return "void {key, value} Stores a value in the global storage register."
-					+ " An arbitrary value is stored with"
-					+ " the given key, and can be retreived using import(). If"
-					+ " the value is already stored, it is overwritten. See {{function|import}} and"
-					+ " [[CommandHelper/import-export|importing/exporting]]. The reference to the value"
-					+ " is stored, not a copy of the value, so in the case of arrays, manipulating the"
-					+ " contents of the array will manipulate the stored value. export() is threadsafe.";
+					+ " An arbitrary value is stored with the given key, and can be retreived using import."
+					+ " If the value is already stored, it is overwritten. See {{function|import}}."
+					+ " The reference to the value is stored, not a copy of the value, so in the case of"
+					+ " arrays, manipulating the contents of the array will manipulate the stored value. An array may"
+					+ " be used as a key. It is converted into a string with the array values separated by dots."
+					+ " export() is threadsafe.";
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIllegalArgumentException.class, CREIndexOverflowException.class};
 		}
 
 		@Override
 		public boolean isRestricted() {
 			return true;
-		}
-
-		@Override
-		public boolean preResolveVariables() {
-			return false;
 		}
 
 		@Override
@@ -2837,65 +2823,41 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-//			if (args.length == 1) {
-//				if (args[0] instanceof IVariable) {
-//					IVariable cur = (IVariable) args[0];
-//					Globals.SetGlobal(environment.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()));
-//				} else {
-//					throw new ConfigRuntimeException("Expecting a IVariable when only one parameter is specified", ExceptionType.InsufficientArgumentsException, t);
-//				}
-//			} else {
-				String key = GetNamespace(args, args.length - 1, getName(), t);
-				Construct c = args[args.length - 1];
-				//We want to store the value contained, not the ivar itself
-				while (c instanceof IVariable) {
-					c = environment.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t).ival();
-				}
-				Globals.SetGlobal(key, c);
-//			}
+			String key;
+			if(args[0] instanceof CString){
+				key = args[0].val();
+			} else if(args[0] instanceof CArray){
+				key = GetNamespace((CArray) args[0], t);
+			} else {
+				throw ConfigRuntimeException.BuildException("Argument 1 in " + this.getName() + " must be a string or array.",
+						CREIllegalArgumentException.class, t);
+			}
+			Construct c = args[1];
+			Globals.SetGlobal(key, c);
 			return CVoid.VOID;
 		}
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-//				new ExampleScript("Deprecated usage", "@var = 2\n"
-//				+ "export(@var)\n"
-//				+ "@var = 0\n"
-//				+ "# In other code, perhaps inside a proc, or another execution unit\n"
-//				+ "import(@var)\n"
-//				+ "msg(@var)"),
-				new ExampleScript("Basic usage", "@var = 2\n"
-				+ "export('custom.name', @var)\n"
-				+ "@var2 = import('custom.name')\n"
-				+ "msg(@var2)"),
-				new ExampleScript("Storage of references", "@array = array(1, 2, 3)\n"
-				+ "export('array', @array)\n"
-				+ "@array[0] = 4\n"
-				+ "@array2 = import('array')\n"
-				+ "msg(@array2)")
+				new ExampleScript("Basic usage", "@var = 2;\n"
+				+ "export('custom.name', @var);\n"
+				+ "@var2 = import('custom.name');\n"
+				+ "msg(@var2);"),
+				new ExampleScript("Storage of references", "@array = array(1, 2, 3);\n"
+				+ "export('array', @array);\n"
+				+ "@array[0] = 4;\n"
+				+ "@array2 = import('array');\n"
+				+ "msg(@array2);"),
+				new ExampleScript("Array key usage", "@key = array(custom, name);\n"
+				+ "export(@key, 'value');\n"
+				+ "@value = import(@key);\n"
+				+ "msg(@value);"),
+				new ExampleScript("Default value usage", "export('custom.name', null);\n"
+				+ "@value = import('custom.name', 'default value');\n"
+				+ "msg(@value);")
 			};
 		}
-
-		@Override
-		public Set<Optimizable.OptimizationOption> optimizationOptions() {
-			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() > 2) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Automatic creation of namespaces is deprecated, and WILL be removed in the future."
-						+ " Use export('my.namespace', @var) instead of export('my', 'namespace', @var)", t);
-			}
-//			if (children.get(0).getData() instanceof IVariable) {
-//				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "export(@ivar) usage is deprecated. Please use the export('custom.name', @ivar) format,"
-//						+ " as this feature WILL be removed in the future.", t);
-//			}
-			//Just a compiler warning
-			return null;
-		}
-
 	}
 
 	@api(environments = CommandHelperEnvironment.class)
@@ -2929,8 +2891,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -2991,9 +2953,9 @@ public class DataHandling {
 				Construct ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
 				if (!(ret instanceof IVariable)) {
-					throw new ConfigRuntimeException("Arguments sent to " + getName() + " barring the last) must be ivariables", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Arguments sent to " + getName() + " barring the last) must be ivariables", CRECastException.class, t);
 				}
-				names[i] = ((IVariable) ret).getName();
+				names[i] = ((IVariable) ret).getVariableName();
 				try {
 					defaults[i] = ((IVariable) ret).ival().clone();
 					types[i] = ((IVariable)ret).getDefinedType();
@@ -3031,7 +2993,6 @@ public class DataHandling {
 
 	@api
 	@unbreakable
-	@nolinking
 	public static class iclosure extends closure {
 
 		@Override
@@ -3095,9 +3056,9 @@ public class DataHandling {
 				Construct ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
 				if (!(ret instanceof IVariable)) {
-					throw new ConfigRuntimeException("Arguments sent to " + getName() + " barring the last) must be ivariables", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Arguments sent to " + getName() + " barring the last) must be ivariables", CRECastException.class, t);
 				}
-				names[i] = ((IVariable) ret).getName();
+				names[i] = ((IVariable) ret).getVariableName();
 				try {
 					defaults[i] = ((IVariable) ret).ival().clone();
 					types[i] = ((IVariable)ret).getDefinedType();
@@ -3187,8 +3148,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -3213,7 +3174,7 @@ public class DataHandling {
 					return e.getReturn();
 				}
 			} else {
-				throw new ConfigRuntimeException("Only a closure (created from the closure function) can be sent to execute()", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Only a closure (created from the closure function) can be sent to execute()", CRECastException.class, t);
 			}
 			return CVoid.VOID;
 		}
@@ -3245,7 +3206,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -3314,8 +3275,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -3376,8 +3337,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -3438,7 +3399,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -3487,8 +3448,8 @@ public class DataHandling {
 	public static class to_radix extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -3505,7 +3466,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int radix = Static.getInt32(args[1], t);
 			if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
-				throw new Exceptions.RangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
+				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}
 			return new CString(Long.toString(Static.getInt(args[0], t), radix), t);
 		}
@@ -3559,8 +3520,8 @@ public class DataHandling {
 	public static class parse_int extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRERangeException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -3578,13 +3539,13 @@ public class DataHandling {
 			String value = args[0].val();
 			int radix = Static.getInt32(args[1], t);
 			if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
-				throw new Exceptions.RangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
+				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}
 			long ret;
 			try {
 				ret = Long.parseLong(value, radix);
 			} catch (NumberFormatException ex) {
-				throw new Exceptions.FormatException("The input string: \"" + value + "\" is improperly formatted. (Perhaps you're using a character greater than"
+				throw new CREFormatException("The input string: \"" + value + "\" is improperly formatted. (Perhaps you're using a character greater than"
 						+ " the radix specified?)", t);
 			}
 			return new CInt(ret, t);
@@ -3622,29 +3583,20 @@ public class DataHandling {
 	}
 
 	/**
-	 * Generates the namespace for this value, given an array of constructs. If
-	 * the entire list of arguments isn't supposed to be part of the namespace,
-	 * the value to be excluded may be specified.
+	 * Generates the namespace for this value, given an array.
 	 *
-	 * @param args
-	 * @param exclude
+	 * @param array
 	 * @return
 	 */
-	private static String GetNamespace(Construct[] args, Integer exclude, String name, Target t) {
-		if (exclude != null && args.length < 2 || exclude == null && args.length < 1) {
-			throw new ConfigRuntimeException(name + " was not provided with enough arguments. Check the documentation, and try again.", ExceptionType.InsufficientArgumentsException, t);
-		}
+	private static String GetNamespace(CArray array, Target t) {
 		boolean first = true;
 		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < args.length; i++) {
-			if (exclude != null && exclude == i) {
-				continue;
-			}
+		for (int i = 0; i < array.size(); i++) {
 			if (!first) {
 				b.append(".");
 			}
 			first = false;
-			b.append(args[i].val());
+			b.append(array.get(i, t).val());
 		}
 		return b.toString();
 	}
@@ -3653,8 +3605,8 @@ public class DataHandling {
 	public static class typeof extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -3734,8 +3686,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -3756,7 +3708,7 @@ public class DataHandling {
 				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(true);
 				Construct script = parent.seval(node, env);
 				if(script instanceof CClosure){
-					throw new Exceptions.CastException("Closures cannot be eval'd directly. Use execute() instead.", t);
+					throw new CRECastException("Closures cannot be eval'd directly. Use execute() instead.", t);
 				}
 				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true));
 				StringBuilder b = new StringBuilder();
@@ -3773,14 +3725,14 @@ public class DataHandling {
 				}
 				return new CString(b.toString(), t);
 			} catch (ConfigCompileException e) {
-				throw new ConfigRuntimeException("Could not compile eval'd code: " + e.getMessage(), ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Could not compile eval'd code: " + e.getMessage(), CREFormatException.class, t);
 			} catch(ConfigCompileGroupException ex){
 				StringBuilder b = new StringBuilder();
 				b.append("Could not compile eval'd code: ");
 				for(ConfigCompileException e : ex.getList()){
 					b.append(e.getMessage()).append("\n");
 				}
-				throw new ConfigRuntimeException(b.toString(), ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException(b.toString(), CREFormatException.class, t);
 			} finally {
 				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(oldDynamicScriptMode);
 			}
@@ -3850,8 +3802,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -3885,8 +3837,8 @@ public class DataHandling {
 	public static class mutable_primitive extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -3982,8 +3934,8 @@ public class DataHandling {
 	public static class _instanceof extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override

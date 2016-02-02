@@ -455,4 +455,19 @@ public class BasicLogicTest {
 				+ "msg(ref_equals(@a, @b))", fakePlayer);
 		verify(fakePlayer).sendMessage("false");
 	}
+
+	public void testSEqualsic1() throws Exception {
+		SRun("msg(sequals_ic(1, '1'))", fakePlayer);
+		verify(fakePlayer).sendMessage("false");
+	}
+
+	public void testSEqualsic2() throws Exception {
+		SRun("msg(sequals_ic('hello', 'HELLO'))", fakePlayer);
+		verify(fakePlayer).sendMessage("true");
+	}
+
+	public void testSEqualsic3() throws Exception {
+		SRun("msg(sequals_ic('false', true))", fakePlayer);
+		verify(fakePlayer).sendMessage("false");
+	}
 }

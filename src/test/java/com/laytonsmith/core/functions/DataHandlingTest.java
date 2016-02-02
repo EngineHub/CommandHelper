@@ -8,7 +8,6 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.RunCommand;
@@ -339,6 +338,21 @@ public class DataHandlingTest {
                 + "msg(_get())", fakePlayer);
         verify(fakePlayer).sendMessage("{1, 2}");
     }
+	
+	@Test
+	public void testExportImportArrayNameSpace() throws Exception{
+		when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
+		SRun("assign(@key, array('custom', 'key1'))"
+				+ "assign(@value, 'key1Value')"
+				+ "export(@key, @value)"
+				+ "msg(import('custom.key1'))", fakePlayer);
+		verify(fakePlayer).sendMessage("key1Value");
+		SRun("assign(@key, array('custom', 'key2'))"
+				+ "assign(@value, 'key2Value')"
+				+ "export('custom.key2', @value)"
+				+ "msg(import(@key))", fakePlayer);
+		verify(fakePlayer).sendMessage("key2Value");
+	}
 
     @Test(timeout = 10000)
     public void testIsBoolean() throws Exception {

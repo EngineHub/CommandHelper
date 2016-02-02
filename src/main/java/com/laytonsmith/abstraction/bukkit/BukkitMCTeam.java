@@ -23,10 +23,9 @@ public class BukkitMCTeam implements MCTeam {
 	@Override
 	public void addEntry(String entry) {
 		if(ReflectionUtils.hasMethod(t.getClass(), "addEntry", null, String.class)){
-			// Spigot method
 			t.addEntry(entry);
 		} else {
-			// Bukkit method
+			// Probably 1.8.5 or prior
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			ReflectionUtils.invokeMethod(t, "addPlayer", player);
 		}
@@ -61,13 +60,12 @@ public class BukkitMCTeam implements MCTeam {
 	@Override
 	public Set<String> getEntries() {
 		Set<String> ret = new HashSet<String>();
-		if(ReflectionUtils.hasMethod(t.getClass(), "getEntries", null)) {
-			// Spigot method
+		if(ReflectionUtils.hasMethod(t.getClass(), "getEntries", null)){
 			for (String e : t.getEntries()) {
 				ret.add(e);
 			}
 		} else {
-			// Bukkit method
+			// Probably 1.8.5 or prior
 			for (OfflinePlayer o : (Set<OfflinePlayer>) ReflectionUtils.invokeMethod(t, "getPlayers")) {
 				ret.add(o.getName());
 			}
@@ -98,10 +96,9 @@ public class BukkitMCTeam implements MCTeam {
 	@Override
 	public boolean hasEntry(String entry) {
 		if(ReflectionUtils.hasMethod(t.getClass(), "hasEntry", null, String.class)){
-			// Spigot method
 			return t.hasEntry(entry);
 		} else {
-			// Bukkit method
+			// Probably 1.8.5 or prior
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			return (boolean) ReflectionUtils.invokeMethod(t, "hasPlayer", player);
 		}
@@ -110,10 +107,9 @@ public class BukkitMCTeam implements MCTeam {
 	@Override
 	public boolean removeEntry(String entry) {
 		if(ReflectionUtils.hasMethod(t.getClass(), "removeEntry", null, String.class)){
-			// Spigot method
 			return t.removeEntry(entry);
 		} else {
-			// Bukkit method
+			// Probably 1.8.5 or prior
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			return (boolean) ReflectionUtils.invokeMethod(t, "removePlayer", player);
 		}

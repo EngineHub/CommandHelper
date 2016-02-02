@@ -12,7 +12,7 @@ import java.util.List;
  *
  * 
  */
-public class ProcedureDefinition extends Construct{
+public class ProcedureDefinition extends Construct {
 	String name;
 	DocComment comment;
 	Environment env;

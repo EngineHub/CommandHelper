@@ -1,17 +1,21 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
-import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.exceptions.StackTraceManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -74,7 +78,7 @@ public class CClosure extends Construct {
             // Convert: \ -> \\ and ' -> \'
             b.append("'").append(data.val().replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n").replace("'", "\\'")).append("'");
 		} else if(node.getData() instanceof IVariable){
-			b.append(((IVariable)node.getData()).getName());
+			b.append(((IVariable)node.getData()).getVariableName());
         } else {
             b.append(node.getData().val());
         }
@@ -135,6 +139,8 @@ public class CClosure extends Construct {
 		if(node == null){
 			return;
 		}
+		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
         try {
             Environment environment;
             synchronized (this) {
@@ -165,7 +171,7 @@ public class CClosure extends Construct {
 				CArray arguments = new CArray(node.getData().getTarget());
 				if (values != null) {
 					for (Construct value : values) {
-						arguments.push(value);
+						arguments.push(value, node.getData().getTarget());
 					}
 				}
 				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(new CClassType("array", Target.UNKNOWN), "@arguments", arguments, node.getData().getTarget()));
@@ -178,6 +184,8 @@ public class CClosure extends Construct {
             try {
                 MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class).GetScript());
             } catch (LoopManipulationException e){
+				// Not normal, but pop anyways.
+				stManager.popStackTraceElement();
 				//This shouldn't ever happen.
 				LoopManipulationException lme = ((LoopManipulationException)e);
 				Target t = lme.getTarget();
@@ -185,19 +193,34 @@ public class CClosure extends Construct {
 						+ " a closure, which is unexpected behavior.", t), environment);
 			} catch (FunctionReturnException ex){
 				// Check the return type of the closure to see if it matches the defined type
+				// Normal execution.
+				stManager.popStackTraceElement();
 				Construct ret = ex.getReturn();
 				if(!InstanceofUtil.isInstanceof(ret, returnType)){
-					throw new Exceptions.CastException("Expected closure to return a value of type " + returnType.val()
+					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
 							 + " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 				}
 				// Now rethrow it
 				throw ex;
 			} catch (CancelCommandException e){
+				stManager.popStackTraceElement();
 				// die()
+			} catch(ConfigRuntimeException ex){
+				if(ex instanceof AbstractCREException){
+					((AbstractCREException)ex).freezeStackTraceElements(stManager);
+				}
+				stManager.popStackTraceElement();
+				throw ex;
+			} catch(Throwable t){
+				// Not sure. Pop and re-throw.
+				stManager.popStackTraceElement();
+				throw t;
 			}
+			// Normal execution.
+			stManager.popStackTraceElement();
 			// If we got here, then there was no return type. This is fine, but only for returnType void or auto.
 			if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CClassType.VOID))){
-				throw new Exceptions.CastException("Expecting closure to return a value of type " + returnType.val() + ","
+				throw new CRECastException("Expecting closure to return a value of type " + returnType.val() + ","
 						+ " but no value was returned.", node.getTarget());
 			}
         }
@@ -210,4 +233,15 @@ public class CClosure extends Construct {
     public boolean isDynamic() {
         return false;
     }
+
+	@Override
+	public String docs() {
+		return "A closure is a data type that contains executable code. This is similar to a procedure, but the value is first class,"
+				+ " and can be stored in variables, and executed.";
+	}
+
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
+	}
 }

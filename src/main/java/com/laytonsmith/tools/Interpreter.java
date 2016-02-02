@@ -61,12 +61,12 @@ import com.laytonsmith.core.environments.InvalidEnvironmentException;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.CmdlineEvents;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
@@ -606,7 +606,7 @@ public final class Interpreter {
 				v.setDefault(arg);
 				vars.add(v);
 				finalArgument.append(arg);
-				arguments.push(new CString(arg, Target.UNKNOWN));
+				arguments.push(new CString(arg, Target.UNKNOWN), Target.UNKNOWN);
 			}
 			Variable v = new Variable("$", "", false, true, Target.UNKNOWN);
 			v.setVal(new CString(finalArgument.toString(), Target.UNKNOWN));
@@ -902,7 +902,7 @@ public final class Interpreter {
 		}
 
 		@Override
-		public MCColor GetColor(String colorName, Target t) throws Exceptions.FormatException {
+		public MCColor GetColor(String colorName, Target t) throws CREFormatException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 

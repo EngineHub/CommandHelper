@@ -13,8 +13,10 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.List;
 
 /**
@@ -38,19 +40,15 @@ public class Recipes {
 		public Boolean runAsync() {
 			return false;
 		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_1;
-		}
+		
 	}
 	
 	@api
 	public static class add_recipe extends recipeFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -72,14 +70,19 @@ public class Recipes {
 		public String docs() {
 			return "boolean {RecipeArray} Adds a recipe to the server and returns whether it was added or not. Please read http://wiki.sk89q.com/wiki/CommandHelper/Array_Formatting to see how the recipe array is formatted.";
 		}
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 	
 	@api
 	public static class get_recipes_for extends recipeFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -88,7 +91,7 @@ public class Recipes {
 			MCItemStack item = ObjectGenerator.GetGenerator().item(args[0], t);
 			List<MCRecipe> recipes = Static.getServer().getRecipesFor(item);
 			for(MCRecipe recipe : recipes) {
-				ret.push(ObjectGenerator.GetGenerator().recipe(recipe, t));
+				ret.push(ObjectGenerator.GetGenerator().recipe(recipe, t), t);
 			}
 			
 			return ret;
@@ -110,14 +113,19 @@ public class Recipes {
 					"NOTE: Gets all recipes for result item regardless of meta and enchants, althogh the array has correct data.";
 		}
 		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 	
 	@api
 	public static class get_all_recipes extends recipeFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -125,7 +133,7 @@ public class Recipes {
 			CArray ret = new CArray(t);
 			List<MCRecipe> recipes = Static.getServer().allRecipes();
 			for(MCRecipe recipe : recipes) {
-				ret.push(ObjectGenerator.GetGenerator().recipe(recipe, t));
+				ret.push(ObjectGenerator.GetGenerator().recipe(recipe, t), t);
 			}
 			
 			return ret;
@@ -146,14 +154,19 @@ public class Recipes {
 			return "array {} Gets all recipes on the server.";
 		}
 		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 	
 	@api
 	public static class clear_recipes extends recipeFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -178,14 +191,19 @@ public class Recipes {
 			return "Void {} Clears all recipes.";
 		}
 		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 	
 	@api
 	public static class reset_recipes extends recipeFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -208,6 +226,11 @@ public class Recipes {
 		@Override
 		public String docs() {
 			return "Void {} Resets all recipes to the default recipes.";
+		}
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
 		}
 		
 	}

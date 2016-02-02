@@ -61,7 +61,7 @@ public class RealFileSystemLayer extends FileSystemLayer {
 
 	private VirtualFile normalize(File real) throws IOException {
 		String path = real.getCanonicalPath().replaceFirst(Pattern.quote(fileSystem.root.getCanonicalPath()), "");
-		path = path.replace("\\", "/");
+		path = path.replace('\\', '/');
 		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}

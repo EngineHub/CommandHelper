@@ -13,13 +13,15 @@ import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
+import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.functions.DataHandling;
-import com.laytonsmith.core.functions.Exceptions;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -56,17 +58,17 @@ public class Procedure implements Cloneable {
         this.varList = new HashMap<>();
         for (IVariable var : varList) {
             try {
-                this.varList.put(var.getName(), var.clone());
+                this.varList.put(var.getVariableName(), var.clone());
             }
             catch (CloneNotSupportedException e) {
-                this.varList.put(var.getName(), var);
+                this.varList.put(var.getVariableName(), var);
             }
             this.varIndex.add(var);
-            this.originals.put(var.getName(), var.ival());
+            this.originals.put(var.getVariableName(), var.ival());
         }
         this.tree = tree;
         if (!this.name.matches("^_[a-zA-Z0-9]+[a-zA-Z_0-9]*")) {
-            throw new ConfigRuntimeException("Procedure names must start with an underscore, and may only contain letters, underscores, and digits. (Found " + this.name + ")", ExceptionType.FormatException, t);
+            throw ConfigRuntimeException.BuildException("Procedure names must start with an underscore, and may only contain letters, underscores, and digits. (Found " + this.name + ")", CREFormatException.class, t);
         }
         //Let's look through the tree now, and see if this is possibly constant or not.
         //If it is, it may or may not help us during compilation, but if it's not,
@@ -180,25 +182,26 @@ public class Procedure implements Cloneable {
         for (String key : originals.keySet()) {
             Construct c = originals.get(key);
             env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CClassType.AUTO, key, c, Target.UNKNOWN));
-            arguments.push(c);
+            arguments.push(c, t);
         }
         Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel());//new Script(null, null);
         for (int i = 0; i < args.size(); i++) {
             Construct c = args.get(i);
             arguments.set(i, c, t);
             if (varIndex.size() > i) {
-                String varname = varIndex.get(i).getName();
+                String varname = varIndex.get(i).getVariableName();
 				if(c instanceof CNull || InstanceofUtil.isInstanceof(c, varIndex.get(i).getDefinedType()) || varIndex.get(i).getDefinedType().equals(CClassType.AUTO)){
 					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varIndex.get(i).getDefinedType(), varname, c, c.getTarget()));
 				} else {
-					throw new Exceptions.CastException("Procedure \"" + name + "\" expects a value of type "
+					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ varIndex.get(i).getDefinedType().val() + " in argument " + (i + 1) + ", but"
 							+ " a value of type " + c.typeof() + " was found instead.", c.getTarget());
 				}
             }
         }
         env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(new CClassType("array", Target.UNKNOWN), "@arguments", arguments, Target.UNKNOWN));
-
+		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
         try {
 			if(tree.getData() instanceof CFunction
 					&& "sconcat".equals(tree.getData().val())){
@@ -217,24 +220,37 @@ public class Procedure implements Cloneable {
 				fakeScript.eval(tree, env);
 			}
         } catch (FunctionReturnException e) {
+			// Normal exit
+			stManager.popStackTraceElement();
             Construct ret = e.getReturn();
 			if(!InstanceofUtil.isInstanceof(ret, returnType)){
-				throw new Exceptions.CastException("Expected procedure \"" + name + "\" to return a value of type " + returnType.val()
+				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type " + returnType.val()
 						 + " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 			}
 			return ret;
 		} catch(LoopManipulationException ex){
+			// Not exactly normal, but pop anyways
+			stManager.popStackTraceElement();
 			// These cannot bubble up past procedure calls. This will eventually be
 			// a compile error.
 			throw ConfigRuntimeException.CreateUncatchableException("Loop manipulation operations (e.g. break() or continue()) cannot"
 					+ " bubble up past procedures.", t);
         } catch(ConfigRuntimeException e){
-			e.addStackTraceTrail(new ConfigRuntimeException.StackTraceElement("proc " + name, e.getTarget()), t);
+			if(e instanceof AbstractCREException){
+				((AbstractCREException)e).freezeStackTraceElements(stManager);
+			}
+			stManager.popStackTraceElement();
 			throw e;
+		} catch(Throwable th){
+			// Not sure. Pop, but rethrow
+			stManager.popStackTraceElement();
+			throw th;
 		}
+		// Normal exit, but no return.
+		stManager.popStackTraceElement();
 		// If we got here, then there was no return value. This is fine, but only for returnType void or auto.
 		if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CClassType.VOID))){
-			throw new Exceptions.CastException("Expecting procedure \"" + name + "\" to return a value of type " + returnType.val() + ","
+			throw new CRECastException("Expecting procedure \"" + name + "\" to return a value of type " + returnType.val() + ","
 					+ " but no value was returned.", tree.getTarget());
 		}
         return CVoid.VOID;

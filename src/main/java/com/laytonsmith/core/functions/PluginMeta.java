@@ -16,8 +16,12 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginChannelException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.Set;
 
 /**
@@ -32,8 +36,8 @@ public class PluginMeta {
 	public static class fake_incoming_plugin_message extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -90,8 +94,8 @@ public class PluginMeta {
 	public static class send_plugin_message extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -148,8 +152,8 @@ public class PluginMeta {
 	public static class register_channel extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PluginChannelException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPluginChannelException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -166,16 +170,16 @@ public class PluginMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if (messenger == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the internal Messenger object (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			String channel = args[0].toString();
 			
 			if (!messenger.isIncomingChannelRegistered(channel)) {
 				messenger.registerIncomingPluginChannel(channel);
 			} else {
-				throw new ConfigRuntimeException("The channel '" + channel + "' is already registered.", ExceptionType.PluginChannelException, t);
+				throw ConfigRuntimeException.BuildException("The channel '" + channel + "' is already registered.", CREPluginChannelException.class, t);
 			}
 			
 			return CVoid.VOID;
@@ -207,8 +211,8 @@ public class PluginMeta {
 	public static class unregister_channel extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PluginChannelException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPluginChannelException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -225,16 +229,16 @@ public class PluginMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if (messenger == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the internal Messenger object (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			String channel = args[0].toString();
 			
 			if (messenger.isIncomingChannelRegistered(channel)) {
 				messenger.unregisterIncomingPluginChannel(channel);
 			} else {
-				throw new ConfigRuntimeException("The channel '" + channel + "' is not registered.", ExceptionType.PluginChannelException, t);
+				throw ConfigRuntimeException.BuildException("The channel '" + channel + "' is not registered.", CREPluginChannelException.class, t);
 			}
 			
 			return CVoid.VOID;
@@ -265,8 +269,8 @@ public class PluginMeta {
 	public static class is_channel_registered extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENotFoundException.class};
 		}
 
 		@Override
@@ -283,9 +287,9 @@ public class PluginMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if (messenger == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the internal Messenger object (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			return CBoolean.get(messenger.isIncomingChannelRegistered(args[0].toString()));
 		}
@@ -316,8 +320,8 @@ public class PluginMeta {
 	public static class get_registered_channels extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENotFoundException.class};
 		}
 
 		@Override
@@ -334,15 +338,15 @@ public class PluginMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if (messenger == null) {
-				throw new ConfigRuntimeException(
+				throw ConfigRuntimeException.BuildException(
 						"Could not find the internal Messenger object (are you running in cmdline mode?)",
-						ExceptionType.NotFoundException, t);
+						CRENotFoundException.class, t);
 			}
 			Set<String> chans = messenger.getIncomingChannels();
 			CArray arr = new CArray(t);
 			
 			for (String chan : chans) {
-				arr.push(new CString(chan, t));
+				arr.push(new CString(chan, t), t);
 			}
 			
 			return arr;

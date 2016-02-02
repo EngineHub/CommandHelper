@@ -2,7 +2,6 @@ package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.api;

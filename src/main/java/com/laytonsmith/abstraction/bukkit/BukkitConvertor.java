@@ -52,6 +52,7 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPatternShape;
@@ -59,10 +60,11 @@ import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -419,7 +421,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public static MCItemMeta BukkitGetCorrectMeta(ItemMeta im) {
-		if (im instanceof BannerMeta) {
+		if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8) && im instanceof BannerMeta) {
 			return new BukkitMCBannerMeta((BannerMeta) im);
 		}
 		if (im instanceof BookMeta) {
@@ -606,7 +608,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
-	public MCColor GetColor(String colorName, Target t) throws Exceptions.FormatException {
+	public MCColor GetColor(String colorName, Target t) throws CREFormatException {
 		return ConvertorHelper.GetColor(colorName, t);
 	}
 

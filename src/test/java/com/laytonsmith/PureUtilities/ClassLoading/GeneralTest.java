@@ -6,9 +6,11 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.FieldMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import org.junit.After;
 import static org.junit.Assert.assertArrayEquals;
@@ -87,7 +89,19 @@ public class GeneralTest {
 	public void testClassFieldReferences() throws Exception {
 		ClassMirror<GeneralTest> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 		ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
-		assertArrayEquals(c1.getFields(), c2.getFields());
+		List<FieldMirror> c1l = new ArrayList<>(Arrays.asList(c1.getFields()));
+		List<FieldMirror> c2l = new ArrayList<>(Arrays.asList(c2.getFields()));
+		for(List<FieldMirror> f : new List[]{c1l, c2l}){
+			Iterator<FieldMirror> it = f.iterator();
+			while(it.hasNext()){
+				// Jacoco adds synthetic fields to this class (as could other instrumentation suites)
+				// so we want to ignore any synthetic fields for the purposes of this test.
+				if(it.next().getName().startsWith("$")){
+					it.remove();
+				}
+			}
+		}
+		assertEquals(c1l, c2l);
 	}
 	
 	@Test

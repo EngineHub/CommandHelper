@@ -15,7 +15,6 @@ import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -163,7 +162,7 @@ public class BukkitMiscEvents {
 		String alias;
 		String[] args;
 		public BukkitMCCommandTabCompleteEvent(MCCommandSender sender, Command cmd, String alias, String[] args) {
-			this.comp = new ArrayList<String>();
+			this.comp = null;
 			this.sender = sender;
 			this.cmd = cmd;
 			this.alias = alias;
@@ -198,6 +197,11 @@ public class BukkitMiscEvents {
 		@Override
 		public List<String> getCompletions() {
 			return comp;
+		}
+
+		@Override
+		public void setCompletions(List<String> completions) {
+			this.comp = completions;
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -8,6 +9,8 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
+import com.laytonsmith.abstraction.enums.MCInstrument;
+import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
 import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
 import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
@@ -17,6 +20,7 @@ import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
 import com.laytonsmith.abstraction.events.MCBlockPistonExtendEvent;
 import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
 import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
+import com.laytonsmith.abstraction.events.MCNotePlayEvent;
 import com.laytonsmith.abstraction.events.MCSignChangeEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
@@ -36,10 +40,13 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -55,10 +62,6 @@ public class BlockEvents {
 	
 	// Stub for actual events below.
 	public static abstract class piston_event extends AbstractEvent {
-		@Override
-        public CHVersion since() {
-            return CHVersion.V3_3_1;
-        }
 		
 		@Override
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
@@ -83,7 +86,7 @@ public class BlockEvents {
             MCBlockPistonEvent event = (MCBlockPistonEvent) e;
             Map<String, Construct> map = evaluate_helper(event);
 
-            CArray blk = new CArray(Target.UNKNOWN);
+            CArray blk = CArray.GetAssociativeArray(Target.UNKNOWN);
 
             int blktype = event.getBlock().getTypeId();
             blk.set("type", new CInt(blktype, Target.UNKNOWN), Target.UNKNOWN);
@@ -149,7 +152,7 @@ public class BlockEvents {
 			CArray affected = new CArray(Target.UNKNOWN);
 			
 			for (MCBlock block : event.getPushedBlocks()) {
-				CArray blk = new CArray(Target.UNKNOWN);
+				CArray blk = CArray.GetAssociativeArray(Target.UNKNOWN);
 
 				int blktype = block.getTypeId();
 				blk.set("type", new CInt(blktype, Target.UNKNOWN), Target.UNKNOWN);
@@ -162,13 +165,18 @@ public class BlockEvents {
 				blk.set("Z", new CInt(block.getZ(), Target.UNKNOWN), Target.UNKNOWN);
 				blk.set("world", new CString(block.getWorld().getName(), Target.UNKNOWN), Target.UNKNOWN);
 				
-				affected.push(blk);
+				affected.push(blk, Target.UNKNOWN);
 			}
 			
 			map.put("affectedBlocks", affected);
 			
             return map;
         }
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
     }
 
     @api
@@ -213,6 +221,11 @@ public class BlockEvents {
 			
             return map;
         }
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
     }
 	
 	@api
@@ -307,7 +320,7 @@ public class BlockEvents {
 
             map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 
-            CArray blk = new CArray(Target.UNKNOWN);
+            CArray blk = CArray.GetAssociativeArray(Target.UNKNOWN);
 
             int blktype = event.getBlock().getTypeId();
             blk.set("type", new CInt(blktype, Target.UNKNOWN), Target.UNKNOWN);
@@ -331,7 +344,7 @@ public class BlockEvents {
             for (Iterator<MCItemStack> iter = items.iterator(); iter.hasNext();) {
                 MCItemStack stack = new BukkitMCItemStack((MCItemStack) iter.next());
                 CArray item = (CArray) ObjectGenerator.GetGenerator().item(stack, Target.UNKNOWN);
-                drops.push(item);
+                drops.push(item, Target.UNKNOWN);
             }
             map.put("drops", drops);
 
@@ -491,7 +504,7 @@ public class BlockEvents {
             int blkdata = event.getBlock().getData();
             map.put("data", new CInt(blkdata, Target.UNKNOWN));
 
-            CArray agst = new CArray(Target.UNKNOWN);
+            CArray agst = CArray.GetAssociativeArray(Target.UNKNOWN);
             MCBlock agstblk = event.getBlockAgainst();
             int againsttype = agstblk.getTypeId();
             agst.set("type", new CInt(againsttype, Target.UNKNOWN), Target.UNKNOWN);
@@ -503,7 +516,7 @@ public class BlockEvents {
             map.put("against", agst);
 
             MCBlockState old = event.getBlockReplacedState();
-            CArray oldarr = new CArray(Target.UNKNOWN);
+            CArray oldarr = CArray.GetAssociativeArray(Target.UNKNOWN);
             oldarr.set("type", new CInt(old.getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
             oldarr.set("data", new CInt(old.getData().getData(), Target.UNKNOWN), Target.UNKNOWN);
             map.put("oldblock", oldarr);
@@ -627,7 +640,7 @@ public class BlockEvents {
             MCBlockBurnEvent event = (MCBlockBurnEvent) e;
             Map<String, Construct> map = evaluate_helper(event);
 
-            CArray blk = new CArray(Target.UNKNOWN);
+            CArray blk = CArray.GetAssociativeArray(Target.UNKNOWN);
 
             int blktype = event.getBlock().getTypeId();
             blk.set("type", new CInt(blktype, Target.UNKNOWN), Target.UNKNOWN);
@@ -1024,12 +1037,12 @@ public class BlockEvents {
 				MCBlockGrowEvent blockGrowEvent = (MCBlockGrowEvent) event;
 				Map<String, Construct> mapEvent = evaluate_helper(event);
 				MCBlock oldBlock = blockGrowEvent.getBlock();
-				CArray oldBlockArray = new CArray(Target.UNKNOWN);
+				CArray oldBlockArray = CArray.GetAssociativeArray(Target.UNKNOWN);
 				oldBlockArray.set("type", new CInt(oldBlock.getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
 				oldBlockArray.set("data", new CInt(oldBlock.getData(), Target.UNKNOWN), Target.UNKNOWN);
 				mapEvent.put("oldblock", oldBlockArray);
 				MCBlockState newBlock = blockGrowEvent.getNewState();
-				CArray newBlockArray = new CArray(Target.UNKNOWN);
+				CArray newBlockArray = CArray.GetAssociativeArray(Target.UNKNOWN);
 				newBlockArray.set("type", new CInt(newBlock.getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
 				newBlockArray.set("data", new CInt(newBlock.getData().getData(), Target.UNKNOWN), Target.UNKNOWN);
 				mapEvent.put("newblock", newBlockArray);
@@ -1042,6 +1055,96 @@ public class BlockEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+			return false;
+		}
+	}
+
+	@api
+	public static class note_play extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "note_play";
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.NOTE_PLAY;
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " This event is called when a noteblock is activated via player interaction or redstone."
+					+ " The instrument may be one of: " + StringUtils.Join(MCInstrument.values(), ", ", ", or ") + "."
+					+ " {location: The location of the noteblock | instrument: The name of the sound"
+					+ " | tone: The note played (eg. F#) | octave: The octave the tone was played (0 - 2)}"
+					+ " {instrument|tone|octave}"
+					+ " {}";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			return event instanceof MCNotePlayEvent;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCNotePlayEvent) {
+				MCNotePlayEvent e = (MCNotePlayEvent) event;
+				Map<String, Construct> map = new HashMap<>();
+				Target t = Target.UNKNOWN;
+				map.put("location", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false));
+				map.put("instrument", new CString(e.getInstrument().name(), t));
+				map.put("tone", new CString(e.getNote().getTone().name() + (e.getNote().isSharped() ? "#" : ""), t));
+				map.put("octave", new CInt(e.getNote().getOctave(), t));
+				return map;
+			} else {
+				throw new EventException("Cannot convert event to NotePlayEvent");
+			}
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+			if (e instanceof MCNotePlayEvent) {
+				MCNotePlayEvent event = (MCNotePlayEvent) e;
+				try {
+					if("instrument".equals(key)){
+						event.setInstrument(MCInstrument.valueOf(value.val()));
+						return true;
+					}
+					if("tone".equals(key)){
+						if(value.val().length() == 0){
+							return false;
+						}
+						int octave = event.getNote().getOctave();
+						MCTone tone = MCTone.valueOf(value.val().substring(0, 1));
+						boolean sharp = value.val().endsWith("#");
+						event.setNote(StaticLayer.GetConvertor().GetNote(octave, tone, sharp));
+						return true;
+					}
+					if("octave".equals(key)){
+						int octave = Static.getInt32(value, Target.UNKNOWN);
+						MCTone tone = event.getNote().getTone();
+						boolean sharp = event.getNote().isSharped();
+						event.setNote(StaticLayer.GetConvertor().GetNote(octave, tone, sharp));
+						return true;
+					}
+				} catch(IllegalArgumentException ex){
+					throw ConfigRuntimeException.BuildException("No " + key + " with the value " + value + " exists",
+							CREIllegalArgumentException.class, Target.UNKNOWN, ex);
+				}
+			}
 			return false;
 		}
 	}

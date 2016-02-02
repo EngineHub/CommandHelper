@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Documentation;
@@ -16,10 +17,10 @@ import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Event;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.ExampleScript;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -89,11 +90,11 @@ public class DocGen {
 			if (f instanceof Function && ((Function)f).thrown() != null) {
 				List thrownList = Arrays.asList(((Function)f).thrown());
 				for (int i = 0; i < thrownList.size(); i++) {
-					ExceptionType t = (ExceptionType) thrownList.get(i);
+					String t = ((Class<? extends CREThrowable>) thrownList.get(i)).getAnnotation(typeof.class).value();
 					if (i != 0) {
 						thrown.append("<br />\n");
 					}
-					thrown.append("[[CommandHelper/Exceptions#").append(t.toString()).append("|").append(t.toString()).append("]]");
+					thrown.append("[[CommandHelper/Exceptions#").append(t).append("|").append(t).append("]]");
 				}
 			}
 			String tableUsages = di.originalArgs.replace("|", "<hr />");
@@ -311,19 +312,19 @@ public class DocGen {
                         : "<div style=\"background-color: green; font-weight: bold; text-align: center;\">No</div>";
                 StringBuilder thrown = new StringBuilder();
                 if (f instanceof Function && ((Function)f).thrown() != null) {
-                    List thrownList = Arrays.asList(((Function)f).thrown());
+                    List<Class<? extends CREThrowable>> thrownList = Arrays.asList(((Function)f).thrown());
                     for (int i = 0; i < thrownList.size(); i++) {
-                        ExceptionType t = (ExceptionType) thrownList.get(i);
+                        String t = ((Class<? extends CREThrowable>) thrownList.get(i)).getAnnotation(typeof.class).value();
                         if (type == MarkupType.HTML || type == MarkupType.TEXT) {
                             if (i != 0) {
                                 thrown.append((type == MarkupType.HTML ? "<br />\n" : " | "));
                             }
-                            thrown.append(t.toString());
+                            thrown.append(t);
                         } else {
                             if (i != 0) {
                                 thrown.append("<br />\n");
                             }
-                            thrown.append("[[CommandHelper/Exceptions#").append(t.toString()).append("|").append(t.toString()).append("]]");
+                            thrown.append("[[CommandHelper/Exceptions#").append(t).append("|").append(t).append("]]");
                         }
                     }
                 }

@@ -1,12 +1,14 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.Sizable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.Stack;
 
 /**
@@ -39,7 +41,7 @@ public class CMutablePrimitive extends CArray implements Sizable {
 	 */
 	public void set(Construct value, Target t){
 		if(value instanceof CArray){
-			throw new ConfigRuntimeException("mutable_primitives can only store primitive values.", Exceptions.ExceptionType.FormatException, t);
+			throw ConfigRuntimeException.BuildException("mutable_primitives can only store primitive values.", CREFormatException.class, t);
 		}
 		this.value = value;
 	}
@@ -127,15 +129,25 @@ public class CMutablePrimitive extends CArray implements Sizable {
 	}
 
 	@Override
-	public void push(Construct c) {
-		this.value = c;
+	public void push(Construct c, Integer i, Target t) {
+		set(c, t);
 	}
 
 	@Override
 	public void set(Construct index, Construct c, Target t) {
-		throw new ConfigRuntimeException("mutable_primitives cannot have values set in them", Exceptions.ExceptionType.CastException, t);
+		throw ConfigRuntimeException.BuildException("mutable_primitives cannot have values set in them", CRECastException.class, t);
 	}
 
+	@Override
+	public String docs() {
+		return "A mutible primitive is a special data type that allows you to store primitives by reference, instead of value.";
+	}
 
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
+	}
+
+	
 
 }

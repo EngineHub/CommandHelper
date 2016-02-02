@@ -341,7 +341,7 @@ public class ParseTree implements Cloneable{
             // Convert: \ -> \\ and ' -> \'
             stringRepresentation.append("'").append(data.val().replaceAll("\t", "\\t").replaceAll("\n", "\\n").replace("\\", "\\\\").replace("'", "\\'")).append("'");
 		} else if(data instanceof IVariable){
-			stringRepresentation.append(((IVariable)data).getName());
+			stringRepresentation.append(((IVariable)data).getVariableName());
         } else {
             stringRepresentation.append(data.val());
         }

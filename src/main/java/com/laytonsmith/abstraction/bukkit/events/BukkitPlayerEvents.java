@@ -42,34 +42,10 @@ import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerBedEnterEvent;
-import org.bukkit.event.player.PlayerBedLeaveEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerChatTabCompleteEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerEditBookEvent;
-import org.bukkit.event.player.PlayerEvent;
-import org.bukkit.event.player.PlayerExpChangeEvent;
-import org.bukkit.event.player.PlayerFishEvent;
-import org.bukkit.event.player.PlayerGameModeChangeEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.player.PlayerPortalEvent;
-import org.bukkit.event.player.PlayerPreLoginEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.player.PlayerPreLoginEvent.Result;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.event.player.PlayerToggleFlightEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
-import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -373,6 +349,11 @@ public class BukkitPlayerEvents {
 		@Override
 		public String getIP() {
 			return event.getAddress().getHostAddress();
+		}
+
+		@Override
+		public String getHostname() {
+			return event.getHostname();
 		}
 	}
 
@@ -965,6 +946,46 @@ public class BukkitPlayerEvents {
 		@Override
 		public void setCancelled(boolean bln) {
 			ptse.setCancelled(bln);
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerMoveEvent extends BukkitMCPlayerEvent
+			implements MCPlayerMoveEvent {
+		PlayerMoveEvent pme;
+		int threshold;
+		MCLocation from;
+
+		public BukkitMCPlayerMoveEvent(PlayerMoveEvent event, int threshold, MCLocation from) {
+			super(event);
+			this.pme = event;
+			this.threshold = threshold;
+			this.from = from;
+		}
+
+		@Override
+		public int getThreshold() {
+			return threshold;
+		};
+
+		@Override
+		public MCLocation getFrom() {
+			return new BukkitMCLocation(from);
+		};
+
+		@Override
+		public MCLocation getTo() {
+			return new BukkitMCLocation(pme.getTo());
+		};
+
+		@Override
+		public boolean isCancelled() {
+			return pme.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean bln) {
+			pme.setCancelled(bln);
 		}
 	}
 }

@@ -1,10 +1,13 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Sizes;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Sizable;
 import java.io.UnsupportedEncodingException;
@@ -474,9 +477,20 @@ public class CByteArray extends CArray implements Sizable, ArrayAccess {
 		return new CInt(b, t);
 	}
 
+	@Override
+	public String docs() {
+		return "A byte_array represents low level byte data.";
+	}
+
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
+	}
+	
 	/**
 	 * This is a more efficient implementation of CArray for the backing byte arrays.
 	 */
+	@typeof("ByteBackingArray")
 	private static class CArrayByteBacking extends CArray {
 		private final byte[] backing;
 		private String value = null;
@@ -486,18 +500,18 @@ public class CByteArray extends CArray implements Sizable, ArrayAccess {
 		}
 
 		@Override
-		public void reverse() {
-			throw new ROException();
+		public void reverse(Target t) {
+			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
 		@Override
-		public void push(Construct c) {
-			throw new ROException();
+		public void push(Construct c, Integer i, Target t) {
+			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
 		@Override
 		public void set(Construct index, Construct c, Target t) {
-			throw new ROException();
+			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
 		@Override
@@ -506,7 +520,7 @@ public class CByteArray extends CArray implements Sizable, ArrayAccess {
 			try{
 				return new CInt(backing[i], t);
 			} catch(ArrayIndexOutOfBoundsException e){
-				throw new Exceptions.RangeException("Index out of range. Found " + i + ", but array length is only " + backing.length, t);
+				throw new CRERangeException("Index out of range. Found " + i + ", but array length is only " + backing.length, t);
 			}
 		}
 
@@ -544,10 +558,37 @@ public class CByteArray extends CArray implements Sizable, ArrayAccess {
 			throw new Error("This error should not happen. Please report this bug to the developers");
 		}
 
-		public class ROException extends ConfigRuntimeException{
-			public ROException(){
-				super("Arrays copied from ByteArrays are read only", Exceptions.ExceptionType.ReadOnlyException, CArrayByteBacking.this.getTarget());
+		@Override
+		public String docs() {
+			return "A read-only subclass of array, which is used to make reading byte arrays more efficient.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@typeof("ByteArrayReadOnlyException")
+		public static class CREByteArrayReadOnlyException extends CREReadOnlyException{
+			
+			public CREByteArrayReadOnlyException (java.lang.String msg, com.laytonsmith.core.constructs.Target t){
+				super(msg, t);
 			}
+			
+			public CREByteArrayReadOnlyException(String msg, Target t, Throwable ex){
+				super(msg, t, ex);
+			}
+
+			@Override
+			public String docs() {
+				return "An exception which is thrown if the array copied from a byte array is attempted to be written to.";
+			}
+
+			@Override
+			public Version since() {
+				return CHVersion.V3_3_1;
+			}			
+			
 		}
 
 	}

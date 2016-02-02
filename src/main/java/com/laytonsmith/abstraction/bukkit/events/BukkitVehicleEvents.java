@@ -2,14 +2,17 @@ package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
+import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.enums.MCCollisionType;
 import com.laytonsmith.abstraction.events.MCVehicleBlockCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEnitityCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEnterExitEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEvent;
+import com.laytonsmith.abstraction.events.MCVehicleMoveEvent;
 import com.laytonsmith.annotations.abstraction;
 import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
 import org.bukkit.event.vehicle.VehicleCollisionEvent;
@@ -17,6 +20,7 @@ import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.event.vehicle.VehicleEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
+import org.bukkit.event.vehicle.VehicleMoveEvent;
 
 /**
  * 
@@ -124,6 +128,49 @@ public class BukkitVehicleEvents {
 				return null;
 			}
 			return BukkitConvertor.BukkitGetCorrectEntity(vee.getExited());
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCVehicleMoveEvent extends BukkitMCVehicleEvent
+			implements MCVehicleMoveEvent {
+
+		VehicleMoveEvent vme;
+		int threshold;
+		boolean cancelled;
+		MCLocation from;
+
+		public BukkitMCVehicleMoveEvent(VehicleMoveEvent event, int threshold, MCLocation from) {
+			super(event);
+			vme = event;
+			this.threshold = threshold;
+			this.cancelled = false;
+			this.from = from;
+		}
+
+		@Override
+		public int getThreshold() {
+			return threshold;
+		}
+
+		@Override
+		public MCLocation getFrom() {
+			return new BukkitMCLocation(from);
+		}
+
+		@Override
+		public MCLocation getTo() {
+			return new BukkitMCLocation(vme.getTo());
+		}
+
+		@Override
+		public void setCancelled(boolean state) {
+			cancelled = state;
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return cancelled;
 		}
 	}
 

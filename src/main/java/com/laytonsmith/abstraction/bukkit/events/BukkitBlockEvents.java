@@ -7,19 +7,23 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCNote;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
+import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCIgniteCause;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
 import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
 import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
 import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
@@ -30,25 +34,17 @@ import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
 import com.laytonsmith.abstraction.events.MCBlockPistonExtendEvent;
 import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
 import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
+import com.laytonsmith.abstraction.events.MCNotePlayEvent;
 import com.laytonsmith.abstraction.events.MCSignChangeEvent;
 import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import org.bukkit.Note;
 import org.bukkit.block.Block;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockDispenseEvent;
-import org.bukkit.event.block.BlockEvent;
-import org.bukkit.event.block.BlockGrowEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockPistonEvent;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -312,7 +308,7 @@ public class BukkitBlockEvents {
             CArray retn = new CArray(Target.UNKNOWN);
 
             for (int i = 0; i < 4; i++) {
-                retn.push(new CString(pie.getLine(i), Target.UNKNOWN));
+                retn.push(new CString(pie.getLine(i), Target.UNKNOWN), Target.UNKNOWN);
             }
 
             return retn;
@@ -380,9 +376,9 @@ public class BukkitBlockEvents {
 		@Override
 		public void setItem(MCItemStack item) {
 			if (item == null || item.getType().getName() == "AIR") {
-				throw new ConfigRuntimeException("Due to Bukkit's handling of this event, the item cannot be set to null."
+				throw ConfigRuntimeException.BuildException("Due to Bukkit's handling of this event, the item cannot be set to null."
 						+ " Until they change this, workaround by cancelling the event and manipulating the block"
-						+ " using inventory functions.", ExceptionType.IllegalArgumentException, Target.UNKNOWN);
+						+ " using inventory functions.", CREIllegalArgumentException.class, Target.UNKNOWN);
 			} else {
 				bde.setItem(((BukkitMCItemStack) item).asItemStack());
 			}
@@ -433,6 +429,46 @@ public class BukkitBlockEvents {
 		@Override
 		public MCBlockState getNewState() {
 			return new BukkitMCBlockState(bge.getNewState());
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCNotePlayEvent implements MCNotePlayEvent {
+
+		NotePlayEvent npe;
+
+		public BukkitMCNotePlayEvent(NotePlayEvent event) {
+			npe = event;
+		}
+
+		@Override
+		public Object _GetObject() {
+			return npe;
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(npe.getBlock());
+		}
+
+		@Override
+		public MCNote getNote() {
+			return new BukkitMCNote(npe.getNote());
+		}
+
+		@Override
+		public void setNote(MCNote note) {
+			npe.setNote((Note) note.getHandle());
+		}
+
+		@Override
+		public MCInstrument getInstrument() {
+			return BukkitMCInstrument.getConvertor().getAbstractedEnum(npe.getInstrument());
+		}
+
+		@Override
+		public void setInstrument(MCInstrument i) {
+			npe.setInstrument(BukkitMCInstrument.getConvertor().getConcreteEnum(i));
 		}
 	}
 }

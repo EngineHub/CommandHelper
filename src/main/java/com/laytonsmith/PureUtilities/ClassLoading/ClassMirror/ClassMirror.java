@@ -4,11 +4,6 @@ package com.laytonsmith.PureUtilities.ClassLoading.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.RetentionPolicy;
@@ -19,15 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
 
 /**
  * This class gathers information about a class, without actually loading 
@@ -37,9 +23,7 @@ import org.objectweb.asm.Opcodes;
  */
 public class ClassMirror<T> implements Serializable {
 	private static final long serialVersionUID = 1L;
-	private final ClassInfo info = new ClassInfo();
-	//Transient, because it's only used during construction
-	private final transient org.objectweb.asm.ClassReader reader;
+	private final ClassInfo info;
 	
 	/**
 	 * If this is just a wrapper for an already loaded Class, this will
@@ -52,30 +36,11 @@ public class ClassMirror<T> implements Serializable {
 	 * The original URL that houses this class.
 	**/
 	private final URL originalURL;
-	
-	/**
-	 * Creates a ClassMirror object for a given input stream representing
-	 * a class file.
-	 * @param is
-	 * @param container
-	 * @throws IOException 
-	 */
-	public ClassMirror(InputStream is, URL container) throws IOException {
-		reader = new org.objectweb.asm.ClassReader(is);
-		underlyingClass = null;
-		originalURL = container;
-		
-		parse();
-	}
-	
-	/**
-	 * Creates a ClassMirror object for a given class file.
-	 * @param file
-	 * @throws FileNotFoundException
-	 * @throws IOException 
-	 */
-	public ClassMirror(File file) throws FileNotFoundException, IOException {
-		this(new FileInputStream(file), file.toURI().toURL());
+
+	protected ClassMirror(ClassInfo info, URL originalURL) {
+		this.underlyingClass = null;
+		this.originalURL = originalURL;
+		this.info = info;
 	}
 	
 	/**
@@ -90,14 +55,8 @@ public class ClassMirror<T> implements Serializable {
 	 */
 	public ClassMirror(Class c){
 		this.underlyingClass = c;
-		reader = null;
 		originalURL = ClassDiscovery.GetClassContainer(c);
-	}
-	
-	private void parse(){
-		reader.accept(info, org.objectweb.asm.ClassReader.SKIP_CODE 
-				| org.objectweb.asm.ClassReader.SKIP_DEBUG 
-				| org.objectweb.asm.ClassReader.SKIP_FRAMES);
+		this.info = new ClassInfo();
 	}
         
 	/**
@@ -139,7 +98,7 @@ public class ClassMirror<T> implements Serializable {
 	 */
 	public String getClassName(){
 		if(underlyingClass != null){
-			return underlyingClass.getName().replace("$", ".");
+			return underlyingClass.getName().replace('$', '.');
 		}
 		return info.name.replaceAll("[/$]", ".");
 	}
@@ -351,6 +310,34 @@ public class ClassMirror<T> implements Serializable {
 	 * @return 
 	 */
 	public MethodMirror[] getMethods(){
+		List<MethodMirror> l = new ArrayList<>();
+		for(AbstractMethodMirror m : getAllMethods()){
+			if(m instanceof MethodMirror){
+				l.add((MethodMirror)m);
+			}
+		}
+		return l.toArray(new MethodMirror[l.size()]);
+	}
+	
+	/**
+	 * Returns the Constructors in this class.
+	 * @return 
+	 */
+	public ConstructorMirror[] getConstructors(){
+		List<ConstructorMirror> l = new ArrayList<>();
+		for(AbstractMethodMirror m : getAllMethods()){
+			if(m instanceof ConstructorMirror){
+				l.add((ConstructorMirror)m);
+			}
+		}
+		return l.toArray(new ConstructorMirror[l.size()]);
+	}
+	
+	/**
+	 * Returns all methods in this class, including constructors.
+	 * @return 
+	 */
+	public AbstractMethodMirror[] getAllMethods(){
 		if(underlyingClass != null){
 			MethodMirror[] mirrors = new MethodMirror[underlyingClass.getDeclaredMethods().length];
 			for(int i = 0; i < mirrors.length; i++){
@@ -358,7 +345,7 @@ public class ClassMirror<T> implements Serializable {
 			}
 			return mirrors;
 		}
-		return info.methods.toArray(new MethodMirror[info.methods.size()]);
+		return info.methods.toArray(new AbstractMethodMirror[info.methods.size()]);
 	}
 	
 	/**
@@ -390,9 +377,9 @@ public class ClassMirror<T> implements Serializable {
 	public MethodMirror getMethod(String name, ClassReferenceMirror... params) throws NoSuchMethodException {
 		List<ClassReferenceMirror> crmParams = new ArrayList<>();
 		crmParams.addAll(Arrays.asList(params));
-		for(MethodMirror m : getMethods()){
-			if(m.getName().equals(name) && m.getParams().equals(crmParams)){
-				return m;
+		for(AbstractMethodMirror m : getAllMethods()){
+			if(m instanceof MethodMirror && m.getName().equals(name) && m.getParams().equals(crmParams)){
+				return (MethodMirror)m;
 			}
 		}
 		throw new NoSuchMethodException("No method matching the signature " + name + "(" + StringUtils.Join(crmParams, ", ") + ") was found.");
@@ -453,7 +440,7 @@ public class ClassMirror<T> implements Serializable {
 		if(underlyingClass != null){
 			return (underlyingClass.getSuperclass() == superClass);
 		}
-		String name = superClass.getName().replace(".", "/");
+		String name = superClass.getName().replace('.', '/');
 		if(info.superClass.equals(name)){
 			return true;
 		}
@@ -547,10 +534,8 @@ public class ClassMirror<T> implements Serializable {
 		return Objects.equals(this.getJVMClassName(), other.getJVMClassName());
 	}
 
-	
-	private static class ClassInfo implements ClassVisitor, Serializable {
+	protected static class ClassInfo implements Serializable {
 		private static final long serialVersionUID = 1L;
-		
 		public ModifierMirror modifiers;
 		public String name;
 		public String superClass;
@@ -560,291 +545,6 @@ public class ClassMirror<T> implements Serializable {
 		public boolean isEnum = false;
 		public ClassReferenceMirror classReferenceMirror;
 		public List<FieldMirror> fields = new ArrayList<>();
-		public List<MethodMirror> methods = new ArrayList<>();
-
-		@Override
-		public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-			if((access & Opcodes.ACC_ENUM) > 0){
-				isEnum = true;
-			}
-			if((access & Opcodes.ACC_INTERFACE) > 0){
-				isInterface = true;
-			}
-			this.modifiers = new ModifierMirror(ModifierMirror.Type.CLASS, access);
-			this.name = name;
-			//We know we aren't an array or a primitive, so we just add L...; to make
-			//the binary name, which is what ClassReferenceMirror expects.
-			this.classReferenceMirror = new ClassReferenceMirror("L" + name + ";");
-			this.superClass = superName;
-			this.interfaces = interfaces;
-		}
-
-		@Override
-		public void visitSource(String source, String debug) {
-			//Ignored
-		}
-
-		@Override
-		public void visitOuterClass(String owner, String name, String desc) {
-			//Ignored
-		}
-
-		@Override
-		public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-			AnnotationMirror am = new AnnotationMirror(new ClassReferenceMirror(desc), visible);
-			annotations.add(am);
-			return new AnnotationV(am);
-		}
-
-		@Override
-		public void visitAttribute(Attribute attr) {
-			
-		}
-
-		@Override
-		public void visitInnerClass(String name, String outerName, String innerName, int access) {
-			
-		}
-
-		@Override
-		public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-			final FieldMirror fm = new FieldMirror(classReferenceMirror, new ModifierMirror(ModifierMirror.Type.FIELD, access),
-					new ClassReferenceMirror(desc), name, value);
-			fields.add(fm);
-			return new FieldVisitor() {
-
-				@Override
-				public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-					AnnotationMirror m = new AnnotationMirror(new ClassReferenceMirror(desc), visible);
-					fm.addAnnotation(m);
-					return new AnnotationV(m);
-				}
-
-				@Override
-				public void visitAttribute(Attribute attr) {
-					
-				}
-
-				@Override
-				public void visitEnd() {
-					
-				}
-			};
-		}
-		
-		private static transient final Pattern METHOD_SIGNATURE_PATTERN = Pattern.compile("^\\((.*)\\)(.*)$");
-
-		@Override
-		public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-			if("<init>".equals(name) || "<clinit>".equals(name)){
-				//For now, we aren't interested in constructors or static initializers
-				return null;
-			}
-			
-			Matcher m = METHOD_SIGNATURE_PATTERN.matcher(desc);
-			if(!m.find()){
-				//The desc type didn't match?
-				throw new Error("No match found for " + desc);
-			}
-			String inner = m.group(1);
-			String ret = m.group(2);
-			List<ClassReferenceMirror> params = new ArrayList<ClassReferenceMirror>();
-			//Parsing the params list is a bit more complicated than it should be.
-			StringBuilder b = new StringBuilder();
-			boolean inObject = false;
-			for(char c : inner.toCharArray()){
-				b.append(c);
-				if(inObject){
-					if(c == ';'){
-						inObject = false;
-						params.add(new ClassReferenceMirror(b.toString()));
-						b = new StringBuilder();
-					}
-				} else {
-					if(c == 'L'){
-						inObject = true;
-					} else if(c != '['){
-						params.add(new ClassReferenceMirror(b.toString()));
-						b = new StringBuilder();
-					} //otherwise, it's an array, continue.
-				}
-			}
-			final MethodMirror mm = new MethodMirror(classReferenceMirror, new ModifierMirror(ModifierMirror.Type.METHOD, access),
-					new ClassReferenceMirror(ret), name, params, 
-					(access & Opcodes.ACC_VARARGS) > 0, (access & Opcodes.ACC_SYNTHETIC) > 0);
-			methods.add(mm);
-			return new MethodVisitor() {
-
-				@Override
-				public AnnotationVisitor visitAnnotationDefault() {
-					return null;
-				}
-
-				@Override
-				public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-					AnnotationMirror am = new AnnotationMirror(new ClassReferenceMirror(desc), visible);
-					mm.addAnnotation(am);
-					return new AnnotationV(am);
-				}
-
-				@Override
-				public AnnotationVisitor visitParameterAnnotation(int parameter, String desc, boolean visible) {
-					return null;
-				}
-
-				@Override
-				public void visitAttribute(Attribute attr) {
-					
-				}
-
-				@Override
-				public void visitCode() {
-					
-				}
-
-				@Override
-				public void visitFrame(int type, int nLocal, Object[] local, int nStack, Object[] stack) {
-					
-				}
-
-				@Override
-				public void visitInsn(int opcode) {
-					
-				}
-
-				@Override
-				public void visitIntInsn(int opcode, int operand) {
-					
-				}
-
-				@Override
-				public void visitVarInsn(int opcode, int var) {
-					
-				}
-
-				@Override
-				public void visitTypeInsn(int opcode, String type) {
-					
-				}
-
-				@Override
-				public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-					
-				}
-
-				@Override
-				public void visitMethodInsn(int opcode, String owner, String name, String desc) {
-					
-				}
-
-				@Override
-				public void visitJumpInsn(int opcode, Label label) {
-					
-				}
-
-				@Override
-				public void visitLabel(Label label) {
-					
-				}
-
-				@Override
-				public void visitLdcInsn(Object cst) {
-					
-				}
-
-				@Override
-				public void visitIincInsn(int var, int increment) {
-					
-				}
-
-				@Override
-				public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels) {
-					
-				}
-
-				@Override
-				public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-					
-				}
-
-				@Override
-				public void visitMultiANewArrayInsn(String desc, int dims) {
-					
-				}
-
-				@Override
-				public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
-					
-				}
-
-				@Override
-				public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
-					
-				}
-
-				@Override
-				public void visitLineNumber(int line, Label start) {
-					
-				}
-
-				@Override
-				public void visitMaxs(int maxStack, int maxLocals) {
-					
-				}
-
-				@Override
-				public void visitEnd() {
-					
-				}
-			};
-		}
-
-		@Override
-		public void visitEnd() {
-			
-		}
-		
+		public List<AbstractMethodMirror> methods = new ArrayList<>();
 	}
-	
-	private static class AnnotationV implements AnnotationVisitor {
-		
-		private final AnnotationMirror mirror;
-		public AnnotationV(AnnotationMirror mirror){
-			this.mirror = mirror;
-		}
-
-		@Override
-		public void visit(String name, Object value) {
-			if(value instanceof org.objectweb.asm.Type){
-				//Type can't serialize, so we need to store a reference to it.
-				//This will only happen if it's a class type, so a ClassReferenceMirror
-				//is what we need anyways.
-				org.objectweb.asm.Type type = (org.objectweb.asm.Type) value;
-				value = new ClassReferenceMirror(type.getDescriptor());
-			}
-			mirror.addAnnotationValue(name, value);
-		}
-
-		@Override
-		public void visitEnum(String name, String desc, String value) {
-			
-		}
-
-		@Override
-		public AnnotationVisitor visitAnnotation(String name, String desc) {
-			return null;
-		}
-
-		@Override
-		public AnnotationVisitor visitArray(String name) {
-			return null;
-		}
-
-		@Override
-		public void visitEnd() {
-			
-		}
-		
-	}
-	
 }

@@ -2,10 +2,12 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import java.util.Set;
 
@@ -14,7 +16,7 @@ import java.util.Set;
  *
  */
 @typeof("string")
-public class CString extends CPrimitive implements Cloneable, ArrayAccess{
+public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 
     public CString(String value, Target t){
         super(value==null?"":value, ConstructType.STRING, t);
@@ -44,7 +46,7 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess{
             int i = (int)Integer.parseInt(index);
             return new CString(this.val().charAt(i), t);
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Expecting numerical index, but recieved " + index, Exceptions.ExceptionType.FormatException, t);
+            throw ConfigRuntimeException.BuildException("Expecting numerical index, but recieved " + index, CREFormatException.class, t);
         }
     }
 
@@ -90,5 +92,15 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess{
 	public Construct get(Construct index, Target t) throws ConfigRuntimeException {
 		int i = Static.getInt32(index, t);
 		return get(i, t);
+	}
+
+	@Override
+	public String docs() {
+		return "A string is a value that contains character data. The character encoding is stored with the string as well.";
+	}
+
+	@Override
+	public Version since() {
+		return CHVersion.V3_0_1;
 	}
 }

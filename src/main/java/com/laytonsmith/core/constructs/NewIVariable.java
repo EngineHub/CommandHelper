@@ -16,7 +16,7 @@ public class NewIVariable extends Construct{
 		return true;
 	}
 	
-	public String getName(){
+	public String getVariableName(){
 		return name;
 	}
 }

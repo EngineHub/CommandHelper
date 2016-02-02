@@ -6,8 +6,8 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -142,8 +142,8 @@ public class MObject {
 						CArray ca = Static.getArray(value, t);
 						MList m = new MList();
 						if(ca.inAssociativeMode()){
-							throw new ConfigRuntimeException("Expected non-associative array, but an associative array was found instead.",
-									Exceptions.ExceptionType.CastException, t);
+							throw ConfigRuntimeException.BuildException("Expected non-associative array, but an associative array was found instead.",
+									CRECastException.class, t);
 						}
 						for(int i = 0; i < ca.size(); i++){
 							m.add(ca.get(i, t));

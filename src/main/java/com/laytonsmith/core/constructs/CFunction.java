@@ -2,6 +2,8 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
@@ -53,6 +55,27 @@ public class CFunction extends Construct {
 	 */
 	public void setFunction(FunctionBase f){
 		function = (Function)f;
+	}
+
+	/**
+	 * Returns true if the Construct is a function, and is of the specified type.
+	 * @param possibleFunction
+	 * @param ofType
+	 * @return
+	 */
+	public static boolean IsFunction(Construct possibleFunction, Class<? extends Function> ofType){
+		Function f = ReflectionUtils.newInstance(ofType);
+		return possibleFunction instanceof CFunction && possibleFunction.val().equals(f.getName());
+	}
+
+	/**
+	 * Returns true if the data in the ParseTree is a funciton, and is of the specified type.
+	 * @param tree
+	 * @param ofType
+	 * @return
+	 */
+	public static boolean IsFunction(ParseTree tree, Class<? extends Function> ofType){
+		return IsFunction(tree.getData(), ofType);
 	}
 
 }

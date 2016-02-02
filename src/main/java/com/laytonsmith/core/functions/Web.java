@@ -36,14 +36,17 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,8 +70,6 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.activation.CommandMap;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -85,7 +86,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import org.apache.commons.codec.binary.Base64;
 
 /**
  *
@@ -113,7 +113,7 @@ public class Web {
 			}
 			CArray c;
 			if(!update){
-				c = new CArray(t);
+				c = CArray.GetAssociativeArray(t);
 			} else {
 				c = aCookie;
 			}
@@ -125,7 +125,7 @@ public class Web {
 			c.set("httpOnly", CBoolean.get(cookie.isHttpOnly()), t);
 			c.set("secureOnly", CBoolean.get(cookie.isSecureOnly()), t);
 			if(!update){
-				ret.push(c);
+				ret.push(c, t);
 			}
 		}
 	}
@@ -148,8 +148,8 @@ public class Web {
 				domain = cookie.get("domain", t).val();
 				path = cookie.get("path", t).val();
 			} else {
-				throw new ConfigRuntimeException("The name, value, domain, and path keys are required"
-						+ " in all cookies.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("The name, value, domain, and path keys are required"
+						+ " in all cookies.", CREFormatException.class, t);
 			}
 			if(cookie.containsKey("expiration")){
 				expiration = Static.getInt(cookie.get("expiration", t), t);
@@ -194,8 +194,8 @@ public class Web {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -214,7 +214,7 @@ public class Web {
 			try {
 				url = new URL(args[0].val());
 			} catch (MalformedURLException ex) {
-				throw new Exceptions.FormatException(ex.getMessage(), t);
+				throw new CREFormatException(ex.getMessage(), t);
 			}
 			final RequestSettings settings = new RequestSettings();
 			final CClosure success;
@@ -230,7 +230,7 @@ public class Web {
 					try{
 						settings.setMethod(HTTPMethod.valueOf(csettings.get("method", t).val()));
 					} catch(IllegalArgumentException e){
-						throw new Exceptions.FormatException(e.getMessage(), t);
+						throw new CREFormatException(e.getMessage(), t);
 					}
 				}
 				boolean useDefaultHeaders = true;
@@ -288,7 +288,7 @@ public class Web {
 					} else {
 						settings.setRawParameter(csettings.get("params", t).val());
 						if(settings.getMethod() != HTTPMethod.POST && settings.getMethod() != HTTPMethod.PUT){
-							throw new Exceptions.FormatException("You must set the method to POST or PUT to use raw params.", t);
+							throw new CREFormatException("You must set the method to POST or PUT to use raw params.", t);
 						}
 					}
 				}
@@ -306,16 +306,16 @@ public class Web {
 					if(csettings.get("success", t) instanceof CClosure){
 						success = (CClosure) csettings.get("success", t);
 					} else {
-						throw new Exceptions.CastException("Expecting the success parameter to be a closure.", t);
+						throw new CRECastException("Expecting the success parameter to be a closure.", t);
 					}
 				} else {
-					throw new ConfigRuntimeException("Missing the success parameter, which is required.", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Missing the success parameter, which is required.", CRECastException.class, t);
 				}
 				if(csettings.containsKey("error")){
 					if(csettings.get("error", t) instanceof CClosure){
 						error = (CClosure) csettings.get("error", t);
 					} else {
-						throw new Exceptions.CastException("Expecting the error parameter to be a closure.", t);
+						throw new CRECastException("Expecting the error parameter to be a closure.", t);
 					}
 				} else {
 					error = null;
@@ -339,7 +339,7 @@ public class Web {
 					try{
 						type = Proxy.Type.valueOf(proxySettings.get("type", t).val());
 					} catch(IllegalArgumentException e){
-						throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t, e);
+						throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t, e);
 					}
 					proxyURL = proxySettings.get("url", t).val();
 					port = Static.getInt32(proxySettings.get("port", t), t);
@@ -371,13 +371,13 @@ public class Web {
 				public void run() {
 					try{
 						HTTPResponse resp = WebUtility.GetPage(url, settings);
-						final CArray array = new CArray(t);
+						final CArray array = CArray.GetAssociativeArray(t);
 						array.set("body", new CString(resp.getContent(), t), t);
-						CArray headers = new CArray(t);
+						CArray headers = CArray.GetAssociativeArray(t);
 						for(String key : resp.getHeaderNames()){
 							CArray h = new CArray(t);
 							for(String val : resp.getHeaders(key)){
-								h.push(new CString(val, t));
+								h.push(new CString(val, t), t);
 							}
 							headers.set(key, h, t);
 						}
@@ -397,14 +397,14 @@ public class Web {
 							}
 						});
 					} catch(IOException e){
-						final ConfigRuntimeException ex = new ConfigRuntimeException((e instanceof UnknownHostException?"Unknown host: ":"")
-								+ e.getMessage(), ExceptionType.IOException, t);
+						final ConfigRuntimeException ex = ConfigRuntimeException.BuildException((e instanceof UnknownHostException?"Unknown host: ":"")
+								+ e.getMessage(), CREIOException.class, t);
 						if(error != null){
 							StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
 								@Override
 								public void run() {
-									executeFinish(error, ObjectGenerator.GetGenerator().exception(ex, t), t, environment);
+									executeFinish(error, ObjectGenerator.GetGenerator().exception(ex, environment, t), t, environment);
 								}
 							});
 						} else {
@@ -515,8 +515,8 @@ public class Web {
 	public static class http_clear_session_cookies extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -564,8 +564,8 @@ public class Web {
 	public static class url_encode extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -621,8 +621,8 @@ public class Web {
 	public static class url_decode extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -678,8 +678,8 @@ public class Web {
 	public static class email extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PluginInternalException, ExceptionType.IOException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREPluginInternalException.class, CREIOException.class};
 		}
 
 		@Override
@@ -706,10 +706,10 @@ public class Web {
 				try {
 					p = environment.getEnv(GlobalEnv.class).getProfiles().getProfileById(profileName);
 				} catch(Profiles.InvalidProfileException ex){
-					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.FormatException, t, ex);
+					throw ConfigRuntimeException.BuildException(ex.getMessage(), CREFormatException.class, t, ex);
 				}
 				if(!(p instanceof EmailProfile)){
-					throw new ConfigRuntimeException("Profile type is expected to be \"email\", but \"" + p.getType() + "\"  was found.", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("Profile type is expected to be \"email\", but \"" + p.getType() + "\"  was found.", CRECastException.class, t);
 				}
 				Map<String, Object> data = ((EmailProfile)p).getMap();
 				for(String key : data.keySet()){
@@ -741,7 +741,7 @@ public class Web {
 			CArray to;
 			if(cto instanceof CString){
 				to = new CArray(t);
-				to.push(cto);
+				to.push(cto, t);
 			} else {
 				to = (CArray)cto;
 			}
@@ -787,10 +787,10 @@ public class Web {
 				message.setSubject(subject);
 
 				if(!"".equals(body)){
-					CArray bodyAttachment = new CArray(t);
+					CArray bodyAttachment = CArray.GetAssociativeArray(t);
 					bodyAttachment.set("type", "text/plain");
 					bodyAttachment.set("content", body);
-					attachments.push(bodyAttachment, 0);
+					attachments.push(bodyAttachment, 0, t);
 				}
 
 				for(Construct c : to.asList()){
@@ -810,7 +810,7 @@ public class Web {
 								type = Message.RecipientType.BCC;
 								break;
 							default:
-								throw new ConfigRuntimeException("Recipient type must be one of either: TO, CC, or BCC, but \"" + stype + "\" was found.", ExceptionType.FormatException, t);
+								throw ConfigRuntimeException.BuildException("Recipient type must be one of either: TO, CC, or BCC, but \"" + stype + "\" was found.", CREFormatException.class, t);
 						}
 						address = ArgumentValidation.getItemFromArray(ca, "address", t, null).val();
 					} else {
@@ -911,9 +911,9 @@ public class Web {
 
 			} catch(MessagingException ex){
 				if(ex.getCause() instanceof SocketTimeoutException){
-					throw new ConfigRuntimeException(ex.getCause().getMessage(), ExceptionType.IOException, t, ex);
+					throw ConfigRuntimeException.BuildException(ex.getCause().getMessage(), CREIOException.class, t, ex);
 				}
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.PluginInternalException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREPluginInternalException.class, t, ex);
 			}
 			return CVoid.VOID;
 		}
@@ -931,7 +931,7 @@ public class Web {
 				CByteArray cb = (CByteArray)c;
 				return cb.asByteArrayCopy();
 			} else {
-				throw new ConfigRuntimeException("Only strings and byte_arrays may be added as attachments' content.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Only strings and byte_arrays may be added as attachments' content.", CREFormatException.class, t);
 			}
 		}
 
@@ -991,14 +991,17 @@ public class Web {
 						+ "\tbody: 'This is the plain text body, which would show up in some email clients, such a mobile devices',\n"
 						+ "\tattachments: array(\n"
 						+ "\t\tarray(\n"
-						+ "\t\t\ttype: 'text/html',"
+						+ "\t\t\ttype: 'text/html',\n"
 						+ "\t\t\tcontent: '<h1>This is the html body, which would show up in most email clients. The <span style=\"color:red;\">plain text body</span> will not show if this does.</h1>'\n"
 						+ "\t\t)\n"
 						+ "\t)\n"
 						+ "));", "<Would send a basic html email, but would have fallback plain text>"),
 				new ExampleScript("Sending an email, with multiple recipients", "email(array(\n"
 						+ "\tfrom: 'from@example.com',\n"
-						+ "\tto: array('to@example.com', array(type: 'BCC', address: 'bcc@example.com')),\n"
+						+ "\tto: array(\n"
+						+ "\t\t'to@example.com',\n"
+						+ "\t\tarray(type: 'BCC', address: 'bcc@example.com')\n"
+						+ "\t),\n"
 						+ "\tbody: 'Two recipients'\n"
 						+ "));", "<Would send a basic email to multiple recipients>"),
 				new ExampleScript("Sending an email, with a text attachment", "email(array(\n"
@@ -1012,7 +1015,7 @@ public class Web {
 						+ "\t\t\tdisposition: 'attachment', // This is what tells the email client to make it downloadable\n"
 						+ "\t\t\tdescription: 'A description of the file, which may or may not be shown by the email client'\n"
 						+ "\t\t)\n"
-						+ "\t)"
+						+ "\t)\n"
 						+ "));", "<Would send a basic email, and the attached file would be downloadable>"),
 				new ExampleScript("Sending an email, with a binary attachment", "email(array(\n"
 						+ "\tfrom: 'from@example.com',\n"
@@ -1033,7 +1036,7 @@ public class Web {
 						+ "\tbody: 'This is the plain text body, which would show up in some email clients, such a mobile devices',\n"
 						+ "\tattachments: array(\n"
 						+ "\t\tarray(\n"
-						+ "\t\t\ttype: 'text/html',"
+						+ "\t\t\ttype: 'text/html',\n"
 						+ "\t\t\tcontent: '<h1>This is an inline image: <img src=\"cid:image.png\" /></h1>'\n"
 						+ "\t\t), array(\n"
 						+ "\t\t\ttype: 'image/png',\n"

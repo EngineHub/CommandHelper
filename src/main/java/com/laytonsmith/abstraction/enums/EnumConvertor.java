@@ -38,14 +38,6 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 	}
 	
 	/**
-	 * If the default handling should be used in the conversion, this exception can
-	 * be thrown to signal to the parent code to perform the default heuristic
-	 * based conversion. This is meant to be thrown from the get(Abstracted|Concrete)EnumCustom
-	 * methods, should they be overridden.
-	 */
-	protected static class UseDefault extends RuntimeException{ }
-	
-	/**
 	 * Given a concrete Enum, returns the abstract version. This is generally
 	 * called in platform specific code. The platform is given a platform specific
 	 * enum, and it needs to return control to the abstract code, so it calls
@@ -55,19 +47,15 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 	 * @return The abstract, platform independent enum
 	 * @throws IllegalArgumentException If the enum lookup failed
 	 */
-	public final Abstracted getAbstractedEnum(Concrete concrete) throws IllegalArgumentException {
+	public final Abstracted getAbstractedEnum(Concrete concrete) {
+		if(concrete == null){
+			return null;
+		}
 		try{
-			try{
-				return getAbstractedEnumCustom(concrete);
-			} catch(UseDefault e){
-				if(concrete == null){
-					return null;
-				}
-				return (Abstracted)Enum.valueOf(abstractedClass, concrete.name());
-			}
+			return getAbstractedEnumCustom(concrete);
 		} catch(IllegalArgumentException e){
 			doLog(concreteClass, abstractedClass, concrete);
-			throw e;
+			return null;
 		}
 	}
 	
@@ -77,11 +65,10 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 	 * where the heuristic isn't valid.
 	 * @param concrete The concrete enum
 	 * @return The abstract enum
-	 * @throws com.laytonsmith.abstraction.enums.EnumConvertor.UseDefault If the default action
 	 * should be taken.
 	 */
-	protected Abstracted getAbstractedEnumCustom(Concrete concrete) throws UseDefault {
-		throw new UseDefault();
+	protected Abstracted getAbstractedEnumCustom(Concrete concrete) throws IllegalArgumentException {
+		return (Abstracted) Enum.valueOf(abstractedClass, concrete.name());
 	}
 	
 	/**
@@ -95,18 +82,14 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 	 * @throws IllegalArgumentException If the enum lookup failed
 	 */
 	public final Concrete getConcreteEnum(Abstracted abstracted){
+		if(abstracted == null){
+			return null;
+		}
 		try{
-			try{
-				return getConcreteEnumCustom(abstracted);
-			} catch(UseDefault e){
-				if(abstracted == null){
-					return null;
-				}
-				return (Concrete)Enum.valueOf(concreteClass, abstracted.name());		
-			}
+			return getConcreteEnumCustom(abstracted);
 		} catch(IllegalArgumentException e){
 			doLog(abstractedClass, concreteClass, abstracted);
-			throw e;
+			return null;
 		}
 	}
 	
@@ -116,11 +99,10 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 	 * where the heuristic isn't valid.
 	 * @param abstracted The abstract enum
 	 * @return The concrete enum
-	 * @throws com.laytonsmith.abstraction.enums.EnumConvertor.UseDefault If the default action
 	 * should be taken.
 	 */
-	protected Concrete getConcreteEnumCustom(Abstracted abstracted) throws UseDefault {
-		throw new UseDefault();
+	protected Concrete getConcreteEnumCustom(Abstracted abstracted) throws IllegalArgumentException {
+		return (Concrete) Enum.valueOf(concreteClass, abstracted.name());
 	}
 	
 	private void doLog(Class from, Class to, Enum value){

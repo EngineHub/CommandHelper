@@ -30,10 +30,13 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CRESecurityException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.persistence.DataSourceException;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -83,8 +86,8 @@ public class FileHandling {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if (!Security.CheckSecurity(location)) {
-					throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
-						Exceptions.ExceptionType.SecurityException, t);
+					throw ConfigRuntimeException.BuildException("You do not have permission to access the file '" + location + "'",
+						CRESecurityException.class, t);
 				}
 			}
 			try {
@@ -95,8 +98,8 @@ public class FileHandling {
 				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.INFO, "Could not read in file while attempting to find "
 					+ location.getAbsolutePath()
 					+ "\nFile " + (location.exists() ? "exists" : "does not exist"), t);
-				throw new ConfigRuntimeException("File could not be read in.",
-					Exceptions.ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException("File could not be read in.",
+					CREIOException.class, t);
 			}
 		}
 
@@ -109,8 +112,8 @@ public class FileHandling {
 		}
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.IOException, Exceptions.ExceptionType.SecurityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIOException.class, CRESecurityException.class};
 		}
 
 		@Override
@@ -140,8 +143,8 @@ public class FileHandling {
 	public static class comp_read extends AbstractFunction implements Optimizable {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -234,8 +237,8 @@ public class FileHandling {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.SecurityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRESecurityException.class};
 		}
 
 		@Override
@@ -254,13 +257,13 @@ public class FileHandling {
 			final String file = args[0].val();
 			final CClosure callback;
 			if(!(args[1] instanceof CClosure)){
-				throw new ConfigRuntimeException("Expected paramter 2 of " + getName() + " to be a closure!", ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException("Expected paramter 2 of " + getName() + " to be a closure!", CRECastException.class, t);
 			} else {
 				callback = ((CClosure)args[1]);
 			}
 			if(!Static.InCmdLine(environment)){
 				if(!Security.CheckSecurity(file)){
-					throw new ConfigRuntimeException("You do not have permission to access the file '" + file + "'", ExceptionType.SecurityException, t);
+					throw ConfigRuntimeException.BuildException("You do not have permission to access the file '" + file + "'", CRESecurityException.class, t);
 				}
 			}
 			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
@@ -274,7 +277,7 @@ public class FileHandling {
 							//It's an SCP transfer
 							returnString = SSHWrapper.SCPReadString(file);
 						} catch (IOException ex) {
-							exception = new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
+							exception = ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
 						}
 					} else {
 						try {
@@ -282,7 +285,7 @@ public class FileHandling {
 							File _file = Static.GetFileFromArgument(file, environment, t, null);
 							returnString = FileUtil.read(_file);
 						} catch (IOException ex) {
-							exception = new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
+							exception = ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
 						}
 					}
 					final Construct cret;
@@ -295,7 +298,7 @@ public class FileHandling {
 					if(exception == null){
 						cex = CNull.NULL;
 					} else {
-						cex = ObjectGenerator.GetGenerator().exception(exception, t);
+						cex = ObjectGenerator.GetGenerator().exception(exception, environment, t);
 					}
 					StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
@@ -346,8 +349,8 @@ public class FileHandling {
 	public static class file_size extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.SecurityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIOException.class, CRESecurityException.class};
 		}
 
 		@Override
@@ -364,8 +367,8 @@ public class FileHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
 			if(!Security.CheckSecurity(location)){
-				throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
-						ExceptionType.SecurityException, t);
+				throw ConfigRuntimeException.BuildException("You do not have permission to access the file '" + location + "'",
+						CRESecurityException.class, t);
 			}
 			return new CInt(location.length(), t);
 		}
@@ -396,8 +399,8 @@ public class FileHandling {
 	public static class read_gzip_binary extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIOException.class};
 		}
 
 		@Override
@@ -417,8 +420,8 @@ public class FileHandling {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if (!Security.CheckSecurity(location)) {
-					throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
-						Exceptions.ExceptionType.SecurityException, t);
+					throw ConfigRuntimeException.BuildException("You do not have permission to access the file '" + location + "'",
+						CRESecurityException.class, t);
 				}
 			}
 			try {
@@ -427,8 +430,8 @@ public class FileHandling {
 			} catch (IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
 					+ "\nFile " + (location.exists() ? "exists" : "does not exist"));
-				throw new ConfigRuntimeException("File could not be read in.",
-					Exceptions.ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException("File could not be read in.",
+					CREIOException.class, t);
 			}
 		}
 
@@ -460,8 +463,8 @@ public class FileHandling {
 	public static class read_binary extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIOException.class};
 		}
 
 		@Override
@@ -481,8 +484,8 @@ public class FileHandling {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if (!Security.CheckSecurity(location)) {
-					throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
-						Exceptions.ExceptionType.SecurityException, t);
+					throw ConfigRuntimeException.BuildException("You do not have permission to access the file '" + location + "'",
+						CRESecurityException.class, t);
 				}
 			}
 			try {
@@ -491,8 +494,8 @@ public class FileHandling {
 			} catch (IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
 					+ "\nFile " + (location.exists() ? "exists" : "does not exist"));
-				throw new ConfigRuntimeException("File could not be read in.",
-					Exceptions.ExceptionType.IOException, t);
+				throw ConfigRuntimeException.BuildException("File could not be read in.",
+					CREIOException.class, t);
 			}
 		}
 
@@ -525,8 +528,8 @@ public class FileHandling {
 	public static class file_parent extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		@Override
@@ -543,7 +546,7 @@ public class FileHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			//TODO: Doesn't work yet.
 			//TODO: Be sure to change over to Static.GetFileFromArgument
-			String path = args[0].val().trim().replace("\\", "/");
+			String path = args[0].val().trim().replace('\\', '/');
 			//Remove duplicate /
 			path = path.replaceAll("(/)(?=.*?/)", path);
 			if("/".equals(path) || path.matches("[a-zA-Z]:/")){
@@ -588,8 +591,8 @@ public class FileHandling {
 	public static class file_resolve extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIOException.class};
 		}
 
 		@Override
@@ -608,7 +611,7 @@ public class FileHandling {
 			try {
 				return new CString(f.getCanonicalPath(), t);
 			} catch (IOException ex) {
-				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
+				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
 			}
 		}
 

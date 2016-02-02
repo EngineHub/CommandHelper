@@ -3,6 +3,8 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static org.junit.Assert.assertEquals;
@@ -362,10 +364,9 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("blarg");
     }
 
-    @Test public void testArrayUsageBeforeDefined() throws Exception{
-        SRun("try(@a[1], msg('success')) msg('end')", fakePlayer);
-        verify(fakePlayer).sendMessage("success");
-        verify(fakePlayer).sendMessage("end");
+    @Test(expected = CREIndexOverflowException.class)
+	public void testArrayUsageBeforeDefined() throws Exception{
+        SRun("@a[1]", fakePlayer);
     }
 
     @Test public void testDirectSquareBracketUsage() throws Exception{

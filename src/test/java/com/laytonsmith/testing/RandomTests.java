@@ -11,9 +11,12 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
+import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -31,9 +34,10 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.functions.DummyFunction;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -55,9 +59,16 @@ import java.util.logging.Logger;
 
 import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.SRun;
+import java.util.HashSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
+import static com.laytonsmith.testing.StaticTest.Run;
+import static com.laytonsmith.testing.StaticTest.SRun;
+import static com.laytonsmith.testing.StaticTest.Run;
+import static com.laytonsmith.testing.StaticTest.SRun;
+import static com.laytonsmith.testing.StaticTest.Run;
+import static com.laytonsmith.testing.StaticTest.SRun;
 
 /**
  *
@@ -74,7 +85,7 @@ public class RandomTests {
 		fakePlayer = StaticTest.GetOnlinePlayer();
 		StaticTest.InstallFakeConvertor(fakePlayer);
 	}
-	private static Set<String> testedFunctions = new TreeSet<String>();
+	private static final Set<String> testedFunctions = new TreeSet<>();
 
 	/**
 	 * This function automatically tests all the boilerplate portions of all
@@ -82,8 +93,9 @@ public class RandomTests {
 	 * that high quality test coverage can be measured.
 	 */
 	@Test
+	@SuppressWarnings({"ThrowableResultIgnored", "CallToPrintStackTrace"})
 	public void testAllBoilerplate() {
-		Map<String, Throwable> uhohs = new HashMap<String, Throwable>();
+		Map<String, Throwable> uhohs = new HashMap<>();
 		String[] requiredMethods = new String[]{"toString", "equals", "hashCode"};
 		//Ensure that all the abstraction objects overloaded
 		StaticTest.InstallFakeServerFrontend();
@@ -112,7 +124,7 @@ public class RandomTests {
 				uhohs.put(c.getName() + " " + required, new NoSuchMethodException(c.getSimpleName() + " does not define " + required));
 			}
 		}
-		Set<String> classDocs = new TreeSet<String>();
+		Set<String> classDocs = new TreeSet<>();
 
 		for (FunctionBase f : FunctionList.getFunctionList(null)) {
 			try {
@@ -125,6 +137,7 @@ public class RandomTests {
 				Class upper = f.getClass().getEnclosingClass();
 				if (upper == null) {
 					fail(f.getName() + " is not enclosed in an upper class.");
+					return;
 				}
 				try {
 					Method m = upper.getMethod("docs", new Class[]{});
@@ -137,24 +150,24 @@ public class RandomTests {
 					} catch (NullPointerException ex) {
 						fail(upper.getName() + "'s docs function should be static");
 					}
-				} catch (IllegalAccessException ex) {
-					Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
-				} catch (IllegalArgumentException ex) {
+				} catch (IllegalAccessException | IllegalArgumentException | SecurityException ex) {
 					Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (InvocationTargetException ex) {
 					fail(upper.getName() + " throws an exception!");
 				} catch (NoSuchMethodException ex) {
 					fail(upper.getName() + " does not include a class level documentation function.");
-				} catch (SecurityException ex) {
-					Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			} catch (Throwable t) {
 				uhohs.put(f.getClass().getName(), t);
 				t.printStackTrace();
 			}
 		}
+		
 		if (!StaticTest.brokenJunk.isEmpty()) {
 			System.err.println("There " + StringUtils.PluralTemplateHelper(StaticTest.brokenJunk.size(), "is %d test that has", "are %d tests that have") + " a failure in extreme circumstances.");
+			for(String s : StaticTest.brokenJunk){
+				uhohs.put(s, null);
+			}
 		}
 		if (!uhohs.isEmpty()) {
 			StringBuilder b = new StringBuilder();
@@ -190,16 +203,17 @@ public class RandomTests {
 	@Test
 	public void testJSONEscapeString() throws MarshalException {
 		CArray ca = new CArray(Target.UNKNOWN);
-		ca.push(C.Int(1));
-		ca.push(C.Double(2.2));
-		ca.push(C.String("string"));
-		ca.push(C.String("\"Quote\""));
-		ca.push(C.Boolean(true));
-		ca.push(C.Boolean(false));
-		ca.push(C.Null());
-		ca.push(C.Void());
-		ca.push(new Command("/Command", Target.UNKNOWN));
-		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)));
+		final Target t = Target.UNKNOWN;
+		ca.push(C.Int(1), t);
+		ca.push(C.Double(2.2), t);
+		ca.push(C.String("string"), t);
+		ca.push(C.String("\"Quote\""), t);
+		ca.push(C.Boolean(true), t);
+		ca.push(C.Boolean(false), t);
+		ca.push(C.Null(), t);
+		ca.push(C.Void(), t);
+		ca.push(new Command("/Command", Target.UNKNOWN), t);
+		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)), t);
 		//[1, 2.2, "string", "\"Quote\"", true, false, null, "", "/Command", [1]]
 		assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]", Construct.json_encode(ca, Target.UNKNOWN));
 	}
@@ -207,16 +221,16 @@ public class RandomTests {
 	@Test
 	public void testJSONDecodeString() throws MarshalException {
 		CArray ca = new CArray(Target.UNKNOWN);
-		ca.push(C.Int(1));
-		ca.push(C.Double(2.2));
-		ca.push(C.String("string"));
-		ca.push(C.String("\"Quote\""));
-		ca.push(C.Boolean(true));
-		ca.push(C.Boolean(false));
-		ca.push(C.Null());
-		ca.push(C.Void());
-		ca.push(new Command("/Command", Target.UNKNOWN));
-		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)));
+		ca.push(C.Int(1), Target.UNKNOWN);
+		ca.push(C.Double(2.2), Target.UNKNOWN);
+		ca.push(C.String("string"), Target.UNKNOWN);
+		ca.push(C.String("\"Quote\""), Target.UNKNOWN);
+		ca.push(C.Boolean(true), Target.UNKNOWN);
+		ca.push(C.Boolean(false), Target.UNKNOWN);
+		ca.push(C.Null(), Target.UNKNOWN);
+		ca.push(C.Void(), Target.UNKNOWN);
+		ca.push(new Command("/Command", Target.UNKNOWN), Target.UNKNOWN);
+		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)), Target.UNKNOWN);
 		StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]", Target.UNKNOWN));
 	}
 
@@ -279,11 +293,11 @@ public class RandomTests {
 			assertEquals(16, d, 0.00001);
 		} catch (ClassNotFoundException cnf) {
 			/* Not much we can really do about this during testing.
-			throw new ConfigRuntimeException("You are missing a required dependency: " + eClass,
-					ExceptionType.PluginInternalException, Target.UNKNOWN);*/
+			throw ConfigRuntimeException.BuildException("You are missing a required dependency: " + eClass,
+					CREPluginInternalException.class, Target.UNKNOWN);*/
 		} catch (ReflectionUtils.ReflectionException rex) {
-			throw new ConfigRuntimeException("Your expression was invalidly formatted",
-					ExceptionType.PluginInternalException, Target.UNKNOWN, rex.getCause());
+			throw ConfigRuntimeException.BuildException("Your expression was invalidly formatted",
+					CREPluginInternalException.class, Target.UNKNOWN, rex.getCause());
 		}
 	}
 

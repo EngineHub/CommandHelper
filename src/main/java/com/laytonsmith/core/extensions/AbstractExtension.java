@@ -2,6 +2,8 @@ package com.laytonsmith.core.extensions;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
+import com.laytonsmith.core.AliasCore;
+
 import java.io.File;
 import java.lang.annotation.Annotation;
 
@@ -69,20 +71,10 @@ public abstract class AbstractExtension implements Extension {
 	 * Called just before the logic in /reloadaliases is called. Won't be called
 	 * if /reloadaliases's help function is called.
 	 * 
-	 * @param reloadGlobals
-	 * @param reloadTimeouts
-	 * @param reloadExecutionQueue
-	 * @param reloadPersistenceConfig
-	 * @param reloadPreferences
-	 * @param reloadProfiler
-	 * @param reloadScripts
-	 * @param reloadExtensions
+	 * @param options
 	 */
 	@Override
-	public void onPreReloadAliases(boolean reloadGlobals, boolean reloadTimeouts, 
-					boolean reloadExecutionQueue, boolean reloadPersistenceConfig, 
-					boolean reloadPreferences, boolean reloadProfiler, 
-					boolean reloadScripts, boolean reloadExtensions) {}
+	public void onPreReloadAliases(AliasCore.ReloadOptions options) {}
 
 	/**
 	 * Called after the logic in /reloadaliases is called. Won't be called

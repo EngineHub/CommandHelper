@@ -4,7 +4,6 @@ import com.laytonsmith.annotations.typeof;
 
 /**
  * Any object that can report a size should implement this.
- *
  */
 @typeof("Sizable")
 public interface Sizable {

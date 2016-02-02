@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
+import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
@@ -52,11 +53,12 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import com.laytonsmith.core.functions.Exceptions;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -268,7 +270,7 @@ public class EntityEvents {
 				Map<String, Construct> ret = evaluate_helper(e);
 				CArray blocks = new CArray(t);
 				for (MCBlock b : e.getBlocks()) {
-					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation()));
+					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation()), t);
 				}
 				ret.put("blocks", blocks);
 				Construct entity = CNull.NULL;
@@ -358,8 +360,8 @@ public class EntityEvents {
 		public BindableEvent convert(CArray manualObject, Target t) {
 			MCEntity p = Static.getEntity(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
 			if (!(p instanceof MCProjectile)) {
-				throw new ConfigRuntimeException("The id was not a projectile",
-						ExceptionType.BadEntityException, Target.UNKNOWN);
+				throw ConfigRuntimeException.BuildException("The id was not a projectile",
+						CREBadEntityException.class, Target.UNKNOWN);
 			}
 			return EventBuilder.instantiate(MCProjectileHitEvent.class, p);
 		}
@@ -575,12 +577,12 @@ public class EntityEvents {
 				throws EventException {
 			if (event instanceof MCEntityDeathEvent) {
 				MCEntityDeathEvent e = (MCEntityDeathEvent) event;
-				Target t = Target.UNKNOWN;
+				final Target t = Target.UNKNOWN;
 				MCLivingEntity dead = e.getEntity();
 				Map<String, Construct> map = evaluate_helper(event);
 				CArray drops = new CArray(t);
 				for(MCItemStack is : e.getDrops()){
-					drops.push(ObjectGenerator.GetGenerator().item(is, t));
+					drops.push(ObjectGenerator.GetGenerator().item(is, t), t);
 				}
 				map.put("type", new CString(dead.getType().name(), t));
 				map.put("id", new CString(dead.getUniqueId().toString(), t));
@@ -619,7 +621,7 @@ public class EntityEvents {
 						value = new CArray(Target.UNKNOWN);
 					}
 					if(!(value instanceof CArray)){
-						throw new ConfigRuntimeException("drops must be an array, or null", Exceptions.ExceptionType.CastException, value.getTarget());
+						throw ConfigRuntimeException.BuildException("drops must be an array, or null", CRECastException.class, value.getTarget());
 					}
 					e.clearDrops();
 					CArray drops = (CArray) value;
@@ -706,7 +708,7 @@ public class EntityEvents {
 				try {
 					type = MCMobs.valueOf(value.val());
 				} catch (IllegalArgumentException iae) {
-					throw new Exceptions.FormatException(value.val() + " is not a valid mob type.", Target.UNKNOWN);
+					throw new CREFormatException(value.val() + " is not a valid mob type.", Target.UNKNOWN);
 				}
 				e.setType(type);
 			}
@@ -730,15 +732,17 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{id: <macro> The entityID | type: <macro> The type of entity being damaged | cause: <macro>"
+			return "{id: <macro> The entityID | type: <macro> The type of entity being damaged"
+				+ " | cause: <macro> One of " + StringUtils.Join(MCDamageCause.values(), ", ", ", or ", " or ")
 				+ " | world: <string match>} Fires when any loaded entity takes damage."
 				+ " {type: The type of entity the got damaged | id: The entityID of the victim"
 				+ " | player: the player who got damaged (only present if type is PLAYER) | world | location"
-				+ " | cause: The type of damage | amount | damager: If the source of damage is a player this will"
-				+ " contain their name, otherwise it will be the entityID of the damager (only available when"
-				+ " an entity causes damage) | shooter: The name of the player who shot, otherwise the entityID"
+				+ " | cause: The type of damage | amount | finalamount: health entity will lose after modifiers"
+				+ " | damager: If the source of damage is a player this will contain their name, otherwise it will be"
+				+ " the entityID of the damager (only available when an entity causes damage)"
+				+ " | shooter: The name of the player who shot, otherwise the entityID"
 				+ " (only available when damager is a projectile)}"
-				+ " {amount: the amount of damage recieved (in half hearts)}"
+				+ " {amount: raw amount of damage (in half hearts)}"
 				+ " {}";
 		}
 
@@ -1134,13 +1138,13 @@ public class EntityEvents {
 		@Override
 		public String docs() {
 			return "{id: <macro> The entityID | damager: <string match>} "
-            		+ "This event is called when a player is damaged by another entity."
-                    + "{player: The player being damaged | damager: The type of entity causing damage | "
-            		+ "amount: amount of damage caused | cause: the cause of damage | "
-                    + "data: the attacking player's name or the shooter if damager is a projectile | "
-            		+ "id: EntityID of the damager | location} "
-                    + "{amount} "
-                    + "{player|amount|damager|cause|data|id}";
+					+ "This event is called when a player is damaged by another entity."
+					+ "{player: The player being damaged | damager: The type of entity causing damage"
+					+ " | amount: raw amount of damage caused | finalamount: health player will lose after modifiers"
+					+ " | cause: the cause of damage | data: the attacking player's name or the shooter if damager is a"
+					+ " projectile | id: EntityID of the damager | location} "
+					+ "{amount} "
+					+ "{player|amount|damager|cause|data|id}";
 		}
 
 		@Override
@@ -1164,21 +1168,22 @@ public class EntityEvents {
 		public Map<String, Construct> evaluate(BindableEvent e)
 				throws EventException {
 			if(e instanceof MCEntityDamageByEntityEvent){
-                MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
-                Map<String, Construct> map = evaluate_helper(e);
+				MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
+				Map<String, Construct> map = evaluate_helper(e);
 				Target t = Target.UNKNOWN;
 
-                // Guaranteed to be a player via matches
-                String name = ((MCPlayer)event.getEntity()).getName();
-                map.put("player", new CString(name, t));
-                String dtype = event.getDamager().getType().name();
-                map.put("damager",  new CString(dtype, t));
-                map.put("cause",  new CString(event.getCause().name(), t));
-                map.put("amount",  new CDouble(event.getDamage(), t));
+				// Guaranteed to be a player via matches
+				String name = ((MCPlayer)event.getEntity()).getName();
+				map.put("player", new CString(name, t));
+				String dtype = event.getDamager().getType().name();
+				map.put("damager",  new CString(dtype, t));
+				map.put("cause",  new CString(event.getCause().name(), t));
+				map.put("amount",  new CDouble(event.getDamage(), t));
+				map.put("finalamount", new CDouble(event.getFinalDamage(), t));
 				map.put("id", new CString(event.getDamager().getUniqueId().toString(), t));
 				map.put("location", ObjectGenerator.GetGenerator().location(event.getEntity().getLocation()));
 
-                Construct data = CNull.NULL;
+				Construct data = CNull.NULL;
 				if(event.getDamager() instanceof MCPlayer) {
 					data = new CString(((MCPlayer)event.getDamager()).getName(), t);
 				} else if (event.getDamager() instanceof MCProjectile) {
@@ -1550,6 +1555,7 @@ public class EntityEvents {
 			map.put("id", new CString(victim.getUniqueId().toString(), Target.UNKNOWN));
 			map.put("cause", new CString(event.getCause().name(), Target.UNKNOWN));
 			map.put("amount", new CDouble(event.getDamage(), Target.UNKNOWN));
+			map.put("finalamount", new CDouble(event.getFinalDamage(), Target.UNKNOWN));
 			map.put("world", new CString(event.getEntity().getWorld().getName(), Target.UNKNOWN));
 			map.put("location", ObjectGenerator.GetGenerator().location(event.getEntity().getLocation()));
 

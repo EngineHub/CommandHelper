@@ -19,8 +19,11 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
@@ -42,7 +45,7 @@ public class Debug {
 //                try {
 //                    Static.LogDebug(message);
 //                } catch (IOException ex) {
-//                    Logger.getLogger(Debug.class.getName()).log(Level.SEVERE, null, ex);
+//                    Logger.getLogger(Debug.class.getVariableName()).log(Level.SEVERE, null, ex);
 //                }
 //            }
 //        }
@@ -66,7 +69,7 @@ public class Debug {
 //    @api
 //    public static class dump_listeners extends AbstractFunction {
 //
-//        public String getName() {
+//        public String getVariableName() {
 //            return "dump_listeners";
 //        }
 //
@@ -78,8 +81,8 @@ public class Debug {
 //            return " {[typeFilter], [verboseLevel]} Send null as the typeFilter to see possibilities. VerboseLevel can be 1-4";
 //        }
 //
-//        public ExceptionType[] thrown() {
-//            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.SecurityException};
+//        public Class<? extends CREThrowable>[] thrown() {
+//            return new Class[]{CRECastException.class, CRESecurityException.class};
 //        }
 //
 //        public boolean isRestricted() {
@@ -100,7 +103,7 @@ public class Debug {
 //
 //        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
-//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, t);
+//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //            }
 //            StringBuilder b = new StringBuilder("\n");
 //            if (args.length >= 1 && args[0] instanceof CNull) {
@@ -167,8 +170,8 @@ public class Debug {
 //                        Set<Method> parentSet = new HashSet(Arrays.asList(parent.getDeclaredMethods()));
 //                        for (Method m : l.getListener().getClass().getDeclaredMethods()) {
 //                            for (Method pm : parentSet) {
-//                                if (pm.getName().equals(m.getName()) && Arrays.equals(pm.getParameterTypes(), m.getParameterTypes())) {
-//                                    b.append("\t\t").append(m.getReturnType().getSimpleName()).append(" ").append(m.getName()).append("(").append(Static.strJoin(m.getParameterTypes(), ", ")).append(");\n");
+//                                if (pm.getVariableName().equals(m.getVariableName()) && Arrays.equals(pm.getParameterTypes(), m.getParameterTypes())) {
+//                                    b.append("\t\t").append(m.getReturnType().getSimpleName()).append(" ").append(m.getVariableName()).append("(").append(Static.strJoin(m.getParameterTypes(), ", ")).append(");\n");
 //                                }
 //                            }
 //                        }
@@ -212,8 +215,8 @@ public class Debug {
         }
 
 		@Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.IOException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREIOException.class};
         }
 
 		@Override
@@ -236,7 +239,7 @@ public class Debug {
                 try {
                     Static.LogDebug(MethodScriptFileLocations.getDefault().getConfigDirectory(), args[0].val(), LogLevel.DEBUG);
                 } catch (IOException ex) {
-                    throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
+                    throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
                 }
             }
             return CVoid.VOID;
@@ -247,8 +250,8 @@ public class Debug {
 	public static class trace extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -266,12 +269,12 @@ public class Debug {
 			if(args[0] instanceof IVariable){
 				if(Prefs.DebugMode()){
 					IVariable ivar = (IVariable)args[0];
-					Construct val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar.getName(), t);
-					StreamUtils.GetSystemOut().println(ivar.getName() + ": " + val.val());
+					Construct val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar.getVariableName(), t);
+					StreamUtils.GetSystemOut().println(ivar.getVariableName() + ": " + val.val());
 				}
 				return CVoid.VOID;
 			} else {
-				throw new Exceptions.CastException("Expecting an ivar, but recieved " + args[0].getCType() + " instead", t);
+				throw new CRECastException("Expecting an ivar, but recieved " + args[0].getCType() + " instead", t);
 			}
 			//TODO: Once Prefs are no longer static, check to see if debug mode is on during compilation, and
 			//if so, remove this function entirely
@@ -309,7 +312,7 @@ public class Debug {
 //    @api
 //    public static class debug_log_events extends AbstractFunction {
 //
-//        public String getName() {
+//        public String getVariableName() {
 //            return "debug_log_events";
 //        }
 //
@@ -325,8 +328,8 @@ public class Debug {
 //                    + " will happen. logToScreen defaults to false. This should only be turned on when you are testing, or have very strict filters set.";
 //        }
 //
-//        public ExceptionType[] thrown() {
-//            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.SecurityException};
+//        public Class<? extends CREThrowable>[] thrown() {
+//            return new Class[]{CRECastException.class, CRESecurityException.class};
 //        }
 //
 //        public boolean isRestricted() {
@@ -347,7 +350,7 @@ public class Debug {
 //
 //        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
-//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, t);
+//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //            }
 //            boolean on = Static.getBoolean(args[0]);
 //            int level = 1;
@@ -366,7 +369,7 @@ public class Debug {
 //    @api
 //    public static class set_debug_event_filter extends AbstractFunction {
 //
-//        public String getName() {
+//        public String getVariableName() {
 //            return "set_debug_event_filter";
 //        }
 //
@@ -379,8 +382,8 @@ public class Debug {
 //                    + " available filters, you can run dump_listeners(null). As these events occur, they will be logged according to the logging level.";
 //        }
 //
-//        public ExceptionType[] thrown() {
-//            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.SecurityException};
+//        public Class<? extends CREThrowable>[] thrown() {
+//            return new Class[]{CRECastException.class, CREFormatException.class, CRESecurityException.class};
 //        }
 //
 //        public boolean isRestricted() {
@@ -401,7 +404,7 @@ public class Debug {
 //
 //        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
-//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, t);
+//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //            }
 //            Set<Event.Type> set = new HashSet<Event.Type>();
 //            if (args[0] instanceof CString) {
@@ -414,7 +417,7 @@ public class Debug {
 //                        Event.Type t = Event.Type.valueOf(args[0].val().toUpperCase());
 //                        set.add(t);
 //                    } catch (IllegalArgumentException e) {
-//                        throw new ConfigRuntimeException(args[0].val() + " is not a valid filter type. The filter log has not been changed.", ExceptionType.FormatException, t);
+//                        throw new ConfigRuntimeException(args[0].val() + " is not a valid filter type. The filter log has not been changed.", CREFormatException.class, t);
 //                    }
 //                }
 //            } else if (args[0] instanceof CArray) {
@@ -422,11 +425,11 @@ public class Debug {
 //                    try {
 //                        set.add(Event.Type.valueOf(((CArray) args[0]).get(c, t).val().toUpperCase()));
 //                    } catch (IllegalArgumentException e) {
-//                        throw new ConfigRuntimeException(c + " is not a valid filter type. The filter log has not been changed.", ExceptionType.FormatException, t);
+//                        throw new ConfigRuntimeException(c + " is not a valid filter type. The filter log has not been changed.", CREFormatException.class, t);
 //                    }
 //                }
 //            } else {
-//                throw new ConfigRuntimeException("The parameter specified to " + this.getName() + " must be an array (or a single string). The filter array has not been changed.", ExceptionType.CastException, t);
+//                throw new ConfigRuntimeException("The parameter specified to " + this.getVariableName() + " must be an array (or a single string). The filter array has not been changed.", CRECastException.class, t);
 //            }
 //            synchronized (EVENT_LOGGING_FILTER) {
 //                EVENT_LOGGING_FILTER.clear();
@@ -441,7 +444,7 @@ public class Debug {
 //    @api
 //    public static class set_debug_plugin_filter extends AbstractFunction {
 //
-//        public String getName() {
+//        public String getVariableName() {
 //            return "set_debug_plugin_filter";
 //        }
 //
@@ -456,8 +459,8 @@ public class Debug {
 //                    + " it may be commonly referred to as.";
 //        }
 //
-//        public ExceptionType[] thrown() {
-//            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.SecurityException};
+//        public Class<? extends CREThrowable>[] thrown() {
+//            return new Class[]{CRECastException.class, CRESecurityException.class};
 //        }
 //
 //        public boolean isRestricted() {
@@ -478,7 +481,7 @@ public class Debug {
 //
 //        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
-//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, t);
+//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //            }
 //            if (args[0] instanceof CString) {
 //                EVENT_PLUGIN_FILTER.clear();
@@ -488,7 +491,7 @@ public class Debug {
 //                    EVENT_PLUGIN_FILTER.add(((CArray) args[0]).get(c, t).val().toUpperCase());
 //                }
 //            } else {
-//                throw new ConfigRuntimeException(this.getName() + " expects the argument to be a single string, or an array of strings.", ExceptionType.CastException, t);
+//                throw new ConfigRuntimeException(this.getVariableName() + " expects the argument to be a single string, or an array of strings.", CRECastException.class, t);
 //            }
 //            return CVoid.VOID;
 //        }
@@ -498,7 +501,7 @@ public class Debug {
 	public static class dump_threads extends AbstractFunction{
 
 		@Override
-		public ExceptionType[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return null;
 		}
 
@@ -517,7 +520,7 @@ public class Debug {
 			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
 			CArray carray = new CArray(t);
 			for(Thread thread : threadSet){
-				carray.push(new CString(thread.getName(), t));
+				carray.push(new CString(thread.getName(), t), t);
 			}
 			return carray;
 		}
@@ -550,8 +553,8 @@ public class Debug {
 	public static class heap_dump extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PluginInternalException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPluginInternalException.class};
 		}
 
 		@Override
@@ -570,7 +573,7 @@ public class Debug {
 			try{
 				HeapDumper.dumpHeap(file.getAbsolutePath(), true);
 			} catch(Throwable tt){
-				throw new ConfigRuntimeException("Could not create a heap dump: " + tt.getMessage(), ExceptionType.PluginInternalException, t, tt);
+				throw ConfigRuntimeException.BuildException("Could not create a heap dump: " + tt.getMessage(), CREPluginInternalException.class, t, tt);
 			}
 			return CVoid.VOID;
 		}

@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.ArgumentSuite;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.CommandExecutor;
+import com.laytonsmith.PureUtilities.Common.Annotations.AnnotationChecks;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.Misc;
 import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
@@ -15,7 +16,6 @@ import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.compiler.AliasCompiler;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -43,7 +43,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -231,6 +230,8 @@ public class Main {
 			if (args.length == 0) {
 				args = new String[]{"--help"};
 			}
+			
+			AnnotationChecks.checkForceImplementation();
 
 			ArgumentParser mode;
 			ArgumentParser.ArgumentParserResults parsedArgs;
@@ -334,7 +335,7 @@ public class Main {
 				PersistenceNetwork pn = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 						new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile().getCanonicalPath()
 								//This replace is required on Windows.
-								.replace("\\", "/")), options);
+								.replace('\\', '/')), options);
 				Map<String[], String> values = pn.getNamespace(new String[]{});
 				for(String [] s : values.keySet()){
 					StreamUtils.GetSystemOut().println(StringUtils.Join(s, ".") + "=" + values.get(s));

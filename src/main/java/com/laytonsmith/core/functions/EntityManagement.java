@@ -85,9 +85,20 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityTypeException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
+import com.laytonsmith.core.exceptions.CRE.CRELengthException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.CRE.CREUnageableMobException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -116,17 +127,12 @@ public class EntityManagement {
 		public Boolean runAsync() {
 			return false;
 		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
 	}
 
 	public static abstract class EntityGetterFunction extends EntityFunction {
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREBadEntityException.class};
 		}
 
 		@Override
@@ -137,9 +143,9 @@ public class EntityManagement {
 
 	public static abstract class EntitySetterFunction extends EntityFunction {
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.LengthException,
-					ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRELengthException.class,
+					CREBadEntityException.class};
 		}
 
 		@Override
@@ -152,9 +158,9 @@ public class EntityManagement {
 	public static class all_entities extends EntityFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException,
-					ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class, CREFormatException.class,
+					CRECastException.class};
 		}
 
 		@Override
@@ -164,7 +170,7 @@ public class EntityManagement {
 			if (args.length == 0) {
 				for (MCWorld w : Static.getServer().getWorlds()) {
 					for (MCEntity e : w.getEntities()) {
-						ret.push(new CString(e.getUniqueId().toString(), t));
+						ret.push(new CString(e.getUniqueId().toString(), t), t);
 					}
 				}
 			} else {
@@ -173,7 +179,7 @@ public class EntityManagement {
 				if (args.length == 3) {
 					w = Static.getServer().getWorld(args[0].val());
 					if (w == null) {
-						throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+						throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), CREInvalidWorldException.class, t);
 					}
 					try {
 						int x = Static.getInt32(args[1], t);
@@ -186,26 +192,31 @@ public class EntityManagement {
 						c = w.getChunkAt(ObjectGenerator.GetGenerator().location(l, w, t));
 					}
 					for (MCEntity e : c.getEntities()) {
-						ret.push(new CString(e.getUniqueId().toString(), t));
+						ret.push(new CString(e.getUniqueId().toString(), t), t);
 					}
 				} else {
 					if (args[0] instanceof CArray) {
 						c = ObjectGenerator.GetGenerator().location(args[0], null, t).getChunk();
 						for (MCEntity e : c.getEntities()) {
-							ret.push(new CString(e.getUniqueId().toString(), t));
+							ret.push(new CString(e.getUniqueId().toString(), t), t);
 						}
 					} else {
 						w = Static.getServer().getWorld(args[0].val());
 						if (w == null) {
-							throw new ConfigRuntimeException("Unknown world: " + args[0].val(), ExceptionType.InvalidWorldException, t);
+							throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), CREInvalidWorldException.class, t);
 						}
 						for (MCEntity e : w.getEntities()) {
-							ret.push(new CString(e.getUniqueId().toString(), t));
+							ret.push(new CString(e.getUniqueId().toString(), t), t);
 						}
 					}
 				}
 			}
 			return ret;
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 
 		@Override
@@ -266,6 +277,11 @@ public class EntityManagement {
 		public String docs() {
 			return "boolean {entityID} Returns true if entity exists, otherwise false.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -293,6 +309,11 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "boolean {entityID} Returns true if entity is living, otherwise false.";
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -325,6 +346,11 @@ public class EntityManagement {
 							+ " world: world, x: -3451.96, y: 65.0, yaw: -170.9, z: 718.521}")
 			};
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 
 	}
 
@@ -332,9 +358,9 @@ public class EntityManagement {
 	public static class set_entity_loc extends EntitySetterFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException,
-					ExceptionType.CastException, ExceptionType.InvalidWorldException, ExceptionType.LengthException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CREFormatException.class,
+					CRECastException.class, CREInvalidWorldException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -345,7 +371,7 @@ public class EntityManagement {
 			if (args[1] instanceof CArray) {
 				l = ObjectGenerator.GetGenerator().location((CArray) args[1], e.getWorld(), t);
 			} else {
-				throw new Exceptions.FormatException("An array was expected but recieved " + args[1], t);
+				throw new CREFormatException("An array was expected but recieved " + args[1], t);
 			}
 			return CBoolean.get(e.teleport(l));
 		}
@@ -374,6 +400,11 @@ public class EntityManagement {
 						"set_entity_loc(852, array(x: 214, y: 64, z: 1812, world: 'world', yaw: -170, pitch: 10))",
 						"This also sets location and direction")
 			};
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 
 	}
@@ -409,6 +440,11 @@ public class EntityManagement {
 							"{magnitude: 0.0, x: 0.0, y: 0.0, z: 0.0}")
 			};
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 
 	}
 
@@ -443,6 +479,11 @@ public class EntityManagement {
 							"The entity just hopped, unless it was an item frame or painting.")
 			};
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 
 	}
 
@@ -455,8 +496,8 @@ public class EntityManagement {
 			if (ent == null) {
 				return CVoid.VOID;
 			} else if (ent instanceof MCHumanEntity) {
-				throw new ConfigRuntimeException("Cannot remove human entity (" + ent.getUniqueId() + ")!",
-						ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("Cannot remove human entity (" + ent.getUniqueId() + ")!",
+						CREBadEntityException.class, t);
 			} else {
 				ent.remove();
 				return CVoid.VOID;
@@ -474,6 +515,11 @@ public class EntityManagement {
 				+ "Note: you can't remove players. As a safety measure for working with NPC plugins, it will "
 				+ "not work on anything human, even if it is not a player.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 
 	}
 
@@ -481,8 +527,8 @@ public class EntityManagement {
 	public static class entity_type extends EntityGetterFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override
@@ -506,6 +552,11 @@ public class EntityManagement {
 			return "mixed {entityID} Returns the EntityType of the entity with the specified ID."
 					+ " Returns null if the entity does not exist.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -518,7 +569,7 @@ public class EntityManagement {
 			if (ent instanceof MCAgeable){
 				return CBoolean.get(((MCAgeable)ent).getCanBreed());
 			} else {
-				throw new ConfigRuntimeException("Entity ID must be from an ageable entity!", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("Entity ID must be from an ageable entity!", CREBadEntityException.class, t);
 			}
 		}
 
@@ -530,6 +581,11 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "boolean {entityID} Returns if an entity is set to be breedable.";
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -545,7 +601,7 @@ public class EntityManagement {
 			if (ent instanceof MCAgeable){
 				((MCAgeable)ent).setCanBreed(breed);
 			} else {
-				throw new ConfigRuntimeException("Entity ID must be from an ageable entity!", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("Entity ID must be from an ageable entity!", CREBadEntityException.class, t);
 			}
 
 			return CVoid.VOID;
@@ -559,6 +615,11 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "void {entityID, boolean} Set an entity to be breedable.";
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -584,15 +645,20 @@ public class EntityManagement {
 		public String docs() {
 			return "int {entityID} Returns the entity age as an integer, represented by server ticks.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
 	public static class set_entity_age extends EntitySetterFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException,
-					ExceptionType.RangeException, ExceptionType.LengthException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREBadEntityException.class,
+					CRERangeException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -600,7 +666,7 @@ public class EntityManagement {
 			int age = Static.getInt32(args[1], t);
 
 			if (age < 1) {
-				throw new ConfigRuntimeException("Entity age can't be less than 1 server tick.", ExceptionType.RangeException, t);
+				throw ConfigRuntimeException.BuildException("Entity age can't be less than 1 server tick.", CRERangeException.class, t);
 			}
 
 			MCEntity ent = Static.getEntity(args[0], t);
@@ -621,15 +687,20 @@ public class EntityManagement {
 		public String docs() {
 			return "void {entityID, int} Sets the age of the entity to the specified int, represented by server ticks.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
 	public static class get_mob_age extends EntityGetterFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.UnageableMobException, ExceptionType.LengthException,
-					ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREUnageableMobException.class, CRELengthException.class,
+					CREBadEntityException.class};
 		}
 
 		@Override
@@ -641,7 +712,7 @@ public class EntityManagement {
 				MCAgeable mob = ((MCAgeable) ent);
 				return new CInt(mob.getAge(), t);
 			} else {
-				throw new ConfigRuntimeException("The specified entity does not age", ExceptionType.UnageableMobException, t);
+				throw ConfigRuntimeException.BuildException("The specified entity does not age", CREUnageableMobException.class, t);
 			}
 		}
 
@@ -655,15 +726,20 @@ public class EntityManagement {
 			return "int {entityID} Returns the mob's age as an integer. Zero represents the point of adulthood. Throws an"
 					+ " UnageableMobException if the mob is not a type that ages";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
 	public static class set_mob_age extends EntityFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.UnageableMobException, ExceptionType.CastException,
-					ExceptionType.BadEntityException, ExceptionType.LengthException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREUnageableMobException.class, CRECastException.class,
+					CREBadEntityException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -682,7 +758,7 @@ public class EntityManagement {
 				mob.setAgeLock(lock);
 				return CVoid.VOID;
 			} else {
-				throw new ConfigRuntimeException("The specified entity does not age", ExceptionType.UnageableMobException, t);
+				throw ConfigRuntimeException.BuildException("The specified entity does not age", CREUnageableMobException.class, t);
 			}
 		}
 
@@ -701,6 +777,11 @@ public class EntityManagement {
 			return "void {entityID, int[, lockAge]} sets the age of the mob to the specified int, and locks it at that age"
 					+ " if lockAge is true, but by default it will not. Throws a UnageableMobException if the mob does"
 					+ " not age naturally.";
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -728,6 +809,11 @@ public class EntityManagement {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{new ExampleScript("Basic use", "msg(get_mob_effects(259))",
 					"{{ambient: false, id: 1, seconds: 30, strength: 1}}")};
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 
 	}
@@ -760,9 +846,9 @@ public class EntityManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.FormatException,
-					ExceptionType.BadEntityException, ExceptionType.RangeException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREFormatException.class,
+					CREBadEntityException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -792,15 +878,20 @@ public class EntityManagement {
 				return CBoolean.TRUE;
 			}
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api(environments={CommandHelperEnvironment.class})
 	public static class shoot_projectile extends EntityFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.BadEntityTypeException,
-				ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CREBadEntityTypeException.class,
+				CREFormatException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -842,8 +933,8 @@ public class EntityManagement {
 				}
 
 				if (shooter_id == null && from == null) {
-					throw new ConfigRuntimeException("Could not find an entity or location matching " + args[0] + "!",
-							ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Could not find an entity or location matching " + args[0] + "!",
+							CREFormatException.class, t);
 				}
 			} else {
 				Static.AssertPlayerNonNull(p, t);
@@ -869,8 +960,8 @@ public class EntityManagement {
 				}
 
 				if (target_id == null && to == null) {
-					throw new ConfigRuntimeException("Could not find an entity or location matching " + args[2] + " for target!",
-							ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Could not find an entity or location matching " + args[2] + " for target!",
+							CREFormatException.class, t);
 				}
 			}
 
@@ -894,13 +985,13 @@ public class EntityManagement {
 					try {
 						projectile_shoot = MCProjectileType.valueOf(args[1].val().toUpperCase());
 					} catch (IllegalArgumentException badEnum) {
-						throw new ConfigRuntimeException(args[1] + " is not a valid Projectile", ExceptionType.FormatException, t);
+						throw ConfigRuntimeException.BuildException(args[1] + " is not a valid Projectile", CREFormatException.class, t);
 					}
 				} else {
 					try {
 						entity_shoot = MCEntityType.valueOf(args[1].val().toUpperCase());
 					} catch (IllegalArgumentException badEnum) {
-						throw new ConfigRuntimeException(args[1] + " is not a valid entity type", ExceptionType.BadEntityTypeException, t);
+						throw ConfigRuntimeException.BuildException(args[1] + " is not a valid entity type", CREBadEntityTypeException.class, t);
 					}
 				}
 			} else {
@@ -912,7 +1003,7 @@ public class EntityManagement {
 			}
 
 			if (args.length < 3 && shooter_id == null) {
-				throw new ConfigRuntimeException("You must specify target location if you want shoot from location, not entity.", ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("You must specify target location if you want shoot from location, not entity.", CREFormatException.class, t);
 			}
 
 			if (shooter_id != null && to == null) {
@@ -960,6 +1051,11 @@ public class EntityManagement {
 					+ " of projectile. Returns the EntityID of the entity. Valid entities types: "
 					+ StringUtils.Join(MCEntityType.types(), ", ", ", or ", " or ");
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -984,8 +1080,8 @@ public class EntityManagement {
 			List<String> types = new ArrayList<String>();
 
 			if (!(args[0] instanceof CArray)) {
-				throw new ConfigRuntimeException("Expecting an array at parameter 1 of entities_in_radius",
-						ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("Expecting an array at parameter 1 of entities_in_radius",
+						CREBadEntityException.class, t);
 			}
 
 			loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
@@ -1027,7 +1123,7 @@ public class EntityManagement {
 			}
 			CArray entities = new CArray(t);
 			for (UUID e : eSet) {
-				entities.push(new CString(e.toString(), t));
+				entities.push(new CString(e.toString(), t), t);
 			}
 
 			return entities;
@@ -1043,8 +1139,8 @@ public class EntityManagement {
 				try {
 					entityType = MCEntityType.valueOf(type.toUpperCase());
 				} catch (IllegalArgumentException e) {
-					throw new ConfigRuntimeException(String.format("Wrong entity type: %s", type),
-							ExceptionType.BadEntityException, t);
+					throw ConfigRuntimeException.BuildException(String.format("Wrong entity type: %s", type),
+							CREBadEntityException.class, t);
 				}
 
 				newTypes.add(entityType.name());
@@ -1062,9 +1158,14 @@ public class EntityManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException,
-					ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREBadEntityException.class,
+					CREFormatException.class};
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -1092,14 +1193,19 @@ public class EntityManagement {
 			return "entityID {entityID} Gets the mob's target if it has one, and returns the target's entityID."
 					+ " If there is no target, null is returned instead.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	//@api
 	public static class set_mob_target extends EntitySetterFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.LengthException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -1123,6 +1229,11 @@ public class EntityManagement {
 			return "void {entityID, entityID} The first ID is the entity who is targetting, the second is the target."
 					+ " It can also be set to null to clear the current target.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -1133,8 +1244,8 @@ public class EntityManagement {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCEntityEquipment eq = le.getEquipment();
 			if (eq == null) {
-				throw new ConfigRuntimeException("Entities of type \"" + le.getType() + "\" do not have equipment.",
-						ExceptionType.BadEntityTypeException, t);
+				throw ConfigRuntimeException.BuildException("Entities of type \"" + le.getType() + "\" do not have equipment.",
+						CREBadEntityTypeException.class, t);
 			}
 			Map<MCEquipmentSlot, MCItemStack> eqmap = le.getEquipment().getAllEquipment();
 			CArray ret = CArray.GetAssociativeArray(t);
@@ -1163,6 +1274,11 @@ public class EntityManagement {
 							+ " weapon: {data: 5, enchants: {} meta: {display: Excalibur, lore: null}, type: 276}}")
 			};
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -1173,8 +1289,8 @@ public class EntityManagement {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCEntityEquipment ee = le.getEquipment();
 			if (ee == null) {
-				throw new ConfigRuntimeException("Entities of type \"" + le.getType() + "\" do not have equipment.",
-						ExceptionType.BadEntityTypeException, t);
+				throw ConfigRuntimeException.BuildException("Entities of type \"" + le.getType() + "\" do not have equipment.",
+						CREBadEntityTypeException.class, t);
 			}
 			Map<MCEquipmentSlot, MCItemStack> eq = ee.getAllEquipment();
 			if (args[1] instanceof CNull) {
@@ -1186,11 +1302,11 @@ public class EntityManagement {
 					try {
 						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ObjectGenerator.GetGenerator().item(ea.get(key, t), t));
 					} catch (IllegalArgumentException iae) {
-						throw new Exceptions.FormatException("Not an equipment slot: " + key, t);
+						throw new CREFormatException("Not an equipment slot: " + key, t);
 					}
 				}
 			} else {
-				throw new Exceptions.FormatException("Expected argument 2 to be an array", t);
+				throw new CREFormatException("Expected argument 2 to be an array", t);
 			}
 			ee.setAllEquipment(eq);
 			return CVoid.VOID;
@@ -1216,6 +1332,11 @@ public class EntityManagement {
 				new ExampleScript("Basic usage", "set_mob_equipment(spawn_mob('SKELETON')[0], array(WEAPON: array(type: 261)))", "Gives a bow to a skeleton")
 			};
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -1235,6 +1356,11 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "double {entityID} Returns the maximum health of this living entity.";
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -1264,6 +1390,11 @@ public class EntityManagement {
 			return new ExampleScript[]{new ExampleScript("Basic use",
 					"set_max_health(256, 10)", "The entity will now only have 5 hearts max.")};
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -1286,6 +1417,11 @@ public class EntityManagement {
 			return "int {entityID} Returns the number of seconds until this entity"
 					+ " stops being on fire, 0 if it already isn't.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 
 	}
 
@@ -1298,7 +1434,7 @@ public class EntityManagement {
 			MCEntity ent = Static.getEntity(args[0], t);
 			int setTicks = (int) Static.msToTicks(Static.getInt(args[1], t)*1000);
 			if (setTicks < 0) {
-				throw new Exceptions.FormatException("Seconds cannot be less than 0", t);
+				throw new CREFormatException("Seconds cannot be less than 0", t);
 			}
 			ent.setFireTicks(setTicks);
 			return CVoid.VOID;
@@ -1315,6 +1451,11 @@ public class EntityManagement {
 					+ " given number of seconds. Throws a FormatException"
 					+ " if seconds is less than 0.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 
 	}
 
@@ -1328,7 +1469,7 @@ public class EntityManagement {
 			try {
 				mee = MCEntityEffect.valueOf(args[1].val().toUpperCase());
 			} catch (IllegalArgumentException iae) {
-				throw new Exceptions.FormatException("Unknown effect at arg 2.", t);
+				throw new CREFormatException("Unknown effect at arg 2.", t);
 			}
 			ent.playEffect(mee);
 			return CVoid.VOID;
@@ -1349,6 +1490,11 @@ public class EntityManagement {
 					+ " dead, they can only log out. Possible effects are: "
 					+ StringUtils.Join(MCEntityEffect.values(), ", ", ", or ", " or ");
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 
 	}
 
@@ -1361,7 +1507,7 @@ public class EntityManagement {
 			try {
 				return new CString(le.getCustomName(), t);
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), CRECastException.class, t);
 			}
 		}
 
@@ -1374,6 +1520,11 @@ public class EntityManagement {
 		public String docs() {
 			return "string {entityID} Returns the name of the given mob.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -1385,7 +1536,7 @@ public class EntityManagement {
 			try {
 				le.setCustomName(args[1].val());
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), CRECastException.class, t);
 			}
 			return CVoid.VOID;
 		}
@@ -1400,16 +1551,21 @@ public class EntityManagement {
 			return "void {entityID, name} Sets the name of the given mob. This"
 					+ " automatically truncates if it is more than 64 characters.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class spawn_entity extends EntityFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
-					ExceptionType.BadEntityException, ExceptionType.InvalidWorldException,
-					ExceptionType.PlayerOfflineException, ExceptionType.NotFoundException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class,
+					CREBadEntityException.class, CREInvalidWorldException.class,
+					CREPlayerOfflineException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -1428,8 +1584,8 @@ public class EntityManagement {
 				} else if (cs instanceof MCBlockCommandSender){
 					l = ((MCBlockCommandSender) cs).getBlock().getRelative(MCBlockFace.UP).getLocation();
 				} else {
-					throw new ConfigRuntimeException("A physical commandsender must exist or location must be explicit.",
-							ExceptionType.PlayerOfflineException, t);
+					throw ConfigRuntimeException.BuildException("A physical commandsender must exist or location must be explicit.",
+							CREPlayerOfflineException.class, t);
 				}
 			}
 			if (args.length >= 2) {
@@ -1438,20 +1594,20 @@ public class EntityManagement {
 			try {
 				entType = MCEntityType.valueOf(args[0].val().toUpperCase());
 				if (entType == null) {
-					throw new ConfigRuntimeException(
+					throw ConfigRuntimeException.BuildException(
 							"Could not find the entity type internal object (are you running in cmdline mode?)",
-							ExceptionType.NotFoundException, t);
+							CRENotFoundException.class, t);
 				}
 				if (!entType.isSpawnable()) {
-					throw new Exceptions.FormatException("Unspawnable entitytype: " + args[0].val(), t);
+					throw new CREFormatException("Unspawnable entitytype: " + args[0].val(), t);
 				}
 			} catch (IllegalArgumentException iae) {
-				throw new Exceptions.FormatException("Unknown entitytype: " + args[0].val(), t);
+				throw new CREFormatException("Unknown entitytype: " + args[0].val(), t);
 			}
 			for (int i = 0; i < qty; i++) {
 				switch (entType.getAbstracted()) {
 					case DROPPED_ITEM:
-						CArray c = new CArray(t);
+						CArray c = CArray.GetAssociativeArray(t);
 						c.set("type", new CInt(1, t), t);
 						c.set("qty", new CInt(qty, t), t);
 						MCItemStack is = ObjectGenerator.GetGenerator().item(c, t);
@@ -1464,7 +1620,7 @@ public class EntityManagement {
 					default:
 						ent = l.getWorld().spawn(l, entType);
 				}
-				ret.push(new CString(ent.getUniqueId().toString(), t));
+				ret.push(new CString(ent.getUniqueId().toString(), t), t);
 			}
 			return ret;
 		}
@@ -1495,6 +1651,11 @@ public class EntityManagement {
 					+ ". Falling_blocks will be sand by default, and dropped_items will be stone,"
 					+ " as these entities already have their own functions for spawning.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -1515,7 +1676,7 @@ public class EntityManagement {
 				rider = Static.getEntity(args[1], t);
 			}
 			if ((horse == null && rider == null) || horse == rider) {
-				throw new Exceptions.FormatException("Horse and rider cannot be the same entity", t);
+				throw new CREFormatException("Horse and rider cannot be the same entity", t);
 			} else if (horse == null) {
 				success = rider.leaveVehicle();
 			} else if (rider == null) {
@@ -1538,6 +1699,11 @@ public class EntityManagement {
 					+ " rider will leave whatever it is riding. If horse and rider are both valid entities,"
 					+ " rider will ride horse. The function returns the success of whatever operation is done."
 					+ " If horse and rider are both null, or otherwise the same, a FormatException is thrown.";
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -1563,6 +1729,11 @@ public class EntityManagement {
 		public String docs() {
 			return "mixed {entityID} Returns the ID of the given entity's rider, or null if it doesn't have one.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -1587,14 +1758,19 @@ public class EntityManagement {
 		public String docs() {
 			return "mixed {entityID} Returns the ID of the given entity's vehicle, or null if it doesn't have one.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
 	public static class get_entity_max_speed extends EntityGetterFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.BadEntityTypeException, ExceptionType.LengthException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CREBadEntityTypeException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -1609,8 +1785,8 @@ public class EntityManagement {
 				return new CDouble(((MCMinecart) e).getMaxSpeed(), t);
 			}
 
-			throw new ConfigRuntimeException("Given entity must be a boat or minecart.",
-					ExceptionType.BadEntityTypeException, t);
+			throw ConfigRuntimeException.BuildException("Given entity must be a boat or minecart.",
+					CREBadEntityTypeException.class, t);
 		}
 
 		@Override
@@ -1623,15 +1799,20 @@ public class EntityManagement {
 			return "double {entityID} Returns a max speed for given entity. Make sure that the entity is a boat"
 					+ " or minecart.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
 	public static class set_entity_max_speed extends EntitySetterFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.BadEntityTypeException,
-					ExceptionType.CastException, ExceptionType.LengthException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CREBadEntityTypeException.class,
+					CRECastException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -1646,8 +1827,8 @@ public class EntityManagement {
 			} else if(e instanceof MCMinecart) {
 				((MCMinecart) e).setMaxSpeed(speed);
 			} else {
-				throw new ConfigRuntimeException("Given entity must be a boat or minecart.",
-						ExceptionType.BadEntityTypeException, t);
+				throw ConfigRuntimeException.BuildException("Given entity must be a boat or minecart.",
+						CREBadEntityTypeException.class, t);
 			}
 
 			return CVoid.VOID;
@@ -1663,6 +1844,11 @@ public class EntityManagement {
 			return "void {entityID} Sets a max speed for given entity. Make sure that the entity is a boat"
 					+ " or minecart.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -1672,9 +1858,9 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntityEquipment eq = Static.getLivingEntity(args[0], t).getEquipment();
 			if (eq.getHolder() instanceof MCPlayer) {
-				throw new ConfigRuntimeException(getName() + " does not work on players.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " does not work on players.", CREBadEntityException.class, t);
 			}
-			CArray ret = new CArray(t);
+			CArray ret = CArray.GetAssociativeArray(t);
 			for (Map.Entry<MCEquipmentSlot, Float> ent : eq.getAllDropChances().entrySet()) {
 				ret.set(ent.getKey().name(), new CDouble(ent.getValue(), t), t);
 			}
@@ -1691,6 +1877,11 @@ public class EntityManagement {
 			return "array {entityID} Returns an associative array of the drop rate for each equipment slot."
 					+ " If the rate is 0, the equipment will not drop. If it is 1, it is guaranteed to drop.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -1701,7 +1892,7 @@ public class EntityManagement {
 			MCEntityEquipment ee = Static.getLivingEntity(args[0], t).getEquipment();
 			Map<MCEquipmentSlot, Float> eq = ee.getAllDropChances();
 			if (ee.getHolder() instanceof MCPlayer) {
-				throw new ConfigRuntimeException(getName() + " does not work on players.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException(getName() + " does not work on players.", CREBadEntityException.class, t);
 			}
 			if (args[1] instanceof CNull) {
 				for (Map.Entry<MCEquipmentSlot, Float> ent : eq.entrySet()) {
@@ -1713,11 +1904,11 @@ public class EntityManagement {
 					try {
 						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), Static.getDouble32(ea.get(key, t), t));
 					} catch (IllegalArgumentException iae) {
-						throw new Exceptions.FormatException("Not an equipment slot: " + key, t);
+						throw new CREFormatException("Not an equipment slot: " + key, t);
 					}
 				}
 			} else {
-				throw new Exceptions.FormatException("Expected argument 2 to be an array", t);
+				throw new CREFormatException("Expected argument 2 to be an array", t);
 			}
 			ee.setAllDropChances(eq);
 			return CVoid.VOID;
@@ -1734,6 +1925,11 @@ public class EntityManagement {
 					+ " but does not work on players. Passing null instead of an array will automatically"
 					+ " set all rates to 0, which will cause nothing to drop. A rate of 1 will guarantee a drop.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -1744,7 +1940,7 @@ public class EntityManagement {
 			try {
 				return CBoolean.get(Static.getEntity(args[0], t).isCustomNameVisible());
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), CRECastException.class, t);
 			}
 		}
 
@@ -1759,6 +1955,11 @@ public class EntityManagement {
 					+ " If this is true it will be as visible as player names, otherwise it will only be"
 					+ " visible when near the mob.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -1769,7 +1970,7 @@ public class EntityManagement {
 			try {
 				Static.getEntity(args[0], t).setCustomNameVisible(Static.getBoolean(args[1]));
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.CastException, t);
+				throw ConfigRuntimeException.BuildException(e.getMessage(), CRECastException.class, t);
 			}
 			return CVoid.VOID;
 		}
@@ -1784,6 +1985,11 @@ public class EntityManagement {
 			return "void {entityID, boolean} Sets the visibility of a mob's custom name."
 					+ " True means it will be visible from a distance, like a playername."
 					+ " False means it will only be visible when near the mob.";
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -1803,6 +2009,11 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "boolean {entityID} Returns whether the specified living entity can pick up items.";
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -1824,6 +2035,11 @@ public class EntityManagement {
 		public String docs() {
 			return "void {entityID, boolean} Sets a living entity's ability to pick up items.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -1842,6 +2058,11 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "boolean {entityID} Returns whether the specified living entity will despawn. True means it will not.";
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -1863,13 +2084,18 @@ public class EntityManagement {
 		public String docs() {
 			return "void {entityID, boolean} Sets whether a living entity will despawn. True means it will not.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api public static class get_art_at extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1894,7 +2120,7 @@ public class EntityManagement {
 					return new CString(((MCPainting)e).getArt().name(), t);
 				}
 			}
-			throw new ConfigRuntimeException("There is no painting at the specified location", ExceptionType.BadEntityException, t);
+			throw ConfigRuntimeException.BuildException("There is no painting at the specified location", CREBadEntityException.class, t);
 		}
 
 		@Override
@@ -1924,8 +2150,8 @@ public class EntityManagement {
 	@api public static class set_art_at extends AbstractFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -1949,7 +2175,7 @@ public class EntityManagement {
 			try{
 				art = MCArt.valueOf(args[1].val());
 			} catch(IllegalArgumentException e){
-				throw new ConfigRuntimeException("Invalid type: " + args[1].val(), ExceptionType.FormatException, t);
+				throw ConfigRuntimeException.BuildException("Invalid type: " + args[1].val(), CREFormatException.class, t);
 			}
 			//If there's already a painting there, just use that one. Otherwise, spawn a new one.
 
@@ -2015,6 +2241,11 @@ public class EntityManagement {
 			return "int {entityID} Returns the entityID of the entity that is holding the given living entity's leash,"
 					+ " or null if it isn't being held.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -2045,6 +2276,11 @@ public class EntityManagement {
 					+ " but the only non-living entity that will persist as a holder across restarts is the leash hitch."
 					+ " Bats, enderdragons, players, and withers can not be held by leashes due to minecraft limitations.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -2064,6 +2300,11 @@ public class EntityManagement {
 		public String docs() {
 			return "boolean {entityID} returns whether the entity is touching the ground";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -2082,6 +2323,11 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CInt(Static.getLivingEntity(args[0], t).getRemainingAir(), t);
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -2103,6 +2349,11 @@ public class EntityManagement {
 			Static.getLivingEntity(args[0], t).setRemainingAir(Static.getInt32(args[1], t));
 			return CVoid.VOID;
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -2121,6 +2372,11 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CInt(Static.getLivingEntity(args[0], t).getMaximumAir(), t);
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -2142,6 +2398,11 @@ public class EntityManagement {
 			Static.getLivingEntity(args[0], t).setMaximumAir(Static.getInt32(args[1], t));
 			return CVoid.VOID;
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -2158,9 +2419,9 @@ public class EntityManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException,
-					ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class,
+					CREBadEntityException.class};
 		}
 
 		@Override
@@ -2178,7 +2439,7 @@ public class EntityManagement {
 			if (args.length >= 2) {
 				CArray givenTransparents = Static.getArray(args[1], t);
 				if (givenTransparents.inAssociativeMode()) {
-					throw new ConfigRuntimeException("The array must not be associative.", ExceptionType.CastException, t);
+					throw ConfigRuntimeException.BuildException("The array must not be associative.", CRECastException.class, t);
 				}
 				transparents = new HashSet<Byte>();
 				for (Construct blockID : givenTransparents.asList()) {
@@ -2190,9 +2451,14 @@ public class EntityManagement {
 			}
 			CArray lineOfSight = new CArray(t);
 			for (MCBlock block : entity.getLineOfSight(transparents, maxDistance)) {
-				lineOfSight.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false));
+				lineOfSight.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), t);
 			}
 			return lineOfSight;
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -2210,8 +2476,8 @@ public class EntityManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.LengthException, ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREBadEntityException.class};
 		}
 
 		@Override
@@ -2224,6 +2490,11 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return CBoolean.get(Static.getLivingEntity(args[0], t).hasLineOfSight(Static.getEntity(args[1], t)));
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -2245,6 +2516,11 @@ public class EntityManagement {
 		public String docs() {
 			return "string {entityUUID} returns the entity id for unique persistent UUID";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 
 	}
 
@@ -2265,6 +2541,11 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "string {entityID} returns the persistent unique id of the entity";
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -2307,7 +2588,7 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
-			CArray specArray = new CArray(t);
+			CArray specArray = CArray.GetAssociativeArray(t);
 
 			switch (entity.getType().getAbstracted()) {
 				case ARROW:
@@ -2488,6 +2769,11 @@ public class EntityManagement {
 			}
 			return specArray;
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 
 		//used to ensure that the indexes are the same in entity_spec(), set_entity_spec(), and in the documentation.
 		private static final String KEY_ARROW_CRITICAL = "critical";
@@ -2559,11 +2845,11 @@ public class EntityManagement {
 		}
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{
-					ExceptionType.CastException, ExceptionType.BadEntityException, ExceptionType.IndexOverflowException,
-					ExceptionType.IndexOverflowException, ExceptionType.RangeException, ExceptionType.FormatException,
-					ExceptionType.LengthException
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{
+					CRECastException.class, CREBadEntityException.class, CREIndexOverflowException.class,
+					CREIndexOverflowException.class, CRERangeException.class, CREFormatException.class,
+					CRELengthException.class
 			};
 		}
 
@@ -2576,7 +2862,7 @@ public class EntityManagement {
 		}
 
 		private static void throwException(String index, Target t) throws ConfigRuntimeException {
-			throw new ConfigRuntimeException("Unknown or uneditable specification: " + index, ExceptionType.IndexOverflowException, t);
+			throw ConfigRuntimeException.BuildException("Unknown or uneditable specification: " + index, CREIndexOverflowException.class, t);
 		}
 
 		@Override
@@ -2595,7 +2881,7 @@ public class EntityManagement {
 							case entity_spec.KEY_ARROW_KNOCKBACK:
 								int k = Static.getInt32(specArray.get(index, t), t);
 								if (k < 0) {
-									throw new ConfigRuntimeException("Knockback can not be negative.", ExceptionType.RangeException, t);
+									throw ConfigRuntimeException.BuildException("Knockback can not be negative.", CRERangeException.class, t);
 								} else {
 									arrow.setKnockbackStrength(k);
 								}
@@ -2734,7 +3020,7 @@ public class EntityManagement {
 								try {
 									hook.setBiteChance(Static.getDouble(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("The chance must be between 0.0 and 1.0", ExceptionType.RangeException, t);
+									throw ConfigRuntimeException.BuildException("The chance must be between 0.0 and 1.0", CRERangeException.class, t);
 								}
 								break;
 							default:
@@ -2761,21 +3047,21 @@ public class EntityManagement {
 								try {
 									horse.setColor(MCHorseColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid horse color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid horse color: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_STYLE:
 								try {
 									horse.setPattern(MCHorsePattern.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid horse style: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid horse style: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_VARIANT:
 								try {
 									horse.setVariant(MCHorseVariant.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid horse variant: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid horse variant: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_CHEST:
@@ -2785,14 +3071,14 @@ public class EntityManagement {
 								try {
 									horse.setJumpStrength(Static.getDouble(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("The jump strength must be between 0.0 and 2.0", ExceptionType.RangeException, t);
+									throw ConfigRuntimeException.BuildException("The jump strength must be between 0.0 and 2.0", CRERangeException.class, t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
 									horse.setDomestication(Static.getInt32(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("The domestication level can not be higher than the max domestication level.", ExceptionType.RangeException, t);
+									throw ConfigRuntimeException.BuildException("The domestication level can not be higher than the max domestication level.", CRERangeException.class, t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_MAXDOMESTICATION:
@@ -2837,7 +3123,7 @@ public class EntityManagement {
 								try {
 									frame.setRotation(MCRotation.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid rotation type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid rotation type: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							default:
@@ -2904,7 +3190,7 @@ public class EntityManagement {
 								try {
 									ocelot.setCatType(MCOcelotType.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid ocelot type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid ocelot type: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							case entity_spec.KEY_OCELOT_SITTING:
@@ -2923,7 +3209,7 @@ public class EntityManagement {
 								try {
 									painting.setArt(MCArt.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid art type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid art type: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							default:
@@ -2984,7 +3270,7 @@ public class EntityManagement {
 								try {
 									rabbit.setRabbitType(MCRabbitType.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid rabbit type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid rabbit type: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							default:
@@ -3000,7 +3286,7 @@ public class EntityManagement {
 								try {
 									sheep.setColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid sheep color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid sheep color: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							case entity_spec.KEY_SHEEP_SHEARED:
@@ -3019,7 +3305,7 @@ public class EntityManagement {
 								try {
 									skeleton.setSkeletonType(MCSkeletonType.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid skeleton type: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid skeleton type: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							default:
@@ -3047,7 +3333,7 @@ public class EntityManagement {
 								try {
 									villager.setProfession(MCProfession.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid profession: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid profession: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							default:
@@ -3081,7 +3367,7 @@ public class EntityManagement {
 								try {
 									wolf.setCollarColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
-									throw new ConfigRuntimeException("Invalid collar color: " + specArray.get(index, t).val(), ExceptionType.FormatException, t);
+									throw ConfigRuntimeException.BuildException("Invalid collar color: " + specArray.get(index, t).val(), CREFormatException.class, t);
 								}
 								break;
 							case entity_spec.KEY_WOLF_SITTING:
@@ -3115,6 +3401,11 @@ public class EntityManagement {
 
 			return CVoid.VOID;
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -3147,8 +3438,13 @@ public class EntityManagement {
 					return CNull.NULL;
 				}
 			} else {
-				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("The given entity is not a projectile.", CREBadEntityException.class, t);
 			}
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -3173,16 +3469,21 @@ public class EntityManagement {
 				if (args[1] instanceof CNull) {
 					((MCProjectile) entity).setShooter(null);
 				} else if (args[1] instanceof CArray) {
-					throw new ConfigRuntimeException("Setting a block as a shooter is not yet supported",
-							ExceptionType.FormatException, t);
+					throw ConfigRuntimeException.BuildException("Setting a block as a shooter is not yet supported",
+							CREFormatException.class, t);
 				} else {
 					((MCProjectile) entity).setShooter(Static.getLivingEntity(args[1], t));
 				}
 			} else {
-				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("The given entity is not a projectile.", CREBadEntityException.class, t);
 			}
 
 			return CVoid.VOID;
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -3206,8 +3507,13 @@ public class EntityManagement {
 			if (entity instanceof MCProjectile) {
 				return CBoolean.get(((MCProjectile) entity).doesBounce());
 			} else {
-				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("The given entity is not a projectile.", CREBadEntityException.class, t);
 			}
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -3231,20 +3537,25 @@ public class EntityManagement {
 			if (entity instanceof MCProjectile) {
 				((MCProjectile) entity).setBounce(Static.getBoolean(args[1]));
 			} else {
-				throw new ConfigRuntimeException("The given entity is not a projectile.", ExceptionType.BadEntityException, t);
+				throw ConfigRuntimeException.BuildException("The given entity is not a projectile.", CREBadEntityException.class, t);
 			}
 
 			return CVoid.VOID;
  		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
 	public static class damage_entity extends EntityFunction {
 
 		@Override
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException,
-				ExceptionType.BadEntityTypeException, ExceptionType.BadEntityException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class,
+				CREBadEntityTypeException.class, CREBadEntityException.class};
 		}
 
 		@Override
@@ -3252,8 +3563,8 @@ public class EntityManagement {
 			MCEntity entity = Static.getEntity(args[0], t);
 
 			if (!(entity instanceof MCLivingEntity)) {
-				throw new ConfigRuntimeException("The entity id provided doesn't"
-					+ " belong to a living entity", ExceptionType.BadEntityTypeException, t);
+				throw ConfigRuntimeException.BuildException("The entity id provided doesn't"
+					+ " belong to a living entity", CREBadEntityTypeException.class, t);
 			}
 
 			MCLivingEntity living = (MCLivingEntity)entity;
@@ -3284,6 +3595,11 @@ public class EntityManagement {
 			return "void {entityId, amount, [sourceEntityId]} Damage an entity. If given,"
 					+ " the source entity will be attributed as the damager.";
 		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 
 	@api
@@ -3302,6 +3618,11 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CDouble(Static.getEntity(args[0], t).getFallDistance(), t);
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 
@@ -3322,6 +3643,11 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getEntity(args[0], t).setFallDistance(ArgumentValidation.getDouble32(args[1], t));
 			return CVoid.VOID;
+		}
+		
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 	}
 }

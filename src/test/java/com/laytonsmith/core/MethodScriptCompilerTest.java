@@ -30,6 +30,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static com.laytonsmith.testing.StaticTest.RunCommand;
+import static com.laytonsmith.testing.StaticTest.SRun;
 //import org.powermock.api.mockito.PowerMockito;
 //import org.powermock.core.classloader.annotations.PowerMockIgnore;
 //import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -569,7 +571,7 @@ public class MethodScriptCompilerTest {
 //    @Test public void testCompile11() throws Exception{
 //
 //        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
-//        when(CommandHelperPlugin.perms.hasPermission(fakePlayer.getName(), "ch.alias.safe")).thenReturn(true);
+//        when(CommandHelperPlugin.perms.hasPermission(fakePlayer.getVariableName(), "ch.alias.safe")).thenReturn(true);
 //        CommandHelperPlugin.myServer = fakeServer;
 //        when(fakeServer.getOnlinePlayers()).thenReturn(new MCPlayer[]{fakePlayer});
 //        String config = "safe:/test $var = >>>\n"
@@ -582,7 +584,7 @@ public class MethodScriptCompilerTest {
 //        assertTrue(s.match("/test 2"));
 //        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, Target.UNKNOWN)}), env, null);
 //        verify(fakePlayer).sendMessage("2");
-//        verify(CommandHelperPlugin.perms).hasPermission(fakePlayer.getName(), "ch.alias.safe");
+//        verify(CommandHelperPlugin.perms).hasPermission(fakePlayer.getVariableName(), "ch.alias.safe");
 //    }
 
     @Test public void testCompile12() throws Exception{
@@ -695,17 +697,19 @@ public class MethodScriptCompilerTest {
         MethodScriptCompiler.compile(MethodScriptCompiler.lex("2 / 0", null, true));
     }
 
-    @Test public void testLineNumberCorrectInException1() throws Exception{
-        String script =
-                "try(\n" //Line 1
-                + "assign(@a, array(1, 2))\n" //Line 2
-                + "\n" //Line 3
-                + "assign(@d, @a[@b])\n" //Line 4
-                + "\n" //Line 5
-                + ", @e, msg(@e[3]))\n"; //Line 6
-        SRun(script, fakePlayer);
-        verify(fakePlayer).sendMessage("4");
-    }
+	// If people complain that the old format is broken, I can see about re-adding this. For now,
+	// this is covered in the other exception handler test
+//    @Test public void testLineNumberCorrectInException1() throws Exception{
+//        String script =
+//                "try(\n" //Line 1
+//                + "assign(@a, array(1, 2))\n" //Line 2
+//                + "\n" //Line 3
+//                + "assign(@d, @a[2])\n" //Line 4
+//                + "\n" //Line 5
+//                + ", @e, msg(@e))\n"; //Line 6
+//        SRun(script, fakePlayer);
+//        verify(fakePlayer).sendMessage("4");
+//    }
 
     @Test public void testLineNumberCorrectInException2() throws Exception{
         String script =
@@ -715,7 +719,7 @@ public class MethodScriptCompilerTest {
         try{
             SRun(script, fakePlayer);
         } catch(ConfigRuntimeException e){
-            assertEquals(3, e.getLineNum());
+            assertEquals(3, e.getTarget().line());
         }
 
     }
@@ -731,7 +735,7 @@ public class MethodScriptCompilerTest {
         try{
             SRun(script, fakePlayer);
         } catch(ConfigRuntimeException e){
-            assertEquals(5, e.getLineNum());
+            assertEquals(5, e.getTarget().line());
         }
     }
 
