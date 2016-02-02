@@ -11,7 +11,7 @@ import java.util.List;
  * available in this class (or have an equivalent Mirror version).
  */
 public class MethodMirror extends AbstractMethodMirror {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 	
 	public MethodMirror(ClassReferenceMirror parentClass, List<AnnotationMirror> annotations, ModifierMirror modifiers, 
 			ClassReferenceMirror type, String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic){

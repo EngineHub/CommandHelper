@@ -111,7 +111,7 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 		}
 		AbstractMethodMirror m = (AbstractMethodMirror)obj;
 		return 
-				this.params.equals(m.params)
+				Objects.equals(this.params, m.params)
 				&& this.isVararg == m.isVararg
 				&& this.isSynthetic == m.isSynthetic;
 	}
