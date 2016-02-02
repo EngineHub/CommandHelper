@@ -4011,6 +4011,16 @@ public class DataHandling {
 			return null;
 		}
 
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "mixed @a = 5; // Actually an int\n"
+						+ "msg(@a instanceof int); // true\n"
+						+ "msg(@a instanceof string); // false\n"),
+				new ExampleScript("Functional usage", "instanceof(5, int)")
+			};
+		}
+
 	}
 
 }
