@@ -64,6 +64,8 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopBreakException;
 import com.laytonsmith.core.exceptions.LoopContinueException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.tools.docgen.templates.ArrayIteration;
+import com.laytonsmith.tools.docgen.templates.Loops;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -91,6 +93,7 @@ public class DataHandling {
 	}
 
 	@api
+	@seealso({com.laytonsmith.tools.docgen.templates.Arrays.class, ArrayIteration.class})
 	public static class array extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -165,6 +168,7 @@ public class DataHandling {
 	}
 
 	@api
+	@seealso({com.laytonsmith.tools.docgen.templates.Arrays.class, ArrayIteration.class})
 	public static class associative_array extends AbstractFunction {
 
 		@Override
@@ -222,6 +226,7 @@ public class DataHandling {
 	}
 
 	@api
+	@seealso({com.laytonsmith.tools.docgen.templates.Variables.class})
 	public static class assign extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -387,6 +392,7 @@ public class DataHandling {
 	@api
 	@noboilerplate
 	@breakable
+	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class, com.laytonsmith.tools.docgen.templates.ArrayIteration.class})
 	public static class _for extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -612,6 +618,7 @@ public class DataHandling {
 
 	@api(environments = CommandHelperEnvironment.class)
 	@breakable
+	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class, ArrayIteration.class})
 	public static class foreach extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -963,7 +970,7 @@ public class DataHandling {
 	@api
 	@noboilerplate
 	@breakable
-	@seealso({foreach.class})
+	@seealso({foreach.class, Loops.class, ArrayIteration.class})
 	public static class foreachelse extends foreach {
 
 		@Override
@@ -1036,6 +1043,7 @@ public class DataHandling {
 	@api
 	@noboilerplate
 	@breakable
+	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class})
 	public static class _while extends AbstractFunction {
 
 		@Override
@@ -1137,6 +1145,7 @@ public class DataHandling {
 	@api
 	@noboilerplate
 	@breakable
+	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class})
 	public static class _dowhile extends AbstractFunction {
 
 		@Override
@@ -2862,6 +2871,7 @@ public class DataHandling {
 
 	@api(environments = CommandHelperEnvironment.class)
 	@unbreakable
+	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class})
 	public static class closure extends AbstractFunction {
 
 		@Override
@@ -2993,6 +3003,7 @@ public class DataHandling {
 
 	@api
 	@unbreakable
+	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class})
 	public static class iclosure extends closure {
 
 		@Override
@@ -3127,6 +3138,7 @@ public class DataHandling {
 	}
 
 	@api
+	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class})
 	public static class execute extends AbstractFunction {
 
 		@Override

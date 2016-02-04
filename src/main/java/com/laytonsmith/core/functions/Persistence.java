@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
@@ -52,6 +53,7 @@ public class Persistence {
 
 	@api(environments={GlobalEnv.class})
 	@noboilerplate
+	@seealso({get_value.class, clear_value.class, com.laytonsmith.tools.docgen.templates.PersistenceNetwork.class})
 	public static class store_value extends AbstractFunction {
 
 		@Override
@@ -134,6 +136,7 @@ public class Persistence {
 
 	@api(environments={GlobalEnv.class})
 	@noboilerplate
+	@seealso({store_value.class, get_values.class, has_value.class, com.laytonsmith.tools.docgen.templates.PersistenceNetwork.class})
 	public static class get_value extends AbstractFunction {
 
 		@Override
@@ -210,6 +213,7 @@ public class Persistence {
 
 	@api(environments={GlobalEnv.class})
 	@noboilerplate
+	@seealso({com.laytonsmith.tools.docgen.templates.PersistenceNetwork.class})
 	public static class get_values extends AbstractFunction {
 
 		@Override
@@ -298,6 +302,7 @@ public class Persistence {
 
 	@api(environments={GlobalEnv.class})
 	@noboilerplate
+	@seealso({get_value.class, com.laytonsmith.tools.docgen.templates.PersistenceNetwork.class})
 	public static class has_value extends AbstractFunction {
 
 		@Override
@@ -354,6 +359,7 @@ public class Persistence {
 
 	@api(environments={GlobalEnv.class})
 	@noboilerplate
+	@seealso({store_value.class, com.laytonsmith.tools.docgen.templates.PersistenceNetwork.class})
 	public static class clear_value extends AbstractFunction {
 
 		@Override

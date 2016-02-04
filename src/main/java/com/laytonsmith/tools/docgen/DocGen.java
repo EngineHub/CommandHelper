@@ -25,6 +25,7 @@ import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.tools.SimpleSyntaxHighlighter;
+import com.laytonsmith.tools.docgen.templates.Template;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -131,14 +132,19 @@ public class DocGen {
 			if(seeAlso != null && seeAlso.length > 0){
 				seeAlsoText += "===See Also===\n";
 				boolean first = true;
-				for(Class<? extends Documentation> c : seeAlso){
+				for(Class c : seeAlso){
+					if(!first){
+						seeAlsoText += ", ";
+					}
+					first = false;
 					if(Function.class.isAssignableFrom(c)){
 						Function f2 = (Function)c.newInstance();
-						if(!first){
-							seeAlsoText += ", ";
-						}
-						first = false;
-						seeAlsoText += "[[CommandHelper/" + (staged?"Staged/":"") + "API/" + f2.getName() + "|" + f2.getName() + "]]";
+						seeAlsoText += "<code>[[CommandHelper/" + (staged?"Staged/":"") + "API/" + f2.getName() + "|" + f2.getName() + "]]</code>";
+					} else if(Template.class.isAssignableFrom(c)){
+						Template t = (Template)c.newInstance();
+						seeAlsoText += "[[CommandHelper/" + (staged?"Staged/":"") + t.getName() + "|Learning Trail: " + t.getDisplayName() + "]]";
+					} else {
+						throw new Error("Unsupported class found in @seealso annotation: " + c.getName());
 					}
 				}
 			}

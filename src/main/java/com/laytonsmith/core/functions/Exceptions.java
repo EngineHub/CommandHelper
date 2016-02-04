@@ -66,7 +66,7 @@ public class Exceptions {
 	}
 
 	@api(environments=CommandHelperEnvironment.class)
-	@seealso(_throw.class)
+	@seealso({_throw.class, com.laytonsmith.tools.docgen.templates.Exceptions.class})
 	public static class _try extends AbstractFunction {
 
 		@Override
@@ -209,7 +209,7 @@ public class Exceptions {
 	}
 
 	@api
-	@seealso(_try.class)
+	@seealso({_try.class, com.laytonsmith.tools.docgen.templates.Exceptions.class})
 	public static class _throw extends AbstractFunction {
 
 		@Override
@@ -304,7 +304,7 @@ public class Exceptions {
 	}
 	
 	@api
-	@seealso({_throw.class, _try.class})
+	@seealso({_throw.class, _try.class, com.laytonsmith.tools.docgen.templates.Exceptions.class})
 	public static class set_uncaught_exception_handler extends AbstractFunction{
 
 		@Override
@@ -553,6 +553,7 @@ public class Exceptions {
 	}
 
 	@api
+	@seealso({com.laytonsmith.tools.docgen.templates.Exceptions.class})
 	public static class get_stack_trace extends AbstractFunction {
 
 		@Override

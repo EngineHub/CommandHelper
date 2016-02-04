@@ -124,7 +124,7 @@ public class ArrayHandling {
 	}
 
 	@api(environments={GlobalEnv.class})
-	@seealso({array_set.class, array.class})
+	@seealso({array_set.class, array.class, com.laytonsmith.tools.docgen.templates.Arrays.class})
 	public static class array_get extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -347,7 +347,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	@seealso({array_get.class, array.class, array_push.class})
+	@seealso({array_get.class, array.class, array_push.class, com.laytonsmith.tools.docgen.templates.Arrays.class})
 	public static class array_set extends AbstractFunction {
 
 		@Override
