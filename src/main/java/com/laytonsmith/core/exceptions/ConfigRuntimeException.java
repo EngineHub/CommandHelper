@@ -214,7 +214,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		PrintMessage(log, console, player, type, message, ex, st);
 		if(ex != null){
 			// Otherwise, a CCE
-			if(ex.getCause() != null){
+			if(ex.getCause() != null && ex.getCause() instanceof ConfigRuntimeException){
 				ex = (ConfigRuntimeException) ex.getCause();
 			}
 			while(ex instanceof CRECausedByWrapper) {
