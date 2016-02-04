@@ -11,6 +11,7 @@
 nbactions-provisional-build.xml
 nbactions-release-profile.xml
 nbactions.xml
+nb-configuration.xml
 true
 /logs/
 /.logs/

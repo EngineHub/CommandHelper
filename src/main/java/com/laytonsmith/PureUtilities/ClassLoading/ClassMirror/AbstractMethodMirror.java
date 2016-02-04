@@ -25,6 +25,7 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 	public AbstractMethodMirror(ClassReferenceMirror parentClass, List<AnnotationMirror> annotations, ModifierMirror modifiers, 
 			ClassReferenceMirror type, String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic){
 		super(parentClass, annotations, modifiers, type, name);
+		Objects.requireNonNull(params, "params cannot be null");
 		this.params = params;
 		this.isVararg = isVararg;
 		this.isSynthetic = isSynthetic;
@@ -40,6 +41,7 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 			String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic){
 		super(parentClass, null, modifiers, type, name);
 		annotations = new ArrayList<>();
+		Objects.requireNonNull(params, "params cannot be null");
 		this.params = params;
 		this.isVararg = isVararg;
 		this.isSynthetic = isSynthetic;
@@ -109,7 +111,7 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 		}
 		AbstractMethodMirror m = (AbstractMethodMirror)obj;
 		return 
-				this.params.equals(m.params)
+				Objects.equals(this.params, m.params)
 				&& this.isVararg == m.isVararg
 				&& this.isSynthetic == m.isSynthetic;
 	}
