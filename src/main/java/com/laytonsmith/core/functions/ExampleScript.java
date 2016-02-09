@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.OSUtils;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
@@ -84,6 +85,16 @@ public class ExampleScript {
 		this(description, script, output, false);
 	}
 
+	/**
+	 * Works like {@link #ExampleScript(java.lang.String, java.lang.String, java.lang.String)} but prints
+	 * a message in the normal output when a compile error is encountered, instead of triggering the exceptional
+	 * handling.
+	 * @param description
+	 * @param script
+	 * @param output
+	 * @param intentionalCompileError
+	 * @throws ConfigCompileException 
+	 */
 	private ExampleScript(String description, String script, String output, boolean intentionalCompileError) throws ConfigCompileException{
 		this.description = description;
 		this.originalScript = script;
@@ -165,13 +176,7 @@ public class ExampleScript {
 				}
 			});
 			fakeCore = new FakeCore();
-			try {
-				Field f = CommandHelperPlugin.class.getDeclaredField("ac");
-				f.setAccessible(true);
-				f.set(null, fakeCore);
-			} catch (Exception ex) {
-				throw new RuntimeException(ex);
-			}
+			ReflectionUtils.set(CommandHelperPlugin.class, "ac", fakeCore);
 		}
 
 	}
@@ -187,7 +192,7 @@ public class ExampleScript {
 	private class FakeCore extends AliasCore{
 		public FakeCore(){
 			super(null, null, null, null, null);
-			this.autoIncludes = new ArrayList<File>();
+			this.autoIncludes = new ArrayList<>();
 		}
 	}
 
