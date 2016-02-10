@@ -65,6 +65,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -476,6 +477,10 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public void runOnMainThreadLater(DaemonManager dm, final Runnable r) {
+		if(!CommandHelperPlugin.self.isEnabled()) {
+			throw new CancelCommandException(Implementation.GetServerType().getBranding()
+					+ " tried to schedule a task while the plugin was disabled (is the server shutting down?).", Target.UNKNOWN);
+		}
 		Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, new Callable<Object>() {
 
 			@Override
@@ -488,6 +493,10 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public <T> T runOnMainThreadAndWait(Callable<T> callable) throws InterruptedException, ExecutionException {
+		if(!CommandHelperPlugin.self.isEnabled()) {
+			throw new CancelCommandException(Implementation.GetServerType().getBranding()
+					+ " tried to schedule a task while the plugin was disabled (is the server shutting down?).", Target.UNKNOWN);
+		}
 		return Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, callable).get();
 	}
 
