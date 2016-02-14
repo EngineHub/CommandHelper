@@ -43,13 +43,16 @@ import com.laytonsmith.core.events.drivers.EntityEvents.entity_death;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.functions.EventBinding.modify_event;
 import com.laytonsmith.core.functions.StringHandling;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.FormatFlagsConversionMismatchException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IllegalFormatConversionException;
@@ -1537,9 +1540,17 @@ public class PlayerEvents {
                     }
                 }
 				if("format".equals(key)){
+					String format = value.nval();
+					if(format == null) {
+						throw new CRENullPointerException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
+								+ " event may not be null.", Target.UNKNOWN);
+					} else if(format.replaceAll("%%", "").replaceAll("\\%\\%|\\%[12]\\$s", "").contains("%")) {
+						throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
+								+ " event only accepts %1$s and %1$s as format specifiers. Use a \"%%\" to display a single \"%\".", Target.UNKNOWN);
+					}
 					try{
-						e.setFormat(value.nval());
-					} catch(UnknownFormatConversionException|IllegalFormatConversionException ex){
+						e.setFormat(format);
+					} catch(UnknownFormatConversionException | IllegalFormatConversionException | FormatFlagsConversionMismatchException ex){
 						throw new CREFormatException(ex.getMessage(), Target.UNKNOWN);
 					}
 				}
