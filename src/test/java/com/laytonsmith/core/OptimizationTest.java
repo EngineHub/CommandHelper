@@ -304,4 +304,9 @@ public class OptimizationTest {
 //                + "if(dyn(), assign(@a, 'hi'))"
 //                + "msg(@a)"));
 //    }
+	
+	@Test
+	public void testNotinstanceofKeyword() throws Exception {
+		assertEquals("msg(not(instanceof(dyn(2),int)))", optimize("msg(dyn(2) notinstanceof int);"));
+	}
 }
