@@ -3982,9 +3982,10 @@ public class DataHandling {
 		@Override
 		public String docs() {
 			return "boolean {value, type} Checks to see if the value is, extends, or implements the given type. Keyword usage is preferred:"
-					+ " @value instanceof int ---- Null is a special value, while any type may be assigned null, it does not extend"
+					+ " <code>@value instanceof int</code>. The opposite operation is <code>@value notinstanceof int</code>. ---- Null is a special value, while any type may be assigned null, it does not extend"
 					+ " any type, and therefore \"null instanceof AnyType\" will always return false. Likewise, other than null, all"
-					+ " values extend \"mixed\", and therefore \"anyNonNullValue instanceof mixed\" will always return true.";
+					+ " values extend \"mixed\", and therefore \"anyNonNullValue instanceof mixed\" will always return true. There is no"
+					+ " (single) functional equivalent to the notinstanceof keyword. <code>@value notinstanceof int</code> simply compiles to not(instanceof(@value, int)).";
 		}
 
 		@Override
@@ -4014,7 +4015,7 @@ public class DataHandling {
 			}
 			// null is technically a type, but instanceof shouldn't work with that
 			if(children.get(1).getData().val().equals("null")){
-				throw new ConfigCompileException("\"null\" cannot be compared against with instanceof", t);
+				throw new ConfigCompileException("\"null\" cannot be compared against with instanceof. Use <value> === null.", t);
 			}
 			// It's hardcoded, allow it, but optimize it out.
 			if(children.get(0).isConst()){
@@ -4029,7 +4030,11 @@ public class DataHandling {
 				new ExampleScript("Basic usage", "mixed @a = 5; // Actually an int\n"
 						+ "msg(@a instanceof int); // true\n"
 						+ "msg(@a instanceof string); // false\n"),
-				new ExampleScript("Functional usage", "instanceof(5, int)")
+				new ExampleScript("Functional usage", "instanceof(5, int)"),
+				new ExampleScript("Inverted usage", "mixed @a = 5;\n"
+						+ "msg(@a notinstanceof int); // false\n"
+						+ "msg(@a notinstanceof string); // true\n"),
+				new ExampleScript("Inverted functional usage", "!instanceof(5, int)")
 			};
 		}
 
