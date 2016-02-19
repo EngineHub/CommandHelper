@@ -1,140 +1,20 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<artifactId>commandhelper</artifactId>
+		<groupId>com.sk89q</groupId>
+		<version>3.3.2-SNAPSHOT</version>
+	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.sk89q</groupId>
-	<artifactId>commandhelper</artifactId>
-	<version>3.3.1-SNAPSHOT</version>
-	<name>CommandHelper</name>
-	<description>CommandHelper is a full blown scripting language built right into Minecraft</description>
-	<inceptionYear>2010</inceptionYear>
-	<organization>
-		<name>MethodScript Team</name>
-		<url>http://wiki.sk89q.com/CommandHelper</url>
-	</organization>
-	<developers>
-		<developer>
-			<id>ladycailin</id>
-			<name>LadyCailin</name>
-			<email>gmail: savannahcailin</email>
-			<url>http://www.laytonsmith.com#donations</url>
-			<roles>
-				<role>project manager</role>
-				<role>developer</role>
-				<role>tester</role>
-			</roles>
-			<timezone>-6</timezone>
-		</developer>
-		<developer>
-			<id>sk89q</id>
-			<name>sk89q</name>
-			<url>http://www.sk89q.com</url>
-			<roles>
-				<role>infrastructure maintainer</role>
-			</roles>
-			<timezone>-8</timezone>
-		</developer>
-	</developers>
-	<contributors>
-		<!-- If I left you out, let me know, and I'll gladly add you! Also, there are more
-		fields that can be filled out, if you want more information added in, I'll do that too -->
-		<contributor>
-			<name>opoq</name>
-			<roles>
-				<role>testing wench</role>
-			</roles>
-		</contributor>
-		<contributor>
-			<name>EntityReborn</name>
-			<roles>
-				<role>contributor</role>
-			</roles>
-		</contributor>
-		<contributor>
-			<name>Deaygo</name>
-			<roles>
-				<role>contributor</role>
-			</roles>
-		</contributor>
-		<contributor>
-			<name>t3hk0d3</name>
-			<roles>
-				<role>contributor</role>
-			</roles>
-		</contributor>
-		<contributor>
-			<name>zml2008</name>
-			<roles>
-				<role>contributor</role>
-			</roles>
-		</contributor>
-		<contributor>
-			<name>albatrossen</name>
-			<roles>
-				<role>contributor</role>
-			</roles>
-		</contributor>
-		<contributor>
-			<name>jb_aero</name>
-			<roles>
-				<role>contributor</role>
-			</roles>
-		</contributor>
-		<contributor>
-			<name>ACzChef</name>
-			<roles>
-				<role>contributor</role>
-			</roles>
-		</contributor>
-		<contributor>
-			<name>MariuszT</name>
-			<roles>
-				<role>contributor</role>
-			</roles>
-		</contributor>
-		<contributor>
-			<name>PseudoKnight</name>
-			<roles>
-				<role>contributor</role>
-			</roles>
-		</contributor>
-	</contributors>
-	<issueManagement>
-		<system>sk89q's Youtrack</system>
-		<url>http://youtrack.sk89q.com/issues/CMDHELPER</url>
-	</issueManagement>
-	<ciManagement>
-		<system>TeamCity</system>
-		<url>http://builds.enginehub.org/job/commandhelper/</url>
-	</ciManagement>
-	<licenses>
-		<license>
-			<name>The MIT License</name>
-			<url>LICENSE.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-	<scm>
-		<connection>scm:git:git://github.com/sk89q/commandhelper.git</connection>
-		<url>https://github.com/sk89q/commandhelper</url>
-		<developerConnection>scm:git:git@github.com:sk89q/commandhelper.git</developerConnection>
-	</scm>
+
+	<artifactId>methodscript</artifactId>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
 	</properties>
 	<repositories>
-		<!-- Repository for other dependencies of SK's -->
-		<repository>
-			<id>sk89q-mvn2</id>
-			<url>http://mvn2.sk89q.com/repo</url>
-		</repository>
-
-		<!-- Repository for Bukkit -->
-		<repository>
-			<id>spigot-repo</id>
-			<url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
-		</repository>
-
-		<!-- Other repositories -->
 		<repository>
 			<id>maven-central</id>
 			<url>http://repo1.maven.org/maven2/</url>
@@ -162,13 +42,6 @@
 			You can check to see if all dependencies are up to date or not by
 			running: mvn versions:display-dependency-updates
 		-->
-
-		<!-- Bukkit -->
-		<dependency>
-			<groupId>org.spigotmc</groupId>
-			<artifactId>spigot-api</artifactId>
-			<version>1.8.8-R0.1-SNAPSHOT</version>
-		</dependency>
 
 		<!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
 		<dependency>
@@ -376,20 +249,6 @@
 			<version>1.1.1</version>
 		</dependency>
 	</dependencies>
-	<distributionManagement>
-		<site>
-			<id>sk89q-docs-upload</id>
-			<url>ftp://sk89q-maven-deploy/commandhelper/</url>
-		</site>
-		<repository>
-			<id>maven.sk89q.com</id>
-			<url>http://maven.sk89q.com/artifactory/libs-release-local</url>
-		</repository>
-		<snapshotRepository>
-			<id>maven.sk89q.com-snapshot</id>
-			<url>http://maven.sk89q.com/artifactory/libs-snapshot-local</url>
-		</snapshotRepository>
-	</distributionManagement>
 	<build>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
 
@@ -454,7 +313,7 @@
 						<manifest>
 							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-							<mainClass>Main</mainClass>
+							<mainClass>com.com.laytonsmith.core.Main</mainClass>
 							<!--<mainClass>MainSandbox</mainClass>-->
 						</manifest>
 						<manifestEntries>
@@ -513,31 +372,31 @@
 							<relocations>
 								<relocation>
 									<pattern>org.perf4j</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.perf4j</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.org.perf4j</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.apache.log4j</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.apache.log4j</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.org.apache.log4j</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.yaml.snakeyaml</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.yaml.snakeyaml</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.org.yaml.snakeyaml</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.json.simple</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.json.simple</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.org.json.simple</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.mindrot.jbcrypt</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.mindrot.jbcrypt</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.org.mindrot.jbcrypt</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>com.jcraft.jsch</pattern>
-									<shadedPattern>com.laytonsmith.libs.com.jcraft.jsch</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.com.jcraft.jsch</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.apache.commons.io</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.apache.commons.io</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.org.apache.commons.io</shadedPattern>
 								</relocation>
 								<!-- This doesn't work due to native libs or something. Will revist later.
 								<relocation>
@@ -547,27 +406,27 @@
 								-->
 								<relocation>
 									<pattern>org.mcstats</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.mcstats</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.org.mcstats</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.mozilla.intl.chardet</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.mozilla.intl.chardet</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.org.mozilla.intl.chardet</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>redis.clients</pattern>
-									<shadedPattern>com.laytonsmith.libs.redis.clients</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.redis.clients</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>com.mysql.jdbc</pattern>
-									<shadedPattern>com.laytonsmith.libs.com.mysql.jdbc</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.com.mysql.jdbc</shadedPattern>
 								</relocation>
 								<relocation> <!-- part of the mysql lib -->
 									<pattern>org.gjt.mm.mysql</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.gjt.mm.mysql</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.org.gjt.mm.mysql</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.apache.commons.codec</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.apache.commons.codec</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.org.apache.commons.codec</shadedPattern>
 								</relocation>
 								<!--<relocation>
 									<pattern>org.apache.bcel</pattern>
@@ -575,11 +434,11 @@
 								</relocation>-->
 								<relocation>
 									<pattern>org.objectweb.asm</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.objectweb.asm</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.org.objectweb.asm</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>jline</pattern>
-									<shadedPattern>com.laytonsmith.libs.jline</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.jline</shadedPattern>
 								</relocation>
 								<!-- Apparently this can't be relocated -->
 								<!--<relocation>
@@ -588,7 +447,7 @@
 								</relocation>-->
 								<relocation>
 									<pattern>jaxax.mail</pattern>
-									<shadedPattern>com.laytonsmith.libs.javax.mail</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.javax.mail</shadedPattern>
 								</relocation>
 								<!-- Cannot relocate this due to a Class.forName in the JavaMail API.
 								<relocation>
@@ -605,7 +464,7 @@
 								</relocation>-->
 								<relocation>
 									<pattern>org.postgresql</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.postgresql</shadedPattern>
+									<shadedPattern>com.com.com.laytonsmith.libs.org.postgresql</shadedPattern>
 								</relocation>
 							</relocations>
 							<filters>
@@ -721,7 +580,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>CacheAnnotations</mainClass>
+					<mainClass>com.com.laytonsmith.PureUtilities.ClassLoading.Annotations.CacheAnnotations</mainClass>
 					<arguments>
 						<argument>${basedir}/target/classes</argument>
 						<argument>${basedir}/target/classes</argument>
@@ -744,9 +603,9 @@
 				<configuration>
 					<outputDirectory>src/main/generated</outputDirectory>
 					<processors>
-						<processor>CheckOverrides</processor>
-						<processor>ExtensionAnnotationProcessor</processor>
-						<processor>MObjectAnnotationProcessor</processor>
+						<processor>com.com.laytonsmith.PureUtilities.Common.Annotations.CheckOverrides</processor>
+						<processor>com.com.laytonsmith.core.extensions.ExtensionAnnotationProcessor</processor>
+						<processor>com.com.laytonsmith.core.MObjectAnnotationProcessor</processor>
 					</processors>
 				</configuration>
 			</plugin>

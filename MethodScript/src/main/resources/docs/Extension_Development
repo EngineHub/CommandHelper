@@ -1,0 +1,158 @@
+== Developing an extension ==
+
+Extensions provide a means of adding functionality to CommandHelper and the MethodScript engine. While the API used is under construction still, it is still deemed stable enough for production use. Any breakages will be minimal, and deprecation will be used where it applies.
+
+An extension currently consists of three core parts:
+
+# The lifecycle class, which takes care of the life and identity of the extension.
+# Events, which add new events that MethodScript can use, and
+# Functions, which add new functionality to MethodScript.
+
+=== LifeCycles ===
+
+The lifecycle class is the central part of the extension and does two things:
+
+# Provide identity to the extension.
+# Facilitate lifecycle operations, such as system events, utility methods, etc.
+
+The minimal definition is as follows:
+
+<syntaxhighlight lang="java">
+@MSExtension("ExtensionName") // Place your extension name here!
+public class MyExtension extends AbstractExtension {
+    @Override
+    public Version getVersion() {
+        return new SimpleVersion(1,2,3); // Set your version here.
+    }
+}
+</syntaxhighlight>
+
+The class name given by the definition doesn't matter, but does assist with debugging in case of a stacktrace. See the source code of <code>AbstractExtension</code> for the full set of methods available to this class.
+
+=== Functions ===
+
+Functions will usually be the first thing a simpler extension will be used for. Usually, functions are "wrapped" in a parent class, which provides general documentation for that group of functions. The full class definition for functions is as follows:
+
+<syntaxhighlight lang="java">
+public class FunctionGroup {
+    public static String docs() {
+        return "These functions provide an example to new extension creators!";
+    }
+
+    @api
+    public static class some_function extends AbstractFunction {
+        <required methods>
+    }
+
+    <more functions>
+}
+</syntaxhighlight>
+
+=== Events ===
+
+Events are a three part thing:
+
+# The bindable object, which acts as a wrapper or data carrier for the event. This will be a POJO with methods to get the data needed.
+# The actual extension point, which converts the bindable object into a MethodScript enabled event, with supporting methods.
+# The actual call to fire the event.
+
+The bindable event layout is simply a class that extends <code>BindableEvent</code>, with one override, <code>_GetObject()</code>. If wrapping a Bukkit event, the Bukkit event should be returned here, given that the <code>BindableEvent</code> instance has been instantiated/provide with one. Otherwise, just return null.
+
+The actual extension point is laid out as follows:
+
+<syntaxhighlight lang="java">
+public class EventGroup {
+    public static String docs() {
+        return "These events provide an example to new extension creators!";
+    }
+
+    @api
+    public static class some_event extends AbstractEvent {
+        <required methods>
+    }
+
+    <more events>
+}
+</syntaxhighlight>
+
+Notice that the event classes extend <code>AbstractEvent</code>. As one can see, the layout is very similar to that of functions.
+
+Events can be triggered from anywhere, with a call to <code>EventUtils.TriggerListener(Driver.EXTENSION, <event name>, <event instance>);</code>. The event name given must be the same as given in the event that has been defined, and the event instance an instance of that event.
+
+=== Maven ===
+
+Our build and dependency manager of choice is maven. While a quick and dirty setup with a bare-minimal pom is possible, run-time speedups and compile-time checks will be missed out on if a few details aren't included.
+
+Please include the following snippit under the <code><build><plugins></code> section in the project's pom:
+
+<syntaxhighlight lang="xml">
+<!-- Leave this alone! Compile-time checks so that your extension works. -->
+<plugin>
+    <groupId>org.bsc.maven</groupId>
+    <artifactId>maven-processor-plugin</artifactId>
+    <version>2.2.4</version>
+
+    <executions>
+        <execution>
+            <id>process</id>
+            <phase>process-classes</phase>
+
+            <goals>
+                <goal>process</goal>
+            </goals>
+        </execution>
+    </executions>
+
+    <configuration>
+        <outputDirectory>src/main/generated</outputDirectory>
+
+        <processors>
+            <processor>ExtensionAnnotationProcessor</processor>
+        </processors>
+    </configuration>
+</plugin>
+
+<!-- Leave this alone! Run-time extension loading speedup. -->
+<plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>exec-maven-plugin</artifactId>
+    <version>1.2.1</version>
+
+    <executions>
+        <execution>
+            <id>cache-annotations</id>
+            <phase>process-classes</phase>
+            <goals>
+                <goal>java</goal>
+            </goals>
+        </execution>
+    </executions>
+
+    <configuration>
+        <mainClass>CacheAnnotations</mainClass>
+
+        <arguments>
+            <argument>${basedir}/target/classes</argument>
+            <argument>${basedir}/target/classes</argument>
+        </arguments>
+    </configuration>
+</plugin>
+</syntaxhighlight>
+
+=== Obfuscation/ProGuard ===
+
+Some extension devs have expressed a desire to obfuscate their code. Unfortunately, there's a gotcha: the caching system we use runs before ProGuard obfuscates things, causing the original class names to be saved to the cache instead of the obfuscated ones. The only way currently known to get around this is to tell ProGuard to not obfuscate any of the extension points (lifecycle, function or event classes), via the <code>-keep class</code> option in the plugin's <code>configuration</code> section.
+
+However, one should be able to use the annotated extension points as wrappers for the true code, which would reside in a different class.
+
+=== Coding Standards ===
+
+To prevent issues in the future, here are a few rules you should follow when creating functions and events:
+
+Names of functions/events should be all lowercase and use underscores as spaces. The function name may NOT start with
+a single underscore, and functions that start with two underscores are highly discouraged, except for meta functions
+that deal with the compiler directly. Documentation should follow the same conventions, so that functions like
+{{function|reflect_docs}} will work. The version that you return does not need to correspond to the MethodScript version, it may
+be your extension's version number. If your function can be optimized, you are encouraged to do so.
+
+{{LearningTrail}}
