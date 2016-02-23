@@ -25,10 +25,7 @@ import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
-import com.laytonsmith.core.Optimizable;
-import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -61,12 +58,9 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -455,17 +449,16 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {[player], locationArray | [player], x, y, z} Sets the location of the player to the specified coordinates. If the coordinates"
-					+ " are not valid, or the player was otherwise prevented from moving, false is returned, otherwise true. If player is omitted, "
-					+ " the current player is used. Note that 1 is automatically added to the y component, which means that sending a player to"
-					+ " x, y, z coordinates shown with F3 will work as expected, instead of getting them stuck inside the floor. ";
+			return "boolean {[player], locationArray | [player], x, y, z} Sets the location of the player to the"
+					+ " specified coordinates. If the coordinates are not valid, or the player was otherwise prevented"
+					+ " from teleporting, false is returned, otherwise true. If player is omitted, the current player"
+					+ " is used. Note that 1 is automatically added to the y coordinate.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRELengthException.class,
-				CREPlayerOfflineException.class, CREFormatException.class,
-				CRENotFoundException.class};
+			return new Class[]{CRECastException.class, CRELengthException.class, CREPlayerOfflineException.class,
+					CREFormatException.class, CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -485,69 +478,57 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			String MCPlayer = null;
-			double x;
-			double y;
-			double z;
-			MCPlayer m = null;
-			MCLocation l = null;
-			if (args.length == 1) {
-				if (args[0] instanceof CArray) {
-					CArray ca = (CArray) args[0];
-					l = ObjectGenerator.GetGenerator().location(ca, (p instanceof MCPlayer ? ((MCPlayer) p).getWorld() : null), t);
-					x = Static.getNumber(ca.get(0, t), t);
-					y = Static.getNumber(ca.get(1, t), t);
-					z = Static.getNumber(ca.get(2, t), t);
-					if (p instanceof MCPlayer) {
-						m = ((MCPlayer) p);
-					}
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCLocation l;
+			if (args.length <= 2){
+				if(!(args[args.length - 1] instanceof CArray)){
+					throw new CRECastException("Expecting an array at parameter " + args.length + " of set_ploc", t);
+				}
+				CArray ca = (CArray) args[args.length - 1];
 
+				if(args.length == 2){
+					p = Static.GetPlayer(args[0], t);
 				} else {
-					throw ConfigRuntimeException.BuildException("Expecting an array at parameter 1 of set_ploc",
-							CRECastException.class, t);
+					Static.AssertPlayerNonNull(p, t);
 				}
-			} else if (args.length == 2) {
-				if (args[1] instanceof CArray) {
-					CArray ca = (CArray) args[1];
-					MCPlayer = args[0].val();
-					l = ObjectGenerator.GetGenerator().location(ca, Static.GetPlayer(MCPlayer, t).getWorld(), t);
-					x = l.getX();
-					y = l.getY();
-					z = l.getZ();
-				} else {
-					throw ConfigRuntimeException.BuildException("Expecting parameter 2 to be an array in set_ploc",
-							CRECastException.class, t);
+
+				l = ObjectGenerator.GetGenerator().location(ca, p.getWorld(), t);
+
+				// set yaw/pitch to current player values if not given
+				MCLocation ploc = p.getLocation();
+				if(ca.isAssociative()){
+					if(!(ca.containsKey("yaw"))){
+						l.setYaw(ploc.getYaw());
+					}
+					if(!(ca.containsKey("pitch"))){
+						l.setPitch(ploc.getPitch());
+					}
+				} else if(ca.size() < 5){
+					l.setYaw(ploc.getYaw());
+					l.setPitch(ploc.getPitch());
 				}
-			} else if (args.length == 3) {
-				if (p instanceof MCPlayer) {
-					m = (MCPlayer) p;
-				}
-				Static.AssertPlayerNonNull(m, t);
-				x = Static.getNumber(args[0], t);
-				y = Static.getNumber(args[1], t);
-				z = Static.getNumber(args[2], t);
-				l = m.getLocation();
 			} else {
-				MCPlayer = args[0].val();
-				x = Static.getNumber(args[1], t);
-				y = Static.getNumber(args[2], t);
-				z = Static.getNumber(args[3], t);
-				l = StaticLayer.GetLocation(Static.GetPlayer(MCPlayer, t).getWorld(), x, y, z, 0, 0);
+				if(args.length == 4){
+					p = Static.GetPlayer(args[0], t);
+				} else {
+					Static.AssertPlayerNonNull(p, t);
+				}
+
+				double x = Static.getNumber(args[args.length - 3], t);
+				double y = Static.getNumber(args[args.length - 2], t);
+				double z = Static.getNumber(args[args.length - 1], t);
+				float yaw = 0;
+				float pitch = 0;
+				MCLocation ploc = p.getLocation();
+				if(ploc != null){
+					yaw = ploc.getYaw();
+					pitch = ploc.getPitch();
+				}
+				l = StaticLayer.GetLocation(p.getWorld(), x, y, z, yaw, pitch);
 			}
-			if (m == null && MCPlayer != null) {
-				m = Static.GetPlayer(MCPlayer, t);
-			}
-			Static.AssertPlayerNonNull(m, t);
-			if (l == null) {
-				throw ConfigRuntimeException.BuildException(
-					"Could not find the location of the player (are you running in cmdline mode?)",
-					CRENotFoundException.class, t);
-			}
-			if (!l.getWorld().exists()) {
-				throw ConfigRuntimeException.BuildException("The world specified does not exist.", CREInvalidWorldException.class, t);
-			}
-			return CBoolean.get(m.teleport(StaticLayer.GetLocation(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch())));
+
+			l.add(0, 1, 0);
+			return CBoolean.get(p.teleport(l));
 		}
 	}
 

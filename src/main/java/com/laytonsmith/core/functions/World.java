@@ -1102,30 +1102,15 @@ public class World {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null , t);
 			MCItemStack item = Static.ParseItemNotation(this.getName(), args[1].val(), 1, t);
-
-			CArray vect = null;
+			Vector3D v = null;
 
 			if (args.length == 3) {
-				if (args[2] instanceof CArray) {
-					vect = (CArray)args[2];
-
-					if (vect.size() < 3) {
-						throw ConfigRuntimeException.BuildException("Argument 3 of spawn_falling_block must have 3 items", CREFormatException.class, t);
-					}
-				} else {
-					throw ConfigRuntimeException.BuildException("Expected array for argument 3 of spawn_falling_block", CREFormatException.class, t);
-				}
+				v = ObjectGenerator.GetGenerator().vector(args[2], t);
 			}
 
 			MCFallingBlock block = loc.getWorld().spawnFallingBlock(loc, item.getType().getType(), (byte)item.getData().getData());
 
-			if (args.length == 3 && vect != null) {
-				double x = Double.valueOf(vect.get(0, t).val());
-				double y = Double.valueOf(vect.get(1, t).val());
-				double z = Double.valueOf(vect.get(2, t).val());
-
-				Vector3D v = new Vector3D(x, y, z);
-
+			if (v != null) {
 				block.setVelocity(v);
 			}
 
@@ -1144,10 +1129,10 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "integer {location array, id[:type], [vector array ie. array(x, y, z)]} Spawns a"
-				+ " falling block of the specified id and type at the specified location, applying"
-				+ " vector array as a velocity if given. Values for the vector array are doubles, and 1.0"
-				+ " seems to imply about 3 times walking speed. Gravity applies for y.";
+			return "integer {location array, id[:type], [vector array]} Spawns a"
+					+ " falling block of the specified id and type at the specified location, applying"
+					+ " vector array as a velocity if given. Values for the vector array are doubles, and 1.0"
+					+ " seems to imply about 3 times walking speed. Gravity applies for y.";
 		}
 
 		@Override
