@@ -113,6 +113,7 @@ public enum MCDamageCause {
 		FALLING_BLOCK,
 		THORNS,
 		DRAGON_BREATH,
+		FLY_INTO_WALL,
         /**
          * Custom damage.
          * <p />
