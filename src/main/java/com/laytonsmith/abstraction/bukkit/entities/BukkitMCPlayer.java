@@ -127,7 +127,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
             is = p.getInventory().getChestplate();
         } else if (slot == 103) {
             is = p.getInventory().getHelmet();
-        }
+        } else if (slot == -106) {
+			is = p.getInventory().getItemInOffHand();
+		}
         if (slot >= 0 && slot <= 35) {
             is = p.getInventory().getItem(slot);
         }

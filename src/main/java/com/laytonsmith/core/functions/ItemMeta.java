@@ -39,8 +39,9 @@ public class ItemMeta {
 	}
 	
 	private static final String applicableItemMeta = "<ul>"
-			+ "<li>All items - display (string), lore (array of strings), enchants (array of enchantment arrays),"
-			+ " repair (int, repair cost),flags(array). Possible flags: "
+			+ "<li>All items - display (string), lore (array of strings), enchants (An array of enchantment arrays, "
+			+ " which are associative arrays that look like: array(etype: The type of enchantment, elevel:"
+			+ " The strength of the enchantment)), repair (int, repair cost), flags(array). Possible flags: "
 			+ StringUtils.Join(MCItemFlag.values(), ", ", " or ") + "</li>"
 			+ "<li>Books - title (string), author (string), pages (array of strings)</li>"
 			+ "<li>EnchantedBooks - stored (array of enchantment arrays (see Example))</li>"

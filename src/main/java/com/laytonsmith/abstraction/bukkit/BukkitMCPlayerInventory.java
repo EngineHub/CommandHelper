@@ -5,6 +5,8 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayerInventory;
+import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.core.Static;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -61,6 +63,16 @@ public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlay
 		}
     }
 
+    @Override
+    public void setItemInOffHand(MCItemStack stack) {
+        if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+            this.i.setItemInOffHand(((BukkitMCItemStack) stack).is);
+            if(this.i.getHolder() instanceof Player){
+                ((Player) this.i.getHolder()).updateInventory();
+            }
+        }
+    }
+
 	@Override
     public MCItemStack getHelmet() {
         return new BukkitMCItemStack(this.i.getHelmet());
@@ -81,7 +93,12 @@ public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlay
         return new BukkitMCItemStack(this.i.getBoots());
     }
 
-	@Override
+    @Override
+    public MCItemStack getItemInOffHand() {
+        return new BukkitMCItemStack(this.i.getItemInOffHand());
+    }
+
+    @Override
 	public int getHeldItemSlot() {
 		return i.getHeldItemSlot();
 	}

@@ -2,7 +2,9 @@
 package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.enums.MCBiomeType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.block.Biome;
 
@@ -74,7 +76,77 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 	}
 
 	private static Biome getBukkitType(MCVanillaBiomeType v) {
-		// Insert a switch statement for values that don't translate directly to a Bukkit value
+		// A switch statement for values that don't translate directly to a Bukkit value
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+			switch(v){
+				case ICE_PLAINS:
+					return Biome.ICE_FLATS;
+				case MUSHROOM_SHORE:
+					return Biome.MUSHROOM_ISLAND_SHORE;
+				case BEACH:
+					return Biome.BEACHES;
+				case SMALL_MOUNTAINS:
+					return Biome.SMALLER_EXTREME_HILLS;
+				case COLD_TAIGA:
+					return Biome.TAIGA_COLD;
+				case COLD_TAIGA_HILLS:
+					return Biome.TAIGA_COLD_HILLS;
+				case MEGA_TAIGA:
+					return Biome.REDWOOD_TAIGA;
+				case MEGA_TAIGA_HILLS:
+					return Biome.REDWOOD_TAIGA_HILLS;
+				case EXTREME_HILLS_PLUS:
+					return Biome.EXTREME_HILLS_WITH_TREES;
+				case SAVANNA_PLATEAU:
+					return Biome.SAVANNA_ROCK;
+				case JUNGLE_MOUNTAINS:
+					return Biome.MUTATED_JUNGLE;
+				case JUNGLE_EDGE_MOUNTAINS:
+					return Biome.MUTATED_JUNGLE_EDGE;
+				case MEGA_SPRUCE_TAIGA:
+					return Biome.MUTATED_REDWOOD_TAIGA;
+				case MEGA_SPRUCE_TAIGA_HILLS:
+					return Biome.MUTATED_REDWOOD_TAIGA_HILLS;
+				case BIRCH_FOREST_MOUNTAINS:
+					return Biome.MUTATED_BIRCH_FOREST;
+				case BIRCH_FOREST_HILLS_MOUNTAINS:
+					return Biome.MUTATED_BIRCH_FOREST_HILLS;
+				case SAVANNA_MOUNTAINS:
+					return Biome.MUTATED_SAVANNA;
+				case SAVANNA_PLATEAU_MOUNTAINS:
+					return Biome.MUTATED_SAVANNA_ROCK;
+				case MESA_PLATEAU_FOREST:
+					return Biome.MESA_ROCK;
+				case MESA_PLATEAU:
+					return Biome.MESA_CLEAR_ROCK;
+				case SUNFLOWER_PLAINS:
+					return Biome.MUTATED_PLAINS;
+				case DESERT_MOUNTAINS:
+					return Biome.MUTATED_DESERT;
+				case SWAMPLAND_MOUNTAINS:
+					return Biome.MUTATED_SWAMPLAND;
+				case ROOFED_FOREST_MOUNTAINS:
+					return Biome.MUTATED_ROOFED_FOREST;
+				case TAIGA_MOUNTAINS:
+					return Biome.MUTATED_TAIGA;
+				case COLD_TAIGA_MOUNTAINS:
+					return Biome.MUTATED_TAIGA_COLD;
+				case FLOWER_FOREST:
+					return Biome.MUTATED_FOREST;
+				case ICE_PLAINS_SPIKES:
+					return Biome.MUTATED_ICE_FLATS;
+				case EXTREME_HILLS_MOUNTAINS:
+					return Biome.MUTATED_EXTREME_HILLS;
+				case EXTREME_HILLS_PLUS_MOUNTAINS:
+					return Biome.MUTATED_EXTREME_HILLS_WITH_TREES;
+				case MESA_BRYCE:
+					return Biome.MUTATED_MESA;
+				case MESA_PLATEAU_MOUNTAINS:
+					return Biome.MUTATED_MESA_CLEAR_ROCK;
+				case MESA_PLATEAU_FOREST_MOUNTAINS:
+					return Biome.MUTATED_MESA_ROCK;
+			}
+		}
 		try {
 			return Biome.valueOf(v.name());
 		} catch (IllegalArgumentException iae) {

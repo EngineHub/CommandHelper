@@ -144,6 +144,7 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		EXTREME_HILLS_PLUS_MOUNTAINS(MCVersion.MC1_7_2),
 		SWAMPLAND_MOUNTAINS(MCVersion.MC1_7_2),
 		MEGA_SPRUCE_TAIGA_HILLS(MCVersion.MC1_7_2),
+		VOID(MCVersion.MC1_9),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;
