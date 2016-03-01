@@ -4,9 +4,12 @@ import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.core.Static;
+import org.bukkit.inventory.EntityEquipment;
+
 import java.util.EnumMap;
 import java.util.Map;
-import org.bukkit.inventory.EntityEquipment;
 
 /**
  *
@@ -43,6 +46,11 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 			case WEAPON:
 				slots.put(key, getWeapon());
 				break;
+			case OFF_HAND:
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+					slots.put(key, getItemInOffHand());
+				}
+				break;
 			case HELMET:
 				slots.put(key, getHelmet());
 				break;
@@ -68,6 +76,11 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 			switch (key) {
 			case WEAPON:
 				setWeapon(stack);
+				break;
+			case OFF_HAND:
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+					setItemInOffHand(stack);
+				}
 				break;
 			case HELMET:
 				setHelmet(stack);
@@ -144,6 +157,11 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	}
 
 	@Override
+	public MCItemStack getItemInOffHand() {
+		return new BukkitMCItemStack(ee.getItemInOffHand());
+	}
+
+	@Override
 	public MCItemStack getHelmet() {
 		return new BukkitMCItemStack(ee.getHelmet());
 	}
@@ -166,6 +184,11 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	@Override
 	public void setWeapon(MCItemStack stack) {
 		ee.setItemInHand(((BukkitMCItemStack) stack).asItemStack());
+	}
+
+	@Override
+	public void setItemInOffHand(MCItemStack stack) {
+		ee.setItemInOffHand(((BukkitMCItemStack) stack).asItemStack());
 	}
 
 	@Override

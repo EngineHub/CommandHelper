@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.MCPlayerInventory;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -35,6 +36,7 @@ import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+
 import java.util.Map;
 
 /**
@@ -59,20 +61,21 @@ public class InventoryManagement {
         }
 
 		@Override
-        public String docs() {
-            return "mixed {[player, [index]]} Gets the inventory information for the specified player, or the current player if none specified. If the index is specified, only the slot "
-                    + " given will be returned."
-                    + " The index of the array in the array is 0 - 35, 100 - 103, which corresponds to the slot in the players inventory. To access armor"
-                    + " slots, you may also specify the index. (100 - 103). The quick bar is 0 - 8. If index is null, the item in the player's hand is returned, regardless"
-                    + " of what slot is selected. If there is no item at the slot specified, null is returned."
-                    + " ---- If all slots are requested, an associative array of item objects is returned, and if"
-                    + " only one item is requested, just that single item object is returned. An item object"
-                    + " consists of the following associative array(name: the string id of the item,"
+		public String docs() {
+			return "mixed {[player, [index]]} Gets the inventory information for the specified player, or the current "
+					+ " player if none specified. If the index is specified, only the slot given will be returned."
+					+ " The index of the array in the array is 0 - 35, 100 - 103, -106, which corresponds to the slot"
+					+ " in the player's inventory. To access armor slots, you may also specify the index. (100 - 103)."
+					+ " The quick bar is 0 - 8. If index is null, the item in the player's hand is returned, regardless"
+					+ " of what slot is selected. If index is -106, the player's off-hand item is returned. If there is"
+					+ " no item at the slot specified, null is returned."
+					+ " ---- If all slots are requested, an associative array of item objects is returned, and if"
+					+ " only one item is requested, just that single item object is returned. An item object"
+					+ " consists of the following associative array(name: the string id of the item,"
 					+ " type: The numeric id of the item, data: The data value of the item,"
-                    + " or the damage if a damagable item, qty: The number of items in their inventory, enchants: An array"
-                    + " of enchant objects, with 0 or more associative arrays which look like:"
-                    + " array(etype: The type of enchantment, elevel: The strength of the enchantment))";
-        }
+					+ " or the damage if a damagable item, qty: The number of items in their inventory, meta: An array"
+                    + " of item meta or null if none exists. See {{function|get_itemmeta}} for details about item meta.";
+		}
 
 		@Override
         public Class<? extends CREThrowable>[] thrown() {
@@ -127,6 +130,9 @@ public class InventoryManagement {
                 for(int i = 100; i < 104; i++){
                     ret.set(i, getInvSlot(m, i, t), t);
                 }
+                if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+                    ret.set(-106, getInvSlot(m, -106, t), t);
+                }
                 return ret;
             } else {
                 return getInvSlot(m, index, t);
@@ -167,8 +173,10 @@ public class InventoryManagement {
                 is = inv.getChestplate();
             } else if(slot.equals(103)){
                 is = inv.getHelmet();
+            } else if(slot.equals(-106)){
+                is = inv.getItemInOffHand();
             } else {
-                throw ConfigRuntimeException.BuildException("Slot index must be 0-35, or 100-103", CRERangeException.class, t);
+                throw ConfigRuntimeException.BuildException("Slot index must be 0-35, or 100-103, or -106", CRERangeException.class, t);
             }
             return ObjectGenerator.GetGenerator().item(is, t);
         }
@@ -437,10 +445,11 @@ public class InventoryManagement {
                     + " to be a stack of stone. set_pinv(array(103: array(type: 298))) gives them a hat. To set the"
                     + " item in hand, use something like set_pinv(array(null: array(type: 298))), where"
                     + " the key is null. If you set a null key in addition to an entire inventory set, only"
-                    + " one item will be used (which one is undefined). Note that this uses the unsafe"
-                    + " enchantment mechanism to add enchantments, so any enchantment value will work. If"
-                    + " type uses the old format (for instance, \"35:11\"), then the second number is taken"
-                    + " to be the data, making this backwards compatible (and sometimes more convenient).";
+                    + " one item will be used (which one is undefined). Use an index of -106 to set the item in the"
+                    + " player's off-hand. Note that this uses the unsafe enchantment mechanism to add enchantments, so"
+                    + " any enchantment value will work. If type uses the old format (for instance, \"35:11\"), then"
+                    + " the second number is taken to be the data, making this backwards compatible (and sometimes more"
+                    + " convenient).";
 
         }
 
@@ -512,6 +521,8 @@ public class InventoryManagement {
                             m.getInventory().setChestplate(is);
                         } else if(index == 103){
                             m.getInventory().setHelmet(is);
+                        } else if(index == -106){
+                            m.getInventory().setItemInOffHand(is);
                         } else {
                             ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found in array passed to set_pinv(), so ignoring.");
                         }
@@ -591,6 +602,9 @@ public class InventoryManagement {
             total += total(is, inv.getLeggings());
             total += total(is, inv.getChestplate());
             total += total(is, inv.getHelmet());
+            if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+                total += total(is, inv.getItemInOffHand());
+            }
             return new CInt(total, t);
         }
 
@@ -682,6 +696,9 @@ public class InventoryManagement {
             }
             if(match(is, inv.getHelmet())){
                 ca.push(new CInt(103, t), t);
+            }
+            if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9) && match(is, inv.getItemInOffHand())){
+                ca.push(new CInt(-106, t), t);
             }
             return ca;
         }

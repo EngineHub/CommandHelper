@@ -462,6 +462,9 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 				case RABBIT:
 					mobType = Rabbit.class;
 					break;
+				case SHULKER:
+					mobType = Shulker.class;
+					break;
 
 			}
         } catch (IllegalArgumentException e) {

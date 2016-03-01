@@ -27,11 +27,13 @@ import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
+import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRemoveCause;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
@@ -53,7 +55,6 @@ import com.laytonsmith.abstraction.events.MCPotionSplashEvent;
 import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
 import com.laytonsmith.abstraction.events.MCProjectileLaunchEvent;
 import com.laytonsmith.annotations.abstraction;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -502,7 +503,8 @@ public class BukkitEntityEvents {
 			} else {
 				e.getPlayer().getInventory().addItem(s.asItemStack());
 				//and for added realism :)
-				e.getPlayer().getWorld().playSound(e.getItem().getLocation(), Sound.ITEM_PICKUP, 1, 2);
+				e.getPlayer().getWorld().playSound(e.getItem().getLocation(),
+						BukkitMCSound.getConvertor().getConcreteEnum(MCSound.ITEM_PICKUP), 1, 2);
 			}
 		}
 

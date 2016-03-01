@@ -1271,7 +1271,8 @@ public class EntityManagement {
 			return new ExampleScript[]{
 					new ExampleScript("Getting a mob's equipment", "get_mob_equipment(276)", "{boots: null,"
 							+ " chestplate: null, helmet: {data: 0, enchants: {} meta: null, type: 91}, leggings: null,"
-							+ " weapon: {data: 5, enchants: {} meta: {display: Excalibur, lore: null}, type: 276}}")
+							+ " off_hand: null, weapon: {data: 5, enchants: {} meta: {display: Excalibur, lore: null},"
+							+ " type: 276}}")
 			};
 		}
 		

@@ -311,6 +311,26 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		}
 
 		@Override
+		public ItemStack getItemInMainHand(){
+			return holder.getItemInHand();
+		}
+
+		@Override
+		public void setItemInMainHand(ItemStack itemStack){
+			holder.setItemInHand(itemStack);
+		}
+
+		@Override
+		public ItemStack getItemInOffHand() {
+			return holder.getEquipment().getItemInOffHand();
+		}
+
+		@Override
+		public void setItemInOffHand(ItemStack itemStack){
+			holder.getEquipment().setItemInOffHand(itemStack);
+		}
+
+		@Override
 		public ItemStack getHelmet() {
 			return holder.getHelmet();
 		}
@@ -352,30 +372,27 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 		@Override
 		public ItemStack[] getArmorContents() {
-			return new ItemStack[]{getItemInHand(), getBoots(), getLeggings(), getChestplate(), getHelmet()};
+			return new ItemStack[]{getBoots(), getLeggings(), getChestplate(), getHelmet()};
 		}
 
 		@Override
 		public void setArmorContents(ItemStack[] itemStacks) {
 			switch (itemStacks.length) {
-				case 5:
-					setHelmet(itemStacks[4]);
 				case 4:
-					setChestplate(itemStacks[3]);
+					setHelmet(itemStacks[3]);
 				case 3:
-					setLeggings(itemStacks[2]);
+					setChestplate(itemStacks[2]);
 				case 2:
-					setBoots(itemStacks[1]);
+					setLeggings(itemStacks[1]);
 				case 1:
-					setItemInHand(itemStacks[0]);
+					setBoots(itemStacks[0]);
 				case 0:
 					return;
 				default:
-					setHelmet(itemStacks[4]);
-					setChestplate(itemStacks[3]);
-					setLeggings(itemStacks[2]);
-					setBoots(itemStacks[1]);
-					setItemInHand(itemStacks[0]);
+					setHelmet(itemStacks[3]);
+					setChestplate(itemStacks[2]);
+					setLeggings(itemStacks[1]);
+					setBoots(itemStacks[0]);
 			}
 		}
 
@@ -386,6 +403,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 			setLeggings(null);
 			setBoots(null);
 			setItemInHand(null);
+			setItemInOffHand(null);
 		}
 
 		@Override

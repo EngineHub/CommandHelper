@@ -110,6 +110,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 
 	@MEnum("VanillaEntityType")
 	public enum MCVanillaEntityType {
+		AREA_EFFECT_CLOUD(true, MCVersion.MC1_9),
 		ARMOR_STAND(true, MCVersion.MC1_8),
 		ARROW(true),
 		/**
@@ -123,6 +124,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		COMPLEX_PART(false),
 		COW(true),
 		CREEPER(true),
+		DRAGON_FIREBALL(true, MCVersion.MC1_9),
 		DROPPED_ITEM(true),
 		EGG(true),
 		ENDERMAN(true),
@@ -171,14 +173,18 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		SHEEP(true),
 		SILVERFISH(true),
 		SKELETON(true),
+		SHULKER(true, MCVersion.MC1_9),
+		SHULKER_BULLET(true, MCVersion.MC1_9),
 		SLIME(true),
 		SMALL_FIREBALL(true),
 		SNOWBALL(true),
 		SNOWMAN(true),
 		SQUID(true),
+		SPECTRAL_ARROW(true, MCVersion.MC1_9),
 		SPIDER(true),
 		SPLASH_POTION(true),
 		THROWN_EXP_BOTTLE(true),
+		TIPPED_ARROW(true, MCVersion.MC1_9),
 		WEATHER(false),
 		WITCH(true, MCVersion.MC1_4_5),
 		WITHER(true, MCVersion.MC1_4),

@@ -107,11 +107,12 @@ public enum MCDamageCause {
          * Damage: variable
          */
         MAGIC,
-		
+
 		MELTING,
 		WITHER,
 		FALLING_BLOCK,
 		THORNS,
+		DRAGON_BREATH,
         /**
          * Custom damage.
          * <p />

@@ -20,12 +20,14 @@ public interface MCEntityEquipment {
 	public void setAllDropChances(Map<MCEquipmentSlot, Float> slots);
 	
 	public MCItemStack getWeapon();
+	public MCItemStack getItemInOffHand();
 	public MCItemStack getHelmet();
 	public MCItemStack getChestplate();
 	public MCItemStack getLeggings();
 	public MCItemStack getBoots();
 	
 	public void setWeapon(MCItemStack stack);
+	public void setItemInOffHand(MCItemStack stack);
 	public void setHelmet(MCItemStack stack);
 	public void setChestplate(MCItemStack stack);
 	public void setLeggings(MCItemStack stack);
