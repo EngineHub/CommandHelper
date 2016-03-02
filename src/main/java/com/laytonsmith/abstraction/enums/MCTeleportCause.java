@@ -10,5 +10,6 @@ public enum MCTeleportCause {
 	NETHER_PORTAL,
 	PLUGIN,
 	SPECTATE,
+	END_GATEWAY,
 	UNKNOWN
 }
