@@ -417,6 +417,26 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		}
 
 		@Override
+		public float getItemInMainHandDropChance() {
+			return 0;
+		}
+
+		@Override
+		public void setItemInMainHandDropChance(float v) {
+
+		}
+
+		@Override
+		public float getItemInOffHandDropChance() {
+			return 0;
+		}
+
+		@Override
+		public void setItemInOffHandDropChance(float v) {
+
+		}
+
+		@Override
 		public float getHelmetDropChance() {
 			return 0;
 		}
