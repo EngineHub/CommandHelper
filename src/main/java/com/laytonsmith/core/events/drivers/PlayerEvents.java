@@ -1542,18 +1542,25 @@ public class PlayerEvents {
 				if("format".equals(key)){
 					String format = value.nval();
 					if(format == null) {
-						throw new CRENullPointerException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
+						throw new CRENullPointerException("The \"format\" key in " + new modify_event().getName() + " for the " + this.getName()
 								+ " event may not be null.", Target.UNKNOWN);
-					} else if(format.replaceAll("%%", "").replaceAll("\\%\\%|\\%[12]\\$s", "").contains("%")) {
-						throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
-								+ " event only accepts %1$s and %1$s as format specifiers. Use a \"%%\" to display a single \"%\".", Target.UNKNOWN);
 					}
 					try{
-						e.setFormat(format);
-					} catch(UnknownFormatConversionException | IllegalFormatConversionException | FormatFlagsConversionMismatchException ex){
-						throw new CREFormatException(ex.getMessage(), Target.UNKNOWN);
+						// Throws UnknownFormatConversionException, MissingFormatException,
+						// IllegalFormatConversionException, FormatFlagsConversionMismatchException, NullPointerException and possibly more.
+						e.setFormat(format); 
+					} catch(Exception ex){
+						// Check the format to give a better exception message.
+						if(format.replaceAll("%%", "").replaceAll("\\%\\%|\\%[12]\\$s", "").contains("%")) {
+							throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
+									+ " event only accepts %1$s and %2$s as format specifiers. Use a \"%%\" to display a single \"%\".", Target.UNKNOWN);
+						} else {
+							throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
+									+ " event was set to an invalid value: " + format + ". The original exception message is: " + ex.getMessage(), Target.UNKNOWN);
+						}
 					}
 				}
+				
                 return true;
             }
             return false;
