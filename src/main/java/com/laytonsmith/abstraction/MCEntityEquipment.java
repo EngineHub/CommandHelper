@@ -34,12 +34,14 @@ public interface MCEntityEquipment {
 	public void setBoots(MCItemStack stack);
 	
 	public float getWeaponDropChance();
+	public float getOffHandDropChance();
 	public float getHelmetDropChance();
 	public float getChestplateDropChance();
 	public float getLeggingsDropChance();
 	public float getBootsDropChance();
 	
 	public void setWeaponDropChance(float chance);
+	public void setOffHandDropChance(float chance);
 	public void setHelmetDropChance(float chance);
 	public void setChestplateDropChance(float chance);
 	public void setLeggingsDropChance(float chance);
