@@ -1052,7 +1052,7 @@ public class Environment {
 					+ " player or an array of players to play the sound to, if"
 					+ " not given, all players can potentially hear it. ----"
 					+ " Possible sounds: "
-					+ StringUtils.Join(MCSound.values(), ", ", ", or ", " or ");
+					+ StringUtils.Join(MCSound.types(), ", ", ", or ", " or ");
 		}
 
 		@Override
