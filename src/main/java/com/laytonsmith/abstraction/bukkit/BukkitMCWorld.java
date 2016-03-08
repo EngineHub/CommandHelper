@@ -468,8 +468,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 			}
         } catch (IllegalArgumentException e) {
-            throw ConfigRuntimeException.BuildException("No mob of type " + name + " exists",
-                    CREFormatException.class, t);
+            throw new CREFormatException("No mob of type " + name + " exists", t);
         }
         for (int i = 0; i < qty; i++) {
             MCEntity e = l.getWorld().spawn(l, mobType);
@@ -486,8 +485,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							color = MCDyeColor.valueOf(type);
 							s.setColor(BukkitMCDyeColor.getConvertor().getConcreteEnum(color));
 						} catch (IllegalArgumentException ex) {
-							throw ConfigRuntimeException.BuildException(type + " is not a valid color",
-									CREFormatException.class, t);
+							throw new CREFormatException(type + " is not a valid color", t);
 						}
 					}
 				}
@@ -499,8 +497,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							otype = MCOcelotType.valueOf(type);
 							o.setCatType(BukkitMCOcelotType.getConvertor().getConcreteEnum(otype));
 						} catch (IllegalArgumentException ex){
-							throw ConfigRuntimeException.BuildException(type + " is not an ocelot type",
-									CREFormatException.class, t);
+							throw new CREFormatException(type + " is not an ocelot type", t);
 						}
 					}
 				}
@@ -517,8 +514,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 								break;
 							}
 						} catch (IllegalArgumentException ex){
-							throw ConfigRuntimeException.BuildException(type + " is not a creeper state",
-									CREFormatException.class, t);
+							throw new CREFormatException(type + " is not a creeper state", t);
 						}
 					}
 				}
@@ -538,8 +534,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 								break;
 							}
 						} catch (IllegalArgumentException ex){
-							throw ConfigRuntimeException.BuildException(type + " is not a wolf state",
-									CREFormatException.class, t);
+							throw new CREFormatException(type + " is not a wolf state", t);
 						}
 					}
 				}
@@ -551,8 +546,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							job = MCProfession.valueOf(type);
 							v.setProfession(BukkitMCProfession.getConvertor().getConcreteEnum(job));
 						} catch (IllegalArgumentException ex) {
-							throw ConfigRuntimeException.BuildException(type + " is not a valid profession",
-									CREFormatException.class, t);
+							throw new CREFormatException(type + " is not a valid profession", t);
 						}
 					}
 				}
@@ -563,8 +557,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							MaterialData held = new MaterialData(Material.valueOf(type));
 							en.setCarriedMaterial(held);
 						} catch (IllegalArgumentException ex) {
-							throw ConfigRuntimeException.BuildException(type + " is not a valid material",
-									CREFormatException.class, t);
+							throw new CREFormatException(type + " is not a valid material", t);
 						}
 					}
 				}
@@ -575,8 +568,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							try{
 								sl.setSize(Integer.parseInt(type));
 							} catch (IllegalArgumentException ex){
-								throw ConfigRuntimeException.BuildException(type + " is not a valid size",
-										CREFormatException.class, t);
+								throw new CREFormatException(type + " is not a valid size", t);
 							}
 						}
 					}
@@ -589,8 +581,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							stype = MCSkeletonType.valueOf(type);
 							sk.setSkeletonType(BukkitMCSkeletonType.getConvertor().getConcreteEnum(stype));
 						} catch (IllegalArgumentException ex){
-							throw ConfigRuntimeException.BuildException(type + " is not a skeleton type",
-									CREFormatException.class, t);
+							throw new CREFormatException(type + " is not a skeleton type", t);
 						}
 					}
 				}
@@ -612,12 +603,10 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 								try {
 									((PigZombie) z).setAnger(Integer.valueOf(type));
 								} catch (IllegalArgumentException iae) {
-									throw ConfigRuntimeException.BuildException(type + " was neither a zombie state nor a number.",
-											CREFormatException.class, t);
+									throw new CREFormatException(type + " was neither a zombie state nor a number.", t);
 								}
 							} else {
-								throw ConfigRuntimeException.BuildException(type + " is not a zombie state",
-										CREFormatException.class, t);
+								throw new CREFormatException(type + " is not a zombie state", t);
 							}
 						}
 					}
@@ -635,8 +624,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 								break;
 							}
 						} catch (IllegalArgumentException ex){
-							throw ConfigRuntimeException.BuildException(type + " is not a pig state",
-									CREFormatException.class, t);
+							throw new CREFormatException(type + " is not a pig state", t);
 						}
 					}
 				}
@@ -655,8 +643,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 									MCHorse.MCHorsePattern hpattern = MCHorse.MCHorsePattern.valueOf(type);
 									h.setStyle(BukkitMCHorse.BukkitMCHorsePattern.getConvertor().getConcreteEnum(hpattern));
 								} catch (IllegalArgumentException notAnything) {
-									throw ConfigRuntimeException.BuildException("Type " + type + " did not match any horse variants,"
-											+ " colors, or patterns.", CREFormatException.class, t);
+									throw new CREFormatException("Type " + type + " did not match any horse variants,"
+											+ " colors, or patterns.", t);
 								}
 							}
 						}

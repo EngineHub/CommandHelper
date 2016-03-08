@@ -170,16 +170,15 @@ public class PluginMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if (messenger == null) {
-				throw ConfigRuntimeException.BuildException(
-						"Could not find the internal Messenger object (are you running in cmdline mode?)",
-						CRENotFoundException.class, t);
+				throw new CRENotFoundException(
+						"Could not find the internal Messenger object (are you running in cmdline mode?)", t);
 			}
 			String channel = args[0].toString();
 			
 			if (!messenger.isIncomingChannelRegistered(channel)) {
 				messenger.registerIncomingPluginChannel(channel);
 			} else {
-				throw ConfigRuntimeException.BuildException("The channel '" + channel + "' is already registered.", CREPluginChannelException.class, t);
+				throw new CREPluginChannelException("The channel '" + channel + "' is already registered.", t);
 			}
 			
 			return CVoid.VOID;
@@ -229,16 +228,15 @@ public class PluginMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if (messenger == null) {
-				throw ConfigRuntimeException.BuildException(
-						"Could not find the internal Messenger object (are you running in cmdline mode?)",
-						CRENotFoundException.class, t);
+				throw new CRENotFoundException(
+						"Could not find the internal Messenger object (are you running in cmdline mode?)", t);
 			}
 			String channel = args[0].toString();
 			
 			if (messenger.isIncomingChannelRegistered(channel)) {
 				messenger.unregisterIncomingPluginChannel(channel);
 			} else {
-				throw ConfigRuntimeException.BuildException("The channel '" + channel + "' is not registered.", CREPluginChannelException.class, t);
+				throw new CREPluginChannelException("The channel '" + channel + "' is not registered.", t);
 			}
 			
 			return CVoid.VOID;
@@ -287,9 +285,8 @@ public class PluginMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if (messenger == null) {
-				throw ConfigRuntimeException.BuildException(
-						"Could not find the internal Messenger object (are you running in cmdline mode?)",
-						CRENotFoundException.class, t);
+				throw new CRENotFoundException(
+						"Could not find the internal Messenger object (are you running in cmdline mode?)", t);
 			}
 			return CBoolean.get(messenger.isIncomingChannelRegistered(args[0].toString()));
 		}
@@ -338,9 +335,8 @@ public class PluginMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
 			if (messenger == null) {
-				throw ConfigRuntimeException.BuildException(
-						"Could not find the internal Messenger object (are you running in cmdline mode?)",
-						CRENotFoundException.class, t);
+				throw new CRENotFoundException(
+						"Could not find the internal Messenger object (are you running in cmdline mode?)", t);
 			}
 			Set<String> chans = messenger.getIncomingChannels();
 			CArray arr = new CArray(t);

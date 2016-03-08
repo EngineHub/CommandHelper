@@ -96,7 +96,7 @@ public class InventoryEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.BuildException("Unsupported Operation", CREBindException.class, Target.UNKNOWN);
+			throw new CREBindException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -641,14 +641,14 @@ public class InventoryEvents {
 								if (CexpCosts.get(i, Target.UNKNOWN) instanceof CInt) {
 									ExpCosts[i] = (int) ((CInt) CexpCosts.get(i, Target.UNKNOWN)).getInt();
 								} else {
-									throw ConfigRuntimeException.BuildException("Expected an intger at index " + i + "!", CREFormatException.class, Target.UNKNOWN);
+									throw new CREFormatException("Expected an intger at index " + i + "!", Target.UNKNOWN);
 								}
 							}
 						} else {
-							throw ConfigRuntimeException.BuildException("Expected a normal array!", CREFormatException.class, Target.UNKNOWN);
+							throw new CREFormatException("Expected a normal array!", Target.UNKNOWN);
 						}
 					} else {
-						throw ConfigRuntimeException.BuildException("Expected an array!", CREFormatException.class, Target.UNKNOWN);
+						throw new CREFormatException("Expected an array!", Target.UNKNOWN);
 					}
 				}
 			}
@@ -817,8 +817,7 @@ public class InventoryEvents {
 						e.getInventory().setMatrix(repl);
 						return true;
 					} else {
-						throw ConfigRuntimeException.BuildException("Expected an array but recieved " + value,
-								CRECastException.class, Target.UNKNOWN);
+						throw new CRECastException("Expected an array but recieved " + value, Target.UNKNOWN);
 					}
 				}
 			} */

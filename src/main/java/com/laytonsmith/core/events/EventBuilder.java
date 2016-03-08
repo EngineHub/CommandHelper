@@ -5,6 +5,8 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -90,9 +92,9 @@ public final class EventBuilder {
                     }
                 }
                 if(constructor == null){
-                    throw ConfigRuntimeException.BuildException("Cannot find an acceptable constructor that follows the format:"
+                    throw new CREPluginInternalException("Cannot find an acceptable constructor that follows the format:"
                             + " public " + bindableEvent.getClass().getSimpleName() + "(" + o.getClass().getSimpleName() + " event)."
-                            + " Please notify the plugin author of this error.", null, Target.UNKNOWN);
+                            + " Please notify the plugin author of this error.", Target.UNKNOWN);
                 }
                 constructors.put((Class<BindableEvent>)clazz, constructor);
             }

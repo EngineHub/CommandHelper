@@ -148,8 +148,8 @@ public class Web {
 				domain = cookie.get("domain", t).val();
 				path = cookie.get("path", t).val();
 			} else {
-				throw ConfigRuntimeException.BuildException("The name, value, domain, and path keys are required"
-						+ " in all cookies.", CREFormatException.class, t);
+				throw new CREFormatException("The name, value, domain, and path keys are required"
+						+ " in all cookies.", t);
 			}
 			if(cookie.containsKey("expiration")){
 				expiration = Static.getInt(cookie.get("expiration", t), t);
@@ -309,7 +309,7 @@ public class Web {
 						throw new CRECastException("Expecting the success parameter to be a closure.", t);
 					}
 				} else {
-					throw ConfigRuntimeException.BuildException("Missing the success parameter, which is required.", CRECastException.class, t);
+					throw new CRECastException("Missing the success parameter, which is required.", t);
 				}
 				if(csettings.containsKey("error")){
 					if(csettings.get("error", t) instanceof CClosure){
@@ -339,7 +339,7 @@ public class Web {
 					try{
 						type = Proxy.Type.valueOf(proxySettings.get("type", t).val());
 					} catch(IllegalArgumentException e){
-						throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t, e);
+						throw new CREFormatException(e.getMessage(), t, e);
 					}
 					proxyURL = proxySettings.get("url", t).val();
 					port = Static.getInt32(proxySettings.get("port", t), t);
@@ -397,8 +397,8 @@ public class Web {
 							}
 						});
 					} catch(IOException e){
-						final ConfigRuntimeException ex = ConfigRuntimeException.BuildException((e instanceof UnknownHostException?"Unknown host: ":"")
-								+ e.getMessage(), CREIOException.class, t);
+						final ConfigRuntimeException ex = new CREIOException((e instanceof UnknownHostException?"Unknown host: ":"")
+								+ e.getMessage(), t);
 						if(error != null){
 							StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
@@ -706,10 +706,10 @@ public class Web {
 				try {
 					p = environment.getEnv(GlobalEnv.class).getProfiles().getProfileById(profileName);
 				} catch(Profiles.InvalidProfileException ex){
-					throw ConfigRuntimeException.BuildException(ex.getMessage(), CREFormatException.class, t, ex);
+					throw new CREFormatException(ex.getMessage(), t, ex);
 				}
 				if(!(p instanceof EmailProfile)){
-					throw ConfigRuntimeException.BuildException("Profile type is expected to be \"email\", but \"" + p.getType() + "\"  was found.", CRECastException.class, t);
+					throw new CRECastException("Profile type is expected to be \"email\", but \"" + p.getType() + "\"  was found.", t);
 				}
 				Map<String, Object> data = ((EmailProfile)p).getMap();
 				for(String key : data.keySet()){
@@ -810,7 +810,7 @@ public class Web {
 								type = Message.RecipientType.BCC;
 								break;
 							default:
-								throw ConfigRuntimeException.BuildException("Recipient type must be one of either: TO, CC, or BCC, but \"" + stype + "\" was found.", CREFormatException.class, t);
+								throw new CREFormatException("Recipient type must be one of either: TO, CC, or BCC, but \"" + stype + "\" was found.", t);
 						}
 						address = ArgumentValidation.getItemFromArray(ca, "address", t, null).val();
 					} else {
@@ -911,9 +911,9 @@ public class Web {
 
 			} catch(MessagingException ex){
 				if(ex.getCause() instanceof SocketTimeoutException){
-					throw ConfigRuntimeException.BuildException(ex.getCause().getMessage(), CREIOException.class, t, ex);
+					throw new CREIOException(ex.getCause().getMessage(), t, ex);
 				}
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREPluginInternalException.class, t, ex);
+				throw new CREPluginInternalException(ex.getMessage(), t, ex);
 			}
 			return CVoid.VOID;
 		}
@@ -931,7 +931,7 @@ public class Web {
 				CByteArray cb = (CByteArray)c;
 				return cb.asByteArrayCopy();
 			} else {
-				throw ConfigRuntimeException.BuildException("Only strings and byte_arrays may be added as attachments' content.", CREFormatException.class, t);
+				throw new CREFormatException("Only strings and byte_arrays may be added as attachments' content.", t);
 			}
 		}
 

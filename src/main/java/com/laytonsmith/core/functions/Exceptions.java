@@ -142,7 +142,7 @@ public class Exceptions {
 				if (pivar instanceof IVariable) {
 					ivar = (IVariable) pivar;
 				} else {
-					throw ConfigRuntimeException.BuildException("Expected argument 2 to be an IVariable", CRECastException.class, t);
+					throw new CRECastException("Expected argument 2 to be an IVariable", t);
 				}
 			}
 			List<String> interest = new ArrayList<String>();
@@ -156,8 +156,7 @@ public class Exceptions {
 						interest.add(ca.get(i, t).val());
 					}
 				} else {
-					throw ConfigRuntimeException.BuildException("Expected argument 4 to be a string, or an array of strings.",
-							CRECastException.class, t);
+					throw new CRECastException("Expected argument 4 to be a string, or an array of strings.", t);
 				}
 			}
 
@@ -165,8 +164,7 @@ public class Exceptions {
 				try {
 					NativeTypeList.getNativeClass(in);
 				} catch (ClassNotFoundException e) {
-					throw ConfigRuntimeException.BuildException("Invalid exception type passed to try():" + in,
-							CREFormatException.class, t);
+					throw new CREFormatException("Invalid exception type passed to try():" + in, t);
 				}
 			}
 
@@ -285,7 +283,7 @@ public class Exceptions {
 					try {
 						c = NativeTypeList.getNativeClass(args[0].val());
 					} catch (ClassNotFoundException ex) {
-						throw ConfigRuntimeException.BuildException("Expected a valid exception type, but found \"" + args[0].val() + "\"", CREFormatException.class, t);
+						throw new CREFormatException("Expected a valid exception type, but found \"" + args[0].val() + "\"", t);
 					}
 					List<Class> classes = new ArrayList<>();
 					List<Object> arguments = new ArrayList<>();

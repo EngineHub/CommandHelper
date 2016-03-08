@@ -43,23 +43,20 @@ public class IncludeCache {
                     CHLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Compilation succeeded, adding to cache.", t);
                     IncludeCache.add(file, tree);
                 } catch (ConfigCompileException ex) {
-                    throw ConfigRuntimeException.BuildException("There was a compile error when trying to include the script at " + file
-                            + "\n" + ex.getMessage() + " :: " + file.getName() + ":" + ex.getLineNum(),
-                            CREIncludeException.class, t);
+                    throw new CREIncludeException("There was a compile error when trying to include the script at " + file
+                            + "\n" + ex.getMessage() + " :: " + file.getName() + ":" + ex.getLineNum(), t);
 				} catch(ConfigCompileGroupException ex){
 					StringBuilder b = new StringBuilder();
 					b.append("There were compile errors when trying to include the script at ").append(file).append("\n");
 					for(ConfigCompileException e : ex.getList()){
 						b.append(e.getMessage()).append(" :: ").append(e.getFile().getName()).append(":").append(e.getLineNum());
 					}
-					throw ConfigRuntimeException.BuildException(b.toString(), CREIncludeException.class, t);
+					throw new CREIncludeException(b.toString(), t);
                 } catch (IOException ex) {
-                    throw ConfigRuntimeException.BuildException("The script at " + file + " could not be found or read in.",
-                            CREIOException.class, t);
+                    throw new CREIOException("The script at " + file + " could not be found or read in.", t);
                 }
             } else {
-                throw ConfigRuntimeException.BuildException("The script cannot access " + file + " due to restrictions imposed by the base-dir setting.",
-                        CRESecurityException.class, t);
+                throw new CRESecurityException("The script cannot access " + file + " due to restrictions imposed by the base-dir setting.", t);
             }
         }
         CHLog.GetLogger().Log(TAG, LogLevel.INFO, "Returning " + file.getAbsolutePath() + " from cache", t);

@@ -326,7 +326,7 @@ public class Minecraft {
 				} catch (NumberFormatException e) {
 				}
 			}
-			throw ConfigRuntimeException.BuildException("Improper value passed to max_stack. Expecting a number, or an item array, but received \"" + args[0].val() + "\"", CRECastException.class, t);
+			throw new CRECastException("Improper value passed to max_stack. Expecting a number, or an item array, but received \"" + args[0].val() + "\"", t);
 		}
 
 		@Override
@@ -405,8 +405,7 @@ public class Minecraft {
 			if (args.length > 1) {
 				qty = Static.getInt32(args[1], t);
 				if (qty > 50) {
-					throw ConfigRuntimeException.BuildException("A bit excessive, don't you think? Let's scale that back some, huh?",
-							CRERangeException.class, t);
+					throw new CRERangeException("A bit excessive, don't you think? Let's scale that back some, huh?", t);
 				}
 			}
 			MCLocation l;
@@ -416,19 +415,18 @@ public class Minecraft {
 			} else if (p != null) {
 				l = p.getLocation();
 			} else {
-				throw ConfigRuntimeException.BuildException("Invalid sender!", CREPlayerOfflineException.class, t);
+				throw new CREPlayerOfflineException("Invalid sender!", t);
 			}
 			
 			if (l == null) { // Happends when executed by a fake player.
-				throw ConfigRuntimeException.BuildException(
-					"Could not find the location of the player (are you running in cmdline mode?)",
-					CRENotFoundException.class, t);
+				throw new CRENotFoundException(
+					"Could not find the location of the player (are you running in cmdline mode?)", t);
 			}
 			
 			try{
 				return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll(" ", "")), secondary, qty, l, t);
 			} catch(IllegalArgumentException e){
-				throw ConfigRuntimeException.BuildException("Invalid mob name: " + mob, CREFormatException.class, t);
+				throw new CREFormatException("Invalid mob name: " + mob, t);
 			}
 		}
 	}
@@ -505,7 +503,7 @@ public class Minecraft {
 				}
 				return CVoid.VOID;
 			} else {
-				throw ConfigRuntimeException.BuildException("The specified entity is not tameable", CREUntameableMobException.class, t);
+				throw new CREUntameableMobException("The specified entity is not tameable", t);
 			}
 		}
 	}
@@ -563,7 +561,7 @@ public class Minecraft {
 					return CNull.NULL;
 				}
 			} else {
-				throw ConfigRuntimeException.BuildException("The specified entity is not tameable", CREUntameableMobException.class, t);
+				throw new CREUntameableMobException("The specified entity is not tameable", t);
 			}
 		}
 	}
@@ -674,19 +672,19 @@ public class Minecraft {
 				try {
 					data = Integer.parseInt(preEff.substring(preEff.indexOf(':') + 1));
 				} catch (NumberFormatException ex) {
-					throw ConfigRuntimeException.BuildException("Effect data expected an integer", CRECastException.class, t);
+					throw new CRECastException("Effect data expected an integer", t);
 				}
 				preEff = preEff.substring(0, preEff.indexOf(':'));
 			}
 			try {
 				e = MCEffect.valueOf(preEff.toUpperCase());
 			} catch (IllegalArgumentException ex) {
-				throw ConfigRuntimeException.BuildException("The effect type " + args[1].val() + " is not valid", CREFormatException.class, t);
+				throw new CREFormatException("The effect type " + args[1].val() + " is not valid", t);
 			}
 			if (e.equals(MCEffect.STEP_SOUND)) {
 				MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
 				if (mat == null || !mat.isBlock()) {
-					throw ConfigRuntimeException.BuildException("This effect requires a valid BlockID", CREFormatException.class, t);
+					throw new CREFormatException("This effect requires a valid BlockID", t);
 				}
 			}
 			if (args.length == 3) {
@@ -743,8 +741,7 @@ public class Minecraft {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			double percent = Static.getDouble(args[1], t);
 			if (percent < 0 || percent > 100) {
-				throw ConfigRuntimeException.BuildException("Health was expected to be a percentage between 0 and 100",
-						CRERangeException.class, t);
+				throw new CRERangeException("Health was expected to be a percentage between 0 and 100", t);
 			} else {
 				e.setHealth(percent / 100.0 * e.getMaxHealth());
 			}
@@ -868,8 +865,7 @@ public class Minecraft {
 			}
 
 			if (index < -1 || index > 16) {
-				throw ConfigRuntimeException.BuildException(this.getName() + " expects the index to be between -1 and 16 (inclusive)",
-						CRERangeException.class, t);
+				throw new CRERangeException(this.getName() + " expects the index to be between -1 and 16 (inclusive)", t);
 			}
 
 			ArrayList<Construct> retVals = new ArrayList<Construct>();
@@ -925,9 +921,8 @@ public class Minecraft {
 				CArray co = new CArray(t);
 				MCPluginManager plugManager = server.getPluginManager();
 				if (plugManager == null) {
-					throw ConfigRuntimeException.BuildException(this.getName()
-							+ " could not receive the server plugins. Are you running in cmdline mode?",
-							CRENotFoundException.class, t);
+					throw new CRENotFoundException(this.getName()
+							+ " could not receive the server plugins. Are you running in cmdline mode?", t);
 				}
 				List<MCPlugin> plugs = plugManager.getPlugins();
 
@@ -1182,8 +1177,7 @@ public class Minecraft {
 			try {
 				type = MCEntityType.valueOf(args[1].val().toUpperCase());
 			} catch (IllegalArgumentException iae) {
-				throw ConfigRuntimeException.BuildException("Not a registered entity type: " + args[1].val(),
-						CREBadEntityException.class, t);
+				throw new CREBadEntityException("Not a registered entity type: " + args[1].val(), t);
 			}
 			if(location.getBlock().getState() instanceof MCCreatureSpawner){
 				((MCCreatureSpawner)location.getBlock().getState()).setSpawnedType(type);
@@ -1260,7 +1254,7 @@ public class Minecraft {
 			if(options.containsKey("strength")){
 				strength = Static.getInt32(options.get("strength", t), t);
 				if (strength < 0 || strength > 128) {
-					throw ConfigRuntimeException.BuildException("Strength must be between 0 and 128", CRERangeException.class, t);
+					throw new CRERangeException("Strength must be between 0 and 128", t);
 				}
 			}
 			if(options.containsKey("flicker")){
@@ -1720,7 +1714,7 @@ public class Minecraft {
 					l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getEyeLocation();
 					natural = false;
 				} else {
-					throw ConfigRuntimeException.BuildException("Invalid sender!", CREPlayerOfflineException.class, t);
+					throw new CREPlayerOfflineException("Invalid sender!", t);
 				}
 				if (args[0] instanceof CNull) {
 					return CNull.NULL; // The item is null, this means we are dropping air.

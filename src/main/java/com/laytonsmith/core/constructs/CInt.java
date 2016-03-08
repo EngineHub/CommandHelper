@@ -7,7 +7,6 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
 /**
  *
@@ -23,7 +22,7 @@ public class CInt extends CNumber implements Cloneable {
         try{
             val = Long.parseLong(value);
         } catch(NumberFormatException e){
-            throw ConfigRuntimeException.BuildException("Could not parse " + value + " as an integer", CREFormatException.class, t);
+            throw new CREFormatException("Could not parse " + value + " as an integer", t);
         }
     }
 

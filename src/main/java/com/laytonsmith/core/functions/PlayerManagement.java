@@ -181,14 +181,12 @@ public class PlayerManagement {
 				dashless = Static.getBoolean(args[1]);
 			}
 			if (pl == null) {
-				throw ConfigRuntimeException.BuildException("No matching player could be found.",
-						CREPlayerOfflineException.class, t);
+				throw new CREPlayerOfflineException("No matching player could be found.", t);
 			}
 			UUID uuid = pl.getUniqueID();
 			if (uuid == null) {
-				throw ConfigRuntimeException.BuildException(
-						"Could not find the UUID of the player (are you running in cmdline mode?)",
-						CRENotFoundException.class, t);
+				throw new CRENotFoundException(
+						"Could not find the UUID of the player (are you running in cmdline mode?)", t);
 			}
 			String uuidStr = uuid.toString();
 			return new CString(dashless ? uuidStr.replace("-", "") : uuidStr, t);
@@ -240,7 +238,7 @@ public class PlayerManagement {
 			} else {
 				MCWorld world = Static.getServer().getWorld(args[0].val());
 				if (world == null) {
-					throw ConfigRuntimeException.BuildException("Unknown world: " + args[0].val(), CREInvalidWorldException.class, t);
+					throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 				}
 				for (MCPlayer player : world.getPlayers()) {
 					if(player.isOnline()){
@@ -329,8 +327,7 @@ public class PlayerManagement {
 				loc = p.getLocation();
 			} else {
 				if (!(args[0] instanceof CArray)) {
-					throw ConfigRuntimeException.BuildException("Expecting an array at parameter 1 of players_in_radius",
-							CRECastException.class, t);
+					throw new CRECastException("Expecting an array at parameter 1 of players_in_radius", t);
 				}
 
 				loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
@@ -399,9 +396,8 @@ public class PlayerManagement {
 			}
 			MCLocation location = p.getLocation();
 			if (location == null) {
-				throw ConfigRuntimeException.BuildException(
-						"Could not find the location of the player (are you running in cmdline mode?)",
-						CRENotFoundException.class, t);
+				throw new CRENotFoundException(
+						"Could not find the location of the player (are you running in cmdline mode?)", t);
 			}
 			location.setY(location.getY() - 1);
 			return ObjectGenerator.GetGenerator().location(location);
@@ -601,12 +597,11 @@ public class PlayerManagement {
 			try {
 				b = p.getTargetBlock(trans, 10000, false);
 			} catch (IllegalStateException ise) {
-				throw ConfigRuntimeException.BuildException("The server's method of finding the target block has failed."
-						+ " There is nothing that can be done about this except standing somewhere else.",
-						CREPluginInternalException.class, t);
+				throw new CREPluginInternalException("The server's method of finding the target block has failed."
+						+ " There is nothing that can be done about this except standing somewhere else.", t);
 			}
 			if (b == null) {
-				throw ConfigRuntimeException.BuildException("No block in sight, or block too far", CRERangeException.class, t);
+				throw new CRERangeException("No block in sight, or block too far", t);
 			} else {
 				return ObjectGenerator.GetGenerator().location(b.getLocation(), false);
 			}
@@ -869,8 +864,7 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(p, t);
 			int maxIndex = 20;
 			if (index < -1 || index > maxIndex) {
-				throw ConfigRuntimeException.BuildException(this.getName() + " expects the index to be between -1 and " + maxIndex,
-						CRERangeException.class, t);
+				throw new CRERangeException(this.getName() + " expects the index to be between -1 and " + maxIndex, t);
 			}
 			ArrayList<Construct> retVals = new ArrayList<Construct>();
 			if (index == 0 || index == -1) {
@@ -881,9 +875,8 @@ public class PlayerManagement {
 				//MCPlayer location
 				MCLocation loc = p.getLocation();
 				if (loc == null) {
-					throw ConfigRuntimeException.BuildException(
-							"Could not find the location of the player (are you running in cmdline mode?)",
-							CRENotFoundException.class, t);
+					throw new CRENotFoundException(
+							"Could not find the location of the player (are you running in cmdline mode?)", t);
 				}
 				retVals.add(new CArray(t,
 						new CDouble(loc.getX(), t),
@@ -1328,16 +1321,14 @@ public class PlayerManagement {
 					toSet = (MCPlayer) p;
 					MCLocation loc = toSet.getLocation();
 					if (loc == null) {
-						throw ConfigRuntimeException.BuildException(
-								"Could not find the location of the given player (are you running in cmdline mode?)",
-								CRENotFoundException.class, t);
+						throw new CRENotFoundException(
+								"Could not find the location of the given player (are you running in cmdline mode?)", t);
 					}
 					pitch = loc.getPitch();
 				}
 				int g = Static.getInt32(args[0], t);
 				if (g < 0 || g > 3) {
-					throw ConfigRuntimeException.BuildException("The F specifed must be from 0 to 3",
-							CRERangeException.class, t);
+					throw new CRERangeException("The F specifed must be from 0 to 3", t);
 				}
 				yaw = g * 90;
 			} else if (args.length == 2) {
@@ -1357,8 +1348,7 @@ public class PlayerManagement {
 					pitch = toSet.getLocation().getPitch();
 					int g = Static.getInt32(args[1], t);
 					if (g < 0 || g > 3) {
-						throw ConfigRuntimeException.BuildException("The F specifed must be from 0 to 3",
-								CRERangeException.class, t);
+						throw new CRERangeException("The F specifed must be from 0 to 3", t);
 					}
 					yaw = g * 90;
 				}
@@ -1371,15 +1361,13 @@ public class PlayerManagement {
 
 			//Error check our data
 			if (pitch > 90 || pitch < -90) {
-				throw ConfigRuntimeException.BuildException("pitch must be between -90 and 90",
-						CRERangeException.class, t);
+				throw new CRERangeException("pitch must be between -90 and 90", t);
 			}
 			Static.AssertPlayerNonNull(toSet, t);
 			MCLocation l = toSet.getLocation();
 			if (l == null) {
-				throw ConfigRuntimeException.BuildException(
-						"Could not find the location of the player (are you running in cmdline mode?)",
-						CRENotFoundException.class, t);
+				throw new CRENotFoundException(
+						"Could not find the location of the player (are you running in cmdline mode?)", t);
 			}
 			l = l.clone();
 			l.setPitch(pitch);
@@ -1449,9 +1437,8 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(m, t);
 			MCGameMode gm = m.getGameMode();
 			if (gm == null) {
-				throw ConfigRuntimeException.BuildException(
-						"Could not find the gamemode of the given player (are you running in cmdline mode?)",
-						CRENotFoundException.class, t);
+				throw new CRENotFoundException(
+						"Could not find the gamemode of the given player (are you running in cmdline mode?)", t);
 			}
 			String mode = gm.name();
 			return new CString(mode, t);
@@ -1515,7 +1502,7 @@ public class PlayerManagement {
 			try {
 				gm = MCGameMode.valueOf(mode.toUpperCase());
 			} catch (IllegalArgumentException e) {
-				throw ConfigRuntimeException.BuildException("Mode must be either " + StringUtils.Join(MCGameMode.values(), ", ", ", or "), CREFormatException.class, t);
+				throw new CREFormatException("Mode must be either " + StringUtils.Join(MCGameMode.values(), ", ", ", or "), t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setGameMode(gm);
@@ -1913,7 +1900,7 @@ public class PlayerManagement {
 				xp = Static.getInt32(args[0], t);
 			}
 			if(xp < 0) {
-				throw ConfigRuntimeException.BuildException("Experience can't be negative", CRERangeException.class, t);
+				throw new CRERangeException("Experience can't be negative", t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			int score = m.getTotalExperience();
@@ -2093,8 +2080,7 @@ public class PlayerManagement {
 			//otherwise the client crashes, and requires deletion of
 			//player data to fix.
 			if (effect < 1 || effect > m.getMaxEffect()) {
-				throw ConfigRuntimeException.BuildException("Invalid effect ID recieved, must be from 1-" + m.getMaxEffect(),
-						CRERangeException.class, t);
+				throw new CRERangeException("Invalid effect ID recieved, must be from 1-" + m.getMaxEffect(), t);
 			}
 
 			int strength = Static.getInt32(args[2], t);
@@ -2238,8 +2224,8 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(m, t);
 			if (health < 0 || health > m.getMaxHealth()) {
-				throw ConfigRuntimeException.BuildException("Health must be between 0 and the player's max health (currently "
-						+ m.getMaxHealth() + " for " + m.getName() + ").", CRERangeException.class, t);
+				throw new CRERangeException("Health must be between 0 and the player's max health (currently "
+						+ m.getMaxHealth() + " for " + m.getName() + ").", t);
 			}
 			m.setHealth(health);
 			return CVoid.VOID;
@@ -2408,9 +2394,8 @@ public class PlayerManagement {
 			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
 			boolean whitelist = Static.getBoolean(args[1]);
 			if (pl == null) {
-				throw ConfigRuntimeException.BuildException(
-						this.getName() + " could not get the offline player (are you running in cmdline mode?)",
-						CRENotFoundException.class, t);
+				throw new CRENotFoundException(
+						this.getName() + " could not get the offline player (are you running in cmdline mode?)", t);
 			}
 			pl.setWhitelisted(whitelist);
 			return CVoid.VOID;
@@ -2471,9 +2456,8 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
 			if (pl == null) {
-				throw ConfigRuntimeException.BuildException(
-						this.getName() + " could not get the offline player (are you running in cmdline mode?)",
-						CRENotFoundException.class, t);
+				throw new CRENotFoundException(
+						this.getName() + " could not get the offline player (are you running in cmdline mode?)", t);
 			}
 			return CBoolean.get(pl.isBanned());
 		}
@@ -2525,9 +2509,8 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
 			if (pl == null) {
-				throw ConfigRuntimeException.BuildException(
-						this.getName() + " could not get the offline player (are you running in cmdline mode?)",
-						CRENotFoundException.class, t);
+				throw new CRENotFoundException(
+						this.getName() + " could not get the offline player (are you running in cmdline mode?)", t);
 			}
 			boolean ban = Static.getBoolean(args[1]);
 			pl.setBanned(ban);
@@ -2590,7 +2573,7 @@ public class PlayerManagement {
 			}
 
 			if(speed < -1 || speed > 1) {
-				throw ConfigRuntimeException.BuildException("Speed must be between -1 and 1", CRERangeException.class, t);
+				throw new CRERangeException("Speed must be between -1 and 1", t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 
@@ -2711,7 +2694,7 @@ public class PlayerManagement {
 			}
 
 			if(speed < -1 || speed > 1) {
-				throw ConfigRuntimeException.BuildException("Speed must be between -1 and 1", CRERangeException.class, t);
+				throw new CRERangeException("Speed must be between -1 and 1", t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 
@@ -2876,7 +2859,7 @@ public class PlayerManagement {
 				l = ObjectGenerator.GetGenerator().location(args[1], null, t);
 			}
 			if (m == null) {
-				throw ConfigRuntimeException.BuildException("That player is not online", CREPlayerOfflineException.class, t);
+				throw new CREPlayerOfflineException("That player is not online", t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			MCLocation old = m.getCompassTarget();
@@ -3254,10 +3237,10 @@ public class PlayerManagement {
 					hour = 0;
 				}
 				if (hour > 24) {
-					throw ConfigRuntimeException.BuildException("Invalid time provided", CREFormatException.class, t);
+					throw new CREFormatException("Invalid time provided", t);
 				}
 				if (minute > 59) {
-					throw ConfigRuntimeException.BuildException("Invalid time provided", CREFormatException.class, t);
+					throw new CREFormatException("Invalid time provided", t);
 				}
 				hour -= 6;
 				hour = hour % 24;
@@ -3268,7 +3251,7 @@ public class PlayerManagement {
 			try {
 				Long.valueOf(stime);
 			} catch (NumberFormatException e) {
-				throw ConfigRuntimeException.BuildException("Invalid time provided", CREFormatException.class, t);
+				throw new CREFormatException("Invalid time provided", t);
 			}
 			time = Long.parseLong(stime);
 			p.setPlayerTime(time, relative);
@@ -3521,8 +3504,7 @@ public class PlayerManagement {
 				listName = args[0].nval();
 			}
 			if (listName != null && listName.length() > 16) {
-				throw ConfigRuntimeException.BuildException("set_list_name([player,] name) expects name to be 16 characters or less",
-						CRELengthException.class, t);
+				throw new CRELengthException("set_list_name([player,] name) expects name to be 16 characters or less", t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setPlayerListName(listName);
@@ -3650,9 +3632,8 @@ public class PlayerManagement {
 			CArray vector = CArray.GetAssociativeArray(t);
 			Vector3D velocity = p.getVelocity();
 			if (velocity == null) {
-				throw ConfigRuntimeException.BuildException(
-						"The players velocity could not be found (Are you running in cmdline mode?)",
-						CRENotFoundException.class, t);
+				throw new CRENotFoundException(
+						"The players velocity could not be found (Are you running in cmdline mode?)", t);
 			}
 			vector.set("magnitude", new CDouble(velocity.length(), t), t);
 			vector.set("x", new CDouble(velocity.X(), t), t);
@@ -3706,7 +3687,7 @@ public class PlayerManagement {
 						y = l.getY();
 						z = l.getZ();
 					} else {
-						throw ConfigRuntimeException.BuildException("Expecting an array, but \"" + args[offset].val() + "\" was given.", CRECastException.class, t);
+						throw new CRECastException("Expecting an array, but \"" + args[offset].val() + "\" was given.", t);
 					}
 					break;
 				}
@@ -3799,7 +3780,7 @@ public class PlayerManagement {
 				//Lines are in an array
 				CArray lineArray = Static.getArray(args[1 + offset], t);
 				if(lineArray.size() != 4) {
-					throw ConfigRuntimeException.BuildException("Line array must have 4 elements.", CRECastException.class, t);
+					throw new CRECastException("Line array must have 4 elements.", t);
 				}
 				lines[0] = lineArray.get(0, t).val();
 				lines[1] = lineArray.get(1, t).val();
@@ -4119,13 +4100,11 @@ public class PlayerManagement {
 			if (args.length == 1) {
 				player = Static.GetUser(args[0].val(), t);
 			} else if (player == null) {
-				throw ConfigRuntimeException.BuildException(this.getName() + " requires a player as first argument when ran from console",
-						CREInsufficientArgumentsException.class, t);
+				throw new CREInsufficientArgumentsException(this.getName() + " requires a player as first argument when ran from console", t);
 			}
 			if (player == null) {
-				throw ConfigRuntimeException.BuildException(
-						this.getName() + " failed to get an offline player (are you running in cmdline mode?)",
-						CRENotFoundException.class, t);
+				throw new CRENotFoundException(
+						this.getName() + " failed to get an offline player (are you running in cmdline mode?)", t);
 			}
 			MCLocation loc = player.getBedSpawnLocation();
 			if (loc == null) {
@@ -4223,8 +4202,7 @@ public class PlayerManagement {
 					}
 					locationIndex = 0;
 				} else {
-					throw ConfigRuntimeException.BuildException("Expecting an array in set_pbed_location",
-							CRECastException.class, t);
+					throw new CRECastException("Expecting an array in set_pbed_location", t);
 				}
 			} else if (args.length == 2) {
 				if (args[1] instanceof CArray) {
@@ -4237,8 +4215,7 @@ public class PlayerManagement {
 					locationIndex = 0;
 					forced = Static.getBoolean(args[1]);
 				} else {
-					throw ConfigRuntimeException.BuildException("Expecting an array in set_pbed_location",
-							CRECastException.class, t);
+					throw new CRECastException("Expecting an array in set_pbed_location", t);
 				}
 			} else if (args.length == 3) {
 				if (args[1] instanceof CArray) {
@@ -4280,9 +4257,8 @@ public class PlayerManagement {
 			} else {
 				l = m.getLocation();
 				if (l == null) {
-					throw ConfigRuntimeException.BuildException(
-							"The given player has a null location (are you running from cmdline mode?)",
-							CRENullPointerException.class , t);
+					throw new CRENullPointerException(
+							"The given player has a null location (are you running from cmdline mode?)", t);
 				}
 				l.setX(Static.getNumber(args[locationIndex], t));
 				l.setY(Static.getNumber(args[locationIndex + 1], t) + 1);
@@ -4776,8 +4752,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			if(!p.getAllowFlight()) {
-				throw ConfigRuntimeException.BuildException("Player must have the ability to fly. Set with set_pflight()",
-						CREIllegalArgumentException.class, t);
+				throw new CREIllegalArgumentException("Player must have the ability to fly. Set with set_pflight()", t);
 			}
 			// This is needed in order for the player to enter flight mode whilst standing on the ground.
 			if(flight
@@ -4844,8 +4819,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			if(p.getGameMode() != MCGameMode.SPECTATOR) {
-				throw ConfigRuntimeException.BuildException("Player must be in spectator mode.",
-						CREIllegalArgumentException.class, t);
+				throw new CREIllegalArgumentException("Player must be in spectator mode.", t);
 			}
 			MCEntity e = p.getSpectatorTarget();
 			if(e == null) {
@@ -4908,8 +4882,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			if(p.getGameMode() != MCGameMode.SPECTATOR) {
-				throw ConfigRuntimeException.BuildException("Player must be in spectator mode.",
-						CREIllegalArgumentException.class, t);
+				throw new CREIllegalArgumentException("Player must be in spectator mode.", t);
 			}
 			if(args[offset] instanceof CNull) {
 				p.setSpectatorTarget(null);

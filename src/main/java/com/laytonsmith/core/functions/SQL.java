@@ -156,7 +156,7 @@ public class SQL {
 					profile = profiles.getProfileById(args[0].val());
 				}
 				if(!(profile instanceof SQLProfile)){
-					throw ConfigRuntimeException.BuildException("Profile must be an SQL type profile, but found \"" + profile.getType() + "\"", CRECastException.class, t);
+					throw new CRECastException("Profile must be an SQL type profile, but found \"" + profile.getType() + "\"", t);
 				}
 				String query = args[1].val();
 				Construct[] params = new Construct[args.length - 2];
@@ -180,7 +180,7 @@ public class SQL {
 						if (params[i] == null) {
 							try {
 								if (ps.getParameterMetaData().isNullable(i + 1) == ParameterMetaData.parameterNoNulls) {
-									throw ConfigRuntimeException.BuildException("Parameter " + (i + 1) + " cannot be set to null. Check your parameters and try again.", CRESQLException.class, t);
+									throw new CRESQLException("Parameter " + (i + 1) + " cannot be set to null. Check your parameters and try again.", t);
 								}
 							} catch(SQLException ex){
 								//Ignored. This appears to be able to happen in various cases, but in the case where it *does* work, we don't want
@@ -201,15 +201,13 @@ public class SQL {
 							} else if (params[i] instanceof CBoolean) {
 								ps.setBoolean(i + 1, Static.getBoolean(params[i]));
 							}else{
-								throw ConfigRuntimeException.BuildException("The type " + params[i].getClass().getSimpleName()
-										+ " of parameter " + (i + 1) + " is not supported."
-										, CRECastException.class, t);
+								throw new CRECastException("The type " + params[i].getClass().getSimpleName()
+										+ " of parameter " + (i + 1) + " is not supported.", t);
 							}
 						} catch (ClassCastException ex) {
-							throw ConfigRuntimeException.BuildException("Could not cast parameter " + (i + 1) + " to "
+							throw new CRECastException("Could not cast parameter " + (i + 1) + " to "
 									+ ps.getParameterMetaData().getParameterTypeName(i + 1) + " from "
-									+ params[i].getClass().getSimpleName() + "."
-									, CRECastException.class, t, ex);
+									+ params[i].getClass().getSimpleName() + ".", t, ex);
 						}
 					}
 					boolean isResultSet = ps.execute();
@@ -255,9 +253,8 @@ public class SQL {
 										|| columnType == Types.BIT) {
 									value = CBoolean.get(rs.getBoolean(i));
 								} else {
-									throw ConfigRuntimeException.BuildException("SQL returned a unhandled column type "
-											+ md.getColumnTypeName(i) + " for column " + md.getColumnName(i) + "."
-											, CRECastException.class, t);
+									throw new CRECastException("SQL returned a unhandled column type "
+											+ md.getColumnTypeName(i) + " for column " + md.getColumnName(i) + ".", t);
 								}
 								if(rs.wasNull()){
 									// Since mscript can assign null to primitives, we
@@ -289,7 +286,7 @@ public class SQL {
 					}
 				}
 			} catch (Profiles.InvalidProfileException | SQLException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), CRESQLException.class, t, ex);
+				throw new CRESQLException(ex.getMessage(), t, ex);
 			}
 		}
 
@@ -463,7 +460,7 @@ public class SQL {
 			startup();
 			Construct arg = args[args.length - 1];
 			if(!(arg instanceof CClosure)){
-				throw ConfigRuntimeException.BuildException("The last argument to " + getName() + " must be a closure.", CRECastException.class, t);
+				throw new CRECastException("The last argument to " + getName() + " must be a closure.", t);
 			}
 			final CClosure closure = ((CClosure)arg);
 			final Construct[] newArgs = new Construct[args.length - 1];

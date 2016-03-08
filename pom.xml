@@ -752,7 +752,6 @@
 						<processor>com.laytonsmith.core.extensions.ExtensionAnnotationProcessor</processor>
 						<processor>com.laytonsmith.core.MObjectAnnotationProcessor</processor>
 					</processors>
-					<compilerArguments>-XDignore.symbole.file</compilerArguments>
 					<outputDiagnostics>false</outputDiagnostics>
 				</configuration>
 			</plugin>
@@ -787,6 +786,7 @@
 						<!-- Include custom, none specific classes -->
 						<include>**/RandomTests.java</include>
 					</includes>
+					<argLine>${argLine}</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -831,7 +831,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.1.201405082137</version>
+				<version>0.7.6.201602180812</version>
 				<configuration>
 					<excludes>
 						<!-- Application starter -->

@@ -177,7 +177,7 @@ public class DataTransformations {
 			try{
 				return new CString(yaml.dump(Construct.GetPOJO(ca)), t);
 			} catch(ClassCastException ex){
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), CRECastException.class, t);
+				throw new CRECastException(ex.getMessage(), t);
 			}
 		}
 

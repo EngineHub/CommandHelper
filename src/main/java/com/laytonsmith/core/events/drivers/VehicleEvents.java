@@ -448,8 +448,7 @@ public class VehicleEvents {
 
 			MCEntity e = Static.getEntity(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
 			if (!(e instanceof MCVehicle)) {
-				throw ConfigRuntimeException.BuildException("The id was not a vehicle",
-						CREBadEntityException.class, Target.UNKNOWN);
+				throw new CREBadEntityException("The id was not a vehicle", Target.UNKNOWN);
 			}
 
 			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), e.getWorld(), manualObject.getTarget());

@@ -188,7 +188,7 @@ public class Echoes {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args.length < 2){
-                throw ConfigRuntimeException.BuildException("You must send at least 2 arguments to tmsg", CREInsufficientArgumentsException.class, t);
+                throw new CREInsufficientArgumentsException("You must send at least 2 arguments to tmsg", t);
             }
 			MCCommandSender p;
 			if (Static.getConsoleName().equals(args[0].val())) {
@@ -197,7 +197,7 @@ public class Echoes {
 				p = Static.GetPlayer(args[0], t);
 			}
             if(p == null){
-                throw ConfigRuntimeException.BuildException("The player " + args[0].val() + " is not online", CREPlayerOfflineException.class, t);
+                throw new CREPlayerOfflineException("The player " + args[0].val() + " is not online", t);
             }
             StringBuilder b = new StringBuilder();
             for(int i = 1; i < args.length; i++){
@@ -436,7 +436,7 @@ public class Echoes {
 			if(p != null){
 				p.chat(args[0].val());
 			} else {
-				throw ConfigRuntimeException.BuildException("Console cannot chat. Use something like broadcast() instead.", CREPlayerOfflineException.class, t);
+				throw new CREPlayerOfflineException("Console cannot chat. Use something like broadcast() instead.", t);
 			}
             return CVoid.VOID;
         }
@@ -553,7 +553,7 @@ public class Echoes {
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CNull){
-                throw ConfigRuntimeException.BuildException("Trying to broadcast null won't work", CRENullPointerException.class, t);
+                throw new CRENullPointerException("Trying to broadcast null won't work", t);
             }
             final MCServer server = Static.getServer();
             String permission = null;

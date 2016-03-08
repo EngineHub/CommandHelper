@@ -50,7 +50,7 @@ public class Crypto {
 			String hash = StringUtils.toHex(hmac).toLowerCase();
 			return new CString(hash, t);
 		} catch (NoSuchAlgorithmException | InvalidKeyException ex) {
-			throw ConfigRuntimeException.BuildException("An error occured while trying to hash your data", CREPluginInternalException.class, t, ex);
+			throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 		}
 	}
 
@@ -177,7 +177,7 @@ public class Crypto {
                 String hash = StringUtils.toHex(digest.digest()).toLowerCase();
                 return new CString(hash, t);
             } catch (NoSuchAlgorithmException ex) {
-                throw ConfigRuntimeException.BuildException("An error occured while trying to hash your data", CREPluginInternalException.class, t, ex);
+                throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
             }
         }
         
@@ -244,7 +244,7 @@ public class Crypto {
                 String hash = StringUtils.toHex(digest.digest()).toLowerCase();
                 return new CString(hash, t);
             } catch (NoSuchAlgorithmException ex) {
-                throw ConfigRuntimeException.BuildException("An error occured while trying to hash your data", CREPluginInternalException.class, t, ex);
+                throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
             }
         }
         
@@ -310,7 +310,7 @@ public class Crypto {
                 String hash = StringUtils.toHex(digest.digest()).toLowerCase();
                 return new CString(hash, t);
             } catch (NoSuchAlgorithmException ex) {
-                throw ConfigRuntimeException.BuildException("An error occured while trying to hash your data", CREPluginInternalException.class, t, ex);
+                throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
             }
         }
         

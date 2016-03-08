@@ -31,6 +31,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.InvalidEnvironmentException;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -176,7 +177,7 @@ public class Script {
                 for (String group : groups) {
                     if (group.startsWith("-") && ((MCPlayer)p).inGroup(group.substring(1))) {
                         //negative permission
-                        throw ConfigRuntimeException.BuildException("You do not have permission to use that command", CREInsufficientPermissionException.class,
+                        throw new CREInsufficientPermissionException("You do not have permission to use that command",
                                 Target.UNKNOWN);
                     } else if (((MCPlayer)p).inGroup(group)) {
                         //They do have permission.
@@ -291,7 +292,7 @@ public class Script {
 						//Not really a function, so we can't put it in Function.
 						Procedure p = getProc(m.val());
 						if (p == null) {
-							throw ConfigRuntimeException.BuildException("Unknown procedure \"" + m.val() + "\"", CREInvalidProcedureException.class, m.getTarget());
+							throw new CREInvalidProcedureException("Unknown procedure \"" + m.val() + "\"", m.getTarget());
 						}
 						Environment newEnv = env;
 						try{
@@ -319,8 +320,7 @@ public class Script {
 						if (f.isRestricted()) {
 							boolean perm = Static.hasCHPermission(f.getName(), env);
 							if (!perm) {
-								throw ConfigRuntimeException.BuildException("You do not have permission to use the " + f.getName() + " function.",
-										CREInsufficientPermissionException.class, m.getTarget());
+								throw new CREInsufficientPermissionException("You do not have permission to use the " + f.getName() + " function.", m.getTarget());
 							}
 						}
 
@@ -353,9 +353,9 @@ public class Script {
 									|| ca[i] instanceof CString || ca[i] instanceof CVoid
 									|| ca[i] instanceof IVariable || ca[i] instanceof CEntry || ca[i] instanceof CLabel)
 									&& (!f.getName().equals("__autoconcat__") && (ca[i] instanceof CLabel))) {
-								throw ConfigRuntimeException.BuildException("Invalid Construct ("
+								throw new CRECastException("Invalid Construct ("
 										+ ca[i].getClass() + ") being passed as an argument to a function ("
-										+ f.getName() + ")", null, m.getTarget());
+										+ f.getName() + ")", m.getTarget());
 							}
 							while(f.preResolveVariables() && ca[i] instanceof IVariable){
 								IVariable cur = (IVariable)ca[i];

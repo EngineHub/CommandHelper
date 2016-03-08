@@ -383,45 +383,6 @@ public class ConfigRuntimeException extends RuntimeException {
 	private Target target;
 
 	/**
-	 * Creates a new ConfigRuntimeException. This method is partially deprecated.
-	 * It should not be used for new code, and it should eventually be phased out, however
-	 * there will be a very long deprecation period. Instead, instantiate an exception
-	 * of type {@link CREThrowable}.
-	 *
-	 * @param msg The message to be displayed
-	 * @param ex The type of exception this is, as seen by user level code
-	 * @param t The code target this exception is being thrown from
-	 * @return An exception of the appropriate subclass
-	 * @deprecated Instead, instantiate an exception
-	 * of type {@link CREThrowable}.
-	 */
-	@Deprecated
-	public static ConfigRuntimeException BuildException(String msg, Class<? extends CREThrowable> ex, Target t) {
-		return BuildException(msg, ex, t, null);
-	}
-
-	/**
-	 * Creates a new ConfigRuntimeException. This method is partially deprecated.
-	 * It should not be used for new code, and it should eventually be phased out, however
-	 * there will be a very long deprecation period. Instead, instantiate an exception
-	 * of type {@link CREThrowable}.
-	 *
-	 * @param msg The message to be displayed
-	 * @param ex The type of exception this is, as seen by user level code
-	 * @param t The code target this exception is being thrown from
-	 * @param cause The chained cause. This is not used for normal execution, but is helpful
-	 * when debugging errors. Where exceptions are triggered by Java code (as opposed to organic
-	 * MethodScript errors) this version should always be preferred.
-	 * @return An exception of the appropriate subclass
-	 * @deprecated Instead, instantiate an exception
-	 * of type {@link CREThrowable}.
-	 */
-	@Deprecated
-	public static ConfigRuntimeException BuildException(String msg, Class<? extends CREThrowable> ex, Target t, Throwable cause) {
-		return ReflectionUtils.newInstance(ex, new Class[]{String.class, Target.class, Throwable.class}, new Object[]{msg, t, cause});
-	}
-
-	/**
 	 * Creates a new ConfigRuntimeException. If the exception is intended to be
 	 * uncatchable, use {@link #CreateUncatchableException} instead.
 	 *

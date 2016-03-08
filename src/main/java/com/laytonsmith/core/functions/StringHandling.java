@@ -684,8 +684,8 @@ public class StringHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (!(args[0] instanceof CString)) {
-				throw ConfigRuntimeException.BuildException(this.getName() + " expects a string as first argument, but type "
-						+ args[0].typeof() + " was found.", CREFormatException.class, t);
+				throw new CREFormatException(this.getName() + " expects a string as first argument, but type "
+						+ args[0].typeof() + " was found.", t);
 			}
 			return new CString(args[0].val().toUpperCase(), t);
 		}
@@ -747,8 +747,8 @@ public class StringHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (!(args[0] instanceof CString)) {
-				throw ConfigRuntimeException.BuildException(this.getName() + " expects a string as first argument, but type "
-						+ args[0].typeof() + " was found.", CREFormatException.class, t);
+				throw new CREFormatException(this.getName() + " expects a string as first argument, but type "
+						+ args[0].typeof() + " was found.", t);
 			}
 			return new CString(args[0].val().toLowerCase(), t);
 		}
@@ -823,8 +823,7 @@ public class StringHandling {
 				}
 				return new CString(s.substring(begin, end), t);
 			} catch (IndexOutOfBoundsException e) {
-				throw ConfigRuntimeException.BuildException("The indices given are not valid for string '" + args[0].val() + "'",
-						CRERangeException.class, t);
+				throw new CRERangeException("The indices given are not valid for string '" + args[0].val() + "'", t);
 			}
 		}
 
@@ -1031,7 +1030,7 @@ public class StringHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args.length < 2) {
-				throw ConfigRuntimeException.BuildException(getName() + " expects 2 or more arguments", CREInsufficientArgumentsException.class, t);
+				throw new CREInsufficientArgumentsException(getName() + " expects 2 or more arguments", t);
 			}
 			int numArgs = args.length;
 			
@@ -1044,8 +1043,8 @@ public class StringHandling {
 				locale = Static.GetLocale(countryCode);
 			}
 			if(locale == null) {
-				throw ConfigRuntimeException.BuildException("The given locale was not found on your system: "
-						+ countryCode, CREFormatException.class, t);
+				throw new CREFormatException("The given locale was not found on your system: "
+						+ countryCode, t);
 			}
 			
 			// Handle the formatting.
@@ -1055,18 +1054,17 @@ public class StringHandling {
 			try{
 				parsed = parse(formatString, t);
 			} catch(IllegalFormatException e){
-				throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t);
+				throw new CREFormatException(e.getMessage(), t);
 			}
 			if (requiredArgs(parsed) != numArgs - 2) {
-				throw ConfigRuntimeException.BuildException("The specified format string: \"" + formatString + "\""
-						+ " expects " + requiredArgs(parsed) + " argument(s), but " + (numArgs - 2) + " were provided.",
-						CREInsufficientArgumentsException.class, t);
+				throw new CREInsufficientArgumentsException("The specified format string: \"" + formatString + "\""
+						+ " expects " + requiredArgs(parsed) + " argument(s), but " + (numArgs - 2) + " were provided.", t);
 			}
 
 			List<Construct> flattenedArgs = new ArrayList<Construct>();
 			if (numArgs == 3 && args[2] instanceof CArray) {
 				if (((CArray) args[2]).inAssociativeMode()) {
-					throw ConfigRuntimeException.BuildException("If the second argument to " + getName() + " is an array, it may not be associative.", CRECastException.class, t);
+					throw new CRECastException("If the second argument to " + getName() + " is an array, it may not be associative.", t);
 				} else {
 					for (int i = 0; i < ((CArray) args[2]).size(); i++) {
 						flattenedArgs.add(((CArray) args[2]).get(i, t));
@@ -1272,8 +1270,8 @@ public class StringHandling {
 				try {
 					List<FormatString> parsed = parse(children.get(1).getData().val(), t);
 					if (requiredArgs(parsed) != children.size() - 2) {
-						throw ConfigRuntimeException.BuildException("The specified format string: \"" + children.get(1).getData().val() + "\""
-								+ " expects " + requiredArgs(parsed) + " argument(s), but " + (children.size() - 2) + " were provided.", CREInsufficientArgumentsException.class, t);
+						throw new CREInsufficientArgumentsException("The specified format string: \"" + children.get(1).getData().val() + "\""
+								+ " expects " + requiredArgs(parsed) + " argument(s), but " + (children.size() - 2) + " were provided.", t);
 					}
 					//If the arguments are constant, we can actually check them too
 					for(int i = 2; i < children.size(); i++){
@@ -1284,7 +1282,7 @@ public class StringHandling {
 						}
 					}
 				} catch (IllegalFormatException e) {
-					throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t);
+					throw new CREFormatException(e.getMessage(), t);
 				}
 				return me;
 			} else {
@@ -1362,7 +1360,7 @@ public class StringHandling {
 			} catch(ReflectionException e){
 				if(e.getCause() instanceof InvocationTargetException){
 					Throwable th = e.getCause().getCause();
-					throw ConfigRuntimeException.BuildException("A format exception was thrown for the argument \"" + format + "\": " + th.getClass().getSimpleName() + ": " + th.getMessage(), CREFormatException.class, t);
+					throw new CREFormatException("A format exception was thrown for the argument \"" + format + "\": " + th.getClass().getSimpleName() + ": " + th.getMessage(), t);
 				} else {
 					//This is unexpected
 					throw ConfigRuntimeException.CreateUncatchableException(e.getMessage(), t);
@@ -1645,7 +1643,7 @@ public class StringHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args.length < 2){
-				throw ConfigRuntimeException.BuildException(getName() + " must have 2 arguments at minimum", CREInsufficientArgumentsException.class, t);
+				throw new CREInsufficientArgumentsException(getName() + " must have 2 arguments at minimum", t);
 			}
 			CResource m = (CResource) args[0];
 			StringBuffer buf = ResourceManager.GetResource(m, StringBuffer.class, t);

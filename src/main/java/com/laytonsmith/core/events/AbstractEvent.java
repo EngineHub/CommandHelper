@@ -114,7 +114,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 			} catch(FunctionReturnException ex){
 				//We simply allow this to end the event execution
 			} catch(ProgramFlowManipulationException ex){
-				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.BuildException("Unexpected control flow operation used.", CREFormatException.class, ex.getTarget()), env);
+				ConfigRuntimeException.HandleUncaughtException(new CREFormatException("Unexpected control flow operation used.", ex.getTarget()), env);
 			}
 		} finally {
 			if(event != null){

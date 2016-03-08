@@ -82,7 +82,7 @@ public class Performance {
 		@Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             if(!Prefs.AllowProfiling()){
-                throw ConfigRuntimeException.BuildException("allow-profiling is currently off, you must set it to true in your preferences.", CRESecurityException.class, t);
+                throw new CRESecurityException("allow-profiling is currently off, you must set it to true in your preferences.", t);
             }
             PERFORMANCE_LOGGING = Static.getBoolean(args[0]);
             return CVoid.VOID;

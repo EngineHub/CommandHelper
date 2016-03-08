@@ -293,11 +293,9 @@ public class RandomTests {
 			assertEquals(16, d, 0.00001);
 		} catch (ClassNotFoundException cnf) {
 			/* Not much we can really do about this during testing.
-			throw ConfigRuntimeException.BuildException("You are missing a required dependency: " + eClass,
-					CREPluginInternalException.class, Target.UNKNOWN);*/
+			throw new CREPluginInternalException("You are missing a required dependency: " + eClass, Target.UNKNOWN);*/
 		} catch (ReflectionUtils.ReflectionException rex) {
-			throw ConfigRuntimeException.BuildException("Your expression was invalidly formatted",
-					CREPluginInternalException.class, Target.UNKNOWN, rex.getCause());
+			throw new CREPluginInternalException("Your expression was invalidly formatted", Target.UNKNOWN, rex.getCause());
 		}
 	}
 

@@ -309,7 +309,7 @@ public class Math {
 			for (int i = 1; i < args.length; i++) {
 				double next = Static.getNumber(args[i], t);
 				if (next == 0) {
-					throw ConfigRuntimeException.BuildException("Division by 0!", CRERangeException.class, t);
+					throw new CRERangeException("Division by 0!", t);
 				}
 				tally /= next;
 			}
@@ -527,8 +527,8 @@ public class Math {
 					} else if(!(array instanceof CArray)){
 						//It's an ArrayAccess type, but we can't use that here, so, throw our
 						//own exception.
-						throw ConfigRuntimeException.BuildException("Cannot increment/decrement a non-array array"
-								+ " accessed value. (The value passed in was \"" + array.val() + "\")", CRECastException.class, t);
+						throw new CRECastException("Cannot increment/decrement a non-array array"
+								+ " accessed value. (The value passed in was \"" + array.val() + "\")", t);
 					} else {
 						//Ok, we're good. Data types should all be correct.
 						CArray myArray = ((CArray)array);
@@ -544,7 +544,7 @@ public class Math {
 							}
 							new ArrayHandling.array_set().exec(t, env, array, index, new CInt(newVal, t));
 						} else {
-							throw ConfigRuntimeException.BuildException("Cannot increment/decrement a non numeric value.", CRECastException.class, t);
+							throw new CRECastException("Cannot increment/decrement a non numeric value.", t);
 						}
 					}
 					long valueToReturn;
@@ -1106,15 +1106,13 @@ public class Math {
 					max = Static.getInt(args[1], t);
 				}
 				if (max > Integer.MAX_VALUE || min > Integer.MAX_VALUE) {
-					throw ConfigRuntimeException.BuildException("max and min must be below int max, defined as " + Integer.MAX_VALUE,
-							CRERangeException.class,
+					throw new CRERangeException("max and min must be below int max, defined as " + Integer.MAX_VALUE,
 							t);
 				}
 
 				long range = max - min;
 				if (range <= 0) {
-					throw ConfigRuntimeException.BuildException("max - min must be greater than 0",
-							CRERangeException.class, t);
+					throw new CRERangeException("max - min must be greater than 0", t);
 				}
 				long rand = java.lang.Math.abs(r.nextLong());
 				long i = (rand % (range)) + min;
@@ -1350,7 +1348,7 @@ public class Math {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			double d = Static.getNumber(args[0], t);
 			if (d < 0) {
-				throw ConfigRuntimeException.BuildException("sqrt expects a number >= 0", CRERangeException.class, t);
+				throw new CRERangeException("sqrt expects a number >= 0", t);
 			}
 			double m = java.lang.Math.sqrt(d);
 			if (m == (int) m) {
@@ -1411,8 +1409,7 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length == 0) {
-				throw ConfigRuntimeException.BuildException("You must send at least one parameter to min",
-						CREInsufficientArgumentsException.class, t);
+				throw new CREInsufficientArgumentsException("You must send at least one parameter to min", t);
 			}
 			double lowest = Double.POSITIVE_INFINITY;
 			List<Construct> list = new ArrayList<Construct>();
@@ -1494,8 +1491,7 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length == 0) {
-				throw ConfigRuntimeException.BuildException("You must send at least one parameter to max",
-						CREInsufficientArgumentsException.class, t);
+				throw new CREInsufficientArgumentsException("You must send at least one parameter to max", t);
 			}
 			double highest = Double.NEGATIVE_INFINITY;
 			List<Construct> list = new ArrayList<Construct>();
@@ -2140,10 +2136,10 @@ public class Math {
 			if (args.length == 2 && args[1] instanceof CArray) {
 				vars = (CArray) args[1];
 			} else if (args.length == 2 && !(args[1] instanceof CArray)) {
-				throw ConfigRuntimeException.BuildException("The second argument of expr() should be an array", CRECastException.class, t);
+				throw new CRECastException("The second argument of expr() should be an array", t);
 			}
 			if (vars != null && !vars.inAssociativeMode()) {
-				throw ConfigRuntimeException.BuildException("The array provided to expr() must be an associative array", CRECastException.class, t);
+				throw new CRECastException("The array provided to expr() must be an associative array", t);
 			}
 			double[] da;
 			String[] varNames;
@@ -2164,7 +2160,7 @@ public class Math {
 				Expression e = Expression.compile(expr, varNames);
 				return new CDouble(e.evaluate(da), t);
 			} catch (ExpressionException ex) {
-				throw ConfigRuntimeException.BuildException("Your expression was invalidly formatted", CREPluginInternalException.class, t, ex);
+				throw new CREPluginInternalException("Your expression was invalidly formatted", t, ex);
 			}*/
 			String eClass = "com.sk89q.worldedit.internal.expression.Expression";
 			String errClass = "com.sk89q.worldedit.internal.expression.ExpressionException";
@@ -2173,8 +2169,7 @@ public class Math {
 				eClazz = Class.forName(eClass);
 				errClazz = Class.forName(errClass);
 			} catch (ClassNotFoundException cnf) {
-				throw ConfigRuntimeException.BuildException("You are missing a required dependency: " + eClass,
-						CREPluginInternalException.class, t);
+				throw new CREPluginInternalException("You are missing a required dependency: " + eClass, t);
 			}
 			try {
 				Object e = ReflectionUtils.invokeMethod(eClazz, null, "compile",
@@ -2184,10 +2179,9 @@ public class Math {
 				return new CDouble((double) d, t);
 			} catch (ReflectionUtils.ReflectionException rex) {
 				if (rex.getCause().getClass().isAssignableFrom(errClazz)) {
-					throw ConfigRuntimeException.BuildException("Your expression was invalidly formatted",
-							CREPluginInternalException.class, args[0].getTarget(), rex.getCause());
+					throw new CREPluginInternalException("Your expression was invalidly formatted", args[0].getTarget(), rex.getCause());
 				} else {
-					throw ConfigRuntimeException.BuildException(rex.getMessage(), CREPluginInternalException.class,
+					throw new CREPluginInternalException(rex.getMessage(),
 							args[0].getTarget(), rex.getCause());
 				}
 			}

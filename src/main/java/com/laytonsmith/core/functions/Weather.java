@@ -85,7 +85,7 @@ public class Weather {
 					ent = w.strikeLightningEffect(StaticLayer.GetLocation(w, x, y + 1, z)).getUniqueId();
 				}
 			} else {
-				throw ConfigRuntimeException.BuildException("World was not specified", CREInvalidWorldException.class, t);
+				throw new CREInvalidWorldException("World was not specified", t);
 			}
 
 			return new CString(ent.toString(), t);
@@ -146,7 +146,7 @@ public class Weather {
 				} else if (args[1] instanceof CInt) {
 					duration = Static.getInt32(args[1], t);
 				} else {
-					throw ConfigRuntimeException.BuildException("", CREFormatException.class, t);
+					throw new CREFormatException("", t);
 				}
 			}
 			if (args.length == 3) {
@@ -159,7 +159,7 @@ public class Weather {
 					w.setWeatherDuration(duration);
 				}
 			} else {
-				throw ConfigRuntimeException.BuildException("World was not specified", CREInvalidWorldException.class, t);
+				throw new CREInvalidWorldException("World was not specified", t);
 			}
 			return CVoid.VOID;
 		}
@@ -226,7 +226,7 @@ public class Weather {
 			if (w != null) {
 				w.setThundering(Static.getBoolean(args[0]));
 			} else {
-				throw ConfigRuntimeException.BuildException("No existing world specified!", CREInvalidWorldException.class, t);
+				throw new CREInvalidWorldException("No existing world specified!", t);
 			}
 			if (args.length == 3) {
 				w.setThunderDuration(Static.getInt32(args[2], t));
@@ -289,7 +289,7 @@ public class Weather {
 			if (w != null) {
 				return CBoolean.get(w.isStorming());
 			} else {
-				throw ConfigRuntimeException.BuildException("No existing world specified!", CREInvalidWorldException.class, t);
+				throw new CREInvalidWorldException("No existing world specified!", t);
 			}
 		}
 
@@ -347,7 +347,7 @@ public class Weather {
 			if (w != null) {
 				return CBoolean.get(w.isThundering());
 			} else {
-				throw ConfigRuntimeException.BuildException("No existing world specified!", CREInvalidWorldException.class, t);
+				throw new CREInvalidWorldException("No existing world specified!", t);
 			}
 		}
 

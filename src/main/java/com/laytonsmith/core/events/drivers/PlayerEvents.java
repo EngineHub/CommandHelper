@@ -1536,7 +1536,7 @@ public class PlayerEvents {
                         }
                         e.setRecipients(list);
                     } else {
-                        throw ConfigRuntimeException.BuildException("recipients must be an array", CRECastException.class, value.getTarget());
+                        throw new CRECastException("recipients must be an array", value.getTarget());
                     }
                 }
 				if("format".equals(key)){
@@ -1666,7 +1666,7 @@ public class PlayerEvents {
                         }
                         e.setRecipients(list);
                     } else {
-                        throw ConfigRuntimeException.BuildException("recipients must be an array", CRECastException.class, value.getTarget());
+                        throw new CRECastException("recipients must be an array", value.getTarget());
                     }
                 }
 				if("format".equals(key)){
@@ -2131,7 +2131,7 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.BuildException("Unsupported Operation", CREBindException.class, Target.UNKNOWN);
+			throw new CREBindException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -2192,7 +2192,7 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw ConfigRuntimeException.BuildException("Unsupported Operation", CREBindException.class, Target.UNKNOWN);
+			throw new CREBindException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
@@ -2437,7 +2437,7 @@ public class PlayerEvents {
 				} else if (key.equalsIgnoreCase("pages")) {
 					CArray pageArray = Static.getArray(value, value.getTarget());
 					if (pageArray.inAssociativeMode()) {
-						throw ConfigRuntimeException.BuildException("The page array must not be associative.", CRECastException.class, pageArray.getTarget());
+						throw new CRECastException("The page array must not be associative.", pageArray.getTarget());
 					} else {
 						List<String> pages = new ArrayList<String>();
 						for (Construct page : pageArray.asList()) {

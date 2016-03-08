@@ -182,7 +182,7 @@ public class Sandbox {
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
             if (original == null) {
-                throw ConfigRuntimeException.BuildException("is_cancelled cannot be called outside an event handler", CREBindException.class, t);
+                throw new CREBindException("is_cancelled cannot be called outside an event handler", t);
             }
             if (original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable
                     && original.getUnderlyingEvent() instanceof org.bukkit.event.Event) {
@@ -251,9 +251,8 @@ public class Sandbox {
                 int slot = Static.getInt32(args[1 - offset], t);
 				MCPlayerInventory pinv = m.getInventory();
 				if (pinv == null) {
-					throw ConfigRuntimeException.BuildException(
-						"Could not find the inventory of the given player (are you running in cmdline mode?)",
-						CRENotFoundException.class, t);
+					throw new CRENotFoundException(
+						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 				}
                 is = pinv.getItem(slot);
             }
@@ -273,7 +272,7 @@ public class Sandbox {
             for (String key : enchantArray.stringKeySet()) {
                 MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
                 if (e == null) {
-                    throw ConfigRuntimeException.BuildException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", CREEnchantmentException.class, t);
+                    throw new CREEnchantmentException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", t);
                 }
                 int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
 

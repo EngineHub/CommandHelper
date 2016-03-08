@@ -142,8 +142,7 @@ public class MObject {
 						CArray ca = Static.getArray(value, t);
 						MList m = new MList();
 						if(ca.inAssociativeMode()){
-							throw ConfigRuntimeException.BuildException("Expected non-associative array, but an associative array was found instead.",
-									CRECastException.class, t);
+							throw new CRECastException("Expected non-associative array, but an associative array was found instead.", t);
 						}
 						for(int i = 0; i < ca.size(); i++){
 							m.add(ca.get(i, t));

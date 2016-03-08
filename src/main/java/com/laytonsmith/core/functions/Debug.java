@@ -239,7 +239,7 @@ public class Debug {
                 try {
                     Static.LogDebug(MethodScriptFileLocations.getDefault().getConfigDirectory(), args[0].val(), LogLevel.DEBUG);
                 } catch (IOException ex) {
-                    throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
+                    throw new CREIOException(ex.getMessage(), t, ex);
                 }
             }
             return CVoid.VOID;
@@ -573,7 +573,7 @@ public class Debug {
 			try{
 				HeapDumper.dumpHeap(file.getAbsolutePath(), true);
 			} catch(Throwable tt){
-				throw ConfigRuntimeException.BuildException("Could not create a heap dump: " + tt.getMessage(), CREPluginInternalException.class, t, tt);
+				throw new CREPluginInternalException("Could not create a heap dump: " + tt.getMessage(), t, tt);
 			}
 			return CVoid.VOID;
 		}

@@ -1141,8 +1141,7 @@ public class BlockEvents {
 						return true;
 					}
 				} catch(IllegalArgumentException ex){
-					throw ConfigRuntimeException.BuildException("No " + key + " with the value " + value + " exists",
-							CREIllegalArgumentException.class, Target.UNKNOWN, ex);
+					throw new CREIllegalArgumentException("No " + key + " with the value " + value + " exists", Target.UNKNOWN, ex);
 				}
 			}
 			return false;

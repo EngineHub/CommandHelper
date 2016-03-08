@@ -110,8 +110,7 @@ public class Meta {
 		@Override
 		public Construct exec(Target t, final Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[1].nval() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
-				throw ConfigRuntimeException.BuildException("The first character of the command must be a forward slash (i.e. '/give')",
-						CREFormatException.class, t);
+				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
 			String cmd = args[1].val().substring(1);
 			if (args[0] instanceof CArray) {
@@ -133,7 +132,7 @@ public class Meta {
 				}
 				if(cmd.equalsIgnoreCase("interpreter-on")){
 					//This isn't allowed for security reasons.
-					throw ConfigRuntimeException.BuildException("/interpreter-on cannot be run from runas for security reasons.", CREFormatException.class, t);
+					throw new CREFormatException("/interpreter-on cannot be run from runas for security reasons.", t);
 				}
 				Static.getServer().runasConsole(cmd);
 			} else {
@@ -155,8 +154,7 @@ public class Meta {
 					//m.chat(cmd);
 					Static.getServer().dispatchCommand(m, cmd);
 				} else {
-					throw ConfigRuntimeException.BuildException("The player " + args[0].val() + " is not online",
-							CREPlayerOfflineException.class, t);
+					throw new CREPlayerOfflineException("The player " + args[0].val() + " is not online", t);
 				}
 			}
 			return CVoid.VOID;
@@ -212,8 +210,7 @@ public class Meta {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
-				throw ConfigRuntimeException.BuildException("The first character of the command must be a forward slash (i.e. '/give')",
-						CREFormatException.class, t);
+				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
 			String cmd = args[0].val().substring(1);
 			//If the command sender is null, then just try to run() this. It's unclear to me what
@@ -339,8 +336,7 @@ public class Meta {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
-				throw ConfigRuntimeException.BuildException("The first character of the command must be a forward slash (i.e. '/give')",
-						CREFormatException.class, t);
+				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
 			String cmd = args[0].val().substring(1);
 			if (Prefs.DebugMode()) {
@@ -356,11 +352,10 @@ public class Meta {
 			try{
 				Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
 			} catch(Exception ex){
-				throw ConfigRuntimeException.BuildException("While running the command: \"" + cmd + "\""
+				throw new CREPluginInternalException("While running the command: \"" + cmd + "\""
 						+ " the plugin threw an unexpected exception (turn on debug mode to see the full"
 						+ " stacktrace): " + ex.getMessage() + "\n\nThis is not a bug in " + Implementation.GetServerType().getBranding()
-						+ " but in the plugin that provides the command.", 
-						CREPluginInternalException.class, t, ex);
+						+ " but in the plugin that provides the command.", t, ex);
 			}
 			return CVoid.VOID;
 		}

@@ -104,20 +104,19 @@ public class Persistence {
 					pc = key.charAt(i - 1);
 				}
 				if ((i == 0 || i == key.length() - 1 || pc == '.') && c == '.') {
-					throw ConfigRuntimeException.BuildException("Periods may only be used as seperators between namespaces.", CREFormatException.class, t);
+					throw new CREFormatException("Periods may only be used as seperators between namespaces.", t);
 				}
 				if (c != '_' && c != '.' && !Character.isLetterOrDigit(c)) {
-					throw ConfigRuntimeException.BuildException("Param 1 in store_value must only contain letters, digits, underscores, or dots, (which denote namespaces).",
-							CREFormatException.class, t);
+					throw new CREFormatException("Param 1 in store_value must only contain letters, digits, underscores, or dots, (which denote namespaces).", t);
 				}
 			}
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Storing: " + key + " -> " + value, t);
 			try {
 				env.getEnv(GlobalEnv.class).GetPersistenceNetwork().set(env.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + key).split("\\."), value);
 			} catch(IllegalArgumentException e){
-				throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t);
+				throw new CREFormatException(e.getMessage(), t);
 			} catch (Exception ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
+				throw new CREIOException(ex.getMessage(), t, ex);
 			}
 			return CVoid.VOID;
 		}
@@ -181,9 +180,9 @@ public class Persistence {
 				try {
 					obj = env.getEnv(GlobalEnv.class).GetPersistenceNetwork().get(("storage." + namespace).split("\\."));
 				} catch (DataSourceException ex) {
-					throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
+					throw new CREIOException(ex.getMessage(), t, ex);
 				} catch(IllegalArgumentException e){
-					throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t, e);
+					throw new CREFormatException(e.getMessage(), t, e);
 				}
 				if (obj == null) {
 					return CNull.NULL;
@@ -271,9 +270,9 @@ public class Persistence {
 			try {
 				list = p.getNamespace(keyChain.toArray(new String[keyChain.size()]));
 			} catch (DataSourceException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
+				throw new CREIOException(ex.getMessage(), t, ex);
 			} catch(IllegalArgumentException e){
-				throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t, e);
+				throw new CREFormatException(e.getMessage(), t, e);
 			}
 			CArray ca = CArray.GetAssociativeArray(t);
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, list.size() + " value(s) are being returned", t);
@@ -345,9 +344,9 @@ public class Persistence {
 			try {
 				return CBoolean.get(env.getEnv(GlobalEnv.class).GetPersistenceNetwork().hasKey(("storage." + GetNamespace(args, null, getName(), t)).split("\\.")));
 			} catch (DataSourceException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
+				throw new CREIOException(ex.getMessage(), t, ex);
 			} catch(IllegalArgumentException e){
-				throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t, e);
+				throw new CREFormatException(e.getMessage(), t, e);
 			}
 		}
 
@@ -404,13 +403,13 @@ public class Persistence {
 			try {
 				environment.getEnv(GlobalEnv.class).GetPersistenceNetwork().clearKey(environment.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + namespace).split("\\."));
 			} catch (DataSourceException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
+				throw new CREIOException(ex.getMessage(), t, ex);
 			} catch (ReadOnlyException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
+				throw new CREIOException(ex.getMessage(), t, ex);
 			} catch (IOException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
+				throw new CREIOException(ex.getMessage(), t, ex);
 			} catch(IllegalArgumentException e){
-				throw ConfigRuntimeException.BuildException(e.getMessage(), CREFormatException.class, t, e);
+				throw new CREFormatException(e.getMessage(), t, e);
 			}
 			return CVoid.VOID;
 		}
@@ -432,7 +431,7 @@ public class Persistence {
 	 */
 	private static String GetNamespace(Construct[] args, Integer exclude, String name, Target t) {
 		if (exclude != null && args.length < 2 || exclude == null && args.length < 1) {
-			throw ConfigRuntimeException.BuildException(name + " was not provided with enough arguments. Check the documentation, and try again.", CREInsufficientArgumentsException.class, t);
+			throw new CREInsufficientArgumentsException(name + " was not provided with enough arguments. Check the documentation, and try again.", t);
 		}
 		boolean first = true;
 		StringBuilder b = new StringBuilder();

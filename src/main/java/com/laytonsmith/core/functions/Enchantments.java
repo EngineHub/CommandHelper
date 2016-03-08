@@ -229,7 +229,7 @@ public class Enchantments {
 				m = Static.GetPlayer(args[0].val(), t);
 				offset = 0;
 			} else if (m == null) {
-				throw ConfigRuntimeException.BuildException("Invalid sender!", CREPlayerOfflineException.class, t);
+				throw new CREPlayerOfflineException("Invalid sender!", t);
 			}
 			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull ? null : Static.getInt32(args[1 - offset], t));
 			if (is == null) {
@@ -257,17 +257,17 @@ public class Enchantments {
 			for (String key : enchantArray.stringKeySet()) {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
 				if (e == null) {
-					throw ConfigRuntimeException.BuildException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", CREEnchantmentException.class, t);
+					throw new CREEnchantmentException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", t);
 				}
 				if (e.canEnchantItem(is)) {
 					int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
 					if (e.getMaxLevel() >= level && level > 0) {
 						is.addEnchantment(e, level);
 					} else {
-						throw ConfigRuntimeException.BuildException("Level must be greater than 0, and less than " + e.getMaxLevel() + " but was " + level, CRERangeException.class, t);
+						throw new CRERangeException("Level must be greater than 0, and less than " + e.getMaxLevel() + " but was " + level, t);
 					}
 				} else {
-					throw ConfigRuntimeException.BuildException(enchantArray.get(key, t).val().toUpperCase() + " cannot be applied to this item", CREEnchantmentException.class, t);
+					throw new CREEnchantmentException(enchantArray.get(key, t).val().toUpperCase() + " cannot be applied to this item", t);
 				}
 			}
 			return CVoid.VOID;
@@ -347,8 +347,8 @@ public class Enchantments {
 			for (String key : enchantArray.stringKeySet()) {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
 				if (e == null) {
-					throw ConfigRuntimeException.BuildException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid"
-							+ " enchantment type", CREEnchantmentException.class, t);
+					throw new CREEnchantmentException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid"
+							+ " enchantment type", t);
 				}
 				is.removeEnchantment(e);
 			}
@@ -405,7 +405,7 @@ public class Enchantments {
 			} else {
 				slot = args[0];
 				if (m == null) {
-					throw ConfigRuntimeException.BuildException("Invalid sender!", CREPlayerOfflineException.class, t);
+					throw new CREPlayerOfflineException("Invalid sender!", t);
 				}
 			}
 			MCItemStack is = m.getItemAt(slot instanceof CNull ? null : Static.getInt32(slot, t));
@@ -480,8 +480,7 @@ public class Enchantments {
 				MCItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), 1, t);
 				return CBoolean.get(e.canEnchantItem(is));
 			} catch (NullPointerException e) {
-				throw ConfigRuntimeException.BuildException(args[0].val().toUpperCase() + " is not a known enchantment type.",
-						CREEnchantmentException.class, t);
+				throw new CREEnchantmentException(args[0].val().toUpperCase() + " is not a known enchantment type.", t);
 			}
 		}
 	}
@@ -532,8 +531,7 @@ public class Enchantments {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
 				return new CInt(e.getMaxLevel(), t);
 			} catch (NullPointerException e) {
-				throw ConfigRuntimeException.BuildException(args[0].val().toUpperCase() + " is not a known enchantment type.",
-						CREEnchantmentException.class, t);
+				throw new CREEnchantmentException(args[0].val().toUpperCase() + " is not a known enchantment type.", t);
 			}
 		}
 	}

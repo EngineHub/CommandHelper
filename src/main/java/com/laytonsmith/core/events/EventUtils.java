@@ -8,6 +8,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
+import com.laytonsmith.core.exceptions.CRE.CREEventException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
@@ -53,10 +54,10 @@ public final class EventUtils {
 		for (Set<BoundEvent> s : event_handles.values()) {
 			for (BoundEvent bb : s) {
 				if (bb.getId().equals(b.getId())) {
-					throw ConfigRuntimeException.BuildException("Cannot have duplicate IDs defined."
+					throw new CREBindException("Cannot have duplicate IDs defined."
 							+ " (Tried to define an event handler with id \"" + b.getId() + "\" at " + b.getTarget() + ","
 							+ " but it has already been defined at " + bb.getTarget() + ")",
-							CREBindException.class, b.getTarget());
+							b.getTarget());
 				}
 			}
 		}
@@ -156,7 +157,7 @@ public final class EventUtils {
 								// The event will stay null, and be caught below
 							}
 							if(convertedEvent == null){
-								throw ConfigRuntimeException.BuildException(eventName + " doesn't support the use of trigger() yet.", CREBindException.class, t);
+								throw new CREBindException(eventName + " doesn't support the use of trigger() yet.", t);
 							} else if (driver.matches(b.getPrefilter(), convertedEvent)) {
 								toRun.add(b);
 							}
@@ -253,7 +254,7 @@ public final class EventUtils {
 				} catch (FunctionReturnException ex) {
 					//We also know how to deal with this
 				} catch (EventException ex) {
-					throw ConfigRuntimeException.BuildException(ex.getMessage(), null, Target.UNKNOWN);
+					throw new CREEventException(ex.getMessage(), Target.UNKNOWN, ex);
 				} catch (ConfigRuntimeException ex) {
 					//An exception has bubbled all the way up
 					ConfigRuntimeException.HandleUncaughtException(ex, b.getEnvironment());

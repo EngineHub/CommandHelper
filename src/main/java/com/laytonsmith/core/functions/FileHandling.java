@@ -86,8 +86,7 @@ public class FileHandling {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if (!Security.CheckSecurity(location)) {
-					throw ConfigRuntimeException.BuildException("You do not have permission to access the file '" + location + "'",
-						CRESecurityException.class, t);
+					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
 			}
 			try {
@@ -98,8 +97,7 @@ public class FileHandling {
 				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.INFO, "Could not read in file while attempting to find "
 					+ location.getAbsolutePath()
 					+ "\nFile " + (location.exists() ? "exists" : "does not exist"), t);
-				throw ConfigRuntimeException.BuildException("File could not be read in.",
-					CREIOException.class, t);
+				throw new CREIOException("File could not be read in.", t);
 			}
 		}
 
@@ -257,13 +255,13 @@ public class FileHandling {
 			final String file = args[0].val();
 			final CClosure callback;
 			if(!(args[1] instanceof CClosure)){
-				throw ConfigRuntimeException.BuildException("Expected paramter 2 of " + getName() + " to be a closure!", CRECastException.class, t);
+				throw new CRECastException("Expected paramter 2 of " + getName() + " to be a closure!", t);
 			} else {
 				callback = ((CClosure)args[1]);
 			}
 			if(!Static.InCmdLine(environment)){
 				if(!Security.CheckSecurity(file)){
-					throw ConfigRuntimeException.BuildException("You do not have permission to access the file '" + file + "'", CRESecurityException.class, t);
+					throw new CRESecurityException("You do not have permission to access the file '" + file + "'", t);
 				}
 			}
 			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
@@ -277,7 +275,7 @@ public class FileHandling {
 							//It's an SCP transfer
 							returnString = SSHWrapper.SCPReadString(file);
 						} catch (IOException ex) {
-							exception = ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
+							exception = new CREIOException(ex.getMessage(), t, ex);
 						}
 					} else {
 						try {
@@ -285,7 +283,7 @@ public class FileHandling {
 							File _file = Static.GetFileFromArgument(file, environment, t, null);
 							returnString = FileUtil.read(_file);
 						} catch (IOException ex) {
-							exception = ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
+							exception = new CREIOException(ex.getMessage(), t, ex);
 						}
 					}
 					final Construct cret;
@@ -367,8 +365,7 @@ public class FileHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
 			if(!Security.CheckSecurity(location)){
-				throw ConfigRuntimeException.BuildException("You do not have permission to access the file '" + location + "'",
-						CRESecurityException.class, t);
+				throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 			}
 			return new CInt(location.length(), t);
 		}
@@ -420,8 +417,7 @@ public class FileHandling {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if (!Security.CheckSecurity(location)) {
-					throw ConfigRuntimeException.BuildException("You do not have permission to access the file '" + location + "'",
-						CRESecurityException.class, t);
+					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
 			}
 			try {
@@ -430,8 +426,7 @@ public class FileHandling {
 			} catch (IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
 					+ "\nFile " + (location.exists() ? "exists" : "does not exist"));
-				throw ConfigRuntimeException.BuildException("File could not be read in.",
-					CREIOException.class, t);
+				throw new CREIOException("File could not be read in.", t);
 			}
 		}
 
@@ -484,8 +479,7 @@ public class FileHandling {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if (!Security.CheckSecurity(location)) {
-					throw ConfigRuntimeException.BuildException("You do not have permission to access the file '" + location + "'",
-						CRESecurityException.class, t);
+					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
 			}
 			try {
@@ -494,8 +488,7 @@ public class FileHandling {
 			} catch (IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
 					+ "\nFile " + (location.exists() ? "exists" : "does not exist"));
-				throw ConfigRuntimeException.BuildException("File could not be read in.",
-					CREIOException.class, t);
+				throw new CREIOException("File could not be read in.", t);
 			}
 		}
 
@@ -611,7 +604,7 @@ public class FileHandling {
 			try {
 				return new CString(f.getCanonicalPath(), t);
 			} catch (IOException ex) {
-				throw ConfigRuntimeException.BuildException(ex.getMessage(), CREIOException.class, t, ex);
+				throw new CREIOException(ex.getMessage(), t, ex);
 			}
 		}
 
