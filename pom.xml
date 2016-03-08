@@ -433,12 +433,16 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>3.3</version>
 				<configuration>
 					<showDeprecation>true</showDeprecation>
 					<source>1.7</source>
 					<target>1.7</target>
-					<compilerArgument>-XDignore.symbol.file</compilerArgument>
+					<compilerArgs>
+						<arg>-XDignore.symbol.file</arg>
+					</compilerArgs>
+					<fork>true</fork>
+					<optimize>true</optimize>
 				</configuration>
 			</plugin>
 
@@ -748,6 +752,8 @@
 						<processor>com.laytonsmith.core.extensions.ExtensionAnnotationProcessor</processor>
 						<processor>com.laytonsmith.core.MObjectAnnotationProcessor</processor>
 					</processors>
+					<compilerArguments>-XDignore.symbole.file</compilerArguments>
+					<outputDiagnostics>false</outputDiagnostics>
 				</configuration>
 			</plugin>
 
