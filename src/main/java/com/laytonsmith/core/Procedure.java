@@ -47,6 +47,7 @@ public class Procedure implements Cloneable {
     private ParseTree tree;
 	private CClassType returnType;
     private boolean possiblyConstant = false;
+	public static final String PROCEDURE_NAME_REGEX = "^_[\\p{L}0-9]+[\\p{L}_0-9]*";
 	/**
 	 * The line the procedure is defined at (for stacktraces)
 	 */
@@ -67,7 +68,7 @@ public class Procedure implements Cloneable {
             this.originals.put(var.getVariableName(), var.ival());
         }
         this.tree = tree;
-        if (!this.name.matches("^_[a-zA-Z0-9]+[a-zA-Z_0-9]*")) {
+        if (!this.name.matches(PROCEDURE_NAME_REGEX)) {
             throw new CREFormatException("Procedure names must start with an underscore, and may only contain letters, underscores, and digits. (Found " + this.name + ")", t);
         }
         //Let's look through the tree now, and see if this is possibly constant or not.
