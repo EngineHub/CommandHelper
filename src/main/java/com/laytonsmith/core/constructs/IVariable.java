@@ -15,11 +15,12 @@ public class IVariable extends Construct implements Cloneable {
     final private String name;
 	final private CClassType type;
 	final private Target definedTarget;
+	final public static String VARIABLE_NAME_REGEX = "@[\\p{L}0-9_]+";
 
     public IVariable(String name, Target t) throws ConfigCompileException {
         super(name, ConstructType.IVARIABLE, t);
-		if(!name.matches("@[a-zA-Z0-9_]+")){
-			throw new ConfigCompileException("IVariables must match the regex: @[a-zA-Z0-9_]+", t);
+		if(!name.matches(VARIABLE_NAME_REGEX)){
+			throw new ConfigCompileException("IVariables must match the regex: " + VARIABLE_NAME_REGEX, t);
 		}
         this.var_value = new CString("", t);
         this.name = name;

@@ -66,8 +66,8 @@ public final class MethodScriptCompiler {
 	private MethodScriptCompiler() {
 	}
 
-	private static final Pattern VAR_PATTERN = Pattern.compile("\\$[a-zA-Z0-9_]+");
-	private static final Pattern IVAR_PATTERN = Pattern.compile("@[a-zA-Z0-9_]+");
+	private static final Pattern VAR_PATTERN = Pattern.compile("\\$[\\p{L}0-9_]+");
+	private static final Pattern IVAR_PATTERN = Pattern.compile(IVariable.VARIABLE_NAME_REGEX);
 
 	/**
 	 * Lexes the script, and turns it into a token stream. This looks through the script
@@ -731,7 +731,8 @@ public final class MethodScriptCompiler {
 
 			if (t.type == TType.UNKNOWN && prev1.type.isPlusMinus() && !prev2.type.isIdentifier()
 					&& !prev2.type.equals(TType.FUNC_END)
-					&& !t.val().matches("(\\@|\\$)[a-zA-Z0-9_]+")) { // Last boolean makes -@b equal to - @b, instead of a string.
+					&& !IVAR_PATTERN.matcher(t.val()).matches() 
+					&& !VAR_PATTERN.matcher(t.val()).matches()) { // Last boolean makes -@b equal to - @b, instead of a string.
 				//It is a negative/positive number. Absorb the sign
 				t.value = prev1.value + t.value;
 				token_list.remove(i - 1);
@@ -746,7 +747,7 @@ public final class MethodScriptCompiler {
 				} else if (IVAR_PATTERN.matcher(t.val()).matches()) {
 					t.type = TType.IVARIABLE;
 				} else if (t.val().charAt(0) == '@') {
-					throw new ConfigCompileException("IVariables must match the regex: @[a-zA-Z0-9_]+", target);
+					throw new ConfigCompileException("IVariables must match the regex: " + IVAR_PATTERN, target);
 				} else if (t.val().equals("$")) {
 					t.type = TType.FINAL_VAR;
 				} else if(keywords.contains(t.val())){
