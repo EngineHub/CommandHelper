@@ -504,7 +504,7 @@ public class BukkitEntityEvents {
 				e.getPlayer().getInventory().addItem(s.asItemStack());
 				//and for added realism :)
 				e.getPlayer().getWorld().playSound(e.getItem().getLocation(),
-						BukkitMCSound.getConvertor().getConcreteEnum(MCSound.ITEM_PICKUP), 1, 2);
+						((BukkitMCSound) MCSound.valueOf("ITEM_PICKUP")).getConcrete(), 1, 2);
 			}
 		}
 

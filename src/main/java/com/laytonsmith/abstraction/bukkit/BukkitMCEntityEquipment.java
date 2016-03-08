@@ -106,6 +106,11 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 				case WEAPON:
 					slots.put(key, getWeaponDropChance());
 					break;
+				case OFF_HAND:
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+						slots.put(key, getOffHandDropChance());
+					}
+					break;
 				case HELMET:
 					slots.put(key, getHelmetDropChance());
 					break;
@@ -131,6 +136,11 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 			switch (key) {
 				case WEAPON:
 					setWeaponDropChance(chance);
+					break;
+				case OFF_HAND:
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+						setOffHandDropChance(chance);
+					}
 					break;
 				case HELMET:
 					setHelmetDropChance(chance);
@@ -217,6 +227,11 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	}
 
 	@Override
+	public float getOffHandDropChance() {
+		return ee.getItemInOffHandDropChance();
+	}
+
+	@Override
 	public float getHelmetDropChance() {
 		return ee.getHelmetDropChance();
 	}
@@ -239,6 +254,11 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	@Override
 	public void setWeaponDropChance(float chance) {
 		ee.setItemInHandDropChance(chance);
+	}
+
+	@Override
+	public void setOffHandDropChance(float chance) {
+		ee.setItemInOffHandDropChance(chance);
 	}
 
 	@Override

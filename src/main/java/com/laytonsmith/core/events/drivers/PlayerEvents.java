@@ -43,13 +43,16 @@ import com.laytonsmith.core.events.drivers.EntityEvents.entity_death;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.functions.EventBinding.modify_event;
 import com.laytonsmith.core.functions.StringHandling;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.FormatFlagsConversionMismatchException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IllegalFormatConversionException;
@@ -1537,12 +1540,27 @@ public class PlayerEvents {
                     }
                 }
 				if("format".equals(key)){
+					String format = value.nval();
+					if(format == null) {
+						throw new CRENullPointerException("The \"format\" key in " + new modify_event().getName() + " for the " + this.getName()
+								+ " event may not be null.", Target.UNKNOWN);
+					}
 					try{
-						e.setFormat(value.nval());
-					} catch(UnknownFormatConversionException|IllegalFormatConversionException ex){
-						throw new CREFormatException(ex.getMessage(), Target.UNKNOWN);
+						// Throws UnknownFormatConversionException, MissingFormatException,
+						// IllegalFormatConversionException, FormatFlagsConversionMismatchException, NullPointerException and possibly more.
+						e.setFormat(format); 
+					} catch(Exception ex){
+						// Check the format to give a better exception message.
+						if(format.replaceAll("%%", "").replaceAll("\\%\\%|\\%[12]\\$s", "").contains("%")) {
+							throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
+									+ " event only accepts %1$s and %2$s as format specifiers. Use a \"%%\" to display a single \"%\".", Target.UNKNOWN);
+						} else {
+							throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
+									+ " event was set to an invalid value: " + format + ". The original exception message is: " + ex.getMessage(), Target.UNKNOWN);
+						}
 					}
 				}
+				
                 return true;
             }
             return false;

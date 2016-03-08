@@ -41,6 +41,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.CHLog;
@@ -320,6 +321,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		}
 		BukkitMCEntityType.build();
 		BukkitMCBiomeType.build();
+		BukkitMCSound.build();
 
 		//Metrics
 		// MCStats no longer appears to be supported. If it comes back, this code can be re-added
