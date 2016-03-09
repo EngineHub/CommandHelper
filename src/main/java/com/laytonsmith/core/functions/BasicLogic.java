@@ -339,7 +339,7 @@ public class BasicLogic {
 					+ " In addition, slices may be used to indicate ranges of integers that should trigger the specified"
 					+ " case. Slices embedded in an array are fine as well. Switch statements also support brace/case/default"
 					+ " syntax, as in most languages, althrough unlike most languages, fallthrough isn't supported. Breaking"
-					+ " with break() isn't required, but allowed. A number greater than 1 may be sent to break, and breaking"
+					+ " with break() isn't required, but recommended. A number greater than 1 may be sent to break, and breaking"
 					+ " out of the switch will consume a \"break counter\" and the break will continue up the chain."
 					+ " If you do use break(), the return value of switch is ignored. See the examples for usage"
 					+ " of brace/case/default syntax, which is highly recommended.";
@@ -443,17 +443,13 @@ public class BasicLogic {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Functional usage", "switch('theValue',\n"
-				+ "\t'notTheValue',\n"
-				+ "\t\tmsg('Nope'),\n"
-				+ "\t'theValue',\n"
-				+ "\t\tmsg('Success')\n"
-				+ ")"),
 				new ExampleScript("With braces/case/default", "switch('theValue'){\n"
 				+ "\tcase 'notTheValue':\n"
 				+ "\t\tmsg('Nope')\n"
+				+ "\t\tbreak();\n"
 				+ "\tcase 'theValue':\n"
 				+ "\t\tmsg('Success')\n"
+				+ "\t\tbreak();\n"
 				+ "}"),
 				new ExampleScript("With braces/case/default. Note the lack of fallthrough, even without a break(),"
 						+ " except where two cases are directly back to back.",
@@ -463,19 +459,39 @@ public class BasicLogic {
 								+ "\t\tmsg('1 or 2');\n"
 								+ "\tcase 3..4:\n"
 								+ "\t\tmsg('3 or 4');\n"
-								+ "\t\tbreak(); # This is optional, as it would break here anyways, but is allowed.\n"
+								+ "\t\tbreak(); // This is optional, as it would break here anyways, but is recommended.\n"
 								+ "\tcase 5..6:\n"
 								+ "\tcase 8:\n"
 								+ "\t\tmsg('5, 6, or 8')\n"
 								+ "\tdefault:\n"
 								+ "\t\tmsg('Any other value'); # A default is optional\n"
 								+ "}\n"),
-				new ExampleScript("With default condition", "switch('noMatch',\n"
-				+ "\t'notIt1',\n"
+				new ExampleScript("With default condition", "switch('noMatch'){\n"
+				+ "\tcase 'notIt1':\n"
+				+ "\t\tmsg('Nope');\n"
+				+ "\t\tbreak();\n"
+				+ "\tcase 'notIt2':\n"
+				+ "\t\tmsg('Nope');\n"
+				+ "\t\tbreak();\n"
+				+ "\tdefault:\n"
+				+ "\t\tmsg('Success');\n"
+				+ "\t\tbreak();\n"
+				+ "}"),
+				new ExampleScript("With slices", "switch(5){\n"
+				+ "\tcase 1..2:\n"
+				+ "\t\tmsg('First');\n"
+				+ "\t\tbreak();\n"
+				+ "\tcase 3..5:\n"
+				+ "\t\tmsg('Second');\n"
+				+ "\t\tbreak();\n"
+				+ "\tcase 6..8:\n"
+				+ "\t\tmsg('Third');\n"
+				+ "\t\tbreak();\n"
+				+ "}"),
+				new ExampleScript("Functional usage", "switch('theValue',\n"
+				+ "\t'notTheValue',\n"
 				+ "\t\tmsg('Nope'),\n"
-				+ "\t'notIt2',\n"
-				+ "\t\tmsg('Nope'),\n"
-				+ "\t, #Default:\n"
+				+ "\t'theValue',\n"
 				+ "\t\tmsg('Success')\n"
 				+ ")"),
 				new ExampleScript("With multiple matches using an array", "switch('string',\n"
@@ -484,20 +500,13 @@ public class BasicLogic {
 				+ "\t'value3',\n"
 				+ "\t\tmsg('No match')\n"
 				+ ")"),
-				new ExampleScript("With slices", "switch(5,\n"
-				+ "\t1..2,\n"
-				+ "\t\tmsg('First'),\n"
-				+ "\t3..5,\n"
-				+ "\t\tmsg('Second'),\n"
-				+ "\t6..8,\n"
-				+ "\t\tmsg('Third')\n"
-				+ ")"),
 				new ExampleScript("With slices in an array", "switch(5,\n"
 				+ "\tarray(1..2, 3..5),\n"
 				+ "\t\tmsg('First'),\n"
 				+ "\t6..8,\n"
 				+ "\t\tmsg('Second')\n"
-				+ ")"),};
+				+ ")"),
+			};
 		}
 
 		@Override

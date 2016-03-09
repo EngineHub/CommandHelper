@@ -203,14 +203,18 @@ if(@value == 'value1'){
 }
 
 switch(@value){
-          case 'value1':
-               code1();
-          case 'value2':
-               code2();
-          case 'value3':
-               code3();
-          default:
-               code4();
+	case 'value1':
+		code1();
+		break();
+	case 'value2':
+		code2();
+		break();
+	case 'value3':
+		code3();
+		break();
+	default:
+		code4();
+		break();
 }
 %%
 As you can see, it's a bit less code using the switch statement, but the results can be achieved either way. 
@@ -227,12 +231,15 @@ of the values specified, the corresponding code is run.
 switch(@val){
 	case 'test1':
 		code1();
+		break();
 	case 'test2':
 	case 'test3':
 	case 'test4':
 		code234();
+		break();
 	default:
 		defaultCode();
+		break();
 }
 %%
 
@@ -246,8 +253,10 @@ Slices may also be used, and if so, if the test value falls within the range of 
 switch(@value){
 	case 0:
 		case0();
+		break();
 	case 1..5:
 		case1_5(); // This one will run
+		break();
 }
 %%
 
@@ -267,6 +276,36 @@ switch(@value){
 %%
 
 Had we left the break() out, case 2 and the default case would have merged together. In all other cases, break() is optional.
+
+{{TakeNote|text=While break() is in fact optional, it is still recommended that you use it when applicable.}}
+
+Using break() is still recommeneded however, even though it is technically optional. Consider the following example.
+
+%%CODE|
+switch(@v){
+	case 1:
+		msg('1');
+	case 2:
+		msg('2');
+}
+%%
+
+In this example, if @v is 1, we msg out 1, and if @v is 2, we message out 2. Consider however, if we comment out line 3, <code>msg('1')</code>. We might expect that the code
+simply won't message anything at all if @v is 1. This is incorrect. Due to the way fallthroughs work, it will simply change it to a combined case 1 and 2. We can
+add a bit more code to ensure that this won't happen:
+
+%%CODE|
+switch(@v){
+	case 1:
+		msg('1');
+		break();
+	case 2:
+		msg('2');
+		break();
+}
+%%
+
+Now, if we comment out <code>msg('1')</code>, as expected, nothing happens when @v is 1.
 
 <code>switch</code> also has a pure functional syntax, but it is not recommended for use in new code.
 

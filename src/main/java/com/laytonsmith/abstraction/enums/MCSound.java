@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 @MDynamicEnum("Sound")
 public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSound, Concrete> {
@@ -42,7 +43,7 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 			}
 			return dummy;
 		}
-		return mappings.keySet();
+		return new TreeSet<>(mappings.keySet());
 	}
 
 	public static Collection<MCSound> values() {
