@@ -502,7 +502,7 @@ public class BasicLogic {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.get(1).getData() instanceof CFunction
+			if (children.size() > 1 && children.get(1).getData() instanceof CFunction
 					&& new StringHandling.sconcat().getName().equals(children.get(1).getData().val())) {
 				//This is the brace/case/default usage of switch, probably. We need
 				//to refactor the data into the old switch format.
@@ -675,10 +675,10 @@ public class BasicLogic {
 				}
 			}
 
-			if ((children.size() > 3 || children.get(1).getData() instanceof CArray)
+			if ((children.size() > 3 || (children.size() > 1 && children.get(1).getData() instanceof CArray))
 					//No point in doing this optimization if there are only 3 args and the case is flat.
 					//Also, doing this check prevents an inifinite loop during optimization.
-					&& !children.get(0).getData().isDynamic()) {
+					&& (children.size() > 0 && !children.get(0).getData().isDynamic())) {
 				ParseTree toReturn = null;
 				//The item passed in is constant (or has otherwise been made constant)
 				//so we can go ahead and condense this down to the single code path

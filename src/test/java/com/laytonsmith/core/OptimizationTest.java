@@ -250,6 +250,11 @@ public class OptimizationTest {
 				+ "}");
 	}
 	
+	@Test
+	public void testEmptySwitch() throws Exception {
+		assertEquals("switch(dyn(1))", optimize("switch(dyn(1)){ case 1: case 2: default: }"));
+	}
+	
 	// Tests "-" signs in front of values to negate them.
 	@Test public void testMinusWithoutValueInFront() throws Exception{
 		assertEquals("assign(@b,neg(@a))", optimize("@b = -@a"));
