@@ -44,7 +44,7 @@ public class CIClosure extends CClosure {
                 environment = env.clone();
 				env.getEnv(GlobalEnv.class).setCloneVars(prev);
             }
-			environment.getEnv(GlobalEnv.class).GetVarList().clear();
+			environment.getEnv(GlobalEnv.class).setCloneVars(true);
             if (values != null) {
                 for (int i = 0; i < names.length; i++) {
                     String name = names[i];
