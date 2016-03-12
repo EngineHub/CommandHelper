@@ -1841,7 +1841,7 @@ public class PlayerManagement {
 				m = Static.GetPlayer(args[0].val(), t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			int texp = m.getExpAtLevel() + m.getExpToLevel() * java.lang.Math.round(m.getExp());
+			int texp = m.getExpAtLevel() + java.lang.Math.round(m.getExpToLevel() * m.getExp());
 			return new CInt(texp, t);
 		}
 	}
