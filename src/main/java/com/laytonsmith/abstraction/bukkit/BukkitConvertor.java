@@ -20,6 +20,7 @@ import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPluginMeta;
+import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
@@ -50,12 +51,14 @@ import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitWorldListener;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
+import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPatternShape;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionType;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.CHLog;
@@ -107,6 +110,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.potion.PotionData;
 import org.yaml.snakeyaml.Yaml;
 
 import java.util.ArrayList;
@@ -213,6 +217,11 @@ public class BukkitConvertor extends AbstractConvertor {
 			return null;
 		}
 		return new BukkitMCItemStack(new ItemStack(mat, qty, (short) data));
+	}
+
+	public MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded){
+		return new BukkitMCPotionData(new PotionData(
+				BukkitMCPotionType.getConvertor().getConcreteEnum(type), extended, upgraded));
 	}
 
 	@Override

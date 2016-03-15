@@ -1,16 +1,18 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCLivingEntity.MCEffect;
+import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCPotionMeta;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import java.util.ArrayList;
-import java.util.List;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta {
 
@@ -18,6 +20,16 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 	public BukkitMCPotionMeta(PotionMeta pomet) {
 		super(pomet);
 		pm = pomet;
+	}
+
+	@Override
+	public MCPotionData getBasePotionData() {
+		return new BukkitMCPotionData(pm.getBasePotionData());
+	}
+
+	@Override
+	public void setBasePotionData(MCPotionData bpd){
+		pm.setBasePotionData((PotionData) bpd.getHandle());
 	}
 	
 	@Override

@@ -1,9 +1,5 @@
 package com.laytonsmith.testing;
 
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
@@ -28,6 +24,7 @@ import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPluginMeta;
+import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
@@ -37,6 +34,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
+import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.convert;
@@ -92,6 +90,10 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 //import static org.powermock.api.mockito.PowerMockito.mock;
 //import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -738,6 +740,12 @@ public class StaticTest {
 		public MCItemStack GetItemStack(String type, int data, int qty) {
 			Convertor c = new BukkitConvertor();
 			return c.GetItemStack(type, data, qty);
+		}
+
+		@Override
+		public MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded) {
+			Convertor c = new BukkitConvertor();
+			return c.GetPotionData(type, extended, upgraded);
 		}
 
 		@Override
