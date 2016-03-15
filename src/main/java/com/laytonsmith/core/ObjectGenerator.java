@@ -300,11 +300,41 @@ public class ObjectGenerator {
 		if (mat == null) {
 			throw new CRENotFoundException("A material type could not be found based on the given id.", t);
 		}
-		if (item.containsKey("data")) {
-			data = Static.getInt32(item.get("data", t), t);
-		}
 		if (item.containsKey("qty")) {
 			qty = Static.getInt32(item.get("qty", t), t);
+		}
+		if (item.containsKey("data")) {
+			data = Static.getInt32(item.get("data", t), t);
+
+			// convert pre-1.9 potions
+			if(data > 0 && mat.getName().equals("POTION") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+				CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING,
+						"Potion data values are no longer supported in Minecraft. Converting item to new potion.", t);
+
+				MCPotionData pd;
+				try {
+					pd = StaticLayer.GetPotionData(data);
+				} catch(IllegalArgumentException ex){
+					throw new CREFormatException("Invalid potion data value.", t, ex);
+				}
+				if ((data & 0x4000) > 0) {
+					mat = StaticLayer.GetMaterial("SPLASH_POTION");
+				}
+				MCItemStack ret = StaticLayer.GetItemStack(mat, qty);
+				if (item.containsKey("meta")) {
+					meta = itemMeta(item.get("meta", t), mat, t);
+					if (meta != null) {
+						ret.setItemMeta(meta);
+					}
+				}
+				if(meta == null){
+					MCItemFactory itemFactory = Static.getServer().getItemFactory();
+					meta = itemFactory.getItemMeta(mat);
+				}
+				((MCPotionMeta) meta).setBasePotionData(pd);
+				ret.setItemMeta(meta);
+				return ret;
+			}
 		}
 
         if (item.containsKey("enchants")) {

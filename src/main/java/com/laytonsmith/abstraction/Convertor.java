@@ -55,6 +55,8 @@ public interface Convertor {
 
 	public MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded);
 
+	public MCPotionData GetPotionData(int data);
+
     public void Startup(CommandHelperPlugin chp);
 
     public int LookupItemId(String materialName);
