@@ -739,7 +739,7 @@ public class InventoryEvents {
 
 		@Override
 		public String docs() {
-			return "{}"
+			return "{player: <macro> | main_hand: <item match> | off_hand: <item match>}"
 					+ " Fires when a player swaps the items in their main and off hands."
 					+ " {player | main_hand: the item array in the main hand before swapping"
 					+ " | off_hand: the item in the off hand}"
@@ -749,7 +749,16 @@ public class InventoryEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			return true;
+			if (event instanceof MCItemSwapEvent) {
+				MCItemSwapEvent e = (MCItemSwapEvent) event;
+
+				Prefilters.match(prefilter, "player", e.getPlayer().getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "main_hand", Static.ParseItemNotation(e.getMainHandItem()), PrefilterType.ITEM_MATCH);
+				Prefilters.match(prefilter, "off_hand", Static.ParseItemNotation(e.getOffHandItem()), PrefilterType.ITEM_MATCH);
+
+				return true;
+			}
+			return false;
 		}
 
 		@Override
