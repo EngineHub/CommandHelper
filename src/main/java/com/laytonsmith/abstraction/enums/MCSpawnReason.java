@@ -42,4 +42,5 @@ public enum MCSpawnReason {
 	OCELOT_BABY,
 	SILVERFISH_BLOCK,
 	MOUNT,
+	TRAP,
 }

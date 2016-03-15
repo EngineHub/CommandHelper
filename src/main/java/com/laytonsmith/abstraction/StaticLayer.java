@@ -4,9 +4,11 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+
 import java.util.Set;
 
 
@@ -84,7 +86,15 @@ public final class StaticLayer {
 	public static MCItemStack GetItemStack(MCMaterial type, int data, int qty){
 		return convertor.GetItemStack(type, data, qty);
 	}
-    
+
+	public static MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded){
+		return convertor.GetPotionData(type, extended, upgraded);
+	}
+
+    public static MCPotionData GetPotionData(int data){
+        return convertor.GetPotionData(data);
+    }
+
     public static MCServer GetServer(){
         return convertor.GetServer();
     }

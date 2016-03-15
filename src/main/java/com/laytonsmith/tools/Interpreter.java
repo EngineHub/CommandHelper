@@ -1,7 +1,5 @@
 package com.laytonsmith.tools;
 
-import static com.laytonsmith.PureUtilities.TermColors.*;
-
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
@@ -26,12 +24,14 @@ import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPluginMeta;
+import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
+import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.api;
@@ -86,6 +86,13 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
+
+import static com.laytonsmith.PureUtilities.TermColors.BLUE;
+import static com.laytonsmith.PureUtilities.TermColors.RED;
+import static com.laytonsmith.PureUtilities.TermColors.YELLOW;
+import static com.laytonsmith.PureUtilities.TermColors.p;
+import static com.laytonsmith.PureUtilities.TermColors.pl;
+import static com.laytonsmith.PureUtilities.TermColors.reset;
 
 /**
  * This is a command line implementation of the in game interpreter mode. This
@@ -798,6 +805,16 @@ public final class Interpreter {
 
 		@Override
 		public MCItemStack GetItemStack(String type, int data, int qty) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCPotionData GetPotionData(int data) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
