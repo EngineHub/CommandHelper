@@ -18,6 +18,7 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
+import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCPotionMeta;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCShapedRecipe;
@@ -30,6 +31,7 @@ import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
+import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.constructs.CArray;
@@ -41,7 +43,6 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
@@ -50,6 +51,7 @@ import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -298,11 +300,41 @@ public class ObjectGenerator {
 		if (mat == null) {
 			throw new CRENotFoundException("A material type could not be found based on the given id.", t);
 		}
-		if (item.containsKey("data")) {
-			data = Static.getInt32(item.get("data", t), t);
-		}
 		if (item.containsKey("qty")) {
 			qty = Static.getInt32(item.get("qty", t), t);
+		}
+		if (item.containsKey("data")) {
+			data = Static.getInt32(item.get("data", t), t);
+
+			// convert pre-1.9 potions
+			if(data > 0 && mat.getName().equals("POTION") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+				CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING,
+						"Potion data values are no longer supported in Minecraft. Converting item to new potion.", t);
+
+				MCPotionData pd;
+				try {
+					pd = StaticLayer.GetPotionData(data);
+				} catch(IllegalArgumentException ex){
+					throw new CREFormatException("Invalid potion data value.", t, ex);
+				}
+				if ((data & 0x4000) > 0) {
+					mat = StaticLayer.GetMaterial("SPLASH_POTION");
+				}
+				MCItemStack ret = StaticLayer.GetItemStack(mat, qty);
+				if (item.containsKey("meta")) {
+					meta = itemMeta(item.get("meta", t), mat, t);
+					if (meta != null) {
+						ret.setItemMeta(meta);
+					}
+				}
+				if(meta == null){
+					MCItemFactory itemFactory = Static.getServer().getItemFactory();
+					meta = itemFactory.getItemMeta(mat);
+				}
+				((MCPotionMeta) meta).setBasePotionData(pd);
+				ret.setItemMeta(meta);
+				return ret;
+			}
 		}
 
         if (item.containsKey("enchants")) {
@@ -390,6 +422,23 @@ public class ObjectGenerator {
 			} else {
 				lore = CNull.NULL;
 			}
+			enchants = enchants(meta.getEnchants(), t);
+			ma.set("display", display, t);
+			ma.set("lore", lore, t);
+			ma.set("enchants", enchants, t);
+			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
+				Set<MCItemFlag> itemFlags = meta.getItemFlags();
+				CArray flagArray = new CArray(t);
+				if (itemFlags.size() > 0) {
+					for (MCItemFlag flag : itemFlags) {
+						flagArray.push(new CString(flag.name(), t), t);
+					}
+				}
+				ma.set("flags", flagArray, t);
+			}
+
+			// Specific ItemMeta
 
 			if(meta instanceof MCFireworkMeta){
 				firework = CArray.GetAssociativeArray(t);
@@ -415,18 +464,10 @@ public class ObjectGenerator {
 				}
 				cf.set("fade", fadeColors, t);
 				ma.set("firework", firework, t);
-			}
-
-			enchants = enchants(meta.getEnchants(), t);
-			ma.set("display", display, t);
-			ma.set("lore", lore, t);
-			ma.set("enchants", enchants, t);
-			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
-			if (meta instanceof MCLeatherArmorMeta) {
+			} else if (meta instanceof MCLeatherArmorMeta) {
 				color = color(((MCLeatherArmorMeta) meta).getColor(), t);
 				ma.set("color", color, t);
-			}
-			if (meta instanceof MCBookMeta) {
+			} else if (meta instanceof MCBookMeta) {
 				if (((MCBookMeta) meta).hasTitle()) {
 					title = new CString(((MCBookMeta) meta).getTitle(), t);
 				} else {
@@ -448,31 +489,37 @@ public class ObjectGenerator {
 				ma.set("title", title, t);
 				ma.set("author", author, t);
 				ma.set("pages", pages, t);
-			}
-			if (meta instanceof MCSkullMeta) {
+			} else if (meta instanceof MCSkullMeta) {
 				if (((MCSkullMeta) meta).hasOwner()) {
 					owner = new CString(((MCSkullMeta) meta).getOwner(), t);
 				} else {
 					owner = CNull.NULL;
 				}
 				ma.set("owner", owner, t);
-			}
-			if (meta instanceof MCEnchantmentStorageMeta) {
+			} else if (meta instanceof MCEnchantmentStorageMeta) {
 				if (((MCEnchantmentStorageMeta) meta).hasStoredEnchants()) {
 					stored = enchants(((MCEnchantmentStorageMeta) meta).getStoredEnchants(), t);
 				} else {
 					stored = CNull.NULL;
 				}
 				ma.set("stored", stored, t);
-			}
-			if (meta instanceof MCPotionMeta) {
-				effects = potions(((MCPotionMeta) meta).getCustomEffects(), t);
+			} else if (meta instanceof MCPotionMeta) {
+				MCPotionMeta potionmeta = (MCPotionMeta) meta;
+				effects = potions(potionmeta.getCustomEffects(), t);
 				ma.set("potions", effects, t);
-				if (effects.size() > 0) {
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+					MCPotionData potiondata = potionmeta.getBasePotionData();
+					if(potiondata != null){
+						CArray base = CArray.GetAssociativeArray(t);
+						base.set("type", potiondata.getType().name(), t);
+						base.set("extended", CBoolean.get(potiondata.isExtended()), t);
+						base.set("upgraded", CBoolean.get(potiondata.isUpgraded()), t);
+						ma.set("base", base, t);
+					}
+				} else if(effects.size() > 0){
 					ma.set("main", ((CArray) effects.get(0, t)).get("id", t), t);
 				}
-			}
-			if (meta instanceof MCBannerMeta) {
+			} else if (meta instanceof MCBannerMeta) {
 				MCBannerMeta bannermeta = (MCBannerMeta) meta;
 				CArray patterns = new CArray(t, bannermeta.numberOfPatterns());
 				for (MCPattern p : bannermeta.getPatterns()) {
@@ -486,16 +533,6 @@ public class ObjectGenerator {
 				if(dyeColor != null) {
 					ma.set("basecolor", new CString(dyeColor.toString(), t), t);
 				}
-			}
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-				Set<MCItemFlag> itemFlags = meta.getItemFlags();
-				CArray flagArray = new CArray(t);
-				if (itemFlags.size() > 0) {
-					for (MCItemFlag flag : itemFlags) {
-						flagArray.push(new CString(flag.name(), t), t);
-					}
-				}
-				ma.set("flags", flagArray, t);
 			}
 			ret = ma;
 		}
@@ -539,6 +576,33 @@ public class ObjectGenerator {
 						throw new CREFormatException("Lore was expected to be an array or a string.", t);
 					}
 				}
+				if (ma.containsKey("enchants")) {
+					Construct enchants = ma.get("enchants", t);
+					if (enchants instanceof CArray) {
+						for (Map.Entry<MCEnchantment, Integer> ench : enchants((CArray) enchants, t).entrySet()) {
+							meta.addEnchant(ench.getKey(), ench.getValue(), true);
+						}
+					} else {
+						throw new CREFormatException("Enchants field was expected to be an array of Enchantment arrays", t);
+					}
+				}
+				if (ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
+					meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
+				}
+				if (ma.containsKey("flags") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
+					Construct flags = ma.get("flags", t);
+					if (flags instanceof CArray) {
+						CArray flagArray = (CArray) flags;
+						for (int i = 0; i < flagArray.size(); i++) {
+							Construct flag = flagArray.get(i, t);
+							meta.addItemFlags(MCItemFlag.valueOf(flag.getValue().toUpperCase()));
+						}
+					} else {
+						throw new CREFormatException("Itemflags was expected to be an array of flags.", t);
+					}
+				}
+
+				// Specific Item Meta
 
 				if(ma.containsKey("firework") && ma.get("firework", t) instanceof CArray && meta instanceof MCFireworkMeta){
 					MCFireworkMeta fmeta = (MCFireworkMeta) meta;
@@ -608,22 +672,7 @@ public class ObjectGenerator {
 						}
 					}
 					builder.createFireworkMeta(fmeta);
-				}
-
-				if (ma.containsKey("enchants")) {
-					Construct enchants = ma.get("enchants", t);
-					if (enchants instanceof CArray) {
-						for (Map.Entry<MCEnchantment, Integer> ench : enchants((CArray) enchants, t).entrySet()) {
-							meta.addEnchant(ench.getKey(), ench.getValue(), true);
-						}
-					} else {
-						throw new CREFormatException("Enchants field was expected to be an array of Enchantment arrays", t);
-					}
-				}
-				if (ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
-					meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
-				}
-				if (meta instanceof MCLeatherArmorMeta) {
+				} else if (meta instanceof MCLeatherArmorMeta) {
 					if (ma.containsKey("color")) {
 						Construct ci = ma.get("color", t);
 						if (ci instanceof CNull) {
@@ -634,8 +683,7 @@ public class ObjectGenerator {
 							throw new CREFormatException("Color was expected to be an array.", t);
 						}
 					}
-				}
-				if (meta instanceof MCBookMeta) {
+				} else if (meta instanceof MCBookMeta) {
 					if (ma.containsKey("title")) {
 						Construct title = ma.get("title", t);
 						if (!(title instanceof CNull)) {
@@ -663,16 +711,14 @@ public class ObjectGenerator {
 							throw new CREFormatException("Pages field was expected to be an array.", t);
 						}
 					}
-				}
-				if (meta instanceof MCSkullMeta) {
+				} else if (meta instanceof MCSkullMeta) {
 					if (ma.containsKey("owner")) {
 						Construct owner = ma.get("owner", t);
 						if (!(owner instanceof CNull)) {
 							((MCSkullMeta) meta).setOwner(owner.val());
 						}
 					}
-				}
-				if (meta instanceof MCEnchantmentStorageMeta) {
+				} else if (meta instanceof MCEnchantmentStorageMeta) {
 					if (ma.containsKey("stored")) {
 						Construct stored = ma.get("stored", t);
 						if (stored instanceof CNull) {
@@ -685,8 +731,7 @@ public class ObjectGenerator {
 							throw new CREFormatException("Stored field was expected to be an array of Enchantment arrays", t);
 						}
 					}
-				}
-				if (meta instanceof MCPotionMeta) {
+				} else if (meta instanceof MCPotionMeta) {
 					if (ma.containsKey("potions")) {
 						Construct effects = ma.get("potions", t);
 						if (effects instanceof CArray) {
@@ -698,11 +743,46 @@ public class ObjectGenerator {
 							throw new CREFormatException("Effects was expected to be an array of potion arrays.", t);
 						}
 					}
-					if (ma.containsKey("main")) {
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+						if(ma.containsKey("base")){
+							Construct potiondata = ma.get("base", t);
+							if(potiondata instanceof CArray){
+								CArray pda = (CArray) potiondata;
+								if(pda.containsKey("type")){
+									MCPotionType type = MCPotionType.valueOf(pda.get("type", t).val().toUpperCase());
+									boolean extended = false;
+									boolean upgraded = false;
+									if(pda.containsKey("extended")){
+										Construct cext = pda.get("extended", t);
+										if(cext instanceof CBoolean){
+											extended = ((CBoolean) cext).getBoolean();
+										} else {
+											throw new CREFormatException(
+													"Expected potion value for key \"extended\" to be a boolean", t);
+										}
+									}
+									if(pda.containsKey("upgraded")){
+										Construct cupg = pda.get("upgraded", t);
+										if(cupg instanceof CBoolean){
+											upgraded = ((CBoolean) cupg).getBoolean();
+										} else {
+											throw new CREFormatException(
+													"Expected potion value for key \"upgraded\" to be a boolean", t);
+										}
+									}
+									try {
+										MCPotionData pd = StaticLayer.GetPotionData(type, extended, upgraded);
+										((MCPotionMeta) meta).setBasePotionData(pd);
+									} catch(IllegalArgumentException ex){
+										throw new CREFormatException(ex.getMessage(), t, ex);
+									}
+								}
+							}
+						}
+					} else if (ma.containsKey("main")) {
 						((MCPotionMeta) meta).setMainEffect(Static.getInt32(ma.get("main", t), t));
 					}
-				}
-				if (meta instanceof MCBannerMeta) {
+				} else if (meta instanceof MCBannerMeta) {
 					if (ma.containsKey("basecolor")) {
 						((MCBannerMeta) meta).setBaseColor(MCDyeColor.valueOf(ma.get("basecolor", t).val().toUpperCase()));
 					}
@@ -716,20 +796,8 @@ public class ObjectGenerator {
 						}
 					}
 				}
-				if (ma.containsKey("flags") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-					Construct flags = ma.get("flags", t);
-					if (flags instanceof CArray) {
-						CArray flagArray = (CArray) flags;
-						for (int i = 0; i < flagArray.size(); i++) {
-							Construct flag = flagArray.get(i, t);
-							meta.addItemFlags(MCItemFlag.valueOf(flag.getValue().toUpperCase()));
-						}
-					} else {
-						throw new CREFormatException("Itemflags was expected to be an array of flags.", t);
-					}
-				}
 			} catch(Exception ex) {
-				throw new CREFormatException("Could not get ItemMeta from the given information.", t, ex);
+				throw new CREFormatException(ex.getMessage(), t, ex);
 			}
 		} else {
 			throw new CREFormatException("An array was expected but recieved " + c + " instead.", t);

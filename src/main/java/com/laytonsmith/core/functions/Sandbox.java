@@ -35,8 +35,9 @@ import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import java.util.Random;
 import org.bukkit.event.Cancellable;
+
+import java.util.Random;
 
 /**
  *
@@ -580,6 +581,54 @@ public class Sandbox {
 		public String docs() {
 			return "double {randomResource} Returns a new rand value. If the seed used to create the resource is the same, each resulting"
 					+ " series of numbers will be the same.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+		
+	}
+	
+	@api
+	public static class test_composite_function extends CompositeFunction {
+
+		@Override
+		protected String script() {
+			// Note that @a is not going to be in scope for the user's scripts.
+			return "@a = ((@arguments[0] + @arguments[1]) > 0);"
+					+ "return(@a);";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return "test_composite_function";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {a, b} This is a test function, which demonstrates to extension authors how to make a composite function."
+					+ " It returns true if a and b added together are greater than 0, false otherwise.";
 		}
 
 		@Override
