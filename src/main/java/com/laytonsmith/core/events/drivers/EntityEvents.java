@@ -1688,7 +1688,7 @@ public class EntityEvents {
             if(e instanceof MCEntityToggleGlideEvent) {
                 MCEntityToggleGlideEvent evt = (MCEntityToggleGlideEvent) e;
                 
-                Prefilters.match(filter, "type", evt.getEntityType().concreteName(), Prefilters.PrefilterType.MACRO);
+                Prefilters.match(filter, "type", evt.getEntityType().name(), Prefilters.PrefilterType.MACRO);
                 Prefilters.match(filter, "id", evt.getEntity().getUniqueId().toString(), Prefilters.PrefilterType.MACRO);
                 
                 if(evt.getEntityType().equals(EntityType.PLAYER)) {
@@ -1711,7 +1711,7 @@ public class EntityEvents {
                 
                 ret.put("gliding", CBoolean.GenerateCBoolean(evt.isGliding(), t));
                 ret.put("id", new CString(evt.getEntity().getUniqueId().toString(), t));    
-                ret.put("type", new CString(evt.getEntityType().concreteName(), t));
+                ret.put("type", new CString(evt.getEntityType().name(), t));
                 
                 if (evt.getEntity() instanceof MCPlayer) {
                     ret.put("player", new CString(((MCPlayer) evt.getEntity()).getName(), t));
