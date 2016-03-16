@@ -4915,7 +4915,8 @@ public class PlayerManagement {
 		
         public Class<? extends CREThrowable>[] thrown() {
             return new Class[] {
-                    CRECastException.class
+                    CREPlayerOfflineException.class,
+                    CREIllegalArgumentException.class
             };
         }
       
@@ -4932,14 +4933,16 @@ public class PlayerManagement {
             boolean glide;
             
             if(args.length == 1) {
-                p = ((CommandHelperEnvironment)environment.getEnv(CommandHelperEnvironment.class)).GetPlayer();
+                p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
                 glide = Static.getBoolean(args[0]);
             } else {
                 p = Static.GetPlayer(args[0].val(), t);
                 glide = Static.getBoolean(args[1]);
             }
             
-            if(p.getEquipment().getChestplate().getTypeId() != 443 || p.isOnGround()) {
+            Static.AssertPlayerNonNull(p, t);
+            
+            if(p.isOnGround()) {
                 throw new CREException("The specified player cannot glide right now", t);
             }
             
@@ -4969,7 +4972,8 @@ public class PlayerManagement {
     	
         public Class<? extends CREThrowable>[] thrown() {
             return new Class[] {
-                    CRECastException.class
+                    CREPlayerOfflineException.class,
+                    CREIllegalArgumentException.class
             };
         }
       
@@ -4985,10 +4989,12 @@ public class PlayerManagement {
             MCPlayer p;
             
             if(args.length == 0) {
-                p = ((CommandHelperEnvironment)environment.getEnv(CommandHelperEnvironment.class)).GetPlayer();
+                p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             } else {
                 p = Static.GetPlayer(args[0].val(), t);
             }
+            
+            Static.AssertPlayerNonNull(p, t);
             
             return CBoolean.GenerateCBoolean(p.isGliding(), t);
         }
@@ -5014,7 +5020,8 @@ public class PlayerManagement {
 
         public Class<? extends CREThrowable>[] thrown() {
             return new Class[] {
-                    CRECastException.class
+                    CREPlayerOfflineException.class,
+                    CREIllegalArgumentException.class
             };
         }
       
@@ -5031,12 +5038,14 @@ public class PlayerManagement {
             Boolean g;
             
             if(args.length == 1) {
-                p = ((CommandHelperEnvironment)environment.getEnv(CommandHelperEnvironment.class)).GetPlayer();
+                p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
                 g = Boolean.valueOf(args[0].val());
             } else {
                 p = Static.GetPlayer(args[0].val(), t);
                 g = Boolean.valueOf(args[1].val());
             }
+            
+            Static.AssertPlayerNonNull(p, t);
             
             p.setGlowing(g);
             
@@ -5064,7 +5073,8 @@ public class PlayerManagement {
         
         public Class<? extends CREThrowable>[] thrown() {
             return new Class[] {
-                    CRECastException.class
+            		CREPlayerOfflineException.class,
+                    CREIllegalArgumentException.class
             };
         }
       
@@ -5080,10 +5090,12 @@ public class PlayerManagement {
             MCPlayer p;
             
             if(args.length == 0) {
-                p = ((CommandHelperEnvironment)environment.getEnv(CommandHelperEnvironment.class)).GetPlayer();
+                p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             } else {
                 p = Static.GetPlayer(args[0].val(), t);
             }
+            
+            Static.AssertPlayerNonNull(p, t);
             
             return CBoolean.GenerateCBoolean(p.isGlowing(), t);
         }

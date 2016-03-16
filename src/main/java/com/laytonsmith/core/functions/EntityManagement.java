@@ -3641,31 +3641,13 @@ public class EntityManagement {
 	}
 	
 	@api
-    public static class set_entity_glowing extends AbstractFunction {
+    public static class set_entity_glowing extends EntitySetterFunction {
 		public String getName() {
             return "set_entity_glowing";
         }
       
-        public Integer[] numArgs() {
-            return new Integer[] {2};
-        }
-      
         public String docs() {
             return "void {Entity ID, boolean} If true, applies glowing effect to the entity";
-        }
-        
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[] {
-                    CRECastException.class
-            };
-        }
-      
-        public boolean isRestricted() {
-            return false;
-        }
-      
-        public Boolean runAsync() {
-            return false;
         }
       
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -3679,33 +3661,15 @@ public class EntityManagement {
     }
     
     @api
-    public static class get_entity_glowing extends AbstractFunction {
+    public static class get_entity_glowing extends EntityGetterFunction {
     	public String getName() {
             return "get_entity_glowing";
-        }
-      
-        public Integer[] numArgs() {
-            return new Integer[] {1};
         }
       
         public String docs() {
             return "boolean {Entity} Returns true if the entity is glowing";
         }
         
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[] {
-                    CRECastException.class
-            };
-        }
-      
-        public boolean isRestricted() {
-            return false;
-        }
-      
-        public Boolean runAsync() {
-            return false;
-        }
-      
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCEntity e = Static.getEntity(args[0], t);
             return CBoolean.GenerateCBoolean(e.isGlowing(), t);
