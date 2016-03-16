@@ -156,7 +156,8 @@ public final class Implementation {
 
 		TEST("test-backend"),
 		BUKKIT("CommandHelper"),
-		SHELL("MethodScript");
+		SHELL("MethodScript"),
+		SPONGE("CommandHelper");
 		//GLOWSTONE,
 		//SINGLE_PLAYER
 		private final String branding;
