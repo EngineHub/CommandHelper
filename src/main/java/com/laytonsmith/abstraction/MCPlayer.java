@@ -1,11 +1,11 @@
 
 package com.laytonsmith.abstraction;
 
+import java.net.InetSocketAddress;
+
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCWeather;
-
-import java.net.InetSocketAddress;
 
 /**
  *
@@ -157,4 +157,12 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 	public boolean isFlying();
 
 	public void updateInventory();
+	
+	public boolean isGliding();
+	
+	public void setGliding(Boolean glide);
+	
+	public boolean isGlowing();
+	
+	public void setGlowing(Boolean glow);
 }
