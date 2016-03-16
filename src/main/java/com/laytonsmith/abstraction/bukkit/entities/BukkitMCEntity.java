@@ -319,5 +319,15 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public MCLocation asyncGetLocation() {
 		return new BukkitMCLocation(e.getLocation());
 	}
+	
+	@Override
+	public boolean isGlowing() {
+		return e.isGlowing();
+	}
+	
+	@Override
+	public void setGlowing(Boolean glow) {
+		e.setGlowing(glow);
+	}
 
 }

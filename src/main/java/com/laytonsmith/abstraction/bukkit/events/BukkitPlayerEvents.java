@@ -26,6 +26,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDeathEvent;
 import com.laytonsmith.abstraction.entities.MCFishHook;
 import com.laytonsmith.abstraction.enums.MCAction;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
@@ -46,6 +47,7 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.player.PlayerPreLoginEvent.Result;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -548,6 +550,14 @@ public class BukkitPlayerEvents {
         public MCItemStack getItem() {
             return new BukkitMCItemStack(pie.getItem());
         }
+		
+		@Override
+		public MCEquipmentSlot getHand() {
+		    if(pie.getHand() == EquipmentSlot.HAND) {
+		        return MCEquipmentSlot.WEAPON;
+		    }
+		    return MCEquipmentSlot.OFF_HAND;
+		}
     }
 
     @abstraction(type=Implementation.Type.BUKKIT)
