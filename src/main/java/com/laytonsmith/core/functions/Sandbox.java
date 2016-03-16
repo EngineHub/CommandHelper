@@ -35,8 +35,9 @@ import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import java.util.Random;
 import org.bukkit.event.Cancellable;
+
+import java.util.Random;
 
 /**
  *
@@ -601,7 +602,7 @@ public class Sandbox {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return null;
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override

@@ -11,5 +11,6 @@ public enum MCTeleportCause {
 	PLUGIN,
 	SPECTATE,
 	END_GATEWAY,
+	CHORUS_FRUIT,
 	UNKNOWN
 }

@@ -16,6 +16,7 @@ import com.laytonsmith.abstraction.events.MCInventoryCloseEvent;
 import com.laytonsmith.abstraction.events.MCInventoryDragEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import com.laytonsmith.abstraction.events.MCItemHeldEvent;
+import com.laytonsmith.abstraction.events.MCItemSwapEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
 import com.laytonsmith.annotations.api;
@@ -725,6 +726,83 @@ public class InventoryEvents {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class item_swap extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "item_swap";
+		}
+
+		@Override
+		public String docs() {
+			return "{player: <macro> | main_hand: <item match> | off_hand: <item match>}"
+					+ " Fires when a player swaps the items in their main and off hands."
+					+ " {player | main_hand: the item array in the main hand before swapping"
+					+ " | off_hand: the item in the off hand}"
+					+ " {main_hand | off_hand}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCItemSwapEvent) {
+				MCItemSwapEvent e = (MCItemSwapEvent) event;
+
+				Prefilters.match(prefilter, "player", e.getPlayer().getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "main_hand", Static.ParseItemNotation(e.getMainHandItem()), PrefilterType.ITEM_MATCH);
+				Prefilters.match(prefilter, "off_hand", Static.ParseItemNotation(e.getOffHandItem()), PrefilterType.ITEM_MATCH);
+
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported operation.", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCItemSwapEvent) {
+				MCItemSwapEvent e = (MCItemSwapEvent) event;
+				Map<String, Construct> ret = evaluate_helper(e);
+				ret.put("main_hand", ObjectGenerator.GetGenerator().item(e.getMainHandItem(), Target.UNKNOWN));
+				ret.put("off_hand", ObjectGenerator.GetGenerator().item(e.getOffHandItem(), Target.UNKNOWN));
+				return ret;
+			} else {
+				throw new EventException("Event received was not an MCItemSwapEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ITEM_SWAP;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCItemSwapEvent) {
+				MCItemSwapEvent e = (MCItemSwapEvent) event;
+				if ("main_hand".equals(key)) {
+					e.setMainHandItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					return true;
+				}
+				if ("off_hand".equals(key)) {
+					e.setOffHandItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
 		}
 	}
 
