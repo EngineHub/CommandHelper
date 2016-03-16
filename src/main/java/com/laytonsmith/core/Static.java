@@ -1218,18 +1218,17 @@ public final class Static {
 		return injectedPlayers.remove(name);
 	}
 
-	public static void HostnameCache(final MCPlayer p) {
+	public static void HostnameCache(final String name, final String hostname) {
 		CommandHelperPlugin.hostnameLookupThreadPool.submit(new Runnable() {
 			@Override
 			public void run() {
-				CommandHelperPlugin.hostnameLookupCache.put(p.getName(),
-						p.getAddress().getHostName());
+				CommandHelperPlugin.hostnameLookupCache.put(name, hostname);
 			}
 		});
 	}
 
-	public static void SetPlayerHost(MCPlayer p, String host) {
-		hostCache.put(p.getName(), host);
+	public static void SetPlayerHost(String playerName, String host) {
+		hostCache.put(playerName, host);
 	}
 
 	public static String GetHost(MCPlayer p) {
