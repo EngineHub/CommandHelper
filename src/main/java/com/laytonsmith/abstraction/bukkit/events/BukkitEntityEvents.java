@@ -774,32 +774,32 @@ public class BukkitEntityEvents {
 	}
 	
 	@abstraction(type = Implementation.Type.BUKKIT)
-    public static class BukkitMCEntityToggleGlideEvent implements MCEntityToggleGlideEvent {
-        EntityToggleGlideEvent e;
-        
-        public BukkitMCEntityToggleGlideEvent(Event e) {
-            this.e = (EntityToggleGlideEvent) e;
-        }
+	public static class BukkitMCEntityToggleGlideEvent implements MCEntityToggleGlideEvent {
+		EntityToggleGlideEvent e;
 
-        @Override
-        public Object _GetObject() {
-            return e;
-        }
+		public BukkitMCEntityToggleGlideEvent(Event e) {
+			this.e = (EntityToggleGlideEvent) e;
+		}
 
-        @Override
-        public boolean isGliding() {
-            return e.isGliding();
-        }
+		@Override
+		public Object _GetObject() {
+			return e;
+		}
 
-        @Override
-        public MCEntity getEntity() {
-            return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity());
-        }
+		@Override
+		public boolean isGliding() {
+			return e.isGliding();
+		}
 
-        @Override
-        public MCEntityType getEntityType() {
-            return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity()).getType();
-        }
-        
-    }
+		@Override
+		public MCEntity getEntity() {
+			return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity());
+		}
+
+		@Override
+		public MCEntityType getEntityType() {
+			return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity()).getType();
+		}
+
+	}
 }

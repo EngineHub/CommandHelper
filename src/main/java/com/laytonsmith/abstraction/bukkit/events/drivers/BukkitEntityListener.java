@@ -157,13 +157,14 @@ public class BukkitEntityListener implements Listener {
 		BukkitMCHangingBreakEvent hbe = new BukkitMCHangingBreakEvent(event);
 		EventUtils.TriggerListener(Driver.HANGING_BREAK, "hanging_break", hbe);
 	}
-	
+
 	@EventIdentifier(event = Driver.ENTITY_TOGGLE_GLIDE, className = "org.bukkit.event.entity.EntityToggleGlideEvent")
-    public void onEntityToggleGlide(Event event) {
-        BukkitMCEntityToggleGlideEvent etge = new BukkitMCEntityToggleGlideEvent(event);
-        if(etge.getEntity() instanceof MCPlayer && ((MCPlayer) etge.getEntity()).isFlying()) {
-            return; // Seems to be a bukkit bug where if you are in fly mode this event will keep getting called.
-        }
-        EventUtils.TriggerListener(Driver.ENTITY_TOGGLE_GLIDE, "entity_toggle_glide", etge);
-    }
+	public void onEntityToggleGlide(Event event) {
+		BukkitMCEntityToggleGlideEvent etge = new BukkitMCEntityToggleGlideEvent(event);
+		if (etge.getEntity() instanceof MCPlayer && ((MCPlayer) etge.getEntity()).isFlying()) {
+			return; // Seems to be a bukkit bug where if you are in fly mode
+					// this event will keep getting called.
+		}
+		EventUtils.TriggerListener(Driver.ENTITY_TOGGLE_GLIDE, "entity_toggle_glide", etge);
+	}
 }
