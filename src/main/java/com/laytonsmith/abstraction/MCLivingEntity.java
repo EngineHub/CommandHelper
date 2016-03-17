@@ -1,11 +1,11 @@
 
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.core.constructs.Target;
-
 import java.util.HashSet;
 import java.util.List;
+
+import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.core.constructs.Target;
 
 /**
  *
@@ -49,6 +49,7 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
     public int getMaximumNoDamageTicks();
     public int getNoDamageTicks();
     public int getRemainingAir();
+    public boolean isGliding();
 	public boolean isLeashed();
 	public void resetMaxHealth();
 	public void setCanPickupItems(boolean pickup);
@@ -62,6 +63,7 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
     public void setNoDamageTicks(int ticks);
     public void setRemainingAir(int ticks);
 	public void setTarget(MCLivingEntity target, Target t);
+	public void setGliding(Boolean glide);
 
 	/**
 	 * Kills the entity. In some cases, this will be equivalent to setHealth(0), but
@@ -111,6 +113,5 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 		public boolean hasParticles() {
 			return particles;
 		}
-
 	}
 }

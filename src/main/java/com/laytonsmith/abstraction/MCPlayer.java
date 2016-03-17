@@ -157,12 +157,4 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 	public boolean isFlying();
 
 	public void updateInventory();
-	
-	public boolean isGliding();
-	
-	public void setGliding(Boolean glide);
-	
-	public boolean isGlowing();
-	
-	public void setGlowing(Boolean glow);
 }

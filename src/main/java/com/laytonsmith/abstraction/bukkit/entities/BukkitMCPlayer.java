@@ -624,24 +624,4 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void setScoreboard(MCScoreboard board) {
 		p.setScoreboard(((BukkitMCScoreboard) board)._scoreboard());
 	}
-	
-	@Override
-	public boolean isGliding() {
-		return p.isGliding();
-	}
-	
-	@Override
-	public void setGliding(Boolean glide) {
-		p.setGliding(glide);
-	}
-	
-	@Override
-	public boolean isGlowing() {
-		return p.isGlowing();
-	}
-	
-	@Override
-	public void setGlowing(Boolean glow) {
-		p.setGlowing(glow);
-	}
 }
