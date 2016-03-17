@@ -4898,210 +4898,198 @@ public class PlayerManagement {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
-	@api
-    public static class set_pgliding extends AbstractFunction {
-		public String getName() {
-            return "set_pgliding";
-        }
-		
-		public Integer[] numArgs() {
-            return new Integer[] {1, 2};
-        }
-      
-        public String docs() {
-            return "void {[Player], boolean} Sets the player to glide";
-        }
-		
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[] {
-                    CREPlayerOfflineException.class,
-                    CREIllegalArgumentException.class
-            };
-        }
-      
-        public boolean isRestricted() {
-            return false;
-        }
-      
-        public Boolean runAsync() {
-            return false;
-        }
-      
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p;
-            boolean glide;
-            
-            if(args.length == 1) {
-                p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-                glide = Static.getBoolean(args[0]);
-            } else {
-                p = Static.GetPlayer(args[0].val(), t);
-                glide = Static.getBoolean(args[1]);
-            }
-            
-            Static.AssertPlayerNonNull(p, t);
-            
-            if(p.isOnGround()) {
-                throw new CREException("The specified player cannot glide right now", t);
-            }
-            
-            p.setGliding(glide);
-            
-            return CVoid.VOID;
-        }
-      
-        public Version since() {
-            return CHVersion.V3_3_2;
-        }
-    }
-    
-    @api
-    public static class get_pgliding extends AbstractFunction {
-    	public String getName() {
-            return "get_pgliding";
-        }
-    	
-    	public Integer[] numArgs() {
-            return new Integer[] {0, 1};
-        }
-      
-        public String docs() {
-            return "boolean {[Player]} Returns true if the player is gliding";
-        }
-    	
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[] {
-                    CREPlayerOfflineException.class,
-                    CREIllegalArgumentException.class
-            };
-        }
-      
-        public boolean isRestricted() {
-            return false;
-        }
-      
-        public Boolean runAsync() {
-            return false;
-        }
-      
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p;
-            
-            if(args.length == 0) {
-                p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-            } else {
-                p = Static.GetPlayer(args[0].val(), t);
-            }
-            
-            Static.AssertPlayerNonNull(p, t);
-            
-            return CBoolean.GenerateCBoolean(p.isGliding(), t);
-        }
-      
-        public Version since() {
-            return CHVersion.V3_3_2;
-        }
-    }
-    
-    @api
-    public static class set_pglowing extends AbstractFunction {
-    	public String getName() {
-            return "set_pglowing";
-        }
-      
-        public Integer[] numArgs() {
-            return new Integer[] {1, 2};
-        }
-      
-        public String docs() {
-            return "void {[Player], glowing} Sets the player to display a glowing effect";
-        }
 
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[] {
-                    CREPlayerOfflineException.class,
-                    CREIllegalArgumentException.class
-            };
-        }
-      
-        public boolean isRestricted() {
-            return false;
-        }
-      
-        public Boolean runAsync() {
-            return false;
-        }
-      
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p;
-            Boolean g;
-            
-            if(args.length == 1) {
-                p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-                g = Boolean.valueOf(args[0].val());
-            } else {
-                p = Static.GetPlayer(args[0].val(), t);
-                g = Boolean.valueOf(args[1].val());
-            }
-            
-            Static.AssertPlayerNonNull(p, t);
-            
-            p.setGlowing(g);
-            
-            return CVoid.VOID;
-        }
-      
-        public Version since() {
-            return CHVersion.V3_3_2;
-        }
-    }
-    
-    @api
-    public static class get_pglowing extends AbstractFunction {
-    	public String getName() {
-            return "get_pglowing";
-        }
-      
-        public Integer[] numArgs() {
-            return new Integer[] {0, 1};
-        }
-      
-        public String docs() {
-            return "void {[Player]} Returns if true if the player is glowing";
-        }
-        
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[] {
-            		CREPlayerOfflineException.class,
-                    CREIllegalArgumentException.class
-            };
-        }
-      
-        public boolean isRestricted() {
-            return false;
-        }
-      
-        public Boolean runAsync() {
-            return false;
-        }
-      
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p;
-            
-            if(args.length == 0) {
-                p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-            } else {
-                p = Static.GetPlayer(args[0].val(), t);
-            }
-            
-            Static.AssertPlayerNonNull(p, t);
-            
-            return CBoolean.GenerateCBoolean(p.isGlowing(), t);
-        }
-      
-        public Version since() {
-            return CHVersion.V3_3_2;
-        }
-    }
+	@api
+	public static class set_pgliding extends AbstractFunction {
+		public String getName() {
+			return "set_pgliding";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[] { 1, 2 };
+		}
+
+		public String docs() {
+			return "void {[Player], boolean} Sets the player to glide";
+		}
+
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] { CREPlayerOfflineException.class };
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			boolean glide;
+
+			if (args.length == 1) {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				glide = Static.getBoolean(args[0]);
+			} else {
+				p = Static.GetPlayer(args[0].val(), t);
+				glide = Static.getBoolean(args[1]);
+			}
+
+			Static.AssertPlayerNonNull(p, t);
+
+			if (p.isOnGround()) {
+				throw new CREException("The specified player cannot glide right now", t);
+			}
+
+			p.setGliding(glide);
+
+			return CVoid.VOID;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class get_pgliding extends AbstractFunction {
+		public String getName() {
+			return "get_pgliding";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[] { 0, 1 };
+		}
+
+		public String docs() {
+			return "boolean {[Player]} Returns true if the player is gliding";
+		}
+
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] { CREPlayerOfflineException.class };
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+
+			if (args.length == 0) {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			} else {
+				p = Static.GetPlayer(args[0].val(), t);
+			}
+
+			Static.AssertPlayerNonNull(p, t);
+
+			return CBoolean.GenerateCBoolean(p.isGliding(), t);
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class set_pglowing extends AbstractFunction {
+		public String getName() {
+			return "set_pglowing";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[] { 1, 2 };
+		}
+
+		public String docs() {
+			return "void {[Player], glowing} Sets the player to display a glowing effect";
+		}
+
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] { CREPlayerOfflineException.class };
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			Boolean g;
+
+			if (args.length == 1) {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				g = Boolean.valueOf(args[0].val());
+			} else {
+				p = Static.GetPlayer(args[0].val(), t);
+				g = Boolean.valueOf(args[1].val());
+			}
+
+			Static.AssertPlayerNonNull(p, t);
+
+			p.setGlowing(g);
+
+			return CVoid.VOID;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class get_pglowing extends AbstractFunction {
+		public String getName() {
+			return "get_pglowing";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[] { 0, 1 };
+		}
+
+		public String docs() {
+			return "void {[Player]} Returns if true if the player is glowing";
+		}
+
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] { CREPlayerOfflineException.class };
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+
+			if (args.length == 0) {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			} else {
+				p = Static.GetPlayer(args[0].val(), t);
+			}
+
+			Static.AssertPlayerNonNull(p, t);
+
+			return CBoolean.GenerateCBoolean(p.isGlowing(), t);
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
 }

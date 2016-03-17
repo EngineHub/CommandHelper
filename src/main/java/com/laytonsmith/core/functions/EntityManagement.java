@@ -3641,42 +3641,42 @@ public class EntityManagement {
 	}
 	
 	@api
-    public static class set_entity_glowing extends EntitySetterFunction {
+	public static class set_entity_glowing extends EntitySetterFunction {
 		public String getName() {
-            return "set_entity_glowing";
-        }
-      
-        public String docs() {
-            return "void {Entity ID, boolean} If true, applies glowing effect to the entity";
-        }
-      
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-        	Static.getEntity(args[0], t).setGlowing(Static.getBoolean(args[1]));
-            return CVoid.VOID;
-        }
-      
-        public Version since() {
-            return CHVersion.V3_3_2;
-        }
-    }
-    
-    @api
-    public static class get_entity_glowing extends EntityGetterFunction {
-    	public String getName() {
-            return "get_entity_glowing";
-        }
-      
-        public String docs() {
-            return "boolean {Entity} Returns true if the entity is glowing";
-        }
-        
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            MCEntity e = Static.getEntity(args[0], t);
-            return CBoolean.GenerateCBoolean(e.isGlowing(), t);
-        }
-      
-        public Version since() {
-            return CHVersion.V3_3_2;
-        }
-    }
+			return "set_entity_glowing";
+		}
+
+		public String docs() {
+			return "void {Entity ID, boolean} If true, applies glowing effect to the entity";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Static.getEntity(args[0], t).setGlowing(Static.getBoolean(args[1]));
+			return CVoid.VOID;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class get_entity_glowing extends EntityGetterFunction {
+		public String getName() {
+			return "get_entity_glowing";
+		}
+
+		public String docs() {
+			return "boolean {Entity} Returns true if the entity is glowing";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			return CBoolean.GenerateCBoolean(e.isGlowing(), t);
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
 }
