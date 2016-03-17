@@ -32,7 +32,6 @@ import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.MemoryDataSource;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
-import org.bukkit.command.CommandException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -471,7 +470,7 @@ public class AliasCore {
 				ArgumentParser.ArgumentParserResults results;
 				results = options.match(settings);
 				if (results.isFlagSet('h')) {
-					throw new CommandException(options.getBuiltDescription());
+					throw new CancelCommandException(options.getBuiltDescription(), Target.UNKNOWN);
 				}
 				if (results.isFlagSet("whitelist")) {
 					//Invert the results
