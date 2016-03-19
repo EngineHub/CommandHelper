@@ -1,7 +1,17 @@
 package com.laytonsmith.core.events.drivers;
 
-import com.laytonsmith.PureUtilities.Common.StringUtils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IllegalFormatConversionException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UnknownFormatConversionException;
+
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
@@ -10,10 +20,35 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.enums.MCAction;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
-import com.laytonsmith.abstraction.events.*;
+import com.laytonsmith.abstraction.events.MCChatTabCompleteEvent;
+import com.laytonsmith.abstraction.events.MCExpChangeEvent;
+import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
+import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBedEvent;
+import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
+import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
+import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
+import com.laytonsmith.abstraction.events.MCPlayerEditBookEvent;
+import com.laytonsmith.abstraction.events.MCPlayerFishEvent;
+import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
+import com.laytonsmith.abstraction.events.MCPlayerItemConsumeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
+import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
+import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
+import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
+import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
+import com.laytonsmith.abstraction.events.MCPlayerPreLoginEvent;
+import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
+import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
+import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
+import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -40,26 +75,15 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.events.drivers.EntityEvents.entity_death;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.EventException;
-import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.EventBinding.modify_event;
 import com.laytonsmith.core.functions.StringHandling;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.FormatFlagsConversionMismatchException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IllegalFormatConversionException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UnknownFormatConversionException;
 
 /**
  *
@@ -858,9 +882,19 @@ public class PlayerEvents {
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent)e;
+                MCEquipmentSlot h = pie.getHand();
+                CString hand;
+                
                 if(((MCPlayerInteractEvent)e).getAction().equals(MCAction.PHYSICAL)){
                     return false;
                 }
+                
+                if(h == MCEquipmentSlot.WEAPON) {
+                   hand = new CString("main_hand", Target.UNKNOWN);
+                } else {
+                    hand = new CString("off_hand", Target.UNKNOWN);
+                }
+                
                 if(prefilter.containsKey("button")){
                     if(pie.getAction().equals(MCAction.LEFT_CLICK_AIR) || pie.getAction().equals(MCAction.LEFT_CLICK_BLOCK)){
                         if(!prefilter.get("button").val().toLowerCase().equals("left")){
@@ -877,6 +911,7 @@ public class PlayerEvents {
                 Prefilters.match(prefilter, "item", Static.ParseItemNotation(pie.getItem()), PrefilterType.ITEM_MATCH);
                 Prefilters.match(prefilter, "block", Static.ParseItemNotation(pie.getClickedBlock()), PrefilterType.ITEM_MATCH);
                 Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
+                Prefilters.match(prefilter, "hand", hand, PrefilterType.MACRO);
 
                 return true;
             }
@@ -890,6 +925,7 @@ public class PlayerEvents {
                 Map<String, Construct> map = evaluate_helper(e);
                 //map.put("player", new CString(pie.getPlayer().getName(), Target.UNKNOWN));
                 MCAction a = pie.getAction();
+                MCEquipmentSlot h = pie.getHand();
                 map.put("action", new CString(a.name().toLowerCase(), Target.UNKNOWN));
                 map.put("block", new CString(Static.ParseItemNotation(pie.getClickedBlock()), Target.UNKNOWN));
                 if(a == MCAction.LEFT_CLICK_AIR || a == MCAction.LEFT_CLICK_BLOCK){
@@ -903,6 +939,12 @@ public class PlayerEvents {
                 }
 				map.put("world", new CString(pie.getPlayer().getWorld().getName(), Target.UNKNOWN));
                 map.put("item", new CString(Static.ParseItemNotation(pie.getItem()), Target.UNKNOWN));
+                if(h == MCEquipmentSlot.WEAPON) {
+                    map.put("hand", new CString("main_hand", Target.UNKNOWN));
+                } else {
+                    map.put("hand", new CString("off_hand", Target.UNKNOWN));
+                }
+                
                 return map;
             } else {
                 throw new EventException("Cannot convert e to PlayerInteractEvent");
