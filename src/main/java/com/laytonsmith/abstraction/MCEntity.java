@@ -1,14 +1,14 @@
 package com.laytonsmith.abstraction;
 
+import java.util.List;
+import java.util.UUID;
+
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
-
-import java.util.List;
-import java.util.UUID;
 
 /**
  * 
@@ -99,4 +99,8 @@ public interface MCEntity extends MCMetadatable {
 	public void setCustomNameVisible(boolean visible);
 
 	public boolean isCustomNameVisible();
+	
+	public boolean isGlowing();
+	
+	public void setGlowing(Boolean glow);
 }

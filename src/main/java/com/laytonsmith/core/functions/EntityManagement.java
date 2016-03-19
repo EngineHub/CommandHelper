@@ -1,8 +1,16 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Common.StringUtils;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCAgeable;
 import com.laytonsmith.abstraction.MCArmorStand;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
@@ -85,9 +93,12 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityTypeException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
@@ -97,16 +108,6 @@ import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CRE.CREUnageableMobException;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  *
@@ -3637,6 +3638,93 @@ public class EntityManagement {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+	}
+	
+	@api
+	public static class set_entity_glowing extends EntitySetterFunction {
+		public String getName() {
+			return "set_entity_glowing";
+		}
+
+		public String docs() {
+			return "void {Entity ID, boolean} If true, applies glowing effect to the entity";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Static.getEntity(args[0], t).setGlowing(Static.getBoolean(args[1]));
+			return CVoid.VOID;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class get_entity_glowing extends EntityGetterFunction {
+		public String getName() {
+			return "get_entity_glowing";
+		}
+
+		public String docs() {
+			return "boolean {Entity} Returns true if the entity is glowing";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			return CBoolean.GenerateCBoolean(e.isGlowing(), t);
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+	
+	@api
+	public static class set_entity_gliding extends EntitySetterFunction {
+		public String getName() {
+			return "set_entity_gliding";
+		}
+
+		public String docs() {
+			return "void {Entity, boolean} If possible, makes the entity glide";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity e = Static.getLivingEntity(args[0], t);
+			boolean glide = Static.getBoolean(args[1]);
+
+			if (e.isOnGround()) {
+				throw new CREException("The specified entity cannot glide right now", t);
+			}
+
+			e.setGliding(glide);
+
+			return CVoid.VOID;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class get_entity_gliding extends EntityGetterFunction {
+		public String getName() {
+			return "get_entity_gliding";
+		}
+
+		public String docs() {
+			return "boolean {Entity} Returns true if the given entity is gliding";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CBoolean.GenerateCBoolean(Static.getLivingEntity(args[0], t).isGliding(), t);
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
 		}
 	}
 }

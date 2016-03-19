@@ -1,11 +1,11 @@
 
 package com.laytonsmith.abstraction;
 
+import java.net.InetSocketAddress;
+
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCWeather;
-
-import java.net.InetSocketAddress;
 
 /**
  *
