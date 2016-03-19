@@ -2,14 +2,8 @@ package com.laytonsmith.PureUtilities.Web;
 
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -210,12 +204,15 @@ public final class WebUtility {
 			if(parameters != null && !parameters.isEmpty()){
 				params = encodeParameters(parameters);
 				conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+				conn.
 			} else if(settings.getRawParameter() != null){
 				params = settings.getRawParameter();
 			}
 			conn.setRequestProperty("Content-Length", Integer.toString(params.length()));
 			OutputStream os = new BufferedOutputStream(conn.getOutputStream());
-			WriteStringToOutputStream(params, os);
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+			WriteStringToOutputStream(params, writer);
+			writer.close();
 			os.close();
 		}
 
@@ -275,7 +272,7 @@ public final class WebUtility {
 		return b.toString();
 	}
 
-	private static void WriteStringToOutputStream(String data, OutputStream os) throws IOException {
+	private static void WriteStringToOutputStream(String data, BufferedWriter os) throws IOException {
 		for (Character c : data.toCharArray()) {
 			os.write((int) c.charValue());
 		}
