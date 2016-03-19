@@ -856,6 +856,7 @@ public class PlayerEvents {
             return "{block: <item match> If the block the player interacts with is this"
                     + " | button: <string match> left or right. If they left or right clicked |"
                     + " item: <item match> The item they are holding when they interacted |"
+                    + " hand: <string match> The hand the player clicked with |"
                     + " player: <string match> The player that triggered the event} "
                     + "Fires when a player left or right clicks a block or the air"
                     + "{action: One of either: left_click_block, right_click_block, left_click_air, or right_click_air |"
@@ -863,7 +864,8 @@ public class PlayerEvents {
                     + " neither facing or location will be present. |"
                     + "player: The player associated with this event |"
                     + "facing: The (lowercase) face of the block they clicked. (One of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ") + ") |"
-                    + "location: The (x, y, z, world) location of the block they clicked}"
+                    + "location: The (x, y, z, world) location of the block they clicked |"
+                    + "hand: The hand used to click with, can be either main_hand or off_hand}"
                     + "{}"
                     + "{player|action|item|location|facing}";
         }
@@ -911,7 +913,7 @@ public class PlayerEvents {
                 Prefilters.match(prefilter, "item", Static.ParseItemNotation(pie.getItem()), PrefilterType.ITEM_MATCH);
                 Prefilters.match(prefilter, "block", Static.ParseItemNotation(pie.getClickedBlock()), PrefilterType.ITEM_MATCH);
                 Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
-                Prefilters.match(prefilter, "hand", hand, PrefilterType.MACRO);
+                Prefilters.match(prefilter, "hand", hand, PrefilterType.STRING_MATCH);
 
                 return true;
             }
