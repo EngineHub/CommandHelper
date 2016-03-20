@@ -209,8 +209,7 @@ public final class WebUtility {
 			}
 			conn.setRequestProperty("Content-Length", Integer.toString(params.length()));
 			OutputStream os = new BufferedOutputStream(conn.getOutputStream());
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-			WriteStringToOutputStream(params, bw);
+			os.write(params.getBytes("UTF-8"));
 			os.close();
 		}
 
