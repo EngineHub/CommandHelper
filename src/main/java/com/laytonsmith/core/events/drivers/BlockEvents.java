@@ -11,17 +11,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCTone;
-import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
-import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
-import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
-import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
-import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonExtendEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
-import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
-import com.laytonsmith.abstraction.events.MCNotePlayEvent;
-import com.laytonsmith.abstraction.events.MCSignChangeEvent;
+import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -40,6 +30,7 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
@@ -756,6 +747,123 @@ public class BlockEvents {
 			return false;
 		}
 	}
+
+    @api
+    public static class block_from_to extends AbstractEvent {
+
+        @Override
+        public String getName() {
+            return "block_from_to";
+        }
+
+        @Override
+        public String docs() {
+            return "{type: <string match> | data: <string match> | world <string match> | totype <string match> | todata <string match> | toworld <string match> | face <string match>} "
+                    + "This event is called when a water or lava is flowed and ender dragon egg is teleported"
+                    + "Cancelling the event cancels the flow or teleport"
+                    + "{block: An array with "
+                    + "keys 'type' (int), 'data' (int), 'X' (int), 'Y' (int), 'Z' (int) "
+                    + "and 'world' (string) for the physical location of the block | "
+                    + "location: the locationArray of this block | "
+                    + "toblock: target block |"
+                    + "tolocation: target block's locationArray}"
+                    + "{block|toblock}"
+                    + "{block|location|toblock|tolocation|face}";
+        }
+
+        @Override
+        public Version since() {
+            return CHVersion.V3_3_2;
+        }
+
+        @Override
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+            if(e instanceof MCBlockFromToEvent) {
+                MCBlockFromToEvent event = (MCBlockFromToEvent) e;
+                Prefilters.match(prefilter, "world", event.getBlock().getWorld().getName(), PrefilterType.STRING_MATCH);
+                Prefilters.match(prefilter, "type", event.getBlock().getTypeId(), PrefilterType.STRING_MATCH);
+                Prefilters.match(prefilter, "data", (int) event.getBlock().getData(), PrefilterType.STRING_MATCH);
+                Prefilters.match(prefilter, "totype", event.getToBlock().getTypeId(), PrefilterType.STRING_MATCH);
+                Prefilters.match(prefilter, "todata", (int) event.getToBlock().getData(), PrefilterType.STRING_MATCH);
+                Prefilters.match(prefilter, "toworld", event.getToBlock().getWorld().getName(), PrefilterType.STRING_MATCH);
+                Prefilters.match(prefilter, "face", event.getBlockFace().toString(), PrefilterType.STRING_MATCH);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public BindableEvent convert(CArray manualObject, Target t) {
+            return null;
+        }
+
+        @Override
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            if (e instanceof MCBlockFromToEvent) {
+                MCBlockFromToEvent event = (MCBlockFromToEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+                CArray block = new CArray(Target.UNKNOWN);
+                block.set("type", event.getBlock().getTypeId() + "", Target.UNKNOWN);
+                block.set("data", (int)event.getBlock().getData() + "", Target.UNKNOWN);
+                map.put("block", block);
+                map.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation()));
+                CArray toblock = new CArray(Target.UNKNOWN);
+                toblock.set("type", event.getToBlock().getTypeId() + "", Target.UNKNOWN);
+                toblock.set("data", (int)event.getToBlock().getData() + "", Target.UNKNOWN);
+                map.put("toblock", toblock);
+                map.put("tolocation", ObjectGenerator.GetGenerator().location(event.getToBlock().getLocation()));
+                map.put("face", new CString(event.getBlockFace().toString(), Target.UNKNOWN));
+                return map;
+            } else {
+                throw new EventException("Cannot convert e to MCBlockFromToEvent");
+            }
+        }
+
+        @Override
+        public Driver driver() {
+            return Driver.BLOCK_FROM_TO;
+        }
+
+        @Override
+        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+            if(event instanceof MCBlockFromToEvent) {
+                MCBlockFromToEvent e = (MCBlockFromToEvent) event;
+                if(key.equals("block") && value instanceof CArray) {
+                    CArray blockArray = (CArray) value;
+                    MCBlock block = e.getBlock();
+                    try {
+                        block.setTypeId(Integer.parseInt(blockArray.get("type", Target.UNKNOWN).val()));
+                    } catch (Exception ex) {
+                        throw new CREFormatException("blockArray is invalid", Target.UNKNOWN);
+                    }
+                    if(blockArray.containsKey("data")) {
+                        try {
+                            block.setData((byte) Integer.parseInt(blockArray.get("data", Target.UNKNOWN).val()));
+                        } catch (Exception ex) {
+                            throw new CREFormatException("blockArray is invalid", Target.UNKNOWN);
+                        }
+                    }
+                }
+                if(key.equals("toblock") && value instanceof CArray) {
+                    CArray blockArray = (CArray) value;
+                    MCBlock block = e.getToBlock();
+                    try {
+                        block.setTypeId(Integer.parseInt(blockArray.get("type", Target.UNKNOWN).val()));
+                    } catch (Exception ex) {
+                        throw new CREFormatException("blockArray is invalid", Target.UNKNOWN);
+                    }
+                    if(blockArray.containsKey("data")) {
+                        try {
+                            block.setData((byte) Integer.parseInt(blockArray.get("data", Target.UNKNOWN).val()));
+                        } catch (Exception ex) {
+                            throw new CREFormatException("blockArray is invalid", Target.UNKNOWN);
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+    }
 
     @api
     public static class sign_changed extends AbstractEvent {

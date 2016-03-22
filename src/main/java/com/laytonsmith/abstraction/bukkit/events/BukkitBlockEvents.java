@@ -24,24 +24,14 @@ import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCIgniteCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
-import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
-import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
-import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
-import com.laytonsmith.abstraction.events.MCBlockEvent;
-import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
-import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonExtendEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
-import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
-import com.laytonsmith.abstraction.events.MCNotePlayEvent;
-import com.laytonsmith.abstraction.events.MCSignChangeEvent;
+import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import org.bukkit.Bukkit;
 import org.bukkit.Note;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.*;
@@ -273,6 +263,38 @@ public class BukkitBlockEvents {
 
 			return null;
 		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockFromToEvent implements MCBlockFromToEvent {
+
+		BlockFromToEvent event;
+
+		public BukkitMCBlockFromToEvent(BlockFromToEvent e) {
+			event = e;
+		}
+
+		@Override
+		public Object _GetObject() {
+			return event;
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(event.getBlock());
+		}
+
+		@Override
+		public MCBlock getToBlock() { return new BukkitMCBlock(event.getToBlock()); }
+
+		@Override
+		public MCBlockFace getBlockFace() { return BukkitMCBlockFace.getConvertor().getAbstractedEnum(event.getFace()); }
+
+		@Override
+		public boolean isCancelled() { return event.isCancelled(); }
+
+		@Override
+		public void setCancelled(boolean cancelled) { event.setCancelled(cancelled); }
 	}
 
     @abstraction(type = Implementation.Type.BUKKIT)
