@@ -93,6 +93,12 @@ public class BukkitBlockListener implements Listener{
 		EventUtils.TriggerListener(Driver.BLOCK_BURN, "block_burn", bbe);
 	}
 
+	@EventHandler(priority=EventPriority.LOWEST)
+	public void onBlockFromTo(BlockFromToEvent e){
+		BukkitBlockEvents.BukkitMCBlockFromToEvent bbe = new BukkitBlockEvents.BukkitMCBlockFromToEvent(e);
+		EventUtils.TriggerListener(Driver.BLOCK_FROM_TO, "block_from_to", bbe);
+	}
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockIgnite(BlockIgniteEvent e) {
 		BukkitBlockEvents.BukkitMCBlockIgniteEvent bie = new BukkitBlockEvents.BukkitMCBlockIgniteEvent(e);
