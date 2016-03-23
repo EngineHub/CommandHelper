@@ -75,7 +75,7 @@ import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.TimedRegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
-//import org.mcstats.Metrics;
+import org.mcstats.Metrics;
 
 import java.io.File;
 import java.io.IOException;
@@ -324,20 +324,21 @@ public class CommandHelperPlugin extends JavaPlugin {
 		BukkitMCSound.build();
 
 		//Metrics
-		// MCStats no longer appears to be supported. If it comes back, this code can be re-added
-//		try {
-//			org.mcstats.Metrics m = new Metrics(this);
-//			m.addCustomData(new Metrics.Plotter("Player count") {
-//
-//				@Override
-//				public int getValue() {
-//					return Static.getServer().getOnlinePlayers().size();
-//				}
-//			});
-//			m.start();
-//		} catch (IOException e) {
-//			// Failed to submit the stats :-(
-//		}
+		try {
+			Metrics m = new Metrics(this);
+			Metrics.Graph graph = m.createGraph("Player count");
+			graph.addPlotter(new Metrics.Plotter("Player count") {
+
+				@Override
+				public int getValue() {
+					return Static.getServer().getOnlinePlayers().size();
+				}
+			});
+			m.addGraph(graph);
+			m.start();
+		} catch (IOException e) {
+			// Failed to submit the stats :-(
+		}
 
 		try {
 			//This may seem redundant, but on a /reload, we want to refresh these
@@ -377,11 +378,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 				return new Thread(r, "CommandHelperHostnameLookup-" + (++hostnameThreadPoolID));
 			}
 		});
-		for (MCPlayer p : Static.getServer().getOnlinePlayers()) {
+		for (Player p : getServer().getOnlinePlayers()) {
 			//Repopulate our cache for currently online players.
 			//New players that join later will get a lookup done
 			//on them at that time.
-			Static.HostnameCache(p);
+			Static.HostnameCache(p.getName(), p.getAddress().getHostName());
 		}
 
 		BukkitDirtyRegisteredListener.PlayDirty();

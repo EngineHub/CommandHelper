@@ -144,11 +144,10 @@
 			<url>http://files.zachsthings.com/repo/</url>
 		</repository-->
 
-		<!-- mcstats repo (this appears to no longer be working)
 		<repository>
 			<id>Plugin Metrics</id>
 			<url>http://repo.mcstats.org/content/repositories/public</url>
-		</repository>-->
+		</repository>
 
 		<!-- Java Mail -->
 		<repository>
@@ -342,12 +341,12 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- MCStats (this appears to no longer be working)
 		<dependency>
-			<groupId>org.mcstats</groupId>
+			<groupId>org.mcstats.bukkit</groupId>
 			<artifactId>metrics</artifactId>
-			<version>1.2-SNAPSHOT</version>
-		</dependency> -->
+			<version>R8-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
@@ -501,7 +500,7 @@
 									<include>com.jcraft:jsch:jar:*</include>
 									<include>org.apache.commons:commons-io:jar:*</include>
 									<include>org.xerial:sqlite-jdbc:jar:*</include>
-									<include>org.mcstats:metrics:jar:*</include>
+									<include>org.mcstats.bukkit:metrics:jar:*</include>
 									<include>net.sourceforge.jchardet:jchardet:jar:*</include>
 									<include>redis.clients:jedis:jar:*</include>
 									<include>mysql:mysql-connector-java:jar:*</include>
@@ -641,7 +640,7 @@
 									</includes>
 								</filter>
 								<filter>
-									<artifact>org.mcstats:metrics:jar:*</artifact>
+									<artifact>org.mcstats.bukkit:metrics:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
