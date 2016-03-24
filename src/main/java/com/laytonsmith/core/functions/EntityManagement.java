@@ -98,7 +98,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityTypeException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
-import com.laytonsmith.core.exceptions.CRE.CREException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
@@ -3694,10 +3693,6 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			boolean glide = Static.getBoolean(args[1]);
-
-			if (e.isOnGround()) {
-				throw new CREException("The specified entity cannot glide right now", t);
-			}
 
 			e.setGliding(glide);
 
