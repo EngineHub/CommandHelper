@@ -1675,7 +1675,7 @@ public class EntityEvents {
 		}
 
 		public String docs() {
-			return "{type: <macro> The entity type of the entity | id <macro> The entity id of the entity | player: <macro> The player triggering the event}"
+			return "{type: <macro> The entity type of the entity | id: <macro> The entity id of the entity | player: <macro> The player triggering the event}"
 					+ " This event is called when an entity toggles it's gliding state (Using Elytra)."
 					+ " {id: The entityID of the entity | type: The entity type of the entity |"
 					+ " gliding: true if the entity is entering gliding mode, false if the entity is leaving it |"
