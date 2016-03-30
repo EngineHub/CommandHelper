@@ -368,7 +368,8 @@ public class Minecraft {
 					+ ", and pigs can be " + StringUtils.Join(MCPigType.values(), ", ", ", or ", " or ") + "."
 					+ " Horses can have three different subTypes, the variant: " + StringUtils.Join(MCHorse.MCHorseVariant.values(), ", ", ", or ", " or ") + ","
 					+ " the color: " + StringUtils.Join(MCHorse.MCHorseColor.values(), ", ", ", or ", " or ") + ","
-					+ " and the pattern: " + StringUtils.Join(MCHorse.MCHorsePattern.values(), ", ", ", or ", " or ") + ".";
+					+ " and the pattern: " + StringUtils.Join(MCHorse.MCHorsePattern.values(), ", ", ", or ", " or ") + "."
+					+ " If qty is larger than 50, a RangeException will be thrown.";
 		}
 
 		@Override
@@ -405,7 +406,8 @@ public class Minecraft {
 			if (args.length > 1) {
 				qty = Static.getInt32(args[1], t);
 				if (qty > 50) {
-					throw new CRERangeException("A bit excessive, don't you think? Let's scale that back some, huh?", t);
+					throw new CRERangeException("A bit excessive to spawn more than 50 mobs, don't you think?"
+							+ " Let's scale that back some, huh?", t);
 				}
 			}
 			MCLocation l;
