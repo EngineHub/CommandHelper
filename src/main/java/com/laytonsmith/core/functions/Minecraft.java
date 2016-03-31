@@ -409,8 +409,8 @@ public class Minecraft {
 			if (args.length > 1) {
 				qty = Static.getInt32(args[1], t);
 				if (qty > spawn_mob.SPAWN_LIMIT) {
-					throw new CRERangeException("A bit excessive to spawn more than " + spawn_mob.SPAWN_LIMIT
-							+ " mobs, don't you think? Let's scale that back some, huh?", t);
+					throw new CRERangeException("You can not spawn more than " + spawn_mob.SPAWN_LIMIT
+							+ " mobs at once using the " + this.getName() + " function.", t);
 				}
 			}
 			MCLocation l;
