@@ -337,6 +337,9 @@ public class Minecraft {
 
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class spawn_mob extends AbstractFunction {
+		
+		// The max amount of mobs that can be spawned at once by this function.
+		private static final int SPAWN_LIMIT = 10000;
 
 		@Override
 		public String getName() {
@@ -369,7 +372,7 @@ public class Minecraft {
 					+ " Horses can have three different subTypes, the variant: " + StringUtils.Join(MCHorse.MCHorseVariant.values(), ", ", ", or ", " or ") + ","
 					+ " the color: " + StringUtils.Join(MCHorse.MCHorseColor.values(), ", ", ", or ", " or ") + ","
 					+ " and the pattern: " + StringUtils.Join(MCHorse.MCHorsePattern.values(), ", ", ", or ", " or ") + "."
-					+ " If qty is larger than 50, a RangeException will be thrown.";
+					+ " If qty is larger than " + spawn_mob.SPAWN_LIMIT + ", a RangeException will be thrown.";
 		}
 
 		@Override
@@ -405,9 +408,9 @@ public class Minecraft {
 			int qty = 1;
 			if (args.length > 1) {
 				qty = Static.getInt32(args[1], t);
-				if (qty > 50) {
-					throw new CRERangeException("A bit excessive to spawn more than 50 mobs, don't you think?"
-							+ " Let's scale that back some, huh?", t);
+				if (qty > spawn_mob.SPAWN_LIMIT) {
+					throw new CRERangeException("A bit excessive to spawn more than " + spawn_mob.SPAWN_LIMIT
+							+ " mobs, don't you think? Let's scale that back some, huh?", t);
 				}
 			}
 			MCLocation l;
