@@ -1,5 +1,10 @@
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
+import org.bukkit.event.Event;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
+
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityChangeBlockEvent;
@@ -9,6 +14,7 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEnti
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityExplodeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityInteractEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityToggleGlideEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCHangingBreakEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCItemDespawnEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCItemSpawnEvent;
@@ -23,10 +29,6 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
-import org.bukkit.event.Event;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 
 /**
  *
@@ -154,5 +156,11 @@ public class BukkitEntityListener implements Listener {
 	public void onHangingBreak(Event event) {
 		BukkitMCHangingBreakEvent hbe = new BukkitMCHangingBreakEvent(event);
 		EventUtils.TriggerListener(Driver.HANGING_BREAK, "hanging_break", hbe);
+	}
+
+	@EventIdentifier(event = Driver.ENTITY_TOGGLE_GLIDE, className = "org.bukkit.event.entity.EntityToggleGlideEvent")
+	public void onEntityToggleGlide(Event event) {
+		BukkitMCEntityToggleGlideEvent etge = new BukkitMCEntityToggleGlideEvent(event);
+		EventUtils.TriggerListener(Driver.ENTITY_TOGGLE_GLIDE, "entity_toggle_glide", etge);
 	}
 }

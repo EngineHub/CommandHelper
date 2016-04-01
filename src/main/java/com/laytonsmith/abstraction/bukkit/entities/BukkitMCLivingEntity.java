@@ -1,5 +1,21 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.bukkit.block.Block;
+import org.bukkit.entity.Creature;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.BlockIterator;
+
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
@@ -15,22 +31,6 @@ import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Creature;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.BlockIterator;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -370,5 +370,15 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	@Override
 	public void setLeashHolder(MCEntity holder) {
 		le.setLeashHolder(holder == null ? null : ((BukkitMCEntity) holder).getHandle());
+	}
+
+	@Override
+	public boolean isGliding() {
+		return le.isGliding();
+	}
+
+	@Override
+	public void setGliding(Boolean glide) {
+		le.setGliding(glide);
 	}
 }
