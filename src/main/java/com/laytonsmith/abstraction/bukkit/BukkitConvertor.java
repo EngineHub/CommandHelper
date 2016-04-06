@@ -304,14 +304,14 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public void Startup(CommandHelperPlugin chp) {
-		chp.registerEvents((Listener) BlockListener);
-		chp.registerEventsDynamic((Listener) EntityListener);
-		chp.registerEvents((Listener) InventoryListener);
-		chp.registerEvents((Listener) PlayerListener);
-		chp.registerEvents((Listener) ServerListener);
-		chp.registerEvents((Listener) VehicleListener);
-		chp.registerEvents((Listener) WeatherListener);
-		chp.registerEvents((Listener) WorldListener);
+		chp.registerEvents(BlockListener);
+		chp.registerEventsDynamic(EntityListener);
+		chp.registerEventsDynamic(InventoryListener);
+		chp.registerEvents(PlayerListener);
+		chp.registerEvents(ServerListener);
+		chp.registerEvents(VehicleListener);
+		chp.registerEvents(WeatherListener);
+		chp.registerEvents(WorldListener);
 	}
 
 	@Override
