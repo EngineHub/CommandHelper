@@ -56,8 +56,7 @@ public class ServerEvents {
 					+ " | maxplayers: The number of slots on the server | motd: The message a player is shown on the serverlist"
 					+ " | list: The list of connected players}"
 					+ " {motd | maxplayers | list: It is only possible to remove players, the added players"
-					+ " will be ignored, moreover, add offline players will throw a PlayerOfflineException each time the event is triggered."
-					+ " This will also change the player count.}"
+					+ " will be ignored. This will also change the player count.}"
 					+ " {}";
 		}
 
@@ -118,11 +117,27 @@ public class ServerEvents {
 						e.setMaxPlayers(Static.getInt32(value, Target.UNKNOWN));
 						return true;
 					case "list":
-						Set<MCPlayer> players = new HashSet<>();
-						for (Construct construct : ArgumentValidation.getArray(value, Target.UNKNOWN).asList()) {
-							players.add(Static.GetPlayer(construct, Target.UNKNOWN));
+						// Modifies the player list. The new list will be the intersection of the original
+						// and the given list. Names and UUID's outside this intersection will simply be ignored.
+						Set<MCPlayer> modifiedPlayers = new HashSet<>();
+						List<Construct> passedList = ArgumentValidation.getArray(value, Target.UNKNOWN).asList();
+						for(MCPlayer player : e.getPlayers()) {
+							for(Construct construct : passedList) {
+								String playerStr = construct.val();
+								if(playerStr.length() > 0 && playerStr.length() <= 16) { // "player" is a name.
+									if(playerStr.equalsIgnoreCase(player.getName())) {
+										modifiedPlayers.add(player);
+										break;
+									}
+								} else { // "player" is the UUID of the player.
+									if(playerStr.equalsIgnoreCase(player.getUniqueID().toString())) {
+										modifiedPlayers.add(player);
+										break;
+									}
+								}
+							}
 						}
-						e.setPlayers(players);
+						e.setPlayers(modifiedPlayers);
 						return true;
 				}
 			}

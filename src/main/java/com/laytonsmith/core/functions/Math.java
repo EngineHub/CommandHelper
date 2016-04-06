@@ -382,17 +382,20 @@ public class Math {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			long arg1 = Static.getInt(args[0], t);
 			long arg2 = Static.getInt(args[1], t);
+			if(arg2 == 0) {
+				throw new CRERangeException("Modulo by 0!", t);
+			}
 			return new CInt(arg1 % arg2, t);
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 		@Override
 		public String docs() {
-			return "int {x, n} Returns x modulo n. Operator syntax is also supported: @x % @n";
+			return "int {x, n} Returns x modulo n. Throws a RangeException when n is 0. Operator syntax is also supported: @x % @n";
 		}
 
 		@Override

@@ -44,6 +44,7 @@ import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
 import com.laytonsmith.abstraction.events.MCEntityInteractEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
+import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
 import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
 import com.laytonsmith.abstraction.events.MCItemSpawnEvent;
@@ -69,6 +70,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
@@ -768,5 +770,35 @@ public class BukkitEntityEvents {
 				return null;
 			}
 		}
+	}
+	
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCEntityToggleGlideEvent implements MCEntityToggleGlideEvent {
+		EntityToggleGlideEvent e;
+
+		public BukkitMCEntityToggleGlideEvent(Event e) {
+			this.e = (EntityToggleGlideEvent) e;
+		}
+
+		@Override
+		public Object _GetObject() {
+			return e;
+		}
+
+		@Override
+		public boolean isGliding() {
+			return e.isGliding();
+		}
+
+		@Override
+		public MCEntity getEntity() {
+			return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity());
+		}
+
+		@Override
+		public MCEntityType getEntityType() {
+			return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity()).getType();
+		}
+
 	}
 }

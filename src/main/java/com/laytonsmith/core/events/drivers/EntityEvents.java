@@ -27,6 +27,7 @@ import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
 import com.laytonsmith.abstraction.events.MCEntityInteractEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
+import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
 import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
 import com.laytonsmith.abstraction.events.MCItemSpawnEvent;
@@ -41,6 +42,7 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -59,6 +61,7 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import org.bukkit.entity.EntityType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1661,6 +1664,76 @@ public class EntityEvents {
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			return false;
+		}
+	}
+
+	@api
+	public static class entity_toggle_glide extends AbstractEvent {
+		public String getName() {
+			return "entity_toggle_glide";
+		}
+
+		public String docs() {
+			return "{type: <macro> The entity type of the entity | id: <macro> The entity id of the entity | player: <macro> The player triggering the event}"
+					+ " This event is called when an entity toggles it's gliding state (Using Elytra)."
+					+ " {id: The entityID of the entity | type: The entity type of the entity |"
+					+ " gliding: true if the entity is entering gliding mode, false if the entity is leaving it |"
+					+ " player: If the entity is a player, this will contain their name, otherwise null}" + " {}"
+					+ " {}";
+		}
+
+		public boolean matches(Map<String, Construct> filter, BindableEvent e) throws PrefilterNonMatchException {
+			if (e instanceof MCEntityToggleGlideEvent) {
+				MCEntityToggleGlideEvent evt = (MCEntityToggleGlideEvent) e;
+
+				Prefilters.match(filter, "type", evt.getEntityType().name(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(filter, "id", evt.getEntity().getUniqueId().toString(),
+						Prefilters.PrefilterType.MACRO);
+
+				if (evt.getEntityType().equals(EntityType.PLAYER)) {
+					Prefilters.match(filter, "player", evt.getEntity().getCustomName(), Prefilters.PrefilterType.MACRO);
+				}
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if (e instanceof MCEntityToggleGlideEvent) {
+				MCEntityToggleGlideEvent evt = (MCEntityToggleGlideEvent) e;
+				Map<String, Construct> ret = evaluate_helper(evt);
+				Target t = Target.UNKNOWN;
+
+				ret.put("gliding", CBoolean.GenerateCBoolean(evt.isGliding(), t));
+				ret.put("id", new CString(evt.getEntity().getUniqueId().toString(), t));
+				ret.put("type", new CString(evt.getEntityType().name(), t));
+
+				if (evt.getEntity() instanceof MCPlayer) {
+					ret.put("player", new CString(((MCPlayer) evt.getEntity()).getName(), t));
+				} else {
+					ret.put("player", CNull.NULL);
+				}
+
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCEntityToggleGlideEvent");
+			}
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) throws ConfigRuntimeException {
+			return false;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		public Driver driver() {
+			return Driver.ENTITY_TOGGLE_GLIDE;
 		}
 	}
 }

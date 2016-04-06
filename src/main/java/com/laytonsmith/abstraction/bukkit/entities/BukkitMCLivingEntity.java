@@ -15,7 +15,6 @@ import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
@@ -370,5 +369,15 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	@Override
 	public void setLeashHolder(MCEntity holder) {
 		le.setLeashHolder(holder == null ? null : ((BukkitMCEntity) holder).getHandle());
+	}
+
+	@Override
+	public boolean isGliding() {
+		return le.isGliding();
+	}
+
+	@Override
+	public void setGliding(Boolean glide) {
+		le.setGliding(glide);
 	}
 }

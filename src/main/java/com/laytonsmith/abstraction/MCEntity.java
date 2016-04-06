@@ -99,4 +99,8 @@ public interface MCEntity extends MCMetadatable {
 	public void setCustomNameVisible(boolean visible);
 
 	public boolean isCustomNameVisible();
+	
+	public boolean isGlowing();
+	
+	public void setGlowing(Boolean glow);
 }
