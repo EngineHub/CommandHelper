@@ -130,7 +130,7 @@ public class CommandHelperListener implements Listener {
 
     @EventHandler(priority= EventPriority.NORMAL)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        Static.HostnameCache(event.getPlayer().getName(), event.getPlayer().getAddress().getHostName());
+        Static.HostnameCache(event.getPlayer().getName(), event.getPlayer().getAddress());
     }
     
     @EventHandler(priority= EventPriority.NORMAL)

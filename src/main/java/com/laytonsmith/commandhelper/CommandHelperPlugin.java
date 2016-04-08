@@ -382,7 +382,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			//Repopulate our cache for currently online players.
 			//New players that join later will get a lookup done
 			//on them at that time.
-			Static.HostnameCache(p.getName(), p.getAddress().getHostName());
+			Static.HostnameCache(p.getName(), p.getAddress());
 		}
 
 		BukkitDirtyRegisteredListener.PlayDirty();

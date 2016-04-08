@@ -62,6 +62,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Array;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -1218,11 +1219,11 @@ public final class Static {
 		return injectedPlayers.remove(name);
 	}
 
-	public static void HostnameCache(final String name, final String hostname) {
+	public static void HostnameCache(final String name, final InetSocketAddress address) {
 		CommandHelperPlugin.hostnameLookupThreadPool.submit(new Runnable() {
 			@Override
 			public void run() {
-				CommandHelperPlugin.hostnameLookupCache.put(name, hostname);
+				CommandHelperPlugin.hostnameLookupCache.put(name, address.getHostName());
 			}
 		});
 	}
