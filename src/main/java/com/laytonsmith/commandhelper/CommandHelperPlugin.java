@@ -443,21 +443,33 @@ public class CommandHelperPlugin extends JavaPlugin {
 			EventIdentifier identifier = method.getAnnotation(EventIdentifier.class);
 			EventHandler defaultHandler = method.getAnnotation(EventHandler.class);
 			EventPriority priority = EventPriority.LOWEST;
-			if (identifier == null || !identifier.event().existsInCurrent()) {
-				continue;
-			}
+			Class<? extends Event> eventClass;
 			if (defaultHandler != null) {
 				priority = defaultHandler.priority();
 			}
-			Class<? extends Event> eventClass = null;
-			try {
-				eventClass = (Class<? extends Event>) Class.forName(identifier.className());
-			} catch (ClassNotFoundException | ClassCastException e) {
-				CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
-								+ " because the class " + identifier.className() + " could not be found."
-								+ " This problem is not expected to occur, so please report it on the bug tracker if it does.",
-						Target.UNKNOWN);
-				continue;
+			if (identifier == null) {
+				if (defaultHandler != null && method.getParameterTypes().length == 1) {
+					try {
+						eventClass = (Class<? extends Event>) method.getParameterTypes()[0];
+					} catch (ClassCastException e) {
+						continue;
+					}
+				} else {
+					continue;
+				}
+			} else {
+				if (!identifier.event().existsInCurrent()) {
+					continue;
+				}
+				try {
+					eventClass = (Class<? extends Event>) Class.forName(identifier.className());
+				} catch (ClassNotFoundException | ClassCastException e) {
+					CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
+							+ " because the class " + identifier.className() + " could not be found."
+							+ " This problem is not expected to occur, so please report it on the bug"
+							+ " tracker if it does.", Target.UNKNOWN);
+					continue;
+				}
 			}
 			HandlerList handler;
 			try {
