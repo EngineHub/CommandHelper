@@ -28,6 +28,7 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -140,6 +141,18 @@ public final class Static {
 	 */
 	public static <T extends Construct> T getObject(Construct construct, Target t, Class<T> clazz) {
 		return ArgumentValidation.getObject(construct, t, clazz);
+	}
+
+	/**
+	 * Returns a CNumber construct (CInt or CDouble) from any java number.
+	 * @param number The java number to convert.
+	 * @param t The code target.
+	 * @return A construct equivalent to the given java number, whose the type is the better to represent it.
+	 */
+	public static CNumber getNumber(Number number, Target t) {
+		long longValue = number.longValue();
+		double doubleValue = number.doubleValue();
+		return longValue == doubleValue ? new CInt(longValue, t) : new CDouble(doubleValue, t);
 	}
 
 	/**

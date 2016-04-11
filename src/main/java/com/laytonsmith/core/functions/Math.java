@@ -7,6 +7,7 @@ import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -1842,6 +1843,162 @@ public class Math {
 			return EnumSet.of(
 						OptimizationOption.CONSTANT_OFFLINE,
 						OptimizationOption.CACHE_RETURN
+			);
+		}
+	}
+
+	@api
+	public static class sinh extends AbstractFunction implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "sinh";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "double {number} Returns the hyperbolic sine of the number";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			return Static.getNumber(java.lang.Math.sinh(ArgumentValidation.getNumber(args[0], t)), t);
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
+	}
+
+	@api
+	public static class cosh extends AbstractFunction implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "cosh";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "double {number} Returns the hyperbolic cosine of the number";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			return Static.getNumber(java.lang.Math.cosh(ArgumentValidation.getNumber(args[0], t)), t);
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						Optimizable.OptimizationOption.CONSTANT_OFFLINE,
+						Optimizable.OptimizationOption.CACHE_RETURN
+			);
+		}
+	}
+
+	@api
+	public static class tanh extends AbstractFunction implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "tanh";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "double {number} Returns the hyperbolic tangent of the number";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			return Static.getNumber(java.lang.Math.tanh(ArgumentValidation.getNumber(args[0], t)), t);
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						Optimizable.OptimizationOption.CONSTANT_OFFLINE,
+						Optimizable.OptimizationOption.CACHE_RETURN
 			);
 		}
 	}
