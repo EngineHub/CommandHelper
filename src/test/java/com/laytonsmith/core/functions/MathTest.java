@@ -239,8 +239,8 @@ public class MathTest {
 
 	@Test
 	public void testRound() throws Exception {
-		assertEquals("4", SRun("round(4.4)", null));
-		assertEquals("5", SRun("round(4.5)", null));
+		assertEquals("4.0", SRun("round(4.4)", null));
+		assertEquals("5.0", SRun("round(4.5)", null));
 		assertEquals("4.6", SRun("round(4.55, 1)", null));
 	}
 
