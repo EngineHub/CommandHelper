@@ -595,7 +595,7 @@ public class VehicleEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return CHVersion.V3_3_2;
 		}
 	}
 }
