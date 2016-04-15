@@ -110,6 +110,7 @@ public enum Driver {
 	VEHICLE_ENTER,
 	VEHICLE_LEAVE,
 	VEHICLE_MOVE,
+	VEHICLE_DESTROY,
 
 	/**
 	 * Weather events
