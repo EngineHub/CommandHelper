@@ -1045,8 +1045,8 @@ public class EntityManagement {
 					+ " if no arguments are passed. If no entity type is specified, it defaults to a fireball."
 					+ " If provide three arguments, with target (entityID, player name or location array), entity will"
 					+ " shoot to target location. Last, fourth argument, is double and specifies the speed"
-					+ " of projectile. Returns the EntityID of the entity. Valid entities types: "
-					+ StringUtils.Join(MCEntityType.types(), ", ", ", or ", " or ");
+					+ " of projectile. Returns the EntityID of the entity. Valid projectile types: "
+					+ StringUtils.Join(MCProjectileType.values(), ", ", ", or ", " or ");
 		}
 		
 		@Override
