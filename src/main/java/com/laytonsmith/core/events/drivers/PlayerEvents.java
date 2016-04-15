@@ -873,7 +873,7 @@ public class PlayerEvents {
                     return false;
                 }
                 
-				if(h == null) {
+				if(h != null) {
 					if(h == MCEquipmentSlot.WEAPON) {
 						hand = new CString("main_hand", Target.UNKNOWN);
 					} else {
