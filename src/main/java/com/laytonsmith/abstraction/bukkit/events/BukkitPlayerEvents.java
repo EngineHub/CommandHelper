@@ -551,12 +551,21 @@ public class BukkitPlayerEvents {
             return new BukkitMCItemStack(pie.getItem());
         }
 		
+		/**
+		 * @since Bukkit 1.9
+		 * @throws UnsupportedOperationException When this method does not exist in the current Bukkit version.
+		 */
 		@Override
-		public MCEquipmentSlot getHand() {
-		    if(pie.getHand() == EquipmentSlot.HAND) {
-		        return MCEquipmentSlot.WEAPON;
-		    }
-		    return MCEquipmentSlot.OFF_HAND;
+		public MCEquipmentSlot getHand() throws UnsupportedOperationException {
+			try {
+				if(pie.getHand() == EquipmentSlot.HAND) {
+					return MCEquipmentSlot.WEAPON;
+				}
+				return MCEquipmentSlot.OFF_HAND;
+			} catch(NoSuchMethodError e) {
+				throw new UnsupportedOperationException(
+						"getHand() method does not exist in Bukkit version: " + Bukkit.getBukkitVersion());
+			}
 		}
     }
 
