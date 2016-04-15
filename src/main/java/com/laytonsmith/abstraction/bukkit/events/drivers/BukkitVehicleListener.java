@@ -18,6 +18,7 @@ import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
+import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.util.Vector;
 
 import java.util.Map;
@@ -86,5 +87,11 @@ public class BukkitVehicleListener implements Listener{
 				}
 			}
 		}
+	}
+
+	@EventHandler(priority= EventPriority.LOWEST)
+	public void onVehicleDestroy(VehicleDestroyEvent event) {
+		BukkitMCVehicleDestroyEvent vee = new BukkitMCVehicleDestroyEvent(event);
+		EventUtils.TriggerListener(Driver.VEHICLE_DESTROY, "vehicle_destroy", vee);
 	}
 }
