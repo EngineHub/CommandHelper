@@ -1391,7 +1391,7 @@ public class ArrayHandling {
 			CArray ca = (CArray) args[0];
 			String glue = " ";
 			if (args.length == 2) {
-				glue = args[1].val();
+				glue = Static.getPrimitive(args[1], t).val();
 			}
 			boolean first = true;
 			for (Construct key : ca.keySet()) {
