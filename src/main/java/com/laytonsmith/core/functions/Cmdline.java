@@ -29,7 +29,6 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
-import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.CRE.CREShellException;
@@ -1672,6 +1671,51 @@ public class Cmdline {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+	}
+
+	@api
+	public static class in_cmdline_mode extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CBoolean.GenerateCBoolean(Static.InCmdLine(environment), t);
+		}
+
+		@Override
+		public String getName() {
+			return "in_cmdline_mode";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {} Returns true if the environment is in cmdline mode. False otherwise.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
 		}
 
 	}
