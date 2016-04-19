@@ -29,6 +29,7 @@ import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CNumber;
+import com.laytonsmith.core.constructs.CPrimitive;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -248,7 +249,23 @@ public final class Static {
 	public static boolean getBoolean(Construct c) {
 		return ArgumentValidation.getBoolean(c, Target.UNKNOWN);
 	}
+	
+	/**
+	 * Returns a primitive from any given construct.
+	 * @param c
+	 * @param t
+	 * @return 
+	 */
+	public static CPrimitive getPrimitive(Construct c, Target t){
+		return ArgumentValidation.getObject(c, t, CPrimitive.class);
+	}
 
+	/**
+	 * Returns a CByteArray from any given construct.
+	 * @param c
+	 * @param t
+	 * @return 
+	 */
 	public static CByteArray getByteArray(Construct c, Target t) {
 		return ArgumentValidation.getByteArray(c, t);
 	}
