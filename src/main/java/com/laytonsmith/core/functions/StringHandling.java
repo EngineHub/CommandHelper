@@ -866,7 +866,7 @@ public class StringHandling {
                 }
                 
                 @Override
-                public Construct exec(Target t, Environment env, Construct... args) {
+                public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
                         String teststring = args[0].nval();
                         String keyword = args[1].nval();
                         Static.AssertNonCNull(t, args);
@@ -916,7 +916,7 @@ public class StringHandling {
                 }
                 
                 @Override
-                public Construct exec(Target t, Environment env, Construct... args) {
+                public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
                         String teststring = args[0].nval();
                         String keyword = args[1].nval();
                         Static.AssertNonCNull(t, args);
