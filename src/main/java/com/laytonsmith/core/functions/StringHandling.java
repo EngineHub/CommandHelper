@@ -846,7 +846,7 @@ public class StringHandling {
 	}
 
 	@api
-	public static class char_is_uppercase extends AbstractFunction {
+	public static class char_is_uppercase extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -865,15 +865,26 @@ public class StringHandling {
 				    args[0].typeof() + " was found.", t);
 			}
 			String text = args[0].nval();
-			
 			// Enforce the fact we are only taking the first character here
 			// Do not let the user pass an entire string. Only a single character.
 			if(text.length() > 1) {
-			    throw new CRECastException("Got " + text + " instead of expected character.", t);
+			    throw new CRECastException("Got \"" + text + "\" instead of expected character.", t);
 			}
 			
 			char check = text.charAt(0);
+			
+			if(!Character.isLetter(check)) {
+			    throw new CRECastException("Got \"" + text + "\" instead of alphabetical character.", t);
+			}
+			
 			return CBoolean.get(Character.isUpperCase(check));
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN);
 		}
 
 		@Override
@@ -899,6 +910,14 @@ public class StringHandling {
 		@Override
 		public CHVersion since() {
 		    return CHVersion.V3_3_2;
+		}
+		
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("", "char_is_uppercase('a')"),
+						new ExampleScript("", "char_is_uppercase('D')"),};
 		}
 	}
 
