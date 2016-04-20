@@ -15,6 +15,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
@@ -844,6 +845,107 @@ public class StringHandling {
 		}
 	}
 
+        @api
+        @seealso({StringHandling.string_ends_with.class})
+        public static class string_starts_with extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENullPointerException.class};
+		}
+
+                @Override
+                public String getName() {
+                    return "string_starts_with";
+                }
+                
+                @Override
+                public String docs() {
+                    return "boolean {teststring, keyword} Determines if the provided teststring starts with the provided keyword. This could be used to find"
+                                      + " the prefix of a line, for instance.";
+                }
+                
+                @Override
+                public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+                        String teststring = args[0].nval();
+                        String keyword = args[1].nval();
+                        Static.AssertNonCNull(t, args);
+                        boolean ret = teststring.startsWith(keyword);
+                        
+                        return CBoolean.get(ret);
+                }
+                
+                @Override
+                public Integer[] numArgs() {
+                        return new Integer[]{2};
+                }
+                
+                @Override
+                public CHVersion since() {
+                      return CHVersion.V3_3_2;
+                }
+                
+                @Override
+                public boolean isRestricted() {
+                     return false;
+                }
+                
+                @Override
+                public Boolean runAsync() {
+                    return null;
+                }
+        }
+
+        @api
+        @seealso({StringHandling.string_starts_with.class})
+        public static class string_ends_with extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENullPointerException.class};
+		}
+
+                @Override
+                public String getName() {
+                    return "string_ends_with";
+                }
+                
+                @Override
+                public String docs() {
+                    return "boolean {teststring, keyword} Determines if the provided teststring ends with the provided keyword.";
+                }
+                
+                @Override
+                public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+                        String teststring = args[0].nval();
+                        String keyword = args[1].nval();
+                        Static.AssertNonCNull(t, args);
+                        boolean ret = teststring.endsWith(keyword);
+                        
+                        return CBoolean.get(ret);
+                }
+                
+                @Override
+                public Integer[] numArgs() {
+                        return new Integer[]{2};
+                }
+                
+                @Override
+                public CHVersion since() {
+                      return CHVersion.V3_3_2;
+                }
+                
+                @Override
+                public boolean isRestricted() {
+                     return false;
+                }
+                
+                @Override
+                public Boolean runAsync() {
+                    return null;
+                }
+        }
+        
 	@api
 	public static class string_position extends AbstractFunction implements Optimizable {
 
