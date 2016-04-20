@@ -861,7 +861,7 @@ public class StringHandling {
                 
                 @Override
                 public String docs() {
-                    return "string {teststring, keyword} Determines if the provided string starts with the provided keyword. This could be used to find"
+                    return "boolean {teststring, keyword} Determines if the provided teststring starts with the provided keyword. This could be used to find"
                                       + " the prefix of a line, for instance.";
                 }
                 
@@ -912,7 +912,7 @@ public class StringHandling {
                 
                 @Override
                 public String docs() {
-                    return "string {teststring, keyword} Determines if the provided string ends with the provided keyword.";
+                    return "boolean {teststring, keyword} Determines if the provided teststring ends with the provided keyword.";
                 }
                 
                 @Override
