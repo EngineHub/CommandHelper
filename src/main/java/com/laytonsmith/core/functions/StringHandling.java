@@ -15,6 +15,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
@@ -841,6 +842,63 @@ public class StringHandling {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
 					OptimizationOption.CACHE_RETURN);
+		}
+	}
+
+	@api
+	public static class char_is_uppercase extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class};
+		}
+
+		@Override
+		public String getName() {
+			return "char_is_uppercase";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			if(!(args[0].nval() instanceof String)) {
+			    throw new CREFormatException(this.getName() + " expects a string as first argument, but type " +
+				    args[0].typeof() + " was found.", t);
+			}
+			String text = args[0].nval();
+			
+			// Enforce the fact we are only taking the first character here
+			// Do not let the user pass an entire string. Only a single character.
+			if(text.length() > 1) {
+			    throw new CRECastException("Got " + text + " instead of expected character.", t);
+			}
+			
+			char check = text.charAt(0);
+			return CBoolean.get(Character.isUpperCase(check));
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {char} Determines if the character provided is uppercase or not.";
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public CHVersion since() {
+		    return CHVersion.V3_3_2;
 		}
 	}
 
