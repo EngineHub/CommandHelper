@@ -4,6 +4,8 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.testing.C;
@@ -243,6 +245,60 @@ public class StringHandlingTest {
 		assertEquals("a", SRun("char_from_unicode(unicode_from_char('a'))", null));
 	}
 
+	@Test
+	public void testCharIsUppercase() throws Exception {
+		assertEquals("true", SRun("char_is_uppercase('M')", null));
+		assertEquals("false", SRun("char_is_uppercase('m')", null));
+
+		try {
+			SRun("char_is_uppercase('magic')", null);
+			fail("Expected char_is_uppercase('magic') to throw an exception.");
+		}
+		catch (ConfigCompileException e) {
+			//pass
+		}
+
+		try {
+			SRun("char_is_uppercase('1')", null);
+			fail("Expected char_is_uppercase('1') to throw an exception.");
+		}
+		catch (ConfigCompileException e) {
+			//pass
+		}
+
+		try {
+			SRun("char_is_uppercase('!')", null);
+			fail("Expected char_is_uppercase('!') to throw an exception.");
+		}
+		catch (ConfigCompileException e) {
+			//pass
+		}
+		
+		try {
+			SRun("char_is_uppercase(1)", null);
+			fail("Expected char_is_uppercase(1) to throw an exception.");
+		}
+		catch (ConfigCompileException e) {
+			//pass
+		}
+		
+		try {
+			SRun("char_is_uppercase(dyn('stuff'))", null);
+			fail("Expected char_is_uppercase(dyn('stuff')) to throw an exception.");
+		}
+		catch (CREFormatException e) {
+			//pass
+		}
+                
+                try {
+                        SRun("char_is_uppercase('')", null);
+                        fail("Expected char_is_uppercase('') to throw an exception.");
+                }
+                catch (ConfigCompileException e) {
+                        //pass
+                }
+	}
+	
 	//Double string tests
 	@Test
 	public void testDoubleStringWithNoControlCharacters() throws Exception {
