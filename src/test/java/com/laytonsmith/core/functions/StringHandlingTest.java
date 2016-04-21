@@ -254,7 +254,7 @@ public class StringHandlingTest {
 			SRun("char_is_uppercase('magic')", null);
 			fail("Expected char_is_uppercase('magic') to throw an exception.");
 		}
-		catch (ConfigCompileException | CRECastException e) {
+		catch (ConfigCompileException e) {
 			//pass
 		}
 
@@ -262,7 +262,7 @@ public class StringHandlingTest {
 			SRun("char_is_uppercase('1')", null);
 			fail("Expected char_is_uppercase('1') to throw an exception.");
 		}
-		catch (ConfigCompileException | CRECastException e) {
+		catch (ConfigCompileException e) {
 			//pass
 		}
 
@@ -270,7 +270,7 @@ public class StringHandlingTest {
 			SRun("char_is_uppercase('!')", null);
 			fail("Expected char_is_uppercase('!') to throw an exception.");
 		}
-		catch (ConfigCompileException | CRECastException e) {
+		catch (ConfigCompileException e) {
 			//pass
 		}
 		
@@ -278,7 +278,7 @@ public class StringHandlingTest {
 			SRun("char_is_uppercase(1)", null);
 			fail("Expected char_is_uppercase(1) to throw an exception.");
 		}
-		catch (ConfigCompileException | CREFormatException | CRECastException e) {
+		catch (ConfigCompileException e) {
 			//pass
 		}
 		
@@ -286,9 +286,17 @@ public class StringHandlingTest {
 			SRun("char_is_uppercase(dyn('stuff'))", null);
 			fail("Expected char_is_uppercase(dyn('stuff')) to throw an exception.");
 		}
-		catch (ConfigCompileException | CRECastException e) {
+		catch (CREFormatException e) {
 			//pass
 		}
+                
+                try {
+                        SRun("char_is_uppercase('')", null);
+                        fail("Expected char_is_uppercase('') to throw an exception.");
+                }
+                catch (ConfigCompileException e) {
+                        //pass
+                }
 	}
 	
 	//Double string tests

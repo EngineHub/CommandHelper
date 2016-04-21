@@ -861,14 +861,14 @@ public class StringHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if(!(args[0].nval() instanceof String)) {
-			    throw new CREFormatException(this.getName() + " expects a string as first argument, but type " +
+			    throw new CRECastException(this.getName() + " expects a string as first argument, but type " +
 				    args[0].typeof() + " was found.", t);
 			}
 			String text = args[0].nval();
 			// Enforce the fact we are only taking the first character here
-			// Do not let the user pass an entire string. Only a single character.
-			if(text.length() > 1) {
-			    throw new CRECastException("Got \"" + text + "\" instead of expected character.", t);
+			// Do not let the user pass an entire string (or an empty string, d'oh). Only a single character.
+			if(text.length() != 1) {
+			    throw new CREFormatException("Got \"" + text + "\" instead of expected character.", t);
 			}
 			
 			char check = text.charAt(0);
@@ -894,7 +894,8 @@ public class StringHandling {
 
 		@Override
 		public String docs() {
-			return "boolean {char} Determines if the character provided is uppercase or not.";
+			return "boolean {char} Determines if the character provided is uppercase or not. The string must be exactly 1 character long and"
+                                    + " a letter, otherwise a FormatException is thrown.";
 		}
 
 		@Override
@@ -916,7 +917,7 @@ public class StringHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-						new ExampleScript("", "char_is_uppercase('a')"),
+						new ExampleScript("Basic usage", "char_is_uppercase('a')"),
 						new ExampleScript("", "char_is_uppercase('D')"),};
 		}
 	}
