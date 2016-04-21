@@ -975,7 +975,7 @@ public class StringHandling {
 			char check = text.charAt(0);
 			
 			if(!Character.isLetter(check)) {
-			    throw new CRECastException("Got \"" + text + "\" instead of alphabetical character.", t);
+			    throw new CREFormatException("Got \"" + text + "\" instead of alphabetical character.", t);
 			}
 			
 			return CBoolean.get(Character.isUpperCase(check));
@@ -1019,7 +1019,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 						new ExampleScript("Basic usage", "char_is_uppercase('a')"),
-						new ExampleScript("", "char_is_uppercase('D')"),};
+						new ExampleScript("Basic usage", "char_is_uppercase('D')"),};
 		}
 	}
         
