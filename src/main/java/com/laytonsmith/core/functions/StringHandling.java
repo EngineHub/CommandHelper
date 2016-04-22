@@ -847,7 +847,7 @@ public class StringHandling {
 
         @api
         @seealso({StringHandling.string_ends_with.class})
-        public static class string_starts_with extends AbstractFunction {
+        public static class string_starts_with extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -862,18 +862,28 @@ public class StringHandling {
                 @Override
                 public String docs() {
                     return "boolean {teststring, keyword} Determines if the provided teststring starts with the provided keyword. This could be used to find"
-                                      + " the prefix of a line, for instance.";
+                                    + " the prefix of a line, for instance. Note that this will cast both arguments to strings. This means that the boolean"
+                                    + " true will match the string 'true' or the integer 1 will match the string '1'. If an empty string is provided for"
+                                    + " the keyword, it will always return true.";
                 }
                 
                 @Override
-                public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+                public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {                        
+                        Static.AssertNonCNull(t, args);
+                        
                         String teststring = args[0].nval();
                         String keyword = args[1].nval();
-                        Static.AssertNonCNull(t, args);
                         boolean ret = teststring.startsWith(keyword);
                         
                         return CBoolean.get(ret);
                 }
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("Basic usage", "string_starts_with('[ERROR] Bad message here!', '[ERROR]')"),
+						new ExampleScript("Basic usage", "string_starts_with('Potato with cheese', 'cheese')")};
+		}
                 
                 @Override
                 public Integer[] numArgs() {
@@ -894,11 +904,19 @@ public class StringHandling {
                 public Boolean runAsync() {
                     return null;
                 }
+                
+                @Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+                                        OptimizationOption.NO_SIDE_EFFECTS);
+		}
         }
 
         @api
         @seealso({StringHandling.string_starts_with.class})
-        public static class string_ends_with extends AbstractFunction {
+        public static class string_ends_with extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -912,18 +930,28 @@ public class StringHandling {
                 
                 @Override
                 public String docs() {
-                    return "boolean {teststring, keyword} Determines if the provided teststring ends with the provided keyword.";
+                    return "boolean {teststring, keyword} Determines if the provided teststring ends with the provided keyword. Note that this will"
+                                    + " cast both arguments to strings. This means that the boolean true will match the string 'true' or the integer 1 will"
+                                    + " match the string '1'. If an empty string is provided for the keyword, it will always return true.";
                 }
                 
                 @Override
-                public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+                public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {                        
+                        Static.AssertNonCNull(t, args);
+                        
                         String teststring = args[0].nval();
                         String keyword = args[1].nval();
-                        Static.AssertNonCNull(t, args);
                         boolean ret = teststring.endsWith(keyword);
                         
                         return CBoolean.get(ret);
                 }
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("Basic usage", "string_ends_with('[ERROR] Bad message here!!', '!')"),
+						new ExampleScript("Basic usage", "string_ends_with('Spaghetti and cheese', 'Spaghetti')")};
+		}
                 
                 @Override
                 public Integer[] numArgs() {
@@ -944,6 +972,14 @@ public class StringHandling {
                 public Boolean runAsync() {
                     return null;
                 }
+                
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+                                        OptimizationOption.NO_SIDE_EFFECTS);
+		}
         }
 
         @api
@@ -985,7 +1021,8 @@ public class StringHandling {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN);
+					OptimizationOption.CACHE_RETURN,
+                                        OptimizationOption.NO_SIDE_EFFECTS);
 		}
 
 		@Override
