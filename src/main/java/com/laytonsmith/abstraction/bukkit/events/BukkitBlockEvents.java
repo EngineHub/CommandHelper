@@ -19,6 +19,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
@@ -35,6 +36,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Note;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.*;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -126,9 +128,7 @@ public class BukkitBlockEvents {
 
         BlockBreakEvent event;
 
-        public BukkitMCBlockBreakEvent(BlockBreakEvent e) {
-            event = e;
-        }
+        public BukkitMCBlockBreakEvent(BlockBreakEvent e) { event = e; }
 
 		@Override
         public Object _GetObject() {
@@ -154,6 +154,7 @@ public class BukkitBlockEvents {
 		public void setExpToDrop(int exp) {
 			event.setExpToDrop(exp);
 		}
+
     }
 
     @abstraction(type = Implementation.Type.BUKKIT)
@@ -199,6 +200,7 @@ public class BukkitBlockEvents {
         public MCBlockState getBlockReplacedState() {
             return new BukkitMCBlockState(event.getBlockReplacedState());
         }
+
     }
 
 	@abstraction(type = Implementation.Type.BUKKIT)
