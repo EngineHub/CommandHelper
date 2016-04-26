@@ -28,6 +28,8 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CNumber;
+import com.laytonsmith.core.constructs.CPrimitive;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -62,6 +64,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Array;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -139,6 +142,18 @@ public final class Static {
 	 */
 	public static <T extends Construct> T getObject(Construct construct, Target t, Class<T> clazz) {
 		return ArgumentValidation.getObject(construct, t, clazz);
+	}
+
+	/**
+	 * Returns a CNumber construct (CInt or CDouble) from any java number.
+	 * @param number The java number to convert.
+	 * @param t The code target.
+	 * @return A construct equivalent to the given java number, whose the type is the better to represent it.
+	 */
+	public static CNumber getNumber(Number number, Target t) {
+		long longValue = number.longValue();
+		double doubleValue = number.doubleValue();
+		return longValue == doubleValue ? new CInt(longValue, t) : new CDouble(doubleValue, t);
 	}
 
 	/**
@@ -234,7 +249,23 @@ public final class Static {
 	public static boolean getBoolean(Construct c) {
 		return ArgumentValidation.getBoolean(c, Target.UNKNOWN);
 	}
+	
+	/**
+	 * Returns a primitive from any given construct.
+	 * @param c
+	 * @param t
+	 * @return 
+	 */
+	public static CPrimitive getPrimitive(Construct c, Target t){
+		return ArgumentValidation.getObject(c, t, CPrimitive.class);
+	}
 
+	/**
+	 * Returns a CByteArray from any given construct.
+	 * @param c
+	 * @param t
+	 * @return 
+	 */
 	public static CByteArray getByteArray(Construct c, Target t) {
 		return ArgumentValidation.getByteArray(c, t);
 	}
@@ -1218,11 +1249,11 @@ public final class Static {
 		return injectedPlayers.remove(name);
 	}
 
-	public static void HostnameCache(final String name, final String hostname) {
+	public static void HostnameCache(final String name, final InetSocketAddress address) {
 		CommandHelperPlugin.hostnameLookupThreadPool.submit(new Runnable() {
 			@Override
 			public void run() {
-				CommandHelperPlugin.hostnameLookupCache.put(name, hostname);
+				CommandHelperPlugin.hostnameLookupCache.put(name, address.getHostName());
 			}
 		});
 	}

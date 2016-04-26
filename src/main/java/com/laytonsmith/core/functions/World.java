@@ -1624,7 +1624,9 @@ public class World {
 		public String docs() {
 			return "locationArray {location_from, location_to, distance} Returns a location that is the specified"
 					+ " distance from the first location along a vector to the second location. Distance must be an"
-					+ " integer greater than 0.";
+					+ " integer greater than 0. This function handles the location arrays as vectors, so worlds are"
+					+ " ignored. The returned location array will have the world specified in location_from or the"
+					+ " player's world if one is not provided.";
 		}
 
 		@Override

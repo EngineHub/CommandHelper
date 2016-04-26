@@ -6,6 +6,9 @@ import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCVehicle;
+import com.laytonsmith.abstraction.MCProjectile;
+import com.laytonsmith.abstraction.MCProjectileSource;
+import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.enums.MCCollisionType;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.events.MCVehicleBlockCollideEvent;
@@ -13,6 +16,7 @@ import com.laytonsmith.abstraction.events.MCVehicleCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEnitityCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEnterExitEvent;
 import com.laytonsmith.abstraction.events.MCVehicleMoveEvent;
+import com.laytonsmith.abstraction.events.MCVehicleDestroyEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -509,6 +513,89 @@ public class VehicleEvents {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class vehicle_destroy extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "vehicle_destroy";
+		}
+
+		@Override
+		public String docs() {
+			return "{vehicletype: <macro> the entitytype of the vehicle} "
+					+ "Fires when a vehicle is destroyed."
+					+ " {vehicletype | vehicle: entityID | passenger: entityID"
+					+ " | damager: If the source of damage is a player this will contain their name, otherwise it will be"
+					+ " the entityID of the damager (only available when an entity causes damage)"
+					+ " | shooter: The name of the player who shot, otherwise the entityID"
+					+ " (only available when damager is a projectile)}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if (event instanceof MCVehicleDestroyEvent) {
+				MCVehicleDestroyEvent e = (MCVehicleDestroyEvent) event;
+				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCVehicleDestroyEvent) {
+				MCVehicleDestroyEvent e = (MCVehicleDestroyEvent) event;
+				Target t = Target.UNKNOWN;
+				Map<String, Construct> ret = evaluate_helper(e);
+				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
+				ret.put("vehicle", new CString(e.getVehicle().getUniqueId().toString(), t));
+				MCEntity damager = ((MCVehicleDestroyEvent) event).getAttacker();
+				if (damager instanceof MCPlayer) {
+					ret.put("damager", new CString(((MCPlayer) damager).getName(), Target.UNKNOWN));
+				} else {
+					ret.put("damager", new CString(damager.getUniqueId().toString(), Target.UNKNOWN));
+				}
+				if (damager instanceof MCProjectile) {
+					MCProjectileSource shooter = ((MCProjectile) damager).getShooter();
+					if (shooter instanceof MCPlayer) {
+						ret.put("shooter", new CString(((MCPlayer) shooter).getName(), Target.UNKNOWN));
+					} else if (shooter instanceof MCEntity) {
+						ret.put("shooter", new CString(((MCEntity) shooter).getUniqueId().toString(), Target.UNKNOWN));
+					} else if (shooter instanceof MCBlockProjectileSource) {
+						ret.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation()));
+					}
+				}
+				ret.put("location", ObjectGenerator.GetGenerator().location(e.getVehicle().getLocation()));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCVehicleDestroyEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.VEHICLE_DESTROY;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
 		}
 	}
 }

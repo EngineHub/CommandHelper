@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.enums.MCAction;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
@@ -52,7 +53,6 @@ import com.laytonsmith.core.functions.StringHandling;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.FormatFlagsConversionMismatchException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IllegalFormatConversionException;
@@ -832,6 +832,7 @@ public class PlayerEvents {
             return "{block: <item match> If the block the player interacts with is this"
                     + " | button: <string match> left or right. If they left or right clicked |"
                     + " item: <item match> The item they are holding when they interacted |"
+                    + " hand: <string match> The hand the player clicked with |"
                     + " player: <string match> The player that triggered the event} "
                     + "Fires when a player left or right clicks a block or the air"
                     + "{action: One of either: left_click_block, right_click_block, left_click_air, or right_click_air |"
@@ -839,7 +840,8 @@ public class PlayerEvents {
                     + " neither facing or location will be present. |"
                     + "player: The player associated with this event |"
                     + "facing: The (lowercase) face of the block they clicked. (One of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ") + ") |"
-                    + "location: The (x, y, z, world) location of the block they clicked}"
+                    + "location: The (x, y, z, world) location of the block they clicked |"
+                    + "hand: The hand used to click with, can be either main_hand or off_hand}"
                     + "{}"
                     + "{player|action|item|location|facing}";
         }
@@ -858,9 +860,29 @@ public class PlayerEvents {
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent)e;
+                CString hand;
+				MCEquipmentSlot h;
+				
+				try {
+					h = pie.getHand();
+				} catch(UnsupportedOperationException ex) {
+					h = null; // We are likely on a pre-1.9 server.
+				}
+                
                 if(((MCPlayerInteractEvent)e).getAction().equals(MCAction.PHYSICAL)){
                     return false;
                 }
+                
+				if(h != null) {
+					if(h == MCEquipmentSlot.WEAPON) {
+						hand = new CString("main_hand", Target.UNKNOWN);
+					} else {
+						hand = new CString("off_hand", Target.UNKNOWN);
+					}
+				} else {
+					hand = null;
+				}
+                
                 if(prefilter.containsKey("button")){
                     if(pie.getAction().equals(MCAction.LEFT_CLICK_AIR) || pie.getAction().equals(MCAction.LEFT_CLICK_BLOCK)){
                         if(!prefilter.get("button").val().toLowerCase().equals("left")){
@@ -877,6 +899,9 @@ public class PlayerEvents {
                 Prefilters.match(prefilter, "item", Static.ParseItemNotation(pie.getItem()), PrefilterType.ITEM_MATCH);
                 Prefilters.match(prefilter, "block", Static.ParseItemNotation(pie.getClickedBlock()), PrefilterType.ITEM_MATCH);
                 Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
+				if(hand != null) {
+					Prefilters.match(prefilter, "hand", hand, PrefilterType.STRING_MATCH);
+				}
 
                 return true;
             }
@@ -890,6 +915,12 @@ public class PlayerEvents {
                 Map<String, Construct> map = evaluate_helper(e);
                 //map.put("player", new CString(pie.getPlayer().getName(), Target.UNKNOWN));
                 MCAction a = pie.getAction();
+				MCEquipmentSlot h;
+				try {
+					h = pie.getHand();
+				} catch(UnsupportedOperationException ex) {
+					h = null; // We are likely on a pre-1.9 server.
+				}
                 map.put("action", new CString(a.name().toLowerCase(), Target.UNKNOWN));
                 map.put("block", new CString(Static.ParseItemNotation(pie.getClickedBlock()), Target.UNKNOWN));
                 if(a == MCAction.LEFT_CLICK_AIR || a == MCAction.LEFT_CLICK_BLOCK){
@@ -903,6 +934,14 @@ public class PlayerEvents {
                 }
 				map.put("world", new CString(pie.getPlayer().getWorld().getName(), Target.UNKNOWN));
                 map.put("item", new CString(Static.ParseItemNotation(pie.getItem()), Target.UNKNOWN));
+                if(h != null) {
+					if(h == MCEquipmentSlot.WEAPON) {
+						map.put("hand", new CString("main_hand", Target.UNKNOWN));
+					} else {
+						map.put("hand", new CString("off_hand", Target.UNKNOWN));
+					}
+				}
+                
                 return map;
             } else {
                 throw new EventException("Cannot convert e to PlayerInteractEvent");

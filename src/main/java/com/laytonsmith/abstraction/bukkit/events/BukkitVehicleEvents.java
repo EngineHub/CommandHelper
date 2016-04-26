@@ -13,6 +13,7 @@ import com.laytonsmith.abstraction.events.MCVehicleEnitityCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEnterExitEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEvent;
 import com.laytonsmith.abstraction.events.MCVehicleMoveEvent;
+import com.laytonsmith.abstraction.events.MCVehicleDestroyEvent;
 import com.laytonsmith.annotations.abstraction;
 import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
 import org.bukkit.event.vehicle.VehicleCollisionEvent;
@@ -21,6 +22,7 @@ import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.event.vehicle.VehicleEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
+import org.bukkit.event.vehicle.VehicleDestroyEvent;
 
 /**
  * 
@@ -171,6 +173,25 @@ public class BukkitVehicleEvents {
 		@Override
 		public boolean isCancelled() {
 			return cancelled;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCVehicleDestroyEvent extends BukkitMCVehicleEvent
+			implements MCVehicleDestroyEvent {
+
+		VehicleDestroyEvent vee;
+		public BukkitMCVehicleDestroyEvent(VehicleDestroyEvent event) {
+			super(event);
+			vee = event;
+		}
+
+		@Override
+		public MCEntity getAttacker() {
+			if (vee.getAttacker() == null) {
+				return null;
+			}
+			return BukkitConvertor.BukkitGetCorrectEntity(vee.getAttacker());
 		}
 	}
 

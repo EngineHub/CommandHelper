@@ -39,6 +39,7 @@ import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.Event;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
@@ -481,6 +482,10 @@ public class BukkitInventoryEvents {
 		PlayerSwapHandItemsEvent is;
 		public BukkitMCItemSwapEvent(PlayerSwapHandItemsEvent event) {
 			is = event;
+		}
+
+		public BukkitMCItemSwapEvent(Event event) {
+			is = (PlayerSwapHandItemsEvent) event;
 		}
 
 		@Override

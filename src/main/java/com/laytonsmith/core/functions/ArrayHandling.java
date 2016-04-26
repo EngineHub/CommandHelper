@@ -1384,14 +1384,14 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (!(args[0] instanceof ArrayAccess)) {
+			if (!(args[0] instanceof CArray)) {
 				throw new CRECastException("Expecting argument 1 to be an array", t);
 			}
 			StringBuilder b = new StringBuilder();
-			ArrayAccess ca = (ArrayAccess) args[0];
+			CArray ca = (CArray) args[0];
 			String glue = " ";
 			if (args.length == 2) {
-				glue = args[1].val();
+				glue = Static.getPrimitive(args[1], t).val();
 			}
 			boolean first = true;
 			for (Construct key : ca.keySet()) {

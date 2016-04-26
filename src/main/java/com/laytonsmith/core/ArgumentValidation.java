@@ -93,6 +93,8 @@ public class ArgumentValidation {
 	 * other types of Constructs. It also assumes that the class specified is
 	 * tagged with a typeof annotation, thereby preventing the need for the
 	 * expectedClassName like the deprecated version uses.
+	 * 
+	 * This will work if the value is a subtype of the expected value.
 	 *
 	 * @param <T> The type expected.
 	 * @param construct The generic object

@@ -239,8 +239,32 @@ public class MathTest {
 
 	@Test
 	public void testRound() throws Exception {
-		assertEquals("4", SRun("round(4.4)", null));
-		assertEquals("5", SRun("round(4.5)", null));
+		assertEquals("4.0", SRun("round(4.4)", null));
+		assertEquals("5.0", SRun("round(4.5)", null));
 		assertEquals("4.6", SRun("round(4.55, 1)", null));
+	}
+
+	@Test
+	public void testSinh() throws Exception {
+		assertEquals("1.1752011936438014", SRun("sinh(1)", null));
+		assertEquals("0", SRun("sinh(0)", null));
+		assertEquals("6.0502044810397875", SRun("sinh(2.5)", null));
+		assertEquals("-6.0502044810397875", SRun("sinh(-2.5)", null));
+	}
+
+	@Test
+	public void testCosh() throws Exception {
+		assertEquals("1.543080634815244", SRun("cosh(1)", null));
+		assertEquals("1", SRun("cosh(0)", null));
+		assertEquals("6.132289479663686", SRun("cosh(2.5)", null));
+		assertEquals("6.132289479663686", SRun("cosh(-2.5)", null));
+	}
+
+	@Test
+	public void testTanh() throws Exception {
+		assertEquals("0.7615941559557649", SRun("tanh(1)", null));
+		assertEquals("0", SRun("tanh(0)", null));
+		assertEquals("0.9866142981514303", SRun("tanh(2.5)", null));
+		assertEquals("-0.9866142981514303", SRun("tanh(-2.5)", null));
 	}
 }

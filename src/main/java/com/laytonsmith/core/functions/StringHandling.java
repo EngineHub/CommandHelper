@@ -15,6 +15,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
@@ -844,6 +845,184 @@ public class StringHandling {
 		}
 	}
 
+        @api
+        @seealso({StringHandling.string_ends_with.class})
+        public static class string_starts_with extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENullPointerException.class};
+		}
+
+                @Override
+                public String getName() {
+                    return "string_starts_with";
+                }
+                
+                @Override
+                public String docs() {
+                    return "boolean {teststring, keyword} Determines if the provided teststring starts with the provided keyword. This could be used to find"
+                                      + " the prefix of a line, for instance.";
+                }
+                
+                @Override
+                public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+                        String teststring = args[0].nval();
+                        String keyword = args[1].nval();
+                        Static.AssertNonCNull(t, args);
+                        boolean ret = teststring.startsWith(keyword);
+                        
+                        return CBoolean.get(ret);
+                }
+                
+                @Override
+                public Integer[] numArgs() {
+                        return new Integer[]{2};
+                }
+                
+                @Override
+                public CHVersion since() {
+                      return CHVersion.V3_3_2;
+                }
+                
+                @Override
+                public boolean isRestricted() {
+                     return false;
+                }
+                
+                @Override
+                public Boolean runAsync() {
+                    return null;
+                }
+        }
+
+        @api
+        @seealso({StringHandling.string_starts_with.class})
+        public static class string_ends_with extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENullPointerException.class};
+		}
+
+                @Override
+                public String getName() {
+                    return "string_ends_with";
+                }
+                
+                @Override
+                public String docs() {
+                    return "boolean {teststring, keyword} Determines if the provided teststring ends with the provided keyword.";
+                }
+                
+                @Override
+                public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+                        String teststring = args[0].nval();
+                        String keyword = args[1].nval();
+                        Static.AssertNonCNull(t, args);
+                        boolean ret = teststring.endsWith(keyword);
+                        
+                        return CBoolean.get(ret);
+                }
+                
+                @Override
+                public Integer[] numArgs() {
+                        return new Integer[]{2};
+                }
+                
+                @Override
+                public CHVersion since() {
+                      return CHVersion.V3_3_2;
+                }
+                
+                @Override
+                public boolean isRestricted() {
+                     return false;
+                }
+                
+                @Override
+                public Boolean runAsync() {
+                    return null;
+                }
+        }
+
+        @api
+	public static class char_is_uppercase extends AbstractFunction implements Optimizable {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class};
+		}
+
+		@Override
+		public String getName() {
+			return "char_is_uppercase";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			if(!(args[0].nval() instanceof String)) {
+			    throw new CRECastException(this.getName() + " expects a string as first argument, but type " +
+				    args[0].typeof() + " was found.", t);
+			}
+			String text = args[0].nval();
+			// Enforce the fact we are only taking the first character here
+			// Do not let the user pass an entire string (or an empty string, d'oh). Only a single character.
+			if(text.length() != 1) {
+			    throw new CREFormatException("Got \"" + text + "\" instead of expected character.", t);
+			}
+			
+			char check = text.charAt(0);
+			
+			if(!Character.isLetter(check)) {
+			    throw new CREFormatException("Got \"" + text + "\" instead of alphabetical character.", t);
+			}
+			
+			return CBoolean.get(Character.isUpperCase(check));
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN);
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {char} Determines if the character provided is uppercase or not. The string must be exactly 1 character long and"
+                                    + " a letter, otherwise a FormatException is thrown.";
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public CHVersion since() {
+		    return CHVersion.V3_3_2;
+		}
+		
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("Basic usage", "char_is_uppercase('a')"),
+						new ExampleScript("Basic usage", "char_is_uppercase('D')"),};
+		}
+	}
+        
 	@api
 	public static class string_position extends AbstractFunction implements Optimizable {
 

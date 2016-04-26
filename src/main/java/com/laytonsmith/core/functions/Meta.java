@@ -147,7 +147,7 @@ public class Meta {
 						name = "Unknown player";
 					}
 
-					CHLog.GetLogger().Log(CHLog.Tags.META, "Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim(), t);
+					CHLog.GetLogger().Log(CHLog.Tags.META, LogLevel.INFO, "Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim(), t);
 					if (Prefs.DebugMode()) {
 						Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim());
 					}

@@ -46,6 +46,7 @@ public enum Driver {
 	PROJECTILE_HIT,
 	PROJECTILE_LAUNCH,
 	TARGET_ENTITY,
+	ENTITY_TOGGLE_GLIDE(MCVersion.MC1_9),
 
 	/**
 	 * Inventory events
@@ -56,7 +57,7 @@ public enum Driver {
 	INVENTORY_OPEN,
 	ITEM_ENCHANT,
 	ITEM_HELD,
-	ITEM_SWAP,
+	ITEM_SWAP(MCVersion.MC1_9),
 	ITEM_PRE_CRAFT,
 	ITEM_PRE_ENCHANT,
 
@@ -109,6 +110,7 @@ public enum Driver {
 	VEHICLE_ENTER,
 	VEHICLE_LEAVE,
 	VEHICLE_MOVE,
+	VEHICLE_DESTROY,
 
 	/**
 	 * Weather events

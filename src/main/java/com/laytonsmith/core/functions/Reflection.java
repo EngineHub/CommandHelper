@@ -344,6 +344,15 @@ public class Reflection {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Return type", "reflect_docs('array_contains', 'return'); // Using 'type' would also work"),
+				new ExampleScript("Args", "reflect_docs('array_contains', 'args');"),
+				new ExampleScript("Description", "reflect_docs('array_contains', 'description');")
+			};
+		}
 	}
 	
 	@api

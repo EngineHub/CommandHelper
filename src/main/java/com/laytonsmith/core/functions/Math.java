@@ -7,6 +7,7 @@ import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -34,6 +35,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import java.text.DecimalFormat;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -382,17 +384,20 @@ public class Math {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			long arg1 = Static.getInt(args[0], t);
 			long arg2 = Static.getInt(args[1], t);
+			if(arg2 == 0) {
+				throw new CRERangeException("Modulo by 0!", t);
+			}
 			return new CInt(arg1 % arg2, t);
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CRERangeException.class};
 		}
 
 		@Override
 		public String docs() {
-			return "int {x, n} Returns x modulo n. Operator syntax is also supported: @x % @n";
+			return "int {x, n} Returns x modulo n. Throws a RangeException when n is 0. Operator syntax is also supported: @x % @n";
 		}
 
 		@Override
@@ -1844,6 +1849,162 @@ public class Math {
 	}
 
 	@api
+	public static class sinh extends AbstractFunction implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "sinh";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "double {number} Returns the hyperbolic sine of the number";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			return Static.getNumber(java.lang.Math.sinh(ArgumentValidation.getNumber(args[0], t)), t);
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
+	}
+
+	@api
+	public static class cosh extends AbstractFunction implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "cosh";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "double {number} Returns the hyperbolic cosine of the number";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			return Static.getNumber(java.lang.Math.cosh(ArgumentValidation.getNumber(args[0], t)), t);
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						Optimizable.OptimizationOption.CONSTANT_OFFLINE,
+						Optimizable.OptimizationOption.CACHE_RETURN
+			);
+		}
+	}
+
+	@api
+	public static class tanh extends AbstractFunction implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "tanh";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "double {number} Returns the hyperbolic tangent of the number";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			return Static.getNumber(java.lang.Math.tanh(ArgumentValidation.getNumber(args[0], t)), t);
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						Optimizable.OptimizationOption.CONSTANT_OFFLINE,
+						Optimizable.OptimizationOption.CACHE_RETURN
+			);
+		}
+	}
+
+	@api
 	public static class to_radians extends AbstractFunction implements Optimizable{
 
 		@Override
@@ -2018,9 +2179,8 @@ public class Math {
 
 		@Override
 		public String docs() {
-			return "mixed {number, [precision]} Unlike floor and ceil, rounds the number to the nearest integer. Precision defaults to 0, but if set to 1 or more, rounds decimal places."
-					+ " For instance, round(2.29, 1) would return 2.3. If precision is < 0, a RangeException is thrown. If precision is set to 0, an integer is always"
-					+ " returned, and if precision is > 0, a double is always returned.";
+			return "double {number, [precision]} Unlike floor and ceil, rounds the number to the nearest double that is equal to an integer. Precision defaults to 0, but if set to 1 or more, rounds decimal places."
+					+ " For instance, round(2.29, 1) would return 2.3. If precision is < 0, a RangeException is thrown.";
 		}
 
 		@Override
@@ -2056,11 +2216,7 @@ public class Math {
 			number = number * java.lang.Math.pow(10, precision);
 			number = java.lang.Math.round(number);
 			number = number / java.lang.Math.pow(10, precision);
-			if(precision == 0){
-				return new CInt((long)number, t);
-			} else {
-				return new CDouble(number, t);
-			}
+			return new CDouble(number, t);
 		}
 
 		@Override
@@ -2080,6 +2236,78 @@ public class Math {
 			);
 		}
 
+	}
+	
+	@api
+	public static class round15 extends AbstractFunction implements Optimizable {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			double x = Static.getDouble(args[0], t) + 1;
+			DecimalFormat twoDForm = new DecimalFormat("0.##############E0");
+			String str = twoDForm.format(x);
+			double d = Double.valueOf(str) - 1;
+			return new CDouble(d, t);
+		}
+
+		@Override
+		public String getName() {
+			return "round15";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "double {value} Rounds value to the 15th place. This is useful when doing math using approximations. For instance,"
+					+ " sin(math_const('PI')) returns 1.2246467991473532E-16, but sin of pi is actually 0. This happens because"
+					+ " pi cannot be accurately represented on a computer, it is an approximation. Using round15, you can round to the"
+					+ " next nearest value, which often time should give a more useful answer to display. For instance,"
+					+ " round15(sin(math_const('PI'))) is 0. This functionality is not provided by default in methods like sin(),"
+					+ " because it technically makes the result less accurate, given the inputs. In general, you should only use this"
+					+ " function just before displaying the value to the user. Internally, you should keep the value returned by the input"
+					+ " functions.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN
+			);
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Without round15", "sin(math_const('PI'));"),
+				new ExampleScript("With round15", "round15(sin(math_const('PI')));")
+			};
+		}
+		
 	}
 
 	@api
@@ -2450,4 +2678,6 @@ public class Math {
 		}
 		
 	}
+	
+	
 }
