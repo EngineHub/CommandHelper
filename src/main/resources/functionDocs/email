@@ -12,8 +12,10 @@ This method blocks until the email has completed sending, so it may be useful to
 There are two types of options that can be provided, transport settings, and email settings. The transport settings affect
 connection to the smtp server, and email settings affect the email itself.
 
-If the profile is specified, then the transport settings are pulled from the profile specified instead, with any other options specified
-overridding the values specified in the profile. The type of the profile is "email".
+If the profile is specified, then the transport settings are pulled from the profile specified in profiles.xml instead, 
+with any other options specified
+overridding the values specified in the profile. See [[CommandHelper/Staged/Profiles]] for more
+information about setting up profiles in general. The type of the profile is "email".
 All transport settings may be specified in the profile. This is
 useful so that sensitive information isn't hardcoded. Here is an example profile:
 
@@ -71,7 +73,7 @@ Email settings:
 |-
 | from || string || &lt;required&gt; || The from address to be used in the email.
 |-
-| to || string|array || &lt;required&gt; || The recipient, or recipient list.
+| to || string{{!}}array || &lt;required&gt; || The recipient, or recipient list.
 If the value is a string, it should be a simple email address, and will be set as a TO field.
 Alternatively, a list of addresses may be provided, in which case each of them will be added to the TO list.
 CC and BCC recipients may also be added. Instead of a string, provide an array with the keys "type" and "address",
@@ -92,18 +94,22 @@ It is an array of zero or more arrays, with the following keys:
 ! Description
 |-
 | type || string || &lt;required&gt; || The mime type of the attachment.
+In general, the least specific mime type is application/octet-stream, so you should
+use this if you aren't sure of the mime type. For a list of all official IANA defined
+mime types, see [https://www.iana.org/assignments/media-types/media-types.xhtml here].
 |-
 | filename || string || <nowiki>''</nowiki> || The filename of this attachment.
 |-
 | description || string || <nowiki>''</nowiki> || The description of this attachment.
 |-
-| disposition || string || <nowiki>''</nowiki> || The content disposition. Generally, you will only use either
-"inline" or "attachment". If the disposition is set to "inline", then it will be up to the email client to display
-this attachment to the user automatically, selecting from the best type that it can render, for instance, or inline
-images. If it is set to "attachment", it will be offered as a download to the user, in most clients. Other content
-disposition headers may be set as well. See RFC 2183 for full information on how to use this field.
+| disposition || string || <nowiki>''</nowiki> || The content disposition. 
+Generally, you will only use either "inline" or "attachment". If the disposition is set to "inline", then 
+it will be up to the email client to display this attachment to the user automatically, selecting from the best type
+that it can render, for instance, or inline images. If it is set to "attachment", it will be offered as a download
+to the user, in most clients. Other content disposition headers may be set as well.
+See RFC 2183 for full information on how to use this field.
 |-
-| content || string|byte_array || &lt;required&gt; || The attachment content. It may be either a string, in which
+| content || string{{!}}byte_array || &lt;required&gt; || The attachment content. It may be either a string, in which
 case it is added to the email as is, or a byte_array, in which case it is base64 encoded for you.
 |}
 

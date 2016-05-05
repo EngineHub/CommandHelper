@@ -63,7 +63,8 @@ public class SQL {
 	}
 
 	@api
-	@seealso({unsafe_query.class, query_async.class, com.laytonsmith.tools.docgen.templates.SQL.class})
+	@seealso({unsafe_query.class, query_async.class, com.laytonsmith.tools.docgen.templates.SQL.class,
+		com.laytonsmith.tools.docgen.templates.Profiles.class})
 	public static class query extends AbstractFunction implements Optimizable{
 
 		private final boolean doWarn;
@@ -377,7 +378,8 @@ public class SQL {
 	}
 
 	@api
-	@seealso({query.class, com.laytonsmith.tools.docgen.templates.SQL.class})
+	@seealso({query.class, com.laytonsmith.tools.docgen.templates.SQL.class,
+		com.laytonsmith.tools.docgen.templates.Profiles.class})
 	public static class unsafe_query extends query {
 
 		public unsafe_query() {
@@ -409,7 +411,8 @@ public class SQL {
 	}
 
 	@api
-	@seealso({query.class, com.laytonsmith.tools.docgen.templates.SQL.class})
+	@seealso({query.class, com.laytonsmith.tools.docgen.templates.SQL.class,
+		com.laytonsmith.tools.docgen.templates.Profiles.class})
 	public static class query_async extends AbstractFunction {
 
 		RunnableQueue queue = null;

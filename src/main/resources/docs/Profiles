@@ -1,0 +1,23 @@
+Profiles allow you to keep sensitive credential information out of your code directly. Various methods
+may ask for a "profile" instead of or in addition to an associative array with various configuration options.
+
+In general, it is best to take advantage of this, and ensure that your profiles.xml file is never exposed
+or otherwise committed to a public repository. Meanwhile, your code may be freely shared, and the various
+profiles can be re-created by other users, using their own connection information, without having to edit
+your code directly.
+
+The profiles.xml file is located in the <code>prefs/</code> folder, and has at minimum, a root
+<code>profiles</code> tag. Different functions will require different types of profile information,
+but in general, the bare minimum profile will look like this:
+
+<pre>
+<profile id="profileName">
+	<type>profileType</type>
+</profile>
+</pre>
+
+The profileName is what is referenced in code. For instance, in the {{function|query}} function,
+the first parameter may be either the profile name, or an array specifying the same information as
+the profile xml. Different functions will require different extra information in the profile, some
+may be optional, some required. See the individual functions for more information about the parameters
+in particular.

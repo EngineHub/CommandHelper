@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
@@ -675,6 +676,7 @@ public class Web {
 
 	@api
 	@noboilerplate
+	@seealso({com.laytonsmith.tools.docgen.templates.Profiles.class})
 	public static class email extends AbstractFunction {
 
 		@Override
