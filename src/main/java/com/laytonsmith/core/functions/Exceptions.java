@@ -503,6 +503,10 @@ public class Exceptions {
 				// TODO: Eh.. should probably move this check into the keyword, since techincally
 				// catch(Exception @e = null) { } would work.
 				ParseTree assign = children.get(i);
+				if(assign.getChildAt(0).getData() instanceof CString){
+					// This is an unknown exception type, because otherwise it would have been cast to a CClassType
+					throw new ConfigCompileException("Unknown class type: " + assign.getChildAt(0).getData().val(), t);
+				}
 				types.add((CClassType)assign.getChildAt(0).getData());
 				if(CFunction.IsFunction(assign, DataHandling.assign.class)) {
 					// assign() will validate params 0 and 1

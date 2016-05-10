@@ -263,5 +263,10 @@ public class NewExceptionHandlingTest {
 					+ "}"
 				+ "}");
 	}
+	
+	@Test(expected = ConfigCompileException.class)
+	public void testUnknownExceptionType() throws Exception{
+		SRun("try { } catch(NoTaReAlExCePtIoNtYpE @e){ }", fakePlayer);
+	}
 
 }
