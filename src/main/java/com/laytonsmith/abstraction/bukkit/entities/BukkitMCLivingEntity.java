@@ -206,6 +206,11 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 		}
 		return blocks;
 	}
+	
+	@Override
+	public boolean hasAI() {
+		return le.hasAI();
+	}
 
 	/**
 	 * @param potionID - ID of the potion
@@ -379,5 +384,10 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	@Override
 	public void setGliding(Boolean glide) {
 		le.setGliding(glide);
+	}
+
+	@Override
+	public void setAI(Boolean ai) {
+		le.setAI(ai);
 	}
 }

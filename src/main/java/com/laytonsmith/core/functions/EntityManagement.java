@@ -3745,4 +3745,47 @@ public class EntityManagement {
 			return CHVersion.V3_3_2;
 		}
 	}
+	
+	@api
+	public static class get_entity_ai extends EntityGetterFunction {
+		public String getName() {
+			return "get_entity_ai";
+		}
+
+		public String docs() {
+			return "boolean {Entity} Returns true if the given entity has AI";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CBoolean.GenerateCBoolean(Static.getLivingEntity(args[0], t).hasAI(), t);
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+	
+	@api
+	public static class set_entity_ai extends EntitySetterFunction {
+		public String getName() {
+			return "set_entity_ai";
+		}
+
+		public String docs() {
+			return "void {Entity, boolean} enables or disables the entity AI";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity e = Static.getLivingEntity(args[0], t);
+			boolean ai = Static.getBoolean(args[1]);
+
+			e.setAI(ai);
+
+			return CVoid.VOID;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
 }
