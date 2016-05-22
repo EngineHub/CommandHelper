@@ -1,8 +1,12 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.enums.MCNameTagVisibility;
+import com.laytonsmith.abstraction.enums.MCOption;
+import com.laytonsmith.abstraction.enums.MCOptionStatus;
 
 import java.util.Set;
+
+import org.bukkit.scoreboard.Team.OptionStatus;
 
 /**
  * 
@@ -15,6 +19,7 @@ public interface MCTeam {
 	public String getDisplayName();
 	public String getName();
 	public MCNameTagVisibility getNameTagVisibility();
+	public MCOptionStatus getOption(MCOption option);
 	public Set<String> getEntries();
 	public String getPrefix();
 	public MCScoreboard getScoreboard();
@@ -26,6 +31,7 @@ public interface MCTeam {
 	public void setCanSeeFriendlyInvisibles(boolean enabled);
 	public void setDisplayName(String displayName);
 	public void setNameTagVisibility(MCNameTagVisibility visibility);
+	public void setOption(MCOption option, MCOptionStatus status);
 	public void setPrefix(String prefix);
 	public void setSuffix(String suffix);
 	public void unregister();
