@@ -139,6 +139,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_SLIME_SIZE%: The size of the slime.
 |-
+| SNOWMAN
+| 
+* %KEY_SNOWMAN_DERP%: With derp mode set to true the snowman wears no pumpkin
+|-
 | SMALL_FIREBALL
 | 
 * %KEY_FIREBALL_DIRECTION%: The direction the small fireball is heading toward.
