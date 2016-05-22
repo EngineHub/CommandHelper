@@ -51,6 +51,7 @@ import com.laytonsmith.abstraction.entities.MCRabbit;
 import com.laytonsmith.abstraction.entities.MCSheep;
 import com.laytonsmith.abstraction.entities.MCSkeleton;
 import com.laytonsmith.abstraction.entities.MCSlime;
+import com.laytonsmith.abstraction.entities.MCSnowman;
 import com.laytonsmith.abstraction.entities.MCThrownPotion;
 import com.laytonsmith.abstraction.entities.MCVillager;
 import com.laytonsmith.abstraction.entities.MCWitherSkull;
@@ -68,6 +69,7 @@ import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.abstraction.enums.MCRabbitType;
 import com.laytonsmith.abstraction.enums.MCRotation;
 import com.laytonsmith.abstraction.enums.MCSkeletonType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
@@ -2732,6 +2734,12 @@ public class EntityManagement {
 					MCSkeleton skeleton = (MCSkeleton) entity;
 					specArray.set(entity_spec.KEY_SKELETON_TYPE, new CString(skeleton.getSkeletonType().name(), t), t);
 					break;
+				case SNOWMAN:
+					if (Static.getVersion().gte(MCVersion.MC1_9)) {
+						MCSnowman snowman = (MCSnowman) entity;
+						specArray.set(entity_spec.KEY_SNOWMAN_DERP, CBoolean.GenerateCBoolean(snowman.isDerp(), t), t);
+					}
+					break;
 				case SPLASH_POTION:
 					MCThrownPotion potion = (MCThrownPotion) entity;
 					specArray.set(entity_spec.KEY_SPLASH_POTION_ITEM, ObjectGenerator.GetGenerator().item(potion.getItem(), t), t);
@@ -2815,6 +2823,7 @@ public class EntityManagement {
 		private static final String KEY_SHEEP_SHEARED = "sheared";
 		private static final String KEY_SKELETON_TYPE = "type";
 		private static final String KEY_SLIME_SIZE = "size";
+		private static final String KEY_SNOWMAN_DERP = "derp";
 		private static final String KEY_SPLASH_POTION_ITEM = "item";
 		private static final String KEY_VILLAGER_PROFESSION = "profession";
 		private static final String KEY_WITHER_SKULL_CHARGED = "charged";
@@ -3300,6 +3309,20 @@ public class EntityManagement {
 								break;
 							default:
 								throwException(index, t);
+						}
+					}
+					break;
+				case SNOWMAN:
+					if (Static.getVersion().gte(MCVersion.MC1_9)) {
+						MCSnowman snowman = (MCSnowman) entity;
+						for (String index : specArray.stringKeySet()) {
+							switch (index.toLowerCase()) {
+								case entity_spec.KEY_SNOWMAN_DERP:
+									snowman.setDerp(Static.getBoolean(specArray.get(index, t)));
+									break;
+								default:
+									throwException(index, t);
+							}
 						}
 					}
 					break;
