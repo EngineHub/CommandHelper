@@ -412,7 +412,11 @@ public class Scoreboards {
 				ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t);
 				ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t);
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-					ops.set("nametagvisibility", new CString(team.getNameTagVisibility().name(), t), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
+						ops.set("nametagvisibility", new CString(team.getOption(MCOption.NAME_TAG_VISIBILITY).name(), t), t);
+					} else {
+						ops.set("nametagvisibility", new CString(team.getNameTagVisibility().name(), t), t);
+					}
 				}
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
 					ops.set("collisionrule", new CString(team.getOption(MCOption.COLLISION_RULE).name(), t), t);
@@ -1124,14 +1128,25 @@ public class Scoreboards {
 					team.setCanSeeFriendlyInvisibles(Static.getBoolean(options.get("friendlyinvisibles", t)));
 				}
 				if (options.containsKey("nametagvisibility") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-					MCNameTagVisibility visibility;
-					try {
-						visibility = MCNameTagVisibility.valueOf(options.get("nametagvisibility", t).val().toUpperCase());
-					} catch (IllegalArgumentException iae) {
-						throw new CREFormatException("Unknown nametagvisibility: "
-								+ options.get("nametagvisibility", t).val(), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
+						MCOptionStatus nametag;
+						try {
+							nametag = MCOptionStatus.valueOf(options.get("nametagvisibility", t).val().toUpperCase());
+						} catch (IllegalArgumentException iae) {
+							throw new CREFormatException("Unknown nametagvisibility: "
+									+ options.get("nametagvisibility", t).val(), t);
+						}
+						team.setOption(MCOption.NAME_TAG_VISIBILITY, nametag);
+					} else {
+						MCNameTagVisibility visibility;
+						try {
+							visibility = MCNameTagVisibility.valueOf(options.get("nametagvisibility", t).val().toUpperCase());
+						} catch (IllegalArgumentException iae) {
+							throw new CREFormatException("Unknown nametagvisibility: "
+									+ options.get("nametagvisibility", t).val(), t);
+						}
+						team.setNameTagVisibility(visibility);
 					}
-					team.setNameTagVisibility(visibility);
 				}
 				if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
 					if(options.containsKey("collisionrule")) {
