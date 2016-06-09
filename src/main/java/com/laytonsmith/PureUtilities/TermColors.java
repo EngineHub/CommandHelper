@@ -59,50 +59,50 @@ public final class TermColors {
     /*
      * Standard foreground colors 
      */
-    @color public static String RED = color(Color.RED).toString();
-    @color public static String GREEN = color(Color.GREEN).toString();
-    @color public static String BLUE = color(Color.BLUE).toString();
-    @color public static String YELLOW = color(Color.YELLOW).toString();
-    @color public static String CYAN = color(Color.CYAN).toString();
-    @color public static String MAGENTA = color(Color.MAGENTA).toString();
-    @color public static String BLACK = color(Color.BLACK).toString();
-    @color public static String WHITE = color(Color.WHITE).toString();
+    @color public static String RED = color(Color.RED);
+    @color public static String GREEN = color(Color.GREEN);
+    @color public static String BLUE = color(Color.BLUE);
+    @color public static String YELLOW = color(Color.YELLOW);
+    @color public static String CYAN = color(Color.CYAN);
+    @color public static String MAGENTA = color(Color.MAGENTA);
+    @color public static String BLACK = color(Color.BLACK);
+    @color public static String WHITE = color(Color.WHITE);
     
     /*
      * Bright foreground colors
      */
-    @color public static String BRIGHT_RED = color(Color.RED, true, true);
-    @color public static String BRIGHT_GREEN = color(Color.GREEN, true, true);
-    @color public static String BRIGHT_BLUE = color(Color.BLUE, true, true);
-    @color public static String BRIGHT_YELLOW = color(Color.YELLOW, true, true);
-    @color public static String BRIGHT_CYAN = color(Color.CYAN, true, true);
-    @color public static String BRIGHT_MAGENTA = color(Color.MAGENTA, true, true);
-    @color public static String BRIGHT_BLACK = color(Color.BLACK, true, true);
-    @color public static String BRIGHT_WHITE = color(Color.WHITE, true, true);
+    @color public static String BRIGHT_RED = color(Color.RED, true, true, true);
+    @color public static String BRIGHT_GREEN = color(Color.GREEN, true, true, true);
+    @color public static String BRIGHT_BLUE = color(Color.BLUE, true, true, true);
+    @color public static String BRIGHT_YELLOW = color(Color.YELLOW, true, true, true);
+    @color public static String BRIGHT_CYAN = color(Color.CYAN, true, true, true);
+    @color public static String BRIGHT_MAGENTA = color(Color.MAGENTA, true, true, true);
+    @color public static String BRIGHT_BLACK = color(Color.BLACK, true, true, true);
+    @color public static String BRIGHT_WHITE = color(Color.WHITE, true, true, true);
     
     /*
      * Standard background colors 
      */
-    @color public static String BG_RED = color(Color.RED, false, false).toString();
-    @color public static String BG_GREEN = color(Color.GREEN, false, false).toString();
-    @color public static String BG_BLUE = color(Color.BLUE, false, false).toString();
-    @color public static String BG_YELLOW = color(Color.YELLOW, false, false).toString();
-    @color public static String BG_CYAN = color(Color.CYAN, false, false).toString();
-    @color public static String BG_MAGENTA = color(Color.MAGENTA, false, false).toString();
-    @color public static String BG_BLACK = color(Color.BLACK, false, false).toString();
-    @color public static String BG_WHITE = color(Color.WHITE, false, false).toString();
+    @color public static String BG_RED = color(Color.RED, false, false, false);
+    @color public static String BG_GREEN = color(Color.GREEN, false, false, false);
+    @color public static String BG_BLUE = color(Color.BLUE, false, false, false);
+    @color public static String BG_YELLOW = color(Color.YELLOW, false, false, false);
+    @color public static String BG_CYAN = color(Color.CYAN, false, false, false);
+    @color public static String BG_MAGENTA = color(Color.MAGENTA, false, false, false);
+    @color public static String BG_BLACK = color(Color.BLACK, false, false, false);
+    @color public static String BG_WHITE = color(Color.WHITE, false, false, false);
     
     /*
      * Bright background colors
      */
-    @color public static String BG_BRIGHT_RED = color(Color.RED, true, false);
-    @color public static String BG_BRIGHT_GREEN = color(Color.GREEN, true, false);
-    @color public static String BG_BRIGHT_BLUE = color(Color.BLUE, true, false);
-    @color public static String BG_BRIGHT_YELLOW = color(Color.YELLOW, true, false);
-    @color public static String BG_BRIGHT_CYAN = color(Color.CYAN, true, false);
-    @color public static String BG_BRIGHT_MAGENTA = color(Color.MAGENTA, true, false);
-    @color public static String BG_BRIGHT_BLACK = color(Color.BLACK, true, false);
-    @color public static String BG_BRIGHT_WHITE = color(Color.WHITE, true, false);
+    @color public static String BG_BRIGHT_RED = color(Color.RED, true, false, false);
+    @color public static String BG_BRIGHT_GREEN = color(Color.GREEN, true, false, false);
+    @color public static String BG_BRIGHT_BLUE = color(Color.BLUE, true, false, false);
+    @color public static String BG_BRIGHT_YELLOW = color(Color.YELLOW, true, false, false);
+    @color public static String BG_BRIGHT_CYAN = color(Color.CYAN, true, false, false);
+    @color public static String BG_BRIGHT_MAGENTA = color(Color.MAGENTA, true, false, false);
+    @color public static String BG_BRIGHT_BLACK = color(Color.BLACK, true, false, false);
+    @color public static String BG_BRIGHT_WHITE = color(Color.WHITE, true, false, false);
     
     @color public static String BLINKON = special("blinkon");
     @color public static String BLINKOFF = special("blinkoff");
@@ -175,51 +175,43 @@ public final class TermColors {
 	}
     
     private static String special(String type){
-        if(SYSTEM.equals(SYS.UNIX)){
-            if(type.equals("blinkon")){
-                return "\033[5m";
-            }
-            if(type.equals("blinkoff")){
-                return "\033[25m";
-            }
-            if(type.equals("bold")){
-                return "\033[1m";
-            }
-            if(type.equals("strike")){
-                return "\033[9m";
-            }
-            if(type.equals("underline")){
-                return "\033[4m";
-            }
-            if(type.equals("italic")){
-                return "\033[3m";
-            }
+        
+        // On windows, these effects (except for reset) get printed as a changed background color.
+        // This is consistent with how broadcast() messages are printed to the console.
+        switch(type) {
+            case "blinkon"  : return "\033[5m";
+            case "blinkoff" : return "\033[25m";
+            case "bold"     : return "\033[1m";
+            case "strike"   : return "\033[9m";
+            case "underline": return "\033[4m";
+            case "italic"   : return "\033[3m";
+            case "reset"    : return "\033[m";
+            default         : return ""; 
         }
-		if(type.equals("reset")){
-			return "\033[m";
-		}
-        return "";
     }
     
     public static String reset(){
 		return RESET;
     }
     /**
-     * Returns the specified color code, foreground, and dark.
+     * Returns the specified color code, foreground, dark and prefixed with an ANSI reset.
      * @param c
      * @return 
      */
     public static String color(Color c){
-        return color(c, false, true);
+        return color(c, false, true, true);
     }
     /**
      * This is not the preferred method, however, if you must, you
      * can use this function to get the specified colors, given an awt Color.
      * Not all colors are supported, and bad colors will just return white.
-     * @param c
+     * @param c The color to set.
+     * @param bright
+     * @param foreground True to set the color of the foreground, false to set the color of the background.
+     * @param resetCurrent Resets ANSI modifiers before this ANSI color.
      * @return 
      */
-    private static String color(Color c, boolean bright, boolean foreground) {
+    private static String color(Color c, boolean bright, boolean foreground, boolean resetCurrent) {
 
         int color = 37;
         if (c.equals(Color.RED)) {
@@ -242,7 +234,8 @@ public final class TermColors {
         if(!foreground){
             color += 10;
         }
-        return "\033[" + (bright?"1;":"") + color + "m";
+        // ANSI: 0 = reset, 1 = bright_intensity, 22 = normal_intensity.
+        return "\033[" + (resetCurrent ? "0;" : "") + color + ";" + (bright ? "1" : "22") + "m";
     }
     
     public static void p(CharSequence c) {
