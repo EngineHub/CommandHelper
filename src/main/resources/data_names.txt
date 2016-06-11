@@ -403,6 +403,11 @@
 210_0=Repeating Command Block
 211_0=Chain Command Block
 212_0=Frosted Ice
+213_0=Magma
+214_0=Nether Wart Block
+215_0=Red Nether Brick
+216_0=Bone Block
+217_0=Structure Void
 255_0=Structure Block
 256_0=Iron Shovel
 257_0=Iron Pickaxe

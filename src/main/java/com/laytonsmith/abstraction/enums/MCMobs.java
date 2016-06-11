@@ -29,6 +29,7 @@ public enum MCMobs {
 	OCELOT,
 	PIG,
 	PIGZOMBIE,
+	POLARBEAR,
 	RABBIT,
 	SHEEP,
 	SHULKER,

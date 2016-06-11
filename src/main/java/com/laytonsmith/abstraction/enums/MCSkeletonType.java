@@ -9,5 +9,6 @@ import com.laytonsmith.annotations.MEnum;
 @MEnum("SkeletonType")
 public enum MCSkeletonType {
 	NORMAL,
-	WITHER
+	WITHER,
+	STRAY
 }

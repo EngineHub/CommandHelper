@@ -23,24 +23,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCHorse;
-import com.laytonsmith.abstraction.enums.MCBiomeType;
-import com.laytonsmith.abstraction.enums.MCCreeperType;
-import com.laytonsmith.abstraction.enums.MCDifficulty;
-import com.laytonsmith.abstraction.enums.MCDyeColor;
-import com.laytonsmith.abstraction.enums.MCEffect;
-import com.laytonsmith.abstraction.enums.MCEntityType;
-import com.laytonsmith.abstraction.enums.MCGameRule;
-import com.laytonsmith.abstraction.enums.MCMobs;
-import com.laytonsmith.abstraction.enums.MCOcelotType;
-import com.laytonsmith.abstraction.enums.MCPigType;
-import com.laytonsmith.abstraction.enums.MCProfession;
-import com.laytonsmith.abstraction.enums.MCSkeletonType;
-import com.laytonsmith.abstraction.enums.MCSound;
-import com.laytonsmith.abstraction.enums.MCTreeType;
-import com.laytonsmith.abstraction.enums.MCWolfType;
-import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
-import com.laytonsmith.abstraction.enums.MCWorldType;
-import com.laytonsmith.abstraction.enums.MCZombieType;
+import com.laytonsmith.abstraction.enums.*;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDifficulty;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
@@ -52,11 +35,11 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTreeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldType;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import org.bukkit.Chunk;
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -357,7 +340,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
     public CArray spawnMob(MCMobs name, String subClass, int qty, MCLocation l, Target t) {
         Class mobType = null;
-        CArray ids = new CArray(Target.UNKNOWN);
+		CArray ids = new CArray(t);
+		Location location = (Location) l.getHandle();
         try {
             switch (name) {
                 case CHICKEN:
@@ -465,20 +449,22 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 				case SHULKER:
 					mobType = Shulker.class;
 					break;
-
+				case POLARBEAR:
+					mobType = PolarBear.class;
+					break;
 			}
-        } catch (IllegalArgumentException e) {
-            throw new CREFormatException("No mob of type " + name + " exists", t);
-        }
-        for (int i = 0; i < qty; i++) {
-            MCEntity e = l.getWorld().spawn(l, mobType);
-            String[] subTypes = subClass.toUpperCase().split("-");
-            if (name == MCMobs.SPIDERJOCKEY) {
-                e.setPassenger(l.getWorld().spawn(l, Skeleton.class));
-            }
+		} catch (NoClassDefFoundError e) {
+			throw new CREFormatException("No mob of type " + name + " exists", t);
+		}
+		String[] subTypes = subClass.toUpperCase().split("-");
+		for (int i = 0; i < qty; i++) {
+			Entity e = w.spawn(location, mobType);
+			if (name == MCMobs.SPIDERJOCKEY) {
+				e.setPassenger(w.spawn(location, Skeleton.class));
+			}
 			if (!subClass.equals("")) { //if subClass is blank, none of this needs to run at all
-				if (((BukkitMCEntity)e).getHandle() instanceof Sheep) {
-					Sheep s = (Sheep) ((BukkitMCEntity)e).getHandle();
+				if(e instanceof Sheep){
+					Sheep s = (Sheep) e;
 					MCDyeColor color = MCDyeColor.WHITE;
 					for (String type : subTypes) {
 						try {
@@ -488,9 +474,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							throw new CREFormatException(type + " is not a valid color", t);
 						}
 					}
-				}
-				if(((BukkitMCEntity)e).getHandle() instanceof Ocelot){
-					Ocelot o = (Ocelot)((BukkitMCEntity)e).getHandle();
+				} else if(e instanceof Ocelot){
+					Ocelot o = (Ocelot) e;
 					MCOcelotType otype = MCOcelotType.WILD_OCELOT;
 					for (String type : subTypes) {
 						try {
@@ -500,9 +485,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							throw new CREFormatException(type + " is not an ocelot type", t);
 						}
 					}
-				}
-				if(((BukkitMCEntity)e).getHandle() instanceof Creeper){
-					Creeper c = (Creeper)((BukkitMCEntity)e).getHandle();
+				} else if(e instanceof Creeper){
+					Creeper c = (Creeper) e;
 					for (String type : subTypes) {
 						try {
 							MCCreeperType ctype = MCCreeperType.valueOf(type);
@@ -517,9 +501,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							throw new CREFormatException(type + " is not a creeper state", t);
 						}
 					}
-				}
-				if(((BukkitMCEntity)e).getHandle() instanceof Wolf){
-					Wolf w = (Wolf)((BukkitMCEntity)e).getHandle();
+				} else if(e instanceof Wolf){
+					Wolf w = (Wolf) e;
 					for (String type : subTypes) {
 						try {
 							MCWolfType wtype = MCWolfType.valueOf(type);
@@ -537,9 +520,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							throw new CREFormatException(type + " is not a wolf state", t);
 						}
 					}
-				}
-				if (((BukkitMCEntity)e).getHandle() instanceof Villager) {
-					Villager v = (Villager) ((BukkitMCEntity)e).getHandle();
+				} else if(e instanceof Villager){
+					Villager v = (Villager) e;
 					MCProfession job = MCProfession.FARMER;
 					for (String type : subTypes){
 						try {
@@ -549,9 +531,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							throw new CREFormatException(type + " is not a valid profession", t);
 						}
 					}
-				}
-				if (((BukkitMCEntity)e).getHandle() instanceof Enderman) {
-					Enderman en = (Enderman) ((BukkitMCEntity)e).getHandle();
+				} else if(e instanceof Enderman){
+					Enderman en = (Enderman) e;
 					for (String type : subTypes){
 						try {
 							MaterialData held = new MaterialData(Material.valueOf(type));
@@ -560,9 +541,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							throw new CREFormatException(type + " is not a valid material", t);
 						}
 					}
-				}
-				if(((BukkitMCEntity)e).getHandle() instanceof Slime){
-					Slime sl = (Slime)((BukkitMCEntity)e).getHandle();
+				} else if(e instanceof Slime){
+					Slime sl = (Slime) e;
 					for (String type : subTypes) {
 						if(!"".equals(type)){
 							try{
@@ -572,9 +552,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							}
 						}
 					}
-				}
-				if(((BukkitMCEntity)e).getHandle() instanceof Skeleton){
-					Skeleton sk = (Skeleton)((BukkitMCEntity)e).getHandle();
+				} else if(e instanceof Skeleton){
+					Skeleton sk = (Skeleton) e;
 					MCSkeletonType stype = MCSkeletonType.NORMAL;
 					for (String type : subTypes) {
 						try {
@@ -584,9 +563,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							throw new CREFormatException(type + " is not a skeleton type", t);
 						}
 					}
-				}
-				if(((BukkitMCEntity)e).getHandle() instanceof Zombie){
-					Zombie z = (Zombie)((BukkitMCEntity)e).getHandle();
+				} else if(e instanceof Zombie){
+					Zombie z = (Zombie) e;
 					for (String type : subTypes) {
 						try {
 							MCZombieType ztype = MCZombieType.valueOf(type);
@@ -596,6 +574,39 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 									break;
 								case VILLAGER:
 									z.setVillager(true);
+									break;
+								case VILLAGER_BLACKSMITH:
+									if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+										z.setVillagerProfession(Villager.Profession.BLACKSMITH);
+									} else {
+										z.setVillager(true);
+									}
+									break;
+								case VILLAGER_BUTCHER:
+									if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+										z.setVillagerProfession(Villager.Profession.BUTCHER);
+									} else {
+										z.setVillager(true);
+									}
+									break;
+								case VILLAGER_LIBRARIAN:
+									if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+										z.setVillagerProfession(Villager.Profession.LIBRARIAN);
+									} else {
+										z.setVillager(true);
+									}
+									break;
+								case VILLAGER_PRIEST:
+									if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+										z.setVillagerProfession(Villager.Profession.PRIEST);
+									} else {
+										z.setVillager(true);
+									}
+									break;
+								case HUSK:
+									if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_10)){
+										z.setVillagerProfession(Villager.Profession.HUSK);
+									}
 									break;
 							}
 						} catch (IllegalArgumentException ex){
@@ -610,9 +621,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							}
 						}
 					}
-				}
-				if(((BukkitMCEntity)e).getHandle() instanceof Pig){
-					Pig p = (Pig)((BukkitMCEntity)e).getHandle();
+				} else if(e instanceof Pig){
+					Pig p = (Pig) e;
 					for (String type : subTypes) {
 						try {
 							MCPigType ptype = MCPigType.valueOf(type);
@@ -627,9 +637,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							throw new CREFormatException(type + " is not a pig state", t);
 						}
 					}
-				}
-				if(((BukkitMCEntity) e).getHandle() instanceof Horse) {
-					Horse h = (Horse) ((BukkitMCEntity) e).getHandle();
+				} else if(e instanceof Horse) {
+					Horse h = (Horse) e;
 					for (String type : subTypes) {
 						try {
 							MCHorse.MCHorseVariant htype = MCHorse.MCHorseVariant.valueOf(type);

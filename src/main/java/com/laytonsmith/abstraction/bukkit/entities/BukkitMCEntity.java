@@ -330,4 +330,14 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 		e.setGlowing(glow);
 	}
 
+	@Override
+	public boolean hasGravity() {
+		return e.hasGravity();
+	}
+
+	@Override
+	public void setHasGravity(boolean gravity) {
+		e.setGravity(gravity);
+	}
+
 }

@@ -103,4 +103,8 @@ public interface MCEntity extends MCMetadatable {
 	public boolean isGlowing();
 	
 	public void setGlowing(Boolean glow);
+
+	public boolean hasGravity();
+
+	public void setHasGravity(boolean gravity);
 }

@@ -5,7 +5,7 @@ package com.laytonsmith.abstraction.enums;
  * 
  */
 public enum MCDamageCause {
-    /**
+        /**
          * Damage caused when an entity contacts a block such as a Cactus.
          * <p />
          * Damage: 1 (Cactus)
@@ -94,30 +94,66 @@ public enum MCDamageCause {
          * <p />
          * Damage: 1
          */
-        STARVATION,
-        /**
-         * Damage caused due to an ongoing poison effect
-         *
-         * Damage: 1
-         */
-        POISON,
-        /**
-         * Damage caused by being hit by a damage potion or spell
-         *
-         * Damage: variable
-         */
-        MAGIC,
-
+		STARVATION,
+		/**
+		 * Damage caused due to an ongoing poison effect
+		 * <p />
+		 * Damage: 1
+		 */
+		POISON,
+		/**
+		 * Damage caused by being hit by a damage potion or spell
+		 * <p />
+		 * Damage: variable
+		 */
+		MAGIC,
+		/**
+		 * Damage caused due to a snowman melting
+		 * <p />
+		 * Damage: 1
+		 */
 		MELTING,
+		/**
+		 * Damage caused by Wither potion effect
+		 */
 		WITHER,
+		/**
+		 * Damage caused by being hit by a falling block which deals damage
+		 * <p />
+		 * <b>Note:</b> Not every block deals damage
+		 * <p />
+		 * Damage: variable
+		 */
 		FALLING_BLOCK,
+		/**
+		 * Damage caused in retaliation to another attack by the Thorns
+		 * enchantment.
+		 * <p />
+		 * Damage: 1-4 (Thorns)
+		 */
 		THORNS,
+		/**
+		 * Damage caused by a dragon breathing fire.
+		 * <p />
+		 * Damage: variable
+		 */
 		DRAGON_BREATH,
+		/**
+		 * Damage caused when an entity runs into a wall.
+		 * <p />
+		 * Damage: variable
+		 */
 		FLY_INTO_WALL,
-        /**
-         * Custom damage.
-         * <p />
-         * Damage: variable
-         */
-        CUSTOM
+		/**
+		 * Damage caused when an entity steps on MAGMA.
+		 * <p />
+		 * Damage: 1
+		 */
+		HOT_FLOOR,
+		/**
+		 * Custom damage.
+		 * <p />
+		 * Damage: variable
+		 */
+		CUSTOM
 }
