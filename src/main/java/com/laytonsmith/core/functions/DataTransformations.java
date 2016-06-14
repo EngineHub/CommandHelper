@@ -172,6 +172,7 @@ public class DataTransformations {
 			DumperOptions options = new DumperOptions();
 			if (prettyPrint) {
 				options.setPrettyFlow(true);
+				options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 			}
 			Yaml yaml = new Yaml(options);
 			try{
