@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -354,7 +356,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * <li>double -> Double</li>
 	 * <li>string -> String</li>
 	 * <li>normal array -> ArrayList&lt;Object&gt;</li>
-	 * <li>associative array -> HashMap&lt;String, Object&gt;</li>
+	 * <li>associative array -> SortedMap&lt;String, Object&gt;</li>
 	 * <li>null -> null</li>
 	 * <li>resource -> Object</li>
 	 * </ul>
@@ -377,8 +379,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		} else if (c instanceof CArray) {
 			CArray ca = (CArray) c;
 			if (ca.inAssociativeMode()) {
-				//HashMap
-				HashMap<String, Object> map = new HashMap<String, Object>((int) ca.size());
+				//SortedMap
+				SortedMap<String, Object> map = new TreeMap<>();
 				for (String key : ca.stringKeySet()) {
 					map.put(key, GetPOJO(ca.get(key, Target.UNKNOWN)));
 				}
