@@ -91,10 +91,6 @@ public final class StaticLayer {
 		return convertor.GetPotionData(type, extended, upgraded);
 	}
 
-    public static MCPotionData GetPotionData(int data){
-        return convertor.GetPotionData(data);
-    }
-
     public static MCServer GetServer(){
         return convertor.GetServer();
     }

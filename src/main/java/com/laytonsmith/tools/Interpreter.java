@@ -814,11 +814,6 @@ public final class Interpreter {
 		}
 
 		@Override
-		public MCPotionData GetPotionData(int data) {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
-		}
-
-		@Override
 		public void Startup(CommandHelperPlugin chp) {
 
 		}

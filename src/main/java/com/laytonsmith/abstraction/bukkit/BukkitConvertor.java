@@ -93,7 +93,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Vehicle;
-import org.bukkit.event.Listener;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -111,7 +110,6 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionData;
-import org.bukkit.potion.PotionType;
 import org.yaml.snakeyaml.Yaml;
 
 import java.util.ArrayList;
@@ -223,69 +221,6 @@ public class BukkitConvertor extends AbstractConvertor {
 	public MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded){
 		return new BukkitMCPotionData(new PotionData(
 				BukkitMCPotionType.getConvertor().getConcreteEnum(type), extended, upgraded));
-	}
-
-	public MCPotionData GetPotionData(int data){
-		PotionType type;
-		switch (data & 0xF) {
-			case 0:
-				type = PotionType.WATER;
-				break;
-			case 1:
-				type = PotionType.REGEN;
-				break;
-			case 2:
-				type = PotionType.SPEED;
-				break;
-			case 3:
-				type = PotionType.FIRE_RESISTANCE;
-				break;
-			case 4:
-				type = PotionType.POISON;
-				break;
-			case 5:
-				type = PotionType.INSTANT_HEAL;
-				break;
-			case 6:
-				type = PotionType.NIGHT_VISION;
-				break;
-			case 8:
-				type = PotionType.WEAKNESS;
-				break;
-			case 9:
-				type = PotionType.STRENGTH;
-				break;
-			case 10:
-				type = PotionType.SLOWNESS;
-				break;
-			case 11:
-				type = PotionType.JUMP;
-				break;
-			case 12:
-				type = PotionType.INSTANT_DAMAGE;
-				break;
-			case 13:
-				type = PotionType.WATER_BREATHING;
-				break;
-			case 14:
-				type = PotionType.INVISIBILITY;
-				break;
-			case 7:
-			default:
-				type = PotionType.WATER;
-		}
-		PotionData pd;
-		if (type == PotionType.WATER) {
-			pd = new PotionData(PotionType.WATER);
-		} else {
-			int level = (data & 0x20) >> 5;
-			if ((data & 0x40) > 0) {
-				pd = new PotionData(type, true, level == 1);
-			} else {
-				pd = new PotionData(type, false, level == 1);
-			}
-		}
-		return new BukkitMCPotionData(pd);
 	}
 
 	@Override

@@ -749,12 +749,6 @@ public class StaticTest {
 		}
 
 		@Override
-		public MCPotionData GetPotionData(int data){
-			Convertor c = new BukkitConvertor();
-			return c.GetPotionData(data);
-		}
-
-		@Override
 		public int SetFutureRunnable(DaemonManager dm, long ms, Runnable r) {
 			//This needs fixing later
 			queue.invokeLater(dm, r);
