@@ -634,54 +634,55 @@ public class BasicLogic {
 					}
 				}
 			});
+                        final boolean hasDefaultCase = (children.size() & 0b00000001) == 0; // size % 2 == 0 -> Even number means there is a default.
 			for (int i = 1; i < children.size(); i += 2) {
-				//To standardize the rest of the code (and to optimize), go ahead and resolve array()
-				if (children.get(i).getData() instanceof CFunction
-						&& new DataHandling.array().getName().equals(children.get(i).getData().val())) {
-					CArray data = new CArray(t);
-					for (ParseTree child : children.get(i).getChildren()) {
-						if (child.getData().isDynamic()) {
-							throw new ConfigCompileException(notConstant, child.getTarget());
-						}
-						data.push(child.getData(), t);
-					}
-					children.set(i, new ParseTree(data, children.get(i).getFileOptions()));
-				}
-				//Now we validate that the values are constant and non-repeating.
-				if (children.size() % 2 == 0 && i == children.size() - 1) {
-					//Even number, means there is a default, so stop checking here
-					break;
-				}
-				if (children.get(i).getData() instanceof CArray) {
-					List<Construct> list = ((CArray) children.get(i).getData()).asList();
-					for (Construct c : list) {
-						if (c instanceof CSlice) {
-							for (Construct cc : ((CSlice) c).asList()) {
-								if (values.contains(cc)) {
-									throw new ConfigCompileException(alreadyContains, cc.getTarget());
-								}
-								values.add(cc);
-							}
-						} else {
-							if (c.isDynamic()) {
-								throw new ConfigCompileException(notConstant, c.getTarget());
-							}
-							if (values.contains(c)) {
-								throw new ConfigCompileException(alreadyContains, c.getTarget());
-							}
-							values.add(c);
-						}
-					}
-				} else {
-					Construct c = children.get(i).getData();
-					if (c.isDynamic()) {
-						throw new ConfigCompileException(notConstant, c.getTarget());
-					}
-					if (values.contains(c)) {
-						throw new ConfigCompileException(alreadyContains, c.getTarget());
-					}
-					values.add(c);
-				}
+                            if (hasDefaultCase && i == children.size() - 1) {
+                                // This is the default case code. Stop checking here.
+                                break;
+                            }
+                            //To standardize the rest of the code (and to optimize), go ahead and resolve array()
+                            if (children.get(i).getData() instanceof CFunction
+                                            && new DataHandling.array().getName().equals(children.get(i).getData().val())) {
+                                    CArray data = new CArray(t);
+                                    for (ParseTree child : children.get(i).getChildren()) {
+                                            if (child.getData().isDynamic()) {
+                                                    throw new ConfigCompileException(notConstant, child.getTarget());
+                                            }
+                                            data.push(child.getData(), t);
+                                    }
+                                    children.set(i, new ParseTree(data, children.get(i).getFileOptions()));
+                            }
+                            //Now we validate that the values are constant and non-repeating.
+                            if (children.get(i).getData() instanceof CArray) {
+                                    List<Construct> list = ((CArray) children.get(i).getData()).asList();
+                                    for (Construct c : list) {
+                                            if (c instanceof CSlice) {
+                                                    for (Construct cc : ((CSlice) c).asList()) {
+                                                            if (values.contains(cc)) {
+                                                                    throw new ConfigCompileException(alreadyContains, cc.getTarget());
+                                                            }
+                                                            values.add(cc);
+                                                    }
+                                            } else {
+                                                    if (c.isDynamic()) {
+                                                            throw new ConfigCompileException(notConstant, c.getTarget());
+                                                    }
+                                                    if (values.contains(c)) {
+                                                            throw new ConfigCompileException(alreadyContains, c.getTarget());
+                                                    }
+                                                    values.add(c);
+                                            }
+                                    }
+                            } else {
+                                    Construct c = children.get(i).getData();
+                                    if (c.isDynamic()) {
+                                            throw new ConfigCompileException(notConstant, c.getTarget());
+                                    }
+                                    if (values.contains(c)) {
+                                            throw new ConfigCompileException(alreadyContains, c.getTarget());
+                                    }
+                                    values.add(c);
+                            }
 			}
 
 			if ((children.size() > 3 || (children.size() > 1 && children.get(1).getData() instanceof CArray))
