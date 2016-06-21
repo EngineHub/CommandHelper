@@ -387,6 +387,14 @@ public class BasicLogicTest {
                 + "array(3, 4), correct,"
                 + "5, wrong)", null));
     }
+    
+    @Test(timeout = 10000)
+    public void testSwitchWithNestedArrayAsDefaultReturn() throws Exception {
+        assertEquals("{{correct}}", SRun("switch(5,"
+                + "'case1', wrong,"
+                + "'case2', also wrong,"
+                + " array(array('correct')))", null));
+    }
 
     @Test(timeout = 10000)
     public void testSequals() throws Exception {
