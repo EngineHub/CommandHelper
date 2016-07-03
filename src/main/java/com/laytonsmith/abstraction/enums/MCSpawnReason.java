@@ -43,4 +43,5 @@ public enum MCSpawnReason {
 	SILVERFISH_BLOCK,
 	MOUNT,
 	TRAP,
+	ENDER_PEARL
 }
