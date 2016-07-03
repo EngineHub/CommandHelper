@@ -117,6 +117,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
@@ -274,6 +275,11 @@ public class BukkitConvertor extends AbstractConvertor {
 					return null;
 				}
 			});
+		} catch(CancellationException ex) {
+			// Ignore the Exception when the plugin is disabled (server shutting down).
+			if(CommandHelperPlugin.self.isEnabled()) {
+				java.util.logging.Logger.getLogger(BukkitConvertor.class.getName()).log(Level.SEVERE, null, ex);
+			}
 		} catch (InterruptedException | ExecutionException ex) {
 			java.util.logging.Logger.getLogger(BukkitConvertor.class.getName()).log(Level.SEVERE, null, ex);
 		}
