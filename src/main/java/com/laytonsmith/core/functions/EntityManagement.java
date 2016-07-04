@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.MCArmorStand;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCEnderCrystal;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCExperienceOrb;
@@ -2615,6 +2616,19 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_DROPPED_ITEM_ITEMSTACK, ObjectGenerator.GetGenerator().item(item.getItemStack(), t), t);
 					specArray.set(entity_spec.KEY_DROPPED_ITEM_PICKUPDELAY, new CInt(item.getPickupDelay(), t), t);
 					break;
+				case ENDER_CRYSTAL:
+					MCEnderCrystal endercrystal = (MCEnderCrystal) entity;
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+						specArray.set(entity_spec.KEY_ENDERCRYSTAL_BASE, CBoolean.get(endercrystal.isShowingBottom()), t);
+						MCLocation location = endercrystal.getBeamTarget();
+						if(location == null){
+							specArray.set(entity_spec.KEY_ENDERCRYSTAL_BEAMTARGET, CNull.NULL, t);
+						} else {
+							specArray.set(entity_spec.KEY_ENDERCRYSTAL_BEAMTARGET,
+									ObjectGenerator.GetGenerator().location(location, false), t);
+						}
+					}
+					break;
 				case ENDERMAN:
 					MCEnderman enderman = (MCEnderman) entity;
 					MCMaterialData carried = enderman.getCarriedMaterial();
@@ -2786,6 +2800,8 @@ public class EntityManagement {
 		private static final String KEY_CREEPER_POWERED = "powered";
 		private static final String KEY_DROPPED_ITEM_ITEMSTACK = "itemstack";
 		private static final String KEY_DROPPED_ITEM_PICKUPDELAY = "pickupdelay";
+		private static final String KEY_ENDERCRYSTAL_BASE = "base";
+		private static final String KEY_ENDERCRYSTAL_BEAMTARGET = "beamtarget";
 		private static final String KEY_ENDERMAN_CARRIED = "carried";
 		private static final String KEY_EXPERIENCE_ORB_AMOUNT = "amount";
 		private static final String KEY_FALLING_BLOCK_BLOCK = "block";
@@ -2956,6 +2972,29 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_DROPPED_ITEM_PICKUPDELAY:
 								item.setPickupDelay(Static.getInt32(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case ENDER_CRYSTAL:
+					MCEnderCrystal endercrystal = (MCEnderCrystal) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_ENDERCRYSTAL_BASE:
+								endercrystal.setShowingBottom(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_ENDERCRYSTAL_BEAMTARGET:
+								Construct c = specArray.get(index, t);
+								if(c instanceof CNull){
+									endercrystal.setBeamTarget(null);
+								} else if(c instanceof CArray){
+									MCLocation l = ObjectGenerator.GetGenerator().location((CArray) c, endercrystal.getWorld(), t);
+									endercrystal.setBeamTarget(l);
+								} else {
+									throw new CRECastException("EnderCrystal beam target must be an array or null", t);
+								}
 								break;
 							default:
 								throwException(index, t);

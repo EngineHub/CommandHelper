@@ -33,6 +33,11 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_DROPPED_ITEM_ITEMSTACK%: An array representing the item.
 * %KEY_DROPPED_ITEM_PICKUPDELAY%: The delay before the item is available to be picked up.
 |-
+| ENDER_CRYSTAL
+|
+* %KEY_ENDERCRYSTAL_BASE%: If the EnderCrystal base is showing or not.
+* %KEY_ENDERCRYSTAL_BEAMTARGET%: The location the EnderCrystal beam is targeting, or null if there's no target.
+|-
 | ENDERMAN
 | 
 * %KEY_ENDERMAN_CARRIED%: The block that the Enderman is carring.
