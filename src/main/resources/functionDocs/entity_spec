@@ -5,6 +5,20 @@ array {entityID} Returns an associative array containing all the data of the giv
 ! scope="col" width="10%" | Entity type
 ! scope="col" width="70%" | Data
 |-
+| AREA_EFFECT_CLOUD
+|
+* %KEY_AREAEFFECTCLOUD_COLOR%: The color array of the particle.
+* %KEY_AREAEFFECTCLOUD_DURATION%: The duration of the cloud in ticks.
+* %KEY_AREAEFFECTCLOUD_DURATIONONUSE%: The amount the duration will change when the effects are applied.
+* %KEY_AREAEFFECTCLOUD_PARTICLE%: The particle which comprises the cloud (can be %PARTICLE%).
+* %KEY_AREAEFFECTCLOUD_POTIONMETA%: The potion meta array for the cloud.
+* %KEY_AREAEFFECTCLOUD_RADIUS%: The radius of the cloud.
+* %KEY_AREAEFFECTCLOUD_RADIUSONUSE%: The distance the radius will change when the effects are applied.
+* %KEY_AREAEFFECTCLOUD_RADIUSPERTICK%: The distance the radius will change per tick.
+* %KEY_AREAEFFECTCLOUD_REAPPLICATIONDELAY%: The interval in ticks for how often effects are applied to entities in cloud.
+* %KEY_AREAEFFECTCLOUD_SOURCE%: The source of the cloud. Can be living entity, dispenser location array, or null.
+* %KEY_AREAEFFECTCLOUD_WAITTIME%: The age of the cloud in ticks before effects can be applied.
+|-
 | ARROW
 | 
 * %KEY_ARROW_CRITICAL%: If this arrow is critical.
@@ -88,6 +102,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_LIGHTNING_EFFECT%: Whether the strike is an effect that does no damage. Not editable.
 |-
+| LINGERING_POTION
+|
+* %KEY_SPLASH_POTION_ITEM%: The item for the thrown potion.
+|-
 | MAGMA_CUBE
 | 
 * %KEY_SLIME_SIZE%: The size of the magma cube.
@@ -155,6 +173,12 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | SPLASH_POTION
 | 
 * %KEY_SPLASH_POTION_ITEM%: The item for the thrown potion.
+|-
+| TIPPED_ARROW
+|
+* %KEY_TIPPEDARROW_POTIONMETA%: The potion meta array for the tipped arrow.
+* %KEY_ARROW_CRITICAL%: If this arrow is critical.
+* %KEY_ARROW_KNOCKBACK%: The knockback strength.
 |-
 | VILLAGER
 | 

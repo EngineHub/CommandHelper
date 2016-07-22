@@ -3,6 +3,7 @@ package com.laytonsmith.abstraction.bukkit.entities;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
+import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockProjectileSource;
 import org.bukkit.entity.Entity;
@@ -51,6 +52,8 @@ public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 	public void setShooter(MCProjectileSource shooter){
 		if(shooter == null){
 			proj.setShooter(null);
+		} else if(shooter instanceof MCBlockProjectileSource){
+			proj.setShooter((BlockProjectileSource) shooter.getHandle());
 		} else {
 			proj.setShooter((ProjectileSource) shooter.getHandle());
 		}
