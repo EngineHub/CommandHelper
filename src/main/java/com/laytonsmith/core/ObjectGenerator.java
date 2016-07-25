@@ -480,11 +480,7 @@ public class ObjectGenerator {
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
 					MCPotionData potiondata = potionmeta.getBasePotionData();
 					if(potiondata != null){
-						CArray base = CArray.GetAssociativeArray(t);
-						base.set("type", potiondata.getType().name(), t);
-						base.set("extended", CBoolean.get(potiondata.isExtended()), t);
-						base.set("upgraded", CBoolean.get(potiondata.isUpgraded()), t);
-						ma.set("base", base, t);
+						ma.set("base", potionData(potiondata, t), t);
 					}
 				} else if(effects.size() > 0){
 					ma.set("main", ((CArray) effects.get(0, t)).get("id", t), t);
@@ -717,36 +713,8 @@ public class ObjectGenerator {
 						if(ma.containsKey("base")){
 							Construct potiondata = ma.get("base", t);
 							if(potiondata instanceof CArray){
-								CArray pda = (CArray) potiondata;
-								if(pda.containsKey("type")){
-									MCPotionType type = MCPotionType.valueOf(pda.get("type", t).val().toUpperCase());
-									boolean extended = false;
-									boolean upgraded = false;
-									if(pda.containsKey("extended")){
-										Construct cext = pda.get("extended", t);
-										if(cext instanceof CBoolean){
-											extended = ((CBoolean) cext).getBoolean();
-										} else {
-											throw new CREFormatException(
-													"Expected potion value for key \"extended\" to be a boolean", t);
-										}
-									}
-									if(pda.containsKey("upgraded")){
-										Construct cupg = pda.get("upgraded", t);
-										if(cupg instanceof CBoolean){
-											upgraded = ((CBoolean) cupg).getBoolean();
-										} else {
-											throw new CREFormatException(
-													"Expected potion value for key \"upgraded\" to be a boolean", t);
-										}
-									}
-									try {
-										MCPotionData pd = StaticLayer.GetPotionData(type, extended, upgraded);
-										((MCPotionMeta) meta).setBasePotionData(pd);
-									} catch(IllegalArgumentException ex){
-										throw new CREFormatException(ex.getMessage(), t, ex);
-									}
-								}
+								CArray pd = (CArray) potiondata;
+								((MCPotionMeta) meta).setBasePotionData(potionData((CArray) potiondata, t));
 							}
 						}
 					} else if (ma.containsKey("main")) {
@@ -1016,6 +984,43 @@ public class ObjectGenerator {
 			}
 		}
 		return ret;
+	}
+
+	public CArray potionData(MCPotionData mcpd, Target t) {
+		CArray base = CArray.GetAssociativeArray(t);
+		base.set("type", mcpd.getType().name(), t);
+		base.set("extended", CBoolean.get(mcpd.isExtended()), t);
+		base.set("upgraded", CBoolean.get(mcpd.isUpgraded()), t);
+		return base;
+	}
+
+	public MCPotionData potionData(CArray pd, Target t) {
+		MCPotionType type = MCPotionType.valueOf(pd.get("type", t).val().toUpperCase());
+		boolean extended = false;
+		boolean upgraded = false;
+		if(pd.containsKey("extended")){
+			Construct cext = pd.get("extended", t);
+			if(cext instanceof CBoolean){
+				extended = ((CBoolean) cext).getBoolean();
+			} else {
+				throw new CREFormatException(
+						"Expected potion value for key \"extended\" to be a boolean", t);
+			}
+		}
+		if(pd.containsKey("upgraded")){
+			Construct cupg = pd.get("upgraded", t);
+			if(cupg instanceof CBoolean){
+				upgraded = ((CBoolean) cupg).getBoolean();
+			} else {
+				throw new CREFormatException(
+						"Expected potion value for key \"upgraded\" to be a boolean", t);
+			}
+		}
+		try {
+			return StaticLayer.GetPotionData(type, extended, upgraded);
+		} catch(IllegalArgumentException ex){
+			throw new CREFormatException(ex.getMessage(), t, ex);
+		}
 	}
 
 	public Construct recipe(MCRecipe r, Target t) {
