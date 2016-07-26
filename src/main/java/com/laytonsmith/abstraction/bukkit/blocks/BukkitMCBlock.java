@@ -25,6 +25,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Sign;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Command;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -135,7 +136,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	
 	@Override
 	public boolean isCommandBlock() {
-		return(b.getType() == Material.COMMAND);
+		return Command.class.isAssignableFrom(b.getType().getData());
 	}
 
 	@Override
