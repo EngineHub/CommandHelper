@@ -1,16 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 
-/**
- *
- *
- */
 public interface MCFireworkBuilder {
 
 	/**
@@ -35,12 +26,6 @@ public interface MCFireworkBuilder {
 	 * @return
 	 */
 	MCFireworkBuilder addFadeColor(MCColor color);
-	/**
-	 * Sets the launch strength of the firework
-	 * @param i
-	 * @return
-	 */
-	MCFireworkBuilder setStrength(int i);
 
 	/**
 	 * Sets the firework type of the firework.
@@ -48,18 +33,11 @@ public interface MCFireworkBuilder {
 	 * @return
 	 */
 	MCFireworkBuilder setType(MCFireworkType type);
-	/**
-	 * Launches the firework from the specified location, upward.
-	 * @param l
-	 * @return entityID of the firework
-	 */
-	MCFirework launch(MCLocation l);
 
 	/**
-	 * Given the entered builder data, create a firework meta with these attributes
-	 * for a given MCFireworkMeta
-	 * @return
+	 * Returns the firework effect object created by this builder
+	 * @return MCFireworkEffect
 	 */
-	void createFireworkMeta(MCFireworkMeta meta);
+	MCFireworkEffect build();
 
 }

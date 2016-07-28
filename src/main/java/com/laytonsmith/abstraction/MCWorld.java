@@ -4,6 +4,7 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
+import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCEffect;
@@ -95,7 +96,9 @@ public interface MCWorld extends MCMetadatable {
 
 	public MCFallingBlock spawnFallingBlock(MCLocation loc, int type, byte data);
 
-    public MCBiomeType getBiome(int x, int z);
+	public MCFirework launchFirework(MCLocation l, int strength, List<MCFireworkEffect> effects);
+
+	public MCBiomeType getBiome(int x, int z);
 
     public void setBiome(int x, int z, MCBiomeType type);
 
