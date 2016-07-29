@@ -48,7 +48,9 @@ public class ItemMeta {
 			+ "<li>Leather Armor - color (color array (see Example))</li>"
 			+ "<li>Skulls - owner (string) NOTE: the visual change only applies to player skulls</li>"
 			+ "<li>Potions - potions (array of potion arrays), main(int, the id of the main effect)</li>"
-			+ "<li>Banners - basecolor (string), patterns (array of pattern arrays)"
+			+ "<li>Banners - basecolor (string), patterns (array of pattern arrays)</li>"
+			+ "<li>Fireworks - firework (array with strength (int), effects (array of effect arrays (see Example)))</li>"
+			+ "<li>Firework Charges - effect (single Firework effect array)"
 			+ "</ul>";
 	
 	@api(environments={CommandHelperEnvironment.class})
@@ -135,7 +137,12 @@ public class ItemMeta {
 							"{display: null, enchants: {}, lore: null, main: 8,"
 							+ " potions: {{ambient: true, id: 8, seconds: 180, strength: 5}}}"),
 					new ExampleScript("Demonstrates a custom banner", "msg(get_itemmeta(0))",
-							"{basecolor: WHITE, patterns: {{color: BLACK, shape: SKULL}, {color: RED, shape: CROSS}}}")
+							"{basecolor: WHITE, patterns: {{color: BLACK, shape: SKULL}, {color: RED, shape: CROSS}}}"),
+					new ExampleScript("Demonstrates a custom firework", "msg(get_itemmeta(null))",
+							"{firework: {effects: {{colors: {{b: 240, g: 240, r: 240}, {b: 44, g: 49, r: 179},"
+							+ " {b: 146, g: 49, r: 37}}, fade: {}, flicker: true, trail: false, type: STAR},"
+							+ " {colors: {{b: 255, g: 255, r: 255}}, fade: {{b: 0, g: 0, r: 255}}, flicker: false,"
+							+ " trail: true, type: BURST}}, strength: 2}}")
 			};
 		}
 		
@@ -238,7 +245,11 @@ public class ItemMeta {
 							+ " a music disc's author and name, firework meta, map meta, and stored enchantments."),
 					new ExampleScript("Demonstrates making a custom banner",
 							"set_itemmeta(0, array(basecolor: SILVER, patterns: array(array(color: BLACK, shape: SKULL))",
-							"This banner will be silver with a black skull.")
+							"This banner will be silver with a black skull."),
+					new ExampleScript("Demonstrates making a custom firework",
+							"set_itemmeta(null, array('firework': array('strength': 1, 'effects': array(array("
+							+ "'type': 'CREEPER', colors: array(array('r': 0, 'g': 255, 'b': 0)))))));",
+							"This firework will store a green creeper face effect.")
 			};
 		}
 		

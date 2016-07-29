@@ -5,6 +5,7 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCFireworkEffect;
 import com.laytonsmith.abstraction.MCItem;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLightningStrike;
@@ -16,12 +17,14 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFallingBlock;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFirework;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHorse;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItem;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLightningStrike;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
+import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.enums.*;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
@@ -42,12 +45,14 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import org.bukkit.Chunk;
 import org.bukkit.Effect;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
@@ -680,6 +685,18 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	public MCFallingBlock spawnFallingBlock(MCLocation loc, int type, byte data) {
 		Location mcloc = (Location)((BukkitMCLocation)loc).getHandle();
 		return new BukkitMCFallingBlock(w.spawnFallingBlock(mcloc, type, data));
+	}
+
+	@Override
+	public MCFirework launchFirework(MCLocation l, int strength, List<MCFireworkEffect> effects){
+		Firework firework = (Firework) w.spawnEntity(((BukkitMCLocation) l).asLocation(), EntityType.FIREWORK);
+		FireworkMeta meta = firework.getFireworkMeta();
+		meta.setPower(strength);
+		for(MCFireworkEffect effect : effects){
+			meta.addEffect((FireworkEffect) effect.getHandle());
+		}
+		firework.setFireworkMeta(meta);
+		return new BukkitMCFirework(firework);
 	}
 
 	@Override

@@ -6,7 +6,7 @@ import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCFireworkBuilder;
+import com.laytonsmith.abstraction.MCFireworkEffect;
 import com.laytonsmith.abstraction.MCItem;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
@@ -20,6 +20,7 @@ import com.laytonsmith.abstraction.MCTameable;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.enums.MCCreeperType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
@@ -69,7 +70,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -1221,7 +1221,7 @@ public class Minecraft {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class};
+			return new Class[]{CREFormatException.class,CRERangeException.class,CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -1248,98 +1248,31 @@ public class Minecraft {
 			} else {
 				options = CArray.GetAssociativeArray(t);
 			}
-			int strength = 2;
-			boolean flicker = false;
-			boolean trail = true;
-			Set<MCColor> colors = new HashSet<MCColor>();
-			colors.add(MCColor.WHITE);
-			Set<MCColor> fade = new HashSet<MCColor>();
-			MCFireworkType type = MCFireworkType.BALL;
 
+			int strength = 2;
 			if(options.containsKey("strength")){
 				strength = Static.getInt32(options.get("strength", t), t);
 				if (strength < 0 || strength > 128) {
 					throw new CRERangeException("Strength must be between 0 and 128", t);
 				}
 			}
-			if(options.containsKey("flicker")){
-				flicker = Static.getBoolean(options.get("flicker", t));
-			}
-			if(options.containsKey("trail")){
-				trail = Static.getBoolean(options.get("trail", t));
-			}
-			if(options.containsKey("colors")){
-				colors = parseColors(options.get("colors", t), t);
-			}
-			if(options.containsKey("fade")){
-				fade = parseColors(options.get("fade", t), t);
-			}
-			if(options.containsKey("type")){
-				try{
-					type = MCFireworkType.valueOf(options.get("type", t).val().toUpperCase());
-				} catch(IllegalArgumentException e){
-					throw new CREFormatException("Invalid type: " + options.get("type", t).val(), t);
-				}
-			}
 
-			MCFireworkBuilder fw = StaticLayer.GetConvertor().GetFireworkBuilder();
-			fw.setStrength(strength);
-			fw.setFlicker(flicker);
-			fw.setTrail(trail);
-			fw.setType(type);
-			for(MCColor color : colors){
-				fw.addColor(color);
-			}
-
-			for(MCColor color : fade){
-				fw.addFadeColor(color);
-			}
-
-			return new CString(fw.launch(loc).getUniqueId().toString(), t);
-		}
-
-		private Set<MCColor> parseColors(Construct c, Target t){
-			Set<MCColor> colors = new HashSet<MCColor>();
-			if(c instanceof CArray){
-				CArray ca = ((CArray)c);
-				if(ca.size() == 3
-						&& ca.get(0, t) instanceof CInt
-						&& ca.get(1, t) instanceof CInt
-						&& ca.get(2, t) instanceof CInt
-						){
-					//It's a single custom color
-					colors.add(parseColor(ca, t));
-				} else {
-					for(String key : ca.stringKeySet()){
-						Construct val = ca.get(key, t);
-						if(val instanceof CArray){
-							colors.add(parseColor(((CArray)val), t));
-						} else if(val instanceof CString){
-							colors.addAll(parseColor(((CString)val), t));
-						}
+			List<MCFireworkEffect> effects = new ArrayList<>();
+			if(options.containsKey("effects")) {
+				Construct cEffects = options.get("effects", t);
+				if(cEffects instanceof CArray){
+					for(Construct c : ((CArray) cEffects).asList()){
+						effects.add(ObjectGenerator.GetGenerator().fireworkEffect((CArray) c, t));
 					}
+				} else {
+					throw new CREFormatException("Firework effects must be an array.", t);
 				}
-			} else if(c instanceof CString){
-				colors.addAll(parseColor(((CString)c), t));
+			} else {
+				effects.add(ObjectGenerator.GetGenerator().fireworkEffect(options, t));
 			}
-			return colors;
-		}
 
-		private MCColor parseColor(CArray ca, Target t){
-			return StaticLayer.GetConvertor().GetColor(
-							Static.getInt32(ca.get(0, t), t),
-							Static.getInt32(ca.get(1, t), t),
-							Static.getInt32(ca.get(2, t), t)
-						);
-		}
-
-		private List<MCColor> parseColor(CString cs, Target t){
-			String split[] = cs.val().split("\\|");
-			List<MCColor> colors = new ArrayList<>();
-			for(String s : split){
-				 colors.add(StaticLayer.GetConvertor().GetColor(s, t));
-			}
-			return colors;
+			MCFirework firework = loc.getWorld().launchFirework(loc, strength, effects);
+			return new CString(firework.getUniqueId().toString(), t);
 		}
 
 		@Override
