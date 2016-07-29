@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.PureUtilities.Vector3D;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
@@ -322,12 +323,17 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	
 	@Override
 	public boolean isGlowing() {
-		return e.isGlowing();
+		if(ReflectionUtils.hasMethod(e.getClass(), "isGlowing", null)) { // Added around 1.9
+			return e.isGlowing();
+		}
+		return false;
 	}
 	
 	@Override
 	public void setGlowing(Boolean glow) {
-		e.setGlowing(glow);
+		if(ReflectionUtils.hasMethod(e.getClass(), "setGlowing", null)) { // Added around 1.9
+			e.setGlowing(glow);
+		}
 	}
 
 	@Override
