@@ -858,38 +858,38 @@ public class StringHandling {
                 public String getName() {
                     return "string_starts_with";
                 }
-                
+
                 @Override
                 public String docs() {
                     return "boolean {teststring, keyword} Determines if the provided teststring starts with the provided keyword. This could be used to find"
                                       + " the prefix of a line, for instance.";
                 }
-                
+
                 @Override
                 public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
                         String teststring = args[0].nval();
                         String keyword = args[1].nval();
                         Static.AssertNonCNull(t, args);
                         boolean ret = teststring.startsWith(keyword);
-                        
+
                         return CBoolean.get(ret);
                 }
-                
+
                 @Override
                 public Integer[] numArgs() {
                         return new Integer[]{2};
                 }
-                
+
                 @Override
                 public CHVersion since() {
                       return CHVersion.V3_3_2;
                 }
-                
+
                 @Override
                 public boolean isRestricted() {
                      return false;
                 }
-                
+
                 @Override
                 public Boolean runAsync() {
                     return null;
@@ -909,37 +909,37 @@ public class StringHandling {
                 public String getName() {
                     return "string_ends_with";
                 }
-                
+
                 @Override
                 public String docs() {
                     return "boolean {teststring, keyword} Determines if the provided teststring ends with the provided keyword.";
                 }
-                
+
                 @Override
                 public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
                         String teststring = args[0].nval();
                         String keyword = args[1].nval();
                         Static.AssertNonCNull(t, args);
                         boolean ret = teststring.endsWith(keyword);
-                        
+
                         return CBoolean.get(ret);
                 }
-                
+
                 @Override
                 public Integer[] numArgs() {
                         return new Integer[]{2};
                 }
-                
+
                 @Override
                 public CHVersion since() {
                       return CHVersion.V3_3_2;
                 }
-                
+
                 @Override
                 public boolean isRestricted() {
                      return false;
                 }
-                
+
                 @Override
                 public Boolean runAsync() {
                     return null;
@@ -971,13 +971,13 @@ public class StringHandling {
 			if(text.length() != 1) {
 			    throw new CREFormatException("Got \"" + text + "\" instead of expected character.", t);
 			}
-			
+
 			char check = text.charAt(0);
-			
+
 			if(!Character.isLetter(check)) {
 			    throw new CREFormatException("Got \"" + text + "\" instead of alphabetical character.", t);
 			}
-			
+
 			return CBoolean.get(Character.isUpperCase(check));
 		}
 
@@ -1013,8 +1013,8 @@ public class StringHandling {
 		public CHVersion since() {
 		    return CHVersion.V3_3_2;
 		}
-		
-		
+
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -1022,7 +1022,7 @@ public class StringHandling {
 						new ExampleScript("Basic usage", "char_is_uppercase('D')"),};
 		}
 	}
-        
+
 	@api
 	public static class string_position extends AbstractFunction implements Optimizable {
 
@@ -1212,7 +1212,7 @@ public class StringHandling {
 				throw new CREInsufficientArgumentsException(getName() + " expects 2 or more arguments", t);
 			}
 			int numArgs = args.length;
-			
+
 			// Get the Locale.
 			Locale locale = null;
 			String countryCode = args[0].nval();
@@ -1225,7 +1225,7 @@ public class StringHandling {
 				throw new CREFormatException("The given locale was not found on your system: "
 						+ countryCode, t);
 			}
-			
+
 			// Handle the formatting.
 			String formatString = args[1].val();
 			Object[] params = new Object[numArgs - 2];
@@ -1630,7 +1630,7 @@ public class StringHandling {
 		}
 
 	}
-	
+
 	@api
 	@seealso(lsprintf.class)
 	public static class sprintf extends lsprintf implements Optimizable {
@@ -1644,7 +1644,7 @@ public class StringHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 
 		@Override
 		public String docs() {
@@ -1656,7 +1656,7 @@ public class StringHandling {
 					+ " valid. All format specifiers in the documentation are valid. This works the same as lsprintf with the"
 					+ " locale set to \"DEFAULT\".";
 		}
-		
+
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 1){
@@ -2065,4 +2065,118 @@ public class StringHandling {
 		}
 
 	}
+
+    @api
+    public static class string_multiply extends AbstractFunction {
+
+	@Override
+	public Class<? extends CREThrowable>[] thrown() {
+	    return new Class[]{CRERangeException.class, CRECastException.class};
+	}
+
+	@Override
+	public boolean isRestricted() {
+	    return false;
+	}
+
+	@Override
+	public Boolean runAsync() {
+	    return null;
+	}
+
+	@Override
+	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+	    if(args[0] instanceof CNull){
+		return CNull.NULL;
+	    }
+	    String string = args[0].val();
+	    int times = Static.getInt32(args[1], t);
+	    if(times < 0) {
+		throw new CRERangeException("Expecting a value >= 0, but " + times + " was found.", t);
+	    }
+	    if(times == 0 || string.equals("")) {
+		return new CString("", t);
+	    }
+	    String s = repeat(string, times);
+	    return new CString(s, t);
+	}
+
+	// Code taken from Apache Commons, and modified.
+	private static final int PAD_LIMIT = 8192;
+	private static String repeat(String str, int repeat) {
+	    int inputLength = str.length();
+	    if (repeat == 1 || inputLength == 0) {
+		return str;
+	    }
+	    if (inputLength == 1 && repeat <= PAD_LIMIT) {
+		return padding(repeat, str.charAt(0));
+	    }
+
+	    int outputLength = inputLength * repeat;
+	    switch (inputLength) {
+		case 1:
+		    char ch = str.charAt(0);
+		    char[] output1 = new char[outputLength];
+		    for (int i = repeat - 1; i >= 0; i--) {
+			output1[i] = ch;
+		    }
+		    return new String(output1);
+		case 2:
+		    char ch0 = str.charAt(0);
+		    char ch1 = str.charAt(1);
+		    char[] output2 = new char[outputLength];
+		    for (int i = repeat * 2 - 2; i >= 0; i--, i--) {
+			output2[i] = ch0;
+			output2[i + 1] = ch1;
+		    }
+		    return new String(output2);
+		default:
+		    StringBuilder buf = new StringBuilder(outputLength);
+		    for (int i = 0; i < repeat; i++) {
+			buf.append(str);
+		    }
+		    return buf.toString();
+	    }
+	}
+
+	private static String padding(int repeat, char padChar) throws IndexOutOfBoundsException {
+	    final char[] buf = new char[repeat];
+	    for (int i = 0; i < buf.length; i++) {
+		buf[i] = padChar;
+	    }
+	    return new String(buf);
+	}
+
+	@Override
+	public String getName() {
+	    return "string_multiply";
+	}
+
+	@Override
+	public Integer[] numArgs() {
+	    return new Integer[]{2};
+	}
+
+	@Override
+	public String docs() {
+	    return "string {string, times} Multiplies a string the given number of times."
+		    + " For instance, string_multiply('a', 3) returns 'aaa'. If the string"
+		    + " is empty, an empty string is returned. If the string is null, null"
+		    + " is returned. If times is 0, an empty string is returned."
+		    + " All other string values are multiplied accordingly. Providing"
+		    + " a value less than 0 for times results in a RangeException.";
+	}
+
+	@Override
+	public Version since() {
+	    return CHVersion.V3_3_2;
+	}
+
+	@Override
+	public ExampleScript[] examples() throws ConfigCompileException {
+	    return new ExampleScript[]{
+		new ExampleScript("Basic usage", "string_multiply('a', 4)")
+	    };
+	}
+    }
 }
