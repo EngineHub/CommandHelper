@@ -7,11 +7,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.laytonsmith.abstraction.enums.MCNameTagVisibility;
+import com.laytonsmith.abstraction.enums.MCOption;
+import com.laytonsmith.abstraction.enums.MCOptionStatus;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOption;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOptionStatus;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCNameTagVisibility;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Team;
+import org.bukkit.scoreboard.Team.OptionStatus;
 
 public class BukkitMCTeam implements MCTeam {
 
@@ -55,6 +60,12 @@ public class BukkitMCTeam implements MCTeam {
 	public MCNameTagVisibility getNameTagVisibility() {
 		NameTagVisibility ntv = t.getNameTagVisibility();
 		return BukkitMCNameTagVisibility.getConvertor().getAbstractedEnum(ntv);
+	}
+	
+	@Override
+	public MCOptionStatus getOption(MCOption option) {
+		OptionStatus os = t.getOption(BukkitMCOption.getConvertor().getConcreteEnum(option));
+		return BukkitMCOptionStatus.getConvertor().getAbstractedEnum(os);
 	}
 
 	@Override
@@ -133,6 +144,11 @@ public class BukkitMCTeam implements MCTeam {
 	@Override
 	public void setNameTagVisibility(MCNameTagVisibility visibility) {
 		t.setNameTagVisibility(BukkitMCNameTagVisibility.getConvertor().getConcreteEnum(visibility));
+	}
+	
+	@Override
+	public void setOption(MCOption option, MCOptionStatus status) {
+		t.setOption(BukkitMCOption.getConvertor().getConcreteEnum(option), BukkitMCOptionStatus.getConvertor().getConcreteEnum(status));
 	}
 
 	@Override
