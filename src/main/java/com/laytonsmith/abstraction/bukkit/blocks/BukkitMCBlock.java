@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
+import com.laytonsmith.abstraction.blocks.MCDispenser;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCreatureSpawner;
@@ -17,14 +18,17 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMetadatable;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
-import java.util.ArrayList;
-import java.util.Collection;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.block.Dispenser;
 import org.bukkit.block.Sign;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Command;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  *
@@ -132,7 +136,17 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	
 	@Override
 	public boolean isCommandBlock() {
-		return(b.getType() == Material.COMMAND);
+		return Command.class.isAssignableFrom(b.getType().getData());
+	}
+
+	@Override
+	public MCDispenser getDispenser() {
+		return new BukkitMCDispenser((Dispenser)b.getState());
+	}
+
+	@Override
+	public boolean isDispenser() {
+		return(b.getType() == Material.DISPENSER);
 	}
 
 	@Override

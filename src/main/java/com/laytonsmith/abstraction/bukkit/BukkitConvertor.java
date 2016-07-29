@@ -102,6 +102,7 @@ import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -444,6 +445,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if (im instanceof EnchantmentStorageMeta) {
 			return new BukkitMCEnchantmentStorageMeta((EnchantmentStorageMeta) im);
+		}
+		if (im instanceof FireworkEffectMeta) {
+			return new BukkitMCFireworkEffectMeta((FireworkEffectMeta) im);
 		}
 		if (im instanceof FireworkMeta) {
 			return new BukkitMCFireworkMeta((FireworkMeta) im);
