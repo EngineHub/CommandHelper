@@ -28,7 +28,7 @@ public class BukkitMCOptionStatus extends EnumConvertor<MCOptionStatus, OptionSt
 
 	@Override
 	protected OptionStatus getConcreteEnumCustom(MCOptionStatus abstracted) {
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9_4)) {
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9)) {
 			return null;
 		}
 		return super.getConcreteEnumCustom(abstracted);

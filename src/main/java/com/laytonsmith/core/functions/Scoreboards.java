@@ -414,7 +414,7 @@ public class Scoreboards {
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
 					ops.set("nametagvisibility", new CString(team.getNameTagVisibility().name(), t), t);
 				}
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9_4)) {
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
 					ops.set("collisionrule", new CString(team.getOption(MCOption.COLLISION_RULE).name(), t), t);
 					ops.set("deathmessagevisibility", new CString(team.getOption(MCOption.DEATH_MESSAGE_VISIBILITY).name(), t), t);
 				}

@@ -323,17 +323,12 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	
 	@Override
 	public boolean isGlowing() {
-		if(ReflectionUtils.hasMethod(e.getClass(), "isGlowing", null)) { // Added around 1.9
-			return e.isGlowing();
-		}
-		return false;
+		return e.isGlowing();
 	}
 	
 	@Override
 	public void setGlowing(Boolean glow) {
-		if(ReflectionUtils.hasMethod(e.getClass(), "setGlowing", null)) { // Added around 1.9
-			e.setGlowing(glow);
-		}
+		e.setGlowing(glow);
 	}
 
 	@Override
