@@ -206,6 +206,14 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 		}
 		return blocks;
 	}
+	
+	@Override
+	public boolean hasAI() {
+		if(ReflectionUtils.hasMethod(le.getClass(), "hasAI", null)) { // Added in 1.9.2
+			return le.hasAI();
+		}
+		return true; // We'll assume the entity does have AI enabled
+	}
 
 	/**
 	 * @param potionID - ID of the potion
@@ -373,11 +381,23 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public boolean isGliding() {
-		return le.isGliding();
+		if(ReflectionUtils.hasMethod(le.getClass(), "isGliding", null)) { // Added around 1.9
+			return le.isGliding();
+		}
+		return false;
 	}
 
 	@Override
 	public void setGliding(Boolean glide) {
-		le.setGliding(glide);
+		if(ReflectionUtils.hasMethod(le.getClass(), "setGliding", null, Boolean.class)) { // Added around 1.9
+			le.setGliding(glide);
+		}
+	}
+	
+	@Override
+	public void setAI(Boolean ai) {
+		if(ReflectionUtils.hasMethod(le.getClass(), "setAI", null, Boolean.class)) { // Added in 1.9.2
+			le.setAI(ai);
+		}
 	}
 }

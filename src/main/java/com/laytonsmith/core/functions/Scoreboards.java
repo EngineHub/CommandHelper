@@ -9,6 +9,8 @@ import com.laytonsmith.abstraction.MCTeam;
 import com.laytonsmith.abstraction.enums.MCCriteria;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.abstraction.enums.MCNameTagVisibility;
+import com.laytonsmith.abstraction.enums.MCOption;
+import com.laytonsmith.abstraction.enums.MCOptionStatus;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
@@ -412,11 +414,16 @@ public class Scoreboards {
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
 					ops.set("nametagvisibility", new CString(team.getNameTagVisibility().name(), t), t);
 				}
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
+					ops.set("collisionrule", new CString(team.getOption(MCOption.COLLISION_RULE).name(), t), t);
+					ops.set("deathmessagevisibility", new CString(team.getOption(MCOption.DEATH_MESSAGE_VISIBILITY).name(), t), t);
+				}
 				to.set("options", ops, t);
 				CArray pl = new CArray(t);
 				for (String entry : team.getEntries()) {
 					pl.push(new CString(entry, t), t);
 				}
+				
 				to.set("players", pl, t);
 				ret.push(to, t);
 			}
@@ -1127,6 +1134,28 @@ public class Scoreboards {
 					}
 					team.setNameTagVisibility(visibility);
 				}
+				if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
+					if(options.containsKey("collisionrule")) {
+						MCOptionStatus collision;
+						try {
+							collision = MCOptionStatus.valueOf(options.get("collisionrule", t).val().toUpperCase());
+						} catch (IllegalArgumentException iae) {
+							throw new CREFormatException("Unknown collisionrule: "
+							+ options.get("collisionrule", t).val(), t);
+						}
+						team.setOption(MCOption.COLLISION_RULE, collision);
+					}
+					if(options.containsKey("deathmessagevisibility")) {
+						MCOptionStatus visibility;
+						try {
+							visibility = MCOptionStatus.valueOf(options.get("deathmessagevisibility", t).val().toUpperCase());
+						} catch (IllegalArgumentException iae) {
+							throw new CREFormatException("Unknown deathmessagevisibility: "
+							+ options.get("deathmessagevisibility", t).val(), t);
+						}
+						team.setOption(MCOption.DEATH_MESSAGE_VISIBILITY, visibility);
+					}
+				}
 			} else {
 				throw new CREFormatException("Expected arg 2 to be an array.", t);
 			}
@@ -1146,7 +1175,7 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "void {teamName, array, [scoreboard]} Sets various options about the team from an array,"
-					+ " checking for keys 'friendlyfire', 'friendlyinvisibles' and 'nametagvisibility'. " + DEF_MSG;
+					+ " checking for keys 'friendlyfire', 'collisionrule', 'deathmessagevisibility', 'friendlyinvisibles' and 'nametagvisibility'. " + DEF_MSG;
 		}
 		
 		@Override
