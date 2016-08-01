@@ -72,9 +72,9 @@ public class BukkitMCScoreboard implements MCScoreboard {
 
 	@Override
 	public Set<String> getEntries() {
-		if(ReflectionUtils.hasMethod(s.getClass(), "getEntries", null)){
+		try {
 			return s.getEntries();
-		} else {
+		} catch(NoSuchMethodError ex){
 			// Probably 1.7.8 or prior
 			Set<String> ret = new HashSet<>();
 			for (OfflinePlayer o : (Set<OfflinePlayer>) ReflectionUtils.invokeMethod(s, "getPlayers")) {
@@ -96,11 +96,11 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	@Override
 	public Set<MCScore> getScores(String entry) {
 		Set<MCScore> ret = new HashSet<>();
-		if(ReflectionUtils.hasMethod(s.getClass(), "getScores", null, String.class)){
+		try {
 			for (Score o : s.getScores(entry)) {
 				ret.add(new BukkitMCScore(o));
 			}
-		} else {
+		} catch(NoSuchMethodError ex){
 			// Probably 1.7.8 or prior
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			for (Score o : (Set<Score>) ReflectionUtils.invokeMethod(s, "getScores", player)) {
@@ -140,9 +140,9 @@ public class BukkitMCScoreboard implements MCScoreboard {
 
 	@Override
 	public void resetScores(String entry) {
-		if(ReflectionUtils.hasMethod(s.getClass(), "resetScores", null, String.class)){
+		try {
 			s.resetScores(entry);
-		} else {
+		} catch(NoSuchMethodError ex){
 			// Probably 1.7.8 or prior
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			ReflectionUtils.invokeMethod(s, "resetScores", player);

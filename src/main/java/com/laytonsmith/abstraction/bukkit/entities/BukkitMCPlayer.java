@@ -403,24 +403,25 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void setSpectatorTarget(MCEntity entity) {
-		if(!ReflectionUtils.hasMethod(p.getClass(), "setSpectatorTarget", null, Entity.class)){
+		try {
+			if(entity == null){
+				p.setSpectatorTarget(null);
+				return;
+			}
+			p.setSpectatorTarget((Entity) entity.getHandle());
+		} catch(NoSuchMethodError ex){
 			// Probably 1.8.6 or prior
-			return;
 		}
-		if(entity == null) {
-			p.setSpectatorTarget(null);
-			return;
-		}
-		p.setSpectatorTarget((Entity) entity.getHandle());
 	}
 
 	@Override
 	public MCEntity getSpectatorTarget() {
-		if(!ReflectionUtils.hasMethod(p.getClass(), "getSpectatorTarget", null)){
+		try {
+			return BukkitConvertor.BukkitGetCorrectEntity(p.getSpectatorTarget());
+		} catch(NoSuchMethodError ex){
 			// Probably 1.8.6 or prior
 			return null;
 		}
-		return BukkitConvertor.BukkitGetCorrectEntity(p.getSpectatorTarget());
 	}
 
 	@Override

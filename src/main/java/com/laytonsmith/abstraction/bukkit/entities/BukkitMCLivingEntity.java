@@ -209,10 +209,12 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	
 	@Override
 	public boolean hasAI() {
-		if(ReflectionUtils.hasMethod(le.getClass(), "hasAI", null)) { // Added in 1.9.2
+		try {
 			return le.hasAI();
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.9.2
+			return true;
 		}
-		return true; // We'll assume the entity does have AI enabled
 	}
 
 	/**
@@ -381,23 +383,29 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public boolean isGliding() {
-		if(ReflectionUtils.hasMethod(le.getClass(), "isGliding", null)) { // Added around 1.9
+		try {
 			return le.isGliding();
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.9
+			return false;
 		}
-		return false;
 	}
 
 	@Override
 	public void setGliding(Boolean glide) {
-		if(ReflectionUtils.hasMethod(le.getClass(), "setGliding", null, Boolean.class)) { // Added around 1.9
+		try {
 			le.setGliding(glide);
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.9
 		}
 	}
 	
 	@Override
 	public void setAI(Boolean ai) {
-		if(ReflectionUtils.hasMethod(le.getClass(), "setAI", null, Boolean.class)) { // Added in 1.9.2
+		try {
 			le.setAI(ai);
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.9.2
 		}
 	}
 }

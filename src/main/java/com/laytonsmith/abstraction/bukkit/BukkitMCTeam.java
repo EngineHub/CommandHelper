@@ -3,20 +3,20 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCTeam;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.laytonsmith.abstraction.enums.MCNameTagVisibility;
 import com.laytonsmith.abstraction.enums.MCOption;
 import com.laytonsmith.abstraction.enums.MCOptionStatus;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCNameTagVisibility;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOption;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOptionStatus;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCNameTagVisibility;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.scoreboard.Team.OptionStatus;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class BukkitMCTeam implements MCTeam {
 
@@ -27,9 +27,9 @@ public class BukkitMCTeam implements MCTeam {
 
 	@Override
 	public void addEntry(String entry) {
-		if(ReflectionUtils.hasMethod(t.getClass(), "addEntry", null, String.class)){
+		try {
 			t.addEntry(entry);
-		} else {
+		} catch(NoSuchMethodError ex){
 			// Probably 1.8.5 or prior
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			ReflectionUtils.invokeMethod(t, "addPlayer", player);
@@ -71,11 +71,11 @@ public class BukkitMCTeam implements MCTeam {
 	@Override
 	public Set<String> getEntries() {
 		Set<String> ret = new HashSet<String>();
-		if(ReflectionUtils.hasMethod(t.getClass(), "getEntries", null)){
+		try {
 			for (String e : t.getEntries()) {
 				ret.add(e);
 			}
-		} else {
+		} catch(NoSuchMethodError ex){
 			// Probably 1.8.5 or prior
 			for (OfflinePlayer o : (Set<OfflinePlayer>) ReflectionUtils.invokeMethod(t, "getPlayers")) {
 				ret.add(o.getName());
@@ -106,9 +106,9 @@ public class BukkitMCTeam implements MCTeam {
 
 	@Override
 	public boolean hasEntry(String entry) {
-		if(ReflectionUtils.hasMethod(t.getClass(), "hasEntry", null, String.class)){
+		try {
 			return t.hasEntry(entry);
-		} else {
+		} catch(NoSuchMethodError ex){
 			// Probably 1.8.5 or prior
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			return (boolean) ReflectionUtils.invokeMethod(t, "hasPlayer", player);
@@ -117,9 +117,9 @@ public class BukkitMCTeam implements MCTeam {
 
 	@Override
 	public boolean removeEntry(String entry) {
-		if(ReflectionUtils.hasMethod(t.getClass(), "removeEntry", null, String.class)){
+		try {
 			return t.removeEntry(entry);
-		} else {
+		} catch(NoSuchMethodError ex){
 			// Probably 1.8.5 or prior
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			return (boolean) ReflectionUtils.invokeMethod(t, "removePlayer", player);
