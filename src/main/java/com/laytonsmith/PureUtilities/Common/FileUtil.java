@@ -17,7 +17,7 @@ import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
 import org.mozilla.intl.chardet.nsPSMDetector;
 
 /**
- * 
+ *
  */
 public class FileUtil {
 
@@ -25,7 +25,7 @@ public class FileUtil {
 	}
 	public static final int OVERWRITE = 0;
 	public static final int APPEND = 1;
-		
+
 	private static final Map<String, Object> fileLocks = new HashMap<>();
 	private static final Map<String, Integer> fileLockCounter = new HashMap<>();
 	/**
@@ -34,7 +34,7 @@ public class FileUtil {
 	 * Though process safe, file locks are not thread safe -.-
 	 * @param file
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private static synchronized Object getLock(File file) throws IOException{
 		String canonical = file.getAbsoluteFile().getCanonicalPath();
@@ -45,7 +45,7 @@ public class FileUtil {
 		fileLockCounter.put(canonical, fileLockCounter.get(canonical) + 1);
 		return fileLocks.get(canonical);
 	}
-	
+
 	private static synchronized void freeLock(File file) throws IOException{
 		String canonical = file.getAbsoluteFile().getCanonicalPath();
 		fileLockCounter.put(canonical, fileLockCounter.get(canonical) - 1);
@@ -67,7 +67,7 @@ public class FileUtil {
 	public static String read(File file, String charset) throws IOException{
 			return StreamUtils.GetString(readAsStream(file), charset);
 	}
-	
+
 	/**
 	 * Returns the contents of this file as a string
 	 *
@@ -115,7 +115,7 @@ public class FileUtil {
 //				}
 //			}
 //		} finally {
-//			freeLock(file);			
+//			freeLock(file);
 //		}
 //	    FileInputStream fis = new FileInputStream(f);
 //	    try{
@@ -126,15 +126,15 @@ public class FileUtil {
 //		    System.gc();
 //	    }
 	}
-	
+
 	/**
 	 * Works the same as write(String, File, int, false).
 	 * @param data
 	 * @param file
 	 * @param mode
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	public static void write(String data, File file, int mode) throws IOException{		
+	public static void write(String data, File file, int mode) throws IOException{
 		write(data, file, mode, false);
 	}
 
@@ -173,7 +173,7 @@ public class FileUtil {
 //					try {
 //						Thread.sleep(sleepTime);
 //						sleepTime += 10;
-//						sleepTimes++;						
+//						sleepTimes++;
 //					} catch (InterruptedException ex) {
 //						//
 //					}
@@ -187,7 +187,7 @@ public class FileUtil {
 //						} else {
 //							raf.seek(raf.length());
 //						}
-//						//Write out the data				
+//						//Write out the data
 //						MappedByteBuffer buf = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, data.length);
 //						buf.put(data);
 //						buf.force();
@@ -235,7 +235,7 @@ public class FileUtil {
 	public static void write(String s, File f) throws IOException {
 		write(s, f, OVERWRITE);
 	}
-	
+
 	/**
 	 * Shorthand for write(s, f, OVERWRITE, create)
 	 */
@@ -394,13 +394,13 @@ public class FileUtil {
 			return file.delete();
 		}
 	}
-	
+
 	/**
 	 * Returns the most likely character encoding for this file. The default is
 	 * "ASCII" and is probably the most common.
 	 * @param file
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static String getFileCharset(File file) throws IOException {
 		int lang = nsPSMDetector.ALL;
@@ -413,7 +413,7 @@ public class FileUtil {
 				result.setObject(charset);
 			}
 		});
-		
+
 		BufferedInputStream imp = null;
 		try{
 			imp = new BufferedInputStream(new FileInputStream(file));
@@ -421,7 +421,7 @@ public class FileUtil {
 			int len;
 			boolean done = false;
 			boolean isAscii = true;
-			
+
 			while((len=imp.read(buf, 0, buf.length)) != -1){
 				if(isAscii){
 					isAscii = det.isAscii(buf, len);
