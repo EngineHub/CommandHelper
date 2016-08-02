@@ -231,7 +231,10 @@ public class Main {
 		args = new String[]{"--help"};
 	    }
 
-	    AnnotationChecks.checkForceImplementation();
+	    // I'm not sure why this is in Main, but if this breaks something, it needs to be put back.
+	    // However, if it is put back, then it needs to be figured out why this causes the terminal
+	    // to lose focus on mac.
+	    //AnnotationChecks.checkForceImplementation();
 
 	    ArgumentParser mode;
 	    ArgumentParser.ArgumentParserResults parsedArgs;

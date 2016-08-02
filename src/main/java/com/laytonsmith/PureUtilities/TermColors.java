@@ -1,7 +1,6 @@
 package com.laytonsmith.PureUtilities;
 
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import java.awt.Color;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
