@@ -207,7 +207,7 @@ public class DocGenTemplates {
 
 		@Override
 		public String generate(String ... args) {
-			Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(datasource.class);
+			Set<Class<?>> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(datasource.class);
 			Pattern p = Pattern.compile("(?s)\\s*(.*?)\\s*\\{\\s*(.*?)\\s*\\}\\s*(.*)\\s*$");
 			SortedSet<String> set = new TreeSet<String>();
 			for(Class c : classes){
@@ -300,7 +300,7 @@ public class DocGenTemplates {
 			set.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class));
 			for(Class<CREThrowable> c : set){
 				// This is suuuuuuper evil, but we don't want to have to deal with the exception constructors, we're
-				// just after the documentation stuff.				
+				// just after the documentation stuff.
 				SimpleDocumentation d = (SimpleDocumentation) ReflectionUtils.instantiateUnsafe(c);
 				b.append("===").append(d.getName()).append("===\n");
 				b.append(d.docs());

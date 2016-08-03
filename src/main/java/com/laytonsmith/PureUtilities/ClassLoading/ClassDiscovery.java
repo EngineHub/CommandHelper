@@ -784,7 +784,7 @@ public class ClassDiscovery {
 	 * @param annotation
 	 * @return
 	 */
-	public Set<Class> loadClassesWithAnnotation(Class<? extends Annotation> annotation) {
+	public Set<Class<?>> loadClassesWithAnnotation(Class<? extends Annotation> annotation) {
 		return loadClassesWithAnnotation(annotation, getDefaultClassLoader(), true);
 	}
 
@@ -799,8 +799,8 @@ public class ClassDiscovery {
 	 * @param initialize
 	 * @return
 	 */
-	public Set<Class> loadClassesWithAnnotation(Class<? extends Annotation> annotation, ClassLoader loader, boolean initialize) {
-		Set<Class> set = new HashSet<>();
+	public Set<Class<?>> loadClassesWithAnnotation(Class<? extends Annotation> annotation, ClassLoader loader, boolean initialize) {
+		Set<Class<?>> set = new HashSet<>();
 		for (ClassMirror<?> cm : getClassesWithAnnotation(annotation)) {
 			try {
 				set.add(cm.loadClass(loader, initialize));
@@ -836,11 +836,11 @@ public class ClassDiscovery {
 		fieldAnnotationCache.put(annotation, mirrors);
 		return mirrors;
 	}
-	
+
 	/**
 	 * Returns all methods, including constructors, with the specified annotations
 	 * @param annotation
-	 * @return 
+	 * @return
 	 */
 	public Set<MethodMirror> getMethodsWithAnnotation(Class<? extends Annotation> annotation) {
 		if (methodAnnotationCache.containsKey(annotation)) {
@@ -896,11 +896,11 @@ public class ClassDiscovery {
 			throw new NoClassDefFoundError();
 		}
 	}
-	
+
 	/**
 	 * Returns all ConstructorMirrors with the given annotation.
 	 * @param annotation
-	 * @return 
+	 * @return
 	 */
 	public Set<ConstructorMirror> getConstructorsWithAnnotation(Class<? extends Annotation> annotation){
 		if (constructorAnnotationCache.containsKey(annotation)) {
@@ -918,22 +918,22 @@ public class ClassDiscovery {
 		constructorAnnotationCache.put(annotation, mirrors);
 		return mirrors;
 	}
-	
+
 	/**
 	 * Loads all Constructors with the given annotation.
 	 * @param annotation
-	 * @return 
+	 * @return
 	 */
 	public Set<Constructor> loadConstructorsWithAnnotation(Class<? extends Annotation> annotation){
 		return loadConstructorsWithAnnotation(annotation, getDefaultClassLoader(), true);
 	}
-	
+
 	/**
 	 * Loads all Constructors with the given annotation, using the specified classloader.
 	 * @param annotation
 	 * @param loader
 	 * @param initialize
-	 * @return 
+	 * @return
 	 */
 	public Set<Constructor> loadConstructorsWithAnnotation(Class<? extends Annotation> annotation, ClassLoader loader, boolean initialize){
 		Set<Constructor> set = new HashSet<>();

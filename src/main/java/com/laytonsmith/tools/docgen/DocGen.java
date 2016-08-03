@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
 
 /**
  *
- * 
+ *
  */
 public class DocGen {
 
@@ -57,7 +57,7 @@ public class DocGen {
 			Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
 			CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
-			
+
 			//StreamUtils.GetSystemOut().println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
 			StreamUtils.GetSystemOut().println(examples("if", true));
 			//System.exit(0);
@@ -70,7 +70,7 @@ public class DocGen {
 			System.exit(0);
 		}
     }
-	
+
 	public static String examples(String function, boolean staged) throws Exception {
 		FunctionBase fb = FunctionList.getFunction(new CFunction(function, Target.UNKNOWN));
 		if(fb instanceof Function){
@@ -126,7 +126,7 @@ public class DocGen {
 			} else {
 				exampleBuilder.append("Sorry, there are no examples for this function! :(");
 			}
-			
+
 			Class[] seeAlso = f.seeAlso();
 			String seeAlsoText = "";
 			if(seeAlso != null && seeAlso.length > 0){
@@ -148,7 +148,7 @@ public class DocGen {
 					}
 				}
 			}
-			
+
 			Map<String, String> templateFields = new HashMap<>();
 			templateFields.put("function_name", f.getName());
 			templateFields.put("returns", di.ret);
@@ -162,8 +162,8 @@ public class DocGen {
 			templateFields.put("examples", exampleBuilder.toString());
 			templateFields.put("staged", staged?"Staged/":"");
 			templateFields.put("seeAlso", seeAlsoText);
-					
-					
+
+
 			String template = StreamUtils.GetString(DocGenTemplates.class.getResourceAsStream("/templates/example_templates"));
 			//Find all the %%templates%% in the template
 			Matcher m = Pattern.compile("%%(.*?)%%").matcher(template);
@@ -188,8 +188,9 @@ public class DocGen {
 	 * @param platform The platform we're using
 	 * @param staged Is this for the staged wiki?
 	 * @return
-	 * @throws ConfigCompileException 
+	 * @throws ConfigCompileException
 	 */
+    @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
     public static String functions(MarkupType type, api.Platforms platform, boolean staged) throws ConfigCompileException {
         Set<FunctionBase> functions = FunctionList.getFunctionList(platform);
         HashMap<Class, ArrayList<FunctionBase>> functionlist = new HashMap<Class, ArrayList<FunctionBase>>();
@@ -206,7 +207,7 @@ public class DocGen {
             }
             fl.add(f);
         }
-        if (type == MarkupType.HTML) {			
+        if (type == MarkupType.HTML) {
             out.append("Command Helper uses a language called MethodScript, which greatly extend the capabilities of the plugin, "
                     + "and make the plugin a fully "
                     + "<a href=\"http://en.wikipedia.org/wiki/Turing_Complete\">Turing Complete</a> language. "
@@ -354,7 +355,7 @@ public class DocGen {
                             + "| " + di.ret + "\n"
                             + "| " + di.args + "\n"
                             + "| " + thrown.toString() + "\n"
-                            + "| " + (di.topDesc != null ? di.topDesc + " [[CommandHelper/" + (staged?"Staged/":"") + "API/" + f.getName() + "#Description|See More...]]" : di.desc) 
+                            + "| " + (di.topDesc != null ? di.topDesc + " [[CommandHelper/" + (staged?"Staged/":"") + "API/" + f.getName() + "#Description|See More...]]" : di.desc)
 							+ (hasExample?"<br />([[CommandHelper/" + (staged?"Staged/":"") + "API/" + f.getName() + "#Examples|Examples...]])":"") + "\n"
                             + "| " + since + "\n"
                             + "| " + restricted + "\n");
@@ -392,7 +393,7 @@ public class DocGen {
         }
 		return out.toString();
     }
-    
+
     public static String Template(String template, boolean staged){
 		Map<String, String> customTemplates = new HashMap<String, String>();
 		customTemplates.put("staged", staged?"Staged/":"");
@@ -400,14 +401,14 @@ public class DocGen {
     }
 
     public static String events(MarkupType type) {
-        Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
+        Set<Class<?>> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
         Set<Documentation> list = new TreeSet<Documentation>();
-        for (Class c : classes) {
+        for (Class<?> c : classes) {
             if (Event.class.isAssignableFrom(c)
                     && Documentation.class.isAssignableFrom(c)) {
                 try {
                     //First, we have to instatiate the event.
-                    Constructor<Event> cons = c.getConstructor();
+                    Constructor<Event> cons = (Constructor<Event>)c.getConstructor();
                     Documentation docs = cons.newInstance();
                     list.add(docs);
                 } catch (Exception ex) {
@@ -427,7 +428,7 @@ public class DocGen {
             doc.append("Events allow you to trigger scripts not just on commands, but also on other actions, such as"
                     + " a player logging in, or a player breaking a block. See the [[CommandHelper/Events|documentation on events]] for"
                     + " more information<br />\n\n");
-            
+
             doc.append("{| width=\"100%\" cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
                         + "|-\n"
                         + "! scope=\"col\" width=\"7%\" | Event Name\n"
@@ -496,9 +497,9 @@ public class DocGen {
 			}
             for (String d : data) {
                 int split = d.indexOf(':');
-                String name; 
-                String description; 
-				if(split == -1){                    
+                String name;
+                String description;
+				if(split == -1){
                     name = d;
                     description = "";
                 } else {
@@ -539,7 +540,7 @@ public class DocGen {
                     .replaceAll("<location match>", "[[CommandHelper/Events/Prefilters#Location Match|Location Match]]")
                     .replaceAll("<math match>", "[[CommandHelper/Events/Prefilters#Math Match|Math Match]]")
                     .replaceAll("<macro>", "[[CommandHelper/Events/Prefilters#Macro|Macro]]")
-                    .replaceAll("<expression>", "[[CommandHelper/Events/Prefilters#Expression|Expression]]");                
+                    .replaceAll("<expression>", "[[CommandHelper/Events/Prefilters#Expression|Expression]]");
             } else if (type == MarkupType.TEXT || type == MarkupType.MARKDOWN) {
                 return macro
                     .replaceAll("<string match>", "<String Match>")
@@ -567,7 +568,7 @@ public class DocGen {
                 int split = d.indexOf(':');
                 String name;
                 String description;
-                if(split == -1){                    
+                if(split == -1){
                     name = d;
                     description = "";
                 } else {
@@ -627,7 +628,7 @@ public class DocGen {
             return b.toString();
         }
     }
-	
+
 	public static class DocInfo{
 		/**
 		 * The return type
@@ -640,7 +641,7 @@ public class DocGen {
 		/**
 		 * The args, without html styling in place (but with [ brackets ] to denote optional arguments
 		 */
-		public String originalArgs;		
+		public String originalArgs;
 		/**
 		 * The full description, if the ---- separator isn't present, or
 		 * the top description if not present.
@@ -670,7 +671,7 @@ public class DocGen {
 			args = originalArgs.replaceAll("\\|", "<hr />").replaceAll("\\[(.*?)\\]", "<strong>[</strong>$1<strong>]</strong>");
 		}
 	}
-	
+
 	public static enum MarkupType {
 		HTML, WIKI, TEXT, MARKDOWN;
 	}

@@ -14,7 +14,7 @@ import java.util.Set;
  * This class dynamically detects the server version being run, using various
  * checks as needed.
  *
- * 
+ *
  */
 public final class Implementation {
 
@@ -25,22 +25,22 @@ public final class Implementation {
 	}
 	private static Implementation.Type serverType = null;
 	private static boolean useAbstractEnumThread = true;
-	
+
 	/**
 	 * Sets whether or not we should verify enums when setServerType is called.
 	 * Defaults to true.
-	 * @param on 
+	 * @param on
 	 */
 	public static void useAbstractEnumThread(boolean on){
 		useAbstractEnumThread = on;
 	}
-	
+
 	/**
-	 * This method works like setServerType, except it does not check to 
+	 * This method works like setServerType, except it does not check to
 	 * see that the server type wasn't already set. This should only be
 	 * used by the embedded tools or other meta code, not during normal
 	 * execution. This does not trigger the abstract enum thread.
-	 * @param type 
+	 * @param type
 	 */
 	public static void forceServerType(Implementation.Type type){
 		serverType = type;
@@ -70,7 +70,7 @@ public final class Implementation {
 						} catch (InterruptedException ex) {
 							//
 						}
-						Set<Class> abstractionenums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(abstractionenum.class);
+						Set<Class<?>> abstractionenums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(abstractionenum.class);
 						for (Class c : abstractionenums) {
 							abstractionenum annotation = (abstractionenum) c.getAnnotation(abstractionenum.class);
 							if (EnumConvertor.class.isAssignableFrom(c)) {

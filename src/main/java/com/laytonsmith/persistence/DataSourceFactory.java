@@ -19,10 +19,10 @@ import java.util.Set;
 /**
  * This utility class provides the means to interact with given data sources.
  *
- * 
+ *
  */
 public class DataSourceFactory {
-	
+
 	private static Map<URI, DataSource> dataSourcePool = new HashMap<>();
 
 	/**
@@ -41,7 +41,7 @@ public class DataSourceFactory {
 	public static DataSource GetDataSource(String uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException, URISyntaxException {
 		return GetDataSource(new URI(uri), options);
 	}
-	
+
 	/**
 	 * Internally, DataSourceFactory re-uses connections, for efficiency reasons. When
 	 * the server is shutdown, a clean shutdown of all the cached connections is
@@ -123,10 +123,10 @@ public class DataSourceFactory {
 	private static void init() {
 		if (protocolHandlers == null) {
 			protocolHandlers = new HashMap<String, Class>();
-			Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(datasource.class);
-			for (Class c : classes) {
+			Set<Class<?>> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(datasource.class);
+			for (Class<?> c : classes) {
 				if (DataSource.class.isAssignableFrom(c)) {
-					protocolHandlers.put(((datasource) c.getAnnotation(datasource.class)).value(), c);
+					protocolHandlers.put((c.getAnnotation(datasource.class)).value(), c);
 				} else {
 					throw new Error(c.getName() + " does not implement DataSource!");
 				}
