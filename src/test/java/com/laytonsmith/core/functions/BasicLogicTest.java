@@ -387,7 +387,7 @@ public class BasicLogicTest {
                 + "array(3, 4), correct,"
                 + "5, wrong)", null));
     }
-    
+
     @Test(timeout = 10000)
     public void testSwitchWithNestedArrayAsDefaultReturn() throws Exception {
         assertEquals("{{correct}}", SRun("switch(5,"
@@ -464,18 +464,33 @@ public class BasicLogicTest {
 		verify(fakePlayer).sendMessage("false");
 	}
 
+	@Test
 	public void testSEqualsic1() throws Exception {
 		SRun("msg(sequals_ic(1, '1'))", fakePlayer);
 		verify(fakePlayer).sendMessage("false");
 	}
 
+	@Test
 	public void testSEqualsic2() throws Exception {
 		SRun("msg(sequals_ic('hello', 'HELLO'))", fakePlayer);
 		verify(fakePlayer).sendMessage("true");
 	}
 
+	@Test
 	public void testSEqualsic3() throws Exception {
 		SRun("msg(sequals_ic('false', true))", fakePlayer);
 		verify(fakePlayer).sendMessage("false");
+	}
+
+	@Test
+	public void testDor() throws Exception {
+	    SRun("msg(dor('', 'b'))", fakePlayer);
+	    verify(fakePlayer).sendMessage("b");
+	}
+
+	@Test
+	public void testDand() throws Exception {
+	    SRun("msg(typeof(dand('a', 'b', false)))", fakePlayer);
+	    verify(fakePlayer).sendMessage("boolean");
 	}
 }

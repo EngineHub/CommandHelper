@@ -403,6 +403,24 @@ public final class MethodScriptCompiler {
 				i++;
 				continue;
 			}
+			if (c == '&' && c2 == '&' && c3 == '&' && !state_in_quote) {
+			    if(buf.length() > 0) {
+				token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+				buf = new StringBuilder();
+			    }
+			    token_list.add(new Token(TType.DEFAULT_AND, "&&&", target));
+			    i++; i++;
+			    continue;
+			}
+			if (c == '|' && c2 == '|' && c3 == '|' && !state_in_quote) {
+			    if(buf.length() > 0) {
+				token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+				buf = new StringBuilder();
+			    }
+			    token_list.add(new Token(TType.DEFAULT_OR, "|||", target));
+			    i++; i++;
+			    continue;
+			}
 			if (c == '&' && c2 == '&' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
@@ -731,7 +749,7 @@ public final class MethodScriptCompiler {
 
 			if (t.type == TType.UNKNOWN && prev1.type.isPlusMinus() && !prev2.type.isIdentifier()
 					&& !prev2.type.equals(TType.FUNC_END)
-					&& !IVAR_PATTERN.matcher(t.val()).matches() 
+					&& !IVAR_PATTERN.matcher(t.val()).matches()
 					&& !VAR_PATTERN.matcher(t.val()).matches()) { // Last boolean makes -@b equal to - @b, instead of a string.
 				//It is a negative/positive number. Absorb the sign
 				t.value = prev1.value + t.value;
@@ -954,10 +972,10 @@ public final class MethodScriptCompiler {
 		 */
 		Stack<AtomicInteger> arrayStack = new Stack<>();
 		arrayStack.add(new AtomicInteger(-1));
-		
+
 		Stack<AtomicInteger> minusArrayStack = new Stack<>();
 		Stack<AtomicInteger> minusFuncStack = new Stack<>();
-		
+
 		int parens = 0;
 		Token t = null;
 
@@ -1071,7 +1089,7 @@ public final class MethodScriptCompiler {
 				ParseTree arrayGet = new ParseTree(new CFunction("array_get", t.target), fileOptions);
 				arrayGet.addChild(myArray);
 				arrayGet.addChild(myIndex);
-				
+
 				// Check if the @var[...] had a negating "-" in front. If so, add a neg().
 				if (minusArrayStack.size() != 0 && arrayStack.size() + 1 == minusArrayStack.peek().get()) {
 					if (!next1.type.equals(TType.LSQUARE_BRACKET)) { // Wait if there are more array_get's comming.
@@ -1162,7 +1180,7 @@ public final class MethodScriptCompiler {
 				} catch (EmptyStackException e) {
 					throw new ConfigCompileException("Unexpected end parenthesis", t.target);
 				}
-				
+
 				// Handle "-func(args)" and "-func(args)[index]".
 				if (minusFuncStack.size() != 0 && minusFuncStack.peek().get() == parens + 1) {
 					if(next1.type.equals(TType.LSQUARE_BRACKET)) {
@@ -1177,7 +1195,7 @@ public final class MethodScriptCompiler {
 					}
 					minusFuncStack.pop();
 				}
-				
+
 			} else if (t.type.equals(TType.COMMA)) {
 				if (constructCount.peek().get() > 1) {
 					int stacks = constructCount.peek().get();
@@ -1314,14 +1332,14 @@ public final class MethodScriptCompiler {
 				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if (t.type.isSymbol()) { //Logic and math symbols
-				
+
 				// Attempt to find "-@var" and change it to "neg(@var)" if it's not @a - @b. Else just add the symbol.
 				// Also handles "-function()" and "-@var[index]".
 				if (t.type.equals(TType.MINUS) && !prev1.type.isAtomicLit() && !prev1.type.equals(TType.IVARIABLE)
 						&& !prev1.type.equals(TType.VARIABLE) && !prev1.type.equals(TType.RCURLY_BRACKET)
 						&& !prev1.type.equals(TType.RSQUARE_BRACKET) && !prev1.type.equals(TType.FUNC_END)
 						&& (next1.type.equals(TType.IVARIABLE) || next1.type.equals(TType.VARIABLE) || next1.type.equals(TType.FUNC_NAME))) {
-					
+
 					// Check if we are negating a value from an array, function or variable.
 					if (next2.type.equals(TType.LSQUARE_BRACKET)) {
 						minusArrayStack.push(new AtomicInteger(arrayStack.size() + 1)); // +1 because the bracket isn't counted yet.
@@ -1338,7 +1356,7 @@ public final class MethodScriptCompiler {
 					tree.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.target), fileOptions));
 					constructCount.peek().incrementAndGet();
 				}
-				
+
 			} else if (t.type == TType.DOT){
 				// Check for doubles that start with a decimal, otherwise concat
 				Construct c = null;
