@@ -634,7 +634,8 @@ public class Meta {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class, CREFormatException.class};
+			return new Class[]{CREPlayerOfflineException.class, CREFormatException.class,
+					CREPluginInternalException.class};
 		}
 
 		@Override
@@ -657,8 +658,13 @@ public class Meta {
 			cmd = cmd.substring(1);
 			
 			MCCommandSender operator = Static.GetCommandSender(player, t);
-			
-			String ret = Static.getServer().dispatchAndCaptureCommand(operator, cmd);
+
+			String ret;
+			try {
+				ret = Static.getServer().dispatchAndCaptureCommand(operator, cmd);
+			} catch(Exception ex){
+				throw new CREPluginInternalException(ex.getMessage(), t, ex);
+			}
 			
 			return new CString(ret, t);
 		}
@@ -678,7 +684,9 @@ public class Meta {
 			return "string {player, command} Works like runas, except any messages sent to the command sender during command execution are attempted to be"
 					+ " intercepted, and are then returned as a string, instead of being sent to the command sender. Note that this is VERY easy"
 					+ " for plugins to get around in such a way that this function will not work, this is NOT a bug in CommandHelper, nor is it necessarily"
-					+ " a problem in the other plugin either, but the other plugin will have to make changes for it to work properly.";
+					+ " a problem in the other plugin either, but the other plugin will have to make changes for it to work properly."
+					+ " A PluginInternalException is thrown if something goes wrong. Any number of things may go wrong that aren't necessarily"
+					+ " this function's fault, and in those cases, this exception is thrown.";
 		}
 
 		@Override
