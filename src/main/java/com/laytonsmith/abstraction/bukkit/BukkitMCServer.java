@@ -170,12 +170,14 @@ public class BukkitMCServer implements MCServer {
 		Static.InjectPlayer(aCommandSender);
 
 		// Dispatch the command now
-		s.dispatchCommand(newCommandSender, cmd);
-
-		// Clean up
-		Static.UninjectPlayer(aCommandSender);
-		if(oldSender != null){
-			Static.InjectPlayer(oldSender);
+		try {
+			s.dispatchCommand(newCommandSender, cmd);
+		} finally {
+			// Clean up
+			Static.UninjectPlayer(aCommandSender);
+			if(oldSender != null){
+				Static.InjectPlayer(oldSender);
+			}
 		}
 
 		// Return the buffered text (if any)
