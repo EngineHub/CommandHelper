@@ -26,10 +26,12 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
@@ -1515,6 +1517,59 @@ public class InventoryManagement {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+	}
+
+	@api(environments={CommandHelperEnvironment.class})
+	public static class get_inventory_name extends AbstractFunction{
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CRECastException.class, CREFormatException.class,
+					CREIllegalArgumentException.class, CREInvalidWorldException.class, CRELengthException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld w = null;
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(p != null){
+				w = p.getWorld();
+			}
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], w, t);
+			return new CString(inventory.getTitle(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "get_inventory_name";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {entityID | locationArray} Returns the name of the inventory specified. If the block or entity"
+					+ " can't have an inventory, a FormatException is thrown.";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
 		}
 
 	}
