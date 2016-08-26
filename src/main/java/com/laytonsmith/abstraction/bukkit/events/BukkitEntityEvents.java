@@ -23,13 +23,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItem;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCProjectile;
-import com.laytonsmith.abstraction.enums.MCDamageCause;
-import com.laytonsmith.abstraction.enums.MCEntityType;
-import com.laytonsmith.abstraction.enums.MCMobs;
-import com.laytonsmith.abstraction.enums.MCRemoveCause;
-import com.laytonsmith.abstraction.enums.MCSound;
-import com.laytonsmith.abstraction.enums.MCSpawnReason;
-import com.laytonsmith.abstraction.enums.MCTargetReason;
+import com.laytonsmith.abstraction.enums.*;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRemoveCause;
@@ -56,6 +50,7 @@ import com.laytonsmith.abstraction.events.MCPotionSplashEvent;
 import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
 import com.laytonsmith.abstraction.events.MCProjectileLaunchEvent;
 import com.laytonsmith.annotations.abstraction;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -82,6 +77,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
@@ -414,6 +410,23 @@ public class BukkitEntityEvents {
 		@Override
 		public MCPlayer getPlayer() {
 			return new BukkitMCPlayer(e.getPlayer());
+		}
+
+		/**
+		 * @since Bukkit 1.9
+		 * @throws UnsupportedOperationException When this method does not exist in the current Bukkit version.
+		 */
+		@Override
+		public MCEquipmentSlot getHand() throws UnsupportedOperationException {
+			try {
+				if(e.getHand() == EquipmentSlot.HAND) {
+					return MCEquipmentSlot.WEAPON;
+				}
+				return MCEquipmentSlot.OFF_HAND;
+			} catch(NoSuchMethodError e) {
+				throw new UnsupportedOperationException(
+						"getHand() method does not exist in Bukkit version: " + Bukkit.getBukkitVersion());
+			}
 		}
 	}
 	

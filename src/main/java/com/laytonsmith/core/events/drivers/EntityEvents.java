@@ -14,10 +14,7 @@ import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
-import com.laytonsmith.abstraction.enums.MCDamageCause;
-import com.laytonsmith.abstraction.enums.MCMobs;
-import com.laytonsmith.abstraction.enums.MCRemoveCause;
-import com.laytonsmith.abstraction.enums.MCSpawnReason;
+import com.laytonsmith.abstraction.enums.*;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
@@ -820,7 +817,8 @@ public class EntityEvents {
 				+ " Fires when a player right clicks an entity. Note, not all entities are clickable."
 				+ " Interactions with Armor Stands do not trigger this event."
 				+ " {player: the player clicking | clicked | id: the id of the entity"
-				+ " | data: if a player is clicked, this will contain their name}"
+				+ " | data: if a player is clicked, this will contain their name"
+				+ " | hand: The hand used to click with, can be either main_hand or off_hand }"
 				+ " {}"
 				+ " {player|clicked|id|data}";
 		}
@@ -847,7 +845,12 @@ public class EntityEvents {
 			if (e instanceof MCPlayerInteractEntityEvent) {
 				MCPlayerInteractEntityEvent event = (MCPlayerInteractEntityEvent) e;
 				Map<String, Construct> map = evaluate_helper(e);
-
+				MCEquipmentSlot h;
+				try {
+					h = event.getHand();
+				} catch(UnsupportedOperationException ex) {
+					h = null; // We are likely on a pre-1.9 server.
+				}
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("clicked", new CString(event.getEntity().getType().name(), Target.UNKNOWN));
 				map.put("id", new CString(event.getEntity().getUniqueId().toString(), Target.UNKNOWN));
@@ -857,6 +860,14 @@ public class EntityEvents {
 					data = ((MCPlayer)event.getEntity()).getName();
 				}
 				map.put("data",  new CString(data, Target.UNKNOWN));
+
+				if(h != null) {
+					if(h == MCEquipmentSlot.WEAPON) {
+						map.put("hand", new CString("main_hand", Target.UNKNOWN));
+					} else {
+						map.put("hand", new CString("off_hand", Target.UNKNOWN));
+					}
+				}
 
 				return map;
 			} else {
@@ -898,7 +909,8 @@ public class EntityEvents {
 					+ " has the click position, and when cancelled only cancels interactions with Armor Stand entities."
 					+ " {player: the player clicking | clicked | id: the id of the entity"
 					+ " | data: if a player is clicked, this will contain their name"
-					+ " | position: offset of clicked location from entity location in an xyz array.}"
+					+ " | position: offset of clicked location from entity location in an xyz array."
+					+ " | hand: The hand used to click with, can be either main_hand or off_hand  }"
 					+ " {}"
 					+ " {player|clicked|id|data}";
 		}
@@ -929,6 +941,12 @@ public class EntityEvents {
 			if (e instanceof MCPlayerInteractAtEntityEvent) {
 				MCPlayerInteractAtEntityEvent event = (MCPlayerInteractAtEntityEvent) e;
 				Map<String, Construct> map = evaluate_helper(e);
+				MCEquipmentSlot h;
+				try {
+					h = event.getHand();
+				} catch(UnsupportedOperationException ex) {
+					h = null; // We are likely on a pre-1.9 server.
+				}
 
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("clicked", new CString(event.getEntity().getType().name(), Target.UNKNOWN));
@@ -940,6 +958,13 @@ public class EntityEvents {
 					data = ((MCPlayer)event.getEntity()).getName();
 				}
 				map.put("data",  new CString(data, Target.UNKNOWN));
+				if(h != null) {
+					if(h == MCEquipmentSlot.WEAPON) {
+						map.put("hand", new CString("main_hand", Target.UNKNOWN));
+					} else {
+						map.put("hand", new CString("off_hand", Target.UNKNOWN));
+					}
+				}
 
 				return map;
 			} else {
