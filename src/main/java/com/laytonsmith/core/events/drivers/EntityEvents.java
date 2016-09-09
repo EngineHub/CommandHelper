@@ -15,6 +15,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
@@ -816,10 +817,11 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{clicked: the type of entity being clicked}"
+			return "{clicked: <macro> the type of entity being clicked"
+				+ " | hand: <string match> The hand the player clicked with, can be either main_hand or off_hand}"
 				+ " Fires when a player right clicks an entity. Note, not all entities are clickable."
 				+ " Interactions with Armor Stands do not trigger this event."
-				+ " {player: the player clicking | clicked | id: the id of the entity"
+				+ " {player: the player clicking | clicked | hand | id: the id of the entity"
 				+ " | data: if a player is clicked, this will contain their name}"
 				+ " {}"
 				+ " {player|clicked|id|data}";
@@ -830,7 +832,15 @@ public class EntityEvents {
 				throws PrefilterNonMatchException {
 			if(event instanceof MCPlayerInteractEntityEvent){
 				MCPlayerInteractEntityEvent e = (MCPlayerInteractEntityEvent) event;
+
 				Prefilters.match(prefilter, "clicked", e.getEntity().getType().name(), Prefilters.PrefilterType.MACRO);
+
+				if(e.getHand() == MCEquipmentSlot.WEAPON) {
+					Prefilters.match(prefilter, "hand", "main_hand", PrefilterType.STRING_MATCH);
+				} else {
+					Prefilters.match(prefilter, "hand", "off_hand", PrefilterType.STRING_MATCH);
+				}
+
 				return true;
 			}
 			return false;
@@ -857,6 +867,12 @@ public class EntityEvents {
 					data = ((MCPlayer)event.getEntity()).getName();
 				}
 				map.put("data",  new CString(data, Target.UNKNOWN));
+
+				if(event.getHand() == MCEquipmentSlot.WEAPON) {
+					map.put("hand", new CString("main_hand", Target.UNKNOWN));
+				} else {
+					map.put("hand", new CString("off_hand", Target.UNKNOWN));
+				}
 
 				return map;
 			} else {
@@ -892,11 +908,13 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{clicked: the type of entity being clicked | x: <expression> offset of clicked location"
-					+ " from entity location on the x axis. | y: <expression> | z: <expression> }"
+			return "{clicked: <macro> the type of entity being clicked"
+					+ " | hand: <string match> The hand the player clicked with, can be either main_hand or off_hand"
+					+ " | x: <expression> offset of clicked location from entity location on the x axis"
+					+ " | y: <expression> | z: <expression> }"
 					+ " Fires when a player right clicks an entity. This event is like player_interact_entity but also"
 					+ " has the click position, and when cancelled only cancels interactions with Armor Stand entities."
-					+ " {player: the player clicking | clicked | id: the id of the entity"
+					+ " {player: the player clicking | clicked | hand | id: the id of the entity"
 					+ " | data: if a player is clicked, this will contain their name"
 					+ " | position: offset of clicked location from entity location in an xyz array.}"
 					+ " {}"
@@ -909,6 +927,13 @@ public class EntityEvents {
 			if(event instanceof MCPlayerInteractAtEntityEvent){
 				MCPlayerInteractAtEntityEvent e = (MCPlayerInteractAtEntityEvent) event;
 				Prefilters.match(prefilter, "clicked", e.getEntity().getType().name(), Prefilters.PrefilterType.MACRO);
+
+				if(e.getHand() == MCEquipmentSlot.WEAPON) {
+					Prefilters.match(prefilter, "hand", "main_hand", PrefilterType.STRING_MATCH);
+				} else {
+					Prefilters.match(prefilter, "hand", "off_hand", PrefilterType.STRING_MATCH);
+				}
+
 				Vector3D position = e.getClickedPosition();
 				Prefilters.match(prefilter, "x", position.X(), Prefilters.PrefilterType.EXPRESSION);
 				Prefilters.match(prefilter, "y", position.Y(), Prefilters.PrefilterType.EXPRESSION);
@@ -940,6 +965,12 @@ public class EntityEvents {
 					data = ((MCPlayer)event.getEntity()).getName();
 				}
 				map.put("data",  new CString(data, Target.UNKNOWN));
+
+				if(event.getHand() == MCEquipmentSlot.WEAPON) {
+					map.put("hand", new CString("main_hand", Target.UNKNOWN));
+				} else {
+					map.put("hand", new CString("off_hand", Target.UNKNOWN));
+				}
 
 				return map;
 			} else {
