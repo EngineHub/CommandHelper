@@ -206,6 +206,16 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 		}
 		return blocks;
 	}
+	
+	@Override
+	public boolean hasAI() {
+		try {
+			return le.hasAI();
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.9.2
+			return true;
+		}
+	}
 
 	/**
 	 * @param potionID - ID of the potion
@@ -373,11 +383,29 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public boolean isGliding() {
-		return le.isGliding();
+		try {
+			return le.isGliding();
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.9
+			return false;
+		}
 	}
 
 	@Override
 	public void setGliding(Boolean glide) {
-		le.setGliding(glide);
+		try {
+			le.setGliding(glide);
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.9
+		}
+	}
+	
+	@Override
+	public void setAI(Boolean ai) {
+		try {
+			le.setAI(ai);
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.9.2
+		}
 	}
 }

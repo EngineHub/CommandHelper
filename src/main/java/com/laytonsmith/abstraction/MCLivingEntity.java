@@ -51,6 +51,7 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
     public int getRemainingAir();
     public boolean isGliding();
 	public boolean isLeashed();
+	public boolean hasAI();
 	public void resetMaxHealth();
 	public void setCanPickupItems(boolean pickup);
 	public void setRemoveWhenFarAway(boolean remove);
@@ -64,6 +65,7 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
     public void setRemainingAir(int ticks);
 	public void setTarget(MCLivingEntity target, Target t);
 	public void setGliding(Boolean glide);
+	public void setAI(Boolean ai);
 
 	/**
 	 * Kills the entity. In some cases, this will be equivalent to setHealth(0), but

@@ -124,6 +124,9 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 			case SPLASH_POTION:
 				wrapperClass = BukkitMCThrownPotion.class;
 				break;
+			case LINGERING_POTION:
+				wrapperClass = BukkitMCThrownPotion.class;
+				break;
 			default:
 				String[] split = abstracted.name().toLowerCase().split("_");
 				if (split.length == 0 || "".equals(split[0])) {

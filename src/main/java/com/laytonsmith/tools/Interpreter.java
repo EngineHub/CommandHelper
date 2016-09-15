@@ -605,7 +605,7 @@ public final class Interpreter {
 			}
 			for (int i = 0; i < args.size(); i++) {
 				String arg = args.get(i);
-				if (i > 1) {
+				if (i > 0) {
 					finalArgument.append(" ");
 				}
 				Variable v = new Variable("$" + Integer.toString(i + 1), "", Target.UNKNOWN);

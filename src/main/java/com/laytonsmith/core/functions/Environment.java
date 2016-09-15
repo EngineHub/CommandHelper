@@ -245,7 +245,11 @@ public class Environment {
 				throw new CRECastException("Not a block ID: " + data
 						+ ". Attempting to set an invalid id can corrupt chunks!", t);
 			}
-			b.setTypeAndData(data, meta, physics);
+			try {
+				b.setTypeAndData(data, meta, physics);
+			} catch(IllegalArgumentException ex){
+				throw new CREFormatException("Invalid block meta data: \"" + id + "\"", t);
+			}
 
 			return CVoid.VOID;
 		}

@@ -14,24 +14,24 @@ import java.util.Set;
 
 /**
  * Unfortunately some methods just can't be overridden.
- * 
+ *
  */
 public final class StaticLayer {
-    
+
     private StaticLayer(){}
     //Do not rename this field, it is used reflectively in testing
     private static Convertor convertor = null;
     static{
         InitConvertor();
-    }        
-    
+    }
+
     private static synchronized void InitConvertor(){
-        Set<Class> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(convert.class);
-        for(Class c : classes){
+        Set<Class<?>> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(convert.class);
+        for(Class<?> c : classes){
             if(!Convertor.class.isAssignableFrom(c)){
                 StreamUtils.GetSystemErr().println("The Convertor " + c.getSimpleName() + " doesn't implement Convertor!");
             }
-            convert convert = (convert)c.getAnnotation(convert.class);
+            convert convert = c.getAnnotation(convert.class);
             if(convert.type() == Implementation.GetServerType()){
                 //This is what we're looking for, instatiate it.
                 try{
@@ -39,7 +39,7 @@ public final class StaticLayer {
                         //Uh... There are more than one implementations for this server type
                         System.out.println("More than one Convertor for this server type was detected!");
                     }
-                    convertor = (Convertor) c.newInstance();                    
+                    convertor = (Convertor) c.newInstance();
                     //At this point we are all set
                 } catch(Exception e){
                     StreamUtils.GetSystemErr().println("Tried to instantiate the Convertor, but couldn't!");
@@ -54,11 +54,11 @@ public final class StaticLayer {
     public static MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
         return convertor.GetLocation(w, x, y, z, yaw, pitch);
     }
-    
-    public static Class GetServerEventMixin() {
+
+    public static Class<?> GetServerEventMixin() {
         return convertor.GetServerEventMixin();
     }
-    
+
     public static MCLocation GetLocation(MCWorld w, double x, double y, double z){
         return GetLocation(w, x, y, z, 0, 0);
     }
@@ -94,15 +94,15 @@ public final class StaticLayer {
     public static MCServer GetServer(){
         return convertor.GetServer();
     }
-    
+
     public static MCEnchantment GetEnchantmentByName(String name){
         return convertor.GetEnchantmentByName(name);
     }
-	
+
 	public static MCMaterial GetMaterial(String name) {
 		return convertor.GetMaterial(name);
 	}
-    
+
     public static MCEnchantment[] GetEnchantmentValues(){
         return convertor.GetEnchantmentValues();
     }
@@ -118,32 +118,32 @@ public final class StaticLayer {
     /**
      * Returns the data value of the specified material name, or -1 if none was found.
      * @param materialName
-     * @return 
+     * @return
      */
     public static int LookupItemId(String materialName){
         return convertor.LookupItemId(materialName);
     }
-    
+
     /**
      * Returns the name of the material, given the material's ID.
      * @param id
-     * @return 
+     * @return
      */
     public static String LookupMaterialName(int id){
         return convertor.LookupMaterialName(id);
     }
-    
+
     /**
      * Adds a runnable to the main thread, if required by this platform,
      * if a multithreaded user code would be dangerous.
      * @param ms
      * @param r
-     * @return 
+     * @return
      */
     public static int SetFutureRunnable(DaemonManager dm, long ms, Runnable r){
         return convertor.SetFutureRunnable(dm, ms, r);
     }
-    
+
     public static int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r){
         return convertor.SetFutureRepeater(dm, ms, initialDelay, r);
     }
@@ -151,22 +151,22 @@ public final class StaticLayer {
     public static void ClearAllRunnables() {
         convertor.ClearAllRunnables();
     }
-    
+
     public static void ClearFutureRunnable(int id){
         convertor.ClearFutureRunnable(id);
     }
 
     /**
      * Given an entity, returns the more specific entity type, by creating a new more
-     * specific type based on the actual type of the underlying object contained by the 
+     * specific type based on the actual type of the underlying object contained by the
      * more generic type.
      * @param e
-     * @return 
+     * @return
      */
     public static MCEntity GetCorrectEntity(MCEntity e) {
         return convertor.GetCorrectEntity(e);
     }
-	
+
 	public static MCRecipe GetNewRecipe(MCRecipeType type, MCItemStack result) {
 		return convertor.GetNewRecipe(type, result);
 	}
@@ -178,7 +178,7 @@ public final class StaticLayer {
 	public static MCPlugin GetPlugin() {
 		return convertor.GetPlugin();
 	}
-	
+
 	public static synchronized Convertor GetConvertor(){
 		return convertor;
 	}

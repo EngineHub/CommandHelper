@@ -249,39 +249,39 @@ public class OptimizationTest {
 				+ "		msg('invalid');"
 				+ "}");
 	}
-	
+
 	@Test
 	public void testEmptySwitch() throws Exception {
 		assertEquals("switch(dyn(1))", optimize("switch(dyn(1)){ case 1: case 2: default: }"));
 	}
-	
+
 	// Tests "-" signs in front of values to negate them.
 	@Test public void testMinusWithoutValueInFront() throws Exception{
 		assertEquals("assign(@b,neg(@a))", optimize("@b = -@a"));
 		assertEquals("assign(@b,neg(@a))", optimize("@b = - @a"));
-		
+
 		assertEquals("assign(@b,array(neg(@a)))", optimize("@b = array(-@a)"));
 		assertEquals("assign(@b,array(neg(@a)))", optimize("@b = array(- @a)"));
-		
+
 		assertEquals("assign(@b,neg(array_get(@a,1)))", optimize("@b = -@a[1]"));
 		assertEquals("assign(@b,neg(array_get(@a,1)))", optimize("@b = - @a[1]"));
-		
+
 		assertEquals("assign(@b,neg(dec(@a)))", optimize("@b = -dec(@a)"));
 		assertEquals("assign(@b,neg(dec(@a)))", optimize("@b = - dec(@a)"));
-		
+
 		assertEquals("assign(@b,neg(array_get(array(1,2,3),1)))", optimize("@b = -array(1,2,3)[1]"));
-		
+
 		assertEquals("assign(@b,neg(array_get(array_get(array_get(array(array(array(2))),0),0),0)))", optimize("@b = -array(array(array(2)))[0][0][0]"));
-		
+
 		assertEquals("assign(@b,neg(array_get(array_get(array_get(array(array(array(2))),neg(array_get(array(1,0),1))),0),0)))",
 				optimize("@b = -array(array(array(2)))[-array(1,0)[1]][0][0]"));
-		
+
 		// Test behaviour where the value should not be negated.
 		assertEquals("assign(@c,subtract(@a,@b))", optimize("@c = @a - @b"));
 		assertEquals("assign(@c,subtract(array_get(@a,0),@b))", optimize("@c = @a[0] - @b"));
 		assertEquals("assign(@c,subtract(abs(@a),@b))", optimize("@c = abs(@a) - @b"));
 		assertEquals("assign(@c,subtract(if(@bool,2,3),@b))", optimize("@c = if(@bool) {2} else {3} - @b"));
-		
+
 		assertEquals("assign(@b,subtract(dec(@a),2))", optimize("@b = dec(@a)-2"));
 		assertEquals("assign(@b,subtract(dec(@a),2))", optimize("@b = dec(@a)- 2"));
 	}
@@ -309,9 +309,33 @@ public class OptimizationTest {
 //                + "if(dyn(), assign(@a, 'hi'))"
 //                + "msg(@a)"));
 //    }
-	
+
 	@Test
 	public void testNotinstanceofKeyword() throws Exception {
 		assertEquals("msg(not(instanceof(dyn(2),int)))", optimize("msg(dyn(2) notinstanceof int);"));
 	}
+
+	@Test
+	public void testDor() throws Exception {
+	    assertEquals("dor(dyn(''),dyn('a'))", optimize("dyn('') ||| dyn('a')"));
+	    assertEquals("dor(dyn(''),dyn('a'),dyn('b'))", optimize("dyn('') ||| dyn('a') ||| dyn('b')"));
+	}
+
+	@Test
+	public void testDand() throws Exception {
+	    assertEquals("dand(dyn(''),dyn('a'))", optimize("dyn('') &&& dyn('a')"));
+	    assertEquals("dand(dyn(''),dyn('a'),dyn('b'))", optimize("dyn('') &&& dyn('a') &&& dyn('b')"));
+	}
+
+	@Test
+	public void testDorOptimization() throws Exception {
+	    assertEquals("'a'", optimize("dor(false, false, 'a')"));
+	}
+
+	@Test
+	public void testDandOptimization() throws Exception {
+	    assertEquals("''", optimize("dand(true, true, '')"));
+	}
+
+
 }

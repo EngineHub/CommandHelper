@@ -860,29 +860,11 @@ public class PlayerEvents {
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent)e;
-                CString hand;
-				MCEquipmentSlot h;
-				
-				try {
-					h = pie.getHand();
-				} catch(UnsupportedOperationException ex) {
-					h = null; // We are likely on a pre-1.9 server.
-				}
-                
-                if(((MCPlayerInteractEvent)e).getAction().equals(MCAction.PHYSICAL)){
+
+                if(pie.getAction().equals(MCAction.PHYSICAL)){
                     return false;
                 }
-                
-				if(h != null) {
-					if(h == MCEquipmentSlot.WEAPON) {
-						hand = new CString("main_hand", Target.UNKNOWN);
-					} else {
-						hand = new CString("off_hand", Target.UNKNOWN);
-					}
-				} else {
-					hand = null;
-				}
-                
+
                 if(prefilter.containsKey("button")){
                     if(pie.getAction().equals(MCAction.LEFT_CLICK_AIR) || pie.getAction().equals(MCAction.LEFT_CLICK_BLOCK)){
                         if(!prefilter.get("button").val().toLowerCase().equals("left")){
@@ -899,8 +881,11 @@ public class PlayerEvents {
                 Prefilters.match(prefilter, "item", Static.ParseItemNotation(pie.getItem()), PrefilterType.ITEM_MATCH);
                 Prefilters.match(prefilter, "block", Static.ParseItemNotation(pie.getClickedBlock()), PrefilterType.ITEM_MATCH);
                 Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
-				if(hand != null) {
-					Prefilters.match(prefilter, "hand", hand, PrefilterType.STRING_MATCH);
+
+				if(pie.getHand() == MCEquipmentSlot.WEAPON) {
+					Prefilters.match(prefilter, "hand", "main_hand", PrefilterType.STRING_MATCH);
+				} else {
+					Prefilters.match(prefilter, "hand", "off_hand", PrefilterType.STRING_MATCH);
 				}
 
                 return true;
@@ -913,14 +898,7 @@ public class PlayerEvents {
             if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
-                //map.put("player", new CString(pie.getPlayer().getName(), Target.UNKNOWN));
                 MCAction a = pie.getAction();
-				MCEquipmentSlot h;
-				try {
-					h = pie.getHand();
-				} catch(UnsupportedOperationException ex) {
-					h = null; // We are likely on a pre-1.9 server.
-				}
                 map.put("action", new CString(a.name().toLowerCase(), Target.UNKNOWN));
                 map.put("block", new CString(Static.ParseItemNotation(pie.getClickedBlock()), Target.UNKNOWN));
                 if(a == MCAction.LEFT_CLICK_AIR || a == MCAction.LEFT_CLICK_BLOCK){
@@ -934,12 +912,10 @@ public class PlayerEvents {
                 }
 				map.put("world", new CString(pie.getPlayer().getWorld().getName(), Target.UNKNOWN));
                 map.put("item", new CString(Static.ParseItemNotation(pie.getItem()), Target.UNKNOWN));
-                if(h != null) {
-					if(h == MCEquipmentSlot.WEAPON) {
-						map.put("hand", new CString("main_hand", Target.UNKNOWN));
-					} else {
-						map.put("hand", new CString("off_hand", Target.UNKNOWN));
-					}
+				if(pie.getHand() == MCEquipmentSlot.WEAPON) {
+					map.put("hand", new CString("main_hand", Target.UNKNOWN));
+				} else {
+					map.put("hand", new CString("off_hand", Target.UNKNOWN));
 				}
                 
                 return map;

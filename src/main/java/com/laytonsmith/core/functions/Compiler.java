@@ -392,6 +392,36 @@ public class Compiler {
 							i--;
 						}
 					}
+					// default and
+					for (int i = 0; i < list.size() - 1; i++) {
+					    ParseTree node = list.get(i + 1);
+						if (node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isDefaultAnd()) {
+							CSymbol sy = (CSymbol) node.getData();
+							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
+							conversion.addChild(list.get(i));
+							conversion.addChild(list.get(i + 2));
+							list.set(i, conversion);
+							list.remove(i + 1);
+							list.remove(i + 1);
+							i--;
+						}
+					}
+
+					// default or
+					for (int i = 0; i < list.size() - 1; i++) {
+					    ParseTree node = list.get(i + 1);
+						if (node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isDefaultOr()) {
+							CSymbol sy = (CSymbol) node.getData();
+							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
+							conversion.addChild(list.get(i));
+							conversion.addChild(list.get(i + 2));
+							list.set(i, conversion);
+							list.remove(i + 1);
+							list.remove(i + 1);
+							i--;
+						}
+					}
+
 					//logical and
 					for (int i = 0; i < list.size() - 1; i++) {
 						ParseTree node = list.get(i + 1);

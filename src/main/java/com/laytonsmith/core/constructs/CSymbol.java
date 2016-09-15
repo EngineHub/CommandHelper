@@ -1,8 +1,10 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.annotations.breakable;
+
 /**
  *
- * 
+ *
  */
 public class CSymbol extends Construct {
 
@@ -58,6 +60,12 @@ public class CSymbol extends Construct {
             case LOGICAL_OR:
                 conversion = "or";
                 break;
+	    case DEFAULT_AND:
+		conversion = "dand";
+		break;
+	    case DEFAULT_OR:
+		conversion = "dor";
+		break;
             case LOGICAL_NOT:
                 conversion = "not";
                 break;
@@ -134,6 +142,14 @@ public class CSymbol extends Construct {
 
     public boolean isLogicalOr() {
         return symbolType.isLogicalOr();
+    }
+
+    public boolean isDefaultAnd() {
+	return symbolType.isDefaultAnd();
+    }
+
+    public boolean isDefaultOr() {
+	return symbolType.isDefaultOr();
     }
 
     @Override

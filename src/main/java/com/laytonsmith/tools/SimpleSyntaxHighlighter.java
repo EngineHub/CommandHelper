@@ -1,10 +1,10 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Color;
 import com.laytonsmith.PureUtilities.Common.HTMLUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.core.compiler.KeywordList;
-import java.awt.Color;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Set;

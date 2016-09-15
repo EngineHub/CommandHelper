@@ -364,7 +364,7 @@ public class FileHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
-			if(!Security.CheckSecurity(location)){
+			if(!Security.CheckSecurity(location) && !Static.InCmdLine(environment)){
 				throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 			}
 			return new CInt(location.length(), t);

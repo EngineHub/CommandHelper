@@ -38,8 +38,8 @@ the same parameter, the result is undefined. Regardless, the parameters will be 
 when passed in as part of the params object, so it is recommended to use this always, especially
 if dealing with user input or other possibly unescaped content. The subtype of the array may be any
 primitive or an array of primitives. Sub arrays are encoded properly. If params is a string, it is
-assumed to be raw POST data, and added literally to the request body, as is. When used this way,
-you MUST set the method to POST, or an exception is thrown. The Content-Type header is not set
+assumed to be raw POST/PUT data, and added literally to the request body, as is. When used this way,
+you MUST set the method to POST or PUT, or an exception is thrown. The Content-Type header is not set
 for you if this occurs, and will likely need to be set manually.
 |-
 | cookiejar

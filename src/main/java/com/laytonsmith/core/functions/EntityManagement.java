@@ -22,6 +22,7 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCPainting;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCTNT;
@@ -30,34 +31,10 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
-import com.laytonsmith.abstraction.entities.MCArrow;
-import com.laytonsmith.abstraction.entities.MCBoat;
-import com.laytonsmith.abstraction.entities.MCCommandMinecart;
-import com.laytonsmith.abstraction.entities.MCCreeper;
-import com.laytonsmith.abstraction.entities.MCEnderman;
-import com.laytonsmith.abstraction.entities.MCFallingBlock;
-import com.laytonsmith.abstraction.entities.MCFishHook;
-import com.laytonsmith.abstraction.entities.MCGuardian;
-import com.laytonsmith.abstraction.entities.MCHorse;
+import com.laytonsmith.abstraction.entities.*;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorseColor;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorsePattern;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorseVariant;
-import com.laytonsmith.abstraction.entities.MCIronGolem;
-import com.laytonsmith.abstraction.entities.MCItemFrame;
-import com.laytonsmith.abstraction.entities.MCMinecart;
-import com.laytonsmith.abstraction.entities.MCOcelot;
-import com.laytonsmith.abstraction.entities.MCPig;
-import com.laytonsmith.abstraction.entities.MCPigZombie;
-import com.laytonsmith.abstraction.entities.MCRabbit;
-import com.laytonsmith.abstraction.entities.MCSheep;
-import com.laytonsmith.abstraction.entities.MCSkeleton;
-import com.laytonsmith.abstraction.entities.MCSlime;
-import com.laytonsmith.abstraction.entities.MCSnowman;
-import com.laytonsmith.abstraction.entities.MCThrownPotion;
-import com.laytonsmith.abstraction.entities.MCVillager;
-import com.laytonsmith.abstraction.entities.MCWitherSkull;
-import com.laytonsmith.abstraction.entities.MCWolf;
-import com.laytonsmith.abstraction.entities.MCZombie;
 import com.laytonsmith.abstraction.enums.MCArt;
 import com.laytonsmith.abstraction.enums.MCBodyPart;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
@@ -65,6 +42,7 @@ import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
+import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.abstraction.enums.MCRabbitType;
@@ -1612,6 +1590,15 @@ public class EntityManagement {
 					case FALLING_BLOCK:
 						ent = l.getWorld().spawnFallingBlock(l, 12, (byte) 0);
 						break;
+					case ITEM_FRAME:
+					case LEASH_HITCH:
+					case PAINTING:
+						try {
+							ent = l.getWorld().spawn(l.getBlock().getLocation(), entType);
+						} catch(NullPointerException | IllegalArgumentException ex){
+							throw new CREFormatException("Unspawnable location for " + entType.getAbstracted().name(), t);
+						}
+						break;
 					default:
 						ent = l.getWorld().spawn(l, entType);
 				}
@@ -2565,6 +2552,7 @@ public class EntityManagement {
 			docs = docs.replace("%SKELETON_TYPE%", StringUtils.Join(MCSkeletonType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PROFESSION%", StringUtils.Join(MCProfession.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%RABBIT_TYPE%", StringUtils.Join(MCRabbitType.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%PARTICLE%", StringUtils.Join(MCParticle.values(), ", ", ", or ", " or "));
 			for (Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -2584,6 +2572,34 @@ public class EntityManagement {
 			CArray specArray = CArray.GetAssociativeArray(t);
 
 			switch (entity.getType().getAbstracted()) {
+				case AREA_EFFECT_CLOUD:
+					MCAreaEffectCloud cloud = (MCAreaEffectCloud) entity;
+					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_COLOR, ObjectGenerator.GetGenerator().color(cloud.getColor(), t), t);
+					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_DURATION, new CInt(cloud.getDuration(), t), t);
+					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_DURATIONONUSE, new CInt(cloud.getDurationOnUse(), t), t);
+					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_PARTICLE, new CString(cloud.getParticle().name(), t), t);
+					CArray meta = CArray.GetAssociativeArray(t);
+					CArray effects = ObjectGenerator.GetGenerator().potions(cloud.getCustomEffects(), t);
+					meta.set("potions", effects, t);
+					meta.set("base", ObjectGenerator.GetGenerator().potionData(cloud.getBasePotionData(), t), t);
+					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_POTIONMETA, meta, t);
+					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_RADIUS, new CDouble(cloud.getRadius(), t), t);
+					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_RADIUSONUSE, new CDouble(cloud.getRadiusOnUse(), t), t);
+					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_RADIUSPERTICK, new CDouble(cloud.getRadiusPerTick(), t), t);
+					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_REAPPLICATIONDELAY, new CInt(cloud.getReapplicationDelay(), t), t);
+					MCProjectileSource cloudSource = cloud.getSource();
+					if(cloudSource instanceof MCBlockProjectileSource){
+						MCLocation blockLocation = ((MCBlockProjectileSource) cloudSource).getBlock().getLocation();
+						CArray locationArray = ObjectGenerator.GetGenerator().location(blockLocation, false);
+						specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_SOURCE, locationArray, t);
+					} else if (cloudSource instanceof MCEntity) {
+						String entityUUID = ((MCEntity) cloudSource).getUniqueId().toString();
+						specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_SOURCE, new CString(entityUUID, t), t);
+					} else {
+						specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_SOURCE, CNull.NULL, t);
+					}
+					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_WAITTIME, new CInt(cloud.getWaitTime(), t), t);
+					break;
 				case ARROW:
 					MCArrow arrow = (MCArrow) entity;
 					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(arrow.isCritical()), t);
@@ -2754,9 +2770,20 @@ public class EntityManagement {
 						specArray.set(entity_spec.KEY_SNOWMAN_DERP, CBoolean.GenerateCBoolean(snowman.isDerp(), t), t);
 					}
 					break;
+				case LINGERING_POTION:
 				case SPLASH_POTION:
 					MCThrownPotion potion = (MCThrownPotion) entity;
 					specArray.set(entity_spec.KEY_SPLASH_POTION_ITEM, ObjectGenerator.GetGenerator().item(potion.getItem(), t), t);
+					break;
+				case TIPPED_ARROW:
+					MCTippedArrow tippedarrow = (MCTippedArrow) entity;
+					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(tippedarrow.isCritical()), t);
+					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(tippedarrow.getKnockbackStrength(), t), t);
+					CArray tippedmeta = CArray.GetAssociativeArray(t);
+					CArray tippedeffects = ObjectGenerator.GetGenerator().potions(tippedarrow.getCustomEffects(), t);
+					tippedmeta.set("potions", tippedeffects, t);
+					tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(tippedarrow.getBasePotionData(), t), t);
+					specArray.set(entity_spec.KEY_TIPPEDARROW_POTIONMETA, tippedmeta, t);
 					break;
 				case VILLAGER:
 					MCVillager villager = (MCVillager) entity;
@@ -2788,6 +2815,17 @@ public class EntityManagement {
 		}
 
 		//used to ensure that the indexes are the same in entity_spec(), set_entity_spec(), and in the documentation.
+		private static final String KEY_AREAEFFECTCLOUD_COLOR = "color";
+		private static final String KEY_AREAEFFECTCLOUD_DURATION = "duration";
+		private static final String KEY_AREAEFFECTCLOUD_DURATIONONUSE = "durationonuse";
+		private static final String KEY_AREAEFFECTCLOUD_PARTICLE = "particle";
+		private static final String KEY_AREAEFFECTCLOUD_POTIONMETA = "potionmeta";
+		private static final String KEY_AREAEFFECTCLOUD_RADIUS = "radius";
+		private static final String KEY_AREAEFFECTCLOUD_RADIUSONUSE = "radiusonuse";
+		private static final String KEY_AREAEFFECTCLOUD_RADIUSPERTICK = "radiuspertick";
+		private static final String KEY_AREAEFFECTCLOUD_REAPPLICATIONDELAY = "reapplicationdelay";
+		private static final String KEY_AREAEFFECTCLOUD_SOURCE = "source";
+		private static final String KEY_AREAEFFECTCLOUD_WAITTIME = "waittime";
 		private static final String KEY_ARROW_CRITICAL = "critical";
 		private static final String KEY_ARROW_KNOCKBACK = "knockback";
 		private static final String KEY_ARMORSTAND_ARMS = "arms";
@@ -2841,6 +2879,7 @@ public class EntityManagement {
 		private static final String KEY_SLIME_SIZE = "size";
 		private static final String KEY_SNOWMAN_DERP = "derp";
 		private static final String KEY_SPLASH_POTION_ITEM = "item";
+		private static final String KEY_TIPPEDARROW_POTIONMETA = "potionmeta";
 		private static final String KEY_VILLAGER_PROFESSION = "profession";
 		private static final String KEY_WITHER_SKULL_CHARGED = "charged";
 		private static final String KEY_WOLF_ANGRY = "angry";
@@ -2886,6 +2925,92 @@ public class EntityManagement {
 			CArray specArray = Static.getArray(args[1], t);
 
 			switch (entity.getType().getAbstracted()) {
+				case AREA_EFFECT_CLOUD:
+					MCAreaEffectCloud cloud = (MCAreaEffectCloud) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_AREAEFFECTCLOUD_COLOR:
+								if (specArray.get(index, t) instanceof CArray){
+									CArray color = (CArray) specArray.get(index, t);
+									cloud.setColor(ObjectGenerator.GetGenerator().color(color, t));
+								} else {
+									throw new CRECastException("AreaEffectCloud color must be an array", t);
+								}
+								break;
+							case entity_spec.KEY_AREAEFFECTCLOUD_DURATION:
+								cloud.setDuration(ArgumentValidation.getInt32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_AREAEFFECTCLOUD_DURATIONONUSE:
+								cloud.setDurationOnUse(ArgumentValidation.getInt32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_AREAEFFECTCLOUD_PARTICLE:
+								String particleName = specArray.get(index, t).val();
+								try {
+									cloud.setParticle(MCParticle.valueOf(particleName));
+								} catch(IllegalArgumentException ex){
+									throw new CREFormatException("Invalid particle type: " + particleName, t);
+								}
+								break;
+							case entity_spec.KEY_AREAEFFECTCLOUD_POTIONMETA:
+								Construct c = specArray.get(index, t);
+								if(c instanceof CArray){
+									CArray meta = (CArray) c;
+									if(meta.containsKey("base")){
+										Construct base = meta.get("base", t);
+										if(base instanceof CArray){
+											MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t);
+											cloud.setBasePotionData(pd);
+										}
+									}
+									if(meta.containsKey("potions")){
+										cloud.clearCustomEffects();
+										Construct potions = meta.get("potions", t);
+										if(potions instanceof CArray){
+											List<MCLivingEntity.MCEffect> list = ObjectGenerator.GetGenerator().potions((CArray) potions, t);
+											for(MCLivingEntity.MCEffect effect : list) {
+												cloud.addCustomEffect(effect);
+											}
+										}
+									}
+								} else {
+									throw new CRECastException("AreaEffectCloud potion meta must be an array", t);
+								}
+								break;
+							case entity_spec.KEY_AREAEFFECTCLOUD_RADIUS:
+								cloud.setRadius(ArgumentValidation.getDouble32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_AREAEFFECTCLOUD_RADIUSONUSE:
+								cloud.setRadiusOnUse(ArgumentValidation.getDouble32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_AREAEFFECTCLOUD_RADIUSPERTICK:
+								cloud.setRadiusPerTick(ArgumentValidation.getDouble32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_AREAEFFECTCLOUD_REAPPLICATIONDELAY:
+								cloud.setReapplicationDelay(ArgumentValidation.getInt32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_AREAEFFECTCLOUD_SOURCE:
+								Construct cloudSource = specArray.get(index, t);
+								if(cloudSource instanceof CNull){
+									cloud.setSource(null);
+								} else if(cloudSource instanceof CArray){
+									MCBlock b = ObjectGenerator.GetGenerator().location(cloudSource, cloud.getWorld(), t).getBlock();
+									if(b.isDispenser()){
+										cloud.setSource(b.getDispenser().getBlockProjectileSource());
+									} else {
+										throw new CRECastException("AreaEffectCloud block source must be a dispenser", t);
+									}
+								} else {
+									cloud.setSource(Static.getLivingEntity(cloudSource, t));
+								}
+								break;
+							case entity_spec.KEY_AREAEFFECTCLOUD_WAITTIME:
+								cloud.setWaitTime(ArgumentValidation.getInt32(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case ARROW:
 					MCArrow arrow = (MCArrow) entity;
 					for (String index : specArray.stringKeySet()) {
@@ -3072,6 +3197,7 @@ public class EntityManagement {
 						switch (index.toLowerCase()) {
 							case entity_spec.KEY_GUARDIAN_ELDER:
 								guardian.setElder(Static.getBoolean(specArray.get(index, t)));
+								break;
 							default:
 								throwException(index, t);
 						}
@@ -3365,12 +3491,63 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case LINGERING_POTION:
 				case SPLASH_POTION:
 					MCThrownPotion potion = (MCThrownPotion) entity;
 					for (String index : specArray.stringKeySet()) {
 						switch (index.toLowerCase()) {
 							case entity_spec.KEY_SPLASH_POTION_ITEM:
-								potion.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
+								MCItemStack potionItem = ObjectGenerator.GetGenerator().item(specArray.get(index, t), t);
+								try {
+									potion.setItem(potionItem);
+								} catch(IllegalArgumentException ex){
+									throw new CREFormatException("Invalid potion type: " + potionItem.getType().getName(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case TIPPED_ARROW:
+					MCTippedArrow tippedarrow = (MCTippedArrow) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_ARROW_CRITICAL:
+								tippedarrow.setCritical(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_ARROW_KNOCKBACK:
+								int k = Static.getInt32(specArray.get(index, t), t);
+								if (k < 0) {
+									throw new CRERangeException("Knockback can not be negative.", t);
+								} else {
+									tippedarrow.setKnockbackStrength(k);
+								}
+								break;
+							case entity_spec.KEY_TIPPEDARROW_POTIONMETA:
+								Construct c = specArray.get(index, t);
+								if(c instanceof CArray){
+									CArray meta = (CArray) c;
+									if(meta.containsKey("base")){
+										Construct base = meta.get("base", t);
+										if(base instanceof CArray){
+											MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t);
+											tippedarrow.setBasePotionData(pd);
+										}
+									}
+									if(meta.containsKey("potions")){
+										tippedarrow.clearCustomEffects();
+										Construct potions = meta.get("potions", t);
+										if(potions instanceof CArray){
+											List<MCLivingEntity.MCEffect> list = ObjectGenerator.GetGenerator().potions((CArray) potions, t);
+											for(MCLivingEntity.MCEffect effect : list) {
+												tippedarrow.addCustomEffect(effect);
+											}
+										}
+									}
+								} else {
+									throw new CRECastException("TippedArrow potion meta must be an array", t);
+								}
 								break;
 							default:
 								throwException(index, t);
@@ -3483,7 +3660,7 @@ public class EntityManagement {
 				MCProjectileSource shooter = ((MCProjectile) entity).getShooter();
 
 				if (shooter instanceof MCBlockProjectileSource) {
-					return ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation());
+					return ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation(), false);
 				} else if (shooter instanceof MCEntity) {
 					return new CString(((MCEntity) shooter).getUniqueId().toString(), t);
 				} else {
@@ -3510,7 +3687,8 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, shooterID} Sets the shooter of the given projectile, can be null.";
+			return "void {entityID, shooterID} Sets the shooter of the given projectile. This can be entity UUID,"
+					+ " dispenser location array (throws CastException if not a dispenser), or null.";
 		}
 
 		@Override
@@ -3521,7 +3699,12 @@ public class EntityManagement {
 				if (args[1] instanceof CNull) {
 					((MCProjectile) entity).setShooter(null);
 				} else if (args[1] instanceof CArray) {
-					throw new CREFormatException("Setting a block as a shooter is not yet supported", t);
+					MCBlock b = ObjectGenerator.GetGenerator().location(args[1], entity.getWorld(), t).getBlock();
+					if(b.isDispenser()){
+						((MCProjectile) entity).setShooter(b.getDispenser().getBlockProjectileSource());
+					} else {
+						throw new CRECastException("Given block location is not a dispenser.", t);
+					}
 				} else {
 					((MCProjectile) entity).setShooter(Static.getLivingEntity(args[1], t));
 				}
@@ -3778,6 +3961,49 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return CBoolean.GenerateCBoolean(Static.getLivingEntity(args[0], t).isGliding(), t);
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+	
+	@api
+	public static class get_entity_ai extends EntityGetterFunction {
+		public String getName() {
+			return "get_entity_ai";
+		}
+
+		public String docs() {
+			return "boolean {Entity} Returns true if the given entity has AI";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CBoolean.GenerateCBoolean(Static.getLivingEntity(args[0], t).hasAI(), t);
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+	
+	@api
+	public static class set_entity_ai extends EntitySetterFunction {
+		public String getName() {
+			return "set_entity_ai";
+		}
+
+		public String docs() {
+			return "void {Entity, boolean} enables or disables the entity AI";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity e = Static.getLivingEntity(args[0], t);
+			boolean ai = Static.getBoolean(args[1]);
+
+			e.setAI(ai);
+
+			return CVoid.VOID;
 		}
 
 		public Version since() {
