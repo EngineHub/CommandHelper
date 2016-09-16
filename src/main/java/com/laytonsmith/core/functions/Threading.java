@@ -21,6 +21,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -28,6 +29,8 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 /**
@@ -329,4 +332,123 @@ public class Threading {
 
 	}
 
+	@api
+	@noboilerplate
+	@seealso({x_new_thread.class})
+	public static class _synchronized extends AbstractFunction {
+		private static final HashMap<String, Integer> syncObjectMap = new HashMap<String, Integer>();
+		
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientArgumentsException.class};
+		}
+		
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+		
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+		
+		@Override
+		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+			
+			// Check argument size and class.
+			if(args.length < 2) {
+				throw new CREInsufficientArgumentsException(getName() + " requires at least 2 arguments.", t);
+			}
+			final CString cSyncName = Static.getObject(args[0], t, CString.class);
+			final CClosure closure = Static.getObject(args[1], t, CClosure.class);
+			
+			// Get the String reference to synchronize or use the passed argument.
+			String syncName = cSyncName.val();
+			String syncStr;
+			synchronized(syncObjectMap) {
+				searchLabel: {
+					for(Entry<String, Integer> entry : syncObjectMap.entrySet()) {
+						if(entry.getKey().equals(syncName)) {
+							syncStr = entry.getKey();
+							entry.setValue(entry.getValue() + 1);
+							break searchLabel;
+						}
+					}
+					syncObjectMap.put(syncName, 1);
+					syncStr = syncName;
+				}
+			}
+			
+			// Get the closure arguments.
+			Construct[] closureArgs;
+			if(args.length <= 2) {
+				closureArgs = null;
+			} else {
+				closureArgs = new Construct[args.length - 2];
+				System.arraycopy(args, 2, closureArgs, 0, closureArgs.length);
+			}
+			
+			// Execute the closure, synchronized using the given or already existing object reference.
+			Construct ret = null;
+			RuntimeException ex = null;
+			synchronized(syncStr) {
+				try {
+					closure.execute(closureArgs);
+					ret = CVoid.VOID;
+				} catch(FunctionReturnException e) {
+					ret = e.getReturn();
+				} catch(ConfigRuntimeException | ProgramFlowManipulationException e) {
+					ex = e;
+				}
+			}
+			
+			// Remove 1 from the call count or remove the synchronize object if there's no thread waiting for it.
+			synchronized(syncObjectMap) {
+				int count = syncObjectMap.get(syncStr); // This should never return null.
+				if(count <= 1) {
+					syncObjectMap.remove(syncStr);
+				} else {
+					for(Entry<String, Integer> entry : syncObjectMap.entrySet()) {
+						if(entry.getKey() == syncName) { // Equals by reference.
+							entry.setValue(count - 1);
+							break;
+						}
+					}
+				}
+			}
+			
+			// Throw the RuntimeException or return the return value.
+			if(ex != null) {
+				throw ex;
+			}
+			return ret;
+		}
+		
+		@Override
+		public String getName() {
+			return "synchronized";
+		}
+		
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{Integer.MAX_VALUE};
+		}
+		
+		@Override
+		public String docs() {
+			return "mixed {string, closure} Synchronizes the code in the closure for all calls with the same string argument."
+					+ " This means that if two threads will call " + getName() + "('example', @someClosure), the second call"
+					+ " will hang the thread until the code in the closure of the first call has finished executing."
+					+ " If you call this function from within a closure in this function, the closure will simply be executed."
+					+ " Returns the return value of the closure.";
+		}
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+		
+	}
+	
 }
