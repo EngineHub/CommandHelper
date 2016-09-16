@@ -10,7 +10,10 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CNull;
@@ -22,6 +25,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -336,11 +340,11 @@ public class Threading {
 	@noboilerplate
 	@seealso({x_new_thread.class})
 	public static class _synchronized extends AbstractFunction {
-		private static final HashMap<String, Integer> syncObjectMap = new HashMap<String, Integer>();
+		private static final HashMap<Object, Integer> syncObjectMap = new HashMap<Object, Integer>();
 		
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREInsufficientArgumentsException.class};
+			return new Class[]{CRENullPointerException.class};
 		}
 		
 		@Override
@@ -350,79 +354,90 @@ public class Threading {
 		
 		@Override
 		public Boolean runAsync() {
-			return null;
+			return false;
 		}
 		
 		@Override
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public boolean preResolveVariables() {
+			return false;
+		}
+		
+		@Override
+		public boolean useSpecialExec() {
+			return true;
+		}
+		
+		@Override
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			
-			// Check argument size and class.
-			if(args.length < 2) {
-				throw new CREInsufficientArgumentsException(getName() + " requires at least 2 arguments.", t);
+			// Get the sync object tree and the code to synchronize.
+			ParseTree syncObjectTree = nodes[0];
+			ParseTree code = nodes[1];
+			
+			// Get the sync object (CArray or String value of the Construct).
+			Construct cSyncObject = parent.seval(syncObjectTree, env);
+			if(cSyncObject instanceof CNull) {
+				throw new CRENullPointerException("Synchronization object may not be null in " + getName() + "().", t);
 			}
-			final CString cSyncName = Static.getObject(args[0], t, CString.class);
-			final CClosure closure = Static.getObject(args[1], t, CClosure.class);
-			
-			// Get the String reference to synchronize or use the passed argument.
-			String syncName = cSyncName.val();
-			String syncStr;
-			synchronized(syncObjectMap) {
-				searchLabel: {
-					for(Entry<String, Integer> entry : syncObjectMap.entrySet()) {
-						if(entry.getKey().equals(syncName)) {
-							syncStr = entry.getKey();
-							entry.setValue(entry.getValue() + 1);
-							break searchLabel;
-						}
-					}
-					syncObjectMap.put(syncName, 1);
-					syncStr = syncName;
-				}
-			}
-			
-			// Get the closure arguments.
-			Construct[] closureArgs;
-			if(args.length <= 2) {
-				closureArgs = null;
+			Object syncObject;
+			if(cSyncObject instanceof CArray) {
+				syncObject = cSyncObject;
 			} else {
-				closureArgs = new Construct[args.length - 2];
-				System.arraycopy(args, 2, closureArgs, 0, closureArgs.length);
+				syncObject = cSyncObject.val();
 			}
 			
-			// Execute the closure, synchronized using the given or already existing object reference.
-			Construct ret = null;
-			RuntimeException ex = null;
-			synchronized(syncStr) {
-				try {
-					closure.execute(closureArgs);
-					ret = CVoid.VOID;
-				} catch(FunctionReturnException e) {
-					ret = e.getReturn();
-				} catch(ConfigRuntimeException | ProgramFlowManipulationException e) {
-					ex = e;
+			// Add String sync objects to the map to be able to synchronize by value.
+			if(syncObject instanceof String) {
+				synchronized(syncObjectMap) {
+					searchLabel: {
+						for(Entry<Object, Integer> entry : syncObjectMap.entrySet()) {
+							Object key = entry.getKey();
+							if(key instanceof String && key.equals(syncObject)) {
+								syncObject = key; // Get reference, value of this assign is the same.
+								entry.setValue(entry.getValue() + 1);
+								break searchLabel;
+							}
+						}
+						syncObjectMap.put(syncObject, 1);
+					}
 				}
 			}
 			
-			// Remove 1 from the call count or remove the synchronize object if there's no thread waiting for it.
-			synchronized(syncObjectMap) {
-				int count = syncObjectMap.get(syncStr); // This should never return null.
-				if(count <= 1) {
-					syncObjectMap.remove(syncStr);
-				} else {
-					for(Entry<String, Integer> entry : syncObjectMap.entrySet()) {
-						if(entry.getKey() == syncName) { // Equals by reference.
-							entry.setValue(count - 1);
-							break;
+			// Evaluate the code, synchronized by the passed sync object.
+			Construct ret;
+			try {
+				synchronized(syncObject) {
+					ret = parent.seval(code, env);
+				}
+			} catch(RuntimeException e) {
+				throw e;
+			} finally {
+				
+				// Remove 1 from the call count or remove the sync object from the map if it was a sync-by-value.
+				if(syncObject instanceof String) {
+					synchronized(syncObjectMap) {
+						int count = syncObjectMap.get(syncObject); // This should never return null.
+						if(count <= 1) {
+							syncObjectMap.remove(syncObject);
+						} else {
+							for(Entry<Object, Integer> entry : syncObjectMap.entrySet()) {
+								if(entry.getKey() == syncObject) { // Equals by reference.
+									entry.setValue(count - 1);
+									break;
+								}
+							}
 						}
 					}
 				}
 			}
 			
-			// Throw the RuntimeException or return the return value.
-			if(ex != null) {
-				throw ex;
-			}
+			// Return the Construct received from evaluating the passed code block.
 			return ret;
+		}
+		
+		@Override
+		public Construct exec(final Target t, final Environment env, Construct... args) throws ConfigRuntimeException {
+			return CVoid.VOID;
 		}
 		
 		@Override
@@ -432,16 +447,19 @@ public class Threading {
 		
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
+			return new Integer[]{2};
 		}
 		
 		@Override
 		public String docs() {
-			return "mixed {string, closure} Synchronizes the code in the closure for all calls with the same string argument."
-					+ " This means that if two threads will call " + getName() + "('example', @someClosure), the second call"
-					+ " will hang the thread until the code in the closure of the first call has finished executing."
-					+ " If you call this function from within a closure in this function, the closure will simply be executed."
-					+ " Returns the return value of the closure.";
+			return "mixed {syncObject, code} Synchronizes access to the code block for all calls (from different"
+					+ " threads) with the same syncObject argument."
+					+ " This means that if two threads will call " + getName() + "('example', <code>), the second"
+					+ " call will hang the thread until the passed code of the first call has finished executing."
+					+ " If you call this function from within this function on the same thread using the same"
+					+ " syncObject, the code will simply be executed. Returns the value of the executed code."
+					+ " For more information about synchronization, see:"
+					+ " https://en.wikipedia.org/wiki/Synchronization_(computer_science)";
 		}
 		
 		@Override
