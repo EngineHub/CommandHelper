@@ -468,24 +468,45 @@ public class Threading {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates two threads possibly overwriting eachother", "export('log', '');\nx_ne"
-						+ "w_thread('Thread1', closure() {\n\t@log = import('log');\n\t@log = @log.'\nSome new log mes"
-						+ "sage from Thread1.'\n\texport('log', @log);\n});\nx_new_thread('Thread2', closure() {\n\t@l"
-						+ "og = import('log');\n\t@log = @log.'\nSome new log message from Thread2.'\n\texport('log', "
-						+ "@log);\n});\nsleep(0.1);\nmsg(import('log'));",
-						"\nSome new log message from Thread1."
-						+ "\nOR\nSome new log message from Thread2."
-						+ "\nOR\nSome new log message from Thread1.\nSome new log message from Thread2."
-						+ "\nOR\nSome new log message from Thread2.\nSome new log message from Thread1."),
-				new ExampleScript("Demonstrates two threads modifying the same variable without possibly overwriting"
-						+ " eachother",
-						"export('log', '');\nx_new_thread('Thread1', closure() {\n\tsynchronized('syncLog') {\n\t\t@lo"
-						+ "g = import('log');\n\t\t@log = @log.'\nSome new log message from Thread1.'\n\t\texport('log"
-						+ "', @log);\n\t}\n});\nx_new_thread('Thread2', closure() {\n\tsynchronized('syncLog') {\n\t\t"
-						+ "@log = import('log');\n\t\t@log = @log.'\nSome new log message from Thread2.'\n\t\texport('"
-						+ "log', @log);\n\t}\n});\nsleep(0.1);\nmsg(import('log'));",
-						"\nSome new log message from Thread1.\nSome new log message from Thread2."
-						+ "\nOR\nSome new log message from Thread2.\nSome new log message from Thread1.")
+				new ExampleScript("Demonstrates two threads possibly overwriting eachother", ""
+						+ "export('log', '');\n"
+						+ "x_new_thread('Thread1', closure() {\n"
+						+ "\t@log = import('log');\n"
+						+ "\t@log = @log.'Some new log message from Thread1.\n'\n"
+						+ "\texport('log', @log);\n"
+						+ "});\n"
+						+ "x_new_thread('Thread2', closure() {\n"
+						+ "\t@log = import('log');\n"
+						+ "\t@log = @log.'Some new log message from Thread2.\n'\n"
+						+ "\texport('log', @log);\n"
+						+ "});\n"
+						+ "sleep(0.1);\n"
+						+ "msg(import('log'));",
+						"Some new log message from Thread1.\n"
+								+ "\nOR\nSome new log message from Thread2.\n"
+								+ "\nOR\nSome new log message from Thread1.\nSome new log message from Thread2.\n"
+								+ "\nOR\nSome new log message from Thread2.\nSome new log message from Thread1.\n"),
+				new ExampleScript("Demonstrates two threads modifying the same variable without the possibility of"
+						+ " overwriting eachother because they are synchronized.", ""
+								+ "export('log', '');\n"
+								+ "x_new_thread('Thread1', closure() {\n"
+								+ "\tsynchronized('syncLog') {\n"
+								+ "\t\t@log = import('log');\n"
+								+ "\t\t@log = @log.'Some new log message from Thread1.\n'\n"
+								+ "\t\texport('log', @log);\n"
+								+ "\t}\n"
+								+ "});\n"
+								+ "x_new_thread('Thread2', closure() {\n"
+								+ "\tsynchronized('syncLog') {\n"
+								+ "\t\t@log = import('log');\n"
+								+ "\t\t@log = @log.'Some new log message from Thread2.\n'\n"
+								+ "\t\texport('log', @log);\n"
+								+ "\t}\n"
+								+ "});\n"
+								+ "sleep(0.1);\n"
+								+ "msg(import('log'));",
+						"Some new log message from Thread1.\nSome new log message from Thread2.\n"
+								+ "\nOR\nSome new log message from Thread2.\nSome new log message from Thread1.\n")
 			};
 		}
 		
