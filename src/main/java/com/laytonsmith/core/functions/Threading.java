@@ -405,10 +405,9 @@ public class Threading {
 			}
 			
 			// Evaluate the code, synchronized by the passed sync object.
-			Construct ret;
 			try {
 				synchronized(syncObject) {
-					ret = parent.seval(code, env);
+					parent.seval(code, env);
 				}
 			} catch(RuntimeException e) {
 				throw e;
@@ -431,9 +430,7 @@ public class Threading {
 					}
 				}
 			}
-			
-			// Return the Construct received from evaluating the passed code block.
-			return ret;
+			return CVoid.VOID;
 		}
 		
 		@Override
@@ -453,12 +450,12 @@ public class Threading {
 		
 		@Override
 		public String docs() {
-			return "mixed {syncObject, code} Synchronizes access to the code block for all calls (from different"
+			return "void {syncObject, code} Synchronizes access to the code block for all calls (from different"
 					+ " threads) with the same syncObject argument."
 					+ " This means that if two threads will call " + getName() + "('example', <code>), the second"
 					+ " call will hang the thread until the passed code of the first call has finished executing."
 					+ " If you call this function from within this function on the same thread using the same"
-					+ " syncObject, the code will simply be executed. Returns the value of the executed code."
+					+ " syncObject, the code will simply be executed."
 					+ " For more information about synchronization, see:"
 					+ " https://en.wikipedia.org/wiki/Synchronization_(computer_science)";
 		}
