@@ -34,6 +34,7 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
@@ -340,7 +341,7 @@ public class Threading {
 	@noboilerplate
 	@seealso({x_new_thread.class})
 	public static class _synchronized extends AbstractFunction {
-		private static final HashMap<Object, Integer> syncObjectMap = new HashMap<Object, Integer>();
+		private static final Map<Object, Integer> syncObjectMap = new HashMap<Object, Integer>();
 		
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -465,6 +466,30 @@ public class Threading {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates two threads possibly overwriting eachother", "export('log', '');\nx_ne"
+						+ "w_thread('Thread1', closure() {\n\t@log = import('log');\n\t@log = @log.'\nSome new log mes"
+						+ "sage from Thread1.'\n\texport('log', @log);\n});\nx_new_thread('Thread2', closure() {\n\t@l"
+						+ "og = import('log');\n\t@log = @log.'\nSome new log message from Thread2.'\n\texport('log', "
+						+ "@log);\n});\nsleep(0.1);\nmsg(import('log'));",
+						"\nSome new log message from Thread1."
+						+ "\nOR\nSome new log message from Thread2."
+						+ "\nOR\nSome new log message from Thread1.\nSome new log message from Thread2."
+						+ "\nOR\nSome new log message from Thread2.\nSome new log message from Thread1."),
+				new ExampleScript("Demonstrates two threads modifying the same variable without possibly overwriting"
+						+ " eachother",
+						"export('log', '');\nx_new_thread('Thread1', closure() {\n\tsynchronized('syncLog') {\n\t\t@lo"
+						+ "g = import('log');\n\t\t@log = @log.'\nSome new log message from Thread1.'\n\t\texport('log"
+						+ "', @log);\n\t}\n});\nx_new_thread('Thread2', closure() {\n\tsynchronized('syncLog') {\n\t\t"
+						+ "@log = import('log');\n\t\t@log = @log.'\nSome new log message from Thread2.'\n\t\texport('"
+						+ "log', @log);\n\t}\n});\nsleep(0.1);\nmsg(import('log'));",
+						"\nSome new log message from Thread1.\nSome new log message from Thread2."
+						+ "\nOR\nSome new log message from Thread2.\nSome new log message from Thread1.")
+			};
 		}
 		
 	}
