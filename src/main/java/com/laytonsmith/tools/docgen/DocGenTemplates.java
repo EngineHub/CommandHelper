@@ -175,10 +175,10 @@ public class DocGenTemplates {
 					}
 					String templateValue = generators.get(name).generate(tmplArgs);
 					templateBuilder.append(templateValue);
-					lastMatch = m.end();
-					appended = false;
 					//template = template.replaceAll("%%" + Pattern.quote(name) + "%%", templateValue);
 				}
+				lastMatch = m.end();
+				appended = false;
 			} catch(Exception e){
 				//Oh well, skip it.
 				e.printStackTrace();

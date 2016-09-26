@@ -35,6 +35,7 @@ import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenExportTool;
 import com.laytonsmith.tools.docgen.DocGenUI;
 import com.laytonsmith.tools.docgen.ExtensionDocGen;
+import com.laytonsmith.tools.docgen.SiteDeploy;
 import com.laytonsmith.tools.pnviewer.PNViewer;
 import java.awt.HeadlessException;
 import java.io.File;
@@ -83,6 +84,7 @@ public class Main {
     private static final ArgumentParser pnViewerMode;
     private static final ArgumentParser coreFunctionsMode;
     private static final ArgumentParser uiMode;
+    private static final ArgumentParser siteDeploy;
 
     static {
 	MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
@@ -197,6 +199,14 @@ public class Main {
 			+ " command creates a subshell to run the launcher in, so that the original cmdline shell returns.")
 		.addFlag("in-shell", "Runs the launcher in the same shell process. By default, it creates a new process and causes the initial shell to return.");
 	suite.addMode("ui", uiMode);
+	siteDeploy = ArgumentParser.GetParser()
+		.addDescription("Deploys the documentation site, using the preferences specified in the configuration file. This mechanism completely re-writes"
+			+ " the remote site, so that builds are totally reproduceable.")
+		.addArgument('c', "config", ArgumentParser.Type.STRING,
+			MethodScriptFileLocations.getDefault().getSiteDeployFile().getAbsolutePath(),
+			"The path to the config file for deployment", "configFile", false)
+		.addFlag("generate-prefs", "Generates the preferences file initially, which you can then fill in.");
+	suite.addMode("site-deploy", siteDeploy);
 
 	ARGUMENT_SUITE = suite;
     }
@@ -561,6 +571,10 @@ public class Main {
 		    ce.start();
 		    System.exit(0);
 		}
+	    } else if(mode == siteDeploy){
+		boolean generatePrefs = parsedArgs.isFlagSet("generate-prefs");
+		File config = new File(parsedArgs.getStringArgument("config"));
+		SiteDeploy.run(generatePrefs, config);
 	    } else {
 		throw new Error("Should not have gotten here");
 	    }

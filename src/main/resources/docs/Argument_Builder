@@ -1,0 +1,147 @@
+The ArgumentBuilder class allows for better, and more precise definitions of functions'
+return types, and arguments. In addition to providing the basis for the compiler's type
+checking, it also is used by the documentation generators to build the documentation
+for a function, as well as to allow easier argument parsing by the functions themselves.
+
+This system is (currently) optional, and by default, functions that extend AbstractFunction
+are opted out of the system. However, eventually, the mechanism will not be optional, and
+all functions will be required to implement the system. New code should be implemented to
+the new standard.
+
+There are several pieces of functionality provided by the system, and several optional
+features that certain functions may choose to take advantage of. As a broad overview,
+the following features are supported: Type safety for functions, and automatic detection
+and handling of CastExceptions, upward type safety (functions provide their return type),
+support for varargs, support for functions with multiple signatures, support for functions
+with generic types (though this is not yet supported by the rest of the system, functions
+can declare their support, which will be reflected in the documentation, 
+and it will be phased in in the future), type unions,
+and support for optional parameters with default.
+
+== General ==
+
+There are 2 methods to implement in the function to provide support. If a function wishes
+to provide support for this mechanism, then the returnType and arguments methods should be
+implemented. By default, AbstractFunction implements these methods and overrides them with
+default implementations, so functions aren't automatically opted in. The core object in
+the argument system is the Argument class. An Argument is a descriptor that describes an
+argument in detail, including its name, its type, and a description of the argument, as well
+as any other information about the object, such as if it is a vararg, the default parameter,
+etc. There are various builder methods available to more concisely write out the information.
+
+=== Return type ===
+
+The returnType function should return a single Argument. Argument requires a name, but in the
+case of returnType, the name can be left blank, as it is not used. If the Argument is a vararg,
+this is an error.
+
+=== Accepted arguments ===
+
+The list of arguments that are accepted by the function is the second part. This list is in
+general more complex, and instead of returning an Argument, it returns an ArgumentList. The
+ArgumentBuilder class provides static methods that make building the ArgumentList easier. In
+general, classes may consider import static'ing the ArgumentBuilder class.
+
+== Varargs ==
+
+Varargs are arguments that convert into an array, but can be passed to the function as an
+unspecified number of arguments (including no arguments, meaning they are technically optional).
+Ultimately, the argument type will be an array<?> where ? is the type specified in the argument.
+The argument will never be null, though it could be an empty array.
+
+== Optional parameters ==
+
+Optional arguments are arguments that do not need to be specified by the user. Generally, if
+an argument is not specified, it is an error, but if the argument is marked as optional, the default
+value (or null, if one isn't provided) is inserted for the user.
+
+== Generics ==
+
+== Type unions ==
+
+== Multiple Signatures ==
+
+Some methods may have entirely different signatures, and simply having optional arguments and
+type unions isn't enough to express the differences. In these cases, using multiple signatures
+is appropriate. By default, one signature is assumed. Multiple signatures must be distinguishable
+between each other. 
+
+== Signature matching ==
+
+Signatures must not overlap. This can unintentially happen when optional arguments (and varargs)
+are used. Signatures with optional arguments are actually considered as permutations
+of themselves, so f(a, [b], [c]) actually has 4
+permutations: f(a, b, c), f(a, b), f(a, c) and f(a). The number of permutations of a method is n ** n,
+where n is the number of optional arguments. Some argument combinations can cause some permutations to
+be ambiguous. This is allowed, however, it can create a situation where the user appears to be able
+to use a signature with various combinations of arguments, but they are in reality not. Consider
+the case of f([B b1], [B b2]). There are 4 permutations here: f(), f(B b1), f(B b2), f(B b1, B b2). f(B b1) and
+f(B b2) cannot be distinguished between each other by types alone, so the user cannot call the function with f(b),
+as we cannot determine if they mean to call f(b1) or f(b2). f() and f(b, b) are still acceptable. Thus,
+in this case, we signal to the user that only a call to f(b) is an error. The other, non-ambiguous signatures
+are allowed.
+
+This situation is however, allowed only if the conflict happens with optional values. If multiple signatures
+are conflicting, then this is an error with the function definition, and is reported as such. For instance,
+if the function registers two signatures: f(a) and f(a...), this is an error, and the function is not allowed
+to register these two signatures.
+
+There are three algorithms here at work. Firstly, determining if a function is allowed to register the given
+signatures (signature validation), and if not, causing an error at the level of the function definition. Secondly, 
+at script compile
+time, determining if the call to the function is correct (compile checks). 
+Finally, at runtime, we determine which signature was called, fill in the optional
+parameters with the defaults (if required), and executing the function (argument parsing). 
+Eventually, the third step will be rolled into compile time where possible.
+
+Despite the no-confliction requirement, there will only be as many signatures as are defined. The
+signature that is ultimately selected will have all optional values filled in with their defaults
+if not provided by the user, so the signature selection process is fully opaque to the function. The
+signature that was matched can be determined by the function.
+
+The next three sections describe the specific algorithms described above.
+
+=== Signature validation ===
+
+There are two levels of validation. First, we have to generate each permutation of each signature that
+has optional values. Then, we need to compare this against each permutation/top level signature of all
+the other signatures. When comparing two signatures, we need to consider all of the following:
+
+If the signatures have different number of arguments, we know they do not conflict, and we can continue.
+If they have the same number of arguments, then we need to consider each argument, one at a time. If any
+of the arguments have different types, we can continue, as they do not match. However, this is a bit tricky,
+because each argument must be shown to be disjoint types. If B extends A, the f(B) and f(A) are ambiguous
+signatures, because calling f(B) could possibly match either type. Thus, each argument is considered to match
+if either of the arguments in a given position can be cast to the other. (This is more complicated, but the
+same general principal with type unions.) Note that classes with different generics are considered different
+types. So array<A> is disjoint with array<B>. However, when using type wildcards, this can get much
+more complicated, so if B extends A, then array<? extends A> and array<B> are not disjoint.
+
+=== Compile checks ===
+
+At compile time, checks are done against the user's code to ensure that ensure that the values sent to the
+functions are of the appropriate type. This validation is considerably easier than the validation of the
+signatures. Given a function with a certain set of arguments, first, signatures that don't match the correct size are 
+eliminated. (Not eliminating signatures that have varargs.) Next, each signature is matched one by one, until
+one is found that matches. If there are none that match, this is a compile error. Compilation is stopped, and
+the errors are reported to the user. Assuming the validation passes, these results are not used; it is merely meant to
+rule out the possibility of some errors. Additionally, values of type auto are essentially wildcards. We must assume
+that they will be of a correct type at runtime. There are still some checks that can be done at compile time, even
+with only auto values being passed in. Namely, if there are no varargs and there are no signatures that match the
+argument count given. But by and large, auto values cannot be checked. As long as there is at least one signature
+that could potentially match, we will allow compilation to continue.
+
+=== Argument parsing ===
+
+At runtime, we again check against the signature list to find the correct signature. Once again, if we cannot
+find the signature, we throw an error, though this time it is a runtime exception, not a compile error. The only
+difference is that this time we WILL find the correct signature, because there will be no auto values anymore,
+only real, runtime values, which are of course always of a concrete type. Once the signature is found, we call
+the function as normal.
+
+== Using the arguments in exec ==
+
+== Using the arguments in execs ==
+
+(Not currently implemented)
+

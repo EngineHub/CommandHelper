@@ -1,0 +1,50 @@
+
+html {
+    font-family: Lato,Arial,'Helvetica Neue',Helvetica,sans-serif;
+}
+
+.hidden {
+    display: none;
+}
+
+.TakeNote {
+    background: #ffdfff;
+    border-color: #dfb8df;
+    margin: 1.1em 1.5em;
+    padding: .7em 1.5em;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    box-shadow: 0 .3em .3em rgba(0,0,0,.1);
+}
+
+.bodyXSmall {
+    
+}
+
+.methodscript_code {
+    font-size: 11pt;
+    line-height: 8pt;
+}
+
+.redLink {
+    color: red;
+}
+
+.maxWidth100Percent {
+    max-width: 100%;
+}
+
+.ppInnerText {
+    color: black;
+    font-size: 11pt;
+}
+
+.ppBlueText {
+    color: #3c508a;
+    font-size: 14pt;
+}
+
+.ppGrayText {
+    color: #424242;
+    font-size: 12pt;
+}

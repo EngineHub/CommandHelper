@@ -50,10 +50,10 @@ public class BlockEvents {
     public static String docs() {
         return "Contains events related to a block";
     }
-	
+
 	// Stub for actual events below.
 	public static abstract class piston_event extends AbstractEvent {
-		
+
 		@Override
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
                 throws PrefilterNonMatchException {
@@ -70,7 +70,7 @@ public class BlockEvents {
                 BindableEvent e) {
             return false;
         }
-		
+
         public Map<String, Construct> evaluate_stub(BindableEvent e)
                 throws EventException {
 
@@ -98,14 +98,14 @@ public class BlockEvents {
 
             CBoolean isSticky = CBoolean.get(event.isSticky());
 			map.put("isSticky", isSticky);
-			
+
 			CString direction = new CString(event.getDirection().name(), Target.UNKNOWN);
 			map.put("direction", direction);
-			
+
             return map;
         }
 	}
-	
+
 	@api
     public static class piston_extend extends piston_event {
 		@Override
@@ -137,11 +137,11 @@ public class BlockEvents {
         public Map<String, Construct> evaluate(BindableEvent e)
                 throws EventException {
             Map<String, Construct> map = evaluate_stub(e);
-			
+
 			MCBlockPistonExtendEvent event = (MCBlockPistonExtendEvent)e;
-			
+
 			CArray affected = new CArray(Target.UNKNOWN);
-			
+
 			for (MCBlock block : event.getPushedBlocks()) {
 				CArray blk = CArray.GetAssociativeArray(Target.UNKNOWN);
 
@@ -155,15 +155,15 @@ public class BlockEvents {
 				blk.set("Y", new CInt(block.getY(), Target.UNKNOWN), Target.UNKNOWN);
 				blk.set("Z", new CInt(block.getZ(), Target.UNKNOWN), Target.UNKNOWN);
 				blk.set("world", new CString(block.getWorld().getName(), Target.UNKNOWN), Target.UNKNOWN);
-				
+
 				affected.push(blk, Target.UNKNOWN);
 			}
-			
+
 			map.put("affectedBlocks", affected);
-			
+
             return map;
         }
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
@@ -202,23 +202,23 @@ public class BlockEvents {
         public Map<String, Construct> evaluate(BindableEvent e)
                 throws EventException {
             Map<String, Construct> map = evaluate_stub(e);
-			
+
 			MCBlockPistonRetractEvent event = (MCBlockPistonRetractEvent)e;
-			
+
 			MCLocation loc = event.getRetractedLocation();
 			CArray location = ObjectGenerator.GetGenerator()
 					.location(StaticLayer.GetLocation(loc.getWorld(), loc.getX(), loc.getY(), loc.getZ()));
 			map.put("retractedLocation", location);
-			
+
             return map;
         }
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
     }
-	
+
 	@api
     public static class block_break extends AbstractEvent {
 
@@ -758,7 +758,7 @@ public class BlockEvents {
 
         @Override
         public String docs() {
-            return "{type: <string match> | data: <string match> | world <string match> | totype <string match> | todata <string match> | toworld <string match> | face <string match>} "
+            return "{type: <string match> | data: <string match> | world: <string match> | totype: <string match> | todata: <string match> | toworld: <string match> | face: <string match>} "
                     + "This event is called when a water or lava is flowed and ender dragon egg is teleported"
                     + "Cancelling the event cancels the flow or teleport"
                     + "{block: An array with "

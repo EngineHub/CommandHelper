@@ -120,8 +120,8 @@ public class Preferences {
 	    in.close();
 	    for (String key : userProperties.stringPropertyNames()) {
 		String val = userProperties.getProperty(key);
-		String value = getObject(val, ((Preference) prefs.get(key))).toString();
-		Object ovalue = getObject(val, ((Preference) prefs.get(key)));
+		String value = getObject(val, prefs.get(key)).toString();
+		Object ovalue = getObject(val, prefs.get(key));
 		Preference p1 = prefs.get(key);
 		Preference p2;
 		if (p1 != null) {
@@ -136,6 +136,7 @@ public class Preferences {
 	save();
     }
 
+    @SuppressWarnings("LoggerStringConcat")
     private Object getObject(String value, Preference p) {
 	if (p == null) {
 	    return value;
@@ -202,11 +203,7 @@ public class Preferences {
 	    return false;
 	} else {
 	    double d = Double.parseDouble(value);
-	    if (d == 0) {
-		return false;
-	    } else {
-		return true;
-	    }
+	    return d != 0;
 	}
     }
 

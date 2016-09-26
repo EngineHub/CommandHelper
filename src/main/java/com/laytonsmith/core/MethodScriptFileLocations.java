@@ -158,6 +158,10 @@ public class MethodScriptFileLocations extends FileLocations {
 		return new File(getPreferencesDirectory(), "logger-preferences.ini");
 	}
 
+	public File getSiteDeployFile(){
+	    return new File(getCmdlineInterpreterDirectory(), "site-deploy.ini");
+	}
+
 	/**
 	 * Returns the location of the cmdline interpreter folder.
 	 * @return

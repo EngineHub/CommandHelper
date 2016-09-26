@@ -75,11 +75,11 @@ The multiline construct is only available in global configs, due to the sheer na
 
 Since complex alias scripts would be hard to read if they were only on one line, the multiline construct allows you to 
 put as many newlines in the middle of your alias definition as you want. To use the multiline construct, use the following syntax:
-<pre>
+%%CODE|
 /cmd = >>>
 #As many newlines as you want
 <<<
-</pre>
+%%
 
 The special symbols >>> and <<< are the "multiline start" and "multiline end" symbols. They may not appear in any other 
 context throughout your script (even in strings). Newlines inside the construct are simply ignored, and do not denote 

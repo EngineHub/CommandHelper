@@ -1,0 +1,64 @@
+[
+    {"CommandHelper": [
+        {"Beginner's_Guide": "Beginner's Guide"},
+        {"Advanced_Guide": "Advanced Guide"},
+        {"Permissions_Settings": "Permissions Settings"},
+        {"Advanced_Scripts": "Advanced Scripts"},
+        "Cookbook",
+        "FAQ"
+    ]},
+    {"MethodScript": [
+        "Numbers",
+        "Strings",
+        "Variables",
+        "Operators",
+        "Logic",
+        "Loops",
+        "Arrays",
+        "Exceptions",
+        "Events",
+        {"Execution_Queue": "Execution Queue"},
+        "Profiler",
+        {"Understanding_References": "Understanding References"},
+        "Debugging",
+        "SQL",
+        {"Array_Iteration": "Array Iteration"},
+        "Closures"
+    ]},
+    {"Select Functions/Classes": [
+        "Meta",
+        "WE-WG",
+        "Economy",
+        "Regex",
+        "IRC"
+    ]},
+    {"API": [
+        "API",
+        {"Interpreter_Mode": "Interpreter Mode"},
+        {"Event_API": "Event API"},
+        {"Builtin_Object_Info": "Builtin Object Info"}
+    ]},
+    {"Tools": [
+        {"Server_Profiler-Debugger": "Profiling/Debugging Server"},
+        {"Data_Manager": "Data Manager"},
+        {"Local_Packages": "Local Packages"},
+        "Optimizer",
+        {"Command_Line_Scripting": "Command Line Scripting"},
+        {"Persistence_Network": "Persistence Network"},
+        "Logging",
+        {"CommandLineTools": "Command Line Tools"},
+        {"SyntaxHighlighting": "Syntax Highlighting"}
+    ]},
+    {"Future/Next Version": [
+        {"Next_Version": "Next Version"},
+        "Roadmap",
+        "Dev"
+    ]},
+    {"Development": [
+        "Architecture",
+        "Contributing",
+        "Compatibility",
+        {"DesignEthos": "Design Ethos"},
+        {"Extension_Development": "Extension Development"}
+    ]}
+]

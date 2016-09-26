@@ -1,0 +1,403 @@
+
+== auto_include.ms ==
+
+This file goes into the same directory as your aliases.msa file, and is normally used for [[CommandHelper/Procedures|Procedures]]. You can put useful commands that you want in <b>every</b> alias here.  Here's a simple one, that is used by the example scripts below
+
+<pre>
+
+proc(_bc, @label, @str,
+    broadcast(colorize('&e[&a'. @label. '&e] &f'. @str))
+)
+
+</pre>
+
+This lets you use the alias _bc in every alias, to do a Broadcast to the server, with a leading subject. You will see it used below.
+
+== Reset a Spleef Arena ==
+
+This script lets anyone in the groups 'Users', 'Mods', 'Admins' or 'Ops' reset a spleef arena. It also only lets it happen every 5 minutes, to stop people spamming it. 
+
+<pre>
+~default/users/mods/admins/ops:/fixspleef = >>>
+    # How many seconds they have to wait before being able
+    # to re-run fixspleef
+    assign(@cooldown, 300)
+
+    # Ensure the persistent variable exists. If it doesn't, set it to 0.
+    if(is_null(get_value('spleef1_lastreset')),
+        store_value('spleef1_lastreset',0)
+    )
+
+    # This makes the command only able to be used by a user in the world called: "world"
+    if(not(equals(pworld(), 'world')), die(concat(color(RED),'You need to be in the normal world to use this command!')))
+
+    # This checks to see if they're a member of 'Default', and gives them
+    # a nice error message rather than complaining.
+    assign(@pinfo, pinfo())
+    if(equals(array_get(array_get(@pinfo,9),0), 'default'),
+        die('You do not have permission for this command')
+    )
+    
+    # Get our persistent value
+    assign(@lastreset, get_value('spleef1_lastreset'))
+
+    # Note that time is in msec, not sec. So we always divide it by 1000.
+    if(@lastreset + @cooldown > time() / 1000,
+        # then
+        msg(concat('[', Error, ']', ' Less than 5 minutes since last reset.'))
+        assign(@timeleft, subtract(add(@lastreset, @cooldown), divide(time(),1000)))
+        die(concat('[', Error, '] ', @timeleft, ' seconds to go'))
+    )
+
+    # Save the current time() (in seconds) in spleef1_lastreset
+    store_value('spleef1_lastreset', time() / 1000)
+
+    # The runas() command runs in a seperate namespace. This NORMALLY doesn't
+    # cause problems, until you start caring about edge cases - This is one. 
+    # Run the selection in the same namespace as the //set.  Even though the
+    # user may have access to /region select, it won't work. Trust me. Do it
+    # this way.
+    # Note that you need to have your region defined as a one block high area, that
+    # will be set to snow.  Change the region name below to whatever yours is.
+    sudo('/region select spleef-arena')
+    sudo('//set 80')   # 80 is 'snow block'
+
+    # Now we do a broadcast, using my handy-dandy broadcast procedure
+    # to tell everyone who did the reset. This is just in case someone 
+    # tries to cheat, everyone gets to know about it.
+    assign(@pinfo, pinfo())
+    _bc(Spleef, concat(array_get(@pinfo,4), ' has just reset the spleef arena with the /fixspleef command!'))
+<<<
+</pre>
+
+== Brand and Unbrand a user ==
+
+Someone giving you problems? Want to make sure everyone else knows about it? Brand them. Note that this is written for use with [http://forums.bukkit.org/threads/18140/ PermissionsEx] and you'll have to change the prefix commands for your own permissions system.
+
+<pre>
+~mod/admin/op:/brand $user $brand =  >>>
+    /pex user $user prefix concat('&e[', $brand, ']&8')
+    _bc('Branding', $user has been branded $brand )
+<<<
+~mod/admin/op:/unbrand $user = >>>
+    /pex user $user prefix ""
+    _bc('Branding', $user . ' has been unbranded')
+<<<
+~mod/admin/op:/brand $user $brand $ = msg('You can only brand with a single word')
+</pre>
+
+You'll notice the last line relies on CH's greedy pattern matching. If someone tries /brand GrieferTest Is an idiot, it WON'T match on the <b>/brand $user $brand</b> alias, because it has too many parameters.  It will, however, happily match on the bottom line, and give a warning to the person who tried to brand to only use one word.
+
+== Sign Editing ==
+
+This requires CommandHelper higher or equal to build 359.
+
+Rather than using ~group/group2 tags, it shows you how to provide a better error message to users, rather than a noisy commandhelper error. Ensure that your base group (in our case, 'default') has the permission 'commandhelper.alias.safe' 
+
+This is made from three commands. The first is when someone types <b>/fixsign</b> without any options. It tells them the parameters. The 'text' is gray as a hint that it's an optional parameter.
+<pre>
+safe:/fixsign = >>>
+    assign(@pinfo, pinfo())
+    if(!array_contains(@pinfo[9],mods) || array_contains(@pinfo[9],admins) || array_contains(@pinfo[9],ops),
+        die(You do not have permission to edit signs)
+    )
+    msg(color(white) . 'Usage: ' . color(red) . '/fixsign lineno' . color(gray) . ' text')
+<<<
+</pre>
+
+The second is when they use <b>/fixsign 3</b> to delete the third line of the sign
+<pre>
+safe:/fixsign $line = >>>
+    assign(@pinfo, pinfo())
+    if(not(or(array_contains(@pinfo[9],mods), array_contains(@pinfo[9],admins), array_contains(@pinfo[9],ops))),
+        die(You do not have permission to edit signs)
+    )
+    if(not(is_integer($line)),
+        die($line should be a line number)
+    )
+    assign(@lineno, $line)
+    dec(@lineno)
+    if(or(gte($line,5),lte($line,0)),
+        die(Line number $line should be between 1 and 4)
+    )
+    assign(@loc, pcursor())
+    if(not(is_sign_at(@loc)),
+        die(Your crosshairs are not looking at a sign. Sorry.)
+    )
+    assign(@text, get_sign_text(@loc))
+    array_set(@text, @lineno, '')
+    set_sign_text(@loc, @text)
+<<<
+</pre>
+
+And the third is to actually edit the sign. Note that the magic variable '$' is used here, which catches any number of words and returns it as a single string.
+<pre>
+safe:/fixsign $line $ = >>>
+    assign(@pinfo, pinfo())
+    if(not(or(array_contains(@pinfo[9],mods), array_contains(@pinfo[9],admins), array_contains(@pinfo[9],ops))),
+        die('You do not have permission to edit signs')
+    )
+    if(!is_integer($line),
+        die($line . ' should be a line number')
+    )
+    assign(@lineno, $line)
+    dec(@lineno)
+    if($line >= 5 || $line <= 0,
+        die('Line number ' . $line . ' should be between 1 and 4')
+    )
+    assign(@loc, pcursor())
+    if(!is_sign_at(@loc),
+        die('Your crosshairs are not looking at a sign. Sorry.')
+    )
+    assign(@text, get_sign_text(@loc))
+    array_set(@text, @lineno, $)
+    set_sign_text(@loc, @text)
+<<<
+</pre>
+
+== Let users see their regions ==
+This ties into WorldGuard, and uses the sk_region commands.
+
+<pre>
+safe:/myregions = >>>
+    assign(@pname,pinfo()[0])
+    assign(@regions,sk_all_regions(pworld()))
+    assign(@uregions, array())
+    foreach(@regions,@region,
+       assign(@rowners,sk_region_info(@region, pworld()))
+       if(array_contains_ic(@rowners[1],@pname),
+          array_push(@uregions,@region)
+       )
+    )
+    if(array_size(@uregions) == 0,
+      msg(You have no regions),
+      msg('Your regions are:' array_implode(@uregions))
+    )
+<<<</pre>
+
+== Use BungeeCord with CommandHelper ==
+
+<pre>
+proc(_writeUTF, @ba, @str,
+        @len = length(@str)
+        if (@len > 200) {
+            die('String too long')
+        }
+        ba_put_byte(@ba, 0)
+        ba_put_byte(@ba, @len)
+        ba_put_bytes(@ba, string_get_bytes(@str, 'ascii'))
+)
+ 
+proc(_changeserver, @player, @server,
+       @ba = byte_array()
+       _writeUTF(@ba, 'Connect')
+       _writeUTF(@ba, @server)
+       bind(player_quit, array(priority: normal, id: 'pq-'.@player), array(player: @player), @event,
+        modify_event('message', @event['player'].' has left for another realm')
+        unbind('pq-'.@event['player'])
+       )
+       send_plugin_message(@player, 'BungeeCord', @ba)
+)
+</pre>
+
+Those two functions, when added to auto_include.ms, will let you do something like this:
+
+<pre>
+*:/pvp = >>>
+   _changeserver(player(), 'pvp')
+<<<
+</pre>
+
+You could also have a script that moves EVERYONE off the server, like this:
+
+<pre> 
+mods,admins,ops:/sendall $world = >>>
+    assign(@all, all_players())
+    foreach(@all, @player,
+        _changeserver(@player, $world)
+    )
+<<<
+</pre>
+
+You would then type "/sendall lobby" to send all players on the current server to the lobby.
+
+== A toggle to let admins and mods join the server unannounced ==
+<br>
+aliases.msa:
+<pre>
+*:/silentjoin [$player] [$] = >>>
+    _verify_mod() #A procedure that checks if the user has the custom permission that all moderators have
+
+    @array = get_value('silentjoin.players')
+    if( is_null(@array) ) {
+        @array = array()
+    } else {
+        array_sort(@array, 'STRING_IC')
+    }
+
+    if(to_lower($player) == 'list') #This shows a list of all people with it enabled, hopefully you don't a player called 'list'!
+    {
+        msg(color(2). 'Players with Silent Join Enabled:'))
+        msg(color(e). array_implode(@array, ', ')))
+        die()
+    }
+
+    if($player == '') {
+        @player = to_lower(player())
+    } else {
+        _verify_op()
+        @player = to_lower($player)
+    }
+
+    if(array_contains(@array, @player)) { #Remove from the list.
+        array_remove_values(@array, @player)
+        store_value('silentjoin.players', @array)
+
+        @bcmsg = ('&c'. @player. ' &ehas had Silent Join &c'. 'disabled')
+        msg(colorize(@bcmsg))
+        console(colorize(@bcmsg. '&e by &5'. player()))
+    } else { #Add to the list.
+        array_push(@array, @player)
+        store_value('silentjoin.players', @array)
+
+        @bcmsg = ('&c'. @player. ' &ehas had Silent Join &a'. 'enabled')
+        msg(colorize(@bcmsg))
+        console(colorize(@bcmsg. '&e by &5'. player()))
+    }
+<<<
+</pre>
+
+Main.ms:
+<pre>
+bind(player_join, null, null, @event,
+    ### Change the default join message ###
+    modify_event('message', (color(7). 'Player Join: '. color(e). player()))
+
+    @array = get_value('silentjoin.players')
+    if( is_null(@array) ) {
+        @array = array()
+    }
+
+    if(array_contains_ic(@array, player())) {
+        modify_event('message', '')
+        _bc_mods(color(b). 'Silent Join: '. color(e). player())
+    }
+)
+
+bind(player_quit, null, null, @event,
+    ### Change the default quit message ###
+    modify_event('message', (color(7). 'Player Quit: '. color(e). player()))
+
+    @array = get_value('silentjoin.players')
+    if( is_null(@array) ) {
+        @array = array()
+    }
+
+    if(array_contains_ic(@array, player())) {
+        modify_event('message', '')
+        _bc_mods(color(b). 'Silent Quit: '. color(e). player())
+    }
+)
+</pre>
+
+Auto_include.ms:
+<pre>
+proc(_bc_mods, @str) {
+    foreach(all_players(), @user) {
+        if( has_permission(@user, 'ch_mod') ) { #The custom permission we gave the mods group.
+            tmsg(@user, @str)
+        }
+    }
+}
+
+proc(_verify_mod, assign(@msg, 'You do not have permission to run this command.')) {
+    if(!has_permission('ch_mod')){
+        die(colorize('&a'. @msg))
+    }
+}
+
+</pre>
+
+== Simple mail system ==
+-added by russellsayshi
+In aliases.msa
+
+<pre>
+*:/mail [$action] [$] = >>>
+    if(equals($action, 'read'), #checking if they do /mail read
+        if(equals(get_value(concat('mail', player())), null), #the mail is stored in mailplayername
+            msg(concat(color(green), 'No new mail.'))
+        ,
+            msg(concat(color(green), get_value(concat('mail', player()))))
+            clear_value(concat('mail', player()))
+            msg(concat(color(green), 'Your mail has been marked as read.'))
+        )
+    ,
+        if(equals($, ''), #if no message is specified
+            msg(concat(color(red), 'Usage: /mail <player> <message>'))
+            msg(concat(color(red), 'To see your mail, do /mail read'))
+        ,
+            if(ponline($action), #if the player is online, notify them of their new message
+                tmsg($action, concat(color(green), 'New mail message. Type /mail read to see your messages.'))
+            )
+            if(equals(get_value(concat('mail', $action)), null),
+                store_value(concat('mail', $action), concat(concat(' ', player()), concat(': ', $))),
+                store_value(concat('mail', $action), concat(get_value(concat('mail', $action)), concat(concat('\n', player()), concat(': ', $))))
+            )
+        )
+    )
+<<<
+</pre>
+
+In main.ms
+
+<pre>
+bind(player_join, null, null, @event,
+    if(equals(get_value(concat('mail', player())), null),
+        msg(concat(color(gray), 'You have no new mail.'))
+    ,
+        msg(concat(color(green), 'You have new mail! Type /mail read to see your messages.'))
+    )
+)
+</pre>
+
+== Pagination ==
+
+In auto_include.ms
+<pre>
+proc _paginate(@title, @list, @page, @perpage=15) {
+
+    ### Check if @list is empty and sorts alphabetically ###
+    if( @list == null ) {
+        @list = array()
+    }
+
+    array_sort(@list, 'STRING_IC')
+
+    ### Checks to see if any values would appear on the specified page, and if so,   ###
+    ###    get all values from that page and push them to the array, else get page 1 ###
+    @maxpage = ceil(array_size(@list) / @perpage)
+    if(!is_integral(@page) || @maxpage == 0) {
+        @maxpage = 1
+    }
+
+    ### If the page number is less than 1, or higher than the maximum page ###
+    if(@page < 1 || @page > @maxpage) {
+        die(colorize('&4Error: &cPlease supply a valid page number between 1 and @{maxpage}...'))
+    }
+
+    @finalList = array()
+
+    for(@i = (@page - 1) * @perpage, @i < (@page * @perpage), @i++) {
+        if(array_size(@list) > @i) {
+            array_push(@finalList, @list[@i])
+        }
+    }
+
+    msg(colorize("&5The list of @title (". array_size(@list). "): &7(Page: @{page}/@{maxpage})"))
+    msg(colorize('&6'. array_implode(@finalList, '&7, &6')))
+}
+
+</pre>
+
+{{LearningTrail}}

@@ -220,7 +220,7 @@ public class SimpleSyntaxHighlighter {
 					+ getRGB(classes.get(ElementTypes.BACKGROUND_COLOR)) + ";"
 					+ " border-color: #" + getRGB(classes.get(ElementTypes.BORDER_COLOR))
 					+ "; border-style: solid; border-width: 1px 0px 1px 0px; margin: 1em 2em;"
-					+ " padding: 0 0 0 1em;\">\n" + out.toString().replace("\t", "&nbsp;&nbsp;&nbsp;") + "</div>\n";
+					+ " padding: 0 0 0 1em;\" class=\"methodscript_code\">\n" + out.toString().replace("\t", "&nbsp;&nbsp;&nbsp;") + "</div>\n";
 	}
 
 	private static final String FUNCTION_PATTERN = "([^a-zA-Z0-9_])?([a-zA-Z_]*[a-zA-Z0-9_]+)((?:&nbsp;)*\\()";
