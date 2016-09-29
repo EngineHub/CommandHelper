@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
+import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCMobs;
@@ -29,6 +30,7 @@ import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
 import com.laytonsmith.abstraction.events.MCEntityInteractEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
+import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
 import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
 import com.laytonsmith.abstraction.events.MCItemSpawnEvent;
@@ -1765,6 +1767,64 @@ public class EntityEvents {
 
 		public Driver driver() {
 			return Driver.ENTITY_TOGGLE_GLIDE;
+		}
+	}
+
+	@api
+	public static class firework_explode extends AbstractEvent {
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public String getName() {
+			return "firework_explode";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fires when a firework rocket explodes."
+					+ " {id: The entityID of the firework rocket"
+					+ " | location: Where the firework rocket is exploding}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCFireworkExplodeEvent) {
+				MCFireworkExplodeEvent e = (MCFireworkExplodeEvent) event;
+				Map<String, Construct> ret = new HashMap<>();
+				MCFirework firework = e.getEntity();
+				ret.put("id", new CString(firework.getUniqueId().toString(), Target.UNKNOWN));
+				ret.put("location", ObjectGenerator.GetGenerator().location(firework.getLocation()));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCFireworkExplodeEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.FIREWORK_EXPLODE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
 		}
 	}
 }

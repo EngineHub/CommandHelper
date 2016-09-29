@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEnti
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityExplodeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityInteractEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityToggleGlideEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCFireworkExplodeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCHangingBreakEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCItemDespawnEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCItemSpawnEvent;
@@ -161,5 +162,11 @@ public class BukkitEntityListener implements Listener {
 	public void onEntityToggleGlide(Event event) {
 		BukkitMCEntityToggleGlideEvent etge = new BukkitMCEntityToggleGlideEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_TOGGLE_GLIDE, "entity_toggle_glide", etge);
+	}
+
+	@EventIdentifier(event = Driver.FIREWORK_EXPLODE, className = "org.bukkit.event.entity.FireworkExplodeEvent")
+	public void onFireworkExplode(Event event) {
+		BukkitMCFireworkExplodeEvent fee = new BukkitMCFireworkExplodeEvent(event);
+		EventUtils.TriggerListener(Driver.FIREWORK_EXPLODE, "firework_explode", fee);
 	}
 }
