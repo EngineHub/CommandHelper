@@ -36,6 +36,7 @@ public interface MCWorld extends MCMetadatable {
 	public MCWorldType getWorldType();
 
 	int getSeaLevel();
+	int getMaxHeight();
 
 	public MCDifficulty getDifficulty();
 	public void setDifficulty(MCDifficulty difficulty);

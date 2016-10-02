@@ -1162,6 +1162,7 @@ public class World {
 			ret.set("generator", new CString(w.getGenerator(), t), t);
 			ret.set("worldtype", new CString(w.getWorldType().name(), t), t);
 			ret.set("sealevel", new CInt(w.getSeaLevel(), t), t);
+			ret.set("maxheight", new CInt(w.getMaxHeight(), t), t);
 			return ret;
 		}
 
