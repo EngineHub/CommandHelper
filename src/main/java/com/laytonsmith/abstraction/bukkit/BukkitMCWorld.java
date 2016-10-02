@@ -205,6 +205,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
+	public int getMaxHeight(){
+		return getHandle().getMaxHeight();
+	}
+
+	@Override
     public MCBlock getBlockAt(int x, int y, int z) {
         if (w.getBlockAt(x, y, z) == null) {
             return null;
