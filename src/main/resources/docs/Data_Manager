@@ -9,7 +9,7 @@ Currently, several methods of data storage are available. Usage of the actual Pe
 [[CommandHelper/Staged/Persistence_Network|here]], and explains how to configure the different backends.
 Conversion between the types is also be possible, so if you begin storing values now, these will be portable
 later. The data in each row is stored as a partial [http://en.wikipedia.org/wiki/JSON JSON], but otherwise follows
-all rules of JSONs. <nowiki>{Objects}</nowiki> and <nowiki>[Arrays]</nowiki> are supported.
+all rules of JSONs. %%NOWIKI|{Objects}%% and %%NOWIKI|[Arrays]%% are supported.
 
 The simplest and quickest way to view all the currently stored values is to open up a terminal, and change to the
 directory the CommandHelper jar is in, and run the following command:
@@ -85,8 +85,9 @@ The <code>storage</code> namespace is reserved for values that are created and a
 
 * storage.**: Values accessible from your main script's store_value and get_value functions. 
 * federation.**: The Federation system stores values here. The namespace should never be set to read only, and should be in a transient data source.
-* extension.<extension name>.**: Extensions may store data in this namespace.
-* custom.**: CommandHelper will not ever touch any values stored in here, and you may use this however you wish with external scripts.
+* extension.&lt;extension name&gt;.**: Extensions may store data in this namespace.
+* site_deploy.**: Information used by site-deploy tool is stored in this namespace.
+* custom.**: MethodScript will not ever touch any values stored in here, and you may use this however you wish with external scripts.
 <!-- These are "reserved" but not listed.
 * snapin.**: Data about snapins resides here.
 * global.**: Values accessible from any script using the store_gvalue and get_gvalue functions. All scripts have access to this namespace, which provides a way for snap ins and other scripts to share data. Child namespaces are allowed to be created here, but are not managed by CommandHelper.

@@ -6,12 +6,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation, when tagging a constructor, indicates that ALL subclasses must
- * include a constructor with the same parameter signature. This check is enforced
+ * This annotation, when tagging a constructor/method, indicates that ALL subclasses must
+ * include a constructor/method with the same parameter signature. This check is enforced
  * at compile time.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.CONSTRUCTOR, ElementType.METHOD})
 public @interface ForceImplementation {
-	
+
 }

@@ -12,10 +12,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.junit.After;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,15 +24,15 @@ import org.junit.Test;
  */
 @GeneralTest.TestAnnotation("value")
 public class GeneralTest {
-	
+
 	@Retention(RetentionPolicy.RUNTIME)
 	public static @interface TestAnnotation {
 		String value();
 	}
-	
+
 	@TestAnnotation("field")
 	private final String field = "field";
-	
+
 	@TestAnnotation("method")
 	private String method(){
 		return "";
@@ -47,47 +46,52 @@ public class GeneralTest {
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(GeneralTest.class));
     }
     @Before
-    public void setUp() throws Exception {        
-        
+    public void setUp() throws Exception {
+
     }
     @After
     public void tearDown(){
-        
+
     }
-	
+
 	@Test
 	public void testEquals() throws Exception {
 		// Test that the same class, loaded two different ways, are still equal
-		ClassMirror<GeneralTest> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+		@SuppressWarnings("unchecked")
+		ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 		ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 		assertTrue(c1.equals(c2));
 	}
-	
+
 	@Test
 	public void testHashCode() throws Exception {
 		// Test that the same class, loaded two different ways, have the same hash code
-		ClassMirror<GeneralTest> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+		@SuppressWarnings("unchecked")
+		ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 		ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 		assertEquals(c1.hashCode(), c2.hashCode());
 	}
-	
+
 	@Test
 	public void testClassReferenceMirrorName() throws Exception {
-		ClassMirror<GeneralTest> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+		@SuppressWarnings("unchecked")
+		ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 		ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 		assertEquals(c1.getClassReference(), c2.getClassReference());
 	}
-	
+
 	@Test
 	public void testClassReferenceAnnotation() throws Exception {
-		ClassMirror<GeneralTest> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+		@SuppressWarnings("unchecked")
+		ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 		ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 		assertEquals(c1.getAnnotations(), c2.getAnnotations());
 	}
-	
+
 	@Test
 	public void testClassFieldReferences() throws Exception {
-		ClassMirror<GeneralTest> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+		@SuppressWarnings("unchecked")
+		ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 		ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 		List<FieldMirror> c1l = new ArrayList<>(Arrays.asList(c1.getFields()));
 		List<FieldMirror> c2l = new ArrayList<>(Arrays.asList(c2.getFields()));
@@ -103,10 +107,11 @@ public class GeneralTest {
 		}
 		assertEquals(c1l, c2l);
 	}
-	
+
 	@Test
 	public void testClassMethodReferences() throws Exception {
-		ClassMirror<GeneralTest> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+		@SuppressWarnings("unchecked")
+		ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 		ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 		List<MethodMirror> m1 = Arrays.asList(c1.getMethods());
 		List<MethodMirror> m2 = Arrays.asList(c1.getMethods());
@@ -121,17 +126,19 @@ public class GeneralTest {
 		Collections.sort(m2, c);
 		assertEquals(m1, m2);
 	}
-	
+
 	@Test
 	public void testPackageReferences() throws Exception {
-		ClassMirror<GeneralTest> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+		@SuppressWarnings("unchecked")
+		ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 		ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 		assertEquals(c1.getPackage(), c2.getPackage());
 	}
-	
+
 	@Test
 	public void testAnnotationValue() throws Exception {
-		ClassMirror<GeneralTest> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+		@SuppressWarnings("unchecked")
+		ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 		ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 		FieldMirror f1 = c1.getField("field");
 		FieldMirror f2 = c1.getField("field");
@@ -143,5 +150,74 @@ public class GeneralTest {
 		assertEquals(f2.loadAnnotation(TestAnnotation.class).value(), "field");
 		assertEquals(m1.loadAnnotation(TestAnnotation.class).value(), "method");
 		assertEquals(m2.loadAnnotation(TestAnnotation.class).value(), "method");
+	}
+
+	/*
+	    A -> B
+	    |
+	    | -> C -> D
+		 |    |
+		 |    | -> F
+		 |
+		 | -> E
+	*/
+
+	public static interface A extends B, C {}
+
+	public static interface B {}
+
+	public static interface C extends D, E {}
+
+	public static interface D extends F {}
+
+	public static interface E {}
+
+	public static interface F {}
+
+	@Test
+	public void testExtendsInterfacesWorks() {
+	    // We are testing that interfaces (with complicated inheritance schemes, as seen above)
+	    // work. Particularly, does A extend F? (Yes, it does.)
+	    assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<A>(A.class), F.class));
+	    assertFalse(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<E>(E.class), F.class));
+
+	    // It also extends itself
+	    assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<A>(A.class), A.class));
+
+	    // Just check all of them too
+	    assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<A>(A.class), B.class));
+	    assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<A>(A.class), C.class));
+	    assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<A>(A.class), D.class));
+	    assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<A>(A.class), E.class));
+
+	    // Just in case, check to make sure that if it isn't a "root" class, it still extends ok
+	    assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<C>(C.class), F.class));
+	}
+
+	public static class AConcrete implements A {}
+
+	@Test
+	public void testClassThatImplementsInterfaceExtendsProperly() {
+	    // Same thing, but this time make sure the concrete class works.
+	    assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), A.class));
+	    // just... check all of them.
+	    assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), B.class));
+	    assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), C.class));
+	    assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), D.class));
+	    assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), E.class));
+	    assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), F.class));
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface tag {}
+
+	@tag
+	public static interface TestMe {}
+
+	@Test
+	public void testInterfaceWithAnnotationIsReturned() {
+	    // Test that the interface specified is *also* returned
+	    Set<ClassMirror<? extends TestMe>> t = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(tag.class, TestMe.class);
+	    assertTrue(t.size() == 1);
 	}
 }

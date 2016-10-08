@@ -24,10 +24,13 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.snapins.PackagePermission;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
+import com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -175,7 +178,12 @@ public abstract class AbstractFunction implements Function {
 	 * @return
 	 */
 	protected String getBundledDocs(){
+	    try {
 		return getBundledDocs(null);
+	    } catch (GenerateException ex) {
+		// This condition is impossible, so we just ignore this case.
+		return "";
+	    }
 	}
 
 	/**
@@ -184,9 +192,10 @@ public abstract class AbstractFunction implements Function {
 	 * it as a string directly in code would be cumbersome. To facilitate dynamic docs, templates
 	 * can be provided, which will be replaced for you.
 	 * @param map
+	 * @throws GenerateException If the templates cannot be properly parsed
 	 * @return
 	 */
-	protected String getBundledDocs(Map<String, DocGenTemplates.Generator> map){
+	protected String getBundledDocs(Map<String, DocGenTemplates.Generator> map) throws GenerateException {
 		String template = StreamUtils.GetString(AbstractFunction.class.getResourceAsStream("/functionDocs/" + getName()));
 		if(map == null){
 			map = new HashMap<>();

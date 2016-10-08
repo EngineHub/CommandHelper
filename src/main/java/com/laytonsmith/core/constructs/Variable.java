@@ -1,8 +1,11 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.core.CHVersion;
+
 /**
  *
- * 
+ *
  */
 public class Variable extends Construct {
 
@@ -70,7 +73,7 @@ public class Variable extends Construct {
     public void setVal(CString val) {
         this.var_value = val;
     }
-	
+
 	public void setVal(String val){
 		this.var_value = new CString(val, this.getTarget());
 	}
@@ -88,4 +91,25 @@ public class Variable extends Construct {
     public boolean isDynamic() {
         return true;
     }
+
+    @Override
+    public Version since() {
+	return super.since();
+    }
+
+    @Override
+    public String docs() {
+	return super.docs();
+    }
+
+    @Override
+    public CClassType[] getSuperclasses() {
+	return new CClassType[]{CClassType.MIXED};
+    }
+
+    @Override
+    public CClassType[] getInterfaces() {
+	return new CClassType[]{};
+    }
+
 }

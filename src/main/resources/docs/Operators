@@ -83,7 +83,7 @@ get will specify function names.
 |
 |-
 | ''Logical OR''
-| <nowiki>||</nowiki>
+| %%NOWIKI|||%%
 | {{function|or}}
 |
 |-
@@ -95,7 +95,7 @@ get will specify function names.
 -= uses {{function|subtract}}, *= uses {{function|multiply}}, /= uses {{function|divide}}, and .= uses {{function|concat}}. 
 |-
 | ''Array Sub-indices''
-| <nowiki>[ ]</nowiki>
+| %%NOWIKI|[ ]%%
 | {{function|array_get}}/{{function|array_set}}/{{function|array_push}}
 | Using square braces allows for array accesses, and in combination with the <code>=</code> sign, setting sub-indices.
 If the array set appears on the right hand side of an assignment, or in a general statement without an assign, it is an

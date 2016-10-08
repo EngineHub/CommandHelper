@@ -24,12 +24,21 @@ wiky.process = function (wikitext, options) {
     for (i = 0; i < lines.length; i++)
     {
         line = lines[i];
-        if (line.match(/^===/) !== null && line.match(/===$/) !== null)
+        if (line.match(/^======/) !== null && line.match(/======$/) !== null)
         {
-            html += "<h2>" + line.substring(3, line.length - 3) + "</h2>";
+            html += "<h6>" + line.substring(6, line.length - 6) + "</h6>";
+        } else if (line.match(/^=====/) !== null && line.match(/=====$/) !== null)
+        {
+            html += "<h5>" + line.substring(5, line.length - 5) + "</h5>";
+        } else if (line.match(/^====/) !== null && line.match(/====$/) !== null)
+        {
+            html += "<h4>" + line.substring(4, line.length - 4) + "</h4>";
+        } else if (line.match(/^===/) !== null && line.match(/===$/) !== null)
+        {
+            html += "<h3>" + line.substring(3, line.length - 3) + "</h3>";
         } else if (line.match(/^==/) !== null && line.match(/==$/) !== null)
         {
-            html += "<h3>" + line.substring(2, line.length - 2) + "</h3>";
+            html += "<h2>" + line.substring(2, line.length - 2) + "</h2>";
         } else if (line.match(/^:+/) !== null)
         {
             // find start line and ending line
@@ -65,7 +74,7 @@ wiky.process = function (wikitext, options) {
             html += wiky.process_normal(line);
         }
 
-        html += "<br/>\n";
+        html += "\n";
     }
 
     return html;

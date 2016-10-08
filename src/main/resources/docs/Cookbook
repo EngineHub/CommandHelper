@@ -1,0 +1,79 @@
+A cookbook has many small, short recipes in it, that tell you how to cook a single dish. With each given recipe, you 
+are expected to modify it to suit your needs, as well as know which recipes to combine to make an entire meal. Just 
+like a cookbook, this page lists common tasks that are small, generic examples that need a bit of modification to suit 
+your needs, but should otherwise complete one small portion of a more complex task. Feel free to take and modify these 
+snippets to fit your needs, and put them in a larger ecosystem of scripts that make up the whole of your server. The 
+examples in this cookbook may only work with development features, so if it doesn't work, try updating to a dev build.
+
+===Command Cooldown===
+This shows how to add a cooldown to any command, so that it won't be able to be run by a player until after
+a certain amount of time.
+
+auto_include.ms:
+%%CODE|
+proc _cooldown(@time, @id){
+  @t = get_value('cooldowns.'.@id);
+ 
+  if(@t == null){
+    store_value('cooldowns.'.@id, time());
+    return(true);
+  } else {
+    if((time() - @t) / 1000 <= @time){
+      die('You must wait at least '.@time.' seconds between command runs');
+    } else {
+      store_value('cooldowns.'.@id, time());
+    }
+  }
+}
+%%
+
+In your actual command:
+%%CODE|
+/command = >>>
+    _cooldown(60, 'SOMETHINGUNIQUEHERE') // 60 seconds is the time between command runs
+
+    // Do the rest of the command here
+<<< 
+%%
+
+=== Continual Server Broadcast ===
+If you want to continually broadcast a message to the server, you can add this little snippet:
+
+In main.ms:
+
+%%CODE|
+// We are setting it to run every 2 minutes (2 minutes, times 60 seconds, times 1000 ms gives us 2 minutes in ms)
+set_interval(2 * 60 * 1000, closure(){
+    array @messages = array(
+        'Message 1',
+        'Message 2',
+        'Message 3' 
+        // You can add as many messages as you like
+    );
+    int @index = rand(array_size(@messages)); // This is the index of a random message
+    broadcast(@messages[@index]);
+});
+%%
+
+=== Delayed Looper ===
+If you want to run some code in a loop a limited number of times, but put a delay between runs, you can use the 
+following code: (Note the [[CommandHelper/Execution Queue|Execution Queue]] is a much more elegant solution to 
+this problem)
+
+%%CODE|
+int @n = 100; // The number of times you wish this to run
+int @delay = 1000; // The delay between runs, in MS
+
+double @counterName = rand(); // Prevents overlapping counter names
+export('counter' . @counterName, @n);
+set_interval(@delay, closure(){
+    int @n = import('counter' . @counterName);
+    msg(@n); // This bit becomes your code
+    dec(@n);
+    if(@n <= 0){
+        clear_task();
+    }
+    export('counter' . @counterName, @n);
+});
+%%
+

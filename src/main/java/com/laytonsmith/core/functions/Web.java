@@ -71,6 +71,8 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.activation.CommandMap;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -468,7 +470,13 @@ public class Web {
 				}
 			});
 			templates.put("CODE", DocGenTemplates.CODE);
+		    try {
 			return super.getBundledDocs(templates);
+		    } catch (DocGenTemplates.Generator.GenerateException ex) {
+			Logger.getLogger(Web.class.getName()).log(Level.SEVERE, null, ex);
+			// just return the unformatted docs, which are more useful than nothing.
+			return super.getBundledDocs();
+		    }
 		}
 
 		@Override

@@ -26,7 +26,7 @@ Skip ahead to the next section
 ==== Step 2 ====
 Run <code>java -jar CommandHelper.jar</code> from your prompt. You will see the
 help listing. Each tool is it's own "verb". The syntax for running a particular
-tool is <code>java -jar CommandHelper.jar &lt;verb&gt; <nowiki>[&lt;arguments for this tool&gt;]</nowiki></code>
+tool is <code>java -jar CommandHelper.jar &lt;verb&gt; %%NOWIKI|[&lt;arguments for this tool&gt;]%%</code>
 
 See the section below that shows the help listing for more details about each tool.
 

@@ -6,12 +6,10 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import com.jcraft.jsch.UserInfo;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -55,8 +53,10 @@ public class SSHWrapper {
      *
      * @param from
      * @param to
+     * @return false, if the file is being pushed to the remote, yet it was already the same, thus no changes were made,
+     * true otherwise
      */
-    public static void SCP(String from, String to) throws IOException {
+    public static boolean SCP(String from, String to) throws IOException {
 	if ((from.contains("@") && to.contains("@")) || (!from.contains("@") && !to.contains("@"))) {
 	    throw new IOException("Paths cannot be both remote, or both local.");
 	}
@@ -167,8 +167,10 @@ public class SSHWrapper {
 		} else {
 		    //We are pushing a local file to a remote, so we need to use SCPTo
 		    File localFile = new File(from);
-		    SCPTo(localFile, file, sshSession);
+		    return SCPTo(localFile, file, sshSession);
 		}
+
+		return true;
 
 	    } catch (JSchException | SftpException ex) {
 		throw new IOException(ex);
@@ -178,7 +180,17 @@ public class SSHWrapper {
 	}
     }
 
-    private static void SCPTo(File lfile, String rfile, Session session) throws JSchException, IOException, SftpException {
+    /**
+     *
+     * @param lfile
+     * @param rfile
+     * @param session
+     * @return true, if the file was uploaded, false if the file is the same on the remote, thus the file is not uploaded
+     * @throws JSchException
+     * @throws IOException
+     * @throws SftpException
+     */
+    private static boolean SCPTo(File lfile, String rfile, Session session) throws JSchException, IOException, SftpException {
 	ChannelSftp channel = null;
 	try {
 	    channel = (ChannelSftp) session.openChannel("sftp");
@@ -209,7 +221,9 @@ public class SSHWrapper {
 	    if(!remote.equals(local)) {
 		// only upload if it's different
 		channel.put(new FileInputStream(lfile), frfile.getName());
+		return true;
 	    }
+	    return false;
 	} finally {
 	    if (channel != null) {
 		channel.exit();
@@ -218,7 +232,13 @@ public class SSHWrapper {
 	}
     }
 
-    private static String getLocalMD5(File localFile) throws IOException {
+    /**
+     * Returns the md5 sum of a local file
+     * @param localFile
+     * @return
+     * @throws IOException
+     */
+    public static String getLocalMD5(File localFile) throws IOException {
 	try {
 	    byte [] f = StreamUtils.GetBytes(new FileInputStream(localFile));
 	    MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
@@ -434,14 +454,16 @@ public class SSHWrapper {
      * Given an input stream, writes it out to a remote file system. The path given (to) must be a remote path.
      *
      * @param is
+     * @return true, if the file on the remote was changed, false, if it was already at this version, thus no
+     * changes were made
      */
-    public static void SCPWrite(InputStream is, String to) throws IOException {
+    public static boolean SCPWrite(InputStream is, String to) throws IOException {
 	File temp = File.createTempFile("methodscript-temp-file", ".tmp");
 	FileOutputStream fos = new FileOutputStream(temp);
 	StreamUtils.Copy(is, fos);
 	fos.close();
 	try {
-	    SCP(temp.getAbsolutePath(), to);
+	    return SCP(temp.getAbsolutePath(), to);
 	} finally {
 	    temp.delete();
 	    temp.deleteOnExit();

@@ -56,7 +56,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * 
+ *
  */
 @core
 public class Exceptions {
@@ -222,16 +222,16 @@ public class Exceptions {
 
 		@Override
 		public String docs() {
-			Set<Class<CREThrowable>> e = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class);
+			Set<Class<? extends CREThrowable>> e = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class);
 			String exceptions = "\nValid Exceptions: ";
 			List<String> ee = new ArrayList<>();
-			for (Class<CREThrowable> c : e) {
+			for (Class<? extends CREThrowable> c : e) {
 				String exceptionType = c.getAnnotation(typeof.class).value();
 				ee.add(exceptionType);
 			}
 			Collections.sort(ee);
 			exceptions += StringUtils.Join(ee, ", ", ", and ");
-			
+
 			return "nothing {exceptionType, msg, [causedBy] | exception} This function causes an exception to be thrown. exceptionType may be any valid exception type."
 					+ "\n\nThe core exception types are: " + exceptions + "\n\nThere may be other exception types as well, refer to the documentation of any extensions you have installed.";
 		}
@@ -279,7 +279,7 @@ public class Exceptions {
 						CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR, "Uncatchable exceptions are no longer supported.", t);
 						throw new CRECastException("An exception type must be specified", t);
 					}
-					Class<Mixed> c;
+					Class<? extends Mixed> c;
 					try {
 						c = NativeTypeList.getNativeClass(args[0].val());
 					} catch (ClassNotFoundException ex) {
@@ -300,7 +300,7 @@ public class Exceptions {
 			}
 		}
 	}
-	
+
 	@api
 	@seealso({_throw.class, _try.class, com.laytonsmith.tools.docgen.templates.Exceptions.class})
 	public static class set_uncaught_exception_handler extends AbstractFunction{
@@ -378,11 +378,11 @@ public class Exceptions {
 						+ "@exception = 1 / @zero; // This should throw an exception\n",
 						// Can't automatically run this, since the examples don't have
 						// the exception handling fully working.
-						"Exception caught!\n" 
+						"Exception caught!\n"
 						+ "{RangeException, Division by 0!, /path/to/script.ms, 8}"),
 			};
 		}
-		
+
 	}
 
 	@api

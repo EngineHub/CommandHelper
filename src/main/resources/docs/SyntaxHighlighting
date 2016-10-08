@@ -1,0 +1,16 @@
+The MethodScript jar comes packaged with a syntax highlighter generator for several different text editors. 
+The syntax files can be updated with data from your specific jar, so it is guaranteed to be up to date. 
+To run the tool, run 
+
+<code>java -jar CommandHelper.jar syntax</code>
+
+from the command line. You will see a list of supported text editors. Select your text editor, and run, for instance:
+
+<code>java -jar CommandHelper.jar syntax npp obsidian</code>
+
+This will print out the syntax file to the console. You can pipe the output to a file with:
+
+<code>java -jar CommandHelper.jar syntax npp obsidian > syntaxFile.xml</code>
+
+This will save the file in the current directory. Follow the procedure for your specific text editor to update the syntax files using the freshly generated syntax file. (This varies depending on your text editor.)
+

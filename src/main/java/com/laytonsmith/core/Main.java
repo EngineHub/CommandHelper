@@ -5,12 +5,12 @@ import com.laytonsmith.PureUtilities.ArgumentSuite;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.CommandExecutor;
-import com.laytonsmith.PureUtilities.Common.Annotations.AnnotationChecks;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.Misc;
 import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
@@ -35,7 +35,7 @@ import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenExportTool;
 import com.laytonsmith.tools.docgen.DocGenUI;
 import com.laytonsmith.tools.docgen.ExtensionDocGen;
-import com.laytonsmith.tools.docgen.SiteDeploy;
+import com.laytonsmith.tools.docgen.sitedeploy.SiteDeploy;
 import com.laytonsmith.tools.pnviewer.PNViewer;
 import java.awt.HeadlessException;
 import java.io.File;
@@ -205,7 +205,16 @@ public class Main {
 		.addArgument('c', "config", ArgumentParser.Type.STRING,
 			MethodScriptFileLocations.getDefault().getSiteDeployFile().getAbsolutePath(),
 			"The path to the config file for deployment", "configFile", false)
-		.addFlag("generate-prefs", "Generates the preferences file initially, which you can then fill in.");
+		.addFlag("generate-prefs", "Generates the preferences file initially, which you can then fill in.")
+		.addFlag("use-local-cache", "Generally, when the uploader runs, it checks the remote server to see if"
+			+ " the file already exists there (and is unchanged compared to the local file). If it is unchanged,"
+			+ " the upload is skipped. However, even checking with the remote to see what the status of the"
+			+ " remote file is takes time. If you are the only one uploading files, then we can simply use"
+			+ " a local cache of what the remote system has, and we can skip the step of checking with the"
+			+ " remote server for any given file. The cache is always populated, whether or not this flag"
+			+ " is set, so if you aren't sure if you can trust the cache, run once without this flag, then"
+			+ " for future runs, you can be sure that the local cache is up to date.")
+		.addFlag("clear-local-cache", "Clears the local cache of all entries, then exits.");
 	suite.addMode("site-deploy", siteDeploy);
 
 	ARGUMENT_SUITE = suite;
@@ -572,9 +581,24 @@ public class Main {
 		    System.exit(0);
 		}
 	    } else if(mode == siteDeploy){
+		boolean clearLocalCache = parsedArgs.isFlagSet("clear-local-cache");
+		if(clearLocalCache) {
+		    PersistenceNetwork p = SiteDeploy.getPersistenceNetwork();
+		    if(p == null) {
+			System.out.println("Cannot get reference to persistence network");
+			System.exit(1);
+			return;
+		    }
+		    DaemonManager dm = new DaemonManager();
+		    p.clearKey(dm, new String[]{"site_deploy", "local_cache"});
+		    dm.waitForThreads();
+		    System.out.println("Local cache cleared");
+		    System.exit(0);
+		}
 		boolean generatePrefs = parsedArgs.isFlagSet("generate-prefs");
+		boolean useLocalCache = parsedArgs.isFlagSet("use-local-cache");
 		File config = new File(parsedArgs.getStringArgument("config"));
-		SiteDeploy.run(generatePrefs, config);
+		SiteDeploy.run(generatePrefs, useLocalCache, config);
 	    } else {
 		throw new Error("Should not have gotten here");
 	    }

@@ -50,7 +50,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 
+ *
  */
 @core
 public class Reflection {
@@ -163,19 +163,19 @@ public class Reflection {
 				return new CArray(t, protocols);
 			} else if("enum".equalsIgnoreCase(param)){
 				CArray a = new CArray(t);
-				Set<Class<Enum>> enums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(MEnum.class, Enum.class);
-				Set<Class<DynamicEnum>> dEnums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class);
+				Set<Class<? extends Enum>> enums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(MEnum.class, Enum.class);
+				Set<Class<? extends DynamicEnum>> dEnums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class);
 				if(args.length == 1){
 					//No name provided
-					for(Class<Enum> e : enums){
+					for(Class<? extends Enum> e : enums){
 						a.push(new CString(e.getAnnotation(MEnum.class).value(), t), t);
 					}
-					for (Class<DynamicEnum> d : dEnums) {
+					for (Class<? extends DynamicEnum> d : dEnums) {
 						a.push(new CString(d.getAnnotation(MDynamicEnum.class).value(), t), t);
 					}
 				} else if(args.length == 2){
 					String enumName = args[1].val();
-					for(Class<Enum> e : enums){
+					for(Class<? extends Enum> e : enums){
 						if(e.getAnnotation(MEnum.class).value().equals(enumName)){
 							for(Enum ee : e.getEnumConstants()){
 								a.push(new CString(ee.name(), t), t);
@@ -183,7 +183,7 @@ public class Reflection {
 							break;
 						}
 					}
-					for (Class<DynamicEnum> d : dEnums) {
+					for (Class<? extends DynamicEnum> d : dEnums) {
 						if (d.getAnnotation(MDynamicEnum.class).value().equals(enumName)) {
 							for (DynamicEnum ee : (Collection<DynamicEnum>) ReflectionUtils.invokeMethod(d, null, "values")) {
 								a.push(new CString(ee.name(), t), t);
@@ -311,7 +311,7 @@ public class Reflection {
 			}
 			return null;
 		}
-		
+
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
@@ -354,7 +354,7 @@ public class Reflection {
 			};
 		}
 	}
-	
+
 	@api
 	public static class get_functions extends AbstractFunction {
 
@@ -374,7 +374,7 @@ public class Reflection {
 		}
 
 		private static Map<String,List<String>> funcs = new HashMap<String,List<String>>();
-		
+
 		private void initf() {
 			for (FunctionBase f : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
 				String[] pack = f.getClass().getEnclosingClass().getName().split("\\.");
@@ -385,7 +385,7 @@ public class Reflection {
 				funcs.get(clazz).add(f.getName());
 			}
 		}
-		
+
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ret = CArray.GetAssociativeArray(t);
@@ -424,7 +424,7 @@ public class Reflection {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class get_events extends AbstractFunction {
 
@@ -474,7 +474,7 @@ public class Reflection {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class get_aliases extends AbstractFunction {
 
@@ -523,7 +523,7 @@ public class Reflection {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class reflect_value_source extends AbstractFunction {
 
@@ -570,7 +570,7 @@ public class Reflection {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 
 	@api

@@ -27,4 +27,9 @@ public abstract class LiteralKeyword extends Keyword {
 
 	protected abstract Construct getValue(Target t);
 
+	@Override
+	public String docs() {
+	    return "Returns a literal " + getName() + " value.";
+	}
+
 }

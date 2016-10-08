@@ -164,8 +164,8 @@ public class SyntaxHighlighters {
 	    base.remove("null"); // Null is technically in the list, but it shouldn't be added.
 	} else if (datalist.equalsIgnoreCase("enums")) {
 	    Set<String> set = new HashSet<>();
-	    Set<Class<Enum>> enums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(MEnum.class, Enum.class);
-	    for(Class<Enum> e : enums) {
+	    Set<Class<? extends Enum>> enums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(MEnum.class, Enum.class);
+	    for(Class<? extends Enum> e : enums) {
 		Enum[] es = e.getEnumConstants();
 		for(Enum ee : es) {
 		    set.add(ee.name());

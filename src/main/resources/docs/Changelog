@@ -287,7 +287,7 @@ Here's a full list of all the new functions. Check out the API for details on ea
 *Added [[CommandHelper/Interpreter Mode|interpreter mode]]!
 *Added user defined procedures
 *read() and include() are subject to the base-dir restriction now
-*<nowiki>#</nowiki> comments work even if they aren't the first character on the line. C style block comments are also available. <nowiki>/* */</nowiki>
+*%%NOWIKI|#%% comments work even if they aren't the first character on the line. C style block comments are also available. %%NOWIKI|/* */%%
 *Commands can be run from the console. If the command doesn't make sense to run without a player, the command should fail gracefully.
 *Added include and procedures. See [[CommandHelper/Procedures|this page]] for more details.
 *Potion Effects can now be accessed with set_peffect. See [http://www.minecraftwiki.net/wiki/Potion_effects the guide] on the minecraft wiki for ID numbers and other information

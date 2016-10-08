@@ -78,6 +78,6 @@ public class Target {
 	 */
     @Override
     public String toString() {
-        return ( file != null ? file.getAbsolutePath() : "Unknown File" ) + ":" + line;
+        return ( file != null ? file.getAbsolutePath() : "Unknown File" ) + ":" + line + "." + col;
     }
 }

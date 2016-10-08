@@ -1,7 +1,7 @@
 
 == auto_include.ms ==
 
-This file goes into the same directory as your aliases.msa file, and is normally used for [[CommandHelper/Procedures|Procedures]]. You can put useful commands that you want in <b>every</b> alias here.  Here's a simple one, that is used by the example scripts below
+This file goes into the same directory as your aliases.msa file, and is normally used for [[Procedures]]. You can put useful commands that you want in <b>every</b> alias here.  Here's a simple one, that is used by the example scripts below
 
 <pre>
 

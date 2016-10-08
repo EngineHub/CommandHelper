@@ -8,7 +8,7 @@ introducing its own methodologies.
 ===Functions===
 
 Functions allow for very dynamic scripts to be run. There are many defined functions, including functions that provide 
-control flow functionality. For the full list of functions, see the [[CommandHelper/API|API]]. A function is identified
+control flow functionality. For the full list of functions, see the [[API]]. A function is identified
 by a literal string, followed by parenthesis. So in <code>func()</code>, "func" is the name of the function, and "("
 and ")" begin and end the function argument list (in this case, there are no arguments being passed in.) Functions
 can have zero, one, or two or more arguments passed to them. In the case of two or more arguments, each argument
@@ -77,7 +77,7 @@ empty string. Cannot be created directly.
 Constant variables ($var), are assigned by the user at command runtime, and are technically constants as far as the 
 rest of the script is concerned. IVariables can be defined by the script writer and assigned various values that can 
 change throughout the script running. To define and use an ivariable, use the assign() function, or the = operator. 
-If an ivariable is used without first being defined, the value of the variable will be 0, 0.0, <nowiki>''</nowiki>, 
+If an ivariable is used without first being defined, the value of the variable will be 0, 0.0, %%NOWIKI|''%%, 
 false, or null, depending on how it is used. Most functions use the value in the ivariable without caring that it is 
 an ivariable, but it is possible that a function requires that a certain argument be an ivariable, such as the for() 
 function.
@@ -86,7 +86,7 @@ function.
 Sometimes a script may sometimes cause an error that could be anticipated. Instead of just having the script die, it is 
 possible to catch these errors, and perform alternate functionality. MethodScript mirrors the functionality of languages 
 like PHP and Java with exception handling. For more information about exception handling in MScript, see 
-[[CommandHelper/Exceptions|this page]]. For a more general discussion on exception handling, see 
+[[Exceptions|this page]]. For a more general discussion on exception handling, see 
 [http://en.wikipedia.org/wiki/Exception_handling this page] on Wikipedia.
 
 === main.ms, auto_include.ms, and aliases.msa ===
@@ -96,13 +96,13 @@ re-run when you /reloadaliases, but bound events and intervals and such are stop
 anything. main.ms uses '''pure MethodScript''', that is, it has a slightly different syntax than aliases.msa. In aliases.msa, 
 each alias is defined, along with a snippet of MethodScript. For instance, in the alias,
 
-%%CODE|
+%%ALIAS|
 /test [$command=''] = >>>
     console($command);
 <<<
 %%
 
-the <code>/test [$command=<nowiki>''</nowiki>] = >>> <<<</code> part is the alias markup, and is not actual MethodScript, 
+the <code>/test [$command=%%NOWIKI|''%%] = >>> <<<</code> part is the alias markup, and is not actual MethodScript, 
 that is, the symbols and characters follow different meanings than inside the alias definition. In this example, 
 <code>console($command);</code> is pure MethodScript.
 
@@ -136,7 +136,7 @@ console('Finished binding all events in main.ms');
 %%
 
 In aliases.msa:
-%%CODE|
+%%ALIAS|
 /test $alias = >>>
     _my_proc();
     console('In /test $alias');
@@ -152,7 +152,7 @@ readable)
 First execution unit, main.ms:
 %%CODE|
 proc(_my_proc, ...);
-bind(some_event, null, null, @event, <CREATION OF EXECUTION UNIT>);
+bind(some_event, null, null, @event, /*<CREATION OF EXECUTION UNIT>*/);
 console('Finished binding all events in main.ms');
 %%
 
@@ -204,7 +204,7 @@ because it can put your server in an inconsistent and unreproducable state if yo
 Here are a few more complex examples to get you started on how to use the advanced features of CommandHelper. Because of 
 the Turing completeness of the plugin, it is possible to do far more advanced things.
 
-%%CODE|
+%%ALIAS|
 /**
  * Better tp. If "/tp name" is used, it implies "/tp thisplayer name"
  * but if "/tp name1 name2" is used, it implies "/tp name1 name2"

@@ -22,11 +22,11 @@ import java.util.logging.Logger;
 
 /**
  *
- * 
+ *
  */
 @datasource("sqlite")
 public class SQLiteDataSource extends SQLDataSource {
-	
+
 	/* These values may not be changed without creating an upgrade routine */
 	private static final String TABLE_NAME = "persistance"; //Note the misspelling!
 	private String path;
@@ -35,7 +35,7 @@ public class SQLiteDataSource extends SQLDataSource {
 	 * If true, the connection will not be recycled, and will be disconnected
 	 * after each call, and re-established before each call. If false, the
 	 * connection is recycled using the AbstractDataSource connect logic.
-	 * 
+	 *
 	 * It appears as though this needs to remain true for connections to work correctly
 	 * if multiple connections are established. Further research may need to be done
 	 * to establish if this is a Windows only problem, or if there is some other
@@ -52,15 +52,15 @@ public class SQLiteDataSource extends SQLDataSource {
 	 * out.
 	 */
 	private final static int TIMEOUT = 30000;
-	
+
 	private SQLiteDataSource(){
-		
+
 	}
-	
+
 	@SuppressWarnings("SleepWhileInLoop")
 	public SQLiteDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
-		super(uri, options);		
-		mixin = getConnectionMixin();	
+		super(uri, options);
+		mixin = getConnectionMixin();
 		try {
 			Class.forName(org.sqlite.JDBC.class.getName());
 			path = mixin.getPath();
@@ -68,7 +68,7 @@ public class SQLiteDataSource extends SQLDataSource {
 			long startTime = System.currentTimeMillis();
 			while(true){
 				if(System.currentTimeMillis() - TIMEOUT > startTime){
-					throw new DataSourceException("Data source at " + uri + " could not connect for " 
+					throw new DataSourceException("Data source at " + uri + " could not connect for "
 							+ (TIMEOUT / 1000) + " seconds, so we're giving up on retrying.");
 				}
 				try {
@@ -110,12 +110,12 @@ public class SQLiteDataSource extends SQLDataSource {
 			super.connect();
 		}
 	}
-	
-	
-	
+
+
+
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * SQLite connections support INSERT OR REPLACE, which prevents duplicate keys from mattering, so this method needs to be overridden for
 	 * SQLite.
 	 * @param dm
@@ -124,7 +124,7 @@ public class SQLiteDataSource extends SQLDataSource {
 	 * @return
 	 * @throws ReadOnlyException
 	 * @throws DataSourceException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	@Override
 	@SuppressWarnings("SleepWhileInLoop")
@@ -141,7 +141,7 @@ public class SQLiteDataSource extends SQLDataSource {
 								+ (TIMEOUT / 1000) + " seconds, so we're giving up on retrying.");
 					}
 					try {
-						try (PreparedStatement statement = getConnection().prepareStatement("INSERT OR REPLACE INTO `" + TABLE_NAME 
+						try (PreparedStatement statement = getConnection().prepareStatement("INSERT OR REPLACE INTO `" + TABLE_NAME
 								+ "` (`" + getKeyColumn() + "`, `" + getValueColumn() + "`) VALUES (?, ?)")) {
 							statement.setString(1, StringUtils.Join(key, "."));
 							statement.setString(2, value);
@@ -149,7 +149,7 @@ public class SQLiteDataSource extends SQLDataSource {
 						}
 						break;
 					} catch(SQLException ex){
-						if(ex.getMessage().startsWith("[SQLITE_BUSY]") 
+						if(ex.getMessage().startsWith("[SQLITE_BUSY]")
 								// This one only happens with SETs
 								|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")){
 							try {
@@ -173,7 +173,7 @@ public class SQLiteDataSource extends SQLDataSource {
 			}
 		}
 	}
-	
+
 	@Override
 	@SuppressWarnings("SleepWhileInLoop")
 	public Set<String[]> keySet(String[] keyBase) throws DataSourceException {
@@ -188,7 +188,7 @@ public class SQLiteDataSource extends SQLDataSource {
 							+ (TIMEOUT / 1000) + " seconds, so we're giving up on retrying.");
 				}
 				try {
-					try(PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getKeyColumn() + "` FROM `" + getEscapedTable() 
+					try(PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getKeyColumn() + "` FROM `" + getEscapedTable()
 							+ "` WHERE `" + getKeyColumn() + "` LIKE ?")){
 						statement.setString(1, searchPrefix + "%");
 						try(ResultSet result = statement.executeQuery()){
@@ -234,7 +234,7 @@ public class SQLiteDataSource extends SQLDataSource {
 							+ (TIMEOUT / 1000) + " seconds, so we're giving up on retrying.");
 				}
 				try {
-					try (PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getValueColumn() + "` FROM `" + getEscapedTable() 
+					try (PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getValueColumn() + "` FROM `" + getEscapedTable()
 							+ "` WHERE `" + getKeyColumn() + "`=? LIMIT 1")) {
 						statement.setString(1, StringUtils.Join(key, "."));
 						try (ResultSet result = statement.executeQuery()) {
@@ -266,7 +266,7 @@ public class SQLiteDataSource extends SQLDataSource {
 			}
 		}
 	}
-	
+
 	@Override
 	@SuppressWarnings("SleepWhileInLoop")
 	protected Map<String[], String> getValues0(String[] leadKey) throws DataSourceException {
@@ -280,7 +280,7 @@ public class SQLiteDataSource extends SQLDataSource {
 							+ (TIMEOUT / 1000) + " seconds, so we're giving up on retrying.");
 				}
 				try {
-					try (PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getKeyColumn() + "`, `" + getValueColumn() + "` FROM `" 
+					try (PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getKeyColumn() + "`, `" + getValueColumn() + "` FROM `"
 							+ getEscapedTable() + "`" + " WHERE `" + getKeyColumn() + "` LIKE ?")){
 						statement.setString(1, StringUtils.Join(leadKey, ".") + "%");
 						try (ResultSet results = statement.executeQuery()){
@@ -312,11 +312,12 @@ public class SQLiteDataSource extends SQLDataSource {
 			}
 		}
 	}
-	
+
 	@Override
 	@SuppressWarnings("SleepWhileInLoop")
 	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
 		try{
+		    dm.activateThread(Thread.currentThread());
 			connect();
 			long startTime = System.currentTimeMillis();
 			while (true) {
@@ -325,7 +326,7 @@ public class SQLiteDataSource extends SQLDataSource {
 							+ (TIMEOUT / 1000) + " seconds, so we're giving up on retrying.");
 				}
 				try {
-					try (PreparedStatement statement = getConnection().prepareStatement("DELETE FROM `" + getEscapedTable() 
+					try (PreparedStatement statement = getConnection().prepareStatement("DELETE FROM `" + getEscapedTable()
 							+ "` WHERE `" + getKeyColumn() + "`=?")) {
 						statement.setString(1, StringUtils.Join(key, "."));
 						statement.executeUpdate();
@@ -333,7 +334,7 @@ public class SQLiteDataSource extends SQLDataSource {
 					}
 					break;
 				} catch(SQLException ex){
-					if(ex.getMessage().startsWith("[SQLITE_BUSY]") 
+					if(ex.getMessage().startsWith("[SQLITE_BUSY]")
 							// This one only happens with SETs
 							|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")){
 						try {
@@ -352,6 +353,7 @@ public class SQLiteDataSource extends SQLDataSource {
 			if(DO_DISCONNECTS){
 				disconnect();
 			}
+			dm.deactivateThread(Thread.currentThread());
 		}
 	}
 
@@ -362,11 +364,11 @@ public class SQLiteDataSource extends SQLDataSource {
 				+ " and the table should be created with the query: <syntaxhighlight lang=\"sql\">"
 				+ getTableCreationQuery() + "</syntaxhighlight>";
 	}
-	
+
 	/**
 	 * Returns the table creation query that should be used to create the table specified.
 	 * This is public for documentation, but is used internally.
-	 * @return 
+	 * @return
 	 */
 	public final String getTableCreationQuery(){
 		return "CREATE TABLE IF NOT EXISTS `" + TABLE_NAME + "` (`" + getKeyColumn() + "` TEXT PRIMARY KEY,"
@@ -417,7 +419,7 @@ public class SQLiteDataSource extends SQLDataSource {
 	protected String getConnectionString() {
 		return "jdbc:sqlite:" + path;
 	}
-	
+
 	private int getRandomSleepTime(){
 		return ((int)(Math.random() * 10) % 10);
 	}

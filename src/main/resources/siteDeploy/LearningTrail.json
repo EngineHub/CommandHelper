@@ -59,6 +59,7 @@
         "Contributing",
         "Compatibility",
         {"DesignEthos": "Design Ethos"},
-        {"Extension_Development": "Extension Development"}
+        {"Extension_Development": "Extension Development"},
+        {"api.json": "JSON API"}
     ]}
 ]

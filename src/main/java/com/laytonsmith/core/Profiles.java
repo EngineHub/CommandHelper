@@ -27,7 +27,7 @@ public class Profiles {
 
 	private final XMLDocument document;
 	private final Map<String, Profile> profiles = new HashMap<>();
-	private static Map<String, Class<Profile>> profileTypes = null;
+	private static Map<String, Class<? extends Profile>> profileTypes = null;
 
 	/**
 	 *
@@ -148,7 +148,7 @@ public class Profiles {
 	private static Profile getProfile0(String id, String type, Map<String, String> data) throws InvalidProfileException {
 		if (profileTypes == null) {
 			profileTypes = new HashMap<>();
-			for (Class<Profile> p : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(ProfileType.class, Profile.class)) {
+			for (Class<? extends Profile> p : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(ProfileType.class, Profile.class)) {
 				String t = p.getAnnotation(ProfileType.class).type();
 				profileTypes.put(t, p);
 			}

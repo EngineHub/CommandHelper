@@ -106,7 +106,7 @@ closure(){
 Execute is used as follows:
 
 %%CODE|
-execute([values...,] <closure>);
+execute([values...,] /*<closure>*/);
 %%
 
 The values may be any value, but the closure must be a closure created with the closure function. A small, self

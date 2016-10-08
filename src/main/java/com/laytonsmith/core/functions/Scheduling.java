@@ -62,6 +62,8 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -533,7 +535,12 @@ public class Scheduling {
 		    return StringUtils.Join(tz, ", ", " or ", " or ", "Couldn't retrieve the list of timezones!");
 		}
 	    });
-	    return getBundledDocs(map);
+	    try {
+		return getBundledDocs(map);
+	    } catch (DocGenTemplates.Generator.GenerateException ex) {
+		Logger.getLogger(Scheduling.class.getName()).log(Level.SEVERE, null, ex);
+		return getBundledDocs();
+	    }
 	}
 
 	@Override

@@ -38,7 +38,6 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.natives.interfaces.Sizable;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
@@ -51,6 +50,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import com.laytonsmith.core.natives.interfaces.Sizeable;
 
 /**
  *
@@ -622,8 +622,8 @@ public class StringHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args[0] instanceof Sizable) {
-				return new CInt(((Sizable) args[0]).size(), t);
+			if (args[0] instanceof Sizeable) {
+				return new CInt(((Sizeable) args[0]).size(), t);
 			} else {
 				return new CInt(args[0].val().length(), t);
 			}

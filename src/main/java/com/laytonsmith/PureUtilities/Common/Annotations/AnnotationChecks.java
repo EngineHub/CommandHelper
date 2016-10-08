@@ -19,10 +19,11 @@ import java.util.Set;
  */
 public class AnnotationChecks {
 
+	@SuppressWarnings("UnnecessaryLabelOnBreakStatement")
 	public static void checkForceImplementation() throws Exception{
 		Set<String> uhohs = new HashSet<>();
-		Set<Constructor> set = ClassDiscovery.getDefaultInstance().loadConstructorsWithAnnotation(ForceImplementation.class);
-		for(Constructor cons : set){
+		Set<Constructor<?>> set = ClassDiscovery.getDefaultInstance().loadConstructorsWithAnnotation(ForceImplementation.class);
+		for(Constructor<?> cons : set){
 			Class superClass = cons.getDeclaringClass();
 			Set<Class> s = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(superClass);
 			checkImplements: for(Class c : s){
@@ -42,12 +43,24 @@ public class AnnotationChecks {
 				}
 			}
 		}
-		
+
 		Set<Method> set2 = ClassDiscovery.getDefaultInstance().loadMethodsWithAnnotation(ForceImplementation.class);
 		for(Method cons : set2){
 			Class superClass = cons.getDeclaringClass();
-			Set<Class> s = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(superClass);
-			checkImplements: for(Class c : s){
+			@SuppressWarnings("unchecked")
+			Set<Class<?>> s = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(superClass);
+			checkImplements: for(Class<?> c : s){
+				// First, check if maybe it has a InterfaceRunner for it
+				findRunner: for(Class<?> ir : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(InterfaceRunnerFor.class)) {
+				    InterfaceRunnerFor ira = ir.getAnnotation(InterfaceRunnerFor.class);
+				    if(ira.value() == c) {
+					// Aha! It does. Set c to ir, then break this for loop.
+					// The runner for this class will act in the stead of this
+					// class.
+					c = ir;
+					break findRunner;
+				    }
+				}
 				// c is the class we want to check to make sure it implements cons
 				for(Method cCons : c.getDeclaredMethods()){
 					if(cCons.getName().equals(cons.getName()) && Arrays.equals(cons.getParameterTypes(), cCons.getParameterTypes())){
@@ -57,14 +70,14 @@ public class AnnotationChecks {
 				uhohs.add(c.getName() + " must implement the method with signature " + cons.getName() + "(" + getSignature(cons) + "), but doesn't.");
 			}
 		}
-		
+
 		if(!uhohs.isEmpty()){
 			List<String> uhohsList = new ArrayList<>(uhohs);
 			Collections.sort(uhohsList);
 			throw new Exception("There " + StringUtils.PluralHelper(uhohs.size(), "error") + ". The following classes need to implement various methods:\n" + StringUtils.Join(uhohs, "\n"));
 		}
 	}
-	
+
 	private static String getSignature(Member executable){
 		List<String> l = new ArrayList<>();
 //		for(Class cc : executable.getParameterTypes()){
@@ -83,5 +96,5 @@ public class AnnotationChecks {
 		}
 		return StringUtils.Join(l, ", ");
 	}
-	
+
 }

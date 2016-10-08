@@ -111,7 +111,7 @@ public class DocGen {
 		    exampleBuilder.append("====Example ").append(count).append("====\n")
 			    .append(es.getDescription()).append("\n\n"
 			    + "Given the following code:\n");
-		    exampleBuilder.append(SimpleSyntaxHighlighter.Highlight(es.getScript())).append("\n");
+		    exampleBuilder.append(SimpleSyntaxHighlighter.Highlight(es.getScript(), true)).append("\n");
 		    String style = "";
 		    if (es.isAutomatic()) {
 			style = " style=\"background-color: #BDC7E9\"";
