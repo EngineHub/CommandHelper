@@ -1,8 +1,8 @@
 CommandHelper has a rich set of command line tools for various tasks. To use the
 command line tools, run
-<pre>
+%%PRE|
 java -jar CommandHelper.jar <arguments>
-</pre>
+%%
 
 === Explain Like I'm 5 ===
 ==== Windows ====

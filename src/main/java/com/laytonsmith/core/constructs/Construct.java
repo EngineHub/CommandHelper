@@ -8,14 +8,19 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.natives.interfaces.MixedInterfaceRunner;
+import com.laytonsmith.core.natives.interfaces.ObjectModifier;
+import com.laytonsmith.core.natives.interfaces.ObjectType;
 import java.io.File;
 import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -470,12 +475,36 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
     @Override
     public CClassType[] getInterfaces() {
-	throw new UnsupportedOperationException("Not supported yet.");
+	throw new UnsupportedOperationException();
     }
 
     @Override
     public CClassType[] getSuperclasses() {
-	throw new UnsupportedOperationException("Not supported yet.");
+	throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Everything that extends this must be a CLASS
+     * @return
+     */
+    @Override
+    public ObjectType getObjectType() {
+	return ObjectType.CLASS;
+    }
+
+    /**
+     * By default, all native methodscript objects are public. If this
+     * is not true, this method must be overridden.
+     * @return
+     */
+    @Override
+    public Set<ObjectModifier> getObjectModifiers() {
+	return EnumSet.of(ObjectModifier.PUBLIC);
+    }
+
+    @Override
+    public CClassType getContainingClass() {
+	return null;
     }
 
 }

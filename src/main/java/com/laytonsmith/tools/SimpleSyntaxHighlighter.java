@@ -22,14 +22,14 @@ import java.util.Set;
 public class SimpleSyntaxHighlighter {
 
     public static void main(String[] args) throws Exception {
-	List<Token> ts = MethodScriptCompiler.lex("if(true) { }", null, true, true);
+	List<Token> ts = MethodScriptCompiler.lex("'a string' + '\\''", null, true, true);
 	for(Token t : ts) {
 	    System.out.println(t.type);
 	    System.out.println(t.value);
 	    System.out.println(t.target);
 	    System.out.println("----------------");
 	}
-	StreamUtils.GetSystemOut().println(SimpleSyntaxHighlighter.Highlight("if(true){ }", true));
+	StreamUtils.GetSystemOut().println(SimpleSyntaxHighlighter.Highlight("'a string' + ' \\''", true));
     }
 
     /**
@@ -174,7 +174,7 @@ public class SimpleSyntaxHighlighter {
 			break;
 		    case SMART_STRING:
 			out.append(getOpenSpan(ElementTypes.DOUBLE_STRING)).append("&quot;");
-			out.append(processDoubleString(t.val()));
+			out.append(processDoubleString(t.toOutputString()));
 			out.append("&quot;").append(getCloseSpan());
 			break;
 		    case VARIABLE:
@@ -199,7 +199,7 @@ public class SimpleSyntaxHighlighter {
 			break;
 		    case STRING:
 			out.append(getOpenSpan(ElementTypes.SINGLE_STRING));
-			out.append("&apos;").append(escapeLit(t.val())).append("&apos;");
+			out.append("&apos;").append(escapeLit(t.toOutputString())).append("&apos;");
 			out.append(getCloseSpan());
 			break;
 		    case IVARIABLE:

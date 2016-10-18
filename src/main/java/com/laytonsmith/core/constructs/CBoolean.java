@@ -3,6 +3,10 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.natives.interfaces.ObjectModifier;
+import com.laytonsmith.core.natives.interfaces.ObjectType;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * Represents a MethodScript boolean.
@@ -122,4 +126,10 @@ public final class CBoolean extends CPrimitive implements Cloneable {
     public CClassType[] getInterfaces() {
 	return new CClassType[]{};
     }
+
+    @Override
+    public Set<ObjectModifier> getObjectModifiers() {
+	return EnumSet.of(ObjectModifier.FINAL, ObjectModifier.PUBLIC);
+    }
+
 }

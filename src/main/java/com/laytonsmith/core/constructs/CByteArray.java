@@ -9,6 +9,8 @@ import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.ObjectModifier;
+import com.laytonsmith.core.natives.interfaces.ObjectType;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import com.laytonsmith.core.natives.interfaces.Sizeable;
+import java.util.EnumSet;
 
 /**
  *
@@ -609,6 +612,16 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	    return new CClassType[]{CClassType.build("array")};
 	}
 
+	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+	    return EnumSet.of(ObjectModifier.PUBLIC, ObjectModifier.STATIC);
+	}
+
+	@Override
+	public CClassType getContainingClass() {
+	    return new CClassType("byte_array", Target.UNKNOWN);
+	}
+
 	@typeof("ByteArrayReadOnlyException")
 	public static class CREByteArrayReadOnlyException extends CREReadOnlyException {
 
@@ -638,6 +651,16 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	    @Override
 	    public CClassType[] getSuperclasses() {
 		return super.getSuperclasses();
+	    }
+
+	    @Override
+	    public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.of(ObjectModifier.PUBLIC, ObjectModifier.STATIC);
+	    }
+
+	    @Override
+	    public CClassType getContainingClass() {
+		return new CClassType("ByteBackingArray", Target.UNKNOWN);
 	    }
 
 	}

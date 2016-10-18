@@ -81,7 +81,7 @@ put as many newlines in the middle of your alias definition as you want. To use 
 <<<
 %%
 
-The special symbols >>> and <<< are the "multiline start" and "multiline end" symbols. They may not appear in any other 
+The special symbols &gt;&gt;&gt; and &lt;&lt;&lt; are the "multiline start" and "multiline end" symbols. They may not appear in any other 
 context throughout your script (even in strings). Newlines inside the construct are simply ignored, and do not denote 
 the end of the alias. The multiline end symbol does not have to be on a line of it's own, but the multiline start symbol 
 must come directly after the equals sign.
@@ -224,8 +224,8 @@ one.
 As well as providing alias functionality, there are a few built in commands. These commands provide meta-functionality 
 for dealing with user aliases and other useful features.
 
-* /reloadaliases - Reloads the global alias file, while the game is running (ops only) \
-[[CommandHelper/Staged/Advanced Guide#reloadaliases|(See the advanced page for usage options)]]
+* /recompile - Reloads the global alias file, while the game is running (ops only) \
+[[Advanced_Guide#recompile|(See the advanced page for usage options)]]. /reloadaliases is an alias to this command.
 * /runalias - Certain configurable plugins might not use the standard method to call commands, \
 so you would get "Unknown Command." for commands that otherwise work when entered normally. Instead use "/runalias /myalias".
 

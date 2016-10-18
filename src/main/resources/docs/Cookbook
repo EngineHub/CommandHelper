@@ -57,7 +57,7 @@ set_interval(2 * 60 * 1000, closure(){
 
 === Delayed Looper ===
 If you want to run some code in a loop a limited number of times, but put a delay between runs, you can use the 
-following code: (Note the [[CommandHelper/Execution Queue|Execution Queue]] is a much more elegant solution to 
+following code: (Note the [[Execution Queue|Execution Queue]] is a much more elegant solution to 
 this problem)
 
 %%CODE|

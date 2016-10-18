@@ -16,10 +16,10 @@ In this case, if the user input procedure returns <code>'2'</code>, then the cod
 returns <code>'string'</code> however, it will throw an exception. As it stands, with no exception handling in
 place, you would see a similar error to this:
 
-<pre>
+%%PRE|
 CastException: Expecting a double, but received string instead
         <<main code>>:Interpreter:2
-</pre>
+%%
 
 This is the default exception handling mechanism. It prints out the exception type, exception message, and a
 stacktrace. But perhaps we want to print a custom message to the user. In this case, we can trap the exception
@@ -203,7 +203,7 @@ originally caused this chain. This can be accessed from the <code>causedBy</code
 
 == Old usage ==
 
-There is an old, now deprecated usage as well, see the article [[CommandHelper/Staged/OldExceptions|here]]
+There is an old, now deprecated usage as well, see the article [[OldExceptions|here]]
 for information on how to use it. For new code, however, the new format should always be used.
 
 == Known Exception Types ==

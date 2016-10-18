@@ -968,4 +968,15 @@ public final class StringUtils {
 
         return wrappedLine.toString();
     }
+
+    /**
+     * Works like {@link String#contains(java.lang.CharSequence)}, except case
+     * is ignored.
+     * @param container
+     * @param contains
+     * @return
+     */
+    public static boolean containsIgnoreCase(String container, String contains) {
+	return container.toLowerCase().contains(contains.toLowerCase());
+    }
 }

@@ -22,7 +22,7 @@ public class StreamUtils {
 	 * Copies from one stream to another
 	 * @param out
 	 * @param in
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static void Copy(InputStream in, OutputStream out) throws IOException {
 		byte[] buffer = new byte[1024];
@@ -32,14 +32,14 @@ public class StreamUtils {
 			len = in.read(buffer);
 		}
 	}
-	
+
 	/**
 	 * Given an input stream, a UTF-8 encoded string is returned, which
 	 * is a reasonable assumption for most textual data. This assumes
 	 * that the stream is finite, i.e. not a streaming socket, for instance, and
 	 * reads until the stream reaches the end.
 	 * @param out
-	 * @return 
+	 * @return
 	 */
 	public static String GetString(InputStream in){
 		try {
@@ -48,7 +48,7 @@ public class StreamUtils {
 			throw new Error(ex);
 		}
 	}
-	
+
 	/**
 	 * Gets a string from an input stream, assuming the given encoding. This assumes
 	 * that the stream is finite, i.e. not a streaming socket, for instance, and
@@ -56,7 +56,7 @@ public class StreamUtils {
 	 * @param in
 	 * @param encoding
 	 * @return
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	public static String GetString(InputStream in, String encoding) throws UnsupportedEncodingException{
 		if(encoding == null){
@@ -81,13 +81,13 @@ public class StreamUtils {
 		return output.toString();
 
 	}
-	
+
 	/**
 	 * Fully reads in a stream, as efficiently as possible, and returns a
 	 * byte array.
 	 * @param in
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static byte[] GetBytes(InputStream in) throws IOException {
 		BufferedInputStream bis = new BufferedInputStream(in);
@@ -98,12 +98,12 @@ public class StreamUtils {
 		}
 		return ArrayUtils.unbox(bytes.toArray(new Byte[bytes.size()]));
 	}
-	
+
 	/**
 	 * Assuming a UTF-8 encoded string is provided, returns an InputStream
 	 * for that String.
 	 * @param contents
-	 * @return 
+	 * @return
 	 */
 	public static InputStream GetInputStream(String contents){
 		try {
@@ -112,16 +112,16 @@ public class StreamUtils {
 			throw new Error(ex);
 		}
 	}
-	
+
 	/**
 	 * Returns an InputStream for a given string, using the given
 	 * encoding.
 	 * @param contents
 	 * @param encoding
 	 * @return
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
-	public static InputStream GetInputStream(String contents, String encoding) throws UnsupportedEncodingException{		
+	public static InputStream GetInputStream(String contents, String encoding) throws UnsupportedEncodingException{
 		return new ByteArrayInputStream(contents.getBytes(encoding));
 	}
 

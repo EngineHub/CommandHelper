@@ -7,6 +7,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.ObjectType;
 import java.util.Set;
 
 /**
@@ -111,4 +112,10 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
     public CClassType[] getInterfaces() {
 	return new CClassType[]{CClassType.build("ArrayAccess")};
     }
+
+    @Override
+    public ObjectType getObjectType() {
+	return ObjectType.CLASS;
+    }
+
 }

@@ -110,4 +110,14 @@ html {
     cursor: help;
 }
 
+code {
+    padding: 0 0.65em;
+    border: none;
+}
+
+#edit_this_page {
+    font-size: x-small;
+    color: rgba(0, 0, 0, 0.75);
+}
+
 

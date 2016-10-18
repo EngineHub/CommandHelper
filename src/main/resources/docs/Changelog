@@ -152,12 +152,12 @@ player_toggle_sprint, item_spawn, hanging_break, book_edited, and plugin_message
 
 ===New Feature Overview===
 * Colors work in the terminal now. The exception is if you're on a windows machine, in which case, no colors for you :( sorry. Also, CH has a cool new splash screen (you can disable it in the preferences).
-* Data Manager - You can now view the persistance data much easier, thanks to the data manager. Be sure to explore all the options. Read up on it at the [[CommandHelper/Data Manager|page on the data manager]].
+* Data Manager - You can now view the persistance data much easier, thanks to the data manager. Be sure to explore all the options. Read up on it at the [[Data Manager|page on the data manager]].
 * Abstraction layer - While you won't see this directly, know that it's much easier to move CH from server type to server type, should bukkit or whatever other server mod become obsolete. This means that CH should live on past server mods, with your scripts safe from the changes!
 * Namespaces in persistance, and improved performance in persistance - Persistance is now much more efficient. In addition, namespace support has been implemented. If you namespace your data using periods, you can much more easily manipulate the data that has been stored. Be sure to re-read the API in the Persistance section, as all the functions have new features now.
-* Events added - Events are now here! Read up on the [[CommandHelper/Events|Events overview]] for basic information relating to all events, and check out the [[CommandHelper/Event API|Event API]] for details on specific events, as well as what events are available. This list will continue to grow as more events are added!
-* ifelse and switch - Now it is much easier to chain if statements. Check out the [[CommandHelper/Logic#ifelse()|wiki page on logic]] for more information.
-* Arrays are associative - Now you can store a value in an array not only with a numeric index, but you can also use strings! Many functions now use this feature, since it's much easier to read and use, but you need to be familiar with the changes for them to make sense. Check out the additional section in the wiki page [[CommandHelper/Arrays|on arrays]]
+* Events added - Events are now here! Read up on the [[Events|Events overview]] for basic information relating to all events, and check out the [[Event API|Event API]] for details on specific events, as well as what events are available. This list will continue to grow as more events are added!
+* ifelse and switch - Now it is much easier to chain if statements. Check out the [[Logic#ifelse()|wiki page on logic]] for more information.
+* Arrays are associative - Now you can store a value in an array not only with a numeric index, but you can also use strings! Many functions now use this feature, since it's much easier to read and use, but you need to be familiar with the changes for them to make sense. Check out the additional section in the wiki page [[Arrays|on arrays]]
 * bitwise operations - binary operations! Check the API page for details.
 * Basic crypto functions - If you need to hash things, this is now possible.
 * import/export - Import and export work like the persistance functions, except they are in-memory only, and won't survive past server restarts (or /reloadaliases, for that matter). There are two modes of operation, so read the API carefully if you use these functions.
@@ -284,15 +284,15 @@ Here's a full list of all the new functions. Check out the API for details on ea
 *Fixed a bug when dealing with offline players in pinfo (as well as a few other functions)
 *substr() now works properly if the last argument is left off
 *When using an ivar as the second parameter in assign(), it works properly now.
-*Added [[CommandHelper/Interpreter Mode|interpreter mode]]!
+*Added [[Interpreter Mode|interpreter mode]]!
 *Added user defined procedures
 *read() and include() are subject to the base-dir restriction now
 *%%NOWIKI|#%% comments work even if they aren't the first character on the line. C style block comments are also available. %%NOWIKI|/* */%%
 *Commands can be run from the console. If the command doesn't make sense to run without a player, the command should fail gracefully.
-*Added include and procedures. See [[CommandHelper/Procedures|this page]] for more details.
+*Added include and procedures. See [[Procedures|this page]] for more details.
 *Potion Effects can now be accessed with set_peffect. See [http://www.minecraftwiki.net/wiki/Potion_effects the guide] on the minecraft wiki for ID numbers and other information
 *Added case-sensitive option to make it possible to toggle command matching being case sensitive or not
-*[[CommandHelper/Arrays|Arrays]] are much more flexible now
+*[[Arrays|Arrays]] are much more flexible now
 *The \u escape sequence is implemented in the lexer. This allows insertion of arbitrary unicode characters into scripts.
 *The WG/WE series of functions are implemented now
 *Added functions: sqrt, include, proc, return, pinv, set_pinv, min, max, is_proc, call_proc, pexp/set_pexp (experimental), ptexp/set_ptexp (experimental), plevel/set_plevel (experimental), pmode/set_pmode, set_peffect (requires CraftBukkit), array_resize, range, Economy Functions, call_alias, item_drop, set_phealth, equals_ic, sk_all_regions, sk_pos1, sk_pos2, sk_region_info, sk_region_overlaps

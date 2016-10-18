@@ -340,9 +340,17 @@ public class Token {
 	return value;
     }
 
+    /**
+     * Returns a string that can be output as useable code. Values that had been escaped internally will
+     * be escaped again. This only affects strings and smart strings. All other tokens return the
+     * same as {@link #val()}
+     * @return
+     */
     public String toOutputString() {
 	if (type.equals(TType.STRING)) {
 	    return value.replace("\\", "\\\\").replace("'", "\\'");
+	} else if(type.equals(TType.SMART_STRING)){
+	    return value.replace("\\", "\\\\").replace("\"", "\\\"");
 	}
 	return value;
     }

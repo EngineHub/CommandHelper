@@ -46,7 +46,7 @@ general, classes may consider import static'ing the ArgumentBuilder class.
 
 Varargs are arguments that convert into an array, but can be passed to the function as an
 unspecified number of arguments (including no arguments, meaning they are technically optional).
-Ultimately, the argument type will be an array<?> where ? is the type specified in the argument.
+Ultimately, the argument type will be an array&lt;?&gt; where ? is the type specified in the argument.
 The argument will never be null, though it could be an empty array.
 
 == Optional parameters ==
@@ -114,8 +114,8 @@ because each argument must be shown to be disjoint types. If B extends A, the f(
 signatures, because calling f(B) could possibly match either type. Thus, each argument is considered to match
 if either of the arguments in a given position can be cast to the other. (This is more complicated, but the
 same general principal with type unions.) Note that classes with different generics are considered different
-types. So array<A> is disjoint with array<B>. However, when using type wildcards, this can get much
-more complicated, so if B extends A, then array<? extends A> and array<B> are not disjoint.
+types. So array&lt;A&gt; is disjoint with array&lt;B&gt;. However, when using type wildcards, this can get much
+more complicated, so if B extends A, then array&lt;? extends A&gt; and array&lt;B&gt; are not disjoint.
 
 === Compile checks ===
 

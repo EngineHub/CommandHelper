@@ -214,7 +214,9 @@ public class Main {
 			+ " remote server for any given file. The cache is always populated, whether or not this flag"
 			+ " is set, so if you aren't sure if you can trust the cache, run once without this flag, then"
 			+ " for future runs, you can be sure that the local cache is up to date.")
-		.addFlag("clear-local-cache", "Clears the local cache of all entries, then exits.");
+		.addFlag("clear-local-cache", "Clears the local cache of all entries, then exits.")
+		.addFlag('d', "do-validation", "Validates all of the uploaded web pages, and prints out a summary of the results."
+			+ " This requires internet connection.");
 	suite.addMode("site-deploy", siteDeploy);
 
 	ARGUMENT_SUITE = suite;
@@ -597,8 +599,14 @@ public class Main {
 		}
 		boolean generatePrefs = parsedArgs.isFlagSet("generate-prefs");
 		boolean useLocalCache = parsedArgs.isFlagSet("use-local-cache");
-		File config = new File(parsedArgs.getStringArgument("config"));
-		SiteDeploy.run(generatePrefs, useLocalCache, config);
+		boolean doValidation = parsedArgs.isFlagSet("do-validation");
+		String configString = parsedArgs.getStringArgument("config");
+		if("".equals(configString)) {
+		    System.err.println("Config file missing, check command and try again");
+		    System.exit(1);
+		}
+		File config = new File(configString);
+		SiteDeploy.run(generatePrefs, useLocalCache, config, "", doValidation);
 	    } else {
 		throw new Error("Should not have gotten here");
 	    }
@@ -613,10 +621,10 @@ public class Main {
 		+ " you are altogether not using craftbukkit. If this is the case, you can download craftbukkit and place"
 		+ " it in the correct directory (one above this one) or you can download bukkit, rename it to bukkit.jar,"
 		+ " and put it in the CommandHelper directory.";
-	if (Prefs.DebugMode()) {
+	//if (Prefs.DebugMode()) {
 	    ret += " If you're dying for more details, here:\n";
 	    ret += Misc.GetStacktrace(error);
-	}
+	//}
 	return ret;
     }
 

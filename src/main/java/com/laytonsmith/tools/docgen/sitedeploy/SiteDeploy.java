@@ -1,13 +1,20 @@
 package com.laytonsmith.tools.docgen.sitedeploy;
 
+import com.laytonsmith.PureUtilities.Common.GNUErrorMessageFormat;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.Preferences;
+import com.laytonsmith.PureUtilities.Web.HTTPMethod;
+import com.laytonsmith.PureUtilities.Web.HTTPResponse;
+import com.laytonsmith.PureUtilities.Web.RequestSettings;
+import com.laytonsmith.PureUtilities.Web.WebUtility;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.MethodScriptFileLocations;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.ReadOnlyException;
@@ -16,11 +23,13 @@ import com.laytonsmith.tools.docgen.DocGenTemplates;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -38,6 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPOutputStream;
 import org.json.simple.JSONValue;
 
 /**
@@ -48,11 +58,6 @@ import org.json.simple.JSONValue;
  */
 public class SiteDeploy {
 
-    public static void main(String[] args) throws Exception {
-	Implementation.setServerType(Implementation.Type.SHELL);
-	run(false, false, null);
-    }
-
     private static final String USERNAME = "username";
     private static final String HOSTNAME = "hostname";
     private static final String PORT = "port";
@@ -60,12 +65,11 @@ public class SiteDeploy {
     private static final String PASSWORD = "use-password";
     private static final String DOCSBASE = "docs-base";
     private static final String SITEBASE = "site-base";
+    private static final String SHOW_TEMPLATE_CREDIT = "show-template-credit";
+    private static final String GITHUB_BASE_URL = "github-base-url";
+    private static final String VALIDATOR_URL = "validator-url";
 
-    public static void run(boolean generate_prefs, boolean useLocalCache, File config) throws Exception {
-	run(generate_prefs, useLocalCache, config, "");
-    }
-
-    public static void run(boolean generate_prefs, boolean useLocalCache, File sitedeploy, String password) throws Exception {
+    public static void run(boolean generate_prefs, boolean useLocalCache, File sitedeploy, String password, boolean doValidation) throws Exception {
 	List<Preferences.Preference> defaults = new ArrayList<>();
 	// SCP Options
 	defaults.add(new Preferences.Preference(USERNAME, "", Preferences.Type.STRING, "The username to scp with"));
@@ -95,6 +99,20 @@ public class SiteDeploy {
 	defaults.add(new Preferences.Preference(SITEBASE, "", Preferences.Type.STRING, "The base url of the"
 		+ " site (where \"home\" should be). This should begin with http:// or https://"));
 
+	// Other options
+	defaults.add(new Preferences.Preference(SHOW_TEMPLATE_CREDIT, "true", Preferences.Type.BOOLEAN, "Whether or not"
+		+ " to show the template credit. (Design by TEMPLATED logo in bottom.) If you set this to false, you"
+		+ " agree that you have purchased a license for your deployment, and are legally allowed to supress"
+		+ " this from the templates."));
+	defaults.add(new Preferences.Preference(GITHUB_BASE_URL, "", Preferences.Type.STRING, "The base url for"
+		+ " the github project. If empty string, then the value " + DEFAULT_GITHUB_BASE_URL + " is used."));
+	defaults.add(new Preferences.Preference(VALIDATOR_URL, "", Preferences.Type.STRING, "The validator url."
+		+ " This service must be based on the https://validator.github.io/validator/ service. If the url"
+		+ " is left blank, then using the --do-validation flag is an error. Generally, you will need"
+		+ " to host your own validator for this solution to work, as running against a public service"
+		+ " will undoubtably result in being blacklisted from the service. This should be something"
+		+ " like http://localhost:8888/"));
+
 	Preferences prefs = new Preferences("Site-Deploy", Logger.getLogger(SiteDeploy.class.getName()), defaults);
 	if (generate_prefs) {
 	    prefs.init(sitedeploy);
@@ -111,32 +129,39 @@ public class SiteDeploy {
 	Boolean use_password = (Boolean) prefs.getPreference(PASSWORD);
 	String docsBase = (String) prefs.getPreference(DOCSBASE);
 	String siteBase = (String) prefs.getPreference(SITEBASE);
+	Boolean showTemplateCredit = (Boolean) prefs.getPreference(SHOW_TEMPLATE_CREDIT);
+	String githubBaseUrl = (String) prefs.getPreference(GITHUB_BASE_URL);
+	String validatorUrl = (String) prefs.getPreference(VALIDATOR_URL);
 
 	{
 	    // Check for config errors
 	    List<String> configErrors = new ArrayList<>();
-	    if("".equals(directory)){
+	    if ("".equals(directory)) {
 		configErrors.add("Directory cannot be empty.");
 	    }
-	    if("".equals(docsBase)) {
+	    if ("".equals(docsBase)) {
 		configErrors.add("DocsBase cannot be empty.");
 	    }
-	    if("".equals(hostname)) {
+	    if ("".equals(hostname)) {
 		configErrors.add("Hostname cannot be empty.");
 	    }
-	    if(!docsBase.startsWith("https://") && !docsBase.startsWith("http://")) {
+	    if (!docsBase.startsWith("https://") && !docsBase.startsWith("http://")) {
 		configErrors.add("DocsBase must begin with either http:// or https://");
 	    }
-	    if(!siteBase.startsWith("https://") && !siteBase.startsWith("http://")) {
+	    if (!siteBase.startsWith("https://") && !siteBase.startsWith("http://")) {
 		configErrors.add("SiteBase must begin with either http:// or https://");
 	    }
-	    if(!"localhost".equals(hostname)) {
-		if(port < 0 || port > 65535) {
+	    if (!"localhost".equals(hostname)) {
+		if (port < 0 || port > 65535) {
 		    configErrors.add("Port must be a number between 0 and 65535.");
 		}
-		if("".equals(username)) {
+		if ("".equals(username)) {
 		    configErrors.add("Username cannot be empty.");
 		}
+	    }
+	    if(doValidation && "".equals(validatorUrl)) {
+		configErrors.add("Validation cannot occur while an empty validation url is specified in the config."
+			+ " Either set a validator url, or re-run without the --do-validation flag.");
 	    }
 	    if (!configErrors.isEmpty()) {
 		System.err.println("Invalid input. Check preferences in " + sitedeploy.getAbsolutePath() + " and re-run");
@@ -161,6 +186,10 @@ public class SiteDeploy {
 	System.out.println("directory: " + directory);
 	System.out.println("docs-base: " + docsBase);
 	System.out.println("site-base: " + siteBase);
+	System.out.println("github-base-url: " + githubBaseUrl);
+	if(doValidation) {
+	    System.out.println("validator-url: " + validatorUrl);
+	}
 
 	if (use_password && password != null) {
 	    jline.console.ConsoleReader reader = null;
@@ -176,7 +205,7 @@ public class SiteDeploy {
 	    }
 	}
 	DeploymentMethod deploymentMethod;
-	if("localhost".equals(hostname)) {
+	if ("localhost".equals(hostname)) {
 	    deploymentMethod = new LocalDeploymentMethod(directory + "/");
 	} else {
 	    /**
@@ -188,12 +217,15 @@ public class SiteDeploy {
 	}
 
 	// Ok, all the configuration details are input and correct, so lets deploy now.
-	deploy(useLocalCache, siteBase, docsBase, deploymentMethod);
+	deploy(useLocalCache, siteBase, docsBase, deploymentMethod, doValidation,
+		showTemplateCredit, githubBaseUrl, validatorUrl);
     }
 
     private static void deploy(boolean useLocalCache, String siteBase, String docsBase,
-	    DeploymentMethod deploymentMethod) throws IOException, InterruptedException {
-	new SiteDeploy(siteBase, docsBase, useLocalCache, deploymentMethod).deploy();
+	    DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
+	    String githubBaseUrl, String validatorUrl) throws IOException, InterruptedException {
+	new SiteDeploy(siteBase, docsBase, useLocalCache, deploymentMethod, doValidation,
+		showTemplateCredit, githubBaseUrl, validatorUrl).deploy();
     }
 
     private final String siteBase;
@@ -212,10 +244,20 @@ public class SiteDeploy {
     private final DaemonManager dm = new DaemonManager();
     private Map<String, String> lc = null;
     private DeploymentMethod deploymentMethod;
+    private final boolean doValidation;
+    private final Map<String, String> uploadedPages = new HashMap<>();
+    private final boolean showTemplateCredit;
+    private final String githubBaseUrl;
+    private final String validatorUrl;
+
+    private static final String EDIT_THIS_PAGE_PREAMBLE = "Find a bug in this page? <a rel=\"noopener noreferrer\" target=\"_blank\" href=\"";
+    private static final String EDIT_THIS_PAGE_POSTAMBLE = "\">Edit this page yourself, then submit a pull request.</a>";
+    private static final String DEFAULT_GITHUB_BASE_URL = "https://github.com/EngineHub/CommandHelper/edit/master/src/main/%s";
 
     @SuppressWarnings("unchecked")
     private SiteDeploy(String siteBase, String docsBase, boolean useLocalCache,
-	    DeploymentMethod deploymentMethod) throws IOException {
+	    DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
+	    String githubBaseUrl, String validatorUrl) throws IOException {
 	this.siteBase = siteBase;
 	this.docsBase = docsBase;
 	this.resourceBase = docsBase + "resources/";
@@ -224,11 +266,18 @@ public class SiteDeploy {
 	this.uploadQueue = Executors.newSingleThreadExecutor();
 	this.useLocalCache = useLocalCache;
 	this.deploymentMethod = deploymentMethod;
+	this.doValidation = doValidation;
+	this.showTemplateCredit = showTemplateCredit;
+	this.validatorUrl = validatorUrl;
+	if(githubBaseUrl.equals("")) {
+	    githubBaseUrl = DEFAULT_GITHUB_BASE_URL;
+	}
+	this.githubBaseUrl = githubBaseUrl;
 	pn = getPersistenceNetwork();
-	if(pn != null) {
+	if (pn != null) {
 	    try {
 		String localCache = pn.get(new String[]{"site_deploy", "local_cache"});
-		if(localCache == null) {
+		if (localCache == null) {
 		    localCache = "{}";
 		}
 		lc = (Map<String, String>) JSONValue.parse(localCache);
@@ -241,6 +290,7 @@ public class SiteDeploy {
 
     /**
      * Returns the persistence network, or null if it couldn't be generated for whatever reason.
+     *
      * @return
      */
     public static PersistenceNetwork getPersistenceNetwork() {
@@ -261,7 +311,7 @@ public class SiteDeploy {
 	reader.flush();
     }
 
-    private synchronized void writeStatus() {
+    private synchronized void writeStatus(String additionalInfo) {
 	int generatePercent = 0;
 	if (totalGenerateTasks.get() != 0) {
 	    generatePercent = (int) (((double) currentGenerateTask.get()) / ((double) totalGenerateTasks.get()) * 100.0);
@@ -274,7 +324,7 @@ public class SiteDeploy {
 		+ " (" + generatePercent + "%)"
 		+ "; Upload progress: " + currentUploadTask.get() + "/" + totalUploadTasks.get()
 		+ " (" + uploadPercent + "%)"
-		+ ";";
+		+ "; " + additionalInfo;
 	try {
 	    resetLine();
 	    reader.getOutput().write(message);
@@ -342,7 +392,7 @@ public class SiteDeploy {
 			    }
 			    assert page != null && name != null;
 			    boolean exists;
-			    if(page.contains(".")) {
+			    if (page.contains(".")) {
 				// We can't really check this, because it might be a synthetic page, like
 				// api.json. So we just have to set it to true.
 				exists = true;
@@ -373,18 +423,28 @@ public class SiteDeploy {
 	    }
 	});
 	g.put("learning_trail", learningTrailGen);
+	/**
+	 * If showTemplateCredit is false, then this will return "display: none;" otherwise, it
+	 * will return an empty string.
+	 */
+	g.put("showTemplateCredit", new Generator() {
+	    @Override
+	    public String generate(String... args) throws GenerateException {
+		return showTemplateCredit ? "" : "display: none;";
+	    }
+	});
 	return g;
     }
 
     private void deploy() throws InterruptedException, IOException {
-	deployResources();
+//	deployResources();
 	deployFrontPages();
 	deployLearningTrail();
-	deployAPI();
-	deployEventAPI();
-	deployFunctions();
-	deployEvents();
-	deployAPIJSON();
+//	deployAPI();
+//	deployEventAPI();
+//	deployFunctions();
+//	deployEvents();
+//	deployAPIJSON();
 	generateQueue.submit(new Runnable() {
 	    @Override
 	    public void run() {
@@ -396,7 +456,85 @@ public class SiteDeploy {
 	uploadQueue.awaitTermination(1, TimeUnit.DAYS);
 	dm.waitForThreads();
 	deploymentMethod.finish();
+	// Next, we need to validate the pages
 	System.out.println();
+	if (doValidation) {
+	    System.out.println("Upload complete, running html5 validation");
+	    int filesValidated = 0;
+	    int specifiedErrors = 0;
+	    try {
+		for (Map.Entry<String, String> e : uploadedPages.entrySet()) {
+		    Map<String, List<String>> headers = new HashMap<>();
+		    RequestSettings settings = new RequestSettings();
+		    //settings.setLogger(Logger.getLogger(SiteDeploy.class.getName()));
+		    settings.setFollowRedirects(true);
+		    headers.put("Content-Type", Arrays.asList(new String[]{"text/html; charset=utf-8"}));
+		    headers.put("Content-Encoding", Arrays.asList(new String[]{"gzip"}));
+		    headers.put("Accept-Encoding", Arrays.asList(new String[]{"gzip"}));
+		    settings.setHeaders(headers);
+
+		    byte[] outStream = e.getValue().getBytes("UTF-8");
+		    ByteArrayOutputStream out = new ByteArrayOutputStream(outStream.length);
+		    try (GZIPOutputStream gz = new GZIPOutputStream(out)) {
+			gz.write(outStream);
+		    }
+		    byte[] param = out.toByteArray();
+		    settings.setRawParameter(param);
+		    settings.setTimeout(10000);
+		    settings.setMethod(HTTPMethod.POST);
+		    HTTPResponse response = WebUtility.GetPage(new URL(validatorUrl + "?out=gnu"), settings);
+		    System.out.println(Static.MCToANSIColors("Response for "
+			    + MCChatColor.AQUA + e.getKey() + MCChatColor.PLAIN_WHITE + ":"));
+		    if (response.getResponseCode() != 200) {
+			System.out.println(response.getContent());
+			throw new IOException("Response was non-200, refusing to continue with validation");
+		    }
+		    String[] errors = response.getContent().split("\n");
+		    int errorsDisplayed = 0;
+		    for(String error : errors) {
+			GNUErrorMessageFormat gnuError = new GNUErrorMessageFormat(error);
+			String supressWarning = "info warning: Section lacks heading. Consider using “h2”-“h6”"
+				+ " elements to add identifying headings to all sections.";
+			if(supressWarning.equals(gnuError.message())) {
+			    continue;
+			}
+			StringBuilder output = new StringBuilder();
+			switch(gnuError.messageType()) {
+			    case ERROR:
+				output.append(MCChatColor.RED);
+				break;
+			    case WARNING:
+				output.append(MCChatColor.GOLD);
+				break;
+			}
+			output.append("line ").append(gnuError.fromLine()).append(" ")
+				.append(gnuError.message()).append(MCChatColor.PLAIN_WHITE);
+			String[] page = e.getValue().split("\n");
+			for(int i = gnuError.fromLine(); i < gnuError.toLine() + 1; i++) {
+			    output.append("\n").append(page[i - 1]);
+			}
+			output.append("\n");
+			for(int i = 0; i < gnuError.fromColumn() - 1; i++) {
+			    output.append(" ");
+			}
+			output.append(MCChatColor.RED).append("^").append(MCChatColor.PLAIN_WHITE);
+			System.out.println(Static.MCToANSIColors(output.toString()));
+			specifiedErrors++;
+			errorsDisplayed++;
+		    }
+		    if(errorsDisplayed == 0) {
+			System.out.println(Static.MCToANSIColors(MCChatColor.GREEN.toString())
+				+ "No errors" + Static.MCToANSIColors(MCChatColor.PLAIN_WHITE.toString()));
+		    }
+		    filesValidated++;
+		}
+	    } catch (IOException ex) {
+		System.err.println("Validation could not occur due to the following exception: " + ex.getMessage());
+		ex.printStackTrace(System.err);
+	    }
+	    System.out.println("Files validated: " + filesValidated);
+	    System.out.println("Errors found: " + specifiedErrors);
+	}
 	System.out.println("Done!");
 	System.out.println("Summary of changed files (" + filesChanged.size() + ")");
 	System.out.println(StringUtils.Join(filesChanged, "\n"));
@@ -413,6 +551,7 @@ public class SiteDeploy {
     }
 
     private boolean notificationAboutLocalCache = true;
+
     /**
      * Writes an arbitrary stream to a file on the remote.
      *
@@ -424,19 +563,20 @@ public class SiteDeploy {
 	    @Override
 	    public void run() {
 		try {
+		    writeStatus("Currently uploading " + toLocation);
 		    // Read the contents only once
-		    byte [] c = StreamUtils.GetBytes(contents);
+		    byte[] c = StreamUtils.GetBytes(contents);
 		    contents.close();
 		    boolean skipUpload = false;
 		    String hash = null;
-		    if(pn != null) {
-			if(notificationAboutLocalCache) {
+		    if (pn != null) {
+			if (notificationAboutLocalCache) {
 			    hash = getLocalMD5(new ByteArrayInputStream(c));
 			    try {
-				if(lc.containsKey(toLocation)) {
-				    if(useLocalCache) {
+				if (lc.containsKey(toLocation)) {
+				    if (useLocalCache) {
 					String cacheHash = lc.get(toLocation);
-					if(cacheHash.equals(hash)) {
+					if (cacheHash.equals(hash)) {
 					    skipUpload = true;
 					}
 				    }
@@ -447,10 +587,10 @@ public class SiteDeploy {
 			    }
 			}
 		    }
-    		    if(!skipUpload && deploymentMethod.deploy(new ByteArrayInputStream(c), toLocation)){
+		    if (!skipUpload && deploymentMethod.deploy(new ByteArrayInputStream(c), toLocation)) {
 			filesChanged.add(toLocation);
 		    }
-		    if(pn != null && notificationAboutLocalCache && hash != null) {
+		    if (pn != null && notificationAboutLocalCache && hash != null) {
 			try {
 			    lc.put(toLocation, hash);
 			    pn.set(dm, new String[]{"site_deploy", "local_cache"}, JSONValue.toJSONString(lc));
@@ -460,8 +600,8 @@ public class SiteDeploy {
 			}
 		    }
 		    currentUploadTask.addAndGet(1);
-		    writeStatus();
-		} catch (IOException ex) {
+		    writeStatus("");
+		} catch (Throwable ex) {
 		    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed while uploading " + toLocation, ex);
 		    generateQueue.shutdownNow();
 		    uploadQueue.shutdownNow();
@@ -473,7 +613,7 @@ public class SiteDeploy {
 
     static synchronized String getLocalMD5(InputStream localFile) throws IOException {
 	try {
-	    byte [] f = StreamUtils.GetBytes(localFile);
+	    byte[] f = StreamUtils.GetBytes(localFile);
 	    MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
 	    digest.update(f);
 	    String hash = StringUtils.toHex(digest.digest()).toLowerCase();
@@ -499,22 +639,86 @@ public class SiteDeploy {
      * Most pages should use this method instead of the other methods. This takes care of all the steps, including
      * substituting the body into the frame, and handling all the other connections.
      *
+     * @param title The title of the page
+     * @param resource The absolute path (or path relative to SiteDeploy.java) of the resource to use
+     * @param toLocation The location on the remote server
+     * @param keywords A list of keywords to be added to the meta tag on the page
+     * @param description A description of the page
+     * @return
+     */
+    private void writePageFromResource(String title, String resource, String toLocation, List<String> keywords,
+	    String description) {
+	String s = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream(resource));
+	s += "<p id=\"edit_this_page\">"
+		+ EDIT_THIS_PAGE_PREAMBLE
+		+ String.format(githubBaseUrl, "resources" + resource)
+		+ EDIT_THIS_PAGE_POSTAMBLE
+		+ "</p>";
+	writePage(title.replace("_", " "), s, toLocation, keywords, description);
+    }
+
+    /**
+     * Most pages should use this method instead of the other methods. This takes care of all the steps, including
+     * substituting the body into the frame, and handling all the other connections.
+     *
+     * @param title The title of the page
+     * @param resource The absolute path (or path relative to SiteDeploy.java) of the resource to use
+     * @param toLocation The location on the remote server
+     * @return
+     */
+    private void writePageFromResource(String title, String resource, String toLocation) {
+	writePageFromResource(title, resource, toLocation, null, "");
+    }
+
+    /**
+     * Most pages should use this method instead of the other methods. This takes care of all the steps, including
+     * substituting the body into the frame, and handling all the other connections.
+     *
+     * @param title The title of the page
      * @param body The content body
      * @param toLocation the location on the remote server
      */
-    private void writePage(final String title, final String body, final String toLocation) {
+    private void writePage(String title, String body, String toLocation) {
+	writePage(title, body, toLocation, null, "");
+    }
+
+    /**
+     * Most pages should use this method instead of the other methods. This takes care of all the steps, including
+     * substituting the body into the frame, and handling all the other connections.
+     *
+     * @param body The content body
+     * @param title The title of the page
+     * @param toLocation the location on the remote server
+     * @param keywords A list of keywords to be added to the meta tag on the page
+     * @param description A description of the page's content
+     */
+    private void writePage(final String title, final String body, final String toLocation,
+	    List<String> keywords, final String description) {
+	if (keywords == null) {
+	    keywords = new ArrayList<>();
+	}
+	final List<String> kw = keywords;
 	generateQueue.submit(new Runnable() {
 	    @Override
 	    public void run() {
+		String bW = body;
+		if (!bW.contains(EDIT_THIS_PAGE_PREAMBLE)) {
+		    bW += "<p id=\"edit_this_page\">"
+			    + EDIT_THIS_PAGE_PREAMBLE
+			    + "java/" + String.format(githubBaseUrl, SiteDeploy.class.getName().replace(".", "/")) + ".java"
+			    + EDIT_THIS_PAGE_POSTAMBLE
+			    + "</p>";
+		}
 		try {
+		    writeStatus("Currently generating " + toLocation);
 		    // First, substitute the templates in the body
 		    final String b;
 		    try {
 			Map<String, Generator> standard = getStandardGenerators();
 			standard.putAll(DocGenTemplates.GetGenerators());
-			b = DocGenTemplates.DoTemplateReplacement(body, standard);
+			b = DocGenTemplates.DoTemplateReplacement(bW, standard);
 		    } catch (Exception ex) {
-			if(ex instanceof GenerateException) {
+			if (ex instanceof GenerateException) {
 			    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed to substitute template"
 				    + " while trying to upload resource to " + toLocation, ex);
 			} else {
@@ -547,12 +751,12 @@ public class SiteDeploy {
 			}
 		    });
 		    /**
-		     * The cacheBuster template is meant to make it easier to deal with caching of resources. The template
-		     * allows you to specify the resource, and it creates a path to the resource using resourceBase, but
-		     * it also appends a hash of the file, so that as the file changes, so does the hash (using a ?v=hash
-		     * query string). Most resources live in /siteDeploy/resources/*, and so the shorthand is to use
-		     * %%cacheBuster|path/to/resource.css%%. However, this isn't always correct, because resources can
-		     * live all over the place. In that case, you should use the following format:
+		     * The cacheBuster template is meant to make it easier to deal with caching of resources. The
+		     * template allows you to specify the resource, and it creates a path to the resource using
+		     * resourceBase, but it also appends a hash of the file, so that as the file changes, so does the
+		     * hash (using a ?v=hash query string). Most resources live in /siteDeploy/resources/*, and so the
+		     * shorthand is to use %%cacheBuster|path/to/resource.css%%. However, this isn't always correct,
+		     * because resources can live all over the place. In that case, you should use the following format:
 		     * %%cacheBuster|/absolute/path/to/resource.css|path/to/resource/in/html.css%%
 		     */
 		    g.put("cacheBuster", new Generator() {
@@ -560,7 +764,7 @@ public class SiteDeploy {
 			public String generate(String... args) {
 			    String resourceLoc = SiteDeploy.this.resourceBase + args[0];
 			    String loc = args[0];
-			    if(!loc.startsWith("/")) {
+			    if (!loc.startsWith("/")) {
 				loc = "/siteDeploy/resources/" + loc;
 			    } else {
 				resourceLoc = SiteDeploy.this.resourceBase + args[1];
@@ -568,7 +772,7 @@ public class SiteDeploy {
 			    String hash = "0";
 			    try {
 				InputStream in = SiteDeploy.class.getResourceAsStream(loc);
-				if(in == null) {
+				if (in == null) {
 				    throw new RuntimeException("Could not find " + loc + " in resources folder for cacheBuster template");
 				}
 				hash = getLocalMD5(in);
@@ -585,32 +789,35 @@ public class SiteDeploy {
 			    return SiteDeploy.this.siteBase.startsWith("https") ? "true" : "false";
 			}
 		    });
+		    g.put("keywords", new Generator() {
+			@Override
+			public String generate(String... args) throws GenerateException {
+			    List<String> k = new ArrayList<>(kw);
+			    k.add(Implementation.GetServerType().getBranding());
+			    return StringUtils.Join(k, ", ");
+			}
+		    });
+		    g.put("description", new Generator() {
+			@Override
+			public String generate(String... args) throws GenerateException {
+			    return description;
+			}
+		    });
 		    g.putAll(getStandardGenerators());
+		    g.putAll(DocGenTemplates.GetGenerators());
 		    String frame = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/frame.html"));
 		    final String bb = DocGenTemplates.DoTemplateReplacement(frame, g);
 		    // Write out using writeFromString
+		    uploadedPages.put(toLocation, bb);
 		    writeFromString(bb, toLocation);
 		    currentGenerateTask.addAndGet(1);
-		    writeStatus();
+		    writeStatus("");
 		} catch (Exception ex) {
 		    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While writing " + toLocation + " the following error occured:", ex);
 		}
 	    }
 	});
 	totalGenerateTasks.addAndGet(1);
-    }
-
-    /**
-     * Most pages should use this method instead of the other methods. This takes care of all the steps, including
-     * substituting the body into the frame, and handling all the other connections.
-     *
-     * @param resource
-     * @param toLocation
-     * @return
-     */
-    private void writePageFromResource(String title, String resource, String toLocation) {
-	String s = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream(resource));
-	writePage(title, s, toLocation);
     }
 
     /**
@@ -648,10 +855,16 @@ public class SiteDeploy {
      * Pages deployed: index.html privacy_policy.html
      */
     private void deployFrontPages() {
-	writePageFromResource(CHVersion.LATEST.toString() + " - Docs", "/siteDeploy/VersionFrontPage", "index.html");
-	writePageFromResource("Privacy Policy", "/siteDeploy/privacy_policy.html", "privacy_policy.html");
-	writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/FrontPage", "../../index.html");
-	writePageFromResource("Doc Directory", "/siteDeploy/DocDirectory", "../index.html");
+	writePageFromResource(CHVersion.LATEST.toString() + " - Docs", "/siteDeploy/VersionFrontPage", "index.html",
+		Arrays.asList(new String[]{CHVersion.LATEST.toString()}), "Front page for " + CHVersion.LATEST.toString());
+	writePageFromResource("Privacy Policy", "/siteDeploy/privacy_policy.html", "privacy_policy.html",
+		Arrays.asList(new String[]{"privacy policy"}), "Privacy policy for the site");
+	writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/FrontPage", "../../index.html",
+		Arrays.asList(new String[]{"index", "front page"}), "The front page for " + Implementation.GetServerType().getBranding());
+	writePageFromResource("Doc Directory", "/siteDeploy/DocDirectory", "../index.html",
+		Arrays.asList(new String[]{"directory"}), "The directory for all documented versions");
+	writePageFromResource("404 Not Found", "/siteDeploy/404", "../../404.html",
+		Arrays.asList(new String[]{"404"}), "Page not found");
     }
 
     /**
@@ -662,7 +875,8 @@ public class SiteDeploy {
 	ZipReader zReader = new ZipReader(root);
 	for (File r : zReader.listFiles()) {
 	    String filename = r.getAbsolutePath().replaceFirst(Pattern.quote(zReader.getFile().getAbsolutePath()), "");
-	    writePageFromResource(r.getName(), "/docs" + filename, r.getName() + ".html");
+	    writePageFromResource(r.getName(), "/docs" + filename, r.getName() + ".html",
+		    Arrays.asList(new String[]{r.getName().replace("_", " ")}), "Learning trail page for " + r.getName().replace("_", " "));
 	}
     }
 

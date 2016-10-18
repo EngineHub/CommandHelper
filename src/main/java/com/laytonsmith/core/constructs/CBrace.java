@@ -2,6 +2,7 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.natives.interfaces.ObjectType;
 
 /**
  *

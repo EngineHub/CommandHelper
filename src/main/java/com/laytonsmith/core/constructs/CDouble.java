@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.natives.interfaces.ObjectType;
 
 /**
  *
@@ -63,4 +64,5 @@ public class CDouble extends CNumber implements Cloneable {
     public CClassType[] getInterfaces() {
 	return new CClassType[]{};
     }
+
 }

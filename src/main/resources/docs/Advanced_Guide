@@ -102,7 +102,7 @@ each alias is defined, along with a snippet of MethodScript. For instance, in th
 <<<
 %%
 
-the <code>/test [$command=%%NOWIKI|''%%] = >>> <<<</code> part is the alias markup, and is not actual MethodScript, 
+the <code>/test [$command=%%NOWIKI|''%%] = &gt;&gt;&gt; &lt;&lt;&lt;</code> part is the alias markup, and is not actual MethodScript, 
 that is, the symbols and characters follow different meanings than inside the alias definition. In this example, 
 <code>console($command);</code> is pure MethodScript.
 
@@ -174,10 +174,10 @@ In this simple example, you can think of each execution path as a line through y
 if that doesn't make sense to you, ignore that for now). That line follows very specific rules based on code structure, 
 so how you lay out your code is important to be able to visualize.
 
-=== reloadaliases ===
+=== recompile ===
 
-The built in <code>/reloadaliases</code> command is used to reload just CommandHelper, though <code>/reload</code> will 
-also reload CommandHelper. However, using the reloadaliases command can allow for finer grained control of what all gets 
+The built in <code>/recompile</code> command is used to reload just CommandHelper, though <code>/reload</code> will 
+also reload CommandHelper. However, using the recompile command can allow for finer grained control of what all gets 
 reloaded. By default, the command reloads the following things about CommandHelper:
 
 * <u>S</u>cripts - Any changes that you have made to any scripts will be reloaded and applied. Main files are re-run, 
@@ -193,11 +193,13 @@ You can actually reload these sub-modules individually if you want, by passing p
 modes, whitelist, or by default, blacklist. In blacklist mode, all modules get reloaded except the modules that are 
 blacklisted, which aren't reloaded. In whitelist mode, only the specified modules are reloaded. You use the underlined 
 letter to refer to that specific module. For instance, if you want to reload everything but leave the exported variables 
-and execution queue alone, you can run <code>/reloadaliases -ge</code>. If you ONLY want to reload tasks, you can
-run <code>/reloadaliases --whitelist -t</code>. Note that reloading individual modules isn't normally encouraged,
+and execution queue alone, you can run <code>/recompile -ge</code>. If you ONLY want to reload tasks, you can
+run <code>/recompile --whitelist -t</code>. Note that reloading individual modules isn't normally encouraged,
 because it can put your server in an inconsistent and unreproducable state if you aren't careful. Running 
-<code>/reloadaliases</code> by itself (which reloads everything) is recommended. You can also run 
-<code>/reloadaliases -h</code> for the usage instructions and long options list.
+<code>/recompile</code> by itself (which reloads everything) is recommended. You can also run 
+<code>/recompile -h</code> for the usage instructions and long options list.
+
+<code>/reloadaliases</code> is an alias to <code>/recompile</code>
 
 ===Scripting Examples===
 
@@ -314,7 +316,7 @@ if used on the right.
 | newline
 | An 'enter' in the file
 |-
-| >>> and <<< 
+| &gt;&gt;&gt; and &lt;&lt;&lt; 
 | multiline_start and multiline_end
 | Starts and stops a multiline construct
 |-
@@ -322,7 +324,7 @@ if used on the right.
 | command
 | This symbol followed by a literal denotes a command
 |-
-| \
+| \&nbsp;
 | separator
 | Separates each macro command
 |-
@@ -342,6 +344,11 @@ if used on the right.
 | lit
 | Anything not defined above is a lit
 |}
+
+%%TAKENOTE|
+In general, autoconcatenation should not be relied on. It is better to use the <code>.</code> operator to concatenate
+things together.
+%%
 
 Note that a lit and string are treated the same, however special characters must be put in a string to be treated as 
 literal character. Technically all other special characters are treated as literals, but to make your script compatible 

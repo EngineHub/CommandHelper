@@ -15,6 +15,7 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
+import com.laytonsmith.core.natives.interfaces.ObjectType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;

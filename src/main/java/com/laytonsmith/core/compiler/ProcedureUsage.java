@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.natives.interfaces.ObjectType;
 
 /**
  *
@@ -40,6 +41,11 @@ public class ProcedureUsage extends Construct {
     @Override
     public CClassType[] getInterfaces() {
 	return new CClassType[]{};
+    }
+
+    @Override
+    public ObjectType getObjectType() {
+	return super.getObjectType();
     }
 
 }

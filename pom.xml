@@ -786,10 +786,8 @@
                         <!-- Include the default test cases, since we're overwriting them -->
                         <include>**/*Test.java</include>
                         <include>**/Test*.java</include>
+                        <include>**/*Tests.java</include>
                         <include>**/*TestCase.java</include>
-
-                        <!-- Include custom, none specific classes -->
-                        <include>**/RandomTests.java</include>
                     </includes>
                     <argLine>${argLine}</argLine>
                 </configuration>

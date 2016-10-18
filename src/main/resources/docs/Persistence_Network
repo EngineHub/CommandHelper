@@ -13,7 +13,7 @@ There are several supported formats, and there is the potential to add more in t
 In your configuration file, a connection can be aliased, to make re-specifying a connection 
 easier, but the actual connection specification is a URI that maps to a specific data source. 
 For instance, the default SQLite format is simply a pointer to a file:
-<pre>sqlite:///home/data/persistence.db</pre>
+%%PRE|sqlite:///home/data/persistence.db%%
 
 There are several different connection types supported, and each has a slightly different requirement:
 
@@ -28,7 +28,7 @@ There are several different connection types supported, and each has a slightly 
 
 In addition, several modifier types can be specified, which modify the connection type. 
 They are specified as extra protocols at the start of the URI.
-<pre>transient:readonly:yml://persistence.yml</pre>
+%%PRE|transient:readonly:yml://persistence.yml%%
 
 In the above example, the <code>transient</code> and <code>read-only</code> flags have been 
 added to the connection. The specific meaning of each flag is as follows, and they aren't always 
@@ -58,16 +58,16 @@ For a full rundown of the speed comparisons, see the chart below.
 
 There are special implementation considerations you must take into account if you are writing 
 an external system that integrates with the persistence network, (including if you edit the 
-files by hand), so you should read up on the [[CommandHelper/Staged/Persistence_Network_Integration|Persistence Network Integration]] 
+files by hand), so you should read up on the [[Persistence_Network_Integration|Persistence Network Integration]] 
 guide before you attempt to edit the output files, or otherwise care about the internal storage specifications.
 
 ===Connection Aliases===
 Often times you will want to re-use a connection, but you don't want to have to re-specify the 
 full connection details for each filter. In this case, you can use connection aliases. A 
 connection alias looks just like a filter, but the filter name starts with a dollar sign.
-<pre>
+%%PRE|
 $connection=mysql://username:password@host:3304/database/table
-</pre>
+%%
 
 Then, elsewhere, instead of rewriting the entire connection string, you may simply use <code>$connection</code>
 
@@ -79,7 +79,7 @@ the namespace conventions followed by the filter system map to the REAL namespac
 the namespaces you use in code. For instance, if you were to make a call to 
 <code>store_value('name.of.key', 'value')</code>, the value will actually be stored in 
 <code>storage.name.of.key</code>. For a more detailed description of the namespaces, see 
-[[CommandHelper/Data_Manager#Namespaces|this wiki page]].
+[[Data_Manager#Namespaces|this wiki page]].
 
 A filter is a simple regex style matcher; if a key matches this filter, it is stored via 
 this connection. Filters are specified as such: <code>filter=connection</code> where 
@@ -96,10 +96,10 @@ following wildcards are supported:
 
 If we are attempting to store a value in "storage.key.name", and we have the following 
 two filters defined:
-<pre>
+%%PRE|
 storage.**.name=$connection1
 storage.**=$connection2
-</pre>
+%%
 Then it would be stored in $connection1, since that is a more specific match. It is defined 
 as a more specific match, because, minus wildcards, more namespaces match. This mechanism of 
 filter competition allows for very specific control over what data goes where, while also not 
@@ -132,7 +132,7 @@ to copy data, and not move it, you also want to use the merge tool. You can also
 data manager to show hidden data, that is, data that is stored in the data store 
 somewhere, but isn't accessible due to bad mappings.
 
-For more information on these tools and more, [[CommandHelper/Staged/Data_Manager|see this article]].
+For more information on these tools and more, [[Data_Manager|see this article]].
 
 ==Usage==
 
@@ -144,7 +144,7 @@ paths are relative to the configuration file itself.
 
 ===Example===
 
-<pre>
+%%PRE|
 #Lines starting with # are considered comments
 
 #These are our aliases
@@ -162,7 +162,7 @@ storage.players.**=$sqlite
 #that got server information, we might map that accordingly
 storage.server_info.**=$remote
 
-</pre>
+%%
 
 So, now, let's go over what would happen when we run our code.
 
@@ -212,7 +212,7 @@ foreach(@iterations, @iteration){
 
 using the following persistence.ini:
 
-<pre>
+%%PRE|
 **=sqlite://persistence.db
 storage.ini.**=ini://persistence/persistence.ini
 storage.sqlite.**=sqlite://persistence/persistence.db
@@ -220,12 +220,12 @@ storage.mem.**=mem://persistence/persistence.db
 storage.json.**=json://persistence/persistence.json
 storage.ser.**=ser://persistence/persistence.ser
 storage.yml.**=yml://persistence/persistence.yml
-</pre>
+%%
 
 Take what information you will from the data, and feel free to run it on your system to get actual values relevant to your system,
 not just relative to each other on the test system.
 
-<pre style='font-family: monospace'>
+%%PRE|
 +-------------+--------+-------+--------+-----------+--------------+----------------------------+
 | iterations: |    1   |   10  |   100  |    1000   |     5000     | File size with 5000 values |
 +-------------+--------+-------+--------+-----------+--------------+----------------------------+
@@ -245,7 +245,7 @@ not just relative to each other on the test system.
 +-------------+--------+-------+--------+-----------+--------------+----------------------------+
 |     ser     |  3 ms  |  0 ms |  4 ms  |   36 ms   |    117 ms    |           31.0 kB          |
 +-------------+--------+-------+--------+-----------+--------------+----------------------------+
-</pre>
+%%
 
 An important observation that could be made based on this data is that SQLite is 
 considerably slower than many of the other protocols. This is because SQLite

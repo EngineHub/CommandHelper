@@ -173,33 +173,21 @@ public class APIBuilder {
 			continue;
 		    }
 		    Map<String, Object> obj = new TreeMap<>();
-		    Class<? extends Mixed> tt = NativeTypeList.getNativeClass(t);
+		    Class<? extends Mixed> tt = NativeTypeList.getNativeClassOrInterfaceRunner(t);
 		    String name;
 		    String docs;
 		    Version since;
 		    URL source;
 		    CClassType[] interfaces;
 		    CClassType[] supers;
-		    if (tt.isInterface() || (tt.getModifiers() & Modifier.ABSTRACT) > 0) {
-			// Find the InterfaceRunner for it
-			Class<? extends MixedInterfaceRunner> mir = NativeTypeList.getInterfaceRunnerFor(t);
-			MixedInterfaceRunner m = ReflectionUtils.instantiateUnsafe(mir);
-			name = m.getName();
-			docs = m.docs();
-			since = m.since();
-			source = m.getSourceJar();
-			interfaces = m.getInterfaces();
-			supers = m.getSuperclasses();
-		    } else {
-			// else just use the real class
-			Mixed m = ReflectionUtils.instantiateUnsafe(tt);
-			name = m.getName();
-			docs = m.docs();
-			since = m.since();
-			source = m.getSourceJar();
-			interfaces = m.getInterfaces();
-			supers = m.getSuperclasses();
-		    }
+		    // else just use the real class
+		    Mixed m = ReflectionUtils.instantiateUnsafe(tt);
+		    name = m.getName();
+		    docs = m.docs();
+		    since = m.since();
+		    source = m.getSourceJar();
+		    interfaces = m.getInterfaces();
+		    supers = m.getSuperclasses();
 		    obj.put("type", name);
 		    obj.put("docs", docs);
 		    obj.put("since", since.toString());
@@ -215,6 +203,9 @@ public class APIBuilder {
 		    }
 		    obj.put("interfaces", i);
 		    obj.put("superclasses", s);
+		    //obj.put("objectType", m.getObjectType().toString());
+		    //obj.put("containingClass", m.getContainingClass().getName());
+		    //obj.put("objectModifiers", m.getObjectModifiers());
 		    objects.put(name, obj);
 		} catch (ClassNotFoundException ex) {
 		    // Pretty sure this isn't possible?

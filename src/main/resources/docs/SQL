@@ -12,7 +12,7 @@ To simplify connection information to various databases, MethodScript allows two
 ways of connecting to a server. Either via ''profiles'' or via in code connection
 information. When connecting statically, connection via profiles is the preferred
 solution, since it makes coding easier, and makes it harder to accidentally leak
-database credentials when sharing code. See [[CommandHelper/Staged/Profiles]] for more information
+database credentials when sharing code. See [[Profiles]] for more information
 about setting up profiles in general. Connections to different SQL server types
 may require different connection information, so you'll need to see the connection
 configuration information below for each supported server type. In general, the configuration format

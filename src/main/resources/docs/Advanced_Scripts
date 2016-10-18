@@ -3,13 +3,13 @@
 
 This file goes into the same directory as your aliases.msa file, and is normally used for [[Procedures]]. You can put useful commands that you want in <b>every</b> alias here.  Here's a simple one, that is used by the example scripts below
 
-<pre>
+%%CODE|
 
 proc(_bc, @label, @str,
     broadcast(colorize('&e[&a'. @label. '&e] &f'. @str))
 )
 
-</pre>
+%%
 
 This lets you use the alias _bc in every alias, to do a Broadcast to the server, with a leading subject. You will see it used below.
 
@@ -17,7 +17,7 @@ This lets you use the alias _bc in every alias, to do a Broadcast to the server,
 
 This script lets anyone in the groups 'Users', 'Mods', 'Admins' or 'Ops' reset a spleef arena. It also only lets it happen every 5 minutes, to stop people spamming it. 
 
-<pre>
+%%ALIAS|
 ~default/users/mods/admins/ops:/fixspleef = >>>
     # How many seconds they have to wait before being able
     # to re-run fixspleef
@@ -68,13 +68,13 @@ This script lets anyone in the groups 'Users', 'Mods', 'Admins' or 'Ops' reset a
     assign(@pinfo, pinfo())
     _bc(Spleef, concat(array_get(@pinfo,4), ' has just reset the spleef arena with the /fixspleef command!'))
 <<<
-</pre>
+%%
 
 == Brand and Unbrand a user ==
 
 Someone giving you problems? Want to make sure everyone else knows about it? Brand them. Note that this is written for use with [http://forums.bukkit.org/threads/18140/ PermissionsEx] and you'll have to change the prefix commands for your own permissions system.
 
-<pre>
+%%ALIAS|
 ~mod/admin/op:/brand $user $brand =  >>>
     /pex user $user prefix concat('&e[', $brand, ']&8')
     _bc('Branding', $user has been branded $brand )
@@ -84,7 +84,7 @@ Someone giving you problems? Want to make sure everyone else knows about it? Bra
     _bc('Branding', $user . ' has been unbranded')
 <<<
 ~mod/admin/op:/brand $user $brand $ = msg('You can only brand with a single word')
-</pre>
+%%
 
 You'll notice the last line relies on CH's greedy pattern matching. If someone tries /brand GrieferTest Is an idiot, it WON'T match on the <b>/brand $user $brand</b> alias, because it has too many parameters.  It will, however, happily match on the bottom line, and give a warning to the person who tried to brand to only use one word.
 
@@ -95,7 +95,7 @@ This requires CommandHelper higher or equal to build 359.
 Rather than using ~group/group2 tags, it shows you how to provide a better error message to users, rather than a noisy commandhelper error. Ensure that your base group (in our case, 'default') has the permission 'commandhelper.alias.safe' 
 
 This is made from three commands. The first is when someone types <b>/fixsign</b> without any options. It tells them the parameters. The 'text' is gray as a hint that it's an optional parameter.
-<pre>
+%%ALIAS|
 safe:/fixsign = >>>
     assign(@pinfo, pinfo())
     if(!array_contains(@pinfo[9],mods) || array_contains(@pinfo[9],admins) || array_contains(@pinfo[9],ops),
@@ -103,10 +103,10 @@ safe:/fixsign = >>>
     )
     msg(color(white) . 'Usage: ' . color(red) . '/fixsign lineno' . color(gray) . ' text')
 <<<
-</pre>
+%%
 
 The second is when they use <b>/fixsign 3</b> to delete the third line of the sign
-<pre>
+%%ALIAS|
 safe:/fixsign $line = >>>
     assign(@pinfo, pinfo())
     if(not(or(array_contains(@pinfo[9],mods), array_contains(@pinfo[9],admins), array_contains(@pinfo[9],ops))),
@@ -128,10 +128,10 @@ safe:/fixsign $line = >>>
     array_set(@text, @lineno, '')
     set_sign_text(@loc, @text)
 <<<
-</pre>
+%%
 
 And the third is to actually edit the sign. Note that the magic variable '$' is used here, which catches any number of words and returns it as a single string.
-<pre>
+%%ALIAS|
 safe:/fixsign $line $ = >>>
     assign(@pinfo, pinfo())
     if(not(or(array_contains(@pinfo[9],mods), array_contains(@pinfo[9],admins), array_contains(@pinfo[9],ops))),
@@ -153,12 +153,12 @@ safe:/fixsign $line $ = >>>
     array_set(@text, @lineno, $)
     set_sign_text(@loc, @text)
 <<<
-</pre>
+%%
 
 == Let users see their regions ==
 This ties into WorldGuard, and uses the sk_region commands.
 
-<pre>
+%%ALIAS|
 safe:/myregions = >>>
     assign(@pname,pinfo()[0])
     assign(@regions,sk_all_regions(pworld()))
@@ -173,11 +173,12 @@ safe:/myregions = >>>
       msg(You have no regions),
       msg('Your regions are:' array_implode(@uregions))
     )
-<<<</pre>
+<<<
+%%
 
 == Use BungeeCord with CommandHelper ==
 
-<pre>
+%%CODE|
 proc(_writeUTF, @ba, @str,
         @len = length(@str)
         if (@len > 200) {
@@ -198,33 +199,33 @@ proc(_changeserver, @player, @server,
        )
        send_plugin_message(@player, 'BungeeCord', @ba)
 )
-</pre>
+%%
 
 Those two functions, when added to auto_include.ms, will let you do something like this:
 
-<pre>
+%%ALIAS|
 *:/pvp = >>>
    _changeserver(player(), 'pvp')
 <<<
-</pre>
+%%
 
 You could also have a script that moves EVERYONE off the server, like this:
 
-<pre> 
+%%ALIAS| 
 mods,admins,ops:/sendall $world = >>>
     assign(@all, all_players())
     foreach(@all, @player,
         _changeserver(@player, $world)
     )
 <<<
-</pre>
+%%
 
 You would then type "/sendall lobby" to send all players on the current server to the lobby.
 
 == A toggle to let admins and mods join the server unannounced ==
 <br>
 aliases.msa:
-<pre>
+%%ALIAS|
 *:/silentjoin [$player] [$] = >>>
     _verify_mod() #A procedure that checks if the user has the custom permission that all moderators have
 
@@ -265,10 +266,10 @@ aliases.msa:
         console(colorize(@bcmsg. '&e by &5'. player()))
     }
 <<<
-</pre>
+%%
 
 Main.ms:
-<pre>
+%%CODE|
 bind(player_join, null, null, @event,
     ### Change the default join message ###
     modify_event('message', (color(7). 'Player Join: '. color(e). player()))
@@ -298,10 +299,10 @@ bind(player_quit, null, null, @event,
         _bc_mods(color(b). 'Silent Quit: '. color(e). player())
     }
 )
-</pre>
+%%
 
 Auto_include.ms:
-<pre>
+%%CODE|
 proc(_bc_mods, @str) {
     foreach(all_players(), @user) {
         if( has_permission(@user, 'ch_mod') ) { #The custom permission we gave the mods group.
@@ -316,13 +317,13 @@ proc(_verify_mod, assign(@msg, 'You do not have permission to run this command.'
     }
 }
 
-</pre>
+%%
 
 == Simple mail system ==
 -added by russellsayshi
 In aliases.msa
 
-<pre>
+%%ALIAS|
 *:/mail [$action] [$] = >>>
     if(equals($action, 'read'), #checking if they do /mail read
         if(equals(get_value(concat('mail', player())), null), #the mail is stored in mailplayername
@@ -347,11 +348,11 @@ In aliases.msa
         )
     )
 <<<
-</pre>
+%%
 
 In main.ms
 
-<pre>
+%%CODE|
 bind(player_join, null, null, @event,
     if(equals(get_value(concat('mail', player())), null),
         msg(concat(color(gray), 'You have no new mail.'))
@@ -359,12 +360,12 @@ bind(player_join, null, null, @event,
         msg(concat(color(green), 'You have new mail! Type /mail read to see your messages.'))
     )
 )
-</pre>
+%%
 
 == Pagination ==
 
 In auto_include.ms
-<pre>
+%%CODE|
 proc _paginate(@title, @list, @page, @perpage=15) {
 
     ### Check if @list is empty and sorts alphabetically ###
@@ -398,6 +399,6 @@ proc _paginate(@title, @list, @page, @perpage=15) {
     msg(colorize('&6'. array_implode(@finalList, '&7, &6')))
 }
 
-</pre>
+%%
 
 {{LearningTrail}}

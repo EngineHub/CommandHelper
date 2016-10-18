@@ -16,8 +16,11 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
+import com.laytonsmith.core.natives.interfaces.ObjectModifier;
+import com.laytonsmith.core.natives.interfaces.ObjectType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -244,4 +247,5 @@ public class CClosure extends Construct {
     public CClassType[] getInterfaces() {
 	return new CClassType[]{};
     }
+
 }

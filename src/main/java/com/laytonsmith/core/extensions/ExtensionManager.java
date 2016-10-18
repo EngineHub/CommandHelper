@@ -212,6 +212,9 @@ public class ExtensionManager {
 	for (ClassMirror<? extends AbstractExtension> extmirror
 		: cd.getClassesWithAnnotationThatExtend(
 			MSExtension.class, AbstractExtension.class)) {
+	    if(extmirror.equals(new ClassMirror<>(AbstractExtension.class))) {
+		continue;
+	    }
 	    AnnotationMirror plug = extmirror.getAnnotation(MSExtension.class);
 
 	    URL plugURL = extmirror.getContainer();
@@ -375,6 +378,9 @@ public class ExtensionManager {
 	// lifecycle is found per URL, it's stored and used, but the first
 	// one found defines the internal name.
 	for (ClassMirror<? extends AbstractExtension> extmirror : cd.getClassesWithAnnotationThatExtend(MSExtension.class, AbstractExtension.class)) {
+	    if(extmirror.equals(new ClassMirror<>(AbstractExtension.class))) {
+		continue;
+	    }
 	    Extension ext;
 	    URL url = extmirror.getContainer();
 	    Class<? extends AbstractExtension> extcls;

@@ -16,6 +16,7 @@ import com.laytonsmith.core.functions.BasicLogic;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.natives.interfaces.ObjectType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -932,4 +933,5 @@ public class CArray extends Construct implements ArrayAccess {
     public CClassType[] getInterfaces() {
 	return new CClassType[]{CClassType.build("ArrayAccess")};
     }
+
 }

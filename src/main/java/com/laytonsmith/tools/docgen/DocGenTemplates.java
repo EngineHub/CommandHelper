@@ -2,6 +2,7 @@ package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.HTMLUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
@@ -70,9 +71,24 @@ public class DocGenTemplates {
 	public String generate(String... args) throws GenerateException ;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 	Implementation.setServerType(Implementation.Type.SHELL);
-	StreamUtils.GetSystemOut().println(Generate("NewObjects"));
+	Map<String, Generator> g = new HashMap<>();
+	g.put("A", new Generator() {
+	    @Override
+	    public String generate(String... args) throws GenerateException {
+		return "(" + args[0] + ")";
+	    }
+	});
+	g.put("B", new Generator() {
+	    @Override
+	    public String generate(String... args) throws GenerateException {
+		return "<text>";
+	    }
+	});
+	g.putAll(DocGenTemplates.GetGenerators());
+	String t = "<%PRE|<%B%>%>";
+	StreamUtils.GetSystemOut().println(DoTemplateReplacement(t, g));
     }
 
     public static String Generate(String forPage) {
@@ -175,8 +191,59 @@ public class DocGenTemplates {
 	}
 	ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenTemplates.class));
 
+	// Find all the <%templates%> (which are the same as %%templates%%, but are nestable)
+	int templateStack = 0;
+	StringBuilder tBuilder = new StringBuilder();
+	StringBuilder tArgument = new StringBuilder();
+	boolean inTemplate = false;
+	for(int i = 0; i < template.length(); i++) {
+	    Character c1 = template.charAt(i);
+	    Character c2 = '\0';
+	    if(i < template.length() - 1) {
+		c2 = template.charAt(i + 1);
+	    }
+	    if(c1 == '<' && c2 == '%') {
+		// start template
+		inTemplate = true;
+		templateStack++;
+		if(templateStack == 1) {
+		    i++; continue;
+		}
+	    }
+
+	    if(c1 == '%' && c2 == '>') {
+		// end template
+		templateStack--;
+		if(templateStack == 0) {
+		    // Process the template now
+		    String[] args = tArgument.toString().split("\\|");
+		    String name = args[0];
+		    if(args.length > 1) {
+			args = ArrayUtils.slice(args, 1, args.length - 1);
+		    }
+		    // Loop over the arguments and resolve them first
+		    for(int j = 0; j < args.length; j++) {
+			args[j] = DoTemplateReplacement(args[j], generators);
+		    }
+		    if (generators.containsKey(name)) {
+			String result = generators.get(name).generate(args);
+			tBuilder.append(result);
+		    }
+		    tArgument = new StringBuilder();
+		}
+		if(templateStack == 0) {
+		    i++; continue;
+		}
+	    }
+	    if(templateStack == 0) {
+		tBuilder.append(c1);
+	    } else {
+		tArgument.append(c1);
+	    }
+	}
+	template = tBuilder.toString();
 	//Find all the %%templates%% in the template
-	Matcher m = Pattern.compile("%%([^\\|%]+)([^%]*?)%%").matcher(template);
+	Matcher m = Pattern.compile("(?:%|<)%([^\\|%]+)([^%]*?)%(?:%|>)").matcher(template);
 	StringBuilder templateBuilder = new StringBuilder();
 	int lastMatch = 0;
 	boolean appended = false;
@@ -193,6 +260,9 @@ public class DocGenTemplates {
 			//We have arguments
 			//remove the initial |, then split
 			tmplArgs = m.group(2).substring(1).split("\\|");
+		    }
+		    for(int i = 0; i < tmplArgs.length; i++) {
+			tmplArgs[i] = DoTemplateReplacement(tmplArgs[i], generators);
 		    }
 		    String templateValue = generators.get(name).generate(tmplArgs);
 		    templateBuilder.append(templateValue);
@@ -219,7 +289,7 @@ public class DocGenTemplates {
 	public String generate(String... args) {
 	    StringBuilder b = new StringBuilder();
 	    for (DataSource.DataSourceModifier mod : DataSource.DataSourceModifier.values()) {
-		b.append("|-\n| ").append(mod.getName().toLowerCase()).append(" || ").append(mod.docs()).append("\n");
+		b.append("|-\n| ").append(mod.getName().toLowerCase()).append(" || ").append(HTMLUtils.escapeHTML(mod.docs())).append("\n");
 
 	    }
 	    return b.toString();
@@ -402,7 +472,7 @@ public class DocGenTemplates {
 	    StringBuilder b = new StringBuilder();
 	    boolean colorsDisabled = TermColors.ColorsDisabled();
 	    TermColors.DisableColors();
-	    b.append("<pre style=\"white-space: pre-wrap;\">\n").append(Main.ARGUMENT_SUITE.getBuiltDescription()).append("\n</pre>\n");
+	    b.append("<pre style=\"white-space: pre-wrap;\">\n").append(HTMLUtils.escapeHTML(Main.ARGUMENT_SUITE.getBuiltDescription())).append("\n</pre>\n");
 	    if (!colorsDisabled) {
 		TermColors.EnableColors();
 	    }
@@ -410,7 +480,7 @@ public class DocGenTemplates {
 		if (f.getType() == ArgumentParser.class) {
 		    b.append("==== ").append(StringUtils.replaceLast(f.getName(), "(?i)mode", "")).append(" ====\n<pre style=\"white-space: pre-wrap;\">");
 		    ArgumentParser parser = (ArgumentParser) ReflectionUtils.get(Main.class, f.getName());
-		    b.append(parser.getBuiltDescription()).append("</pre>\n\n");
+		    b.append(HTMLUtils.escapeHTML(parser.getBuiltDescription())).append("</pre>\n\n");
 		}
 	    }
 	    return b.toString();
@@ -428,7 +498,7 @@ public class DocGenTemplates {
 		PrintStream ps = new PrintStream(baos);
 		Manager.out = ps;
 		Manager.help(new String[0]);
-		String initial = baos.toString("UTF-8").replace("\n", "<br />").replace("\t", "&nbsp;&nbsp;&nbsp;");
+		String initial = HTMLUtils.escapeHTML(baos.toString("UTF-8")).replace("\n", "<br />").replace("\t", "&nbsp;&nbsp;&nbsp;");
 		baos.reset();
 		for (String option : Manager.options) {
 		    Manager.out.println("\n===" + option + "===");
@@ -437,7 +507,7 @@ public class DocGenTemplates {
 		if (!colorsDisabled) {
 		    TermColors.EnableColors();
 		}
-		return initial + baos.toString("UTF-8");
+		return initial + HTMLUtils.escapeHTML(baos.toString("UTF-8"));
 	    } catch (UnsupportedEncodingException ex) {
 		throw new Error(ex);
 	    }
@@ -605,6 +675,21 @@ public class DocGenTemplates {
 		text = args[1];
 	    }
 	    return "[[CommandHelper/Staged/" + page + (text != null ? "|" + text : "") + "]]";
+	}
+    };
+
+    public static Generator TAKENOTE = new Generator() {
+	@Override
+	public String generate(String... args) throws GenerateException {
+	    return "{{TakeNote|text=" + StringUtils.Join(args, "|") + "}}";
+	}
+
+    };
+
+    public static Generator CURRENTYEAR = new Generator() {
+	@Override
+	public String generate(String... args) throws GenerateException {
+	    return new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy", Target.UNKNOWN)).val();
 	}
     };
 }

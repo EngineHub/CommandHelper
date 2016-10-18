@@ -68,7 +68,7 @@ get will specify function names.
 | If a minus or plus sign is used to denote the sign of a number, it is handled slightly differently, for instance, ''2 + -1'' does not use any subtraction
 |-
 | ''Relational''
-| < > <= >=
+| &lt; &gt; &lt;= &gt;=
 | {{function|lt}}/{{function|gt}}/{{function|lte}}/{{function|gte}}
 |
 |-

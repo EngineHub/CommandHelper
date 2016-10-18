@@ -1,0 +1,14 @@
+This site is deployed via the site-deploy tool built in to %%branding%%. You can deploy your own version 
+of the site locally, if you wish, simply run 
+
+<code>java -jar %%branding%%.jar site-deploy</code>
+
+You must have a webserver set up to properly use the site, however, you may look at individual files in the
+web browser.
+
+The site is generated with Java, and uses Javascript, HTML5, and CSS to display what you see. 
+
+Portions of the site are copyright &copy; 2016 - %%CURRENTYEAR%% by the %%branding%% Team, based on works
+contributed under the license of the MethodScript project.
+
+<div style="%%showTemplateCredit%%">The site template is provided by <a href="http://templated.co">TEMPLATED</a>.</div>

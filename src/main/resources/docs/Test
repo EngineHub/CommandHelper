@@ -1,4 +1,5 @@
 
-%%CODE|
-    testFunction();
-%%
+
+<%PRE|
+    <%MySQL_CREATION_QUERY%>
+%>

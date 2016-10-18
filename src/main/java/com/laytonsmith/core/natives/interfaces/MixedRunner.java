@@ -4,6 +4,8 @@ import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.constructs.CClassType;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  *
@@ -32,6 +34,16 @@ public class MixedRunner extends AbstractMixedInterfaceRunner {
     @Override
     public CClassType[] getInterfaces() {
 	return new CClassType[]{};
+    }
+
+    @Override
+    public ObjectType getObjectType() {
+	return ObjectType.CLASS;
+    }
+
+    @Override
+    public Set<ObjectModifier> getObjectModifiers() {
+	return EnumSet.of(ObjectModifier.PUBLIC);
     }
 
 }

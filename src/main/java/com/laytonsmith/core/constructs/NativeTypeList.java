@@ -47,10 +47,36 @@ public class NativeTypeList {
 	throw new ClassNotFoundException("Could not find the class of type " + methodscriptType);
     }
 
-    public static Class<? extends MixedInterfaceRunner> getInterfaceRunnerFor(String methodscriptType) throws ClassNotFoundException {
+    /**
+     * Like {@link #getNativeClass(java.lang.String)}, except if there is an interface runner for this type, that
+     * class is returned instead. This works, because MixedInterfaceRunner extends Mixed. In general, if you need
+     * to construct an object to call the methods defined in MixedInterfaceRunner, this is the method you should
+     * use. Despite being an instanceof Mixed, you should only call the methods defined in {@link MixedInterfaceRunner},
+     * as all other methods will throw exceptions.
+     * @param methodscriptType
+     * @return
+     * @throws ClassNotFoundException
+     */
+    public static Class<? extends Mixed> getNativeClassOrInterfaceRunner(String methodscriptType) throws ClassNotFoundException {
+	try {
+	    return getInterfaceRunnerFor(methodscriptType);
+	} catch(ClassNotFoundException | IllegalArgumentException ex) {
+	    return getNativeClass(methodscriptType);
+	}
+    }
+
+    /**
+     * Returns the interface runner for the specified methodscript type.
+     * @param methodscriptType
+     * @return
+     * @throws ClassNotFoundException If the methodscript type could not be found
+     * @throws IllegalArgumentExceptio If the underlying type isn't a java interface or abstract class
+     */
+    public static Class<? extends MixedInterfaceRunner> getInterfaceRunnerFor(String methodscriptType) throws
+	    ClassNotFoundException, IllegalArgumentException {
 	Class<? extends Mixed> c = getNativeClass(methodscriptType);
 	if(!c.isInterface() && (c.getModifiers() & Modifier.ABSTRACT) == 0) {
-	    throw new IllegalArgumentException(methodscriptType + " does not represent a java interface");
+	    throw new IllegalArgumentException(methodscriptType + " does not represent a java interface or abstract class");
 	}
 	Set<Class<? extends MixedInterfaceRunner>> set = ClassDiscovery.getDefaultInstance()
 		.loadClassesWithAnnotationThatExtend(InterfaceRunnerFor.class, MixedInterfaceRunner.class);

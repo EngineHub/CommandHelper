@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  */
 @datasource("mysql")
 public class MySQLDataSource extends SQLDataSource {
-	
+
 	/* These values may not be changed without creating an upgrade routine */
 
 	private static final String KEY_HASH_COLUMN = "key_hash";
@@ -31,11 +31,11 @@ public class MySQLDataSource extends SQLDataSource {
 	private String password;
 	private String database;
 	private String table;
-	
+
 	private MySQLDataSource(){
 		super();
 	}
-	
+
 	public MySQLDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
 		super(uri, options);
 		try {
@@ -79,14 +79,14 @@ public class MySQLDataSource extends SQLDataSource {
 		} catch (IOException | SQLException ex) {
 			throw new DataSourceException("Could not connect to MySQL data source \"" + uri.toString() + "\": " + ex.getMessage(), ex);
 		}
-		
+
 	}
-	
+
 	/**
 	 * Returns the table creation query that should be used to create the table specified.
 	 * This is public for documentation, but is used internally.
 	 * @param table
-	 * @return 
+	 * @return
 	 */
 	public final String getTableCreationQuery(String table) {
 		return "CREATE TABLE IF NOT EXISTS `" + table + "` (\n"
@@ -119,13 +119,13 @@ public class MySQLDataSource extends SQLDataSource {
 			throw new Error(ex);
 		}
 	}
-	
+
 	@Override
 	public String get0(String[] key) throws DataSourceException {
 		try {
 			connect();
-			String ret; 
-			try (PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getValueColumn() + "` FROM `" 
+			String ret;
+			try (PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getValueColumn() + "` FROM `"
 					+ getEscapedTable() + "` WHERE `" + KEY_HASH_COLUMN + "`=UNHEX(MD5(?))"
 					+ " LIMIT 1")) {
 				String joinedKey = StringUtils.Join(key, ".");
@@ -143,7 +143,7 @@ public class MySQLDataSource extends SQLDataSource {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
-	
+
 	@Override
 	public boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		try {
@@ -168,12 +168,12 @@ public class MySQLDataSource extends SQLDataSource {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
-	
+
 	@Override
 	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
 		if(hasKey(key)){
 			try{
-				connect();				
+				connect();
 				try (PreparedStatement statement = getConnection().prepareStatement("DELETE FROM `" + getEscapedTable() + "`"
 						+ " WHERE `" + KEY_HASH_COLUMN + "`=UNHEX(MD5(?))")) {
 					String joinedKey = StringUtils.Join(key, ".");
@@ -199,7 +199,7 @@ public class MySQLDataSource extends SQLDataSource {
 			+ " based data sources, without risking either data corruption,"
 			+ " or extremely low efficiency. The layout of the table"
 			+ " in the database is required to be of a specific format:"
-			+ " <syntaxhighlight lang=\"sql\">" + getTableCreationQuery("testTable") + "</syntaxhighlight>";
+			+ getTableCreationQuery("testTable");
 	}
 
 	@Override
@@ -240,5 +240,5 @@ public class MySQLDataSource extends SQLDataSource {
 	protected String getTable() {
 		return table;
 	}
-	
+
 }

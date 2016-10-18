@@ -1,6 +1,5 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.nolinking;
 import com.laytonsmith.annotations.unbreakable;
@@ -808,6 +807,19 @@ public final class MethodScriptCompiler {
 			buf.append("\t");
 		    } else if (c2 == '@' && in_smart_quote) {
 			buf.append("\\@");
+		    } else if(c2 == '0') {
+			buf.append('\0');
+		    } else if(c2 == 'f') {
+			// Form feed
+			buf.append("\f");
+		    } else if(c2 == 'v'){
+			// Vertical tab
+			buf.append("\u000B");
+		    } else if(c2 == 'a') {
+			// Alarm
+			buf.append("\u0007");
+		    } else if(c2 == 'b') {
+			buf.append("\u0008");
 		    } else if (c2 == 'u') {
 			//Grab the next 4 characters, and check to see if they are numbers
 			StringBuilder unicode = new StringBuilder();
@@ -821,6 +833,19 @@ public final class MethodScriptCompiler {
 			}
 			buf.append(Character.toChars(Integer.parseInt(unicode.toString(), 16)));
 			i += 4;
+		    } else if(c2 == 'U') {
+			//Grab the next 8 characters, and check to see if they are numbers
+			StringBuilder unicode = new StringBuilder();
+			for (int m = 0; m < 8; m++) {
+			    unicode.append(script.charAt(i + 2 + m));
+			}
+			try {
+			    Integer.parseInt(unicode.toString(), 16);
+			} catch (NumberFormatException e) {
+			    throw new ConfigCompileException("Unrecognized unicode escape sequence", target);
+			}
+			buf.append(Character.toChars(Integer.parseInt(unicode.toString(), 16)));
+			i += 8;
 		    } else {
 			//Since we might expand this list later, don't let them
 			//use unescaped backslashes

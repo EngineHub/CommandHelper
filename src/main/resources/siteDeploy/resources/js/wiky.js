@@ -26,19 +26,24 @@ wiky.process = function (wikitext, options) {
         line = lines[i];
         if (line.match(/^======/) !== null && line.match(/======$/) !== null)
         {
-            html += "<h6>" + line.substring(6, line.length - 6) + "</h6>";
+            var subject = line.substring(6, line.length - 6).trim();
+            html += "<h6 id=\"" + subject + "\">" + subject + "</h6>";
         } else if (line.match(/^=====/) !== null && line.match(/=====$/) !== null)
         {
-            html += "<h5>" + line.substring(5, line.length - 5) + "</h5>";
+            var subject = line.substring(5, line.length - 5).trim();
+            html += "<h5 id=\"" + subject + "\">" + subject + "</h5>";
         } else if (line.match(/^====/) !== null && line.match(/====$/) !== null)
         {
-            html += "<h4>" + line.substring(4, line.length - 4) + "</h4>";
+            var subject = line.substring(4, line.length - 4).trim();
+            html += "<h4 id=\"" + subject + "\">" + subject + "</h4>";
         } else if (line.match(/^===/) !== null && line.match(/===$/) !== null)
         {
-            html += "<h3>" + line.substring(3, line.length - 3) + "</h3>";
+            var subject = line.substring(3, line.length - 3).trim();
+            html += "<h3 id=\"" + subject + "\">" + subject + "</h3>";
         } else if (line.match(/^==/) !== null && line.match(/==$/) !== null)
         {
-            html += "<h2>" + line.substring(2, line.length - 2) + "</h2>";
+            var subject = line.substring(2, line.length - 2).trim();
+            html += "<h2 id=\"" + subject + "\">" + subject + "</h2>";
         } else if (line.match(/^:+/) !== null)
         {
             // find start line and ending line
