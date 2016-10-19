@@ -717,7 +717,11 @@ public class ClassDiscovery {
 		mirrors.add((ClassMirror<T>) c);
 	    }
 	}
-	mirrors.add(new ClassMirror<T>(superClass));
+	if(superClass.getAnnotation(annotation) != null) {
+	    // The mechanism above won't automatically add this class, so we need to add it
+	    // ourselves here.
+	    mirrors.add(new ClassMirror<T>(superClass));
+	}
 	return mirrors;
     }
 

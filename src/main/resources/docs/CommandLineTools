@@ -1,6 +1,6 @@
 CommandHelper has a rich set of command line tools for various tasks. To use the
 command line tools, run
-%%PRE|
+%%SYNTAX|bash|
 java -jar CommandHelper.jar <arguments>
 %%
 

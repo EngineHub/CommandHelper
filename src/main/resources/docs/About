@@ -6,9 +6,51 @@ of the site locally, if you wish, simply run
 You must have a webserver set up to properly use the site, however, you may look at individual files in the
 web browser.
 
-The site is generated with Java, and uses Javascript, HTML5, and CSS to display what you see. 
+The site is generated with Java, and uses Javascript, HTML5, and CSS to display what you see.
+
+For more information about how this site is generated, or information about the templating syntax, see
+[[SiteDeployTool|this page]].
+
+== Legal and Regulatory ==
 
 Portions of the site are copyright &copy; 2016 - %%CURRENTYEAR%% by the %%branding%% Team, based on works
 contributed under the license of the MethodScript project.
 
+This site may use cookies. See our privacy policy [[privacy_policy|here]].
+
 <div style="%%showTemplateCredit%%">The site template is provided by <a href="http://templated.co">TEMPLATED</a>.</div>
+
+Syntax highlighting for non-MethodScript code is provided by highlightjs, under the following license:
+
+<%PRE|
+Copyright (c) 2006, Ivan Sagalaev
+All rights reserved.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+* Neither the name of highlight.js nor the names of its contributors
+      may be used to endorse or promote products derived from this software
+      without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS "AS IS" AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+%>
+
+The methodscript.com website is tested via BrowserStack
+
+<a href="https://www.browserstack.com">
+    <img style="width: 25%;" src="<%cacheBuster|images/browserstack.svg%>" alt="BrowserStack Logo" />
+</a>

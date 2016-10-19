@@ -87,7 +87,7 @@ public class DocGenTemplates {
 	    }
 	});
 	g.putAll(DocGenTemplates.GetGenerators());
-	String t = "<%PRE|<%B%>%>";
+	String t = "<%SYNTAX|html|\n<%MySQL_CREATE_TABLE_QUERY%>\n%>";
 	StreamUtils.GetSystemOut().println(DoTemplateReplacement(t, g));
     }
 
@@ -283,6 +283,9 @@ public class DocGenTemplates {
 	return templateBuilder.toString();
     }
 
+    /**
+     * Returns a wiki table of the data source modifier list, along with the docs for each one.
+     */
     public static Generator data_source_modifiers = new Generator() {
 
 	@Override
@@ -296,6 +299,9 @@ public class DocGenTemplates {
 	}
     };
 
+    /**
+     * Returns a wiki table with documentation for each supported persistence data type.
+     */
     public static Generator persistence_connections = new Generator() {
 
 	@Override
@@ -347,6 +353,9 @@ public class DocGenTemplates {
 
     };
 
+    /**
+     * Returns header listing of all the compiler optimization types
+     */
     public static Generator optimization_explanations = new Generator() {
 
 	@Override
@@ -379,6 +388,9 @@ public class DocGenTemplates {
 	}
     };
 
+    /**
+     * Returns a header list of all known exception types, along with their docs
+     */
     public static Generator EXCEPTION_TYPES = new Generator() {
 
 	@Override
@@ -408,7 +420,7 @@ public class DocGenTemplates {
     /**
      * Returns the fully qualified (and github linked) class name, given the package regex and complete class name. For
      * instance: %%GET_CLASS|.*|DocGenTemplates%% would (likely) return [http://url.to.github.com/path/to/file/
-     * com.laytonsmith.tools.docgen.DocGenTemplates]
+     * com/laytonsmith/tools/docgen/DocGenTemplates]
      */
     public static Generator GET_CLASS = new Generator() {
 
@@ -580,17 +592,49 @@ public class DocGenTemplates {
 
     };
 
+    /**
+     * Creates a &lt;pre&gt; block, escaping all special characters within it.
+     */
     public static Generator PRE = new Generator() {
 	@Override
 	public String generate(String... args) {
 	    String code = StringUtils.Join(args, "|");
 	    String out = code.replaceAll("<", "&lt;");
 	    out = out.replaceAll(">", "&gt;");
+	    out = escapeWiki(out);
+	    if(out.startsWith("\n")) {
+		out = out.substring(1);
+	    }
+	    if(out.endsWith("\n")) {
+		out = out.substring(0, out.length() - 1);
+	    }
 	    return "<pre class=\"pre\">" + out + "</pre>";
 	}
 
     };
 
+    /**
+     * Creates a syntax highlighting block. The first argument is the type, and the second
+     * argument is the code itself.
+     */
+    public static Generator SYNTAX = new Generator() {
+	@Override
+	public String generate(String... args) {
+	    String code = StringUtils.Join(ArrayUtils.slice(args, 1, args.length - 1), "|");
+	    String out = code.replaceAll("<", "&lt;");
+	    out = out.replaceAll(">", "&gt;");
+	    out = escapeWiki(out);
+	    if(out.startsWith("\n")) {
+		out = out.substring(1);
+	    }
+	    return "<pre><code class=\"" + args[0] + "\">" + out + "</code></pre>";
+	}
+
+    };
+
+    /**
+     * Creates a special "warning" section, to draw attention to that message.
+     */
     public static Generator NOTE = new Generator() {
 	@Override
 	public String generate(String... args) {
@@ -621,6 +665,19 @@ public class DocGenTemplates {
 
     };
 
+    /**
+     * Returns the value of a constant defined in a java class. Given the following java class:
+     *
+     * <code>
+     * package foo.bar;
+     *
+     * class Baz {
+     *	 public static int BING = 42;
+     * }
+     * </code>
+     *
+     * then the following would return 42: %%CONST|foo.bar.Baz.BING%%
+     */
     public static Generator CONST = new Generator() {
 
 	@Override
@@ -656,6 +713,9 @@ public class DocGenTemplates {
 	}
     };
 
+    /**
+     * Returns the current date. This accepts a template in the same structure as simple_date()
+     */
     public static Generator DATE = new Generator() {
 
 	@Override
@@ -665,6 +725,11 @@ public class DocGenTemplates {
 	}
     };
 
+    /**
+     * Returns a wikified version to link to the given doc page. Optionally, you may include
+     * the text for the link, otherwise the link itself is used as the text.
+     * arg 0 is the documentation page, arg 1 is the text
+     */
     public static Generator DOCLINK = new Generator() {
 
 	@Override
@@ -674,10 +739,13 @@ public class DocGenTemplates {
 	    if (args.length >= 2) {
 		text = args[1];
 	    }
-	    return "[[CommandHelper/Staged/" + page + (text != null ? "|" + text : "") + "]]";
+	    return "[[" + page + (text != null ? "|" + text : "") + "]]";
 	}
     };
 
+    /**
+     * Equivalent to %%NOTE%%
+     */
     public static Generator TAKENOTE = new Generator() {
 	@Override
 	public String generate(String... args) throws GenerateException {
@@ -686,6 +754,9 @@ public class DocGenTemplates {
 
     };
 
+    /**
+     * Answers the question: WHAT YEAR IS IT?
+     */
     public static Generator CURRENTYEAR = new Generator() {
 	@Override
 	public String generate(String... args) throws GenerateException {

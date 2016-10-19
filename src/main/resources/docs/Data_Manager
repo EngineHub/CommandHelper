@@ -13,7 +13,7 @@ all rules of JSONs. %%NOWIKI|{Objects}%% and %%NOWIKI|[Arrays]%% are supported.
 
 The simplest and quickest way to view all the currently stored values is to open up a terminal, and change to the
 directory the CommandHelper jar is in, and run the following command:
-%%PRE|
+%%SYNTAX|bash|
 java -jar CommandHelper.jar print-db
 %%
 This will print all the stored values to the console. Using pipes and redirects, you can further manipulate this 
@@ -53,7 +53,7 @@ read/write access, even if the server is running, and read access for all other 
 
 To access the data manager, open up a terminal (command prompt in Windows) and cd to the plugins folder of your server, 
 and run the following command:
-%%PRE|
+%%SYNTAX|bash|
 java -jar CommandHelper.jar manager
 %%
 

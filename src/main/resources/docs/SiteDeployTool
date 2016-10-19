@@ -1,0 +1,66 @@
+This page explains the templating system, and how it works. There are a number of systems that
+interact together to produce these web pages, and if you wish to contribute, it is helpful to understand
+how they work together. There are 3 main systems to be aware of. Initial template replacement, wiki replacement,
+and page rendering.
+
+== Initial template replacement and deployment ==
+
+There are three processing stages. First, when the site is deployed, there is some template replacement done then.
+The java uses <code>&lt;&#37;</code> and <code>&#37;&gt;</code> or for simple templates where arguments need not
+also be parsed, just <code>&#37;&#37;</code> and <code>&#37;&#37;</code>. These allow the static pages to replace
+information in them at deploy time, using the jar itself to do the templating work. This is useful for pages that
+need information from the codebase, or it would in general be easier to parse the template in java instead of javascript.
+The template replacement has the template name, and can also accept arguments, for instance 
+<code>&lt;&#37;TEMPLATE_NAME&#37;&gt;</code> and for templates with arguments: 
+<code>&lt;&#37;TEMPLATE_NAME|argument&#37;&gt;</code> where TEMPLATE_NAME is the name of the template, and arguments
+are pipe separated. If the arguments have nested templates, they must use &lt;&#37; &#37;&gt;, the double percent
+variety cannot be nested. Depending on where exactly the page contents were generated from, the templates that are
+available may vary, and you'll need to trace the code for that specific page to see what templates are available. By and
+large however, all templates defined in DocGenTemplates.java are available everywhere.
+
+There are a few notable templates worth discussing.
+
+* CODE|code - This syntax highlights pure mscript code.
+* ALIAS|code - This syntax highlights mscript code that is defined in an msa file
+* PRE|text - Creates a &lt;pre&gt; code block, escaping all html special characters in the text
+* SYNTAX|type|code - Given the language or code type, will apply the proper html to make sure the text \
+is syntax highlighted (for languages other than mscript)
+* NOWIKI|text - Escapes the text, ensuring that no wiki markup will be processed.
+
+There are several others worth looking at, see the DocGenTemplate.java source code for each.
+
+After the templates are replaced, for pages, the file is inserted into the frame.html wrapper, which provides the
+basic structure of the html document.
+
+Different pages are generated from different sources, and may follow slightly different deployment rules, to see
+the specific rules that are followed, see the SiteDeploy.java file. Note that several file types are automatically
+scanned for, and their mere existence in the resources is enough to cause them to be processed. Other types of files
+are manually listed, and may be handled differently. Consult the SiteDeploy file to see how each page is exactly generated.
+
+Once the page is deployed, for html pages, they are also validated, so make sure that the page content will validate.
+
+Several steps of the rendering stage are (currently) handled in javascript, including the wiki parsing, and syntax
+highlighting for non-mscript code blocks.
+
+== Client side rendering ==
+
+The client renders the wiki formatting, as well as the syntax highlighting for non-mscript code blocks. Most simple
+wiki markup is supported, including tables. See the [https://en.wikipedia.org/wiki/Help:Cheatsheet page here] for a
+cheat sheet for this markup. Wiki templates (double left curly brace/double right curly brace) do not work, except for 
+a very limited subset, including function, object, keyword, and TakeNote. Raw HTML is also supported, including script
+tags, however, html should be avoided whenever possible.
+
+If a page needs to run javascript, it can, by way of normal script tags. Do be aware that the typical jquery onload
+mechanism does not work, because there is page rendering that needs to happen first. In order to properly hook into
+the code after the page really is finished loading, a special promise object is defined. All your code should go in 
+a block that looks like this:
+
+%%SYNTAX|html|
+<script type="text/javascript">
+    pageRender.then(function() {
+        // Your javascript code goes here
+    });
+</script>
+%%
+
+

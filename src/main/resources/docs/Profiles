@@ -10,7 +10,7 @@ The profiles.xml file is located in the <code>prefs/</code> folder, and has at m
 <code>profiles</code> tag. Different functions will require different types of profile information,
 but in general, the bare minimum profile will look like this:
 
-%%PRE|
+%%SYNTAX|xml|
 <profile id="profileName">
 	<type>profileType</type>
 </profile>

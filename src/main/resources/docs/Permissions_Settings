@@ -115,7 +115,7 @@ You can use the star label as an alternative to assigning all groups to an alias
 then tagging the alias with that label. This opens the alias up to all users. It essentially disables permission 
 checking entirely for that one alias.
 
-%%PRE|
+%%ALIAS|
 *:/safeAlias = dangerous('careful')
 %%
 

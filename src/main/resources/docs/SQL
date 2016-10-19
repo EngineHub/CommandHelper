@@ -18,7 +18,7 @@ may require different connection information, so you'll need to see the connecti
 configuration information below for each supported server type. In general, the configuration format
 is as follows:
 
-%%PRE|
+%%SYNTAX|xml|
 <?xml version="1.0" encoding="UTF-8" ?>
 <profiles>
 	<profile id="profileName">

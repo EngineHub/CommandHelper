@@ -144,7 +144,7 @@ paths are relative to the configuration file itself.
 
 ===Example===
 
-%%PRE|
+%%SYNTAX|ini|
 #Lines starting with # are considered comments
 
 #These are our aliases
@@ -212,7 +212,7 @@ foreach(@iterations, @iteration){
 
 using the following persistence.ini:
 
-%%PRE|
+%%SYNTAX|ini|
 **=sqlite://persistence.db
 storage.ini.**=ini://persistence/persistence.ini
 storage.sqlite.**=sqlite://persistence/persistence.db

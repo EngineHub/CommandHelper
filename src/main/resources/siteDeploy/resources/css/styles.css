@@ -46,7 +46,7 @@ html {
     font-size: 11pt;
     line-height: 14pt;
     box-shadow: 0 .3em .3em rgba(0,0,0,.1);
-    background: linear-gradient(to right, #F9F9F9, rgba(0,0,0,0));
+    background: #F9F9F9;
 }
 
 .methodscript_code a {

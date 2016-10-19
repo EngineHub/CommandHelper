@@ -89,7 +89,7 @@ There are three columns in the table, and the table name is determined by the us
 
 The columns are defined by the query:
 
-<%PRE|
+<%SYNTAX|sql|
 <%MySQL_CREATE_TABLE_QUERY%>
 %>
 
@@ -113,7 +113,7 @@ SQLite data is a flat data structure. Since TEXT columns can be indexed in SQLit
 the key column is the primary key. The database may contain multiple tables, but only the table created
 with the query:
 
-<%PRE|
+<%SYNTAX|sql|
 <%SQLite_CREATE_TABLE_QUERY%>
 %>
 

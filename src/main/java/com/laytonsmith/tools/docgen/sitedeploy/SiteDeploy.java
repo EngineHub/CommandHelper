@@ -1,6 +1,8 @@
 package com.laytonsmith.tools.docgen.sitedeploy;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.GNUErrorMessageFormat;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
@@ -12,13 +14,17 @@ import com.laytonsmith.PureUtilities.Web.WebUtility;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.enums.MCChatColor;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.ReadOnlyException;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
+import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException;
@@ -40,6 +46,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -360,6 +367,39 @@ public class SiteDeploy {
 		return SiteDeploy.this.docsBase;
 	    }
 	});
+	/**
+	 * The cacheBuster template is meant to make it easier to deal with caching of resources. The
+	 * template allows you to specify the resource, and it creates a path to the resource using
+	 * resourceBase, but it also appends a hash of the file, so that as the file changes, so does the
+	 * hash (using a ?v=hash query string). Most resources live in /siteDeploy/resources/*, and so the
+	 * shorthand is to use %%cacheBuster|path/to/resource.css%%. However, this isn't always correct,
+	 * because resources can live all over the place. In that case, you should use the following format:
+	 * %%cacheBuster|/absolute/path/to/resource.css|path/to/resource/in/html.css%%
+	 */
+	g.put("cacheBuster", new Generator() {
+	    @Override
+	    public String generate(String... args) {
+		String resourceLoc = SiteDeploy.this.resourceBase + args[0];
+		String loc = args[0];
+		if (!loc.startsWith("/")) {
+		    loc = "/siteDeploy/resources/" + loc;
+		} else {
+		    resourceLoc = SiteDeploy.this.resourceBase + args[1];
+		}
+		String hash = "0";
+		try {
+		    InputStream in = SiteDeploy.class.getResourceAsStream(loc);
+		    if (in == null) {
+			throw new RuntimeException("Could not find " + loc + " in resources folder for cacheBuster template");
+		    }
+		    hash = getLocalMD5(in);
+		} catch (IOException ex) {
+		    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		return resourceLoc + "?v=" + hash;
+	    }
+
+	});
 	final Generator learningTrailGen = new Generator() {
 	    @Override
 	    public String generate(String... args) {
@@ -437,14 +477,14 @@ public class SiteDeploy {
     }
 
     private void deploy() throws InterruptedException, IOException {
-//	deployResources();
+	deployResources();
 	deployFrontPages();
 	deployLearningTrail();
-//	deployAPI();
-//	deployEventAPI();
-//	deployFunctions();
-//	deployEvents();
-//	deployAPIJSON();
+	deployAPI();
+	deployEventAPI();
+	deployFunctions();
+	deployEvents();
+	deployAPIJSON();
 	generateQueue.submit(new Runnable() {
 	    @Override
 	    public void run() {
@@ -750,39 +790,6 @@ public class SiteDeploy {
 			    return title;
 			}
 		    });
-		    /**
-		     * The cacheBuster template is meant to make it easier to deal with caching of resources. The
-		     * template allows you to specify the resource, and it creates a path to the resource using
-		     * resourceBase, but it also appends a hash of the file, so that as the file changes, so does the
-		     * hash (using a ?v=hash query string). Most resources live in /siteDeploy/resources/*, and so the
-		     * shorthand is to use %%cacheBuster|path/to/resource.css%%. However, this isn't always correct,
-		     * because resources can live all over the place. In that case, you should use the following format:
-		     * %%cacheBuster|/absolute/path/to/resource.css|path/to/resource/in/html.css%%
-		     */
-		    g.put("cacheBuster", new Generator() {
-			@Override
-			public String generate(String... args) {
-			    String resourceLoc = SiteDeploy.this.resourceBase + args[0];
-			    String loc = args[0];
-			    if (!loc.startsWith("/")) {
-				loc = "/siteDeploy/resources/" + loc;
-			    } else {
-				resourceLoc = SiteDeploy.this.resourceBase + args[1];
-			    }
-			    String hash = "0";
-			    try {
-				InputStream in = SiteDeploy.class.getResourceAsStream(loc);
-				if (in == null) {
-				    throw new RuntimeException("Could not find " + loc + " in resources folder for cacheBuster template");
-				}
-				hash = getLocalMD5(in);
-			    } catch (IOException ex) {
-				Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
-			    }
-			    return resourceLoc + "?v=" + hash;
-			}
-
-		    });
 		    g.put("useHttps", new Generator() {
 			@Override
 			public String generate(String... args) {
@@ -881,7 +888,40 @@ public class SiteDeploy {
     }
 
     private void deployAPI() {
+	Set<Class<? extends Function>> functionClasses = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, Function.class);
+	// A map of where it maps the enclosing class to the list of function rows, which contains a list of
+	// table cells.
+	Map<Class<?>, List<List<String>>> data = new HashMap<>();
+	for(Class<? extends Function> functionClass : functionClasses) {
+	    if(!data.containsKey(functionClass.getEnclosingClass())) {
+		data.put(functionClass.getEnclosingClass(), new ArrayList<List<String>>());
+	    }
+	    List<List<String>> d = data.get(functionClass.getEnclosingClass());
+	    List<String> c = new ArrayList<>();
+	    // function name, returns, arguments, throws, description, since, restricted
+	    Function f;
+	    try {
+		f = ReflectionUtils.instantiateUnsafe(functionClass);
+	    } catch(ReflectionUtils.ReflectionException ex) {
+		throw new RuntimeException("While trying to construct " + functionClass + ", got the following", ex);
+	    }
+	    DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
+	    c.add(f.getName());
+	    c.add(di.ret);
+	    c.add(di.args);
+	    List<String> exc = new ArrayList<>();
+	    if(f.thrown() != null) {
+		for(Class<? extends CREThrowable> e : f.thrown()) {
+		    CREThrowable ct = ReflectionUtils.instantiateUnsafe(e);
+		    exc.add("{{object|" + ct.getName() + "}}");
+		}
+	    }
+	    c.add(StringUtils.Join(exc, "<br>"));
+	    StringBuilder desc = new StringBuilder();
 
+	    c.add(desc.toString());
+	    d.add(c);
+	}
     }
 
     private void deployEventAPI() {

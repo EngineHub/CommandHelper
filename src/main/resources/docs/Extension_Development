@@ -17,7 +17,7 @@ The lifecycle class is the central part of the extension and does two things:
 
 The minimal definition is as follows:
 
-%%PRE|
+%%SYNTAX|java|
 @MSExtension("ExtensionName") // Place your extension name here!
 public class MyExtension extends AbstractExtension {
     @Override
@@ -33,7 +33,7 @@ The class name given by the definition doesn't matter, but does assist with debu
 
 Functions will usually be the first thing a simpler extension will be used for. Usually, functions are "wrapped" in a parent class, which provides general documentation for that group of functions. The full class definition for functions is as follows:
 
-%%PRE|
+%%SYNTAX|java|
 public class FunctionGroup {
     public static String docs() {
         return "These functions provide an example to new extension creators!";
@@ -60,7 +60,7 @@ The bindable event layout is simply a class that extends <code>BindableEvent</co
 
 The actual extension point is laid out as follows:
 
-%%PRE|
+%%SYNTAX|java|
 public class EventGroup {
     public static String docs() {
         return "These events provide an example to new extension creators!";
@@ -85,7 +85,7 @@ Our build and dependency manager of choice is maven. While a quick and dirty set
 
 Please include the following snippit under the <code>&lt;build&gt;&lt;plugins&gt;</code> section in the project's pom:
 
-%%PRE|
+%%SYNTAX|xml|
 <!-- Leave this alone! Compile-time checks so that your extension works. -->
 <plugin>
     <groupId>org.bsc.maven</groupId>
