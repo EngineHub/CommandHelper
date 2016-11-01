@@ -8,6 +8,7 @@
 .classpath
 .project
 *.iml
+nbproject/
 nbactions-provisional-build.xml
 nbactions-release-profile.xml
 nbactions.xml
