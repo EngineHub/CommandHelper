@@ -24,4 +24,11 @@ interface DeploymentMethod {
      */
     void finish();
 
+    /**
+     * Should return a string that, given the input parameter, will be a unique (but human readable)
+     * identifier for that particular resource location.
+     * @return
+     */
+    String getID();
+
 }

@@ -26,4 +26,9 @@ class RemoteDeploymentMethod implements DeploymentMethod {
 	SSHWrapper.closeSessions();
     }
 
+    @Override
+    public String getID() {
+	return remote;
+    }
+
 }

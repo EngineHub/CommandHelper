@@ -19,6 +19,7 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -47,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -613,9 +615,9 @@ public class SiteDeploy {
 			if (notificationAboutLocalCache) {
 			    hash = getLocalMD5(new ByteArrayInputStream(c));
 			    try {
-				if (lc.containsKey(toLocation)) {
+				if (lc.containsKey(deploymentMethod.getID() + toLocation)) {
 				    if (useLocalCache) {
-					String cacheHash = lc.get(toLocation);
+					String cacheHash = lc.get(deploymentMethod.getID() + toLocation);
 					if (cacheHash.equals(hash)) {
 					    skipUpload = true;
 					}
@@ -632,7 +634,7 @@ public class SiteDeploy {
 		    }
 		    if (pn != null && notificationAboutLocalCache && hash != null) {
 			try {
-			    lc.put(toLocation, hash);
+			    lc.put(deploymentMethod.getID() + toLocation, hash);
 			    pn.set(dm, new String[]{"site_deploy", "local_cache"}, JSONValue.toJSONString(lc));
 			} catch (DataSourceException | ReadOnlyException | IllegalArgumentException ex) {
 			    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
@@ -888,40 +890,72 @@ public class SiteDeploy {
     }
 
     private void deployAPI() {
-	Set<Class<? extends Function>> functionClasses = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, Function.class);
-	// A map of where it maps the enclosing class to the list of function rows, which contains a list of
-	// table cells.
-	Map<Class<?>, List<List<String>>> data = new HashMap<>();
-	for(Class<? extends Function> functionClass : functionClasses) {
-	    if(!data.containsKey(functionClass.getEnclosingClass())) {
-		data.put(functionClass.getEnclosingClass(), new ArrayList<List<String>>());
-	    }
-	    List<List<String>> d = data.get(functionClass.getEnclosingClass());
-	    List<String> c = new ArrayList<>();
-	    // function name, returns, arguments, throws, description, since, restricted
-	    Function f;
-	    try {
-		f = ReflectionUtils.instantiateUnsafe(functionClass);
-	    } catch(ReflectionUtils.ReflectionException ex) {
-		throw new RuntimeException("While trying to construct " + functionClass + ", got the following", ex);
-	    }
-	    DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
-	    c.add(f.getName());
-	    c.add(di.ret);
-	    c.add(di.args);
-	    List<String> exc = new ArrayList<>();
-	    if(f.thrown() != null) {
-		for(Class<? extends CREThrowable> e : f.thrown()) {
-		    CREThrowable ct = ReflectionUtils.instantiateUnsafe(e);
-		    exc.add("{{object|" + ct.getName() + "}}");
+	generateQueue.submit(new Runnable() {
+	    @Override
+	    public void run() {
+		Set<Class<? extends Function>> functionClasses = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, Function.class);
+		// A map of where it maps the enclosing class to the list of function rows, which contains a list of
+		// table cells.
+		Map<Class<?>, List<List<String>>> data = new TreeMap<>();
+		for(Class<? extends Function> functionClass : functionClasses) {
+		    if(!data.containsKey(functionClass.getEnclosingClass())) {
+			data.put(functionClass.getEnclosingClass(), new ArrayList<List<String>>());
+		    }
+		    List<List<String>> d = data.get(functionClass.getEnclosingClass());
+		    List<String> c = new ArrayList<>();
+		    // function name, returns, arguments, throws, description, since, restricted
+		    Function f;
+		    try {
+			f = ReflectionUtils.instantiateUnsafe(functionClass);
+		    } catch(ReflectionUtils.ReflectionException ex) {
+			throw new RuntimeException("While trying to construct " + functionClass + ", got the following", ex);
+		    }
+		    DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
+		    c.add(f.getName());
+		    c.add(di.ret);
+		    c.add(di.args);
+		    List<String> exc = new ArrayList<>();
+		    if(f.thrown() != null) {
+			for(Class<? extends CREThrowable> e : f.thrown()) {
+			    CREThrowable ct = ReflectionUtils.instantiateUnsafe(e);
+			    exc.add("{{object|" + ct.getName() + "}}");
+			}
+		    }
+		    c.add(StringUtils.Join(exc, "<br>"));
+		    StringBuilder desc = new StringBuilder();
+		    desc.append(di.desc);
+		    if(di.extendedDesc != null) {
+			desc.append(" [[functions/").append(f.getName()).append("|See more...]]");
+		    }
+		    try {
+			if(f.examples() != null && f.examples().length > 0) {
+			    desc.append("<br>([[functions/").append(f.getName()).append("#Examples|Examples...]]");
+			}
+		    } catch (ConfigCompileException ex) {
+			Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+		    }
+		    c.add(desc.toString());
+		    c.add(f.since().toString());
+		    c.add("<span class=\"api_" + (f.isRestricted() ? "yes" : "no") + "\">" + (f.isRestricted() ? "Yes" : "No")
+			+ "</span>");
+		    d.add(c);
 		}
-	    }
-	    c.add(StringUtils.Join(exc, "<br>"));
-	    StringBuilder desc = new StringBuilder();
+		// data is now constructed.
+		StringBuilder b = new StringBuilder();
+		for(Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
+		    Class<?> clazz = e.getKey();
+		    b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
+		    String docs = (String)ReflectionUtils.invokeMethod(clazz, null, "docs");
+		    b.append("<p>").append(docs).append("</p>");
+		}
 
-	    c.add(desc.toString());
-	    d.add(c);
-	}
+		writePage("API", b.toString(), "API",
+			Arrays.asList(new String[]{"API", "functions"}),
+			"A list of all " + Implementation.GetServerType().getBranding() + " functions");
+		currentGenerateTask.addAndGet(1);
+	    }
+	});
+	totalGenerateTasks.addAndGet(1);
     }
 
     private void deployEventAPI() {

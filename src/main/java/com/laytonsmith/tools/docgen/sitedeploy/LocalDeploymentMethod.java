@@ -51,4 +51,9 @@ class LocalDeploymentMethod implements DeploymentMethod {
     public void finish() {
     }
 
+    @Override
+    public String getID() {
+	return rootDirectory;
+    }
+
 }
