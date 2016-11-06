@@ -12,6 +12,7 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.PlayerEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.NPC;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -215,7 +216,11 @@ public class BukkitPlayerListener implements Listener {
 		if (event.getFrom().equals(event.getTo())) {
 			return;
 		}
-		
+
+		if(event.getPlayer() instanceof NPC || event.getPlayer().hasMetadata("NPC")) {
+			return;
+		}
+
 		BukkitMCPlayerTeleportEvent pte = new BukkitMCPlayerTeleportEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_TELEPORT, "player_teleport", pte);
 	}
