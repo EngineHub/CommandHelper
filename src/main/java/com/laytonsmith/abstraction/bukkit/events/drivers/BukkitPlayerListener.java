@@ -217,7 +217,7 @@ public class BukkitPlayerListener implements Listener {
 			return;
 		}
 
-		if(event.getPlayer() instanceof NPC || event.getPlayer().hasMetadata("NPC")) {
+		if(event.getPlayer().hasMetadata("NPC")) {
 			return;
 		}
 
