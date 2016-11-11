@@ -12,7 +12,6 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.PlayerEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.NPC;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
