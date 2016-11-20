@@ -35,7 +35,7 @@ public class BukkitMCSkeleton extends BukkitMCLivingEntity implements MCSkeleton
 			((Skeleton) getHandle()).setSkeletonType(BukkitMCSkeletonType.getConvertor().getConcreteEnum(type));
 		} catch(UnsupportedOperationException ex){
 			// 1.11 or later
-			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING,
+			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR,
 					"Cannot change Skeleton to Stray or WitherSkeleton in Minecraft 1.11+", Target.UNKNOWN);
 		}
 	}

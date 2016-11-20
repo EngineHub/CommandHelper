@@ -48,7 +48,7 @@ public class BukkitMCZombie extends BukkitMCLivingEntity implements MCZombie {
 			getHandle().setVillager(isVillager);
 		} catch(UnsupportedOperationException ex){
 			// 1.11 or later
-			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING,
+			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR,
 					"Cannot change a Zombie to ZombieVillager in Minecraft 1.11+", Target.UNKNOWN);
 		}
 	}
