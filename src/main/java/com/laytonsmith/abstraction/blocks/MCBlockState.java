@@ -17,4 +17,6 @@ public interface MCBlockState extends MCMetadatable {
 	public MCBlock getBlock();
 
 	public MCLocation getLocation();
+
+	public void update();
 }

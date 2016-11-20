@@ -8,6 +8,9 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.annotations.abstractionenum;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.constructs.Target;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 
@@ -46,7 +49,13 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 	
 	@Override
 	public void setVariant(MCHorseVariant variant) {
-		h.setVariant(BukkitMCHorseVariant.getConvertor().getConcreteEnum(variant));
+		try {
+			h.setVariant(BukkitMCHorseVariant.getConvertor().getConcreteEnum(variant));
+		} catch(UnsupportedOperationException ex){
+			// 1.11 or later
+			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR,
+					"Cannot change Horse variant in Minecraft 1.11+", Target.UNKNOWN);
+		}
 	}
 	
 	@Override
@@ -75,7 +84,13 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 	
 	@Override
 	public void setHasChest(boolean hasChest) {
-		h.setCarryingChest(hasChest);
+		try {
+			h.setCarryingChest(hasChest);
+		} catch(UnsupportedOperationException ex){
+			// 1.11 or later
+			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR,
+					"Horse cannot have chest in Minecraft 1.11+", Target.UNKNOWN);
+		}
 	}
 	
 	@Override
@@ -141,6 +156,8 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 					return MCHorseVariant.SKELETON;
 				case UNDEAD_HORSE:
 					return MCHorseVariant.ZOMBIE;
+				case LLAMA:
+					return MCHorseVariant.HORSE;
 			}
 			return super.getAbstractedEnumCustom(concrete);
 		}
@@ -156,7 +173,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 			return super.getConcreteEnumCustom(abstracted);
 		}
 	}
-	
+
 	@abstractionenum(
 			implementation= Implementation.Type.BUKKIT,
 			forAbstractEnum=MCHorseColor.class,

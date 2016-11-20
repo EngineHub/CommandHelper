@@ -126,13 +126,17 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		 * Spawn with world.dropItem()
 		 */
 		DROPPED_ITEM(true),
+		DONKEY(true, MCVersion.MC1_11),
 		EGG(true),
+		ELDER_GUARDIAN(true, MCVersion.MC1_11),
 		ENDERMAN(true),
 		ENDERMITE(true, MCVersion.MC1_8),
 		ENDER_CRYSTAL(true),
 		ENDER_DRAGON(true),
 		ENDER_EYE(true),
 		ENDER_PEARL(true),
+		EVOKER(true, MCVersion.MC1_11),
+		EVOKER_FANGS(false, MCVersion.MC1_11),
 		EXPERIENCE_ORB(true),
 		/**
 		 * Spawn with world.spawnFallingBlock()
@@ -147,8 +151,11 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		GIANT(true),
 		GUARDIAN(true, MCVersion.MC1_8),
 		HORSE(true, MCVersion.MC1_6),
+		HUSK(true, MCVersion.MC1_11),
 		IRON_GOLEM(true, MCVersion.MC1_2),
 		ITEM_FRAME(true, MCVersion.MC1_4_5),
+		LLAMA(true, MCVersion.MC1_11),
+		LLAMA_SPIT(false, MCVersion.MC1_11),
 		LEASH_HITCH(true, MCVersion.MC1_6),
 		/**
 		 * Spawn with world.strikeLightning()
@@ -163,6 +170,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		MINECART_HOPPER(true, MCVersion.MC1_5),
 		MINECART_MOB_SPAWNER(true, MCVersion.MC1_5),
 		MINECART_TNT(true, MCVersion.MC1_5),
+		MULE(true, MCVersion.MC1_11),
 		MUSHROOM_COW(true),
 		OCELOT(true, MCVersion.MC1_2),
 		PAINTING(true),
@@ -177,6 +185,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		SKELETON(true),
 		SHULKER(true, MCVersion.MC1_9),
 		SHULKER_BULLET(true, MCVersion.MC1_9),
+		SKELETON_HORSE(true, MCVersion.MC1_11),
 		SLIME(true),
 		SMALL_FIREBALL(true),
 		SNOWBALL(true),
@@ -185,15 +194,21 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		SPECTRAL_ARROW(true, MCVersion.MC1_9),
 		SPIDER(true),
 		SPLASH_POTION(true),
+		STRAY(true, MCVersion.MC1_11),
 		THROWN_EXP_BOTTLE(true),
 		TIPPED_ARROW(true, MCVersion.MC1_9),
+		VEX(true, MCVersion.MC1_11),
+		VINDICATOR(true, MCVersion.MC1_11),
 		WEATHER(false),
 		WITCH(true, MCVersion.MC1_4_5),
 		WITHER(true, MCVersion.MC1_4),
+		WITHER_SKELETON(true, MCVersion.MC1_11),
 		WITHER_SKULL(true, MCVersion.MC1_4),
 		WOLF(true),
 		VILLAGER(true),
 		ZOMBIE(true),
+		ZOMBIE_HORSE(true, MCVersion.MC1_11),
+		ZOMBIE_VILLAGER(true, MCVersion.MC1_11),
 		/**
 		 * An unknown entity without an Entity Class
 		 */

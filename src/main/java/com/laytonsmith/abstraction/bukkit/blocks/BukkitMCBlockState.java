@@ -46,4 +46,9 @@ public class BukkitMCBlockState extends BukkitMCMetadatable implements MCBlockSt
 	public MCLocation getLocation() {
 		return new BukkitMCLocation(bs.getLocation());
 	}
+
+	@Override
+	public void update() {
+		bs.update();
+	}
 }
