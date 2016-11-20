@@ -1,7 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.PureUtilities.Vector3D;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
@@ -55,7 +54,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public void fireEntityDamageEvent(MCDamageCause dc) {
-		EntityDamageEvent ede = new EntityDamageEvent(e, EntityDamageEvent.DamageCause.valueOf(dc.name()), 9001);
+		EntityDamageEvent ede = new EntityDamageEvent(e, EntityDamageEvent.DamageCause.valueOf(dc.name()), 9001.0);
 		CommandHelperPlugin.self.getServer().getPluginManager().callEvent(ede);
 	}
 

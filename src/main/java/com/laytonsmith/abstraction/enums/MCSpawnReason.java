@@ -8,7 +8,6 @@ import com.laytonsmith.annotations.MEnum;
  */
 @MEnum("SpawnReason")
 public enum MCSpawnReason {
-	BED,
 	BREEDING,
 	BUILD_IRONGOLEM,
 	BUILD_SNOWMAN,

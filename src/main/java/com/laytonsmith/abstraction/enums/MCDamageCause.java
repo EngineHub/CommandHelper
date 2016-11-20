@@ -155,5 +155,12 @@ public enum MCDamageCause {
 		 * <p />
 		 * Damage: variable
 		 */
+		CRAMMING,
+		/**
+		 * Damage caused when an entity is colliding with too many entities due
+		 * to the maxEntityCramming game rule.
+		 * <p />
+		 * Damage: 6
+		 */
 		CUSTOM
 }

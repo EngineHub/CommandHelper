@@ -35,6 +35,7 @@ import com.laytonsmith.abstraction.entities.*;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorseColor;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorsePattern;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorseVariant;
+import com.laytonsmith.abstraction.entities.MCLlama.MCLlamaColor;
 import com.laytonsmith.abstraction.enums.MCArt;
 import com.laytonsmith.abstraction.enums.MCBodyPart;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
@@ -2545,6 +2546,7 @@ public class EntityManagement {
 			docs = docs.replace("%HORSE_COLOR%", StringUtils.Join(MCHorseColor.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%HORSE_STYLE%", StringUtils.Join(MCHorsePattern.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%HORSE_VARIANT%", StringUtils.Join(MCHorseVariant.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%LLAMA_COLOR%", StringUtils.Join(MCLlamaColor.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%ROTATION%", StringUtils.Join(MCRotation.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%OCELOT_TYPE%", StringUtils.Join(MCOcelotType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%ART%", StringUtils.Join(MCArt.values(), ", ", ", or ", " or "));
@@ -2627,6 +2629,15 @@ public class EntityManagement {
 					MCCreeper creeper = (MCCreeper) entity;
 					specArray.set(entity_spec.KEY_CREEPER_POWERED, CBoolean.get(creeper.isPowered()), t);
 					break;
+				case DONKEY:
+				case MULE:
+					MCChestedHorse chestedhorse = (MCChestedHorse) entity;
+					specArray.set(entity_spec.KEY_HORSE_CHEST, CBoolean.get(chestedhorse.hasChest()), t);
+					specArray.set(entity_spec.KEY_HORSE_JUMP, new CDouble(chestedhorse.getJumpStrength(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(chestedhorse.getDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(chestedhorse.getMaxDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(chestedhorse.getSaddle(), t), t);
+					break;
 				case DROPPED_ITEM:
 					MCItem item = (MCItem) entity;
 					specArray.set(entity_spec.KEY_DROPPED_ITEM_ITEMSTACK, ObjectGenerator.GetGenerator().item(item.getItemStack(), t), t);
@@ -2688,6 +2699,10 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_HORSE_ARMOR, ObjectGenerator.GetGenerator().item(horse.getArmor(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(horse.getSaddle(), t), t);
 					break;
+				case HUSK:
+					MCZombie husk = (MCZombie) entity;
+					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(husk.isBaby()), t);
+					break;
 				case IRON_GOLEM:
 					MCIronGolem golem = (MCIronGolem) entity;
 					specArray.set(entity_spec.KEY_IRON_GOLEM_PLAYERCREATED, CBoolean.get(golem.isPlayerCreated()), t);
@@ -2705,6 +2720,14 @@ public class EntityManagement {
 				case LIGHTNING:
 					MCLightningStrike lightning = (MCLightningStrike) entity;
 					specArray.set(entity_spec.KEY_LIGHTNING_EFFECT, CBoolean.get(lightning.isEffect()), t);
+					break;
+				case LLAMA:
+					MCLlama llama = (MCLlama) entity;
+					specArray.set(entity_spec.KEY_HORSE_COLOR, new CString(llama.getLlamaColor().name(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_CHEST, CBoolean.get(llama.hasChest()), t);
+					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(llama.getDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(llama.getMaxDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(llama.getSaddle(), t), t);
 					break;
 				case MAGMA_CUBE:
 				case SLIME:
@@ -2739,7 +2762,6 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_PIG_ZOMBIE_ANGRY, CBoolean.get(pigZombie.isAngry()), t);
 					specArray.set(entity_spec.KEY_PIG_ZOMBIE_ANGER, new CInt(pigZombie.getAnger(), t), t);
 					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(pigZombie.isBaby()), t);
-					specArray.set(entity_spec.KEY_ZOMBIE_VILLAGER, CBoolean.get(pigZombie.isVillager()), t);
 					break;
 				case PRIMED_TNT:
 					MCTNT tnt = (MCTNT) entity;
@@ -2761,8 +2783,18 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_SHEEP_SHEARED, CBoolean.get(sheep.isSheared()), t);
 					break;
 				case SKELETON:
+				case STRAY:
+				case WITHER_SKELETON:
 					MCSkeleton skeleton = (MCSkeleton) entity;
 					specArray.set(entity_spec.KEY_SKELETON_TYPE, new CString(skeleton.getSkeletonType().name(), t), t);
+					break;
+				case SKELETON_HORSE:
+				case ZOMBIE_HORSE:
+					MCHorse undeadhorse = (MCHorse) entity;
+					specArray.set(entity_spec.KEY_HORSE_JUMP, new CDouble(undeadhorse.getJumpStrength(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(undeadhorse.getDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(undeadhorse.getMaxDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(undeadhorse.getSaddle(), t), t);
 					break;
 				case SNOWMAN:
 					if (Static.getVersion().gte(MCVersion.MC1_9_4)) {
@@ -2804,6 +2836,11 @@ public class EntityManagement {
 					MCZombie zombie = (MCZombie) entity;
 					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(zombie.isBaby()), t);
 					specArray.set(entity_spec.KEY_ZOMBIE_VILLAGER, CBoolean.get(zombie.isVillager()), t);
+					break;
+				case ZOMBIE_VILLAGER:
+					MCZombieVillager zombievillager = (MCZombieVillager) entity;
+					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(zombievillager.isBaby()), t);
+					specArray.set(entity_spec.KEY_VILLAGER_PROFESSION, new CString(zombievillager.getProfession().name(), t), t);
 					break;
 			}
 			return specArray;
@@ -3088,6 +3125,39 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case DONKEY:
+				case MULE:
+					MCChestedHorse chestedhorse = (MCChestedHorse) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_HORSE_CHEST:
+								chestedhorse.setHasChest(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_HORSE_JUMP:
+								try {
+									chestedhorse.setJumpStrength(Static.getDouble(specArray.get(index, t), t));
+								} catch (IllegalArgumentException exception) {
+									throw new CRERangeException("The jump strength must be between 0.0 and 2.0", t);
+								}
+								break;
+							case entity_spec.KEY_HORSE_DOMESTICATION:
+								try {
+									chestedhorse.setDomestication(Static.getInt32(specArray.get(index, t), t));
+								} catch (IllegalArgumentException exception) {
+									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
+								}
+								break;
+							case entity_spec.KEY_HORSE_MAXDOMESTICATION:
+								chestedhorse.setMaxDomestication(Static.getInt32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_HORSE_SADDLE:
+								chestedhorse.setSaddle(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case DROPPED_ITEM:
 					MCItem item = (MCItem) entity;
 					for (String index : specArray.stringKeySet()) {
@@ -3259,6 +3329,18 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case HUSK:
+					MCZombie husk = (MCZombie) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_ZOMBIE_BABY:
+								husk.setBaby(Static.getBoolean(specArray.get(index, t)));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case IRON_GOLEM:
 					MCIronGolem golem = (MCIronGolem) entity;
 					for (String index : specArray.stringKeySet()) {
@@ -3289,6 +3371,38 @@ public class EntityManagement {
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid rotation type: " + specArray.get(index, t).val(), t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case LLAMA:
+					MCLlama llama = (MCLlama) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_HORSE_COLOR:
+								try {
+									llama.setLlamaColor(MCLlamaColor.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid llama color: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							case entity_spec.KEY_HORSE_CHEST:
+								llama.setHasChest(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_HORSE_DOMESTICATION:
+								try {
+									llama.setDomestication(Static.getInt32(specArray.get(index, t), t));
+								} catch (IllegalArgumentException exception) {
+									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
+								}
+								break;
+							case entity_spec.KEY_HORSE_MAXDOMESTICATION:
+								llama.setMaxDomestication(Static.getInt32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_HORSE_SADDLE:
+								llama.setSaddle(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -3400,9 +3514,6 @@ public class EntityManagement {
 							case entity_spec.KEY_ZOMBIE_BABY:
 								pigZombie.setBaby(Static.getBoolean(specArray.get(index, t)));
 								break;
-							case entity_spec.KEY_ZOMBIE_VILLAGER:
-								pigZombie.setVillager(Static.getBoolean(specArray.get(index, t)));
-								break;
 							case entity_spec.KEY_PIG_ZOMBIE_ANGRY:
 								pigZombie.setAngry(Static.getBoolean(specArray.get(index, t)));
 								break;
@@ -3471,6 +3582,36 @@ public class EntityManagement {
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid skeleton type: " + specArray.get(index, t).val(), t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case SKELETON_HORSE:
+				case ZOMBIE_HORSE:
+					MCHorse undeadhorse = (MCHorse) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_HORSE_JUMP:
+								try {
+									undeadhorse.setJumpStrength(Static.getDouble(specArray.get(index, t), t));
+								} catch (IllegalArgumentException exception) {
+									throw new CRERangeException("The jump strength must be between 0.0 and 2.0", t);
+								}
+								break;
+							case entity_spec.KEY_HORSE_DOMESTICATION:
+								try {
+									undeadhorse.setDomestication(Static.getInt32(specArray.get(index, t), t));
+								} catch (IllegalArgumentException exception) {
+									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
+								}
+								break;
+							case entity_spec.KEY_HORSE_MAXDOMESTICATION:
+								undeadhorse.setMaxDomestication(Static.getInt32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_HORSE_SADDLE:
+								undeadhorse.setSaddle(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -3616,6 +3757,25 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_ZOMBIE_VILLAGER:
 								zombie.setVillager(Static.getBoolean(specArray.get(index, t)));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case ZOMBIE_VILLAGER:
+					MCZombieVillager zombievillager = (MCZombieVillager) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_ZOMBIE_BABY:
+								zombievillager.setBaby(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_VILLAGER_PROFESSION:
+								try {
+									zombievillager.setProfession(MCProfession.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid profession: " + specArray.get(index, t).val(), t);
+								}
 								break;
 							default:
 								throwException(index, t);

@@ -2,6 +2,9 @@ package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.entities.MCZombie;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.constructs.Target;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Zombie;
 
@@ -41,6 +44,12 @@ public class BukkitMCZombie extends BukkitMCLivingEntity implements MCZombie {
 
 	@Override
 	public void setVillager(boolean isVillager) {
-		getHandle().setVillager(isVillager);
+		try {
+			getHandle().setVillager(isVillager);
+		} catch(UnsupportedOperationException ex){
+			// 1.11 or later
+			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING,
+					"Cannot change a Zombie to ZombieVillager in Minecraft 1.11+", Target.UNKNOWN);
+		}
 	}
 }
