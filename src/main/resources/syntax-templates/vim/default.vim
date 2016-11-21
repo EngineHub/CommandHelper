@@ -35,5 +35,5 @@ highlight smartstring ctermfg=3 guifg=orange
 highlight ivariable ctermfg=green guifg=green
 highlight smartIVariable ctermfg=green guifg=green
 highlight variable ctermfg=LightCyan guifg=LightCyan
-highlight finalvar ctermfg=6 guifg=6
+highlight finalvar ctermfg=#008080 guifg=#008080
 highlight label ctermfg=yellow guifg=yellow

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import com.google.common.base.Preconditions;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 
 import org.objectweb.asm.AnnotationVisitor;
@@ -31,7 +30,11 @@ public class ClassMirrorVisitor extends ClassVisitor {
     }
 
     public ClassMirror<?> getMirror(URL source) {
-        Preconditions.checkState(done, "Not done visiting %s", classInfo.name == null ? "none" : classInfo.name);
+        if(!done) {
+            throw new IllegalStateException(String.format(
+                    "Not done visiting %s", classInfo.name == null ? "none" : classInfo.name
+            ));
+        }
         return new ClassMirror<Object>(this.classInfo, source);
     }
 
@@ -39,7 +42,12 @@ public class ClassMirrorVisitor extends ClassVisitor {
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        Preconditions.checkState(!done, "Can't visit %s, because we already visited %s", name, classInfo.name); // Ensure we never visit more than one class
+        if(done) {
+            // Ensure we never visit more than one class
+            throw new IllegalStateException(String.format(
+                    "Can't visit %s, because we already visited %s", name, classInfo.name
+            ));
+        }
         if ((access & ACC_ENUM) == ACC_ENUM) classInfo.isEnum = true;
         if ((access & ACC_INTERFACE) == ACC_INTERFACE) classInfo.isInterface = true;
         classInfo.modifiers = new ModifierMirror(ModifierMirror.Type.CLASS, access);

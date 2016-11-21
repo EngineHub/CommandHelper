@@ -41,6 +41,8 @@ public enum MCVersion implements Version {
 	MC1_9_4,
 	MC1_10,
 	MC1_10_X,
+	MC1_11,
+	MC1_11_X,
 	MC1_X,
 	MC2_X,
 	MCX_X,

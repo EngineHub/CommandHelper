@@ -166,17 +166,22 @@
 			these dependencies are updated, or important dependencies are added.
 			You can check to see if all dependencies are up to date or not by
 			running: mvn versions:display-dependency-updates
+
+			IMPORTANT: When adding a new non-test dependency, add the license that it uses in a comment
+			within the dependency
 		-->
 
 		<!-- Bukkit -->
 		<dependency>
+			<!-- GPL -->
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.10-R0.1-SNAPSHOT</version>
+			<version>1.11-R0.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
 		<dependency>
+			<!-- Apache 2.0 -->
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
 			<version>1.1.1</version>
@@ -184,6 +189,7 @@
 
 		<!-- BCrypt -->
 		<dependency>
+			<!-- MIT -->
 			<groupId>org.mindrot</groupId>
 			<artifactId>jBCrypt</artifactId>
 			<version>1.0</version>
@@ -207,6 +213,7 @@
 
 		<!-- Profiling library -->
 		<dependency>
+			<!-- Apache 2.0 -->
 			<groupId>org.perf4j</groupId>
 			<artifactId>perf4j</artifactId>
 			<version>0.9.16</version>
@@ -214,6 +221,7 @@
 			<type>jar</type>
 		</dependency>
 		<dependency>
+			<!-- Apache 2.0 -->
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.17</version>
@@ -223,6 +231,7 @@
 		<!-- Database -->
 		<!-- SQLite -->
 		<dependency>
+			<!-- Apache 2.0 -->
 			<groupId>org.xerial</groupId>
 			<artifactId>sqlite-jdbc</artifactId>
 			<version>3.7.15-M1</version>
@@ -231,6 +240,7 @@
 
 		<!-- Redis -->
 		<dependency>
+			<!-- MIT -->
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
 			<version>2.5.1</version>
@@ -240,6 +250,7 @@
 
 		<!-- MySQL -->
 		<dependency>
+			<!-- GPL -->
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.30</version>
@@ -249,6 +260,7 @@
 
 		<!-- PostgreSQL -->
 		<dependency>
+			<!-- BSD -->
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>9.1-901-1.jdbc4</version>
@@ -256,6 +268,7 @@
 
 		<!-- Yaml parsing -->
 		<dependency>
+			<!-- Apache 2.0 -->
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
 			<version>1.13</version>
@@ -263,6 +276,7 @@
 
 		<!-- Apache commons IO -->
 		<dependency>
+			<!-- Apache 2.0 -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.4</version>
@@ -284,6 +298,7 @@
 		</dependency>-->
 		<!-- Embedded SSH Client -->
 		<dependency>
+			<!-- BSD -->
 			<groupId>com.jcraft</groupId>
 			<artifactId>jsch</artifactId>
 			<version>0.1.51</version>
@@ -291,6 +306,7 @@
 
 		<!-- Charset detection library -->
 		<dependency>
+			<!-- Mozilla Public License 1.1 -->
 			<groupId>net.sourceforge.jchardet</groupId>
 			<artifactId>jchardet</artifactId>
 			<version>1.0</version>

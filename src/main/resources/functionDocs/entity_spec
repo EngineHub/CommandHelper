@@ -42,6 +42,14 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_CREEPER_POWERED%: If the Creeper is powered or not.
 |-
+| DONKEY, MULE
+|
+* %KEY_HORSE_CHEST%: Whether the horse has a chest equipped.
+* %KEY_HORSE_DOMESTICATION%: The domestication level of the horse (can't be higher than the maximum domestication level).
+* %KEY_HORSE_JUMP%: The jump strength (between 1.0 and 2.0).
+* %KEY_HORSE_MAXDOMESTICATION%: The maximum domestication level of the horse.
+* %KEY_HORSE_SADDLE%: An item pertaining to the saddle a horse has put on. Can be anything.
+|-
 | DROPPED_ITEM
 | 
 * %KEY_DROPPED_ITEM_ITEMSTACK%: An array representing the item.
@@ -75,19 +83,23 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |-
 | GUARDIAN
 |
-* %KEY_GUARDIAN_ELDER%: Whether the guardian is an elder guardian.
+* %KEY_GUARDIAN_ELDER%: Whether the guardian is an elder guardian. (deprecated)
 |-
 | HORSE
 | 
 * %KEY_HORSE_ARMOR%: An item pertaining to the armor a horse has put on.
-* %KEY_HORSE_CHEST%: Whether the horse has a chest equipped.
+* %KEY_HORSE_CHEST%: Whether the horse has a chest equipped. (deprecated)
 * %KEY_HORSE_COLOR%: The horse's color (can be %HORSE_COLOR%).
 * %KEY_HORSE_DOMESTICATION%: The domestication level of the horse (can't be higher than the maximum domestication level).
 * %KEY_HORSE_JUMP%: The jump strength (between 1.0 and 2.0).
 * %KEY_HORSE_MAXDOMESTICATION%: The maximum domestication level of the horse.
 * %KEY_HORSE_SADDLE%: An item pertaining to the saddle a horse has put on. Can be anything.
 * %KEY_HORSE_STYLE%: The horse's style (can be %HORSE_STYLE%).
-* %KEY_HORSE_VARIANT%: The horse's variant (can be %HORSE_VARIANT%).
+* %KEY_HORSE_VARIANT%: The horse's variant (can be %HORSE_VARIANT%). (deprecated)
+|-
+| HUSK
+|
+* %KEY_ZOMBIE_BABY%: Whether the husk is a baby.
 |-
 | IRON_GOLEM
 | 
@@ -97,6 +109,14 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_ITEM_FRAME_ITEM%: The item in the frame.
 * %KEY_ITEM_FRAME_ROTATION%: The rotation of the frame's item (can be %ROTATION%).
+|-
+| LLAMA
+|
+* %KEY_HORSE_CHEST%: Whether the horse has a chest equipped.
+* %KEY_HORSE_DOMESTICATION%: The domestication level of the horse (can't be higher than the maximum domestication level).
+* %KEY_HORSE_MAXDOMESTICATION%: The maximum domestication level of the horse.
+* %KEY_HORSE_COLOR%: The llama's color (can be %LLAMA_COLOR%).
+* %KEY_HORSE_SADDLE%: An item pertaining to the saddle a horse has put on. Can be anything.
 |-
 | LIGHTNING
 | 
@@ -138,7 +158,6 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_PIG_ZOMBIE_ANGER%: The pig zombie's anger level.
 * %KEY_PIG_ZOMBIE_ANGRY%: Whether the zombie is angry.
 * %KEY_ZOMBIE_BABY%: Whether the pig zombie is a baby.
-* %KEY_ZOMBIE_VILLAGER%: Whether the pig zombie is a villager.
 |- 
 | PRIMED_TNT
 | 
@@ -156,7 +175,14 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |-
 | SKELETON
 | 
-* %KEY_SKELETON_TYPE%: The type of the skeleton (can be %SKELETON_TYPE%).
+* %KEY_SKELETON_TYPE%: The type of the skeleton (can be %SKELETON_TYPE%). (deprecated)
+|-
+| SKELTONHORSE, ZOMBIEHORSE
+|
+* %KEY_HORSE_DOMESTICATION%: The domestication level of the horse (can't be higher than the maximum domestication level).
+* %KEY_HORSE_JUMP%: The jump strength (between 1.0 and 2.0).
+* %KEY_HORSE_MAXDOMESTICATION%: The maximum domestication level of the horse.
+* %KEY_HORSE_SADDLE%: An item pertaining to the saddle a horse has put on. Can be anything.
 |-
 | SLIME
 | 
@@ -198,5 +224,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | ZOMBIE
 | 
 * %KEY_ZOMBIE_BABY%: Whether the zombie is a baby.
-* %KEY_ZOMBIE_VILLAGER%: Whether the zombie is a villager.
+* %KEY_ZOMBIE_VILLAGER%: Whether the zombie is a villager. (deprecated)
+|-
+| ZOMBIEVILLAGER
+|
+* %KEY_ZOMBIE_BABY%: Whether the zombie is a baby.
+* %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%).
 |}

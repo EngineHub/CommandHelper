@@ -348,125 +348,210 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
     }
 
 	@Override
-    public CArray spawnMob(MCMobs name, String subClass, int qty, MCLocation l, Target t) {
-        Class mobType = null;
+	public CArray spawnMob(MCMobs name, String subClass, int qty, MCLocation l, Target t) {
+		Class mobType = null;
 		CArray ids = new CArray(t);
 		Location location = (Location) l.getHandle();
-        try {
-            switch (name) {
-                case CHICKEN:
-                    mobType = Chicken.class;
-                    break;
-                case COW:
-                    mobType = Cow.class;
-                    break;
-                case CREEPER:
-                    mobType = Creeper.class;
-                    break;
-                case GHAST:
-                    mobType = Ghast.class;
-                    break;
-                case PIG:
-                    mobType = Pig.class;
-                    break;
-                case PIGZOMBIE:
-                    mobType = PigZombie.class;
-                    break;
-                case SHEEP:
-                    mobType = Sheep.class;
-                    break;
-                case SKELETON:
-                    mobType = Skeleton.class;
-                    break;
-                case SLIME:
-                    mobType = Slime.class;
-                    break;
-                case SPIDER:
-                    mobType = Spider.class;
-                    break;
-                case SQUID:
-                    mobType = Squid.class;
-                    break;
-                case WOLF:
-                    mobType = Wolf.class;
-                    break;
-                case ZOMBIE:
-                    mobType = Zombie.class;
-                    break;
-                case CAVESPIDER:
-                    mobType = CaveSpider.class;
-                    break;
-                case ENDERMAN:
-                    mobType = Enderman.class;
-                    break;
-                case SILVERFISH:
-                    mobType = Silverfish.class;
-                    break;
-                case BLAZE:
-                    mobType = Blaze.class;
-                    break;
-                case VILLAGER:
-                    mobType = Villager.class;
-                    break;
-                case ENDERDRAGON:
-                    mobType = EnderDragon.class;
-                    break;
-                case MAGMACUBE:
-                    mobType = MagmaCube.class;
-                    break;
-                case MOOSHROOM:
-                    mobType = MushroomCow.class;
-                    break;
-                case SPIDERJOCKEY:
-                    mobType = Spider.class;
-                    break;
-                case GIANT:
-					mobType = Giant.class;
-                    break;
-                case SNOWGOLEM:
-                    mobType = Snowman.class;
-                    break;
-                case OCELOT:
-                    mobType = Ocelot.class;
-                    break;
-                case IRONGOLEM:
-                    mobType = IronGolem.class;
-                    break;
+		MCVersion version = Static.getServer().getMinecraftVersion();
+		String[] subTypes = subClass.toUpperCase().split("-");
+		try {
+			switch (name) {
 				case BAT:
 					mobType = Bat.class;
 					break;
-				case WITHER:
-					mobType = Wither.class;
+				case BLAZE:
+					mobType = Blaze.class;
 					break;
-				case WITHER_SKULL:
-					mobType = WitherSkull.class;
+				case CAVESPIDER:
+					mobType = CaveSpider.class;
 					break;
-				case WITCH:
-					mobType = Witch.class;
+				case CHICKEN:
+					mobType = Chicken.class;
 					break;
-				case HORSE:
-					mobType = Horse.class;
+				case COW:
+					mobType = Cow.class;
+					break;
+				case CREEPER:
+					mobType = Creeper.class;
+					break;
+				case ELDERGUARDIAN:
+					mobType = ElderGuardian.class;
+					break;
+				case ENDERDRAGON:
+					mobType = EnderDragon.class;
+					break;
+				case ENDERMAN:
+					mobType = Enderman.class;
 					break;
 				case ENDERMITE:
 					mobType = Endermite.class;
 					break;
+				case EVOKER:
+					mobType = Evoker.class;
+					break;
+				case GHAST:
+					mobType = Ghast.class;
+					break;
 				case GUARDIAN:
 					mobType = Guardian.class;
+					break;
+				case GIANT:
+					mobType = Giant.class;
+					break;
+				case HORSE:
+					mobType = Horse.class;
+					if(!(subClass.equals("")) && version.gte(MCVersion.MC1_11)){
+						for (String type : subTypes) {
+							try {
+								MCHorse.MCHorseVariant htype = MCHorse.MCHorseVariant.valueOf(type);
+								switch(htype) {
+									case DONKEY:
+										mobType = Donkey.class;
+										break;
+									case MULE:
+										mobType = Mule.class;
+										break;
+									case SKELETON:
+										mobType = SkeletonHorse.class;
+										break;
+									case ZOMBIE:
+										mobType = ZombieHorse.class;
+										break;
+								}
+								subClass = "";
+								break;
+							} catch (IllegalArgumentException notVar) {
+								// not variant
+							}
+						}
+					}
+					break;
+				case IRONGOLEM:
+					mobType = IronGolem.class;
+					break;
+				case LLAMA:
+					mobType = Llama.class;
+					break;
+				case MAGMACUBE:
+					mobType = MagmaCube.class;
+					break;
+				case MOOSHROOM:
+					mobType = MushroomCow.class;
+					break;
+				case OCELOT:
+					mobType = Ocelot.class;
+					break;
+				case PIG:
+					mobType = Pig.class;
+					break;
+				case PIGZOMBIE:
+					mobType = PigZombie.class;
+					break;
+				case POLARBEAR:
+					mobType = PolarBear.class;
 					break;
 				case RABBIT:
 					mobType = Rabbit.class;
 					break;
+				case SHEEP:
+					mobType = Sheep.class;
+					break;
 				case SHULKER:
 					mobType = Shulker.class;
 					break;
-				case POLARBEAR:
-					mobType = PolarBear.class;
+				case SILVERFISH:
+					mobType = Silverfish.class;
+					break;
+				case SKELETON:
+					mobType = Skeleton.class;
+					if(!(subClass.equals("")) && version.gte(MCVersion.MC1_11)){
+						MCSkeletonType stype = MCSkeletonType.NORMAL;
+						for (String type : subTypes) {
+							try {
+								stype = MCSkeletonType.valueOf(type);
+							} catch (IllegalArgumentException ex){
+								throw new CREFormatException(type + " is not a skeleton type", t);
+							}
+						}
+						if(stype == MCSkeletonType.WITHER){
+							mobType = WitherSkeleton.class;
+						} else if(stype == MCSkeletonType.STRAY){
+							mobType = Stray.class;
+						}
+						subClass = "";
+					}
+					break;
+				case SLIME:
+					mobType = Slime.class;
+					break;
+				case SNOWGOLEM:
+					mobType = Snowman.class;
+					break;
+				case SPIDER:
+					mobType = Spider.class;
+					break;
+				case SPIDERJOCKEY:
+					mobType = Spider.class;
+					break;
+				case SQUID:
+					mobType = Squid.class;
+					break;
+				case VEX:
+					mobType = Vex.class;
+					break;
+				case VILLAGER:
+					mobType = Villager.class;
+					break;
+				case VINDICATOR:
+					mobType = Vindicator.class;
+					break;
+				case WITCH:
+					mobType = Witch.class;
+					break;
+				case WITHER:
+					mobType = Wither.class;
+					break;
+				case WOLF:
+					mobType = Wolf.class;
+					break;
+				case ZOMBIE:
+					mobType = Zombie.class;
+					if(!(subClass.equals("")) && version.gte(MCVersion.MC1_11)){
+						for(int i = 0; i < subTypes.length; i++){
+							try {
+								MCZombieType ztype = MCZombieType.valueOf(subTypes[i]);
+								switch (ztype) {
+									case HUSK:
+										mobType = Husk.class;
+									case BABY:
+										continue;
+									case VILLAGER_BLACKSMITH:
+										subTypes[i] = "BLACKSMITH";
+										break;
+									case VILLAGER_BUTCHER:
+										subTypes[i] = "BUTCHER";
+										break;
+									case VILLAGER_LIBRARIAN:
+										subTypes[i] = "LIBRARIAN";
+										break;
+									case VILLAGER_PRIEST:
+										subTypes[i] = "PRIEST";
+										break;
+									case VILLAGER:
+										subTypes[i] = "FARMER";
+										break;
+								}
+								mobType = ZombieVillager.class;
+							} catch (IllegalArgumentException ex) {
+								// not a ZombieType
+							}
+						}
+					}
 					break;
 			}
 		} catch (NoClassDefFoundError e) {
 			throw new CREFormatException("No mob of type " + name + " exists", t);
 		}
-		String[] subTypes = subClass.toUpperCase().split("-");
 		for (int i = 0; i < qty; i++) {
 			Entity e = w.spawn(location, mobType);
 			if (name == MCMobs.SPIDERJOCKEY) {
@@ -574,59 +659,80 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 						}
 					}
 				} else if(e instanceof Zombie){
-					Zombie z = (Zombie) e;
-					for (String type : subTypes) {
-						try {
-							MCZombieType ztype = MCZombieType.valueOf(type);
-							switch (ztype) {
-								case BABY:
-									z.setBaby(true);
-									break;
-								case VILLAGER:
-									z.setVillager(true);
-									break;
-								case VILLAGER_BLACKSMITH:
-									if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
-										z.setVillagerProfession(Villager.Profession.BLACKSMITH);
-									} else {
-										z.setVillager(true);
-									}
-									break;
-								case VILLAGER_BUTCHER:
-									if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
-										z.setVillagerProfession(Villager.Profession.BUTCHER);
-									} else {
-										z.setVillager(true);
-									}
-									break;
-								case VILLAGER_LIBRARIAN:
-									if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
-										z.setVillagerProfession(Villager.Profession.LIBRARIAN);
-									} else {
-										z.setVillager(true);
-									}
-									break;
-								case VILLAGER_PRIEST:
-									if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
-										z.setVillagerProfession(Villager.Profession.PRIEST);
-									} else {
-										z.setVillager(true);
-									}
-									break;
-								case HUSK:
-									if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_10)){
-										z.setVillagerProfession(Villager.Profession.HUSK);
-									}
-									break;
+					if (e instanceof PigZombie) {
+						PigZombie pz = (PigZombie) e;
+						for (String value : subTypes) {
+							if(value.equals("BABY")) {
+								pz.setBaby(true);
+								continue;
 							}
-						} catch (IllegalArgumentException ex){
-							if (z instanceof PigZombie) {
-								try {
-									((PigZombie) z).setAnger(Integer.valueOf(type));
-								} catch (IllegalArgumentException iae) {
-									throw new CREFormatException(type + " was neither a zombie state nor a number.", t);
+							try {
+								pz.setAnger(Integer.valueOf(value));
+							} catch (IllegalArgumentException iae) {
+								throw new CREFormatException(value + " is not a number.", t);
+							}
+						}
+					} else if(version.gte(MCVersion.MC1_11) && e instanceof ZombieVillager) {
+						ZombieVillager zv = (ZombieVillager) e;
+						for (String type : subTypes){
+							if(type.equals("BABY")) {
+								zv.setBaby(true);
+								continue;
+							}
+							try {
+								MCProfession job = MCProfession.valueOf(type);
+								zv.setVillagerProfession(BukkitMCProfession.getConvertor().getConcreteEnum(job));
+							} catch (IllegalArgumentException ex) {
+								throw new CREFormatException(type + " is not a valid profession", t);
+							}
+						}
+					} else {
+						Zombie z = (Zombie) e;
+						for (String type : subTypes) {
+							try {
+								MCZombieType ztype = MCZombieType.valueOf(type);
+								switch (ztype) {
+									case BABY:
+										z.setBaby(true);
+										break;
+									case VILLAGER:
+										z.setVillager(true);
+										break;
+									case VILLAGER_BLACKSMITH:
+										if (version.gte(MCVersion.MC1_9)) {
+											z.setVillagerProfession(Villager.Profession.BLACKSMITH);
+										} else {
+											z.setVillager(true);
+										}
+										break;
+									case VILLAGER_BUTCHER:
+										if (version.gte(MCVersion.MC1_9)) {
+											z.setVillagerProfession(Villager.Profession.BUTCHER);
+										} else {
+											z.setVillager(true);
+										}
+										break;
+									case VILLAGER_LIBRARIAN:
+										if (version.gte(MCVersion.MC1_9)) {
+											z.setVillagerProfession(Villager.Profession.LIBRARIAN);
+										} else {
+											z.setVillager(true);
+										}
+										break;
+									case VILLAGER_PRIEST:
+										if (version.gte(MCVersion.MC1_9)) {
+											z.setVillagerProfession(Villager.Profession.PRIEST);
+										} else {
+											z.setVillager(true);
+										}
+										break;
+									case HUSK:
+										if (version.gt(MCVersion.MC1_9_X) && version.lt(MCVersion.MC1_11)) {
+											z.setVillagerProfession(Villager.Profession.HUSK);
+										}
+										break;
 								}
-							} else {
+							} catch (IllegalArgumentException ex) {
 								throw new CREFormatException(type + " is not a zombie state", t);
 							}
 						}
@@ -650,22 +756,28 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 				} else if(e instanceof Horse) {
 					Horse h = (Horse) e;
 					for (String type : subTypes) {
-						try {
-							MCHorse.MCHorseVariant htype = MCHorse.MCHorseVariant.valueOf(type);
-							h.setVariant(BukkitMCHorse.BukkitMCHorseVariant.getConvertor().getConcreteEnum(htype));
-						} catch (IllegalArgumentException notVar) {
+						if(version.lt(MCVersion.MC1_11)){
 							try {
-								MCHorse.MCHorseColor hcolor = MCHorse.MCHorseColor.valueOf(type);
-								h.setColor(BukkitMCHorse.BukkitMCHorseColor.getConvertor().getConcreteEnum(hcolor));
-							} catch (IllegalArgumentException notColor) {
-								try {
-									MCHorse.MCHorsePattern hpattern = MCHorse.MCHorsePattern.valueOf(type);
-									h.setStyle(BukkitMCHorse.BukkitMCHorsePattern.getConvertor().getConcreteEnum(hpattern));
-								} catch (IllegalArgumentException notAnything) {
-									throw new CREFormatException("Type " + type + " did not match any horse variants,"
-											+ " colors, or patterns.", t);
-								}
+								MCHorse.MCHorseVariant htype = MCHorse.MCHorseVariant.valueOf(type);
+								h.setVariant(BukkitMCHorse.BukkitMCHorseVariant.getConvertor().getConcreteEnum(htype));
+								break; // no other variants can have colors or patterns
+							} catch (IllegalArgumentException ex) {
+								// not variant
 							}
+						}
+						try {
+							MCHorse.MCHorseColor hcolor = MCHorse.MCHorseColor.valueOf(type);
+							h.setColor(BukkitMCHorse.BukkitMCHorseColor.getConvertor().getConcreteEnum(hcolor));
+							continue;
+						} catch (IllegalArgumentException ex) {
+							// not color
+						}
+						try {
+							MCHorse.MCHorsePattern hpattern = MCHorse.MCHorsePattern.valueOf(type);
+							h.setStyle(BukkitMCHorse.BukkitMCHorsePattern.getConvertor().getConcreteEnum(hpattern));
+						} catch (IllegalArgumentException notAnything) {
+							throw new CREFormatException("Type " + type + " did not match any horse variants,"
+									+ " colors, or patterns.", t);
 						}
 					}
 				}

@@ -26,4 +26,14 @@ public class BukkitMCProfession extends EnumConvertor<MCProfession, Villager.Pro
 		}
 		return instance;
 	}
+
+	@Override
+	protected MCProfession getAbstractedEnumCustom(Villager.Profession concrete) {
+		switch (concrete) {
+			case NORMAL:
+			case HUSK:
+				return MCProfession.FARMER;
+		}
+		return super.getAbstractedEnumCustom(concrete);
+	}
 }
