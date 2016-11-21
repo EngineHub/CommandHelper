@@ -621,9 +621,10 @@ public class DocGenTemplates {
 	@Override
 	public String generate(String... args) {
 	    String code = StringUtils.Join(ArrayUtils.slice(args, 1, args.length - 1), "|");
-	    String out = code.replaceAll("<", "&lt;");
-	    out = out.replaceAll(">", "&gt;");
+	    String out = code;
 	    out = escapeWiki(out);
+	    out = out.replaceAll("<", "&lt;");
+	    out = out.replaceAll(">", "&gt;");
 	    if(out.startsWith("\n")) {
 		out = out.substring(1);
 	    }

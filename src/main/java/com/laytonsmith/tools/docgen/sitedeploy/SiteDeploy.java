@@ -41,6 +41,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -168,7 +169,7 @@ public class SiteDeploy {
 		    configErrors.add("Username cannot be empty.");
 		}
 	    }
-	    if(doValidation && "".equals(validatorUrl)) {
+	    if (doValidation && "".equals(validatorUrl)) {
 		configErrors.add("Validation cannot occur while an empty validation url is specified in the config."
 			+ " Either set a validator url, or re-run without the --do-validation flag.");
 	    }
@@ -188,7 +189,7 @@ public class SiteDeploy {
 	}
 	directory += CHVersion.LATEST;
 	docsBase += CHVersion.LATEST + "/";
-	System.out.println("Using the following settings:");
+	System.out.println("Using the following settings, loaded from " + sitedeploy.getCanonicalPath());
 	System.out.println("username: " + username);
 	System.out.println("hostname: " + hostname);
 	System.out.println("port: " + port);
@@ -196,7 +197,7 @@ public class SiteDeploy {
 	System.out.println("docs-base: " + docsBase);
 	System.out.println("site-base: " + siteBase);
 	System.out.println("github-base-url: " + githubBaseUrl);
-	if(doValidation) {
+	if (doValidation) {
 	    System.out.println("validator-url: " + validatorUrl);
 	}
 
@@ -278,7 +279,7 @@ public class SiteDeploy {
 	this.doValidation = doValidation;
 	this.showTemplateCredit = showTemplateCredit;
 	this.validatorUrl = validatorUrl;
-	if(githubBaseUrl.equals("")) {
+	if (githubBaseUrl.equals("")) {
 	    githubBaseUrl = DEFAULT_GITHUB_BASE_URL;
 	}
 	this.githubBaseUrl = githubBaseUrl;
@@ -370,12 +371,12 @@ public class SiteDeploy {
 	    }
 	});
 	/**
-	 * The cacheBuster template is meant to make it easier to deal with caching of resources. The
-	 * template allows you to specify the resource, and it creates a path to the resource using
-	 * resourceBase, but it also appends a hash of the file, so that as the file changes, so does the
-	 * hash (using a ?v=hash query string). Most resources live in /siteDeploy/resources/*, and so the
-	 * shorthand is to use %%cacheBuster|path/to/resource.css%%. However, this isn't always correct,
-	 * because resources can live all over the place. In that case, you should use the following format:
+	 * The cacheBuster template is meant to make it easier to deal with caching of resources. The template allows
+	 * you to specify the resource, and it creates a path to the resource using resourceBase, but it also appends a
+	 * hash of the file, so that as the file changes, so does the hash (using a ?v=hash query string). Most
+	 * resources live in /siteDeploy/resources/*, and so the shorthand is to use
+	 * %%cacheBuster|path/to/resource.css%%. However, this isn't always correct, because resources can live all over
+	 * the place. In that case, you should use the following format:
 	 * %%cacheBuster|/absolute/path/to/resource.css|path/to/resource/in/html.css%%
 	 */
 	g.put("cacheBuster", new Generator() {
@@ -466,8 +467,8 @@ public class SiteDeploy {
 	});
 	g.put("learning_trail", learningTrailGen);
 	/**
-	 * If showTemplateCredit is false, then this will return "display: none;" otherwise, it
-	 * will return an empty string.
+	 * If showTemplateCredit is false, then this will return "display: none;" otherwise, it will return an empty
+	 * string.
 	 */
 	g.put("showTemplateCredit", new Generator() {
 	    @Override
@@ -486,6 +487,7 @@ public class SiteDeploy {
 	deployEventAPI();
 	deployFunctions();
 	deployEvents();
+	deployObjects();
 	deployAPIJSON();
 	generateQueue.submit(new Runnable() {
 	    @Override
@@ -533,15 +535,15 @@ public class SiteDeploy {
 		    }
 		    String[] errors = response.getContent().split("\n");
 		    int errorsDisplayed = 0;
-		    for(String error : errors) {
+		    for (String error : errors) {
 			GNUErrorMessageFormat gnuError = new GNUErrorMessageFormat(error);
 			String supressWarning = "info warning: Section lacks heading. Consider using “h2”-“h6”"
 				+ " elements to add identifying headings to all sections.";
-			if(supressWarning.equals(gnuError.message())) {
+			if (supressWarning.equals(gnuError.message())) {
 			    continue;
 			}
 			StringBuilder output = new StringBuilder();
-			switch(gnuError.messageType()) {
+			switch (gnuError.messageType()) {
 			    case ERROR:
 				output.append(MCChatColor.RED);
 				break;
@@ -552,11 +554,11 @@ public class SiteDeploy {
 			output.append("line ").append(gnuError.fromLine()).append(" ")
 				.append(gnuError.message()).append(MCChatColor.PLAIN_WHITE);
 			String[] page = e.getValue().split("\n");
-			for(int i = gnuError.fromLine(); i < gnuError.toLine() + 1; i++) {
+			for (int i = gnuError.fromLine(); i < gnuError.toLine() + 1; i++) {
 			    output.append("\n").append(page[i - 1]);
 			}
 			output.append("\n");
-			for(int i = 0; i < gnuError.fromColumn() - 1; i++) {
+			for (int i = 0; i < gnuError.fromColumn() - 1; i++) {
 			    output.append(" ");
 			}
 			output.append(MCChatColor.RED).append("^").append(MCChatColor.PLAIN_WHITE);
@@ -564,7 +566,7 @@ public class SiteDeploy {
 			specifiedErrors++;
 			errorsDisplayed++;
 		    }
-		    if(errorsDisplayed == 0) {
+		    if (errorsDisplayed == 0) {
 			System.out.println(Static.MCToANSIColors(MCChatColor.GREEN.toString())
 				+ "No errors" + Static.MCToANSIColors(MCChatColor.PLAIN_WHITE.toString()));
 		    }
@@ -893,66 +895,75 @@ public class SiteDeploy {
 	generateQueue.submit(new Runnable() {
 	    @Override
 	    public void run() {
-		Set<Class<? extends Function>> functionClasses = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, Function.class);
-		// A map of where it maps the enclosing class to the list of function rows, which contains a list of
-		// table cells.
-		Map<Class<?>, List<List<String>>> data = new TreeMap<>();
-		for(Class<? extends Function> functionClass : functionClasses) {
-		    if(!data.containsKey(functionClass.getEnclosingClass())) {
-			data.put(functionClass.getEnclosingClass(), new ArrayList<List<String>>());
-		    }
-		    List<List<String>> d = data.get(functionClass.getEnclosingClass());
-		    List<String> c = new ArrayList<>();
-		    // function name, returns, arguments, throws, description, since, restricted
-		    Function f;
-		    try {
-			f = ReflectionUtils.instantiateUnsafe(functionClass);
-		    } catch(ReflectionUtils.ReflectionException ex) {
-			throw new RuntimeException("While trying to construct " + functionClass + ", got the following", ex);
-		    }
-		    DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
-		    c.add(f.getName());
-		    c.add(di.ret);
-		    c.add(di.args);
-		    List<String> exc = new ArrayList<>();
-		    if(f.thrown() != null) {
-			for(Class<? extends CREThrowable> e : f.thrown()) {
-			    CREThrowable ct = ReflectionUtils.instantiateUnsafe(e);
-			    exc.add("{{object|" + ct.getName() + "}}");
+		try {
+		    Set<Class<? extends Function>> functionClasses = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, Function.class);
+		    // A map of where it maps the enclosing class to the list of function rows, which contains a list of
+		    // table cells.
+		    Map<Class<?>, List<List<String>>> data = new TreeMap<>(new Comparator<Class<?>>() {
+			@Override
+			public int compare(Class<?> o1, Class<?> o2) {
+			    return o1.getCanonicalName().compareTo(o2.getCanonicalName());
 			}
-		    }
-		    c.add(StringUtils.Join(exc, "<br>"));
-		    StringBuilder desc = new StringBuilder();
-		    desc.append(di.desc);
-		    if(di.extendedDesc != null) {
-			desc.append(" [[functions/").append(f.getName()).append("|See more...]]");
-		    }
-		    try {
-			if(f.examples() != null && f.examples().length > 0) {
-			    desc.append("<br>([[functions/").append(f.getName()).append("#Examples|Examples...]]");
+		    });
+		    for (Class<? extends Function> functionClass : functionClasses) {
+			if (!data.containsKey(functionClass.getEnclosingClass())) {
+			    data.put(functionClass.getEnclosingClass(), new ArrayList<List<String>>());
 			}
-		    } catch (ConfigCompileException ex) {
-			Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+			List<List<String>> d = data.get(functionClass.getEnclosingClass());
+			List<String> c = new ArrayList<>();
+			// function name, returns, arguments, throws, description, since, restricted
+			Function f;
+			try {
+			    f = ReflectionUtils.instantiateUnsafe(functionClass);
+			} catch (ReflectionUtils.ReflectionException ex) {
+			    throw new RuntimeException("While trying to construct " + functionClass + ", got the following", ex);
+			}
+			DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
+			c.add(f.getName());
+			c.add(di.ret);
+			c.add(di.args);
+			List<String> exc = new ArrayList<>();
+			if (f.thrown() != null) {
+			    for (Class<? extends CREThrowable> e : f.thrown()) {
+				CREThrowable ct = ReflectionUtils.instantiateUnsafe(e);
+				exc.add("{{object|" + ct.getName() + "}}");
+			    }
+			}
+			c.add(StringUtils.Join(exc, "<br>"));
+			StringBuilder desc = new StringBuilder();
+			desc.append(di.desc);
+			if (di.extendedDesc != null) {
+			    desc.append(" [[functions/").append(f.getName()).append("|See more...]]");
+			}
+			try {
+			    if (f.examples() != null && f.examples().length > 0) {
+				desc.append("<br>([[functions/").append(f.getName()).append("#Examples|Examples...]]");
+			    }
+			} catch (ConfigCompileException ex) {
+			    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+			}
+			c.add(desc.toString());
+			c.add(f.since().toString());
+			c.add("<span class=\"api_" + (f.isRestricted() ? "yes" : "no") + "\">" + (f.isRestricted() ? "Yes" : "No")
+				+ "</span>");
+			d.add(c);
 		    }
-		    c.add(desc.toString());
-		    c.add(f.since().toString());
-		    c.add("<span class=\"api_" + (f.isRestricted() ? "yes" : "no") + "\">" + (f.isRestricted() ? "Yes" : "No")
-			+ "</span>");
-		    d.add(c);
-		}
-		// data is now constructed.
-		StringBuilder b = new StringBuilder();
-		for(Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
-		    Class<?> clazz = e.getKey();
-		    b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
-		    String docs = (String)ReflectionUtils.invokeMethod(clazz, null, "docs");
-		    b.append("<p>").append(docs).append("</p>");
-		}
+		    // data is now constructed.
+		    StringBuilder b = new StringBuilder();
+		    for (Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
+			Class<?> clazz = e.getKey();
+			b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
+			String docs = (String) ReflectionUtils.invokeMethod(clazz, null, "docs");
+			b.append("<p>").append(docs).append("</p>");
+		    }
 
-		writePage("API", b.toString(), "API",
-			Arrays.asList(new String[]{"API", "functions"}),
-			"A list of all " + Implementation.GetServerType().getBranding() + " functions");
-		currentGenerateTask.addAndGet(1);
+		    writePage("API", b.toString(), "API",
+			    Arrays.asList(new String[]{"API", "functions"}),
+			    "A list of all " + Implementation.GetServerType().getBranding() + " functions");
+		    currentGenerateTask.addAndGet(1);
+		} catch (Exception ex) {
+		    ex.printStackTrace(System.err);
+		}
 	    }
 	});
 	totalGenerateTasks.addAndGet(1);
@@ -967,6 +978,10 @@ public class SiteDeploy {
     }
 
     private void deployEvents() {
+
+    }
+
+    private void deployObjects() {
 
     }
 

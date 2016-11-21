@@ -5,7 +5,7 @@ package com.laytonsmith.core;
  */
 public class MainSandbox {
 
-	public static void main(String[] argv) throws Exception {	
+    public static void main(String[] argv) throws Exception {
 //		URL url = ClassDiscovery.GetClassContainer(MainSandbox.class);
 //		long start;
 //		start = System.currentTimeMillis();
@@ -24,7 +24,7 @@ public class MainSandbox {
 //		cdc.writeDescriptor(zip);
 //		zip.close();
 //		StreamUtils.GetSystemOut().println(StringUtils.HumanReadableByteCount(baos.toByteArray().length));
-		
+
 //		//URI information
 //		String[] uris = new String[]{"yml:user@remote:22:abcd:path/to/remote/file"
 //		,"yml:user@remote:22:/path/to/remote/file", "yml:user@remote:/path/to/remote/file",
@@ -43,8 +43,8 @@ public class MainSandbox {
 //			StreamUtils.GetSystemOut().println("Fragment: " + uri.getFragment());
 //			StreamUtils.GetSystemOut().println("\n\n***********************************\n\n");
 //		}
-		
-		//Execution queue usage
+
+	//Execution queue usage
 //		final ExecutionQueue queue = new ExecutionQueue("Test", "default");
 //		for(int i = 0; i < 3; i++){
 //			final int j = i;
@@ -69,8 +69,8 @@ public class MainSandbox {
 //				}
 //			}, "Thread-" + i).start();
 //		}
-		
-		//Profiler usage
+
+	//Profiler usage
 //		Profiler p = new Profiler(new File("profiler.config"));
 //		p.doLog("Starting profiling");
 //		ProfilePoint ProfilerTop = p.start("Profiler Top", LogLevel.ERROR);
@@ -84,17 +84,17 @@ public class MainSandbox {
 //		p.stop(ProfilerBottom);
 //		p.stop(ProfilerMiddle);
 //		p.stop(ProfilerTop);
-		
-		//Profiling reg_split vs split
+
+	//Profiling reg_split vs split
 //		String toSplit = "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z";
 //		Regex.reg_split regSplitFunction = new Regex.reg_split();
 //		StringHandling.split splitFunction = new StringHandling.split();
 //		Target t = Target.UNKNOWN;
 //		int times = 1000000;
-//		
+//
 //		CString subject = new CString(toSplit, t);
 //		CString pattern = new CString(",", t);
-//		
+//
 //		long startRegSplit = System.currentTimeMillis();
 //		{
 //			for(int i = 0; i < times; i++){
@@ -109,7 +109,7 @@ public class MainSandbox {
 //			}
 //		}
 //		long stopSplit = System.currentTimeMillis();
-//		
+//
 //		StreamUtils.GetSystemOut().println("reg_split took " + (stopRegSplit - startRegSplit) + "ms under " + times + " iterations.");
 //		StreamUtils.GetSystemOut().println("split took " + (stopSplit - startSplit) + "ms under " + times + " iterations.");
 //		InetAddress i1 = InetAddress.getByName("173.194.37.72");
@@ -121,7 +121,7 @@ public class MainSandbox {
 //		StreamUtils.GetSystemOut().println("i2.getHostName(): " + i2.getHostName());
 //		StreamUtils.GetSystemOut().println("i2.toString(): " + i2.toString());
 //		StreamUtils.GetSystemOut().println("i2.getHostAddress(): " + i2.getHostAddress());
-		
+
 //		DB.CConnection conn = DB.CConnection.GetConnection(DB.SupportedDBConnectors.MYSQL, "localhost", "test", 3306, "", "");
 //		DB db = new MySQLProfile();
 //		db.connect(conn);
@@ -140,7 +140,7 @@ public class MainSandbox {
 //				}
 //			}
 //		}
-	}
-	
-	
+    }
+
+
 }
