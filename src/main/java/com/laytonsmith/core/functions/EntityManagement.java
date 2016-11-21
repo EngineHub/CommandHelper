@@ -2790,7 +2790,7 @@ public class EntityManagement {
 					break;
 				case SKELETON_HORSE:
 				case ZOMBIE_HORSE:
-					MCHorse undeadhorse = (MCHorse) entity;
+					MCAbstractHorse undeadhorse = (MCAbstractHorse) entity;
 					specArray.set(entity_spec.KEY_HORSE_JUMP, new CDouble(undeadhorse.getJumpStrength(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(undeadhorse.getDomestication(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(undeadhorse.getMaxDomestication(), t), t);
@@ -3590,7 +3590,7 @@ public class EntityManagement {
 					break;
 				case SKELETON_HORSE:
 				case ZOMBIE_HORSE:
-					MCHorse undeadhorse = (MCHorse) entity;
+					MCAbstractHorse undeadhorse = (MCAbstractHorse) entity;
 					for (String index : specArray.stringKeySet()) {
 						switch (index.toLowerCase()) {
 							case entity_spec.KEY_HORSE_JUMP:
