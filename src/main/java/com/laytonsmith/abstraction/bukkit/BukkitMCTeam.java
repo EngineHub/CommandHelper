@@ -65,7 +65,7 @@ public class BukkitMCTeam implements MCTeam {
 	@Override
 	public MCOptionStatus getOption(MCOption option) {
 		OptionStatus os = t.getOption(BukkitMCOption.getConvertor().getConcreteEnum(option));
-		return BukkitMCOptionStatus.getConvertor().getAbstractedEnum(os);
+		return MCOptionStatus.valueOf(os.name());
 	}
 
 	@Override
