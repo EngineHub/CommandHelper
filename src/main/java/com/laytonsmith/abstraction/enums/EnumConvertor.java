@@ -106,13 +106,10 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 	}
 	
 	private void doLog(Class from, Class to, Enum value){
-		String message = "When trying to convert " + from.getName() + "." + value.name() + " to a "
-				+ to.getName() + ", no match was found. This may be caused by an old plugin version, or a newer server version.";
+		String message = from.getSimpleName() + "." + value.name() + " missing a match in " + to.getName();
 		LogLevel level = LogLevel.WARNING;
 		if(useError){
 			level = LogLevel.ERROR;
-		} else {
-			message += " This may or may not cause further problems during runtime.";
 		}
 		CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, level, message, Target.UNKNOWN);
 	}
