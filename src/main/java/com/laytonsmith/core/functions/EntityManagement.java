@@ -39,6 +39,7 @@ import com.laytonsmith.abstraction.entities.MCLlama.MCLlamaColor;
 import com.laytonsmith.abstraction.enums.MCArt;
 import com.laytonsmith.abstraction.enums.MCBodyPart;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
+import com.laytonsmith.abstraction.enums.MCEnderDragonPhase;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -2555,6 +2556,7 @@ public class EntityManagement {
 			docs = docs.replace("%PROFESSION%", StringUtils.Join(MCProfession.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%RABBIT_TYPE%", StringUtils.Join(MCRabbitType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PARTICLE%", StringUtils.Join(MCParticle.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%ENDERDRAGON_PHASE%", StringUtils.Join(MCEnderDragonPhase.values(), ", ", ", or ", " or "));
 			for (Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -2654,6 +2656,12 @@ public class EntityManagement {
 							specArray.set(entity_spec.KEY_ENDERCRYSTAL_BEAMTARGET,
 									ObjectGenerator.GetGenerator().location(location, false), t);
 						}
+					}
+					break;
+				case ENDER_DRAGON:
+					MCEnderDragon enderdragon = (MCEnderDragon) entity;
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9_X)){
+						specArray.set(entity_spec.KEY_ENDERDRAGON_PHASE, new CString(enderdragon.getPhase().name(), t), t);
 					}
 					break;
 				case ENDERMAN:
@@ -2877,6 +2885,7 @@ public class EntityManagement {
 		private static final String KEY_DROPPED_ITEM_PICKUPDELAY = "pickupdelay";
 		private static final String KEY_ENDERCRYSTAL_BASE = "base";
 		private static final String KEY_ENDERCRYSTAL_BEAMTARGET = "beamtarget";
+		private static final String KEY_ENDERDRAGON_PHASE = "phase";
 		private static final String KEY_ENDERMAN_CARRIED = "carried";
 		private static final String KEY_EXPERIENCE_ORB_AMOUNT = "amount";
 		private static final String KEY_FALLING_BLOCK_BLOCK = "block";
@@ -3190,6 +3199,18 @@ public class EntityManagement {
 								} else {
 									throw new CRECastException("EnderCrystal beam target must be an array or null", t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case ENDER_DRAGON:
+					MCEnderDragon enderdragon = (MCEnderDragon) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_ENDERDRAGON_PHASE:
+								enderdragon.setPhase(MCEnderDragonPhase.valueOf(specArray.get(index, t).val().toUpperCase()));
 								break;
 							default:
 								throwException(index, t);
