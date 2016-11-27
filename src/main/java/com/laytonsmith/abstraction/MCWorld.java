@@ -42,8 +42,9 @@ public interface MCWorld extends MCMetadatable {
 	public void setDifficulty(MCDifficulty difficulty);
 	public boolean getPVP();
 	public void setPVP(boolean pvp);
-	public boolean getGameRuleValue(MCGameRule gameRule);
-	public void setGameRuleValue(MCGameRule gameRule, boolean value);
+	public String[] getGameRules();
+	public String getGameRuleValue(String gameRule);
+	public boolean setGameRuleValue(MCGameRule gameRule, String value);
 
     public MCBlock getBlockAt(int x, int y, int z);
 	public MCChunk getChunkAt(int x, int z);

@@ -171,13 +171,18 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public boolean getGameRuleValue(MCGameRule gameRule) {
-		return Boolean.valueOf(w.getGameRuleValue(gameRule.getGameRule()));
+	public String[] getGameRules() {
+    	return w.getGameRules();
 	}
 
 	@Override
-	public void setGameRuleValue(MCGameRule gameRule, boolean value) {
-		w.setGameRuleValue(gameRule.getGameRule(), String.valueOf(value));
+	public String getGameRuleValue(String gameRule) {
+		return w.getGameRuleValue(gameRule);
+	}
+
+	@Override
+	public boolean setGameRuleValue(MCGameRule gameRule, String value) {
+		return w.setGameRuleValue(gameRule.getGameRule(), value);
 	}
 
 	@Override

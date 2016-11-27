@@ -1490,9 +1490,9 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "mixed {world, [gameRule]} Returns an associative array containing the values of all existing gamerules for the given world."
-					+ " If gameRule is set, the function only returns the value of the specified gamerule, a boolean."
-					+ "gameRule can be " + StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
+			return "mixed {world, [gameRule]} Returns an associative array containing the values of all existing"
+					+ " gamerules for the given world. If gameRule is specified, the function only returns that value."
+					+ " gameRule can be " + StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override
@@ -1508,18 +1508,23 @@ public class World {
 			}
 			if (args.length == 1) {
 				CArray gameRules = CArray.GetAssociativeArray(t);
-				for (MCGameRule gameRule : MCGameRule.values()) {
-					gameRules.set(new CString(gameRule.getGameRule(), t), CBoolean.get(world.getGameRuleValue(gameRule)), t);
+				for (String gameRule : world.getGameRules()) {
+					gameRules.set(new CString(gameRule, t),
+							Static.resolveConstruct(world.getGameRuleValue(gameRule), t), t);
 				}
 				return gameRules;
 			} else {
-				MCGameRule gameRule;
 				try {
-					gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
+					MCGameRule gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
+					String value = world.getGameRuleValue(gameRule.getGameRule());
+					if(value.equals("")) {
+						throw new CREFormatException("The gamerule \"" + args[1].val()
+								+ "\" does not exist in this version.", t);
+					}
+					return Static.resolveConstruct(value, t);
 				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The gamerule \"" + args[1].val() + "\" does not exist.", t);
 				}
-				return CBoolean.get(world.getGameRuleValue(gameRule));
 			}
 		}
 	}
@@ -1554,8 +1559,9 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {[world], gameRule, value} Sets the value of the gamerule for the specified world, value is a boolean. If world is not given the value is set for all worlds."
-					+ " gameRule can be " + StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
+			return "void {[world], gameRule, value} Sets the value of the gamerule for the specified world. If world is"
+					+ " not given the value is set for all worlds. Returns true if successful. gameRule can be "
+					+ StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override
@@ -1566,15 +1572,19 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCGameRule gameRule;
+			boolean success = false;
 			if (args.length == 2) {
 				try {
 					gameRule = MCGameRule.valueOf(args[0].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The gamerule \"" + args[0].val() + "\" does not exist.", t);
 				}
-				boolean value = Static.getBoolean(args[1]);
+				if(!args[1].getCType().equals(gameRule.getRuleType())) {
+					throw new CREFormatException("Wrong value type for \"" + args[0].val() + "\".", t);
+				}
+				String value = args[1].val();
 				for (MCWorld world : Static.getServer().getWorlds()) {
-					world.setGameRuleValue(gameRule, value);
+					success = world.setGameRuleValue(gameRule, value);
 				}
 			} else {
 				try {
@@ -1586,9 +1596,12 @@ public class World {
 				if (world == null) {
 					throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 				}
-				world.setGameRuleValue(gameRule, Static.getBoolean(args[2]));
+				if(!args[2].getCType().equals(gameRule.getRuleType())) {
+					throw new CREFormatException("Wrong value type for \"" + args[1].val() + "\".", t);
+				}
+				success = world.setGameRuleValue(gameRule, args[2].val());
 			}
-			return CVoid.VOID;
+			return CBoolean.get(success);
 		}
 	}
 
