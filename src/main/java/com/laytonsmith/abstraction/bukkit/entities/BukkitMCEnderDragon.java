@@ -27,7 +27,7 @@ public class BukkitMCEnderDragon extends BukkitMCComplexLivingEntity implements 
 
 	@Override
 	public MCEnderDragonPhase getPhase() {
-		return BukkitMCEnderDragonPhase.getConvertor().getAbstractedEnum(ed.getPhase());
+		return MCEnderDragonPhase.valueOf(ed.getPhase().name());
 	}
 
 	@Override
