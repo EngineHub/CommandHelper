@@ -47,7 +47,7 @@ public enum Driver {
 	PROJECTILE_LAUNCH,
 	TARGET_ENTITY,
 	ENTITY_TOGGLE_GLIDE(MCVersion.MC1_9),
-	FIREWORK_EXPLODE,
+	FIREWORK_EXPLODE(MCVersion.MC1_8_X),
 
 	/**
 	 * Inventory events
