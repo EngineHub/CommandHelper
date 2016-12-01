@@ -16,7 +16,12 @@ public class BukkitMCBlockStateMeta extends BukkitMCItemMeta implements MCBlockS
 
 	@Override
 	public MCBlockState getBlockState() {
-		return BukkitConvertor.BukkitGetCorrectBlockState(bsm.getBlockState());
+		try {
+			return BukkitConvertor.BukkitGetCorrectBlockState(bsm.getBlockState());
+		} catch(IllegalStateException ex){
+			// BlockStateMeta that cannot get a BlockState
+			return null;
+		}
 	}
 
 	@Override
