@@ -1333,7 +1333,7 @@ public class BasicLogic {
     }
 
     @api
-	public static class equals_item extends AbstractFunction {
+	public static class item_equals extends AbstractFunction {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
@@ -1341,7 +1341,7 @@ public class BasicLogic {
 
 		@Override
 		public String getName() {
-			return "equals_item";
+			return "item_equals";
 		}
 
 		@Override
