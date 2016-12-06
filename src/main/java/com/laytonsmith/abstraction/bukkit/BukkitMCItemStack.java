@@ -191,9 +191,4 @@ public class BukkitMCItemStack implements MCItemStack {
 		}
 		is.setItemMeta(((BukkitMCItemMeta)im).asItemMeta());
 	}
-
-    @Override
-    public boolean isSimilar(MCItemStack item) {
-        return is.isSimilar((ItemStack)item.getHandle());
-    }
 }

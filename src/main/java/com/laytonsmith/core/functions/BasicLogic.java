@@ -1,14 +1,16 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.Convertor;
+import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
@@ -1349,12 +1351,12 @@ public class BasicLogic {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[] {CREFormatException.class, CRENotFoundException.class};
+			return new Class[] {CREFormatException.class, CRENotFoundException.class, CRECastException.class};
 		}
 
 		@Override
 		public String docs() {
-			return "boolean {itemArray1, itemArray2} Returns true or false if the item are equal.";
+			return "boolean {itemArray1, itemArray2} Returns true if the items are equal.";
 		}
 
 		@Override
@@ -1369,12 +1371,81 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCItemStack itemA = ObjectGenerator.GetGenerator().item(args[0], t);
-			MCItemStack itemB = ObjectGenerator.GetGenerator().item(args[1], t);
-			if (itemA.isSimilar(itemB)) {
-				return CBoolean.TRUE;
+			if (!(args[0] instanceof CArray)) {
+				throw new CRECastException("Expecting an array as argument 1", t);
+			} else if (!(args[1] instanceof CArray)) {
+				throw new CRECastException("Expecting an array as argument 2", t);
+			}
+			CArray itemA = (CArray) args[0];
+			CArray itemB = (CArray) args[1];
+			MCMaterial matA, matB;
+			int dataA, dataB;
+			CArray metaA = null, metaB = null;
+			Convertor convertor = StaticLayer.GetConvertor();
+
+			// Assert Material
+			if (itemA.containsKey("name") && itemB.containsKey("name")) {
+				matA = convertor.GetMaterial(itemA.get("name", t).val());
+				matB = convertor.GetMaterial(itemB.get("name", t).val());
+			} else if (itemA.containsKey("type")) {
+				matA = convertor.getMaterial(Static.getInt32(itemA.get("type", t), t));
+				matB = convertor.getMaterial(Static.getInt8(itemB.get("type", t), t));
 			} else {
-				return CBoolean.FALSE;
+				throw new CREFormatException("Could not find item type!", t);
+			}
+			if (matA == null || matB == null) {
+				throw new CRENotFoundException("A material type could not be found based on the given id.", t);
+			}
+			// Data
+			if (itemA.containsKey("data") && itemB.containsKey("data")) {
+				dataA = Static.getInt32(itemA.get("data", t), t);
+				dataB = Static.getInt32(itemB.get("data", t), t);
+			} else {
+				throw new CREFormatException("Could not find item data!", t);
+			}
+			// Meta
+			if (itemA.containsKey("meta") && itemB.containsKey("meta")) {
+				Construct cMetaA = itemA.get("meta", t);
+				Construct cMetaB = itemB.get("meta", t);
+				assertMeta(cMetaA, t);
+				assertMeta(cMetaB, t);
+				metaA = (CArray) cMetaA;
+				metaB = (CArray) cMetaB;
+			}
+
+			// Compare
+			boolean hasMetaA = metaA != null;
+			boolean hasMetaB = metaB != null;
+			return CBoolean.GenerateCBoolean(
+					matA.getType() == matB.getType() &&
+							dataA == dataB && hasMetaA == hasMetaB &&
+							(!hasMetaA || metaA.val().equals(metaB.val())), t);
+		}
+
+		private void assertMeta(Construct cMeta, Target t) {
+			if (cMeta instanceof CArray) {
+				CArray meta = (CArray) cMeta;
+				// Lore
+				if (meta.containsKey("lore")) {
+					Construct cLore = meta.get("lore", t);
+					if (!(cLore instanceof CString) && !(cLore instanceof CArray)) {
+						throw new CREFormatException("Lore was expected to be an array or a string.", t);
+					}
+				}
+				// Enchant
+				if (meta.containsKey("enchants")) {
+					Construct enchants = meta.get("enchants", t);
+					if (!(enchants instanceof  CArray)) {
+						throw new CREFormatException("Enchants field was expected to be an array of Enchantment arrays", t);
+					}
+				}
+				// Flag
+				if (meta.containsKey("flags") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
+					Construct flags = meta.get("flags", t);
+					if (!(flags instanceof CArray)) {
+						throw new CREFormatException("Item flags was expected to be an array of flags.", t);
+					}
+				}
 			}
 		}
 	}

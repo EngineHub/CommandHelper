@@ -29,6 +29,4 @@ public interface MCItemStack extends AbstractionObject{
 	public boolean hasItemMeta();
 	public MCItemMeta getItemMeta();
 	public void setItemMeta(MCItemMeta im);
-
-	public boolean isSimilar(MCItemStack item);
 }
