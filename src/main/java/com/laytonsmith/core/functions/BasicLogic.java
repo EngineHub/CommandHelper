@@ -1,12 +1,14 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
@@ -31,6 +33,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -1326,6 +1329,55 @@ public class BasicLogic {
 		new ExampleScript("Basic usage", "equals_ic('completely', 'DIFFERENT')"),};
 	}
     }
+
+    @api
+	public static class equals_item extends AbstractFunction {
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public String getName() {
+			return "equals_item";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[] {2};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] {CREFormatException.class, CRENotFoundException.class};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {itemArray1, itemArray2} Returns true or false if the item are equal.";
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCItemStack itemA = ObjectGenerator.GetGenerator().item(args[0], t);
+			MCItemStack itemB = ObjectGenerator.GetGenerator().item(args[1], t);
+			if (itemA.isSimilar(itemB)) {
+				return CBoolean.TRUE;
+			} else {
+				return CBoolean.FALSE;
+			}
+		}
+	}
 
     @api
     public static class ref_equals extends AbstractFunction {
