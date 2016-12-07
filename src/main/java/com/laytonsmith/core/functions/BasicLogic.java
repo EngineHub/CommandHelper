@@ -1379,74 +1379,147 @@ public class BasicLogic {
 			CArray itemA = (CArray) args[0];
 			CArray itemB = (CArray) args[1];
 			MCMaterial matA, matB;
-			int dataA, dataB;
-			CArray metaA = null, metaB = null;
 			Convertor convertor = StaticLayer.GetConvertor();
 
-			// Assert Material
-			if (itemA.containsKey("name") && itemB.containsKey("name")) {
-				matA = convertor.GetMaterial(itemA.get("name", t).val());
-				matB = convertor.GetMaterial(itemB.get("name", t).val());
-			} else if (itemA.containsKey("type")) {
-				matA = convertor.getMaterial(Static.getInt32(itemA.get("type", t), t));
-				matB = convertor.getMaterial(Static.getInt8(itemB.get("type", t), t));
-			} else {
+			// Material
+			boolean isContNameA = itemA.containsKey("name");
+			boolean isContNameB = itemB.containsKey("name");
+			if (!(isContNameA || itemA.containsKey("type")) ||
+					!(isContNameB || itemB.containsKey("type"))) {
 				throw new CREFormatException("Could not find item type!", t);
 			}
-			if (matA == null || matB == null) {
-				throw new CRENotFoundException("A material type could not be found based on the given id.", t);
+			if (isContNameA) {
+				matA = convertor.GetMaterial(itemA.get("name", t).val());
+			} else {
+				matA = convertor.getMaterial(Static.getInt32(itemA.get("type", t), t));
+			}
+			if (isContNameB) {
+				matB = convertor.GetMaterial(itemB.get("name", t).val());
+			} else {
+				matB = convertor.getMaterial(Static.getInt32(itemB.get("type", t), t));
+			}
+			if (matA.getType() != matB.getType()) {
+				return CBoolean.FALSE;
 			}
 			// Data
 			if (itemA.containsKey("data") && itemB.containsKey("data")) {
-				dataA = Static.getInt32(itemA.get("data", t), t);
-				dataB = Static.getInt32(itemB.get("data", t), t);
+				int dataA = Static.getInt32(itemA.get("data", t), t);
+				int dataB = Static.getInt32(itemB.get("data", t), t);
+				if (dataA != dataB) {
+					return CBoolean.FALSE;
+				}
 			} else {
 				throw new CREFormatException("Could not find item data!", t);
 			}
+
 			// Meta
-			if (itemA.containsKey("meta") && itemB.containsKey("meta")) {
-				Construct cMetaA = itemA.get("meta", t);
-				Construct cMetaB = itemB.get("meta", t);
-				assertMeta(cMetaA, t);
-				assertMeta(cMetaB, t);
-				metaA = (CArray) cMetaA;
-				metaB = (CArray) cMetaB;
+			Construct cMetaA = null, cMetaB = null;
+			if (itemA.containsKey("meta")) {
+				cMetaA = itemA.get("meta", t);
 			}
-
-			// Compare
-			boolean hasMetaA = metaA != null;
-			boolean hasMetaB = metaB != null;
-			return CBoolean.GenerateCBoolean(
-					matA.getType() == matB.getType() &&
-							dataA == dataB && hasMetaA == hasMetaB &&
-							(!hasMetaA || metaA.val().equals(metaB.val())), t);
-		}
-
-		private void assertMeta(Construct cMeta, Target t) {
-			if (cMeta instanceof CArray) {
-				CArray meta = (CArray) cMeta;
-				// Lore
-				if (meta.containsKey("lore")) {
-					Construct cLore = meta.get("lore", t);
-					if (!(cLore instanceof CString) && !(cLore instanceof CArray)) {
-						throw new CREFormatException("Lore was expected to be an array or a string.", t);
-					}
-				}
-				// Enchant
-				if (meta.containsKey("enchants")) {
-					Construct enchants = meta.get("enchants", t);
-					if (!(enchants instanceof  CArray)) {
-						throw new CREFormatException("Enchants field was expected to be an array of Enchantment arrays", t);
-					}
-				}
-				// Flag
-				if (meta.containsKey("flags") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-					Construct flags = meta.get("flags", t);
-					if (!(flags instanceof CArray)) {
-						throw new CREFormatException("Item flags was expected to be an array of flags.", t);
-					}
-				}
+			if (itemB.containsKey("meta")) {
+				cMetaB = itemB.get("meta", t);
 			}
+			boolean hasMetaA = cMetaA != null && !(cMetaA instanceof CNull);
+			if (hasMetaA == (cMetaB != null && !(cMetaB instanceof CNull))) {
+				if (hasMetaA) {
+					CArray metaA, metaB;
+					boolean cMetaIsCArr = cMetaA instanceof CArray;
+					if (cMetaIsCArr && cMetaB instanceof CArray) {
+						metaA = (CArray) cMetaA;
+						metaB = (CArray) cMetaB;
+					} else {
+						throw new CREFormatException("An array was expected but received " + (cMetaIsCArr ? cMetaB : cMetaA) + " instead.", t);
+					}
+					// Display
+					boolean isMetaContDispA = metaA.containsKey("display");
+					if (isMetaContDispA == metaB.containsKey("display")) {
+						if (isMetaContDispA) {
+							CString displayA, displayB;
+							Construct cDisplayA = metaA.get("display", t);
+							Construct cDisplayB = metaA.get("display", t);
+							if (!(cDisplayA instanceof CString) || !(cDisplayB instanceof CString)) {
+								throw new CREFormatException("Display name was expected to be an string", t);
+							}
+							displayA = (CString) cDisplayA;
+							displayB = (CString) cDisplayB;
+							if (!displayA.equals(displayB)) {
+								return CBoolean.FALSE;
+							}
+						}
+					} else {
+						return CBoolean.FALSE;
+					}
+					// Lore
+					boolean isMetaContLoreA = metaA.containsKey("lore");
+					if (isMetaContLoreA == metaB.containsKey("lore")) {
+						if (isMetaContLoreA) {
+							Construct cLoreA = metaA.get("lore", t);
+							Construct cLoreB = metaB.get("lore", t);
+							if (cLoreA.getCType() == cLoreB.getCType()) {
+								if (cLoreA instanceof CString) {
+									CString loreA = (CString) cLoreA;
+									CString loreB = (CString) cLoreB;
+									if (!loreA.equals(loreB)) {
+										return CBoolean.FALSE;
+									}
+								} else if (cLoreA instanceof CArray) {
+									CArray loreA = (CArray) cLoreA;
+									CArray loreB = (CArray) cLoreB;
+									if (!loreA.equals(loreB)) {
+										return CBoolean.FALSE;
+									}
+								} else {
+									throw new CREFormatException("Lore was expected to be an array or a string.", t);
+								}
+							} else {
+								return CBoolean.FALSE;
+							}
+						}
+					}
+					// Enchant
+					boolean isMetaContEncnA = metaA.containsKey("enchants");
+					if (isMetaContEncnA == metaB.containsKey("enchants")) {
+						if (isMetaContEncnA) {
+							Construct cEncnA = metaA.get("enchants", t);
+							Construct cEncnB = metaB.get("enchants", t);
+							if (!(cEncnA instanceof CArray) || !(cEncnB instanceof CArray)) {
+								throw new CREFormatException("Enchants field was expected to be an array of Enchantment arrays", t);
+							}
+							CArray encnA = (CArray) cEncnA;
+							CArray encnB = (CArray) cEncnB;
+							if (!encnA.equals(encnB)) {
+								return CBoolean.FALSE;
+							}
+						}
+					} else {
+						return CBoolean.FALSE;
+					}
+					// Flag
+					if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
+						boolean isMetaContFlagA = metaA.containsKey("flags");
+						if (isMetaContFlagA == metaA.containsKey("flags")) {
+							if (isMetaContFlagA) {
+								Construct cFlagA = metaA.get("enchants", t);
+								Construct cFlagB = metaB.get("enchants", t);
+								if (!(cFlagA instanceof CArray) || !(cFlagB instanceof CArray)) {
+									throw new CREFormatException("Enchants field was expected to be an array of Enchantment arrays", t);
+								}
+								CArray encnA = (CArray) cFlagA;
+								CArray encnB = (CArray) cFlagB;
+								if (!encnA.equals(encnB)) {
+									return CBoolean.FALSE;
+								}
+							}
+						} else {
+							return CBoolean.FALSE;
+						}
+					}
+				}
+			} else {
+				return CBoolean.FALSE;
+			}
+			return CBoolean.TRUE;
 		}
 	}
 
@@ -1883,7 +1956,7 @@ public class BasicLogic {
 	    // TODO: Can't do this yet, because children of side effect free functions may still have side effects that
 	    // we need to maintain. However, with complications introduced by code branch functions, we can't process
 	    // this yet.
-//			if(foundFalse){
+//			if(foundFalse){`
 //				//However, we can remove any functions that have no side effects that come before the false.
 //				it = children.iterator();
 //				while(it.hasNext()){

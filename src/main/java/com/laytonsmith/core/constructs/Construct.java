@@ -466,6 +466,18 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	public Version since() {
 		throw new UnsupportedOperationException();
 	}
-	
-	
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Construct) {
+			if (obj instanceof CArray) {
+				CArray array = (CArray) obj;
+				return array.val().equals(val());
+			} else {
+				Construct conzt = (Construct) obj;
+				return conzt.val().equals(val());
+			}
+		}
+		return false;
+	}
 }
