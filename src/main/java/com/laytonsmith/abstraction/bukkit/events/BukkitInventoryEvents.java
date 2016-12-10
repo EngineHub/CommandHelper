@@ -195,6 +195,11 @@ public class BukkitInventoryEvents {
 		}
 
 		@Override
+		public int getHotbarButton() {
+			return ic.getHotbarButton();
+		}
+
+		@Override
 		public MCSlotType getSlotType() {
 			return MCSlotType.valueOf(ic.getSlotType().name());
 		}

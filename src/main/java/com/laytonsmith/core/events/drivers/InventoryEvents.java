@@ -125,6 +125,7 @@ public class InventoryEvents {
 
 				map.put("slot", new CInt(e.getSlot(), Target.UNKNOWN));
 				map.put("rawslot", new CInt(e.getRawSlot(), Target.UNKNOWN));
+				map.put("hotbarbutton", new CInt(e.getHotbarButton(), Target.UNKNOWN));
 				map.put("slottype", new CString(e.getSlotType().name(), Target.UNKNOWN));
 				map.put("slotitem", ObjectGenerator.GetGenerator().item(e.getCurrentItem(), Target.UNKNOWN));
 

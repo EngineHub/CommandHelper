@@ -18,6 +18,7 @@ public interface MCInventoryClickEvent extends MCInventoryInteractEvent {
 	public MCItemStack getCursor();
 	public int getSlot();
 	public int getRawSlot();
+	public int getHotbarButton();
 	public MCSlotType getSlotType();
 	@Override
 	public MCHumanEntity getWhoClicked();
