@@ -869,6 +869,11 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
+		public MCEntity getEntity() {
+			return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity());
+		}
+
+		@Override
 		public MCRegainReason getRegainReason() {
 			return BukkitMCRegainReason.getConvertor().getAbstractedEnum(e.getRegainReason());
 		}

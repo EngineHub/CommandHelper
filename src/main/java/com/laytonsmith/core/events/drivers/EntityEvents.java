@@ -1844,12 +1844,14 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{reason: <macro>} " +
-					"Fired when an entity regained the health. " +
-					"{amount: The amount of regained the health | " +
-					"cause: The cause of regain, one of: " + StringUtils.Join(MCRegainReason.values(), ", ") + "} " +
-					"{amount} " +
-					"{}";
+			return "{reason: <macro>}" +
+					" Fired when an entity regained the health." +
+					" {id: The entity ID of regained entity" +
+					" amount: The amount of regained the health |" +
+					" cause: The cause of regain, one of: " + StringUtils.Join(MCRegainReason.values(), ", ") +
+					" player: The regained player}" +
+					" {amount}" +
+					" {}";
 		}
 
 		@Override
@@ -1873,6 +1875,7 @@ public class EntityEvents {
 				MCEntityRegainHealthEvent event = (MCEntityRegainHealthEvent) e;
 
 				Map<String, Construct> ret = evaluate_helper(e);
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), Target.UNKNOWN));
 				ret.put("amount", new CDouble(event.getAmount(), Target.UNKNOWN));
 				ret.put("reason", new CString(event.getRegainReason().name(), Target.UNKNOWN));
 				return ret;
@@ -1891,7 +1894,7 @@ public class EntityEvents {
 			if (event instanceof MCEntityRegainHealthEvent) {
 				MCEntityRegainHealthEvent e = (MCEntityRegainHealthEvent) event;
 				if (key.equalsIgnoreCase("amount")) {
-					e.setAmount(Static.getInt32(value, Target.UNKNOWN));
+					e.setAmount(Static.getDouble32(value, Target.UNKNOWN));
 					return true;
 				}
 			}
