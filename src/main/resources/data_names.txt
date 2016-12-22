@@ -691,6 +691,7 @@
 448_0=Dark Oak Boat
 449_0=Totem of Undying
 450_0=Shulker Shell
+452_0=Iron Nugget
 2256_0=Music Disc - 13
 2257_0=Music Disc - cat
 2258_0=Music Disc - blocks

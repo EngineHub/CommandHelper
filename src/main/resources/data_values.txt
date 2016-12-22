@@ -8251,6 +8251,7 @@ darkoakboat=448:0
 totemofundying=449:0
 totem=449:0
 shulkershell=450:0
+ironnugget=452:0
 musicdisc13=2256:0
 13disc=2256:0
 goldmusicrecord=2256:0
