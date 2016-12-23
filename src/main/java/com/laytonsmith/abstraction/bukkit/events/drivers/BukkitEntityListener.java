@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEnti
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDeathEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityExplodeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityInteractEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityToggleGlideEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCFireworkExplodeEvent;
@@ -168,5 +169,11 @@ public class BukkitEntityListener implements Listener {
 	public void onFireworkExplode(Event event) {
 		BukkitMCFireworkExplodeEvent fee = new BukkitMCFireworkExplodeEvent(event);
 		EventUtils.TriggerListener(Driver.FIREWORK_EXPLODE, "firework_explode", fee);
+	}
+
+	@EventIdentifier(event = Driver.ENTITY_REGAIN_HEALTH, className = "org.bukkit.event.entity.EntityRegainHealthEvent")
+	public void onRegainHealth(Event event) {
+		BukkitMCEntityRegainHealthEvent erhe = new BukkitMCEntityRegainHealthEvent(event);
+		EventUtils.TriggerListener(Driver.ENTITY_REGAIN_HEALTH, "entity_regain_health", erhe);
 	}
 }

@@ -29,12 +29,14 @@ import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCMobs;
+import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRegainReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRemoveCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
@@ -46,6 +48,7 @@ import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
 import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
 import com.laytonsmith.abstraction.events.MCEntityInteractEvent;
+import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
 import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
@@ -73,6 +76,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.entity.FireworkExplodeEvent;
@@ -839,5 +843,39 @@ public class BukkitEntityEvents {
 			return new BukkitMCFirework(e.getEntity());
 		}
 
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCEntityRegainHealthEvent implements MCEntityRegainHealthEvent {
+		EntityRegainHealthEvent e;
+
+		public BukkitMCEntityRegainHealthEvent(Event e) {
+			this.e = (EntityRegainHealthEvent) e;
+		}
+
+		@Override
+		public Object _GetObject() {
+			return e;
+		}
+
+		@Override
+		public double getAmount() {
+			return e.getAmount();
+		}
+
+		@Override
+		public void setAmount(double amount) {
+			e.setAmount(amount);
+		}
+
+		@Override
+		public MCEntity getEntity() {
+			return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity());
+		}
+
+		@Override
+		public MCRegainReason getRegainReason() {
+			return BukkitMCRegainReason.getConvertor().getAbstractedEnum(e.getRegainReason());
+		}
 	}
 }

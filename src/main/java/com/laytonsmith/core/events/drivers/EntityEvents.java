@@ -18,6 +18,7 @@ import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCMobs;
+import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
@@ -28,6 +29,7 @@ import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
 import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
 import com.laytonsmith.abstraction.events.MCEntityInteractEvent;
+import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
 import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
@@ -1824,6 +1826,78 @@ public class EntityEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+	public static class entity_regain_health extends AbstractEvent {
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public String getName() {
+			return "entity_regain_health";
+		}
+
+		@Override
+		public String docs() {
+			return "{reason: <macro>}" +
+					" Fired when an entity regained the health." +
+					" {id: The entity ID of regained entity" +
+					" amount: The amount of regained the health |" +
+					" cause: The cause of regain, one of: " + StringUtils.Join(MCRegainReason.values(), ", ") +
+					" player: The regained player}" +
+					" {amount}" +
+					" {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if (e instanceof MCEntityRegainHealthEvent) {
+				MCEntityRegainHealthEvent event = (MCEntityRegainHealthEvent) e;
+				Prefilters.match(prefilter, "reason", event.getRegainReason().name(), PrefilterType.MACRO);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if (e instanceof MCEntityRegainHealthEvent) {
+				MCEntityRegainHealthEvent event = (MCEntityRegainHealthEvent) e;
+
+				Map<String, Construct> ret = evaluate_helper(e);
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), Target.UNKNOWN));
+				ret.put("amount", new CDouble(event.getAmount(), Target.UNKNOWN));
+				ret.put("reason", new CString(event.getRegainReason().name(), Target.UNKNOWN));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCEntityRegainHealthEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ENTITY_REGAIN_HEALTH;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCEntityRegainHealthEvent) {
+				MCEntityRegainHealthEvent e = (MCEntityRegainHealthEvent) event;
+				if (key.equalsIgnoreCase("amount")) {
+					e.setAmount(Static.getDouble32(value, Target.UNKNOWN));
+					return true;
+				}
+			}
 			return false;
 		}
 	}
