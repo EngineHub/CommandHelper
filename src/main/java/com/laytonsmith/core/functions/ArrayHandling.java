@@ -3009,120 +3009,120 @@ public class ArrayHandling {
 						+ "msg(@areas);")
 			};
 		}
-		
-		@api
-		public static class array_subset_of extends AbstractFunction {
-			@Override
-			public Version since() {
-				return CHVersion.V3_3_2;
-			}
+	}
 
-			@Override
-			public String getName() {
-				return "array_subset_of";
-			}
+	@api
+	public static class array_subset_of extends AbstractFunction {
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
 
-			@Override
-			public Integer[] numArgs() {
-				return new Integer[] {2};
-			}
+		@Override
+		public String getName() {
+			return "array_subset_of";
+		}
 
-			@Override
-			public Class<? extends CREThrowable>[] thrown() {
-				return new Class[] {CREIllegalArgumentException.class};
-			}
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[] {2};
+		}
 
-			@Override
-			public String docs() {
-				return "boolean {array, array} " +
-						"Returns true if first array is a subset of second array.";
-			}
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] {CREIllegalArgumentException.class};
+		}
 
-			@Override
-			public boolean isRestricted() {
+		@Override
+		public String docs() {
+			return "boolean {array, array} " +
+					"Returns true if first array is a subset of second array.";
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Construct constA = args[0];
+			Construct constB = args[1];
+			if (!(constA instanceof CArray)) {
+				throw new CREIllegalArgumentException("Expecting an array, but received " + constA, t);
+			}
+			if (!(constB instanceof CArray)) {
+				throw new CREIllegalArgumentException("Expecting an array, but received " + constB, t);
+			}
+			return CBoolean.get(subsetOf(constA, constB, t));
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[] {
+					new ExampleScript("Basic usage",
+							"@arrayA = array(0, 1)\n" +
+									"@arrayB = array(0, 1, 5, 9)\n" +
+									"array_subset_of(@arrayA, @arrayB)"),
+					new ExampleScript("Basic usage",
+							"@arrayA = array(0, 1)\n" +
+									"@arrayB = array(0, 2, 5, 9)\n" +
+									"array_subset_of(@arrayA, @arrayB)"),
+					new ExampleScript("Mix array",
+							"@arrayA = array(a: 1, b: array(one, two))\n" +
+									"@arrayB = array(a: 1, b: array(one, two, three), c: 3)\n" +
+									"array_subset_of(@arrayA, @arrayB)"),
+					new ExampleScript("Mix array",
+							"@arrayA = array(a: 1, b: array(one, two))\n" +
+									"@arrayB = array(a: 1, b: array(two, one, three), c: 3)\n" +
+									"array_subset_of(@arrayA, @arrayB)")
+			};
+		}
+
+		public boolean subsetOf(Construct constA, Construct constB, Target t) {
+			if (constA.getCType() != constB.getCType()) {
 				return false;
 			}
-
-			@Override
-			public Boolean runAsync() {
-				return null;
-			}
-
-			@Override
-			public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-				Construct constA = args[0];
-				Construct constB = args[1];
-				if (!(constA instanceof CArray)) {
-					throw new CREIllegalArgumentException("Expecting an array, but received " + constA, t);
-				}
-				if (!(constB instanceof CArray)) {
-					throw new CREIllegalArgumentException("Expecting an array, but received " + constB, t);
-				}
-				return CBoolean.get(subsetOf(constA, constB, t));
-			}
-
-			@Override
-			public ExampleScript[] examples() throws ConfigCompileException {
-				return new ExampleScript[] {
-						new ExampleScript("Basic usage",
-								"@arrayA = array(0, 1)\n" +
-										"@arrayB = array(0, 1, 5, 9)\n" +
-										"array_subset_of(@arrayA, @arrayB)"),
-						new ExampleScript("Basic usage",
-								"@arrayA = array(0, 1)\n" +
-										"@arrayB = array(0, 2, 5, 9)\n" +
-										"array_subset_of(@arrayA, @arrayB)"),
-						new ExampleScript("Mix array",
-								"@arrayA = array(a: 1, b: array(one, two))\n" +
-										"@arrayB = array(a: 1, b: array(one, two, three), c: 3)\n" +
-										"array_subset_of(@arrayA, @arrayB)"),
-						new ExampleScript("Mix array",
-								"@arrayA = array(a: 1, b: array(one, two))\n" +
-										"@arrayB = array(a: 1, b: array(two, one, three), c: 3)\n" +
-										"array_subset_of(@arrayA, @arrayB)")
-				};
-			}
-
-			public boolean subsetOf(Construct constA, Construct constB, Target t) {
-				if (constA.getCType() != constB.getCType()) {
+			if (constA instanceof CArray) {
+				CArray arrA = (CArray) constA;
+				CArray arrB = (CArray) constB;
+				if (arrA.isAssociative() != arrB.isAssociative()) {
 					return false;
 				}
-				if (constA instanceof CArray) {
-					CArray arrA = (CArray) constA;
-					CArray arrB = (CArray) constB;
-					if (arrA.isAssociative() != arrB.isAssociative()) {
-						return false;
-					}
-					if (arrA.isAssociative()) {
-						for (String key : arrA.stringKeySet()) {
-							if (!arrB.containsKey(key)) {
-								return false;
-							}
-							Construct eltA = arrA.get(key, t);
-							Construct eltB = arrB.get(key, t);
-							if (!subsetOf(eltA, eltB, t)) {
-								return false;
-							}
+				if (arrA.isAssociative()) {
+					for (String key : arrA.stringKeySet()) {
+						if (!arrB.containsKey(key)) {
+							return false;
 						}
-					} else {
-						for (int i = 0; i < arrA.size(); i++) {
-							if (!arrB.containsKey(i)) {
-								return false;
-							}
-							Construct eltA = arrA.get(i, t);
-							Construct eltB = arrB.get(i, t);
-							if (!subsetOf(eltA, eltB, t)) {
-								return false;
-							}
+						Construct eltA = arrA.get(key, t);
+						Construct eltB = arrB.get(key, t);
+						if (!subsetOf(eltA, eltB, t)) {
+							return false;
 						}
 					}
 				} else {
-					if (!equals.doEquals(constA, constB)) {
-						return false;
+					for (int i = 0; i < arrA.size(); i++) {
+						if (!arrB.containsKey(i)) {
+							return false;
+						}
+						Construct eltA = arrA.get(i, t);
+						Construct eltB = arrB.get(i, t);
+						if (!subsetOf(eltA, eltB, t)) {
+							return false;
+						}
 					}
 				}
-				return true;
+			} else {
+				if (!equals.doEquals(constA, constB)) {
+					return false;
+				}
 			}
+			return true;
 		}
 	}
 }
