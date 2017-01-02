@@ -452,6 +452,9 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	public static MCItemMeta BukkitGetCorrectMeta(ItemMeta im) {
 		MCVersion version = Static.getServer().getMinecraftVersion();
+		if (version.gte(MCVersion.MC1_11_X) && im instanceof SpawnEggMeta) {
+			return new BukkitMCSpawnEggMeta((SpawnEggMeta) im);
+		}
 		if (version.gte(MCVersion.MC1_8_6) && im instanceof BlockStateMeta) {
 			return new BukkitMCBlockStateMeta((BlockStateMeta) im);
 		}

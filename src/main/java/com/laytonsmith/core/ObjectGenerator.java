@@ -29,6 +29,7 @@ import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCShapedRecipe;
 import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
+import com.laytonsmith.abstraction.MCSpawnEggMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBanner;
@@ -533,6 +534,13 @@ public class ObjectGenerator {
 				if(dyeColor != null) {
 					ma.set("basecolor", new CString(dyeColor.toString(), t), t);
 				}
+			} else if (meta instanceof MCSpawnEggMeta) {
+				MCEntityType spawntype = ((MCSpawnEggMeta) meta).getSpawnedType();
+				if(spawntype == null) {
+					ma.set("spawntype", CNull.NULL, t);
+				} else {
+					ma.set("spawntype", new CString(spawntype.name(), t), t);
+				}
 			}
 			ret = ma;
 		}
@@ -791,6 +799,13 @@ public class ObjectGenerator {
 							MCPatternShape shape = MCPatternShape.valueOf(pattern.get("shape", t).val().toUpperCase());
 							MCDyeColor color = MCDyeColor.valueOf(pattern.get("color", t).val().toUpperCase());
 							((MCBannerMeta) meta).addPattern(StaticLayer.GetConvertor().GetPattern(color, shape));
+						}
+					}
+				} else if (meta instanceof MCSpawnEggMeta) {
+					if (ma.containsKey("spawntype")) {
+						Construct spawntype = ma.get("spawntype", t);
+						if(spawntype instanceof CString) {
+							((MCSpawnEggMeta) meta).setSpawnedType(MCEntityType.valueOf(spawntype.val().toUpperCase()));
 						}
 					}
 				}
