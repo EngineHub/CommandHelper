@@ -1279,12 +1279,14 @@ public class EntityEvents {
 
 		@Override
         public String docs() {
-            return "{player: <string match> | mobtype: <macro>} "
-            		+ "This event is called when a player is targeted by another entity."
-                    + "{player: The player's name | mobtype: The type of mob targeting "
-                    + "the player (this will be all capitals!) | id: The EntityID of the mob}"
-                    + "{player: target a different player, or null to make the mob re-look for targets}"
-                    + "{player|mobtype}";
+			return "{player: <macro> | mobtype: <macro> | reason: <macro>} "
+					+ "This event is called when a player is targeted by a mob."
+					+ "{player: The player's name | mobtype: The type of mob targeting "
+					+ "the player (this will be all capitals!) | id: The UUID of the mob"
+					+ " | reason: The reason the entity is targeting the player. Can be one of "
+					+ StringUtils.Join(MCDamageCause.values(), ", ", ", or ", " or ") + "}"
+					+ "{player: target a different player, or null to make the mob re-look for targets}"
+					+ "{player|mobtype|reason}";
         }
 
 		@Override
@@ -1299,24 +1301,14 @@ public class EntityEvents {
 
 		@Override
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-        	if(e instanceof MCEntityTargetEvent){
-        		MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
-
-        		Prefilters.match(prefilter, "mobtype", ete.getEntityType().name(), Prefilters.PrefilterType.MACRO);
-
-        		MCEntity target = ete.getTarget();
-        		if (target == null) {
-        			return false;
-        		}
-
-        		if (target instanceof MCPlayer) {
-	        		Prefilters.match(prefilter, "player", ((MCPlayer)target).getName(), Prefilters.PrefilterType.MACRO);
-
-	        		return true;
-	        	}
-        	}
-
-        	return false;
+			if(e instanceof MCEntityTargetEvent) {
+				MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
+				Prefilters.match(prefilter, "mobtype", ete.getEntityType().name(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(prefilter, "player", ((MCPlayer) ete.getTarget()).getName(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(prefilter, "reason", ete.getReason().name(), Prefilters.PrefilterType.MACRO);
+				return true;
+			}
+			return false;
         }
 
 		@Override
@@ -1325,17 +1317,10 @@ public class EntityEvents {
                 MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
 
-                String name = "";
-                MCEntity target = ete.getTarget();
-                if (target instanceof MCPlayer) {
-                	name = ((MCPlayer)ete.getTarget()).getName();
-                }
-
-                map.put("player", new CString(name, Target.UNKNOWN));
-
-                String type = ete.getEntityType().name();
-                map.put("mobtype", new CString(type, Target.UNKNOWN));
+				map.put("player", new CString(((MCPlayer)ete.getTarget()).getName(), Target.UNKNOWN));
+				map.put("mobtype", new CString(ete.getEntityType().name(), Target.UNKNOWN));
 				map.put("id", new CString(ete.getEntity().getUniqueId().toString(), Target.UNKNOWN));
+				map.put("reason", new CString(ete.getReason().name(), Target.UNKNOWN));
 
                 return map;
             } else {

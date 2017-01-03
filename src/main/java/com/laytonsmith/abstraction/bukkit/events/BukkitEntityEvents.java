@@ -653,6 +653,7 @@ public class BukkitEntityEvents {
             return BukkitConvertor.BukkitGetCorrectEntity(pie.getEntity()).getType();
         }
 
+		@Override
         public MCTargetReason getReason() {
             return MCTargetReason.valueOf(pie.getReason().name());
         }
