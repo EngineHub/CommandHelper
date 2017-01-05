@@ -3496,16 +3496,14 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer m;
 			String listName;
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0], t);
 				listName = args[1].nval();
 			} else {
+				m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				listName = args[0].nval();
-			}
-			if (listName != null && listName.length() > 16) {
-				throw new CRELengthException("set_list_name([player,] name) expects name to be 16 characters or less", t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setPlayerListName(listName);
