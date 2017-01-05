@@ -3481,7 +3481,8 @@ public class PlayerManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREFormatException.class};
+			return new Class[]{CREPlayerOfflineException.class,
+					CRELengthException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -3506,7 +3507,18 @@ public class PlayerManagement {
 				listName = args[0].nval();
 			}
 			Static.AssertPlayerNonNull(m, t);
-			m.setPlayerListName(listName);
+			try {
+				m.setPlayerListName(listName);
+			} catch(IllegalArgumentException e) {
+				if(listName.length() > 16) {
+					throw new CRELengthException("set_list_name([player,] name)"
+							+ " expects name to be 16 characters or less for MineCraft versions prior to 1.8.", t);
+				} else {
+					throw new CREIllegalArgumentException("set_list_name([player,] name)"
+							+ " was called with a name that is already in use."
+							+ " (This will no longer cause an Exception for MineCraft versions 1.8 and higher).", t);
+				}
+			}
 			return CVoid.VOID;
 		}
 
@@ -3522,11 +3534,12 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], [listName]} Sets the player's list name."
-					+ " The name cannot be longer than 16 characters, but colors are supported."
-					+ " Setting the name to null resets it. If the name specified is already taken,"
-					+ " a FormatException is thrown, and if the length of the name is greater than 16"
-					+ " characters, a LengthException is thrown.";
+			return "void {[player], [listName]} Sets the player's list name. Colors are supported"
+					+ " and setting the name to null resets it."
+					+ " MineCraft versions prior to 1.8 have a limit of 16 characters for the name."
+					+ " In these versions, an IllegalArgumentException is thrown if the name specified is already"
+					+ " taken and a LengthException is thrown when the name is greater than 16 characters."
+					+ " In versions 1.8 and higher, specifying an already taken name will be silently ignored.";
 		}
 
 		@Override
