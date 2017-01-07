@@ -21,6 +21,7 @@ import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
+import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
@@ -1009,7 +1010,7 @@ public class EntityEvents {
 
 		@Override
         public String docs() {
-            return "{player: <string match> | item: <item match>} "
+            return "{player: <macro match> | item: <item match>} "
                     + "This event is called when a player drops an item. "
                     + "{player: The player | item: An item array representing "
                     + "the item being dropped. } "
@@ -1088,7 +1089,7 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <string match> | item: <item match>} "
+			return "{player: <macro match> | item: <item match>} "
 				+ "This event is called when a player picks up an item."
 				+ "{player: The player | item: An item array representing "
 				+ "the item being picked up | "
@@ -1174,7 +1175,7 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{id: <macro> The entityID | damager: <string match>} "
+			return "{id: <macro match> The entityID | damager: <macro match>} "
 					+ "This event is called when a player is damaged by another entity."
 					+ "{player: The player being damaged | damager: The type of entity causing damage"
 					+ " | amount: raw amount of damage caused | finalamount: health player will lose after modifiers"
@@ -1284,7 +1285,7 @@ public class EntityEvents {
 					+ "{player: The player's name | mobtype: The type of mob targeting "
 					+ "the player (this will be all capitals!) | id: The UUID of the mob"
 					+ " | reason: The reason the entity is targeting the player. Can be one of "
-					+ StringUtils.Join(MCDamageCause.values(), ", ", ", or ", " or ") + "}"
+					+ StringUtils.Join(MCTargetReason.values(), ", ", ", or ", " or ") + "}"
 					+ "{player: target a different player, or null to make the mob re-look for targets}"
 					+ "{player|mobtype|reason}";
         }

@@ -342,7 +342,11 @@ public class VehicleEvents {
 		@Override
 		public String docs() {
 			return "{vehicletype: <macro> the entitytype of the vehicle | passengertype: <macro>"
-					+ " the enitytype of the passenger | world: <string> the world the vehicle is in}"
+					+ " the enitytype of the passenger | world: <string> the world the vehicle is in"
+					+ "| from: <location match> This should be a location array (x, y, z, world)."
+					+ "| to: <location match> The location the vehicle is now in."
+					+ "| threshold: <custom> The minimum distance the vehicle must have travelled before the event"
+					+ " will be triggered. This is based on the 3D distance, and is measured in block units.}"
 					+ " Fires when a vehicle is moving. Due to the high frequency of this event, prefilters are"
 					+ " extremely important to use -- especially threshold."
 					+ "{world | from: Get the previous position | to: Get the next position"

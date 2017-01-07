@@ -674,7 +674,7 @@ public class BlockEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <string match> | cause: <macro> | world: <macro>} "
+			return "{player: <macro match> | cause: <macro match> | world: <string match>} "
 					+ "This event is called when a block or entity is ignited."
 					+ "{player: The player's name | ignitingentity: entity ID, if entity is ignited | ignitingblock:"
 					+ " block ID, if block is ignited | location: the locationArray of block or entity | cause:"
@@ -875,8 +875,8 @@ public class BlockEvents {
 
 		@Override
         public String docs() {
-            return "{player: <string match> | 1: <macro> | 2: <macro> | "
-                    + "3: <macro> | 4: <macro> } "
+            return "{player: <string match> | 1: <regex> | 2: regex> | "
+                    + "3: <regex> | 4: <regex> } "
                     + "This event is called when a player changes a sign. "
                     + "Cancelling the event cancels any edits completely."
                     + "{player: The player's name | location: an array usable as a locationArray while also "

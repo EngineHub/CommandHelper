@@ -1963,8 +1963,9 @@ public class BasicLogic {
 
 	@Override
 	public String docs() {
-	    return "boolean {var1, [var2...]} Returns the boolean value of a logical OR across all arguments. Uses lazy determination, so once an "
-		    + "argument resolves to true, the function returns. Operator syntax is also supported: @a || @b";
+		return "boolean {var1, [var2...]} Returns the boolean value of a logical OR across all arguments. Uses lazy"
+				+ " determination, so once an argument resolves to true, the function returns. Operator syntax is also"
+				+ " supported: @a <nowiki>||</nowiki> @b";
 	}
 
 	@Override

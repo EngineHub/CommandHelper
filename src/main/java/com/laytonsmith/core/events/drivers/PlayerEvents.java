@@ -322,8 +322,8 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro> The player that teleport. Switching worlds will trigger this event, but world_changed is called "
-				+ "after, only if this isn't cancelled first."
+			return "{player: <string match> The player that teleport. Switching worlds will trigger this event, but"
+				+ " world_changed is called after, only if this isn't cancelled first. | type: <string match>"
 				+ "| from: <location match> This should be a location array (x, y, z, world)."
 				+ "| to: <location match> The location the player is now in. This should be a location array as well.} "
 				+ "{player | from: The location the player is coming from | to: The location the player is now in | "
@@ -424,7 +424,7 @@ public class PlayerEvents {
 		public String docs() {
 			return "{player: <macro> | from: <location match> This should be a location array (x, y, z, world)."
 					+ " | to: <location match> The location the player is coming to. This should be a location array as well."
-					+ " | type: the type of portal occuring, one of: " +  StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
+					+ " | type: <macro> the type of portal occuring, one of: " +  StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
 					+ "Fired when a player collides with portal."
 					+ "{player: The player that teleport | from: The location the player is coming from"
 					+ " | to: The location the player is coming to. Returns null when using Nether portal and \"allow-nether\""
@@ -833,7 +833,7 @@ public class PlayerEvents {
                     + " | button: <string match> left or right. If they left or right clicked |"
                     + " item: <item match> The item they are holding when they interacted |"
                     + " hand: <string match> The hand the player clicked with |"
-                    + " player: <string match> The player that triggered the event} "
+                    + " player: <macro match> The player that triggered the event} "
                     + "Fires when a player left or right clicks a block or the air"
                     + "{action: One of either: left_click_block, right_click_block, left_click_air, or right_click_air |"
                     + "block: The id of the block they clicked, or 0 if they clicked the air. If they clicked the air, "
