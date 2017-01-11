@@ -30,8 +30,6 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import org.bukkit.Bukkit;
 import org.bukkit.Note;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.*;
@@ -125,6 +123,8 @@ public class BukkitBlockEvents {
     public static class BukkitMCBlockBreakEvent implements MCBlockBreakEvent {
 
         BlockBreakEvent event;
+        boolean dropsModified = false;
+        List<MCItemStack> drops = null;
 
         public BukkitMCBlockBreakEvent(BlockBreakEvent e) {
             event = e;
@@ -153,6 +153,22 @@ public class BukkitBlockEvents {
 		@Override
 		public void setExpToDrop(int exp) {
 			event.setExpToDrop(exp);
+		}
+
+		@Override
+		public List<MCItemStack> getDrops() {
+        	return this.drops;
+		}
+
+		@Override
+		public void setDrops(List<MCItemStack> drops) {
+			dropsModified = true;
+			this.drops = drops;
+		}
+
+		@Override
+		public boolean isModified() {
+        	return dropsModified;
 		}
     }
 

@@ -1,17 +1,25 @@
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.events.BukkitBlockEvents;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.PluginManager;
 
 /**
  *
@@ -74,12 +82,44 @@ public class BukkitBlockListener implements Listener{
 		BukkitBlockEvents.BukkitMCBlockPlaceEvent bpe = new BukkitBlockEvents.BukkitMCBlockPlaceEvent(e);
         EventUtils.TriggerListener(Driver.BLOCK_PLACE, "block_place", bpe);
     }
+
+	private static boolean ignorebreak = false;
 	
 	@EventHandler(priority=EventPriority.LOWEST)
-    public void onBlockBreak(BlockBreakEvent e){
+	public void onBlockBreak(BlockBreakEvent e){
+		if(ignorebreak){
+			return;
+		}
 		BukkitBlockEvents.BukkitMCBlockBreakEvent bbe = new BukkitBlockEvents.BukkitMCBlockBreakEvent(e);
-        EventUtils.TriggerListener(Driver.BLOCK_BREAK, "block_break", bbe);
-    }
+		EventUtils.TriggerListener(Driver.BLOCK_BREAK, "block_break", bbe);
+		if(bbe.isModified() && !e.isCancelled()) {
+			e.setCancelled(true);
+			// If we've modified the drops, create a new event for other plugins (eg. block loggers, region protection)
+			BlockBreakEvent chevent = new BlockBreakEvent(e.getBlock(), e.getPlayer());
+			chevent.setExpToDrop(bbe.getExpToDrop());
+			PluginManager manager = Bukkit.getServer().getPluginManager();
+			ignorebreak = true;
+			try {
+				manager.callEvent(chevent);
+			} finally {
+				ignorebreak = false;
+			}
+			if (!chevent.isCancelled()) {
+				Block block = chevent.getBlock();
+				block.setType(Material.AIR);
+				Location loc = block.getLocation();
+				loc.add(0.5, 0.5, 0.5);
+				for (MCItemStack item : bbe.getDrops()) {
+					block.getWorld().dropItemNaturally(loc, (ItemStack) item.getHandle());
+				}
+				int amt = chevent.getExpToDrop();
+				if(amt > 0) {
+					ExperienceOrb exp = (ExperienceOrb) block.getWorld().spawnEntity(loc, EntityType.EXPERIENCE_ORB);
+					exp.setExperience(amt);
+				}
+			}
+		}
+	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockDispense(BlockDispenseEvent e) {
