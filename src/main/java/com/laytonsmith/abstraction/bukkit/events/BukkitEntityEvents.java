@@ -10,11 +10,14 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
+import com.laytonsmith.abstraction.MCTravelAgent;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCTravelAgent;
+import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
@@ -48,6 +51,7 @@ import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
 import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
 import com.laytonsmith.abstraction.events.MCEntityInteractEvent;
+import com.laytonsmith.abstraction.events.MCEntityPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
@@ -63,6 +67,9 @@ import com.laytonsmith.abstraction.events.MCPotionSplashEvent;
 import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
 import com.laytonsmith.abstraction.events.MCProjectileLaunchEvent;
 import com.laytonsmith.annotations.abstraction;
+import org.bukkit.Location;
+import org.bukkit.TravelAgent;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -76,6 +83,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
+import org.bukkit.event.entity.EntityPortalEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
@@ -877,6 +885,65 @@ public class BukkitEntityEvents {
 		@Override
 		public MCRegainReason getRegainReason() {
 			return BukkitMCRegainReason.getConvertor().getAbstractedEnum(e.getRegainReason());
+		}
+	}
+
+	public static class BukkitMCEntityPortalEvent implements MCEntityPortalEvent {
+
+		EntityPortalEvent epe;
+
+		public BukkitMCEntityPortalEvent(Event event) {
+			epe = (EntityPortalEvent) event;
+		}
+
+		@Override
+		public Object _GetObject() {
+			return epe;
+		}
+
+		@Override
+		public MCEntity getEntity() {
+			return new BukkitMCEntity(epe.getEntity());
+		}
+
+		@Override
+		public void setTo(MCLocation newloc) {
+			World w = (World) newloc.getWorld().getHandle();
+			Location loc = new Location(w, newloc.getX(), newloc.getY(), newloc.getZ());
+			epe.setTo(loc);
+		}
+
+		@Override
+		public MCLocation getFrom() {
+			return new BukkitMCLocation(epe.getFrom());
+		}
+
+		@Override
+		public MCLocation getTo() {
+			if (epe.getTo() == null) {
+				return null;
+			}
+			return new BukkitMCLocation(epe.getTo());
+		}
+
+		@Override
+		public void setCancelled(boolean state) {
+			epe.setCancelled(state);
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return epe.isCancelled();
+		}
+
+		@Override
+		public void useTravelAgent(boolean useTravelAgent) {
+			epe.useTravelAgent(useTravelAgent);
+		}
+
+		@Override
+		public MCTravelAgent getPortalTravelAgent() {
+			return new BukkitMCTravelAgent(epe.getPortalTravelAgent());
 		}
 	}
 }
