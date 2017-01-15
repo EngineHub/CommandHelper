@@ -30,6 +30,7 @@ import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
 import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
 import com.laytonsmith.abstraction.events.MCEntityInteractEvent;
+import com.laytonsmith.abstraction.events.MCEntityPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
@@ -1881,6 +1882,105 @@ public class EntityEvents {
 				MCEntityRegainHealthEvent e = (MCEntityRegainHealthEvent) event;
 				if (key.equalsIgnoreCase("amount")) {
 					e.setAmount(Static.getDouble32(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	@api
+	public static class entity_portal_travel extends AbstractEvent {
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public String getName() {
+			return "entity_portal_travel";
+		}
+
+		@Override
+		public String docs() {
+			return "{type: <macro>}"
+					+ " Fired when an entity travels through a portal."
+					+ " {id: The UUID of entity | type: The type of entity"
+					+ " | from: The location the entity is coming from"
+					+ " | to: The location the entity is going to. Returns null when using Nether portal and "
+					+ " \"allow-nether\" in server.properties is set to false or when using Ender portal and "
+					+ " \"allow-end\" in bukkit.yml is set to false."
+					+ " | creationradius: The maximum radius from the given location to create a portal."
+					+ " | searchradius: The search radius value for finding an available portal.}"
+					+ " {to|creationradius|searchradius}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if (e instanceof MCEntityPortalEvent) {
+				MCEntityPortalEvent event = (MCEntityPortalEvent) e;
+				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.MACRO);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if (e instanceof MCEntityPortalEvent) {
+				MCEntityPortalEvent event = (MCEntityPortalEvent) e;
+				Map<String, Construct> ret = new HashMap<>();
+				Target t = Target.UNKNOWN;
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
+				ret.put("type", new CString(event.getEntity().getType().name(), t));
+				ret.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
+				MCLocation to = event.getTo();
+				if(to == null) {
+					ret.put("to", CNull.NULL);
+				} else {
+					ret.put("to", ObjectGenerator.GetGenerator().location(to));
+				}
+				ret.put("creationradius", new CInt(event.getPortalTravelAgent().getCreationRadius(), t));
+				ret.put("searchradius", new CInt(event.getPortalTravelAgent().getSearchRadius(), t));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCEntityPortalEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ENTITY_PORTAL_TRAVEL;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCEntityPortalEvent) {
+				MCEntityPortalEvent e = (MCEntityPortalEvent)event;
+
+				if (key.equalsIgnoreCase("to")) {
+					e.useTravelAgent(true);
+					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, Target.UNKNOWN);
+					e.setTo(loc);
+					return true;
+				}
+
+				if (key.equalsIgnoreCase("creationradius")) {
+					e.useTravelAgent(true);
+					e.getPortalTravelAgent().setCreationRadius(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
+
+				if (key.equalsIgnoreCase("searchradius")) {
+					e.useTravelAgent(true);
+					e.getPortalTravelAgent().setSearchRadius(Static.getInt32(value, Target.UNKNOWN));
 					return true;
 				}
 			}
