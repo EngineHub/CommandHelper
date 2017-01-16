@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * A procedure is a user defined function, essentially. Unlike a closure, however, it does not
@@ -47,7 +48,7 @@ public class Procedure implements Cloneable {
     private ParseTree tree;
 	private CClassType returnType;
     private boolean possiblyConstant = false;
-	public static final String PROCEDURE_NAME_REGEX = "^_[\\p{L}0-9]+[\\p{L}_0-9]*";
+	private static final Pattern PROCEDURE_NAME_REGEX = Pattern.compile("^_[\\p{L}0-9]+[\\p{L}_0-9]*");
 	/**
 	 * The line the procedure is defined at (for stacktraces)
 	 */
@@ -68,7 +69,7 @@ public class Procedure implements Cloneable {
             this.originals.put(var.getVariableName(), var.ival());
         }
         this.tree = tree;
-        if (!this.name.matches(PROCEDURE_NAME_REGEX)) {
+        if (!PROCEDURE_NAME_REGEX.matcher(name).matches()) {
             throw new CREFormatException("Procedure names must start with an underscore, and may only contain letters, underscores, and digits. (Found " + this.name + ")", t);
         }
         //Let's look through the tree now, and see if this is possibly constant or not.
