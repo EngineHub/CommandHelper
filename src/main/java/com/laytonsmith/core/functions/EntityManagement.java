@@ -1666,7 +1666,12 @@ public class EntityManagement {
 			} else if (rider == null) {
 				success = horse.eject();
 			} else {
-				success = horse.setPassenger(rider);
+				try {
+					success = horse.setPassenger(rider);
+				} catch(IllegalStateException ex){
+					throw new CREFormatException("Circular entity riding!"
+							+ " One entity is already a passenger of the other.", t);
+				}
 			}
 			return CBoolean.get(success);
 		}
