@@ -26,47 +26,15 @@ import org.bukkit.plugin.PluginManager;
  * 
  */
 public class BukkitBlockListener implements Listener{
-	// Track piston state, because Bukkit tends to multi-fire it's piston events.
-	// HAX!
-	List<Block> pistonsOut = new ArrayList<>();
-	List<Block> pistonsIn = new ArrayList<>();
-	
+
 	@EventHandler(priority=EventPriority.LOWEST)
     public void onPistonExtend(final BlockPistonExtendEvent e){
-		pistonsIn.remove(e.getBlock());
-		if (pistonsOut.contains(e.getBlock())) {
-			return;
-		}
-		
-		Bukkit.getScheduler().runTaskLater(CommandHelperPlugin.self, new Runnable() {
-			@Override
-			public void run() {
-				pistonsOut.remove(e.getBlock());
-			}
-		}, 20);
-		
-		pistonsOut.add(e.getBlock());
-		
 		BukkitBlockEvents.BukkitMCBlockPistonExtendEvent mce = new BukkitBlockEvents.BukkitMCBlockPistonExtendEvent(e);
         EventUtils.TriggerListener(Driver.PISTON_EXTEND, "piston_extend", mce);
     }
 	
 	@EventHandler(priority=EventPriority.LOWEST)
     public void onPistonRetract(final BlockPistonRetractEvent e){
-		pistonsOut.remove(e.getBlock());
-		if (pistonsIn.contains(e.getBlock())) {
-			return;
-		}
-		
-		Bukkit.getScheduler().runTaskLater(CommandHelperPlugin.self, new Runnable() {
-			@Override
-			public void run() {
-				pistonsIn.remove(e.getBlock());
-			}
-		}, 20);
-		
-		pistonsIn.add(e.getBlock());
-		
 		BukkitBlockEvents.BukkitMCBlockPistonRetractEvent mce = new BukkitBlockEvents.BukkitMCBlockPistonRetractEvent(e);
         EventUtils.TriggerListener(Driver.PISTON_RETRACT, "piston_retract", mce);
     }
