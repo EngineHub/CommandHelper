@@ -338,11 +338,11 @@ public class AliasCore {
 				aliasConfig.getParentFile().mkdirs();
 				aliasConfig.createNewFile();
 				try {
-					String samp_config = getStringResource(AliasCore.class.getResourceAsStream("/samp_config.txt"));
+					String samp_aliases = getStringResource(AliasCore.class.getResourceAsStream("/samp_aliases.txt"));
 					//Because the sample config may have been written an a machine that isn't this type, replace all
 					//line endings
-					samp_config = samp_config.replaceAll("\n|\r\n", System.getProperty("line.separator"));
-					file_put_contents(aliasConfig, samp_config, "o");
+					samp_aliases = samp_aliases.replaceAll("\n|\r\n", System.getProperty("line.separator"));
+					file_put_contents(aliasConfig, samp_aliases, "o");
 				} catch (Exception e) {
 					logger.log(Level.WARNING, "CommandHelper: Could not write sample config file");
 				}
