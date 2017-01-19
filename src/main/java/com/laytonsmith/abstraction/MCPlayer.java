@@ -3,6 +3,7 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
+import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCWeather;
 
 import java.net.InetSocketAddress;
@@ -132,6 +133,18 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 	public void playSound(MCLocation l, MCSound sound, float volume, float pitch);
 	
 	public void playSound(MCLocation l, String sound, float volume, float pitch);
+
+	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch);
+
+	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch);
+
+	public void stopSound(MCSound sound);
+
+	public void stopSound(String sound);
+
+	public void stopSound(MCSound sound, MCSoundCategory category);
+
+	public void stopSound(String sound, MCSoundCategory category);
 
     int getFoodLevel();
 

@@ -21,10 +21,12 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
+import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.MCWeather;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSoundCategory;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWeather;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
@@ -546,6 +548,67 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public void playSound(MCLocation l, String sound, float volume, float pitch) {
 		p.playSound(((BukkitMCLocation) l).asLocation(), sound, volume, pitch);
+	}
+
+	@Override
+	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch) {
+		try {
+			p.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		} catch(NoClassDefFoundError ex) {
+			// probably prior to 1.11, ignore category
+			playSound(l, sound, volume, pitch);
+		}
+	}
+
+	@Override
+	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch) {
+		try {
+			p.playSound((Location) l.getHandle(), sound,
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		} catch(NoClassDefFoundError ex) {
+			// probably prior to 1.11, ignore category
+			playSound(l, sound, volume, pitch);
+		}
+	}
+
+	@Override
+	public void stopSound(MCSound sound) {
+		try {
+			p.stopSound(((BukkitMCSound) sound).getConcrete());
+		} catch(NoSuchMethodError ex){
+			// probably prior to 1.10
+		}
+	}
+
+	@Override
+	public void stopSound(String sound) {
+		try {
+			p.stopSound(sound);
+		} catch(NoSuchMethodError ex){
+			// probably prior to 1.10
+		}
+	}
+
+	@Override
+	public void stopSound(MCSound sound, MCSoundCategory category) {
+		try {
+			p.stopSound(((BukkitMCSound) sound).getConcrete(),
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category));
+		} catch(NoClassDefFoundError ex){
+			// probably prior to 1.11, ignore category
+			stopSound(sound);
+		}
+	}
+
+	@Override
+	public void stopSound(String sound, MCSoundCategory category) {
+		try {
+			p.stopSound(sound, BukkitMCSoundCategory.getConvertor().getConcreteEnum(category));
+		} catch(NoClassDefFoundError ex){
+			// probably prior to 1.11, ignore category
+			stopSound(sound);
+		}
 	}
 
 	@Override

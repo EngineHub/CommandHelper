@@ -15,6 +15,7 @@ import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
+import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.enums.MCTreeType;
 import com.laytonsmith.annotations.api;
@@ -982,10 +983,12 @@ public class Environment {
 
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			MCSound sound;
+			MCSoundCategory category = null;
 			float volume = 1, pitch = 1;
 
-			if (!(args[1] instanceof CArray))
+			if (!(args[1] instanceof CArray)) {
 				throw new CREFormatException("An array was expected but recieved " + args[1], t);
+			}
 
 			CArray sa = (CArray) args[1];
 
@@ -999,26 +1002,46 @@ public class Environment {
 				throw new CREFormatException("Sound field was missing.", t);
 			}
 
-			if (sa.containsKey("volume"))
-				volume = Static.getDouble32(sa.get("volume", t), t);
+			if (sa.containsKey("category")) {
+				try {
+					category = MCSoundCategory.valueOf(sa.get("category", t).val().toUpperCase());
+				} catch (IllegalArgumentException iae){
+					throw new CREFormatException("Sound category '" + sa.get("category", t).val() + "' is invalid.", t);
+				}
+			}
 
-			if (sa.containsKey("pitch"))
+			if (sa.containsKey("volume")) {
+				volume = Static.getDouble32(sa.get("volume", t), t);
+			}
+
+			if (sa.containsKey("pitch")) {
 				pitch = Static.getDouble32(sa.get("pitch", t), t);
+			}
 
 			if (args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
 				if (args[2] instanceof CArray) {
-					for (String key : ((CArray) args[2]).stringKeySet())
+					for (String key : ((CArray) args[2]).stringKeySet()) {
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
+					}
 				} else {
 					players.add(Static.GetPlayer(args[2], t));
 				}
 
-				for (MCPlayer p : players)
-					p.playSound(loc, sound, volume, pitch);
+				if(category == null) {
+					for (MCPlayer p : players) {
+						p.playSound(loc, sound, volume, pitch);
+					}
+				} else {
+					for (MCPlayer p : players) {
+						p.playSound(loc, sound, category, volume, pitch);
+					}
+				}
 
-			} else {
+			} else if(category == null){
 				loc.getWorld().playSound(loc, sound, volume, pitch);
+			} else {
+				loc.getWorld().playSound(loc, sound, category, volume, pitch);
 			}
 			return CVoid.VOID;
 		}
@@ -1037,11 +1060,12 @@ public class Environment {
 		public String docs() {
 			return "void {locationArray, soundArray[, players]} Plays a sound at the"
 					+ " given location. SoundArray is in an associative array with"
-					+ " keys 'sound', 'volume', 'pitch', where volume and pitch"
-					+ " are optional and default to 1. Players can be a single"
+					+ " keys 'sound', 'category', 'volume', 'pitch', where all are optional except sound."
+					+ " Volume and pitch default to 1. Players can be a single"
 					+ " player or an array of players to play the sound to, if"
-					+ " not given, all players can potentially hear it. ----"
-					+ " Possible sounds: "
+					+ " not given, all players can potentially hear it. ---- Possible categories: "
+					+ StringUtils.Join(MCSoundCategory.values(), ", ", ", or ", " or ") + "."
+					+ " ---- Possible sounds: "
 					+ StringUtils.Join(MCSound.types(), ", ", ", or ", " or ");
 		}
 
@@ -1079,38 +1103,60 @@ public class Environment {
 
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			String path;
+			MCSoundCategory category = null;
 			float volume = 1, pitch = 1;
 
-			if (!(args[1] instanceof CArray))
+			if (!(args[1] instanceof CArray)) {
 				throw new CREFormatException("An array was expected but recieved " + args[1], t);
+			}
 
 			CArray sa = (CArray) args[1];
 
-			if (!sa.containsKey("sound"))
+			if (!sa.containsKey("sound")) {
 				throw new CREFormatException("Sound field was missing.", t);
+			}
 
 			path = sa.get("sound", t).val();
 
-			if (sa.containsKey("volume"))
-				volume = Static.getDouble32(sa.get("volume", t), t);
+			if (sa.containsKey("category")) {
+				try {
+					category = MCSoundCategory.valueOf(sa.get("category", t).val().toUpperCase());
+				} catch (IllegalArgumentException iae){
+					throw new CREFormatException("Sound category '" + sa.get("category", t).val() + "' is invalid.", t);
+				}
+			}
 
-			if (sa.containsKey("pitch"))
+			if (sa.containsKey("volume")) {
+				volume = Static.getDouble32(sa.get("volume", t), t);
+			}
+
+			if (sa.containsKey("pitch")) {
 				pitch = Static.getDouble32(sa.get("pitch", t), t);
+			}
 
 			if (args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
 				if (args[2] instanceof CArray) {
-					for (String key : ((CArray) args[2]).stringKeySet())
+					for (String key : ((CArray) args[2]).stringKeySet()) {
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
+					}
 				} else {
 					players.add(Static.GetPlayer(args[2], t));
 				}
 
-				for (MCPlayer p : players) {
-					p.playSound(loc, path, volume, pitch);
+				if(category == null) {
+					for (MCPlayer p : players) {
+						p.playSound(loc, path, volume, pitch);
+					}
+				} else {
+					for (MCPlayer p : players) {
+						p.playSound(loc, path, category, volume, pitch);
+					}
 				}
-			} else {
+			} else if(category == null){
 				loc.getWorld().playSound(loc, path, volume, pitch);
+			} else {
+				loc.getWorld().playSound(loc, path, category, volume, pitch);
 			}
 			return CVoid.VOID;
 		}
@@ -1129,11 +1175,12 @@ public class Environment {
 		public String docs() {
 			return "void {locationArray, soundArray[, players]} Plays a sound at the"
 					+ " given location. SoundArray is in an associative array with"
-					+ " keys 'sound', 'volume', 'pitch', where volume and pitch"
-					+ " are optional and default to 1. Players can be a single"
+					+ " keys 'sound', 'category', 'volume', 'pitch', where all are optional except sound."
+					+ " Volume and pitch default to 1. Players can be a single"
 					+ " player or an array of players to play the sound to, if"
 					+ " not given, all players can potentially hear it. Sound is"
-					+ " a sound path, separated by periods. ";
+					+ " a sound path, separated by periods. ---- Possible categories: "
+					+ StringUtils.Join(MCSoundCategory.values(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override

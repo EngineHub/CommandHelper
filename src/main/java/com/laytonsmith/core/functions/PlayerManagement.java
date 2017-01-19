@@ -16,6 +16,8 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCGameMode;
+import com.laytonsmith.abstraction.enums.MCSound;
+import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCWeather;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
@@ -4908,5 +4910,138 @@ public class PlayerManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+	}
+
+	@api
+	@seealso({com.laytonsmith.core.functions.Environment.play_sound.class})
+	public static class stop_sound extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class,CRELengthException.class, CREFormatException.class,
+					CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+				throws ConfigRuntimeException {
+
+			MCPlayer p = Static.GetPlayer(args[0], t);
+
+			MCSound sound;
+			try {
+				sound = MCSound.valueOf(args[1].val().toUpperCase());
+			} catch (IllegalArgumentException iae) {
+				throw new CREFormatException("Sound name '" + args[1].val() + "' is invalid.", t);
+			}
+
+			if(args.length == 3) {
+				MCSoundCategory category;
+				try {
+					category = MCSoundCategory.valueOf(args[2].val().toUpperCase());
+				} catch (IllegalArgumentException iae) {
+					throw new CREFormatException("Sound category '" + args[2].val() + "' is invalid.", t);
+				}
+				p.stopSound(sound, category);
+			} else {
+				p.stopSound(sound);
+			}
+
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "stop_sound";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {player, sound, [category]} Stops the specified sound for the given player.";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+
+	}
+
+	@api
+	@seealso({com.laytonsmith.core.functions.Environment.play_named_sound.class})
+	public static class stop_named_sound extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class,CRELengthException.class, CREFormatException.class,
+					CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+				throws ConfigRuntimeException {
+
+			MCPlayer p = Static.GetPlayer(args[0], t);
+			String sound = args[1].val();
+			if(args.length == 3) {
+				MCSoundCategory category;
+				try {
+					category = MCSoundCategory.valueOf(args[2].val().toUpperCase());
+				} catch (IllegalArgumentException iae) {
+					throw new CREFormatException("Sound category '" + args[2].val() + "' is invalid.", t);
+				}
+				p.stopSound(sound, category);
+			} else {
+				p.stopSound(sound);
+			}
+
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "stop_named_sound";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {player, sound, [category]} Stops the specified sound for the given player.";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+
 	}
 }
