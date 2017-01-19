@@ -35,6 +35,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOcelotType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSkeletonType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSoundCategory;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTreeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldType;
@@ -259,8 +260,36 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public void playSound(MCLocation l, String sound, float volume, float pitch) {
-		for(Player p: w.getPlayers())
-			p.playSound(((BukkitMCLocation)l).asLocation(), sound, volume, pitch);
+		try {
+			w.playSound((Location) l.getHandle(), sound, volume, pitch);
+		} catch(NoSuchMethodError ex) {
+			// probably prior to 1.9, so send to all players in world
+			for (Player p : w.getPlayers()) {
+				p.playSound(((BukkitMCLocation) l).asLocation(), sound, volume, pitch);
+			}
+		}
+	}
+
+	@Override
+	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch) {
+		try {
+			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		} catch(NoClassDefFoundError ex){
+			// probably before 1.11, ignore category
+			playSound(l, sound, volume, pitch);
+		}
+	}
+
+	@Override
+	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch) {
+		try {
+			w.playSound((Location) l.getHandle(), sound,
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		} catch(NoClassDefFoundError ex) {
+			// probably before 1.11, ignore category
+			playSound(l, sound, volume, pitch);
+		}
 	}
 
 	@Override
