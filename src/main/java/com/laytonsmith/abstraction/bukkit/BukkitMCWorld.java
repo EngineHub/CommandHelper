@@ -13,6 +13,7 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.MCWorldBorder;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
@@ -184,6 +185,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public boolean setGameRuleValue(MCGameRule gameRule, String value) {
 		return w.setGameRuleValue(gameRule.getGameRule(), value);
+	}
+
+	@Override
+	public MCWorldBorder getWorldBorder() {
+		return new BukkitMCWorldBorder(w.getWorldBorder());
 	}
 
 	@Override
