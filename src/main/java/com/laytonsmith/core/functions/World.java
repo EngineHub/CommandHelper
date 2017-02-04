@@ -9,14 +9,17 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.MCWorldBorder;
 import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCGameRule;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -1887,6 +1890,149 @@ public class World {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class get_world_border extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld w = Static.getServer().getWorld(args[0].val());
+			if (w == null){
+				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
+			}
+			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)){
+				return CNull.NULL;
+			}
+			MCWorldBorder wb = w.getWorldBorder();
+			CArray ret = CArray.GetAssociativeArray(t);
+			ret.set("width", new CDouble(wb.getSize(), t), t);
+			ret.set("center", ObjectGenerator.GetGenerator().location(wb.getCenter(), false), t);
+			ret.set("damagebuffer", new CDouble(wb.getDamageBuffer(), t), t);
+			ret.set("damageamount", new CDouble(wb.getDamageAmount(), t), t);
+			ret.set("warningtime", new CInt(wb.getWarningTime(), t), t);
+			ret.set("warningdistance", new CInt(wb.getWarningDistance(), t), t);
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_world_border";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {world_name} Returns an associative array of all information about the world's border."
+					+ " The keys are width, center, damagebuffer, damageamount, warningtime, warningdistance.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class set_world_border extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class,
+					CRERangeException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld w = Static.getServer().getWorld(args[0].val());
+			if (w == null){
+				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
+			}
+			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)){
+				return CVoid.VOID;
+			}
+			MCWorldBorder wb = w.getWorldBorder();
+			Construct c = args[1];
+			if(!(c instanceof CArray)){
+				throw new CREFormatException("Expected array but given \"" + args[1].val() + "\"", t);
+			}
+			CArray params = (CArray)c;
+			if(params.containsKey("width")){
+				if(params.containsKey("seconds")){
+					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t),
+							ArgumentValidation.getInt32(params.get("seconds", t), t));
+				} else {
+					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t));
+				}
+			}
+			if(params.containsKey("center")){
+				wb.setCenter(ObjectGenerator.GetGenerator().location(params.get("center", t), w, t));
+			}
+			if(params.containsKey("damagebuffer")){
+				wb.setDamageBuffer(ArgumentValidation.getDouble(params.get("damagebuffer", t), t));
+			}
+			if(params.containsKey("damageamount")){
+				wb.setDamageAmount(ArgumentValidation.getDouble(params.get("damageamount", t), t));
+			}
+			if(params.containsKey("warningtime")){
+				wb.setWarningTime(ArgumentValidation.getInt32(params.get("warningtime", t), t));
+			}
+			if(params.containsKey("warningdistance")){
+				wb.setWarningDistance(ArgumentValidation.getInt32(params.get("warningdistance", t), t));
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_world_border";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {world_name, paramArray} Updates the world's border with the given values. In addition to the"
+					+ " keys returned by get_world_border(), you can specify the \"seconds\" for which the \"width\""
+					+ " will be applied.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
 		}
 	}
 }

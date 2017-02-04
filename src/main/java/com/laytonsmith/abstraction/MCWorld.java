@@ -46,6 +46,7 @@ public interface MCWorld extends MCMetadatable {
 	public String[] getGameRules();
 	public String getGameRuleValue(String gameRule);
 	public boolean setGameRuleValue(MCGameRule gameRule, String value);
+	public MCWorldBorder getWorldBorder();
 
     public MCBlock getBlockAt(int x, int y, int z);
 	public MCChunk getChunkAt(int x, int z);
