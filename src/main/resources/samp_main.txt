@@ -21,4 +21,4 @@ bind(player_join, null, null, @event, @server_name) {
 	if(pisop(@event['player'])) {
 		msg('Welcome to '.@server_name.' (Change this message in plugins/CommandHelper/main.ms)');
 	}
-)}
+}
