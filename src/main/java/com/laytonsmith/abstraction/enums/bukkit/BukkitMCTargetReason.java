@@ -9,7 +9,7 @@ import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 /**
  *
- * 
+ *
  */
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,
