@@ -1286,9 +1286,8 @@ public class BlockEvents {
                 Prefilters.match(prefilter, "newdata", newBlock.getData().getData(), PrefilterType.STRING_MATCH);
                 Prefilters.match(prefilter, "world", oldBlock.getWorld().getName(), PrefilterType.MACRO);
                 return true;
-            } else {
-                return false;
             }
+            return false;
         }
 
         @Override
