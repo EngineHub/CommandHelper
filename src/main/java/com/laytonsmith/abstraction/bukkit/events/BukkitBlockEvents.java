@@ -509,4 +509,29 @@ public class BukkitBlockEvents {
 			npe.setInstrument(BukkitMCInstrument.getConvertor().getConcreteEnum(i));
 		}
 	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockFadeEvent implements MCBlockFadeEvent {
+
+		BlockFadeEvent bfe;
+
+		public BukkitMCBlockFadeEvent(BlockFadeEvent bfe) {
+			this.bfe = bfe;
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(bfe.getBlock());
+		}
+
+		@Override
+		public MCBlockState getNewState() {
+			return new BukkitMCBlockState(bfe.getNewState());
+		}
+
+		@Override
+		public Object _GetObject() {
+			return bfe;
+		}
+	}
 }
