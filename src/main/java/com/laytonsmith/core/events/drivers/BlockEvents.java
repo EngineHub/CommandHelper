@@ -1280,10 +1280,6 @@ public class BlockEvents {
                 MCBlockFadeEvent event = (MCBlockFadeEvent) e;
                 MCBlock oldBlock = event.getBlock();
                 Prefilters.match(prefilter, "oldtype", oldBlock.getTypeId(), PrefilterType.STRING_MATCH);
-                Prefilters.match(prefilter, "olddata", oldBlock.getData(), PrefilterType.STRING_MATCH);
-                MCBlockState newBlock = event.getNewState();
-                Prefilters.match(prefilter, "newtype", newBlock.getTypeId(), PrefilterType.STRING_MATCH);
-                Prefilters.match(prefilter, "newdata", newBlock.getData().getData(), PrefilterType.STRING_MATCH);
                 Prefilters.match(prefilter, "world", oldBlock.getWorld().getName(), PrefilterType.MACRO);
                 return true;
             }
