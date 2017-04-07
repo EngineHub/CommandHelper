@@ -2092,6 +2092,11 @@ public class PlayerManagement {
 			boolean particles = true;
 			if (args.length >= 4) {
 				seconds = Static.getInt32(args[3], t);
+				if(seconds < 0) {
+					throw new CRERangeException("Seconds cannot be less than 0", t);
+				} else if(seconds > Integer.MAX_VALUE / 20) {
+					throw new CRERangeException("Seconds cannot be greater than 107374182", t);
+				}
 			}
 			if (args.length >= 5) {
 				ambient = Static.getBoolean(args[4]);

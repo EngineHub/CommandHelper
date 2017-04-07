@@ -819,7 +819,8 @@ public class EntityManagement {
 					+ " defaults to 30. If the potionID is out of range, a RangeException is thrown, because out of"
 					+ " range potion effects cause the client to crash, fairly hardcore. See"
 					+ " http://www.minecraftwiki.net/wiki/Potion_effects for a complete list of potions that can be"
-					+ " added. To remove an effect, set the seconds to 0. Strength is the number of levels to add to the"
+					+ " added. To remove an effect, set the seconds to 0. If seconds is less than 0 or greater than"
+					+ " 107374182 a RangeException is thrown. Strength is the number of levels to add to the"
 					+ " base power (effect level 1). Ambient takes a boolean of whether the particles should be less"
 					+ " noticeable. Particles takes a boolean of whether the particles should be visible at all. The"
 					+ " function returns true if the effect was added or removed as desired, and false if it wasn't"
@@ -845,6 +846,11 @@ public class EntityManagement {
 			boolean particles = true;
 			if (args.length >= 4) {
 				seconds = Static.getInt32(args[3], t);
+				if(seconds < 0) {
+					throw new CRERangeException("Seconds cannot be less than 0", t);
+				} else if(seconds > Integer.MAX_VALUE / 20) {
+					throw new CRERangeException("Seconds cannot be greater than 107374182", t);
+				}
 			}
 			if (args.length == 5) {
 				ambient = Static.getBoolean(args[4]);
@@ -1381,7 +1387,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
-			return new CInt(Static.ticksToMs(ent.getFireTicks())/1000, t);
+			return new CInt(ent.getFireTicks() / 20, t);
 		}
 
 		@Override
@@ -1409,11 +1415,13 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
-			int setTicks = (int) Static.msToTicks(Static.getInt(args[1], t)*1000);
-			if (setTicks < 0) {
-				throw new CREFormatException("Seconds cannot be less than 0", t);
+			int seconds = Static.getInt32(args[1], t);
+			if(seconds < 0) {
+				throw new CRERangeException("Seconds cannot be less than 0", t);
+			} else if(seconds > Integer.MAX_VALUE / 20) {
+				throw new CRERangeException("Seconds cannot be greater than 107374182", t);
 			}
-			ent.setFireTicks(setTicks);
+			ent.setFireTicks(seconds * 20);
 			return CVoid.VOID;
 		}
 
@@ -1425,8 +1433,8 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "void {entityID, seconds} Sets the entity on fire for the"
-					+ " given number of seconds. Throws a FormatException"
-					+ " if seconds is less than 0.";
+					+ " given number of seconds. Throws a RangeException"
+					+ " if seconds is less than 0 or greater than 107374182.";
 		}
 		
 		@Override

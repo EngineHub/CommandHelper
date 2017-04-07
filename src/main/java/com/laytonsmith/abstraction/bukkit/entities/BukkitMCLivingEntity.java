@@ -229,11 +229,9 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public void addEffect(int potionID, int strength, int seconds, boolean ambient, boolean particles, Target t) {
 		PotionEffect pe;
 		if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
-			pe = new PotionEffect(PotionEffectType.getById(potionID), (int)Static.msToTicks(seconds * 1000),
-					strength, ambient);
+			pe = new PotionEffect(PotionEffectType.getById(potionID), seconds * 20, strength, ambient);
 		} else {
-			pe = new PotionEffect(PotionEffectType.getById(potionID), (int) Static.msToTicks(seconds * 1000),
-					strength, ambient, particles);
+			pe = new PotionEffect(PotionEffectType.getById(potionID), seconds * 20, strength, ambient, particles);
 		}
 		try{
 			if(le != null){
@@ -276,10 +274,10 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 			MCEffect e;
 			if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
 				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(),
-						(int) (Static.ticksToMs(pe.getDuration()) / 1000), pe.isAmbient(), true);
+						pe.getDuration() / 20, pe.isAmbient(), true);
 			} else {
 				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(),
-						(int)(Static.ticksToMs(pe.getDuration()) / 1000), pe.isAmbient(), pe.hasParticles());
+						pe.getDuration() / 20, pe.isAmbient(), pe.hasParticles());
 			}
 			effects.add(e);
 		}

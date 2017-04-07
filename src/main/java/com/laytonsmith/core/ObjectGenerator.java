@@ -1046,6 +1046,11 @@ public class ObjectGenerator {
 				}
 				if (effect.containsKey("seconds")) {
 					seconds = Static.getInt32(effect.get("seconds", t), t);
+					if(seconds < 0) {
+						throw new CRERangeException("Seconds cannot be less than 0", t);
+					} else if(seconds > Integer.MAX_VALUE / 20) {
+						throw new CRERangeException("Seconds cannot be greater than 107374182", t);
+					}
 				}
 				if (effect.containsKey("ambient")) {
 					ambient = Static.getBoolean(effect.get("ambient", t));

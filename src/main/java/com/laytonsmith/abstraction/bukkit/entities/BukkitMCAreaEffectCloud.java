@@ -13,7 +13,6 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockProjectileSource;
 import com.laytonsmith.abstraction.entities.MCAreaEffectCloud;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCParticle;
-import com.laytonsmith.core.Static;
 import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionData;
@@ -49,7 +48,7 @@ public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEff
 		List<MCLivingEntity.MCEffect> list = new ArrayList<>();
 		for (PotionEffect pe : aec.getCustomEffects()) {
 			list.add(new MCLivingEntity.MCEffect(pe.getType().getId(), pe.getAmplifier(),
-					(int)(Static.ticksToMs(pe.getDuration()) / 1000), pe.isAmbient(), pe.hasParticles()));
+					pe.getDuration() / 20, pe.isAmbient(), pe.hasParticles()));
 		}
 		return list;
 	}
@@ -106,8 +105,7 @@ public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEff
 	@Override
 	public void addCustomEffect(MCLivingEntity.MCEffect effect){
 		PotionEffect pe = new PotionEffect(PotionEffectType.getById(effect.getPotionID()),
-				(int) Static.msToTicks(effect.getSecondsRemaining() * 1000),
-				effect.getStrength(), effect.isAmbient(), effect.hasParticles());
+				effect.getSecondsRemaining() * 20, effect.getStrength(), effect.isAmbient(), effect.hasParticles());
 		aec.addCustomEffect(pe, true);
 	}
 
