@@ -2421,9 +2421,10 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "array {entityID, [transparents, [maxDistance]]} Returns an array containg all blocks along the living entity's line of sight."
-					+ " transparents is an array of block IDs, only air by default."
-					+ " maxDistance represent the maximum distance to scan, it may be limited by the server by at least 100 blocks, no less.";
+			return "array {entityID, [transparents, [maxDistance]]} Returns an array containing all blocks along the"
+					+ " living entity's line of sight. transparents is an array of block IDs, only air by default."
+					+ " maxDistance represents the maximum distance to scan. The server may cap the scan distance,"
+					+ " but probably by not any less than 100 meters.";
 		}
 
 		@Override
@@ -2438,7 +2439,7 @@ public class EntityManagement {
 				}
 				transparents = new HashSet<Byte>();
 				for (Construct blockID : givenTransparents.asList()) {
-					transparents.add(Static.getInt8(blockID, t));
+					transparents.add((byte) Static.getInt16(blockID, t));
 				}
 			}
 			if (args.length == 3) {
