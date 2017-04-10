@@ -88,16 +88,17 @@ public class BukkitMCItemStack implements MCItemStack {
     }
     
 	@Override
-    public Map<MCEnchantment, Integer> getEnchantments(){
-        if(is == null || is.getEnchantments() == null){
-            return null;
-        }
-        Map<MCEnchantment, Integer> map = new HashMap<MCEnchantment, Integer>();
-        for(Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()){
-            map.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
-        }
-        return map;
-    }
+	public Map<MCEnchantment, Integer> getEnchantments(){
+		Map<MCEnchantment, Integer> map = new HashMap<>();
+		try {
+			for(Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()){
+				map.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
+			}
+		} catch(NullPointerException npe) {
+			// Probably invalid enchantment, always return map
+		}
+		return map;
+	}
     
 	@Override
     public void removeEnchantment(MCEnchantment e){
