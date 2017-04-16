@@ -343,23 +343,27 @@ public class DataHandling {
 
 	@Override
 	public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-	    //We can't really optimize, but we can check that we are
-	    //getting an ivariable.
-	    int offset = 0;
-	    if (args.length == 3) {
-		offset = 1;
-		if (!(args[0] instanceof CClassType)) {
-		    throw new ConfigCompileException("Expecting a ClassType for parameter 1 to assign", t);
+		//We can't really optimize, but we can check that we are
+		//getting an ivariable.
+		int offset = 0;
+		if (args.length == 3) {
+			offset = 1;
+			if (!(args[0] instanceof CClassType)) {
+				throw new ConfigCompileException("Expecting a ClassType for parameter 1 to assign", t);
+			}
 		}
-	    }
-	    if (!(args[offset + 0] instanceof IVariable)) {
-		throw new ConfigCompileException("Expecting an ivar for argument 1 to assign", t);
-	    }
-	    return null;
+		if(args.length > 0 && !(args[offset] instanceof IVariable)) {
+			throw new ConfigCompileException("Expecting an ivar for argument 1 to assign", t);
+		}
+		return null;
 	}
 
 	@Override
 	public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		//Check for too few arguments
+		if (children.size() < 2) {
+			return null;
+		}
 	    if (children.get(0).getData() instanceof IVariable
 		    && children.get(1).getData() instanceof IVariable) {
 		if (((IVariable) children.get(0).getData()).getVariableName().equals(

@@ -1772,6 +1772,12 @@ public final class MethodScriptCompiler {
 			return;
 		}
 		if (tree.getData().val().equals("proc")) {
+			//Check for too few arguments
+			if (children.size() < 2) {
+				compilerErrors.add(new ConfigCompileException("Incorrect number of arguments passed to proc",
+						tree.getData().getTarget()));
+				return;
+			}
 			//We just went out of scope, so we need to pop the layer of Procedures that
 			//are internal to us
 			procs.pop();

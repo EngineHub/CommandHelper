@@ -144,13 +144,13 @@ public class BasicLogic {
 
 	@Override
 	public ParseTree optimizeDynamic(Target t, List<ParseTree> args, FileOptions fileOptions) throws ConfigCompileException {
-	    //Check for too many/too few arguments
-	    if (args.size() == 1) {
-		throw new ConfigCompileException("Incorrect number of arguments passed to if()", t);
-	    }
-	    if (args.size() > 3) {
-		throw new ConfigCompileException("if() can only have 3 parameters", t);
-	    }
+		//Check for too many/few arguments
+		if (args.size() < 2) {
+			throw new ConfigCompileException("Too few arguments passed to if()", t);
+		}
+		if (args.size() > 3) {
+			throw new ConfigCompileException("if() can only have 3 parameters", t);
+		}
 	    if (args.get(0).isConst()) {
 		// We can optimize this one way or the other, since the condition is const
 		if (Static.getBoolean(args.get(0).getData())) {
