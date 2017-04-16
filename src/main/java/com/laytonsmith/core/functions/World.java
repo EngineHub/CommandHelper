@@ -1706,7 +1706,9 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "double {location_from, location_to} Calculate yaw from one location to another on the X-Z plane. The rotation is measured in degrees (0-359.99...) relative to the (x=0,z=1) vector, which points south.";
+			return "double {location_from, location_to} Calculate yaw from one location to another on the X-Z plane."
+					+ " The rotation is measured in degrees (0-359.99...) relative to the (x=0,z=1) vector, which"
+					+ " points south. Throws a FormatException if locations have differing worlds.";
 		}
 
 		@Override
@@ -1722,7 +1724,12 @@ public class World {
 			MCLocation from = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
 			MCLocation to = ObjectGenerator.GetGenerator().location(args[1], p != null ? p.getWorld() : null, t);
 
-			MCLocation subtract = to.subtract(from);
+			MCLocation subtract;
+			try {
+				subtract = to.subtract(from);
+			} catch(IllegalArgumentException ex) {
+				throw new CREFormatException("Locations are in differing worlds.", t);
+			}
 			double dX = subtract.getX();
 			double dZ = subtract.getZ();
 
