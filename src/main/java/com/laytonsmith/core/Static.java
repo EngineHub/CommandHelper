@@ -528,7 +528,7 @@ public final class Static {
 	 * @param msg
 	 */
 	public static void SendMessage(final MCCommandSender m, String msg, final Target t) {
-		if (m != null) {
+		if (m != null && !(m instanceof MCConsoleCommandSender)) {
 			if (m instanceof MCPlayer) {
 				MCPlayer p = (MCPlayer) m;
 				if (!p.isOnline()) {
