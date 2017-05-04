@@ -31,6 +31,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
+import com.laytonsmith.abstraction.blocks.MCShulkerBox;
 import com.laytonsmith.abstraction.entities.*;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorseColor;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorsePattern;
@@ -2804,6 +2805,15 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_SHEEP_COLOR, new CString(sheep.getColor().name(), t), t);
 					specArray.set(entity_spec.KEY_SHEEP_SHEARED, CBoolean.get(sheep.isSheared()), t);
 					break;
+				case SHULKER_BULLET:
+					MCShulkerBullet bullet = (MCShulkerBullet) entity;
+					MCEntity target = bullet.getTarget();
+					if(target == null) {
+						specArray.set(entity_spec.KEY_SHULKERBULLET_TARGET, CNull.NULL, t);
+					} else {
+						specArray.set(entity_spec.KEY_SHULKERBULLET_TARGET, new CString(target.getUniqueId().toString(), t), t);
+					}
+					break;
 				case SKELETON:
 				case STRAY:
 				case WITHER_SKELETON:
@@ -2935,6 +2945,7 @@ public class EntityManagement {
 		private static final String KEY_PRIMED_TNT_SOURCE = "source";
 		private static final String KEY_SHEEP_COLOR = "color";
 		private static final String KEY_SHEEP_SHEARED = "sheared";
+		private static final String KEY_SHULKERBULLET_TARGET = "target";
 		private static final String KEY_SKELETON_TYPE = "type";
 		private static final String KEY_SLIME_SIZE = "size";
 		private static final String KEY_SNOWMAN_DERP = "derp";
@@ -3601,6 +3612,23 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_SHEEP_SHEARED:
 								sheep.setSheared(Static.getBoolean(specArray.get(index, t)));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case SHULKER_BULLET:
+					MCShulkerBullet bullet = (MCShulkerBullet) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_SHULKERBULLET_TARGET:
+								Construct c = specArray.get(index, t);
+								if(c instanceof CNull) {
+									bullet.setTarget(null);
+								} else {
+									bullet.setTarget(Static.getEntity(c, t));
+								}
 								break;
 							default:
 								throwException(index, t);
