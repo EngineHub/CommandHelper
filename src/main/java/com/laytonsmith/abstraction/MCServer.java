@@ -82,6 +82,8 @@ public interface MCServer extends AbstractionObject{
     public List<MCOfflinePlayer> getWhitelistedPlayers();
     public List<MCOfflinePlayer> getOperators();
 
+	public void banName(String name);
+	public void unbanName(String name);
 	public void banIP(String address);
 	public Set<String> getIPBans();
 	public void unbanIP(String address);

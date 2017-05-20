@@ -46,7 +46,6 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -352,11 +351,6 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     }
 
 	@Override
-    public void setBanned(boolean banned) {
-        p.setBanned(banned);
-    }
-
-	@Override
     public void setCompassTarget(MCLocation l) {
 		p.setCompassTarget(((BukkitMCLocation) l)._Location());
 	}
@@ -436,51 +430,36 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
             throw new IllegalStateException("Running server isn't CraftBukkit");
         }
 
-		try {
-			//Probably 1.4.6
-			Class nmsMinecraftServerClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "MinecraftServer").loadClass();
-			/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
-			/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
-			Set opSet = (Set)ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass(), nmsPlayerList, "operators");
-
-			// since all Java objects pass by reference, we don't need to set field back to object
-			if (value) {
-				opSet.add(p.getName().toLowerCase());
-			} else {
-				opSet.remove(p.getName().toLowerCase());
+		// Since 1.7.8
+		Class nmsMinecraftServerClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "MinecraftServer").loadClass();
+		/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
+		/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
+		/*n.m.s.OpList*/ Object opSet = ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass(), nmsPlayerList, "operators");
+		//opSet.getClass().getSuperclass() == n.m.s.JsonList
+		Map/*<String, n.m.s.OpListEntry>*/ d = (Map)ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
+		if(value){
+			/*n.m.s.OpListEntry*/ Class nmsOpListEntry = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "OpListEntry").loadClass();
+			Class nmsGameProfile;
+			try {
+				/*com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("com.mojang.authlib.GameProfile");
+			} catch (ClassNotFoundException eee){
+				// Prior to 1.8
+				/*net.minecraft.util.com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("net.minecraft.util.com.mojang.authlib.GameProfile");
 			}
-		} catch(ClassCastException ex){
-			// Probably 1.7.8
-			Class nmsMinecraftServerClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "MinecraftServer").loadClass();
-			/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
-			/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
-			/*n.m.s.OpList*/ Object opSet = ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass(), nmsPlayerList, "operators");
-			//opSet.getClass().getSuperclass() == n.m.s.JsonList
-			Map/*<String, n.m.s.OpListEntry>*/ d = (Map)ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
-			if(value){
-				/*n.m.s.OpListEntry*/ Class nmsOpListEntry = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "OpListEntry").loadClass();
-				Class nmsGameProfile;
-				try {
-					/*net.minecraft.util.com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("net.minecraft.util.com.mojang.authlib.GameProfile");
-				} catch (ClassNotFoundException eee){
-					// Probably 1.8
-					/*com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("com.mojang.authlib.GameProfile");
-				}
-				Object gameProfile = ReflectionUtils.invokeMethod(p, "getProfile");
-				Object opListEntry;
-				try {
-					opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class}, new Object[]{gameProfile, 4});
-				} catch (ReflectionUtils.ReflectionException e) {
-					// Probably 1.8.6
-					opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class, boolean.class}, new Object[]{gameProfile, 4, false});
-				}
-				d.put(p.getUniqueId().toString(), opListEntry);
-			} else {
-				d.remove(p.getUniqueId().toString());
+			Object gameProfile = ReflectionUtils.invokeMethod(p, "getProfile");
+			Object opListEntry;
+			try {
+				opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class, boolean.class}, new Object[]{gameProfile, 4, false});
+			} catch (ReflectionUtils.ReflectionException e) {
+				// Prior to 1.8.6
+				opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class}, new Object[]{gameProfile, 4});
 			}
+			d.put(p.getUniqueId().toString(), opListEntry);
+		} else {
+			d.remove(p.getUniqueId().toString());
 		}
-        p.recalculatePermissions();
-    }
+		p.recalculatePermissions();
+	}
 
 	@Override
 	public void setTotalExperience(int total)

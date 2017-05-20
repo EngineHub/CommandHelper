@@ -2515,13 +2515,24 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
-			if (pl == null) {
-				throw new CRENotFoundException(
-						this.getName() + " could not get the offline player (are you running in cmdline mode?)", t);
-			}
+			String target = args[0].val();
 			boolean ban = Static.getBoolean(args[1]);
-			pl.setBanned(ban);
+			if(target.length() > 16) {
+				MCOfflinePlayer pl = Static.GetUser(target, t);
+				if (pl == null) {
+					throw new CRENotFoundException(
+							this.getName() + " could not get the offline player (are you running in cmdline mode?)", t);
+				}
+				target = pl.getName();
+				if (target == null) {
+					throw new CRENotFoundException(this.getName() + " could not get offline player's name", t);
+				}
+			}
+			if(ban) {
+				Static.getServer().banName(target);
+			} else {
+				Static.getServer().unbanName(target);
+			}
 			return CVoid.VOID;
 		}
 	}

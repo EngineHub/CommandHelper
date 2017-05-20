@@ -118,10 +118,9 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	@Override
-	public List<MCBlock> getLineOfSight(HashSet<Byte> transparent,
-			int maxDistance) {
-		List<Block> lst = le.getLineOfSight(transparent, maxDistance);
-		List<MCBlock> retn = new ArrayList<MCBlock>();
+	public List<MCBlock> getLineOfSight(HashSet<Short> transparent, int maxDistance) {
+		List<Block> lst = getLineOfSight(transparent, maxDistance, 512);
+		List<MCBlock> retn = new ArrayList<>();
 
 		for (Block b : lst) {
 			retn.add(new BukkitMCBlock(b));

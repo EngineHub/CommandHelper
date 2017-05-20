@@ -31,7 +31,6 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
-import com.laytonsmith.abstraction.blocks.MCShulkerBox;
 import com.laytonsmith.abstraction.entities.*;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorseColor;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorsePattern;
@@ -2431,16 +2430,16 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity entity = Static.getLivingEntity(args[0], t);
-			HashSet<Byte> transparents = null;
+			HashSet<Short> transparents = null;
 			int maxDistance = 512;
 			if (args.length >= 2) {
 				CArray givenTransparents = Static.getArray(args[1], t);
 				if (givenTransparents.inAssociativeMode()) {
 					throw new CRECastException("The array must not be associative.", t);
 				}
-				transparents = new HashSet<Byte>();
+				transparents = new HashSet<>();
 				for (Construct blockID : givenTransparents.asList()) {
-					transparents.add((byte) Static.getInt16(blockID, t));
+					transparents.add(Static.getInt16(blockID, t));
 				}
 			}
 			if (args.length == 3) {

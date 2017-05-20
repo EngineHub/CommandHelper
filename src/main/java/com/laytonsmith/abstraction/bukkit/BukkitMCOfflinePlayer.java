@@ -40,11 +40,6 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
     }
 
 	@Override
-    public void setBanned(boolean banned) {
-        op.setBanned(banned);
-    }
-
-	@Override
     public boolean isWhitelisted() {
         return op.isWhitelisted();
     }

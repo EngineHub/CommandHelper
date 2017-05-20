@@ -53,14 +53,6 @@ public interface MCOfflinePlayer extends MCAnimalTamer{
      */
     public boolean isWhitelisted();
 
-    /**
-	 * Bans or unbans this player.
-	 * Depending on how the server retrieved the player, this may or may not work.
-	 *
-     * @param banned true if banned
-     */
-    public void setBanned(boolean banned);
-
 	/**
 	 * Sets if this player is whitelisted or not.
 	 * Depending on how the server retrieved the player, this may or may not work.

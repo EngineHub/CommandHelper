@@ -42,7 +42,7 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 	public MCBlock getTargetBlock(HashSet<Short> transparent, int maxDistance, boolean castToByte);
 	public MCBlock getTargetBlock(HashSet<Byte> transparent, int maxDistance);
     public List<MCBlock> getLastTwoTargetBlocks(HashSet<Byte> transparent, int maxDistance);
-    public List<MCBlock> getLineOfSight(HashSet<Byte> transparent, int maxDistance);
+	public List<MCBlock> getLineOfSight(HashSet<Short> transparent, int maxDistance);
 	public boolean hasLineOfSight(MCEntity other);
     public double getMaxHealth();
     public int getMaximumAir();
