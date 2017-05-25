@@ -219,7 +219,7 @@ public class Commands {
 						List<Construct> ca = ((CArray) ops.get("aliases", t)).asList();
 						List<String> aliases = new ArrayList<String>();
 						for (Construct c : ca) {
-							aliases.add(c.val());
+							aliases.add(c.val().toLowerCase());
 						}
 						cmd.setAliases(aliases);
 					}
@@ -254,9 +254,9 @@ public class Commands {
 		public String docs() {
 			return "boolean {commandname, optionsArray} Registers a command to the server's command list,"
 					+ " or updates an existing one. Options is an associative array that can have the following keys:"
-					+ " description, usage, permission, noPermMsg, aliases, tabcompleter, and/or executor."
-					+ " Everything is optional and can be modified later, except for 'aliases' due to how"
-					+ " Bukkit's command map works. 'noPermMsg' is the message displayed when the user doesn't"
+					+ " description, usage, permission, noPermMsg, aliases, tabcompleter, and/or executor. Everything"
+					+ " is optional and can be modified later, except for 'aliases' which can only be changed by first"
+					+ " unregistering the command. 'noPermMsg' is the message displayed when the user doesn't"
 					+ " have the permission specified in 'permission'. 'Usage' is the message shown when the"
 					+ " 'executor' returns false. 'Executor' is the closure run when the command is executed,"
 					+ " and can return true or false (by default is treated as true). 'tabcompleter' is the closure"
