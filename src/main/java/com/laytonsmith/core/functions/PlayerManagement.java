@@ -1587,7 +1587,7 @@ public class PlayerManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREPlayerOfflineException.class};
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -1620,6 +1620,9 @@ public class PlayerManagement {
 				xp = Static.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
+			if(xp < 0 || xp > 100) {
+				throw new CRERangeException("Experience percentage must be from 0 to 100.", t);
+			}
 			m.setExp(((float) xp) / 100.0F);
 			return CVoid.VOID;
 		}
