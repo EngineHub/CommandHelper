@@ -78,8 +78,6 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
 	public void resetPlayerWeather();
 
-	public void sendTexturePack(String url);
-
 	public void sendResourcePack(String url);
 
     public void setAllowFlight(boolean flight);

@@ -813,24 +813,6 @@ public final class Static {
 		return java.lang.Math.min(max, java.lang.Math.max(min, i));
 	}
 
-	/**
-	 * Returns the entity with the specified id. If it doesn't exist, a
-	 * ConfigRuntimeException is thrown.
-	 *
-	 * @param id
-	 * @return
-	 */
-	public static MCEntity getEntity(int id, Target t) {
-		for (MCWorld w : getServer().getWorlds()) {
-			for (MCEntity e : w.getEntities()) {
-				if (e.getEntityId() == id) {
-					return StaticLayer.GetCorrectEntity(e);
-				}
-			}
-		}
-		throw new CREBadEntityException("That entity (ID " + id + ") does not exist.", t);
-	}
-
 	public static MCEntity getEntity(Construct id, Target t) {
 		return getEntityByUuid(GetUUID(id.val(), t), t);
 	}
@@ -868,30 +850,6 @@ public final class Static {
 		for (MCWorld w : Static.getServer().getWorlds()) {
 			for (MCLivingEntity e : w.getLivingEntities()) {
 				if (e.getUniqueId().compareTo(id) == 0) {
-					try {
-						return (MCLivingEntity) StaticLayer.GetCorrectEntity(e);
-					} catch (ClassCastException cce) {
-						throw new CREBadEntityException("The entity found was misinterpreted by the converter, this is"
-								+ " a developer mistake, please file a ticket.", t);
-					}
-				}
-			}
-		}
-		throw new CREBadEntityException("That entity (" + id + ") does not exist or is not alive.", t);
-	}
-
-	/**
-	 * Returns the living entity with the specified id. If it doesn't exist or isn't living, a ConfigRuntimeException is
-	 * thrown.
-	 *
-	 * @param id
-	 *
-	 * @return
-	 */
-	public static MCLivingEntity getLivingEntity(int id, Target t) {
-		for (MCWorld w : Static.getServer().getWorlds()) {
-			for (MCLivingEntity e : w.getLivingEntities()) {
-				if (e.getEntityId() == id) {
 					try {
 						return (MCLivingEntity) StaticLayer.GetCorrectEntity(e);
 					} catch (ClassCastException cce) {

@@ -335,13 +335,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         p.sendMessage(string);
     }
 
-        @Override
-    public void sendTexturePack(String url) {
-            p.setTexturePack(url);
-    }
-
-        @Override
-    public void sendResourcePack(String url) {
+	@Override
+	public void sendResourcePack(String url) {
             p.setResourcePack(url);
     }
 
@@ -369,13 +364,6 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void setFlying(boolean flight) {
 		p.setFlying(flight);
 	}
-
-    /*public void setHealth(int i) {
-        if(i == 0){
-            this.fireEntityDamageEvent(MCDamageCause.CUSTOM);
-        }
-        p.setHealth(i);
-    }*/
 
 	@Override
     public void setLevel(int xp) {
@@ -495,7 +483,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public boolean isNewPlayer() {
         //Note the reversed logic here. If they have NOT played before, they are
         //a new player.
-        return !p.getServer().getOfflinePlayer(p.getName()).hasPlayedBefore();
+        return !p.hasPlayedBefore();
     }
 
 	@Override

@@ -18,11 +18,6 @@ public interface MCEntity extends MCMetadatable {
 
 	public boolean eject();
 
-	public void fireEntityDamageEvent(MCDamageCause dc);
-
-	@Deprecated
-	int getEntityId();
-
 	public float getFallDistance();
 
 	public int getFireTicks();

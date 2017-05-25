@@ -35,6 +35,7 @@ import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.abstraction.enums.MCWolfType;
 import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -1340,6 +1341,8 @@ public class Minecraft {
 	}
 
 	@api
+	@hide("Deprecated in favor of send_resourcepack")
+	@Deprecated
 	public static class send_texturepack extends AbstractFunction {
 
 		@Override
@@ -1361,7 +1364,7 @@ public class Minecraft {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
-			p.sendTexturePack(args[1].val());
+			p.sendResourcePack(args[1].val());
 			return CVoid.VOID;
 		}
 
@@ -1377,11 +1380,7 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "void {player, url} Sends a texturepack URL to the player's client."
-					+ " If the client has not been requested to change textures in the"
-					+ " past, they will recieve a confirmation dialog before downloading"
-					+ " and switching to the new pack. Clients that ignore server textures"
-					+ " will not recieve the request, so this function will not affect them.";
+			return "void {player, url} Deprecated in favor of send_resourcepack().";
 		}
 
 		@Override

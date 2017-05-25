@@ -2035,7 +2035,7 @@ public class PlayerEvents {
 					+ " Fires when a player casts or reels a fishing rod."
 					+ " {player | world | state | chance | xp | hook: the fishhook entity id"
 					+ " | caught: the id of the snared entity, can be a fish item}"
-					+ " {chance: the chance of catching a fish from pulling the bobber at random"
+					+ " {chance: the chance of catching a fish from pulling the bobber at random (pre 1.9 only)"
 					+ " | xp: the exp the player will get from catching a fish}"
 					+ " {}";
 		}

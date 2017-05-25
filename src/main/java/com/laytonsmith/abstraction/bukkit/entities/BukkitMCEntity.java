@@ -53,17 +53,6 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	}
 
 	@Override
-	public void fireEntityDamageEvent(MCDamageCause dc) {
-		EntityDamageEvent ede = new EntityDamageEvent(e, EntityDamageEvent.DamageCause.valueOf(dc.name()), 9001.0);
-		CommandHelperPlugin.self.getServer().getPluginManager().callEvent(ede);
-	}
-
-	@Override
-	public int getEntityId() {
-		return e.getEntityId();
-	}
-
-	@Override
 	public float getFallDistance() {
 		return e.getFallDistance();
 	}
