@@ -2780,6 +2780,9 @@ public class DataHandling {
 	    if (args[0] instanceof CString) {
 		key = args[0].val();
 	    } else if (args[0] instanceof CArray) {
+                if(((CArray)args[0]).isAssociative()) {
+                    throw new CREIllegalArgumentException("Associative arrays may not be used as keys in " + getName(), t);
+                }
 		key = GetNamespace((CArray) args[0], t);
 	    } else {
 		throw new CREIllegalArgumentException("Argument 1 in " + this.getName() + " must be a string or array.", t);
