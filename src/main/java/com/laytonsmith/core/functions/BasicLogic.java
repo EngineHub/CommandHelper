@@ -1,6 +1,10 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.Convertor;
+import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.core;
@@ -31,6 +35,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -1328,6 +1333,197 @@ public class BasicLogic {
     }
 
     @api
+	public static class item_equals extends AbstractFunction {
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public String getName() {
+			return "item_equals";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[] {2};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] {CREFormatException.class, CRENotFoundException.class, CRECastException.class};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {itemArray1, itemArray2} Returns true if the items are equal.";
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if (!(args[0] instanceof CArray)) {
+				throw new CRECastException("Expecting an array as argument 1", t);
+			} else if (!(args[1] instanceof CArray)) {
+				throw new CRECastException("Expecting an array as argument 2", t);
+			}
+			CArray itemA = (CArray) args[0];
+			CArray itemB = (CArray) args[1];
+			MCMaterial matA, matB;
+			Convertor convertor = StaticLayer.GetConvertor();
+
+			// Material
+			boolean isContNameA = itemA.containsKey("name");
+			boolean isContNameB = itemB.containsKey("name");
+			if (!(isContNameA || itemA.containsKey("type")) ||
+					!(isContNameB || itemB.containsKey("type"))) {
+				throw new CREFormatException("Could not find item type!", t);
+			}
+			if (isContNameA) {
+				matA = convertor.GetMaterial(itemA.get("name", t).val());
+			} else {
+				matA = convertor.getMaterial(Static.getInt32(itemA.get("type", t), t));
+			}
+			if (isContNameB) {
+				matB = convertor.GetMaterial(itemB.get("name", t).val());
+			} else {
+				matB = convertor.getMaterial(Static.getInt32(itemB.get("type", t), t));
+			}
+			if (matA.getType() != matB.getType()) {
+				return CBoolean.FALSE;
+			}
+			// Data
+			if (itemA.containsKey("data") && itemB.containsKey("data")) {
+				int dataA = Static.getInt32(itemA.get("data", t), t);
+				int dataB = Static.getInt32(itemB.get("data", t), t);
+				if (dataA != dataB) {
+					return CBoolean.FALSE;
+				}
+			} else {
+				throw new CREFormatException("Could not find item data!", t);
+			}
+
+			// Meta
+			Construct cMetaA = null, cMetaB = null;
+			if (itemA.containsKey("meta")) {
+				cMetaA = itemA.get("meta", t);
+			}
+			if (itemB.containsKey("meta")) {
+				cMetaB = itemB.get("meta", t);
+			}
+			boolean hasMetaA = cMetaA != null && !(cMetaA instanceof CNull);
+			if (hasMetaA == (cMetaB != null && !(cMetaB instanceof CNull))) {
+				if (hasMetaA) {
+					CArray metaA, metaB;
+					boolean cMetaIsCArr = cMetaA instanceof CArray;
+					if (cMetaIsCArr && cMetaB instanceof CArray) {
+						metaA = (CArray) cMetaA;
+						metaB = (CArray) cMetaB;
+					} else {
+						throw new CREFormatException("An array was expected but received " + (cMetaIsCArr ? cMetaB : cMetaA) + " instead.", t);
+					}
+					// Display
+					boolean isMetaContDispA = metaA.containsKey("display");
+					if (isMetaContDispA == metaB.containsKey("display")) {
+						if (isMetaContDispA) {
+							CString displayA, displayB;
+							Construct cDisplayA = metaA.get("display", t);
+							Construct cDisplayB = metaA.get("display", t);
+							if (!(cDisplayA instanceof CString) || !(cDisplayB instanceof CString)) {
+								throw new CREFormatException("Display name was expected to be an string", t);
+							}
+							displayA = (CString) cDisplayA;
+							displayB = (CString) cDisplayB;
+							if (!displayA.equals(displayB)) {
+								return CBoolean.FALSE;
+							}
+						}
+					} else {
+						return CBoolean.FALSE;
+					}
+					// Lore
+					boolean isMetaContLoreA = metaA.containsKey("lore");
+					if (isMetaContLoreA == metaB.containsKey("lore")) {
+						if (isMetaContLoreA) {
+							Construct cLoreA = metaA.get("lore", t);
+							Construct cLoreB = metaB.get("lore", t);
+							if (cLoreA.getCType() == cLoreB.getCType()) {
+								if (cLoreA instanceof CString) {
+									CString loreA = (CString) cLoreA;
+									CString loreB = (CString) cLoreB;
+									if (!loreA.equals(loreB)) {
+										return CBoolean.FALSE;
+									}
+								} else if (cLoreA instanceof CArray) {
+									CArray loreA = (CArray) cLoreA;
+									CArray loreB = (CArray) cLoreB;
+									if (!loreA.equals(loreB)) {
+										return CBoolean.FALSE;
+									}
+								} else {
+									throw new CREFormatException("Lore was expected to be an array or a string.", t);
+								}
+							} else {
+								return CBoolean.FALSE;
+							}
+						}
+					}
+					// Enchant
+					boolean isMetaContEncnA = metaA.containsKey("enchants");
+					if (isMetaContEncnA == metaB.containsKey("enchants")) {
+						if (isMetaContEncnA) {
+							Construct cEncnA = metaA.get("enchants", t);
+							Construct cEncnB = metaB.get("enchants", t);
+							if (!(cEncnA instanceof CArray) || !(cEncnB instanceof CArray)) {
+								throw new CREFormatException("Enchants field was expected to be an array of Enchantment arrays", t);
+							}
+							CArray encnA = (CArray) cEncnA;
+							CArray encnB = (CArray) cEncnB;
+							if (!encnA.equals(encnB)) {
+								return CBoolean.FALSE;
+							}
+						}
+					} else {
+						return CBoolean.FALSE;
+					}
+					// Flag
+					if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
+						boolean isMetaContFlagA = metaA.containsKey("flags");
+						if (isMetaContFlagA == metaA.containsKey("flags")) {
+							if (isMetaContFlagA) {
+								Construct cFlagA = metaA.get("enchants", t);
+								Construct cFlagB = metaB.get("enchants", t);
+								if (!(cFlagA instanceof CArray) || !(cFlagB instanceof CArray)) {
+									throw new CREFormatException("Enchants field was expected to be an array of Enchantment arrays", t);
+								}
+								CArray encnA = (CArray) cFlagA;
+								CArray encnB = (CArray) cFlagB;
+								if (!encnA.equals(encnB)) {
+									return CBoolean.FALSE;
+								}
+							}
+						} else {
+							return CBoolean.FALSE;
+						}
+					}
+				}
+			} else {
+				return CBoolean.FALSE;
+			}
+			return CBoolean.TRUE;
+		}
+	}
+
+    @api
     public static class ref_equals extends AbstractFunction {
 
 	@Override
@@ -1760,7 +1956,7 @@ public class BasicLogic {
 	    // TODO: Can't do this yet, because children of side effect free functions may still have side effects that
 	    // we need to maintain. However, with complications introduced by code branch functions, we can't process
 	    // this yet.
-//			if(foundFalse){
+//			if(foundFalse){`
 //				//However, we can remove any functions that have no side effects that come before the false.
 //				it = children.iterator();
 //				while(it.hasNext()){
