@@ -17,6 +17,7 @@ public class MySQLProfile extends SQLProfile {
 	private final String database;
 	private final String username;
 	private final String password;
+	private final Boolean useSSL;
 
 	public MySQLProfile(String id, Map<String, String> elements) throws Profiles.InvalidProfileException {
 		super(id, elements);
@@ -48,6 +49,11 @@ public class MySQLProfile extends SQLProfile {
 		} else {
 			port = 3306;
 		}
+		if(elements.containsKey("useSSL")) {
+			useSSL = Boolean.parseBoolean(elements.get("useSSL"));
+		} else {
+			useSSL = null;
+		}
 	}
 
 	public String getDatabase() {
@@ -73,7 +79,8 @@ public class MySQLProfile extends SQLProfile {
 			return "jdbc:mysql://" + host + ":" + port + "/" + database + "?generateSimpleParameterMetadata=true"
 					+ "&jdbcCompliantTruncation=false"
 					+ (username == null ? "" : "&user=" + URLEncoder.encode(username, "UTF-8"))
-					+ (password == null ? "" : "&password=" + URLEncoder.encode(password, "UTF-8"));
+					+ (password == null ? "" : "&password=" + URLEncoder.encode(password, "UTF-8"))
+					+ (useSSL == null ? "" : "&useSSL=" + useSSL);
 		} catch (UnsupportedEncodingException ex) {
 			throw new Error();
 		}
