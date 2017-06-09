@@ -153,6 +153,11 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_PAINTING_ART%: The art on the painting (can be %ART%).
 |- 
+| PARROT
+| 
+* %KEY_PARROT_SITTING%: If the parrot is sitting.
+* %KEY_PARROT_TYPE%: The type of the parrot (can be %PARROT_TYPE%).
+|- 
 | PIG
 | 
 * %KEY_PIG_SADDLED%: If the pig has a saddle.

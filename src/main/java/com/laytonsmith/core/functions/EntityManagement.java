@@ -44,6 +44,7 @@ import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
+import com.laytonsmith.abstraction.enums.MCParrotType;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
@@ -2564,6 +2565,7 @@ public class EntityManagement {
 			docs = docs.replace("%LLAMA_COLOR%", StringUtils.Join(MCLlamaColor.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%ROTATION%", StringUtils.Join(MCRotation.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%OCELOT_TYPE%", StringUtils.Join(MCOcelotType.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%PARROT_TYPE%", StringUtils.Join(MCParrotType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%ART%", StringUtils.Join(MCArt.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%DYE_COLOR%", StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%SKELETON_TYPE%", StringUtils.Join(MCSkeletonType.values(), ", ", ", or ", " or "));
@@ -2775,6 +2777,11 @@ public class EntityManagement {
 					MCPainting painting = (MCPainting) entity;
 					specArray.set(entity_spec.KEY_PAINTING_ART, new CString(painting.getArt().name(), t), t);
 					break;
+				case PARROT:
+					MCParrot parrot = (MCParrot) entity;
+					specArray.set(entity_spec.KEY_PARROT_SITTING, CBoolean.get(parrot.isSitting()), t);
+					specArray.set(entity_spec.KEY_PARROT_TYPE, new CString(parrot.getVariant().name(), t), t);
+					break;
 				case PIG:
 					MCPig pig = (MCPig) entity;
 					specArray.set(entity_spec.KEY_PIG_SADDLED, CBoolean.get(pig.isSaddled()), t);
@@ -2936,6 +2943,8 @@ public class EntityManagement {
 		private static final String KEY_OCELOT_TYPE = "type";
 		private static final String KEY_OCELOT_SITTING = "sitting";
 		private static final String KEY_PAINTING_ART = "type";
+		private static final String KEY_PARROT_SITTING = "sitting";
+		private static final String KEY_PARROT_TYPE = "type";
 		private static final String KEY_PIG_SADDLED = "saddled";
 		private static final String KEY_PIG_ZOMBIE_ANGRY = "angry";
 		private static final String KEY_PIG_ZOMBIE_ANGER = "anger";
@@ -3533,6 +3542,25 @@ public class EntityManagement {
 									painting.setArt(MCArt.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid art type: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case PARROT:
+					MCParrot parrot = (MCParrot) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_PARROT_SITTING:
+								parrot.setSitting(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_PARROT_TYPE:
+								try {
+									parrot.setVariant(MCParrotType.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid parrot type: " + specArray.get(index, t).val(), t);
 								}
 								break;
 							default:
