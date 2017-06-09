@@ -466,6 +466,9 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 						}
 					}
 					break;
+				case ILLUSIONER:
+					mobType = Illusioner.class;
+					break;
 				case IRONGOLEM:
 					mobType = IronGolem.class;
 					break;
@@ -480,6 +483,9 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					break;
 				case OCELOT:
 					mobType = Ocelot.class;
+					break;
+				case PARROT:
+					mobType = Parrot.class;
 					break;
 				case PIG:
 					mobType = Pig.class;
