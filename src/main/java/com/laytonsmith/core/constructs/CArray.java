@@ -47,7 +47,7 @@ public class CArray extends Construct implements ArrayAccess{
     private List<Construct> array;
     private SortedMap<String, Construct> associative_array;
     private String mutVal;
-    CArray parent = null;
+	private CArray parent = null;
 	private boolean valueDirty = true;
 
 	public CArray(Target t) {
@@ -119,7 +119,7 @@ public class CArray extends Construct implements ArrayAccess{
 			}
 			this.next_index = array.size();
 		}
-		regenValue(new HashSet<CArray>());
+		regenValue();
 	}
 
 	/**
@@ -194,16 +194,23 @@ public class CArray extends Construct implements ArrayAccess{
 	 * sets the toString value to dirty, which means that the value will be regenerated
 	 * next time it is requested.
 	 */
-    private void regenValue(Set<CArray> arrays) {
+	private void regenValue() {
+		if(valueDirty){
+			return; // All parents must be dirty too
+		}
+		regenValue(new HashSet<CArray>());
+	}
+
+	private void regenValue(Set<CArray> arrays) {
 		if(arrays.contains(this)){
 			return; //Recursive, so don't continue.
 		}
-		arrays.add(this);
-        valueDirty = true;
+		valueDirty = true;
 		if(parent != null){
+			arrays.add(this);
 			parent.regenValue(arrays);
 		}
-    }
+	}
 
 	/**
 	 * Reverses the array in place, if it is a normal array, otherwise, if associative, it throws
@@ -213,7 +220,7 @@ public class CArray extends Construct implements ArrayAccess{
 	public void reverse(Target t){
 		if(!associative_mode){
 			Collections.reverse(array);
-			regenValue(new HashSet<CArray>());
+			regenValue();
 		} else {
 			throw new CRECastException("Cannot reverse an associative array.", t);
 		}
@@ -267,7 +274,7 @@ public class CArray extends Construct implements ArrayAccess{
         if(c instanceof CArray){
             ((CArray)c).parent = this;
         }
-        regenValue(new HashSet<CArray>());
+        regenValue();
     }
 
     /**
@@ -341,7 +348,7 @@ public class CArray extends Construct implements ArrayAccess{
         if(c instanceof CArray){
             ((CArray)c).parent = this;
         }
-        regenValue(new HashSet<CArray>());
+        regenValue();
     }
 
     public final void set(int index, Construct c, Target t){
@@ -455,14 +462,13 @@ public class CArray extends Construct implements ArrayAccess{
 		return ret;
 	}
 
-    @Override
-    public String val() {
-		if(valueDirty){
-			mutVal = getString(new Stack<CArray>(), this.getTarget());
-			valueDirty = false;
+	@Override
+	public String val() {
+		if(valueDirty) {
+			getString(new Stack<CArray>(), this.getTarget());
 		}
-        return mutVal;
-    }
+		return mutVal;
+	}
 
     @Override
     public String toString() {
@@ -479,6 +485,9 @@ public class CArray extends Construct implements ArrayAccess{
 	 * @return
 	 */
 	protected String getString(Stack<CArray> arrays, Target t){
+		if(!valueDirty) {
+			return mutVal;
+		}
 		StringBuilder b = new StringBuilder();
 		b.append("{");
 		if (!inAssociativeMode()) {
@@ -529,8 +538,9 @@ public class CArray extends Construct implements ArrayAccess{
 			}
 		}
 		b.append("}");
-		String ret = b.toString();
-		return ret;
+		mutVal = b.toString();
+		valueDirty = false;
+		return mutVal;
 	}
 
 	@Override
@@ -560,7 +570,7 @@ public class CArray extends Construct implements ArrayAccess{
                 clone.associative_array = new TreeMap<String, Construct>(this.associative_array);
             }
         }
-        clone.regenValue(new HashSet<CArray>());
+        clone.regenValue();
         return clone;
     }
 	
@@ -652,7 +662,7 @@ public class CArray extends Construct implements ArrayAccess{
         } else {
             ret = associative_array.remove(c);
         }
-        regenValue(new HashSet<CArray>());
+        regenValue();
         return ret;
     }
 
@@ -679,7 +689,7 @@ public class CArray extends Construct implements ArrayAccess{
 				}
 			}
 		}
-		regenValue(new HashSet<CArray>());
+		regenValue();
 	}
 
 	/**
@@ -896,7 +906,7 @@ public class CArray extends Construct implements ArrayAccess{
             }
         });
         this.array = list;
-        this.regenValue(new HashSet<CArray>());
+        this.regenValue();
     }
 
 	public boolean isEmpty(){
