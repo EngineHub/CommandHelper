@@ -4142,7 +4142,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {Entity ID, boolean} If true, applies glowing effect to the entity";
+			return "void {entityID, boolean} If true, applies glowing effect to the entity (MC 1.9)";
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -4162,7 +4162,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "boolean {Entity} Returns true if the entity is glowing";
+			return "boolean {entityID} Returns true if the entity is glowing (MC 1.9)";
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -4182,7 +4182,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {Entity, boolean} If possible, makes the entity glide";
+			return "void {entityID, boolean} If possible, makes the entity glide (MC 1.9)";
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -4206,7 +4206,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "boolean {Entity} Returns true if the given entity is gliding";
+			return "boolean {entityID} Returns true if the given entity is gliding (MC 1.9)";
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -4225,7 +4225,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "boolean {Entity} Returns true if the given entity has AI";
+			return "boolean {entityID} Returns true if the given entity has AI (MC 1.9.2)";
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -4244,7 +4244,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {Entity, boolean} enables or disables the entity AI";
+			return "void {entityID, boolean} enables or disables the entity AI (MC 1.9.2)";
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -4253,6 +4253,127 @@ public class EntityManagement {
 
 			e.setAI(ai);
 
+			return CVoid.VOID;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class get_entity_silent extends EntityGetterFunction {
+		public String getName() {
+			return "get_entity_silent";
+		}
+
+		public String docs() {
+			return "boolean {entityID} Returns true if the entity produces sounds (MC 1.9.4)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CBoolean.GenerateCBoolean(Static.getEntity(args[0], t).isSilent(), t);
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class set_entity_silent extends EntitySetterFunction {
+		public String getName() {
+			return "set_entity_silent";
+		}
+
+		public String docs() {
+			return "void {entityID, boolean} Sets whether or not entity produces sounds (MC 1.9.4)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			e.setSilent(Static.getBoolean(args[1]));
+			return CVoid.VOID;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class get_entity_gravity extends EntityGetterFunction {
+		public String getName() {
+			return "get_entity_gravity";
+		}
+
+		public String docs() {
+			return "boolean {entityID} Returns true if gravity applies to the entity (MC 1.10)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CBoolean.GenerateCBoolean(Static.getEntity(args[0], t).hasGravity(), t);
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class set_entity_gravity extends EntitySetterFunction {
+		public String getName() {
+			return "set_entity_gravity";
+		}
+
+		public String docs() {
+			return "void {entityID, boolean} Sets whether or not gravity applies to the entity (MC 1.10)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			e.setHasGravity(Static.getBoolean(args[1]));
+			return CVoid.VOID;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class get_entity_invulnerable extends EntityGetterFunction {
+		public String getName() {
+			return "get_entity_invulnerable";
+		}
+
+		public String docs() {
+			return "boolean {entityID} Returns true if the entity cannot be damaged (MC 1.9.2)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CBoolean.GenerateCBoolean(Static.getEntity(args[0], t).isInvulnerable(), t);
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class set_entity_invulnerable extends EntitySetterFunction {
+		public String getName() {
+			return "set_entity_invulnerable";
+		}
+
+		public String docs() {
+			return "void {entityID, boolean} If set to true the entity cannot be damaged, except by players in"
+					+ " creative mode (MC 1.9.2)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			e.setInvulnerable(Static.getBoolean(args[1]));
 			return CVoid.VOID;
 		}
 

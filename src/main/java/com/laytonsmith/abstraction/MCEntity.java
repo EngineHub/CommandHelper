@@ -102,4 +102,12 @@ public interface MCEntity extends MCMetadatable {
 	public boolean hasGravity();
 
 	public void setHasGravity(boolean gravity);
+
+	public boolean isSilent();
+
+	public void setSilent(boolean silent);
+
+	public boolean isInvulnerable();
+
+	public void setInvulnerable(boolean invulnerable);
 }

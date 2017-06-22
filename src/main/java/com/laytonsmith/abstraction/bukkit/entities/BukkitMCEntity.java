@@ -12,14 +12,12 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCMetadatable;
 import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents;
-import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
 import org.bukkit.EntityEffect;
 import org.bukkit.entity.Entity;
@@ -311,22 +309,78 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	
 	@Override
 	public boolean isGlowing() {
-		return e.isGlowing();
+		try {
+			return e.isGlowing();
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.9
+			return false;
+		}
 	}
 	
 	@Override
 	public void setGlowing(Boolean glow) {
-		e.setGlowing(glow);
+		try {
+			e.setGlowing(glow);
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.9
+		}
 	}
 
 	@Override
 	public boolean hasGravity() {
-		return e.hasGravity();
+		try {
+			return e.hasGravity();
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.10
+			return true;
+		}
 	}
 
 	@Override
 	public void setHasGravity(boolean gravity) {
-		e.setGravity(gravity);
+		try {
+			e.setGravity(gravity);
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.10
+		}
+	}
+
+	@Override
+	public boolean isSilent() {
+		try {
+			return e.isSilent();
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.9.4
+			return false;
+		}
+	}
+
+	@Override
+	public void setSilent(boolean silent) {
+		try {
+			e.setSilent(silent);
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.9.4
+		}
+	}
+
+	@Override
+	public boolean isInvulnerable() {
+		try {
+			return e.isInvulnerable();
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.9.2
+			return false;
+		}
+	}
+
+	@Override
+	public void setInvulnerable(boolean invulnerable) {
+		try {
+			e.setInvulnerable(invulnerable);
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.9.2
+		}
 	}
 
 }
