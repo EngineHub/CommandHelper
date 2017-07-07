@@ -18,7 +18,7 @@ public interface MCScoreboard {
 	 * @return Set of all players tracked by this scoreboard
 	 */
 	public Set<String> getEntries();
-	public MCTeam getPlayerTeam(MCOfflinePlayer player);
+	public MCTeam getPlayerTeam(String entry);
 	public Set<MCScore> getScores(String entry);
 	public MCTeam getTeam(String teamName);
 	public Set<MCTeam> getTeams();
