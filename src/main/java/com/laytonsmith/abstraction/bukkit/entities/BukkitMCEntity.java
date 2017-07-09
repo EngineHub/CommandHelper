@@ -29,7 +29,9 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -380,6 +382,36 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 			e.setInvulnerable(invulnerable);
 		} catch(NoSuchMethodError ex){
 			// Probably before 1.9.2
+		}
+	}
+
+	@Override
+	public Set<String> getScoreboardTags() {
+		try {
+			return e.getScoreboardTags();
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.10.2
+			return Collections.emptySet();
+		}
+	}
+
+	@Override
+	public boolean addScoreboardTag(String tag) {
+		try {
+			return e.addScoreboardTag(tag);
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.10.2
+			return false;
+		}
+	}
+
+	@Override
+	public boolean removeScoreboardTag(String tag) {
+		try {
+			return e.removeScoreboardTag(tag);
+		} catch(NoSuchMethodError ex){
+			// Probably before 1.10.2
+			return false;
 		}
 	}
 

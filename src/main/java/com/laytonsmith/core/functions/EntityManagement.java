@@ -4381,4 +4381,68 @@ public class EntityManagement {
 			return CHVersion.V3_3_2;
 		}
 	}
+
+	@api
+	public static class get_scoreboard_tags extends EntityGetterFunction {
+		public String getName() {
+			return "get_scoreboard_tags";
+		}
+
+		public String docs() {
+			return "array {entityID} Returns an array of scoreboard tags for this entity. (MC 1.10.2)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			CArray tags = new CArray(t);
+			for(String tag : e.getScoreboardTags()) {
+				tags.push(new CString(tag, t), t);
+			}
+			return tags;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class add_scoreboard_tag extends EntitySetterFunction {
+		public String getName() {
+			return "add_scoreboard_tag";
+		}
+
+		public String docs() {
+			return "boolean {entityID, tag} Adds a tag to the entity. Returns whether or not it was successful. (MC 1.10.2)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			return CBoolean.get(e.addScoreboardTag(args[1].val()));
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class remove_scoreboard_tag extends EntitySetterFunction {
+		public String getName() {
+			return "remove_scoreboard_tag";
+		}
+
+		public String docs() {
+			return "boolean {entityID, tag} Removes a tag from the entity. Returns whether or not it was successful. (MC 1.10.2)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			return CBoolean.get(e.removeScoreboardTag(args[1].val()));
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
 }
