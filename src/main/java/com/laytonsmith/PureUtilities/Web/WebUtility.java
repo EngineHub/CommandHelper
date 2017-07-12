@@ -26,10 +26,10 @@ import org.apache.commons.codec.binary.Base64;
 /**
  * Contains methods to simplify web connections.
  *
- * 
+ *
  */
 public final class WebUtility {
-	
+
 	public static void main(String[] args) throws Exception {
 		CookieJar stash = new CookieJar();
 		HTTPResponse resp = GetPage(new URL("http://www.google.com/"), HTTPMethod.GET, null, null, stash, true, 60000);
@@ -65,7 +65,7 @@ public final class WebUtility {
 	 * @return
 	 * @throws IOException
 	 */
-	public static HTTPResponse GetPage(URL url, HTTPMethod method, Map<String, List<String>> headers, 
+	public static HTTPResponse GetPage(URL url, HTTPMethod method, Map<String, List<String>> headers,
 			Map<String, String> parameters, CookieJar cookieStash, boolean followRedirects, int timeout) throws SocketTimeoutException, IOException {
 		RequestSettings settings = new RequestSettings()
 				.setMethod(method).setHeaders(headers).setParameters(parameters)
@@ -123,7 +123,7 @@ public final class WebUtility {
 		if(m.find()){
 			httpVersion = m.group(1);
 		}
-		HTTPResponse resp = new HTTPResponse(response.getConnection().getResponseMessage(), 
+		HTTPResponse resp = new HTTPResponse(response.getConnection().getResponseMessage(),
 				response.getConnection().getResponseCode(), response.getConnection().getHeaderFields(), b==null?null:b.toString(), httpVersion);
 		if (cookieStash != null && resp.getHeaderNames().contains("Set-Cookie")) {
 			//We need to add the cookie to the stash
@@ -133,7 +133,7 @@ public final class WebUtility {
 		}
 		return resp;
 	}
-	
+
 	/**
 	 * Returns the raw web stream. Cookies are used to initiate the request, but
 	 * the cookie jar isn't updated with the received cookies.
@@ -141,7 +141,7 @@ public final class WebUtility {
 	 * @param settings
 	 * @return
 	 * @throws SocketTimeoutException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static RawHTTPResponse getWebStream(URL url, RequestSettings settings) throws SocketTimeoutException, IOException{
 		if(settings == null){
@@ -166,7 +166,7 @@ public final class WebUtility {
 			String query = b.toString();
 			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "?" + query);
 		}
-		
+
 		Proxy proxy;
 		if(settings.getProxy() == null){
 			proxy = Proxy.NO_PROXY;
@@ -251,7 +251,7 @@ public final class WebUtility {
 				b.append("&");
 			}
 			first = false;
-			
+
 			List<String> values = parameters.get(key);
 			try {
 				if(values.size() == 1){
@@ -344,6 +344,11 @@ public final class WebUtility {
 		});
 	}
 
+	/**
+	 * Given a query string "a=1&b=2", returns a map of that data
+	 * @param query
+	 * @return
+	 */
 	public static Map<String, String> getQueryMap(String query) {
 		Map<String, String> map = new HashMap<String, String>();
 		if(query == null){
