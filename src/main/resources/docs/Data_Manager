@@ -84,6 +84,7 @@ storage.MyKey: "MyValue"
 The <code>storage</code> namespace is reserved for values that are created and accessible from our script's store_value and get_value functions. If you manually edit the data from the data manager, or import other external data, if you want this data to be accessible from your scripts, you must include the correct namespace in the key name. The following namespaces are reserved for future use, and should not be used outside of their given scope:
 
 * storage.**: Values accessible from your main script's store_value and get_value functions. 
+* oauth.**: Refresh and access tokens stored by the OAuth scripts
 * federation.**: The Federation system stores values here. The namespace should never be set to read only, and should be in a transient data source.
 * extension.<extension name>.**: Extensions may store data in this namespace.
 * custom.**: CommandHelper will not ever touch any values stored in here, and you may use this however you wish with external scripts.
