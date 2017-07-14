@@ -147,7 +147,7 @@ public class OAuth {
 			    CArray tokenJson = (CArray) new DataTransformations.json_decode().exec(t, env, new CString(tokenResponse.getContent(), t));
 			    storeRefreshToken(env, clientId, tokenJson.get("refresh_token", t).val());
 			    accessToken = tokenJson.get("access_token", t).val();
-			    storeAccessToken(env, clientId, new AccessToken(accessToken, Static.getInt32(tokenJson.get("expires_in", t), t)));
+			    storeAccessToken(env, clientId, new AccessToken(accessToken, Static.getInt32(tokenJson.get("expires_in", t), t) * 1000));
 			}
 			if (accessToken == null) {
 			    refreshToken = getRefreshToken(env, clientId);
@@ -163,7 +163,8 @@ public class OAuth {
 			    settings.setParameters(tokenParameters);
 			    HTTPResponse tokenResponse = WebUtility.GetPage(new URL(tokenUrl), settings);
 			    CArray tokenJson = (CArray) new DataTransformations.json_decode().exec(t, env, new CString(tokenResponse.getContent(), t));
-			    storeAccessToken(env, clientId, new AccessToken(tokenJson.get("access_token", t).val(), Static.getInt32(tokenJson.get("expires_in", t), t)));
+			    accessToken = tokenJson.get("access_token", t).val();
+			    storeAccessToken(env, clientId, new AccessToken(accessToken, Static.getInt32(tokenJson.get("expires_in", t), t) * 1000));
 			}
 		    } catch (InterruptedException ex) {
 			return CNull.NULL;
@@ -191,7 +192,7 @@ public class OAuth {
 
 	    public AccessToken(String accessToken, int expiresIn) {
 		this.accessToken = accessToken;
-		this.expiry = new Date((System.currentTimeMillis() / 1000) + expiresIn);
+		this.expiry = new Date((System.currentTimeMillis()) + expiresIn);
 	    }
 
 	    public AccessToken(String accessToken, Date expiresOn) {
@@ -216,7 +217,7 @@ public class OAuth {
 
 	private static boolean hasRefreshToken(Environment env, String clientId) throws DataSourceException {
 	    PersistenceNetwork pn = env.getEnv(GlobalEnv.class).GetPersistenceNetwork();
-	    return pn.hasKey(new String[]{"oauth", clientId, "refreshToken"});
+	    return pn.hasKey(new String[]{"oauth", getFormattedClientId(clientId), "refreshToken"});
 	}
 
 	private static void storeRefreshToken(Environment env, String clientId, String refreshToken) throws DataSourceException, ReadOnlyException, IOException {
@@ -250,7 +251,7 @@ public class OAuth {
 		// No key exists in the first place
 		return null;
 	    }
-	    if (aT.getExpiry().before(new Date())) {
+	    if (aT.getExpiry().after(new Date())) {
 		// The key is not expired, so return it now
 		return aT.getAccessToken();
 	    } else {
@@ -269,7 +270,7 @@ public class OAuth {
 	    }
 	}
 
-	private static String getFormattedClientId(String clientId) {
+	public static String getFormattedClientId(String clientId) {
 	    return clientId.replaceAll("[^a-zA-Z_\\.]", "");
 	}
 
@@ -422,7 +423,7 @@ public class OAuth {
 	    PersistenceNetwork pn = environment.getEnv(GlobalEnv.class).GetPersistenceNetwork();
 	    String namespace = "oauth";
 	    if (args.length >= 1) {
-		namespace += args[0].val();
+		namespace += x_get_oauth_token.getFormattedClientId(args[0].val());
 	    }
 	    DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
 	    try {
