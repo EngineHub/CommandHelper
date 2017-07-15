@@ -20,6 +20,7 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCMapMeta;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
@@ -541,6 +542,14 @@ public class ObjectGenerator {
 				} else {
 					ma.set("spawntype", new CString(spawntype.name(), t), t);
 				}
+			} else if (meta instanceof MCMapMeta && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
+				MCColor mapcolor = ((MCMapMeta) meta).getColor();
+				if (mapcolor == null) {
+					color = CNull.NULL;
+				} else {
+					color = color(mapcolor, t);
+				}
+				ma.set("color", color, t);
 			}
 			ret = ma;
 		}
@@ -806,6 +815,15 @@ public class ObjectGenerator {
 						Construct spawntype = ma.get("spawntype", t);
 						if(spawntype instanceof CString) {
 							((MCSpawnEggMeta) meta).setSpawnedType(MCEntityType.valueOf(spawntype.val().toUpperCase()));
+						}
+					}
+				} else if (meta instanceof MCMapMeta && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
+					if (ma.containsKey("color")) {
+						Construct ci = ma.get("color", t);
+						if (ci instanceof CArray) {
+							((MCMapMeta) meta).setColor(color((CArray) ci, t));
+						} else if (!(ci instanceof CNull)) {
+							throw new CREFormatException("Color was expected to be an array.", t);
 						}
 					}
 				}

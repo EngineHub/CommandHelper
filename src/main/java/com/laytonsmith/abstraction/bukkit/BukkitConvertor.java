@@ -122,10 +122,6 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
-/**
- *
- *
- */
 @convert(type = Implementation.Type.BUKKIT)
 public class BukkitConvertor extends AbstractConvertor {
 
@@ -481,6 +477,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if (im instanceof SkullMeta) {
 			return new BukkitMCSkullMeta((SkullMeta) im);
+		}
+		if (im instanceof MapMeta) {
+			return new BukkitMCMapMeta((MapMeta) im);
 		}
 		return new BukkitMCItemMeta(im);
 	}
