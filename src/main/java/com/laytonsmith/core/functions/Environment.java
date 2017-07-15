@@ -68,18 +68,17 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "string {x, y, z, [world] | xyzArray, [world]} Gets the id of the block at x, y, z. This function expects "
-					+ "either 1 or 3 arguments. If 1 argument is passed, it should be an array with the x, y, z"
-					+ " coordinates. The format of the return will be x:y where x is the id of the block, and"
-					+ " y is the meta data for the block. All blocks will return in this format, but blocks"
-					+ " that don't have meta data normally will return 0 in y. If world isn't specified, the current"
-					+ " player's world is used.";
+			return "string {x, y, z, [world] | xyzArray, [world]} Gets the id of the block at the coordinates. The format"
+					+ " of the return will be x:y where x is the id of the block, and y is the meta data for the block."
+					+ " All blocks will return in this format, but blocks that don't have meta data will return 0 in y"
+					+ " (eg. air is \"0:0\"). If a world isn't provided in the location array or as an argument, the"
+					+ " current player's world is used.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class, CRECastException.class,
-				CRELengthException.class, CREInvalidWorldException.class, CRENotFoundException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CRENotFoundException.class};
 		}
 
 		@Override
@@ -104,9 +103,6 @@ public class Environment {
 				w = player.getWorld();
 			}
 			if (args.length < 3) {
-				if (!(args[0] instanceof CArray)) {
-					throw new CRECastException("get_block_at expects param 1 to be an array", t);
-				}
 				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = loc.getBlockX();
 				y = loc.getBlockY();
@@ -125,7 +121,7 @@ public class Environment {
 				if (args.length == 4) {
 					w = Static.getServer().getWorld(args[3].val());
 					if (w == null) {
-						throw new CREInvalidWorldException("The specified world " + args[4].val() + " doesn't exist", t);
+						throw new CREInvalidWorldException("The specified world " + args[3].val() + " doesn't exist", t);
 					}
 				}
 			}
@@ -162,17 +158,15 @@ public class Environment {
 		@Override
 		public String docs() {
 			return "void {x, y, z, id, [world] [physics] | locationArray, id, [physics]} Sets the id of the block at"
-					+ " the x y z coordinates specified. If the first argument passed is an array,"
-					+ " it should be x, y, z, world coordinates. Id must be a blocktype identifier similar to the type"
-					+ " returned from get_block_at, except if the meta value is not specified, 0 is used."
+					+ " the x y z coordinates specified. The id must be an integer or a blocktype identifier similar to"
+					+ " the type returned from get_block_at (eg. \"0:0\"). If the meta value is not specified, 0 is used."
 					+ " If world isn't specified, the current player's world is used. Physics (which defaults to true)"
 					+ " specifies whether or not to update the surrounding blocks when this block is set.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRELengthException.class,
-					CREFormatException.class, CREInvalidWorldException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -199,9 +193,6 @@ public class Environment {
 				w = player.getWorld();
 			}
 			if (args.length < 4) {
-				if (!(args[0] instanceof CArray)) {
-					throw new CRECastException("set_block_at expects param 1 to be an array", t);
-				}
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = l.getBlockX();
 				y = l.getBlockY();
@@ -217,16 +208,16 @@ public class Environment {
 				y = (int) java.lang.Math.floor(Static.getNumber(args[1], t));
 				z = (int) java.lang.Math.floor(Static.getNumber(args[2], t));
 				id = args[3].val();
-				if (args.length >= 5) {
+				if (args.length > 4) {
 					w = Static.getServer().getWorld(args[4].val());
 					if (w == null) {
 						throw new CREInvalidWorldException("The specified world " + args[4].val() + " doesn't exist", t);
 					}
+					if (args.length == 6) {
+						physics = Static.getBoolean(args[5]);
+					}
 				} else if (w == null) {
 					throw new CREInvalidWorldException("No world was provided", t);
-				}
-				if (args.length == 6) {
-					physics = Static.getBoolean(args[2]);
 				}
 			}
 			MCBlock b = w.getBlockAt(x, y, z);

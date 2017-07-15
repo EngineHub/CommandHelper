@@ -222,12 +222,9 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-    public MCBlock getBlockAt(int x, int y, int z) {
-        if (w.getBlockAt(x, y, z) == null) {
-            return null;
-        }
-        return new BukkitMCBlock(w.getBlockAt(x, y, z));
-    }
+	public MCBlock getBlockAt(int x, int y, int z) {
+		return new BukkitMCBlock(w.getBlockAt(x, y, z));
+	}
 
 	@Override
     public MCEntity spawn(MCLocation l, Class mobType) {
