@@ -16,6 +16,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
+import com.laytonsmith.abstraction.enums.MCEntityType.MCVanillaEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCRegainReason;
@@ -68,7 +69,6 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import org.bukkit.entity.EntityType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1712,7 +1712,7 @@ public class EntityEvents {
 				Prefilters.match(filter, "id", evt.getEntity().getUniqueId().toString(),
 						Prefilters.PrefilterType.MACRO);
 
-				if (evt.getEntityType().equals(EntityType.PLAYER)) {
+				if (evt.getEntityType().getAbstracted().equals(MCVanillaEntityType.PLAYER)) {
 					Prefilters.match(filter, "player", evt.getEntity().getCustomName(), Prefilters.PrefilterType.MACRO);
 				}
 				return true;
