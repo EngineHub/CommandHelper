@@ -1708,12 +1708,12 @@ public class EntityEvents {
 			if (e instanceof MCEntityToggleGlideEvent) {
 				MCEntityToggleGlideEvent evt = (MCEntityToggleGlideEvent) e;
 
-				Prefilters.match(filter, "type", evt.getEntityType().name(), Prefilters.PrefilterType.MACRO);
-				Prefilters.match(filter, "id", evt.getEntity().getUniqueId().toString(),
-						Prefilters.PrefilterType.MACRO);
+				MCEntity entity = evt.getEntity();
+				Prefilters.match(filter, "type", entity.getType().name(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(filter, "id", entity.getUniqueId().toString(), Prefilters.PrefilterType.MACRO);
 
-				if (evt.getEntityType().getAbstracted().equals(MCVanillaEntityType.PLAYER)) {
-					Prefilters.match(filter, "player", evt.getEntity().getCustomName(), Prefilters.PrefilterType.MACRO);
+				if (entity instanceof MCPlayer) {
+					Prefilters.match(filter, "player", ((MCPlayer) entity).getName(), Prefilters.PrefilterType.MACRO);
 				}
 				return true;
 			}
