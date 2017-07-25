@@ -1563,7 +1563,7 @@ public class PlayerManagement {
 				m = Static.GetPlayer(args[0].val(), t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			return new CInt((int) (m.getExp() * 100), t);
+			return new CInt(java.lang.Math.round(m.getExp() * 100), t);
 		}
 	}
 
