@@ -127,6 +127,11 @@ simply cannot be overridden, for instance Host and User-Agent will ALWAYS be set
 | If this is not null, the file will be downloaded instead of returned, and saved to the specified location on
 disk. Note that this is currently only enabled from cmdline mode, but will be added in general at a later date.
 If this setting is set from non-cdmline mode, it is silently ignored.
+|-
+| blocking
+| boolean
+| false
+| If this is true, the method will block until it is complete, and it also won't use the internal thread pool.
 |}
 <!-- TODO: This isn't working yet, so just leave it off 
 |-

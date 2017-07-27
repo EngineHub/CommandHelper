@@ -668,12 +668,12 @@ public final class MethodScriptCompiler {
 	    }
 	    if (c == '(' && !state_in_quote) {
 		if (buf.length() > 0) {
-		    if(saveAllTokens) {
+		    if (saveAllTokens) {
 			// In this case, we need to check for keywords first, because we want to go ahead
 			// and convert into that stage. In the future, we might want to do this unconditionally,
 			// but for now, just go ahead and only do it if saveAllTokens is true, because we know
 			// that won't be used by the compiler.
-			if(KeywordList.getKeywordByName(buf.toString()) != null) {
+			if (KeywordList.getKeywordByName(buf.toString()) != null) {
 			    // it's a keyword
 			    token_list.add(new Token(TType.KEYWORD, buf.toString(), target));
 			} else {
@@ -739,11 +739,11 @@ public final class MethodScriptCompiler {
 		}
 //		if (token_list.isEmpty() || (token_list.size() > 0
 //			&& token_list.get(token_list.size() - 1).type != TType.WHITESPACE)) {
-		    if (c == '\t') {
-			token_list.add(new Token(TType.WHITESPACE, "\t", target));
-		    } else {
-			token_list.add(new Token(TType.WHITESPACE, " ", target));
-		    }
+		if (c == '\t') {
+		    token_list.add(new Token(TType.WHITESPACE, "\t", target));
+		} else {
+		    token_list.add(new Token(TType.WHITESPACE, " ", target));
+		}
 //		}
 		continue;
 	    }
@@ -807,18 +807,18 @@ public final class MethodScriptCompiler {
 			buf.append("\t");
 		    } else if (c2 == '@' && in_smart_quote) {
 			buf.append("\\@");
-		    } else if(c2 == '0') {
+		    } else if (c2 == '0') {
 			buf.append('\0');
-		    } else if(c2 == 'f') {
+		    } else if (c2 == 'f') {
 			// Form feed
 			buf.append("\f");
-		    } else if(c2 == 'v'){
+		    } else if (c2 == 'v') {
 			// Vertical tab
 			buf.append("\u000B");
-		    } else if(c2 == 'a') {
+		    } else if (c2 == 'a') {
 			// Alarm
 			buf.append("\u0007");
-		    } else if(c2 == 'b') {
+		    } else if (c2 == 'b') {
 			buf.append("\u0008");
 		    } else if (c2 == 'u') {
 			//Grab the next 4 characters, and check to see if they are numbers
@@ -833,7 +833,7 @@ public final class MethodScriptCompiler {
 			}
 			buf.append(Character.toChars(Integer.parseInt(unicode.toString(), 16)));
 			i += 4;
-		    } else if(c2 == 'U') {
+		    } else if (c2 == 'U') {
 			//Grab the next 8 characters, and check to see if they are numbers
 			StringBuilder unicode = new StringBuilder();
 			for (int m = 0; m < 8; m++) {
@@ -895,7 +895,7 @@ public final class MethodScriptCompiler {
 	    Token next = i + 1 < token_list.size() ? token_list.get(i + 1) : new Token(TType.UNKNOWN, "", t.target);
 
 	    // Combine whitespace tokens into one
-	    if(t.type == TType.WHITESPACE && next.type == TType.WHITESPACE) {
+	    if (t.type == TType.WHITESPACE && next.type == TType.WHITESPACE) {
 		t = new Token(TType.WHITESPACE, t.val() + next.val(), t.target);
 		token_list.set(i, t);
 		token_list.remove(i + 1);
@@ -1027,7 +1027,7 @@ public final class MethodScriptCompiler {
 	ArrayList<Token> tokens2 = new ArrayList<>();
 	for (int i = 0; i < tokens1_1.size(); i++) {
 	    // For now, just remove comments
-	    if(tokens1_1.get(i).type.isComment()) {
+	    if (tokens1_1.get(i).type.isComment()) {
 		tokens1_1.remove(i);
 		i--;
 		continue;
@@ -1928,6 +1928,12 @@ public final class MethodScriptCompiler {
 	    return;
 	}
 	if (tree.getData().val().equals("proc")) {
+	    //Check for too few arguments
+	    if (children.size() < 2) {
+		compilerErrors.add(new ConfigCompileException("Incorrect number of arguments passed to proc",
+			tree.getData().getTarget()));
+		return;
+	    }
 	    //We just went out of scope, so we need to pop the layer of Procedures that
 	    //are internal to us
 	    procs.pop();

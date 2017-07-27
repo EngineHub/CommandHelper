@@ -1,0 +1,102 @@
+#=========================================================================#
+#
+# CommandHelper sample alias file
+#
+#=========================================================================#
+
+# Lines that start with # or // are comments
+# Lines surrounded by /* */ are block comments
+
+
+# Simple alias for /tell
+# The special variable "$" must be the last variable, and it matches all the arguments from that point on.
+/msg $player $ = /tell $player $
+
+# Simple alias for /save-all
+# Super simple aliases can be error proofed by optionally matching all arguments, then not using them.
+/save [$] = /save-all
+
+# Echoes information back to the user
+# This demonstrates how to do string dot concatenation.
+/ping [$] = msg('Pong! '.$)
+
+/*
+	Short alias for long commands
+	Suppose we have a plugin that broadcasts messages only to moderators and it's a very long command.
+	We also want to add the name of the player running the command. For that we can use the function player().
+*/
+/mb $ = /mod-broadcast '('.player().')' $
+
+# Lets notify our users to use the new, shorter version
+/mod-broadcast [$] = msg(color('red').'Use /mb instead of /mod-broadcast')
+
+/*
+	Give kit with a macro
+	Gives a diamond pickaxe, shovel, and axe. Note that commands are separated by \ and this creates a macro.
+*/
+/kit diamond = /give player() diamond_pickaxe \
+	/give player() diamond_shovel \
+	/give player() diamond_axe
+
+/*
+	Give command with material name lookup
+	Note that the second variable $qty is optional, and if no value is given, 1 is the default. The function
+	data_values() turns "stone" into "1:0". The pgive_item() function accepts two arguments separated by a comma.
+	Also note that the command is labelled with "creative". If you are running a creative server, and the users should
+	be able to give themselves items, then you can give them the "ch.alias.creative" permission to run this alias.
+*/
+creative:/i $data [$qty=1] = pgive_item(player(), data_values($data), $qty)
+
+# Creates a simple way to control the weather
+# The equals comparison here evaluates to true if the $value argument is "true". All other words would be false.
+rain:/rain [$value] = storm($value == 'true')
+
+# Sets the time on the server with a function that accepts english words like "sunrise"
+/time $time = set_world_time($time)
+
+/*
+	Better teleportation
+	If "/tp name" is used, it implies "/tp thisplayer name". Unspecified arguments are empty strings, which evaluate
+	as false when checked in an if() function. If false, it'll run the second argument in the if() function.
+*/
+/tp $p1 [$p2] = set_ploc(if(!$p2, player(), $p1), ploc(if(!$p2, $p1, $p2)))
+
+# Kills the player, optionally with a message.
+# Demonstrates how to use the multi-line alias construct.
+thor:/thor $player [$] = >>>
+	lightning(ploc($player));
+	msg('Thou hast smitten the evil player '.$player.' with thy mighty hand');
+	tmsg($player, color('red').if($, $, 'You have been smitten by Thor\'s Hammer!'));
+	pkill($player);
+<<<
+
+/*
+	Shows help information
+	This demonstrates how to use die() and msg(). They work basically the same, except die() kills the command if
+	evaluated. They both send a message to the player. This also shows multi-line if/else using braces.
+*/
+/help [$cmd] = >>>
+	if(!$cmd) {
+		die('Do you need halp?');
+	}
+	if($cmd == 'commandhelper') {
+		msg('The best plugin ever!');
+	} else {
+	    msg('I don\'t know what that is.');
+	}
+<<<
+
+# List all players on the server
+# Demonstrates the foreach function, as well as ivars and concatenation assignment.
+/list = >>>
+	# Initialize an empty string
+	@playerList = '';
+	@playerArray = all_players();
+	# Loop through the array stored in @playerArray
+	foreach(@player in @playerArray) {
+		# Append our player's name to the end of @playerList string
+		@playerList .= @player . ' ';
+	}
+	# Output the string
+	msg(@playerList);
+<<<

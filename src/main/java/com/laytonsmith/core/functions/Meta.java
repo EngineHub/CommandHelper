@@ -292,7 +292,8 @@ public class Meta {
 				if(Prefs.UseSudoFallback()){
 					p.setOp(value);
 				} else {
-					Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName());
+					Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName() + "."
+							+ " Check that your server jar ends with \".jar\" or enable \"use-sudo-fallback\" in preferences.ini.");
 					StreamUtils.GetSystemErr().println("Extra information about the error: ");
 					e.printStackTrace();
 				}

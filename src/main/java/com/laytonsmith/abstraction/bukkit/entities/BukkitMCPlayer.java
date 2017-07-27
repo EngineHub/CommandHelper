@@ -21,10 +21,12 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
+import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.MCWeather;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSoundCategory;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWeather;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
@@ -44,7 +46,6 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -334,24 +335,14 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         p.sendMessage(string);
     }
 
-        @Override
-    public void sendTexturePack(String url) {
-            p.setTexturePack(url);
-    }
-
-        @Override
-    public void sendResourcePack(String url) {
+	@Override
+	public void sendResourcePack(String url) {
             p.setResourcePack(url);
     }
 
 	@Override
     public void setAllowFlight(boolean flight) {
         p.setAllowFlight(flight);
-    }
-
-	@Override
-    public void setBanned(boolean banned) {
-        p.setBanned(banned);
     }
 
 	@Override
@@ -373,13 +364,6 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void setFlying(boolean flight) {
 		p.setFlying(flight);
 	}
-
-    /*public void setHealth(int i) {
-        if(i == 0){
-            this.fireEntityDamageEvent(MCDamageCause.CUSTOM);
-        }
-        p.setHealth(i);
-    }*/
 
 	@Override
     public void setLevel(int xp) {
@@ -434,51 +418,36 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
             throw new IllegalStateException("Running server isn't CraftBukkit");
         }
 
-		try {
-			//Probably 1.4.6
-			Class nmsMinecraftServerClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "MinecraftServer").loadClass();
-			/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
-			/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
-			Set opSet = (Set)ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass(), nmsPlayerList, "operators");
-
-			// since all Java objects pass by reference, we don't need to set field back to object
-			if (value) {
-				opSet.add(p.getName().toLowerCase());
-			} else {
-				opSet.remove(p.getName().toLowerCase());
+		// Since 1.7.8
+		Class nmsMinecraftServerClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "MinecraftServer").loadClass();
+		/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
+		/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
+		/*n.m.s.OpList*/ Object opSet = ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass(), nmsPlayerList, "operators");
+		//opSet.getClass().getSuperclass() == n.m.s.JsonList
+		Map/*<String, n.m.s.OpListEntry>*/ d = (Map)ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
+		if(value){
+			/*n.m.s.OpListEntry*/ Class nmsOpListEntry = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "OpListEntry").loadClass();
+			Class nmsGameProfile;
+			try {
+				/*com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("com.mojang.authlib.GameProfile");
+			} catch (ClassNotFoundException eee){
+				// Prior to 1.8
+				/*net.minecraft.util.com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("net.minecraft.util.com.mojang.authlib.GameProfile");
 			}
-		} catch(ClassCastException ex){
-			// Probably 1.7.8
-			Class nmsMinecraftServerClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "MinecraftServer").loadClass();
-			/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
-			/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
-			/*n.m.s.OpList*/ Object opSet = ReflectionUtils.get(ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "PlayerList").loadClass(), nmsPlayerList, "operators");
-			//opSet.getClass().getSuperclass() == n.m.s.JsonList
-			Map/*<String, n.m.s.OpListEntry>*/ d = (Map)ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
-			if(value){
-				/*n.m.s.OpListEntry*/ Class nmsOpListEntry = ClassDiscovery.getDefaultInstance().forFuzzyName("net.minecraft.server.*", "OpListEntry").loadClass();
-				Class nmsGameProfile;
-				try {
-					/*net.minecraft.util.com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("net.minecraft.util.com.mojang.authlib.GameProfile");
-				} catch (ClassNotFoundException eee){
-					// Probably 1.8
-					/*com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("com.mojang.authlib.GameProfile");
-				}
-				Object gameProfile = ReflectionUtils.invokeMethod(p, "getProfile");
-				Object opListEntry;
-				try {
-					opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class}, new Object[]{gameProfile, 4});
-				} catch (ReflectionUtils.ReflectionException e) {
-					// Probably 1.8.6
-					opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class, boolean.class}, new Object[]{gameProfile, 4, false});
-				}
-				d.put(p.getUniqueId().toString(), opListEntry);
-			} else {
-				d.remove(p.getUniqueId().toString());
+			Object gameProfile = ReflectionUtils.invokeMethod(p, "getProfile");
+			Object opListEntry;
+			try {
+				opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class, boolean.class}, new Object[]{gameProfile, 4, false});
+			} catch (ReflectionUtils.ReflectionException e) {
+				// Prior to 1.8.6
+				opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class}, new Object[]{gameProfile, 4});
 			}
+			d.put(p.getUniqueId().toString(), opListEntry);
+		} else {
+			d.remove(p.getUniqueId().toString());
 		}
-        p.recalculatePermissions();
-    }
+		p.recalculatePermissions();
+	}
 
 	@Override
 	public void setTotalExperience(int total)
@@ -514,7 +483,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public boolean isNewPlayer() {
         //Note the reversed logic here. If they have NOT played before, they are
         //a new player.
-        return !p.getServer().getOfflinePlayer(p.getName()).hasPlayedBefore();
+        return !p.hasPlayedBefore();
     }
 
 	@Override
@@ -546,6 +515,67 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public void playSound(MCLocation l, String sound, float volume, float pitch) {
 		p.playSound(((BukkitMCLocation) l).asLocation(), sound, volume, pitch);
+	}
+
+	@Override
+	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch) {
+		try {
+			p.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		} catch(NoClassDefFoundError ex) {
+			// probably prior to 1.11, ignore category
+			playSound(l, sound, volume, pitch);
+		}
+	}
+
+	@Override
+	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch) {
+		try {
+			p.playSound((Location) l.getHandle(), sound,
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
+		} catch(NoClassDefFoundError ex) {
+			// probably prior to 1.11, ignore category
+			playSound(l, sound, volume, pitch);
+		}
+	}
+
+	@Override
+	public void stopSound(MCSound sound) {
+		try {
+			p.stopSound(((BukkitMCSound) sound).getConcrete());
+		} catch(NoSuchMethodError ex){
+			// probably prior to 1.10
+		}
+	}
+
+	@Override
+	public void stopSound(String sound) {
+		try {
+			p.stopSound(sound);
+		} catch(NoSuchMethodError ex){
+			// probably prior to 1.10
+		}
+	}
+
+	@Override
+	public void stopSound(MCSound sound, MCSoundCategory category) {
+		try {
+			p.stopSound(((BukkitMCSound) sound).getConcrete(),
+					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category));
+		} catch(NoClassDefFoundError ex){
+			// probably prior to 1.11, ignore category
+			stopSound(sound);
+		}
+	}
+
+	@Override
+	public void stopSound(String sound, MCSoundCategory category) {
+		try {
+			p.stopSound(sound, BukkitMCSoundCategory.getConvertor().getConcreteEnum(category));
+		} catch(NoClassDefFoundError ex){
+			// probably prior to 1.11, ignore category
+			stopSound(sound);
+		}
 	}
 
 	@Override

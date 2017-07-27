@@ -85,12 +85,22 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	}
 
 	@Override
-	public MCTeam getPlayerTeam(MCOfflinePlayer player) {
-		Team t = s.getPlayerTeam((OfflinePlayer) player.getHandle());
-		if(t == null) {
-			return null;
+	public MCTeam getPlayerTeam(String entry) {
+		try {
+			Team t = s.getEntryTeam(entry);
+			if(t == null) {
+				return null;
+			}
+			return new BukkitMCTeam(t);
+		} catch(NoSuchMethodError ex) {
+			// Probably 1.8.6 or prior
+			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
+			Object t = ReflectionUtils.invokeMethod(s, "getPlayerTeam", player);
+			if (t == null) {
+				return null;
+			}
+			return new BukkitMCTeam((Team) t);
 		}
-		return new BukkitMCTeam(t);
 	}
 
 	@Override

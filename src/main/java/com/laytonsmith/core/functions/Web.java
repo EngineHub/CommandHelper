@@ -376,10 +376,14 @@ public class Web {
 			}
 		    }
 		}
+		if (csettings.containsKey("blocking")) {
+		    boolean blocking = Static.getBoolean(csettings.get("blocking", t));
+		    settings.setBlocking(blocking);
+		}
 		settings.setAuthenticationDetails(username, password);
 	    }
 	    environment.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
-	    threadPool.submit(new Runnable() {
+	    Runnable task = new Runnable() {
 
 		@Override
 		public void run() {
@@ -430,7 +434,12 @@ public class Web {
 			environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
 		    }
 		}
-	    });
+	    };
+	    if(settings.getBlocking()) {
+		task.run();
+	    } else {
+		threadPool.submit(task);
+	    }
 	    return CVoid.VOID;
 	}
 

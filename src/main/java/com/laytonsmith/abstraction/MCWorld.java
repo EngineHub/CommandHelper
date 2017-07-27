@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCGameRule;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCSound;
+import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCTreeType;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
@@ -36,13 +37,16 @@ public interface MCWorld extends MCMetadatable {
 	public MCWorldType getWorldType();
 
 	int getSeaLevel();
+	int getMaxHeight();
 
 	public MCDifficulty getDifficulty();
 	public void setDifficulty(MCDifficulty difficulty);
 	public boolean getPVP();
 	public void setPVP(boolean pvp);
-	public boolean getGameRuleValue(MCGameRule gameRule);
-	public void setGameRuleValue(MCGameRule gameRule, boolean value);
+	public String[] getGameRules();
+	public String getGameRuleValue(String gameRule);
+	public boolean setGameRuleValue(MCGameRule gameRule, String value);
+	public MCWorldBorder getWorldBorder();
 
     public MCBlock getBlockAt(int x, int y, int z);
 	public MCChunk getChunkAt(int x, int z);
@@ -63,8 +67,9 @@ public interface MCWorld extends MCMetadatable {
 	public void playEffect(MCLocation l, MCEffect mCEffect, int data, int radius);
 
 	public void playSound(MCLocation l, MCSound sound, float volume, float pitch);
-
 	public void playSound(MCLocation l, String sound, float volume, float pitch);
+	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch);
+	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch);
 
     public MCItem dropItemNaturally(MCLocation l, MCItemStack is);
 

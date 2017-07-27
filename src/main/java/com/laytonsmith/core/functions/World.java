@@ -9,14 +9,17 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.MCWorldBorder;
 import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCGameRule;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -1162,6 +1165,7 @@ public class World {
 			ret.set("generator", new CString(w.getGenerator(), t), t);
 			ret.set("worldtype", new CString(w.getWorldType().name(), t), t);
 			ret.set("sealevel", new CInt(w.getSeaLevel(), t), t);
+			ret.set("maxheight", new CInt(w.getMaxHeight(), t), t);
 			return ret;
 		}
 
@@ -1489,9 +1493,9 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "mixed {world, [gameRule]} Returns an associative array containing the values of all existing gamerules for the given world."
-					+ " If gameRule is set, the function only returns the value of the specified gamerule, a boolean."
-					+ "gameRule can be " + StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
+			return "mixed {world, [gameRule]} Returns an associative array containing the values of all existing"
+					+ " gamerules for the given world. If gameRule is specified, the function only returns that value."
+					+ " gameRule can be " + StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override
@@ -1507,18 +1511,23 @@ public class World {
 			}
 			if (args.length == 1) {
 				CArray gameRules = CArray.GetAssociativeArray(t);
-				for (MCGameRule gameRule : MCGameRule.values()) {
-					gameRules.set(new CString(gameRule.getGameRule(), t), CBoolean.get(world.getGameRuleValue(gameRule)), t);
+				for (String gameRule : world.getGameRules()) {
+					gameRules.set(new CString(gameRule, t),
+							Static.resolveConstruct(world.getGameRuleValue(gameRule), t), t);
 				}
 				return gameRules;
 			} else {
-				MCGameRule gameRule;
 				try {
-					gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
+					MCGameRule gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
+					String value = world.getGameRuleValue(gameRule.getGameRule());
+					if(value.equals("")) {
+						throw new CREFormatException("The gamerule \"" + args[1].val()
+								+ "\" does not exist in this version.", t);
+					}
+					return Static.resolveConstruct(value, t);
 				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The gamerule \"" + args[1].val() + "\" does not exist.", t);
 				}
-				return CBoolean.get(world.getGameRuleValue(gameRule));
 			}
 		}
 	}
@@ -1553,8 +1562,9 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {[world], gameRule, value} Sets the value of the gamerule for the specified world, value is a boolean. If world is not given the value is set for all worlds."
-					+ " gameRule can be " + StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
+			return "void {[world], gameRule, value} Sets the value of the gamerule for the specified world. If world is"
+					+ " not given the value is set for all worlds. Returns true if successful. gameRule can be "
+					+ StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override
@@ -1565,15 +1575,19 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCGameRule gameRule;
+			boolean success = false;
 			if (args.length == 2) {
 				try {
 					gameRule = MCGameRule.valueOf(args[0].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The gamerule \"" + args[0].val() + "\" does not exist.", t);
 				}
-				boolean value = Static.getBoolean(args[1]);
+				if(!args[1].getCType().equals(gameRule.getRuleType())) {
+					throw new CREFormatException("Wrong value type for \"" + args[0].val() + "\".", t);
+				}
+				String value = args[1].val();
 				for (MCWorld world : Static.getServer().getWorlds()) {
-					world.setGameRuleValue(gameRule, value);
+					success = world.setGameRuleValue(gameRule, value);
 				}
 			} else {
 				try {
@@ -1585,9 +1599,12 @@ public class World {
 				if (world == null) {
 					throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 				}
-				world.setGameRuleValue(gameRule, Static.getBoolean(args[2]));
+				if(!args[2].getCType().equals(gameRule.getRuleType())) {
+					throw new CREFormatException("Wrong value type for \"" + args[1].val() + "\".", t);
+				}
+				success = world.setGameRuleValue(gameRule, args[2].val());
 			}
-			return CVoid.VOID;
+			return CBoolean.get(success);
 		}
 	}
 
@@ -1606,8 +1623,7 @@ public class World {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREInvalidWorldException.class, CREFormatException.class,
-				CRERangeException.class};
+			return new Class[]{CREInvalidWorldException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -1623,10 +1639,8 @@ public class World {
 		@Override
 		public String docs() {
 			return "locationArray {location_from, location_to, distance} Returns a location that is the specified"
-					+ " distance from the first location along a vector to the second location. Distance must be an"
-					+ " integer greater than 0. This function handles the location arrays as vectors, so worlds are"
-					+ " ignored. The returned location array will have the world specified in location_from or the"
-					+ " player's world if one is not provided.";
+					+ " distance from the first location along a vector to the second location. The target location's"
+					+ " world is ignored.";
 		}
 
 		@Override
@@ -1640,22 +1654,14 @@ public class World {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 
 			MCLocation from = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
-			MCLocation to = ObjectGenerator.GetGenerator().location(args[1], p != null ? p.getWorld() : null, t);
+			MCLocation to = ObjectGenerator.GetGenerator().location(args[1], from.getWorld(), t);
 
-			int distance = Static.getInt32(args[2], t);
+			double distance = Static.getNumber(args[2], t);
 
-			if (distance <= 0) {
-				throw new CRERangeException("Distance must be greater than 0.", t);
-			}
+			Vector3D vector = to.toVector().subtract(from.toVector()).normalize();
 
-			MCLocation shifted_from = from;
-
-			Vector3D velocity = to.toVector().subtract(from.toVector()).normalize();
-
-			for (int i = 0; i < distance; i++) {
-				shifted_from = shifted_from.add(velocity);
-			}
-			return ObjectGenerator.GetGenerator().location(shifted_from);
+			MCLocation shifted_from = from.add(vector.multiply(distance));
+			return ObjectGenerator.GetGenerator().location(shifted_from, false);
 		}
 	}
 
@@ -1689,7 +1695,9 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "double {location_from, location_to} Calculate yaw from one location to another on the X-Z plane. The rotation is measured in degrees (0-359.99...) relative to the (x=0,z=1) vector, which points south.";
+			return "double {location_from, location_to} Calculate yaw from one location to another on the X-Z plane."
+					+ " The rotation is measured in degrees (0-359.99...) relative to the (x=0,z=1) vector, which"
+					+ " points south. Throws a FormatException if locations have differing worlds.";
 		}
 
 		@Override
@@ -1705,7 +1713,12 @@ public class World {
 			MCLocation from = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
 			MCLocation to = ObjectGenerator.GetGenerator().location(args[1], p != null ? p.getWorld() : null, t);
 
-			MCLocation subtract = to.subtract(from);
+			MCLocation subtract;
+			try {
+				subtract = to.subtract(from);
+			} catch(IllegalArgumentException ex) {
+				throw new CREFormatException("Locations are in differing worlds.", t);
+			}
 			double dX = subtract.getX();
 			double dZ = subtract.getZ();
 
@@ -1873,6 +1886,149 @@ public class World {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class get_world_border extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld w = Static.getServer().getWorld(args[0].val());
+			if (w == null){
+				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
+			}
+			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)){
+				return CNull.NULL;
+			}
+			MCWorldBorder wb = w.getWorldBorder();
+			CArray ret = CArray.GetAssociativeArray(t);
+			ret.set("width", new CDouble(wb.getSize(), t), t);
+			ret.set("center", ObjectGenerator.GetGenerator().location(wb.getCenter(), false), t);
+			ret.set("damagebuffer", new CDouble(wb.getDamageBuffer(), t), t);
+			ret.set("damageamount", new CDouble(wb.getDamageAmount(), t), t);
+			ret.set("warningtime", new CInt(wb.getWarningTime(), t), t);
+			ret.set("warningdistance", new CInt(wb.getWarningDistance(), t), t);
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_world_border";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {world_name} Returns an associative array of all information about the world's border."
+					+ " The keys are width, center, damagebuffer, damageamount, warningtime, warningdistance.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class set_world_border extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class,
+					CRERangeException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld w = Static.getServer().getWorld(args[0].val());
+			if (w == null){
+				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
+			}
+			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)){
+				return CVoid.VOID;
+			}
+			MCWorldBorder wb = w.getWorldBorder();
+			Construct c = args[1];
+			if(!(c instanceof CArray)){
+				throw new CREFormatException("Expected array but given \"" + args[1].val() + "\"", t);
+			}
+			CArray params = (CArray)c;
+			if(params.containsKey("width")){
+				if(params.containsKey("seconds")){
+					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t),
+							ArgumentValidation.getInt32(params.get("seconds", t), t));
+				} else {
+					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t));
+				}
+			}
+			if(params.containsKey("center")){
+				wb.setCenter(ObjectGenerator.GetGenerator().location(params.get("center", t), w, t));
+			}
+			if(params.containsKey("damagebuffer")){
+				wb.setDamageBuffer(ArgumentValidation.getDouble(params.get("damagebuffer", t), t));
+			}
+			if(params.containsKey("damageamount")){
+				wb.setDamageAmount(ArgumentValidation.getDouble(params.get("damageamount", t), t));
+			}
+			if(params.containsKey("warningtime")){
+				wb.setWarningTime(ArgumentValidation.getInt32(params.get("warningtime", t), t));
+			}
+			if(params.containsKey("warningdistance")){
+				wb.setWarningDistance(ArgumentValidation.getInt32(params.get("warningdistance", t), t));
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_world_border";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {world_name, paramArray} Updates the world's border with the given values. In addition to the"
+					+ " keys returned by get_world_border(), you can specify the \"seconds\" for which the \"width\""
+					+ " will be applied.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
 		}
 	}
 }

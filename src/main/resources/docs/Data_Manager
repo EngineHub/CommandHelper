@@ -129,12 +129,11 @@ want this data to be accessible from your scripts, you must include the correct 
 following namespaces are reserved for future use, and should not be used outside of their given scope:
 
 * storage.**: Values accessible from your main script's store_value and get_value functions. 
-* federation.**: The Federation system stores values here. The namespace should never be set to read only, and should 
-be in a transient data source.
-* extension.&lt;extension name&gt;.**: Extensions may store data in this namespace.
+* oauth.**: Refresh and access tokens stored by the OAuth scripts
 * site_deploy.**: Information used by site-deploy tool is stored in this namespace.
-* custom.**: MethodScript will not ever touch any values stored in here, and you may use this however you wish with 
-external scripts.
+* federation.**: The Federation system stores values here. The namespace should never be set to read only, and should be in a transient data source.
+* extension.<extension name>.**: Extensions may store data in this namespace.
+* custom.**: CommandHelper will not ever touch any values stored in here, and you may use this however you wish with external scripts.
 <!-- These are "reserved" but not listed.
 * snapin.**: Data about snapins resides here.
 * global.**: Values accessible from any script using the store_gvalue and get_gvalue functions. All scripts have 

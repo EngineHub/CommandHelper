@@ -322,8 +322,8 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro> The player that teleport. Switching worlds will trigger this event, but world_changed is called "
-				+ "after, only if this isn't cancelled first."
+			return "{player: <string match> The player that teleport. Switching worlds will trigger this event, but"
+				+ " world_changed is called after, only if this isn't cancelled first. | type: <string match>"
 				+ "| from: <location match> This should be a location array (x, y, z, world)."
 				+ "| to: <location match> The location the player is now in. This should be a location array as well.} "
 				+ "{player | from: The location the player is coming from | to: The location the player is now in | "
@@ -424,7 +424,7 @@ public class PlayerEvents {
 		public String docs() {
 			return "{player: <macro> | from: <location match> This should be a location array (x, y, z, world)."
 					+ " | to: <location match> The location the player is coming to. This should be a location array as well."
-					+ " | type: the type of portal occuring, one of: " +  StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
+					+ " | type: <macro> the type of portal occuring, one of: " +  StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
 					+ "Fired when a player collides with portal."
 					+ "{player: The player that teleport | from: The location the player is coming from"
 					+ " | to: The location the player is coming to. Returns null when using Nether portal and \"allow-nether\""
@@ -833,7 +833,7 @@ public class PlayerEvents {
                     + " | button: <string match> left or right. If they left or right clicked |"
                     + " item: <item match> The item they are holding when they interacted |"
                     + " hand: <string match> The hand the player clicked with |"
-                    + " player: <string match> The player that triggered the event} "
+                    + " player: <macro match> The player that triggered the event} "
                     + "Fires when a player left or right clicks a block or the air"
                     + "{action: One of either: left_click_block, right_click_block, left_click_air, or right_click_air |"
                     + "block: The id of the block they clicked, or 0 if they clicked the air. If they clicked the air, "
@@ -860,29 +860,11 @@ public class PlayerEvents {
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent)e;
-                CString hand;
-				MCEquipmentSlot h;
-				
-				try {
-					h = pie.getHand();
-				} catch(UnsupportedOperationException ex) {
-					h = null; // We are likely on a pre-1.9 server.
-				}
-                
-                if(((MCPlayerInteractEvent)e).getAction().equals(MCAction.PHYSICAL)){
+
+                if(pie.getAction().equals(MCAction.PHYSICAL)){
                     return false;
                 }
-                
-				if(h != null) {
-					if(h == MCEquipmentSlot.WEAPON) {
-						hand = new CString("main_hand", Target.UNKNOWN);
-					} else {
-						hand = new CString("off_hand", Target.UNKNOWN);
-					}
-				} else {
-					hand = null;
-				}
-                
+
                 if(prefilter.containsKey("button")){
                     if(pie.getAction().equals(MCAction.LEFT_CLICK_AIR) || pie.getAction().equals(MCAction.LEFT_CLICK_BLOCK)){
                         if(!prefilter.get("button").val().toLowerCase().equals("left")){
@@ -899,8 +881,11 @@ public class PlayerEvents {
                 Prefilters.match(prefilter, "item", Static.ParseItemNotation(pie.getItem()), PrefilterType.ITEM_MATCH);
                 Prefilters.match(prefilter, "block", Static.ParseItemNotation(pie.getClickedBlock()), PrefilterType.ITEM_MATCH);
                 Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
-				if(hand != null) {
-					Prefilters.match(prefilter, "hand", hand, PrefilterType.STRING_MATCH);
+
+				if(pie.getHand() == MCEquipmentSlot.WEAPON) {
+					Prefilters.match(prefilter, "hand", "main_hand", PrefilterType.STRING_MATCH);
+				} else {
+					Prefilters.match(prefilter, "hand", "off_hand", PrefilterType.STRING_MATCH);
 				}
 
                 return true;
@@ -913,14 +898,7 @@ public class PlayerEvents {
             if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
-                //map.put("player", new CString(pie.getPlayer().getName(), Target.UNKNOWN));
                 MCAction a = pie.getAction();
-				MCEquipmentSlot h;
-				try {
-					h = pie.getHand();
-				} catch(UnsupportedOperationException ex) {
-					h = null; // We are likely on a pre-1.9 server.
-				}
                 map.put("action", new CString(a.name().toLowerCase(), Target.UNKNOWN));
                 map.put("block", new CString(Static.ParseItemNotation(pie.getClickedBlock()), Target.UNKNOWN));
                 if(a == MCAction.LEFT_CLICK_AIR || a == MCAction.LEFT_CLICK_BLOCK){
@@ -934,12 +912,10 @@ public class PlayerEvents {
                 }
 				map.put("world", new CString(pie.getPlayer().getWorld().getName(), Target.UNKNOWN));
                 map.put("item", new CString(Static.ParseItemNotation(pie.getItem()), Target.UNKNOWN));
-                if(h != null) {
-					if(h == MCEquipmentSlot.WEAPON) {
-						map.put("hand", new CString("main_hand", Target.UNKNOWN));
-					} else {
-						map.put("hand", new CString("off_hand", Target.UNKNOWN));
-					}
+				if(pie.getHand() == MCEquipmentSlot.WEAPON) {
+					map.put("hand", new CString("main_hand", Target.UNKNOWN));
+				} else {
+					map.put("hand", new CString("off_hand", Target.UNKNOWN));
 				}
                 
                 return map;
@@ -2059,7 +2035,7 @@ public class PlayerEvents {
 					+ " Fires when a player casts or reels a fishing rod."
 					+ " {player | world | state | chance | xp | hook: the fishhook entity id"
 					+ " | caught: the id of the snared entity, can be a fish item}"
-					+ " {chance: the chance of catching a fish from pulling the bobber at random"
+					+ " {chance: the chance of catching a fish from pulling the bobber at random (pre 1.9 only)"
 					+ " | xp: the exp the player will get from catching a fish}"
 					+ " {}";
 		}

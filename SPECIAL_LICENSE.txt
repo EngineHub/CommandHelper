@@ -10,6 +10,9 @@ under MIT/GPL. In layman's terms, this means that you cannot submit code that ad
 Objects, for instance, and keep the copyright on it, you must release that to the public domain,
 however, your code will still be available to use under the MIT or GPL license, since
 it is immediately released under those licenses, in addition to the copyright being relinquished.
+While the project as a whole is only released under MIT or GPL, code that is part of the core
+may be individually released under the CC0 license. So if you copy paste individual core files
+out, this may be released under your choice of CC0, MIT, or GPL.
 
 If commercialization of the software without crediting
 you in the future makes you uncomfortable, please do not submit code to the core.

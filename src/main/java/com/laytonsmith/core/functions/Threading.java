@@ -10,7 +10,10 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CNull;
@@ -21,6 +24,8 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -28,6 +33,9 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 /**
@@ -329,4 +337,179 @@ public class Threading {
 
 	}
 
+	@api
+	@noboilerplate
+	@seealso({x_new_thread.class})
+	public static class _synchronized extends AbstractFunction {
+		private static final Map<Object, Integer> syncObjectMap = new HashMap<Object, Integer>();
+		
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENullPointerException.class};
+		}
+		
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+		
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+		
+		@Override
+		public boolean preResolveVariables() {
+			return false;
+		}
+		
+		@Override
+		public boolean useSpecialExec() {
+			return true;
+		}
+		
+		@Override
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			
+			// Get the sync object tree and the code to synchronize.
+			ParseTree syncObjectTree = nodes[0];
+			ParseTree code = nodes[1];
+			
+			// Get the sync object (CArray or String value of the Construct).
+			Construct cSyncObject = parent.seval(syncObjectTree, env);
+			if(cSyncObject instanceof CNull) {
+				throw new CRENullPointerException("Synchronization object may not be null in " + getName() + "().", t);
+			}
+			Object syncObject;
+			if(cSyncObject instanceof CArray) {
+				syncObject = cSyncObject;
+			} else {
+				syncObject = cSyncObject.val();
+			}
+			
+			// Add String sync objects to the map to be able to synchronize by value.
+			if(syncObject instanceof String) {
+				synchronized(syncObjectMap) {
+					searchLabel: {
+						for(Entry<Object, Integer> entry : syncObjectMap.entrySet()) {
+							Object key = entry.getKey();
+							if(key instanceof String && key.equals(syncObject)) {
+								syncObject = key; // Get reference, value of this assign is the same.
+								entry.setValue(entry.getValue() + 1);
+								break searchLabel;
+							}
+						}
+						syncObjectMap.put(syncObject, 1);
+					}
+				}
+			}
+			
+			// Evaluate the code, synchronized by the passed sync object.
+			try {
+				synchronized(syncObject) {
+					parent.seval(code, env);
+				}
+			} catch(RuntimeException e) {
+				throw e;
+			} finally {
+				
+				// Remove 1 from the call count or remove the sync object from the map if it was a sync-by-value.
+				if(syncObject instanceof String) {
+					synchronized(syncObjectMap) {
+						int count = syncObjectMap.get(syncObject); // This should never return null.
+						if(count <= 1) {
+							syncObjectMap.remove(syncObject);
+						} else {
+							for(Entry<Object, Integer> entry : syncObjectMap.entrySet()) {
+								if(entry.getKey() == syncObject) { // Equals by reference.
+									entry.setValue(count - 1);
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			return CVoid.VOID;
+		}
+		
+		@Override
+		public Construct exec(final Target t, final Environment env, Construct... args) throws ConfigRuntimeException {
+			return CVoid.VOID;
+		}
+		
+		@Override
+		public String getName() {
+			return "synchronized";
+		}
+		
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+		
+		@Override
+		public String docs() {
+			return "void {syncObject, code} Synchronizes access to the code block for all calls (from different"
+					+ " threads) with the same syncObject argument."
+					+ " This means that if two threads will call " + getName() + "('example', <code>), the second"
+					+ " call will hang the thread until the passed code of the first call has finished executing."
+					+ " If you call this function from within this function on the same thread using the same"
+					+ " syncObject, the code will simply be executed."
+					+ " For more information about synchronization, see:"
+					+ " https://en.wikipedia.org/wiki/Synchronization_(computer_science)";
+		}
+		
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates two threads possibly overwriting eachother", ""
+						+ "export('log', '');\n"
+						+ "x_new_thread('Thread1', closure() {\n"
+						+ "\t@log = import('log');\n"
+						+ "\t@log = @log.'Some new log message from Thread1.\n'\n"
+						+ "\texport('log', @log);\n"
+						+ "});\n"
+						+ "x_new_thread('Thread2', closure() {\n"
+						+ "\t@log = import('log');\n"
+						+ "\t@log = @log.'Some new log message from Thread2.\n'\n"
+						+ "\texport('log', @log);\n"
+						+ "});\n"
+						+ "sleep(0.1);\n"
+						+ "msg(import('log'));",
+						"Some new log message from Thread1.\n"
+								+ "\nOR\nSome new log message from Thread2.\n"
+								+ "\nOR\nSome new log message from Thread1.\nSome new log message from Thread2.\n"
+								+ "\nOR\nSome new log message from Thread2.\nSome new log message from Thread1.\n"),
+				new ExampleScript("Demonstrates two threads modifying the same variable without the possibility of"
+						+ " overwriting eachother because they are synchronized.", ""
+								+ "export('log', '');\n"
+								+ "x_new_thread('Thread1', closure() {\n"
+								+ "\tsynchronized('syncLog') {\n"
+								+ "\t\t@log = import('log');\n"
+								+ "\t\t@log = @log.'Some new log message from Thread1.\n'\n"
+								+ "\t\texport('log', @log);\n"
+								+ "\t}\n"
+								+ "});\n"
+								+ "x_new_thread('Thread2', closure() {\n"
+								+ "\tsynchronized('syncLog') {\n"
+								+ "\t\t@log = import('log');\n"
+								+ "\t\t@log = @log.'Some new log message from Thread2.\n'\n"
+								+ "\t\texport('log', @log);\n"
+								+ "\t}\n"
+								+ "});\n"
+								+ "sleep(0.1);\n"
+								+ "msg(import('log'));",
+						"Some new log message from Thread1.\nSome new log message from Thread2.\n"
+								+ "\nOR\nSome new log message from Thread2.\nSome new log message from Thread1.\n")
+			};
+		}
+		
+	}
+	
 }

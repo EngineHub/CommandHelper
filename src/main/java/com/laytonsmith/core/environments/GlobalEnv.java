@@ -60,7 +60,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private boolean interrupt = false;
 	private final List<ArrayAccess.ArrayAccessIterator> arrayAccessList = Collections.synchronizedList(new ArrayList<ArrayAccess.ArrayAccessIterator>());
 	private final MutableObject<TaskManager> taskManager = new MutableObject<>();
-	private final WeakHashMap<Thread, StackTraceManager> stackTraceManager = new WeakHashMap<>();
+	private final WeakHashMap<Thread, StackTraceManager> stackTraceManagers = new WeakHashMap<>();
 
 	/**
 	 * Creates a new GlobalEnvironment. All fields in the constructor are required, and cannot be null.
@@ -369,9 +369,14 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @return
 	 */
 	public StackTraceManager GetStackTraceManager(){
-		if(!stackTraceManager.containsKey(Thread.currentThread())){
-			stackTraceManager.put(Thread.currentThread(), new StackTraceManager());
+		Thread currentThread = Thread.currentThread();
+		synchronized(stackTraceManagers) {
+			if(!stackTraceManagers.containsKey(currentThread)){
+				StackTraceManager manager = new StackTraceManager();
+				stackTraceManagers.put(currentThread, manager);
+				return manager;
+			}
+			return stackTraceManagers.get(currentThread);
 		}
-		return stackTraceManager.get(Thread.currentThread());
 	}
 }

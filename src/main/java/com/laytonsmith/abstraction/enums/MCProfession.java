@@ -12,5 +12,7 @@ public enum MCProfession {
 	BUTCHER,
 	FARMER,
 	LIBRARIAN,
-	PRIEST
+	PRIEST,
+	NORMAL,
+	NITWIT
 }

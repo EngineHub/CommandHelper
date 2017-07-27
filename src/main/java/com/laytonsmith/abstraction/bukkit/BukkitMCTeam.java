@@ -59,13 +59,13 @@ public class BukkitMCTeam implements MCTeam {
 	@Override
 	public MCNameTagVisibility getNameTagVisibility() {
 		NameTagVisibility ntv = t.getNameTagVisibility();
-		return BukkitMCNameTagVisibility.getConvertor().getAbstractedEnum(ntv);
+		return MCNameTagVisibility.valueOf(ntv.name());
 	}
 	
 	@Override
 	public MCOptionStatus getOption(MCOption option) {
 		OptionStatus os = t.getOption(BukkitMCOption.getConvertor().getConcreteEnum(option));
-		return BukkitMCOptionStatus.getConvertor().getAbstractedEnum(os);
+		return MCOptionStatus.valueOf(os.name());
 	}
 
 	@Override

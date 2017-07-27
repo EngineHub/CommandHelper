@@ -23,5 +23,6 @@ public enum MCInventoryType {
 	PLAYER,
 	WORKBENCH,
 	ANVIL,
-	BEACON
+	BEACON,
+	SHULKER_BOX
 }

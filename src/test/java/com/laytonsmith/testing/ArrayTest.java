@@ -3,7 +3,6 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import static com.laytonsmith.testing.StaticTest.SRun;
@@ -453,4 +452,20 @@ public class ArrayTest {
 		verify(fakePlayer).sendMessage("{{}, {}}");
 	}
 
+	@Test
+	public void testArrayDirtyOrderToString() throws Exception {
+		SRun("@a = array(); @b = array(); @c = array(); @a[] = @b; @b[] = @c;\n"
+				+ "concat(@a); @b[] = null; @c[] = null; msg(@a);", fakePlayer);
+		verify(fakePlayer).sendMessage("{{{null}, null}}");
+	}
+
+/*
+	Uncomment when CArray can have multiple parents
+	@Test
+	public void testArrayDirtyMultiParentToString() throws Exception {
+		SRun("@a = array(); @b = array(); @c = array(); @a[] = @c; @b[] = @c;\n"
+				+ "concat(@a); @c[] = null; msg(@a);", fakePlayer);
+		verify(fakePlayer).sendMessage("{{null}}");
+	}
+*/
 }

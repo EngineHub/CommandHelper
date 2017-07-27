@@ -25,8 +25,12 @@ import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldCreator;
+import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBanner;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCShulkerBox;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
@@ -74,8 +78,12 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
@@ -99,15 +107,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
-import org.bukkit.inventory.meta.BannerMeta;
-import org.bukkit.inventory.meta.BookMeta;
-import org.bukkit.inventory.meta.EnchantmentStorageMeta;
-import org.bukkit.inventory.meta.FireworkEffectMeta;
-import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.inventory.meta.*;
 import org.bukkit.material.MaterialData;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionData;
@@ -122,10 +122,6 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
-/**
- *
- *
- */
 @convert(type = Implementation.Type.BUKKIT)
 public class BukkitConvertor extends AbstractConvertor {
 
@@ -436,8 +432,29 @@ public class BukkitConvertor extends AbstractConvertor {
 		return entities;
 	}
 
+	public static MCBlockState BukkitGetCorrectBlockState(BlockState bs) {
+		MCVersion version = Static.getServer().getMinecraftVersion();
+		if(version.gte(MCVersion.MC1_11) && bs instanceof ShulkerBox){
+			return new BukkitMCShulkerBox((ShulkerBox) bs);
+		}
+		if(version.gte(MCVersion.MC1_9) && bs instanceof Banner){
+			return new BukkitMCBanner((Banner) bs);
+		}
+		if(bs instanceof CreatureSpawner){
+			return new BukkitMCCreatureSpawner((CreatureSpawner) bs);
+		}
+		return new BukkitMCBlockState(bs);
+	}
+
 	public static MCItemMeta BukkitGetCorrectMeta(ItemMeta im) {
-		if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8) && im instanceof BannerMeta) {
+		MCVersion version = Static.getServer().getMinecraftVersion();
+		if (version.gte(MCVersion.MC1_11_X) && im instanceof SpawnEggMeta) {
+			return new BukkitMCSpawnEggMeta((SpawnEggMeta) im);
+		}
+		if (version.gte(MCVersion.MC1_8_6) && im instanceof BlockStateMeta) {
+			return new BukkitMCBlockStateMeta((BlockStateMeta) im);
+		}
+		if (version.gte(MCVersion.MC1_8) && im instanceof BannerMeta) {
 			return new BukkitMCBannerMeta((BannerMeta) im);
 		}
 		if (im instanceof BookMeta) {
@@ -460,6 +477,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if (im instanceof SkullMeta) {
 			return new BukkitMCSkullMeta((SkullMeta) im);
+		}
+		if (im instanceof MapMeta) {
+			return new BukkitMCMapMeta((MapMeta) im);
 		}
 		return new BukkitMCItemMeta(im);
 	}

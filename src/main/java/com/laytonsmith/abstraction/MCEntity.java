@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -17,11 +18,6 @@ import java.util.UUID;
 public interface MCEntity extends MCMetadatable {
 
 	public boolean eject();
-
-	public void fireEntityDamageEvent(MCDamageCause dc);
-
-	@Deprecated
-	int getEntityId();
 
 	public float getFallDistance();
 
@@ -107,4 +103,18 @@ public interface MCEntity extends MCMetadatable {
 	public boolean hasGravity();
 
 	public void setHasGravity(boolean gravity);
+
+	public boolean isSilent();
+
+	public void setSilent(boolean silent);
+
+	public boolean isInvulnerable();
+
+	public void setInvulnerable(boolean invulnerable);
+
+	public Set<String> getScoreboardTags();
+
+	public boolean addScoreboardTag(String tag);
+
+	public boolean removeScoreboardTag(String tag);
 }

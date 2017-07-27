@@ -15,6 +15,7 @@ import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCSound;
+import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.enums.MCTreeType;
 import com.laytonsmith.annotations.api;
@@ -67,18 +68,17 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "string {x, y, z, [world] | xyzArray, [world]} Gets the id of the block at x, y, z. This function expects "
-					+ "either 1 or 3 arguments. If 1 argument is passed, it should be an array with the x, y, z"
-					+ " coordinates. The format of the return will be x:y where x is the id of the block, and"
-					+ " y is the meta data for the block. All blocks will return in this format, but blocks"
-					+ " that don't have meta data normally will return 0 in y. If world isn't specified, the current"
-					+ " player's world is used.";
+			return "string {x, y, z, [world] | xyzArray, [world]} Gets the id of the block at the coordinates. The format"
+					+ " of the return will be x:y where x is the id of the block, and y is the meta data for the block."
+					+ " All blocks will return in this format, but blocks that don't have meta data will return 0 in y"
+					+ " (eg. air is \"0:0\"). If a world isn't provided in the location array or as an argument, the"
+					+ " current player's world is used.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class, CRECastException.class,
-				CRELengthException.class, CREInvalidWorldException.class, CRENotFoundException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CRENotFoundException.class};
 		}
 
 		@Override
@@ -103,9 +103,6 @@ public class Environment {
 				w = player.getWorld();
 			}
 			if (args.length < 3) {
-				if (!(args[0] instanceof CArray)) {
-					throw new CRECastException("get_block_at expects param 1 to be an array", t);
-				}
 				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = loc.getBlockX();
 				y = loc.getBlockY();
@@ -124,7 +121,7 @@ public class Environment {
 				if (args.length == 4) {
 					w = Static.getServer().getWorld(args[3].val());
 					if (w == null) {
-						throw new CREInvalidWorldException("The specified world " + args[4].val() + " doesn't exist", t);
+						throw new CREInvalidWorldException("The specified world " + args[3].val() + " doesn't exist", t);
 					}
 				}
 			}
@@ -161,17 +158,15 @@ public class Environment {
 		@Override
 		public String docs() {
 			return "void {x, y, z, id, [world] [physics] | locationArray, id, [physics]} Sets the id of the block at"
-					+ " the x y z coordinates specified. If the first argument passed is an array,"
-					+ " it should be x, y, z, world coordinates. Id must be a blocktype identifier similar to the type"
-					+ " returned from get_block_at, except if the meta value is not specified, 0 is used."
+					+ " the x y z coordinates specified. The id must be an integer or a blocktype identifier similar to"
+					+ " the type returned from get_block_at (eg. \"0:0\"). If the meta value is not specified, 0 is used."
 					+ " If world isn't specified, the current player's world is used. Physics (which defaults to true)"
 					+ " specifies whether or not to update the surrounding blocks when this block is set.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRELengthException.class,
-					CREFormatException.class, CREInvalidWorldException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -198,9 +193,6 @@ public class Environment {
 				w = player.getWorld();
 			}
 			if (args.length < 4) {
-				if (!(args[0] instanceof CArray)) {
-					throw new CRECastException("set_block_at expects param 1 to be an array", t);
-				}
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = l.getBlockX();
 				y = l.getBlockY();
@@ -216,16 +208,16 @@ public class Environment {
 				y = (int) java.lang.Math.floor(Static.getNumber(args[1], t));
 				z = (int) java.lang.Math.floor(Static.getNumber(args[2], t));
 				id = args[3].val();
-				if (args.length >= 5) {
+				if (args.length > 4) {
 					w = Static.getServer().getWorld(args[4].val());
 					if (w == null) {
 						throw new CREInvalidWorldException("The specified world " + args[4].val() + " doesn't exist", t);
 					}
+					if (args.length == 6) {
+						physics = Static.getBoolean(args[5]);
+					}
 				} else if (w == null) {
 					throw new CREInvalidWorldException("No world was provided", t);
-				}
-				if (args.length == 6) {
-					physics = Static.getBoolean(args[2]);
 				}
 			}
 			MCBlock b = w.getBlockAt(x, y, z);
@@ -982,10 +974,12 @@ public class Environment {
 
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			MCSound sound;
+			MCSoundCategory category = null;
 			float volume = 1, pitch = 1;
 
-			if (!(args[1] instanceof CArray))
+			if (!(args[1] instanceof CArray)) {
 				throw new CREFormatException("An array was expected but recieved " + args[1], t);
+			}
 
 			CArray sa = (CArray) args[1];
 
@@ -999,26 +993,46 @@ public class Environment {
 				throw new CREFormatException("Sound field was missing.", t);
 			}
 
-			if (sa.containsKey("volume"))
-				volume = Static.getDouble32(sa.get("volume", t), t);
+			if (sa.containsKey("category")) {
+				try {
+					category = MCSoundCategory.valueOf(sa.get("category", t).val().toUpperCase());
+				} catch (IllegalArgumentException iae){
+					throw new CREFormatException("Sound category '" + sa.get("category", t).val() + "' is invalid.", t);
+				}
+			}
 
-			if (sa.containsKey("pitch"))
+			if (sa.containsKey("volume")) {
+				volume = Static.getDouble32(sa.get("volume", t), t);
+			}
+
+			if (sa.containsKey("pitch")) {
 				pitch = Static.getDouble32(sa.get("pitch", t), t);
+			}
 
 			if (args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
 				if (args[2] instanceof CArray) {
-					for (String key : ((CArray) args[2]).stringKeySet())
+					for (String key : ((CArray) args[2]).stringKeySet()) {
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
+					}
 				} else {
 					players.add(Static.GetPlayer(args[2], t));
 				}
 
-				for (MCPlayer p : players)
-					p.playSound(loc, sound, volume, pitch);
+				if(category == null) {
+					for (MCPlayer p : players) {
+						p.playSound(loc, sound, volume, pitch);
+					}
+				} else {
+					for (MCPlayer p : players) {
+						p.playSound(loc, sound, category, volume, pitch);
+					}
+				}
 
-			} else {
+			} else if(category == null){
 				loc.getWorld().playSound(loc, sound, volume, pitch);
+			} else {
+				loc.getWorld().playSound(loc, sound, category, volume, pitch);
 			}
 			return CVoid.VOID;
 		}
@@ -1037,11 +1051,12 @@ public class Environment {
 		public String docs() {
 			return "void {locationArray, soundArray[, players]} Plays a sound at the"
 					+ " given location. SoundArray is in an associative array with"
-					+ " keys 'sound', 'volume', 'pitch', where volume and pitch"
-					+ " are optional and default to 1. Players can be a single"
+					+ " keys 'sound', 'category', 'volume', 'pitch', where all are optional except sound."
+					+ " Volume and pitch default to 1. Players can be a single"
 					+ " player or an array of players to play the sound to, if"
-					+ " not given, all players can potentially hear it. ----"
-					+ " Possible sounds: "
+					+ " not given, all players can potentially hear it. ---- Possible categories: "
+					+ StringUtils.Join(MCSoundCategory.values(), ", ", ", or ", " or ") + "."
+					+ " ---- Possible sounds: "
 					+ StringUtils.Join(MCSound.types(), ", ", ", or ", " or ");
 		}
 
@@ -1079,38 +1094,60 @@ public class Environment {
 
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			String path;
+			MCSoundCategory category = null;
 			float volume = 1, pitch = 1;
 
-			if (!(args[1] instanceof CArray))
+			if (!(args[1] instanceof CArray)) {
 				throw new CREFormatException("An array was expected but recieved " + args[1], t);
+			}
 
 			CArray sa = (CArray) args[1];
 
-			if (!sa.containsKey("sound"))
+			if (!sa.containsKey("sound")) {
 				throw new CREFormatException("Sound field was missing.", t);
+			}
 
 			path = sa.get("sound", t).val();
 
-			if (sa.containsKey("volume"))
-				volume = Static.getDouble32(sa.get("volume", t), t);
+			if (sa.containsKey("category")) {
+				try {
+					category = MCSoundCategory.valueOf(sa.get("category", t).val().toUpperCase());
+				} catch (IllegalArgumentException iae){
+					throw new CREFormatException("Sound category '" + sa.get("category", t).val() + "' is invalid.", t);
+				}
+			}
 
-			if (sa.containsKey("pitch"))
+			if (sa.containsKey("volume")) {
+				volume = Static.getDouble32(sa.get("volume", t), t);
+			}
+
+			if (sa.containsKey("pitch")) {
 				pitch = Static.getDouble32(sa.get("pitch", t), t);
+			}
 
 			if (args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
 				if (args[2] instanceof CArray) {
-					for (String key : ((CArray) args[2]).stringKeySet())
+					for (String key : ((CArray) args[2]).stringKeySet()) {
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
+					}
 				} else {
 					players.add(Static.GetPlayer(args[2], t));
 				}
 
-				for (MCPlayer p : players) {
-					p.playSound(loc, path, volume, pitch);
+				if(category == null) {
+					for (MCPlayer p : players) {
+						p.playSound(loc, path, volume, pitch);
+					}
+				} else {
+					for (MCPlayer p : players) {
+						p.playSound(loc, path, category, volume, pitch);
+					}
 				}
-			} else {
+			} else if(category == null){
 				loc.getWorld().playSound(loc, path, volume, pitch);
+			} else {
+				loc.getWorld().playSound(loc, path, category, volume, pitch);
 			}
 			return CVoid.VOID;
 		}
@@ -1129,11 +1166,12 @@ public class Environment {
 		public String docs() {
 			return "void {locationArray, soundArray[, players]} Plays a sound at the"
 					+ " given location. SoundArray is in an associative array with"
-					+ " keys 'sound', 'volume', 'pitch', where volume and pitch"
-					+ " are optional and default to 1. Players can be a single"
+					+ " keys 'sound', 'category', 'volume', 'pitch', where all are optional except sound."
+					+ " Volume and pitch default to 1. Players can be a single"
 					+ " player or an array of players to play the sound to, if"
 					+ " not given, all players can potentially hear it. Sound is"
-					+ " a sound path, separated by periods. ";
+					+ " a sound path, separated by periods. ---- Possible categories: "
+					+ StringUtils.Join(MCSoundCategory.values(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override

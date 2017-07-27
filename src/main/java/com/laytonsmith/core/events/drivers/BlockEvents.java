@@ -7,7 +7,6 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
-import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCTone;
@@ -32,13 +31,13 @@ import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -331,9 +330,11 @@ public class BlockEvents {
 			map.put("location", location);
 
             CArray drops = new CArray(Target.UNKNOWN);
-            Collection<MCItemStack> items = event.getBlock().getDrops(event.getPlayer().getItemInHand());
-            for (Iterator<MCItemStack> iter = items.iterator(); iter.hasNext();) {
-                MCItemStack stack = new BukkitMCItemStack((MCItemStack) iter.next());
+			Collection<MCItemStack> items = event.getDrops();
+			if(items == null) {
+				items = event.getBlock().getDrops(event.getPlayer().getItemInHand());
+			}
+			for (MCItemStack stack : items) {
                 CArray item = (CArray) ObjectGenerator.GetGenerator().item(stack, Target.UNKNOWN);
                 drops.push(item, Target.UNKNOWN);
             }
@@ -352,26 +353,16 @@ public class BlockEvents {
             MCBlock blk = event.getBlock();
 
             if (key.equals("drops")) {
-                blk.setTypeId(0);
-
-                if (value instanceof CArray) {
-                    CArray arr = (CArray) value;
-
-                    for (int i = 0; i < arr.size(); i++) {
-                        CArray item = (CArray) arr.get(i, Target.UNKNOWN);
-                        MCItemStack stk = ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN);
-
-                        blk.getWorld().dropItemNaturally(
-                            StaticLayer.GetLocation(
-                                    blk.getWorld(),
-                                    blk.getX(),
-                                    blk.getY(),
-                                    blk.getZ()),
-                            stk);
-                    }
-
-                    return true;
-                }
+				List<MCItemStack> drops = new ArrayList<>();
+				if (value instanceof CArray) {
+					CArray arr = (CArray) value;
+					for (int i = 0; i < arr.size(); i++) {
+						CArray item = (CArray) arr.get(i, Target.UNKNOWN);
+						drops.add(ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN));
+					}
+				}
+				event.setDrops(drops);
+				return true;
             }
 
 			if (key.equals("xp")) {
@@ -674,7 +665,7 @@ public class BlockEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <string match> | cause: <macro> | world: <macro>} "
+			return "{player: <macro match> | cause: <macro match> | world: <string match>} "
 					+ "This event is called when a block or entity is ignited."
 					+ "{player: The player's name | ignitingentity: entity ID, if entity is ignited | ignitingblock:"
 					+ " block ID, if block is ignited | location: the locationArray of block or entity | cause:"
@@ -875,8 +866,8 @@ public class BlockEvents {
 
 		@Override
         public String docs() {
-            return "{player: <string match> | 1: <macro> | 2: <macro> | "
-                    + "3: <macro> | 4: <macro> } "
+            return "{player: <string match> | 1: <regex> | 2: regex> | "
+                    + "3: <regex> | 4: <regex> } "
                     + "This event is called when a player changes a sign. "
                     + "Cancelling the event cancels any edits completely."
                     + "{player: The player's name | location: an array usable as a locationArray while also "

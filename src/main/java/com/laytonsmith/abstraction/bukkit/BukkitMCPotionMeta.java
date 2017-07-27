@@ -3,7 +3,6 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCLivingEntity.MCEffect;
 import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCPotionMeta;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -38,8 +37,7 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 		if (potionID < 1 || potionID > maxID) {
 			throw new CRERangeException("Invalid effect ID, must be from 1-" + maxID, t);
 		}
-		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), 
-				(int) Static.msToTicks(seconds * 1000), strength, ambient);
+		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), seconds * 20, strength, ambient);
 		return pm.addCustomEffect(pe, overwrite);
 	}
 
@@ -52,8 +50,7 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 	public List<MCEffect> getCustomEffects() {
 		List<MCEffect> list = new ArrayList<MCEffect>();
 		for (PotionEffect pe : pm.getCustomEffects()) {
-			list.add(new MCEffect(pe.getType().getId(), pe.getAmplifier(), 
-					(int)(Static.ticksToMs(pe.getDuration()) / 1000), pe.isAmbient()));
+			list.add(new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration() / 20, pe.isAmbient()));
 		}
 		return list;
 	}

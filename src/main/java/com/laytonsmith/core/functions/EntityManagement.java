@@ -35,13 +35,16 @@ import com.laytonsmith.abstraction.entities.*;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorseColor;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorsePattern;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorseVariant;
+import com.laytonsmith.abstraction.entities.MCLlama.MCLlamaColor;
 import com.laytonsmith.abstraction.enums.MCArt;
 import com.laytonsmith.abstraction.enums.MCBodyPart;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
+import com.laytonsmith.abstraction.enums.MCEnderDragonPhase;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
+import com.laytonsmith.abstraction.enums.MCParrotType;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
@@ -817,7 +820,8 @@ public class EntityManagement {
 					+ " defaults to 30. If the potionID is out of range, a RangeException is thrown, because out of"
 					+ " range potion effects cause the client to crash, fairly hardcore. See"
 					+ " http://www.minecraftwiki.net/wiki/Potion_effects for a complete list of potions that can be"
-					+ " added. To remove an effect, set the seconds to 0. Strength is the number of levels to add to the"
+					+ " added. To remove an effect, set the seconds to 0. If seconds is less than 0 or greater than"
+					+ " 107374182 a RangeException is thrown. Strength is the number of levels to add to the"
 					+ " base power (effect level 1). Ambient takes a boolean of whether the particles should be less"
 					+ " noticeable. Particles takes a boolean of whether the particles should be visible at all. The"
 					+ " function returns true if the effect was added or removed as desired, and false if it wasn't"
@@ -843,6 +847,11 @@ public class EntityManagement {
 			boolean particles = true;
 			if (args.length >= 4) {
 				seconds = Static.getInt32(args[3], t);
+				if(seconds < 0) {
+					throw new CRERangeException("Seconds cannot be less than 0", t);
+				} else if(seconds > Integer.MAX_VALUE / 20) {
+					throw new CRERangeException("Seconds cannot be greater than 107374182", t);
+				}
 			}
 			if (args.length == 5) {
 				ambient = Static.getBoolean(args[4]);
@@ -1379,7 +1388,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
-			return new CInt(Static.ticksToMs(ent.getFireTicks())/1000, t);
+			return new CInt(ent.getFireTicks() / 20, t);
 		}
 
 		@Override
@@ -1407,11 +1416,13 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
-			int setTicks = (int) Static.msToTicks(Static.getInt(args[1], t)*1000);
-			if (setTicks < 0) {
-				throw new CREFormatException("Seconds cannot be less than 0", t);
+			int seconds = Static.getInt32(args[1], t);
+			if(seconds < 0) {
+				throw new CRERangeException("Seconds cannot be less than 0", t);
+			} else if(seconds > Integer.MAX_VALUE / 20) {
+				throw new CRERangeException("Seconds cannot be greater than 107374182", t);
 			}
-			ent.setFireTicks(setTicks);
+			ent.setFireTicks(seconds * 20);
 			return CVoid.VOID;
 		}
 
@@ -1423,8 +1434,8 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "void {entityID, seconds} Sets the entity on fire for the"
-					+ " given number of seconds. Throws a FormatException"
-					+ " if seconds is less than 0.";
+					+ " given number of seconds. Throws a RangeException"
+					+ " if seconds is less than 0 or greater than 107374182.";
 		}
 		
 		@Override
@@ -1664,7 +1675,12 @@ public class EntityManagement {
 			} else if (rider == null) {
 				success = horse.eject();
 			} else {
-				success = horse.setPassenger(rider);
+				try {
+					success = horse.setPassenger(rider);
+				} catch(IllegalStateException ex){
+					throw new CREFormatException("Circular entity riding!"
+							+ " One entity is already a passenger of the other.", t);
+				}
 			}
 			return CBoolean.get(success);
 		}
@@ -2406,24 +2422,25 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "array {entityID, [transparents, [maxDistance]]} Returns an array containg all blocks along the living entity's line of sight."
-					+ " transparents is an array of block IDs, only air by default."
-					+ " maxDistance represent the maximum distance to scan, it may be limited by the server by at least 100 blocks, no less.";
+			return "array {entityID, [transparents, [maxDistance]]} Returns an array containing all blocks along the"
+					+ " living entity's line of sight. transparents is an array of block IDs, only air by default."
+					+ " maxDistance represents the maximum distance to scan. The server may cap the scan distance,"
+					+ " but probably by not any less than 100 meters.";
 		}
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity entity = Static.getLivingEntity(args[0], t);
-			HashSet<Byte> transparents = null;
+			HashSet<Short> transparents = null;
 			int maxDistance = 512;
 			if (args.length >= 2) {
 				CArray givenTransparents = Static.getArray(args[1], t);
 				if (givenTransparents.inAssociativeMode()) {
 					throw new CRECastException("The array must not be associative.", t);
 				}
-				transparents = new HashSet<Byte>();
+				transparents = new HashSet<>();
 				for (Construct blockID : givenTransparents.asList()) {
-					transparents.add(Static.getInt8(blockID, t));
+					transparents.add(Static.getInt16(blockID, t));
 				}
 			}
 			if (args.length == 3) {
@@ -2545,14 +2562,17 @@ public class EntityManagement {
 			docs = docs.replace("%HORSE_COLOR%", StringUtils.Join(MCHorseColor.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%HORSE_STYLE%", StringUtils.Join(MCHorsePattern.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%HORSE_VARIANT%", StringUtils.Join(MCHorseVariant.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%LLAMA_COLOR%", StringUtils.Join(MCLlamaColor.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%ROTATION%", StringUtils.Join(MCRotation.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%OCELOT_TYPE%", StringUtils.Join(MCOcelotType.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%PARROT_TYPE%", StringUtils.Join(MCParrotType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%ART%", StringUtils.Join(MCArt.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%DYE_COLOR%", StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%SKELETON_TYPE%", StringUtils.Join(MCSkeletonType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PROFESSION%", StringUtils.Join(MCProfession.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%RABBIT_TYPE%", StringUtils.Join(MCRabbitType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PARTICLE%", StringUtils.Join(MCParticle.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%ENDERDRAGON_PHASE%", StringUtils.Join(MCEnderDragonPhase.values(), ", ", ", or ", " or "));
 			for (Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -2627,6 +2647,15 @@ public class EntityManagement {
 					MCCreeper creeper = (MCCreeper) entity;
 					specArray.set(entity_spec.KEY_CREEPER_POWERED, CBoolean.get(creeper.isPowered()), t);
 					break;
+				case DONKEY:
+				case MULE:
+					MCChestedHorse chestedhorse = (MCChestedHorse) entity;
+					specArray.set(entity_spec.KEY_HORSE_CHEST, CBoolean.get(chestedhorse.hasChest()), t);
+					specArray.set(entity_spec.KEY_HORSE_JUMP, new CDouble(chestedhorse.getJumpStrength(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(chestedhorse.getDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(chestedhorse.getMaxDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(chestedhorse.getSaddle(), t), t);
+					break;
 				case DROPPED_ITEM:
 					MCItem item = (MCItem) entity;
 					specArray.set(entity_spec.KEY_DROPPED_ITEM_ITEMSTACK, ObjectGenerator.GetGenerator().item(item.getItemStack(), t), t);
@@ -2643,6 +2672,12 @@ public class EntityManagement {
 							specArray.set(entity_spec.KEY_ENDERCRYSTAL_BEAMTARGET,
 									ObjectGenerator.GetGenerator().location(location, false), t);
 						}
+					}
+					break;
+				case ENDER_DRAGON:
+					MCEnderDragon enderdragon = (MCEnderDragon) entity;
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9_X)){
+						specArray.set(entity_spec.KEY_ENDERDRAGON_PHASE, new CString(enderdragon.getPhase().name(), t), t);
 					}
 					break;
 				case ENDERMAN:
@@ -2688,6 +2723,10 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_HORSE_ARMOR, ObjectGenerator.GetGenerator().item(horse.getArmor(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(horse.getSaddle(), t), t);
 					break;
+				case HUSK:
+					MCZombie husk = (MCZombie) entity;
+					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(husk.isBaby()), t);
+					break;
 				case IRON_GOLEM:
 					MCIronGolem golem = (MCIronGolem) entity;
 					specArray.set(entity_spec.KEY_IRON_GOLEM_PLAYERCREATED, CBoolean.get(golem.isPlayerCreated()), t);
@@ -2705,6 +2744,14 @@ public class EntityManagement {
 				case LIGHTNING:
 					MCLightningStrike lightning = (MCLightningStrike) entity;
 					specArray.set(entity_spec.KEY_LIGHTNING_EFFECT, CBoolean.get(lightning.isEffect()), t);
+					break;
+				case LLAMA:
+					MCLlama llama = (MCLlama) entity;
+					specArray.set(entity_spec.KEY_HORSE_COLOR, new CString(llama.getLlamaColor().name(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_CHEST, CBoolean.get(llama.hasChest()), t);
+					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(llama.getDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(llama.getMaxDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(llama.getSaddle(), t), t);
 					break;
 				case MAGMA_CUBE:
 				case SLIME:
@@ -2730,6 +2777,11 @@ public class EntityManagement {
 					MCPainting painting = (MCPainting) entity;
 					specArray.set(entity_spec.KEY_PAINTING_ART, new CString(painting.getArt().name(), t), t);
 					break;
+				case PARROT:
+					MCParrot parrot = (MCParrot) entity;
+					specArray.set(entity_spec.KEY_PARROT_SITTING, CBoolean.get(parrot.isSitting()), t);
+					specArray.set(entity_spec.KEY_PARROT_TYPE, new CString(parrot.getVariant().name(), t), t);
+					break;
 				case PIG:
 					MCPig pig = (MCPig) entity;
 					specArray.set(entity_spec.KEY_PIG_SADDLED, CBoolean.get(pig.isSaddled()), t);
@@ -2739,7 +2791,6 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_PIG_ZOMBIE_ANGRY, CBoolean.get(pigZombie.isAngry()), t);
 					specArray.set(entity_spec.KEY_PIG_ZOMBIE_ANGER, new CInt(pigZombie.getAnger(), t), t);
 					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(pigZombie.isBaby()), t);
-					specArray.set(entity_spec.KEY_ZOMBIE_VILLAGER, CBoolean.get(pigZombie.isVillager()), t);
 					break;
 				case PRIMED_TNT:
 					MCTNT tnt = (MCTNT) entity;
@@ -2760,9 +2811,28 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_SHEEP_COLOR, new CString(sheep.getColor().name(), t), t);
 					specArray.set(entity_spec.KEY_SHEEP_SHEARED, CBoolean.get(sheep.isSheared()), t);
 					break;
+				case SHULKER_BULLET:
+					MCShulkerBullet bullet = (MCShulkerBullet) entity;
+					MCEntity target = bullet.getTarget();
+					if(target == null) {
+						specArray.set(entity_spec.KEY_SHULKERBULLET_TARGET, CNull.NULL, t);
+					} else {
+						specArray.set(entity_spec.KEY_SHULKERBULLET_TARGET, new CString(target.getUniqueId().toString(), t), t);
+					}
+					break;
 				case SKELETON:
+				case STRAY:
+				case WITHER_SKELETON:
 					MCSkeleton skeleton = (MCSkeleton) entity;
 					specArray.set(entity_spec.KEY_SKELETON_TYPE, new CString(skeleton.getSkeletonType().name(), t), t);
+					break;
+				case SKELETON_HORSE:
+				case ZOMBIE_HORSE:
+					MCAbstractHorse undeadhorse = (MCAbstractHorse) entity;
+					specArray.set(entity_spec.KEY_HORSE_JUMP, new CDouble(undeadhorse.getJumpStrength(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(undeadhorse.getDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(undeadhorse.getMaxDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(undeadhorse.getSaddle(), t), t);
 					break;
 				case SNOWMAN:
 					if (Static.getVersion().gte(MCVersion.MC1_9_4)) {
@@ -2805,6 +2875,11 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(zombie.isBaby()), t);
 					specArray.set(entity_spec.KEY_ZOMBIE_VILLAGER, CBoolean.get(zombie.isVillager()), t);
 					break;
+				case ZOMBIE_VILLAGER:
+					MCZombieVillager zombievillager = (MCZombieVillager) entity;
+					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(zombievillager.isBaby()), t);
+					specArray.set(entity_spec.KEY_VILLAGER_PROFESSION, new CString(zombievillager.getProfession().name(), t), t);
+					break;
 			}
 			return specArray;
 		}
@@ -2840,6 +2915,7 @@ public class EntityManagement {
 		private static final String KEY_DROPPED_ITEM_PICKUPDELAY = "pickupdelay";
 		private static final String KEY_ENDERCRYSTAL_BASE = "base";
 		private static final String KEY_ENDERCRYSTAL_BEAMTARGET = "beamtarget";
+		private static final String KEY_ENDERDRAGON_PHASE = "phase";
 		private static final String KEY_ENDERMAN_CARRIED = "carried";
 		private static final String KEY_EXPERIENCE_ORB_AMOUNT = "amount";
 		private static final String KEY_FALLING_BLOCK_BLOCK = "block";
@@ -2867,6 +2943,8 @@ public class EntityManagement {
 		private static final String KEY_OCELOT_TYPE = "type";
 		private static final String KEY_OCELOT_SITTING = "sitting";
 		private static final String KEY_PAINTING_ART = "type";
+		private static final String KEY_PARROT_SITTING = "sitting";
+		private static final String KEY_PARROT_TYPE = "type";
 		private static final String KEY_PIG_SADDLED = "saddled";
 		private static final String KEY_PIG_ZOMBIE_ANGRY = "angry";
 		private static final String KEY_PIG_ZOMBIE_ANGER = "anger";
@@ -2875,6 +2953,7 @@ public class EntityManagement {
 		private static final String KEY_PRIMED_TNT_SOURCE = "source";
 		private static final String KEY_SHEEP_COLOR = "color";
 		private static final String KEY_SHEEP_SHEARED = "sheared";
+		private static final String KEY_SHULKERBULLET_TARGET = "target";
 		private static final String KEY_SKELETON_TYPE = "type";
 		private static final String KEY_SLIME_SIZE = "size";
 		private static final String KEY_SNOWMAN_DERP = "derp";
@@ -3088,6 +3167,39 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case DONKEY:
+				case MULE:
+					MCChestedHorse chestedhorse = (MCChestedHorse) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_HORSE_CHEST:
+								chestedhorse.setHasChest(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_HORSE_JUMP:
+								try {
+									chestedhorse.setJumpStrength(Static.getDouble(specArray.get(index, t), t));
+								} catch (IllegalArgumentException exception) {
+									throw new CRERangeException("The jump strength must be between 0.0 and 2.0", t);
+								}
+								break;
+							case entity_spec.KEY_HORSE_DOMESTICATION:
+								try {
+									chestedhorse.setDomestication(Static.getInt32(specArray.get(index, t), t));
+								} catch (IllegalArgumentException exception) {
+									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
+								}
+								break;
+							case entity_spec.KEY_HORSE_MAXDOMESTICATION:
+								chestedhorse.setMaxDomestication(Static.getInt32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_HORSE_SADDLE:
+								chestedhorse.setSaddle(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case DROPPED_ITEM:
 					MCItem item = (MCItem) entity;
 					for (String index : specArray.stringKeySet()) {
@@ -3120,6 +3232,18 @@ public class EntityManagement {
 								} else {
 									throw new CRECastException("EnderCrystal beam target must be an array or null", t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case ENDER_DRAGON:
+					MCEnderDragon enderdragon = (MCEnderDragon) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_ENDERDRAGON_PHASE:
+								enderdragon.setPhase(MCEnderDragonPhase.valueOf(specArray.get(index, t).val().toUpperCase()));
 								break;
 							default:
 								throwException(index, t);
@@ -3259,6 +3383,18 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case HUSK:
+					MCZombie husk = (MCZombie) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_ZOMBIE_BABY:
+								husk.setBaby(Static.getBoolean(specArray.get(index, t)));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case IRON_GOLEM:
 					MCIronGolem golem = (MCIronGolem) entity;
 					for (String index : specArray.stringKeySet()) {
@@ -3289,6 +3425,38 @@ public class EntityManagement {
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid rotation type: " + specArray.get(index, t).val(), t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case LLAMA:
+					MCLlama llama = (MCLlama) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_HORSE_COLOR:
+								try {
+									llama.setLlamaColor(MCLlamaColor.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid llama color: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							case entity_spec.KEY_HORSE_CHEST:
+								llama.setHasChest(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_HORSE_DOMESTICATION:
+								try {
+									llama.setDomestication(Static.getInt32(specArray.get(index, t), t));
+								} catch (IllegalArgumentException exception) {
+									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
+								}
+								break;
+							case entity_spec.KEY_HORSE_MAXDOMESTICATION:
+								llama.setMaxDomestication(Static.getInt32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_HORSE_SADDLE:
+								llama.setSaddle(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -3381,6 +3549,25 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case PARROT:
+					MCParrot parrot = (MCParrot) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_PARROT_SITTING:
+								parrot.setSitting(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_PARROT_TYPE:
+								try {
+									parrot.setVariant(MCParrotType.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid parrot type: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case PIG:
 					MCPig pig = (MCPig) entity;
 					for (String index : specArray.stringKeySet()) {
@@ -3399,9 +3586,6 @@ public class EntityManagement {
 						switch (index.toLowerCase()) {
 							case entity_spec.KEY_ZOMBIE_BABY:
 								pigZombie.setBaby(Static.getBoolean(specArray.get(index, t)));
-								break;
-							case entity_spec.KEY_ZOMBIE_VILLAGER:
-								pigZombie.setVillager(Static.getBoolean(specArray.get(index, t)));
 								break;
 							case entity_spec.KEY_PIG_ZOMBIE_ANGRY:
 								pigZombie.setAngry(Static.getBoolean(specArray.get(index, t)));
@@ -3461,6 +3645,23 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case SHULKER_BULLET:
+					MCShulkerBullet bullet = (MCShulkerBullet) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_SHULKERBULLET_TARGET:
+								Construct c = specArray.get(index, t);
+								if(c instanceof CNull) {
+									bullet.setTarget(null);
+								} else {
+									bullet.setTarget(Static.getEntity(c, t));
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case SKELETON:
 					MCSkeleton skeleton = (MCSkeleton) entity;
 					for (String index : specArray.stringKeySet()) {
@@ -3471,6 +3672,36 @@ public class EntityManagement {
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid skeleton type: " + specArray.get(index, t).val(), t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case SKELETON_HORSE:
+				case ZOMBIE_HORSE:
+					MCAbstractHorse undeadhorse = (MCAbstractHorse) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_HORSE_JUMP:
+								try {
+									undeadhorse.setJumpStrength(Static.getDouble(specArray.get(index, t), t));
+								} catch (IllegalArgumentException exception) {
+									throw new CRERangeException("The jump strength must be between 0.0 and 2.0", t);
+								}
+								break;
+							case entity_spec.KEY_HORSE_DOMESTICATION:
+								try {
+									undeadhorse.setDomestication(Static.getInt32(specArray.get(index, t), t));
+								} catch (IllegalArgumentException exception) {
+									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
+								}
+								break;
+							case entity_spec.KEY_HORSE_MAXDOMESTICATION:
+								undeadhorse.setMaxDomestication(Static.getInt32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_HORSE_SADDLE:
+								undeadhorse.setSaddle(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -3616,6 +3847,25 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_ZOMBIE_VILLAGER:
 								zombie.setVillager(Static.getBoolean(specArray.get(index, t)));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case ZOMBIE_VILLAGER:
+					MCZombieVillager zombievillager = (MCZombieVillager) entity;
+					for (String index : specArray.stringKeySet()) {
+						switch (index.toLowerCase()) {
+							case entity_spec.KEY_ZOMBIE_BABY:
+								zombievillager.setBaby(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_VILLAGER_PROFESSION:
+								try {
+									zombievillager.setProfession(MCProfession.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid profession: " + specArray.get(index, t).val(), t);
+								}
 								break;
 							default:
 								throwException(index, t);
@@ -3892,7 +4142,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {Entity ID, boolean} If true, applies glowing effect to the entity";
+			return "void {entityID, boolean} If true, applies glowing effect to the entity (MC 1.9)";
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -3912,7 +4162,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "boolean {Entity} Returns true if the entity is glowing";
+			return "boolean {entityID} Returns true if the entity is glowing (MC 1.9)";
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -3932,7 +4182,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {Entity, boolean} If possible, makes the entity glide";
+			return "void {entityID, boolean} If possible, makes the entity glide (MC 1.9)";
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -3956,7 +4206,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "boolean {Entity} Returns true if the given entity is gliding";
+			return "boolean {entityID} Returns true if the given entity is gliding (MC 1.9)";
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -3975,7 +4225,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "boolean {Entity} Returns true if the given entity has AI";
+			return "boolean {entityID} Returns true if the given entity has AI (MC 1.9.2)";
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -3994,7 +4244,7 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			return "void {Entity, boolean} enables or disables the entity AI";
+			return "void {entityID, boolean} enables or disables the entity AI (MC 1.9.2)";
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -4004,6 +4254,191 @@ public class EntityManagement {
 			e.setAI(ai);
 
 			return CVoid.VOID;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class get_entity_silent extends EntityGetterFunction {
+		public String getName() {
+			return "get_entity_silent";
+		}
+
+		public String docs() {
+			return "boolean {entityID} Returns true if the entity produces sounds (MC 1.9.4)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CBoolean.GenerateCBoolean(Static.getEntity(args[0], t).isSilent(), t);
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class set_entity_silent extends EntitySetterFunction {
+		public String getName() {
+			return "set_entity_silent";
+		}
+
+		public String docs() {
+			return "void {entityID, boolean} Sets whether or not entity produces sounds (MC 1.9.4)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			e.setSilent(Static.getBoolean(args[1]));
+			return CVoid.VOID;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class get_entity_gravity extends EntityGetterFunction {
+		public String getName() {
+			return "get_entity_gravity";
+		}
+
+		public String docs() {
+			return "boolean {entityID} Returns true if gravity applies to the entity (MC 1.10)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CBoolean.GenerateCBoolean(Static.getEntity(args[0], t).hasGravity(), t);
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class set_entity_gravity extends EntitySetterFunction {
+		public String getName() {
+			return "set_entity_gravity";
+		}
+
+		public String docs() {
+			return "void {entityID, boolean} Sets whether or not gravity applies to the entity (MC 1.10)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			e.setHasGravity(Static.getBoolean(args[1]));
+			return CVoid.VOID;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class get_entity_invulnerable extends EntityGetterFunction {
+		public String getName() {
+			return "get_entity_invulnerable";
+		}
+
+		public String docs() {
+			return "boolean {entityID} Returns true if the entity cannot be damaged (MC 1.9.2)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CBoolean.GenerateCBoolean(Static.getEntity(args[0], t).isInvulnerable(), t);
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class set_entity_invulnerable extends EntitySetterFunction {
+		public String getName() {
+			return "set_entity_invulnerable";
+		}
+
+		public String docs() {
+			return "void {entityID, boolean} If set to true the entity cannot be damaged, except by players in"
+					+ " creative mode (MC 1.9.2)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			e.setInvulnerable(Static.getBoolean(args[1]));
+			return CVoid.VOID;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class get_scoreboard_tags extends EntityGetterFunction {
+		public String getName() {
+			return "get_scoreboard_tags";
+		}
+
+		public String docs() {
+			return "array {entityID} Returns an array of scoreboard tags for this entity. (MC 1.10.2)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			CArray tags = new CArray(t);
+			for(String tag : e.getScoreboardTags()) {
+				tags.push(new CString(tag, t), t);
+			}
+			return tags;
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class add_scoreboard_tag extends EntitySetterFunction {
+		public String getName() {
+			return "add_scoreboard_tag";
+		}
+
+		public String docs() {
+			return "boolean {entityID, tag} Adds a tag to the entity. Returns whether or not it was successful. (MC 1.10.2)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			return CBoolean.get(e.addScoreboardTag(args[1].val()));
+		}
+
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class remove_scoreboard_tag extends EntitySetterFunction {
+		public String getName() {
+			return "remove_scoreboard_tag";
+		}
+
+		public String docs() {
+			return "boolean {entityID, tag} Removes a tag from the entity. Returns whether or not it was successful. (MC 1.10.2)";
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			return CBoolean.get(e.removeScoreboardTag(args[1].val()));
 		}
 
 		public Version since() {

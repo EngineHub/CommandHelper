@@ -58,6 +58,10 @@ public class IVariable extends Construct implements Cloneable {
 	return var_value;
     }
 
+    /**
+     * Returns the name of the variable, including the @ sign
+     * @return
+     */
     public String getVariableName() {
 	return name;
     }

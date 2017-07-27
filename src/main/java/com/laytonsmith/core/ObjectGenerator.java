@@ -2,8 +2,10 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCBannerMeta;
+import com.laytonsmith.abstraction.MCBlockStateMeta;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCColor;
+import com.laytonsmith.abstraction.MCCreatureSpawner;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEnchantmentStorageMeta;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
@@ -11,12 +13,14 @@ import com.laytonsmith.abstraction.MCFireworkEffect;
 import com.laytonsmith.abstraction.MCFireworkEffectMeta;
 import com.laytonsmith.abstraction.MCFireworkMeta;
 import com.laytonsmith.abstraction.MCFurnaceRecipe;
+import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemFactory;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCMapMeta;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
@@ -26,10 +30,15 @@ import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCShapedRecipe;
 import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
+import com.laytonsmith.abstraction.MCSpawnEggMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCBanner;
+import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.blocks.MCShulkerBox;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
@@ -412,7 +421,38 @@ public class ObjectGenerator {
 
 			// Specific ItemMeta
 
-			if(meta instanceof  MCFireworkEffectMeta){
+			if(meta instanceof MCBlockStateMeta) {
+				MCBlockState bs = ((MCBlockStateMeta) meta).getBlockState();
+				if(bs instanceof MCShulkerBox){
+					MCShulkerBox mcsb = (MCShulkerBox) bs;
+					MCInventory inv = mcsb.getInventory();
+					CArray box = CArray.GetAssociativeArray(t);
+					for(int i = 0; i < inv.getSize(); i++){
+						Construct item = ObjectGenerator.GetGenerator().item(inv.getItem(i), t);
+						if(!(item instanceof CNull)) {
+							box.set(i, item, t);
+						}
+					}
+					ma.set("inventory", box, t);
+				} else if(bs instanceof MCBanner){
+					MCBanner banner = (MCBanner) bs;
+					CArray patterns = new CArray(t, banner.numberOfPatterns());
+					for (MCPattern p : banner.getPatterns()) {
+						CArray pattern = CArray.GetAssociativeArray(t);
+						pattern.set("shape", new CString(p.getShape().toString(), t), t);
+						pattern.set("color", new CString(p.getColor().toString(), t), t);
+						patterns.push(pattern, t);
+					}
+					ma.set("patterns", patterns, t);
+					MCDyeColor dyeColor = banner.getBaseColor();
+					if(dyeColor != null) {
+						ma.set("basecolor", new CString(dyeColor.toString(), t), t);
+					}
+				} else if(bs instanceof MCCreatureSpawner){
+					MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
+					ma.set("spawntype", mccs.getSpawnedType().name());
+				}
+			} else if(meta instanceof  MCFireworkEffectMeta){
 				MCFireworkEffectMeta mcfem = (MCFireworkEffectMeta) meta;
 				MCFireworkEffect effect = mcfem.getEffect();
 				if(effect == null){
@@ -495,6 +535,21 @@ public class ObjectGenerator {
 				if(dyeColor != null) {
 					ma.set("basecolor", new CString(dyeColor.toString(), t), t);
 				}
+			} else if (meta instanceof MCSpawnEggMeta) {
+				MCEntityType spawntype = ((MCSpawnEggMeta) meta).getSpawnedType();
+				if(spawntype == null) {
+					ma.set("spawntype", CNull.NULL, t);
+				} else {
+					ma.set("spawntype", new CString(spawntype.name(), t), t);
+				}
+			} else if (meta instanceof MCMapMeta && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
+				MCColor mapcolor = ((MCMapMeta) meta).getColor();
+				if (mapcolor == null) {
+					color = CNull.NULL;
+				} else {
+					color = color(mapcolor, t);
+				}
+				ma.set("color", color, t);
 			}
 			ret = ma;
 		}
@@ -566,7 +621,60 @@ public class ObjectGenerator {
 
 				// Specific Item Meta
 
-				if(meta instanceof MCFireworkEffectMeta){
+				if(meta instanceof MCBlockStateMeta){
+					MCBlockStateMeta bsm = (MCBlockStateMeta) meta;
+					MCBlockState bs = bsm.getBlockState();
+					if(bs instanceof MCShulkerBox){
+						if(ma.containsKey("inventory")){
+							MCShulkerBox box = (MCShulkerBox) bs;
+							MCInventory inv = box.getInventory();
+							Construct csbm = ma.get("inventory", t);
+							if(csbm instanceof CArray){
+								CArray cinv = (CArray) csbm;
+								for(String key : cinv.stringKeySet()){
+									try {
+										int index = Integer.parseInt(key);
+										if (index < 0 || index >= inv.getSize()) {
+											ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found"
+													+ " in ShulkerBox inventory array, so ignoring.");
+										}
+										MCItemStack is = ObjectGenerator.GetGenerator().item(cinv.get(key, t), t);
+										inv.setItem(index, is);
+									} catch (NumberFormatException ex) {
+										ConfigRuntimeException.DoWarning("Expecting integer value for key in ShulkerBox"
+												+ " inventory array, but \"" + key + "\" was found. Ignoring.");
+									}
+								}
+								bsm.setBlockState(bs);
+							} else if(!(csbm instanceof CNull)){
+								throw new CREFormatException("ShulkerBox inventory expected to be an array or null.", t);
+							}
+						}
+					} else if(bs instanceof MCBanner){
+						MCBanner banner = (MCBanner) bs;
+						if(ma.containsKey("basecolor")){
+							banner.setBaseColor(MCDyeColor.valueOf(ma.get("basecolor", t).val().toUpperCase()));
+						}
+						if(ma.containsKey("patterns")){
+							CArray array = ArgumentValidation.getArray(ma.get("patterns", t), t);
+							for (String key : array.stringKeySet()) {
+								CArray pattern = ArgumentValidation.getArray(array.get(key, t), t);
+								MCPatternShape shape = MCPatternShape.valueOf(pattern.get("shape", t).val().toUpperCase());
+								MCDyeColor color = MCDyeColor.valueOf(pattern.get("color", t).val().toUpperCase());
+								banner.addPattern(StaticLayer.GetConvertor().GetPattern(color, shape));
+							}
+						}
+						banner.update();
+						bsm.setBlockState(banner);
+					} else if(bs instanceof MCCreatureSpawner){
+						if(ma.containsKey("spawntype")){
+							MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
+							MCEntityType type = MCEntityType.valueOf(ma.get("spawntype", t).val().toUpperCase());
+							mccs.setSpawnedType(type);
+							bsm.setBlockState(bs);
+						}
+					}
+				} else if(meta instanceof MCFireworkEffectMeta){
 					MCFireworkEffectMeta femeta = (MCFireworkEffectMeta) meta;
 					if(ma.containsKey("effect")){
 						Construct cfem = ma.get("effect", t);
@@ -700,6 +808,22 @@ public class ObjectGenerator {
 							MCPatternShape shape = MCPatternShape.valueOf(pattern.get("shape", t).val().toUpperCase());
 							MCDyeColor color = MCDyeColor.valueOf(pattern.get("color", t).val().toUpperCase());
 							((MCBannerMeta) meta).addPattern(StaticLayer.GetConvertor().GetPattern(color, shape));
+						}
+					}
+				} else if (meta instanceof MCSpawnEggMeta) {
+					if (ma.containsKey("spawntype")) {
+						Construct spawntype = ma.get("spawntype", t);
+						if(spawntype instanceof CString) {
+							((MCSpawnEggMeta) meta).setSpawnedType(MCEntityType.valueOf(spawntype.val().toUpperCase()));
+						}
+					}
+				} else if (meta instanceof MCMapMeta && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
+					if (ma.containsKey("color")) {
+						Construct ci = ma.get("color", t);
+						if (ci instanceof CArray) {
+							((MCMapMeta) meta).setColor(color((CArray) ci, t));
+						} else if (!(ci instanceof CNull)) {
+							throw new CREFormatException("Color was expected to be an array.", t);
 						}
 					}
 				}
@@ -940,6 +1064,11 @@ public class ObjectGenerator {
 				}
 				if (effect.containsKey("seconds")) {
 					seconds = Static.getInt32(effect.get("seconds", t), t);
+					if(seconds < 0) {
+						throw new CRERangeException("Seconds cannot be less than 0", t);
+					} else if(seconds > Integer.MAX_VALUE / 20) {
+						throw new CRERangeException("Seconds cannot be greater than 107374182", t);
+					}
 				}
 				if (effect.containsKey("ambient")) {
 					ambient = Static.getBoolean(effect.get("ambient", t));

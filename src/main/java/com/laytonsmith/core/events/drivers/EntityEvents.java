@@ -14,10 +14,15 @@ import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
+import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
+import com.laytonsmith.abstraction.enums.MCEntityType.MCVanillaEntityType;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCMobs;
+import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
+import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
@@ -26,8 +31,11 @@ import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
 import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
 import com.laytonsmith.abstraction.events.MCEntityInteractEvent;
+import com.laytonsmith.abstraction.events.MCEntityPortalEvent;
+import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
+import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
 import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
 import com.laytonsmith.abstraction.events.MCItemSpawnEvent;
@@ -61,7 +69,6 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import org.bukkit.entity.EntityType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -816,10 +823,11 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{clicked: the type of entity being clicked}"
+			return "{clicked: <macro> the type of entity being clicked"
+				+ " | hand: <string match> The hand the player clicked with, can be either main_hand or off_hand}"
 				+ " Fires when a player right clicks an entity. Note, not all entities are clickable."
 				+ " Interactions with Armor Stands do not trigger this event."
-				+ " {player: the player clicking | clicked | id: the id of the entity"
+				+ " {player: the player clicking | clicked | hand | id: the id of the entity"
 				+ " | data: if a player is clicked, this will contain their name}"
 				+ " {}"
 				+ " {player|clicked|id|data}";
@@ -830,7 +838,15 @@ public class EntityEvents {
 				throws PrefilterNonMatchException {
 			if(event instanceof MCPlayerInteractEntityEvent){
 				MCPlayerInteractEntityEvent e = (MCPlayerInteractEntityEvent) event;
+
 				Prefilters.match(prefilter, "clicked", e.getEntity().getType().name(), Prefilters.PrefilterType.MACRO);
+
+				if(e.getHand() == MCEquipmentSlot.WEAPON) {
+					Prefilters.match(prefilter, "hand", "main_hand", PrefilterType.STRING_MATCH);
+				} else {
+					Prefilters.match(prefilter, "hand", "off_hand", PrefilterType.STRING_MATCH);
+				}
+
 				return true;
 			}
 			return false;
@@ -857,6 +873,12 @@ public class EntityEvents {
 					data = ((MCPlayer)event.getEntity()).getName();
 				}
 				map.put("data",  new CString(data, Target.UNKNOWN));
+
+				if(event.getHand() == MCEquipmentSlot.WEAPON) {
+					map.put("hand", new CString("main_hand", Target.UNKNOWN));
+				} else {
+					map.put("hand", new CString("off_hand", Target.UNKNOWN));
+				}
 
 				return map;
 			} else {
@@ -892,11 +914,13 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{clicked: the type of entity being clicked | x: <expression> offset of clicked location"
-					+ " from entity location on the x axis. | y: <expression> | z: <expression> }"
+			return "{clicked: <macro> the type of entity being clicked"
+					+ " | hand: <string match> The hand the player clicked with, can be either main_hand or off_hand"
+					+ " | x: <expression> offset of clicked location from entity location on the x axis"
+					+ " | y: <expression> | z: <expression> }"
 					+ " Fires when a player right clicks an entity. This event is like player_interact_entity but also"
 					+ " has the click position, and when cancelled only cancels interactions with Armor Stand entities."
-					+ " {player: the player clicking | clicked | id: the id of the entity"
+					+ " {player: the player clicking | clicked | hand | id: the id of the entity"
 					+ " | data: if a player is clicked, this will contain their name"
 					+ " | position: offset of clicked location from entity location in an xyz array.}"
 					+ " {}"
@@ -909,6 +933,13 @@ public class EntityEvents {
 			if(event instanceof MCPlayerInteractAtEntityEvent){
 				MCPlayerInteractAtEntityEvent e = (MCPlayerInteractAtEntityEvent) event;
 				Prefilters.match(prefilter, "clicked", e.getEntity().getType().name(), Prefilters.PrefilterType.MACRO);
+
+				if(e.getHand() == MCEquipmentSlot.WEAPON) {
+					Prefilters.match(prefilter, "hand", "main_hand", PrefilterType.STRING_MATCH);
+				} else {
+					Prefilters.match(prefilter, "hand", "off_hand", PrefilterType.STRING_MATCH);
+				}
+
 				Vector3D position = e.getClickedPosition();
 				Prefilters.match(prefilter, "x", position.X(), Prefilters.PrefilterType.EXPRESSION);
 				Prefilters.match(prefilter, "y", position.Y(), Prefilters.PrefilterType.EXPRESSION);
@@ -940,6 +971,12 @@ public class EntityEvents {
 					data = ((MCPlayer)event.getEntity()).getName();
 				}
 				map.put("data",  new CString(data, Target.UNKNOWN));
+
+				if(event.getHand() == MCEquipmentSlot.WEAPON) {
+					map.put("hand", new CString("main_hand", Target.UNKNOWN));
+				} else {
+					map.put("hand", new CString("off_hand", Target.UNKNOWN));
+				}
 
 				return map;
 			} else {
@@ -974,7 +1011,7 @@ public class EntityEvents {
 
 		@Override
         public String docs() {
-            return "{player: <string match> | item: <item match>} "
+            return "{player: <macro match> | item: <item match>} "
                     + "This event is called when a player drops an item. "
                     + "{player: The player | item: An item array representing "
                     + "the item being dropped. } "
@@ -1053,7 +1090,7 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <string match> | item: <item match>} "
+			return "{player: <macro match> | item: <item match>} "
 				+ "This event is called when a player picks up an item."
 				+ "{player: The player | item: An item array representing "
 				+ "the item being picked up | "
@@ -1139,7 +1176,7 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{id: <macro> The entityID | damager: <string match>} "
+			return "{id: <macro match> The entityID | damager: <macro match>} "
 					+ "This event is called when a player is damaged by another entity."
 					+ "{player: The player being damaged | damager: The type of entity causing damage"
 					+ " | amount: raw amount of damage caused | finalamount: health player will lose after modifiers"
@@ -1244,12 +1281,14 @@ public class EntityEvents {
 
 		@Override
         public String docs() {
-            return "{player: <string match> | mobtype: <macro>} "
-            		+ "This event is called when a player is targeted by another entity."
-                    + "{player: The player's name | mobtype: The type of mob targeting "
-                    + "the player (this will be all capitals!) | id: The EntityID of the mob}"
-                    + "{player: target a different player, or null to make the mob re-look for targets}"
-                    + "{player|mobtype}";
+			return "{player: <macro> | mobtype: <macro> | reason: <macro>} "
+					+ "This event is called when a player is targeted by a mob."
+					+ "{player: The player's name | mobtype: The type of mob targeting "
+					+ "the player (this will be all capitals!) | id: The UUID of the mob"
+					+ " | reason: The reason the entity is targeting the player. Can be one of "
+					+ StringUtils.Join(MCTargetReason.values(), ", ", ", or ", " or ") + "}"
+					+ "{player: target a different player, or null to make the mob re-look for targets}"
+					+ "{player|mobtype|reason}";
         }
 
 		@Override
@@ -1264,24 +1303,14 @@ public class EntityEvents {
 
 		@Override
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-        	if(e instanceof MCEntityTargetEvent){
-        		MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
-
-        		Prefilters.match(prefilter, "mobtype", ete.getEntityType().name(), Prefilters.PrefilterType.MACRO);
-
-        		MCEntity target = ete.getTarget();
-        		if (target == null) {
-        			return false;
-        		}
-
-        		if (target instanceof MCPlayer) {
-	        		Prefilters.match(prefilter, "player", ((MCPlayer)target).getName(), Prefilters.PrefilterType.MACRO);
-
-	        		return true;
-	        	}
-        	}
-
-        	return false;
+			if(e instanceof MCEntityTargetEvent) {
+				MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
+				Prefilters.match(prefilter, "mobtype", ete.getEntityType().name(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(prefilter, "player", ((MCPlayer) ete.getTarget()).getName(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(prefilter, "reason", ete.getReason().name(), Prefilters.PrefilterType.MACRO);
+				return true;
+			}
+			return false;
         }
 
 		@Override
@@ -1290,17 +1319,10 @@ public class EntityEvents {
                 MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
 
-                String name = "";
-                MCEntity target = ete.getTarget();
-                if (target instanceof MCPlayer) {
-                	name = ((MCPlayer)ete.getTarget()).getName();
-                }
-
-                map.put("player", new CString(name, Target.UNKNOWN));
-
-                String type = ete.getEntityType().name();
-                map.put("mobtype", new CString(type, Target.UNKNOWN));
+				map.put("player", new CString(((MCPlayer)ete.getTarget()).getName(), Target.UNKNOWN));
+				map.put("mobtype", new CString(ete.getEntityType().name(), Target.UNKNOWN));
 				map.put("id", new CString(ete.getEntity().getUniqueId().toString(), Target.UNKNOWN));
+				map.put("reason", new CString(ete.getReason().name(), Target.UNKNOWN));
 
                 return map;
             } else {
@@ -1686,12 +1708,12 @@ public class EntityEvents {
 			if (e instanceof MCEntityToggleGlideEvent) {
 				MCEntityToggleGlideEvent evt = (MCEntityToggleGlideEvent) e;
 
-				Prefilters.match(filter, "type", evt.getEntityType().name(), Prefilters.PrefilterType.MACRO);
-				Prefilters.match(filter, "id", evt.getEntity().getUniqueId().toString(),
-						Prefilters.PrefilterType.MACRO);
+				MCEntity entity = evt.getEntity();
+				Prefilters.match(filter, "type", entity.getType().name(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(filter, "id", entity.getUniqueId().toString(), Prefilters.PrefilterType.MACRO);
 
-				if (evt.getEntityType().equals(EntityType.PLAYER)) {
-					Prefilters.match(filter, "player", evt.getEntity().getCustomName(), Prefilters.PrefilterType.MACRO);
+				if (entity instanceof MCPlayer) {
+					Prefilters.match(filter, "player", ((MCPlayer) entity).getName(), Prefilters.PrefilterType.MACRO);
 				}
 				return true;
 			}
@@ -1734,6 +1756,235 @@ public class EntityEvents {
 
 		public Driver driver() {
 			return Driver.ENTITY_TOGGLE_GLIDE;
+		}
+	}
+
+	@api
+	public static class firework_explode extends AbstractEvent {
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public String getName() {
+			return "firework_explode";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Fires when a firework rocket explodes."
+					+ " {id: The entityID of the firework rocket"
+					+ " | location: Where the firework rocket is exploding}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if (event instanceof MCFireworkExplodeEvent) {
+				MCFireworkExplodeEvent e = (MCFireworkExplodeEvent) event;
+				Map<String, Construct> ret = new HashMap<>();
+				MCFirework firework = e.getEntity();
+				ret.put("id", new CString(firework.getUniqueId().toString(), Target.UNKNOWN));
+				ret.put("location", ObjectGenerator.GetGenerator().location(firework.getLocation()));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCFireworkExplodeEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.FIREWORK_EXPLODE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+	public static class entity_regain_health extends AbstractEvent {
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public String getName() {
+			return "entity_regain_health";
+		}
+
+		@Override
+		public String docs() {
+			return "{reason: <macro>}" +
+					" Fired when an entity regained the health." +
+					" {id: The entity ID of regained entity" +
+					" amount: The amount of regained the health |" +
+					" cause: The cause of regain, one of: " + StringUtils.Join(MCRegainReason.values(), ", ") +
+					" player: The regained player}" +
+					" {amount}" +
+					" {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if (e instanceof MCEntityRegainHealthEvent) {
+				MCEntityRegainHealthEvent event = (MCEntityRegainHealthEvent) e;
+				Prefilters.match(prefilter, "reason", event.getRegainReason().name(), PrefilterType.MACRO);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if (e instanceof MCEntityRegainHealthEvent) {
+				MCEntityRegainHealthEvent event = (MCEntityRegainHealthEvent) e;
+
+				Map<String, Construct> ret = evaluate_helper(e);
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), Target.UNKNOWN));
+				ret.put("amount", new CDouble(event.getAmount(), Target.UNKNOWN));
+				ret.put("reason", new CString(event.getRegainReason().name(), Target.UNKNOWN));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCEntityRegainHealthEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ENTITY_REGAIN_HEALTH;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCEntityRegainHealthEvent) {
+				MCEntityRegainHealthEvent e = (MCEntityRegainHealthEvent) event;
+				if (key.equalsIgnoreCase("amount")) {
+					e.setAmount(Static.getDouble32(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	@api
+	public static class entity_portal_travel extends AbstractEvent {
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public String getName() {
+			return "entity_portal_travel";
+		}
+
+		@Override
+		public String docs() {
+			return "{type: <macro>}"
+					+ " Fired when an entity travels through a portal."
+					+ " {id: The UUID of entity | type: The type of entity"
+					+ " | from: The location the entity is coming from"
+					+ " | to: The location the entity is going to. Returns null when using Nether portal and "
+					+ " \"allow-nether\" in server.properties is set to false or when using Ender portal and "
+					+ " \"allow-end\" in bukkit.yml is set to false."
+					+ " | creationradius: The maximum radius from the given location to create a portal."
+					+ " | searchradius: The search radius value for finding an available portal.}"
+					+ " {to|creationradius|searchradius}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if (e instanceof MCEntityPortalEvent) {
+				MCEntityPortalEvent event = (MCEntityPortalEvent) e;
+				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.MACRO);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if (e instanceof MCEntityPortalEvent) {
+				MCEntityPortalEvent event = (MCEntityPortalEvent) e;
+				Map<String, Construct> ret = new HashMap<>();
+				Target t = Target.UNKNOWN;
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
+				ret.put("type", new CString(event.getEntity().getType().name(), t));
+				ret.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
+				MCLocation to = event.getTo();
+				if(to == null) {
+					ret.put("to", CNull.NULL);
+				} else {
+					ret.put("to", ObjectGenerator.GetGenerator().location(to));
+				}
+				ret.put("creationradius", new CInt(event.getPortalTravelAgent().getCreationRadius(), t));
+				ret.put("searchradius", new CInt(event.getPortalTravelAgent().getSearchRadius(), t));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCEntityPortalEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ENTITY_PORTAL_TRAVEL;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCEntityPortalEvent) {
+				MCEntityPortalEvent e = (MCEntityPortalEvent)event;
+
+				if (key.equalsIgnoreCase("to")) {
+					e.useTravelAgent(true);
+					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, Target.UNKNOWN);
+					e.setTo(loc);
+					return true;
+				}
+
+				if (key.equalsIgnoreCase("creationradius")) {
+					e.useTravelAgent(true);
+					e.getPortalTravelAgent().setCreationRadius(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
+
+				if (key.equalsIgnoreCase("searchradius")) {
+					e.useTravelAgent(true);
+					e.getPortalTravelAgent().setSearchRadius(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 }

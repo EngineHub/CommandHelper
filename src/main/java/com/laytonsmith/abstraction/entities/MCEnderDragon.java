@@ -1,9 +1,10 @@
 package com.laytonsmith.abstraction.entities;
 
-/**
- *
- * @author Hekta
- */
+import com.laytonsmith.abstraction.enums.MCEnderDragonPhase;
+
 public interface MCEnderDragon extends MCComplexLivingEntity {
+
+	MCEnderDragonPhase getPhase();
+	void setPhase(MCEnderDragonPhase phase);
 
 }

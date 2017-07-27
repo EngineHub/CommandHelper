@@ -110,7 +110,7 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 	private void setWrapperClass() {
 		switch (getAbstracted()) {
 			case UNKNOWN:
-				wrapperClass = BukkitMCEntity.class;
+				wrapperClass = null;
 				break;
 			case DROPPED_ITEM:
 				wrapperClass = BukkitMCItem.class;

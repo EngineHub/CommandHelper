@@ -101,6 +101,10 @@ on the MySQL website: http://www.mysql.com/
 | port
 | The port you are connecting to. If not specified, 3306 is assumed.
 | Optional
+|-
+| useSSL
+| If set: "useSSL=false". If value "true": "useSSL=true". Default: useSSL will not be an argument.
+| Optional
 |}
 
 === PostgreSQL ===

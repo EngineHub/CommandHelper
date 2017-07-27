@@ -24,6 +24,7 @@ import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
+import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
@@ -448,6 +449,16 @@ public class BukkitMCServer implements MCServer {
 		}
 
 		return new BukkitMCInventory(Bukkit.createInventory(ih, size, title));
+	}
+
+	@Override
+	public void banName(String name) {
+		s.getBanList(BanList.Type.NAME).addBan(name, null, null, null);
+	}
+
+	@Override
+	public void unbanName(String name) {
+		s.getBanList(BanList.Type.NAME).pardon(name);
 	}
 
 	@Override

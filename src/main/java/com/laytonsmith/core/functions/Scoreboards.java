@@ -171,18 +171,44 @@ public class Scoreboards {
     /**
      * A shortcut for making a scoreboard argument optional
      *
-     * @param numArgsToReadName the number of arguments that will cause the function to check user input
      * @param indexOfName the index that will contain the name of the scoreboard
      * @param t
      * @param args the array of arguments passed to the function
      * @return the scoreboard chosen, defaulting to main if numArgsToReadName was not matched
      * @throws CREScoreboardException if the specified scoreboard does not exist
      */
-    public static MCScoreboard assignBoard(int numArgsToReadName, int indexOfName, Target t, Construct... args) throws CREScoreboardException {
-	if (args.length == numArgsToReadName) {
+    static MCScoreboard assignBoard(int indexOfName, Target t, Construct... args) throws CREScoreboardException {
+	if (args.length == indexOfName + 1) {
 	    return getBoard(args[indexOfName].val(), t);
 	}
 	return getBoard(MAIN, t);
+    }
+
+    static CArray getTeam(MCTeam team, Target t) {
+	CArray to = CArray.GetAssociativeArray(t);
+	to.set("name", new CString(team.getName(), t), t);
+	to.set("displayname", new CString(team.getDisplayName(), t), t);
+	to.set("prefix", new CString(team.getPrefix(), t), t);
+	to.set("suffix", new CString(team.getSuffix(), t), t);
+	to.set("size", new CInt(team.getSize(), t), t);
+	CArray ops = CArray.GetAssociativeArray(t);
+	ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t);
+	ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t);
+	if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
+	    ops.set("nametagvisibility", new CString(team.getNameTagVisibility().name(), t), t);
+	}
+	if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
+	    ops.set("collisionrule", new CString(team.getOption(MCOption.COLLISION_RULE).name(), t), t);
+	    ops.set("deathmessagevisibility", new CString(team.getOption(MCOption.DEATH_MESSAGE_VISIBILITY).name(), t), t);
+	}
+	to.set("options", ops, t);
+	CArray pl = new CArray(t);
+	for (String entry : team.getEntries()) {
+	    pl.push(new CString(entry, t), t);
+	}
+
+	to.set("players", pl, t);
+	return to;
     }
 
     /**
@@ -272,7 +298,7 @@ public class Scoreboards {
 	public Construct exec(Target t, Environment environment,
 		Construct... args) throws ConfigRuntimeException {
 	    MCPlayer p = Static.GetPlayer(args[0], t);
-	    p.setScoreboard(assignBoard(2, 1, t, args));
+	    p.setScoreboard(assignBoard(1, t, args));
 	    return CVoid.VOID;
 	}
 
@@ -417,30 +443,7 @@ public class Scoreboards {
 	    }
 	    CArray ret = new CArray(t);
 	    for (MCTeam team : s.getTeams()) {
-		CArray to = CArray.GetAssociativeArray(t);
-		to.set("name", new CString(team.getName(), t), t);
-		to.set("displayname", new CString(team.getDisplayName(), t), t);
-		to.set("prefix", new CString(team.getPrefix(), t), t);
-		to.set("suffix", new CString(team.getSuffix(), t), t);
-		to.set("size", new CInt(team.getSize(), t), t);
-		CArray ops = CArray.GetAssociativeArray(t);
-		ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t);
-		ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t);
-		if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-		    ops.set("nametagvisibility", new CString(team.getNameTagVisibility().name(), t), t);
-		}
-		if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-		    ops.set("collisionrule", new CString(team.getOption(MCOption.COLLISION_RULE).name(), t), t);
-		    ops.set("deathmessagevisibility", new CString(team.getOption(MCOption.DEATH_MESSAGE_VISIBILITY).name(), t), t);
-		}
-		to.set("options", ops, t);
-		CArray pl = new CArray(t);
-		for (String entry : team.getEntries()) {
-		    pl.push(new CString(entry, t), t);
-		}
-
-		to.set("players", pl, t);
-		ret.push(to, t);
+		ret.push(getTeam(team, t), t);
 	    }
 	    return ret;
 	}
@@ -521,7 +524,7 @@ public class Scoreboards {
 	@Override
 	public Construct exec(Target t, Environment environment,
 		Construct... args) throws ConfigRuntimeException {
-	    MCScoreboard s = assignBoard(3, 2, t, args);
+	    MCScoreboard s = assignBoard(2, t, args);
 	    String name = args[0].val();
 	    if (name.length() > 16) {
 		throw new CRELengthException("Objective names should be no more than 16 characters", t);
@@ -579,7 +582,7 @@ public class Scoreboards {
 	@Override
 	public Construct exec(Target t, Environment environment,
 		Construct... args) throws ConfigRuntimeException {
-	    MCScoreboard s = assignBoard(2, 1, t, args);
+	    MCScoreboard s = assignBoard(1, t, args);
 	    String name = args[0].val();
 	    if (name.length() > 16) {
 		throw new CRELengthException("Team names should be no more than 16 characters.", t);
@@ -627,7 +630,7 @@ public class Scoreboards {
 	@Override
 	public Construct exec(Target t, Environment environment,
 		Construct... args) throws ConfigRuntimeException {
-	    MCScoreboard s = assignBoard(3, 2, t, args);
+	    MCScoreboard s = assignBoard(2, t, args);
 	    MCObjective o = s.getObjective(args[0].val());
 	    if (o == null) {
 		throw new CREScoreboardException("No objective by that name exists.", t);
@@ -705,7 +708,7 @@ public class Scoreboards {
 	@Override
 	public Construct exec(Target t, Environment environment,
 		Construct... args) throws ConfigRuntimeException {
-	    MCScoreboard s = assignBoard(3, 2, t, args);
+	    MCScoreboard s = assignBoard(2, t, args);
 	    MCTeam o = s.getTeam(args[0].val());
 	    if (o == null) {
 		throw new CREScoreboardException("No team by that name exists.", t);
@@ -797,7 +800,7 @@ public class Scoreboards {
 	@Override
 	public Construct exec(Target t, Environment environment,
 		Construct... args) throws ConfigRuntimeException {
-	    MCScoreboard s = assignBoard(3, 2, t, args);
+	    MCScoreboard s = assignBoard(2, t, args);
 	    MCTeam team = s.getTeam(args[0].val());
 	    if (team == null) {
 		throw new CREScoreboardException("No team by that name exists.", t);
@@ -839,7 +842,7 @@ public class Scoreboards {
 	@Override
 	public Construct exec(Target t, Environment environment,
 		Construct... args) throws ConfigRuntimeException {
-	    MCScoreboard s = assignBoard(3, 2, t, args);
+	    MCScoreboard s = assignBoard(2, t, args);
 	    MCTeam team = s.getTeam(args[0].val());
 	    if (team == null) {
 		throw new CREScoreboardException("No team by that name exists.", t);
@@ -866,6 +869,41 @@ public class Scoreboards {
 	@Override
 	public CHVersion since() {
 	    return CHVersion.V3_3_1;
+	}
+    }
+
+    @api
+    public static class get_pteam extends SBFunction {
+
+	@Override
+	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+	    MCScoreboard s = assignBoard(1, t, args);
+	    MCTeam team = s.getPlayerTeam(args[0].val());
+	    if (team == null) {
+		return CNull.NULL;
+	    }
+	    return getTeam(team, t);
+	}
+
+	@Override
+	public String getName() {
+	    return "get_pteam";
+	}
+
+	@Override
+	public Integer[] numArgs() {
+	    return new Integer[]{1, 2};
+	}
+
+	@Override
+	public String docs() {
+	    return "array {player, [scoreboard]} Returns a team array for this player, or null if not in a team."
+		    + " Contains the keys name, displayname, prefix, suffix, size, options, and players." + DEF_MSG;
+	}
+
+	@Override
+	public CHVersion since() {
+	    return CHVersion.V3_3_2;
 	}
     }
 
@@ -932,7 +970,7 @@ public class Scoreboards {
 	@Override
 	public Construct exec(Target t, Environment environment,
 		Construct... args) throws ConfigRuntimeException {
-	    MCScoreboard s = assignBoard(2, 1, t, args);
+	    MCScoreboard s = assignBoard(1, t, args);
 	    MCObjective o = s.getObjective(args[0].val());
 	    try {
 		o.unregister();
@@ -971,7 +1009,7 @@ public class Scoreboards {
 	@Override
 	public Construct exec(Target t, Environment environment,
 		Construct... args) throws ConfigRuntimeException {
-	    MCScoreboard s = assignBoard(2, 1, t, args);
+	    MCScoreboard s = assignBoard(1, t, args);
 	    MCTeam team = s.getTeam(args[0].val());
 	    try {
 		team.unregister();
@@ -1010,7 +1048,7 @@ public class Scoreboards {
 	@Override
 	public Construct exec(Target t, Environment environment,
 		Construct... args) throws ConfigRuntimeException {
-	    MCScoreboard s = assignBoard(3, 2, t, args);
+	    MCScoreboard s = assignBoard(2, t, args);
 	    MCObjective o = s.getObjective(args[0].val());
 	    if (o == null) {
 		throw new CREScoreboardException("The given objective does not exist.", t);
@@ -1030,8 +1068,7 @@ public class Scoreboards {
 
 	@Override
 	public String docs() {
-	    return "int {objectiveName, player, [scoreboard]} Returns the player's score for the given objective."
-		    + " Works for offline players, so the name must be exact. " + DEF_MSG;
+	    return "int {objectiveName, player, [scoreboard]} Returns the player's score for the given objective." + DEF_MSG;
 	}
 
 	@Override
@@ -1051,7 +1088,7 @@ public class Scoreboards {
 	@Override
 	public Construct exec(Target t, Environment environment,
 		Construct... args) throws ConfigRuntimeException {
-	    MCScoreboard s = assignBoard(4, 3, t, args);
+	    MCScoreboard s = assignBoard(3, t, args);
 	    MCObjective o = s.getObjective(args[0].val());
 	    if (o == null) {
 		throw new CREScoreboardException("The given objective does not exist.", t);
@@ -1090,7 +1127,7 @@ public class Scoreboards {
 
 	@Override
 	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-	    assignBoard(2, 1, t, args).resetScores(args[0].val());
+	    assignBoard(1, t, args).resetScores(args[0].val());
 	    return CVoid.VOID;
 	}
 
@@ -1126,7 +1163,7 @@ public class Scoreboards {
 
 	@Override
 	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-	    MCScoreboard s = assignBoard(3, 2, t, args);
+	    MCScoreboard s = assignBoard(2, t, args);
 	    MCTeam team = s.getTeam(args[0].val());
 	    if (team == null) {
 		throw new CREScoreboardException("No team by that name exists.", t);

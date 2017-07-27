@@ -19,11 +19,6 @@ public class BukkitMCScore implements MCScore {
 	}
 
 	@Override
-	public MCOfflinePlayer getPlayer() {
-		return new BukkitMCOfflinePlayer(s.getPlayer());
-	}
-
-	@Override
 	public int getScore() {
 		return s.getScore();
 	}

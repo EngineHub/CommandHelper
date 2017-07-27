@@ -36,7 +36,7 @@ public class WeatherEvents {
 
         @Override
         public String docs() {
-            return "{world: <string match> the world | location: <location match> the lightning strike location"
+            return "{world: <macro match> the world | location: <location match> the lightning strike location"
                     + " | is_effect: <boolean match> whether the strike was real or just an effect}"
                     + " Fires when lightning strikes or the lightning strike effect occurs."
                     + " {world: the name of the world in which the strike occurred | id: the lightning entityID"
@@ -105,7 +105,7 @@ public class WeatherEvents {
 
         @Override
         public String docs() {
-            return "{world: <string match> the world | has_thunder: <boolean match> if it is thundering}"
+            return "{world: <macro match> the world | has_thunder: <boolean match> if it is thundering}"
                     + " Fires when thunder begins or ends."
                     + " {world: the name of the world in which thunder is changing | has_thunder: if the world is"
                     + " thundering}"
@@ -170,7 +170,7 @@ public class WeatherEvents {
 
         @Override
         public String docs() {
-            return "{world: <string match> the world | has_rain: <boolean match> if it is raining}"
+            return "{world: <macro match> the world | has_rain: <boolean match> if it is raining}"
                     + " Fires when rain starts or stops."
                     + " {world: the name of the world in which the weather changed | has_rain: if it is raining}"
                     + " {}"
