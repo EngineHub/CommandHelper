@@ -33,7 +33,7 @@
         "IRC"
     ]},
     {"API": [
-        "API",
+        {"API.html": "API"},
         {"Interpreter_Mode": "Interpreter Mode"},
         {"Event_API": "Event API"},
         {"Builtin_Object_Info": "Builtin Object Info"}

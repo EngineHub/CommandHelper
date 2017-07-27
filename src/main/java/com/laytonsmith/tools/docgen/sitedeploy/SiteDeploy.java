@@ -52,6 +52,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -242,8 +245,8 @@ public class SiteDeploy {
     private final String docsBase;
     private final String resourceBase;
     private final jline.console.ConsoleReader reader;
-    private final ExecutorService generateQueue;
-    private final ExecutorService uploadQueue;
+    private final ThreadPoolExecutor generateQueue;
+    private final ThreadPoolExecutor uploadQueue;
     private final AtomicInteger currentUploadTask = new AtomicInteger(0);
     private final AtomicInteger totalUploadTasks = new AtomicInteger(0);
     private final AtomicInteger currentGenerateTask = new AtomicInteger(0);
@@ -272,8 +275,24 @@ public class SiteDeploy {
 	this.docsBase = docsBase;
 	this.resourceBase = docsBase + "resources/";
 	this.reader = new jline.console.ConsoleReader();
-	this.generateQueue = Executors.newSingleThreadExecutor();
-	this.uploadQueue = Executors.newSingleThreadExecutor();
+	this.generateQueue = new ThreadPoolExecutor(1, 1,
+		0L, TimeUnit.MILLISECONDS,
+		new LinkedBlockingQueue<Runnable>(),
+		new ThreadFactory() {
+	    @Override
+	    public Thread newThread(Runnable r) {
+		return new Thread(r, "generateQueue");
+	    }
+	});
+	this.uploadQueue = new ThreadPoolExecutor(1, 1,
+		0L, TimeUnit.MILLISECONDS,
+		new LinkedBlockingQueue<Runnable>(),
+		new ThreadFactory() {
+	    @Override
+	    public Thread newThread(Runnable r) {
+		return new Thread(r, "uploadQueue");
+	    }
+	});
 	this.useLocalCache = useLocalCache;
 	this.deploymentMethod = deploymentMethod;
 	this.doValidation = doValidation;
@@ -489,14 +508,31 @@ public class SiteDeploy {
 	deployEvents();
 	deployObjects();
 	deployAPIJSON();
-	generateQueue.submit(new Runnable() {
+	Runnable generateFinalizer = new Runnable() {
 	    @Override
 	    public void run() {
-		uploadQueue.shutdown();
+		// Just us left, shut us down
+		if (generateQueue.getQueue().isEmpty()) {
+		    generateQueue.shutdown();
+		} else {
+		    // Oops, we're a bit premature. Schedule us to run again.
+		    generateQueue.submit(this);
+		}
 	    }
-	});
-	generateQueue.shutdown();
+	};
+	generateQueue.submit(generateFinalizer);
 	generateQueue.awaitTermination(1, TimeUnit.DAYS);
+	Runnable uploadFinalizer = new Runnable() {
+	    @Override
+	    public void run() {
+		if(uploadQueue.getQueue().isEmpty()) {
+		    uploadQueue.shutdown();
+		} else {
+		    uploadQueue.submit(this);
+		}
+	    }
+	};
+	uploadQueue.submit(uploadFinalizer);
 	uploadQueue.awaitTermination(1, TimeUnit.DAYS);
 	dm.waitForThreads();
 	deploymentMethod.finish();
@@ -837,58 +873,111 @@ public class SiteDeploy {
      * replacement)
      */
     private void deployResources() {
-	try {
-	    File root = new File(SiteDeploy.class.getResource("/siteDeploy/resources").toExternalForm());
-	    ZipReader reader = new ZipReader(root);
-	    Queue<File> q = new LinkedList<>();
-	    q.addAll(Arrays.asList(reader.listFiles()));
-	    while (q.peek() != null) {
-		ZipReader r = new ZipReader(q.poll());
-		if (r.isDirectory()) {
-		    q.addAll(Arrays.asList(r.listFiles()));
-		} else {
-		    String fileName = r.getFile().getAbsolutePath().replaceFirst(Pattern.quote(reader.getFile().getAbsolutePath()), "");
-		    writeFromStream(r.getInputStream(), "resources" + fileName);
+	generateQueue.submit(new Runnable() {
+	    @Override
+	    public void run() {
+		try {
+		    File root = new File(SiteDeploy.class.getResource("/siteDeploy/resources").toExternalForm());
+		    ZipReader reader = new ZipReader(root);
+		    Queue<File> q = new LinkedList<>();
+		    q.addAll(Arrays.asList(reader.listFiles()));
+		    while (q.peek() != null) {
+			ZipReader r = new ZipReader(q.poll());
+			if (r.isDirectory()) {
+			    q.addAll(Arrays.asList(r.listFiles()));
+			} else {
+			    String fileName = r.getFile().getAbsolutePath().replaceFirst(Pattern.quote(reader.getFile().getAbsolutePath()), "");
+			    writeFromStream(r.getInputStream(), "resources" + fileName);
+			}
+		    }
+		} catch (IOException ex) {
+		    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 		}
+		String index_js = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/index.js"));
+		try {
+		    writeFromString(DocGenTemplates.DoTemplateReplacement(index_js, getStandardGenerators()), "resources/js/index.js");
+		} catch (Generator.GenerateException ex) {
+		    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "GenerateException in /siteDeploy/index.js", ex);
+		}
+		currentGenerateTask.addAndGet(1);
 	    }
-	} catch (IOException ex) {
-	    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
-	}
-	String index_js = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/index.js"));
-	try {
-	    writeFromString(DocGenTemplates.DoTemplateReplacement(index_js, getStandardGenerators()), "resources/js/index.js");
-	} catch (Generator.GenerateException ex) {
-	    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "GenerateException in /siteDeploy/index.js", ex);
-	}
+	});
+	totalGenerateTasks.addAndGet(1);
     }
 
     /**
      * Pages deployed: index.html privacy_policy.html
      */
     private void deployFrontPages() {
-	writePageFromResource(CHVersion.LATEST.toString() + " - Docs", "/siteDeploy/VersionFrontPage", "index.html",
-		Arrays.asList(new String[]{CHVersion.LATEST.toString()}), "Front page for " + CHVersion.LATEST.toString());
-	writePageFromResource("Privacy Policy", "/siteDeploy/privacy_policy.html", "privacy_policy.html",
-		Arrays.asList(new String[]{"privacy policy"}), "Privacy policy for the site");
-	writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/FrontPage", "../../index.html",
-		Arrays.asList(new String[]{"index", "front page"}), "The front page for " + Implementation.GetServerType().getBranding());
-	writePageFromResource("Doc Directory", "/siteDeploy/DocDirectory", "../index.html",
-		Arrays.asList(new String[]{"directory"}), "The directory for all documented versions");
-	writePageFromResource("404 Not Found", "/siteDeploy/404", "../../404.html",
-		Arrays.asList(new String[]{"404"}), "Page not found");
+	generateQueue.submit(new Runnable() {
+	    @Override
+	    public void run() {
+		writePageFromResource(CHVersion.LATEST.toString() + " - Docs", "/siteDeploy/VersionFrontPage", "index.html",
+			Arrays.asList(new String[]{CHVersion.LATEST.toString()}), "Front page for " + CHVersion.LATEST.toString());
+		currentGenerateTask.addAndGet(1);
+	    }
+	});
+	totalGenerateTasks.addAndGet(1);
+	generateQueue.submit(new Runnable() {
+	    @Override
+	    public void run() {
+		writePageFromResource("Privacy Policy", "/siteDeploy/privacy_policy.html", "privacy_policy.html",
+			Arrays.asList(new String[]{"privacy policy"}), "Privacy policy for the site");
+		currentGenerateTask.addAndGet(1);
+	    }
+	});
+	totalGenerateTasks.addAndGet(1);
+	generateQueue.submit(new Runnable() {
+	    @Override
+	    public void run() {
+		writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/FrontPage", "../../index.html",
+			Arrays.asList(new String[]{"index", "front page"}), "The front page for " + Implementation.GetServerType().getBranding());
+		currentGenerateTask.addAndGet(1);
+	    }
+	});
+	totalGenerateTasks.addAndGet(1);
+	generateQueue.submit(new Runnable() {
+	    @Override
+	    public void run() {
+		writePageFromResource("Doc Directory", "/siteDeploy/DocDirectory", "../index.html",
+			Arrays.asList(new String[]{"directory"}), "The directory for all documented versions");
+		currentGenerateTask.addAndGet(1);
+	    }
+	});
+	totalGenerateTasks.addAndGet(1);
+	generateQueue.submit(new Runnable() {
+	    @Override
+	    public void run() {
+		writePageFromResource("404 Not Found", "/siteDeploy/404", "../../404.html",
+			Arrays.asList(new String[]{"404"}), "Page not found");
+		currentGenerateTask.addAndGet(1);
+	    }
+	});
+	totalGenerateTasks.addAndGet(1);
     }
 
     /**
      * Pages deployed: All files from /docs/*
      */
-    private void deployLearningTrail() throws IOException {
-	File root = new File(SiteDeploy.class.getResource("/docs").toExternalForm());
-	ZipReader zReader = new ZipReader(root);
-	for (File r : zReader.listFiles()) {
-	    String filename = r.getAbsolutePath().replaceFirst(Pattern.quote(zReader.getFile().getAbsolutePath()), "");
-	    writePageFromResource(r.getName(), "/docs" + filename, r.getName() + ".html",
-		    Arrays.asList(new String[]{r.getName().replace("_", " ")}), "Learning trail page for " + r.getName().replace("_", " "));
-	}
+    private void deployLearningTrail() {
+	generateQueue.submit(new Runnable() {
+	    @Override
+	    public void run() {
+		try {
+		    File root = new File(SiteDeploy.class.getResource("/docs").toExternalForm());
+		    ZipReader zReader = new ZipReader(root);
+		    for (File r : zReader.listFiles()) {
+			String filename = r.getAbsolutePath().replaceFirst(Pattern.quote(zReader.getFile().getAbsolutePath()), "");
+			writePageFromResource(r.getName(), "/docs" + filename, r.getName() + ".html",
+				Arrays.asList(new String[]{r.getName().replace("_", " ")}), "Learning trail page for " + r.getName().replace("_", " "));
+		    }
+		} catch (IOException ex) {
+		    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		currentGenerateTask.addAndGet(1);
+	    }
+	});
+	totalGenerateTasks.addAndGet(1);
     }
 
     private void deployAPI() {
@@ -939,7 +1028,7 @@ public class SiteDeploy {
 			    if (f.examples() != null && f.examples().length > 0) {
 				desc.append("<br>([[functions/").append(f.getName()).append("#Examples|Examples...]]");
 			    }
-			} catch (ConfigCompileException ex) {
+			} catch (ConfigCompileException | NoClassDefFoundError ex) {
 			    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 			}
 			c.add(desc.toString());
@@ -952,16 +1041,20 @@ public class SiteDeploy {
 		    StringBuilder b = new StringBuilder();
 		    for (Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
 			Class<?> clazz = e.getKey();
-			b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
-			String docs = (String) ReflectionUtils.invokeMethod(clazz, null, "docs");
-			b.append("<p>").append(docs).append("</p>");
+			try {
+			    b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
+			    String docs = (String) ReflectionUtils.invokeMethod(clazz, null, "docs");
+			    b.append("<p>").append(docs).append("</p>\n\n");
+			} catch (Error ex) {
+			    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
+			}
 		    }
 
-		    writePage("API", b.toString(), "API",
+		    writePage("API", b.toString(), "API.html",
 			    Arrays.asList(new String[]{"API", "functions"}),
 			    "A list of all " + Implementation.GetServerType().getBranding() + " functions");
 		    currentGenerateTask.addAndGet(1);
-		} catch (Exception ex) {
+		} catch (Error ex) {
 		    ex.printStackTrace(System.err);
 		}
 	    }
@@ -970,19 +1063,43 @@ public class SiteDeploy {
     }
 
     private void deployEventAPI() {
-
+//	generateQueue.submit(new Runnable() {
+//	    @Override
+//	    public void run() {
+//		currentGenerateTask.addAndGet(1);
+//	    }
+//	});
+//	totalGenerateTasks.addAndGet(1);
     }
 
     private void deployFunctions() {
-
+//	generateQueue.submit(new Runnable() {
+//	    @Override
+//	    public void run() {
+//		currentGenerateTask.addAndGet(1);
+//	    }
+//	});
+//	totalGenerateTasks.addAndGet(1);
     }
 
     private void deployEvents() {
-
+//	generateQueue.submit(new Runnable() {
+//	    @Override
+//	    public void run() {
+//		currentGenerateTask.addAndGet(1);
+//	    }
+//	});
+//	totalGenerateTasks.addAndGet(1);
     }
 
     private void deployObjects() {
-
+//	generateQueue.submit(new Runnable() {
+//	    @Override
+//	    public void run() {
+//		currentGenerateTask.addAndGet(1);
+//	    }
+//	});
+//	totalGenerateTasks.addAndGet(1);
     }
 
     /**

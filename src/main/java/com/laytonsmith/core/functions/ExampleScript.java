@@ -1,11 +1,6 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.OSUtils;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
@@ -14,23 +9,15 @@ import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Variable;
-import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.persistence.DataSourceException;
-import org.bukkit.Server;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
@@ -52,9 +39,6 @@ public class ExampleScript {
 	String output;
 	StringBuilder playerOutput = null;
 
-	MCPlayer fakePlayer;
-	static MCServer fakeServer;
-	static Plugin fakePlugin;
 	static AliasCore fakeCore;
 	static boolean init = false;
 
@@ -93,7 +77,7 @@ public class ExampleScript {
 	 * @param script
 	 * @param output
 	 * @param intentionalCompileError
-	 * @throws ConfigCompileException 
+	 * @throws ConfigCompileException
 	 */
 	private ExampleScript(String description, String script, String output, boolean intentionalCompileError) throws ConfigCompileException{
 		this.description = description;
@@ -116,68 +100,6 @@ public class ExampleScript {
 			}
 		}
 		playerOutput = new StringBuilder();
-
-		fakePlayer = (MCPlayer)Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), new Class[]{MCPlayer.class}, new InvocationHandler() {
-
-			@Override
-			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-				if(method.getName().equals("getName") || method.getName().equals("getDisplayName")){
-					return "Player";
-				}
-				if(method.getName().equals("getServer")){
-					return fakeServer;
-				}
-				if(method.getName().equals("sendMessage")){
-					playerOutput.append(args[0].toString()).append("\n");
-				}
-				if(method.getName().equals("isOnline")){
-					return true;
-				}
-				return genericReturn(method.getReturnType());
-			}
-		});
-		if(!init){
-			init = true;
-			fakeServer = (MCServer)Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), new Class[]{MCServer.class}, new InvocationHandler() {
-
-				@Override
-				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-					return genericReturn(method.getReturnType());
-				}
-			});
-			final PluginManager bukkitPluginManager = (PluginManager)Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), new Class[]{PluginManager.class}, new InvocationHandler() {
-
-				@Override
-				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-					StreamUtils.GetSystemOut().println(method.getReturnType().getSimpleName() + " " + method.getName());
-					return genericReturn(method.getReturnType());
-				}
-			});
-			final Server bukkitServer = (Server)Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), new Class[]{Server.class}, new InvocationHandler() {
-
-				@Override
-				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-					StreamUtils.GetSystemOut().println(method.getReturnType().getSimpleName() + " " + method.getName());
-					if(method.getName().equals("getPluginManager")){
-						return bukkitPluginManager;
-					}
-					return genericReturn(method.getReturnType());
-				}
-			});
-			fakePlugin = (Plugin)Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), new Class[]{Plugin.class}, new InvocationHandler() {
-
-				@Override
-				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-					StreamUtils.GetSystemOut().println(method.getReturnType().getSimpleName() + " " + method.getName());
-					if(method.getName().equals("getServer")){
-						return bukkitServer;
-					}
-					return genericReturn(method.getReturnType());
-				}
-			});
-			fakeCore = new FakeCore();
-			ReflectionUtils.set(CommandHelperPlugin.class, "ac", fakeCore);
-		}
 
 	}
 
@@ -238,7 +160,6 @@ public class ExampleScript {
 		} catch (Profiles.InvalidProfileException ex) {
 			throw new RuntimeException(ex);
 		}
-		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 		final StringBuilder finalOutput = new StringBuilder();
 		String thrown = null;
 		try{

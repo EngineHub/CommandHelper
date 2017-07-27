@@ -153,14 +153,14 @@ public class ArrayHandling {
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
 				if (index instanceof CSlice) {
-						
+
 					// Deep clone the array if the "index" is the initial one.
 					if (((CSlice) index).getStart() == 0 && ((CSlice) index).getFinish() == -1) {
 						return ca.deepClone(t);
 					} else if(ca.inAssociativeMode()) {
 						throw new CRECastException("Array slices are not allowed with an associative array", t);
 					}
-					
+
 					//It's a range
 					long start = ((CSlice) index).getStart();
 					long finish = ((CSlice) index).getFinish();
@@ -432,7 +432,7 @@ public class ArrayHandling {
 						+ "msg(@array);\n"
 						+ "@array[0] = 'value0';\n"
 						+ "msg(@array);"),
-				new ExampleScript("Demonstrates functional usage", 
+				new ExampleScript("Demonstrates functional usage",
 						"array @array = array(null);\n"
 						+ "msg(@array);\n"
 						+ "array_set(@array, 0, 'value0');\n"
@@ -512,13 +512,13 @@ public class ArrayHandling {
 						+ " operator is that this occurs on the Left Hand Side (LHS) of the assignment.",
 						"array @array = array();\n"
 								+ "@array[] = 'new value';"),
-				new ExampleScript("Demonstrates functional usage", 
+				new ExampleScript("Demonstrates functional usage",
 						"array @array = array();\n"
 								+ "msg(@array);\n"
 								+ "array_push(@array, 0);\n"
 								+ "msg(@array);"),
 				new ExampleScript("Demonstrates pushing multiple values (note that it is not possible to use the bracket notation"
-						+ " and push multiple values)", 
+						+ " and push multiple values)",
 						"array @array = array();\n"
 								+ "msg(@array);\n"
 								+ "array_push(@array, 0, 1, 2);\n"
@@ -961,12 +961,12 @@ public class ArrayHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates basic usage", 
+				new ExampleScript("Demonstrates basic usage",
 						"array @array = array();\n"
 						+ "msg(@array);\n"
 						+ "array_resize(@array, 2);\n"
 						+ "msg(@array);"),
-				new ExampleScript("Demonstrates custom fill", 
+				new ExampleScript("Demonstrates custom fill",
 						"array @array = array();\n"
 								+ "msg(@array);\n"
 								+ "array_resize(@array, 2, 'a');\n"
@@ -2441,7 +2441,7 @@ public class ArrayHandling {
 		}
 
 	}
-	
+
 	@api
 	public static class array_shallow_clone extends AbstractFunction {
 
