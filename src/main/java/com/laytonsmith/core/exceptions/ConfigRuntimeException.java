@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.CHLog;
@@ -100,6 +101,10 @@ public class ConfigRuntimeException extends RuntimeException {
 		if (env.getEnv(GlobalEnv.class).GetExceptionHandler() != null) {
 			CClosure c = env.getEnv(GlobalEnv.class).GetExceptionHandler();
 			CArray ex = ObjectGenerator.GetGenerator().exception(e, env, Target.UNKNOWN);
+			if (e.getEnv() != null) {
+				MCCommandSender sender = e.getEnv().getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				c.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
+			}
 			Construct ret = CNull.NULL;
 			try {
 				c.execute(new Construct[]{ex});
