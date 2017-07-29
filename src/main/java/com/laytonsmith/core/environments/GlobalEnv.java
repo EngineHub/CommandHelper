@@ -8,7 +8,6 @@ import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.events.BoundEvent;
@@ -49,7 +48,6 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private final Map<String, Object> custom = new HashMap<>();
 	private Script script = null;
 	private final MutableObject<File> root;
-	private final MutableObject<CClosure> uncaughtExceptionHandler = new MutableObject<>();
 	private Map<String, Procedure> procs = null;
 	private IVariableList iVariableList = null;
 	private String label = null;
@@ -228,14 +226,6 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 			throw new IllegalArgumentException("File provided to SetRootFolder must be a folder, not a file. (" + file.toString() + " was found.)");
 		}
 		this.root.setObject(file);
-	}
-
-	public void SetExceptionHandler(CClosure construct) {
-		uncaughtExceptionHandler.setObject(construct);
-	}
-
-	public CClosure GetExceptionHandler() {
-		return uncaughtExceptionHandler.getObject();
 	}
 
 	/**
