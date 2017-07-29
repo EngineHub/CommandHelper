@@ -52,8 +52,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * 
@@ -323,8 +321,8 @@ public class Exceptions {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CClosure){
-				CClosure old = environment.getEnv(GlobalEnv.class).GetExceptionHandler();
-				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure)args[0]);
+				CClosure old = ConfigRuntimeException.GetExceptionHandler();
+				ConfigRuntimeException.SetExceptionHandler((CClosure)args[0]);
 				if(old == null){
 					return CNull.NULL;
 				} else {

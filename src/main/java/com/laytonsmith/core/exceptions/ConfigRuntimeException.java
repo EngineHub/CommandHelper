@@ -1,9 +1,9 @@
 package com.laytonsmith.core.exceptions;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.CHLog;
@@ -19,10 +19,8 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
-import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +30,8 @@ import java.util.List;
  * A ConfigRuntimeException is the base class for user level exceptions.
  */
 public class ConfigRuntimeException extends RuntimeException {
+
+	private static CClosure uncaughtExceptionHandler;
 
 	/**
 	 * Creates a new instance of <code>ConfigRuntimeException</code> without
@@ -97,12 +97,15 @@ public class ConfigRuntimeException extends RuntimeException {
 	public static Reaction GetReaction(ConfigRuntimeException e, Environment env) {
 		//If there is an exception handler, call it to see what it says.
 		Reaction reaction = Reaction.REPORT;
-		if (env.getEnv(GlobalEnv.class).GetExceptionHandler() != null) {
-			CClosure c = env.getEnv(GlobalEnv.class).GetExceptionHandler();
+		if (uncaughtExceptionHandler != null) {
 			CArray ex = ObjectGenerator.GetGenerator().exception(e, env, Target.UNKNOWN);
+			if (e.getEnv() != null) {
+				MCCommandSender sender = e.getEnv().getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				uncaughtExceptionHandler.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
+			}
 			Construct ret = CNull.NULL;
 			try {
-				c.execute(new Construct[]{ex});
+				uncaughtExceptionHandler.execute(ex);
 			} catch (FunctionReturnException retException) {
 				ret = retException.getReturn();
 			}
@@ -117,6 +120,14 @@ public class ConfigRuntimeException extends RuntimeException {
 			}
 		}
 		return reaction;
+	}
+
+	public static void SetExceptionHandler(CClosure construct) {
+		uncaughtExceptionHandler = construct;
+	}
+
+	public static CClosure GetExceptionHandler() {
+		return uncaughtExceptionHandler;
 	}
 
 	/**
