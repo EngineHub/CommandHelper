@@ -249,6 +249,9 @@ public class SQL {
 				    if (md.getColumnTypeName(i).equals("YEAR")) {
 					value = new CInt(rs.getLong(i), t);
 				    } else if (rs.getTimestamp(i) == null) {
+					// Normally we check for null below, but since
+					// we want to dereference the value now, we have
+					// to have a specific null check here.
 					value = CNull.NULL;
 				    } else {
 					value = new CInt(rs.getTimestamp(i).getTime(), t);
