@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.ArgumentSuite;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.CommandExecutor;
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.Misc;
 import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
@@ -563,7 +564,7 @@ public class Main {
 		    }
 		} else {
 		    try {
-			PNViewer.main(parsedArgs.getStringListArgument().toArray(new String[0]));
+			PNViewer.main(parsedArgs.getStringListArgument().toArray(ArrayUtils.EMPTY_STRING_ARRAY));
 		    } catch (HeadlessException ex) {
 			StreamUtils.GetSystemErr().println("The Persistence Network Viewer may not be run from a headless environment.");
 			System.exit(1);

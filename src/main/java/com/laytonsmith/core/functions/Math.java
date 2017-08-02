@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
@@ -2237,7 +2238,7 @@ public class Math {
 		}
 
 	}
-	
+
 	@api
 	public static class round15 extends AbstractFunction implements Optimizable {
 
@@ -2307,7 +2308,7 @@ public class Math {
 				new ExampleScript("With round15", "round15(sin(math_const('PI')));")
 			};
 		}
-		
+
 	}
 
 	@api
@@ -2381,8 +2382,8 @@ public class Math {
 					i++;
 				}
 			} else {
-				da = new double[0];
-				varNames = new String[0];
+				da = ArrayUtils.EMPTY_DOUBLE_ARRAY;
+				varNames = ArrayUtils.EMPTY_STRING_ARRAY;
 			}
 			/*try {
 				Expression e = Expression.compile(expr, varNames);
@@ -2556,7 +2557,7 @@ public class Math {
 		}
 
 	}
-	
+
 	@api
 	public static class math_const extends AbstractFunction implements Optimizable {
 
@@ -2574,7 +2575,7 @@ public class Math {
 		public Boolean runAsync() {
 			return null;
 		}
-		
+
 		@MEnum("MathConstants")
 		public static enum MathConstants {
 			NaN(Double.NaN, "A representation of an undefinied number (Not a Number), per the IEEE 754 standard"),
@@ -2604,11 +2605,11 @@ public class Math {
 				this.value = value;
 				this.doc = doc;
 			}
-			
+
 			public Number getValue(){
 				return this.value;
 			}
-			
+
 			public String getDoc(){
 				return doc;
 			}
@@ -2676,8 +2677,8 @@ public class Math {
 				new ExampleScript("Basic usage", "math_const('PI');")
 			};
 		}
-		
+
 	}
-	
-	
+
+
 }

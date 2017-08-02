@@ -60,7 +60,7 @@
         "Compatibility",
         {"DesignEthos": "Design Ethos"},
         {"Extension_Development": "Extension Development"},
-        {"api.json": "JSON API"},
+        {"api.json": "api.json"},
         {"SiteDeployTool": "Site Deploy Tool"}
     ]}
 ]

@@ -30,6 +30,16 @@ html {
     box-shadow: 0 .3em .3em rgba(0,0,0,.1);
 }
 
+.Warning {
+    font-style: italic;
+    margin: 1em 3em;
+    margin-top: 2em;
+    padding: .7em 1.5em;
+    border-top: 2px solid #dfb800;
+    border-bottom: 2px solid #dfb800;
+    box-shadow: 0 .3em .3em rgba(0,0,0,.1);
+}
+
 .bodyXSmall {
     
 }
@@ -120,4 +130,7 @@ code {
     color: rgba(0, 0, 0, 0.75);
 }
 
+.hiddenFunction {
+    display: none;
+}
 

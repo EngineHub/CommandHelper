@@ -21,15 +21,15 @@ import java.util.Stack;
  * environment as well, but contains values that the compiler (or function optimizations)
  * might need, and are usually considered "static". The settings are all passed in to the constructor,
  * but you can use the various factory methods to create an environment from other sources.
- * 
+ *
  */
-public class CompilerEnvironment implements Environment.EnvironmentImpl{	
+public class CompilerEnvironment implements Environment.EnvironmentImpl{
 	/**
 	 * A constant is a construct that is defined in source like ${this}. The value
 	 * must be passed in at compile time.
 	 */
 	private Map<String, Construct> constants = new HashMap<String, Construct>();
-	
+
 	/**
 	 * A list of included parse trees. These likely will have come from other files, but
 	 * the compilation result should have been cached.
@@ -48,7 +48,7 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl{
 	public void setConstant(String name, String value){
 		setConstant(name, new CString(value, Target.UNKNOWN));
 	}
-	public Construct getConstant(String name){		
+	public Construct getConstant(String name){
 		return constants.get(name);
 	}
 	public void pushVariableStack(){
@@ -68,11 +68,11 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl{
 		}
 		return false;
 	}
-	
+
 	public void addInclude(ParseTree tree){
 		includes.add(tree);
 	}
-	
+
 	public List<ParseTree> getIncludes(){
 		return new ArrayList<ParseTree>(includes);
 	}
@@ -81,5 +81,5 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl{
 	public EnvironmentImpl clone() throws CloneNotSupportedException {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
-	
+
 }

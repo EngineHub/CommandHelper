@@ -8,7 +8,7 @@
 * Write your own /tp, /time, or /warp
 * Do much more, from the simple to the complex, with zero Java code.
 
-Remember that [https://github.com/sk89q/commandhelper CommandHelper is open source].
+Remember that [https://github.com/EngineHub/commandhelper CommandHelper is open source].
 
 == Installation ==
 
@@ -19,8 +19,8 @@ Remember that [https://github.com/sk89q/commandhelper CommandHelper is open sour
 How do you use CommandHelper? We have a set of easy to follow articles that you can read!
 
 * '''Want to setup simple aliases?''' Try the [[Beginner's_Guide|Beginner's Guide]]
-* '''Want to script completely new features?''' Follow the ''Learning Trail'' below.
-* '''Just want the API?''' See the [[API|API reference]].
+* '''Want to script completely new features?''' Follow the ''Learning Trail'' at the bottom of the page.
+* '''Just want the API?''' See the [[API.html|API reference]].
 * '''Want an example configuration?''' See the [[CommandHelper/Example Script|this example]].
 
 Need more help? Visit the [http://forum.sk89q.com/forums/commandhelper.20/ forums], or chat with us on IRC in [http://skq.me/irc/irc.esper.net/commandhelper/ #CommandHelper on irc.esper.net].

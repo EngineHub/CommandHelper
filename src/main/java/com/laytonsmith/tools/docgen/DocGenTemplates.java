@@ -127,7 +127,7 @@ public class DocGenTemplates {
 		Field f = DocGenTemplates.class.getDeclaredField(name);
 		f.setAccessible(true);
 		if (Generator.class.isAssignableFrom(f.getType()) && Modifier.isStatic(f.getModifiers())) {
-		    String[] tmplArgs = new String[0];
+		    String[] tmplArgs = ArrayUtils.EMPTY_STRING_ARRAY;
 		    if (m.group(2) != null && !m.group(2).equals("")) {
 			//We have arguments
 			//remove the initial |, then split (noting that empty arguments is still an argument)
@@ -255,7 +255,7 @@ public class DocGenTemplates {
 	    String name = m.group(1);
 	    try {
 		if (generators.containsKey(name)) {
-		    String[] tmplArgs = new String[0];
+		    String[] tmplArgs = ArrayUtils.EMPTY_STRING_ARRAY;
 		    if (m.group(2) != null && !m.group(2).equals("")) {
 			//We have arguments
 			//remove the initial |, then split
@@ -509,7 +509,7 @@ public class DocGenTemplates {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintStream ps = new PrintStream(baos);
 		Manager.out = ps;
-		Manager.help(new String[0]);
+		Manager.help(ArrayUtils.EMPTY_STRING_ARRAY);
 		String initial = HTMLUtils.escapeHTML(baos.toString("UTF-8")).replace("\n", "<br />").replace("\t", "&nbsp;&nbsp;&nbsp;");
 		baos.reset();
 		for (String option : Manager.options) {
@@ -599,9 +599,7 @@ public class DocGenTemplates {
 	@Override
 	public String generate(String... args) {
 	    String code = StringUtils.Join(args, "|");
-	    String out = code.replaceAll("<", "&lt;");
-	    out = out.replaceAll(">", "&gt;");
-	    out = escapeWiki(out);
+	    String out = escapeWiki(code);
 	    if(out.startsWith("\n")) {
 		out = out.substring(1);
 	    }
@@ -752,7 +750,6 @@ public class DocGenTemplates {
 	public String generate(String... args) throws GenerateException {
 	    return "{{TakeNote|text=" + StringUtils.Join(args, "|") + "}}";
 	}
-
     };
 
     /**

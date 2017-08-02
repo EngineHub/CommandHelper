@@ -46,6 +46,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -171,6 +172,7 @@ public class Web {
     }
 
     @api
+    @seealso({http_clear_session_cookies.class})
     public static class http_request extends AbstractFunction {
 
 	/**
@@ -276,13 +278,13 @@ public class Web {
 		if (csettings.containsKey("params") && !(csettings.get("params", t) instanceof CNull)) {
 		    if (csettings.get("params", t) instanceof CArray) {
 			CArray params = Static.getArray(csettings.get("params", t), t);
-			Map<String, List<String>> mparams = new HashMap<String, List<String>>();
+			Map<String, List<String>> mparams = new HashMap<>();
 			for (String key : params.stringKeySet()) {
 			    Construct c = params.get(key, t);
-			    List<String> l = new ArrayList<String>();
+			    List<String> l = new ArrayList<>();
 			    if (c instanceof CArray) {
 				for (String kkey : ((CArray) c).stringKeySet()) {
-				    l.add(((CArray) c).get(kkey, t).val());
+				    l.add(((ArrayAccess) c).get(kkey, t).val());
 				}
 			    } else {
 				l.add(c.val());
@@ -300,9 +302,6 @@ public class Web {
 			    } catch (UnsupportedEncodingException ex) {
 				throw new Error(ex);
 			    }
-			}
-			if (settings.getMethod() != HTTPMethod.POST && settings.getMethod() != HTTPMethod.PUT) {
-			    throw new CREFormatException("You must set the method to POST or PUT to use raw params.", t);
 			}
 		    }
 		}
@@ -379,6 +378,9 @@ public class Web {
 		if (csettings.containsKey("blocking")) {
 		    boolean blocking = Static.getBoolean(csettings.get("blocking", t));
 		    settings.setBlocking(blocking);
+		}
+		if (csettings.containsKey("log") && Static.getBoolean(csettings.get("log", t))) {
+		    settings.setLogger(Logger.getLogger(Web.class.getName()));
 		}
 		settings.setAuthenticationDetails(username, password);
 	    }

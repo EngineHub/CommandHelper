@@ -4,7 +4,15 @@
     var $body = $("#body");
     var $learningTrail = $("#learningTrail");
     var learningTrailJSON = JSON.parse("%%js_string_learning_trail%%");
-    var api = $.getJSON(docsBase + "api.json").promise();
+    var apiURL = docsBase + "api.json?v=" + apiJsonVersion;
+    var api;
+    var apiData = sessionStorage.getItem(apiURL);
+    if(apiData) {
+        api = $.Deferred();
+        api.resolve(JSON.parse(apiData));
+    } else { 
+        api = $.getJSON(apiURL).promise();
+    }
     api.fail(function() {
         console.log("Could not load api.json");
         console.log(arguments);
@@ -65,12 +73,13 @@
     function doStandardReplacement(html) {
         var promise = $.Deferred();
         api.done(function (resp) {
+            sessionStorage.setItem(apiURL, JSON.stringify(resp));
             (function () {
                 var r = /{{function\|(.*?)}}/g;
                 var match;
                 while ((match = r.exec(html)) !== null) {
                     if (typeof (resp.functions[match[1]]) !== "undefined") {
-                        html = html.substr(0, match.index) + "<a href=\"" + docsBase + "api/function/" + match[1] + "\">"
+                        html = html.substr(0, match.index) + "<a href=\"" + docsBase + "API/functions/" + match[1] + "\">"
                                 + "<span class=\"function_tooltip tt_cursor\" data-tooltip-content=\"#function_tooltip_content\">"
                                 + match[1]
                                 + "</span></a>"
@@ -107,9 +116,10 @@
         html = html.replace(/\n\s*\n/g, '\n');
         html = wiky.process(html);
         html = html.replace(/{{TakeNote\|text=([\s\S]*?)}}/g, "<div class=\"TakeNote\"><strong>Note:</strong> $1</div>");
+        html = html.replace(/{{Warning\|text=([\s\S]*?)}}/g, "<div class=\"Warning\"><strong>Warning:</strong> $1</div>");
         html = html.replace(/\[(https?:\/\/.*?) (.*)\]/g, "<a href=\"$1\">$2</a>");
         html = html.replace(/__NOTOC__/g, "");
-        var internalLink = /\[\[(.*?)(?:\|(.*))?\]\]/g;
+        var internalLink = /\[\[(.*?)(?:\|(.*?))?\]\]/g;
         var result;
         while ((result = internalLink.exec(html)) !== null) {
             var replacement = result[0];
@@ -246,7 +256,7 @@
             ret += "<table " + lines[0] + ">";
             for(var i = 1; i < lines.length; i++) {
                 var line = lines[i].trim();
-                if(line === "|-") {
+                if(line.match(/^\|-/)) {
                     // new row
                     if(firstRow) {
                         firstRow = false;
@@ -255,7 +265,12 @@
                         ret += lastCellWasTH ? "</th>" : "</td>";
                         ret += "</tr>";
                     }
-                    ret += "<tr>";
+                    var attrRow = "";
+                    var q;
+                    if((q = line.match(/^\|-(.+)$/))) {
+                        attrRow = q[1].trim();
+                    }
+                    ret += "<tr " + attrRow + ">";
                     firstCell = true;
                     continue;
                 }

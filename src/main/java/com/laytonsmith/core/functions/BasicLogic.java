@@ -2242,7 +2242,7 @@ public class BasicLogic {
 		new ExampleScript("Functional usage", "not(false)"),
 		new ExampleScript("Operator syntax, true condition", "!false"),
 		new ExampleScript("Operator syntax, false condition", "!true"),
-		new ExampleScript("Operator syntax, using variable", "!@var"),};
+		new ExampleScript("Operator syntax, using variable", "boolean @var = false;\nmsg(!@var);"),};
 	}
     }
 
@@ -2305,7 +2305,11 @@ public class BasicLogic {
 	@Override
 	public ExampleScript[] examples() throws ConfigCompileException {
 	    return new ExampleScript[]{
-		new ExampleScript("Basic usage", "xor(true, false)"),};
+		new ExampleScript("One of each", "xor(true, false)"),
+		new ExampleScript("One of each", "xor(false, true)"),
+		new ExampleScript("Both true", "xor(true, true)"),
+		new ExampleScript("Both false", "xor(false, false)")
+	    };
 	}
     }
 
@@ -2489,7 +2493,11 @@ public class BasicLogic {
 	@Override
 	public ExampleScript[] examples() throws ConfigCompileException {
 	    return new ExampleScript[]{
-		new ExampleScript("Basic usage", "xnor(true, true)"),};
+		new ExampleScript("Two true values", "xnor(true, true)"),
+		new ExampleScript("One of each", "xnor(true, false)"),
+		new ExampleScript("One of each", "xnor(false, true)"),
+		new ExampleScript("Two false", "xnor(false, false)")
+	    };
 	}
     }
 

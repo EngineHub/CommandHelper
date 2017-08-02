@@ -13,29 +13,29 @@ import java.util.Map;
 
 /**
  * An ArgumentSuite is an ArgumentParser that supports "modes".
- * 
+ *
  * A mode is a required parameter that causes a fully separate argument parser to
  * be used to parse the remaining arguments. This allows for finer control over
  * mutually exclusive parameters in both the documentation and the validation, as
  * well as wider support for traditional use cases.
- * 
+ *
  */
 public class ArgumentSuite {
-	
+
 	private Map<String, ArgumentParser> suite;
 	private Map<String, String> aliases;
 	private String description;
-	
+
 	public ArgumentSuite(){
 		suite = new LinkedHashMap<String, ArgumentParser>();
 		aliases = new LinkedHashMap<String, String>();
 	}
-	
+
 	/**
 	 * Adds a new mode. A mode name may contain dashes, which would look like normal
 	 * argument flags, but would actually be a mode. This is useful especially for a
 	 * --help command, which shows the ArgumentSuite's help.
-	 * @param modeName The name of this mode. This may not contain spaces. 
+	 * @param modeName The name of this mode. This may not contain spaces.
 	 * @param mode The sub-ArgumentParser that will be used when in this mode.
 	 * @throws IllegalArgumentException if the name of the mode contains spaces
 	 */
@@ -44,7 +44,7 @@ public class ArgumentSuite {
 		suite.put(modeName, mode);
 		return this;
 	}
-	
+
 	/**
 	 * Adds a mode alias. This is the recommended behavior instead of adding the
 	 * same mode with a different name, because the built description is aware
@@ -53,30 +53,30 @@ public class ArgumentSuite {
 	 * strictly need to exist yet.
 	 * @param alias
 	 * @param realModeName
-	 * @return 
+	 * @return
 	 */
 	public ArgumentSuite addModeAlias(String alias, String realModeName){
 		validateModeName(alias);
 		aliases.put(alias, realModeName);
 		return this;
 	}
-	
+
 	private void validateModeName(String modeName){
 		if(modeName.contains(" ")){
 			throw new IllegalArgumentException("The mode name may not contain a space.");
 		}
 	}
-	
+
 	/**
 	 * Adds a description, which is used in {@see #getBuiltDescription}
 	 * @param description
-	 * @return 
+	 * @return
 	 */
 	public ArgumentSuite addDescription(String description){
 		this.description = description;
 		return this;
 	}
-	
+
 	/**
 	 * Returns a mode that was previously registered.
 	 * @param name The name of the mode to get
@@ -90,17 +90,17 @@ public class ArgumentSuite {
 			throw new IllegalArgumentException("No mode by the name \"" + name + "\" has been registered.");
 		}
 	}
-	
+
 	/**
 	 * Selects the appropriate mode, and calls match on that ArgumentParser.
 	 * @param args The pre-parsed arguments
 	 * @param defaultMode The default mode, which will be used only if no arguments were passed in.
-	 * @return 
+	 * @return
 	 * @throws ResultUseException if the mode cannot be found, or if the sub-ArgumentParser
 	 * throws an exception.
 	 */
 	public ArgumentSuiteResults match(String [] args, String defaultMode) throws ResultUseException, ValidationException {
-		String [] nonModeArgs = new String[0];
+		String [] nonModeArgs = ArrayUtils.EMPTY_STRING_ARRAY;
 		String mode;
 		if(args.length > 1){
 			mode = args[0];
@@ -120,12 +120,12 @@ public class ArgumentSuite {
 			throw new ResultUseException("Mode " + mode + " was not found.");
 		}
 	}
-	
+
 	/**
 	 * Selects the appropriate mode, and calls match on that ArgumentParser.
 	 * @param args The unparsed arguments
 	 * @param defaultMode The default mode, which will be used only if no arguments were passed in.
-	 * @return 
+	 * @return
 	 * @throws ResultUseException if the mode cannot be found, or if the sub-ArgumentParser
 	 * throws an exception.
 	 */
@@ -134,11 +134,11 @@ public class ArgumentSuite {
 		//pass that to the other match
 		return match(ArgumentParser.lex(args).toArray(new String[]{}), defaultMode);
 	}
-	
+
 	/**
 	 * Returns a built description of this ArgumentSuite, which would be appropriate
 	 * to display if no arguments are passed in (or the mode name is help, -help, --help, etc)
-	 * @return 
+	 * @return
 	 */
 	public String getBuiltDescription(){
 		StringBuilder b = new StringBuilder();
@@ -165,14 +165,14 @@ public class ArgumentSuite {
 		}
 		return b.toString();
 	}
-	
+
 	/**
 	 * A convenience method to get the real mode name registered for this
 	 * alias, or null if no such alias exists. If the alias is actually a mode,
 	 * it is simply returned. Useful for perhaps a help mode, to resolve the actual
 	 * mode named. If {@code alias} is null, null is returned.
 	 * @param alias
-	 * @return 
+	 * @return
 	 */
 	public String getModeFromAlias(String alias){
 		if(alias == null){
@@ -186,7 +186,7 @@ public class ArgumentSuite {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * A convenience method to get the underlying ArgumentParser
 	 * based on the mode name given. Aliases will not suffice, but you
@@ -195,7 +195,7 @@ public class ArgumentSuite {
 	 * a help mode, to generically display a mode's help. If {@see mode}
 	 * is null, null is returned.
 	 * @param mode
-	 * @return 
+	 * @return
 	 */
 	public ArgumentParser getModeFromName(String mode){
 		if(mode == null){
@@ -207,7 +207,7 @@ public class ArgumentSuite {
 			return null;
 		}
 	}
-	
+
 	public static class ArgumentSuiteResults{
 		private ArgumentParser mode;
 		private ArgumentParserResults results;
@@ -217,33 +217,33 @@ public class ArgumentSuite {
 			this.mode = mode;
 			this.results = results;
 		}
-		
+
 		/**
 		 * Returns the name of the mode that was selected. (Not the alias)
-		 * @return 
+		 * @return
 		 */
 		public String getModeName(){
 			return modeName;
 		}
-		
+
 		/**
 		 * The ArgumentParser for the given mode. This will be a reference
 		 * to the mode passed in, so you can do == on it.
-		 * @return 
+		 * @return
 		 */
 		public ArgumentParser getMode(){
 			return mode;
 		}
-		
+
 		/**
 		 * The ArgumentParserResults for the ArgumentParser mode
-		 * @return 
+		 * @return
 		 */
 		public ArgumentParserResults getResults(){
 			return results;
 		}
 	}
-	
+
 	public static void main(String [] args){
 		ArgumentSuite suite = new ArgumentSuite();
 		ArgumentParser mode1 = ArgumentParser.GetParser();
@@ -289,13 +289,13 @@ public class ArgumentSuite {
 		} catch (ResultUseException ex) {
 			showHelp(suite);
 		} catch (ValidationException ex) {
-			showHelp(suite);			
+			showHelp(suite);
 		}
 	}
-	
+
 	private static void showHelp(ArgumentSuite suite){
 		StreamUtils.GetSystemOut().println(suite.getBuiltDescription());
 		System.exit(1);
 	}
-	
+
 }

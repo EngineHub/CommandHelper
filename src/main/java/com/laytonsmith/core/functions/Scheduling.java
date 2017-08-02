@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.Range;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
@@ -517,7 +518,7 @@ public class Scheduling {
 
 		@Override
 		public String generate(String... args) {
-		    String[] timezones = new String[0];
+		    String[] timezones = ArrayUtils.EMPTY_STRING_ARRAY;
 		    try {
 			timezones = TimeZone.getAvailableIDs();
 		    } catch (NullPointerException e) {
@@ -704,7 +705,7 @@ public class Scheduling {
 
 	@Override
 	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-	    String[] timezones = new String[0];
+	    String[] timezones = ArrayUtils.EMPTY_STRING_ARRAY;
 	    try {
 		timezones = TimeZone.getAvailableIDs();
 	    } catch (NullPointerException e) {
@@ -738,7 +739,7 @@ public class Scheduling {
 
 	@Override
 	public String docs() {
-	    return "array<string> {} Returns a list of time zones registered on this system.";
+	    return "array&lt;string&gt; {} Returns a list of time zones registered on this system.";
 	}
 
 	@Override

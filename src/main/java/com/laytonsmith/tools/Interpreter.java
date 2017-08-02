@@ -136,7 +136,14 @@ public final class Interpreter {
      */
     private static final int MAX_COMMAND_HISTORY = 100;
 
-    public static void startWithTTY(String file, List<String> args) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+    public static void startWithTTY(File file, List<String> args, boolean systemExitOnFailure) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+	startWithTTY(file.getCanonicalPath(), args, systemExitOnFailure);
+    }
+
+    public static void startWithTTY(String file, List<String> args) throws Profiles.InvalidProfileException, IOException, DataSourceException, URISyntaxException {
+	startWithTTY(file, args, true);
+    }
+    public static void startWithTTY(String file, List<String> args, boolean systemExitOnFailure) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 	File fromFile = new File(file).getCanonicalFile();
 	Interpreter interpreter = new Interpreter(args, fromFile.getParentFile().getPath(), true);
 	try {
@@ -144,11 +151,15 @@ public final class Interpreter {
 	} catch (ConfigCompileException ex) {
 	    ConfigRuntimeException.HandleUncaughtException(ex, null, null);
 	    StreamUtils.GetSystemOut().println(TermColors.reset());
-	    System.exit(1);
+	    if(systemExitOnFailure) {
+		System.exit(1);
+	    }
 	} catch (ConfigCompileGroupException ex) {
 	    ConfigRuntimeException.HandleUncaughtException(ex, null);
 	    StreamUtils.GetSystemOut().println(TermColors.reset());
-	    System.exit(1);
+	    if(systemExitOnFailure) {
+		System.exit(1);
+	    }
 	}
     }
 
@@ -553,6 +564,19 @@ public final class Interpreter {
      */
     public void execute(String script, List<String> args) throws ConfigCompileException, IOException, ConfigCompileGroupException {
 	execute(script, args, null);
+    }
+
+    /**
+     * Works like {@link #execute(String, List, File)} but reads the file
+     * in for you.
+     * @param script Path the the file
+     * @param args Arguments to be passed to the script
+     * @throws ConfigCompileException If there is a compile error in the script
+     * @throws IOException
+     */
+    public void execute(File script, List<String> args) throws ConfigCompileException, IOException, ConfigCompileGroupException {
+	String scriptString = FileUtil.read(script);
+	execute(scriptString, args, script);
     }
 
     /**

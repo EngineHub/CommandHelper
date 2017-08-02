@@ -604,7 +604,7 @@ public class EventBinding {
 
 		@Override
 		public String docs() {
-			return "void {<none> | parameterArray | parameter, [parameter...]} Locks the specified event parameter(s), or all of them,"
+			return "void {&lt;none&gt; | parameterArray | parameter, [parameter...]} Locks the specified event parameter(s), or all of them,"
 					+ " if specified with no arguments. Locked parameters become read only for lower priority event handlers.";
 		}
 

@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.CommandExecutor;
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
@@ -947,7 +948,7 @@ public class Cmdline {
 					command[i] = array.get(i, t).val();
 				}
 			} else {
-				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
+				command = StringUtils.ArgParser(args[0].val()).toArray(ArrayUtils.EMPTY_STRING_ARRAY);
 			}
 			if(args.length > 1){
 				CArray options = Static.getArray(args[1], t);
@@ -1163,7 +1164,7 @@ public class Cmdline {
 					command[i] = array.get(i, t).val();
 				}
 			} else {
-				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
+				command = StringUtils.ArgParser(args[0].val()).toArray(ArrayUtils.EMPTY_STRING_ARRAY);
 			}
 			if(args.length > 1){
 				CArray options = Static.getArray(args[1], t);

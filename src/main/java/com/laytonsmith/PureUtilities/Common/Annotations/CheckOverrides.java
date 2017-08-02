@@ -2,6 +2,7 @@ package com.laytonsmith.PureUtilities.Common.Annotations;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
@@ -37,7 +38,7 @@ import javax.tools.Diagnostic;
 @SupportedAnnotationTypes({"java.lang.Override", "com.laytonsmith.annotations.MustUseOverride"})
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class CheckOverrides extends AbstractProcessor {
-	
+
 	private static final boolean enabled = true;
 
 	private static Map<Class, Set<Method>> methods = null;
@@ -92,7 +93,7 @@ public class CheckOverrides extends AbstractProcessor {
 						String inner = m.group(1);
 						String[] args;
 						if ("".equals(inner.trim())) {
-							args = new String[0];
+							args = ArrayUtils.EMPTY_STRING_ARRAY;
 						} else {
 							//Take out generics, since we can't really deal with them, and they make parsing
 							//the args harder.
@@ -320,7 +321,7 @@ public class CheckOverrides extends AbstractProcessor {
 	private static void setup() {
 		if (methods == null) {
 			methods = new HashMap<>();
-			
+
 			List<ClassMirror<?>> classes = ClassDiscovery.getDefaultInstance().getKnownClasses(ClassDiscovery.GetClassContainer(CheckOverrides.class));
 			for (ClassMirror cm : classes) {
 				Class c = cm.loadClass(CheckOverrides.class.getClassLoader(), false);

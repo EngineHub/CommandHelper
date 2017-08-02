@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities.Web;
 
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 
@@ -97,7 +98,7 @@ public final class WebUtility {
 	BufferedReader in = new BufferedReader(new InputStreamReader(response.getStream()));
 	if (settings.getDownloadTo() == null) {
 	    if(settings.getLogger() != null) {
-		settings.getLogger().log(Level.SEVERE, "Reading in response body");
+		settings.getLogger().log(Level.INFO, "Reading in response body");
 	    }
 	    b = new StringBuilder();
 	    String line;
@@ -107,7 +108,7 @@ public final class WebUtility {
 	    in.close();
 	} else {
 	    if(settings.getLogger() != null) {
-		settings.getLogger().log(Level.SEVERE, "Saving file to {0}", settings.getDownloadTo());
+		settings.getLogger().log(Level.INFO, "Saving file to {0}", settings.getDownloadTo());
 	    }
 	    int r;
 	    OutputStream out = new BufferedOutputStream(new FileOutputStream(settings.getDownloadTo()));
@@ -161,7 +162,7 @@ public final class WebUtility {
 	String username = settings.getUsername();
 	String password = settings.getPassword();
 	if (logger != null) {
-	    logger.log(Level.SEVERE, "Using the following settings:\n"
+	    logger.log(Level.INFO, "Using the following settings:\n"
 		    + "HTTP method: {0}\n"
 		    + "Headers: {1}\n"
 		    + "Parameters: {2}\n"
@@ -187,7 +188,7 @@ public final class WebUtility {
 	    url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "?" + query);
 	}
 	if (logger != null) {
-	    logger.log(Level.SEVERE, "Using url: {0}", url);
+	    logger.log(Level.INFO, "Using url: {0}", url);
 	}
 
 	Proxy proxy;
@@ -197,7 +198,7 @@ public final class WebUtility {
 	    proxy = settings.getProxy();
 	}
 	if (logger != null) {
-	    logger.log(Level.SEVERE, "Using proxy: {0}", proxy);
+	    logger.log(Level.INFO, "Using proxy: {0}", proxy);
 	}
 	InetSocketAddress addr = (InetSocketAddress) proxy.address();
 	if (addr != null) {
@@ -207,7 +208,7 @@ public final class WebUtility {
 	}
 	//FIXME: When given a bad proxy, this causes it to stall forever
 	if (logger != null) {
-	    logger.log(Level.SEVERE, "Opening connection...");
+	    logger.log(Level.INFO, "Opening connection...");
 	}
 	HttpURLConnection conn = (HttpURLConnection) url.openConnection(/*proxy*/);
 	conn.setConnectTimeout(timeout);
@@ -220,7 +221,7 @@ public final class WebUtility {
 	}
 	if (username != null && password != null) {
 	    if (logger != null) {
-		logger.log(Level.SEVERE, "Using Username/Password authentication, adding Authorization header");
+		logger.log(Level.INFO, "Using Username/Password authentication, adding Authorization header");
 	    }
 	    conn.setRequestProperty("Authorization", "Basic " + new String(Base64.encodeBase64((username + ":" + password).getBytes("UTF-8")), "UTF-8"));
 	}
@@ -230,32 +231,32 @@ public final class WebUtility {
 	    }
 	}
 	conn.setRequestMethod(method.name());
-	if (method == HTTPMethod.POST) {
+	if ((parameters != null && !parameters.isEmpty()) || settings.getRawParameter() != null) {
 	    conn.setDoOutput(true);
-	    byte[] params = new byte[0];
+	    byte[] params = ArrayUtils.EMPTY_BYTE_ARRAY;
 	    if (parameters != null && !parameters.isEmpty()) {
 		if (logger != null) {
-		    logger.log(Level.SEVERE, "Parameters are added, and content type set to application/x-www-form-urlencoded");
+		    logger.log(Level.INFO, "Parameters are added, and content type set to application/x-www-form-urlencoded");
 		}
 		params = encodeParameters(parameters).getBytes("UTF-8");
 		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 	    } else if (settings.getRawParameter() != null) {
 		if (logger != null) {
-		    logger.log(Level.SEVERE, "Raw parameter is added");
+		    logger.log(Level.INFO, "Raw parameter is added");
 		}
 		params = settings.getRawParameter();
 	    }
 	    conn.setRequestProperty("Content-Length", Integer.toString(params.length));
 	    if (logger != null) {
-		logger.log(Level.SEVERE, "Content length is {0}", params.length);
-		logger.log(Level.SEVERE, "Writing out request now");
+		logger.log(Level.INFO, "Content length is {0}", params.length);
+		logger.log(Level.INFO, "Writing out request now");
 	    }
 	    OutputStream os = new BufferedOutputStream(conn.getOutputStream());
 	    os.write(params);
 	    os.close();
 	}
 	if (logger != null) {
-	    logger.log(Level.SEVERE, "Output sent");
+	    logger.log(Level.INFO, "Output sent");
 	}
 	InputStream is;
 	try {
@@ -270,18 +271,18 @@ public final class WebUtility {
 	}
 	if ("x-gzip".equals(conn.getContentEncoding()) || "gzip".equals(conn.getContentEncoding())) {
 	    if (logger != null) {
-		logger.log(Level.SEVERE, "Response is gzipped, using a GZIPInputStream");
+		logger.log(Level.INFO, "Response is gzipped, using a GZIPInputStream");
 	    }
 	    is = new GZIPInputStream(is);
 	} else if ("deflate".equals(conn.getContentEncoding())) {
 	    if (logger != null) {
-		logger.log(Level.SEVERE, "Response is zipped, using a InflaterInputStream");
+		logger.log(Level.INFO, "Response is zipped, using a InflaterInputStream");
 	    }
 	    is = new InflaterInputStream(is);
 	} else if ("identity".equals(conn.getContentEncoding())) {
 	    //This is the default, meaning no transformation is needed.
 	    if (logger != null) {
-		logger.log(Level.SEVERE, "Response is not compressed");
+		logger.log(Level.INFO, "Response is not compressed");
 	    }
 	}
 	if (is == null) {

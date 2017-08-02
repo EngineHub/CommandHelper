@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -38,10 +39,35 @@ public class Preferences {
      * The type a particular preference can be. The value will be cast to the given type if possible. NUMBER and DOUBLE
      * are guaranteed to be castable to a Double. NUMBER can also sometimes be cast to an int. BOOLEAN is cast to a
      * boolean, and may be stored in the preferences file as either true/false, yes/no, on/off, or a number, which get
-     * parsed accordingly. STRING can be any value.
+     * parsed accordingly. STRING can be any value. FILE is interpreted as a File object (whether or not it exists).
      */
     public enum Type {
-	NUMBER, BOOLEAN, STRING, INT, DOUBLE
+	/**
+	 * This is a number, either a double or an int, depending on the input
+	 */
+	NUMBER,
+	/**
+	 * This is a true or false value. The following words mean true: true, yes, on. The following
+	 * words mean false: false, no, off. Case does not matter.
+	 */
+	BOOLEAN,
+	/**
+	 * This can be any value, and is returned as a string as is.
+	 */
+	STRING,
+	/**
+	 * This must an integer.
+	 */
+	INT,
+	/**
+	 * This must be a double.
+	 */
+	DOUBLE,
+	/**
+	 * This represents a file on the file system. The existence of the file does not matter. If the input
+	 * is an empty string, null is returned.
+	 */
+	FILE
     }
 
     /**
@@ -120,7 +146,7 @@ public class Preferences {
 	    in.close();
 	    for (String key : userProperties.stringPropertyNames()) {
 		String val = userProperties.getProperty(key);
-		String value = getObject(val, prefs.get(key)).toString();
+		String value = Objects.toString(getObject(val, prefs.get(key)), null);
 		Object ovalue = getObject(val, prefs.get(key));
 		Preference p1 = prefs.get(key);
 		Preference p2;
@@ -141,7 +167,7 @@ public class Preferences {
 	if (p == null) {
 	    return value;
 	}
-	if (value.equalsIgnoreCase("null")) {
+	if ("null".equalsIgnoreCase(value)) {
 	    return getObject(p.value, p);
 	}
 	switch (p.allowed) {
@@ -181,6 +207,11 @@ public class Preferences {
 			}
 		    }
 		}
+	    case FILE:
+		if(value == null || "".equals(value)) {
+		    return null;
+		}
+		return new File(value);
 	    case STRING:
 	    default:
 		return value;

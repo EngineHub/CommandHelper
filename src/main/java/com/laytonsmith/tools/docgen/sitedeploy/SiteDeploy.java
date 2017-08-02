@@ -1,7 +1,9 @@
 package com.laytonsmith.tools.docgen.sitedeploy;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.GNUErrorMessageFormat;
+import com.laytonsmith.PureUtilities.Common.HTMLUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
@@ -15,20 +17,28 @@ import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.MethodScriptFileLocations;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.functions.ExampleScript;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.ReadOnlyException;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
+import com.laytonsmith.tools.Interpreter;
+import com.laytonsmith.tools.SimpleSyntaxHighlighter;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException;
+import com.laytonsmith.tools.docgen.templates.Template;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -41,6 +51,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -50,6 +61,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -81,8 +93,10 @@ public class SiteDeploy {
     private static final String SHOW_TEMPLATE_CREDIT = "show-template-credit";
     private static final String GITHUB_BASE_URL = "github-base-url";
     private static final String VALIDATOR_URL = "validator-url";
+    private static final String POST_SCRIPT = "post-script";
 
-    public static void run(boolean generate_prefs, boolean useLocalCache, File sitedeploy, String password, boolean doValidation) throws Exception {
+    public static void run(boolean generate_prefs, boolean useLocalCache, File sitedeploy, String password,
+	    boolean doValidation) throws Exception {
 	List<Preferences.Preference> defaults = new ArrayList<>();
 	// SCP Options
 	defaults.add(new Preferences.Preference(USERNAME, "", Preferences.Type.STRING, "The username to scp with"));
@@ -125,6 +139,16 @@ public class SiteDeploy {
 		+ " to host your own validator for this solution to work, as running against a public service"
 		+ " will undoubtably result in being blacklisted from the service. This should be something"
 		+ " like http://localhost:8888/"));
+	defaults.add(new Preferences.Preference(POST_SCRIPT, "", Preferences.Type.FILE,
+		"The path to a shell script, or an mscript. This will be executed after"
+		+ " the upload (and validation, if specified) is complete, and can be used"
+		+ " to run custom procedures afterwards, for instance clearing any systems'"
+		+ " caches as might be necessary. The script will be sent a list of all the"
+		+ " the changed files as arguments. If the file name ends with .ms, it will"
+		+ " be executed with the MethodScript engine. Otherwise, the file will be"
+		+ " executed using the system shell. Leave this option empty to skip this"
+		+ " step. If the file is specified, it must exist, and if it does not end"
+		+ " in .ms, it must be executable."));
 
 	Preferences prefs = new Preferences("Site-Deploy", Logger.getLogger(SiteDeploy.class.getName()), defaults);
 	if (generate_prefs) {
@@ -145,6 +169,7 @@ public class SiteDeploy {
 	Boolean showTemplateCredit = (Boolean) prefs.getPreference(SHOW_TEMPLATE_CREDIT);
 	String githubBaseUrl = (String) prefs.getPreference(GITHUB_BASE_URL);
 	String validatorUrl = (String) prefs.getPreference(VALIDATOR_URL);
+	File finalizerScript = (File) prefs.getPreference(POST_SCRIPT);
 
 	{
 	    // Check for config errors
@@ -176,9 +201,17 @@ public class SiteDeploy {
 		configErrors.add("Validation cannot occur while an empty validation url is specified in the config."
 			+ " Either set a validator url, or re-run without the --do-validation flag.");
 	    }
+	    if (finalizerScript != null) {
+		if (!finalizerScript.exists()) {
+		    configErrors.add("post-script file specified does not exist (" + finalizerScript.getCanonicalPath() + ")");
+		} else if (!finalizerScript.getPath().endsWith(".ms") && !finalizerScript.canExecute()) {
+		    configErrors.add("post-script does not end in .ms, and is not executable");
+		}
+	    }
 	    if (!configErrors.isEmpty()) {
 		System.err.println("Invalid input. Check preferences in " + sitedeploy.getAbsolutePath() + " and re-run");
-		System.err.println("Here are the following error(s):");
+		System.err.println(StringUtils.PluralTemplateHelper(configErrors.size(),
+			"Here is the %d error:", "Here are the %d errors:"));
 		System.err.println(" - " + StringUtils.Join(configErrors, "\n - "));
 		System.exit(1);
 	    }
@@ -200,6 +233,9 @@ public class SiteDeploy {
 	System.out.println("docs-base: " + docsBase);
 	System.out.println("site-base: " + siteBase);
 	System.out.println("github-base-url: " + githubBaseUrl);
+	if (finalizerScript != null) {
+	    System.out.println("post-script: " + finalizerScript.getCanonicalPath());
+	}
 	if (doValidation) {
 	    System.out.println("validator-url: " + validatorUrl);
 	}
@@ -231,14 +267,14 @@ public class SiteDeploy {
 
 	// Ok, all the configuration details are input and correct, so lets deploy now.
 	deploy(useLocalCache, siteBase, docsBase, deploymentMethod, doValidation,
-		showTemplateCredit, githubBaseUrl, validatorUrl);
+		showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript);
     }
 
     private static void deploy(boolean useLocalCache, String siteBase, String docsBase,
 	    DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
-	    String githubBaseUrl, String validatorUrl) throws IOException, InterruptedException {
+	    String githubBaseUrl, String validatorUrl, File finalizerScript) throws IOException, InterruptedException {
 	new SiteDeploy(siteBase, docsBase, useLocalCache, deploymentMethod, doValidation,
-		showTemplateCredit, githubBaseUrl, validatorUrl).deploy();
+		showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript).deploy();
     }
 
     private final String siteBase;
@@ -262,6 +298,7 @@ public class SiteDeploy {
     private final boolean showTemplateCredit;
     private final String githubBaseUrl;
     private final String validatorUrl;
+    private final File finalizerScript;
 
     private static final String EDIT_THIS_PAGE_PREAMBLE = "Find a bug in this page? <a rel=\"noopener noreferrer\" target=\"_blank\" href=\"";
     private static final String EDIT_THIS_PAGE_POSTAMBLE = "\">Edit this page yourself, then submit a pull request.</a>";
@@ -270,10 +307,11 @@ public class SiteDeploy {
     @SuppressWarnings("unchecked")
     private SiteDeploy(String siteBase, String docsBase, boolean useLocalCache,
 	    DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
-	    String githubBaseUrl, String validatorUrl) throws IOException {
+	    String githubBaseUrl, String validatorUrl, File finalizerScript) throws IOException {
 	this.siteBase = siteBase;
 	this.docsBase = docsBase;
 	this.resourceBase = docsBase + "resources/";
+	this.finalizerScript = finalizerScript;
 	this.reader = new jline.console.ConsoleReader();
 	this.generateQueue = new ThreadPoolExecutor(1, 1,
 		0L, TimeUnit.MILLISECONDS,
@@ -389,6 +427,12 @@ public class SiteDeploy {
 		return SiteDeploy.this.docsBase;
 	    }
 	});
+	g.put("apiJsonVersion", new Generator() {
+	    @Override
+	    public String generate(String... args) throws GenerateException {
+		return apiJsonVersion;
+	    }
+	});
 	/**
 	 * The cacheBuster template is meant to make it easier to deal with caching of resources. The template allows
 	 * you to specify the resource, and it creates a path to the resource using resourceBase, but it also appends a
@@ -498,7 +542,12 @@ public class SiteDeploy {
 	return g;
     }
 
+    String apiJson;
+    String apiJsonVersion;
+
     private void deploy() throws InterruptedException, IOException {
+	apiJson = JSONValue.toJSONString(new APIBuilder().build());
+	apiJsonVersion = getLocalMD5(StreamUtils.GetInputStream(apiJson));
 	deployResources();
 	deployFrontPages();
 	deployLearningTrail();
@@ -525,7 +574,7 @@ public class SiteDeploy {
 	Runnable uploadFinalizer = new Runnable() {
 	    @Override
 	    public void run() {
-		if(uploadQueue.getQueue().isEmpty()) {
+		if (uploadQueue.getQueue().isEmpty()) {
 		    uploadQueue.shutdown();
 		} else {
 		    uploadQueue.submit(this);
@@ -602,10 +651,6 @@ public class SiteDeploy {
 			specifiedErrors++;
 			errorsDisplayed++;
 		    }
-		    if (errorsDisplayed == 0) {
-			System.out.println(Static.MCToANSIColors(MCChatColor.GREEN.toString())
-				+ "No errors" + Static.MCToANSIColors(MCChatColor.PLAIN_WHITE.toString()));
-		    }
 		    filesValidated++;
 		}
 	    } catch (IOException ex) {
@@ -614,6 +659,24 @@ public class SiteDeploy {
 	    }
 	    System.out.println("Files validated: " + filesValidated);
 	    System.out.println("Errors found: " + specifiedErrors);
+	}
+	if (finalizerScript != null) {
+	    System.out.println("Running post-script");
+	    if (finalizerScript.getPath().endsWith(".ms")) {
+		try {
+		    Interpreter.startWithTTY(finalizerScript, filesChanged, false);
+		} catch (DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+		    ex.printStackTrace(System.err);
+		}
+	    } else {
+		List<String> args = new ArrayList<>();
+		args.add(finalizerScript.getCanonicalPath());
+		args.addAll(filesChanged);
+		CommandExecutor exec = new CommandExecutor(args.toArray(new String[args.size()]));
+		exec.setSystemInputsAndOutputs();
+		exec.start();
+		exec.waitFor();
+	    }
 	}
 	System.out.println("Done!");
 	System.out.println("Summary of changed files (" + filesChanged.size() + ")");
@@ -785,7 +848,7 @@ public class SiteDeploy {
 		if (!bW.contains(EDIT_THIS_PAGE_PREAMBLE)) {
 		    bW += "<p id=\"edit_this_page\">"
 			    + EDIT_THIS_PAGE_PREAMBLE
-			    + "java/" + String.format(githubBaseUrl, SiteDeploy.class.getName().replace(".", "/")) + ".java"
+			    + String.format(githubBaseUrl, "java/" + SiteDeploy.class.getName().replace(".", "/")) + ".java"
 			    + EDIT_THIS_PAGE_POSTAMBLE
 			    + "</p>";
 		}
@@ -985,7 +1048,16 @@ public class SiteDeploy {
 	    @Override
 	    public void run() {
 		try {
-		    Set<Class<? extends Function>> functionClasses = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, Function.class);
+		    Set<Class<? extends Function>> functionClasses
+			    = new TreeSet<>(new Comparator<Class<? extends Function>>() {
+				@Override
+				public int compare(Class<? extends Function> o1, Class<? extends Function> o2) {
+				    Function f1 = ReflectionUtils.instantiateUnsafe(o1);
+				    Function f2 = ReflectionUtils.instantiateUnsafe(o2);
+				    return f1.getName().compareTo(f2.getName());
+				}
+			    });
+		    functionClasses.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, Function.class));
 		    // A map of where it maps the enclosing class to the list of function rows, which contains a list of
 		    // table cells.
 		    Map<Class<?>, List<List<String>>> data = new TreeMap<>(new Comparator<Class<?>>() {
@@ -994,6 +1066,7 @@ public class SiteDeploy {
 			    return o1.getCanonicalName().compareTo(o2.getCanonicalName());
 			}
 		    });
+		    List<String> hiddenFunctions = new ArrayList<>();
 		    for (Class<? extends Function> functionClass : functionClasses) {
 			if (!data.containsKey(functionClass.getEnclosingClass())) {
 			    data.put(functionClass.getEnclosingClass(), new ArrayList<List<String>>());
@@ -1001,14 +1074,29 @@ public class SiteDeploy {
 			List<List<String>> d = data.get(functionClass.getEnclosingClass());
 			List<String> c = new ArrayList<>();
 			// function name, returns, arguments, throws, description, since, restricted
-			Function f;
+			final Function f;
 			try {
 			    f = ReflectionUtils.instantiateUnsafe(functionClass);
 			} catch (ReflectionUtils.ReflectionException ex) {
 			    throw new RuntimeException("While trying to construct " + functionClass + ", got the following", ex);
 			}
-			DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
-			c.add(f.getName());
+			final DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
+			// If the function is hidden, we don't want to put it on the main page by default. Regardless,
+			// we do want to generate the function page, it will just remain unlinked.
+			generateQueue.submit(new Runnable() {
+			    @Override
+			    public void run() {
+				generateFunctionDocs(f, di);
+			    }
+			});
+			if (f.since().equals(CHVersion.V0_0_0)) {
+			    // Don't add these
+			    continue;
+			}
+			if (f.getClass().getAnnotation(hide.class) != null) {
+			    hiddenFunctions.add(f.getName());
+			}
+			c.add("[[API/functions/" + f.getName() + "|" + f.getName() + "]]");
 			c.add(di.ret);
 			c.add(di.args);
 			List<String> exc = new ArrayList<>();
@@ -1020,13 +1108,13 @@ public class SiteDeploy {
 			}
 			c.add(StringUtils.Join(exc, "<br>"));
 			StringBuilder desc = new StringBuilder();
-			desc.append(di.desc);
+			desc.append(HTMLUtils.escapeHTML(di.desc));
 			if (di.extendedDesc != null) {
-			    desc.append(" [[functions/").append(f.getName()).append("|See more...]]");
+			    desc.append(" [[functions/").append(f.getName()).append("|See more...]]<br>\n");
 			}
 			try {
 			    if (f.examples() != null && f.examples().length > 0) {
-				desc.append("<br>([[functions/").append(f.getName()).append("#Examples|Examples...]]");
+				desc.append("<br>([[API/functions/").append(f.getName()).append("#Examples|Examples...]])\n");
 			    }
 			} catch (ConfigCompileException | NoClassDefFoundError ex) {
 			    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
@@ -1039,16 +1127,61 @@ public class SiteDeploy {
 		    }
 		    // data is now constructed.
 		    StringBuilder b = new StringBuilder();
+		    b.append("<p>INTRO GOES HERE</p>\n");
+		    b.append("<ul id=\"TOC\">");
+		    for (Class<?> clazz : data.keySet()) {
+			b.append("<li><a href=\"#").append(clazz.getSimpleName())
+				.append("\">").append(clazz.getSimpleName()).append("</a></li>");
+		    }
+		    b.append("</ul>\n");
 		    for (Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
 			Class<?> clazz = e.getKey();
+			List<List<String>> clazzData = e.getValue();
+			if (clazzData.isEmpty()) {
+			    // If there are no functions in the class, don't display it. This is most likely to happen
+			    // if all the class's functions are hidden with @hide.
+			    continue;
+			}
 			try {
 			    b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
 			    String docs = (String) ReflectionUtils.invokeMethod(clazz, null, "docs");
 			    b.append("<p>").append(docs).append("</p>\n\n");
+			    b.append("{|\n|-\n");
+			    b.append("! scope=\"col\" width=\"6%\" | Function Name\n"
+				    + "! scope=\"col\" width=\"5%\" | Returns\n"
+				    + "! scope=\"col\" width=\"10%\" | Arguments\n"
+				    + "! scope=\"col\" width=\"10%\" | Throws\n"
+				    + "! scope=\"col\" width=\"61%\" | Description\n"
+				    + "! scope=\"col\" width=\"3%\" | Since\n"
+				    + "! scope=\"col\" width=\"5%\" | Restricted\n");
+			    for (List<String> row : clazzData) {
+				b.append("|-");
+				if (hiddenFunctions.contains(row.get(0))) {
+				    b.append(" class=\"hiddenFunction\"");
+				}
+				b.append("\n");
+				for (String cell : row) {
+				    b.append("| ").append(cell).append("\n");
+				}
+
+			    }
+			    b.append("|}\n");
+			    b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
 			} catch (Error ex) {
 			    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
 			}
 		    }
+
+		    b.append("<div><a href=\"#\" id=\"showHidden\">Show hidden</a></div>");
+		    b.append("<script type=\"text/javascript\">\n"
+			    + "pageRender.then(function() {\n"
+			    + "$('#showHidden').click(function(event){\n"
+			    + "$('.hiddenFunction').removeClass('hiddenFunction');\n"
+			    + "$('#showHidden').remove();\n"
+			    + "event.preventDefault();\nreturn false;\n"
+			    + "});\n"
+			    + "});\n"
+			    + "</script>");
 
 		    writePage("API", b.toString(), "API.html",
 			    Arrays.asList(new String[]{"API", "functions"}),
@@ -1060,6 +1193,142 @@ public class SiteDeploy {
 	    }
 	});
 	totalGenerateTasks.addAndGet(1);
+    }
+
+    private void generateFunctionDocs(Function f, DocGen.DocInfo docs) {
+	StringBuilder page = new StringBuilder();
+	page.append("== ").append(f.getName()).append(" ==\n");
+	page.append("<p>").append(docs.desc).append("</p>\n");
+
+	page.append("=== Vital Info ===\n");
+	page.append("{| style=\"width: 40%;\" cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n");
+	page.append("|-\n"
+		+ "! scope=\"col\" width=\"20%\" | \n"
+		+ "! scope=\"col\" width=\"80%\" | \n"
+		+ "|-\n"
+		+ "! scope=\"row\" | Name\n"
+		+ "| " + f.getName() + "\n"
+		+ "|-\n"
+		+ "! scope=\"row\" | Returns\n"
+		+ "| " + docs.ret + "\n"
+		+ "|-\n"
+		+ "! scope=\"row\" | Usages\n"
+		+ "| " + docs.args + "\n"
+		+ "|-\n"
+		+ "! scope=\"row\" | Throws\n"
+		+ "| ");
+	List<String> exceptions = new ArrayList<>();
+	for (Class<? extends CREThrowable> c : f.thrown()) {
+	    String t = c.getAnnotation(typeof.class).value();
+	    exceptions.add("[[../objects/" + t + "|" + t + "]]");
+	}
+	page.append(StringUtils.Join(exceptions, "<br>"));
+	page.append("\n"
+		+ "|-\n"
+		+ "! scope=\"row\" | Since\n"
+		+ "| " + f.since() + "\n"
+		+ "|-\n"
+		+ "! scope=\"row\" | Restricted\n");
+	page.append("| <div style=\"background-color: ");
+	page.append(f.isRestricted() ? "red" : "green");
+	page.append("; font-weight: bold; text-align: center;\">"
+		+ (f.isRestricted() ? "Yes" : "No") + "</div>\n"
+		+ "|-\n"
+		+ "! scope=\"row\" | Optimizations\n"
+		+ "| ");
+	String optimizationMessage = "None";
+	if (f instanceof Optimizable) {
+	    Set<Optimizable.OptimizationOption> options = ((Optimizable) f).optimizationOptions();
+	    List<String> list = new ArrayList<>();
+	    for (Optimizable.OptimizationOption option : options) {
+		list.add("[[../../Optimizer#" + option.name() + "|" + option.name() + "]]");
+	    }
+	    optimizationMessage = StringUtils.Join(list, " <br /> Œ");
+	}
+	page.append(optimizationMessage);
+	page.append("\n|}");
+	if (docs.extendedDesc != null) {
+	    page.append("<p>").append(docs.extendedDesc).append("</p>");
+	}
+
+	String[] usages = docs.originalArgs.split("\\|");
+	StringBuilder usageBuilder = new StringBuilder();
+	for (String usage : usages) {
+	    usageBuilder.append("<pre>\n").append(f.getName()).append("(").append(usage.trim()).append(")\n</pre>");
+	}
+	page.append("\n=== Usages ===\n");
+	page.append(usageBuilder.toString());
+
+	StringBuilder exampleBuilder = new StringBuilder();
+	try {
+	    if (f.examples() != null && f.examples().length > 0) {
+		int count = 1;
+		//If the output was automatically generated, change the color of the pre
+		for (ExampleScript es : f.examples()) {
+		    exampleBuilder.append("====Example ").append(count).append("====\n")
+			    .append(es.getDescription()).append("\n\n"
+			    + "Given the following code:\n");
+		    exampleBuilder.append(SimpleSyntaxHighlighter.Highlight(es.getScript(), true)).append("\n");
+		    String style = "";
+		    exampleBuilder.append("\n\nThe output ");
+		    if (es.isAutomatic()) {
+			style = " background-color: #BDC7E9;";
+			exampleBuilder.append("would");
+		    } else {
+			exampleBuilder.append("might");
+		    }
+		    exampleBuilder.append(" be:\n<pre class=\"pre\" style=\"border-top: 1px solid blue; border-bottom: 1px solid blue;")
+			    .append(style).append("\"");
+		    exampleBuilder.append(style).append(">%%NOWIKI|").append(es.getOutput())
+			    .append("%%").append("</pre>\n");
+		    count++;
+		}
+	    } else {
+		exampleBuilder.append("Sorry, there are no examples for this function! :(");
+	    }
+	} catch (ConfigCompileException | IOException | DataSourceException | URISyntaxException ex) {
+	    exampleBuilder.append("Error while compiling the examples for ").append(f.getName());
+	}
+
+	page.append("\n=== Examples ===\n");
+	page.append(exampleBuilder.toString());
+
+	Class<?>[] seeAlso = f.seeAlso();
+	String seeAlsoText = "";
+	if (seeAlso != null && seeAlso.length > 0) {
+	    seeAlsoText += "===See Also===\n";
+	    boolean first = true;
+	    for (Class<?> c : seeAlso) {
+		if (!first) {
+		    seeAlsoText += ", ";
+		}
+		first = false;
+		if (Function.class.isAssignableFrom(c)) {
+		    Function f2 = (Function) ReflectionUtils.newInstance(c);
+		    seeAlsoText += "<code>[[" + f2.getName() + "|" + f2.getName() + "]]</code>";
+		} else if (Template.class.isAssignableFrom(c)) {
+		    Template t = (Template) ReflectionUtils.newInstance(c);
+		    seeAlsoText += "[[" + t.getName() + "|Learning Trail: " + t.getDisplayName() + "]]";
+		} else {
+		    throw new Error("Unsupported class found in @seealso annotation: " + c.getName());
+		}
+	    }
+	}
+	page.append(seeAlsoText);
+
+	Class<?> container = f.getClass();
+	while (container.getEnclosingClass() != null) {
+	    container = container.getEnclosingClass();
+	}
+	String bW = "<p id=\"edit_this_page\">"
+		+ EDIT_THIS_PAGE_PREAMBLE
+		+ String.format(githubBaseUrl, "java/" + container.getName().replace(".", "/")) + ".java"
+		+ EDIT_THIS_PAGE_POSTAMBLE
+		+ " (Note this page is automatically generated from the documentation in the source code.)</p>";
+	page.append(bW);
+	String description = "";
+	writePage(f.getName(), page.toString(), "API/functions/" + f.getName(), Arrays.asList(new String[]{f.getName(),
+	    f.getName() + " api", f.getName() + " example", f.getName() + " description"}), description);
     }
 
     private void deployEventAPI() {
@@ -1109,8 +1378,7 @@ public class SiteDeploy {
 	generateQueue.submit(new Runnable() {
 	    @Override
 	    public void run() {
-		Map<String, Object> json = new APIBuilder().build();
-		writeFromString(JSONValue.toJSONString(json), "api.json");
+		writeFromString(apiJson, "api.json");
 		currentGenerateTask.addAndGet(1);
 	    }
 	});
