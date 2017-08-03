@@ -105,16 +105,9 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	@Override
-	public List<MCBlock> getLastTwoTargetBlocks(HashSet<Byte> transparent,
-			int maxDistance) {
-		List<Block> lst = le.getLastTwoTargetBlocks(transparent, maxDistance);
-		List<MCBlock> retn = new ArrayList<MCBlock>();
-
-		for (Block b : lst) {
-			retn.add(new BukkitMCBlock(b));
-		}
-
-		return retn;
+	public MCBlock getTargetSpace(int maxDistance) {
+		List<Block> lst = getLineOfSight(null, maxDistance, 2);
+		return new BukkitMCBlock(lst.get(0));
 	}
 
 	@Override
@@ -155,22 +148,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	@Override
-	public MCBlock getTargetBlock(HashSet<Byte> b, int i) {
-		return new BukkitMCBlock(le.getTargetBlock(b, i));
-	}
-
-	@Override
-	public MCBlock getTargetBlock(HashSet<Short> b, int i, boolean castToByte) {
-		if (castToByte) {
-			if (b == null) {
-				return getTargetBlock(null, i);
-			}
-			HashSet<Byte> bb = new HashSet<Byte>();
-			for (int id : b) {
-				bb.add((byte) id);
-			}
-			return getTargetBlock(bb, i);
-		}
+	public MCBlock getTargetBlock(HashSet<Short> b, int i) {
 		return new BukkitMCBlock(getFirstTargetBlock(b, i));
 	}
 
