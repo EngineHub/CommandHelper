@@ -69,6 +69,7 @@ import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.SRun;
+import java.awt.HeadlessException;
 
 /**
  *
@@ -156,13 +157,17 @@ public class RandomTests {
 					fail(upper.getName() + " throws an exception!");
 				} catch (NoSuchMethodException ex) {
 					fail(upper.getName() + " does not include a class level documentation function.");
+				} catch (HeadlessException ex) {
+				    // Hmm. Whatever's running us doesn't have a head, and we just tested a function
+				    // that requires a head. Whatever, just skip it and move on. It'll have to be tested
+				    // manually.
 				}
 			} catch (Throwable t) {
 				uhohs.put(f.getClass().getName(), t);
 				t.printStackTrace();
 			}
 		}
-		
+
 		if (!StaticTest.brokenJunk.isEmpty()) {
 			System.err.println("There " + StringUtils.PluralTemplateHelper(StaticTest.brokenJunk.size(), "is %d test that has", "are %d tests that have") + " a failure in extreme circumstances.");
 			for(String s : StaticTest.brokenJunk){
