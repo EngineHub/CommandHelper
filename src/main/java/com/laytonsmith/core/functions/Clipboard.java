@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -10,6 +11,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.awt.Toolkit;
@@ -31,11 +33,12 @@ public class Clipboard {
     private final static java.awt.datatransfer.Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
     @api
+    @noboilerplate
     public static class get_clipboard extends AbstractFunction {
 
 	@Override
 	public Class<? extends CREThrowable>[] thrown() {
-	    return new Class[]{CREFormatException.class};
+	    return new Class[]{CREFormatException.class, CREInsufficientPermissionException.class};
 	}
 
 	@Override
@@ -91,11 +94,12 @@ public class Clipboard {
     }
 
     @api
+    @noboilerplate
     public static class set_clipboard extends AbstractFunction {
 
 	@Override
 	public Class<? extends CREThrowable>[] thrown() {
-	    return null;
+	    return new Class[]{CREInsufficientPermissionException.class};
 	}
 
 	@Override
