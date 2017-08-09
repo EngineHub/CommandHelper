@@ -381,11 +381,11 @@ public class SiteDeploy {
     private synchronized void writeStatus(String additionalInfo) {
 	int generatePercent = 0;
 	if (totalGenerateTasks.get() != 0) {
-	    generatePercent = (int) (((double) currentGenerateTask.get()) / ((double) totalGenerateTasks.get()) * 100.0);
+	    generatePercent = (int) (currentGenerateTask.get() / ((double) totalGenerateTasks.get()) * 100.0);
 	}
 	int uploadPercent = 0;
 	if (totalUploadTasks.get() != 0) {
-	    uploadPercent = (int) (((double) currentUploadTask.get()) / ((double) totalUploadTasks.get()) * 100.0);
+	    uploadPercent = (int) (currentUploadTask.get() / ((double) totalUploadTasks.get()) * 100.0);
 	}
 	String message = "Generate progress: " + currentGenerateTask.get() + "/" + totalGenerateTasks.get()
 		+ " (" + generatePercent + "%)"
@@ -545,6 +545,7 @@ public class SiteDeploy {
     String apiJson;
     String apiJsonVersion;
 
+    @SuppressWarnings("StringEquality")
     private void deploy() throws InterruptedException, IOException {
 	apiJson = JSONValue.toJSONString(new APIBuilder().build());
 	apiJsonVersion = getLocalMD5(StreamUtils.GetInputStream(apiJson));
@@ -612,12 +613,14 @@ public class SiteDeploy {
 		    settings.setTimeout(10000);
 		    settings.setMethod(HTTPMethod.POST);
 		    HTTPResponse response = WebUtility.GetPage(new URL(validatorUrl + "?out=gnu"), settings);
-		    System.out.println(Static.MCToANSIColors("Response for "
-			    + MCChatColor.AQUA + e.getKey() + MCChatColor.PLAIN_WHITE + ":"));
+
 		    if (response.getResponseCode() != 200) {
+			System.out.println(Static.MCToANSIColors("Response for "
+				+ MCChatColor.AQUA + e.getKey() + MCChatColor.PLAIN_WHITE + ":"));
 			System.out.println(response.getContent());
 			throw new IOException("Response was non-200, refusing to continue with validation");
 		    }
+
 		    String[] errors = response.getContent().split("\n");
 		    int errorsDisplayed = 0;
 		    for (String error : errors) {
@@ -626,6 +629,11 @@ public class SiteDeploy {
 				+ " elements to add identifying headings to all sections.";
 			if (supressWarning.equals(gnuError.message())) {
 			    continue;
+			}
+			// == on String, yes this is what I want
+			if(error == errors[0]) {
+			    System.out.println(Static.MCToANSIColors("Response for "
+				    + MCChatColor.AQUA + e.getKey() + MCChatColor.PLAIN_WHITE + ":"));
 			}
 			StringBuilder output = new StringBuilder();
 			switch (gnuError.messageType()) {
@@ -1145,7 +1153,7 @@ public class SiteDeploy {
 			try {
 			    b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
 			    String docs = (String) ReflectionUtils.invokeMethod(clazz, null, "docs");
-			    b.append("<p>").append(docs).append("</p>\n\n");
+			    b.append("<div>").append(docs).append("</div>\n\n");
 			    b.append("{|\n|-\n");
 			    b.append("! scope=\"col\" width=\"6%\" | Function Name\n"
 				    + "! scope=\"col\" width=\"5%\" | Returns\n"
@@ -1198,7 +1206,7 @@ public class SiteDeploy {
     private void generateFunctionDocs(Function f, DocGen.DocInfo docs) {
 	StringBuilder page = new StringBuilder();
 	page.append("== ").append(f.getName()).append(" ==\n");
-	page.append("<p>").append(docs.desc).append("</p>\n");
+	page.append("<div>").append(docs.desc).append("</div>\n");
 
 	page.append("=== Vital Info ===\n");
 	page.append("{| style=\"width: 40%;\" cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n");
@@ -1207,13 +1215,13 @@ public class SiteDeploy {
 		+ "! scope=\"col\" width=\"80%\" | \n"
 		+ "|-\n"
 		+ "! scope=\"row\" | Name\n"
-		+ "| " + f.getName() + "\n"
+		+ "| ").append(f.getName()).append("\n"
 		+ "|-\n"
 		+ "! scope=\"row\" | Returns\n"
-		+ "| " + docs.ret + "\n"
+		+ "| ").append(docs.ret).append("\n"
 		+ "|-\n"
 		+ "! scope=\"row\" | Usages\n"
-		+ "| " + docs.args + "\n"
+		+ "| ").append(docs.args).append("\n"
 		+ "|-\n"
 		+ "! scope=\"row\" | Throws\n"
 		+ "| ");
@@ -1226,13 +1234,13 @@ public class SiteDeploy {
 	page.append("\n"
 		+ "|-\n"
 		+ "! scope=\"row\" | Since\n"
-		+ "| " + f.since() + "\n"
+		+ "| ").append(f.since()).append("\n"
 		+ "|-\n"
 		+ "! scope=\"row\" | Restricted\n");
 	page.append("| <div style=\"background-color: ");
 	page.append(f.isRestricted() ? "red" : "green");
 	page.append("; font-weight: bold; text-align: center;\">"
-		+ (f.isRestricted() ? "Yes" : "No") + "</div>\n"
+		).append(f.isRestricted() ? "Yes" : "No").append("</div>\n"
 		+ "|-\n"
 		+ "! scope=\"row\" | Optimizations\n"
 		+ "| ");
@@ -1248,7 +1256,7 @@ public class SiteDeploy {
 	page.append(optimizationMessage);
 	page.append("\n|}");
 	if (docs.extendedDesc != null) {
-	    page.append("<p>").append(docs.extendedDesc).append("</p>");
+	    page.append("<div>").append(docs.extendedDesc).append("</div>");
 	}
 
 	String[] usages = docs.originalArgs.split("\\|");
@@ -1266,7 +1274,7 @@ public class SiteDeploy {
 		//If the output was automatically generated, change the color of the pre
 		for (ExampleScript es : f.examples()) {
 		    exampleBuilder.append("====Example ").append(count).append("====\n")
-			    .append(es.getDescription()).append("\n\n"
+			    .append(HTMLUtils.escapeHTML(es.getDescription())).append("\n\n"
 			    + "Given the following code:\n");
 		    exampleBuilder.append(SimpleSyntaxHighlighter.Highlight(es.getScript(), true)).append("\n");
 		    String style = "";
@@ -1279,7 +1287,7 @@ public class SiteDeploy {
 		    }
 		    exampleBuilder.append(" be:\n<pre class=\"pre\" style=\"border-top: 1px solid blue; border-bottom: 1px solid blue;")
 			    .append(style).append("\"");
-		    exampleBuilder.append(style).append(">%%NOWIKI|").append(es.getOutput())
+		    exampleBuilder.append(">%%NOWIKI|").append(es.getOutput())
 			    .append("%%").append("</pre>\n");
 		    count++;
 		}

@@ -338,7 +338,7 @@ public class Minecraft {
 
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class spawn_mob extends AbstractFunction {
-		
+
 		// The max amount of mobs that can be spawned at once by this function.
 		private static final int SPAWN_LIMIT = 10000;
 
@@ -423,12 +423,12 @@ public class Minecraft {
 			} else {
 				throw new CREPlayerOfflineException("Invalid sender!", t);
 			}
-			
+
 			if (l == null) { // Happends when executed by a fake player.
 				throw new CRENotFoundException(
 					"Could not find the location of the player (are you running in cmdline mode?)", t);
 			}
-			
+
 			try{
 				return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll(" ", "")), secondary, qty, l, t);
 			} catch(IllegalArgumentException e){
@@ -1081,7 +1081,7 @@ public class Minecraft {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = StaticLayer.GetServer();
-			
+
 			CArray co = new CArray(t);
 			List<MCOfflinePlayer> so = server.getWhitelistedPlayers();
 			for (MCOfflinePlayer o : so) {
@@ -1320,7 +1320,7 @@ public class Minecraft {
 					+ "| trail || A boolean, determining if the firework will leave a trail || true\n"
 					+ "|-\n"
 					+ "| colors || An array of colors, or a pipe seperated string of color names (for the named colors only)"
-					+ " for instance: array('WHITE') or 'WHITE<nowiki>|</nowiki>BLUE'. If you want custom colors, you must use an array, though"
+					+ " for instance: array('WHITE') or 'WHITE|BLUE'. If you want custom colors, you must use an array, though"
 					+ " you can still use color names as an item in the array, for instance: array('ORANGE', array(30, 45, 150))."
 					+ " These colors are used as the primary colors. || 'WHITE'\n"
 					+ "|-\n"

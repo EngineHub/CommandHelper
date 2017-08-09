@@ -54,3 +54,9 @@ The methodscript.com website is tested via BrowserStack
 <a href="https://www.browserstack.com">
     <img style="width: 25%;" src="<%cacheBuster|images/browserstack.svg%>" alt="BrowserStack Logo" />
 </a>
+
+This site uses and is validated against HTML5 and CSS3
+
+<a href="http://www.w3.org/html/logo/">
+<img src="https://www.w3.org/html/logo/badge/html5-badge-h-css3-semantics.png" width="165" height="64" alt="HTML5 Powered with CSS3 / Styling, and Semantics" title="HTML5 Powered with CSS3 / Styling, and Semantics">
+</a>

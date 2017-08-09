@@ -197,7 +197,7 @@ public class EntityManagement {
 			}
 			return ret;
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -261,7 +261,7 @@ public class EntityManagement {
 		public String docs() {
 			return "boolean {entityID} Returns true if entity exists, otherwise false.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -294,7 +294,7 @@ public class EntityManagement {
 		public String docs() {
 			return "boolean {entityID} Returns true if entity is living, otherwise false.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -330,7 +330,7 @@ public class EntityManagement {
 							+ " world: world, x: -3451.96, y: 65.0, yaw: -170.9, z: 718.521}")
 			};
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -376,7 +376,7 @@ public class EntityManagement {
 			return new ExampleScript[]{
 				new ExampleScript("Teleporting an entity to you", "set_entity_loc(386, ploc())",
 						"The entity will teleport to the block you are standing on."),
-				new ExampleScript("Teleporting an entity to another", "set_entity_loc(201, entity_location(10653))",
+				new ExampleScript("Teleporting an entity to another", "set_entity_loc(201, entity_loc(10653))",
 						"The entity will teleport to the other and face the same direction, if they both exist."),
 				new ExampleScript("Setting location with a normal array",
 						"set_entity_loc(465, array(214, 64, 1812, 'world', -170, 10))", "This set location and direction."),
@@ -385,7 +385,7 @@ public class EntityManagement {
 						"This also sets location and direction")
 			};
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -424,7 +424,7 @@ public class EntityManagement {
 							"{magnitude: 0.0, x: 0.0, y: 0.0, z: 0.0}")
 			};
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -463,7 +463,7 @@ public class EntityManagement {
 							"The entity just hopped, unless it was an item frame or painting.")
 			};
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -498,7 +498,7 @@ public class EntityManagement {
 				+ "Note: you can't remove players. As a safety measure for working with NPC plugins, it will "
 				+ "not work on anything human, even if it is not a player.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -535,7 +535,7 @@ public class EntityManagement {
 			return "mixed {entityID} Returns the EntityType of the entity with the specified ID."
 					+ " Returns null if the entity does not exist.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -565,7 +565,7 @@ public class EntityManagement {
 		public String docs() {
 			return "boolean {entityID} Returns if an entity is set to be breedable.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -599,7 +599,7 @@ public class EntityManagement {
 		public String docs() {
 			return "void {entityID, boolean} Set an entity to be breedable.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -628,7 +628,7 @@ public class EntityManagement {
 		public String docs() {
 			return "int {entityID} Returns the entity age as an integer, represented by server ticks.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -670,7 +670,7 @@ public class EntityManagement {
 		public String docs() {
 			return "void {entityID, int} Sets the age of the entity to the specified int, represented by server ticks.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -709,7 +709,7 @@ public class EntityManagement {
 			return "int {entityID} Returns the mob's age as an integer. Zero represents the point of adulthood. Throws an"
 					+ " UnageableMobException if the mob is not a type that ages";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -761,7 +761,7 @@ public class EntityManagement {
 					+ " if lockAge is true, but by default it will not. Throws a UnageableMobException if the mob does"
 					+ " not age naturally.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -793,7 +793,7 @@ public class EntityManagement {
 			return new ExampleScript[]{new ExampleScript("Basic use", "msg(get_mob_effects(259))",
 					"{{ambient: false, id: 1, seconds: 30, strength: 1}}")};
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -867,7 +867,7 @@ public class EntityManagement {
 				return CBoolean.TRUE;
 			}
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1038,7 +1038,7 @@ public class EntityManagement {
 					+ " of projectile. Returns the EntityID of the entity. Valid projectile types: "
 					+ StringUtils.Join(MCProjectileType.values(), ", ", ", or ", " or ");
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1147,7 +1147,7 @@ public class EntityManagement {
 			return new Class[]{CRECastException.class, CREBadEntityException.class,
 					CREFormatException.class};
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1178,7 +1178,7 @@ public class EntityManagement {
 			return "entityID {entityID} Gets the mob's target if it has one, and returns the target's entityID."
 					+ " If there is no target, null is returned instead.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1214,7 +1214,7 @@ public class EntityManagement {
 			return "void {entityID, entityID} The first ID is the entity who is targetting, the second is the target."
 					+ " It can also be set to null to clear the current target.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1259,7 +1259,7 @@ public class EntityManagement {
 							+ " type: 276}}")
 			};
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1316,7 +1316,7 @@ public class EntityManagement {
 				new ExampleScript("Basic usage", "set_mob_equipment(spawn_mob('SKELETON')[0], array(WEAPON: array(type: 261)))", "Gives a bow to a skeleton")
 			};
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1341,7 +1341,7 @@ public class EntityManagement {
 		public String docs() {
 			return "double {entityID} Returns the maximum health of this living entity.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1374,7 +1374,7 @@ public class EntityManagement {
 			return new ExampleScript[]{new ExampleScript("Basic use",
 					"set_max_health(256, 10)", "The entity will now only have 5 hearts max.")};
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1401,7 +1401,7 @@ public class EntityManagement {
 			return "int {entityID} Returns the number of seconds until this entity"
 					+ " stops being on fire, 0 if it already isn't.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1437,7 +1437,7 @@ public class EntityManagement {
 					+ " given number of seconds. Throws a RangeException"
 					+ " if seconds is less than 0 or greater than 107374182.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1476,7 +1476,7 @@ public class EntityManagement {
 					+ " dead, they can only log out. Possible effects are: "
 					+ StringUtils.Join(MCEntityEffect.values(), ", ", ", or ", " or ");
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1506,7 +1506,7 @@ public class EntityManagement {
 		public String docs() {
 			return "string {entityID} Returns the name of the given mob.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1537,7 +1537,7 @@ public class EntityManagement {
 			return "void {entityID, name} Sets the name of the given mob. This"
 					+ " automatically truncates if it is more than 64 characters.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1644,7 +1644,7 @@ public class EntityManagement {
 					+ ". Falling_blocks will be sand by default, and dropped_items will be stone,"
 					+ " as these entities already have their own functions for spawning.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1698,7 +1698,7 @@ public class EntityManagement {
 					+ " rider will ride horse. The function returns the success of whatever operation is done."
 					+ " If horse and rider are both null, or otherwise the same, a FormatException is thrown.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1727,7 +1727,7 @@ public class EntityManagement {
 		public String docs() {
 			return "mixed {entityID} Returns the ID of the given entity's rider, or null if it doesn't have one.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1756,7 +1756,7 @@ public class EntityManagement {
 		public String docs() {
 			return "mixed {entityID} Returns the ID of the given entity's vehicle, or null if it doesn't have one.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1796,7 +1796,7 @@ public class EntityManagement {
 			return "double {entityID} Returns a max speed for given entity. Make sure that the entity is a boat"
 					+ " or minecart.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1840,7 +1840,7 @@ public class EntityManagement {
 			return "void {entityID} Sets a max speed for given entity. Make sure that the entity is a boat"
 					+ " or minecart.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1873,7 +1873,7 @@ public class EntityManagement {
 			return "array {entityID} Returns an associative array of the drop rate for each equipment slot."
 					+ " If the rate is 0, the equipment will not drop. If it is 1, it is guaranteed to drop.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1921,7 +1921,7 @@ public class EntityManagement {
 					+ " but does not work on players. Passing null instead of an array will automatically"
 					+ " set all rates to 0, which will cause nothing to drop. A rate of 1 will guarantee a drop.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1951,7 +1951,7 @@ public class EntityManagement {
 					+ " If this is true it will be as visible as player names, otherwise it will only be"
 					+ " visible when near the mob.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1982,7 +1982,7 @@ public class EntityManagement {
 					+ " True means it will be visible from a distance, like a playername."
 					+ " False means it will only be visible when near the mob.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2006,7 +2006,7 @@ public class EntityManagement {
 		public String docs() {
 			return "boolean {entityID} Returns whether the specified living entity can pick up items.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2031,7 +2031,7 @@ public class EntityManagement {
 		public String docs() {
 			return "void {entityID, boolean} Sets a living entity's ability to pick up items.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2055,7 +2055,7 @@ public class EntityManagement {
 		public String docs() {
 			return "boolean {entityID} Returns whether the specified living entity will despawn. True means it will not.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2080,7 +2080,7 @@ public class EntityManagement {
 		public String docs() {
 			return "void {entityID, boolean} Sets whether a living entity will despawn. True means it will not.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2237,7 +2237,7 @@ public class EntityManagement {
 			return "int {entityID} Returns the entityID of the entity that is holding the given living entity's leash,"
 					+ " or null if it isn't being held.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2272,7 +2272,7 @@ public class EntityManagement {
 					+ " but the only non-living entity that will persist as a holder across restarts is the leash hitch."
 					+ " Bats, enderdragons, players, and withers can not be held by leashes due to minecraft limitations.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2296,7 +2296,7 @@ public class EntityManagement {
 		public String docs() {
 			return "boolean {entityID} returns whether the entity is touching the ground";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2320,7 +2320,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CInt(Static.getLivingEntity(args[0], t).getRemainingAir(), t);
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2345,7 +2345,7 @@ public class EntityManagement {
 			Static.getLivingEntity(args[0], t).setRemainingAir(Static.getInt32(args[1], t));
 			return CVoid.VOID;
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2369,7 +2369,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CInt(Static.getLivingEntity(args[0], t).getMaximumAir(), t);
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2394,7 +2394,7 @@ public class EntityManagement {
 			Static.getLivingEntity(args[0], t).setMaximumAir(Static.getInt32(args[1], t));
 			return CVoid.VOID;
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2452,7 +2452,7 @@ public class EntityManagement {
 			}
 			return lineOfSight;
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2488,7 +2488,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return CBoolean.get(Static.getLivingEntity(args[0], t).hasLineOfSight(Static.getEntity(args[1], t)));
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2513,7 +2513,7 @@ public class EntityManagement {
 		public String docs() {
 			return "string {entityUUID} returns the entity id for unique persistent UUID";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2539,7 +2539,7 @@ public class EntityManagement {
 		public String docs() {
 			return "string {entityID} returns the persistent unique id of the entity";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2883,7 +2883,7 @@ public class EntityManagement {
 			}
 			return specArray;
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -3880,7 +3880,7 @@ public class EntityManagement {
 
 			return CVoid.VOID;
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -3920,7 +3920,7 @@ public class EntityManagement {
 				throw new CREBadEntityException("The given entity is not a projectile.", t);
 			}
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -3964,7 +3964,7 @@ public class EntityManagement {
 
 			return CVoid.VOID;
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -3994,7 +3994,7 @@ public class EntityManagement {
 				throw new CREBadEntityException("The given entity is not a projectile.", t);
 			}
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -4026,7 +4026,7 @@ public class EntityManagement {
 
 			return CVoid.VOID;
  		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -4079,7 +4079,7 @@ public class EntityManagement {
 			return "void {entityId, amount, [sourceEntityId]} Damage an entity. If given,"
 					+ " the source entity will be attributed as the damager.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -4103,7 +4103,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CDouble(Static.getEntity(args[0], t).getFallDistance(), t);
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -4128,13 +4128,13 @@ public class EntityManagement {
 			Static.getEntity(args[0], t).setFallDistance(ArgumentValidation.getDouble32(args[1], t));
 			return CVoid.VOID;
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class set_entity_glowing extends EntitySetterFunction {
 		public String getName() {
@@ -4174,7 +4174,7 @@ public class EntityManagement {
 			return CHVersion.V3_3_2;
 		}
 	}
-	
+
 	@api
 	public static class set_entity_gliding extends EntitySetterFunction {
 		public String getName() {
@@ -4217,7 +4217,7 @@ public class EntityManagement {
 			return CHVersion.V3_3_2;
 		}
 	}
-	
+
 	@api
 	public static class get_entity_ai extends EntityGetterFunction {
 		public String getName() {
@@ -4236,7 +4236,7 @@ public class EntityManagement {
 			return CHVersion.V3_3_2;
 		}
 	}
-	
+
 	@api
 	public static class set_entity_ai extends EntitySetterFunction {
 		public String getName() {

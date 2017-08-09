@@ -19,7 +19,7 @@ information about setting up profiles in general. The type of the profile is "em
 All transport settings may be specified in the profile. This is
 useful so that sensitive information isn't hardcoded. Here is an example profile:
 
-<pre>
+<%PRE|
 <profile id="myEmailProfile">
 	<type>email</type>
 	<host>example.com</host>
@@ -30,7 +30,7 @@ useful so that sensitive information isn't hardcoded. Here is an example profile
 	<use_start_tls>true</use_start_tls>
 	<timeout>10000</timeout>
 </profile>
-</pre>
+%>
 
 Transport settings:
 
@@ -82,7 +82,7 @@ recipient using CC or BCC, use this form: array(array(type: 'BCC', address: 'ema
 |-
 | subject || string || '&lt;No Subject&gt;' || The subject of the email
 |-
-| body || string || <nowiki>''</nowiki> || This is shorthand for adding a plain text body to the email.
+| body || string || <%NOWIKI|''%> || This is shorthand for adding a plain text body to the email.
 |-
 | attachments || array || array() || Allows for providing various attachments to an email, such as HTML or a file.
 It is an array of zero or more arrays, with the following keys:
@@ -98,11 +98,11 @@ In general, the least specific mime type is application/octet-stream, so you sho
 use this if you aren't sure of the mime type. For a list of all official IANA defined
 mime types, see [https://www.iana.org/assignments/media-types/media-types.xhtml here].
 |-
-| filename || string || <nowiki>''</nowiki> || The filename of this attachment.
+| filename || string || <%NOWIKI|''%> || The filename of this attachment.
 |-
-| description || string || <nowiki>''</nowiki> || The description of this attachment.
+| description || string || <%NOWIKI|''%> || The description of this attachment.
 |-
-| disposition || string || <nowiki>''</nowiki> || The content disposition. 
+| disposition || string || <%NOWIKI|''%> || The content disposition. 
 Generally, you will only use either "inline" or "attachment". If the disposition is set to "inline", then 
 it will be up to the email client to display this attachment to the user automatically, selecting from the best type
 that it can render, for instance, or inline images. If it is set to "attachment", it will be offered as a download

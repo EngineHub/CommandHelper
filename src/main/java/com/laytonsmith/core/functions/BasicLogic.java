@@ -1426,7 +1426,7 @@ public class BasicLogic {
 	@Override
 	public String docs() {
 	    return "boolean {var1, var2} Returns the results of a less than operation. Operator syntax"
-		    + " is also supported: @a < @b";
+		    + " is also supported: @a &lt; @b";
 	}
 
 	@Override
@@ -1493,7 +1493,7 @@ public class BasicLogic {
 	@Override
 	public String docs() {
 	    return "boolean {var1, var2} Returns the result of a greater than operation. Operator syntax is also supported:"
-		    + " @a > @b";
+		    + " @a &gt; @b";
 	}
 
 	@Override
@@ -1560,7 +1560,7 @@ public class BasicLogic {
 	@Override
 	public String docs() {
 	    return "boolean {var1, var2} Returns the result of a less than or equal to operation. Operator"
-		    + " syntax is also supported: @a <= @b";
+		    + " syntax is also supported: @a &lt;= @b";
 	}
 
 	@Override
@@ -1628,7 +1628,7 @@ public class BasicLogic {
 	@Override
 	public String docs() {
 	    return "boolean {var1, var2} Returns the result of a greater than or equal to operation. Operator"
-		    + " sytnax is also supported: @a >= @b";
+		    + " sytnax is also supported: @a &gt;= @b";
 	}
 
 	@Override
@@ -1965,7 +1965,7 @@ public class BasicLogic {
 	public String docs() {
 		return "boolean {var1, [var2...]} Returns the boolean value of a logical OR across all arguments. Uses lazy"
 				+ " determination, so once an argument resolves to true, the function returns. Operator syntax is also"
-				+ " supported: @a <nowiki>||</nowiki> @b";
+				+ " supported: @a || @b";
 	}
 
 	@Override

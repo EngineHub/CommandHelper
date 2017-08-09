@@ -535,7 +535,7 @@ public class Web {
 		+ "\t)),\n"
 		+ "\tsuccess: closure(@response){\n"
 		+ "\t\t// Handle the server's response\n"
-		+ "\t}}"
+		+ "\t}"
 		+ "));", "<A POST request with json data would be sent to the server>")
 	    };
 	}
@@ -1076,7 +1076,7 @@ public class Web {
 		+ "\t\t\tdisposition: 'inline', // Technically we could leave this off, because it defaults to inline\n"
 		+ "\t\t\tdescription: 'An image',\n"
 		+ "\t)\n"
-		+ "));", "<Would send an html email, and the attached image would show up>"),};
+		+ ")));", "<Would send an html email, and the attached image would show up>"),};
 	}
 
     }

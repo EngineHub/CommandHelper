@@ -2181,7 +2181,7 @@ public class Math {
 		@Override
 		public String docs() {
 			return "double {number, [precision]} Unlike floor and ceil, rounds the number to the nearest double that is equal to an integer. Precision defaults to 0, but if set to 1 or more, rounds decimal places."
-					+ " For instance, round(2.29, 1) would return 2.3. If precision is < 0, a RangeException is thrown.";
+					+ " For instance, round(2.29, 1) would return 2.3. If precision is &lt; 0, a RangeException is thrown.";
 		}
 
 		@Override
@@ -2551,8 +2551,8 @@ public class Math {
 				new ExampleScript("log base 10", "logarithm(100)"),
 				new ExampleScript("log base 10", "logarithm(1000)"),
 				new ExampleScript("log base n", "logarithm(123, 3)"),
-				new ExampleScript("Error condition", "logarithm(0)"),
-				new ExampleScript("Error condition", "logarithm(-1)"),
+				new ExampleScript("Error condition", "logarithm(0)", true),
+				new ExampleScript("Error condition", "logarithm(-1)", true),
 			};
 		}
 

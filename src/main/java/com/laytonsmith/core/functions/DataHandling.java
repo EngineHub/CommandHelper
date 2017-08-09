@@ -1324,7 +1324,7 @@ public class DataHandling {
 		+ "\tfor(assign(@j, 0), @j < 1000, @j++,\n"
 		+ "\t\tbreak(3) #There are only 2 loops to break out of\n"
 		+ "\t)"
-		+ ")"),};
+		+ ")", true),};
 	}
 
 	@Override

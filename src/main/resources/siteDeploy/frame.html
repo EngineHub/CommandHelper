@@ -52,6 +52,7 @@
                 $('pre code').each(function(i, block) {
                     hljs.highlightBlock(block);
                 });
+                $('#loadingSpinner').hide();
             });
         </script>
     </head>
@@ -74,9 +75,13 @@
         <!-- Main -->
         <section id="main" class="wrapper">
             <div class="container">
-                <div id="body" class="hidden" style="display: none;">
+                <noscript>
+                    <div class="center">Sorry! This site requires JavaScript to use. Please enable JavaScript to continue.</div>
+                </noscript>
+                <div id="body" style="display: none;">
                     %%body%%
                 </div>
+                <img src="%%cacheBuster|images/loading.svg%%" alt="" id="loadingSpinner" style="width: 20em; margin: 0 auto; display: block;"/>
             </div>
         </section>
         

@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
@@ -62,6 +63,15 @@ public class ExampleScript {
 	this(description, script, null, false);
     }
 
+    /**
+     * Creates a new example script, where the output will come from the script itself. If the code
+     * is meant to demonstrate that it causes a compile error, then {@code intentionalCompileError}
+     * should be set to true. Otherwise, it will display blank, and print an error to console.
+     * @param description
+     * @param script
+     * @param intentionalCompileError
+     * @throws ConfigCompileException
+     */
     public ExampleScript(String description, String script, boolean intentionalCompileError) throws ConfigCompileException {
 	this(description, script, null, intentionalCompileError);
     }
@@ -96,12 +106,19 @@ public class ExampleScript {
 	}
 	this.description = description;
 	this.originalScript = script;
+	String errorOutput = "Oops, something went wrong with this example.";
+	String consoleErrorOutput = Static.MCToANSIColors(MCChatColor.RED.toString() + "Unintentional compile error in "
+		+ c.getEnclosingClass().getSimpleName() + ":" + functionName + "(): \"" + description + "\"\n" + MCChatColor.PLAIN_WHITE);
 	try {
 	    this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File((OSUtils.GetOS() == OSUtils.OS.WINDOWS ? "C:\\" : "/") + "Examples.ms"), true));
 	    this.output = output;
 	} catch (ConfigCompileException e) {
 	    if (intentionalCompileError) {
 		this.output = "Causes compile error: " + e.getMessage();
+	    } else {
+		this.output = errorOutput;
+		System.out.println(consoleErrorOutput);
+		System.out.println(e.getMessage());
 	    }
 	} catch (ConfigCompileGroupException ex) {
 	    if (intentionalCompileError) {
@@ -111,6 +128,12 @@ public class ExampleScript {
 		    b.append(e.getMessage()).append("\n");
 		}
 		this.output = b.toString();
+	    } else {
+		this.output = errorOutput;
+		System.out.println(consoleErrorOutput);
+		for(ConfigCompileException e : ex.getList()) {
+		    System.out.println(e.getMessage());
+		}
 	    }
 	}
 	playerOutput = new StringBuilder();
