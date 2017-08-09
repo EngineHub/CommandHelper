@@ -597,7 +597,7 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(p, t);
 			MCBlock b;
 			try {
-				b = p.getTargetBlock(trans, 10000, false);
+				b = p.getTargetBlock(trans, 512);
 			} catch (IllegalStateException ise) {
 				throw new CREPluginInternalException("The server's method of finding the target block has failed."
 						+ " There is nothing that can be done about this except standing somewhere else.", t);
@@ -633,7 +633,7 @@ public class PlayerManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class};
+			return new Class[]{CREPlayerOfflineException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -653,7 +653,11 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
-			return ObjectGenerator.GetGenerator().location(p.getLastTwoTargetBlocks(null, 10000).get(0).getLocation(), false);
+			MCBlock b = p.getTargetSpace(512);
+			if(b == null) {
+				throw new CRERangeException("No block in sight, or block too far", t);
+			}
+			return ObjectGenerator.GetGenerator().location(b.getLocation(), false);
 		}
 
 		@Override

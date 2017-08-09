@@ -39,9 +39,8 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
     public double getLastDamage();
     public MCEntity getLeashHolder();
 	public MCLivingEntity getTarget(Target t);
-	public MCBlock getTargetBlock(HashSet<Short> transparent, int maxDistance, boolean castToByte);
-	public MCBlock getTargetBlock(HashSet<Byte> transparent, int maxDistance);
-    public List<MCBlock> getLastTwoTargetBlocks(HashSet<Byte> transparent, int maxDistance);
+	public MCBlock getTargetBlock(HashSet<Short> transparent, int maxDistance);
+    public MCBlock getTargetSpace(int maxDistance);
 	public List<MCBlock> getLineOfSight(HashSet<Short> transparent, int maxDistance);
 	public boolean hasLineOfSight(MCEntity other);
     public double getMaxHealth();

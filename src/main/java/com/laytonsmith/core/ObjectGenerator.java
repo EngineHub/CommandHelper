@@ -352,7 +352,13 @@ public class ObjectGenerator {
                     }
                     MCEnchantment etype = StaticLayer.GetEnchantmentByName(setype);
 					if(etype == null){
-						throw new CREFormatException("Invalid enchantment array etype: \"" + setype + "\".", t);
+						if(setype.equals("SWEEPING")) {
+							// data from 1.11.2, changed in 1.12
+							etype = StaticLayer.GetEnchantmentByName("SWEEPING_EDGE");
+						}
+						if(etype == null){
+							throw new CREFormatException("Invalid enchantment array etype: \"" + setype + "\".", t);
+						}
 					}
                     enchants.put(etype, elevel);
                 } catch (ClassCastException e) {
@@ -1019,10 +1025,17 @@ public class ObjectGenerator {
 		for (String key : enchantArray.stringKeySet()) {
 			try {
 				CArray ea = (CArray) enchantArray.get(key, t);
-				MCEnchantment etype = StaticLayer.GetConvertor().GetEnchantmentByName(ea.get("etype", t).val());
+				String setype = ea.get("etype", t).val();
+				MCEnchantment etype = StaticLayer.GetConvertor().GetEnchantmentByName(setype);
 				int elevel = Static.getInt32(ea.get("elevel", t), t);
 				if (etype == null) {
-					throw new CREEnchantmentException("Unknown enchantment type at " + key, t);
+					if(setype.equals("SWEEPING")) {
+						// data from 1.11.2, changed in 1.12
+						etype = StaticLayer.GetEnchantmentByName("SWEEPING_EDGE");
+					}
+					if(etype == null) {
+						throw new CREEnchantmentException("Unknown enchantment type at " + key, t);
+					}
 				}
 				ret.put(etype, elevel);
 			} catch (ClassCastException cce) {

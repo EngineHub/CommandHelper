@@ -137,13 +137,13 @@ public class PlayerManangementTest {
         MCBlock b = mock(MCBlock.class);
         CommandHelperPlugin.myServer = fakeServer;
         when(fakeServer.getPlayer(fakePlayer.getName())).thenReturn(fakePlayer);
-        when(fakePlayer.getTargetBlock((HashSet) eq(null), anyInt(), eq(false))).thenReturn(b);
+        when(fakePlayer.getTargetBlock((HashSet) eq(null), anyInt())).thenReturn(b);
         MCWorld w = mock(MCWorld.class);
 		MCLocation loc = StaticTest.GetFakeLocation(w, 0, 0, 0);
 		when(b.getLocation()).thenReturn(loc);
         when(b.getWorld()).thenReturn(w);
         Run("pcursor()", fakePlayer);
-        verify(fakePlayer, times(1)).getTargetBlock((HashSet) eq(null), anyInt(), eq(false));
+        verify(fakePlayer, times(1)).getTargetBlock((HashSet) eq(null), anyInt());
     }
 
     @Test(timeout = 10000)
