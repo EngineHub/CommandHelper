@@ -14,6 +14,7 @@ import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -26,11 +27,21 @@ import java.io.IOException;
  * @author cailin
  */
 public class Clipboard {
+
     public static String docs() {
 	return "Provides functions for managing the system clipboard";
     }
 
-    private final static java.awt.datatransfer.Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+    @SuppressWarnings("FieldMayBeFinal") // No it can't, shut up ide
+    private static java.awt.datatransfer.Clipboard clipboard;
+
+    static {
+	try {
+	    clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+	} catch (HeadlessException ex) {
+	    clipboard = null;
+	}
+    }
 
     @api
     @noboilerplate
@@ -55,7 +66,7 @@ public class Clipboard {
 	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 	    Cmdline.requireCmdlineMode(environment, this, t);
 	    Transferable tr = clipboard.getContents(null);
-	    if(tr.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+	    if (tr.isDataFlavorSupported(DataFlavor.stringFlavor)) {
 		try {
 		    String data = (String) tr.getTransferData(DataFlavor.stringFlavor);
 		    return new CString(data, t);
