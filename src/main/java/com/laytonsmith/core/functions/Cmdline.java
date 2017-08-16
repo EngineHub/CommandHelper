@@ -1260,7 +1260,7 @@ public class Cmdline {
 
     @api
     @noboilerplate
-    @seealso({shell_adv.class, shell_on.class, shell.class})
+    @seealso({shell_adv.class, shell_on.class, shell.class, get_os.class})
     public static class shell_on_adv extends AbstractFunction {
 
 	@Override
@@ -1326,7 +1326,7 @@ public class Cmdline {
 
     @api
     @noboilerplate
-    @seealso({shell.class, shell_adv.class, shell_on_adv.class})
+    @seealso({shell.class, shell_adv.class, shell_on_adv.class, get_os.class})
     public static class shell_on extends AbstractFunction {
 
 	@Override
@@ -1388,6 +1388,18 @@ public class Cmdline {
 	    return CHVersion.V3_3_2;
 	}
 
+	@Override
+	public ExampleScript[] examples() throws ConfigCompileException {
+	    return new ExampleScript[]{
+		new ExampleScript("Mac OS usage", "shell_on('MAC', 'diskutil secureErase freespace /Volumes/*')", "<Would run the mac specific command>"),
+		new ExampleScript("Unix usage", "shell_on('MAC|LINUX|SOLARIS', 'whoami')", "<Prints the current user name on Unix based systems>"),
+		new ExampleScript("Windows batch file", "shell_on('WINDOWS', 'ERASE file.txt')", "Erases the file, but only on windows"),
+		new ExampleScript("Delete a file on all OSes", "// Note I don't need any conditionals here\n"
+			+ "shell_on('WINDOWS', 'ERASE file.txt');\n"
+			+ "shell_on('MAC|LINUX|SOLARIS', 'rm file.txt');", "<Would delete file.txt on all OSes>")
+	    };
+	}
+
     }
 
     @api
@@ -1430,7 +1442,7 @@ public class Cmdline {
 
 	@Override
 	public Version since() {
-	    throw new UnsupportedOperationException("Not supported yet.");
+	    return CHVersion.V3_3_2;
 	}
 
     }

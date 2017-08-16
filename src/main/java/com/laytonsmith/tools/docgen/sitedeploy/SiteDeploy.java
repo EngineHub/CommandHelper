@@ -1292,7 +1292,7 @@ public class SiteDeploy {
 		    count++;
 		}
 	    } else {
-		exampleBuilder.append("Sorry, there are no examples for this function! :(");
+		exampleBuilder.append("Sorry, there are no examples for this function! :(\n");
 	    }
 	} catch (ConfigCompileException | IOException | DataSourceException | URISyntaxException ex) {
 	    exampleBuilder.append("Error while compiling the examples for ").append(f.getName());
