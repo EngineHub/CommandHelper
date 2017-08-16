@@ -1071,7 +1071,7 @@ public final class MethodScriptCompiler {
 				int array = arrayStack.pop().get();
 				//index is the location of the first node with the index
 				int index = array + 1;
-				if (!tree.hasChildren()) {
+				if (!tree.hasChildren() || array == -1) {
 					throw new ConfigCompileException("Brackets are illegal here", t.target);
 				}
 				ParseTree myArray = tree.getChildAt(array);
