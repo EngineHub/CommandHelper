@@ -1,0 +1,619 @@
+MethodScript supports templating for web (or any other template needs) through template
+language tags. In many ways, the support for templates is much like JSP and PHP, but
+differs in a few key ways, which allow greater flexibility when creating text via
+templates.
+
+== Overview ==
+Before delving into MethodScript's templating system, it is useful to discuss the
+shortcomings of existing templating systems. PHP was originally designed as a template
+language. In fact, there are still relics in PHP that support inline template syntax
+for mostly HTML pages:
+
+<pre>
+<?php if ($a == 5): ?>
+inline html
+<?php endif; ?>
+</pre>
+
+This approach is very useful, however due to the unrestricted nature of PHP, it can cause
+problems with separating concerns. [http://www.smarty.net/ Smarty] was created to assist with
+the [http://en.wikipedia.org/wiki/Separation_of_concerns separation of concerns], 
+but requires learning an all new templating language syntax (on
+top of also needing to know PHP) and so adds a layer of complication that doesn't really
+solve the underlying problem (because you can still mix too much logic into the UI code
+anyways). MethodScript's templating system takes these concerns into consideration, and
+while it by default promotes good separation of concerns, it does not actually restrict
+a user from breaking these concerns, where flexibility (or minimal code) is desired.
+
+The most prominent architecture of a web page (or any UI for that matter) is the 
+[http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller Model-View-Controller (MVC)]
+paradigm. This pattern allows for the best separation of concerns, by moving the 
+data driven portions of the application into separate code from the UI components.
+A good template system would only allow access to the ''View'' portion of the paradigm,
+which is what MethodScript does by default. MethodScript uses standard XHTML as its
+display model, which easily translates to web applications. The UI library in MethodScript
+mirrors all the XHTML tags with objects, and vice versa, and allows the creation
+of more complex macro components that are made up of the native xhtml primitives, either
+in pure MethodScript, or xhtml templates.
+In addition, of the subset of functions that are compilable to javascript, those
+scripts are compiled into javascript at compile time, using the standard xhtml
+script tag, which allows for client side UI logic to be embedded or included the
+same as pure javascript would preventing you from having to learn an all new language,
+in addition to being able to fully optimize the logic at compile time.
+It also allows for javascript code side by side, in standard script tags. All xhtml+MethodScript
+template files are first class in pure MethodScript code, which allows for the business
+logic to access the UI components as easily as pure MethodScript elements, while
+still maintaining strong typing. In addition, most all standard CSS components have class based accessors
+as well, allowing for type safety, inheritance, and variable based CSS templates
+to be generated.
+
+== Usage ==
+There are two key concepts that you need to know to effectively write MethodScript
+templates: variable inclusion, and dynamic scripting. All templates
+that use only variable inclusion compile directly into equivalent pure
+MethodScript classes, and dynamic scripting portions are compiled down to javascript
+and virtual MethodScript code.
+
+Before we move on to the usage of these concepts, lets look at a perfectly
+static page that doesn't use any MethodScript in the template itself.
+
+=== Barebones usage ===
+
+A barebones example has potentially two parts, the root XHTML page, and the controller
+code. In the simplest example though, it is simply a XHTML class that is accessed. We won't
+consider that example yet, because there is no interaction with MethodScript in that case,
+and the XHTML template would simply be passed through, virtually untouched. Instead, we
+will assume that a pure MethodScript file is accessed, which uses MethodScript to display
+the XHTML template instead. In the basic case, when a .ms file is accessed through the web server, it is run
+once, and is expected to call the display method on a XHTML object, which will in turn output
+the rendered xhtml to the client. (It can output any text in reality, which is used for instance,
+in the course of ajax request responses.) HTTP headers may be buffered at any point before this,
+and are sent just before the body of the HTTP response. Let's look at example code.
+
+<pre>
+XHTML @page = new XHTML();
+@page->setTitle('Page title');
+@page->setDescription('This escapes special symbols like & when used this way');
+@page->addChild(new XHTMLDiv('Inner text'));
+@page->display();
+</pre>
+
+This renders the following markup (assuming the output is set to be tidied and configured
+to output xhtml):
+
+<pre>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="description" content="This escapes special symbols like &amp;amp; when used this way" />
+		<title>Page title</title>
+	</head>
+	<body>
+		<div>Inner text</div>
+	</body>
+</html>
+</pre>
+
+In fact, if you put the rendered XHTML into a template file, it would essentially compile
+to equivalent MethodScript.
+
+Usually you won't use the XHTML object directly. If you have a standard page layout, it is
+best to create a factory method that will create and set up an XHTML object for you, and
+then return that, which can be further operated on for that page specifically. Now lets
+consider the case where we ourselves are creating a template. Templates are defined by the
+fact that they have the .mst extension. This puts the compiler into a "template compiling
+mode" instead of assuming pure mscript. The component must extend an existing UIComponent
+class (which all the XHTML objects extend). The class name is the name of the file it
+is in, and it extends whatever type the root element is. For instance, if we had a simple
+component that has static text inside a div (assuming it is saved in MyDiv.mst), we can write this:
+
+<pre>
+<?xml version="1.0" encoding="UTF-8"?>
+<div>
+	Inner text
+</div>
+</pre>
+
+Since the root element is a div, the doctype is inherited from it, though
+attributes and elements can be added as well. Because of this, all
+elements have a doctype, even if it isn't directly specified.
+Written in equivalent pure mscript, this class would look like this:
+
+<pre>
+@{XHTML}
+class MyDiv extends Div {
+	public MyDiv(){
+		this->addChild('Inner text');
+	}
+}
+</pre>
+
+and regardless of how we just defined that, we can use it via pure MethodScript like
+this:
+
+<pre>
+XHTML @page = new XHTML();
+@page->addChild(new MyDiv());
+@page->display();
+</pre>
+
+or like this in another template:
+
+<pre>
+<?xml version="1.0" encoding="UTF-8"?>
+<div>
+	<MyDiv />
+</div>
+</pre>
+
+The @{XHTML} annotation is used to tell the UI compiler that this class is available
+in mst templates. More advanced usage is shown later in this tutorial.
+
+=== Variable Inclusion ===
+Variable inclusion is the most straightforward way to make templates dynamic, and this
+principal is core to the understanding of the templating system. When a component defines
+a property, it is eligible to be used as an attribute. Attributes can be set via the component
+constructor, or as individual xml attributes in a template. When creating a custom component,
+attributes are defined via the constructor as a struct, or in a DTD ATTLIST in a template.
+Once defined, the variable is defined in the template as a $var, and are simply expanded out.
+Note that only primitive values are available in attributes, if you have a more complex
+layout, you'll need to use static scripting to properly layout a page.
+
+==== Declaring attributes in custom components ====
+
+
+To declare your own element with attributes in MethodScript is a two step
+process. First, you must set the attributesClass value of the @{XHTML} annotation
+to your struct class, which should extend the nearest parent class's attributesClass
+struct. (The top level XHTML element, which everything must
+extend from ultimately defines an empty struct, called Attributes.) Secondly,
+you must implement the (Attributes) or (Attributes, UIComponents...) constructor.
+Upon creation (either through pure MethodScript or via mst templates) this data
+will be passed in then. All attribute values must extend the primitive type,
+and cannot be objects.
+
+For example:
+
+<pre>
+
+@{XHTML(attributesClass: MyDivAttributes)}
+class MyDiv extends Div {
+
+	public static struct MyDivAttributes {
+		public string @name;
+		public int @age = 21;
+	}
+
+	public MyDiv(MyDivAttributes @options){
+		this->addChild(new Div('Name: '.@options->name));
+		this->addChild(new Div('Age: '.@options->age));
+	}
+}
+</pre>
+
+The equivalent structure written in a MyDiv.mst file is slightly simpler, because
+the attributes simply need to be declared with a type, and possibly a default value,
+using the attr attribute in the root element. The availability of the attributes
+is checked at compile time, so if you forget to declare one of them, then use it,
+it will be a compile error. All attributes from the parent are also available to
+be used as well inside of the template.
+
+<pre>
+<?xml version="1.0" encoding="UTF-8"?>
+<div attr="string name; int age=21;">
+	<div>Name: $name</div>
+	<div>Age: $age</div>
+</div>
+</pre>
+
+If you have an attribute named $var, and you need a literal <code>$var</code>, you
+can use the xml escape sequence &amp;#36;var. 
+
+=== Dynamic Scripting ===
+When writing UI code, especially HTML, for truly dynamic web pages, you need to
+run some client side logic to do what you need. For instance, say you have a button
+that when clicked makes a number count up. In this case, you need to (ultimately)
+write javascript to do that. However, javascript is a cumbersome, unwieldy language
+in many cases, so MethodScript offers the ability to compile to javascript in many
+cases. Most of the core functionality is available in the cross compiler, and some
+additional features are used specifically in these scripts. Most notably is the
+ability to access the dom. Note that while this code does get compiled at the same
+time as the rest of your script, it doesn't actually get run as MethodScript, it
+is cross compiled to javascript, and included as part of the entire output html.
+A very simple Hello World program would look like this:
+
+HelloWorld.mst:
+<pre>
+<?xml version="1.0" encoding="UTF-8"?>
+<div attr="string output;">
+	<script type="text/mscript">
+		&lt;![CDATA[
+		JS::alert($output);
+		]]&gt;
+	</script>
+</div>
+</pre>
+
+We would deliver this to the browser using the following main code:
+
+<pre>
+XHTML @page = new XHTML();
+@page->addChild(new HelloWorld({output: 'Hello World!'}));
+@page->display();
+</pre>
+
+which would result in the the following html:
+
+<pre>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title></title>
+	</head>
+	<body>
+		<script type="text/javascript">
+		&lt;![CDATA[
+			alert('Hello World!');
+		]]&gt;
+		</script>
+	</body>
+</html>
+</pre>
+
+As you can see, MethodScript does most of the work for you, making it far simpler
+to use than javascript. However, this does not stop you from using javascript yourself.
+Any javascript you embed in the template will be included exactly as is, so existing
+javascript librarys can be used. Unfortunately, you cannot interface MethodScript
+with javascript directly, though MethodScript can call javascript functions indirectly.
+Inside of the tag, the <code>this</code> keyword is available, and refers to that instance
+of the html tag.
+
+The equivalent to doing this in pure MethodScript is equally straightforward, but
+less clear. The important thing to remember is that this uses rclosure linking rules.
+The XHTML->addScript method is used to add a script to an element. The same template
+shown above would be written in pure MethodScript like this:
+
+<pre>
+@{XHTML(attributeClass: HelloWorldAttributes)}
+public class HelloWorld extends Div {
+	public static struct HelloWorldAttributes {
+		public string @output;
+	}
+	public HelloWorld(HelloWorldAttributes @options){
+		this->addScript(rclosure(){ // returns void, no args
+			alert(@options->output);
+		});
+	}
+}
+</pre>
+
+In the case of using pure MethodScript, you can even conditionally add scripts if needed.
+In either case however, before the script is cross compiled to javascript, it is optimized
+in the MethodScript compiler, which may significantly change the output script. This condenses
+the output code so that only the elements that truly need to be client side are sent.
+Any logic that can be determined at compile time will be resolved at compile time.
+While it is possible to add multiple script blocks in a mst template, it doesn't
+affect the output script (other than lexical correctness, if your scripts aren't
+logically complete) because the script will be gathered up and placed in the appropriate
+location anyways.
+
+External MethodScript-compiled-to-javascript can also be included, akin to how you
+would include a script tag in the head of an html page. To do this, in the XHTML
+object, call the useScript method, and pass it a reference to a .ms file, which will
+be cross compiled and be made available in the javascript. Your server can be configured
+to manage caching automatically, or if you have a volatile environment, to simply
+turn off caching, and the compiled javascript will be re-rendered each time it is
+requested as a part of the browser request process.
+
+==== DOM access ====
+
+One of the most important things that javascript provides is the ability to access
+the dom. MethodScript exposes this functionality in an easy to use way, so you can
+take advantage of some of the type safety that the templating system uses, while still
+being able to access core properties easily. The simplest and most straightforward
+example would be for a div to hide itself after a few seconds. To do this, we can
+use the methods in the XHTML class in a script block.
+
+FadeDiv.mst:
+<pre>
+<?xml version="1.0" encoding="UTF-8"?>
+<div>
+	<script type="text/mscript">
+		&lt;![CDATA[
+		set_timeout(5000, closure(){
+			@hideThis->style->display = Display::NONE;
+		});
+		]]&gt;
+	</script>
+	<div id="hideThis">
+		Hide me!
+	</div>
+</div>
+</pre>
+
+This would compile to the following output:
+
+<pre>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title></title>
+	</head>
+	<body>
+		<div id="hideThis">
+			Hide me!
+		</div>
+		<script type="text/javascript">
+		&lt;![CDATA[
+			setTimeout(function(){
+				document.getElementById("hideThis").style.display = "none";
+			}, 5000);
+		]]&gt;
+		</script>
+	</body>
+</html>
+</pre>
+
+As you can see, the dom access is generally easier, or just as easy in javascript,
+but we get the advantage that in MethodScript, many invalid operations become
+a compile error. For instance, the display property only recognizes some string
+values, so that is an enum, so the following code would cause a compile error,
+even though it would work (though it would be ignored) in javascript.
+
+<pre>
+#Works
+hideThis->style->display = "none";
+#Compile error!
+hideThis->style->display = "invalid";
+</pre>
+
+Additionally, when working with specific elements with ids, we don't need
+to use document.getElementById("id"), we can simply use id. The compile figures
+out what type that is exactly, and adds it as a valid child, if it is statically
+declared. For dynamically declared elements with ids, you would have to use
+getElementById, but generally that's a code smell, since you shouldn't be generating
+ids programmatically anyways (use class references instead). Further, doing it this
+way helps to enforce decoupling, because any javascript using an id is by definition
+tightly coupled with that element, and so the code specific to it should be logically
+placed in the same file anyways, to make it easier to find. Generic library code
+shouldn't be using the ids anyways, and so the ids simply won't be available in the
+header code, making your dom access follow proper inheritance principals.
+
+All CSS and DOM elements are mapped to first class MethodScript data structures,
+so the type safety is applicable to all values. For experimental CSS values, raw
+string based styles can be added, but the standard values all have first class mappings.
+
+If a first class mapping doesn't exist, or you are trying to access experimental or non-standard values,
+you can use the reflection mechanism to bypass the compiler, just as you would in normal MethodScript
+code.
+
+<pre>
+hideThis->style['display'] = "experimental value";
+</pre>
+
+The dynamic scripting can also be used to make html changes at compile time. For instance,
+given the following template:
+
+Optimized.mst:
+<pre>
+<?xml version="1.0" encoding="UTF-8"?>
+<div>
+	<script type="text/mscript">
+		&lt;![CDATA[
+			@hideThis->style->display = Display::NONE;
+		]]&gt;
+	</script>
+	<div id="hideThis">
+		Hide me!
+	</div>
+</div>
+</pre>
+
+This would actually result in html code that had no javascript in it, because
+the dom manipulation would happen at compile time, because all the components
+are known to the compiler, and they don't require any javascript to be run by the
+client. The output html would be simple:
+
+<pre>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title></title>
+	</head>
+	<body>
+		<div id="hideThis" style="display:none;">
+			Hide me!
+		</div>
+	</body>
+</html>
+</pre>
+
+As you can see, the html is already pre-rendered with the correct styling. If you actually
+did intend on the code to remain javascript for whatever reason (perhaps you wanted it to
+flash unstyled content??) then you would have to write the javascript in directly.
+
+Note that the output javascript may not look anything at all like you expected, as it
+is run through several optimizations to ensure the least amount of code is actually
+sent to the client, however, the behavior should be consistent. You can turn debug flags
+on in the compiler, and it will output comments into the html explaining in more detail
+where certain javascript came from, as well as how the compilation process happened,
+so if you do find a bug in your code, it is easy to trace back to the root of the problem
+by reverse engineering the javascript. Additionally, obfuscation, minification, and formatting
+options can be set as well.
+
+Barring bugs in MethodScript itself, the output javascript is guaranteed to never throw any
+(unintended) exceptions, or cause undefined behavior in the DOM.
+
+==== DOM Events ====
+Events are handled via individualized event handlers for each event type. Each element
+has its own events available to it via javascript compiled MethodScript. A simple example
+is a button that pops up an alert when it is clicked.
+
+Alert.mst:
+<pre>
+<?xml version="1.0" encoding="UTF-8"?>
+<div>
+	<script type="text/mscript">
+		&lt;![CDATA[
+			int @i = 0;
+			@clickMe->onClick(closure(MouseEvent @event){
+				@i++;
+				alert('The button was clicked '.@i.' time(s)');
+			});
+		]]&gt;
+	</script>
+	<button id="clickMe" value="Click Me" />
+</div>
+</pre>
+
+This results in the following equivalent html (the actual html rendered will be
+more complicated, but for this example, it has be simplified to equivalent javascript):
+
+<pre>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title></title>
+	</head>
+	<body>
+		<button id="clickMe" value="Click Me" />
+		<script type="text/javascript">
+		&lt;![CDATA[
+			var i = 0;
+			document.getElementById("clickMe").onclick = function(event){
+				i++;
+				alert("The button was clicked " + i + " time(s)");
+			};
+		]]&gt;
+		</script>
+	</body>
+</html>
+</pre>
+
+Each event has its own event object that is passed in, and has all the data that
+would be in the equivalent javascript event, allowing full access to the event.
+Check the API for each event for more information about each.
+
+==== Ajax wrappers ====
+
+Some functions cannot be run directly on the client side, because they need data from the server.
+In this case, many functions transparently will compile to applicable javascript, and
+handle both the server and client side code to do manage this process for you. For instance,
+let's assume we want to read information from the persistance data on the server. We
+can simply use async_get_value like normal (get_value isn't available in the javascript
+compiler), and the call will still work.
+
+persist.mst:
+<pre>
+<?xml version="1.0" encoding="UTF-8"?>
+<div>
+	<script type="text/mscript">
+		&lt;![CDATA[
+			@load->onClick(closure(MouseEvent @event){
+				async_get_value('userInput.'.@input->value, closure(Object @value){
+					@output->text = @value;
+				});
+			});
+		]]&gt;
+	</script>
+	<input type="text" id="input" />
+	<button id="load" value="Load" />
+	<div id="output"></div>
+</div>
+</pre>
+
+This transforms into fairly complicated HTML, because as much code as possible is
+converted to client side javascript, but since much of the script still must run
+server side, this compiles into a cached script that is registered with the runtime,
+and responds appropriately to the call. Since the script may expose security holes
+if the data isn't properly validated, even more complication may be added to the
+javascript and server side compiled script. Essentially, this turns into the following
+javascript (client side):
+<pre>
+//Pretend the ajax function exists.
+document.getElementById("load").onclick = function(event){
+	ajax("server_url.com/pathToAutomaticallyGeneratedFileThatWillRespondToThis?v1="
+		+ document.getElementById("input").value, function(response){
+			document.getElementById("output").innerHTML = escapeSpecialChars(response.value);
+		});
+};
+</pre>
+
+and the following equivalent pseudo MethodScript (server side):
+
+<pre>
+@v1 = get_request_var('v1');
+@ret = get_value('userInput.'.@v1);
+output(@ret);
+die();
+</pre>
+
+All server data methods are individually supported in this equivalent manner, that is,
+whatever data is needed to run the script on the server is requested from the client,
+and as little data as possible to actually run the script server side is sent, allowing for
+zero data leaks to the client, while maximizing functionality.
+
+==== Javascript Compiler ====
+Some final notes on the MethodScript to Javascript compiler:
+
+Scripts may look nothing like each other. Where possible, anything that can be
+done server side does not get compiled into the javascript, but the compiled javascript
+is guaranteed to be equivalent to the behavior defined in the MethodScript. The
+compiler does this by using a different compilation algorithm in the supported
+functions, which makes them "magic" in the sense that you can't directly replicate
+this behavior with custom code, unless you hook into the compiler functionality.
+There are three steps when running the compiler and script: MethodScript/MST compilation, 
+MethodScript runtime, Javascript runtime. Each of
+these steps transforms the output significantly, so tracing a problem can be tricky
+if you don't understand what the system is doing at each step.
+
+MethodScript/MST compilation: The code is compiled into units. Templates are compiled
+and validated during this stage, and all code is checked for lexical correctness,
+as well as type safety. Segments of code in templates that are to be compiled into javascript
+are set aside for now, though the MethodScript optimizer will have already done as
+much optimization as possible. The scripts that need to be compiled to javascript
+are then cross compiled into javascript and server side MethodScript (where applicable)
+and cached until needed.
+
+MethodScript runtime: When a user accesses a web page, it starts the process of generating
+the actual output html. The parameters sent by the user are used to piece together the output
+from the cached sections of templates, or fully dynamically if using pure MethodScript.
+Once the construction of the output is complete, the output is sent to the user.
+
+Javascript runtime: For dynamic pages, the javascript segments will run as needed
+during the course of user interaction. If the javascript communicates back to the server,
+the segments of cached async code are run, and respond appropriately to the user.
+
+As you can tell, the backend process is very complicated, however, most of the work
+is done at compilation time, which makes actual runtime of the scripts faster, and
+most of the hard work is hidden from you.
+
+== TypeScript support ==
+In addition to writing Javascript, you may also set the type="text/typescript" and the compiler
+will use the builtin TypeScript compiler to cross compile from TypeScript to JavaScript.
+
+== Transformers ==
+Regardless of the transformer used, your code must always validate as well formed,
+and valid xml. Once the validation has occurred though, the model is released
+to the transformer to be rendered to actual text output. The default transformer
+simply outputs xhtml, but other transformers can be used to change the output
+based on, perhaps, the user's browser, or to create a mobile device layout, for
+instance. The transformer has three stages it can choose to override individually.
+The first, it is given the whole display
+tree as an object, and it can choose to modify the tree as an object. Secondly,
+it is given each individual element to render on it's own (with context information).
+Finally, the entire output string is given to the transformer, at which point it
+can do text based transformations on it. The transformer can be set statically,
+or can be registered as part of the outermost UIComponent, or it can be
+specified at render time when the display method is called on the outermost
+UIComponent. The most specific transformer is then used.
