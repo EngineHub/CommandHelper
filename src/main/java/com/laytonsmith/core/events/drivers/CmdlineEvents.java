@@ -7,7 +7,9 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
@@ -143,7 +145,7 @@ public class CmdlineEvents {
 					+ " Fired when a command is issued from the interactive prompt. If the event is not"
 					+ " cancelled, the interpreter will handle it as normal. Otherwise, the event can"
 					+ " be cancelled, and custom handling can be triggered."
-					+ " {command: The command that was triggered}"
+					+ " {command: The command that was triggered, shellMode: If the shell is in shell mode (activated with $$)}"
 					+ " {}"
 					+ " {}";
 		}
@@ -155,7 +157,8 @@ public class CmdlineEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t).val());
+			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t).val(),
+				Static.getBoolean(manualObject.get("shellMode", t)));
 			return cpi;
 		}
 
@@ -164,6 +167,7 @@ public class CmdlineEvents {
 			CmdlinePromptInput cpi = (CmdlinePromptInput)e;
 			Map<String, Construct> map = new HashMap<>();
 			map.put("command", new CString(cpi.getCommand(), Target.UNKNOWN));
+			map.put("shellMode", CBoolean.get(cpi.isShellMode()));
 			return map;
 		}
 
@@ -191,8 +195,10 @@ public class CmdlineEvents {
 
 			private boolean isCancelled = false;
 			private final String command;
-			public CmdlinePromptInput(String command){
+			private final boolean shellMode;
+			public CmdlinePromptInput(String command, boolean shellMode){
 				this.command = command;
+				this.shellMode = shellMode;
 			}
 
 			@Override
@@ -213,7 +219,9 @@ public class CmdlineEvents {
 				return isCancelled;
 			}
 
-
+			public boolean isShellMode() {
+			    return this.shellMode;
+			}
 
 		}
 

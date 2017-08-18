@@ -5,10 +5,10 @@ import java.util.List;
 
 /**
  *
- * 
+ *
  */
 public class ArrayUtils {
-	
+
 	/**
 	 * Instantiating a new 0 length array is *usually* inefficient, unless you
 	 * are doing reference comparisons later. If you are generating it simply to use
@@ -57,7 +57,7 @@ public class ArrayUtils {
 	 * as a "default" value for an array, consider using this instead to increase performance.
 	 */
 	public static final boolean[] EMPTY_BOOLEAN_ARRAY = new boolean[0];
-	
+
 	/**
 	 * Instantiating a new 0 length array is *usually* inefficient, unless you
 	 * are doing reference comparisons later. If you are generating it simply to use
@@ -106,12 +106,12 @@ public class ArrayUtils {
 	 * as a "default" value for an array, consider using this instead to increase performance.
 	 */
 	public static final Boolean[] EMPTY_BOOLEAN_OBJ_ARRAY = new Boolean[0];
-	
-	
+
+
 	/***************************************************************************
 	 * Slices
 	 ***************************************************************************/
-	
+
 	/**
 	 * Slices an array, where the array [0, 1, 2] sliced from 0 to 2 would return the whole array.
 	 * That is, start and finish are inclusive. Finish may be less than start, in which case the slice will also
@@ -121,8 +121,9 @@ public class ArrayUtils {
 	 * @param array The array to be sliced. Note that the original array remains unchanged.
 	 * @param start The starting node.
 	 * @param finish The ending node (inclusive).
-	 * @return 
+	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T> T [] slice(T[] array, int start, int finish){
 		int size = Math.abs(start - finish) + 1;
 		Object [] newArray = new Object[size];
@@ -139,7 +140,7 @@ public class ArrayUtils {
 		}
 		return (T[])newArray;
 	}
-	
+
 	/**
 	 * Slices an array, where the array [0, 1, 2] sliced from 0 to 2 would return the whole array.
 	 * That is, start and finish are inclusive. Finish may be less than start, in which case the slice will also
@@ -148,7 +149,7 @@ public class ArrayUtils {
 	 * @param array The array to be sliced. Note that the original array remains unchanged.
 	 * @param start The starting node.
 	 * @param finish The ending node (inclusive).
-	 * @return 
+	 * @return
 	 */
 	public static char [] slice(char[] array, int start, int finish){
 		int size = Math.abs(start - finish) + 1;
@@ -174,7 +175,7 @@ public class ArrayUtils {
 	 * @param array The array to be sliced. Note that the original array remains unchanged.
 	 * @param start The starting node.
 	 * @param finish The ending node (inclusive).
-	 * @return 
+	 * @return
 	 */
 	public static byte [] slice(byte[] array, int start, int finish){
 		int size = Math.abs(start - finish) + 1;
@@ -200,7 +201,7 @@ public class ArrayUtils {
 	 * @param array The array to be sliced. Note that the original array remains unchanged.
 	 * @param start The starting node.
 	 * @param finish The ending node (inclusive).
-	 * @return 
+	 * @return
 	 */
 	public static short [] slice(short[] array, int start, int finish){
 		int size = Math.abs(start - finish) + 1;
@@ -226,7 +227,7 @@ public class ArrayUtils {
 	 * @param array The array to be sliced. Note that the original array remains unchanged.
 	 * @param start The starting node.
 	 * @param finish The ending node (inclusive).
-	 * @return 
+	 * @return
 	 */
 	public static int [] slice(int[] array, int start, int finish){
 		int size = Math.abs(start - finish) + 1;
@@ -252,7 +253,7 @@ public class ArrayUtils {
 	 * @param array The array to be sliced. Note that the original array remains unchanged.
 	 * @param start The starting node.
 	 * @param finish The ending node (inclusive).
-	 * @return 
+	 * @return
 	 */
 	public static long [] slice(long[] array, int start, int finish){
 		int size = Math.abs(start - finish) + 1;
@@ -278,7 +279,7 @@ public class ArrayUtils {
 	 * @param array The array to be sliced. Note that the original array remains unchanged.
 	 * @param start The starting node.
 	 * @param finish The ending node (inclusive).
-	 * @return 
+	 * @return
 	 */
 	public static float [] slice(float[] array, int start, int finish){
 		int size = Math.abs(start - finish) + 1;
@@ -304,7 +305,7 @@ public class ArrayUtils {
 	 * @param array The array to be sliced. Note that the original array remains unchanged.
 	 * @param start The starting node.
 	 * @param finish The ending node (inclusive).
-	 * @return 
+	 * @return
 	 */
 	public static double [] slice(double[] array, int start, int finish){
 		int size = Math.abs(start - finish) + 1;
@@ -330,7 +331,7 @@ public class ArrayUtils {
 	 * @param array The array to be sliced. Note that the original array remains unchanged.
 	 * @param start The starting node.
 	 * @param finish The ending node (inclusive).
-	 * @return 
+	 * @return
 	 */
 	public static boolean [] slice(boolean[] array, int start, int finish){
 		int size = Math.abs(start - finish) + 1;
@@ -348,17 +349,18 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/***************************************************************************
 	 * Unboxes
 	 ***************************************************************************/
-	
+
 	/**
 	 * "Unboxes" an array, that is, unboxes all the primitives in this
 	 * array, and returns a primitive array.
 	 * @param array The "boxed" array
-	 * @return The "unboxed" array 
+	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static char[] unbox(Character[] array){
 		if(array == null){
 			return null;
@@ -371,13 +373,14 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/**
 	 * "Unboxes" an array, that is, unboxes all the primitives in this
 	 * array, and returns a primitive array.
 	 * @param array The "boxed" array
-	 * @return The "unboxed" array 
+	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static byte[] unbox(Byte[] array){
 		if(array == null){
 			return null;
@@ -390,13 +393,14 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/**
 	 * "Unboxes" an array, that is, unboxes all the primitives in this
 	 * array, and returns a primitive array.
 	 * @param array The "boxed" array
-	 * @return The "unboxed" array 
+	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static short[] unbox(Short[] array){
 		if(array == null){
 			return null;
@@ -409,13 +413,14 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/**
 	 * "Unboxes" an array, that is, unboxes all the primitives in this
 	 * array, and returns a primitive array.
 	 * @param array The "boxed" array
-	 * @return The "unboxed" array 
+	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static int[] unbox(Integer[] array){
 		if(array == null){
 			return null;
@@ -428,13 +433,14 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/**
 	 * "Unboxes" an array, that is, unboxes all the primitives in this
 	 * array, and returns a primitive array.
 	 * @param array The "boxed" array
-	 * @return The "unboxed" array 
+	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static long[] unbox(Long[] array){
 		if(array == null){
 			return null;
@@ -447,13 +453,14 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/**
 	 * "Unboxes" an array, that is, unboxes all the primitives in this
 	 * array, and returns a primitive array.
 	 * @param array The "boxed" array
-	 * @return The "unboxed" array 
+	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static float[] unbox(Float[] array){
 		if(array == null){
 			return null;
@@ -466,13 +473,14 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/**
 	 * "Unboxes" an array, that is, unboxes all the primitives in this
 	 * array, and returns a primitive array.
 	 * @param array The "boxed" array
 	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static double[] unbox(Double[] array){
 		if(array == null){
 			return null;
@@ -485,13 +493,14 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/**
 	 * "Unboxes" an array, that is, unboxes all the primitives in this
 	 * array, and returns a primitive array.
 	 * @param array The "boxed" array
 	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static boolean[] unbox(Boolean[] array){
 		if(array == null){
 			return null;
@@ -504,11 +513,11 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/***************************************************************************
 	 * Boxes
 	 ***************************************************************************/
-	
+
 	/**
 	 * "Boxes" an array, that is, boxes all the primitives in the given array,
 	 * and returns a new "boxed" array.
@@ -527,7 +536,7 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/**
 	 * "Boxes" an array, that is, boxes all the primitives in the given array,
 	 * and returns a new "boxed" array.
@@ -546,7 +555,7 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/**
 	 * "Boxes" an array, that is, boxes all the primitives in the given array,
 	 * and returns a new "boxed" array.
@@ -565,7 +574,7 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/**
 	 * "Boxes" an array, that is, boxes all the primitives in the given array,
 	 * and returns a new "boxed" array.
@@ -584,7 +593,7 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/**
 	 * "Boxes" an array, that is, boxes all the primitives in the given array,
 	 * and returns a new "boxed" array.
@@ -603,7 +612,7 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/**
 	 * "Boxes" an array, that is, boxes all the primitives in the given array,
 	 * and returns a new "boxed" array.
@@ -622,7 +631,7 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/**
 	 * "Boxes" an array, that is, boxes all the primitives in the given array,
 	 * and returns a new "boxed" array.
@@ -641,7 +650,7 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+
 	/**
 	 * "Boxes" an array, that is, boxes all the primitives in the given array,
 	 * and returns a new "boxed" array.
@@ -660,25 +669,26 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-		
+
 	/***************************************************************************
 	 * Misc
 	 ***************************************************************************/
-	
+
 	/**
 	 * Returns a new array, based on the runtime type of the list.
 	 * @param <T>
 	 * @param list
-	 * @return 
+	 * @return
 	 */
-	public static <T> T[] asArray(Class<T> clazz, List list){
+	@SuppressWarnings("unchecked")
+	public static <T> T[] asArray(Class<T> clazz, List<T> list){
 		T[] obj = (T[]) Array.newInstance(clazz, list.size());
 		for(int i = 0; i < list.size(); i++){
-			obj[i] = (T)list.get(i);
+			obj[i] = list.get(i);
 		}
 		return obj;
-	}		
-	
+	}
+
 	/**
 	 * Returns a new array, where each item has been cast to the
 	 * specified class, and the returned array is an array type
@@ -687,24 +697,26 @@ public class ArrayUtils {
 	 * @param array Despite being an Object, instead of an Object[], this will throw a ClassCastException
 	 * if it is not an array type.
 	 * @param toClass
-	 * @return 
+	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T> T cast(Object array, Class<T> toArrayClass){
 		if(!array.getClass().isArray()){
 			throw new ClassCastException();
 		}
 		Object obj;
-		Class toClass = toArrayClass.getComponentType();
+		Class<?> toClass = toArrayClass.getComponentType();
 
 		obj = toArrayClass.cast(Array.newInstance(toClass, Array.getLength(array)));
-		for(int i = 0; i < Array.getLength(array); i++){				
+		for(int i = 0; i < Array.getLength(array); i++){
 			doSet(obj, i, Array.get(array, i));
 		}
 		return (T)obj;
 	}
-	
+
+	@SuppressWarnings("UnnecessaryUnboxing")
 	private static void doSet(Object array, int index, Object o){
-		Class componentType = array.getClass().getComponentType();
+		Class<?> componentType = array.getClass().getComponentType();
 		if(componentType.isPrimitive()){
 			if(componentType == char.class){
 				Array.setChar(array, index, ((Character)o).charValue());
