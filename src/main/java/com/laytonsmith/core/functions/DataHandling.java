@@ -853,7 +853,7 @@ public class DataHandling {
 		+ "foreach(@key: @value in @array){\n"
 		+ "\tmsg(@key . ': ' . @value);\n"
 		+ "}"),
-		new ExampleScript("Using \"a\" keyword", "@array = array(1, 2, 3);\n"
+		new ExampleScript("Using \"as\" keyword", "@array = array(1, 2, 3);\n"
 		+ "foreach(@array as @value){\n"
 		+ "\tmsg(@value);\n"
 		+ "}"),
