@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
@@ -37,7 +35,7 @@ import static com.laytonsmith.testing.StaticTest.SRun;
  */
 public class MathTest {
 
-	Target t = Target.UNKNOWN;
+    Target t = Target.UNKNOWN;
     MCServer fakeServer;
     MCPlayer fakePlayer;
     IVariableList varList;
@@ -56,14 +54,14 @@ public class MathTest {
 
     @Before
     public void setUp() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
+        StaticTest.InstallFakeServerFrontend();
         fakePlayer = GetOnlinePlayer();
         fakeServer = GetFakeServer();
 
         varList = new IVariableList();
         varList.set(new IVariable(CClassType.AUTO, "var", C.onstruct(1), Target.UNKNOWN));
         varList.set(new IVariable(CClassType.AUTO, "var2", C.onstruct(2.5), Target.UNKNOWN));
-		env = Static.GenerateStandaloneEnvironment();
+        env = Static.GenerateStandaloneEnvironment();
         env.getEnv(GlobalEnv.class).SetVarList(varList);
         env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
     }
@@ -179,11 +177,11 @@ public class MathTest {
         }
     }
 
-	@Test
-	public void testRand2() throws Exception{
-		SRun("assign(@rand, rand()) if(@rand >= 0 && @rand <= 1, msg('pass'), msg('fail'))", fakePlayer);
-		verify(fakePlayer).sendMessage("pass");
-	}
+    @Test
+    public void testRand2() throws Exception {
+        SRun("assign(@rand, rand()) if(@rand >= 0 && @rand <= 1, msg('pass'), msg('fail'))", fakePlayer);
+        verify(fakePlayer).sendMessage("pass");
+    }
 
     @Test(timeout = 10000)
     public void testSubtract() {
@@ -216,7 +214,7 @@ public class MathTest {
         try {
             StaticTest.SRun("sqrt(-1)", fakePlayer);
             fail("Did not expect to pass");
-        } catch (ConfigCompileException|ConfigCompileGroupException e) {
+        } catch (ConfigCompileException | ConfigCompileGroupException e) {
             //pass
         }
     }
@@ -231,40 +229,52 @@ public class MathTest {
         assertEquals("50", StaticTest.SRun("max(6, 7, array(4, 4, 50), 2, 5)", fakePlayer));
     }
 
-	@Test
-	public void testChained() throws Exception{
-		assertEquals("8", SRun("2 + 2 + 2 + 2", null));
-		assertEquals("20", SRun("2 * 2 + 2 * 2 * 2 + 2 * 2 * 2", null));
-	}
+    @Test
+    public void testChained() throws Exception {
+        assertEquals("8", SRun("2 + 2 + 2 + 2", null));
+        assertEquals("20", SRun("2 * 2 + 2 * 2 * 2 + 2 * 2 * 2", null));
+    }
 
-	@Test
-	public void testRound() throws Exception {
-		assertEquals("4.0", SRun("round(4.4)", null));
-		assertEquals("5.0", SRun("round(4.5)", null));
-		assertEquals("4.6", SRun("round(4.55, 1)", null));
-	}
+    @Test
+    public void testRound() throws Exception {
+        assertEquals("4.0", SRun("round(4.4)", null));
+        assertEquals("5.0", SRun("round(4.5)", null));
+        assertEquals("4.6", SRun("round(4.55, 1)", null));
+    }
 
-	@Test
-	public void testSinh() throws Exception {
-		assertEquals("1.1752011936438014", SRun("sinh(1)", null));
-		assertEquals("0", SRun("sinh(0)", null));
-		assertEquals("6.0502044810397875", SRun("sinh(2.5)", null));
-		assertEquals("-6.0502044810397875", SRun("sinh(-2.5)", null));
-	}
+    @Test
+    public void testSinh() throws Exception {
+        assertEquals("1.1752011936438014", SRun("sinh(1)", null));
+        assertEquals("0", SRun("sinh(0)", null));
+        assertEquals("6.0502044810397875", SRun("sinh(2.5)", null));
+        assertEquals("-6.0502044810397875", SRun("sinh(-2.5)", null));
+    }
 
-	@Test
-	public void testCosh() throws Exception {
-		assertEquals("1.543080634815244", SRun("cosh(1)", null));
-		assertEquals("1", SRun("cosh(0)", null));
-		assertEquals("6.132289479663686", SRun("cosh(2.5)", null));
-		assertEquals("6.132289479663686", SRun("cosh(-2.5)", null));
-	}
+    @Test
+    public void testCosh() throws Exception {
+        assertEquals("1.543080634815244", SRun("cosh(1)", null));
+        assertEquals("1", SRun("cosh(0)", null));
+        assertEquals("6.132289479663686", SRun("cosh(2.5)", null));
+        assertEquals("6.132289479663686", SRun("cosh(-2.5)", null));
+    }
 
-	@Test
-	public void testTanh() throws Exception {
-		assertEquals("0.7615941559557649", SRun("tanh(1)", null));
-		assertEquals("0", SRun("tanh(0)", null));
-		assertEquals("0.9866142981514303", SRun("tanh(2.5)", null));
-		assertEquals("-0.9866142981514303", SRun("tanh(-2.5)", null));
-	}
+    @Test
+    public void testTanh() throws Exception {
+        assertEquals("0.7615941559557649", SRun("tanh(1)", null));
+        assertEquals("0", SRun("tanh(0)", null));
+        assertEquals("0.9866142981514303", SRun("tanh(2.5)", null));
+        assertEquals("-0.9866142981514303", SRun("tanh(-2.5)", null));
+    }
+    
+    @Test
+    public void testClamp() throws Exception {
+        assertEquals("8.0", SRun("clamp(8, 1, 10);", null));
+        assertEquals("10.0", SRun("clamp(1, 10, 20);", null));
+        assertEquals("25.0", SRun("clamp(50, 10, 25);", null));
+        assertEquals("5.0", SRun("clamp(5, 20, 10);", null));
+        assertEquals("50.0", SRun("clamp(50, 20, 10);", null));
+        assertEquals("10.0", SRun("clamp(12, 20, 10);", null));
+        assertEquals("20.0", SRun("clamp(19, 20, 10);", null));
+        assertEquals("10.0", SRun("clamp(15, 20, 10);", null));
+    }
 }
