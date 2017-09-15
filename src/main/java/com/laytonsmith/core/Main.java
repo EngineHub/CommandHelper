@@ -217,7 +217,19 @@ public class Main {
 			+ " for future runs, you can be sure that the local cache is up to date.")
 		.addFlag("clear-local-cache", "Clears the local cache of all entries, then exits.")
 		.addFlag('d', "do-validation", "Validates all of the uploaded web pages, and prints out a summary of the results."
-			+ " This requires internet connection.");
+			+ " This requires internet connection.")
+		.addFlag("install", "When installing a fresh server, it is useful to have the setup completely automated. If this flag"
+			+ " is set, then the server is assumed to be a fresh ubuntu server, with nothing else on it. In that case,"
+			+ " the server will be installed from scratch automatically. NOTE: This will not account for the fact that"
+			+ " the documentation website is generally configured to allow for multiple versions of documentation. Old"
+			+ " versions will not be accounted for or uploaded. This process, if desired, must be done manually. If this"
+			+ " option is configured, the installation will occur before the upload or processing of files. During installation,"
+			+ " a \"lock\" file will be created, and if that file is present, it is assumed that the installation"
+			+ " has already occured on the instance, and will not be repeated. This is a safety measure to ensure"
+			+ " that the instance will not attempt to be redeployed, making it safe to always add the install"
+			+ " flag. If this flag is set, additional options need to be added to the config file. The remote server"
+			+ " is assumed to be an already running AWS ubuntu instance, with security groups configured and a pem"
+			+ " file available, but no login is necessary.");
 	suite.addMode("site-deploy", siteDeploy);
 
 	ARGUMENT_SUITE = suite;

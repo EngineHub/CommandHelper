@@ -62,8 +62,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -94,6 +92,10 @@ public class SiteDeploy {
     private static final String GITHUB_BASE_URL = "github-base-url";
     private static final String VALIDATOR_URL = "validator-url";
     private static final String POST_SCRIPT = "post-script";
+
+    private static final String INSTALL_URL = "install-url";
+    private static final String INSTALL_PEM_FILE = "install-pem-file";
+    private static final String INSTALL_PUB_KEYS = "install-pub-keys";
 
     public static void run(boolean generate_prefs, boolean useLocalCache, File sitedeploy, String password,
 	    boolean doValidation) throws Exception {
@@ -149,6 +151,15 @@ public class SiteDeploy {
 		+ " executed using the system shell. Leave this option empty to skip this"
 		+ " step. If the file is specified, it must exist, and if it does not end"
 		+ " in .ms, it must be executable."));
+	defaults.add(new Preferences.Preference(INSTALL_URL, "", Preferences.Type.STRING, "The ec2 instance public url."
+		+ " NOTE: The security group of the instance must be configured to allow access to port 22. Ports 80 and"
+		+ " 443 are also used, and should be opened, but that will not affect the installation process."));
+	defaults.add(new Preferences.Preference(INSTALL_PEM_FILE, "", Preferences.Type.STRING, "The path to the PEM file"
+		+ " used for initial login."));
+	defaults.add(new Preferences.Preference(INSTALL_PUB_KEYS, "", Preferences.Type.STRING, "A list of public keys"
+		+ " to upload to, and add to the authorized_keys file on the server. These keys will not"
+		+ " be used by this script, but can allow easier login in the future. If blank, no additional keys"
+		+ " will be uploaded."));
 
 	Preferences prefs = new Preferences("Site-Deploy", Logger.getLogger(SiteDeploy.class.getName()), defaults);
 	if (generate_prefs) {
