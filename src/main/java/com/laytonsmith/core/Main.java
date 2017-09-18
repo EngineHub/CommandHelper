@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.Misc;
+import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
@@ -16,11 +17,13 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.ExampleLocalPackageInstaller;
@@ -82,6 +85,7 @@ public class Main {
     private static final ArgumentParser pnViewerMode;
     private static final ArgumentParser coreFunctionsMode;
     private static final ArgumentParser uiMode;
+    private static final ArgumentParser newMode;
 
     static {
 	MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
@@ -196,6 +200,12 @@ public class Main {
 			+ " command creates a subshell to run the launcher in, so that the original cmdline shell returns.")
 		.addFlag("in-shell", "Runs the launcher in the same shell process. By default, it creates a new process and causes the initial shell to return.");
 	suite.addMode("ui", uiMode);
+	newMode = ArgumentParser.GetParser()
+		.addDescription("Creates a blank script in the specified location with the appropriate permissions, having the correct hashbang, and ready to be executed. If"
+			+ " the specified file already exists, it will refuse to create it, unless --force is set.")
+		.addArgument("Location and name to create the script as. Multiple arguments can be provided, and they will create multiple files.", "<file>", true)
+		.addFlag('f', "force", "Forces the file to be overwritten, even if it already exists");
+	suite.addMode("new", newMode);
 
 	ARGUMENT_SUITE = suite;
     }
@@ -234,7 +244,6 @@ public class Main {
 	    // However, if it is put back, then it needs to be figured out why this causes the terminal
 	    // to lose focus on mac.
 	    //AnnotationChecks.checkForceImplementation();
-
 	    ArgumentParser mode;
 	    ArgumentParser.ArgumentParserResults parsedArgs;
 
@@ -559,6 +568,25 @@ public class Main {
 			    + StringUtils.Join(args, " ") + " --in-shell");
 		    ce.start();
 		    System.exit(0);
+		}
+	    } else if (mode == newMode) {
+		String li = OSUtils.GetLineEnding();
+		for (String file : parsedArgs.getStringListArgument()) {
+		    File f = new File(file);
+		    if (f.exists() && !parsedArgs.isFlagSet('f')) {
+			System.out.println(file + " already exists, refusing to create");
+			continue;
+		    }
+		    f.createNewFile();
+		    f.setExecutable(true);
+		    FileUtil.write("#!/usr/bin/env /usr/local/bin/mscript"
+			    + li + li
+			    + "/**" + li
+			    + " * Name: " + f.getName() + li
+			    + " * Author: " + StaticLayer.GetConvertor().GetUser(null) + li
+			    + " * Creation Date: " + new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy-MM-dd", Target.UNKNOWN)).val() + li
+			    + " * Description: " + li
+			    + " */" + li + li, f, true);
 		}
 	    } else {
 		throw new Error("Should not have gotten here");
