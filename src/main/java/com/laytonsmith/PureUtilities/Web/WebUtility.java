@@ -5,22 +5,44 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.binary.Base64;
 
 /**
@@ -30,336 +52,493 @@ import org.apache.commons.codec.binary.Base64;
  */
 public final class WebUtility {
 
-	public static void main(String[] args) throws Exception {
-		CookieJar stash = new CookieJar();
-		HTTPResponse resp = GetPage(new URL("http://www.google.com/"), HTTPMethod.GET, null, null, stash, true, 60000);
-		StreamUtils.GetSystemOut().println(stash.getCookies(new URL("http://www.google.com")));
+    public static void main(String[] args) throws Exception {
+	CookieJar stash = new CookieJar();
+	HTTPResponse resp = GetPage(new URL("http://www.google.com/"), HTTPMethod.GET, null, null, stash, true, 60000);
+	StreamUtils.GetSystemOut().println(stash.getCookies(new URL("http://www.google.com")));
+    }
+
+    private WebUtility() {
+    }
+    private static int urlRetrieverPoolId = 0;
+    private static ExecutorService urlRetrieverPool = Executors.newCachedThreadPool(new ThreadFactory() {
+	@Override
+	public Thread newThread(Runnable r) {
+	    return new Thread(r, "URLRetrieverThread-" + (++urlRetrieverPoolId));
+	}
+    });
+
+    /**
+     * Gets a web page based on the parameters specified. This is a blocking call, if you wish for it to be event
+     * driven, consider using the GetPage that requires a HTTPResponseCallback.
+     *
+     * @param url The url to navigate to
+     * @param method The HTTP method to use
+     * @param parameters The parameters to be sent. Parameters can be also specified directly in the URL, and they will
+     * be merged. May be null.
+     * @param cookieStash An instance of a cookie stash to use, or null if none is needed. Cookies will automatically be
+     * added and used from this instance.
+     * @param followRedirects If 300 code responses should automatically be followed.
+     * @param timeout Sets the timeout in ms for this connection. 0 means no timeout. If the timeout is reached, a
+     * SocketTimeoutException will be thrown.
+     * @return
+     * @throws IOException
+     */
+    public static HTTPResponse GetPage(URL url, HTTPMethod method, Map<String, List<String>> headers,
+	    Map<String, String> parameters, CookieJar cookieStash, boolean followRedirects, int timeout) throws SocketTimeoutException, IOException {
+	RequestSettings settings = new RequestSettings()
+		.setMethod(method).setHeaders(headers).setParameters(parameters)
+		.setCookieJar(cookieStash).setFollowRedirects(followRedirects).setTimeout(timeout);
+	return GetPage(url, settings);
+    }
+
+    /**
+     * Gets a web page based on the parameters specified. This is a blocking call, if you wish for it to be event
+     * driven, consider using the GetPage that requires a HTTPResponseCallback.
+     *
+     * @param url The url to navigate to
+     * @param method The HTTP method to use
+     * @param parameters The parameters to be sent. Parameters can be also specified directly in the URL, and they will
+     * be merged. May be null.
+     * @param cookieStash An instance of a cookie stash to use, or null if none is needed. Cookies will automatically be
+     * added and used from this instance.
+     * @param followRedirects If 300 code responses should automatically be followed.
+     * @param timeout Sets the timeout in ms for this connection. 0 means no timeout. If the timeout is reached, a
+     * SocketTimeoutException will be thrown.
+     * @param username The username to use in response to HTTP Basic authentication. Null ignores this parameter.
+     * @param password The password to use in response to HTTP Basic authentication. Null ignores this parameter.
+     * @return
+     * @throws IOException
+     */
+    public static HTTPResponse GetPage(URL url, RequestSettings settings) throws SocketTimeoutException, IOException {
+	CookieJar cookieStash = settings.getCookieJar();
+	RawHTTPResponse response = getWebStream(url, settings);
+	StringBuilder b = null;
+	BufferedReader in = new BufferedReader(new InputStreamReader(response.getStream()));
+	if (settings.getDownloadTo() == null) {
+	    b = new StringBuilder();
+	    String line;
+	    while ((line = in.readLine()) != null) {
+		b.append(line).append("\n");
+	    }
+	    in.close();
+	} else {
+	    int r;
+	    OutputStream out = new BufferedOutputStream(new FileOutputStream(settings.getDownloadTo()));
+	    while ((r = in.read()) != -1) {
+		out.write(r);
+	    }
+	    try {
+		out.close();
+	    } finally {
+		in.close();
+	    }
+	}
+	//Assume 1.0 if something breaks
+	String httpVersion = "1.0";
+	Matcher m = Pattern.compile("HTTP/(\\d\\+.\\d+).*").matcher(response.getConnection().getHeaderField(0));
+	if (m.find()) {
+	    httpVersion = m.group(1);
+	}
+	HTTPResponse resp = new HTTPResponse(response.getConnection().getResponseMessage(),
+		response.getConnection().getResponseCode(), response.getConnection().getHeaderFields(), b == null ? null : b.toString(), httpVersion);
+	if (cookieStash != null && resp.getHeaderNames().contains("Set-Cookie")) {
+	    //We need to add the cookie to the stash
+	    for (String h : resp.getHeaders("Set-Cookie")) {
+		cookieStash.addCookie(new Cookie(h, url));
+	    }
+	}
+	return resp;
+    }
+
+    /**
+     * Returns the raw web stream. Cookies are used to initiate the request, but the cookie jar isn't updated with the
+     * received cookies.
+     *
+     * @param url
+     * @param settings
+     * @return
+     * @throws SocketTimeoutException
+     * @throws IOException
+     */
+    public static RawHTTPResponse getWebStream(URL url, RequestSettings _settings) throws SocketTimeoutException, IOException {
+	if (_settings == null) {
+	    _settings = new RequestSettings();
+	}
+	final RequestSettings settings = _settings;
+	HTTPMethod method = settings.getMethod();
+	Map<String, List<String>> headers = settings.getHeaders();
+	Map<String, List<String>> parameters = settings.getParameters();
+	CookieJar cookieStash = settings.getCookieJar();
+	boolean followRedirects = settings.getFollowRedirects();
+	final int timeout = settings.getTimeout();
+	String username = settings.getUsername();
+	String password = settings.getPassword();
+	//First, let's check to see that the url is properly formatted. If there are parameters,
+	//and this is a GET request, we want to tack them on to the end.
+	if (parameters != null && !parameters.isEmpty() && method == HTTPMethod.GET) {
+	    StringBuilder b = new StringBuilder(url.getQuery() == null ? "" : url.getQuery());
+	    if (b.length() != 0) {
+		b.append("&");
+	    }
+	    b.append(encodeParameters(parameters));
+	    String query = b.toString();
+	    url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "?" + query);
 	}
 
-	private WebUtility() {
+	Proxy proxy;
+	if (settings.getProxy() == null) {
+	    proxy = Proxy.NO_PROXY;
+	} else {
+	    proxy = settings.getProxy();
 	}
-	private static int urlRetrieverPoolId = 0;
-	private static ExecutorService urlRetrieverPool = Executors.newCachedThreadPool(new ThreadFactory() {
-		@Override
-		public Thread newThread(Runnable r) {
-			return new Thread(r, "URLRetrieverThread-" + (++urlRetrieverPoolId));
-		}
-	});
+	InetSocketAddress addr = (InetSocketAddress) proxy.address();
+	if (addr != null) {
+	    if (addr.isUnresolved()) {
+		throw new IOException("Could not resolve the proxy address: " + addr.toString());
+	    }
+	}
+	//FIXME: When given a bad proxy, this causes it to stall forever
+	HttpURLConnection conn = (HttpURLConnection) url.openConnection(/*proxy*/);
+	if (conn instanceof HttpsURLConnection
+		&& (settings.getDisableCertChecking() || settings.getUseDefaultTrustStore() == false
+		|| !settings.getTrustStore().isEmpty())) {
+	    HttpsURLConnection conns = (HttpsURLConnection) conn;
+	    // User has requested special handling in the certificates.
 
-	/**
-	 * Gets a web page based on the parameters specified. This is a blocking
-	 * call, if you wish for it to be event driven, consider using the GetPage
-	 * that requires a HTTPResponseCallback.
-	 *
-	 * @param url The url to navigate to
-	 * @param method The HTTP method to use
-	 * @param parameters The parameters to be sent. Parameters can be also
-	 * specified directly in the URL, and they will be merged. May be null.
-	 * @param cookieStash An instance of a cookie stash to use, or null if none
-	 * is needed. Cookies will automatically be added and used from this
-	 * instance.
-	 * @param followRedirects If 300 code responses should automatically be
-	 * followed.
-	 * @param timeout Sets the timeout in ms for this connection. 0 means no timeout. If the timeout
-	 * is reached, a SocketTimeoutException will be thrown.
-	 * @return
-	 * @throws IOException
-	 */
-	public static HTTPResponse GetPage(URL url, HTTPMethod method, Map<String, List<String>> headers,
-			Map<String, String> parameters, CookieJar cookieStash, boolean followRedirects, int timeout) throws SocketTimeoutException, IOException {
-		RequestSettings settings = new RequestSettings()
-				.setMethod(method).setHeaders(headers).setParameters(parameters)
-				.setCookieJar(cookieStash).setFollowRedirects(followRedirects).setTimeout(timeout);
-		return GetPage(url, settings);
-	}
-	/**
-	 * Gets a web page based on the parameters specified. This is a blocking
-	 * call, if you wish for it to be event driven, consider using the GetPage
-	 * that requires a HTTPResponseCallback.
-	 *
-	 * @param url The url to navigate to
-	 * @param method The HTTP method to use
-	 * @param parameters The parameters to be sent. Parameters can be also
-	 * specified directly in the URL, and they will be merged. May be null.
-	 * @param cookieStash An instance of a cookie stash to use, or null if none
-	 * is needed. Cookies will automatically be added and used from this
-	 * instance.
-	 * @param followRedirects If 300 code responses should automatically be
-	 * followed.
-	 * @param timeout Sets the timeout in ms for this connection. 0 means no timeout. If the timeout
-	 * is reached, a SocketTimeoutException will be thrown.
-	 * @param username The username to use in response to HTTP Basic authentication. Null ignores this parameter.
-	 * @param password The password to use in response to HTTP Basic authentication. Null ignores this parameter.
-	 * @return
-	 * @throws IOException
-	 */
-	public static HTTPResponse GetPage(URL url, RequestSettings settings) throws SocketTimeoutException, IOException {
-		CookieJar cookieStash = settings.getCookieJar();
-		RawHTTPResponse response = getWebStream(url, settings);
-		StringBuilder b = null;
-		BufferedReader in = new BufferedReader(new InputStreamReader(response.getStream()));
-		if(settings.getDownloadTo() == null){
-			b = new StringBuilder();
-			String line;
-			while ((line = in.readLine()) != null) {
-				b.append(line).append("\n");
+	    final SSLContext sslc;
+	    try {
+		sslc = SSLContext.getInstance("SSL");
+	    } catch (NoSuchAlgorithmException ex) {
+		throw new IOException(ex);
+	    }
+	    TrustManager _defaultTrustManager = null;
+	    {
+		if(settings.getUseDefaultTrustStore()) {
+		    TrustManagerFactory tmf;
+		    try {
+			tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+		    } catch (NoSuchAlgorithmException ex) {
+			throw new RuntimeException(ex);
+		    }
+		    try {
+			tmf.init((KeyStore)null);
+		    } catch (KeyStoreException ex) {
+			throw new IOException(ex);
+		    }
+		    for(TrustManager tm : tmf.getTrustManagers()) {
+			if(tm instanceof X509TrustManager) {
+			    _defaultTrustManager = tm;
+			    break;
 			}
-			in.close();
+		    }
 		} else {
-			int r;
-			OutputStream out = new BufferedOutputStream(new FileOutputStream(settings.getDownloadTo()));
-			while((r = in.read()) != -1){
-				out.write(r);
+		    _defaultTrustManager = null;
+		}
+	    }
+	    final X509TrustManager defaultTrustManager = (X509TrustManager)_defaultTrustManager;
+	    final TrustManager[] overrideTrustManager = new TrustManager[]{
+		new X509TrustManager() {
+		    @Override
+		    public void checkClientTrusted(X509Certificate[] xcs, String string) throws CertificateException {
+			// Hmm. Not sure when this would be used. Always throw for now.
+			throw new CertificateException("Not supported yet");
+		    }
+
+		    @Override
+		    public void checkServerTrusted(X509Certificate[] xcs, String string) throws CertificateException {
+			if(settings.getDisableCertChecking()) {
+			    // No cert checking, all pass
+			    return;
 			}
-			try{
-				out.close();
-			} finally {
-				in.close();
+			boolean trusted = true;
+			if(defaultTrustManager != null) {
+			    try {
+				defaultTrustManager.checkClientTrusted(xcs, string);
+			    } catch(CertificateException ex) {
+				trusted = false;
+			    }
 			}
-		}
-		//Assume 1.0 if something breaks
-		String httpVersion = "1.0";
-		Matcher m = Pattern.compile("HTTP/(\\d\\+.\\d+).*").matcher(response.getConnection().getHeaderField(0));
-		if(m.find()){
-			httpVersion = m.group(1);
-		}
-		HTTPResponse resp = new HTTPResponse(response.getConnection().getResponseMessage(),
-				response.getConnection().getResponseCode(), response.getConnection().getHeaderFields(), b==null?null:b.toString(), httpVersion);
-		if (cookieStash != null && resp.getHeaderNames().contains("Set-Cookie")) {
-			//We need to add the cookie to the stash
-			for (String h : resp.getHeaders("Set-Cookie")) {
-				cookieStash.addCookie(new Cookie(h, url));
+			if(trusted) {
+			    return;
 			}
-		}
-		return resp;
-	}
-
-	/**
-	 * Returns the raw web stream. Cookies are used to initiate the request, but
-	 * the cookie jar isn't updated with the received cookies.
-	 * @param url
-	 * @param settings
-	 * @return
-	 * @throws SocketTimeoutException
-	 * @throws IOException
-	 */
-	public static RawHTTPResponse getWebStream(URL url, RequestSettings settings) throws SocketTimeoutException, IOException{
-		if(settings == null){
-			settings = new RequestSettings();
-		}
-		HTTPMethod method = settings.getMethod();
-		Map<String, List<String>> headers = settings.getHeaders();
-		Map<String, List<String>> parameters = settings.getParameters();
-		CookieJar cookieStash = settings.getCookieJar();
-		boolean followRedirects = settings.getFollowRedirects();
-		final int timeout = settings.getTimeout();
-		String username = settings.getUsername();
-		String password = settings.getPassword();
-		//First, let's check to see that the url is properly formatted. If there are parameters,
-		//and this is a GET request, we want to tack them on to the end.
-		if (parameters != null && !parameters.isEmpty() && method == HTTPMethod.GET) {
-			StringBuilder b = new StringBuilder(url.getQuery() == null ? "" : url.getQuery());
-			if (b.length() != 0) {
-				b.append("&");
-			}
-			b.append(encodeParameters(parameters));
-			String query = b.toString();
-			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "?" + query);
-		}
-
-		Proxy proxy;
-		if(settings.getProxy() == null){
-			proxy = Proxy.NO_PROXY;
-		} else {
-			proxy = settings.getProxy();
-		}
-		InetSocketAddress addr = (InetSocketAddress)proxy.address();
-		if(addr != null){
-			if(addr.isUnresolved()){
-				throw new IOException("Could not resolve the proxy address: " + addr.toString());
-			}
-		}
-		//FIXME: When given a bad proxy, this causes it to stall forever
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection(/*proxy*/);
-		conn.setConnectTimeout(timeout);
-		conn.setInstanceFollowRedirects(followRedirects);
-		if (cookieStash != null) {
-			String cookies = cookieStash.getCookies(url);
-			if (cookies != null) {
-				conn.setRequestProperty("Cookie", cookies);
-			}
-		}
-		if(username != null && password != null){
-			conn.setRequestProperty("Authorization", "Basic " + new String(Base64.encodeBase64((username + ":" + password).getBytes("UTF-8")), "UTF-8"));
-		}
-		if (headers != null) {
-			for (String key : headers.keySet()) {
-				conn.setRequestProperty(key, StringUtils.Join(headers.get(key), ","));
-			}
-		}
-		conn.setRequestMethod(method.name());
-		if (method == HTTPMethod.POST) {
-			conn.setDoOutput(true);
-			String params = "";
-			if(parameters != null && !parameters.isEmpty()){
-				params = encodeParameters(parameters);
-				conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-			} else if(settings.getRawParameter() != null){
-				params = settings.getRawParameter();
-			}
-			conn.setRequestProperty("Content-Length", Integer.toString(params.length()));
-			OutputStream os = new BufferedOutputStream(conn.getOutputStream());
-			os.write(params.getBytes("UTF-8"));
-			os.close();
-		}
-
-		InputStream is;
-		try{
-			is = conn.getInputStream();
-		} catch(UnknownHostException e){
-			throw e;
-		} catch(Exception e){
-			is = conn.getErrorStream();
-		}
-		if("x-gzip".equals(conn.getContentEncoding()) || "gzip".equals(conn.getContentEncoding())){
-			is = new GZIPInputStream(is);
-		} else if("deflate".equals(conn.getContentEncoding())){
-			is = new InflaterInputStream(is);
-		} else if("identity".equals(conn.getContentEncoding())){
-			//This is the default, meaning no transformation is needed.
-		}
-		if(is == null){
-			throw new IOException("Could not connnect to " + url);
-		}
-		return new RawHTTPResponse(conn, is);
-	}
-
-	/**
-	 * Returns a properly encoded string of parameters.
-	 *
-	 * @param parameters
-	 * @return
-	 */
-	public static String encodeParameters(Map<String, List<String>> parameters) {
-		if (parameters == null) {
-			return "";
-		}
-		StringBuilder b = new StringBuilder();
-		boolean first = true;
-		for (String key : parameters.keySet()) {
-			if (!first) {
-				b.append("&");
-			}
-			first = false;
-
-			List<String> values = parameters.get(key);
-			try {
-				if(values.size() == 1){
-						String value = values.get(0);
-						b.append(URLEncoder.encode(key, "UTF-8")).append("=").append(URLEncoder.encode(value, "UTF-8"));
-				} else {
-						for(String value : values){
-							b.append(URLEncoder.encode(key + "[]", "UTF-8")).append("=").append(URLEncoder.encode(value, "UTF-8"));
-						}
-				}
-			} catch (UnsupportedEncodingException ex) {
-				throw new Error(ex);
-			}
-		}
-		return b.toString();
-	}
-
-	private static void WriteStringToOutputStream(String data, BufferedWriter bw) throws IOException {
-		for (Character c : data.toCharArray()) {
-			bw.write((int) c.charValue());
-		}
-	}
-
-	/**
-	 * A very simple convenience method to get a page, using all the default settings
-	 * found in {@link RequestSettings}.
-	 *
-	 * @param url
-	 * @return
-	 */
-	public static HTTPResponse GetPage(URL url) throws IOException {
-		return GetPage(url, null);
-	}
-
-	/**
-	 * A very simple convenience method to get a page using a string url.
-	 *
-	 * @param url
-	 * @return
-	 * @throws IOException
-	 */
-	public static HTTPResponse GetPage(String url) throws IOException {
-		return GetPage(new URL(url));
-	}
-
-	/**
-	 * A very simple convenience method to get a page. Only the contents are
-	 * returned by this method.
-	 *
-	 * @param url
-	 * @return
-	 * @throws IOException
-	 */
-	public static String GetPageContents(URL url) throws IOException {
-		return GetPage(url).getContent();
-	}
-
-	/**
-	 * A very simple convenience method to get a page. Only the contents are
-	 * returned by this method.
-	 *
-	 * @param url
-	 * @return
-	 * @throws IOException
-	 */
-	public static String GetPageContents(String url) throws IOException {
-		return GetPage(url).getContent();
-	}
-
-	/**
-	 * Makes an asynchronous call to a URL, and runs the callback when finished.
-	 */
-	public static void GetPage(final URL url, final RequestSettings settings, final HTTPResponseCallback callback) {
-		urlRetrieverPool.submit(new Runnable() {
-			@Override
-			public void run() {
+			// If any of the certificates are trusted, then the whole chain is trusted
+			for(X509Certificate c : xcs) {
+			    // Unfortunately, we do not know what schemes to use, so we must walk through each
+			    // trust store item one at a time. We have a documented guarantee that we will walk
+			    // this list from top to bottom, so we have a linked hash map.
+			    LinkedHashMap<String, String> ts = settings.getTrustStore();
+			    for(String fingerprint : ts.keySet()) {
+				fingerprint = fingerprint.toLowerCase().replace(" ", "");
 				try {
-					HTTPResponse response = GetPage(url, settings);
-					if (callback == null) {
-						return;
-					}
-					callback.response(response);
-				} catch (IOException ex) {
-					if (callback == null) {
-						return;
-					}
-					callback.error(ex);
+				    String scheme = ts.get(fingerprint);
+				    String fp = getThumbPrint(c, scheme).toLowerCase().replace(" ", "");
+				    if(fp.equals(fingerprint)) {
+					return;
+				    }
+				} catch (NoSuchAlgorithmException | CertificateEncodingException ex) {
+				    throw new RuntimeException(ex);
 				}
+			    }
 			}
-		});
+			// None of the certificates matched, so throw an exception
+			throw new CertificateException();
+		    }
+
+		    @Override
+		    public X509Certificate[] getAcceptedIssuers() {
+			if(settings.getDisableCertChecking()) {
+			    return new X509Certificate[0];
+			}
+			if(defaultTrustManager != null) {
+			    return defaultTrustManager.getAcceptedIssuers();
+			}
+			return new X509Certificate[0];
+		    }
+		}
+	    };
+	    try {
+		sslc.init(null, overrideTrustManager, new java.security.SecureRandom());
+	    } catch (KeyManagementException ex) {
+		throw new IOException(ex);
+	    }
+	    final SSLSocketFactory ssf;
+	    ssf = sslc.getSocketFactory();
+	    conns.setSSLSocketFactory(new SSLSocketFactory() {
+
+		@Override
+		public String[] getDefaultCipherSuites() {
+		    return ssf.getDefaultCipherSuites();
+		}
+
+		@Override
+		public String[] getSupportedCipherSuites() {
+		    return ssf.getSupportedCipherSuites();
+		}
+
+		@Override
+		public Socket createSocket(Socket socket, String string, int i, boolean bln) throws IOException {
+		    return ssf.createSocket(socket, string, i, bln);
+		}
+
+		@Override
+		public Socket createSocket(String string, int i) throws IOException, UnknownHostException {
+		    return ssf.createSocket(string, i);
+		}
+
+		@Override
+		public Socket createSocket(String string, int i, InetAddress ia, int i1) throws IOException, UnknownHostException {
+		    return ssf.createSocket(string, i, ia, i1);
+		}
+
+		@Override
+		public Socket createSocket(InetAddress ia, int i) throws IOException {
+		    return ssf.createSocket(ia, i);
+		}
+
+		@Override
+		public Socket createSocket(InetAddress ia, int i, InetAddress ia1, int i1) throws IOException {
+		    return ssf.createSocket(ia, i, ia1, i1);
+		}
+	    });
+	}
+	conn.setConnectTimeout(timeout);
+	conn.setInstanceFollowRedirects(followRedirects);
+	if (cookieStash != null) {
+	    String cookies = cookieStash.getCookies(url);
+	    if (cookies != null) {
+		conn.setRequestProperty("Cookie", cookies);
+	    }
+	}
+	if (username != null && password != null) {
+	    conn.setRequestProperty("Authorization", "Basic " + new String(Base64.encodeBase64((username + ":" + password).getBytes("UTF-8")), "UTF-8"));
+	}
+	if (headers != null) {
+	    for (String key : headers.keySet()) {
+		conn.setRequestProperty(key, StringUtils.Join(headers.get(key), ","));
+	    }
+	}
+	conn.setRequestMethod(method.name());
+	if (method == HTTPMethod.POST) {
+	    conn.setDoOutput(true);
+	    String params = "";
+	    if (parameters != null && !parameters.isEmpty()) {
+		params = encodeParameters(parameters);
+		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+	    } else if (settings.getRawParameter() != null) {
+		params = settings.getRawParameter();
+	    }
+	    conn.setRequestProperty("Content-Length", Integer.toString(params.length()));
+	    OutputStream os = new BufferedOutputStream(conn.getOutputStream());
+	    os.write(params.getBytes("UTF-8"));
+	    os.close();
 	}
 
-	/**
-	 * Given a query string "a=1&b=2", returns a map of that data
-	 * @param query
-	 * @return
-	 */
-	public static Map<String, String> getQueryMap(String query) {
-		Map<String, String> map = new HashMap<String, String>();
-		if(query == null){
-			return map;
-		}
-		String[] params = query.split("&");
-		for (String param : params) {
-			String name = param.split("=")[0];
-			String value = param.split("=")[1];
-			map.put(name, value);
-		}
-		return map;
+	InputStream is;
+	try {
+	    is = conn.getInputStream();
+	} catch (UnknownHostException e) {
+	    throw e;
+	} catch (Exception e) {
+	    is = conn.getErrorStream();
 	}
+	if ("x-gzip".equals(conn.getContentEncoding()) || "gzip".equals(conn.getContentEncoding())) {
+	    is = new GZIPInputStream(is);
+	} else if ("deflate".equals(conn.getContentEncoding())) {
+	    is = new InflaterInputStream(is);
+	} else if ("identity".equals(conn.getContentEncoding())) {
+	    //This is the default, meaning no transformation is needed.
+	}
+	if (is == null) {
+	    throw new IOException("Could not connnect to " + url);
+	}
+	return new RawHTTPResponse(conn, is);
+    }
+
+    /**
+     * Returns a properly encoded string of parameters.
+     *
+     * @param parameters
+     * @return
+     */
+    public static String encodeParameters(Map<String, List<String>> parameters) {
+	if (parameters == null) {
+	    return "";
+	}
+	StringBuilder b = new StringBuilder();
+	boolean first = true;
+	for (String key : parameters.keySet()) {
+	    if (!first) {
+		b.append("&");
+	    }
+	    first = false;
+
+	    List<String> values = parameters.get(key);
+	    try {
+		if (values.size() == 1) {
+		    String value = values.get(0);
+		    b.append(URLEncoder.encode(key, "UTF-8")).append("=").append(URLEncoder.encode(value, "UTF-8"));
+		} else {
+		    for (String value : values) {
+			b.append(URLEncoder.encode(key + "[]", "UTF-8")).append("=").append(URLEncoder.encode(value, "UTF-8"));
+		    }
+		}
+	    } catch (UnsupportedEncodingException ex) {
+		throw new Error(ex);
+	    }
+	}
+	return b.toString();
+    }
+
+    private static void WriteStringToOutputStream(String data, BufferedWriter bw) throws IOException {
+	for (Character c : data.toCharArray()) {
+	    bw.write((int) c.charValue());
+	}
+    }
+
+    /**
+     * A very simple convenience method to get a page, using all the default settings found in {@link RequestSettings}.
+     *
+     * @param url
+     * @return
+     */
+    public static HTTPResponse GetPage(URL url) throws IOException {
+	return GetPage(url, null);
+    }
+
+    /**
+     * A very simple convenience method to get a page using a string url.
+     *
+     * @param url
+     * @return
+     * @throws IOException
+     */
+    public static HTTPResponse GetPage(String url) throws IOException {
+	return GetPage(new URL(url));
+    }
+
+    /**
+     * A very simple convenience method to get a page. Only the contents are returned by this method.
+     *
+     * @param url
+     * @return
+     * @throws IOException
+     */
+    public static String GetPageContents(URL url) throws IOException {
+	return GetPage(url).getContent();
+    }
+
+    /**
+     * A very simple convenience method to get a page. Only the contents are returned by this method.
+     *
+     * @param url
+     * @return
+     * @throws IOException
+     */
+    public static String GetPageContents(String url) throws IOException {
+	return GetPage(url).getContent();
+    }
+
+    /**
+     * Makes an asynchronous call to a URL, and runs the callback when finished.
+     */
+    public static void GetPage(final URL url, final RequestSettings settings, final HTTPResponseCallback callback) {
+	urlRetrieverPool.submit(new Runnable() {
+	    @Override
+	    public void run() {
+		try {
+		    HTTPResponse response = GetPage(url, settings);
+		    if (callback == null) {
+			return;
+		    }
+		    callback.response(response);
+		} catch (IOException ex) {
+		    if (callback == null) {
+			return;
+		    }
+		    callback.error(ex);
+		}
+	    }
+	});
+    }
+
+    /**
+     * Given a query string "a=1&b=2", returns a map of that data
+     *
+     * @param query
+     * @return
+     */
+    public static Map<String, String> getQueryMap(String query) {
+	Map<String, String> map = new HashMap<String, String>();
+	if (query == null) {
+	    return map;
+	}
+	String[] params = query.split("&");
+	for (String param : params) {
+	    String name = param.split("=")[0];
+	    String value = param.split("=")[1];
+	    map.put(name, value);
+	}
+	return map;
+    }
+
+    /**
+     * Given an X509Certificate, calculates and returns the fingerprint in the given encryption scheme
+     *
+     * @param cert The certificate to get the fingerprint from
+     * @param encryptionScheme The encryption scheme, for instance "SHA-1".
+     * @return The hex fingerprint
+     * @throws NoSuchAlgorithmException
+     * @throws CertificateEncodingException
+     */
+    public static String getThumbPrint(X509Certificate cert, String encryptionScheme)
+	    throws NoSuchAlgorithmException, CertificateEncodingException {
+	MessageDigest md = MessageDigest.getInstance("SHA-1");
+	byte[] der = cert.getEncoded();
+	md.update(der);
+	byte[] digest = md.digest();
+	return StringUtils.toHex(digest);
+
+    }
+
 }
