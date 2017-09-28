@@ -719,18 +719,16 @@ public class Meta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCLocation loc;
-			String type;
+			CArray ret;
 			if(sender instanceof MCBlockCommandSender) {
 				loc = ((MCBlockCommandSender) sender).getBlock().getLocation();
-				type = "block";
+				ret = ObjectGenerator.GetGenerator().location(loc, false); // Do not include pitch/yaw.
 			} else if(sender instanceof MCCommandMinecart) {
 				loc = ((MCCommandMinecart) sender).getLocation();
-				type = "minecart";
+				ret = ObjectGenerator.GetGenerator().location(loc, true); // Include pitch/yaw.
 			} else {
 				return CNull.NULL;
 			}
-			CArray ret = ObjectGenerator.GetGenerator().location(loc);
-			ret.set("type", new CString(type, t), t);
 			return ret;
 		}
 
@@ -747,8 +745,8 @@ public class Meta {
 		@Override
 		public String docs() {
 			return "locationArray {} If this command was being run from a command block block or minecart, this will"
-					+ " return the location of the block or minecart with an additional \"type\" key with value"
-					+ " \"block\" or \"minecart\" for command block blocks and command block minecarts respectively."
+					+ " return the location of the block or minecart."
+					+ " The yaw and pitch will only be included in the locationArray for minecart command blocks."
 					+ " If a player or console ran this command (or any other command sender), this will return null.";
 		}
 
