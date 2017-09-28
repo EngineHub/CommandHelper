@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -118,6 +119,8 @@ public class AliasCore {
 		Environment env = Environment.createEnvironment(gEnv, cEnv);
 		if (player instanceof MCBlockCommandSender) {
 			cEnv.SetBlockCommandSender((MCBlockCommandSender) player);
+		} else if(player instanceof MCCommandMinecart) {
+			cEnv.SetCommandMinecartSender((MCCommandMinecart) player);
 		}
 
 		if (scripts == null) {
