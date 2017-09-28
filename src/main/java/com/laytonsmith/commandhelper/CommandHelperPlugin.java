@@ -562,18 +562,15 @@ public class CommandHelperPlugin extends JavaPlugin {
 			if (sender instanceof Player) {
 				PlayerCommandPreprocessEvent pcpe = new PlayerCommandPreprocessEvent((Player) sender, command);
 				playerListener.onPlayerCommandPreprocess(pcpe);
-			} else if (sender instanceof ConsoleCommandSender) {
+			} else if (sender instanceof ConsoleCommandSender
+					|| sender instanceof BlockCommandSender || sender instanceof CommandMinecart) {
+				// Console commands and command blocks/minecarts all fire the same event, so pass them to the
+				// event handler that would get them if they would not have started with "/runalias".
 				if (command.startsWith("/")) {
 					command = command.substring(1);
 				}
-				ServerCommandEvent sce = new ServerCommandEvent((ConsoleCommandSender) sender, command);
+				ServerCommandEvent sce = new ServerCommandEvent(sender, command);
 				serverListener.onServerCommand(sce);
-			} else if(sender instanceof BlockCommandSender){
-				MCCommandSender s = new BukkitMCBlockCommandSender((BlockCommandSender) sender);
-				Static.getAliasCore().alias(command, s);
-			} else if(sender instanceof CommandMinecart) {
-				MCCommandSender s = new BukkitMCCommandMinecart((CommandMinecart) sender);
-				Static.getAliasCore().alias(command, s);
 			}
 			return true;
 		} else if(cmdName.equalsIgnoreCase("interpreter-on")){
