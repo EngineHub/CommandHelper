@@ -1,10 +1,12 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCBlockCommandSender;
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -134,12 +136,6 @@ public class Weather {
 			boolean b = Static.getBoolean(args[0]);
 			MCWorld w = null;
 			int duration = -1;
-			if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
-				w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
-			}
-			if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCBlockCommandSender) {
-				w = env.getEnv(CommandHelperEnvironment.class).GetBlockCommandSender().getBlock().getWorld();
-			}
 			if (args.length == 2) {
 				if (args[1] instanceof CString) {
 					w = Static.getServer().getWorld(args[1].val());
@@ -152,6 +148,16 @@ public class Weather {
 			if (args.length == 3) {
 				w = Static.getServer().getWorld(args[1].val());
 				duration = Static.getInt32(args[2], t);
+			}
+			if(w == null) {
+				MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				if(sender instanceof MCPlayer) {
+					w = ((MCPlayer) sender).getWorld();
+				} else if(sender instanceof MCBlockCommandSender) {
+					w = ((MCBlockCommandSender) sender).getBlock().getWorld();
+				} else if(sender instanceof MCCommandMinecart) {
+					w = ((MCCommandMinecart) sender).getWorld();
+				}
 			}
 			if (w != null) {
 				w.setStorm(b);

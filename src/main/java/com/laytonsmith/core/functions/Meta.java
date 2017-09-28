@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.AliasCore;
@@ -716,12 +717,21 @@ public class Meta {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCBlockCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetBlockCommandSender();
-			if(cs != null){
-				MCLocation l = (cs.getBlock().getLocation());
-				return ObjectGenerator.GetGenerator().location(l);
+			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCLocation loc;
+			String type;
+			if(sender instanceof MCBlockCommandSender) {
+				loc = ((MCBlockCommandSender) sender).getBlock().getLocation();
+				type = "block";
+			} else if(sender instanceof MCCommandMinecart) {
+				loc = ((MCCommandMinecart) sender).getLocation();
+				type = "minecart";
+			} else {
+				return CNull.NULL;
 			}
-			return CNull.NULL;
+			CArray ret = ObjectGenerator.GetGenerator().location(loc);
+			ret.set("type", new CString(type, t), t);
+			return ret;
 		}
 
 		@Override
@@ -736,8 +746,10 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "locationArray {} If this command was being run from a command block, this will return the location of"
-					+ " the block. If a player or console ran this command, (or any other command sender) this will return null.";
+			return "locationArray {} If this command was being run from a command block block or minecart, this will"
+					+ " return the location of the block or minecart with an additional \"type\" key with value"
+					+ " \"block\" or \"minecart\" for command block blocks and command block minecarts respectively."
+					+ " If a player or console ran this command (or any other command sender), this will return null.";
 		}
 
 		@Override

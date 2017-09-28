@@ -3,8 +3,10 @@
 package com.laytonsmith.commandhelper;
 
 import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCConsoleCommandSender;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.events.BukkitMiscEvents;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.InternalException;
@@ -12,7 +14,9 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.logging.Level;
+import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -29,11 +33,18 @@ public class CommandHelperServerListener implements Listener{
 		//Run this first, so external events can intercept it.
 		BukkitMiscEvents.BukkitMCConsoleCommandEvent cce = new BukkitMiscEvents.BukkitMCConsoleCommandEvent(event);
 		EventUtils.TriggerExternal(cce);
-        MCCommandSender player = new BukkitMCCommandSender(event.getSender());
-        if(event.getSender() instanceof ConsoleCommandSender){
-            //Need the more specific subtype for player()
+		
+		// Select the proper CommandSender wrapper.
+        MCCommandSender player;
+        if(event.getSender() instanceof ConsoleCommandSender){ // Console.
             player = new BukkitMCConsoleCommandSender((ConsoleCommandSender)event.getSender());
-        }
+        } else if(event.getSender() instanceof BlockCommandSender){ // Commandblock blocks.
+            player = new BukkitMCBlockCommandSender((BlockCommandSender)event.getSender());
+        } else if(event.getSender() instanceof CommandMinecart) { // Commandblock minecarts.
+            player = new BukkitMCCommandMinecart((CommandMinecart) event.getSender());
+        } else { // Players or unknown CommandSenders.
+			player = new BukkitMCCommandSender(event.getSender());
+		}
         boolean match = false;
         try {
             match = Static.getAliasCore().alias("/" + event.getCommand(), player);

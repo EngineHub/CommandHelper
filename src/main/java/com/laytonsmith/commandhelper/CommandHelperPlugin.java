@@ -37,6 +37,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
@@ -87,6 +88,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.entity.minecart.CommandMinecart;
 
 /**
  * Entry point for the plugin.
@@ -567,7 +569,10 @@ public class CommandHelperPlugin extends JavaPlugin {
 				ServerCommandEvent sce = new ServerCommandEvent((ConsoleCommandSender) sender, command);
 				serverListener.onServerCommand(sce);
 			} else if(sender instanceof BlockCommandSender){
-				MCCommandSender s = new BukkitMCBlockCommandSender((BlockCommandSender)sender);
+				MCCommandSender s = new BukkitMCBlockCommandSender((BlockCommandSender) sender);
+				Static.getAliasCore().alias(command, s);
+			} else if(sender instanceof CommandMinecart) {
+				MCCommandSender s = new BukkitMCCommandMinecart((CommandMinecart) sender);
 				Static.getAliasCore().alias(command, s);
 			}
 			return true;
@@ -576,7 +581,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				int interpreterTimeout = Prefs.InterpreterTimeout();
 				if(interpreterTimeout != 0){
 					interpreterUnlockedUntil = (interpreterTimeout * 60 * 1000) + System.currentTimeMillis();
-					sender.sendMessage("Inpterpreter mode unlocked for " + interpreterTimeout + " minute"
+					sender.sendMessage("Interpreter mode unlocked for " + interpreterTimeout + " minute"
 							+ (interpreterTimeout==1?"":"s"));
 				}
 			} else {
