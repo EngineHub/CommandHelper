@@ -66,6 +66,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -359,6 +360,29 @@ public class Web {
 		    SocketAddress addr = new InetSocketAddress(proxyURL, port);
 		    Proxy proxy = new Proxy(type, addr);
 		    settings.setProxy(proxy);
+		}
+		if(csettings.containsKey("trustStore")) {
+		    Construct trustStore = csettings.get("trustStore", t);
+		    if(trustStore instanceof CBoolean && Static.getBoolean(trustStore) == false) {
+			settings.setDisableCertChecking(true);
+		    } else if(trustStore instanceof CArray) {
+			CArray trustStoreA = ((CArray)trustStore);
+			LinkedHashMap<String, String> trustStoreJ = new LinkedHashMap<>((int)trustStoreA.size());
+			final String noDefault = "no default";
+			for(String key : trustStoreA.stringKeySet()) {
+			    String value = trustStoreA.get(key, t).val();
+			    if(noDefault.equals(key) && noDefault.equals(value)) {
+				settings.setUseDefaultTrustStore(false);
+				continue;
+			    }
+			    trustStoreJ.put(key, value);
+			}
+			settings.setTrustStore(trustStoreJ);
+		    } else if(trustStore instanceof CNull) {
+			// Do nothing, use the default settings
+		    } else {
+			throw new CRECastException("Unexpected type for value trustStore in " + getName(), t);
+		    }
 		}
 		if (csettings.containsKey("download")) {
 		    Construct download = csettings.get("download", t);

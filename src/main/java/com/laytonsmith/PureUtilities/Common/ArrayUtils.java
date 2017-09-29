@@ -129,6 +129,7 @@ public class ArrayUtils {
 	 * @param finish The ending node (inclusive).
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T> T [] slice(T[] array, int start, int finish){
 		int size = Math.abs(start - finish) + 1;
 		Object newArray = Array.newInstance(array.getClass().getComponentType(), size);
@@ -365,6 +366,7 @@ public class ArrayUtils {
 	 * @param array The "boxed" array
 	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static char[] unbox(Character[] array){
 		if(array == null){
 			return null;
@@ -384,6 +386,7 @@ public class ArrayUtils {
 	 * @param array The "boxed" array
 	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static byte[] unbox(Byte[] array){
 		if(array == null){
 			return null;
@@ -403,6 +406,7 @@ public class ArrayUtils {
 	 * @param array The "boxed" array
 	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static short[] unbox(Short[] array){
 		if(array == null){
 			return null;
@@ -422,6 +426,7 @@ public class ArrayUtils {
 	 * @param array The "boxed" array
 	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static int[] unbox(Integer[] array){
 		if(array == null){
 			return null;
@@ -441,6 +446,7 @@ public class ArrayUtils {
 	 * @param array The "boxed" array
 	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static long[] unbox(Long[] array){
 		if(array == null){
 			return null;
@@ -460,6 +466,7 @@ public class ArrayUtils {
 	 * @param array The "boxed" array
 	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static float[] unbox(Float[] array){
 		if(array == null){
 			return null;
@@ -479,6 +486,7 @@ public class ArrayUtils {
 	 * @param array The "boxed" array
 	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static double[] unbox(Double[] array){
 		if(array == null){
 			return null;
@@ -498,6 +506,7 @@ public class ArrayUtils {
 	 * @param array The "boxed" array
 	 * @return The "unboxed" array
 	 */
+	@SuppressWarnings("UnnecessaryUnboxing")
 	public static boolean[] unbox(Boolean[] array){
 		if(array == null){
 			return null;
@@ -677,10 +686,11 @@ public class ArrayUtils {
 	 * @param list
 	 * @return
 	 */
-	public static <T> T[] asArray(Class<T> clazz, List<?> list){
+	@SuppressWarnings("unchecked")
+	public static <T> T[] asArray(Class<T> clazz, List<T> list){
 		T[] obj = (T[]) Array.newInstance(clazz, list.size());
 		for(int i = 0; i < list.size(); i++){
-			obj[i] = (T)list.get(i);
+			obj[i] = list.get(i);
 		}
 		return obj;
 	}
@@ -695,6 +705,7 @@ public class ArrayUtils {
 	 * @param toClass
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T> T cast(Object array, Class<T> toArrayClass){
 		if(!array.getClass().isArray()){
 			throw new ClassCastException();
@@ -709,6 +720,7 @@ public class ArrayUtils {
 		return (T)obj;
 	}
 
+	@SuppressWarnings("UnnecessaryUnboxing")
 	private static void doSet(Object array, int index, Object o){
 		Class<?> componentType = array.getClass().getComponentType();
 		if(componentType.isPrimitive()){

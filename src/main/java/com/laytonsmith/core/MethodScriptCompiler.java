@@ -106,7 +106,7 @@ public final class MethodScriptCompiler {
 	if (script.isEmpty()) {
 	    return new ArrayList<>();
 	}
-	if (script.charAt(0) == 65279) {
+	if ((int) script.charAt(0) == 65279) {
 	    // Remove the UTF-8 Byte Order Mark, if present.
 	    script = script.substring(1);
 	}
@@ -132,7 +132,7 @@ public final class MethodScriptCompiler {
 	StringBuilder buf = new StringBuilder();
 	int line_num = 1;
 	int column = 1;
-	int lastKnownI = 0;
+	int lastColumn = 0;
 	Target target = Target.UNKNOWN;
 	//first we lex
 	for (int i = 0; i < script.length(); i++) {
@@ -146,11 +146,11 @@ public final class MethodScriptCompiler {
 		c3 = script.charAt(i + 2);
 	    }
 
-	    column += (i - lastKnownI);
-	    lastKnownI = i;
+	    column += i - lastColumn;
+	    lastColumn = i;
 	    if (c == '\n') {
 		line_num++;
-		column = 0;
+		column = 1;
 		if (!inMultiline && !inPureMScript) {
 		    inCommand = true;
 		}
@@ -221,9 +221,9 @@ public final class MethodScriptCompiler {
 		    buf = new StringBuilder();
 		    target = new Target(line_num, file, column);
 		    continue;
+
 		}
 	    }
-
 	    if (in_comment) {
 		buf.append(c);
 		continue;
@@ -551,7 +551,7 @@ public final class MethodScriptCompiler {
 //                if (buf.length() > 0) {
 //                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 //                    buf = new StringBuilder();
-//		      target = new Target(line_num, file, column);
+//				  target = new Target(line_num, file, column);
 //                }
 //                token_list.add(new Token(TType.BIT_AND, "&", target));
 //                continue;
@@ -560,7 +560,7 @@ public final class MethodScriptCompiler {
 //                if (buf.length() > 0) {
 //                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 //                    buf = new StringBuilder();
-//		      target = new Target(line_num, file, column);
+//				  target = new Target(line_num, file, column);
 //                }
 //                token_list.add(new Token(TType.BIT_OR, "|", target));
 //                continue;
@@ -569,7 +569,7 @@ public final class MethodScriptCompiler {
 //                if (buf.length() > 0) {
 //                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 //                    buf = new StringBuilder();
-//		      target = new Target(line_num, file, column);
+//				  target = new Target(line_num, file, column);
 //                }
 //                token_list.add(new Token(TType.BIT_XOR, "^", target));
 //                continue;
@@ -1102,7 +1102,7 @@ public final class MethodScriptCompiler {
 
 	List<Token> tempStream = new ArrayList<>(stream.size());
 	for (Token t : stream) {
-	    if (!t.type.isWhitespace() && !t.type.isComment()) {
+	    if (!t.type.isWhitespace()) {
 		tempStream.add(t);
 	    }
 	}
@@ -1228,7 +1228,7 @@ public final class MethodScriptCompiler {
 		int array = arrayStack.pop().get();
 		//index is the location of the first node with the index
 		int index = array + 1;
-		if (!tree.hasChildren()) {
+		if (!tree.hasChildren() || array == -1) {
 		    throw new ConfigCompileException("Brackets are illegal here", t.target);
 		}
 		ParseTree myArray = tree.getChildAt(array);
@@ -1898,9 +1898,6 @@ public final class MethodScriptCompiler {
 	if (func == null) {
 	    //It's a proc call. Let's see if we can optimize it
 	    Procedure p = null;
-	    //Did you know about this feature in java? I didn't until recently.
-	    //I break to the loop label, which makes it jump to the bottom of
-	    //that loop.
 	    loop:
 	    for (List<Procedure> proc : procs) {
 		for (Procedure pp : proc) {

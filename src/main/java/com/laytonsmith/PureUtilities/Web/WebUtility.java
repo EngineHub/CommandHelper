@@ -6,15 +6,29 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -24,6 +38,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.binary.Base64;
 
 /**
@@ -148,10 +168,11 @@ public final class WebUtility {
      * @throws SocketTimeoutException
      * @throws IOException
      */
-    public static RawHTTPResponse getWebStream(URL url, RequestSettings settings) throws SocketTimeoutException, IOException {
-	if (settings == null) {
-	    settings = new RequestSettings();
+    public static RawHTTPResponse getWebStream(URL url, RequestSettings _settings) throws SocketTimeoutException, IOException {
+	if (_settings == null) {
+	    _settings = new RequestSettings();
 	}
+	final RequestSettings settings = _settings;
 	Logger logger = settings.getLogger();
 	HTTPMethod method = settings.getMethod();
 	Map<String, List<String>> headers = settings.getHeaders();
@@ -211,6 +232,148 @@ public final class WebUtility {
 	    logger.log(Level.INFO, "Opening connection...");
 	}
 	HttpURLConnection conn = (HttpURLConnection) url.openConnection(/*proxy*/);
+	if (conn instanceof HttpsURLConnection
+		&& (settings.getDisableCertChecking() || settings.getUseDefaultTrustStore() == false
+		|| !settings.getTrustStore().isEmpty())) {
+	    HttpsURLConnection conns = (HttpsURLConnection) conn;
+	    // User has requested special handling in the certificates.
+
+	    final SSLContext sslc;
+	    try {
+		sslc = SSLContext.getInstance("SSL");
+	    } catch (NoSuchAlgorithmException ex) {
+		throw new IOException(ex);
+	    }
+	    TrustManager _defaultTrustManager = null;
+	    {
+		if(settings.getUseDefaultTrustStore()) {
+		    TrustManagerFactory tmf;
+		    try {
+			tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+		    } catch (NoSuchAlgorithmException ex) {
+			throw new RuntimeException(ex);
+		    }
+		    try {
+			tmf.init((KeyStore)null);
+		    } catch (KeyStoreException ex) {
+			throw new IOException(ex);
+		    }
+		    for(TrustManager tm : tmf.getTrustManagers()) {
+			if(tm instanceof X509TrustManager) {
+			    _defaultTrustManager = tm;
+			    break;
+			}
+		    }
+		} else {
+		    _defaultTrustManager = null;
+		}
+	    }
+	    final X509TrustManager defaultTrustManager = (X509TrustManager)_defaultTrustManager;
+	    final TrustManager[] overrideTrustManager = new TrustManager[]{
+		new X509TrustManager() {
+		    @Override
+		    public void checkClientTrusted(X509Certificate[] xcs, String string) throws CertificateException {
+			// Hmm. Not sure when this would be used. Always throw for now.
+			throw new CertificateException("Not supported yet");
+		    }
+
+		    @Override
+		    public void checkServerTrusted(X509Certificate[] xcs, String string) throws CertificateException {
+			if(settings.getDisableCertChecking()) {
+			    // No cert checking, all pass
+			    return;
+			}
+			boolean trusted = true;
+			if(defaultTrustManager != null) {
+			    try {
+				defaultTrustManager.checkClientTrusted(xcs, string);
+			    } catch(CertificateException ex) {
+				trusted = false;
+			    }
+			}
+			if(trusted) {
+			    return;
+			}
+			// If any of the certificates are trusted, then the whole chain is trusted
+			for(X509Certificate c : xcs) {
+			    // Unfortunately, we do not know what schemes to use, so we must walk through each
+			    // trust store item one at a time. We have a documented guarantee that we will walk
+			    // this list from top to bottom, so we have a linked hash map.
+			    LinkedHashMap<String, String> ts = settings.getTrustStore();
+			    for(String fingerprint : ts.keySet()) {
+				fingerprint = fingerprint.toLowerCase().replace(" ", "");
+				try {
+				    String scheme = ts.get(fingerprint);
+				    String fp = getThumbPrint(c, scheme).toLowerCase().replace(" ", "");
+				    if(fp.equals(fingerprint)) {
+					return;
+				    }
+				} catch (NoSuchAlgorithmException | CertificateEncodingException ex) {
+				    throw new RuntimeException(ex);
+				}
+			    }
+			}
+			// None of the certificates matched, so throw an exception
+			throw new CertificateException();
+		    }
+
+		    @Override
+		    public X509Certificate[] getAcceptedIssuers() {
+			if(settings.getDisableCertChecking()) {
+			    return new X509Certificate[0];
+			}
+			if(defaultTrustManager != null) {
+			    return defaultTrustManager.getAcceptedIssuers();
+			}
+			return new X509Certificate[0];
+		    }
+		}
+	    };
+	    try {
+		sslc.init(null, overrideTrustManager, new java.security.SecureRandom());
+	    } catch (KeyManagementException ex) {
+		throw new IOException(ex);
+	    }
+	    final SSLSocketFactory ssf;
+	    ssf = sslc.getSocketFactory();
+	    conns.setSSLSocketFactory(new SSLSocketFactory() {
+
+		@Override
+		public String[] getDefaultCipherSuites() {
+		    return ssf.getDefaultCipherSuites();
+		}
+
+		@Override
+		public String[] getSupportedCipherSuites() {
+		    return ssf.getSupportedCipherSuites();
+		}
+
+		@Override
+		public Socket createSocket(Socket socket, String string, int i, boolean bln) throws IOException {
+		    return ssf.createSocket(socket, string, i, bln);
+		}
+
+		@Override
+		public Socket createSocket(String string, int i) throws IOException, UnknownHostException {
+		    return ssf.createSocket(string, i);
+		}
+
+		@Override
+		public Socket createSocket(String string, int i, InetAddress ia, int i1) throws IOException, UnknownHostException {
+		    return ssf.createSocket(string, i, ia, i1);
+		}
+
+		@Override
+		public Socket createSocket(InetAddress ia, int i) throws IOException {
+		    return ssf.createSocket(ia, i);
+		}
+
+		@Override
+		public Socket createSocket(InetAddress ia, int i, InetAddress ia1, int i1) throws IOException {
+		    return ssf.createSocket(ia, i, ia1, i1);
+		}
+	    });
+	}
 	conn.setConnectTimeout(timeout);
 	conn.setInstanceFollowRedirects(followRedirects);
 	if (cookieStash != null) {
@@ -398,6 +561,12 @@ public final class WebUtility {
 	});
     }
 
+    /**
+     * Given a query string "a=1&b=2", returns a map of that data
+     *
+     * @param query
+     * @return
+     */
     public static Map<String, String> getQueryMap(String query) {
 	Map<String, String> map = new HashMap<String, String>();
 	if (query == null) {
@@ -411,4 +580,24 @@ public final class WebUtility {
 	}
 	return map;
     }
+
+    /**
+     * Given an X509Certificate, calculates and returns the fingerprint in the given encryption scheme
+     *
+     * @param cert The certificate to get the fingerprint from
+     * @param encryptionScheme The encryption scheme, for instance "SHA-1".
+     * @return The hex fingerprint
+     * @throws NoSuchAlgorithmException
+     * @throws CertificateEncodingException
+     */
+    public static String getThumbPrint(X509Certificate cert, String encryptionScheme)
+	    throws NoSuchAlgorithmException, CertificateEncodingException {
+	MessageDigest md = MessageDigest.getInstance("SHA-1");
+	byte[] der = cert.getEncoded();
+	md.update(der);
+	byte[] digest = md.digest();
+	return StringUtils.toHex(digest);
+
+    }
+
 }

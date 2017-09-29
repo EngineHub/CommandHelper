@@ -1,0 +1,64 @@
+
+MethodScript has several "built in" types. They work just like user definable types, but it is worth mentioning them specifically,
+since they form the basis of all objects.
+
+== Inheritance Tree ==
+
+TODO: Add inheritance tree image
+
+== mixed ==
+Mixed is the root of all possible types. It is an interface, which defines a very few methods, which are common
+to all objects, built in and user defined types.
+
+=== primitive ===
+
+The primitive class defines all data types that can be "typed in" directly into code, so 'string', 5, 3.1415.
+
+==== string ====
+
+A string is created in code with quotes, either single quotes or double quotes. 'string', for example.
+
+==== number ====
+
+The number class is the super class for all data types that support numeric operations.
+
+===== double =====
+
+A double is a floating point number.
+
+===== int =====
+
+An int is a integral number.
+
+==== boolean ====
+
+A boolean is a true/false value.
+
+=== array ===
+
+An array is a "collection" of other data types.
+
+==== map ====
+
+A map is a "dictionary" of string to mixed mappings. 
+
+==== Object ====
+
+An Object is the superclass of all user defined types, and is the first
+type in the hierarchy that requires instantiation with the "new" keyword.
+
+== byte_array ==
+
+A byte array wraps a native byte array object, to allow for more efficient
+byte array manipulations, and to allow for translation to external processes
+that communicate at the lowest level.
+
+== auto ==
+
+The auto type isn't a type per se, it works as a bridge between scripting language
+and compiled language. If a type is marked as auto, casting is not required, and
+it will attempt to cast to the correct data type at runtime, and only throw
+an exception then. This is discouraged from normal use, except in the case
+of receiving user input, or very small one time scripts. Additionally, string
+constants and numeric constants work as if they are declared as auto. Variables
+declared as auto are eligible to use the cross-casting system.

@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.Proxy;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -24,9 +25,12 @@ public class RequestSettings {
     private Proxy proxy = null;
     private byte[] rawParameter;
     private File downloadTo;
+    private boolean blocking = false;
+    private boolean disableCertChecking = false;
+    private boolean useDefaultTrustStore = true;
+    private LinkedHashMap<String, String> trustStore = new LinkedHashMap<>();
     @SuppressWarnings("NonConstantLogger")
     private Logger logger;
-    private boolean blocking;
 
     /**
      *
@@ -282,6 +286,72 @@ public class RequestSettings {
      */
     public boolean getBlocking() {
 	return this.blocking;
+    }
+
+    /**
+     * Sets whether or not cert checking is disabled. If this is true, NO certificate checking is done, and all
+     * certificates will be considered valid. If this is true, {@link #setUseDefaultTrustStore(boolean)} and
+     * {@link #setTrustStore(java.util.Map)} are ignored.
+     *
+     * @param check
+     * @return
+     */
+    public RequestSettings setDisableCertChecking(boolean check) {
+	this.disableCertChecking = check;
+	return this;
+    }
+
+    /**
+     * Returns whether or not the trust store should be disabled. Default is false.
+     *
+     * @return
+     */
+    public boolean getDisableCertChecking() {
+	return this.disableCertChecking;
+    }
+
+    /**
+     * Sets whether or not to use the default trust store. If false, then only certificates registered using
+     * {@link #setTrustStore(java.util.Map)} will be accepted. If this is false, and
+     * {@link #setTrustStore(java.util.Map)} is false, this effectively prevents any ssl connections.
+     *
+     * @param useDefaultTrustStore
+     * @return
+     */
+    public RequestSettings setUseDefaultTrustStore(boolean useDefaultTrustStore) {
+	this.useDefaultTrustStore = useDefaultTrustStore;
+	return this;
+    }
+
+    /**
+     * Returns whether or not the default trust store should be used.
+     *
+     * @return
+     */
+    public boolean getUseDefaultTrustStore() {
+	return this.useDefaultTrustStore;
+    }
+
+    /**
+     * Sets the trust store. Values should be in the form: "02 79 AB D6 97 19 A2 CB E8 79 11 B2 7F AF 8D": "SHA-256"
+     * where the key is the fingerprint, and the value is the encryption scheme. Note that the map is cloned, and the
+     * original map is not used.
+     *
+     * @param trustStore The trust store to use
+     * @return
+     */
+    public RequestSettings setTrustStore(LinkedHashMap<String, String> trustStore) {
+	this.trustStore = new LinkedHashMap<>(trustStore);
+	return this;
+    }
+
+    /**
+     * Returns the trust store in use. Note that the map is cloned, and the original map is not used.
+     *
+     * @return
+     */
+    public LinkedHashMap<String, String> getTrustStore() {
+	return new LinkedHashMap<>(trustStore);
     }
 
 }

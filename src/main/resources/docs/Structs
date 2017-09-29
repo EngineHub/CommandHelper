@@ -1,0 +1,110 @@
+
+A Struct is a special type of class, which allows for more precise associative array definitions, while not quite allowing for the full
+power of objects. A struct may only be declared with public members, and no methods. Any associative array can be cross cast to a
+struct, and vice versa.
+
+== Using a struct ==
+To create a new struct, you use it the same as if you were constructing a new object,
+using <code>new</code>. All structs work as if they have exactly one no-arg constructor.
+Assuming we have a struct named "Struct", then this code would create a new one:
+
+<pre>
+Struct @s = new Struct();
+</pre>
+
+This creates a new struct, with all the properties initialized to their defaults.
+Additionally, since cross casting is available, the following works as well:
+
+<pre>
+Struct @s = array();
+</pre>
+
+Members in a struct are accessed the same as members in classes, with the -> operator.
+Assuming our example struct has the int member @i, we can get and set it like this:
+
+<pre>
+Struct @s = new Struct();
+@s->i = 1;
+msg(@s->i); # Msgs 1
+
+# We can also set it directly via an array constructor
+Struct @s2 = array(i: 2);
+msg(@s2->i); # Msgs 2
+
+# Also, we can use the reflection/array access methods as well
+@s2['i'] = 3;
+msg(@s2['i']); # Msgs 3
+</pre>
+
+When using a struct, you gain the advantage of type safety in associative arrays,
+assuming they aren't dynamic. Usually however, it may be a better idea to use full
+Objects, so you can also add methods later. However, a configurable factory is a good use of structs
+in combination with objects, which is demonstrated below.
+
+== Defining a struct ==
+
+A struct is defined in exactly the same way as a class, except it may ONLY have a members block, and is
+declared with the <code>struct</code> keyword. If we set the parameters with a value, that becomes their
+default, which itself defaults to null. 
+
+<pre>
+struct A {
+	members {
+		int @a = 1;
+		double @b = 2.5;
+		public string @c = 'String'; # Don't strictly need public here
+	}
+}
+</pre>
+
+Adding access modifiers is optional, though if specified, must be public.
+
+== Example ==
+
+A good use of structs is when you have lots of configuration for an object. Instead
+of using a constructor with lots of optional parameters, or having separate setter
+methods for each field, you can use a configuration struct to simplify the configuration.
+
+<pre>
+class Car {
+	
+	members {
+		private string @make;
+		private string @model;
+		private int @year;
+		private CarOptions @options;
+	}
+
+	public Car(string @make, string @model, int @year, CarOptions @options = array()){
+		this->make = @make;
+		this->model = @model;
+		this->year = @year;
+		this->options = @options[]; # Clone the array, so they can't change options on us later
+	}
+
+	struct CarOptions {
+		members {
+			boolean @GPS = false;
+			boolean @leatherSeats = false;
+			boolean @XMRadio = false;
+			Color @color = 0x000000;
+			int @rentalMonths = 1;
+		}
+	}
+}
+
+# Creating a new Car object:
+
+# This constructs a new car with the default optional options, but allows
+# for us to still specify the required parameters as part of the constructor
+Car @c1 = new Car('Make', 'Model', 2014);
+
+# This constructs a new car with only some of the options selected
+Car @c2 = new Car('Make', 'Model', 2014, array(color: 0xFFFFFF));
+
+# This would cause an error at compile time, since @rentalMonths is an int
+Car @c3 = new Car('Make', 'Model', 2014, array(rentalMonths: 'string'));
+</pre>
+
+If used properly, structs can work well in cases where a "named argument list" is
+desirable.

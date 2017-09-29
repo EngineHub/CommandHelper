@@ -10,7 +10,7 @@ import java.net.URL;
 
 /**
  *
- * 
+ *
  */
 public class WebConnection implements ConnectionMixin{
 	URL source;

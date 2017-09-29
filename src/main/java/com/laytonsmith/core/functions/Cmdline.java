@@ -1748,7 +1748,8 @@ public class Cmdline {
 	public String docs() {
 	    return "void {closure} Sets the cmdline prompt. This is only usable or useful in cmdline interpreter mode. The closure should"
 		    + " return a string, that string will be used as the prompt. The closure is called each time a prompt needs generating,"
-		    + " thereby allowing for dynamic prompts.";
+		    + " thereby allowing for dynamic prompts. A boolean is sent to the closure, if true, the shell is in shellMode, meaning"
+		    + " the command is interpreted as a shell command. If false, it is in normal mscript mode.";
 	}
 
 	@Override

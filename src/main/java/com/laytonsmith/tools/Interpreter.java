@@ -3,6 +3,7 @@ package com.laytonsmith.tools;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.LimitedQueue;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.SignalHandler;
@@ -93,6 +94,13 @@ import static com.laytonsmith.PureUtilities.TermColors.YELLOW;
 import static com.laytonsmith.PureUtilities.TermColors.p;
 import static com.laytonsmith.PureUtilities.TermColors.pl;
 import static com.laytonsmith.PureUtilities.TermColors.reset;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.functions.Cmdline;
+import com.laytonsmith.core.functions.Echoes;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -112,6 +120,7 @@ public final class Interpreter {
 
     private boolean inTTYMode = false;
     private boolean multilineMode = false;
+    private boolean inShellMode = false;
     private String script = "";
     private Environment env;
     private Thread scriptThread = null;
@@ -164,8 +173,15 @@ public final class Interpreter {
     }
 
     private String getHelpMsg() {
-	String msg = YELLOW + "You are now in cmdline interpreter mode. Use exit() to exit, and >>> to enter"
-		+ " multiline mode.";
+	String msg = YELLOW + "You are now in cmdline interpreter mode.\n"
+		+ "- on a line by itself (outside of mulitline mode), or the exit() command exits the shell.\n"
+		+ ">>> on a line by itself starts multiline mode, where multiple lines can be written, but not yet executed.\n"
+		+ "<<< on a line by itself ends multiline mode, and executes the buffered script.\n"
+		+ "- on a line by itself while in multiline mode cancels multiline mode, and clears the buffer, without executing the buffered script.\n"
+		+ "If the line starts with $$, then the rest of the line is taken to be a shell command. The command is taken as a string, wrapped\n"
+		+ "in shell_adv(), (where system out and system err are piped to the corresponding outputs).\n"
+		+ "If $$ is on a line by itself, it puts the shell in shell_adv mode, and each line is taken as if it started\n"
+		+ "with $$. Use - on a line by itself to exit this mode as well.";
 	try {
 	    msg += "\nYour current working directory is: " + env.getEnv(GlobalEnv.class).GetRootFolder().getCanonicalPath();
 	} catch (IOException ex) {
@@ -431,7 +447,7 @@ public final class Interpreter {
 	CClosure c = (CClosure) env.getEnv(GlobalEnv.class).GetCustom("cmdline_prompt");
 	if (c != null) {
 	    try {
-		c.execute();
+		c.execute(CBoolean.get(inShellMode));
 	    } catch (FunctionReturnException ex) {
 		String val = ex.getReturn().val();
 		return Static.MCToANSIColors(val) + TermColors.RESET;
@@ -513,7 +529,14 @@ public final class Interpreter {
 	switch (line) {
 	    case "-":
 		//Exit interpreter mode
-		return false;
+		if(multilineMode) {
+		    script = "";
+		} else if(inShellMode) {
+		    inShellMode = false;
+		} else {
+		    return false;
+		}
+		break;
 	    case ">>>":
 		//Start multiline mode
 		if (multilineMode) {
@@ -534,6 +557,9 @@ public final class Interpreter {
 		} catch (ConfigCompileGroupException e) {
 		    ConfigRuntimeException.HandleUncaughtException(e, null);
 		}
+		break;
+	    case "$$":
+		inShellMode = true;
 		break;
 	    default:
 		if (multilineMode) {
@@ -567,19 +593,6 @@ public final class Interpreter {
     }
 
     /**
-     * Works like {@link #execute(String, List, File)} but reads the file
-     * in for you.
-     * @param script Path the the file
-     * @param args Arguments to be passed to the script
-     * @throws ConfigCompileException If there is a compile error in the script
-     * @throws IOException
-     */
-    public void execute(File script, List<String> args) throws ConfigCompileException, IOException, ConfigCompileGroupException {
-	String scriptString = FileUtil.read(script);
-	execute(scriptString, args, script);
-    }
-
-    /**
      * This executes an entire script. The cmdline_prompt_event is first triggered (if used) and if the event is
      * cancelled, nothing happens.
      *
@@ -590,13 +603,17 @@ public final class Interpreter {
      * @throws IOException
      */
     public void execute(String script, List<String> args, File fromFile) throws ConfigCompileException, IOException, ConfigCompileGroupException {
-	CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput input = new CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput(script);
+	CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput input = new CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput(script, inShellMode);
 	EventUtils.TriggerListener(Driver.CMDLINE_PROMPT_INPUT, "cmdline_prompt_input", input);
 	if (input.isCancelled()) {
 	    return;
 	}
 	ctrlCcount = 0;
 	if ("exit".equals(script)) {
+	    if(inShellMode) {
+		inShellMode = false;
+		return;
+	    }
 	    pl(YELLOW + "Use exit() if you wish to exit.");
 	    return;
 	}
@@ -606,6 +623,31 @@ public final class Interpreter {
 	}
 	if (fromFile == null) {
 	    fromFile = new File("Interpreter");
+	}
+	boolean localShellMode = false;
+	if(!inShellMode && script.startsWith("$$")) {
+	    localShellMode = true;
+	    script = script.substring(2);
+	}
+
+	if(inShellMode || localShellMode) {
+	    // Wrap this in shell_adv
+	    if(doBuiltin(script)) {
+		return;
+	    }
+	    List<String> shellArgs = StringUtils.ArgParser(script);
+	    List<String> escapedArgs = new ArrayList<>();
+	    for(String arg : shellArgs) {
+		escapedArgs.add(new CString(arg, Target.UNKNOWN).getQuote());
+	    }
+	    script = "shell_adv("
+		    + "array("
+			+ StringUtils.Join(escapedArgs, ",")
+		    + "),"
+		    + "array("
+			+ "'stdout':closure(@l){sys_out(@l);},"
+			+ "'stderr':closure(@l){sys_err(@l);})"
+		    + ");";
 	}
 	isExecuting = true;
 	ProfilePoint compile = env.getEnv(GlobalEnv.class).GetProfiler().start("Compilation", LogLevel.VERBOSE);
@@ -705,11 +747,7 @@ public final class Interpreter {
 		} catch (InterruptedException ex) {
 		    //
 		}
-		try {
-		    env.getEnv(GlobalEnv.class).GetDaemonManager().waitForThreads();
-		} catch (InterruptedException ex) {
-		    //
-		}
+
 	    } finally {
 		p.stop();
 	    }
@@ -717,6 +755,85 @@ public final class Interpreter {
 	    env.getEnv(GlobalEnv.class).SetInterrupt(false);
 	    isExecuting = false;
 	}
+    }
+
+    public boolean doBuiltin(String script) {
+	List<String> args = StringUtils.ArgParser(script);
+	if(args.size() > 0) {
+	    String command = args.get(0);
+	    args.remove(0);
+	    command = command.toLowerCase(Locale.ENGLISH);
+	    switch(command) {
+		case "help":
+		    pl(getHelpMsg());
+		    pl("Shell builtins:");
+		    pl("cd <dir> - Runs cd() with the provided argument.");
+		    pl("s - equivalent to cd('..').");
+		    pl("echo - Prints the arguments. If -e is set as the first argument, arguments are sent to colorize() first.");
+		    pl("exit - Exits shellMode, and returns back to normal mscript mode.");
+		    pl("logout - Exits the shell entirely with a return code of 0.");
+		    pl("pwd - Runs pwd()");
+		    pl("help - Prints this message.");
+		    return true;
+		case "cd":
+		case "s":
+		    if("s".equals(command)) {
+			args.add("..");
+		    }
+		    if(args.size() > 1) {
+			pl(RED + "Too many arguments passed to cd");
+			return true;
+		    }
+		    Construct[] a = new Construct[0];
+		    if(args.size() == 1) {
+			a = new Construct[]{new CString(args.get(0), Target.UNKNOWN)};
+		    }
+		    try {
+			new Cmdline.cd().exec(Target.UNKNOWN, env, a);
+		    } catch(CREIOException ex) {
+			pl(RED + ex.getMessage());
+		    }
+		    return true;
+		case "pwd":
+		    pl(new Cmdline.pwd().exec(Target.UNKNOWN, env).val());
+		    return true;
+		case "exit":
+		    // We need previous code to intercept, we cannot do this here.
+		    throw new Error("I should not run");
+		case "logout":
+		    new Cmdline.exit().exec(Target.UNKNOWN, env, new CInt(0, Target.UNKNOWN));
+		    return true; // won't actually run
+		case "echo":
+		    // TODO Probably need some variable interpolation maybe? Otherwise, I don't think this command
+		    // is actually useful as is, because this is not supposed to be a scripting environment.. that's
+		    // what the normal shell is for.
+		    boolean colorize = false;
+		    if(args.size() > 0 && "-e".equals(args.get(0))) {
+			colorize = true;
+			args.remove(0);
+		    }
+		    String output = StringUtils.Join(args, " ");
+		    if(colorize) {
+			output = new Echoes.colorize().exec(Target.UNKNOWN, env, new CString(output, Target.UNKNOWN)).val();
+		    }
+		    pl(output);
+		    return true;
+	    }
+	}
+	return false;
+    }
+
+    /**
+     * Works like {@link #execute(String, List, File)} but reads the file
+     * in for you.
+     * @param script Path the the file
+     * @param args Arguments to be passed to the script
+     * @throws ConfigCompileException If there is a compile error in the script
+     * @throws IOException
+     */
+    public void execute(File script, List<String> args) throws ConfigCompileException, IOException, ConfigCompileGroupException {
+	String scriptString = FileUtil.read(script);
+	execute(scriptString, args, script);
     }
 
     public static void install() {

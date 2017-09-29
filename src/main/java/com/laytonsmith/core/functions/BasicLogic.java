@@ -2090,7 +2090,7 @@ public class BasicLogic {
 		    return c;
 		}
 	    }
-	    return CBoolean.FALSE;
+	    return env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
 	}
 
 	@Override
@@ -2158,7 +2158,7 @@ public class BasicLogic {
 	public String docs() {
 	    return "mixed {...} Returns the first true value. The arguments to this function are lazily evaluated, so"
 		    + " if the first value evaluates to true, the rest of the arguments will not be evaluated."
-		    + " If none of the values are true, false is returned. Usage of"
+		    + " If none of the values are true, the last value is returned (which will be falsy). Usage of"
 		    + " the operator is preferred: |||";
 	}
 

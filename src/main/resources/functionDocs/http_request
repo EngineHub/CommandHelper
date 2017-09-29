@@ -122,6 +122,24 @@ of web requests that can be running concurrently.
 | Automatically adds the default headers to this request, unless specifically overridden. Note that some headers
 simply cannot be overridden, for instance Host and User-Agent will ALWAYS be set. 
 |- 
+| trustStore
+| boolean or array
+| null
+| If value is null, then the default JVM behavior is used. If trustStore is false, then no trust store will be used,
+and all certificates will be trusted when making https connections (NOTE: this is generally dangerous. Instead, you
+should use specific overrides, by providing an array). If the value is an array, it is assumed to be an array of fingerprints: hash
+mechanism, for instance: array('02 79 AB D6 97 19 A2 CB E8 79 11 B2 7F AF 8D': 'SHA-256'). The spaces in the fingerprint
+are optional. The JVM's trust store is used in addition to the provided fingerprints, so already valid certificates
+do not need to be listed here. If you wish to disable the JVM's store, and only use the provided certificates, then
+you can send exactly the key/value pair ('no default': 'no default') as a value inside of the array, and the default JVM certificates will be
+ignored. When providing fingerprints, only the highest security scheme should be provided (don't provide a SHA-1
+fingerprint if a SHA-256 one is available). If multiple fingerprints for the same certificate are provided, then
+they will be resolved top to bottom. When using the default trust store, the certificate is first checked with the
+built in trust store, and then only if it fails is custom store checked. This prevents you from having to update
+your custom trust store if the certificate is later changed to a valid certificate. It is not required that you
+provide the leaf certificate. If a parent certificate is provided, then the whole certificate chain is considered
+trusted.
+|-
 | download
 | string
 | null
