@@ -24,8 +24,10 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -237,6 +239,74 @@ public class Echoes {
             return false;
         }
     }
+
+	@api
+	public static class title extends AbstractFunction {
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public String getName() {
+			return "title";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2,3,5,6};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], title, subtitle, [fadein, stay, fadeout]} Shows a title and/or subtitle to a player."
+					+ " The title and subtitle parameters can be null. The integers fadein, stay, and fadeout define the"
+					+ " time in ticks that the title will be displayed. The defaults are 10, 70, and 20 respectively.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRECastException.class, CRERangeException.class,
+					CRELengthException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer player;
+			int fadein = 10;
+			int stay = 70;
+			int fadeout = 20;
+			int offset = 0;
+
+			if(args.length == 3 || args.length == 6) {
+				player = Static.GetPlayer(args[0].val(), t);
+				offset = 1;
+			} else {
+				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(player, t);
+			}
+
+			if(args.length > 3) {
+				fadein = Static.getInt32(args[2 + offset], t);
+				stay = Static.getInt32(args[3 + offset], t);
+				fadeout = Static.getInt32(args[4 + offset], t);
+			}
+
+			player.sendTitle(args[offset].nval(), args[1 + offset].nval(), fadein, stay, fadeout);
+			return CVoid.VOID;
+		}
+	}
     
     @api public static class color extends AbstractFunction implements Optimizable {
 		

@@ -341,6 +341,20 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     }
 
 	@Override
+	public void sendTitle(String title, String subtitle, int fadein, int stay, int fadeout) {
+		try {
+			p.sendTitle(title, subtitle, fadein, stay, fadeout);
+		} catch(NoSuchMethodError ex1){
+			// Probably prior to 1.11, try the deprecated method
+			try {
+				p.sendTitle(title, subtitle);
+			} catch(NoSuchMethodError ex2){
+				// Probably prior to 1.8.7, no title API
+			}
+		}
+	}
+
+	@Override
     public void setAllowFlight(boolean flight) {
         p.setAllowFlight(flight);
     }
