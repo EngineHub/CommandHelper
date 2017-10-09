@@ -42,6 +42,7 @@ import java.util.TreeMap;
 @typeof("array")
 public class CArray extends Construct implements ArrayAccess{
 
+    public static final CClassType TYPE = CClassType.get("array");
     private boolean associative_mode = false;
     private long next_index = 0;
     private List<Construct> array;
@@ -234,7 +235,7 @@ public class CArray extends Construct implements ArrayAccess{
 	public final void push(Construct c, Target t){
 		push(c, null, t);
 	}
-	
+
 	/**
      * Pushes a new Construct onto the end of the array. If the index is specified, this works like
 	 * a "insert" operation, in that all values are shifted to the right, starting with the value
@@ -573,26 +574,26 @@ public class CArray extends Construct implements ArrayAccess{
         clone.regenValue();
         return clone;
     }
-	
+
 	public CArray deepClone(Target t) {
 		CArray clone = deepClone(this, t, new ArrayList<CArray[]>());
 		return clone;
 	}
-	
+
 	private static CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs) {
-		
+
 		// Return the clone reference if this array has been cloned before (both clones will have the same reference).
 		for(CArray[] refCouple : cloneRefs) {
 			if(refCouple[0] == array) {
 				return refCouple[1];
 			}
 		}
-		
+
 		// Create the clone to put array in and add it to the cloneRefs list.
 		CArray clone = new CArray(t, (int) array.size());
 		clone.associative_mode = array.associative_mode;
 		cloneRefs.add(new CArray[] {array, clone});
-		
+
 		// Iterate over the array, recursively calling this method to perform a deep clone.
 		for (Construct key : array.keySet()) {
 			Construct value = array.get(key, t);

@@ -21,10 +21,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * 
+ *
  */
 @typeof("iclosure")
 public class CIClosure extends CClosure {
+
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("iclosure");
+
 	public CIClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Construct[] defaults, CClassType[] types, Target t) {
         super(node, env, returnType, names, defaults, types, t);
     }
@@ -73,7 +77,7 @@ public class CIClosure extends CClosure {
 						arguments.push(value, node.getData().getTarget());
 					}
 				}
-				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(new CClassType("array", Target.UNKNOWN), "@arguments", arguments, node.getData().getTarget()));
+				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, node.getData().getTarget()));
 			}
 
             ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());
@@ -114,7 +118,7 @@ public class CIClosure extends CClosure {
 				throw t;
 			}
 			// If we got here, then there was no return type. This is fine, but only for returnType void or auto.
-			if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CClassType.VOID))){
+			if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CVoid.TYPE))){
 				throw new CRECastException("Expecting closure to return a value of type " + returnType.val() + ","
 						+ " but no value was returned.", node.getTarget());
 			}

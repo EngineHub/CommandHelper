@@ -3,31 +3,35 @@ package com.laytonsmith.core.exceptions.CRE;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 
 /**
- * 
+ *
  */
 @typeof("EventException")
 public class CREEventException extends CREException {
 
-	public CREEventException(String msg, Target t) {
-		super(msg, t);
-	}
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("EventException");
 
-	public CREEventException(String msg, Target t, Throwable cause) {
-		super(msg, t, cause);
-	}
+    public CREEventException(String msg, Target t) {
+	super(msg, t);
+    }
 
-	@Override
-	public String docs() {
-		return "Thrown if something is wrong with the event object. Usually this indicates a bigger problem with the server configuration or plugin issue, rather"
-				+ " than an error in the script.";
-	}
+    public CREEventException(String msg, Target t, Throwable cause) {
+	super(msg, t, cause);
+    }
 
-	@Override
-	public Version since() {
-		return CHVersion.V3_3_2;
-	}
+    @Override
+    public String docs() {
+	return "Thrown if something is wrong with the event object. Usually this indicates a bigger problem with the server configuration or plugin issue, rather"
+		+ " than an error in the script.";
+    }
+
+    @Override
+    public Version since() {
+	return CHVersion.V3_3_2;
+    }
 
 }

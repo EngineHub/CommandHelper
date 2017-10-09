@@ -29,6 +29,8 @@ import java.util.logging.Logger;
 @typeof("closure")
 public class CClosure extends Construct {
 
+    public static final CClassType TYPE = CClassType.get("closure");
+
     public static final long serialVersionUID = 1L;
     protected ParseTree node;
     protected final Environment env;
@@ -166,7 +168,7 @@ public class CClosure extends Construct {
 					break;
 				}
 			}
-			
+
 			if(!hasArgumentsParam){
 				CArray arguments = new CArray(node.getData().getTarget());
 				if (values != null) {
@@ -174,9 +176,9 @@ public class CClosure extends Construct {
 						arguments.push(value, node.getData().getTarget());
 					}
 				}
-				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(new CClassType("array", Target.UNKNOWN), "@arguments", arguments, node.getData().getTarget()));
+				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, node.getData().getTarget()));
 			}
-			
+
             ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());
             List<ParseTree> children = new ArrayList<ParseTree>();
             children.add(node);
@@ -213,7 +215,7 @@ public class CClosure extends Construct {
 				stManager.popStackTraceElement();
 			}
 			// If we got here, then there was no return type. This is fine, but only for returnType void or auto.
-			if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CClassType.VOID))){
+			if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CVoid.TYPE))){
 				throw new CRECastException("Expecting closure to return a value of type " + returnType.val() + ","
 						+ " but no value was returned.", node.getTarget());
 			}

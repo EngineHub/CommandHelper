@@ -249,12 +249,12 @@ public final class Static {
 	public static boolean getBoolean(Construct c) {
 		return ArgumentValidation.getBoolean(c, Target.UNKNOWN);
 	}
-	
+
 	/**
 	 * Returns a primitive from any given construct.
 	 * @param c
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static CPrimitive getPrimitive(Construct c, Target t){
 		return ArgumentValidation.getObject(c, t, CPrimitive.class);
@@ -264,7 +264,7 @@ public final class Static {
 	 * Returns a CByteArray from any given construct.
 	 * @param c
 	 * @param t
-	 * @return 
+	 * @return
 	 */
 	public static CByteArray getByteArray(Construct c, Target t) {
 		return ArgumentValidation.getByteArray(c, t);
@@ -459,7 +459,7 @@ public final class Static {
 			return CNull.NULL;
 		}
 		if(val.equals("void")){
-			return CClassType.VOID;
+			return CVoid.TYPE;
 		}
 		if (INVALID_HEX.matcher(val).matches()) {
 			throw new CREFormatException("Hex numbers must only contain digits 0-9, and the letters A-F, but \"" + val + "\" was found.", t);
@@ -498,7 +498,7 @@ public final class Static {
 		// TODO: Once compiler environments are added, we would need to check to see if the value here is a custom
 		// type. However, as it stands, since we only support the native types, we will just hardcode the check here.
 		if(NativeTypeList.getNativeTypeList().contains(val)){
-			return new CClassType(val, t);
+			return CClassType.get(val);
 		} else {
 			return new CString(val, t);
 		}
@@ -1069,7 +1069,7 @@ public final class Static {
 		f.flush();
 	}
 
-	
+
 
 	public static boolean hasCHPermission(String functionName, Environment env) {
 		//The * label completely overrides everything
@@ -1360,7 +1360,7 @@ public final class Static {
 		Construct value = args[argNumber];
 		if (!type.isAssignableFrom(value.getClass())) {
 			typeof todesired = type.getAnnotation(typeof.class);
-			String toactual = value.typeof();
+			CClassType toactual = value.typeof();
 			if (todesired != null) {
 				throw new CRECastException("Argument " + (argNumber + 1) + " of " + func.getName() + " was expected to be a "
 						+ todesired.value() + ", but " + toactual + " \"" + value.val() + "\" was found.", t);

@@ -201,7 +201,7 @@ public class Procedure implements Cloneable {
 				}
             }
         }
-        env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(new CClassType("array", Target.UNKNOWN), "@arguments", arguments, Target.UNKNOWN));
+        env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, Target.UNKNOWN));
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
         try {
@@ -251,7 +251,7 @@ public class Procedure implements Cloneable {
 		// Normal exit, but no return.
 		stManager.popStackTraceElement();
 		// If we got here, then there was no return value. This is fine, but only for returnType void or auto.
-		if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CClassType.VOID))){
+		if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CVoid.TYPE))){
 			throw new CRECastException("Expecting procedure \"" + name + "\" to return a value of type " + returnType.val() + ","
 					+ " but no value was returned.", tree.getTarget());
 		}

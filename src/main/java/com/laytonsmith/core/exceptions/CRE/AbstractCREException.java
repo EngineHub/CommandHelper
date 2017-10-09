@@ -68,8 +68,8 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * Alias for {@link #getName() }
 	 * @return
 	 */
-	public String getExceptionType(){
-		return getName();
+	public CClassType getExceptionType(){
+		return CClassType.get(getName());
 	}
 
 	/**
@@ -94,7 +94,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 */
 	public CArray getExceptionObject(){
 		CArray ret = new CArray(Target.UNKNOWN);
-		ret.set("classType", new CClassType(this.getName(), Target.UNKNOWN), Target.UNKNOWN);
+		ret.set("classType", this.getExceptionType(), Target.UNKNOWN);
 		ret.set("message", this.getMessage());
 		CArray stackTrace = new CArray(Target.UNKNOWN);
 		ret.set("stackTrace", stackTrace, Target.UNKNOWN);
@@ -105,7 +105,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		ret.set("causedBy", getCausedBy(this.getCause()), Target.UNKNOWN);
 		return ret;
 	}
-	
+
 	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
 	public static AbstractCREException getFromCArray(CArray exception, Target t) throws ClassNotFoundException {
 		String classType = exception.get("classType", t).val();
@@ -121,7 +121,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 			CArray stElement = Static.getArray(consStElement, t);
 			int line = Static.getInt32(stElement.get("line", t), t);
 			File f = new File(stElement.get("file", t).val());
-			int col = 0; // 
+			int col = 0; //
 			st.add(new StackTraceElement(stElement.get("id", t).val(), new Target(line, f, col)));
 		}
 		// Now we have parsed everything into POJOs
@@ -131,7 +131,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		ex.stackTrace = st;
 		return ex;
 	}
-	
+
 	private static Construct getCausedBy(Throwable causedBy){
 		if(causedBy == null || !(causedBy instanceof CRECausedByWrapper)){
 			return CNull.NULL;
@@ -213,13 +213,13 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 		return obj;
 	}
-	
+
 	public void freezeStackTraceElements(StackTraceManager manager){
 		if(this.stackTrace == null){
 			this.stackTrace = manager.getCurrentStackTrace();
 		}
 	}
-	
+
 	public List<StackTraceElement> getCREStackTrace(){
 		if(this.stackTrace == null){
 			return new ArrayList<>();

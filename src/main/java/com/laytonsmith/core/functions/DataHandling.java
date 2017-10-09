@@ -3651,7 +3651,7 @@ public class DataHandling {
 	@Override
 	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 	    try {
-		return new CClassType(args[0].typeof(), t);
+		return args[0].typeof();
 	    } catch (IllegalArgumentException ex) {
 		throw new Error("Class " + args[0].getClass().getName() + " is not annotated with @typeof. Please report this"
 			+ " error to the developers.");

@@ -3,6 +3,7 @@ package com.laytonsmith.core.compiler.keywords;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.util.List;
@@ -35,7 +36,7 @@ public class ClosureKeyword extends Keyword {
 				return keywordPosition;
 			} else {
 				// Else it's standalone, so this should be treated as the closure ClassType
-				list.set(keywordPosition, new ParseTree(new CClassType("closure", list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions()));
+				list.set(keywordPosition, new ParseTree(CClosure.TYPE, list.get(keywordPosition).getFileOptions()));
 				return keywordPosition;
 			}
 		} catch(IndexOutOfBoundsException ex){

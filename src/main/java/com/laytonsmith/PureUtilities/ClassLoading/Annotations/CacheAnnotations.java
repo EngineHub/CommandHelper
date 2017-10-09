@@ -28,7 +28,7 @@ import java.util.Set;
  *
  */
 public class CacheAnnotations {
-	
+
 	public static void main(String[] args) throws Exception {
 		File outputDir = new File(args[0]);
 		File scanDir = new File(args[1]);
@@ -50,7 +50,8 @@ public class CacheAnnotations {
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(cacheFile);
 		StreamUtils.GetSystemOut().println("-- Checking for custom compile errors --");
 		AnnotationChecks.checkForceImplementation();
-		
+		AnnotationChecks.checkForTypeInTypeofClasses();
+
 		Implementation.setServerType(Implementation.Type.SHELL);
 		List<String> uhohs = new ArrayList<>();
 		Set<Class> apiClasses = new HashSet<>();
@@ -91,7 +92,7 @@ public class CacheAnnotations {
 					if(!m.getName().equals("getName")){
 						if(c.getAnnotation(typeof.class) != null && !isGetNameExempt){
 							uhohs.add(c.getName() + " must implement " + m.getName() + "().");
-						}						
+						}
 					}
 				} catch (SecurityException ex) {
 					throw new Error(ex);

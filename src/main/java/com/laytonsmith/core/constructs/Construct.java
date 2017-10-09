@@ -298,7 +298,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	public static Construct GetConstruct(Object o) throws ClassCastException {
 		return Construct.GetConstruct(o, false);
 	}
-	
+
 	/**
 	 * Converts a POJO to a Construct, if the type is convertable. This accepts
 	 * many types of objects, and should be expanded if a type does fit into the
@@ -437,18 +437,18 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
 	 */
-	public final String typeof() {
+	public final CClassType typeof() {
 		typeof ann = this.getClass().getAnnotation(typeof.class);
 		if (ann == null) {
 			throw new IllegalArgumentException();
 		}
-		return ann.value();
+		return CClassType.get(ann.value());
 	}
 
 	/**
 	 * Overridden from {@link SimpleDocumentation}. This should just return the value
 	 * of the typeof annotation, unconditionally.
-	 * @return 
+	 * @return
 	 */
 	@Override
 	public final String getName() {
@@ -466,6 +466,6 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	public Version since() {
 		throw new UnsupportedOperationException();
 	}
-	
-	
+
+
 }

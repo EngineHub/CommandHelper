@@ -4,6 +4,7 @@ package com.laytonsmith.core.natives.interfaces;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -15,6 +16,9 @@ import java.util.Set;
  */
 @typeof("ArrayAccess")
 public interface ArrayAccess extends Mixed, Sizable {
+
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("ArrayAccess");
     /**
      * Return the mixed at this location. This should throw an exception if
      * the index does not exist. This method will not be called if
@@ -201,5 +205,5 @@ public interface ArrayAccess extends Mixed, Sizable {
 
 	@Override
 	public Version since();
-	
+
 }

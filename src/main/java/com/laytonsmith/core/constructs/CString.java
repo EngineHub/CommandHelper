@@ -18,6 +18,9 @@ import java.util.Set;
 @typeof("string")
 public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("string");
+
     public CString(String value, Target t){
         super(value==null?"":value, ConstructType.STRING, t);
     }
