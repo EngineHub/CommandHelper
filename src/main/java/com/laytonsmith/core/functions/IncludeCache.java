@@ -14,21 +14,25 @@ import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
 import com.laytonsmith.core.exceptions.CRE.CRESecurityException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-/**
- *
- */
 public class IncludeCache {
-    private static final CHLog.Tags TAG = CHLog.Tags.INCLUDES;
-    private static HashMap<File, ParseTree> cache = new HashMap<File, ParseTree>();
+	private static final CHLog.Tags TAG = CHLog.Tags.INCLUDES;
+	private static HashMap<File, ParseTree> cache = new HashMap<>();
 
-    private static void add(File file, ParseTree tree){
-        cache.put(file, tree);
-    }
+	static void add(File file, ParseTree tree){
+		cache.put(file, tree);
+	}
+
+	static void addAll(HashMap<File, ParseTree> files){
+		cache.putAll(files);
+	}
+
+	static boolean has(File file) {
+		return cache.containsKey(file);
+	}
 
     public static ParseTree get(File file, Target t){
         CHLog.GetLogger().Log(TAG, LogLevel.DEBUG, "Loading " + file.getAbsolutePath(), t);
