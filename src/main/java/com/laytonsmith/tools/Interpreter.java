@@ -1,6 +1,5 @@
 package com.laytonsmith.tools;
 
-import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
@@ -451,7 +450,7 @@ public final class Interpreter {
 	Installer.Install(MethodScriptFileLocations.getDefault().getConfigDirectory());
 	Installer.InstallCmdlineInterpreter();
 
-	env = Static.GenerateStandaloneEnvironment();
+	env = Static.GenerateStandaloneEnvironment(false);
 	env.getEnv(GlobalEnv.class).SetCustom("cmdline", true);
 	if (Prefs.UseColors()) {
 	    TermColors.EnableColors();

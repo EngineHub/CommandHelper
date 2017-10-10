@@ -1788,7 +1788,7 @@ public final class MethodScriptCompiler {
 				Script fakeScript = Script.GenerateScript(root, "*");
 				Environment env = null;
 				try {
-					env = Static.GenerateStandaloneEnvironment();
+					env = Static.GenerateStandaloneEnvironment(false);
 				} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e) {
 					//
 				}

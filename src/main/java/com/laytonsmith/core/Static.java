@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.XMLDocument;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
@@ -1251,18 +1252,30 @@ public final class Static {
 	 * @throws DataSourceException
 	 * @throws URISyntaxException
 	 */
-	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+	public static Environment GenerateStandaloneEnvironment(boolean install) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		File platformFolder = MethodScriptFileLocations.getDefault().getConfigDirectory();
-		Installer.Install(platformFolder);
+		if(install) {
+			Installer.Install(platformFolder);
+		}
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(platformFolder);
 		PersistenceNetwork persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 				new URI("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/')), options);
+		Profiler profiler;
+		if(Implementation.GetServerType().equals(Implementation.Type.BUKKIT) && CommandHelperPlugin.self.profiler != null) {
+			profiler = CommandHelperPlugin.self.profiler;
+		} else {
+			profiler = new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile());
+		}
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
-				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, platformFolder,
+				profiler, persistenceNetwork, platformFolder,
 				new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile()), new TaskManager());
 		gEnv.SetLabel(GLOBAL_PERMISSION);
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
+	}
+
+	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+		return GenerateStandaloneEnvironment(true);
 	}
 
 	/**
