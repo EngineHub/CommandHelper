@@ -1,8 +1,10 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.nolinking;
 import com.laytonsmith.annotations.unbreakable;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.KeywordList;
@@ -24,6 +26,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -36,6 +39,7 @@ import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
+import com.laytonsmith.core.taskmanager.TaskManager;
 import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
 import java.io.IOException;
@@ -1788,7 +1792,14 @@ public final class MethodScriptCompiler {
 				Script fakeScript = Script.GenerateScript(root, "*");
 				Environment env = null;
 				try {
-					env = Static.GenerateStandaloneEnvironment(false);
+					if(Implementation.GetServerType().equals(Implementation.Type.BUKKIT)) {
+						CommandHelperPlugin plugin = CommandHelperPlugin.self;
+						GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistenceNetwork,
+								MethodScriptFileLocations.getDefault().getConfigDirectory(), plugin.profiles, new TaskManager());
+						env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
+					} else {
+						env = Static.GenerateStandaloneEnvironment(false);
+					}
 				} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e) {
 					//
 				}

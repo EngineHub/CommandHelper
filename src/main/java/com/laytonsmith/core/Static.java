@@ -5,7 +5,6 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.XMLDocument;
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
@@ -1261,14 +1260,8 @@ public final class Static {
 		options.setWorkingDirectory(platformFolder);
 		PersistenceNetwork persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 				new URI("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/')), options);
-		Profiler profiler;
-		if(Implementation.GetServerType().equals(Implementation.Type.BUKKIT) && CommandHelperPlugin.self.profiler != null) {
-			profiler = CommandHelperPlugin.self.profiler;
-		} else {
-			profiler = new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile());
-		}
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
-				profiler, persistenceNetwork, platformFolder,
+				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, platformFolder,
 				new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile()), new TaskManager());
 		gEnv.SetLabel(GLOBAL_PERMISSION);
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
