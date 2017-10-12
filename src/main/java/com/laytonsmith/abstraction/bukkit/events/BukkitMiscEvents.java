@@ -6,7 +6,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.events.MCCommandTabCompleteEvent;
-import com.laytonsmith.abstraction.events.MCConsoleCommandEvent;
+import com.laytonsmith.abstraction.events.MCServerCommandEvent;
 import com.laytonsmith.abstraction.events.MCPluginIncomingMessageEvent;
 import com.laytonsmith.abstraction.events.MCServerPingEvent;
 import org.bukkit.command.Command;
@@ -26,11 +26,13 @@ import java.util.Set;
  * 
  */
 public class BukkitMiscEvents {
-	public static class BukkitMCConsoleCommandEvent implements MCConsoleCommandEvent {
+	public static class BukkitMCServerCommandEvent implements MCServerCommandEvent {
 		ServerCommandEvent sce;
+		MCCommandSender sender;
 		
-		public BukkitMCConsoleCommandEvent(ServerCommandEvent sce){
+		public BukkitMCServerCommandEvent(ServerCommandEvent sce, MCCommandSender sender){
 			this.sce = sce;
+			this.sender = sender;
 		}
 
 		@Override
@@ -46,6 +48,11 @@ public class BukkitMiscEvents {
 		@Override
 		public void setCommand(String command) {
 			sce.setCommand(command);
+		}
+
+		@Override
+		public MCCommandSender getCommandSender() {
+			return sender;
 		}
 	}
 	

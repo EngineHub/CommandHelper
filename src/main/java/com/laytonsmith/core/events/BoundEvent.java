@@ -10,7 +10,6 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
@@ -258,9 +257,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
             if(activeEvent.parsedEvent.containsKey("player")){
                 try{
                     MCPlayer p = Static.GetPlayer(activeEvent.parsedEvent.get("player"), Target.UNKNOWN);
-                    if(p != null && p.isOnline()){
-                        env.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
-                    }
+                    env.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
                 } catch(ConfigRuntimeException e){
                     if(!(e instanceof CREPlayerOfflineException)){
                         throw e;

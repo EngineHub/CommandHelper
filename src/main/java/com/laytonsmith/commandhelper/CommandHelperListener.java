@@ -93,7 +93,6 @@ public class CommandHelperListener implements Listener {
             return;
         }
         MCPlayerCommandEvent mpce = new BukkitPlayerEvents.BukkitMCPlayerCommandEvent(event);
-		EventUtils.TriggerExternal(mpce);
         EventUtils.TriggerListener(Driver.PLAYER_COMMAND, "player_command", mpce);
         if(mpce.isCancelled()){
             return;

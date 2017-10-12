@@ -4,11 +4,9 @@ import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -111,18 +109,6 @@ public class AliasCore {
 	 * @return
 	 */
 	public boolean alias(String command, final MCCommandSender player) {
-		GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
-				MethodScriptFileLocations.getDefault().getConfigDirectory(),
-				parent.profiles, new TaskManager());
-		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
-		cEnv.SetCommandSender(player);
-		Environment env = Environment.createEnvironment(gEnv, cEnv);
-		if (player instanceof MCBlockCommandSender) {
-			cEnv.SetBlockCommandSender((MCBlockCommandSender) player);
-		} else if(player instanceof MCCommandMinecart) {
-			cEnv.SetCommandMinecartSender((MCCommandMinecart) player);
-		}
-
 		if (scripts == null) {
 			throw ConfigRuntimeException.CreateUncatchableException("Cannot run alias commands, no config file is loaded", Target.UNKNOWN);
 		}
@@ -149,6 +135,14 @@ public class AliasCore {
 							b.append(" ----> ").append(command);
 							Static.getLogger().log(Level.INFO, b.toString());
 						}
+
+						GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
+								MethodScriptFileLocations.getDefault().getConfigDirectory(),
+								parent.profiles, new TaskManager());
+						CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
+						cEnv.SetCommandSender(player);
+						Environment env = Environment.createEnvironment(gEnv, cEnv);
+
 						try {
 							env.getEnv(CommandHelperEnvironment.class).SetCommand(command);
 							ProfilePoint alias = env.getEnv(GlobalEnv.class).GetProfiler().start("Global Alias - \"" + command + "\"", LogLevel.ERROR);
