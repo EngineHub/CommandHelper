@@ -276,7 +276,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public boolean inGroup(String groupName) {
-		return getGroups().contains(groupName);
+		return p.hasPermission(Static.groupPrefix + groupName);
 	}
 
 	@Override
