@@ -342,6 +342,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void sendTitle(String title, String subtitle, int fadein, int stay, int fadeout) {
+		if(title == null) {
+			// If the title is null the subtitle won't be displayed. This is unintuitive.
+			title = "";
+		}
 		try {
 			p.sendTitle(title, subtitle, fadein, stay, fadeout);
 		} catch(NoSuchMethodError ex1){
