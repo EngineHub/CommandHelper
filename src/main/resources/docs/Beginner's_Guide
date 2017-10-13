@@ -1,6 +1,6 @@
 
 This page assumes you have already installed and are running CommandHelper. Note that the instructions here are designed 
-for the master alias file, but in general will work for user aliases and LocalPackages as well.
+for the master alias file, but in general will work for LocalPackages as well.
 
 ===General===
 
@@ -16,11 +16,8 @@ and macros are specified as such:
 When using global aliases, each alias is defined on it's own line, meaning that a newline separates the aliases from 
 each other. The exception to this rule is that when using macros, each macro can be on a line of its own, as long as 
 the previous line ends in a backslash. (Another exception is when you use the "multiline construct", which is covered
-below.) All rules applying to aliases may be used for individual user aliases, 
-except of course that you can't have newlines when adding user aliases. Global aliases go in the aliases.msa file, 
-located at the root of the CommandHelper folder, and use the exact same syntax as in game aliases, which are added using 
-the /alias command. Global aliases are added in aliases.msa, and everybody can use them, and user aliases are added in 
-game with /alias, and only apply to that user.
+below.) Global aliases go in the aliases.msa file, located at the root of the CommandHelper folder, and everybody can
+use them.
 %%CODE|
 /alias_command = /real1 \
 /real2 \
@@ -70,8 +67,6 @@ Fairly simple! Note that we MUST quote this (though using run() is technically o
 symbol would cause a compile error otherwise.
 
 ===Multiline Construct===
-
-The multiline construct is only available in global configs, due to the sheer nature of how users input aliases. 
 
 Since complex alias scripts would be hard to read if they were only on one line, the multiline construct allows you to 
 put as many newlines in the middle of your alias definition as you want. To use the multiline construct, use the following syntax:
@@ -197,9 +192,8 @@ are being run at that time. It is however compiled into an intermediate stage th
 user runs a command. Once a user runs a command, this sequence is followed:
 
 The command is checked against the signatures of all defined aliases (the left side of the alias) to see if it matches. 
-It is not possible to have the same signature for two aliases within the config file, but a user may have defined an 
-alias with an identical signature in their personal aliases. In this event, the global alias will be run. If a match is 
-found, any variables are assigned, then filled in on the right side, and functions are resolved, then each command in 
+It is not possible to have the same signature for two aliases within the config file. If a match is found, any
+variables are assigned, then filled in on the right side, and functions are resolved, then each command in
 the macro (possibly only one command) is run.
 
 For a command to "match" an alias, the following factors are taken into consideration. Any literals must match exactly. 
@@ -222,7 +216,7 @@ one.
 ===Built-In Commands===
 
 As well as providing alias functionality, there are a few built in commands. These commands provide meta-functionality 
-for dealing with user aliases and other useful features.
+for dealing with aliases and other useful features.
 
 * /reloadaliases - Reloads the global alias file, while the game is running (ops only) 
 [[CommandHelper/Staged/Advanced Guide#reloadaliases|(See the advanced page for usage options)]]

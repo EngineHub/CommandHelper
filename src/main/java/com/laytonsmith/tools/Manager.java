@@ -341,8 +341,8 @@ public class Manager {
 					break;
 				case "print":
 					pl("Prints out the information in your persistence file. Entries may be narrowed down by"
-							+ " specifying the namespace (for instance " + MAGENTA + "print user.username" + WHITE
-							+ " will only show that particular users's aliases.) This is namespace based, so you"
+							+ " specifying the namespace (for instance " + MAGENTA + "print storage.warp" + WHITE
+							+ " will show only that data.) This is namespace based, so you"
 							+ " must provide the entire namespace that your are trying to narrow down."
 							+ "(" + MAGENTA + "print storage" + WHITE + " is valid, but " + MAGENTA + "print stor"
 							+ WHITE + " is not)");

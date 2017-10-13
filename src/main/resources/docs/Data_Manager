@@ -93,7 +93,6 @@ The <code>storage</code> namespace is reserved for values that are created and a
 * global.**: Values accessible from any script using the store_gvalue and get_gvalue functions. All scripts have access to this namespace, which provides a way for snap ins and other scripts to share data. Child namespaces are allowed to be created here, but are not managed by CommandHelper.
 * prefs.**: If CommandHelper stores preferences, it would use this namespace.
 * user.**: Automatically managed data about users are stored here
-* user.*.aliases.*: User aliases are stored here
 * user.*.**: Data about a particular user is stored here.
 * history.**: Journaling meta data for databases, to allow for database change events.
 -->
