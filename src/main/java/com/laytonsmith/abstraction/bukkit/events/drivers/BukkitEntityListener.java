@@ -92,7 +92,6 @@ public class BukkitEntityListener implements Listener {
 	@EventIdentifier(event = Driver.PROJECTILE_HIT, className = "org.bukkit.event.entity.ProjectileHitEvent")
 	public void onPHit(Event event) {
 		BukkitMCProjectileHitEvent phe = new BukkitMCProjectileHitEvent(event);
-		EventUtils.TriggerExternal(phe);
 		EventUtils.TriggerListener(Driver.PROJECTILE_HIT, "projectile_hit", phe);
 	}
 
