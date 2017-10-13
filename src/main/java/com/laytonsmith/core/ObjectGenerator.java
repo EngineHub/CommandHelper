@@ -311,6 +311,9 @@ public class ObjectGenerator {
 		if (mat == null) {
 			throw new CRENotFoundException("A material type could not be found based on the given id.", t);
 		}
+		if (mat.getType() == 0) {
+			return EmptyItem();
+		}
 		if (item.containsKey("qty")) {
 			qty = Static.getInt32(item.get("qty", t), t);
 		}
@@ -376,11 +379,6 @@ public class ObjectGenerator {
 		for (Map.Entry<MCEnchantment, Integer> entry : enchants.entrySet()) {
 			ret.addUnsafeEnchantment(entry.getKey(), entry.getValue());
 		}
-
-        //Giving them air crashes the client, so just clear the inventory slot
-        if (ret.getTypeId() == 0) {
-            ret = EmptyItem();
-        }
         return ret;
     }
 

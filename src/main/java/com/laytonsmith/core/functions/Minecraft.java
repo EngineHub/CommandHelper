@@ -1642,19 +1642,16 @@ public class Minecraft {
         }
 
 		@Override
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCLocation l;
-            MCItemStack is;
-            boolean natural;
+			MCItemStack is;
+			boolean natural;
 			if (args.length == 1) {
 				if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 					l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getEyeLocation();
 					natural = false;
 				} else {
 					throw new CREPlayerOfflineException("Invalid sender!", t);
-				}
-				if (args[0] instanceof CNull) {
-					return CNull.NULL; // The item is null, this means we are dropping air.
 				}
 				is = ObjectGenerator.GetGenerator().item(args[0], t);
 			} else {
@@ -1665,14 +1662,14 @@ public class Minecraft {
 					natural = true;
 				} else {
 					p = Static.GetPlayer(args[0].val(), t);
-					Static.AssertPlayerNonNull(p, t);
 					l = p.getEyeLocation();
 					natural = false;
 				}
-				if (args[1] instanceof CNull) {
-					return CNull.NULL; // The item is null, this means we are dropping air.
-				}
 				is = ObjectGenerator.GetGenerator().item(args[1], t);
+			}
+			if(is.getTypeId() == 0) {
+				// can't drop air
+				return CNull.NULL;
 			}
 			if (args.length == 3) {
 				natural = Static.getBoolean(args[2]);
@@ -1683,13 +1680,9 @@ public class Minecraft {
 			} else {
 				item = l.getWorld().dropItem(l, is);
 			}
-			if (item != null) {
-				return new CString(item.getUniqueId().toString(), t);
-			} else {
-				return CNull.NULL;
-			}
-        }
-    }
+			return new CString(item.getUniqueId().toString(), t);
+		}
+	}
 
 	@api
 	public static class shutdown_server extends AbstractFunction implements Optimizable {
