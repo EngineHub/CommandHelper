@@ -1310,13 +1310,7 @@ public class PlayerManagement {
 					}
 				}
 				if (l != null) {
-					float yaw = l.getYaw();
-					float pitch = l.getPitch();
-					//normalize yaw
-					if (yaw < 0) {
-						yaw = (((yaw) % 360) + 360);
-					}
-					return new CArray(t, new CDouble(yaw, t), new CDouble(pitch, t));
+					return new CArray(t, new CDouble(l.getYaw(), t), new CDouble(l.getPitch(), t));
 				}
 			}
 			//Setter

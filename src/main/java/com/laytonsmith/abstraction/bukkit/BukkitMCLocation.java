@@ -68,7 +68,15 @@ public class BukkitMCLocation implements MCLocation {
 
 	@Override
     public float getYaw() {
-        return l.getYaw();
+		// The yaw returned by Bukkit is not kept in range properly, fixing it here prevents issues with this later.
+		float yaw = l.getYaw();
+		while(yaw < 0) {
+			yaw += 360;
+		}
+		while(yaw >= 360) {
+			yaw -= 360;
+		}
+        return yaw; // In range of 0 (inclusive) to 360 (exclusive).
     }
 
 	@Override
