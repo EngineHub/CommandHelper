@@ -32,6 +32,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCShulkerBox;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
@@ -101,6 +102,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Vehicle;
+import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -630,8 +632,10 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCConsoleCommandSender((ConsoleCommandSender) sender);
 		} else if (sender instanceof BlockCommandSender) {
 			return new BukkitMCBlockCommandSender((BlockCommandSender) sender);
+		} else if (sender instanceof CommandMinecart) {
+			return new BukkitMCCommandMinecart((CommandMinecart) sender);
 		} else {
-			return null;
+			return new BukkitMCCommandSender(sender);
 		}
 	}
 

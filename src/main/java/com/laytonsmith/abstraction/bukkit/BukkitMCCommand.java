@@ -251,9 +251,6 @@ public class BukkitMCCommand implements MCCommand {
 			CommandHelperEnvironment cEnv = closure.getEnv().getEnv(CommandHelperEnvironment.class);
 			cEnv.SetCommandSender(sender);
 			cEnv.SetCommand("/" + label + StringUtils.Join(args, " "));
-			if (sender instanceof MCBlockCommandSender) {
-				cEnv.SetBlockCommandSender((MCBlockCommandSender) sender);
-			}
 
 			try {
 				closure.execute(new CString(label, t), new CString(sender.getName(), t), cargs,

@@ -1,22 +1,12 @@
 package com.laytonsmith.core.environments;
 
-import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 
-/**
- *
- *
- */
 public class CommandHelperEnvironment implements Environment.EnvironmentImpl, Cloneable {
-
 
     private MCCommandSender commandSender = null;
     private String command = null;
-
-
-
 
     /**
      * Given the environment, this function returns the CommandSender in the
@@ -73,28 +63,4 @@ public class CommandHelperEnvironment implements Environment.EnvironmentImpl, Cl
     public String GetCommand(){
         return this.command;
     }
-
-	public void SetBlockCommandSender(MCBlockCommandSender bcs) {
-		this.commandSender = bcs;
-	}
-
-	public MCBlockCommandSender GetBlockCommandSender(){
-		if(this.commandSender instanceof MCBlockCommandSender){
-			return (MCBlockCommandSender)commandSender;
-		} else {
-			return null;
-		}
-	}
-
-	public void SetCommandMinecartSender(MCCommandMinecart mcs) {
-		this.commandSender = mcs;
-	}
-	
-	public MCCommandMinecart GetCommandMinecartSender() {
-		if(this.commandSender instanceof MCCommandMinecart) {
-			return (MCCommandMinecart) commandSender;
-		} else {
-			return null;
-		}
-	}
 }
