@@ -1301,21 +1301,20 @@ public class PlayerManagement {
 					if (p instanceof MCPlayer) {
 						l = ((MCPlayer) p).getLocation();
 					}
-				} else if (args.length == 1) {
+				} else {
 					//if it's a number, we are setting F. Otherwise, it's a getter for the MCPlayer specified.
-
 					if (!(args[0] instanceof CInt)) {
 						MCPlayer p2 = Static.GetPlayer(args[0], t);
 						l = p2.getLocation();
 					}
 				}
 				if (l != null) {
-					float yaw = l.getYaw();
-					float pitch = l.getPitch();
-					//normalize yaw
-					if (yaw < 0) {
-						yaw = (((yaw) % 360) + 360);
+					// guarantee yaw in the 0 - 359.9~ range
+					float yaw = l.getYaw() % 360.0f;
+					if(yaw < 0.0f) {
+						yaw += 360.0f;
 					}
+					float pitch = l.getPitch();
 					return new CArray(t, new CDouble(yaw, t), new CDouble(pitch, t));
 				}
 			}

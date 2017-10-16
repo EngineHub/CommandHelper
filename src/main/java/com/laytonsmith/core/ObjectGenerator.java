@@ -93,30 +93,7 @@ public class ObjectGenerator {
      * @return
      */
     public CArray location(MCLocation l) {
-        CArray ca = CArray.GetAssociativeArray(Target.UNKNOWN);
-        Construct x = new CDouble(l.getX(), Target.UNKNOWN);
-        Construct y = new CDouble(l.getY(), Target.UNKNOWN);
-        Construct z = new CDouble(l.getZ(), Target.UNKNOWN);
-        Construct world = new CString(l.getWorld().getName(), Target.UNKNOWN);
-		float yawRaw = l.getYaw();
-		if (yawRaw < 0) {
-			yawRaw = (((yawRaw) % 360) + 360);
-		}
-        Construct yaw = new CDouble(yawRaw, Target.UNKNOWN);
-        Construct pitch = new CDouble(l.getPitch(), Target.UNKNOWN);
-        ca.set("0", x, Target.UNKNOWN);
-        ca.set("1", y, Target.UNKNOWN);
-        ca.set("2", z, Target.UNKNOWN);
-        ca.set("3", world, Target.UNKNOWN);
-        ca.set("4", yaw, Target.UNKNOWN);
-        ca.set("5", pitch, Target.UNKNOWN);
-        ca.set("x", x, Target.UNKNOWN);
-        ca.set("y", y, Target.UNKNOWN);
-        ca.set("z", z, Target.UNKNOWN);
-        ca.set("world", world, Target.UNKNOWN);
-        ca.set("yaw", yaw, Target.UNKNOWN);
-        ca.set("pitch", pitch, Target.UNKNOWN);
-        return ca;
+        return location(l, true);
     }
 
 	/**
@@ -141,7 +118,12 @@ public class ObjectGenerator {
 		ca.set("z", z, Target.UNKNOWN);
 		ca.set("world", world, Target.UNKNOWN);
 		if (includeYawAndPitch) {
-			Construct yaw = new CDouble(l.getYaw(), Target.UNKNOWN);
+			// guarantee yaw in the 0 - 359.9~ range
+			float yawRaw = l.getYaw() % 360.0f;
+			if(yawRaw < 0.0f) {
+				yawRaw += 360.0f;
+			}
+			Construct yaw = new CDouble(yawRaw, Target.UNKNOWN);
 			Construct pitch = new CDouble(l.getPitch(), Target.UNKNOWN);
 			ca.set("4", yaw, Target.UNKNOWN);
 			ca.set("5", pitch, Target.UNKNOWN);
