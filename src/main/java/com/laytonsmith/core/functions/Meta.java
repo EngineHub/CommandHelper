@@ -554,26 +554,25 @@ public class Meta {
 	    return null;
 	}
 
-	@Override
-	public Construct execs(Target t, Environment environment, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
-	    MCPlayer p = Static.GetPlayer(parent.seval(nodes[0], environment).val(), t);
-	    MCCommandSender originalPlayer = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-	    int offset = 0;
-	    String originalLabel = environment.getEnv(GlobalEnv.class).GetLabel();
-	    if (nodes.length == 3) {
-		offset++;
-		String label = environment.getEnv(GlobalEnv.class).GetScript().seval(nodes[1], environment).val();
-		environment.getEnv(GlobalEnv.class).SetLabel(label);
-		environment.getEnv(GlobalEnv.class).GetScript().setLabel(label);
-	    }
-	    environment.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
-	    ParseTree tree = nodes[1 + offset];
-	    environment.getEnv(GlobalEnv.class).GetScript().eval(tree, environment);
-	    environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(originalPlayer);
-	    environment.getEnv(GlobalEnv.class).SetLabel(originalLabel);
-	    environment.getEnv(GlobalEnv.class).GetScript().setLabel(originalLabel);
-	    return CVoid.VOID;
-	}
+		@Override
+		public Construct execs(Target t, Environment environment, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
+			MCPlayer p = Static.GetPlayer(parent.seval(nodes[0], environment).val(), t);
+			MCCommandSender originalPlayer = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			int offset = 0;
+			String originalLabel = environment.getEnv(GlobalEnv.class).GetLabel();
+			if (nodes.length == 3) {
+				offset++;
+				String label = environment.getEnv(GlobalEnv.class).GetScript().seval(nodes[1], environment).val();
+				environment.getEnv(GlobalEnv.class).SetLabel(label);
+			}
+			environment.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
+			parent.enforceLabelPermissions();
+			ParseTree tree = nodes[1 + offset];
+			parent.eval(tree, environment);
+			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(originalPlayer);
+			environment.getEnv(GlobalEnv.class).SetLabel(originalLabel);
+			return CVoid.VOID;
+		}
 
 	@Override
 	public boolean useSpecialExec() {

@@ -1077,44 +1077,9 @@ public final class Static {
 			return true;
 		}
 		MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-		MCCommandSender commandSender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-		String label = env.getEnv(GlobalEnv.class).GetLabel();
-		boolean perm = false;
-		if (commandSender != null) {
-			if (commandSender.isOp()) {
-				perm = true;
-			} else if (commandSender instanceof MCPlayer) {
-				perm = player.hasPermission("ch.func.use." + functionName)
-						|| player.hasPermission("commandhelper.func.use." + functionName);
-				if (label != null && label.startsWith("~")) {
-					String[] groups = label.substring(1).split("/");
-					for (String group : groups) {
-						if (player.inGroup(group)) {
-							perm = true;
-							break;
-						}
-					}
-				} else {
-					if (label != null) {
-						if (label.contains(".")) {
-                            //We are using a non-standard permission. Don't automatically
-							//add CH's prefix
-							if (player.hasPermission(label)) {
-								perm = true;
-							}
-						} else if ((player.hasPermission("ch.alias." + label))
-								|| player.hasPermission("commandhelper.alias." + label)) {
-							perm = true;
-						}
-					}
-				}
-			} else if (commandSender instanceof MCConsoleCommandSender) {
-				perm = true;
-			}
-		} else {
-			perm = true;
-		}
-		return perm;
+		return player == null || player.isOp()
+				|| player.hasPermission("ch.func.use." + functionName)
+				|| player.hasPermission("commandhelper.func.use." + functionName);
 	}
 
 	public static String Logo() {

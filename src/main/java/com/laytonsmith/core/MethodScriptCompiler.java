@@ -908,7 +908,7 @@ public final class MethodScriptCompiler {
 							}
 						}
 					}
-					Script s = new Script(left, right);
+					Script s = new Script(left, right, null);
 					scripts.add(s);
 					left = new ArrayList<>();
 					right = new ArrayList<>();
@@ -1986,7 +1986,7 @@ public final class MethodScriptCompiler {
 			return CVoid.VOID;
 		}
 		if (script == null) {
-			script = new Script(null, null);
+			script = new Script(null, null, env.getEnv(GlobalEnv.class).GetLabel());
 		}
 		if (vars != null) {
 			Map<String, Variable> varMap = new HashMap<>();
@@ -2008,7 +2008,6 @@ public final class MethodScriptCompiler {
 		StringBuilder b = new StringBuilder();
 		Construct returnable = null;
 		for (ParseTree gg : root.getChildren()) {
-			script.setLabel(env.getEnv(GlobalEnv.class).GetLabel());
 			Construct retc = script.eval(gg, env);
 			if (root.numberOfChildren() == 1) {
 				returnable = retc;
@@ -2034,6 +2033,7 @@ public final class MethodScriptCompiler {
 			} catch (ProgramFlowManipulationException e) {
 				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in auto include files.", e.getTarget()), env);
 			} catch (ConfigRuntimeException e) {
+				e.setEnv(env);
 				ConfigRuntimeException.HandleUncaughtException(e, env);
 			}
 		}

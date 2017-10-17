@@ -122,13 +122,13 @@ public class Script {
         return b.toString();
     }
 
-    public Script(List<Token> left, List<Token> right) {
-        this.left = left;
-        this.fullRight = right;
-        this.left_vars = new HashMap<String, Variable>();
-        //this.OriginalEnv = env;
+	public Script(List<Token> left, List<Token> right, String label) {
+		this.left = left;
+		this.fullRight = right;
+		this.left_vars = new HashMap<>();
+		this.label = label;
 		compileTime = System.currentTimeMillis();
-    }
+	}
 
     private Script(){
 		compileTime = System.currentTimeMillis();
@@ -171,21 +171,7 @@ public class Script {
             throw ConfigRuntimeException.CreateUncatchableException("Unable to run command, script not yet compiled, or a compiler error occured for that command."
                     + " To see the compile error, run /reloadaliases", target);
         }
-        if (p instanceof MCPlayer) {
-            if (CurrentEnv.getEnv(GlobalEnv.class).GetLabel() != null) {
-                String[] groups = CurrentEnv.getEnv(GlobalEnv.class).GetLabel().split("/");
-                for (String group : groups) {
-                    if (group.startsWith("-") && ((MCPlayer)p).inGroup(group.substring(1))) {
-                        //negative permission
-                        throw new CREInsufficientPermissionException("You do not have permission to use that command",
-                                Target.UNKNOWN);
-                    } else if (((MCPlayer)p).inGroup(group)) {
-                        //They do have permission.
-                        break;
-                    }
-                }
-            }
-        }
+        enforceLabelPermissions();
 
         try {
             for (ParseTree rootNode : cright) {
@@ -271,12 +257,9 @@ public class Script {
 			//unconditionally.
 			throw new CancelCommandException("", Target.UNKNOWN);
 		}
-        final Construct m = c.getData();
-        CurrentEnv = env;
-		//TODO: Reevaluate if this line is needed. The script doesn't know the label inherently, the
-		//environment does, and setting it this way taints the environment.
-        CurrentEnv.getEnv(GlobalEnv.class).SetLabel(this.label);
-        if (m.getCType() == ConstructType.FUNCTION) {
+		final Construct m = c.getData();
+		CurrentEnv = env;
+		if (m.getCType() == ConstructType.FUNCTION) {
 				StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 				boolean addedRootStackElement = false;
 				boolean caughtException = false;
@@ -317,11 +300,9 @@ public class Script {
 
 					ArrayList<Construct> args = new ArrayList<Construct>();
 					try{
-						if (f.isRestricted()) {
-							boolean perm = Static.hasCHPermission(f.getName(), env);
-							if (!perm) {
-								throw new CREInsufficientPermissionException("You do not have permission to use the " + f.getName() + " function.", m.getTarget());
-							}
+						if (f.isRestricted() && !Static.hasCHPermission(f.getName(), env)) {
+							throw new CREInsufficientPermissionException("You do not have permission to use the "
+									+ f.getName() + " function.", m.getTarget());
 						}
 
 						if(f.useSpecialExec()){
@@ -911,13 +892,38 @@ public class Script {
         }
     }
 
-    /**
-     * This is only used by scriptas to hack the label in and out.
-     * @param label
-     */
-    public void setLabel(String label) {
-        this.label = label;
-    }
+	public void enforceLabelPermissions() {
+		String label = CurrentEnv.getEnv(GlobalEnv.class).GetLabel();
+		if(label == null || label.equals(Static.GLOBAL_PERMISSION)) {
+			return;
+		}
+		MCPlayer p = CurrentEnv.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		if(p == null) {
+			// labels only apply to players
+			CurrentEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
+		} else if(label.startsWith("~")) {
+			// group labels
+			String[] groups = label.substring(1).split("/");
+			for (String group : groups) {
+				if (group.startsWith("-") && p.inGroup(group.substring(1))) {
+					// negative permission
+					throw new CREInsufficientPermissionException("You do not have permission to use that script.",
+							Target.UNKNOWN);
+				} else if (p.inGroup(group)) {
+					// they have explicit permission.
+					CurrentEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
+					return;
+				}
+			}
+		} else if (label.indexOf('.') != -1) {
+			// custom permission label
+			if (p.hasPermission(label)) {
+				CurrentEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
+			}
+		} else if (p.hasPermission("ch.alias." + label) || p.hasPermission("commandhelper.alias." + label)) {
+			CurrentEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
+		}
+	}
 
 	public boolean doLog(){
 		return !nolog;
