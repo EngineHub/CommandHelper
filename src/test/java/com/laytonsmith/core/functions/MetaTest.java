@@ -74,23 +74,13 @@ public class MetaTest {
         SRun("assign(@e, 'msg(\\'Hello World!\\')') eval(@e)", fakePlayer);
         verify(fakePlayer).sendMessage("Hello World!");
     }
-    //:( I can't get this to work right, because AlwaysOpPlayer is different than
-    //fakePlayer, so I can't get my test to activate when the function is called.
-//    @Test(timeout=10000)
-//    public void testRunas2() throws Exception {
-//        final AtomicBoolean bool = new AtomicBoolean(false);
-//        String script =
-//                "runas(~op, '/cmd yay')";
-//        when(fakeServer.dispatchCommand(fakePlayer, "cmd yay")).thenAnswer(new Answer<Boolean>(){
-//
-//            public Boolean answer(InvocationOnMock invocation) throws Throwable {
-//                assertTrue(((Server)invocation.getMock()).getPlayer(fakePlayer.getName()).isOp());
-//                bool.set(true);
-//                return true;
-//            }
-//
-//        });
-//        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), fakePlayer, null, null);
-//        assertTrue(bool.get());
-//    }
-    }
+
+	@Test public void testScriptas() throws Exception{
+		String script = "scriptas('Player02', 'newlabel', msg(reflect_pull('label'))); msg(reflect_pull('label'))";
+		MCPlayer fakePlayer2 = GetOnlinePlayer("Player02", fakeServer);
+		when(fakeServer.getPlayer("Player02")).thenReturn(fakePlayer2);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
+		verify(fakePlayer2).sendMessage("newlabel");
+		verify(fakePlayer).sendMessage("*");
+	}
+}
