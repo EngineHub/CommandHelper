@@ -562,8 +562,10 @@ public class Meta {
 			String originalLabel = environment.getEnv(GlobalEnv.class).GetLabel();
 			if (nodes.length == 3) {
 				offset++;
-				String label = environment.getEnv(GlobalEnv.class).GetScript().seval(nodes[1], environment).val();
+				String label = parent.seval(nodes[1], environment).val();
 				environment.getEnv(GlobalEnv.class).SetLabel(label);
+			} else {
+				environment.getEnv(GlobalEnv.class).SetLabel(parent.getLabel());
 			}
 			environment.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
 			parent.enforceLabelPermissions();
