@@ -145,10 +145,6 @@
 			<id>maven-central</id>
 			<url>http://repo1.maven.org/maven2/</url>
 		</repository>
-		<!--repository>
-			<id>zml2008</id>
-			<url>http://files.zachsthings.com/repo/</url>
-		</repository-->
 
 		<repository>
 			<id>Plugin Metrics</id>
@@ -176,7 +172,7 @@
 			<!-- GPL -->
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.12.1-R0.1-SNAPSHOT</version>
+			<version>1.12.2-R0.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
@@ -194,14 +190,6 @@
 			<artifactId>jBCrypt</artifactId>
 			<version>1.0</version>
 		</dependency>
-
-		<!-- Used for potion effects
-		<dependency>
-		 <groupId>org.bukkit</groupId>
-		 <artifactId>minecraft-server</artifactId>
-		 <version>1.8.1</version>
-		 <type>jar</type>
-		</dependency> -->
 
 		<!-- Used for IRC hooks -->
 		<!--<dependency> NOT READY YET
