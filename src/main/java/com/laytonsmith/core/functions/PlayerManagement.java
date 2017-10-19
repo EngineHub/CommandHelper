@@ -207,7 +207,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "UUID {[player], [dashless]} Returns the uuid of the current player or the specified player."
+			return "string {[player], [dashless]} Returns the uuid of the current player or the specified player."
 					+ " This will attempt to find an offline player, but if that also fails,"
 					+ " a PlayerOfflineException will be thrown.";
 		}
@@ -673,8 +673,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "{[player]} Returns the \"target space\" that the player is currently targetting. This is the \"space\" where"
-					+ " if they placed a block (and were close enough), it would end up going.";
+			return "array {[player]} Returns the \"target space\" that the player is currently targetting. This is the"
+					+ " \"space\" where if they placed a block (and were close enough), it would end up going.";
 		}
 
 		@Override
@@ -1124,6 +1124,57 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(ptok, t);
 			ptok.kickPlayer(message);
 			return CVoid.VOID;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class display_name extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "display_name";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {[player]} Returns the display name of the player.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m;
+			if (args.length == 0) {
+				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(m, t);
+			} else {
+				m = Static.GetPlayer(args[0].val(), t);
+			}
+			return new CString(m.getDisplayName(), t);
 		}
 	}
 
@@ -2182,6 +2233,108 @@ public class PlayerManagement {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class psneaking extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "psneaking";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {[player]} Returns whether or not the player is sneaking.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m;
+			if (args.length == 0) {
+				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(m, t);
+			} else {
+				m = Static.GetPlayer(args[0].val(), t);
+			}
+			return CBoolean.get(m.isSneaking());
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class phealth extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "phealth";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "double {[player]} Gets the player's health.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m;
+			if (args.length == 0) {
+				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(m, t);
+			} else {
+				m = Static.GetPlayer(args[0].val(), t);
+			}
+			return new CDouble(m.getHealth(), t);
 		}
 	}
 
@@ -3431,7 +3584,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player]} Returns true if the given player is experiencing a storm, as set by"
+			return "boolean {[player]} Returns true if the given player is experiencing a storm, as set by"
 					+ " set_pstorm(). (ignores world weather)";
 		}
 
@@ -4193,7 +4346,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {[player], locationArray, [forced] | [player], x, y, z, [forced]} Sets the respawn location"
+			return "void {[player], locationArray, [forced] | [player], x, y, z, [forced]} Sets the respawn location"
 					+ " of a player. If player is omitted, the current player is used. The specified location should be"
 					+ " the block below the respawn location. If forced is false, it will respawn the player next to"
 					+ " that location only if a bed found is found there. (forced defaults to true)";
@@ -4826,7 +4979,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player]} Gets the entity that a spectator is viewing. If the player isn't spectating"
+			return "string {[player]} Gets the entity that a spectator is viewing. If the player isn't spectating"
 					+ " from an entity, null is returned. If the player isn't in spectator mode, an"
 					+ " IllegalArgumentException is thrown.";
 		}
