@@ -246,19 +246,13 @@ public class EntityEvents {
 				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
 				if (prefilter.containsKey("id")) {
 					if (e.getEntity() == null) {
-						if (prefilter.get("id") instanceof CNull || prefilter.get("id").val().equals("null")) {
-							return true;
-						}
-						return false;
+						return prefilter.get("id") instanceof CNull;
 					}
 					Prefilters.match(prefilter, "id", e.getEntity().getUniqueId().toString(), PrefilterType.MACRO);
 				}
 				if (prefilter.containsKey("type")) {
 					if (e.getEntity() == null) {
-						if (prefilter.get("type") instanceof CNull || prefilter.get("type").val().equals("null")) {
-							return true;
-						}
-						return false;
+						return prefilter.get("type") instanceof CNull;
 					}
 					Prefilters.match(prefilter, "type", e.getEntity().getType().name(), PrefilterType.MACRO);
 				}
@@ -598,11 +592,10 @@ public class EntityEvents {
 				map.put("drops", drops);
 				map.put("xp", new CInt(e.getDroppedExp(), t));
 				CArray cod = CArray.GetAssociativeArray(t);
-				Map<String, Construct> ldc =
-						parseEntityDamageEvent(dead.getLastDamageCause(),
-								new HashMap<String, Construct>());
-				for (String key : ldc.keySet()) {
-					cod.set(key, ldc.get(key), t);
+				Map<String, Construct> ldc = parseEntityDamageEvent(dead.getLastDamageCause(),
+						new HashMap<String, Construct>());
+				for (Map.Entry<String, Construct> entry : ldc.entrySet()) {
+					cod.set(entry.getKey(), entry.getValue(), t);
 				}
 				map.put("cause", cod);
 				map.put("location", ObjectGenerator.GetGenerator().location(dead.getLocation()));

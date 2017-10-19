@@ -251,8 +251,8 @@ public class BoundEvent implements Comparable<BoundEvent> {
     //        root.setRoot(tree);
             Environment env = originalEnv.clone();
             CArray ca = CArray.GetAssociativeArray(Target.UNKNOWN);
-            for (String key : activeEvent.parsedEvent.keySet()) {
-                ca.set(new CString(key, Target.UNKNOWN), activeEvent.parsedEvent.get(key), Target.UNKNOWN);
+            for (Map.Entry<String, Construct> entry : activeEvent.parsedEvent.entrySet()) {
+                ca.set(new CString(entry.getKey(), Target.UNKNOWN), entry.getValue(), Target.UNKNOWN);
             }
             if(activeEvent.parsedEvent.containsKey("player")){
                 try{

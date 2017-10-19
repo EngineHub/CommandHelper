@@ -268,9 +268,7 @@ public class BlockEvents {
                     Construct v = prefilter.get("type");
 
                     if (v instanceof CInt) {
-                        int val = Integer.parseInt(v.val());
-
-                        if (event.getBlock().getTypeId() != val) {
+                        if (event.getBlock().getTypeId() != ((CInt) v).getInt()) {
                             return false;
                         }
                     } else {
@@ -282,9 +280,7 @@ public class BlockEvents {
                     Construct v = prefilter.get("data");
 
                     if (v instanceof CInt) {
-                        int val = Integer.parseInt(v.val());
-
-                        if ((int) event.getBlock().getData() != val) {
+                        if ((int) event.getBlock().getData() != ((CInt) v).getInt()) {
                             return false;
                         }
                     } else {
@@ -429,9 +425,7 @@ public class BlockEvents {
                     Construct v = prefilter.get("type");
 
                     if (v instanceof CInt) {
-                        int val = Integer.parseInt(v.val());
-
-                        if (event.getBlock().getTypeId() != val) {
+                        if (event.getBlock().getTypeId() != ((CInt) v).getInt()) {
                             return false;
                         }
                     } else {
@@ -443,9 +437,7 @@ public class BlockEvents {
                     Construct v = prefilter.get("data");
 
                     if (v instanceof CInt) {
-                        int val = Integer.parseInt(v.val());
-
-                        if ((int) event.getBlock().getData() != val) {
+                        if ((int) event.getBlock().getData() != ((CInt) v).getInt()) {
                             return false;
                         }
                     } else {
@@ -582,9 +574,7 @@ public class BlockEvents {
                     Construct v = prefilter.get("type");
 
                     if (v instanceof CInt) {
-                        int val = Integer.parseInt(v.val());
-
-                        if (event.getBlock().getTypeId() != val) {
+                        if (event.getBlock().getTypeId() != ((CInt) v).getInt()) {
                             return false;
                         }
                     } else {
@@ -596,9 +586,7 @@ public class BlockEvents {
                     Construct v = prefilter.get("data");
 
                     if (v instanceof CInt) {
-                        int val = Integer.parseInt(v.val());
-
-                        if ((int) event.getBlock().getData() != val) {
+                        if ((int) event.getBlock().getData() != ((CInt) v).getInt()) {
                             return false;
                         }
                     } else {
@@ -1027,8 +1015,7 @@ public class BlockEvents {
 				throws PrefilterNonMatchException {
 			if (e instanceof MCBlockDispenseEvent) {
 				MCBlockDispenseEvent event = (MCBlockDispenseEvent) e;
-				Prefilters.match(prefilter, "type",
-						StaticLayer.GetConvertor().LookupMaterialName(event.getBlock().getTypeId()), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "type", event.getBlock().getType().getName(), PrefilterType.STRING_MATCH);
 				Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItem()), PrefilterType.ITEM_MATCH);
 				return true;
 			}
@@ -1047,7 +1034,7 @@ public class BlockEvents {
 			Map<String, Construct> map = evaluate_helper(e);
 			MCBlock blk = event.getBlock();
 
-			map.put("type", new CString(StaticLayer.GetConvertor().LookupMaterialName(event.getBlock().getTypeId()), Target.UNKNOWN));
+			map.put("type", new CString(event.getBlock().getType().getName(), Target.UNKNOWN));
 
 			map.put("item", ObjectGenerator.GetGenerator().item(event.getItem(), Target.UNKNOWN));
 

@@ -67,8 +67,7 @@ public final class EventUtils {
 	 * @param id
 	 */
 	public static void UnregisterEvent(String id) {
-		for (Driver type : event_handles.keySet()) {
-			SortedSet<BoundEvent> set = event_handles.get(type);
+		for (SortedSet<BoundEvent> set : event_handles.values()) {
 			Iterator<BoundEvent> i = set.iterator();
 			while (i.hasNext()) {
 				BoundEvent b = i.next();
@@ -88,8 +87,7 @@ public final class EventUtils {
 	 * @return
 	 */
 	public static BoundEvent GetEventById(String id) {
-		for (Driver type : event_handles.keySet()) {
-			SortedSet<BoundEvent> set = event_handles.get(type);
+		for (SortedSet<BoundEvent> set : event_handles.values()) {
 			for (BoundEvent b : set) {
 				if (b.getId().equals(id)) {
 					return b;
@@ -103,8 +101,7 @@ public final class EventUtils {
 	 * Unregisters all event handlers. Runs in O(n)
 	 */
 	public static void UnregisterAll(String name) {
-		for (Driver type : event_handles.keySet()) {
-			SortedSet<BoundEvent> set = event_handles.get(type);
+		for (SortedSet<BoundEvent> set : event_handles.values()) {
 			Iterator<BoundEvent> i = set.iterator();
 			while (i.hasNext()) {
 				BoundEvent b = i.next();
@@ -266,8 +263,7 @@ public final class EventUtils {
 
 	public static Construct DumpEvents() {
 		CArray ca = new CArray(Target.UNKNOWN);
-		for (Driver type : event_handles.keySet()) {
-			SortedSet<BoundEvent> set = event_handles.get(type);
+		for (SortedSet<BoundEvent> set : event_handles.values()) {
 			Iterator<BoundEvent> i = set.iterator();
 			while (i.hasNext()) {
 				BoundEvent b = i.next();
