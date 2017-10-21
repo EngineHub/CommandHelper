@@ -4,21 +4,17 @@ package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.Common.DateUtils;
 import com.laytonsmith.PureUtilities.Pair;
-import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
-import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.profiler.ProfilePoint;
@@ -243,7 +239,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
      * original event object (of whatever type it may be) into a standard map, which
      * contains the event object data. It is converted into a CArray here, and then
      * the script is executed with the driver's execute function.
-     * @param event
+     * @param activeEvent
      */
     public void trigger(ActiveEvent activeEvent) throws EventException {
         try {
@@ -254,19 +250,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
             for (Map.Entry<String, Construct> entry : activeEvent.parsedEvent.entrySet()) {
                 ca.set(new CString(entry.getKey(), Target.UNKNOWN), entry.getValue(), Target.UNKNOWN);
             }
-            if(activeEvent.parsedEvent.containsKey("player")){
-                try{
-                    MCPlayer p = Static.GetPlayer(activeEvent.parsedEvent.get("player"), Target.UNKNOWN);
-                    env.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
-                } catch(ConfigRuntimeException e){
-                    if(!(e instanceof CREPlayerOfflineException)){
-                        throw e;
-                    }
-                    //else we just leave the player to be null. It either doesn't matter here,
-                    //or the event will add it later, manually.
-                }
-            }
-	    env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, ca, Target.UNKNOWN));
+            env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, ca, Target.UNKNOWN));
             env.getEnv(GlobalEnv.class).SetEvent(activeEvent);
             activeEvent.addHistory("Triggering bound event: " + this);
             try{

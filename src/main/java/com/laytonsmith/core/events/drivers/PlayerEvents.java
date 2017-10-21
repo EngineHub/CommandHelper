@@ -3,6 +3,7 @@ package com.laytonsmith.core.events.drivers;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCBookMeta;
+import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -29,7 +30,6 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
@@ -717,7 +717,6 @@ public class PlayerEvents {
                 //Static lookups of the player don't seem to work here, but
                 //the player is passed in with the event.
                 MCPlayer player = ((MCPlayerLoginEvent)activeEvent.getUnderlyingEvent()).getPlayer();
-                env.getEnv(CommandHelperEnvironment.class).SetPlayer(player);
                 Static.InjectPlayer(player);
             }
         }
@@ -1220,7 +1219,6 @@ public class PlayerEvents {
                 //Static lookups of the player don't seem to work here, but
                 //the player is passed in with the event.
                 MCPlayer player = ((MCPlayerRespawnEvent)activeEvent.getUnderlyingEvent()).getPlayer();
-                env.getEnv(CommandHelperEnvironment.class).SetPlayer(player);
                 Static.InjectPlayer(player);
             }
         }
@@ -1440,7 +1438,6 @@ public class PlayerEvents {
                 //Static lookups of the player don't seem to work here, but
                 //the player is passed in with the event.
                 MCPlayer player = ((MCPlayerQuitEvent)activeEvent.getUnderlyingEvent()).getPlayer();
-                env.getEnv(CommandHelperEnvironment.class).SetPlayer(player);
                 Static.InjectPlayer(player);
             }
         }
@@ -2110,6 +2107,23 @@ public class PlayerEvents {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public void preExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerFishEvent){
+				// Static lookups of the entity don't work here, so we need to inject them
+				MCEntity entity = ((MCPlayerFishEvent)activeEvent.getUnderlyingEvent()).getHook();
+				Static.InjectEntity(entity);
+			}
+		}
+
+		@Override
+		public void postExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerFishEvent){
+				MCEntity entity = ((MCPlayerFishEvent)activeEvent.getUnderlyingEvent()).getHook();
+				Static.UninjectEntity(entity);
+			}
 		}
 	}
 

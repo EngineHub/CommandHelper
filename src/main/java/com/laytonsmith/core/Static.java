@@ -641,7 +641,8 @@ public final class Static {
 		return b.getTypeId() + (b.getData() == 0 ? "" : ":" + Byte.toString(b.getData()));
 	}
 
-	private static Map<String, MCCommandSender> injectedPlayers = new HashMap<String, MCCommandSender>();
+	private static Map<String, MCCommandSender> injectedPlayers = new HashMap<>();
+	private static MCEntity injectedEntity;
 	private static final Pattern DASHLESS_PATTERN = Pattern.compile("^([A-Fa-f0-9]{8})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{12})$");
 
 	/**
@@ -829,6 +830,10 @@ public final class Static {
 	 * @return
 	 */
 	public static MCEntity getEntityByUuid(UUID id, Target t) {
+		if(injectedEntity != null && injectedEntity.getUniqueId().equals(id)) {
+			// This entity is not in the world yet, but it was injected by the event
+			return injectedEntity;
+		}
 		for (MCWorld w : getServer().getWorlds()) {
 			for (MCEntity e : w.getEntities()) {
 				if (e.getUniqueId().compareTo(id) == 0) {
@@ -847,6 +852,13 @@ public final class Static {
 	 * @return
 	 */
 	public static MCLivingEntity getLivingByUUID(UUID id, Target t) {
+		if(injectedEntity != null && injectedEntity.getUniqueId().equals(id)) {
+			// This entity is not in the world yet, but it was injected by the event
+			if(injectedEntity instanceof MCLivingEntity) {
+				return (MCLivingEntity) injectedEntity;
+			}
+			throw new CREBadEntityException("That entity (" + id + ") is not alive.", t);
+		}
 		for (MCWorld w : Static.getServer().getWorlds()) {
 			for (MCLivingEntity e : w.getLivingEntities()) {
 				if (e.getUniqueId().compareTo(id) == 0) {
@@ -1167,6 +1179,14 @@ public final class Static {
 			name = "~console";
 		}
 		return injectedPlayers.remove(name);
+	}
+
+	public static void InjectEntity(MCEntity entity) {
+		injectedEntity = entity;
+	}
+
+	public static void UninjectEntity(MCEntity entity) {
+		injectedEntity = null;
 	}
 
 	public static void HostnameCache(final String name, final InetSocketAddress address) {

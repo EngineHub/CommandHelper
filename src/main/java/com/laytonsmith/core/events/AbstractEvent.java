@@ -4,6 +4,7 @@ package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.Documentation;
@@ -14,9 +15,11 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
@@ -77,20 +80,30 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
     }
 
 
-    /**
-     * This function is run when the actual event occurs.
+	/**
+	 * This function is run when the actual event occurs.
 	 * @param tree The compiled parse tree
-     * @param b The bound event
+	 * @param b The bound event
 	 * @param env The operating environment
 	 * @param activeEvent The active event being executed
-     */
+	 */
 	@Override
-    public final void execute(ParseTree tree, BoundEvent b, Environment env, BoundEvent.ActiveEvent activeEvent) throws ConfigRuntimeException{
-        try{
-            preExecution(env, activeEvent);
-        } catch(UnsupportedOperationException e){
-            //Ignore. This particular event doesn't need to customize
-        }
+	public final void execute(ParseTree tree, BoundEvent b, Environment env, BoundEvent.ActiveEvent activeEvent) throws ConfigRuntimeException{
+		try{
+			preExecution(env, activeEvent);
+		} catch(UnsupportedOperationException e){
+			//Ignore. This particular event doesn't need to customize
+		}
+		// Various events have a player in them (not just instances MCPlayerEvent) so we put them into the env.
+		// Do this after preExcecution() in case the particular event needs to inject the player first.
+		if(activeEvent.getParsedEvent().containsKey("player")){
+			try{
+				MCPlayer p = Static.GetPlayer(activeEvent.getParsedEvent().get("player"), Target.UNKNOWN);
+				env.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
+			} catch(CREPlayerOfflineException e){
+				// Leave the player to be null. It may be a bug in this particular event, but we still want to execute.
+			}
+		}
 		ProfilePoint event = null;
 		if(env.getEnv(GlobalEnv.class).GetProfiler() != null){
 			event = env.getEnv(GlobalEnv.class).GetProfiler().start("Event " + b.getEventName() + " (defined at " + b.getTarget().toString() + ")", LogLevel.ERROR);
@@ -117,16 +130,17 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 				ConfigRuntimeException.HandleUncaughtException(new CREFormatException("Unexpected control flow operation used.", ex.getTarget()), env);
 			}
 		} finally {
-			if(event != null){
+			if(event != null) {
 				event.stop();
 			}
+			try{
+				// finally, among other things, we need to clean-up injected players and entities
+				this.postExecution(env, activeEvent);
+			} catch(UnsupportedOperationException e){
+				//Ignore.
+			}
 		}
-        try{
-            this.postExecution(env, activeEvent);
-        } catch(UnsupportedOperationException e){
-            //Ignore.
-        }
-    }
+	}
 
 	/**
 	 * This method is called before the event handling code is run, and provides a place

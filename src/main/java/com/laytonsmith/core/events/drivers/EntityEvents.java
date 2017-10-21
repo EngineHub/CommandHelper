@@ -16,7 +16,6 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
-import com.laytonsmith.abstraction.enums.MCEntityType.MCVanillaEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCRegainReason;
@@ -57,8 +56,10 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
+import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
@@ -216,6 +217,23 @@ public class EntityEvents {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public void preExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCItemSpawnEvent){
+				// Static lookups of the entity don't work here, so we need to inject them
+				MCEntity entity = ((MCItemSpawnEvent)activeEvent.getUnderlyingEvent()).getEntity();
+				Static.InjectEntity(entity);
+			}
+		}
+
+		@Override
+		public void postExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCItemSpawnEvent){
+				MCEntity entity = ((MCItemSpawnEvent)activeEvent.getUnderlyingEvent()).getEntity();
+				Static.UninjectEntity(entity);
+			}
 		}
 	}
 
@@ -536,6 +554,23 @@ public class EntityEvents {
 			}
 			return false;
 		}
+
+		@Override
+		public void preExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCProjectileLaunchEvent){
+				// Static lookups of the entity don't work here, so we need to inject them
+				MCEntity entity = ((MCProjectileLaunchEvent)activeEvent.getUnderlyingEvent()).getEntity();
+				Static.InjectEntity(entity);
+			}
+		}
+
+		@Override
+		public void postExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCProjectileLaunchEvent){
+				MCEntity entity = ((MCProjectileLaunchEvent)activeEvent.getUnderlyingEvent()).getEntity();
+				Static.UninjectEntity(entity);
+			}
+		}
 	}
 
 	@api
@@ -720,6 +755,23 @@ public class EntityEvents {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public void preExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCCreatureSpawnEvent){
+				// Static lookups of the entity don't work here, so we need to inject them
+				MCEntity entity = ((MCCreatureSpawnEvent)activeEvent.getUnderlyingEvent()).getEntity();
+				Static.InjectEntity(entity);
+			}
+		}
+
+		@Override
+		public void postExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCCreatureSpawnEvent){
+				MCEntity entity = ((MCCreatureSpawnEvent)activeEvent.getUnderlyingEvent()).getEntity();
+				Static.UninjectEntity(entity);
+			}
 		}
 
 	}
