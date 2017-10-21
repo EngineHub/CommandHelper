@@ -251,12 +251,6 @@ public class PlayerEvents {
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
                 throws PrefilterNonMatchException {
             if (e instanceof MCPlayerKickEvent) {
-                //I gather we do not what to intercept anything from players in interpreter mode
-                //because there would be no one to recieve the information
-                if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerKickEvent)e).getPlayer().getName())){
-                    throw new PrefilterNonMatchException();
-                }
-
                 Prefilters.match(prefilter, "player", ((MCPlayerKickEvent)e).getPlayer().getName(), PrefilterType.MACRO);
                 Prefilters.match(prefilter, "reason", ((MCPlayerKickEvent)e).getReason(), PrefilterType.MACRO);
                 return true;
@@ -1384,12 +1378,6 @@ public class PlayerEvents {
 		@Override
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerQuitEvent) {
-                //As a very special case, if this player is currently in interpreter mode, we do not want to
-                //intercept their chat event
-                if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerQuitEvent)e).getPlayer().getName())){
-                    throw new PrefilterNonMatchException();
-                }
-
                 Prefilters.match(prefilter, "player", ((MCPlayerQuitEvent)e).getPlayer().getName(), PrefilterType.MACRO);
                 return true;
             }
