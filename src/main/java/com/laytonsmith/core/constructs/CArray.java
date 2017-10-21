@@ -378,8 +378,8 @@ public class CArray extends Construct implements ArrayAccess{
                 throw new CREIndexOverflowException("The element at index \"" + index.val() + "\" does not exist", t, e);
             }
         } else {
-            if(associative_array.containsKey(normalizeConstruct(index))){
-                Construct val = associative_array.get(normalizeConstruct(index));
+            Construct val = associative_array.get(normalizeConstruct(index));
+            if(val != null){
                 if(val instanceof CEntry){
                     return ((CEntry)val).construct();
                 }
