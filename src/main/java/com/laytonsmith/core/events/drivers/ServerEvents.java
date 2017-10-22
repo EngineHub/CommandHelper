@@ -190,13 +190,13 @@ public class ServerEvents {
 						e.setMOTD(value.val());
 						return true;
 					case "maxplayers":
-						e.setMaxPlayers(Static.getInt32(value, Target.UNKNOWN));
+						e.setMaxPlayers(Static.getInt32(value, value.getTarget()));
 						return true;
 					case "list":
 						// Modifies the player list. The new list will be the intersection of the original
 						// and the given list. Names and UUID's outside this intersection will simply be ignored.
 						Set<MCPlayer> modifiedPlayers = new HashSet<>();
-						List<Construct> passedList = ArgumentValidation.getArray(value, Target.UNKNOWN).asList();
+						List<Construct> passedList = ArgumentValidation.getArray(value, value.getTarget()).asList();
 						for(MCPlayer player : e.getPlayers()) {
 							for(Construct construct : passedList) {
 								String playerStr = construct.val();
@@ -303,7 +303,7 @@ public class ServerEvents {
 						List<String> comp = new ArrayList<>();
 						if (((CArray) value).inAssociativeMode()) {
 							for (Construct k : ((CArray) value).keySet()) {
-								comp.add(((CArray) value).get(k, Target.UNKNOWN).val());
+								comp.add(((CArray) value).get(k, value.getTarget()).val());
 							}
 						} else {
 							for (Construct v : ((CArray) value).asList()) {

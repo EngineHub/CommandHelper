@@ -207,7 +207,7 @@ public class EntityEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCItemSpawnEvent) {
 				if ("item".equals(key)) {
-					((MCItemSpawnEvent) event).getEntity().setItemStack(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					((MCItemSpawnEvent) event).getEntity().setItemStack(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -321,7 +321,7 @@ public class EntityEvents {
 			if (event instanceof MCEntityExplodeEvent) {
 				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
 				if (key.equals("yield")) {
-					e.setYield(Static.getDouble32(value, Target.UNKNOWN));
+					e.setYield(Static.getDouble32(value, value.getTarget()));
 					return true;
 				}
 				if (key.equals("blocks")) {
@@ -330,7 +330,7 @@ public class EntityEvents {
 						List<MCBlock> blocks = new ArrayList<MCBlock>();
 						for (String b : ba.stringKeySet()) {
 							MCWorld w = e.getLocation().getWorld();
-							MCLocation loc = ObjectGenerator.GetGenerator().location(ba.get(b, Target.UNKNOWN), w, Target.UNKNOWN);
+							MCLocation loc = ObjectGenerator.GetGenerator().location(ba.get(b, value.getTarget()), w, value.getTarget());
 							blocks.add(loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
 						}
 						e.setBlocks(blocks);
@@ -429,7 +429,7 @@ public class EntityEvents {
 					if (value instanceof CNull) {
 						le = null;
 					} else {
-						le = Static.getLivingEntity(value, Target.UNKNOWN);
+						le = Static.getLivingEntity(value, value.getTarget());
 					}
 					e.getEntity().setShooter(le);
 				}
@@ -548,7 +548,7 @@ public class EntityEvents {
 			if (event instanceof MCProjectileLaunchEvent) {
 				MCProjectileLaunchEvent projectileLaunchEvent = (MCProjectileLaunchEvent) event;
 				if (key.equals("velocity")) {
-					projectileLaunchEvent.getEntity().setVelocity(ObjectGenerator.GetGenerator().vector(value, Target.UNKNOWN));
+					projectileLaunchEvent.getEntity().setVelocity(ObjectGenerator.GetGenerator().vector(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -650,12 +650,12 @@ public class EntityEvents {
 			if (event instanceof MCEntityDeathEvent) {
 				MCEntityDeathEvent e = (MCEntityDeathEvent) event;
 				if (key.equals("xp")) {
-					e.setDroppedExp(Static.getInt32(value, Target.UNKNOWN));
+					e.setDroppedExp(Static.getInt32(value, value.getTarget()));
 					return true;
 				}
 				if(key.equals("drops")){
 					if(value instanceof CNull){
-						value = new CArray(Target.UNKNOWN);
+						value = new CArray(value.getTarget());
 					}
 					if(!(value instanceof CArray)){
 						throw new CRECastException("drops must be an array, or null", value.getTarget());
@@ -663,7 +663,7 @@ public class EntityEvents {
 					e.clearDrops();
 					CArray drops = (CArray) value;
 					for(String dropID : drops.stringKeySet()){
-						e.addDrop(ObjectGenerator.GetGenerator().item(drops.get(dropID, Target.UNKNOWN), Target.UNKNOWN));
+						e.addDrop(ObjectGenerator.GetGenerator().item(drops.get(dropID, value.getTarget()), value.getTarget()));
 					}
 					return true;
 				}
@@ -745,7 +745,7 @@ public class EntityEvents {
 				try {
 					type = MCMobs.valueOf(value.val());
 				} catch (IllegalArgumentException iae) {
-					throw new CREFormatException(value.val() + " is not a valid mob type.", Target.UNKNOWN);
+					throw new CREFormatException(value.val() + " is not a valid mob type.", value.getTarget());
 				}
 				e.setType(type);
 			}
@@ -1114,7 +1114,7 @@ public class EntityEvents {
                 MCPlayerDropItemEvent e = (MCPlayerDropItemEvent)event;
 
                 if (key.equalsIgnoreCase("item")) {
-                    MCItemStack stack = ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN);
+                    MCItemStack stack = ObjectGenerator.GetGenerator().item(value, value.getTarget());
 
                     e.setItemStack(stack);
 
@@ -1192,7 +1192,7 @@ public class EntityEvents {
 				MCPlayerPickupItemEvent e = (MCPlayerPickupItemEvent)event;
 
 				if (key.equalsIgnoreCase("item")) {
-					MCItemStack stack = ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN);
+					MCItemStack stack = ObjectGenerator.GetGenerator().item(value, value.getTarget());
 
 					e.setItemStack(stack);
 
@@ -1385,7 +1385,7 @@ public class EntityEvents {
         				ete.setTarget(null);
         				return true;
         			} else if (value instanceof CString) {
-        				MCPlayer p = Static.GetPlayer(value.val(), Target.UNKNOWN);
+        				MCPlayer p = Static.GetPlayer(value.val(), value.getTarget());
 
         				if (p.isOnline()) {
         					ete.setTarget((MCEntity)p);
@@ -1926,7 +1926,7 @@ public class EntityEvents {
 			if (event instanceof MCEntityRegainHealthEvent) {
 				MCEntityRegainHealthEvent e = (MCEntityRegainHealthEvent) event;
 				if (key.equalsIgnoreCase("amount")) {
-					e.setAmount(Static.getDouble32(value, Target.UNKNOWN));
+					e.setAmount(Static.getDouble32(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -2012,20 +2012,20 @@ public class EntityEvents {
 
 				if (key.equalsIgnoreCase("to")) {
 					e.useTravelAgent(true);
-					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, Target.UNKNOWN);
+					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, value.getTarget());
 					e.setTo(loc);
 					return true;
 				}
 
 				if (key.equalsIgnoreCase("creationradius")) {
 					e.useTravelAgent(true);
-					e.getPortalTravelAgent().setCreationRadius(Static.getInt32(value, Target.UNKNOWN));
+					e.getPortalTravelAgent().setCreationRadius(Static.getInt32(value, value.getTarget()));
 					return true;
 				}
 
 				if (key.equalsIgnoreCase("searchradius")) {
 					e.useTravelAgent(true);
-					e.getPortalTravelAgent().setSearchRadius(Static.getInt32(value, Target.UNKNOWN));
+					e.getPortalTravelAgent().setSearchRadius(Static.getInt32(value, value.getTarget()));
 					return true;
 				}
 			}

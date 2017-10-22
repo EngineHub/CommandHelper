@@ -1527,9 +1527,9 @@ public class PlayerEvents {
                     if(value instanceof CArray){
                         List<MCPlayer> list = new ArrayList<MCPlayer>();
                         for(String index : ((CArray)value).stringKeySet()){
-                            Construct v = ((CArray)value).get(index, Target.UNKNOWN);
+                            Construct v = ((CArray)value).get(index, value.getTarget());
                             try{
-                                list.add(Static.GetPlayer(v, Target.UNKNOWN));
+                                list.add(Static.GetPlayer(v, value.getTarget()));
                             } catch(ConfigRuntimeException ex){
                                 //Ignored
                             }
@@ -1543,7 +1543,7 @@ public class PlayerEvents {
 					String format = value.nval();
 					if(format == null) {
 						throw new CRENullPointerException("The \"format\" key in " + new modify_event().getName() + " for the " + this.getName()
-								+ " event may not be null.", Target.UNKNOWN);
+								+ " event may not be null.", value.getTarget());
 					}
 					try{
 						// Throws UnknownFormatConversionException, MissingFormatException,
@@ -1553,10 +1553,10 @@ public class PlayerEvents {
 						// Check the format to give a better exception message.
 						if(format.replaceAll("%%", "").replaceAll("\\%\\%|\\%[12]\\$s", "").contains("%")) {
 							throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
-									+ " event only accepts %1$s and %2$s as format specifiers. Use a \"%%\" to display a single \"%\".", Target.UNKNOWN);
+									+ " event only accepts %1$s and %2$s as format specifiers. Use a \"%%\" to display a single \"%\".", value.getTarget());
 						} else {
 							throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
-									+ " event was set to an invalid value: " + format + ". The original exception message is: " + ex.getMessage(), Target.UNKNOWN);
+									+ " event was set to an invalid value: " + format + ". The original exception message is: " + ex.getMessage(), value.getTarget());
 						}
 					}
 				}
@@ -1657,9 +1657,9 @@ public class PlayerEvents {
                     if(value instanceof CArray){
                         List<MCPlayer> list = new ArrayList<MCPlayer>();
                         for(String index : ((CArray)value).stringKeySet()){
-                            Construct v = ((CArray)value).get(index, Target.UNKNOWN);
+                            Construct v = ((CArray)value).get(index, value.getTarget());
                             try{
-                                list.add(Static.GetPlayer(v, Target.UNKNOWN));
+                                list.add(Static.GetPlayer(v, value.getTarget()));
                             } catch(ConfigRuntimeException ex){
                                 //Ignored
                             }
@@ -1673,7 +1673,7 @@ public class PlayerEvents {
 					try{
 						e.setFormat(value.nval());
 					} catch(UnknownFormatConversionException|IllegalFormatConversionException ex){
-						throw new CREFormatException(ex.getMessage(), Target.UNKNOWN);
+						throw new CREFormatException(ex.getMessage(), value.getTarget());
 					}
 				}
                 return true;
@@ -2072,15 +2072,15 @@ public class PlayerEvents {
 			if (event instanceof MCPlayerFishEvent) {
 				MCPlayerFishEvent e = (MCPlayerFishEvent) event;
 				if (key.equals("chance")) {
-					double chance = Static.getDouble(value, Target.UNKNOWN);
+					double chance = Static.getDouble(value, value.getTarget());
 					if (chance > 1.0 || chance < 0.0) {
-						throw new CREFormatException("Chance must be between 0.0 and 1.0", Target.UNKNOWN);
+						throw new CREFormatException("Chance must be between 0.0 and 1.0", value.getTarget());
 					}
 					e.getHook().setBiteChance(chance);
 					return true;
 				}
 				if (key.equals("xp")) {
-					e.setExpToDrop(Static.getInt32(value, Target.UNKNOWN));
+					e.setExpToDrop(Static.getInt32(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -2240,7 +2240,7 @@ public class PlayerEvents {
 						e.getTabCompletions().clear();
 						if (((CArray) value).inAssociativeMode()) {
 							for (Construct k : ((CArray) value).keySet()) {
-								e.getTabCompletions().add(((CArray) value).get(k, Target.UNKNOWN).val());
+								e.getTabCompletions().add(((CArray) value).get(k, value.getTarget()).val());
 							}
 						} else {
 							for (Construct v : ((CArray) value).asList()) {
@@ -2319,7 +2319,7 @@ public class PlayerEvents {
 			if (event instanceof MCExpChangeEvent) {
 				MCExpChangeEvent e = (MCExpChangeEvent) event;
 				if ("amount".equals(key)) {
-					e.setAmount(Static.getInt32(value, Target.UNKNOWN));
+					e.setAmount(Static.getInt32(value, value.getTarget()));
 					return true;
 				}
 			}

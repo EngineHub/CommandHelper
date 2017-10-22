@@ -353,8 +353,8 @@ public class BlockEvents {
 				if (value instanceof CArray) {
 					CArray arr = (CArray) value;
 					for (int i = 0; i < arr.size(); i++) {
-						CArray item = (CArray) arr.get(i, Target.UNKNOWN);
-						drops.add(ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN));
+						CArray item = (CArray) arr.get(i, value.getTarget());
+						drops.add(ObjectGenerator.GetGenerator().item(item, value.getTarget()));
 					}
 				}
 				event.setDrops(drops);
@@ -811,15 +811,15 @@ public class BlockEvents {
                     CArray blockArray = (CArray) value;
                     MCBlock block = e.getBlock();
                     try {
-                        block.setTypeId(Integer.parseInt(blockArray.get("type", Target.UNKNOWN).val()));
+                        block.setTypeId(Integer.parseInt(blockArray.get("type", value.getTarget()).val()));
                     } catch (Exception ex) {
-                        throw new CREFormatException("blockArray is invalid", Target.UNKNOWN);
+                        throw new CREFormatException("blockArray is invalid", value.getTarget());
                     }
                     if(blockArray.containsKey("data")) {
                         try {
-                            block.setData((byte) Integer.parseInt(blockArray.get("data", Target.UNKNOWN).val()));
+                            block.setData((byte) Integer.parseInt(blockArray.get("data", value.getTarget()).val()));
                         } catch (Exception ex) {
-                            throw new CREFormatException("blockArray is invalid", Target.UNKNOWN);
+                            throw new CREFormatException("blockArray is invalid", value.getTarget());
                         }
                     }
                 }
@@ -827,15 +827,15 @@ public class BlockEvents {
                     CArray blockArray = (CArray) value;
                     MCBlock block = e.getToBlock();
                     try {
-                        block.setTypeId(Integer.parseInt(blockArray.get("type", Target.UNKNOWN).val()));
+                        block.setTypeId(Integer.parseInt(blockArray.get("type", value.getTarget()).val()));
                     } catch (Exception ex) {
-                        throw new CREFormatException("blockArray is invalid", Target.UNKNOWN);
+                        throw new CREFormatException("blockArray is invalid", value.getTarget());
                     }
                     if(blockArray.containsKey("data")) {
                         try {
-                            block.setData((byte) Integer.parseInt(blockArray.get("data", Target.UNKNOWN).val()));
+                            block.setData((byte) Integer.parseInt(blockArray.get("data", value.getTarget()).val()));
                         } catch (Exception ex) {
-                            throw new CREFormatException("blockArray is invalid", Target.UNKNOWN);
+                            throw new CREFormatException("blockArray is invalid", value.getTarget());
                         }
                     }
                 }
@@ -936,7 +936,7 @@ public class BlockEvents {
                     String[] lines = {"","","",""};
 
                     for (int i = 0; i < 4; i++) {
-                        lines[i] = val.get(i, Target.UNKNOWN).toString();
+                        lines[i] = val.get(i, value.getTarget()).toString();
                     }
 
                     sce.setLines(lines);
@@ -1053,11 +1053,11 @@ public class BlockEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCBlockDispenseEvent) {
 				if ("item".equals(key)) {
-					((MCBlockDispenseEvent) event).setItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					((MCBlockDispenseEvent) event).setItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
 				if ("velocity".equals(key)) {
-					((MCBlockDispenseEvent) event).setVelocity(ObjectGenerator.GetGenerator().vector(value, Target.UNKNOWN));
+					((MCBlockDispenseEvent) event).setVelocity(ObjectGenerator.GetGenerator().vector(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -1220,14 +1220,14 @@ public class BlockEvents {
 						return true;
 					}
 					if("octave".equals(key)){
-						int octave = Static.getInt32(value, Target.UNKNOWN);
+						int octave = Static.getInt32(value, value.getTarget());
 						MCTone tone = event.getNote().getTone();
 						boolean sharp = event.getNote().isSharped();
 						event.setNote(StaticLayer.GetConvertor().GetNote(octave, tone, sharp));
 						return true;
 					}
 				} catch(IllegalArgumentException ex){
-					throw new CREIllegalArgumentException("No " + key + " with the value " + value + " exists", Target.UNKNOWN, ex);
+					throw new CREIllegalArgumentException("No " + key + " with the value " + value + " exists", value.getTarget(), ex);
 				}
 			}
 			return false;

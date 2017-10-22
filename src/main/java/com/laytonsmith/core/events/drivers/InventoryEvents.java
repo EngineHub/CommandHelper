@@ -155,11 +155,11 @@ public class InventoryEvents {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 
 				if (key.equalsIgnoreCase("slotitem")) {
-					e.setCurrentItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					e.setCurrentItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
 				if (key.equalsIgnoreCase("cursoritem")) {
-					e.setCursor(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -280,7 +280,7 @@ public class InventoryEvents {
 				MCInventoryDragEvent e = (MCInventoryDragEvent) event;
 
 				if (key.equalsIgnoreCase("cursoritem")) {
-					e.setCursor(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -526,17 +526,17 @@ public class InventoryEvents {
 				MCEnchantItemEvent e = (MCEnchantItemEvent) event;
 
 				if (key.equalsIgnoreCase("levels")) {
-					e.setExpLevelCost(Static.getInt32(value, Target.UNKNOWN));
+					e.setExpLevelCost(Static.getInt32(value, value.getTarget()));
 					return true;
 				}
 
 				if (key.equalsIgnoreCase("item")) {
-					e.setItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					e.setItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
 
 				if (key.equalsIgnoreCase("enchants")) {
-					e.setEnchantsToAdd((ObjectGenerator.GetGenerator().enchants((CArray) value, Target.UNKNOWN)));
+					e.setEnchantsToAdd((ObjectGenerator.GetGenerator().enchants((CArray) value, value.getTarget())));
 					return true;
 				}
 			}
@@ -629,7 +629,7 @@ public class InventoryEvents {
 				MCPrepareItemEnchantEvent e = (MCPrepareItemEnchantEvent) event;
 
 				if (key.equalsIgnoreCase("item")) {
-					e.setItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					e.setItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
 
@@ -640,17 +640,17 @@ public class InventoryEvents {
 							int[] ExpCosts = e.getExpLevelCostsOffered();
 
 							for (int i = 0; i <= 2; i++) {
-								if (CexpCosts.get(i, Target.UNKNOWN) instanceof CInt) {
-									ExpCosts[i] = (int) ((CInt) CexpCosts.get(i, Target.UNKNOWN)).getInt();
+								if (CexpCosts.get(i, value.getTarget()) instanceof CInt) {
+									ExpCosts[i] = (int) ((CInt) CexpCosts.get(i, value.getTarget())).getInt();
 								} else {
-									throw new CREFormatException("Expected an intger at index " + i + "!", Target.UNKNOWN);
+									throw new CREFormatException("Expected an intger at index " + i + "!", value.getTarget());
 								}
 							}
 						} else {
-							throw new CREFormatException("Expected a normal array!", Target.UNKNOWN);
+							throw new CREFormatException("Expected a normal array!", value.getTarget());
 						}
 					} else {
-						throw new CREFormatException("Expected an array!", Target.UNKNOWN);
+						throw new CREFormatException("Expected an array!", value.getTarget());
 					}
 				}
 			}
@@ -717,7 +717,7 @@ public class InventoryEvents {
 			if (event instanceof MCItemHeldEvent) {
 				MCItemHeldEvent e = (MCItemHeldEvent) event;
 				if ("to".equals(key)) {
-					e.getPlayer().getInventory().setHeldItemSlot(Static.getInt32(value, Target.UNKNOWN));
+					e.getPlayer().getInventory().setHeldItemSlot(Static.getInt32(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -790,11 +790,11 @@ public class InventoryEvents {
 			if (event instanceof MCItemSwapEvent) {
 				MCItemSwapEvent e = (MCItemSwapEvent) event;
 				if ("main_hand".equals(key)) {
-					e.setMainHandItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					e.setMainHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
 				if ("off_hand".equals(key)) {
-					e.setOffHandItem(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					e.setOffHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
 			}
