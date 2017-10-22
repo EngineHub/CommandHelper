@@ -296,7 +296,8 @@ public class Minecraft {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREFormatException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CRERangeException.class,
+					CRENotFoundException.class};
 		}
 
 		@Override
@@ -311,23 +312,21 @@ public class Minecraft {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
-				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t);
+			Construct id = args[0];
+			if (id instanceof CArray) {
+				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t);
 				return new CInt(is.getType().getMaxStackSize(), t);
-			} else {
-				String item = args[0].val();
-				if (item.contains(":")) {
-					String[] split = item.split(":");
-					item = split[0];
-				}
-				try {
-					int iitem = Integer.parseInt(item);
-					int max = StaticLayer.GetItemStack(iitem, 1).getType().getMaxStackSize();
-					return new CInt(max, t);
-				} catch (NumberFormatException e) {
+			} else if(id instanceof CString) {
+				int seperatorIndex = id.val().indexOf(':');
+				if(seperatorIndex != -1) {
+					id = new CString(id.val().substring(0, seperatorIndex), t);
 				}
 			}
-			throw new CRECastException("Improper value passed to max_stack. Expecting a number, or an item array, but received \"" + args[0].val() + "\"", t);
+			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(id, t));
+			if(mat == null) {
+				throw new CRENotFoundException("A material type could not be found based on the given id.", t);
+			}
+			return new CInt(mat.getMaxStackSize(), t);
 		}
 
 		@Override
