@@ -1233,4 +1233,75 @@ public class BlockEvents {
 			return false;
 		}
 	}
+
+	@api
+    public static class block_fade extends AbstractEvent {
+        @Override
+        public String getName() {
+            return "block_fade";
+        }
+
+        @Override
+        public Driver driver() {
+            return Driver.BLOCK_FADE;
+        }
+
+        @Override
+        public String docs() {
+            return "{oldtype: <string match> The block type before the fades | olddata: <string match> The block data before the fades |"
+                    + " newtype: <string match> The block type after the fades | newdata: <string match> The block data after the fades |"
+                    + " world: <macro>}"
+                    + " Called when a block fades, melts or disappears based on world conditions."
+                    + " {oldblock: The block before the fades (an array with keys 'type' and 'data') | newblock: The block after the fades (an array with keys 'type' and 'data') |"
+                    + " location: the location of the block that will fade}";
+        }
+
+        @Override
+        public Version since() {
+            return CHVersion.V3_3_2;
+        }
+
+        @Override
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+            if (e instanceof MCBlockFadeEvent) {
+                MCBlockFadeEvent event = (MCBlockFadeEvent) e;
+                MCBlock oldBlock = event.getBlock();
+                Prefilters.match(prefilter, "oldtype", oldBlock.getTypeId(), PrefilterType.STRING_MATCH);
+                Prefilters.match(prefilter, "world", oldBlock.getWorld().getName(), PrefilterType.MACRO);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public BindableEvent convert(CArray manualObject, Target t) {
+            return null;
+        }
+
+        @Override
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            if (!(e instanceof MCBlockFadeEvent)) {
+                throw new EventException("Cannot convert event to BlockFadeEvent");
+            }
+            MCBlockFadeEvent event = (MCBlockFadeEvent) e;
+            Map<String, Construct> mapEvent = evaluate_helper(event);
+            MCBlock oldBlock = event.getBlock();
+            CArray oldBlockArray = CArray.GetAssociativeArray(Target.UNKNOWN);
+            oldBlockArray.set("type", new CInt(oldBlock.getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
+            oldBlockArray.set("data", new CInt(oldBlock.getData(), Target.UNKNOWN), Target.UNKNOWN);
+            mapEvent.put("oldblock", oldBlockArray);
+            MCBlockState newBlock = event.getNewState();
+            CArray newBlockArray = CArray.GetAssociativeArray(Target.UNKNOWN);
+            newBlockArray.set("type", new CInt(newBlock.getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
+            newBlockArray.set("data", new CInt(newBlock.getData().getData(), Target.UNKNOWN), Target.UNKNOWN);
+            mapEvent.put("newblock", newBlockArray);
+            mapEvent.put("location", ObjectGenerator.GetGenerator().location(oldBlock.getLocation(), false));
+            return mapEvent;
+        }
+
+        @Override
+        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+            return false;
+        }
+    }
 }
