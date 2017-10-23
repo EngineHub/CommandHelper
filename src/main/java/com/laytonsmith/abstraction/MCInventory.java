@@ -15,6 +15,7 @@ public interface MCInventory extends AbstractionObject {
 	public MCItemStack getItem(int index);
 	public void setItem(int index, MCItemStack stack);
 	public List<MCHumanEntity> getViewers();
+	public void updateViewers();
 	public void clear();
 	public void clear(int index);
 	public MCInventoryHolder getHolder();

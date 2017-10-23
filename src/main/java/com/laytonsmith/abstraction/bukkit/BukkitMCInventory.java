@@ -73,9 +73,6 @@ public class BukkitMCInventory implements MCInventory {
 				throw new CRERangeException("No slot " + slot + " exists in the given inventory", Target.UNKNOWN);
 			}
 		}
-		if(this.i.getHolder() instanceof Player){
-			((Player)this.i.getHolder()).updateInventory();
-		}
     }
 	
 	@Override
@@ -130,6 +127,15 @@ public class BukkitMCInventory implements MCInventory {
 		}
 		
 		return retn;
+	}
+
+	@Override
+	public void updateViewers() {
+		for (HumanEntity human: i.getViewers()) {
+			if(human instanceof Player) {
+				((Player) human).updateInventory();
+			}
+		}
 	}
 	
 	@Override

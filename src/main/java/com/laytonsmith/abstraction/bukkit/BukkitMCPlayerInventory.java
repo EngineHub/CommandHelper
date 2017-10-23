@@ -32,46 +32,33 @@ public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlay
     }
 
 	@Override
-    public void setHelmet(MCItemStack stack) {
-        this.i.setHelmet(((BukkitMCItemStack)stack).is);
-		if(this.i.getHolder() instanceof Player){
-			((Player)this.i.getHolder()).updateInventory();
-		}
-    }
+	public void setHelmet(MCItemStack stack) {
+		this.i.setHelmet(((BukkitMCItemStack)stack).__ItemStack());
+	}
 
 	@Override
-    public void setChestplate(MCItemStack stack) {
-        this.i.setChestplate(((BukkitMCItemStack)stack).is);
-		if(this.i.getHolder() instanceof Player){
-			((Player)this.i.getHolder()).updateInventory();
-		}
-    }
+	public void setChestplate(MCItemStack stack) {
+		this.i.setChestplate(((BukkitMCItemStack)stack).__ItemStack());
+	}
 
 	@Override
-    public void setLeggings(MCItemStack stack) {
-        this.i.setLeggings(((BukkitMCItemStack)stack).is);
-		if(this.i.getHolder() instanceof Player){
-			((Player)this.i.getHolder()).updateInventory();
-		}
-    }
+	public void setLeggings(MCItemStack stack) {
+		this.i.setLeggings(((BukkitMCItemStack)stack).__ItemStack());
+	}
 
 	@Override
-    public void setBoots(MCItemStack stack) {
-        this.i.setBoots(((BukkitMCItemStack)stack).is);
-		if(this.i.getHolder() instanceof Player){
-			((Player)this.i.getHolder()).updateInventory();
-		}
-    }
+	public void setBoots(MCItemStack stack) {
+		this.i.setBoots(((BukkitMCItemStack)stack).__ItemStack());
+	}
 
-    @Override
-    public void setItemInOffHand(MCItemStack stack) {
-        if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
-            this.i.setItemInOffHand(((BukkitMCItemStack) stack).is);
-            if(this.i.getHolder() instanceof Player){
-                ((Player) this.i.getHolder()).updateInventory();
-            }
-        }
-    }
+	@Override
+	public void setItemInOffHand(MCItemStack stack) {
+		try {
+			this.i.setItemInOffHand(((BukkitMCItemStack) stack).__ItemStack());
+		} catch(NoSuchMethodError ex) {
+			// probably before 1.9
+		}
+	}
 
 	@Override
     public MCItemStack getHelmet() {
