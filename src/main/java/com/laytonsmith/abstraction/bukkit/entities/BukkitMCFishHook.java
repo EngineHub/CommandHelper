@@ -13,16 +13,4 @@ public class BukkitMCFishHook extends BukkitMCProjectile implements MCFishHook {
 		f = (FishHook) e;
 	}
 
-	@Override
-	public double getBiteChance() {
-		// only works pre-1.9
-		return f.getBiteChance();
-	}
-
-	@Override
-	public void setBiteChance(double chance) {
-		// only works pre-1.9
-		f.setBiteChance(chance);
-	}
-
 }

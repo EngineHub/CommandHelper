@@ -2019,10 +2019,9 @@ public class PlayerEvents {
 			return "{state: <macro> Can be one of " + StringUtils.Join(MCFishingState.values(), ", ", ", or ")
 					+ " | player: <macro> The player who is fishing | world: <string match>}"
 					+ " Fires when a player casts or reels a fishing rod."
-					+ " {player | world | state | chance | xp | hook: the fishhook entity id"
+					+ " {player | world | state | xp | hook: the fishhook entity id"
 					+ " | caught: the id of the snared entity, can be a fish item}"
-					+ " {chance: the chance of catching a fish from pulling the bobber at random (pre 1.9 only)"
-					+ " | xp: the exp the player will get from catching a fish}"
+					+ " {xp: the exp the player will get from catching a fish}"
 					+ " {}";
 		}
 
@@ -2060,7 +2059,6 @@ public class PlayerEvents {
 					caught = new CString(event.getCaught().getUniqueId().toString(), t);
 				}
 				ret.put("caught", caught);
-				ret.put("chance", new CDouble(event.getHook().getBiteChance(), t));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCPlayerFishEvent");
@@ -2072,14 +2070,6 @@ public class PlayerEvents {
 				BindableEvent event) {
 			if (event instanceof MCPlayerFishEvent) {
 				MCPlayerFishEvent e = (MCPlayerFishEvent) event;
-				if (key.equals("chance")) {
-					double chance = Static.getDouble(value, value.getTarget());
-					if (chance > 1.0 || chance < 0.0) {
-						throw new CREFormatException("Chance must be between 0.0 and 1.0", value.getTarget());
-					}
-					e.getHook().setBiteChance(chance);
-					return true;
-				}
 				if (key.equals("xp")) {
 					e.setExpToDrop(Static.getInt32(value, value.getTarget()));
 					return true;

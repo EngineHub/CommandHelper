@@ -2705,10 +2705,6 @@ public class EntityManagement {
 					MCFireball ball = (MCFireball) entity;
 					specArray.set(entity_spec.KEY_FIREBALL_DIRECTION, ObjectGenerator.GetGenerator().vector(ball.getDirection(), t), t);
 					break;
-				case FISHING_HOOK:
-					MCFishHook hook = (MCFishHook) entity;
-					specArray.set(entity_spec.KEY_FISHING_HOOK_CHANCE, new CDouble(hook.getBiteChance(), t), t);
-					break;
 				case GUARDIAN:
 					MCGuardian guardian = (MCGuardian) entity;
 					specArray.set(entity_spec.KEY_GUARDIAN_ELDER, CBoolean.get(guardian.isElder()), t);
@@ -2923,7 +2919,6 @@ public class EntityManagement {
 		private static final String KEY_FALLING_BLOCK_BLOCK = "block";
 		private static final String KEY_FALLING_BLOCK_DROPITEM = "dropitem";
 		private static final String KEY_FIREBALL_DIRECTION = "direction";
-		private static final String KEY_FISHING_HOOK_CHANCE = "chance";
 		private static final String KEY_GUARDIAN_ELDER = "elder";
 		private static final String KEY_HORSE_COLOR = "color";
 		private static final String KEY_HORSE_STYLE = "style";
@@ -3295,22 +3290,6 @@ public class EntityManagement {
 						switch (index.toLowerCase()) {
 							case entity_spec.KEY_FIREBALL_DIRECTION:
 								ball.setDirection(ObjectGenerator.GetGenerator().vector(specArray.get(index, t), t));
-								break;
-							default:
-								throwException(index, t);
-						}
-					}
-					break;
-				case FISHING_HOOK:
-					MCFishHook hook = (MCFishHook) entity;
-					for (String index : specArray.stringKeySet()) {
-						switch (index.toLowerCase()) {
-							case entity_spec.KEY_FISHING_HOOK_CHANCE:
-								try {
-									hook.setBiteChance(Static.getDouble(specArray.get(index, t), t));
-								} catch (IllegalArgumentException exception) {
-									throw new CRERangeException("The chance must be between 0.0 and 1.0", t);
-								}
 								break;
 							default:
 								throwException(index, t);
