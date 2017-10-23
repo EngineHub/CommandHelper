@@ -264,7 +264,7 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCProjectile getEntity() {
-			return new BukkitMCProjectile(ple.getEntity());
+			return (MCProjectile) BukkitConvertor.BukkitGetCorrectEntity(ple.getEntity());
 		}
 
 		@Override

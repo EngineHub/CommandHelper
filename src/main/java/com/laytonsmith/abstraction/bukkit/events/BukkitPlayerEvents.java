@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBookMeta;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
@@ -761,7 +762,7 @@ public class BukkitPlayerEvents {
 			if (e.getCaught() == null) {
 				return null;
 			}
-			return new BukkitMCEntity(e.getCaught());
+			return BukkitConvertor.BukkitGetCorrectEntity(e.getCaught());
 		}
 
 		@Override
