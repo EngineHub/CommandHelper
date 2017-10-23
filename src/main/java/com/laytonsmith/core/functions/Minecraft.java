@@ -668,18 +668,20 @@ public class Minecraft {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld() : null), t);
-			MCEffect e = null;
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
+			MCEffect e;
 			String preEff = args[1].val();
 			int data = 0;
 			int radius = 64;
-			if (preEff.contains(":")) {
+			int index = preEff.indexOf(':');
+			if (index != -1) {
 				try {
-					data = Integer.parseInt(preEff.substring(preEff.indexOf(':') + 1));
+					data = Integer.parseInt(preEff.substring(index + 1));
 				} catch (NumberFormatException ex) {
 					throw new CRECastException("Effect data expected an integer", t);
 				}
-				preEff = preEff.substring(0, preEff.indexOf(':'));
+				preEff = preEff.substring(0, index);
 			}
 			try {
 				e = MCEffect.valueOf(preEff.toUpperCase());
