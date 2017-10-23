@@ -345,6 +345,11 @@ public class BukkitMCServer implements MCServer {
     }
 
 	@Override
+	public String getMotd() {
+		return s.getMotd();
+	}
+
+	@Override
     public int getMaxPlayers() {
         return s.getMaxPlayers();
     }

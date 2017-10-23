@@ -837,7 +837,8 @@ public class Minecraft {
 					+ "<li>13 - Uptime; The number of milliseconds the server has been running</li>"
 					+ "<li>14 - gcmax; The maximum amount of memory that the Java virtual machine will attempt to use, in bytes</li>"
 					+ "<li>15 - gctotal; The total amount of memory in the Java virtual machine, in bytes</li>"
-					+ "<li>16 - gcfree; The amount of free memory in the Java Virtual Machine, in bytes</li></ul>";
+					+ "<li>16 - gcfree; The amount of free memory in the Java Virtual Machine, in bytes</li>"
+					+ "<li>17 - MOTD; The message displayed on the server list.</li></ul>";
 		}
 
 		@Override
@@ -972,6 +973,10 @@ public class Minecraft {
 			if (index == 16 || index == -1) {
 				//gcfree
 				retVals.add(new CInt((Runtime.getRuntime().freeMemory()), t));
+			}
+			if (index == 17 || index == -1) {
+				//motd
+				retVals.add(new CString(server.getMotd(), t));
 			}
 
 			if (retVals.size() == 1) {

@@ -57,6 +57,8 @@ public interface MCServer extends AbstractionObject{
     /* Boring information get methods -.- */
     public String getServerName();
 
+	public String getMotd();
+
 	public String getAPIVersion();
 
 	public String getServerVersion();
