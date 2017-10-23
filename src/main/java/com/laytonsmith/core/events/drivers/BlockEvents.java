@@ -1248,11 +1248,10 @@ public class BlockEvents {
 
         @Override
         public String docs() {
-            return "{oldtype: <string match> The block type before the fades | olddata: <string match> The block data before the fades |"
-                    + " newtype: <string match> The block type after the fades | newdata: <string match> The block data after the fades |"
-                    + " world: <macro>}"
+            return "{oldtype: <string match> The block type before the fades | world: <string match>}"
                     + " Called when a block fades, melts or disappears based on world conditions."
-                    + " {oldblock: The block before the fades (an array with keys 'type' and 'data') | newblock: The block after the fades (an array with keys 'type' and 'data') |"
+                    + " {oldblock: The block before the fades (an array with keys 'type' and 'data') |"
+                    + " newblock: The block after the fades (an array with keys 'type' and 'data') |"
                     + " location: the location of the block that will fade}";
         }
 
@@ -1266,8 +1265,20 @@ public class BlockEvents {
             if (e instanceof MCBlockFadeEvent) {
                 MCBlockFadeEvent event = (MCBlockFadeEvent) e;
                 MCBlock oldBlock = event.getBlock();
-                Prefilters.match(prefilter, "oldtype", oldBlock.getTypeId(), PrefilterType.STRING_MATCH);
-                Prefilters.match(prefilter, "world", oldBlock.getWorld().getName(), PrefilterType.MACRO);
+                Construct type = prefilter.get("oldtype");
+                if(type != null) {
+                    if (type instanceof CInt) {
+                        if (oldBlock.getTypeId() != ((CInt) type).getInt()) {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+                Construct world = prefilter.get("world");
+                if(world != null && !world.val().equals(oldBlock.getWorld().getName())){
+                    return false;
+                }
                 return true;
             }
             return false;
