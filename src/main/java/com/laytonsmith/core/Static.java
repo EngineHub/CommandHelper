@@ -954,9 +954,7 @@ public final class Static {
 	 * @return
 	 */
 	public static MCMetadatable getMetadatable(Construct construct, Target t) {
-		if (construct instanceof CInt) {
-			return Static.getEntity(construct, t);
-		} else if (construct instanceof CArray) {
+		if (construct instanceof CArray) {
 			return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
 		} else if (construct instanceof CString) {
 			switch (construct.val().length()) {
