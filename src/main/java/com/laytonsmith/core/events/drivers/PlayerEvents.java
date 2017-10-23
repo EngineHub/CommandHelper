@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.entities.MCFishHook;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
@@ -2100,17 +2101,37 @@ public class PlayerEvents {
 		@Override
 		public void preExecution(Environment env, ActiveEvent activeEvent) {
 			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerFishEvent){
-				// Static lookups of the entity don't work here, so we need to inject them
-				MCEntity entity = ((MCPlayerFishEvent)activeEvent.getUnderlyingEvent()).getHook();
-				Static.InjectEntity(entity);
+				MCPlayerFishEvent event = (MCPlayerFishEvent)activeEvent.getUnderlyingEvent();
+				// Static lookups of just spawned entities in certain fishing states don't work here, so inject them
+				switch(event.getState()){
+					case FISHING:
+						MCFishHook hook = event.getHook();
+						Static.InjectEntity(hook);
+						break;
+					case CAUGHT_ENTITY:
+					case CAUGHT_FISH:
+						MCEntity entity = event.getCaught();
+						Static.InjectEntity(entity);
+						break;
+				}
 			}
 		}
 
 		@Override
 		public void postExecution(Environment env, ActiveEvent activeEvent) {
 			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerFishEvent){
-				MCEntity entity = ((MCPlayerFishEvent)activeEvent.getUnderlyingEvent()).getHook();
-				Static.UninjectEntity(entity);
+				MCPlayerFishEvent event = (MCPlayerFishEvent)activeEvent.getUnderlyingEvent();
+				switch(event.getState()){
+					case FISHING:
+						MCFishHook hook = event.getHook();
+						Static.UninjectEntity(hook);
+						break;
+					case CAUGHT_ENTITY:
+					case CAUGHT_FISH:
+						MCEntity entity = event.getCaught();
+						Static.UninjectEntity(entity);
+						break;
+				}
 			}
 		}
 	}
