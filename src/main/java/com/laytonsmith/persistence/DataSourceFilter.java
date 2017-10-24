@@ -323,8 +323,9 @@ public class DataSourceFilter {
 	public URI getConnection(String key) {
 		//Since looking through these patterns, doing the matches, calculating string distance are all
 		//fairly expensive operations, let's improve the runtime complexity by using a cache
-		if (cache.containsKey(key)) {
-			return cache.get(key);
+		URI cached = cache.get(key);
+		if(cached != null){
+			return cached;
 		}
 		List<Pattern> matches = new ArrayList<Pattern>();
 		for (Pattern p : mappings.keySet()) {
