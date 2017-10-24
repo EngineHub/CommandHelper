@@ -89,19 +89,17 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	 */
 	@Override
 	public final void execute(ParseTree tree, BoundEvent b, Environment env, BoundEvent.ActiveEvent activeEvent) throws ConfigRuntimeException{
-		try{
-			preExecution(env, activeEvent);
-		} catch(UnsupportedOperationException e){
-			//Ignore. This particular event doesn't need to customize
-		}
-		// Various events have a player in them (not just instances MCPlayerEvent) so we put them into the env.
+		preExecution(env, activeEvent);
+		// Various events have a player to put into the env.
 		// Do this after preExcecution() in case the particular event needs to inject the player first.
-		if(activeEvent.getParsedEvent().containsKey("player")){
+		Construct c = activeEvent.getParsedEvent().get("player");
+		if(c != null){
 			try{
-				MCPlayer p = Static.GetPlayer(activeEvent.getParsedEvent().get("player"), Target.UNKNOWN);
+				MCPlayer p = Static.GetPlayer(c, Target.UNKNOWN);
 				env.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
 			} catch(CREPlayerOfflineException e){
-				// Leave the player to be null. It may be a bug in this particular event, but we still want to execute.
+				// Set env player to null to prevent incorrect inherited player from being used in a player event.
+				env.getEnv(CommandHelperEnvironment.class).SetPlayer(null);
 			}
 		}
 		ProfilePoint event = null;
@@ -110,8 +108,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		}
 		try {
 			try {
-				//Get the label from the bind time environment, and put it in the current
-				//environment.
+				//Get the label from the bind time environment, and put it in the current environment.
 				String label = b.getEnvironment().getEnv(GlobalEnv.class).GetLabel();
 				if(label == null){
 					//Set the permission to global if it's null, since that means
@@ -133,12 +130,8 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 			if(event != null) {
 				event.stop();
 			}
-			try{
-				// finally, among other things, we need to clean-up injected players and entities
-				this.postExecution(env, activeEvent);
-			} catch(UnsupportedOperationException e){
-				//Ignore.
-			}
+			// Finally, among other things, we need to clean-up injected players and entities
+			postExecution(env, activeEvent);
 		}
 	}
 
@@ -147,8 +140,6 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	 * for the event code itself to modify the environment or active event data.
 	 * @param env The environment, at the time just before the event handler is called.
 	 * @param activeEvent The event handler code.
-	 * @throws UnsupportedOperationException If the preExecution isn't supported, this may
-	 * be thrown, and it will be ignored.
 	 */
     public void preExecution(Environment env, BoundEvent.ActiveEvent activeEvent){
 
