@@ -855,10 +855,6 @@ public class PlayerEvents {
             if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent)e;
 
-                if(pie.getAction().equals(MCAction.PHYSICAL)){
-                    return false;
-                }
-
                 if(prefilter.containsKey("button")){
                     if(pie.getAction().equals(MCAction.LEFT_CLICK_AIR) || pie.getAction().equals(MCAction.LEFT_CLICK_BLOCK)){
                         if(!prefilter.get("button").val().toLowerCase().equals("left")){
@@ -1072,9 +1068,6 @@ public class PlayerEvents {
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent)e;
-                if(!((MCPlayerInteractEvent)e).getAction().equals(MCAction.PHYSICAL)){
-                    return false;
-                }
 				Prefilters.match(prefilter, "location", pie.getClickedBlock().getLocation(), PrefilterType.LOCATION_MATCH);
 				if(prefilter.containsKey("activated")){
 					//TODO: Once activation is supported, check for that here
