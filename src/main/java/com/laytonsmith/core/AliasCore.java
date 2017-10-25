@@ -271,7 +271,7 @@ public class AliasCore {
 			//Clear out the data source cache
 			DataSourceFactory.DisconnectAll();
 
-			PacketJumper.startup();
+			// PacketJumper.startup(); we're not using this yet
 
 			if (options.reloadExtensions()) {
 				ProfilePoint extensionManagerStartup = parent.profiler.start("Extension manager startup", LogLevel.VERBOSE);

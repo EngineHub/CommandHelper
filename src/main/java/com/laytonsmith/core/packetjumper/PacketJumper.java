@@ -2,9 +2,12 @@
 package com.laytonsmith.core.packetjumper;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.constructs.Construct;
+import org.bukkit.Bukkit;
+
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -36,14 +39,17 @@ public class PacketJumper {
 //				} catch (IOException ex) {
 //					Logger.getLogger(PacketJumper.class.getName()).log(Level.SEVERE, null, ex);
 //				}
-				
-				Class PacketClass = ClassDiscovery.getDefaultInstance().forFuzzyName("net\\.minecraft\\.server.*", "Packet").loadClass();
-
-				Set<Class> packets = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(PacketClass);
-				for(Class packet : packets){
-					packetInfo.add(new PacketInfo(packet));
+				String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+				try {
+					Class PacketClass = Class.forName("net.minecraft.server." + version + ".Packet");
+					Set<Class> packets = ReflectionUtils.getAllExtensions(PacketClass);
+					for (Class packet : packets) {
+						packetInfo.add(new PacketInfo(packet));
+					}
+					started = true;
+				} catch(ClassNotFoundException ex) {
+					StreamUtils.GetSystemOut().println("[CommandHelper] Failed to find Minecraft Packet classes.");
 				}
-				started = true;
 			}
 		}, "PacketJumperInitializer");
 		initializingThread.start();
