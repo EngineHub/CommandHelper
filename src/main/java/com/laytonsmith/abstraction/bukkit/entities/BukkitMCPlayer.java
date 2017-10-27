@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -19,6 +20,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
 import com.laytonsmith.abstraction.enums.MCInstrument;
+import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCVersion;
@@ -32,10 +34,12 @@ import com.laytonsmith.core.Static;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Note;
+import org.bukkit.Particle;
 import org.bukkit.Server;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -593,6 +597,26 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		} catch(NoClassDefFoundError ex){
 			// probably prior to 1.11, ignore category
 			stopSound(sound);
+		}
+	}
+
+	@Override
+	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
+		try {
+			Particle type = Particle.valueOf(pa.name());
+			if(data != null) {
+				Object particleData = null;
+				if(type.getDataType().equals(MaterialData.class) && data instanceof MCMaterialData) {
+					particleData = ((MCMaterialData) data).getHandle();
+				} else if(type.getDataType().equals(ItemStack.class) && data instanceof MCItemStack) {
+					particleData = ((MCItemStack) data).getHandle();
+				}
+				p.spawnParticle(type, ((BukkitMCLocation) l).asLocation(), count, offsetX, offsetY, offsetZ, velocity, particleData);
+			} else {
+				p.spawnParticle(type, ((BukkitMCLocation) l).asLocation(), count, offsetX, offsetY, offsetZ, velocity);
+			}
+		} catch(NoClassDefFoundError ex) {
+			// probably prior to 1.9
 		}
 	}
 

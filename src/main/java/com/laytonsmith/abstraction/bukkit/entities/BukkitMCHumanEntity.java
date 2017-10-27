@@ -13,6 +13,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -48,12 +49,9 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 
 	@Override
 	public MCItemStack getItemInHand() {
-        if (he == null || he.getItemInHand() == null) {
-            return null;
-        }
-        
-        return new BukkitMCItemStack(he.getItemInHand());
-    }
+		ItemStack is = he.getItemInHand();
+		return is == null ? null : new BukkitMCItemStack(is);
+	}
 
 	@Override
 	public MCItemStack getItemOnCursor() {

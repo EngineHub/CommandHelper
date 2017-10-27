@@ -47,10 +47,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- *
- *
- */
 public class BukkitMCServer implements MCServer {
 
     Server s;
@@ -79,40 +75,13 @@ public class BukkitMCServer implements MCServer {
     }
 
 	@Override
-    public Collection<MCPlayer> getOnlinePlayers() {
-		Collection<Player> players = getOnlinePlayersOverwrite(s);
-		if(players == null){
-			return null;
-		}
+	public Collection<MCPlayer> getOnlinePlayers() {
+		Collection<? extends Player> players = s.getOnlinePlayers();
 		Set<MCPlayer> mcpa = new HashSet<>();
 		for(Player p : players){
 			mcpa.add(new BukkitMCPlayer(p));
 		}
-        return mcpa;
-    }
-
-	/**
-	 * The bukkit method getOnlinePlayers changed from returning a Player[]
-	 * to a Collection<Player>. This method abstracts that out.
-	 * @return
-	 */
-	public static Collection<Player> getOnlinePlayersOverwrite(Server s){
-		Object retValue = ReflectionUtils.invokeMethod(s, "getOnlinePlayers");
-        if(retValue == null){
-            return null;
-        }
-		if(retValue instanceof Collection){
-			// New version
-			return (Collection<Player>) retValue;
-		} else {
-			// Old version, it's an array
-			Set<Player> mcpa = new HashSet<>();
-			Player[] pa = (Player[]) retValue;
-			for(Player p : pa){
-				mcpa.add(p);
-			}
-			return mcpa;
-		}
+		return mcpa;
 	}
 
     public static MCServer Get() {
@@ -120,15 +89,15 @@ public class BukkitMCServer implements MCServer {
     }
 
 	@Override
-    public boolean dispatchCommand(MCCommandSender sender, String command){
+	public boolean dispatchCommand(MCCommandSender sender, String command){
 		CommandSender cs;
-		if(sender instanceof BukkitMCPlayer){
-			cs = (CommandSender)((MCPlayer)sender).getHandle();
+		if(sender instanceof MCPlayer){
+			cs = (Player) sender.getHandle();
 		} else {
-			cs = (CommandSender)((MCCommandSender)sender).getHandle();
+			cs = (CommandSender) sender.getHandle();
 		}
-        return s.dispatchCommand(cs, command);
-    }
+		return s.dispatchCommand(cs, command);
+	}
 
 	private class CommandSenderInterceptor implements InvocationHandler {
 		private final StringBuilder buffer;
@@ -212,24 +181,22 @@ public class BukkitMCServer implements MCServer {
 	}
 
 	@Override
-    public MCWorld getWorld(String name) {
-        if(s.getWorld(name) == null){
-            return null;
-        }
-        return new BukkitMCWorld(s.getWorld(name));
-    }
+	public MCWorld getWorld(String name) {
+		World w = s.getWorld(name);
+		if(w == null){
+			return null;
+		}
+		return new BukkitMCWorld(w);
+	}
 
 	@Override
-    public List<MCWorld> getWorlds(){
-        if(s.getWorlds() == null){
-            return null;
-        }
-        List<MCWorld> list = new ArrayList<MCWorld>();
-        for(World w : s.getWorlds()){
-            list.add(new BukkitMCWorld(w));
-        }
-        return list;
-    }
+	public List<MCWorld> getWorlds(){
+		List<MCWorld> list = new ArrayList<>();
+		for(World w : s.getWorlds()){
+			list.add(new BukkitMCWorld(w));
+		}
+		return list;
+	}
 
 	@Override
     public void broadcastMessage(String message) {
@@ -268,9 +235,6 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public MCOfflinePlayer[] getOfflinePlayers() {
-		if (s.getOfflinePlayers() == null) {
-			return null;
-		}
 		OfflinePlayer[] offp = s.getOfflinePlayers();
 		MCOfflinePlayer[] mcoff = new MCOfflinePlayer[offp.length];
 		for (int i = 0; i < offp.length; i++) {
@@ -355,40 +319,31 @@ public class BukkitMCServer implements MCServer {
     }
 
 	@Override
-    public List<MCOfflinePlayer> getBannedPlayers() {
-        if(s.getBannedPlayers() == null){
-            return null;
-        }
-        List<MCOfflinePlayer> list = new ArrayList<MCOfflinePlayer>();
-        for(OfflinePlayer p : s.getBannedPlayers()){
-            list.add(getOfflinePlayer(p.getName()));
-        }
-        return list;
-    }
+	public List<MCOfflinePlayer> getBannedPlayers() {
+		List<MCOfflinePlayer> list = new ArrayList<>();
+		for(OfflinePlayer p : s.getBannedPlayers()){
+			list.add(getOfflinePlayer(p.getName()));
+		}
+		return list;
+	}
 
 	@Override
-    public List<MCOfflinePlayer> getWhitelistedPlayers() {
-        if(s.getBannedPlayers() == null){
-            return null;
-        }
-        List<MCOfflinePlayer> list = new ArrayList<MCOfflinePlayer>();
-        for(OfflinePlayer p : s.getWhitelistedPlayers()){
-            list.add(getOfflinePlayer(p.getName()));
-        }
-        return list;
-    }
+	public List<MCOfflinePlayer> getWhitelistedPlayers() {
+		List<MCOfflinePlayer> list = new ArrayList<>();
+		for(OfflinePlayer p : s.getWhitelistedPlayers()){
+			list.add(getOfflinePlayer(p.getName()));
+		}
+		return list;
+	}
 
 	@Override
-    public List<MCOfflinePlayer> getOperators() {
-        if(s.getOperators() == null){
-            return null;
-        }
-        List<MCOfflinePlayer> list = new ArrayList<MCOfflinePlayer>();
-        for(OfflinePlayer p : s.getOperators()){
-            list.add(getOfflinePlayer(p.getName()));
-        }
-        return list;
-    }
+	public List<MCOfflinePlayer> getOperators() {
+		List<MCOfflinePlayer> list = new ArrayList<>();
+		for(OfflinePlayer p : s.getOperators()){
+			list.add(getOfflinePlayer(p.getName()));
+		}
+		return list;
+	}
 
 	@Override
     public void runasConsole(String cmd) {
@@ -535,10 +490,6 @@ public class BukkitMCServer implements MCServer {
 		}
 		return ret;
 	}
-
-//	public Iterator<MCRecipe> recipe iterator() {
-//		Iterator<MCRecipe> ret = //create iterator;
-//	}
 
 	@Override
 	public void clearRecipes() {

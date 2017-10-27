@@ -13,10 +13,15 @@ Also note that CommandHelper may still be backwards and forward compatible to a 
 ! scope="col" width="40%" | Milestone
 ! scope="col" width="50%" | Compatibility
 |-
+| [http://builds.enginehub.org/job/commandhelper/9876 #3219-]
+| [https://github.com/EngineHub/CommandHelper/commit/4d970d0dc2edb1a7a648904df01af148bba761e1 4d970d0]
+| Updated for Spigot 1.12.1
+| Spigot 1.7.8 - 1.12.1
+|-
 | [http://builds.enginehub.org/job/commandhelper/7014 #2895-]
 | [https://github.com/sk89q/commandhelper/commit/6304f912f0be41e3522e0ae4191b1319ef8a8b89 6304f91]
 | Should still be compatible with former build
-| Spigot 1.8.6
+| Spigot 1.7.6 - 1.8.6
 |-
 | [http://builds.enginehub.org/job/commandhelper/6821 #2857-]
 | [https://github.com/sk89q/commandhelper/commit/f8953eb485a6689299381c8f644ea16fb92e9853 f8953eb]
@@ -28,9 +33,9 @@ Also note that CommandHelper may still be backwards and forward compatible to a 
 |-
 | [http://builds.enginehub.org/job/commandhelper/6492 #2802-]
 | [https://github.com/sk89q/CommandHelper/commit/cc0f80e9983b13c2ff6f643fbbc441f8f86268e8 cc0f80e]
-| Updated to Spigot 1.8.
+| Updated for Spigot 1.8.
 * Vault 1.4
-| Spigot 1.8
+| Spigot 1.7.2 - 1.8
 |-
 | [http://builds.enginehub.org/job/commandhelper/5115/ #2717-aca997c]
 | [https://github.com/sk89q/commandhelper/commit/aca997cf7a09f00a92cd46aefc3a8f44f478a3d5 aca997c]
@@ -46,13 +51,13 @@ Also note that CommandHelper may still be backwards and forward compatible to a 
 |-
 | [http://builds.enginehub.org/job/commandhelper/5114/ #2716-512d9d3]
 | [https://github.com/sk89q/commandhelper/commit/484c0645d302e22b8eec815acb54b91ea31c3b10 484c064]
-| Updated to Minecraft 1.7.9 (should still be compatible with 1.7.2 builds, excepting that Sound.BREATH and Sound.HURT have been removed).
-| Bukkit 1.7.9
+| Updated for Minecraft 1.7.9 (should still be compatible with 1.7.2 builds, excepting that Sound.BREATH and Sound.HURT have been removed).
+| Bukkit 1.7.2 - 1.7.9
 |-
 | [http://builds.enginehub.org/job/commandhelper/4876/ #2681-773d877]
 | [https://github.com/sk89q/commandhelper/commit/773d877048514bb422b1e8755c9520ac99d9852a 773d877]
 | Updated to Minecraft 1.7.8 (should still be compatible with 1.7.2 builds, however)
-| Bukkit 1.7.8
+| Bukkit 1.7.2 - 1.7.8
 |-
 | [http://builds.enginehub.org/job/commandhelper/3463/ #2445-8c4b165]
 | [https://github.com/sk89q/commandhelper/commit/8c4b1652ed5c43dddb95c7e6612aea072716aea5 8c4b165]

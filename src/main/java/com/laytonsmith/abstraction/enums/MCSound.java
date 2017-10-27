@@ -272,9 +272,9 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 		VILLAGER_IDLE,
 		VILLAGER_NO,
 		VILLAGER_YES,
-		AMBIENT_CAVE,
 
 		// After 1.9 renames
+		AMBIENT_CAVE(MCVersion.MC1_9),
 		BLOCK_ANVIL_BREAK(MCVersion.MC1_9),
 		BLOCK_ANVIL_DESTROY(MCVersion.MC1_9),
 		BLOCK_ANVIL_FALL(MCVersion.MC1_9),

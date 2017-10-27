@@ -20,6 +20,7 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCMapMeta;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCPattern;
@@ -208,74 +209,75 @@ public class ObjectGenerator {
 		if (world == null) {
 			throw new CREInvalidWorldException("The specified world doesn't exist, or no world was provided", t);
 		}
-        return StaticLayer.GetLocation(world, x, y, z, yaw, pitch);
-    }
+		return StaticLayer.GetLocation(world, x, y, z, yaw, pitch);
+	}
 
-    /**
-     * An Item Object consists of data about a particular item stack.
-     * Information included is: recipeType, data, qty, and an array of enchantment
- objects (labeled enchants): erecipeType (enchantment recipeType) and elevel
- (enchantment level). For backwards compatibility, this information is
- also listed in numerical slots as well as associative slots. If the
- MCItemStack is null, or the underlying item is nonexistant (or air) CNull
- is returned.
-     *
-     * @param is
-     * @return
-     */
-    public Construct item(MCItemStack is, Target t) {
-        if (is == null || is.getAmount() == 0 || is.getTypeId() == 0) {
-            return CNull.NULL;
-        }
-        int type = is.getTypeId();
+	/**
+	 * An Item Object consists of data about a particular item stack.
+	 * Information included is: recipeType, data, qty, and an array of enchantment
+	 * objects (labeled enchants): erecipeType (enchantment recipeType) and elevel
+	 * (enchantment level). For backwards compatibility, this information is
+	 * also listed in numerical slots as well as associative slots. If the
+	 * MCItemStack is null, or the underlying item is nonexistant (or air) CNull
+	 * is returned.
+	 *
+	 * @param is
+	 * @return An item array or CNull
+	 */
+	public Construct item(MCItemStack is, Target t) {
+		if (is == null || is.getAmount() == 0 || is.getTypeId() == 0) {
+			return CNull.NULL;
+		}
 
-        int data;
-        if(type < 256){
-            //Use the data
-            data = (is.getData() != null ? is.getData().getData() : 0);
-        } else {
-            //Use the durability
-            data = is.getDurability();
-        }
+		int type = is.getTypeId();
+		int data = 0;
+		if(type < 256){
+			//Use the data
+			MCMaterialData md = is.getData();
+			if(md != null) {
+				data = md.getData();
+			}
+		} else {
+			//Use the durability
+			data = is.getDurability();
+		}
 
-        CArray enchants = new CArray(t);
-        for (Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {
-            CArray enchObj = CArray.GetAssociativeArray(t);
-            enchObj.set("etype", new CString(entry.getKey().getName(), t), t);
-            enchObj.set("elevel", new CInt(entry.getValue(), t), t);
-            enchants.push(enchObj, t);
-        }
-		Construct meta = itemMeta(is, t);
-        CArray ret = CArray.GetAssociativeArray(t);
+		CArray ret = CArray.GetAssociativeArray(t);
 		ret.set("name", new CString(is.getType().getName(), t), t);
 		ret.set("type", new CInt(type, t), t);
 		ret.set("data", new CInt(data, t), t);
 		ret.set("qty", new CInt(is.getAmount(), t), t);
-		ret.set("enchants", enchants, t);
-		ret.set("meta", meta, t);
-        return ret;
-    }
+		ret.set("enchants", enchants(is.getEnchantments(), t), t);
+		ret.set("meta", itemMeta(is, t), t);
+		return ret;
+	}
 
-    /**
-     * Gets an MCItemStack from a given item "object". Supports both the old and
-     * new formats currently
-     *
-     * @param i
-     * @param t
-     * @return
-     */
-    public MCItemStack item(Construct i, Target t) {
-        if (i instanceof CNull) {
-            return EmptyItem();
-        }
-        if (!(i instanceof CArray)) {
-            throw new CREFormatException("Expected an array!", t);
-        }
-        CArray item = (CArray) i;
-		MCMaterial mat = null;
-		int data = 0, qty = 1;
-        Map<MCEnchantment, Integer> enchants = new HashMap<MCEnchantment, Integer>();
-		MCItemMeta meta = null;
+	/**
+	 * Gets an MCItemStack from a given item "object". Supports both the old and
+	 * new formats currently
+	 *
+	 * @param i
+	 * @param t
+	 * @return An abstract item stack
+	 */
+	public MCItemStack item(Construct i, Target t) {
+		if (i instanceof CNull) {
+			return EmptyItem();
+		}
+		if (!(i instanceof CArray)) {
+			throw new CREFormatException("Expected an array!", t);
+		}
+		CArray item = (CArray) i;
+		MCMaterial mat;
+		int data = 0;
+		int qty = 1;
+
+		if (item.containsKey("qty")) {
+			qty = Static.getInt32(item.get("qty", t), t);
+			if(qty <= 0){
+				return EmptyItem();
+			}
+		}
 
 		if (item.containsKey("name")) {
 			mat = StaticLayer.GetConvertor().GetMaterial(item.get("name", t).val());
@@ -303,77 +305,40 @@ public class ObjectGenerator {
 		if (mat.getType() == 0) {
 			return EmptyItem();
 		}
-		if (item.containsKey("qty")) {
-			qty = Static.getInt32(item.get("qty", t), t);
-		}
+
 		if (item.containsKey("data")) {
 			data = Static.getInt32(item.get("data", t), t);
 		}
 
-        if (item.containsKey("enchants")) {
-            CArray enchantArray;
-            try {
-				enchantArray = (CArray) item.get("enchants", t);
-                if (enchantArray == null) {
-                    throw new NullPointerException();
-                }
-            } catch (Exception e) {
-                throw new CREFormatException("Enchants value must be an array of enchantment arrays.", t, e);
-            }
-
-            for (String index : enchantArray.stringKeySet()) {
-                try {
-                    CArray enchantment = (CArray) enchantArray.get(index, t);
-                    String setype = null;
-                    String selevel = null;
-                    if (enchantment.containsKey("etype")) {
-                        setype = enchantment.get("etype", t).val();
-                    }
-
-                    if (enchantment.containsKey("elevel")) {
-                        selevel = enchantment.get("elevel", t).val();
-                    }
-                    if (setype == null || selevel == null) {
-                        throw new CREFormatException("An enchantment array must have an etype and elevel.", t);
-                    }
-                    int elevel = 0;
-                    try {
-                        elevel = Integer.parseInt(selevel);
-                    } catch (NumberFormatException e) {
-                        throw new CREFormatException("Expecting enchantment array elevel to be an integer but got \"" + selevel + "\" instead.", t);
-                    }
-                    MCEnchantment etype = StaticLayer.GetEnchantmentByName(setype);
-					if(etype == null){
-						if(setype.equals("SWEEPING")) {
-							// data from 1.11.2, changed in 1.12
-							etype = StaticLayer.GetEnchantmentByName("SWEEPING_EDGE");
-						}
-						if(etype == null){
-							throw new CREFormatException("Invalid enchantment array etype: \"" + setype + "\".", t);
-						}
-					}
-                    enchants.put(etype, elevel);
-                } catch (ClassCastException e) {
-                    throw new CREFormatException("Enchants value must be an array of enchantment arrays.", t, e);
-                }
-            }
-        }
-		if (item.containsKey("meta")) {
+		MCItemMeta meta = null;
+		if(item.containsKey("meta")) {
 			meta = itemMeta(item.get("meta", t), mat, t);
 		}
+
+		// Create itemstack
 		MCItemStack ret = StaticLayer.GetItemStack(mat, data, qty);
 		if (meta != null) {
 			ret.setItemMeta(meta);
 		}
-		for (Map.Entry<MCEnchantment, Integer> entry : enchants.entrySet()) {
-			ret.addUnsafeEnchantment(entry.getKey(), entry.getValue());
-		}
-        return ret;
-    }
 
-    private static MCItemStack EmptyItem() {
-        return StaticLayer.GetItemStack(0, 1);
-    }
+		// Fallback to enchants in item array if not in meta
+		if ((meta == null || !meta.hasEnchants()) && item.containsKey("enchants")) {
+			try {
+				Map<MCEnchantment, Integer> enchants = enchants((CArray) item.get("enchants", t), t);
+				for (Map.Entry<MCEnchantment, Integer> entry : enchants.entrySet()) {
+					ret.addUnsafeEnchantment(entry.getKey(), entry.getValue());
+				}
+			} catch(ClassCastException ex) {
+				throw new CREFormatException("Enchants must be an array of enchantment arrays.", t);
+			}
+		}
+
+		return ret;
+	}
+
+	private static MCItemStack EmptyItem() {
+		return StaticLayer.GetItemStack(0, 1);
+	}
 
 	public Construct itemMeta(MCItemStack is, Target t) {
 		Construct ret, display, lore, color, title, author, pages, owner, stored;
@@ -570,11 +535,12 @@ public class ObjectGenerator {
 				}
 				if (ma.containsKey("lore")) {
 					Construct li = ma.get("lore", t);
-					if(li instanceof CString){
-						li = new CArray(t, li);
-					}
 					if (li instanceof CNull) {
 						//do nothing
+					} else if (li instanceof CString){
+						List<String> ll = new ArrayList<>();
+						ll.add(li.val());
+						meta.setLore(ll);
 					} else if (li instanceof CArray) {
 						CArray la = (CArray) li;
 						List<String> ll = new ArrayList<>();
@@ -829,10 +795,10 @@ public class ObjectGenerator {
 		return meta;
 	}
 
-    public CArray exception(ConfigRuntimeException e, Environment env, Target t) {
+	public CArray exception(ConfigRuntimeException e, Environment env, Target t) {
 		AbstractCREException ex = AbstractCREException.getAbstractCREException(e);
 		return ex.getExceptionObject();
-    }
+	}
 	
 	public AbstractCREException exception(CArray exception, Target t) throws ClassNotFoundException{
 		return AbstractCREException.getFromCArray(exception, t);
