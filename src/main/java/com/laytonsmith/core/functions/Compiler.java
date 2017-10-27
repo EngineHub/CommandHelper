@@ -154,8 +154,8 @@ public class Compiler {
 		 * this is ok, since it's really a compiler mechanism more than a
 		 * function.
 		 *
-		 * @param t
 		 * @param list
+		 * @param returnSConcat
 		 * @return
 		 */
 		public ParseTree optimizeSpecial(List<ParseTree> list, boolean returnSConcat) throws ConfigCompileException {
@@ -183,7 +183,7 @@ public class Compiler {
 							ParseTree rhs;
 							if (i < list.size() - 3) {
 								//Need to autoconcat
-								ParseTree ac = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), lhs.getFileOptions());
+								ParseTree ac = new ParseTree(new CFunction("__autoconcat__", node.getTarget()), lhs.getFileOptions());
 								int index = i + 2;
 								ac.addChild(list.get(index));
 								list.remove(index);
@@ -217,7 +217,7 @@ public class Compiler {
 					ParseTree rhs;
 					if (i < list.size() - 3) {
 						//Need to autoconcat
-						ParseTree ac = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), lhs.getFileOptions());
+						ParseTree ac = new ParseTree(new CFunction("__autoconcat__", node.getTarget()), lhs.getFileOptions());
 						int index = i + 2;
 						//As an incredibly special case, because (@value = !@value) is supported, and
 						//! hasn't been reduced yet, we want to check for that case, and if present, grab
@@ -529,7 +529,7 @@ public class Compiler {
 							list.remove(0);
 							ParseTree child = list.get(0);
 							if (list.size() > 1) {
-								child = new ParseTree(new CFunction("sconcat", Target.UNKNOWN), child.getFileOptions());
+								child = new ParseTree(new CFunction("sconcat", child.getTarget()), child.getFileOptions());
 								child.setChildren(list);
 							}
 							try {
@@ -548,13 +548,15 @@ public class Compiler {
 				}
 				ParseTree tree;
 				FileOptions options = new FileOptions(new HashMap<String, String>());
+				Target t = Target.UNKNOWN;
 				if (!list.isEmpty()) {
 					options = list.get(0).getFileOptions();
+					t = list.get(0).getTarget();
 				}
 				if (returnSConcat) {
-					tree = new ParseTree(new CFunction("sconcat", Target.UNKNOWN), options);
+					tree = new ParseTree(new CFunction("sconcat", t), options);
 				} else {
-					tree = new ParseTree(new CFunction("concat", Target.UNKNOWN), options);
+					tree = new ParseTree(new CFunction("concat", t), options);
 				}
 				tree.setChildren(list);
 				return tree;
