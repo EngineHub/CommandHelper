@@ -98,8 +98,10 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 				MCPlayer p = Static.GetPlayer(c, Target.UNKNOWN);
 				env.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
 			} catch(CREPlayerOfflineException e){
-				// Set env player to null to prevent incorrect inherited player from being used in a player event.
-				env.getEnv(CommandHelperEnvironment.class).SetPlayer(null);
+				// Set env CommandSender to prevent incorrect inherited player from being used in a player event.
+				if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
+				}
 			}
 		}
 		ProfilePoint event = null;

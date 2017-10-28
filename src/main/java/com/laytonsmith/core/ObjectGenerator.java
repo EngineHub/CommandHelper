@@ -322,7 +322,7 @@ public class ObjectGenerator {
 		}
 
 		// Fallback to enchants in item array if not in meta
-		if ((meta == null || !meta.hasEnchants()) && item.containsKey("enchants")) {
+		if (item.containsKey("enchants")) {
 			try {
 				Map<MCEnchantment, Integer> enchants = enchants((CArray) item.get("enchants", t), t);
 				for (Map.Entry<MCEnchantment, Integer> entry : enchants.entrySet()) {
