@@ -357,7 +357,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		if (showSplashScreen) {
 			StreamUtils.GetSystemOut().println(TermColors.reset());
 			//StreamUtils.GetSystemOut().flush();
-			StreamUtils.GetSystemOut().println("\n\n\n" + Static.Logo());
+			StreamUtils.GetSystemOut().println("\n\n" + Static.Logo());
 		}
 		ac = new AliasCore(new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), script_name),
 				CommandHelperFileLocations.getDefault().getLocalPackagesDirectory(),

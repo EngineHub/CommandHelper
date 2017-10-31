@@ -1097,6 +1097,7 @@ public final class Static {
 		logo = logo.replaceAll("( +)", TermColors.BG_BLACK + "$1");
 		logo = logo.replaceAll("_", TermColors.BG_RED + TermColors.RED + "_");
 		logo = logo.replaceAll("/", TermColors.BG_BRIGHT_WHITE + TermColors.WHITE + "/");
+		logo = logo.replace("\n", TermColors.reset() + "\n");
 		String s = logo + TermColors.reset();
 		return s;
 	}
