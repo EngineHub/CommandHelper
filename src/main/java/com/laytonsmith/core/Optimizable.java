@@ -115,12 +115,12 @@ public interface Optimizable extends Function {
 		/**
 		 * This is a priority optimization function, meaning it needs to be optimized before its children are.
 		 * This is required when optimization of the children could cause different internal behavior, for instance
-		 * if this function is expecting the precense of soem code element, but the child gets optimized out, this
+		 * if this function is expecting the presence of some code element, but the child gets optimized out, this
 		 * would cause an error, even though the user did in fact provide code in that section.
 		 */
 		PRIORITY_OPTIMIZATION("This is a priority optimization function, meaning it needs to be optimized before its children are."
 				+ " This is required when optimization of the children could cause different internal behavior, for instance"
-				+ " if this function is expecting the precense of soem code element, but the child gets optimized out, this"
+				+ " if this function is expecting the presence of some code element, but the child gets optimized out, this"
 				+ " would cause an error, even though the user did in fact provide code in that section.", CHVersion.V3_3_1);
 
 		private final CHVersion since;

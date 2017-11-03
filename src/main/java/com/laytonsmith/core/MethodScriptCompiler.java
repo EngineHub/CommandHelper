@@ -1831,7 +1831,11 @@ public final class MethodScriptCompiler {
 					throw new ConfigCompileException(e);
 				}
 				if (tempNode == Optimizable.PULL_ME_UP) {
-					tempNode = tree.getChildAt(0);
+					if(tree.hasChildren()) {
+						tempNode = tree.getChildAt(0);
+					} else {
+						tempNode = null;
+					}
 				}
 				if (tempNode == Optimizable.REMOVE_ME) {
 					tree.setData(new CFunction("p", Target.UNKNOWN));
