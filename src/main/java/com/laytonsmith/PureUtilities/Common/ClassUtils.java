@@ -193,7 +193,7 @@ public class ClassUtils {
 			//This is fine for non arrays.
 			return c.getName();
 		}
-		int arrayCount = c.getName().lastIndexOf("[") + 1;
+		int arrayCount = c.getName().lastIndexOf('[') + 1;
 		Class cc = c.getComponentType();
 		while(cc.isArray()){
 			cc = cc.getComponentType();
@@ -209,7 +209,7 @@ public class ClassUtils {
 	 * @return
 	 */
 	public static String getCommonNameFromJVMName(String classname){
-		int arrayCount = classname.lastIndexOf("[") + 1;
+		int arrayCount = classname.lastIndexOf('[') + 1;
 		classname = classname.substring(arrayCount);
 		//ZBSIJDFC
 		if("Z".equals(classname)){
@@ -231,7 +231,7 @@ public class ClassUtils {
 		} else if("V".equals(classname)){
 			return "void"; //special case
 		} else {
-			classname = classname.substring(1, classname.length() - 1).replace('/', '.').replace('$', '.');
+			classname = classname.substring(1, classname.length() - 1).replace('/', '.');
 		}
 		return classname + StringUtils.stringMultiply(arrayCount, "[]");
 	}

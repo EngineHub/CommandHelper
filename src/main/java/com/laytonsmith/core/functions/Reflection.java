@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Version;
@@ -163,29 +164,29 @@ public class Reflection {
 				return new CArray(t, protocols);
 			} else if("enum".equalsIgnoreCase(param)){
 				CArray a = new CArray(t);
-				Set<Class<Enum>> enums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(MEnum.class, Enum.class);
-				Set<Class<DynamicEnum>> dEnums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class);
+				Set<ClassMirror<Enum>> enums = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(MEnum.class, Enum.class);
+				Set<ClassMirror<DynamicEnum>> dEnums = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class);
 				if(args.length == 1){
 					//No name provided
-					for(Class<Enum> e : enums){
-						a.push(new CString(e.getAnnotation(MEnum.class).value(), t), t);
+					for(ClassMirror<Enum> e : enums){
+						a.push(new CString((String) e.getAnnotation(MEnum.class).getValue("value"), t), t);
 					}
-					for (Class<DynamicEnum> d : dEnums) {
-						a.push(new CString(d.getAnnotation(MDynamicEnum.class).value(), t), t);
+					for (ClassMirror<DynamicEnum> d : dEnums) {
+						a.push(new CString((String) d.getAnnotation(MDynamicEnum.class).getValue("value"), t), t);
 					}
 				} else if(args.length == 2){
 					String enumName = args[1].val();
-					for(Class<Enum> e : enums){
-						if(e.getAnnotation(MEnum.class).value().equals(enumName)){
-							for(Enum ee : e.getEnumConstants()){
+					for(ClassMirror<Enum> e : enums){
+						if(e.getAnnotation(MEnum.class).getValue("value").equals(enumName)){
+							for(Enum ee : e.loadClass().getEnumConstants()){
 								a.push(new CString(ee.name(), t), t);
 							}
 							break;
 						}
 					}
-					for (Class<DynamicEnum> d : dEnums) {
-						if (d.getAnnotation(MDynamicEnum.class).value().equals(enumName)) {
-							for (DynamicEnum ee : (Collection<DynamicEnum>) ReflectionUtils.invokeMethod(d, null, "values")) {
+					for (ClassMirror<DynamicEnum> d : dEnums) {
+						if (d.getAnnotation(MDynamicEnum.class).getValue("value").equals(enumName)) {
+							for (DynamicEnum ee : (Collection<DynamicEnum>) ReflectionUtils.invokeMethod(d.loadClass(), null, "values")) {
 								a.push(new CString(ee.name(), t), t);
 							}
 							break;

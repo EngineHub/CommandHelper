@@ -706,7 +706,7 @@ public class ClassDiscovery {
 	 */
 	public Set<ClassMirror<?>> getClassesWithAnnotation(Class<? extends Annotation> annotation) {
 		if (classAnnotationCache.containsKey(annotation)) {
-			return new HashSet<>(classAnnotationCache.get(annotation));
+			return classAnnotationCache.get(annotation);
 		}
 		doDiscovery();
 		Set<ClassMirror<?>> mirrors = new HashSet<>();
