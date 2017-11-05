@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
+import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCMetadatable;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -596,23 +597,20 @@ public final class Static {
 	 * @return
 	 */
 	public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, Target t) {
-		int type = 0;
+		int type;
 		short data = 0;
-		MCItemStack is;
-			String[] sData = notation.split(":");
-			try {
-			type = Integer.parseInt(sData[0]);
-				if (sData.length > 1) {
-					data = (short) Integer.parseInt(sData[1]);
-				}
-			} catch (NumberFormatException e) {
+		try {
+			int separatorIndex = notation.indexOf(':');
+			if(separatorIndex != -1) {
+				type = Integer.parseInt(notation.substring(0, separatorIndex));
+				data = (short) Integer.parseInt(notation.substring(separatorIndex + 1));
+			} else {
+				type = Integer.parseInt(notation);
+			}
+		} catch (NumberFormatException e) {
 			throw new CREFormatException("Item value passed to " + functionName + " is invalid: " + notation, t);
 		}
-
-		is = StaticLayer.GetItemStack(type, qty);
-		is.setDurability(data);
-		//is.setData(new MaterialData(type, data));
-		return is;
+		return StaticLayer.GetItemStack(type, data, qty);
 	}
 
 	/**
@@ -628,8 +626,11 @@ public final class Static {
 		String append = null;
 		if (is.getDurability() != 0) {
 			append = Short.toString(is.getDurability());
-		} else if (is.getData() != null) {
-			append = Integer.toString(is.getData().getData());
+		} else {
+			MCMaterialData md = is.getData();
+			if(md != null) {
+				append = Integer.toString(md.getData());
+			}
 		}
 		return is.getTypeId() + (append == null ? "" : ":" + append);
 	}
@@ -638,7 +639,8 @@ public final class Static {
 		if (b == null || b.isNull()) {
 			return "0";
 		}
-		return b.getTypeId() + (b.getData() == 0 ? "" : ":" + Byte.toString(b.getData()));
+		byte data = b.getData();
+		return b.getTypeId() + (data == 0 ? "" : ":" + Byte.toString(data));
 	}
 
 	private static Map<String, MCCommandSender> injectedPlayers = new HashMap<>();

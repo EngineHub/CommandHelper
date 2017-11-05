@@ -647,9 +647,13 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCMaterial GetMaterial(String name) {
-		Material match = Material.matchMaterial(name);
+		Material match = Material.getMaterial(name);
 		if (match == null) {
-			return null;
+			// Try harder
+			match = Material.matchMaterial(name);
+			if(match == null){
+				return null;
+			}
 		}
 		return new BukkitMCMaterial(match);
 	}

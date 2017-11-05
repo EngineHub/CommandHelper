@@ -15,6 +15,7 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCSound;
@@ -5212,6 +5213,141 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "void {player, sound, [category]} Stops the specified sound for the given player.";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+
+	}
+
+	@api
+	public static class pcooldown extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREFormatException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			String materialName;
+			if(args.length == 2) {
+				p = Static.GetPlayer(args[0], t);
+				materialName = args[1].val();
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				materialName = args[0].val();
+			}
+
+			MCMaterial mat = StaticLayer.GetMaterial(materialName);
+			if(mat == null){
+				throw new CREFormatException("Material name is invalid.", t);
+			}
+
+			return new CInt(p.getCooldown(mat), t);
+		}
+
+		@Override
+		public String getName() {
+			return "pcooldown";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "int {[player], material} Gets the time left on the player's cooldown for the specified material."
+					+ " The material is the name found in item arrays. This returns an integer representing the"
+					+ " time in game ticks until items of this material can be used again by this player. (MC 1.11.2)";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+
+	}
+
+	@api
+	public static class set_pcooldown extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREFormatException.class, CREPlayerOfflineException.class,
+					CRERangeException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			String materialName;
+			int cooldown;
+			if(args.length == 3) {
+				p = Static.GetPlayer(args[0], t);
+				materialName = args[1].val();
+				cooldown = Static.getInt32(args[2], t);
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				materialName = args[0].val();
+				cooldown = Static.getInt32(args[1], t);
+			}
+
+			MCMaterial mat = StaticLayer.GetMaterial(materialName);
+			if(mat == null){
+				throw new CREFormatException("Material name is invalid.", t);
+			}
+
+			if(cooldown < 0){
+				throw new CRERangeException("Cooldowns cannot be negative.", t);
+			}
+
+			p.setCooldown(mat, cooldown);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_pcooldown";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "int {[player], material, cooldown} Sets the player's cooldown time for the specified material."
+					+ " The material is the name found in item arrays. The cooldown must be a positive integer"
+					+ " representing game ticks. (MC 1.11.2)";
 		}
 
 		@Override

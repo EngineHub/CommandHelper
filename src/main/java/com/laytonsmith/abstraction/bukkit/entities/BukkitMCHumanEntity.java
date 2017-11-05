@@ -5,11 +5,13 @@ import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryView;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventoryView;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
@@ -86,6 +88,25 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 	@Override
 	public void setItemOnCursor(MCItemStack item) {
 		he.setItemOnCursor(((BukkitMCItemStack)item).asItemStack());
+	}
+
+	@Override
+	public int getCooldown(MCMaterial material) {
+		try {
+			return he.getCooldown((Material) material.getHandle());
+		} catch(NoSuchMethodError ex) {
+			// Probably prior to 1.11.2
+			return 0;
+		}
+	}
+
+	@Override
+	public void setCooldown(MCMaterial material, int ticks) {
+		try {
+			he.setCooldown((Material) material.getHandle(), ticks);
+		} catch(NoSuchMethodError ex) {
+			// Probably prior to 1.11.2
+		}
 	}
 
 	@Override
