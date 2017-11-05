@@ -317,6 +317,15 @@ public class CArray extends Construct implements ArrayAccess{
         return set;
 	}
 
+	private void setAssociative() {
+		associative_array = new TreeMap<>(comparator);
+		for (int i = 0; i < array.size(); i++) {
+			associative_array.put(Integer.toString(i), array.get(i));
+		}
+		associative_mode = true;
+		array = null; // null out the original array container so it can be GC'd
+	}
+
     /**
      *
      * @param index
@@ -324,23 +333,24 @@ public class CArray extends Construct implements ArrayAccess{
      */
     public void set(Construct index, Construct c, Target t) {
         if (!associative_mode) {
-            try {
-                int indx = Static.getInt32(index, t);
-                if (indx > next_index || indx < 0) {
-                    throw new CREIndexOverflowException("", Target.UNKNOWN);
-                } else if(indx == next_index){
-                    this.push(c, t);
-                } else {
-                    array.set(indx, c);
+            if (index instanceof CNull) {
+                // Invalid normal array index
+                setAssociative();
+            } else {
+                try {
+                    int indx = Static.getInt32(index, t);
+                    if (indx > next_index || indx < 0) {
+                        // Out of range
+                        setAssociative();
+                    } else if (indx == next_index) {
+                        this.push(c, t);
+                    } else {
+                        array.set(indx, c);
+                    }
+                } catch (ConfigRuntimeException e) {
+                    // Not a number
+                    setAssociative();
                 }
-            } catch (ConfigRuntimeException e) {
-                //Not a number. Convert to associative.
-                associative_array = new TreeMap<String, Construct>(comparator);
-                for (int i = 0; i < array.size(); i++) {
-                    associative_array.put(Integer.toString(i), array.get(i));
-                }
-                associative_mode = true;
-                array = null; // null out the original array container so it can be GC'd
             }
         }
         if (associative_mode) {
@@ -353,12 +363,12 @@ public class CArray extends Construct implements ArrayAccess{
     }
 
     public final void set(int index, Construct c, Target t){
-        this.set(new CInt(index, Target.UNKNOWN), c, t);
+        this.set(new CInt(index, t), c, t);
     }
     /* Shortcuts */
 
     public final void set(String index, Construct c, Target t){
-        set(new CString(index, c.getTarget()), c, t);
+        set(new CString(index, t), c, t);
     }
 
     public final void set(String index, String value, Target t){
