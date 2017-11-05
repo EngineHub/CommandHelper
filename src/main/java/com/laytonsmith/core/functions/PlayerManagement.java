@@ -5291,7 +5291,7 @@ public class PlayerManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRELengthException.class, CREFormatException.class, CREPlayerOfflineException.class,
-					CRERangeException.class};
+					CRERangeException.class, CRECastException.class};
 		}
 
 		@Override
