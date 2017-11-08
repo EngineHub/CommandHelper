@@ -14,10 +14,11 @@ $language_data = array(
     'LANG_NAME' => 'CommandHelper',
     'COMMENT_SINGLE' => array(1 => '#', 2 => '//'),
     'HARD_QUOTE' => array("'", "'"),
-    'HARDESCAPE' => array("\\"),
+    'HARDESCAPE' => array('\\\''),
     'HARDCHAR' => array("\\"),
     'CASE_KEYWORDS' => GESHI_CAPS_NO_CHANGE,
     'QUOTEMARKS' => array('"', "'"),
+    'ESCAPE_CHAR' => array('\\'),
     'ESCAPE_REGEXP' => array(
             //Simple Single Char Escapes
             1 => "#\\\\[nfrtv\$\"\n\\\\]#i",
@@ -92,8 +93,8 @@ $language_data = array(
         )
     ),
     'URLS' => array(
-        1 => 'http://wiki.sk89q.com/wiki/CommandHelper/Staged/API/{FNAMEL}',
-        2 => 'http://wiki.sk89q.com/wiki/CommandHelper/Staged/API/{FNAMEL}'
+        1 => 'https://methodscript.com/docs/3.3.2/API/functions{FNAMEL}',
+        2 => 'https://methodscript.com/docs/3.3.2/API/functions{FNAMEL}'
     ),
     'OOLANG' => false,
     'REGEXPS' => array(
