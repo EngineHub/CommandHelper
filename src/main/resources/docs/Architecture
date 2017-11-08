@@ -14,9 +14,9 @@ right? Here's a picture that shows on a high level how the various components wo
 
 ===Core===
 The core is what glues everything together. The core knows how to register the plugin with 
-bukkit, handles the builtin commands, and manages the user aliases. When the plugin starts 
-up initially, it starts in bukkit specific code, which sets the abstraction layer type, as 
-well as hands control off to the more generic core.
+bukkit and handles the builtin commands. When the plugin starts up initially, it starts in
+bukkit specific code, which sets the abstraction layer type, as well as hands control off to
+the more generic core.
 
 
 ===Compiler===

@@ -20,6 +20,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Dispenser;
@@ -30,10 +31,6 @@ import org.bukkit.material.Command;
 import java.util.ArrayList;
 import java.util.Collection;
 
-/**
- *
- * 
- */
 public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
     Block b;
@@ -77,23 +74,19 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	}
 
 	@Override
-    public MCBlockState getState() {
-        if(b.getState() == null){
-            return null;
-        }
-		if(b.getState() instanceof CreatureSpawner){
-			return new BukkitMCCreatureSpawner((CreatureSpawner)b.getState());
+	public MCBlockState getState() {
+		BlockState bs = b.getState();
+		if(bs instanceof CreatureSpawner){
+			return new BukkitMCCreatureSpawner((CreatureSpawner)bs);
 		}
-        return new BukkitMCBlockState(b.getState());
-    }
+		return new BukkitMCBlockState(bs);
+	}
 
 	@Override
-    public MCMaterial getType() {
-        if(b.getType() == null){
-            return null;
-        }
-        return new BukkitMCMaterial(b.getType());
-    }
+	public MCMaterial getType() {
+		Material type = b.getType();
+		return type == null ? null : new BukkitMCMaterial(type);
+	}
 
 	@Override
     public MCWorld getWorld() {
@@ -125,9 +118,10 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
     }
 
 	@Override
-    public boolean isSign() {
-        return (b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST || b.getType() == Material.WALL_SIGN);
-    }
+	public boolean isSign() {
+		Material type = b.getType();
+		return (type == Material.SIGN || type == Material.SIGN_POST || type == Material.WALL_SIGN);
+	}
 	
 	@Override
 	public MCCommandBlock getCommandBlock() {

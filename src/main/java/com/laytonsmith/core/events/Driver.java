@@ -25,6 +25,7 @@ public enum Driver {
 	SIGN_CHANGED,
 	REDSTONE_CHANGED,
 	NOTE_PLAY,
+	BLOCK_FADE,
 
 	/**
 	 * Entity events

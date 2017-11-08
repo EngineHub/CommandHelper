@@ -73,8 +73,9 @@ public class DataSourceFactory {
 	 */
 	public static DataSource GetDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		init();
-		if(dataSourcePool.containsKey(uri)){
-			return dataSourcePool.get(uri);
+		DataSource source = dataSourcePool.get(uri);
+		if(source != null){
+			return source;
 		}
 		List<DataSource.DataSourceModifier> modifiers = new ArrayList<DataSource.DataSourceModifier>();
 		while (DataSource.DataSourceModifier.isModifier(uri.getScheme())) {

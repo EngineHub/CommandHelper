@@ -36,8 +36,9 @@ public class ThreadsafeDataSource implements DataSource {
 	 */
 	public static synchronized ThreadsafeDataSource GetDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
 		Pair<URI, ConnectionMixinFactory.ConnectionMixinOptions> pair = new Pair<>(uri, options);
-		if(sources.containsKey(pair) && sources.get(pair) != null){
-			return sources.get(pair);
+		ThreadsafeDataSource source = sources.get(pair);
+		if(source != null){
+			return source;
 		} else {
 			ThreadsafeDataSource ds = new ThreadsafeDataSource(DataSourceFactory.GetDataSource(uri, options));
 			sources.put(pair, ds);

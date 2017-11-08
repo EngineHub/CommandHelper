@@ -35,9 +35,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
-import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
@@ -58,7 +56,6 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistence.PersistenceNetwork;
-import org.bukkit.Server;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -279,13 +276,10 @@ public class CommandHelperPlugin extends JavaPlugin {
 		cdc.setLogger(Logger.getLogger(CommandHelperPlugin.class.getName()));
 		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
-		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Server.class));
 
 		StreamUtils.GetSystemOut().println("[CommandHelper] Running initial class discovery,"
 				+ " this will probably take a few seconds...");
-		myServer = StaticLayer.GetServer();
 		StreamUtils.GetSystemOut().println("[CommandHelper] Loading extensions in the background...");
-
 		loadingThread = new Thread("extensionloader") {
 			@Override
 			public void run() {
@@ -321,6 +315,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+		myServer = StaticLayer.GetServer();
 		BukkitMCEntityType.build();
 		BukkitMCBiomeType.build();
 		BukkitMCSound.build();
@@ -362,7 +357,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		if (showSplashScreen) {
 			StreamUtils.GetSystemOut().println(TermColors.reset());
 			//StreamUtils.GetSystemOut().flush();
-			StreamUtils.GetSystemOut().println("\n\n\n" + Static.Logo());
+			StreamUtils.GetSystemOut().println("\n\n" + Static.Logo());
 		}
 		ac = new AliasCore(new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), script_name),
 				CommandHelperFileLocations.getDefault().getLocalPackagesDirectory(),

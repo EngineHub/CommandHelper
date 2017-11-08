@@ -32,6 +32,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCShulkerBox;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
@@ -53,7 +54,6 @@ import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitVehicleListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitWeatherListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitWorldListener;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
-import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
@@ -93,6 +93,7 @@ import org.bukkit.entity.Ageable;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Hanging;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -101,6 +102,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Vehicle;
+import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -108,12 +110,12 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.*;
-import org.bukkit.material.MaterialData;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionData;
 import org.yaml.snakeyaml.Yaml;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -154,17 +156,15 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCEnchantment GetEnchantmentByName(String name) {
+		Enchantment enchant = Enchantment.getByName(name);
+		if(enchant != null) {
+			return new BukkitMCEnchantment(enchant);
+		}
 		try {
-			//If they are looking it up by number, we can support that
+			//If they are looking it up by number, we can support that too
 			int i = Integer.valueOf(name);
 			return new BukkitMCEnchantment(Enchantment.getById(i));
-		} catch (NumberFormatException e) {
-			try {
-				return new BukkitMCEnchantment(Enchantment.getByName(name));
-			} catch (NullPointerException ee) {
-				return null;
-			}
-		} catch(NullPointerException e) {
+		} catch(NumberFormatException | NullPointerException e) {
 			return null;
 		}
 	}
@@ -249,8 +249,9 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public int LookupItemId(String materialName) {
-		if (Material.matchMaterial(materialName) != null) {
-			return new MaterialData(Material.matchMaterial(materialName)).getItemTypeId();
+		Material mat = Material.matchMaterial(materialName);
+		if (mat != null) {
+			return mat.getId();
 		} else {
 			return -1;
 		}
@@ -422,10 +423,17 @@ public class BukkitConvertor extends AbstractConvertor {
 		if (radius <= 0) {
 			radius = 1;
 		}
-		Entity tempEntity = ((BukkitMCEntity) location.getWorld().spawn(location, MCEntityType.MCVanillaEntityType.ARROW)).getHandle();
-		List<Entity> near = tempEntity.getNearbyEntities(radius, radius, radius);
-		tempEntity.remove();
-		List<MCEntity> entities = new ArrayList<MCEntity>();
+		Location l = (Location) location.getHandle();
+		Collection<Entity> near;
+		try {
+			near = l.getWorld().getNearbyEntities(l, radius, radius, radius);
+		} catch(NoSuchMethodError ex) {
+			// Probably before 1.8.3
+			Entity tempEntity = l.getWorld().spawnEntity(l, EntityType.ARROW);
+			near = tempEntity.getNearbyEntities(radius, radius, radius);
+			tempEntity.remove();
+		}
+		List<MCEntity> entities = new ArrayList<>();
 		for (Entity e : near) {
 			entities.add(BukkitGetCorrectEntity(e));
 		}
@@ -500,10 +508,10 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCInventory GetLocationInventory(MCLocation location) {
-		Block b = ((Location) (location.getHandle())).getBlock();
+		Block b = ((Location) location.getHandle()).getBlock();
 		if (b.getState() instanceof InventoryHolder) {
 			if (b.getState() instanceof DoubleChest) {
-				DoubleChest dc = (DoubleChest) (b.getState());
+				DoubleChest dc = (DoubleChest) b.getState();
 				return new BukkitMCDoubleChest(dc.getLeftSide().getInventory(), dc.getRightSide().getInventory());
 			} else {
 				return new BukkitMCInventory(((InventoryHolder) b.getState()).getInventory());
@@ -630,16 +638,22 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCConsoleCommandSender((ConsoleCommandSender) sender);
 		} else if (sender instanceof BlockCommandSender) {
 			return new BukkitMCBlockCommandSender((BlockCommandSender) sender);
+		} else if (sender instanceof CommandMinecart) {
+			return new BukkitMCCommandMinecart((CommandMinecart) sender);
 		} else {
-			return null;
+			return new BukkitMCCommandSender(sender);
 		}
 	}
 
 	@Override
 	public MCMaterial GetMaterial(String name) {
-		Material match = Material.matchMaterial(name);
+		Material match = Material.getMaterial(name);
 		if (match == null) {
-			return null;
+			// Try harder
+			match = Material.matchMaterial(name);
+			if(match == null){
+				return null;
+			}
 		}
 		return new BukkitMCMaterial(match);
 	}

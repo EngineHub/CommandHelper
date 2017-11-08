@@ -45,13 +45,7 @@ public class BukkitMCObjective implements MCObjective {
 
 	@Override
 	public MCScore getScore(String entry) {
-		try {
-			return new BukkitMCScore(o.getScore(entry));
-		} catch(NoSuchMethodError ex){
-			// Probably 1.7.8 or prior
-			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
-			return new BukkitMCScore((Score) ReflectionUtils.invokeMethod(o, "getScore", player));
-		}
+		return new BukkitMCScore(o.getScore(entry));
 	}
 
 	@Override

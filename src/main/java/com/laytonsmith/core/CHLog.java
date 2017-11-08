@@ -49,7 +49,6 @@ public class CHLog {
         PERSISTENCE("persistence", "Logs when any persistence actions occur.", LogLevel.ERROR),
         //TODO Add the rest of these hooks into the code
 //        IO("IO", "Logs when the filesystem is accessed.", Level.OFF),
-//        ALIAS("alias", "Logs use of user aliases.", Level.OFF),
 //        EVENTS("events", "Logs bindings and use of an event.", Level.OFF),
 //        PROCEDURES("procedures", "Logs when a procedure is created", Level.OFF),
         INCLUDES("includes", "Logs what file is requested when include() is used", LogLevel.ERROR),

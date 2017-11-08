@@ -228,8 +228,16 @@ public class WorldEvents {
 			if (e instanceof MCStructureGrowEvent) {
 				MCStructureGrowEvent event = (MCStructureGrowEvent) e;
 				Prefilters.match(prefilter, "world", event.getWorld().getName(), Prefilters.PrefilterType.MACRO);
-				MCPlayer player = event.getPlayer();
-				Prefilters.match(prefilter, "player", player == null ? null : player.getName(), Prefilters.PrefilterType.MACRO);
+				if(prefilter.containsKey("player")) {
+					MCPlayer player = event.getPlayer();
+					if(player == null) {
+						if(!(prefilter.get("player") instanceof CNull)) {
+							return false;
+						}
+					} else if(!player.getName().equals(prefilter.get("player").val())) {
+						return false;
+					}
+				}
 				Prefilters.match(prefilter, "type", event.getSpecies().name(), Prefilters.PrefilterType.MACRO);
 				Prefilters.match(prefilter, "bonemeal", event.isFromBonemeal(), Prefilters.PrefilterType.BOOLEAN_MATCH);
 				return true;

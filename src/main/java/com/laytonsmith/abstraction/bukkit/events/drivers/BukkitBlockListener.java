@@ -124,4 +124,10 @@ public class BukkitBlockListener implements Listener{
 		BukkitBlockEvents.BukkitMCNotePlayEvent npe = new BukkitBlockEvents.BukkitMCNotePlayEvent(e);
 		EventUtils.TriggerListener(Driver.NOTE_PLAY, "note_play", npe);
 	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onBlockFade(BlockFadeEvent e) {
+		BukkitBlockEvents.BukkitMCBlockFadeEvent bfe = new BukkitBlockEvents.BukkitMCBlockFadeEvent(e);
+		EventUtils.TriggerListener(Driver. BLOCK_FADE, "block_fade", bfe);
+	}
 }

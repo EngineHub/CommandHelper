@@ -12,10 +12,10 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBookMeta;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCTravelAgent;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
@@ -418,12 +418,12 @@ public class BukkitPlayerEvents {
             pce = event.pce;
         }
 
-        public static BukkitMCPlayerChatEvent _instantiate(MCPlayer player, String message, String format){
+		public static BukkitMCPlayerChatEvent _instantiate(MCPlayer player, String message, String format){
 			AsyncPlayerChatEvent apce = new AsyncPlayerChatEvent(false, ((BukkitMCPlayer)player)._Player(), message,
-                    new HashSet<>(BukkitMCServer.getOnlinePlayersOverwrite(Bukkit.getServer())));
+					new HashSet<>(Bukkit.getServer().getOnlinePlayers()));
 			apce.setFormat(format);
-            return new BukkitMCPlayerChatEvent(apce);
-        }
+			return new BukkitMCPlayerChatEvent(apce);
+		}
 
 		@Override
         public String getMessage() {
@@ -761,7 +761,7 @@ public class BukkitPlayerEvents {
 			if (e.getCaught() == null) {
 				return null;
 			}
-			return new BukkitMCEntity(e.getCaught());
+			return BukkitConvertor.BukkitGetCorrectEntity(e.getCaught());
 		}
 
 		@Override

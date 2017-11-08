@@ -3,12 +3,14 @@ package com.laytonsmith.core.events.drivers;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCBookMeta;
+import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.entities.MCFishHook;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
@@ -29,7 +31,6 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
@@ -251,12 +252,6 @@ public class PlayerEvents {
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
                 throws PrefilterNonMatchException {
             if (e instanceof MCPlayerKickEvent) {
-                //I gather we do not what to intercept anything from players in interpreter mode
-                //because there would be no one to recieve the information
-                if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerKickEvent)e).getPlayer().getName())){
-                    throw new PrefilterNonMatchException();
-                }
-
                 Prefilters.match(prefilter, "player", ((MCPlayerKickEvent)e).getPlayer().getName(), PrefilterType.MACRO);
                 Prefilters.match(prefilter, "reason", ((MCPlayerKickEvent)e).getReason(), PrefilterType.MACRO);
                 return true;
@@ -717,7 +712,6 @@ public class PlayerEvents {
                 //Static lookups of the player don't seem to work here, but
                 //the player is passed in with the event.
                 MCPlayer player = ((MCPlayerLoginEvent)activeEvent.getUnderlyingEvent()).getPlayer();
-                env.getEnv(CommandHelperEnvironment.class).SetPlayer(player);
                 Static.InjectPlayer(player);
             }
         }
@@ -860,10 +854,6 @@ public class PlayerEvents {
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent)e;
-
-                if(pie.getAction().equals(MCAction.PHYSICAL)){
-                    return false;
-                }
 
                 if(prefilter.containsKey("button")){
                     if(pie.getAction().equals(MCAction.LEFT_CLICK_AIR) || pie.getAction().equals(MCAction.LEFT_CLICK_BLOCK)){
@@ -1078,9 +1068,6 @@ public class PlayerEvents {
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent)e;
-                if(!((MCPlayerInteractEvent)e).getAction().equals(MCAction.PHYSICAL)){
-                    return false;
-                }
 				Prefilters.match(prefilter, "location", pie.getClickedBlock().getLocation(), PrefilterType.LOCATION_MATCH);
 				if(prefilter.containsKey("activated")){
 					//TODO: Once activation is supported, check for that here
@@ -1220,7 +1207,6 @@ public class PlayerEvents {
                 //Static lookups of the player don't seem to work here, but
                 //the player is passed in with the event.
                 MCPlayer player = ((MCPlayerRespawnEvent)activeEvent.getUnderlyingEvent()).getPlayer();
-                env.getEnv(CommandHelperEnvironment.class).SetPlayer(player);
                 Static.InjectPlayer(player);
             }
         }
@@ -1386,12 +1372,6 @@ public class PlayerEvents {
 		@Override
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerQuitEvent) {
-                //As a very special case, if this player is currently in interpreter mode, we do not want to
-                //intercept their chat event
-                if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerQuitEvent)e).getPlayer().getName())){
-                    throw new PrefilterNonMatchException();
-                }
-
                 Prefilters.match(prefilter, "player", ((MCPlayerQuitEvent)e).getPlayer().getName(), PrefilterType.MACRO);
                 return true;
             }
@@ -1440,7 +1420,6 @@ public class PlayerEvents {
                 //Static lookups of the player don't seem to work here, but
                 //the player is passed in with the event.
                 MCPlayer player = ((MCPlayerQuitEvent)activeEvent.getUnderlyingEvent()).getPlayer();
-                env.getEnv(CommandHelperEnvironment.class).SetPlayer(player);
                 Static.InjectPlayer(player);
             }
         }
@@ -1542,9 +1521,9 @@ public class PlayerEvents {
                     if(value instanceof CArray){
                         List<MCPlayer> list = new ArrayList<MCPlayer>();
                         for(String index : ((CArray)value).stringKeySet()){
-                            Construct v = ((CArray)value).get(index, Target.UNKNOWN);
+                            Construct v = ((CArray)value).get(index, value.getTarget());
                             try{
-                                list.add(Static.GetPlayer(v, Target.UNKNOWN));
+                                list.add(Static.GetPlayer(v, value.getTarget()));
                             } catch(ConfigRuntimeException ex){
                                 //Ignored
                             }
@@ -1558,7 +1537,7 @@ public class PlayerEvents {
 					String format = value.nval();
 					if(format == null) {
 						throw new CRENullPointerException("The \"format\" key in " + new modify_event().getName() + " for the " + this.getName()
-								+ " event may not be null.", Target.UNKNOWN);
+								+ " event may not be null.", value.getTarget());
 					}
 					try{
 						// Throws UnknownFormatConversionException, MissingFormatException,
@@ -1568,10 +1547,10 @@ public class PlayerEvents {
 						// Check the format to give a better exception message.
 						if(format.replaceAll("%%", "").replaceAll("\\%\\%|\\%[12]\\$s", "").contains("%")) {
 							throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
-									+ " event only accepts %1$s and %2$s as format specifiers. Use a \"%%\" to display a single \"%\".", Target.UNKNOWN);
+									+ " event only accepts %1$s and %2$s as format specifiers. Use a \"%%\" to display a single \"%\".", value.getTarget());
 						} else {
 							throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
-									+ " event was set to an invalid value: " + format + ". The original exception message is: " + ex.getMessage(), Target.UNKNOWN);
+									+ " event was set to an invalid value: " + format + ". The original exception message is: " + ex.getMessage(), value.getTarget());
 						}
 					}
 				}
@@ -1672,9 +1651,9 @@ public class PlayerEvents {
                     if(value instanceof CArray){
                         List<MCPlayer> list = new ArrayList<MCPlayer>();
                         for(String index : ((CArray)value).stringKeySet()){
-                            Construct v = ((CArray)value).get(index, Target.UNKNOWN);
+                            Construct v = ((CArray)value).get(index, value.getTarget());
                             try{
-                                list.add(Static.GetPlayer(v, Target.UNKNOWN));
+                                list.add(Static.GetPlayer(v, value.getTarget()));
                             } catch(ConfigRuntimeException ex){
                                 //Ignored
                             }
@@ -1688,7 +1667,7 @@ public class PlayerEvents {
 					try{
 						e.setFormat(value.nval());
 					} catch(UnknownFormatConversionException|IllegalFormatConversionException ex){
-						throw new CREFormatException(ex.getMessage(), Target.UNKNOWN);
+						throw new CREFormatException(ex.getMessage(), value.getTarget());
 					}
 				}
                 return true;
@@ -2033,10 +2012,9 @@ public class PlayerEvents {
 			return "{state: <macro> Can be one of " + StringUtils.Join(MCFishingState.values(), ", ", ", or ")
 					+ " | player: <macro> The player who is fishing | world: <string match>}"
 					+ " Fires when a player casts or reels a fishing rod."
-					+ " {player | world | state | chance | xp | hook: the fishhook entity id"
+					+ " {player | world | state | xp | hook: the fishhook entity id"
 					+ " | caught: the id of the snared entity, can be a fish item}"
-					+ " {chance: the chance of catching a fish from pulling the bobber at random (pre 1.9 only)"
-					+ " | xp: the exp the player will get from catching a fish}"
+					+ " {xp: the exp the player will get from catching a fish}"
 					+ " {}";
 		}
 
@@ -2074,7 +2052,6 @@ public class PlayerEvents {
 					caught = new CString(event.getCaught().getUniqueId().toString(), t);
 				}
 				ret.put("caught", caught);
-				ret.put("chance", new CDouble(event.getHook().getBiteChance(), t));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCPlayerFishEvent");
@@ -2086,16 +2063,8 @@ public class PlayerEvents {
 				BindableEvent event) {
 			if (event instanceof MCPlayerFishEvent) {
 				MCPlayerFishEvent e = (MCPlayerFishEvent) event;
-				if (key.equals("chance")) {
-					double chance = Static.getDouble(value, Target.UNKNOWN);
-					if (chance > 1.0 || chance < 0.0) {
-						throw new CREFormatException("Chance must be between 0.0 and 1.0", Target.UNKNOWN);
-					}
-					e.getHook().setBiteChance(chance);
-					return true;
-				}
 				if (key.equals("xp")) {
-					e.setExpToDrop(Static.getInt32(value, Target.UNKNOWN));
+					e.setExpToDrop(Static.getInt32(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -2110,6 +2079,43 @@ public class PlayerEvents {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public void preExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerFishEvent){
+				MCPlayerFishEvent event = (MCPlayerFishEvent)activeEvent.getUnderlyingEvent();
+				// Static lookups of just spawned entities in certain fishing states don't work here, so inject them
+				switch(event.getState()){
+					case FISHING:
+						MCFishHook hook = event.getHook();
+						Static.InjectEntity(hook);
+						break;
+					case CAUGHT_ENTITY:
+					case CAUGHT_FISH:
+						MCEntity entity = event.getCaught();
+						Static.InjectEntity(entity);
+						break;
+				}
+			}
+		}
+
+		@Override
+		public void postExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerFishEvent){
+				MCPlayerFishEvent event = (MCPlayerFishEvent)activeEvent.getUnderlyingEvent();
+				switch(event.getState()){
+					case FISHING:
+						MCFishHook hook = event.getHook();
+						Static.UninjectEntity(hook);
+						break;
+					case CAUGHT_ENTITY:
+					case CAUGHT_FISH:
+						MCEntity entity = event.getCaught();
+						Static.UninjectEntity(entity);
+						break;
+				}
+			}
 		}
 	}
 
@@ -2238,7 +2244,7 @@ public class PlayerEvents {
 						e.getTabCompletions().clear();
 						if (((CArray) value).inAssociativeMode()) {
 							for (Construct k : ((CArray) value).keySet()) {
-								e.getTabCompletions().add(((CArray) value).get(k, Target.UNKNOWN).val());
+								e.getTabCompletions().add(((CArray) value).get(k, value.getTarget()).val());
 							}
 						} else {
 							for (Construct v : ((CArray) value).asList()) {
@@ -2317,7 +2323,7 @@ public class PlayerEvents {
 			if (event instanceof MCExpChangeEvent) {
 				MCExpChangeEvent e = (MCExpChangeEvent) event;
 				if ("amount".equals(key)) {
-					e.setAmount(Static.getInt32(value, Target.UNKNOWN));
+					e.setAmount(Static.getInt32(value, value.getTarget()));
 					return true;
 				}
 			}

@@ -1,19 +1,23 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.events.MCLightningStrikeEvent;
 import com.laytonsmith.abstraction.events.MCThunderChangeEvent;
 import com.laytonsmith.abstraction.events.MCWeatherChangeEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
+import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.exceptions.EventException;
@@ -91,6 +95,23 @@ public class WeatherEvents {
         @Override
         public Version since() {
             return CHVersion.V3_3_1;
+        }
+
+        @Override
+        public void preExecution(Environment env, BoundEvent.ActiveEvent activeEvent) {
+            if(activeEvent.getUnderlyingEvent() instanceof MCLightningStrikeEvent){
+                // Static lookups of the entity don't work here, so we need to inject them
+                MCEntity entity = ((MCLightningStrikeEvent)activeEvent.getUnderlyingEvent()).getLightning();
+                Static.InjectEntity(entity);
+            }
+        }
+
+        @Override
+        public void postExecution(Environment env, BoundEvent.ActiveEvent activeEvent) {
+            if(activeEvent.getUnderlyingEvent() instanceof MCLightningStrikeEvent){
+                MCEntity entity = ((MCLightningStrikeEvent)activeEvent.getUnderlyingEvent()).getLightning();
+                Static.UninjectEntity(entity);
+            }
         }
 
     }

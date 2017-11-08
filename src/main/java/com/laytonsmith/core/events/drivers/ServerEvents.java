@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.events.MCCommandTabCompleteEvent;
+import com.laytonsmith.abstraction.events.MCServerCommandEvent;
 import com.laytonsmith.abstraction.events.MCRedstoneChangedEvent;
 import com.laytonsmith.abstraction.events.MCServerPingEvent;
 import com.laytonsmith.annotations.api;
@@ -17,8 +18,11 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
+import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
@@ -34,11 +38,83 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- *
- *
- */
 public class ServerEvents {
+
+	@api
+	public static class server_command extends AbstractEvent {
+
+		public String getName() {
+			return "server_command";
+		}
+
+		public String docs() {
+			return "{prefix: <string match> The first part of the command, i.e. 'cmd' in '/cmd blah blah'}"
+					+ "This event is fired off when any command is run from the console or commandblock. This fires"
+					+ " before CommandHelper aliases, allowing you to insert control beforehand. Be careful with this"
+					+ " event, because it can override ALL server commands, potentially creating all sorts of havoc."
+					+ "{command: The entire command | prefix: Just the prefix of the command}"
+					+ "{command}"
+					+ "{}";
+		}
+
+		public Driver driver() {
+			return Driver.SERVER_COMMAND;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if(!(e instanceof MCServerCommandEvent)) {
+				return false;
+			}
+			MCServerCommandEvent event = (MCServerCommandEvent) e;
+			if(prefilter.containsKey("prefix")){
+				String prefix = event.getCommand().split(" ", 2)[0];
+				if(!prefix.equals(prefilter.get("prefix").val())) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(!(e instanceof MCServerCommandEvent)) {
+				throw new EventException("Cannot convert e to MCServerCommandEvent");
+			}
+			MCServerCommandEvent event = (MCServerCommandEvent) e;
+			Map<String, Construct> map = new HashMap<>();
+			map.put("command", new CString(event.getCommand(), Target.UNKNOWN));
+			String prefix = event.getCommand().split(" ", 2)[0];
+			map.put("prefix", new CString(prefix, Target.UNKNOWN));
+			return map;
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCServerCommandEvent) {
+				MCServerCommandEvent e = (MCServerCommandEvent) event;
+				if(key.equals("command")){
+					e.setCommand(value.val());
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public void preExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCServerCommandEvent) {
+				MCServerCommandEvent event = (MCServerCommandEvent) activeEvent.getUnderlyingEvent();
+				env.getEnv(CommandHelperEnvironment.class).SetCommandSender(event.getCommandSender());
+			}
+		}
+	}
 
 	@api
 	public static class server_ping extends AbstractEvent {
@@ -114,13 +190,13 @@ public class ServerEvents {
 						e.setMOTD(value.val());
 						return true;
 					case "maxplayers":
-						e.setMaxPlayers(Static.getInt32(value, Target.UNKNOWN));
+						e.setMaxPlayers(Static.getInt32(value, value.getTarget()));
 						return true;
 					case "list":
 						// Modifies the player list. The new list will be the intersection of the original
 						// and the given list. Names and UUID's outside this intersection will simply be ignored.
 						Set<MCPlayer> modifiedPlayers = new HashSet<>();
-						List<Construct> passedList = ArgumentValidation.getArray(value, Target.UNKNOWN).asList();
+						List<Construct> passedList = ArgumentValidation.getArray(value, value.getTarget()).asList();
 						for(MCPlayer player : e.getPlayers()) {
 							for(Construct construct : passedList) {
 								String playerStr = construct.val();
@@ -227,7 +303,7 @@ public class ServerEvents {
 						List<String> comp = new ArrayList<>();
 						if (((CArray) value).inAssociativeMode()) {
 							for (Construct k : ((CArray) value).keySet()) {
-								comp.add(((CArray) value).get(k, Target.UNKNOWN).val());
+								comp.add(((CArray) value).get(k, value.getTarget()).val());
 							}
 						} else {
 							for (Construct v : ((CArray) value).asList()) {

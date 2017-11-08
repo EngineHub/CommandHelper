@@ -983,14 +983,10 @@ public class Environment {
 
 			CArray sa = (CArray) args[1];
 
-			if (sa.containsKey("sound")) {
-				try {
-					sound = MCSound.valueOf(sa.get("sound", t).val().toUpperCase());
-				} catch (IllegalArgumentException iae) {
-					throw new CREFormatException("Sound name '" + sa.get("sound", t).val() + "' is invalid.", t);
-				}
-			} else {
-				throw new CREFormatException("Sound field was missing.", t);
+			try {
+				sound = MCSound.valueOf(sa.get("sound", t).val().toUpperCase());
+			} catch (IllegalArgumentException iae) {
+				throw new CREFormatException("Sound name '" + sa.get("sound", t).val() + "' is invalid.", t);
 			}
 
 			if (sa.containsKey("category")) {
@@ -1052,8 +1048,9 @@ public class Environment {
 			return "void {locationArray, soundArray[, players]} Plays a sound at the"
 					+ " given location. SoundArray is in an associative array with"
 					+ " keys 'sound', 'category', 'volume', 'pitch', where all are optional except sound."
-					+ " Volume and pitch default to 1. Players can be a single"
-					+ " player or an array of players to play the sound to, if"
+					+ " Volume, if greater than 1.0 (default), is the distance in chunks players can hear the sound."
+					+ " Pitch has a range of 0.5 - 2.0, where where 1.0 is the middle pitch and default. Players can"
+					+ " be a single player or an array of players to play the sound to, if"
 					+ " not given, all players can potentially hear it. ---- Possible categories: "
 					+ StringUtils.Join(MCSoundCategory.values(), ", ", ", or ", " or ") + "."
 					+ " ---- Possible sounds: "
@@ -1102,10 +1099,6 @@ public class Environment {
 			}
 
 			CArray sa = (CArray) args[1];
-
-			if (!sa.containsKey("sound")) {
-				throw new CREFormatException("Sound field was missing.", t);
-			}
 
 			path = sa.get("sound", t).val();
 
@@ -1167,8 +1160,9 @@ public class Environment {
 			return "void {locationArray, soundArray[, players]} Plays a sound at the"
 					+ " given location. SoundArray is in an associative array with"
 					+ " keys 'sound', 'category', 'volume', 'pitch', where all are optional except sound."
-					+ " Volume and pitch default to 1. Players can be a single"
-					+ " player or an array of players to play the sound to, if"
+					+ " Volume, if greater than 1.0 (default), is the distance in chunks players can hear the sound."
+					+ " Pitch has a range of 0.5 - 2.0, where where 1.0 is the middle pitch and default. Players can"
+					+ " be a single player or an array of players to play the sound to, if"
 					+ " not given, all players can potentially hear it. Sound is"
 					+ " a sound path, separated by periods. ---- Possible categories: "
 					+ StringUtils.Join(MCSoundCategory.values(), ", ", ", or ", " or ") + ".";

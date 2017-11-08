@@ -463,8 +463,7 @@ public class Meta {
 		    + " to CommandHelper only. ---- Returns true if the command was run, or false otherwise. Note however that if an alias"
 		    + " ends up throwing an exception to the top level, it will not bubble up to this script, it will be caught and dealt"
 		    + " with already; if this happens, this function will still return true, because essentially the return value"
-		    + " simply indicates if the command matches an alias. Also, it is worth noting that this will trigger a player's"
-		    + " personal alias possibly.";
+		    + " simply indicates if the command matches an alias.";
 	}
 
 	@Override
@@ -555,26 +554,27 @@ public class Meta {
 	    return null;
 	}
 
-	@Override
-	public Construct execs(Target t, Environment environment, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
-	    MCPlayer p = Static.GetPlayer(parent.seval(nodes[0], environment).val(), t);
-	    MCCommandSender originalPlayer = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-	    int offset = 0;
-	    String originalLabel = environment.getEnv(GlobalEnv.class).GetLabel();
-	    if (nodes.length == 3) {
-		offset++;
-		String label = environment.getEnv(GlobalEnv.class).GetScript().seval(nodes[1], environment).val();
-		environment.getEnv(GlobalEnv.class).SetLabel(label);
-		environment.getEnv(GlobalEnv.class).GetScript().setLabel(label);
-	    }
-	    environment.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
-	    ParseTree tree = nodes[1 + offset];
-	    environment.getEnv(GlobalEnv.class).GetScript().eval(tree, environment);
-	    environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(originalPlayer);
-	    environment.getEnv(GlobalEnv.class).SetLabel(originalLabel);
-	    environment.getEnv(GlobalEnv.class).GetScript().setLabel(originalLabel);
-	    return CVoid.VOID;
-	}
+		@Override
+		public Construct execs(Target t, Environment environment, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
+			MCPlayer p = Static.GetPlayer(parent.seval(nodes[0], environment).val(), t);
+			MCCommandSender originalPlayer = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			int offset = 0;
+			String originalLabel = environment.getEnv(GlobalEnv.class).GetLabel();
+			if (nodes.length == 3) {
+				offset++;
+				String label = parent.seval(nodes[1], environment).val();
+				environment.getEnv(GlobalEnv.class).SetLabel(label);
+			} else {
+				environment.getEnv(GlobalEnv.class).SetLabel(parent.getLabel());
+			}
+			environment.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
+			parent.enforceLabelPermissions();
+			ParseTree tree = nodes[1 + offset];
+			parent.eval(tree, environment);
+			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(originalPlayer);
+			environment.getEnv(GlobalEnv.class).SetLabel(originalLabel);
+			return CVoid.VOID;
+		}
 
 	@Override
 	public boolean useSpecialExec() {

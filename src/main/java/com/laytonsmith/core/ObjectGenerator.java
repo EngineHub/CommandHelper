@@ -20,6 +20,7 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCMapMeta;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCPattern;
@@ -93,30 +94,7 @@ public class ObjectGenerator {
      * @return
      */
     public CArray location(MCLocation l) {
-        CArray ca = CArray.GetAssociativeArray(Target.UNKNOWN);
-        Construct x = new CDouble(l.getX(), Target.UNKNOWN);
-        Construct y = new CDouble(l.getY(), Target.UNKNOWN);
-        Construct z = new CDouble(l.getZ(), Target.UNKNOWN);
-        Construct world = new CString(l.getWorld().getName(), Target.UNKNOWN);
-		float yawRaw = l.getYaw();
-		if (yawRaw < 0) {
-			yawRaw = (((yawRaw) % 360) + 360);
-		}
-        Construct yaw = new CDouble(yawRaw, Target.UNKNOWN);
-        Construct pitch = new CDouble(l.getPitch(), Target.UNKNOWN);
-        ca.set("0", x, Target.UNKNOWN);
-        ca.set("1", y, Target.UNKNOWN);
-        ca.set("2", z, Target.UNKNOWN);
-        ca.set("3", world, Target.UNKNOWN);
-        ca.set("4", yaw, Target.UNKNOWN);
-        ca.set("5", pitch, Target.UNKNOWN);
-        ca.set("x", x, Target.UNKNOWN);
-        ca.set("y", y, Target.UNKNOWN);
-        ca.set("z", z, Target.UNKNOWN);
-        ca.set("world", world, Target.UNKNOWN);
-        ca.set("yaw", yaw, Target.UNKNOWN);
-        ca.set("pitch", pitch, Target.UNKNOWN);
-        return ca;
+        return location(l, true);
     }
 
 	/**
@@ -141,7 +119,12 @@ public class ObjectGenerator {
 		ca.set("z", z, Target.UNKNOWN);
 		ca.set("world", world, Target.UNKNOWN);
 		if (includeYawAndPitch) {
-			Construct yaw = new CDouble(l.getYaw(), Target.UNKNOWN);
+			// guarantee yaw in the 0 - 359.9~ range
+			float yawRaw = l.getYaw() % 360.0f;
+			if(yawRaw < 0.0f) {
+				yawRaw += 360.0f;
+			}
+			Construct yaw = new CDouble(yawRaw, Target.UNKNOWN);
 			Construct pitch = new CDouble(l.getPitch(), Target.UNKNOWN);
 			ca.set("4", yaw, Target.UNKNOWN);
 			ca.set("5", pitch, Target.UNKNOWN);
@@ -226,167 +209,136 @@ public class ObjectGenerator {
 		if (world == null) {
 			throw new CREInvalidWorldException("The specified world doesn't exist, or no world was provided", t);
 		}
-        return StaticLayer.GetLocation(world, x, y, z, yaw, pitch);
-    }
+		return StaticLayer.GetLocation(world, x, y, z, yaw, pitch);
+	}
 
-    /**
-     * An Item Object consists of data about a particular item stack.
-     * Information included is: recipeType, data, qty, and an array of enchantment
- objects (labeled enchants): erecipeType (enchantment recipeType) and elevel
- (enchantment level). For backwards compatibility, this information is
- also listed in numerical slots as well as associative slots. If the
- MCItemStack is null, or the underlying item is nonexistant (or air) CNull
- is returned.
-     *
-     * @param is
-     * @return
-     */
-    public Construct item(MCItemStack is, Target t) {
-        if (is == null || is.getAmount() == 0 || is.getTypeId() == 0) {
-            return CNull.NULL;
-        }
-        int type = is.getTypeId();
+	/**
+	 * An Item Object consists of data about a particular item stack.
+	 * Information included is: recipeType, data, qty, and an array of enchantment
+	 * objects (labeled enchants): erecipeType (enchantment recipeType) and elevel
+	 * (enchantment level). For backwards compatibility, this information is
+	 * also listed in numerical slots as well as associative slots. If the
+	 * MCItemStack is null, or the underlying item is nonexistant (or air) CNull
+	 * is returned.
+	 *
+	 * @param is
+	 * @return An item array or CNull
+	 */
+	public Construct item(MCItemStack is, Target t) {
+		if (is == null || is.getAmount() == 0 || is.getTypeId() == 0) {
+			return CNull.NULL;
+		}
 
-        int data;
-        if(type < 256){
-            //Use the data
-            data = (is.getData() != null ? is.getData().getData() : 0);
-        } else {
-            //Use the durability
-            data = is.getDurability();
-        }
+		int type = is.getTypeId();
+		int data = 0;
+		if(type < 256){
+			//Use the data
+			MCMaterialData md = is.getData();
+			if(md != null) {
+				data = md.getData();
+			}
+		} else {
+			//Use the durability
+			data = is.getDurability();
+		}
 
-        CArray enchants = new CArray(t);
-        for (Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {
-            CArray enchObj = CArray.GetAssociativeArray(t);
-            enchObj.set("etype", new CString(entry.getKey().getName(), t), t);
-            enchObj.set("elevel", new CInt(entry.getValue(), t), t);
-            enchants.push(enchObj, t);
-        }
-		Construct meta = itemMeta(is, t);
-        CArray ret = CArray.GetAssociativeArray(t);
+		CArray ret = CArray.GetAssociativeArray(t);
 		ret.set("name", new CString(is.getType().getName(), t), t);
 		ret.set("type", new CInt(type, t), t);
 		ret.set("data", new CInt(data, t), t);
 		ret.set("qty", new CInt(is.getAmount(), t), t);
-		ret.set("enchants", enchants, t);
-		ret.set("meta", meta, t);
-        return ret;
-    }
+		ret.set("enchants", enchants(is.getEnchantments(), t), t);
+		ret.set("meta", itemMeta(is, t), t);
+		return ret;
+	}
 
-    /**
-     * Gets an MCItemStack from a given item "object". Supports both the old and
-     * new formats currently
-     *
-     * @param i
-     * @return
-     */
-    public MCItemStack item(Construct i, Target t) {
-        if (i instanceof CNull) {
-            return EmptyItem();
-        }
-        if (!(i instanceof CArray)) {
-            throw new CREFormatException("Expected an array!", t);
-        }
-        CArray item = (CArray) i;
-		MCMaterial mat = null;
-		int data = 0, qty = 1;
-        Map<MCEnchantment, Integer> enchants = new HashMap<MCEnchantment, Integer>();
-		MCItemMeta meta = null;
+	/**
+	 * Gets an MCItemStack from a given item "object". Supports both the old and
+	 * new formats currently
+	 *
+	 * @param i
+	 * @param t
+	 * @return An abstract item stack
+	 */
+	public MCItemStack item(Construct i, Target t) {
+		if (i instanceof CNull) {
+			return EmptyItem();
+		}
+		if (!(i instanceof CArray)) {
+			throw new CREFormatException("Expected an array!", t);
+		}
+		CArray item = (CArray) i;
+		MCMaterial mat;
+		int data = 0;
+		int qty = 1;
+
+		if (item.containsKey("qty")) {
+			qty = Static.getInt32(item.get("qty", t), t);
+			if(qty <= 0){
+				return EmptyItem();
+			}
+		}
 
 		if (item.containsKey("name")) {
 			mat = StaticLayer.GetConvertor().GetMaterial(item.get("name", t).val());
 		} else if (item.containsKey("type")) {
-			if (item.get("type", t).val().contains(":")) {
-				//We're using the combo addressing method
-				String[] split = item.get("type", t).val().split(":");
-				item = item.deepClone(t);
-				item.set("type", split[0]);
-				item.set("data", split[1]);
+			Construct type = item.get("type", t);
+			if(type instanceof CString) {
+				int seperatorIndex = type.val().indexOf(':');
+				if (seperatorIndex != -1) {
+					try {
+						data = Integer.parseInt(type.val().substring(seperatorIndex + 1));
+					} catch (NumberFormatException e) {
+						throw new CRERangeException("The item data \"" + type.val().substring(seperatorIndex + 1)
+								+ "\" is not a valid integer.", t);
+					}
+					type = new CString(type.val().substring(0, seperatorIndex), t);
+				}
 			}
-			mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(item.get("type", t), t));
+			mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(type, t));
 		} else {
 			throw new CREFormatException("Could not find item type!", t);
 		}
 		if (mat == null) {
 			throw new CRENotFoundException("A material type could not be found based on the given id.", t);
 		}
-		if (item.containsKey("qty")) {
-			qty = Static.getInt32(item.get("qty", t), t);
+		if (mat.getType() == 0) {
+			return EmptyItem();
 		}
+
 		if (item.containsKey("data")) {
 			data = Static.getInt32(item.get("data", t), t);
 		}
 
-        if (item.containsKey("enchants")) {
-            CArray enchantArray;
-            try {
-				enchantArray = (CArray) item.get("enchants", t);
-                if (enchantArray == null) {
-                    throw new NullPointerException();
-                }
-            } catch (Exception e) {
-                throw new CREFormatException("Enchants value must be an array of enchantment arrays.", t, e);
-            }
-
-            for (String index : enchantArray.stringKeySet()) {
-                try {
-                    CArray enchantment = (CArray) enchantArray.get(index, t);
-                    String setype = null;
-                    String selevel = null;
-                    if (enchantment.containsKey("etype")) {
-                        setype = enchantment.get("etype", t).val();
-                    }
-
-                    if (enchantment.containsKey("elevel")) {
-                        selevel = enchantment.get("elevel", t).val();
-                    }
-                    if (setype == null || selevel == null) {
-                        throw new CREFormatException("An enchantment array must have an etype and elevel.", t);
-                    }
-                    int elevel = 0;
-                    try {
-                        elevel = Integer.parseInt(selevel);
-                    } catch (NumberFormatException e) {
-                        throw new CREFormatException("Expecting enchantment array elevel to be an integer but got \"" + selevel + "\" instead.", t);
-                    }
-                    MCEnchantment etype = StaticLayer.GetEnchantmentByName(setype);
-					if(etype == null){
-						if(setype.equals("SWEEPING")) {
-							// data from 1.11.2, changed in 1.12
-							etype = StaticLayer.GetEnchantmentByName("SWEEPING_EDGE");
-						}
-						if(etype == null){
-							throw new CREFormatException("Invalid enchantment array etype: \"" + setype + "\".", t);
-						}
-					}
-                    enchants.put(etype, elevel);
-                } catch (ClassCastException e) {
-                    throw new CREFormatException("Enchants value must be an array of enchantment arrays.", t, e);
-                }
-            }
-        }
-		if (item.containsKey("meta")) {
+		MCItemMeta meta = null;
+		if(item.containsKey("meta")) {
 			meta = itemMeta(item.get("meta", t), mat, t);
 		}
+
+		// Create itemstack
 		MCItemStack ret = StaticLayer.GetItemStack(mat, data, qty);
 		if (meta != null) {
 			ret.setItemMeta(meta);
 		}
-		for (Map.Entry<MCEnchantment, Integer> entry : enchants.entrySet()) {
-			ret.addUnsafeEnchantment(entry.getKey(), entry.getValue());
+
+		// Fallback to enchants in item array if not in meta
+		if (item.containsKey("enchants")) {
+			try {
+				Map<MCEnchantment, Integer> enchants = enchants((CArray) item.get("enchants", t), t);
+				for (Map.Entry<MCEnchantment, Integer> entry : enchants.entrySet()) {
+					ret.addUnsafeEnchantment(entry.getKey(), entry.getValue());
+				}
+			} catch(ClassCastException ex) {
+				throw new CREFormatException("Enchants must be an array of enchantment arrays.", t);
+			}
 		}
 
-        //Giving them air crashes the client, so just clear the inventory slot
-        if (ret.getTypeId() == 0) {
-            ret = EmptyItem();
-        }
-        return ret;
-    }
+		return ret;
+	}
 
-    private static MCItemStack EmptyItem() {
-        return StaticLayer.GetItemStack(0, 1);
-    }
+	private static MCItemStack EmptyItem() {
+		return StaticLayer.GetItemStack(0, 1);
+	}
 
 	public Construct itemMeta(MCItemStack is, Target t) {
 		Construct ret, display, lore, color, title, author, pages, owner, stored;
@@ -583,11 +535,12 @@ public class ObjectGenerator {
 				}
 				if (ma.containsKey("lore")) {
 					Construct li = ma.get("lore", t);
-					if(li instanceof CString){
-						li = new CArray(t, li);
-					}
 					if (li instanceof CNull) {
 						//do nothing
+					} else if (li instanceof CString){
+						List<String> ll = new ArrayList<>();
+						ll.add(li.val());
+						meta.setLore(ll);
 					} else if (li instanceof CArray) {
 						CArray la = (CArray) li;
 						List<String> ll = new ArrayList<>();
@@ -842,10 +795,10 @@ public class ObjectGenerator {
 		return meta;
 	}
 
-    public CArray exception(ConfigRuntimeException e, Environment env, Target t) {
+	public CArray exception(ConfigRuntimeException e, Environment env, Target t) {
 		AbstractCREException ex = AbstractCREException.getAbstractCREException(e);
 		return ex.getExceptionObject();
-    }
+	}
 	
 	public AbstractCREException exception(CArray exception, Target t) throws ClassNotFoundException{
 		return AbstractCREException.getFromCArray(exception, t);

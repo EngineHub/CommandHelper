@@ -16,7 +16,6 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
-import com.laytonsmith.abstraction.enums.MCEntityType.MCVanillaEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCRegainReason;
@@ -57,8 +56,10 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
+import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
@@ -206,7 +207,7 @@ public class EntityEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCItemSpawnEvent) {
 				if ("item".equals(key)) {
-					((MCItemSpawnEvent) event).getEntity().setItemStack(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					((MCItemSpawnEvent) event).getEntity().setItemStack(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -216,6 +217,23 @@ public class EntityEvents {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public void preExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCItemSpawnEvent){
+				// Static lookups of the entity don't work here, so we need to inject them
+				MCEntity entity = ((MCItemSpawnEvent)activeEvent.getUnderlyingEvent()).getEntity();
+				Static.InjectEntity(entity);
+			}
+		}
+
+		@Override
+		public void postExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCItemSpawnEvent){
+				MCEntity entity = ((MCItemSpawnEvent)activeEvent.getUnderlyingEvent()).getEntity();
+				Static.UninjectEntity(entity);
+			}
 		}
 	}
 
@@ -246,19 +264,13 @@ public class EntityEvents {
 				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
 				if (prefilter.containsKey("id")) {
 					if (e.getEntity() == null) {
-						if (prefilter.get("id") instanceof CNull || prefilter.get("id").val().equals("null")) {
-							return true;
-						}
-						return false;
+						return prefilter.get("id") instanceof CNull;
 					}
 					Prefilters.match(prefilter, "id", e.getEntity().getUniqueId().toString(), PrefilterType.MACRO);
 				}
 				if (prefilter.containsKey("type")) {
 					if (e.getEntity() == null) {
-						if (prefilter.get("type") instanceof CNull || prefilter.get("type").val().equals("null")) {
-							return true;
-						}
-						return false;
+						return prefilter.get("type") instanceof CNull;
 					}
 					Prefilters.match(prefilter, "type", e.getEntity().getType().name(), PrefilterType.MACRO);
 				}
@@ -309,7 +321,7 @@ public class EntityEvents {
 			if (event instanceof MCEntityExplodeEvent) {
 				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
 				if (key.equals("yield")) {
-					e.setYield(Static.getDouble32(value, Target.UNKNOWN));
+					e.setYield(Static.getDouble32(value, value.getTarget()));
 					return true;
 				}
 				if (key.equals("blocks")) {
@@ -318,7 +330,7 @@ public class EntityEvents {
 						List<MCBlock> blocks = new ArrayList<MCBlock>();
 						for (String b : ba.stringKeySet()) {
 							MCWorld w = e.getLocation().getWorld();
-							MCLocation loc = ObjectGenerator.GetGenerator().location(ba.get(b, Target.UNKNOWN), w, Target.UNKNOWN);
+							MCLocation loc = ObjectGenerator.GetGenerator().location(ba.get(b, value.getTarget()), w, value.getTarget());
 							blocks.add(loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
 						}
 						e.setBlocks(blocks);
@@ -417,7 +429,7 @@ public class EntityEvents {
 					if (value instanceof CNull) {
 						le = null;
 					} else {
-						le = Static.getLivingEntity(value, Target.UNKNOWN);
+						le = Static.getLivingEntity(value, value.getTarget());
 					}
 					e.getEntity().setShooter(le);
 				}
@@ -536,11 +548,28 @@ public class EntityEvents {
 			if (event instanceof MCProjectileLaunchEvent) {
 				MCProjectileLaunchEvent projectileLaunchEvent = (MCProjectileLaunchEvent) event;
 				if (key.equals("velocity")) {
-					projectileLaunchEvent.getEntity().setVelocity(ObjectGenerator.GetGenerator().vector(value, Target.UNKNOWN));
+					projectileLaunchEvent.getEntity().setVelocity(ObjectGenerator.GetGenerator().vector(value, value.getTarget()));
 					return true;
 				}
 			}
 			return false;
+		}
+
+		@Override
+		public void preExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCProjectileLaunchEvent){
+				// Static lookups of the entity don't work here, so we need to inject them
+				MCEntity entity = ((MCProjectileLaunchEvent)activeEvent.getUnderlyingEvent()).getEntity();
+				Static.InjectEntity(entity);
+			}
+		}
+
+		@Override
+		public void postExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCProjectileLaunchEvent){
+				MCEntity entity = ((MCProjectileLaunchEvent)activeEvent.getUnderlyingEvent()).getEntity();
+				Static.UninjectEntity(entity);
+			}
 		}
 	}
 
@@ -598,11 +627,10 @@ public class EntityEvents {
 				map.put("drops", drops);
 				map.put("xp", new CInt(e.getDroppedExp(), t));
 				CArray cod = CArray.GetAssociativeArray(t);
-				Map<String, Construct> ldc =
-						parseEntityDamageEvent(dead.getLastDamageCause(),
-								new HashMap<String, Construct>());
-				for (String key : ldc.keySet()) {
-					cod.set(key, ldc.get(key), t);
+				Map<String, Construct> ldc = parseEntityDamageEvent(dead.getLastDamageCause(),
+						new HashMap<String, Construct>());
+				for (Map.Entry<String, Construct> entry : ldc.entrySet()) {
+					cod.set(entry.getKey(), entry.getValue(), t);
 				}
 				map.put("cause", cod);
 				map.put("location", ObjectGenerator.GetGenerator().location(dead.getLocation()));
@@ -622,12 +650,12 @@ public class EntityEvents {
 			if (event instanceof MCEntityDeathEvent) {
 				MCEntityDeathEvent e = (MCEntityDeathEvent) event;
 				if (key.equals("xp")) {
-					e.setDroppedExp(Static.getInt32(value, Target.UNKNOWN));
+					e.setDroppedExp(Static.getInt32(value, value.getTarget()));
 					return true;
 				}
 				if(key.equals("drops")){
 					if(value instanceof CNull){
-						value = new CArray(Target.UNKNOWN);
+						value = new CArray(value.getTarget());
 					}
 					if(!(value instanceof CArray)){
 						throw new CRECastException("drops must be an array, or null", value.getTarget());
@@ -635,7 +663,7 @@ public class EntityEvents {
 					e.clearDrops();
 					CArray drops = (CArray) value;
 					for(String dropID : drops.stringKeySet()){
-						e.addDrop(ObjectGenerator.GetGenerator().item(drops.get(dropID, Target.UNKNOWN), Target.UNKNOWN));
+						e.addDrop(ObjectGenerator.GetGenerator().item(drops.get(dropID, value.getTarget()), value.getTarget()));
 					}
 					return true;
 				}
@@ -717,7 +745,7 @@ public class EntityEvents {
 				try {
 					type = MCMobs.valueOf(value.val());
 				} catch (IllegalArgumentException iae) {
-					throw new CREFormatException(value.val() + " is not a valid mob type.", Target.UNKNOWN);
+					throw new CREFormatException(value.val() + " is not a valid mob type.", value.getTarget());
 				}
 				e.setType(type);
 			}
@@ -727,6 +755,23 @@ public class EntityEvents {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public void preExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCCreatureSpawnEvent){
+				// Static lookups of the entity don't work here, so we need to inject them
+				MCEntity entity = ((MCCreatureSpawnEvent)activeEvent.getUnderlyingEvent()).getEntity();
+				Static.InjectEntity(entity);
+			}
+		}
+
+		@Override
+		public void postExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCCreatureSpawnEvent){
+				MCEntity entity = ((MCCreatureSpawnEvent)activeEvent.getUnderlyingEvent()).getEntity();
+				Static.UninjectEntity(entity);
+			}
 		}
 
 	}
@@ -1069,7 +1114,7 @@ public class EntityEvents {
                 MCPlayerDropItemEvent e = (MCPlayerDropItemEvent)event;
 
                 if (key.equalsIgnoreCase("item")) {
-                    MCItemStack stack = ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN);
+                    MCItemStack stack = ObjectGenerator.GetGenerator().item(value, value.getTarget());
 
                     e.setItemStack(stack);
 
@@ -1147,7 +1192,7 @@ public class EntityEvents {
 				MCPlayerPickupItemEvent e = (MCPlayerPickupItemEvent)event;
 
 				if (key.equalsIgnoreCase("item")) {
-					MCItemStack stack = ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN);
+					MCItemStack stack = ObjectGenerator.GetGenerator().item(value, value.getTarget());
 
 					e.setItemStack(stack);
 
@@ -1340,7 +1385,7 @@ public class EntityEvents {
         				ete.setTarget(null);
         				return true;
         			} else if (value instanceof CString) {
-        				MCPlayer p = Static.GetPlayer(value.val(), Target.UNKNOWN);
+        				MCPlayer p = Static.GetPlayer(value.val(), value.getTarget());
 
         				if (p.isOnline()) {
         					ete.setTarget((MCEntity)p);
@@ -1881,7 +1926,7 @@ public class EntityEvents {
 			if (event instanceof MCEntityRegainHealthEvent) {
 				MCEntityRegainHealthEvent e = (MCEntityRegainHealthEvent) event;
 				if (key.equalsIgnoreCase("amount")) {
-					e.setAmount(Static.getDouble32(value, Target.UNKNOWN));
+					e.setAmount(Static.getDouble32(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -1967,20 +2012,20 @@ public class EntityEvents {
 
 				if (key.equalsIgnoreCase("to")) {
 					e.useTravelAgent(true);
-					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, Target.UNKNOWN);
+					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, value.getTarget());
 					e.setTo(loc);
 					return true;
 				}
 
 				if (key.equalsIgnoreCase("creationradius")) {
 					e.useTravelAgent(true);
-					e.getPortalTravelAgent().setCreationRadius(Static.getInt32(value, Target.UNKNOWN));
+					e.getPortalTravelAgent().setCreationRadius(Static.getInt32(value, value.getTarget()));
 					return true;
 				}
 
 				if (key.equalsIgnoreCase("searchradius")) {
 					e.useTravelAgent(true);
-					e.getPortalTravelAgent().setSearchRadius(Static.getInt32(value, Target.UNKNOWN));
+					e.getPortalTravelAgent().setSearchRadius(Static.getInt32(value, value.getTarget()));
 					return true;
 				}
 			}

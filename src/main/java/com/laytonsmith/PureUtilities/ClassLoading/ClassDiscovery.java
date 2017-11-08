@@ -62,11 +62,11 @@ public class ClassDiscovery {
      * @return
      */
     public static synchronized ClassDiscovery getDefaultInstance() {
-	if (defaultInstance == null) {
-	    defaultInstance = new ClassDiscovery();
-	    //defaultInstance.setDebugMode(true);
-	}
-	return defaultInstance;
+        if (defaultInstance == null) {
+            defaultInstance = new ClassDiscovery();
+            //defaultInstance.setDebugMode(true);
+        }
+        return defaultInstance;
     }
 
     /**
@@ -76,7 +76,7 @@ public class ClassDiscovery {
      * @param cd
      */
     public static void setDefaultInstance(ClassDiscovery cd) {
-	defaultInstance = cd;
+        defaultInstance = cd;
     }
 
     /**
@@ -85,7 +85,7 @@ public class ClassDiscovery {
      * which case, you can create a new one.
      */
     public ClassDiscovery() {
-	//
+        //
     }
 
     /**
@@ -159,7 +159,7 @@ public class ClassDiscovery {
      * @param on
      */
     public void setDebugMode(boolean on) {
-	debug = on;
+        debug = on;
     }
 
     /**
@@ -169,10 +169,10 @@ public class ClassDiscovery {
      * @param url
      */
     public void removePreCache(URL url) {
-	if (url == null) {
-	    throw new NullPointerException("url cannot be null");
-	}
-	preCaches.remove(url);
+        if (url == null) {
+            throw new NullPointerException("url cannot be null");
+        }
+        preCaches.remove(url);
     }
 
     /**
@@ -182,13 +182,13 @@ public class ClassDiscovery {
      * @param cache
      */
     public void addPreCache(URL url, ClassDiscoveryURLCache cache) {
-	if (url == null) {
-	    throw new NullPointerException("url cannot be null");
-	}
-	if (debug) {
-	    StreamUtils.GetSystemOut().println("Adding precache for " + url);
-	}
-	preCaches.put(url, cache);
+        if (url == null) {
+            throw new NullPointerException("url cannot be null");
+        }
+        if (debug) {
+            StreamUtils.GetSystemOut().println("Adding precache for " + url);
+        }
+        preCaches.put(url, cache);
     }
 
     /**
@@ -197,7 +197,7 @@ public class ClassDiscovery {
      * @param cache
      */
     public void setClassDiscoveryCache(ClassDiscoveryCache cache) {
-	this.classDiscoveryCache = cache;
+        this.classDiscoveryCache = cache;
     }
 
     /**
@@ -206,20 +206,20 @@ public class ClassDiscovery {
      * @param progressIterator
      */
     public void setProgressIterator(ProgressIterator progressIterator) {
-	this.progressIterator = progressIterator;
+        this.progressIterator = progressIterator;
     }
 
     /**
      * Looks through all the URLs and pulls out all known classes, and caches them in the classCache object.
      */
     private synchronized void doDiscovery() {
-	if (!dirtyURLs.isEmpty()) {
-	    Iterator<URL> it = dirtyURLs.iterator();
-	    while (it.hasNext()) {
-		discover(it.next());
-		it.remove();
-	    }
-	}
+        if (!dirtyURLs.isEmpty()) {
+            Iterator<URL> it = dirtyURLs.iterator();
+            while (it.hasNext()) {
+                discover(it.next());
+                it.remove();
+            }
+        }
     }
 
     /**
@@ -227,51 +227,51 @@ public class ClassDiscovery {
      * methods should call doDiscovery, which handles looking through the dirtyURLs.
      */
     private synchronized void discover(URL rootLocation) {
-	long start = System.currentTimeMillis();
-	if (debug) {
-	    StreamUtils.GetSystemOut().println("Beginning discovery of " + rootLocation);
-	}
-	try {
-	    //If the ClassDiscoveryCache is set, just use this.
-	    if (classDiscoveryCache != null) {
-		ClassDiscoveryURLCache cduc = classDiscoveryCache.getURLCache(rootLocation);
-		preCaches.put(rootLocation, cduc);
-	    }
+        long start = System.currentTimeMillis();
+        if (debug) {
+            StreamUtils.GetSystemOut().println("Beginning discovery of " + rootLocation);
+        }
+        try {
+            //If the ClassDiscoveryCache is set, just use this.
+            if (classDiscoveryCache != null) {
+                ClassDiscoveryURLCache cduc = classDiscoveryCache.getURLCache(rootLocation);
+                preCaches.put(rootLocation, cduc);
+            }
 
-	    String url;
-	    try {
-		url = URLDecoder.decode(rootLocation.toString(), "UTF8");
-	    } catch (UnsupportedEncodingException ex) {
-		throw new RuntimeException(ex);
-	    }
+            String url;
+            try {
+                url = URLDecoder.decode(rootLocation.toString(), "UTF8");
+            } catch (UnsupportedEncodingException ex) {
+                url = URLDecoder.decode(rootLocation.toString());
+            }
 
-	    if (url == null) {
-		url = GetClassContainer(ClassDiscovery.class).toString();
-	    }
-	    final File rootLocationFile;
-	    if (!classCache.containsKey(rootLocation)) {
-		classCache.put(rootLocation, Collections.synchronizedSet(new HashSet<ClassMirror<?>>()));
-	    } else {
-		classCache.get(rootLocation).clear();
-	    }
-	    final Set<ClassMirror<?>> mirrors = classCache.get(rootLocation);
-	    if (preCaches.containsKey(rootLocation)) {
-		if (debug) {
-		    StreamUtils.GetSystemOut().println("Precache already contains this URL, so using it");
-		}
-		//No need, already got a cache for this url
-		mirrors.addAll(preCaches.get(rootLocation).getClasses());
-		return;
-	    }
-	    if (debug) {
-		StreamUtils.GetSystemOut().println("Precache does not contain data for this URL, so scanning now.");
-	    }
-	    url = url.replaceFirst("^jar:", "");
-	    if (url.endsWith("!/")) {
-		url = StringUtils.replaceLast(url, "!/", "");
-	    }
-	    if (url.startsWith("file:") && !url.endsWith(".jar")) {
-		final AtomicInteger id = new AtomicInteger(0);
+            if (url == null) {
+                url = GetClassContainer(ClassDiscovery.class).toString();
+            }
+            final File rootLocationFile;
+            if (!classCache.containsKey(rootLocation)) {
+                classCache.put(rootLocation, Collections.synchronizedSet(new HashSet<ClassMirror<?>>()));
+            } else {
+                classCache.get(rootLocation).clear();
+            }
+            final Set<ClassMirror<?>> mirrors = classCache.get(rootLocation);
+            if (preCaches.containsKey(rootLocation)) {
+                if (debug) {
+                    StreamUtils.GetSystemOut().println("Precache already contains this URL, so using it");
+                }
+                //No need, already got a cache for this url
+                mirrors.addAll(preCaches.get(rootLocation).getClasses());
+                return;
+            }
+            if (debug) {
+                StreamUtils.GetSystemOut().println("Precache does not contain data for this URL, so scanning now.");
+            }
+            url = url.replaceFirst("^jar:", "");
+            if (url.endsWith("!/")) {
+                url = StringUtils.replaceLast(url, "!/", "");
+            }
+            if (url.startsWith("file:") && !url.endsWith(".jar")) {
+                final AtomicInteger id = new AtomicInteger(0);
 //				ExecutorService service = Executors.newFixedThreadPool(10, new ThreadFactory() {
 //					@Override
 //					public Thread newThread(Runnable r) {
@@ -279,38 +279,38 @@ public class ClassDiscovery {
 //					}
 //				});
 
-		//Remove file: from the front
-		String root = url.substring(5);
-		rootLocationFile = new File(root);
-		List<File> fileList = new ArrayList<>();
-		descend(new File(root), fileList);
+                //Remove file: from the front
+                String root = url.substring(5);
+                rootLocationFile = new File(root);
+                List<File> fileList = new ArrayList<>();
+                descend(new File(root), fileList);
 
-		//Now, we have all the class files in the package. But, it's the absolute path
-		//to all of them. We have to first remove the "front" part
-		for (File f : fileList) {
-		    String file = f.toString();
-		    if (!file.matches(".*\\$(?:\\d)*\\.class") && file.endsWith(".class")) {
-			InputStream stream = null;
-			try {
-			    stream = FileUtil.readAsStream(new File(rootLocationFile,
-				    f.getAbsolutePath().replaceFirst(Pattern.quote(new File(root).getAbsolutePath() + File.separator), "")));
-			    ClassReader reader = new ClassReader(stream);
-			    ClassMirrorVisitor mirrorVisitor = new ClassMirrorVisitor();
-			    reader.accept(mirrorVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
-			    mirrors.add(mirrorVisitor.getMirror(new URL(url)));
-			} catch (IOException ex) {
-			    Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
-			} finally {
-			    if (stream != null) {
-				try {
-				    stream.close();
-				} catch (IOException ex) {
-				    Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			    }
-			}
-		    }
-		}
+                //Now, we have all the class files in the package. But, it's the absolute path
+                //to all of them. We have to first remove the "front" part
+                for (File f : fileList) {
+                    String file = f.toString();
+                    if (!file.matches(".*\\$(?:\\d)*\\.class") && file.endsWith(".class")) {
+                        InputStream stream = null;
+                        try {
+                            stream = FileUtil.readAsStream(new File(rootLocationFile,
+                                    f.getAbsolutePath().replaceFirst(Pattern.quote(new File(root).getAbsolutePath() + File.separator), "")));
+                            ClassReader reader = new ClassReader(stream);
+                            ClassMirrorVisitor mirrorVisitor = new ClassMirrorVisitor();
+                            reader.accept(mirrorVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+                            mirrors.add(mirrorVisitor.getMirror(new URL(url)));
+                        } catch (IOException ex) {
+                            Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
+                        } finally {
+                            if (stream != null) {
+                                try {
+                                    stream.close();
+                                } catch (IOException ex) {
+                                    Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
+                        }
+                    }
+                }
 //				service.shutdown();
 //				try {
 //					//Doesn't look like 0 is an option, so we'll just wait a day.
@@ -318,41 +318,41 @@ public class ClassDiscovery {
 //				} catch (InterruptedException ex) {
 //					Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 //				}
-	    } else if (url.startsWith("file:") && url.endsWith(".jar")) {
-		//We are running from a jar
-		url = url.replaceFirst("file:", "");
-		rootLocationFile = new File(url);
-		ZipIterator zi = new ZipIterator(rootLocationFile);
-		try {
-		    zi.iterate(new ZipIterator.ZipIteratorCallback() {
-			@Override
-			public void handle(String filename, InputStream in) {
-			    if (!filename.matches(".*\\$(?:\\d)*\\.class") && filename.endsWith(".class")) {
-				try {
-				    ClassReader reader = new ClassReader(in);
-				    ClassMirrorVisitor mirrorVisitor = new ClassMirrorVisitor();
-				    reader.accept(mirrorVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
-				    mirrors.add(mirrorVisitor.getMirror(rootLocationFile.toURI().toURL()));
-				} catch (IOException ex) {
-				    Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
-				}
+            } else if (url.startsWith("file:") && url.endsWith(".jar")) {
+                //We are running from a jar
+                url = url.replaceFirst("file:", "");
+                rootLocationFile = new File(url);
+                ZipIterator zi = new ZipIterator(rootLocationFile);
+                try {
+                    zi.iterate(new ZipIterator.ZipIteratorCallback() {
+                        @Override
+                        public void handle(String filename, InputStream in) {
+                            if (!filename.matches(".*\\$(?:\\d)*\\.class") && filename.endsWith(".class")) {
+                                try {
+                                    ClassReader reader = new ClassReader(in);
+                                    ClassMirrorVisitor mirrorVisitor = new ClassMirrorVisitor();
+                                    reader.accept(mirrorVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+                                    mirrors.add(mirrorVisitor.getMirror(rootLocationFile.toURI().toURL()));
+                                } catch (IOException ex) {
+                                    Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
+                                }
 
-			    }
-			}
-		    }, progressIterator);
-		} catch (IOException ex) {
-		    Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	    } else {
-		throw new RuntimeException("Unknown url type: " + rootLocation);
-	    }
-	} catch (RuntimeException e) {
-	    e.printStackTrace(System.err);
-	} finally {
-	    if (debug) {
-		StreamUtils.GetSystemOut().println("Scans finished for " + rootLocation + ", taking " + (System.currentTimeMillis() - start) + " ms.");
-	    }
-	}
+                            }
+                        }
+                    }, progressIterator);
+                } catch (IOException ex) {
+                    Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+                throw new RuntimeException("Unknown url type: " + rootLocation);
+            }
+        } catch (RuntimeException e) {
+            e.printStackTrace(System.err);
+        } finally {
+            if (debug) {
+                StreamUtils.GetSystemOut().println("Scans finished for " + rootLocation + ", taking " + (System.currentTimeMillis() - start) + " ms.");
+            }
+        }
     }
     private ClassLoader defaultClassLoader = null;
 
@@ -363,7 +363,7 @@ public class ClassDiscovery {
      * @param cl
      */
     public void setDefaultClassLoader(ClassLoader cl) {
-	defaultClassLoader = cl;
+        defaultClassLoader = cl;
     }
 
     /**
@@ -373,11 +373,11 @@ public class ClassDiscovery {
      * @return
      */
     public ClassLoader getDefaultClassLoader() {
-	if (defaultClassLoader == null) {
-	    return ClassDiscovery.class.getClassLoader();
-	} else {
-	    return defaultClassLoader;
-	}
+        if (defaultClassLoader == null) {
+            return ClassDiscovery.class.getClassLoader();
+        } else {
+            return defaultClassLoader;
+        }
     }
 
     /**
@@ -387,16 +387,16 @@ public class ClassDiscovery {
      * @param url
      */
     public synchronized void addDiscoveryLocation(URL url) {
-	if (url == null) {
-	    throw new NullPointerException("url cannot be null");
-	}
-	if (urlCache.contains(url)) {
-	    //Already here, so just return.
-	    return;
-	}
-	urlCache.add(url);
-	dirtyURLs.add(url);
-	classCache.put(url, new HashSet<ClassMirror<?>>());
+        if (url == null) {
+            throw new NullPointerException("url cannot be null");
+        }
+        if (urlCache.contains(url)) {
+            //Already here, so just return.
+            return;
+        }
+        urlCache.add(url);
+        dirtyURLs.add(url);
+        classCache.put(url, new HashSet<ClassMirror<?>>());
     }
 
     /**
@@ -406,17 +406,17 @@ public class ClassDiscovery {
      * @param folder
      */
     public void addAllJarsInFolder(File folder) {
-	if (folder != null && folder.exists() && folder.isDirectory()) {
-	    for (File f : folder.listFiles()) {
-		if (f.getName().endsWith(".jar")) {
-		    try {
-			addDiscoveryLocation(f.toURI().toURL());
-		    } catch (MalformedURLException ex) {
-			//
-		    }
-		}
-	    }
-	}
+        if (folder != null && folder.exists() && folder.isDirectory()) {
+            for (File f : folder.listFiles()) {
+                if (f.getName().endsWith(".jar")) {
+                    try {
+                        addDiscoveryLocation(f.toURI().toURL());
+                    } catch (MalformedURLException ex) {
+                        //
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -425,20 +425,20 @@ public class ClassDiscovery {
      * @param url
      */
     public synchronized void removeDiscoveryLocation(URL url) {
-	if (url == null) {
-	    throw new NullPointerException("url cannot be null");
-	}
+        if (url == null) {
+            throw new NullPointerException("url cannot be null");
+        }
 
-	if (!urlCache.contains(url)) {
-	    //Not here, so just return.
-	    return;
-	}
+        if (!urlCache.contains(url)) {
+            //Not here, so just return.
+            return;
+        }
 
-	urlCache.remove(url);
-	dirtyURLs.remove(url);
-	preCaches.remove(url);
+        urlCache.remove(url);
+        dirtyURLs.remove(url);
+        preCaches.remove(url);
 
-	invalidateCaches();
+        invalidateCaches();
     }
 
     /**
@@ -448,15 +448,15 @@ public class ClassDiscovery {
      * instance need to be garbage collected.
      */
     public void invalidateCaches() {
-	classCache.clear();
-	forNameCache.clear();
-	jvmNameToMirror.clear();
-	fuzzyClassCache.clear();
-	classAnnotationCache.clear();
-	fieldAnnotationCache.clear();
-	methodAnnotationCache.clear();
-	constructorAnnotationCache.clear();
-	dirtyURLs.addAll(urlCache);
+        classCache.clear();
+        forNameCache.clear();
+        jvmNameToMirror.clear();
+        fuzzyClassCache.clear();
+        classAnnotationCache.clear();
+        fieldAnnotationCache.clear();
+        methodAnnotationCache.clear();
+        constructorAnnotationCache.clear();
+        dirtyURLs.addAll(urlCache);
     }
 
     /**
@@ -467,12 +467,12 @@ public class ClassDiscovery {
      * @return A list of ClassMirror objects for all known classes
      */
     public Set<ClassMirror<?>> getKnownClasses() {
-	doDiscovery();
-	Set<ClassMirror<?>> ret = new HashSet<>();
-	for (URL url : urlCache) {
-	    ret.addAll(getKnownClasses(url));
-	}
-	return ret;
+        doDiscovery();
+        Set<ClassMirror<?>> ret = new HashSet<>();
+        for (URL url : urlCache) {
+            ret.addAll(getKnownClasses(url));
+        }
+        return ret;
     }
 
     /**
@@ -483,14 +483,14 @@ public class ClassDiscovery {
      * @return
      */
     public List<ClassMirror<?>> getKnownClasses(URL url) {
-	if (url == null) {
-	    throw new NullPointerException("url cannot be null");
-	}
-	if (!classCache.containsKey(url)) {
-	    addDiscoveryLocation(url);
-	}
-	doDiscovery();
-	return new ArrayList<>(classCache.get(url));
+        if (url == null) {
+            throw new NullPointerException("url cannot be null");
+        }
+        if (!classCache.containsKey(url)) {
+            addDiscoveryLocation(url);
+        }
+        doDiscovery();
+        return new ArrayList<>(classCache.get(url));
     }
 
     /**
@@ -502,28 +502,28 @@ public class ClassDiscovery {
      */
     @SuppressWarnings("unchecked")
     public <T> Set<ClassMirror<T>> getClassesThatExtend(Class<T> superType) {
-	if (superType == java.lang.Object.class) {
-	    //To avoid complication down the road, if this is the case,
-	    //just return all known classes here.
-	    // Ugh, this double cast though. This is definitely safe, since
-	    // everything extends Object in java, but to get the compiler to
-	    // shut up, we have to supress warnings and double cast it.
-	    return (Set<ClassMirror<T>>) (Set<?>) getKnownClasses();
-	}
-	if (classSubtypeCache.containsKey(superType)) {
-	    return new HashSet<>((Set) classSubtypeCache.get(superType));
-	}
-	doDiscovery();
-	Set<ClassMirror<?>> mirrors = new HashSet<>();
-	Set<ClassMirror<T>> knownClasses = (Set) getKnownClasses();
-	outer:
-	for (ClassMirror<T> m : knownClasses) {
-	    if (doesClassExtend(m, superType)) {
-		mirrors.add(m);
-	    }
-	}
-	classSubtypeCache.put(superType, mirrors);
-	return (Set) mirrors;
+        if (superType == java.lang.Object.class) {
+            //To avoid complication down the road, if this is the case,
+            //just return all known classes here.
+            // Ugh, this double cast though. This is definitely safe, since
+            // everything extends Object in java, but to get the compiler to
+            // shut up, we have to supress warnings and double cast it.
+            return (Set<ClassMirror<T>>) (Set<?>) getKnownClasses();
+        }
+        if (classSubtypeCache.containsKey(superType)) {
+            return new HashSet<>((Set) classSubtypeCache.get(superType));
+        }
+        doDiscovery();
+        Set<ClassMirror<?>> mirrors = new HashSet<>();
+        Set<ClassMirror<T>> knownClasses = (Set) getKnownClasses();
+        outer:
+        for (ClassMirror<T> m : knownClasses) {
+            if (doesClassExtend(m, superType)) {
+                mirrors.add(m);
+            }
+        }
+        classSubtypeCache.put(superType, mirrors);
+        return (Set) mirrors;
     }
 
     /**
@@ -536,100 +536,100 @@ public class ClassDiscovery {
      */
     @SuppressWarnings("unchecked")
     public boolean doesClassExtend(ClassMirror<?> subClass, Class<?> superClass) {
-	if (subClass.directlyExtendsFrom(superClass)) {
-	    //Trivial case, so just add this now, then continue.
-	    return true;
-	}
-	//Well, crap, more complicated. Ok, so, the list of supers
-	//can probably be walked up even further, so we need to find
-	//the supers of these (and make sure it's not in the ClassMirror
-	//cache, to avoid loading classes unneccessarily) and then load
-	//the actual Class object for them. Essentially, this falls back
-	//to loading the class when it
-	//can't be found in the mirrors pool.
-	Set<ClassReferenceMirror<?>> supers = new HashSet<>();
-	// Interfaces don't have a superclass. If they extend something, that's different.
-	if (!subClass.isInterface()) {
-	    //Get the superclass. If it's java.lang.Object, we're done.
-	    ClassReferenceMirror<?> su = subClass.getSuperClass();
-	    while (!"Ljava/lang/Object;".equals(su.getJVMName())) {
-		supers.add(su);
-		ClassMirror<?> find = getClassMirrorFromJVMName(su.getJVMName());
-		if (find == null) {
-		    try {
-			//Ok, have to Class.forName this one
-			Class<?> clazz = ClassUtils.forCanonicalName(su.toString(), false, defaultClassLoader);
-			//We can just use isAssignableFrom now
-			if (superClass.isAssignableFrom(clazz)) {
-			    return true;
-			} else {
-			    //We need to add change the reference to su
-			    su = new ClassReferenceMirror<>("L" + clazz.getSuperclass().getName().replace('.', '/') + ";");
-			}
-		    } catch (ClassNotFoundException ex) {
-			//Hmm, ok? I guess something bad happened, so let's break
-			//the loop and give up on this class.
-			return false;
-		    }
-		} else {
-		    su = find.getSuperClass();
-		}
-	    }
-	    for (ClassReferenceMirror<?> r : supers) {
-		// Look through the supers. If any of them equal the search class, return true
-		if (r.getJVMName().equals(ClassUtils.getJVMName(superClass))) {
-		    return true;
-		}
-	    }
-	}
-	//Same thing now, but for interfaces
-	Deque<ClassReferenceMirror<?>> interfaces = new ArrayDeque<>();
-	Set<ClassReferenceMirror<?>> handled = new HashSet<>();
-	interfaces.addAll(subClass.getInterfaces());
-	//Also have to add all the supers' interfaces too
-	for (ClassReferenceMirror<?> r : supers) {
-	    ClassMirror<?> find = getClassMirrorFromJVMName(r.getJVMName());
-	    if (find == null) {
-		try {
-		    Class<?> clazz = Class.forName(r.toString());
-		    for (Class<?> c : clazz.getInterfaces()) {
-			interfaces.add(new ClassReferenceMirror<>("L" + c.getName().replace('.', '/') + ";"));
-		    }
-		} catch (ClassNotFoundException ex) {
-		    return false;
-		}
-	    } else {
-		interfaces.addAll(find.getInterfaces());
-	    }
-	}
-	while (!interfaces.isEmpty()) {
-	    ClassReferenceMirror<?> in = interfaces.pop();
-	    if (ClassUtils.getJVMName(superClass).equals(in.getJVMName())) {
-		//Early short circuit. We know it's in the the list already.
-		return true;
-	    }
-	    if (handled.contains(in)) {
-		continue;
-	    }
-	    handled.add(in);
-	    supers.add(in);
-	    ClassMirror<?> find = getClassMirrorFromJVMName(in.getJVMName());
-	    if (find != null) {
-		interfaces.addAll(find.getInterfaces());
-	    } else {
-		try {
-		    //Again, have to check Class.forName
-		    Class<?> clazz = ClassUtils.forCanonicalName(in.toString(), false, getDefaultClassLoader());
-		    if (superClass.isAssignableFrom(clazz)) {
-			return true;
-		    }
-		} catch (ClassNotFoundException ex) {
-		    return false;
-		}
-	    }
-	}
-	//Nope.
-	return false;
+        if (subClass.directlyExtendsFrom(superClass)) {
+            //Trivial case, so just add this now, then continue.
+            return true;
+        }
+        //Well, crap, more complicated. Ok, so, the list of supers
+        //can probably be walked up even further, so we need to find
+        //the supers of these (and make sure it's not in the ClassMirror
+        //cache, to avoid loading classes unneccessarily) and then load
+        //the actual Class object for them. Essentially, this falls back
+        //to loading the class when it
+        //can't be found in the mirrors pool.
+        Set<ClassReferenceMirror<?>> supers = new HashSet<>();
+        // Interfaces don't have a superclass. If they extend something, that's different.
+        if (!subClass.isInterface()) {
+            //Get the superclass. If it's java.lang.Object, we're done.
+            ClassReferenceMirror<?> su = subClass.getSuperClass();
+            while (!"Ljava/lang/Object;".equals(su.getJVMName())) {
+                supers.add(su);
+                ClassMirror<?> find = getClassMirrorFromJVMName(su.getJVMName());
+                if (find == null) {
+                    try {
+                        //Ok, have to Class.forName this one
+                        Class<?> clazz = ClassUtils.forCanonicalName(su.toString(), false, defaultClassLoader);
+                        //We can just use isAssignableFrom now
+                        if (superClass.isAssignableFrom(clazz)) {
+                            return true;
+                        } else {
+                            //We need to add change the reference to su
+                            su = new ClassReferenceMirror<>("L" + clazz.getSuperclass().getName().replace('.', '/') + ";");
+                        }
+                    } catch (ClassNotFoundException ex) {
+                        //Hmm, ok? I guess something bad happened, so let's break
+                        //the loop and give up on this class.
+                        return false;
+                    }
+                } else {
+                    su = find.getSuperClass();
+                }
+            }
+            for (ClassReferenceMirror<?> r : supers) {
+                // Look through the supers. If any of them equal the search class, return true
+                if (r.getJVMName().equals(ClassUtils.getJVMName(superClass))) {
+                    return true;
+                }
+            }
+        }
+        //Same thing now, but for interfaces
+        Deque<ClassReferenceMirror<?>> interfaces = new ArrayDeque<>();
+        Set<ClassReferenceMirror<?>> handled = new HashSet<>();
+        interfaces.addAll(subClass.getInterfaces());
+        //Also have to add all the supers' interfaces too
+        for (ClassReferenceMirror<?> r : supers) {
+            ClassMirror<?> find = getClassMirrorFromJVMName(r.getJVMName());
+            if (find == null) {
+                try {
+                    Class<?> clazz = Class.forName(r.toString());
+                    for (Class<?> c : clazz.getInterfaces()) {
+                        interfaces.add(new ClassReferenceMirror<>("L" + c.getName().replace('.', '/') + ";"));
+                    }
+                } catch (ClassNotFoundException ex) {
+                    return false;
+                }
+            } else {
+                interfaces.addAll(find.getInterfaces());
+            }
+        }
+        while (!interfaces.isEmpty()) {
+            ClassReferenceMirror<?> in = interfaces.pop();
+            if (ClassUtils.getJVMName(superClass).equals(in.getJVMName())) {
+                //Early short circuit. We know it's in the the list already.
+                return true;
+            }
+            if (handled.contains(in)) {
+                continue;
+            }
+            handled.add(in);
+            supers.add(in);
+            ClassMirror<?> find = getClassMirrorFromJVMName(in.getJVMName());
+            if (find != null) {
+                interfaces.addAll(find.getInterfaces());
+            } else {
+                try {
+                    //Again, have to check Class.forName
+                    Class<?> clazz = ClassUtils.forCanonicalName(in.toString(), false, getDefaultClassLoader());
+                    if (superClass.isAssignableFrom(clazz)) {
+                        return true;
+                    }
+                } catch (ClassNotFoundException ex) {
+                    return false;
+                }
+            }
+        }
+        //Nope.
+        return false;
     }
 
     /**
@@ -642,7 +642,7 @@ public class ClassDiscovery {
      * @return
      */
     public <T> Set<Class<T>> loadClassesThatExtend(Class<T> superType) {
-	return loadClassesThatExtend(superType, getDefaultClassLoader(), true);
+        return loadClassesThatExtend(superType, getDefaultClassLoader(), true);
     }
 
     /**
@@ -657,26 +657,26 @@ public class ClassDiscovery {
      * @return
      */
     public <T> Set<Class<T>> loadClassesThatExtend(Class<T> superType, ClassLoader loader, boolean initialize) {
-	Set<Class<T>> set = new HashSet<>();
-	for (ClassMirror<T> cm : getClassesThatExtend(superType)) {
-	    set.add(cm.loadClass(loader, initialize));
-	}
-	return set;
+        Set<Class<T>> set = new HashSet<>();
+        for (ClassMirror<T> cm : getClassesThatExtend(superType)) {
+            set.add(cm.loadClass(loader, initialize));
+        }
+        return set;
     }
 
     private ClassMirror<?> getClassMirrorFromJVMName(String className) {
-	if (jvmNameToMirror.containsKey(className)) {
-	    return jvmNameToMirror.get(className);
-	}
-	for (ClassMirror<?> c : getKnownClasses()) {
-	    if (c.getJVMClassName().equals(className)) {
-		jvmNameToMirror.put(c.getJVMClassName(), c);
-		return c;
-	    }
-	}
-	//Still not found? Return null then.
-	jvmNameToMirror.put(className, null);
-	return null;
+        if (jvmNameToMirror.containsKey(className)) {
+            return jvmNameToMirror.get(className);
+        }
+        for (ClassMirror<?> c : getKnownClasses()) {
+            if (c.getJVMClassName().equals(className)) {
+                jvmNameToMirror.put(c.getJVMClassName(), c);
+                return c;
+            }
+        }
+        //Still not found? Return null then.
+        jvmNameToMirror.put(className, null);
+        return null;
     }
 
     /**
@@ -687,18 +687,18 @@ public class ClassDiscovery {
      * @return
      */
     public Set<ClassMirror<?>> getClassesWithAnnotation(Class<? extends Annotation> annotation) {
-	if (classAnnotationCache.containsKey(annotation)) {
-	    return new HashSet<>(classAnnotationCache.get(annotation));
-	}
-	doDiscovery();
-	Set<ClassMirror<?>> mirrors = new HashSet<>();
-	for (ClassMirror<?> m : getKnownClasses()) {
-	    if (m.hasAnnotation(annotation)) {
-		mirrors.add(m);
-	    }
-	}
-	classAnnotationCache.put(annotation, mirrors);
-	return mirrors;
+        if (classAnnotationCache.containsKey(annotation)) {
+            return new HashSet<>(classAnnotationCache.get(annotation));
+        }
+        doDiscovery();
+        Set<ClassMirror<?>> mirrors = new HashSet<>();
+        for (ClassMirror<?> m : getKnownClasses()) {
+            if (m.hasAnnotation(annotation)) {
+                mirrors.add(m);
+            }
+        }
+        classAnnotationCache.put(annotation, mirrors);
+        return mirrors;
     }
 
     /**
@@ -711,18 +711,18 @@ public class ClassDiscovery {
      */
     @SuppressWarnings("unchecked")
     public <T> Set<ClassMirror<? extends T>> getClassesWithAnnotationThatExtend(Class<? extends Annotation> annotation, Class<T> superClass) {
-	Set<ClassMirror<? extends T>> mirrors = new HashSet<>();
-	for (ClassMirror<?> c : getClassesWithAnnotation(annotation)) {
-	    if (doesClassExtend(c, superClass)) {
-		mirrors.add((ClassMirror<T>) c);
-	    }
-	}
-	if(superClass.getAnnotation(annotation) != null) {
-	    // The mechanism above won't automatically add this class, so we need to add it
-	    // ourselves here.
-	    mirrors.add(new ClassMirror<T>(superClass));
-	}
-	return mirrors;
+        Set<ClassMirror<? extends T>> mirrors = new HashSet<>();
+        for (ClassMirror<?> c : getClassesWithAnnotation(annotation)) {
+            if (doesClassExtend(c, superClass)) {
+                mirrors.add((ClassMirror<T>) c);
+            }
+        }
+        if (superClass.getAnnotation(annotation) != null) {
+            // The mechanism above won't automatically add this class, so we need to add it
+            // ourselves here.
+            mirrors.add(new ClassMirror<T>(superClass));
+        }
+        return mirrors;
     }
 
     /**
@@ -736,7 +736,7 @@ public class ClassDiscovery {
      * @return A set of classes that match the criteria
      */
     public <T> Set<Class<? extends T>> loadClassesWithAnnotationThatExtend(Class<? extends Annotation> annotation, Class<T> superClass) {
-	return loadClassesWithAnnotationThatExtend(annotation, superClass, getDefaultClassLoader(), true);
+        return loadClassesWithAnnotationThatExtend(annotation, superClass, getDefaultClassLoader(), true);
     }
 
     /**
@@ -752,16 +752,16 @@ public class ClassDiscovery {
      * @return A set of classes that match the criteria
      */
     public <T> Set<Class<? extends T>> loadClassesWithAnnotationThatExtend(Class<? extends Annotation> annotation, Class<T> superClass, ClassLoader loader, boolean initialize) {
-	Set<Class<? extends T>> set = new HashSet<>();
-	for (ClassMirror<? extends T> cm : getClassesWithAnnotationThatExtend(annotation, superClass)) {
-	    try {
-		set.add(cm.loadClass(loader, initialize));
-	    } catch (NoClassDefFoundError e) {
-		//Ignore this for now?
-		//throw new Error("While trying to process " + cm.toString() + ", an error occurred.", e);
-	    }
-	}
-	return set;
+        Set<Class<? extends T>> set = new HashSet<>();
+        for (ClassMirror<? extends T> cm : getClassesWithAnnotationThatExtend(annotation, superClass)) {
+            try {
+                set.add(cm.loadClass(loader, initialize));
+            } catch (NoClassDefFoundError e) {
+                //Ignore this for now?
+                //throw new Error("While trying to process " + cm.toString() + ", an error occurred.", e);
+            }
+        }
+        return set;
     }
 
     /**
@@ -773,7 +773,7 @@ public class ClassDiscovery {
      * @return
      */
     public Set<Class<?>> loadClassesWithAnnotation(Class<? extends Annotation> annotation) {
-	return loadClassesWithAnnotation(annotation, getDefaultClassLoader(), true);
+        return loadClassesWithAnnotation(annotation, getDefaultClassLoader(), true);
     }
 
     /**
@@ -787,16 +787,16 @@ public class ClassDiscovery {
      * @return
      */
     public Set<Class<?>> loadClassesWithAnnotation(Class<? extends Annotation> annotation, ClassLoader loader, boolean initialize) {
-	Set<Class<?>> set = new HashSet<>();
-	for (ClassMirror<?> cm : getClassesWithAnnotation(annotation)) {
-	    try {
-		set.add(cm.loadClass(loader, initialize));
-	    } catch (NoClassDefFoundError e) {
-		//Ignore this for now?
-		//throw new Error("While trying to process " + cm.toString() + ", an error occurred.", e);
-	    }
-	}
-	return set;
+        Set<Class<?>> set = new HashSet<>();
+        for (ClassMirror<?> cm : getClassesWithAnnotation(annotation)) {
+            try {
+                set.add(cm.loadClass(loader, initialize));
+            } catch (NoClassDefFoundError e) {
+                //Ignore this for now?
+                //throw new Error("While trying to process " + cm.toString() + ", an error occurred.", e);
+            }
+        }
+        return set;
     }
 
     /**
@@ -807,20 +807,20 @@ public class ClassDiscovery {
      * @return
      */
     public Set<FieldMirror> getFieldsWithAnnotation(Class<? extends Annotation> annotation) {
-	if (fieldAnnotationCache.containsKey(annotation)) {
-	    return new HashSet<>(fieldAnnotationCache.get(annotation));
-	}
-	doDiscovery();
-	Set<FieldMirror> mirrors = new HashSet<>();
-	for (ClassMirror<?> m : getKnownClasses()) {
-	    for (FieldMirror f : m.getFields()) {
-		if (f.hasAnnotation(annotation)) {
-		    mirrors.add(f);
-		}
-	    }
-	}
-	fieldAnnotationCache.put(annotation, mirrors);
-	return mirrors;
+        if (fieldAnnotationCache.containsKey(annotation)) {
+            return new HashSet<>(fieldAnnotationCache.get(annotation));
+        }
+        doDiscovery();
+        Set<FieldMirror> mirrors = new HashSet<>();
+        for (ClassMirror<?> m : getKnownClasses()) {
+            for (FieldMirror f : m.getFields()) {
+                if (f.hasAnnotation(annotation)) {
+                    mirrors.add(f);
+                }
+            }
+        }
+        fieldAnnotationCache.put(annotation, mirrors);
+        return mirrors;
     }
 
     /**
@@ -830,20 +830,20 @@ public class ClassDiscovery {
      * @return
      */
     public Set<MethodMirror> getMethodsWithAnnotation(Class<? extends Annotation> annotation) {
-	if (methodAnnotationCache.containsKey(annotation)) {
-	    return new HashSet<>(methodAnnotationCache.get(annotation));
-	}
-	doDiscovery();
-	Set<MethodMirror> mirrors = new HashSet<>();
-	for (ClassMirror<?> m : getKnownClasses()) {
-	    for (MethodMirror mm : m.getMethods()) {
-		if (mm.hasAnnotation(annotation)) {
-		    mirrors.add(mm);
-		}
-	    }
-	}
-	methodAnnotationCache.put(annotation, mirrors);
-	return mirrors;
+        if (methodAnnotationCache.containsKey(annotation)) {
+            return new HashSet<>(methodAnnotationCache.get(annotation));
+        }
+        doDiscovery();
+        Set<MethodMirror> mirrors = new HashSet<>();
+        for (ClassMirror<?> m : getKnownClasses()) {
+            for (MethodMirror mm : m.getMethods()) {
+                if (mm.hasAnnotation(annotation)) {
+                    mirrors.add(mm);
+                }
+            }
+        }
+        methodAnnotationCache.put(annotation, mirrors);
+        return mirrors;
     }
 
     /**
@@ -855,7 +855,7 @@ public class ClassDiscovery {
      * @return
      */
     public Set<Method> loadMethodsWithAnnotation(Class<? extends Annotation> annotation) {
-	return loadMethodsWithAnnotation(annotation, getDefaultClassLoader(), true);
+        return loadMethodsWithAnnotation(annotation, getDefaultClassLoader(), true);
     }
 
     /**
@@ -869,15 +869,15 @@ public class ClassDiscovery {
      * @return
      */
     public Set<Method> loadMethodsWithAnnotation(Class<? extends Annotation> annotation, ClassLoader loader, boolean initialize) {
-	try {
-	    Set<Method> set = new HashSet<>();
-	    for (MethodMirror mm : getMethodsWithAnnotation(annotation)) {
-		set.add(mm.loadMethod(loader, initialize));
-	    }
-	    return set;
-	} catch (ClassNotFoundException ex) {
-	    throw new NoClassDefFoundError();
-	}
+        try {
+            Set<Method> set = new HashSet<>();
+            for (MethodMirror mm : getMethodsWithAnnotation(annotation)) {
+                set.add(mm.loadMethod(loader, initialize));
+            }
+            return set;
+        } catch (ClassNotFoundException ex) {
+            throw new NoClassDefFoundError();
+        }
     }
 
     /**
@@ -887,20 +887,20 @@ public class ClassDiscovery {
      * @return
      */
     public Set<ConstructorMirror<?>> getConstructorsWithAnnotation(Class<? extends Annotation> annotation) {
-	if (constructorAnnotationCache.containsKey(annotation)) {
-	    return new HashSet<>(constructorAnnotationCache.get(annotation));
-	}
-	doDiscovery();
-	Set<ConstructorMirror<?>> mirrors = new HashSet<>();
-	for (ClassMirror<?> m : getKnownClasses()) {
-	    for (ConstructorMirror<?> mm : m.getConstructors()) {
-		if (mm.hasAnnotation(annotation)) {
-		    mirrors.add(mm);
-		}
-	    }
-	}
-	constructorAnnotationCache.put(annotation, mirrors);
-	return mirrors;
+        if (constructorAnnotationCache.containsKey(annotation)) {
+            return new HashSet<>(constructorAnnotationCache.get(annotation));
+        }
+        doDiscovery();
+        Set<ConstructorMirror<?>> mirrors = new HashSet<>();
+        for (ClassMirror<?> m : getKnownClasses()) {
+            for (ConstructorMirror<?> mm : m.getConstructors()) {
+                if (mm.hasAnnotation(annotation)) {
+                    mirrors.add(mm);
+                }
+            }
+        }
+        constructorAnnotationCache.put(annotation, mirrors);
+        return mirrors;
     }
 
     /**
@@ -910,7 +910,7 @@ public class ClassDiscovery {
      * @return
      */
     public Set<Constructor<?>> loadConstructorsWithAnnotation(Class<? extends Annotation> annotation) {
-	return loadConstructorsWithAnnotation(annotation, getDefaultClassLoader(), true);
+        return loadConstructorsWithAnnotation(annotation, getDefaultClassLoader(), true);
     }
 
     /**
@@ -922,30 +922,30 @@ public class ClassDiscovery {
      * @return
      */
     public Set<Constructor<?>> loadConstructorsWithAnnotation(Class<? extends Annotation> annotation, ClassLoader loader, boolean initialize) {
-	Set<Constructor<?>> set = new HashSet<>();
-	for (AbstractMethodMirror m : getConstructorsWithAnnotation(annotation)) {
-	    try {
-		Class<?> c = m.getDeclaringClass().loadClass(loader, initialize);
-		outer:
-		for (Constructor<?> cc : c.getDeclaredConstructors()) {
-		    Class<?>[] params = cc.getParameterTypes();
-		    if (m.getParams().size() != params.length) {
-			continue;
-		    }
-		    for (int i = 0; i < params.length; i++) {
-			ClassReferenceMirror<?> crm = m.getParams().get(i);
-			ClassReferenceMirror<?> crm2 = new ClassReferenceMirror<>(ClassUtils.getJVMName(params[i]));
-			if (!crm.equals(crm2)) {
-			    continue outer;
-			}
-		    }
-		    set.add(cc);
-		}
-	    } catch (ClassNotFoundException ex) {
-		throw new NoClassDefFoundError();
-	    }
-	}
-	return set;
+        Set<Constructor<?>> set = new HashSet<>();
+        for (AbstractMethodMirror m : getConstructorsWithAnnotation(annotation)) {
+            try {
+                Class<?> c = m.getDeclaringClass().loadClass(loader, initialize);
+                outer:
+                for (Constructor<?> cc : c.getDeclaredConstructors()) {
+                    Class<?>[] params = cc.getParameterTypes();
+                    if (m.getParams().size() != params.length) {
+                        continue;
+                    }
+                    for (int i = 0; i < params.length; i++) {
+                        ClassReferenceMirror<?> crm = m.getParams().get(i);
+                        ClassReferenceMirror<?> crm2 = new ClassReferenceMirror<>(ClassUtils.getJVMName(params[i]));
+                        if (!crm.equals(crm2)) {
+                            continue outer;
+                        }
+                    }
+                    set.add(cc);
+                }
+            } catch (ClassNotFoundException ex) {
+                throw new NoClassDefFoundError();
+            }
+        }
+        return set;
     }
 
     /**
@@ -956,16 +956,16 @@ public class ClassDiscovery {
      * @throws java.lang.ClassNotFoundException
      */
     public ClassMirror<?> forName(String className) throws ClassNotFoundException {
-	if (forNameCache.containsKey(className)) {
-	    return forNameCache.get(className);
-	}
-	for (ClassMirror<?> c : getKnownClasses()) {
-	    if (c.getClassName().equals(className) || c.getJVMClassName().equals(className)) {
-		forNameCache.put(className, c);
-		return c;
-	    }
-	}
-	throw new ClassNotFoundException(className);
+        if (forNameCache.containsKey(className)) {
+            return forNameCache.get(className);
+        }
+        for (ClassMirror<?> c : getKnownClasses()) {
+            if (c.getClassName().equals(className) || c.getJVMClassName().equals(className)) {
+                forNameCache.put(className, c);
+                return c;
+            }
+        }
+        throw new ClassNotFoundException(className);
     }
 
     /**
@@ -976,7 +976,7 @@ public class ClassDiscovery {
      * @return
      */
     public ClassMirror<?> forFuzzyName(String packageRegex, String className) {
-	return forFuzzyName(packageRegex, className, true, getDefaultClassLoader());
+        return forFuzzyName(packageRegex, className, true, getDefaultClassLoader());
     }
 
     /**
@@ -991,53 +991,53 @@ public class ClassDiscovery {
      * @return
      */
     public ClassMirror<?> forFuzzyName(String packageRegex, String className, boolean initialize, ClassLoader classLoader) {
-	String index = packageRegex + className;
-	if (fuzzyClassCache.containsKey(index)) {
-	    return fuzzyClassCache.get(index);
-	}
-	Set<ClassMirror<?>> found = new HashSet<>();
-	Set<ClassMirror<?>> searchSpace = getKnownClasses();
-	for (ClassMirror<?> c : searchSpace) {
-	    if (c.getPackage().getName().matches(packageRegex) && c.getSimpleName().equals(className)) {
-		found.add(c);
-	    }
-	}
-	ClassMirror<?> find;
-	if (found.size() == 1) {
-	    find = found.iterator().next();
-	} else if (found.isEmpty()) {
-	    find = null;
-	} else {
-	    ClassMirror<?> candidate = null;
-	    int max = Integer.MAX_VALUE;
-	    for (ClassMirror<?> f : found) {
-		int distance = StringUtils.LevenshteinDistance(f.getPackage().getName(), packageRegex);
-		if (distance < max) {
-		    candidate = f;
-		    max = distance;
-		}
-	    }
-	    find = candidate;
-	}
-	fuzzyClassCache.put(index, find);
-	return find;
+        String index = packageRegex + className;
+        if (fuzzyClassCache.containsKey(index)) {
+            return fuzzyClassCache.get(index);
+        }
+        Set<ClassMirror<?>> found = new HashSet<>();
+        Set<ClassMirror<?>> searchSpace = getKnownClasses();
+        for (ClassMirror<?> c : searchSpace) {
+            if (c.getPackage().getName().matches(packageRegex) && c.getSimpleName().equals(className)) {
+                found.add(c);
+            }
+        }
+        ClassMirror<?> find;
+        if (found.size() == 1) {
+            find = found.iterator().next();
+        } else if (found.isEmpty()) {
+            find = null;
+        } else {
+            ClassMirror<?> candidate = null;
+            int max = Integer.MAX_VALUE;
+            for (ClassMirror<?> f : found) {
+                int distance = StringUtils.LevenshteinDistance(f.getPackage().getName(), packageRegex);
+                if (distance < max) {
+                    candidate = f;
+                    max = distance;
+                }
+            }
+            find = candidate;
+        }
+        fuzzyClassCache.put(index, find);
+        return find;
     }
 
     private static void descend(File start, List<File> fileList) {
-	if (start.isFile()) {
-	    if (start.getName().endsWith(".class")) {
-		fileList.add(start);
-	    }
-	} else {
-	    File[] list = start.listFiles();
-	    if (list == null) {
-		StreamUtils.GetSystemOut().println("Could not list files in " + start);
-		return;
-	    }
-	    for (File child : start.listFiles()) {
-		descend(child, fileList);
-	    }
-	}
+        if (start.isFile()) {
+            if (start.getName().endsWith(".class")) {
+                fileList.add(start);
+            }
+        } else {
+            File[] list = start.listFiles();
+            if (list == null) {
+                StreamUtils.GetSystemOut().println("Could not list files in " + start);
+                return;
+            }
+            for (File child : start.listFiles()) {
+                descend(child, fileList);
+            }
+        }
     }
 
     /**
@@ -1049,37 +1049,37 @@ public class ClassDiscovery {
      * @return
      */
     public static URL GetClassContainer(Class<?> c) {
-	if (c == null) {
-	    throw new NullPointerException("The Class passed to this method may not be null");
-	}
-	while (c.isMemberClass() || c.isAnonymousClass()) {
-	    c = c.getEnclosingClass(); //Get the actual enclosing file
-	}
-	if (c.getProtectionDomain().getCodeSource() == null) {
-	    //This is a proxy or other dynamically generated class, and has no physical container,
-	    //so just return null.
-	    return null;
-	}
-	String packageRoot = null;
-	//This is the full path to THIS file, but we need to get the package root below.
-	String thisClass = c.getResource(c.getSimpleName() + ".class").toString();
-	try {
-	    try {
-		packageRoot = StringUtils.replaceLast(thisClass, Pattern.quote(c.getName().replaceAll("\\.", "/") + ".class"), "");
-	    } catch (Exception e) {
-		//Hmm, ok, try this then
-		packageRoot = c.getProtectionDomain().getCodeSource().getLocation().toString();
-	    }
-	    packageRoot = URLDecoder.decode(packageRoot, "UTF-8");
-	    if (packageRoot.matches("jar:file:.*!/")) {
-		packageRoot = StringUtils.replaceLast(packageRoot, "!/", "");
-		packageRoot = packageRoot.replaceFirst("jar:", "");
-	    }
-	    return new URL(packageRoot);
-	} catch (UnsupportedEncodingException e) {
-	    throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown.", e);
-	} catch (MalformedURLException e) {
-	    throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown for potential URL: \"" + packageRoot + "\"", e);
-	}
+        if (c == null) {
+            throw new NullPointerException("The Class passed to this method may not be null");
+        }
+        while (c.isMemberClass() || c.isAnonymousClass()) {
+            c = c.getEnclosingClass(); //Get the actual enclosing file
+        }
+        if (c.getProtectionDomain().getCodeSource() == null) {
+            //This is a proxy or other dynamically generated class, and has no physical container,
+            //so just return null.
+            return null;
+        }
+        String packageRoot = null;
+        //This is the full path to THIS file, but we need to get the package root below.
+        String thisClass = c.getResource(c.getSimpleName() + ".class").toString();
+        try {
+            try {
+                packageRoot = StringUtils.replaceLast(thisClass, Pattern.quote(c.getName().replaceAll("\\.", "/") + ".class"), "");
+            } catch (Exception e) {
+                //Hmm, ok, try this then
+                packageRoot = c.getProtectionDomain().getCodeSource().getLocation().toString();
+            }
+            packageRoot = URLDecoder.decode(packageRoot, "UTF-8");
+            if (packageRoot.matches("jar:file:.*!/")) {
+                packageRoot = StringUtils.replaceLast(packageRoot, "!/", "");
+                packageRoot = packageRoot.replaceFirst("jar:", "");
+            }
+            return new URL(packageRoot);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown.", e);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown for potential URL: \"" + packageRoot + "\"", e);
+        }
     }
 }

@@ -9,10 +9,6 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMetadatable;
 import org.bukkit.block.BlockState;
 
-/**
- *
- * 
- */
 public class BukkitMCBlockState extends BukkitMCMetadatable implements MCBlockState {
     
     BlockState bs;
@@ -31,6 +27,16 @@ public class BukkitMCBlockState extends BukkitMCMetadatable implements MCBlockSt
     public MCMaterialData getData() {
         return new BukkitMCMaterialData(bs.getData());
     }
+
+	@Override
+	public void setTypeId(int type) {
+		bs.setTypeId(type);
+	}
+
+	@Override
+	public void setRawData(byte data) {
+		bs.setRawData(data);
+	}
 
 	@Override
     public int getTypeId() {

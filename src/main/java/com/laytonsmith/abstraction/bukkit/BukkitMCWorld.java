@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLightningStrike;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldBorder;
@@ -50,20 +51,18 @@ import org.bukkit.Effect;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- *
- */
 public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
     World w;
@@ -108,10 +107,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public List<MCPlayer> getPlayers() {
-		if (w.getPlayers() == null) {
-			return null;
-		}
-		List<MCPlayer> list = new ArrayList<MCPlayer>();
+		List<MCPlayer> list = new ArrayList<>();
 		for (Player p : w.getPlayers()) {
 			list.add(new BukkitMCPlayer(p));
 		}
@@ -120,10 +116,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public List<MCEntity> getEntities() {
-		if (w.getEntities() == null) {
-			return null;
-		}
-		List<MCEntity> list = new ArrayList<MCEntity>();
+		List<MCEntity> list = new ArrayList<>();
 		for (Entity e : w.getEntities()) {
 			list.add(new BukkitMCEntity(e));
 		}
@@ -131,16 +124,13 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-    public List<MCLivingEntity> getLivingEntities() {
-        if (w.getLivingEntities() == null) {
-            return null;
-        }
-        List<MCLivingEntity> list = new ArrayList<MCLivingEntity>();
-        for (LivingEntity e : w.getLivingEntities()) {
-            list.add(new BukkitMCLivingEntity(e));
-        }
-        return list;
-    }
+	public List<MCLivingEntity> getLivingEntities() {
+		List<MCLivingEntity> list = new ArrayList<>();
+		for (LivingEntity e : w.getLivingEntities()) {
+			list.add(new BukkitMCLivingEntity(e));
+		}
+		return list;
+	}
 
 	@Override
     public String getName() {
@@ -253,6 +243,26 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public void playEffect(MCLocation l, MCEffect mCEffect, int data, int radius) {
 		w.playEffect(((BukkitMCLocation) l).l, Effect.valueOf(mCEffect.name()), data, radius);
+	}
+
+	@Override
+	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
+		try {
+			Particle type = Particle.valueOf(pa.name());
+			if(data != null) {
+				Object particleData = null;
+				if(type.getDataType().equals(MaterialData.class) && data instanceof MCMaterialData) {
+					particleData = ((MCMaterialData) data).getHandle();
+				} else if(type.getDataType().equals(ItemStack.class) && data instanceof MCItemStack) {
+					particleData = ((MCItemStack) data).getHandle();
+				}
+				w.spawnParticle(type, ((BukkitMCLocation) l).asLocation(), count, offsetX, offsetY, offsetZ, velocity, particleData);
+			} else {
+				w.spawnParticle(type, ((BukkitMCLocation) l).asLocation(), count, offsetX, offsetY, offsetZ, velocity);
+			}
+		} catch(NoClassDefFoundError ex) {
+			// probably prior to 1.9
+		}
 	}
 
 	@Override
@@ -843,7 +853,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public MCFallingBlock spawnFallingBlock(MCLocation loc, int type, byte data) {
-		Location mcloc = (Location)((BukkitMCLocation)loc).getHandle();
+		Location mcloc = (Location) loc.getHandle();
 		return new BukkitMCFallingBlock(w.spawnFallingBlock(mcloc, type, data));
 	}
 

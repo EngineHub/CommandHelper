@@ -23,7 +23,7 @@ public class ClassUtils {
      * @throws ClassNotFoundException If the class can't be found.
      */
     public static Class forCanonicalName(String className) throws ClassNotFoundException {
-	return forCanonicalName(className, false, false, null);
+        return forCanonicalName(className, false, false, null);
     }
 
     /**
@@ -39,7 +39,7 @@ public class ClassUtils {
      * @throws ClassNotFoundException If the class can't be found.
      */
     public static Class forCanonicalName(String className, boolean initialize, ClassLoader classLoader) throws ClassNotFoundException {
-	return forCanonicalName(className, true, initialize, classLoader);
+        return forCanonicalName(className, true, initialize, classLoader);
     }
 
     /**
@@ -53,94 +53,94 @@ public class ClassUtils {
      * @throws ClassNotFoundException
      */
     private static Class forCanonicalName(String className, boolean useInitializer, boolean initialize, ClassLoader classLoader) throws ClassNotFoundException {
-	className = StringUtils.replaceLast(className, "\\.\\.\\.", "[]");
-	//Of course primitives all need to be dealt with specially.
-	int arrays = 0;
-	Matcher m = ARRAY_COUNT_PATTERN.matcher(className);
-	while (m.find()) {
-	    arrays++;
-	}
-	String simpleName = className.replaceAll("\\[\\]", "");
-	String primitiveID = null;
-	Class primitiveClass = null;
-	if (null != simpleName) {
-	    switch (simpleName) {
-		case "boolean":
-		    primitiveID = "Z";
-		    primitiveClass = boolean.class;
-		    break;
-		case "byte":
-		    primitiveID = "B";
-		    primitiveClass = byte.class;
-		    break;
-		case "short":
-		    primitiveID = "S";
-		    primitiveClass = short.class;
-		    break;
-		case "int":
-		    primitiveID = "I";
-		    primitiveClass = int.class;
-		    break;
-		case "long":
-		    primitiveID = "J";
-		    primitiveClass = long.class;
-		    break;
-		case "float":
-		    primitiveID = "F";
-		    primitiveClass = float.class;
-		    break;
-		case "double":
-		    primitiveID = "D";
-		    primitiveClass = double.class;
-		    break;
-		case "char":
-		    primitiveID = "C";
-		    primitiveClass = char.class;
-		    break;
-	    }
-	}
-	if (primitiveClass != null) {
-	    if (arrays > 0) {
-		//This will be dealt with below
-		className = StringUtils.stringMultiply(arrays, "[") + primitiveID;
-	    } else {
-		//Class.forName doesn't know how to deal with this, so short circuit.
-		return primitiveClass;
-	    }
-	} else if (arrays > 0) {
-	    //Ok, we need to get it from the canonical name
-	    className = StringUtils.stringMultiply(arrays, "[") + "L" + simpleName + ";";
-	}
-	Class c = null;
-	try {
-	    if (useInitializer) {
-		c = Class.forName(className, initialize, classLoader);
-	    } else {
-		c = Class.forName(className);
-	    }
-	} catch (ClassNotFoundException ex) {
-	    //Ok, try replacing the last . with $ as this may be an inner class
-	    String name = className;
-	    while (name.contains(".")) {
-		name = StringUtils.replaceLast(name, "\\.", "$");
-		try {
-		    if (useInitializer) {
-			c = Class.forName(name, initialize, classLoader);
-		    } else {
-			c = Class.forName(name);
-		    }
-		    //Awesome, found it.
-		    break;
-		} catch (ClassNotFoundException e) {
-		    //No? Try again then.
-		}
-	    }
-	    if (c == null) {
-		//We really couldn't find it.
-		throw ex;
-	    }
-	}
-	return c;
+        className = StringUtils.replaceLast(className, "\\.\\.\\.", "[]");
+        //Of course primitives all need to be dealt with specially.
+        int arrays = 0;
+        Matcher m = ARRAY_COUNT_PATTERN.matcher(className);
+        while (m.find()) {
+            arrays++;
+        }
+        String simpleName = className.replaceAll("\\[\\]", "");
+        String primitiveID = null;
+        Class primitiveClass = null;
+        if (null != simpleName) {
+            switch (simpleName) {
+                case "boolean":
+                    primitiveID = "Z";
+                    primitiveClass = boolean.class;
+                    break;
+                case "byte":
+                    primitiveID = "B";
+                    primitiveClass = byte.class;
+                    break;
+                case "short":
+                    primitiveID = "S";
+                    primitiveClass = short.class;
+                    break;
+                case "int":
+                    primitiveID = "I";
+                    primitiveClass = int.class;
+                    break;
+                case "long":
+                    primitiveID = "J";
+                    primitiveClass = long.class;
+                    break;
+                case "float":
+                    primitiveID = "F";
+                    primitiveClass = float.class;
+                    break;
+                case "double":
+                    primitiveID = "D";
+                    primitiveClass = double.class;
+                    break;
+                case "char":
+                    primitiveID = "C";
+                    primitiveClass = char.class;
+                    break;
+            }
+        }
+        if (primitiveClass != null) {
+            if (arrays > 0) {
+                //This will be dealt with below
+                className = StringUtils.stringMultiply(arrays, "[") + primitiveID;
+            } else {
+                //Class.forName doesn't know how to deal with this, so short circuit.
+                return primitiveClass;
+            }
+        } else if (arrays > 0) {
+            //Ok, we need to get it from the canonical name
+            className = StringUtils.stringMultiply(arrays, "[") + "L" + simpleName + ";";
+        }
+        Class c = null;
+        try {
+            if (useInitializer) {
+                c = Class.forName(className, initialize, classLoader);
+            } else {
+                c = Class.forName(className);
+            }
+        } catch (ClassNotFoundException ex) {
+            //Ok, try replacing the last . with $ as this may be an inner class
+            String name = className;
+            while (name.contains(".")) {
+                name = StringUtils.replaceLast(name, "\\.", "$");
+                try {
+                    if (useInitializer) {
+                        c = Class.forName(name, initialize, classLoader);
+                    } else {
+                        c = Class.forName(name);
+                    }
+                    //Awesome, found it.
+                    break;
+                } catch (ClassNotFoundException e) {
+                    //No? Try again then.
+                }
+            }
+            if (c == null) {
+                //We really couldn't find it.
+                throw ex;
+            }
+        }
+        return c;
     }
 
     /**
@@ -151,32 +151,32 @@ public class ClassUtils {
      * @return
      */
     public static String getJVMName(Class clazz) {
-	if(clazz == null) {
-	    return null;
-	}
-	//For arrays, .getName() is fine.
-	if (clazz.isArray()) {
-	    return clazz.getName().replace('.', '/');
-	}
-	if (clazz == boolean.class) {
-	    return "Z";
-	} else if (clazz == byte.class) {
-	    return "B";
-	} else if (clazz == short.class) {
-	    return "S";
-	} else if (clazz == int.class) {
-	    return "I";
-	} else if (clazz == long.class) {
-	    return "J";
-	} else if (clazz == float.class) {
-	    return "F";
-	} else if (clazz == double.class) {
-	    return "D";
-	} else if (clazz == char.class) {
-	    return "C";
-	} else {
-	    return "L" + clazz.getName().replace('.', '/') + ";";
-	}
+        if (clazz == null) {
+            return null;
+        }
+        //For arrays, .getName() is fine.
+        if (clazz.isArray()) {
+            return clazz.getName().replace('.', '/');
+        }
+        if (clazz == boolean.class) {
+            return "Z";
+        } else if (clazz == byte.class) {
+            return "B";
+        } else if (clazz == short.class) {
+            return "S";
+        } else if (clazz == int.class) {
+            return "I";
+        } else if (clazz == long.class) {
+            return "J";
+        } else if (clazz == float.class) {
+            return "F";
+        } else if (clazz == double.class) {
+            return "D";
+        } else if (clazz == char.class) {
+            return "C";
+        } else {
+            return "L" + clazz.getName().replace('.', '/') + ";";
+        }
     }
 
     /**
@@ -188,16 +188,16 @@ public class ClassUtils {
      * @return
      */
     public static String getCommonName(Class c) {
-	if (!c.isArray()) {
-	    //This is fine for non arrays.
-	    return c.getName();
-	}
-	int arrayCount = c.getName().lastIndexOf("[") + 1;
-	Class cc = c.getComponentType();
-	while (cc.isArray()) {
-	    cc = cc.getComponentType();
-	}
-	return cc.getName() + StringUtils.stringMultiply(arrayCount, "[]");
+        if (!c.isArray()) {
+            //This is fine for non arrays.
+            return c.getName();
+        }
+        int arrayCount = c.getName().lastIndexOf("[") + 1;
+        Class cc = c.getComponentType();
+        while (cc.isArray()) {
+            cc = cc.getComponentType();
+        }
+        return cc.getName() + StringUtils.stringMultiply(arrayCount, "[]");
     }
 
     /**
@@ -208,31 +208,31 @@ public class ClassUtils {
      * @return
      */
     public static String getCommonNameFromJVMName(String classname) {
-	int arrayCount = classname.lastIndexOf("[") + 1;
-	classname = classname.substring(arrayCount);
-	//ZBSIJDFC
-	if ("Z".equals(classname)) {
-	    classname = "boolean";
-	} else if ("B".equals(classname)) {
-	    classname = "byte";
-	} else if ("S".equals(classname)) {
-	    classname = "short";
-	} else if ("I".equals(classname)) {
-	    classname = "int";
-	} else if ("J".equals(classname)) {
-	    classname = "long";
-	} else if ("D".equals(classname)) {
-	    classname = "double";
-	} else if ("F".equals(classname)) {
-	    classname = "float";
-	} else if ("C".equals(classname)) {
-	    classname = "char";
-	} else if ("V".equals(classname)) {
-	    return "void"; //special case
-	} else {
-	    classname = classname.substring(1, classname.length() - 1).replace('/', '.').replace('$', '.');
-	}
-	return classname + StringUtils.stringMultiply(arrayCount, "[]");
+        int arrayCount = classname.lastIndexOf("[") + 1;
+        classname = classname.substring(arrayCount);
+        //ZBSIJDFC
+        if ("Z".equals(classname)) {
+            classname = "boolean";
+        } else if ("B".equals(classname)) {
+            classname = "byte";
+        } else if ("S".equals(classname)) {
+            classname = "short";
+        } else if ("I".equals(classname)) {
+            classname = "int";
+        } else if ("J".equals(classname)) {
+            classname = "long";
+        } else if ("D".equals(classname)) {
+            classname = "double";
+        } else if ("F".equals(classname)) {
+            classname = "float";
+        } else if ("C".equals(classname)) {
+            classname = "char";
+        } else if ("V".equals(classname)) {
+            return "void"; //special case
+        } else {
+            classname = classname.substring(1, classname.length() - 1).replace('/', '.').replace('$', '.');
+        }
+        return classname + StringUtils.stringMultiply(arrayCount, "[]");
     }
 
     /**
@@ -244,9 +244,9 @@ public class ClassUtils {
      * @return
      */
     public static Set<Class<?>> getAllCastableClasses(Class<?> c) {
-	Set<Class<?>> ret = new HashSet<>();
-	getAllCastableClassesWithBlacklist(c, ret);
-	return ret;
+        Set<Class<?>> ret = new HashSet<>();
+        getAllCastableClassesWithBlacklist(c, ret);
+        return ret;
     }
 
     /**
@@ -257,23 +257,23 @@ public class ClassUtils {
      * @return
      */
     private static Set<Class<?>> getAllCastableClassesWithBlacklist(Class<?> c, Set<Class<?>> blacklist) {
-	if (blacklist.contains(c)) {
-	    return blacklist;
-	}
-	while (true) {
-	    blacklist.add(c);
-	    Class<?> su = c.getSuperclass();
-	    if (su == null) {
-		return blacklist;
-	    }
-	    blacklist.add(su);
-	    blacklist.addAll(getAllCastableClassesWithBlacklist(su, blacklist));
-	    for (Class<?> iface : c.getInterfaces()) {
-		blacklist.add(iface);
-		blacklist.addAll(getAllCastableClassesWithBlacklist(iface, blacklist));
-	    }
-	    c = su;
-	}
+        if (blacklist.contains(c)) {
+            return blacklist;
+        }
+        while (true) {
+            blacklist.add(c);
+            Class<?> su = c.getSuperclass();
+            if (su == null) {
+                return blacklist;
+            }
+            blacklist.add(su);
+            blacklist.addAll(getAllCastableClassesWithBlacklist(su, blacklist));
+            for (Class<?> iface : c.getInterfaces()) {
+                blacklist.add(iface);
+                blacklist.addAll(getAllCastableClassesWithBlacklist(iface, blacklist));
+            }
+            c = su;
+        }
     }
 
 }

@@ -1,7 +1,5 @@
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.annotations.event;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
@@ -13,17 +11,12 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -74,8 +67,7 @@ public final class EventUtils {
 	 * @param id
 	 */
 	public static void UnregisterEvent(String id) {
-		for (Driver type : event_handles.keySet()) {
-			SortedSet<BoundEvent> set = event_handles.get(type);
+		for (SortedSet<BoundEvent> set : event_handles.values()) {
 			Iterator<BoundEvent> i = set.iterator();
 			while (i.hasNext()) {
 				BoundEvent b = i.next();
@@ -95,8 +87,7 @@ public final class EventUtils {
 	 * @return
 	 */
 	public static BoundEvent GetEventById(String id) {
-		for (Driver type : event_handles.keySet()) {
-			SortedSet<BoundEvent> set = event_handles.get(type);
+		for (SortedSet<BoundEvent> set : event_handles.values()) {
 			for (BoundEvent b : set) {
 				if (b.getId().equals(id)) {
 					return b;
@@ -110,8 +101,7 @@ public final class EventUtils {
 	 * Unregisters all event handlers. Runs in O(n)
 	 */
 	public static void UnregisterAll(String name) {
-		for (Driver type : event_handles.keySet()) {
-			SortedSet<BoundEvent> set = event_handles.get(type);
+		for (SortedSet<BoundEvent> set : event_handles.values()) {
 			Iterator<BoundEvent> i = set.iterator();
 			while (i.hasNext()) {
 				BoundEvent b = i.next();
@@ -273,8 +263,7 @@ public final class EventUtils {
 
 	public static Construct DumpEvents() {
 		CArray ca = new CArray(Target.UNKNOWN);
-		for (Driver type : event_handles.keySet()) {
-			SortedSet<BoundEvent> set = event_handles.get(type);
+		for (SortedSet<BoundEvent> set : event_handles.values()) {
 			Iterator<BoundEvent> i = set.iterator();
 			while (i.hasNext()) {
 				BoundEvent b = i.next();
@@ -282,64 +271,6 @@ public final class EventUtils {
 			}
 		}
 		return ca;
-	}
-
-	/**
-	 *
-	 * @param mce
-	 * @deprecated Use {@link #TriggerListener(com.laytonsmith.core.events.Driver, java.lang.String, com.laytonsmith.core.events.BindableEvent)} instead
-	 */
-	@Deprecated
-	public static void TriggerExternal(BindableEvent mce) {
-		for (Method m : ClassDiscovery.getDefaultInstance().loadMethodsWithAnnotation(event.class)) {
-			Class<?>[] params = m.getParameterTypes();
-			if (params.length != 1 || !BindableEvent.class.isAssignableFrom(params[0])) {
-				Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE,
-						"An event handler annotated with @{0} may only contain one parameter, which extends {1}",
-						new Object[]{event.class.getSimpleName(), BindableEvent.class.getName()});
-			} else {
-				try {
-					Object instance = null;
-
-					if ((m.getModifiers() & Modifier.STATIC) == 0) {
-						//It's not static, so we need an instance. Ideally we could skip
-						//this step, but it's harder to enforce that across jars.
-						//We could emit a warning, but the end user wouldn't know what
-						//to do with that. However, if this step fails (no no-arg constructors
-						//exist) we will be forced to fail.
-						//
-						// TODO: We could preprocess, as we are for lifecycles, and emit errors.
-						try {
-							instance = m.getDeclaringClass().newInstance();
-						} catch (InstantiationException | IllegalAccessException e) {
-							throw new RuntimeException("Could not instantiate the superclass " + m.getDeclaringClass().getName()
-									+ ". There is no no-arg constructor present. Ideally however, the method " + m.getName()
-									+ " would simply be static, which would decrease overhead in general. "
-									+ " Note to the end user: This error is not a CommandHelper error,"
-									+ " it is an error in the extension that provides the event handler for"
-									+ " " + mce.getClass().getName() + ", and should be reported to the extension"
-									+ " author.", e);
-						}
-					}
-
-					m.invoke(instance, mce);
-				} catch (IllegalAccessException ex) {
-					Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE,
-							"Illegal Access Exception while triggering"
-							+ " an external event:", ex.getCause());
-				} catch (IllegalArgumentException ex) {
-					// If we do this, console gets spammed for hooks that don't apply for
-					// the event being fired. Need to check if mce is instance of params[0].
-
-					//Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, null, ex);
-				} catch (InvocationTargetException ex) {
-					Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE,
-							"Invocation Target Exception while triggering"
-							+ " an external event:", ex.getCause());
-				}
-			}
-
-		}
 	}
 
 	/**

@@ -64,7 +64,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "mixed {[player, [index]]} Gets the inventory information for the specified player, or the current "
+			return "mixed {[player, [slot]]} Gets the inventory information for the specified player, or the current "
 					+ " player if none specified. If the index is specified, only the slot given will be returned."
 					+ " The index of the array in the array is 0 - 35, 100 - 103, -106, which corresponds to the slot"
 					+ " in the player's inventory. To access armor slots, you may also specify the index. (100 - 103)."
@@ -102,19 +102,17 @@ public class InventoryManagement {
 
 		@Override
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-            MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
             Integer index = -1;
-            boolean all = false;
-            MCPlayer m = null;
+            boolean all;
+            MCPlayer m;
             if (args.length == 0) {
                 all = true;
-                if (p instanceof MCPlayer) {
-                    m = (MCPlayer) p;
-                }
+                m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                Static.AssertPlayerNonNull(m, t);
             } else if (args.length == 1) {
                 all = true;
                 m = Static.GetPlayer(args[0], t);
-            } else if (args.length == 2) {
+            } else {
                 if (args[1] instanceof CNull) {
                     index = null;
                 } else {
@@ -123,7 +121,6 @@ public class InventoryManagement {
                 all = false;
                 m = Static.GetPlayer(args[0], t);
             }
-			Static.AssertPlayerNonNull(m, t);
             if(all){
                 CArray ret = CArray.GetAssociativeArray(t);
                 for(int i = 0; i < 36; i++){
@@ -430,110 +427,112 @@ public class InventoryManagement {
 
 		@Override
         public Integer[] numArgs() {
-            return new Integer[]{1, 2, 3, 4, 5, 7};
+            return new Integer[]{1, 2, 3};
         }
 
 		@Override
         public String docs() {
-            return "void {[player], pinvArray} Sets a player's inventory to the specified inventory object."
-                    + " An inventory object is one that matches what is returned by pinv(), so set_pinv(pinv()),"
-                    + " while pointless, would be a correct call. ---- The array must be associative, "
+            return "void {[player, [slot]], array} Sets a player's inventory to the specified inventory array."
+                    + " An inventory array is one that matches what is returned by pinv(), so set_pinv(pinv()),"
+                    + " while pointless, would be a correct call. If a slot is specified as the second argument,"
+                    + " only that slot is set with the given item array. ---- An inventory array must be associative,"
                     + " however, it may skip items, in which case, only the specified values will be changed. If"
                     + " a key is out of range, or otherwise improper, a warning is emitted, and it is skipped,"
                     + " but the function will not fail as a whole. A simple way to set one item in a player's"
-                    + " inventory would be: set_pinv(array(2: array(type: 1, qty: 64))) This sets the player's second slot"
-                    + " to be a stack of stone. set_pinv(array(103: array(type: 298))) gives them a hat. To set the"
-                    + " item in hand, use something like set_pinv(array(null: array(type: 298))), where"
-                    + " the key is null. If you set a null key in addition to an entire inventory set, only"
-                    + " one item will be used (which one is undefined). Use an index of -106 to set the item in the"
-                    + " player's off-hand. Note that this uses the unsafe enchantment mechanism to add enchantments, so"
-                    + " any enchantment value will work. If type uses the old format (for instance, \"35:11\"), then"
-                    + " the second number is taken to be the data, making this backwards compatible (and sometimes more"
-                    + " convenient).";
+                    + " inventory would be: set_pinv(player(), 2, array(name: STONE, qty: 64)). This sets the player's"
+                    + " second slot to be a stack of stone. set_pinv(array(103: array(type: 298))) gives them a hat."
+                    + " To set the item in hand, use something like set_pinv(player(), null, array(type: 298))."
+                    + " If you set a null key in an inventory array, only one of the items will be used (which one is"
+                    + " undefined). Use an index of -106 to set the item in the player's off-hand. The type key"
+                    + " supports the string item format (eg. \"35:11\") for convenience and backwards compatibility.";
 
         }
 
 		@Override
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[]{CREPlayerOfflineException.class, CRECastException.class, CREFormatException.class};
-        }
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRECastException.class, CREFormatException.class};
+		}
 
 		@Override
-        public boolean isRestricted() {
-            return true;
-        }
+		public boolean isRestricted() {
+			return true;
+		}
 		@Override
-        public CHVersion since() {
-            return CHVersion.V3_2_0;
-        }
+		public CHVersion since() {
+			return CHVersion.V3_2_0;
+		}
 
 		@Override
-        public Boolean runAsync() {
-            return false;
-        }
+		public Boolean runAsync() {
+			return false;
+		}
 
 		@Override
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-            MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-            MCPlayer m = null;
-            if (p instanceof MCPlayer) {
-                m = (MCPlayer) p;
-            }
-            Construct arg;
-            if(args.length == 2){
-                m = Static.GetPlayer(args[0], t);
-                arg = args[1];
-            } else if(args.length == 1){
-                arg = args[0];
-            } else {
-                throw new CREFormatException("The old format for set_pinv has been deprecated. Please update your script.", t);
-            }
-            if(!(arg instanceof CArray)){
-                throw new CRECastException("Expecting an array as argument " + (args.length==1?"1":"2"), t);
-            }
-            CArray array = (CArray)arg;
-			Static.AssertPlayerNonNull(m, t);
-            for(String key : array.stringKeySet()){
-                try{
-                    int index = -2;
-                    try{
-                        index = Integer.parseInt(key);
-                    } catch(NumberFormatException e){
-                        if(key.isEmpty() || key.equals("null")){
-                            //It was a null key
-                            index = -1;
-                        } else {
-                            throw e;
-                        }
-                    }
-                    if(index == -1){
-                        MCItemStack is = ObjectGenerator.GetGenerator().item(array.get("", t), t);
-                        m.setItemInHand(is);
-                    } else {
-                        MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t), t);
-                        if(index >= 0 && index <= 35){
-                            m.getInventory().setItem(index, is);
-                        } else if(index == 100){
-                            m.getInventory().setBoots(is);
-                        } else if(index == 101){
-                            m.getInventory().setLeggings(is);
-                        } else if(index == 102){
-                            m.getInventory().setChestplate(is);
-                        } else if(index == 103){
-                            m.getInventory().setHelmet(is);
-                        } else if(index == -106){
-                            m.getInventory().setItemInOffHand(is);
-                        } else {
-                            ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found in array passed to set_pinv(), so ignoring.");
-                        }
-                    }
-                } catch(NumberFormatException e){
-                    ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_pinv(), but \"" + key + "\" was found. Ignoring.");
-                }
-            }
-            return CVoid.VOID;
-        }
-    }
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m;
+			Construct arg;
+			if(args.length == 3) {
+				// Single item
+				m = Static.GetPlayer(args[0], t);
+				MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t);
+				if(args[1] instanceof CNull){
+					m.setItemInHand(is);
+				} else {
+					setInvSlot(m.getInventory(), Static.getInt32(args[1], t), is);
+				}
+				m.getInventory().updateViewers();
+				return CVoid.VOID;
+			} else if(args.length == 1) {
+				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(m, t);
+				arg = args[0];
+			} else {
+				m = Static.GetPlayer(args[0], t);
+				arg = args[1];
+			}
+			if(!(arg instanceof CArray)){
+				throw new CRECastException("Expecting an array as the last argument.", t);
+			}
+			CArray array = (CArray)arg;
+			MCPlayerInventory inv = m.getInventory();
+			for (String key : array.stringKeySet()) {
+				if (key.isEmpty() || key.equals("null")) {
+					//It was a null key
+					MCItemStack is = ObjectGenerator.GetGenerator().item(array.get("", t), t);
+					m.setItemInHand(is);
+				} else {
+					try {
+						int index = Integer.parseInt(key);
+						MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t), t);
+						setInvSlot(inv, index, is);
+					} catch (NumberFormatException e) {
+						ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to"
+								+ " set_pinv(), but \"" + key + "\" was found. Ignoring.");
+					}
+				}
+			}
+			inv.updateViewers();
+			return CVoid.VOID;
+		}
+
+		private void setInvSlot(MCPlayerInventory inv, Integer index, MCItemStack is) {
+			if(index >= 0 && index <= 35){
+				inv.setItem(index, is);
+			} else if(index == 100){
+				inv.setBoots(is);
+			} else if(index == 101){
+				inv.setLeggings(is);
+			} else if(index == 102){
+				inv.setChestplate(is);
+			} else if(index == 103){
+				inv.setHelmet(is);
+			} else if(index == -106){
+				inv.setItemInOffHand(is);
+			} else {
+				ConfigRuntimeException.DoWarning("Ignoring out of range slot (" + index + ") passed to set_pinv().");
+			}
+		}
+	}
 
     @api(environments={CommandHelperEnvironment.class})
 	public static class phas_item extends AbstractFunction{
@@ -877,6 +876,7 @@ public class InventoryManagement {
                     }
                 }
             }
+            inv.updateViewers();
             return new CInt(total - remaining, t);
 
         }
@@ -1061,6 +1061,7 @@ public class InventoryManagement {
 					}
 				}
 			}
+			inv.updateViewers();
 			return new CInt(total - remaining, t);
 
 		}
@@ -1177,7 +1178,7 @@ public class InventoryManagement {
 					ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_penderchest(), but \"" + key + "\" was found. Ignoring.");
 				}
 			}
-
+			m.getEnderChest().updateViewers();
 			return CVoid.VOID;
 		}
 	}
@@ -1384,6 +1385,7 @@ public class InventoryManagement {
 			MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t);
 			try{
 				inv.setItem(slot, is);
+				inv.updateViewers();
 				return CVoid.VOID;
 			} catch(ArrayIndexOutOfBoundsException e){
 				throw new CRERangeException("Index out of bounds for the inventory type.", t);
@@ -1787,6 +1789,7 @@ public class InventoryManagement {
 					ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_inventory(), but \"" + key + "\" was found. Ignoring.");
 				}
 			}
+			inventory.updateViewers();
 			return CVoid.VOID;
 		}
 	}
@@ -1932,6 +1935,7 @@ public class InventoryManagement {
 					}
 				}
 			}
+			inventory.updateViewers();
 			return new CInt(total - remaining, t);
 
 		}

@@ -98,7 +98,7 @@ public enum MCEffect {
 	VILLAGER_THUNDERCLOUD("angryVillager"),
 	HAPPY_VILLAGER("happyVillager"),
 	LARGE_SMOKE("largesmoke"),
-	ITEM_BREAK("iconcrack"),
+	//ITEM_BREAK("iconcrack"), // crashes clients without correct data
 	TILE_BREAK("blockcrack"),
 	TILE_DUST("blockdust")
 	;

@@ -76,7 +76,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -935,9 +934,7 @@ public final class Static {
      * @return
      */
     public static MCMetadatable getMetadatable(Construct construct, Target t) {
-        if (construct instanceof CInt) {
-            return Static.getEntity(construct, t);
-        } else if (construct instanceof CArray) {
+        if (construct instanceof CArray) {
             return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
         } else if (construct instanceof CString) {
             switch (construct.val().length()) {

@@ -2,11 +2,8 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.*;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.PlayerEvents;
@@ -15,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.*;
 
@@ -76,8 +74,11 @@ public class BukkitPlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerInteract(PlayerInteractEvent e) {
 		BukkitMCPlayerInteractEvent pie = new BukkitMCPlayerInteractEvent(e);
-		EventUtils.TriggerListener(Driver.PLAYER_INTERACT, "player_interact", pie);
-		EventUtils.TriggerListener(Driver.PLAYER_INTERACT, "pressure_plate_activated", pie);
+		if(e.getAction().equals(Action.PHYSICAL)){
+			EventUtils.TriggerListener(Driver.PLAYER_INTERACT, "pressure_plate_activated", pie);
+		} else {
+			EventUtils.TriggerListener(Driver.PLAYER_INTERACT, "player_interact", pie);
+		}
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -202,12 +203,12 @@ public class BukkitPlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
-		BukkitMCPlayer currentPlayer = (BukkitMCPlayer) Static.GetPlayer(event.getPlayer().getName(), Target.UNKNOWN);
-		//Apparently this happens sometimes, so prevent it
-		if (!event.getFrom().equals(currentPlayer._Player().getWorld())) {
-			BukkitMCWorldChangedEvent wce = new BukkitMCWorldChangedEvent(event);
-			EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", wce);
+		if (event.getFrom().equals(event.getPlayer().getWorld())) {
+			return;
 		}
+
+		BukkitMCWorldChangedEvent wce = new BukkitMCWorldChangedEvent(event);
+		EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", wce);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)

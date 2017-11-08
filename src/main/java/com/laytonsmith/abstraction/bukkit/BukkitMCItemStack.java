@@ -41,10 +41,14 @@ public class BukkitMCItemStack implements MCItemStack {
     
 	@Override
     public MCMaterialData getData(){
-        if(is == null || is.getData() == null){
+        if(is == null){
             return null;
         }
-        return new BukkitMCMaterialData(is.getData());
+        MaterialData md = is.getData();
+        if(md == null){
+            return null;
+        }
+        return new BukkitMCMaterialData(md);
     }
     
 	@Override

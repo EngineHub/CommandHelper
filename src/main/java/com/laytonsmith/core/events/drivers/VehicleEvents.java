@@ -204,7 +204,7 @@ public class VehicleEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> The entitytype of the vehicle | collisiontype: <macro> One of "
+			return "{type: <macro> The entitytype of the vehicle | collisiontype: <string match> One of "
 					+ StringUtils.Join(MCCollisionType.values(), ", ", ", or ", " or ")
 					+ " | hittype: <macro> Matches an entitytype in an enitity collision"
 					+ " | hittype: <item match> Matches a block in a block collision}"
@@ -223,7 +223,11 @@ public class VehicleEvents {
 			if (e instanceof MCVehicleCollideEvent) {
 				MCVehicleCollideEvent event = (MCVehicleCollideEvent) e;
 				Prefilters.match(prefilter, "type", event.getVehicle().getType().name(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "collisiontype", event.getCollisionType().name(), PrefilterType.MACRO);
+				if(prefilter.containsKey("collisiontype")) {
+					if(!event.getCollisionType().name().equals(prefilter.get("collisiontype").val())) {
+						return false;
+					}
+				}
 				switch (event.getCollisionType()) {
 					case BLOCK:
 						Prefilters.match(prefilter, "hittype", Static.ParseItemNotation(((MCVehicleBlockCollideEvent) event)

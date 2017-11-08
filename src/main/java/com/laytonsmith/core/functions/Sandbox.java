@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -14,6 +15,9 @@ import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.commandhelper.BukkitDirtyRegisteredListener;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -31,12 +35,20 @@ import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CRESecurityException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import org.bukkit.event.Cancellable;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Random;
 
 /**
@@ -49,93 +61,6 @@ public class Sandbox {
                 + " to the documentation, and are subject to removal at any point in time, nor are they"
                 + " likely to have good documentation.";
     }
-
-    //This broke as of 1.1
-//    @api
-//    public static class plugin_cmd extends AbstractFunction {
-//
-//        public String getName() {
-//            return "plugin_cmd";
-//        }
-//
-//        public Integer[] numArgs() {
-//            return new Integer[]{2};
-//        }
-//
-//        public String docs() {
-//            return "void {plugin, cmd} ";
-//        }
-//
-//        public Class<? extends CREThrowable>[] thrown() {
-//            return null;
-//        }
-//
-//        public boolean isRestricted() {
-//            return true;
-//        }
-//
-//        //
-//        public boolean preResolveVariables() {
-//            return true;
-//        }
-//
-//        public CHVersion since() {
-//            return "0.0.0";
-//        }
-//
-//        public Boolean runAsync() {
-//            return false;
-//        }
-//
-//        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-//            Object o = AliasCore.parent.getServer().getPluginManager();
-//            if (o instanceof SimplePluginManager) {
-//                SimplePluginManager spm = (SimplePluginManager) o;
-//                try {
-//                    Method m = spm.getClass().getDeclaredMethod("getEventListeners", Event.Type.class);
-//                    m.setAccessible(true);
-//                    SortedSet<RegisteredListener> sl = (SortedSet<RegisteredListener>) m.invoke(spm, Event.Type.SERVER_COMMAND);
-//                    for(RegisteredListener l : sl){
-//                        if (l.getPlugin().getDescription().getName().equalsIgnoreCase(args[0].val())) {
-//                            if(env.GetCommandSender() instanceof ConsoleCommandSender){
-//                                l.callEvent(new ServerCommandEvent((ConsoleCommandSender)env.GetCommandSender(), args[1].val()));
-//                            }
-//                        }
-//                    }
-//                    SortedSet<RegisteredListener> ss = (SortedSet<RegisteredListener>) m.invoke(spm, Event.Type.PLAYER_COMMAND_PREPROCESS);
-//
-//                    for (RegisteredListener l : ss) {
-//                        if (l.getPlugin().getDescription().getName().equalsIgnoreCase(args[0].val())) {
-//                            if(env.GetCommandSender() instanceof MCPlayer){
-//                                l.callEvent(new PlayerCommandPreprocessEvent(((BukkitMCPlayer)env.GetPlayer())._Player(), args[1].val()));
-//                            }
-//                            PluginCommand.class.getDeclaredMethods();
-//                            Constructor c = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
-//                            c.setAccessible(true);
-//                            List<String> argList = Arrays.asList(args[1].val().split(" "));
-//                            Command com = (Command) c.newInstance(argList.get(0).substring(1), l.getPlugin());
-//                            l.getPlugin().onCommand(((BukkitMCCommandSender)env.GetCommandSender())._CommandSender(), com, argList.get(0).substring(1), argList.subList(1, argList.size()).toArray(new String[]{}));
-//                        }
-//                    }
-//                } catch (InstantiationException ex) {
-//                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
-//                } catch (IllegalAccessException ex) {
-//                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
-//                } catch (IllegalArgumentException ex) {
-//                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
-//                } catch (InvocationTargetException ex) {
-//                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
-//                } catch (NoSuchMethodException ex) {
-//                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
-//                } catch (SecurityException ex) {
-//                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            }
-//
-//            return CVoid.VOID;
-//        }
-//    }
-
 
     @api(environments={CommandHelperEnvironment.class})
     public static class super_cancel extends AbstractFunction {
@@ -636,5 +561,97 @@ public class Sandbox {
 			return CHVersion.V3_3_2;
 		}
 		
+	}
+
+	@api
+	public static class x_recompile_includes extends AbstractFunction {
+		@Override
+		public String getName() {
+			return "x_recompile_includes";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {path} Reads and compiles specified *.ms files. This can be used for files already compiled"
+					+ " with include(). Scripts that then include() these files will use the updated code."
+					+ " The path can be a directory or file. It is executed recursively through all subdirectories."
+					+ " If there's a compile error in any of the files, the function will throw an exception and other"
+					+ " scripts will continue to use the previous version of the code when included.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIOException.class, CREIncludeException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			File file = Static.GetFileFromArgument(args[0].val(), env, t, null);
+			if(Security.CheckSecurity(file.getAbsolutePath())) {
+				if (file.isDirectory()) {
+					IncludeCache.addAll(compileDirectory(file, t));
+				} else if (IncludeCache.has(file)) {
+					IncludeCache.add(file, compileFile(file, t));
+				}
+			} else {
+				throw new CRESecurityException("The script cannot access " + file
+						+ " due to restrictions imposed by the base-dir setting.", t);
+			}
+			return CVoid.VOID;
+		}
+
+		private HashMap<File, ParseTree> compileDirectory(File file, Target t) {
+			HashMap<File, ParseTree> newFiles = new HashMap<>();
+			File[] files = file.listFiles();
+			if(files != null) {
+				for (File f : files) {
+					if(f.isDirectory()) {
+						newFiles.putAll(compileDirectory(f, t));
+					} else if (IncludeCache.has(f)) {
+						newFiles.put(f, compileFile(f, t));
+					}
+				}
+			}
+			return newFiles;
+		}
+
+		private ParseTree compileFile(File file, Target t) {
+			try {
+				String s = new ZipReader(file).getFileContents();
+				return MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true));
+			} catch (ConfigCompileException ex) {
+				throw new CREIncludeException("There was a compile error when trying to recompile the script at "
+						+ file + "\n" + ex.getMessage() + " :: " + file.getName() + ":" + ex.getLineNum(), t);
+			} catch(ConfigCompileGroupException ex){
+				StringBuilder b = new StringBuilder();
+				b.append("There were compile errors when trying to recompile the script at ").append(file).append("\n");
+				for(ConfigCompileException e : ex.getList()){
+					b.append(e.getMessage()).append(" :: ").append(e.getFile().getName()).append(":").append(e.getLineNum());
+				}
+				throw new CREIncludeException(b.toString(), t);
+			} catch (IOException ex) {
+				throw new CREIOException("The script at " + file + " could not be found or read in.", t);
+			}
+		}
 	}
 }

@@ -296,7 +296,8 @@ public class Minecraft {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREFormatException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CRERangeException.class,
+					CRENotFoundException.class};
 		}
 
 		@Override
@@ -311,23 +312,21 @@ public class Minecraft {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
-				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t);
+			Construct id = args[0];
+			if (id instanceof CArray) {
+				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t);
 				return new CInt(is.getType().getMaxStackSize(), t);
-			} else {
-				String item = args[0].val();
-				if (item.contains(":")) {
-					String[] split = item.split(":");
-					item = split[0];
-				}
-				try {
-					int iitem = Integer.parseInt(item);
-					int max = StaticLayer.GetItemStack(iitem, 1).getType().getMaxStackSize();
-					return new CInt(max, t);
-				} catch (NumberFormatException e) {
+			} else if(id instanceof CString) {
+				int seperatorIndex = id.val().indexOf(':');
+				if(seperatorIndex != -1) {
+					id = new CString(id.val().substring(0, seperatorIndex), t);
 				}
 			}
-			throw new CRECastException("Improper value passed to max_stack. Expecting a number, or an item array, but received \"" + args[0].val() + "\"", t);
+			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(id, t));
+			if(mat == null) {
+				throw new CRENotFoundException("A material type could not be found based on the given id.", t);
+			}
+			return new CInt(mat.getMaxStackSize(), t);
 		}
 
 		@Override
@@ -669,18 +668,20 @@ public class Minecraft {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld() : null), t);
-			MCEffect e = null;
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
+			MCEffect e;
 			String preEff = args[1].val();
 			int data = 0;
 			int radius = 64;
-			if (preEff.contains(":")) {
+			int index = preEff.indexOf(':');
+			if (index != -1) {
 				try {
-					data = Integer.parseInt(preEff.substring(preEff.indexOf(':') + 1));
+					data = Integer.parseInt(preEff.substring(index + 1));
 				} catch (NumberFormatException ex) {
 					throw new CRECastException("Effect data expected an integer", t);
 				}
-				preEff = preEff.substring(0, preEff.indexOf(':'));
+				preEff = preEff.substring(0, index);
 			}
 			try {
 				e = MCEffect.valueOf(preEff.toUpperCase());
@@ -836,7 +837,8 @@ public class Minecraft {
 					+ "<li>13 - Uptime; The number of milliseconds the server has been running</li>"
 					+ "<li>14 - gcmax; The maximum amount of memory that the Java virtual machine will attempt to use, in bytes</li>"
 					+ "<li>15 - gctotal; The total amount of memory in the Java virtual machine, in bytes</li>"
-					+ "<li>16 - gcfree; The amount of free memory in the Java Virtual Machine, in bytes</li></ul>";
+					+ "<li>16 - gcfree; The amount of free memory in the Java Virtual Machine, in bytes</li>"
+					+ "<li>17 - MOTD; The message displayed on the server list.</li></ul>";
 		}
 
 		@Override
@@ -971,6 +973,10 @@ public class Minecraft {
 			if (index == 16 || index == -1) {
 				//gcfree
 				retVals.add(new CInt((Runtime.getRuntime().freeMemory()), t));
+			}
+			if (index == 17 || index == -1) {
+				//motd
+				retVals.add(new CString(server.getMotd(), t));
 			}
 
 			if (retVals.size() == 1) {
@@ -1642,19 +1648,16 @@ public class Minecraft {
         }
 
 		@Override
-        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCLocation l;
-            MCItemStack is;
-            boolean natural;
+			MCItemStack is;
+			boolean natural;
 			if (args.length == 1) {
 				if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 					l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getEyeLocation();
 					natural = false;
 				} else {
 					throw new CREPlayerOfflineException("Invalid sender!", t);
-				}
-				if (args[0] instanceof CNull) {
-					return CNull.NULL; // The item is null, this means we are dropping air.
 				}
 				is = ObjectGenerator.GetGenerator().item(args[0], t);
 			} else {
@@ -1665,14 +1668,14 @@ public class Minecraft {
 					natural = true;
 				} else {
 					p = Static.GetPlayer(args[0].val(), t);
-					Static.AssertPlayerNonNull(p, t);
 					l = p.getEyeLocation();
 					natural = false;
 				}
-				if (args[1] instanceof CNull) {
-					return CNull.NULL; // The item is null, this means we are dropping air.
-				}
 				is = ObjectGenerator.GetGenerator().item(args[1], t);
+			}
+			if(is.getTypeId() == 0) {
+				// can't drop air
+				return CNull.NULL;
 			}
 			if (args.length == 3) {
 				natural = Static.getBoolean(args[2]);
@@ -1683,13 +1686,9 @@ public class Minecraft {
 			} else {
 				item = l.getWorld().dropItem(l, is);
 			}
-			if (item != null) {
-				return new CString(item.getUniqueId().toString(), t);
-			} else {
-				return CNull.NULL;
-			}
-        }
-    }
+			return new CString(item.getUniqueId().toString(), t);
+		}
+	}
 
 	@api
 	public static class shutdown_server extends AbstractFunction implements Optimizable {

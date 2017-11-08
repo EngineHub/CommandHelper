@@ -886,18 +886,7 @@ public class EventBinding {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			String id = args[0].val();
-			for (Driver d : Driver.values()) {
-				Set<BoundEvent> events = EventUtils.GetEvents(d);
-				if (events != null) {
-					for (BoundEvent b : events) {
-						if (b.getId().equals(id)) {
-							return CBoolean.TRUE;
-						}
-					}
-				}
-			}
-			return CBoolean.FALSE;
+			return CBoolean.get(EventUtils.GetEventById(args[0].val()) != null);
 		}
 
 		@Override
