@@ -130,7 +130,7 @@ public class ClassDiscoveryCache {
 			}
 			
 			if(logger != null){
-				logger.log(Level.INFO, "Performing one time scan of {0}, this may take a few moments.", fromClassLocation);
+				logger.log(Level.INFO, "[CommandHelper] Performing one time scan of {0}, this may take a few moments.", fromClassLocation);
 			}
 			
 			ClassDiscoveryURLCache cache = new ClassDiscoveryURLCache(fromClassLocation, progress);
