@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("PlayerOfflineException")
 public class CREPlayerOfflineException extends CREException {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("PlayerOfflineException");
+
     public CREPlayerOfflineException(String msg, Target t) {
 	super(msg, t);
     }

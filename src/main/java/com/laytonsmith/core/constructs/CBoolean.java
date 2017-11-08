@@ -14,6 +14,9 @@ import java.util.Set;
 @typeof("boolean")
 public final class CBoolean extends CPrimitive implements Cloneable {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("boolean");
+
     public static final long serialVersionUID = 1L;
 
     /**
@@ -119,7 +122,7 @@ public final class CBoolean extends CPrimitive implements Cloneable {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.build("primitive")};
+	return new CClassType[]{CPrimitive.TYPE};
     }
 
     @Override

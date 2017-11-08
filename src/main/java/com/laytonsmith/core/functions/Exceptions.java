@@ -427,7 +427,7 @@ public class Exceptions {
 					throw ex;
 				}
 				AbstractCREException e = AbstractCREException.getAbstractCREException(ex);
-				CClassType exceptionType = new CClassType(e.getExceptionType(), t);
+				CClassType exceptionType = e.getExceptionType();
 				for(int i = 1; i < nodes.length - 1; i+=2){
 					ParseTree assign = nodes[i];
 					CClassType clauseType = ((CClassType)assign.getChildAt(0).getData());
@@ -439,7 +439,7 @@ public class Exceptions {
 							// This should eventually be changed to be of the appropriate type. Unfortunately, that will
 							// require reworking basically everything. We need all functions to accept Mixed, instead of Construct.
 							// This will have to do in the meantime.
-							varList.set(new IVariable(new CClassType("array", t), var.getVariableName(), e.getExceptionObject(), t));
+							varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(), t));
 							parent.eval(nodes[i + 1], env);
 							varList.remove(var.getVariableName());
 						} catch (ConfigRuntimeException | FunctionReturnException newEx){
@@ -511,7 +511,7 @@ public class Exceptions {
 				if(CFunction.IsFunction(assign, DataHandling.assign.class)) {
 					// assign() will validate params 0 and 1
 					CClassType type = ((CClassType)assign.getChildAt(0).getData());
-					if(!type.unsafeDoesExtend(new CClassType("Throwable", t))){
+					if(!type.unsafeDoesExtend(CREThrowable.TYPE)){
 						throw new ConfigCompileException("The type defined in a catch clause must extend the"
 								+ " Throwable class.", t);
 					}

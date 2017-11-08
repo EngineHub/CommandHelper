@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("IncludeException")
 public class CREIncludeException extends CREException {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("IncludeException");
+
     public CREIncludeException(String msg, Target t) {
 	super(msg, t);
     }

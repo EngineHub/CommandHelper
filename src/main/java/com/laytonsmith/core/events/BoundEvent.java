@@ -269,7 +269,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
                     //or the event will add it later, manually.
                 }
             }
-            env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(new CClassType("array", Target.UNKNOWN), eventObjName, ca, Target.UNKNOWN));
+	    env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, ca, Target.UNKNOWN));
             env.getEnv(GlobalEnv.class).SetEvent(activeEvent);
             activeEvent.addHistory("Triggering bound event: " + this);
             try{
@@ -298,7 +298,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
     public void manual_trigger(CArray event) throws EventException{
         try {
             Environment env = originalEnv.clone();
-            env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(new CClassType("array", Target.UNKNOWN), eventObjName, event, Target.UNKNOWN));
+            env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, event, Target.UNKNOWN));
             Map<String, Construct> map = new HashMap<>();
             for(String key : event.stringKeySet()){
                 map.put(key, event.get(key, Target.UNKNOWN));

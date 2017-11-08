@@ -12,6 +12,9 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 @typeof("int")
 public class CInt extends CNumber implements Cloneable {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("int");
+
     public static final long serialVersionUID = 1L;
     final long val;
 
@@ -55,7 +58,7 @@ public class CInt extends CNumber implements Cloneable {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.build("number")};
+	return new CClassType[]{CNumber.TYPE};
     }
 
     @Override

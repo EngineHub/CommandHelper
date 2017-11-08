@@ -24,7 +24,7 @@ public class ArrayAccessRunner extends AbstractMixedInterfaceRunner {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.MIXED, CClassType.build("Sizeable")};
+	return new CClassType[]{Mixed.TYPE, Sizeable.TYPE};
     }
 
     @Override

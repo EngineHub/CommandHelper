@@ -24,7 +24,7 @@ import java.util.Map;
  * written entirely in MethodScript, and does not directly run any java.
  */
 public abstract class CompositeFunction extends AbstractFunction {
-	
+
 	private static final Map<Class<? extends CompositeFunction>, ParseTree> cachedScripts = new HashMap<>();
 
 	@Override
@@ -32,7 +32,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 		ParseTree tree;
 		if(!cachedScripts.containsKey(this.getClass())){
 			try {
-				
+
 				String script = script();
 				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true))
 						// the root of the tree is null, so go ahead and pull it up
@@ -50,7 +50,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 		GlobalEnv env = environment.getEnv(GlobalEnv.class);
 		IVariableList oldVariables = env.GetVarList();
 		IVariableList newVariables = new IVariableList();
-		newVariables.set(new IVariable(new CClassType("array", t), "@arguments", new CArray(t, args.length, args), t));
+		newVariables.set(new IVariable(CClassType.get("array"), "@arguments", new CArray(t, args.length, args), t));
 		env.SetVarList(newVariables);
 		Construct ret = CVoid.VOID;
 		try {
@@ -66,13 +66,13 @@ public abstract class CompositeFunction extends AbstractFunction {
 	 * The script that will be compiled and run when this function is executed. The value array @arguments will be set with the
 	 * function inputs. Variables set in this script will not leak to the actual script environment, but in general, the rest of
 	 * the environment is identical, and so any other changes to the environment will persist. To return a value, use return().
-	 * @return 
+	 * @return
 	 */
 	protected abstract String script();
-	
+
 	/**
 	 * This method can be overridden to return false if the script should not be compiled and cached.
-	 * @return 
+	 * @return
 	 */
 	protected boolean cacheCompile(){
 		return true;
@@ -88,5 +88,5 @@ public abstract class CompositeFunction extends AbstractFunction {
 		// This defeats the purpose, so don't allow this.
 		return false;
 	}
-	
+
 }

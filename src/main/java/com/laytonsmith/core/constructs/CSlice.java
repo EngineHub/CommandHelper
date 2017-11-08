@@ -22,6 +22,9 @@ import java.util.Stack;
 @typeof("slice")
 public class CSlice extends CArray {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("slice");
+
     private long start;
     private long finish;
     private int direction;
@@ -202,7 +205,7 @@ public class CSlice extends CArray {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.build("array")};
+	return new CClassType[]{CArray.TYPE};
     }
 
     @Override

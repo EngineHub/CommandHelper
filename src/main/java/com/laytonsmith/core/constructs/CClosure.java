@@ -16,11 +16,9 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
-import com.laytonsmith.core.natives.interfaces.ObjectModifier;
-import com.laytonsmith.core.natives.interfaces.ObjectType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,64 +38,67 @@ public class CClosure extends Construct {
     protected final CClassType[] types;
     protected final CClassType returnType;
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("closure");
+
     public CClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Construct[] defaults, CClassType[] types, Target t) {
-	super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);
-	this.node = node;
-	this.env = env;
-	this.names = names;
-	this.defaults = defaults;
-	this.types = types;
-	this.returnType = returnType;
-	for (String pName : names) {
-	    if (pName.equals("@arguments")) {
-		CHLog.GetLogger().w(CHLog.Tags.COMPILER, "This closure overrides the builtin @arguments parameter", t);
-		break;
-	    }
-	}
+        super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);
+        this.node = node;
+        this.env = env;
+        this.names = names;
+        this.defaults = defaults;
+        this.types = types;
+        this.returnType = returnType;
+        for (String pName : names) {
+            if (pName.equals("@arguments")) {
+                CHLog.GetLogger().w(CHLog.Tags.COMPILER, "This closure overrides the builtin @arguments parameter", t);
+                break;
+            }
+        }
     }
 
     @Override
     public String val() {
-	StringBuilder b = new StringBuilder();
-	condense(getNode(), b);
-	return b.toString();
+        StringBuilder b = new StringBuilder();
+        condense(getNode(), b);
+        return b.toString();
     }
 
     private void condense(ParseTree node, StringBuilder b) {
-	if (node == null) {
-	    return;
-	}
-	if (node.getData() instanceof CFunction) {
-	    b.append(((CFunction) node.getData()).val()).append("(");
-	    for (int i = 0; i < node.numberOfChildren(); i++) {
-		condense(node.getChildAt(i), b);
-		if (i != node.numberOfChildren() - 1 && !((CFunction) node.getData()).val().equals("__autoconcat__")) {
-		    b.append(",");
-		}
-	    }
-	    b.append(")");
-	} else if (node.getData() instanceof CString) {
-	    CString data = (CString) node.getData();
-	    // Convert: \ -> \\ and ' -> \'
-	    b.append("'").append(data.val().replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n").replace("'", "\\'")).append("'");
-	} else if (node.getData() instanceof IVariable) {
-	    b.append(((IVariable) node.getData()).getVariableName());
-	} else {
-	    b.append(node.getData().val());
-	}
+        if (node == null) {
+            return;
+        }
+        if (node.getData() instanceof CFunction) {
+            b.append(((CFunction) node.getData()).val()).append("(");
+            for (int i = 0; i < node.numberOfChildren(); i++) {
+                condense(node.getChildAt(i), b);
+                if (i != node.numberOfChildren() - 1 && !((CFunction) node.getData()).val().equals("__autoconcat__")) {
+                    b.append(",");
+                }
+            }
+            b.append(")");
+        } else if (node.getData() instanceof CString) {
+            CString data = (CString) node.getData();
+            // Convert: \ -> \\ and ' -> \'
+            b.append("'").append(data.val().replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n").replace("'", "\\'")).append("'");
+        } else if (node.getData() instanceof IVariable) {
+            b.append(((IVariable) node.getData()).getVariableName());
+        } else {
+            b.append(node.getData().val());
+        }
     }
 
     public ParseTree getNode() {
-	return node;
+        return node;
     }
 
     @Override
     public CClosure clone() throws CloneNotSupportedException {
-	CClosure clone = (CClosure) super.clone();
-	if (this.node != null) {
-	    clone.node = this.node.clone();
-	}
-	return clone;
+        CClosure clone = (CClosure) super.clone();
+        if (this.node != null) {
+            clone.node = this.node.clone();
+        }
+        return clone;
     }
 
     /**
@@ -108,7 +109,7 @@ public class CClosure extends Construct {
      * @return
      */
     public synchronized Environment getEnv() {
-	return env;
+        return env;
     }
 
     /**
@@ -137,115 +138,115 @@ public class CClosure extends Construct {
      * @throws FunctionReturnException If the closure has a return() call in it.
      */
     public void execute(Construct... values) throws ConfigRuntimeException, ProgramFlowManipulationException, FunctionReturnException, CancelCommandException {
-	if (node == null) {
-	    return;
-	}
-	StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
-	stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
-	try {
-	    Environment environment;
-	    synchronized (this) {
-		environment = env.clone();
-	    }
-	    if (values != null) {
-		for (int i = 0; i < names.length; i++) {
-		    String name = names[i];
-		    Construct value;
-		    try {
-			value = values[i];
-		    } catch (Exception e) {
-			value = defaults[i].clone();
-		    }
-		    environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value, getTarget()));
-		}
-	    }
-	    boolean hasArgumentsParam = false;
-	    for (String pName : this.names) {
-		if (pName.equals("@arguments")) {
-		    hasArgumentsParam = true;
-		    break;
-		}
-	    }
+        if (node == null) {
+            return;
+        }
+        StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+        stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
+        try {
+            Environment environment;
+            synchronized (this) {
+                environment = env.clone();
+            }
+            if (values != null) {
+                for (int i = 0; i < names.length; i++) {
+                    String name = names[i];
+                    Construct value;
+                    try {
+                        value = values[i];
+                    } catch (Exception e) {
+                        value = defaults[i].clone();
+                    }
+                    environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value, getTarget()));
+                }
+            }
+            boolean hasArgumentsParam = false;
+            for (String pName : this.names) {
+                if (pName.equals("@arguments")) {
+                    hasArgumentsParam = true;
+                    break;
+                }
+            }
 
-	    if (!hasArgumentsParam) {
-		CArray arguments = new CArray(node.getData().getTarget());
-		if (values != null) {
-		    for (Construct value : values) {
-			arguments.push(value, node.getData().getTarget());
-		    }
-		}
-		environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(new CClassType("array", Target.UNKNOWN), "@arguments", arguments, node.getData().getTarget()));
-	    }
+            if (!hasArgumentsParam) {
+                CArray arguments = new CArray(node.getData().getTarget());
+                if (values != null) {
+                    for (Construct value : values) {
+                        arguments.push(value, node.getData().getTarget());
+                    }
+                }
+                environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, node.getData().getTarget()));
+            }
 
-	    ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());
-	    List<ParseTree> children = new ArrayList<ParseTree>();
-	    children.add(node);
-	    newNode.setChildren(children);
-	    try {
-		MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class).GetScript());
-	    } catch (LoopManipulationException e) {
-		//This shouldn't ever happen.
-		LoopManipulationException lme = ((LoopManipulationException) e);
-		Target t = lme.getTarget();
-		ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A " + lme.getName() + "() bubbled up to the top of"
-			+ " a closure, which is unexpected behavior.", t), environment);
-	    } catch (FunctionReturnException ex) {
-		// Check the return type of the closure to see if it matches the defined type
-		// Normal execution.
-		Construct ret = ex.getReturn();
-		if (!InstanceofUtil.isInstanceof(ret, returnType)) {
-		    throw new CRECastException("Expected closure to return a value of type " + returnType.val()
-			    + " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
-		}
-		// Now rethrow it
-		throw ex;
-	    } catch (CancelCommandException e) {
-		// die()
-	    } catch (ConfigRuntimeException ex) {
-		if (ex instanceof AbstractCREException) {
-		    ((AbstractCREException) ex).freezeStackTraceElements(stManager);
-		}
-		throw ex;
-	    } catch (Throwable t) {
-		// Not sure. Pop and re-throw.
-		throw t;
-	    } finally {
-		stManager.popStackTraceElement();
-	    }
-	    // If we got here, then there was no return type. This is fine, but only for returnType void or auto.
-	    if (!(returnType.equals(CClassType.AUTO) || returnType.equals(CClassType.VOID))) {
-		throw new CRECastException("Expecting closure to return a value of type " + returnType.val() + ","
-			+ " but no value was returned.", node.getTarget());
-	    }
-	} catch (CloneNotSupportedException ex) {
-	    Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
-	}
+            ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());
+            List<ParseTree> children = new ArrayList<ParseTree>();
+            children.add(node);
+            newNode.setChildren(children);
+            try {
+                MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class).GetScript());
+            } catch (LoopManipulationException e) {
+                //This shouldn't ever happen.
+                LoopManipulationException lme = ((LoopManipulationException) e);
+                Target t = lme.getTarget();
+                ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A " + lme.getName() + "() bubbled up to the top of"
+                        + " a closure, which is unexpected behavior.", t), environment);
+            } catch (FunctionReturnException ex) {
+                // Check the return type of the closure to see if it matches the defined type
+                // Normal execution.
+                Construct ret = ex.getReturn();
+                if (!InstanceofUtil.isInstanceof(ret, returnType)) {
+                    throw new CRECastException("Expected closure to return a value of type " + returnType.val()
+                            + " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
+                }
+                // Now rethrow it
+                throw ex;
+            } catch (CancelCommandException e) {
+                // die()
+            } catch (ConfigRuntimeException ex) {
+                if (ex instanceof AbstractCREException) {
+                    ((AbstractCREException) ex).freezeStackTraceElements(stManager);
+                }
+                throw ex;
+            } catch (Throwable t) {
+                // Not sure. Pop and re-throw.
+                throw t;
+            } finally {
+                stManager.popStackTraceElement();
+            }
+            // If we got here, then there was no return type. This is fine, but only for returnType void or auto.
+            if (!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
+                throw new CRECastException("Expecting closure to return a value of type " + returnType.val() + ","
+                        + " but no value was returned.", node.getTarget());
+            }
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
     public boolean isDynamic() {
-	return false;
+        return false;
     }
 
     @Override
     public String docs() {
-	return "A closure is a data type that contains executable code. This is similar to a procedure, but the value is first class,"
-		+ " and can be stored in variables, and executed.";
+        return "A closure is a data type that contains executable code. This is similar to a procedure, but the value is first class,"
+                + " and can be stored in variables, and executed.";
     }
 
     @Override
     public Version since() {
-	return CHVersion.V3_3_1;
+        return CHVersion.V3_3_1;
     }
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.MIXED};
+        return new CClassType[]{Mixed.TYPE};
     }
 
     @Override
     public CClassType[] getInterfaces() {
-	return new CClassType[]{};
+        return new CClassType[]{};
     }
 
 }

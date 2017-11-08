@@ -29,7 +29,7 @@ public class IVariableList {
 
     public IVariable get(String name, Target t, boolean bypassAssignedCheck){
         if(!varList.containsKey(name)){
-            this.set(new IVariable(CClassType.AUTO, name, CNull.UNDEFINED, t));
+            this.set(new IVariable(Auto.TYPE, name, CNull.UNDEFINED, t));
         }
 		IVariable v = varList.get(name);
 

@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("LengthException")
 public class CRELengthException extends CREException {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("LengthException");
+
     public CRELengthException(String msg, Target t) {
 	super(msg, t);
     }

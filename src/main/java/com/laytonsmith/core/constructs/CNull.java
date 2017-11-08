@@ -10,6 +10,9 @@ import com.laytonsmith.core.CHVersion;
 @typeof("null")
 public final class CNull extends Construct implements Cloneable {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("null");
+
     public static final long serialVersionUID = 1L;
 
     /**

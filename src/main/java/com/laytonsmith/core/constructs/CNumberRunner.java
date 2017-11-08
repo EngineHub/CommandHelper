@@ -24,7 +24,7 @@ public class CNumberRunner extends AbstractMixedInterfaceRunner {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.build("primitive")};
+	return new CClassType[]{CPrimitive.TYPE};
     }
 
     @Override

@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("FormatException")
 public class CREFormatException extends CREException {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("FormatException");
+
     public CREFormatException(String msg, Target t) {
 	super(msg, t);
     }

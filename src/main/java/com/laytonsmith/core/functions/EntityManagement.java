@@ -1569,6 +1569,8 @@ public class EntityManagement {
 					l = ((MCPlayer) cs).getLocation();
 				} else if (cs instanceof MCBlockCommandSender){
 					l = ((MCBlockCommandSender) cs).getBlock().getRelative(MCBlockFace.UP).getLocation();
+				} else if(cs instanceof MCCommandMinecart) {
+					l = ((MCCommandMinecart) cs).getLocation().add(0, 1, 0); // One block above the minecart.
 				} else {
 					throw new CREPlayerOfflineException("A physical commandsender must exist or location must be explicit.", t);
 				}

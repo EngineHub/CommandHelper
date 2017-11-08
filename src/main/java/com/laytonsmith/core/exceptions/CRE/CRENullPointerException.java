@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("NullPointerException")
 public class CRENullPointerException extends CREException {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("NullPointerException");
+
     public CRENullPointerException(String msg, Target t) {
 	super(msg, t);
     }

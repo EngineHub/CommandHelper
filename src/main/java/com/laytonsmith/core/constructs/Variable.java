@@ -2,6 +2,7 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
@@ -104,7 +105,7 @@ public class Variable extends Construct {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.MIXED};
+	return new CClassType[]{Mixed.TYPE};
     }
 
     @Override

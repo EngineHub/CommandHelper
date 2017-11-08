@@ -37,6 +37,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
@@ -87,6 +88,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.entity.minecart.CommandMinecart;
 
 /**
  * Entry point for the plugin.
@@ -560,15 +562,15 @@ public class CommandHelperPlugin extends JavaPlugin {
 			if (sender instanceof Player) {
 				PlayerCommandPreprocessEvent pcpe = new PlayerCommandPreprocessEvent((Player) sender, command);
 				playerListener.onPlayerCommandPreprocess(pcpe);
-			} else if (sender instanceof ConsoleCommandSender) {
+			} else if (sender instanceof ConsoleCommandSender
+					|| sender instanceof BlockCommandSender || sender instanceof CommandMinecart) {
+				// Console commands and command blocks/minecarts all fire the same event, so pass them to the
+				// event handler that would get them if they would not have started with "/runalias".
 				if (command.startsWith("/")) {
 					command = command.substring(1);
 				}
-				ServerCommandEvent sce = new ServerCommandEvent((ConsoleCommandSender) sender, command);
+				ServerCommandEvent sce = new ServerCommandEvent(sender, command);
 				serverListener.onServerCommand(sce);
-			} else if(sender instanceof BlockCommandSender){
-				MCCommandSender s = new BukkitMCBlockCommandSender((BlockCommandSender)sender);
-				Static.getAliasCore().alias(command, s);
 			}
 			return true;
 		} else if(cmdName.equalsIgnoreCase("interpreter-on")){
@@ -576,7 +578,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				int interpreterTimeout = Prefs.InterpreterTimeout();
 				if(interpreterTimeout != 0){
 					interpreterUnlockedUntil = (interpreterTimeout * 60 * 1000) + System.currentTimeMillis();
-					sender.sendMessage("Inpterpreter mode unlocked for " + interpreterTimeout + " minute"
+					sender.sendMessage("Interpreter mode unlocked for " + interpreterTimeout + " minute"
 							+ (interpreterTimeout==1?"":"s"));
 				}
 			} else {

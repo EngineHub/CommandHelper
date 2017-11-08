@@ -23,6 +23,7 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.keywords.InKeyword;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
@@ -2164,7 +2165,7 @@ public class DataHandling {
 	    ParseTree tree = null;
 	    List<String> varNames = new ArrayList<>();
 	    boolean usesAssign = false;
-	    CClassType returnType = CClassType.AUTO;
+	    CClassType returnType = Auto.TYPE;
 	    if (nodes[0].getData() instanceof CClassType) {
 		returnType = (CClassType) nodes[0].getData();
 		ParseTree[] newNodes = new ParseTree[nodes.length - 1];
@@ -2946,10 +2947,10 @@ public class DataHandling {
 	public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 	    if (nodes.length == 0) {
 		//Empty closure, do nothing.
-		return new CClosure(null, env, CClassType.AUTO, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
+		return new CClosure(null, env, Auto.TYPE, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
 	    }
 	    // Handle the closure type first thing
-	    CClassType returnType = CClassType.AUTO;
+	    CClassType returnType = Auto.TYPE;
 	    if (nodes[0].getData() instanceof CClassType) {
 		returnType = (CClassType) nodes[0].getData();
 		ParseTree[] newNodes = new ParseTree[nodes.length - 1];
@@ -3050,10 +3051,10 @@ public class DataHandling {
 	public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 	    if (nodes.length == 0) {
 		//Empty closure, do nothing.
-		return new CClosure(null, env, CClassType.AUTO, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
+		return new CClosure(null, env, Auto.TYPE, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
 	    }
 	    // Handle the closure type first thing
-	    CClassType returnType = CClassType.AUTO;
+	    CClassType returnType = Auto.TYPE;
 	    if (nodes[0].getData() instanceof CClassType) {
 		returnType = (CClassType) nodes[0].getData();
 		ParseTree[] newNodes = new ParseTree[nodes.length - 1];
@@ -3651,7 +3652,7 @@ public class DataHandling {
 	@Override
 	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 	    try {
-		return new CClassType(args[0].typeof(), t);
+		return args[0].typeof();
 	    } catch (IllegalArgumentException ex) {
 		throw new Error("Class " + args[0].getClass().getName() + " is not annotated with @typeof. Please report this"
 			+ " error to the developers.");

@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("ScoreboardException")
 public class CREScoreboardException extends CREException {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("ScoreboardException");
+
     public CREScoreboardException(String msg, Target t) {
 	super(msg, t);
     }

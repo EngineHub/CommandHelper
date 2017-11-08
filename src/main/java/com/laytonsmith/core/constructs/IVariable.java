@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
@@ -24,28 +25,28 @@ public class IVariable extends Construct implements Cloneable {
 	}
 	this.var_value = new CString("", t);
 	this.name = name;
-	this.type = CClassType.AUTO;
+	this.type = Auto.TYPE;
 	this.definedTarget = t;
     }
 
     public IVariable(CClassType type, String name, Construct value, Target t) {
-	super(name, ConstructType.IVARIABLE, t);
-	if (!type.equals(CClassType.AUTO) && !(value instanceof CNull)) {
-	    if (!InstanceofUtil.isInstanceof(value, type.val())) {
-		throw new CRECastException(name + " is of type " + type.val() + ", but a value of type "
-			+ value.typeof() + " was assigned to it.", t);
-	    }
-	}
-	if (type.equals(CClassType.VOID)) {
-	    throw new CRECastException("Variables may not be of type void", t);
-	}
-	this.type = type;
-	if (value == null) {
-	    throw new NullPointerException();
-	}
-	this.var_value = value;
-	this.name = name;
-	this.definedTarget = t;
+        super(name, ConstructType.IVARIABLE, t);
+		if(!type.equals(Auto.TYPE) && !(value instanceof CNull)){
+			if(!InstanceofUtil.isInstanceof(value, type.val())){
+				throw new CRECastException(name + " is of type " + type.val() + ", but a value of type "
+						+ value.typeof() + " was assigned to it.", t);
+			}
+		}
+		if(type.equals(CVoid.TYPE)){
+			throw new CRECastException("Variables may not be of type void", t);
+		}
+		this.type = type;
+		if(value == null){
+			throw new NullPointerException();
+		}
+        this.var_value = value;
+        this.name = name;
+		this.definedTarget = t;
     }
 
     @Override
@@ -119,7 +120,7 @@ public class IVariable extends Construct implements Cloneable {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.MIXED};
+	return new CClassType[]{Mixed.TYPE};
     }
 
     @Override

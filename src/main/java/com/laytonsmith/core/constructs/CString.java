@@ -17,8 +17,11 @@ import java.util.Set;
 @typeof("string")
 public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 
-    public CString(String value, Target t) {
-	super(value == null ? "" : value, ConstructType.STRING, t);
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("string");
+
+    public CString(String value, Target t){
+        super(value==null?"":value, ConstructType.STRING, t);
     }
 
     public CString(char value, Target t) {
@@ -105,12 +108,12 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.build("primitive")};
+	return new CClassType[]{CPrimitive.TYPE};
     }
 
     @Override
     public CClassType[] getInterfaces() {
-	return new CClassType[]{CClassType.build("ArrayAccess")};
+	return new CClassType[]{ArrayAccess.TYPE};
     }
 
     @Override

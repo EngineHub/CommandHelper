@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("IndexOverflowException")
 public class CREIndexOverflowException extends CREException {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("IndexOverflowException");
+
     public CREIndexOverflowException(String msg, Target t) {
 	super(msg, t);
     }

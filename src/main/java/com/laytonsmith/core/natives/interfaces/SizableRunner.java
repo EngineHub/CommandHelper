@@ -23,7 +23,7 @@ public class SizableRunner extends AbstractMixedInterfaceRunner {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.MIXED};
+	return new CClassType[]{Mixed.TYPE};
     }
 
     @Override

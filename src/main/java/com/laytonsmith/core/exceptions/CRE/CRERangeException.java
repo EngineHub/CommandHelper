@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("RangeException")
 public class CRERangeException extends CREException {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("RangeException");
+
     public CRERangeException(String msg, Target t) {
 	super(msg, t);
     }

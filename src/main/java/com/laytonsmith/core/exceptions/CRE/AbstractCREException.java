@@ -33,36 +33,36 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
     private List<StackTraceElement> stackTrace = null;
 
     public AbstractCREException(String msg, Target t) {
-	super(msg, t);
+        super(msg, t);
     }
 
     public AbstractCREException(String msg, Target t, Throwable cause) {
-	super(msg, t, cause);
+        super(msg, t, cause);
     }
 
     @Override
     public Class<? extends Documentation>[] seeAlso() {
-	seealso see = this.getClass().getAnnotation(seealso.class);
-	if (see == null) {
-	    return EMPTY_CLASS;
-	} else {
-	    return see.value();
-	}
+        seealso see = this.getClass().getAnnotation(seealso.class);
+        if (see == null) {
+            return EMPTY_CLASS;
+        } else {
+            return see.value();
+        }
     }
 
     @Override
     public URL getSourceJar() {
-	return ClassDiscovery.GetClassContainer(this.getClass());
+        return ClassDiscovery.GetClassContainer(this.getClass());
     }
 
     @Override
     public String getName() {
-	typeof to = this.getClass().getAnnotation(typeof.class);
-	if (to == null) {
-	    throw new Error("ConfigRuntimeException subtypes must annotate themselves with @typeof, if they are instantiateable.");
-	} else {
-	    return to.value();
-	}
+        typeof to = this.getClass().getAnnotation(typeof.class);
+        if (to == null) {
+            throw new Error("ConfigRuntimeException subtypes must annotate themselves with @typeof, if they are instantiateable.");
+        } else {
+            return to.value();
+        }
     }
 
     /**
@@ -70,8 +70,8 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
      *
      * @return
      */
-    public String getExceptionType() {
-	return getName();
+    public CClassType getExceptionType() {
+        return CClassType.get(getName());
     }
 
     /**
@@ -82,11 +82,11 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
      * @return
      */
     public static String getExceptionName(ConfigRuntimeException ex) {
-	if (ex instanceof AbstractCREException) {
-	    return ((AbstractCREException) ex).getName();
-	} else {
-	    return ex.getClass().getName();
-	}
+        if (ex instanceof AbstractCREException) {
+            return ((AbstractCREException) ex).getName();
+        } else {
+            return ex.getClass().getName();
+        }
     }
 
     private CArray exceptionObject = null;
@@ -97,52 +97,52 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
      * @return
      */
     public CArray getExceptionObject() {
-	CArray ret = new CArray(Target.UNKNOWN);
-	ret.set("classType", new CClassType(this.getName(), Target.UNKNOWN), Target.UNKNOWN);
-	ret.set("message", this.getMessage());
-	CArray stackTrace = new CArray(Target.UNKNOWN);
-	ret.set("stackTrace", stackTrace, Target.UNKNOWN);
-	for (StackTraceElement e : this.getCREStackTrace()) {
-	    CArray element = e.getObjectFor();
-	    stackTrace.push(element, Target.UNKNOWN);
-	}
-	ret.set("causedBy", getCausedBy(this.getCause()), Target.UNKNOWN);
-	return ret;
+        CArray ret = new CArray(Target.UNKNOWN);
+        ret.set("classType", this.getExceptionType(), Target.UNKNOWN);
+        ret.set("message", this.getMessage());
+        CArray stackTrace = new CArray(Target.UNKNOWN);
+        ret.set("stackTrace", stackTrace, Target.UNKNOWN);
+        for (StackTraceElement e : this.getCREStackTrace()) {
+            CArray element = e.getObjectFor();
+            stackTrace.push(element, Target.UNKNOWN);
+        }
+        ret.set("causedBy", getCausedBy(this.getCause()), Target.UNKNOWN);
+        return ret;
     }
 
     @SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
     public static AbstractCREException getFromCArray(CArray exception, Target t) throws ClassNotFoundException {
-	String classType = exception.get("classType", t).val();
-	Class<? extends Mixed> clzz = NativeTypeList.getNativeClass(classType);
-	Throwable cause = null;
-	if (exception.get("causedBy", t) instanceof CArray) {
-	    // It has a cause
-	    cause = new CRECausedByWrapper((CArray) exception.get("causedBy", t));
-	}
-	String message = exception.get("message", t).val();
-	List<StackTraceElement> st = new ArrayList<>();
-	for (Construct consStElement : Static.getArray(exception.get("stackTrace", t), t).asList()) {
-	    CArray stElement = Static.getArray(consStElement, t);
-	    int line = Static.getInt32(stElement.get("line", t), t);
-	    File f = new File(stElement.get("file", t).val());
-	    int col = 0; //
-	    st.add(new StackTraceElement(stElement.get("id", t).val(), new Target(line, f, col)));
-	}
-	// Now we have parsed everything into POJOs
-	Class[] types = new Class[]{String.class, Target.class, Throwable.class};
-	Object[] args = new Object[]{message, t, cause};
-	AbstractCREException ex = (AbstractCREException) ReflectionUtils.newInstance(clzz, types, args);
-	ex.stackTrace = st;
-	return ex;
+        String classType = exception.get("classType", t).val();
+        Class<? extends Mixed> clzz = NativeTypeList.getNativeClass(classType);
+        Throwable cause = null;
+        if (exception.get("causedBy", t) instanceof CArray) {
+            // It has a cause
+            cause = new CRECausedByWrapper((CArray) exception.get("causedBy", t));
+        }
+        String message = exception.get("message", t).val();
+        List<StackTraceElement> st = new ArrayList<>();
+        for (Construct consStElement : Static.getArray(exception.get("stackTrace", t), t).asList()) {
+            CArray stElement = Static.getArray(consStElement, t);
+            int line = Static.getInt32(stElement.get("line", t), t);
+            File f = new File(stElement.get("file", t).val());
+            int col = 0; //
+            st.add(new StackTraceElement(stElement.get("id", t).val(), new Target(line, f, col)));
+        }
+        // Now we have parsed everything into POJOs
+        Class[] types = new Class[]{String.class, Target.class, Throwable.class};
+        Object[] args = new Object[]{message, t, cause};
+        AbstractCREException ex = (AbstractCREException) ReflectionUtils.newInstance(clzz, types, args);
+        ex.stackTrace = st;
+        return ex;
     }
 
     private static Construct getCausedBy(Throwable causedBy) {
-	if (causedBy == null || !(causedBy instanceof CRECausedByWrapper)) {
-	    return CNull.NULL;
-	}
-	CRECausedByWrapper cre = (CRECausedByWrapper) causedBy;
-	CArray ret = cre.getException();
-	return ret;
+        if (causedBy == null || !(causedBy instanceof CRECausedByWrapper)) {
+            return CNull.NULL;
+        }
+        CRECausedByWrapper cre = (CRECausedByWrapper) causedBy;
+        CArray ret = cre.getException();
+        return ret;
     }
 
     /**
@@ -152,15 +152,15 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
      * @return
      */
     public static AbstractCREException getAbstractCREException(ConfigRuntimeException ex) {
-	if (ex instanceof AbstractCREException) {
-	    return (AbstractCREException) ex;
-	}
-	throw new Error("Unexpected CRE exception that isn't convertable to AbstractCREException");
+        if (ex instanceof AbstractCREException) {
+            return (AbstractCREException) ex;
+        }
+        throw new Error("Unexpected CRE exception that isn't convertable to AbstractCREException");
     }
 
     @Override
     public String val() {
-	return getName() + ":" + getMessage();
+        return getName() + ":" + getMessage();
     }
 
     /**
@@ -174,82 +174,82 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
      */
     @Override
     public Construct get(String index, Target t) throws ConfigRuntimeException {
-	return exceptionObject.get(index, t);
+        return exceptionObject.get(index, t);
     }
 
     @Override
     public Construct get(int index, Target t) throws ConfigRuntimeException {
-	return exceptionObject.get(index, t);
+        return exceptionObject.get(index, t);
     }
 
     @Override
     public Construct get(Construct index, Target t) throws ConfigRuntimeException {
-	return exceptionObject.get(index, t);
+        return exceptionObject.get(index, t);
     }
 
     @Override
     public Set<Construct> keySet() {
-	return exceptionObject.keySet();
+        return exceptionObject.keySet();
     }
 
     @Override
     public long size() {
-	return exceptionObject.size();
+        return exceptionObject.size();
     }
 
     @Override
     public boolean isAssociative() {
-	return exceptionObject.isAssociative();
+        return exceptionObject.isAssociative();
     }
 
     @Override
     public boolean canBeAssociative() {
-	return exceptionObject.canBeAssociative();
+        return exceptionObject.canBeAssociative();
     }
 
     @Override
     public Construct slice(int begin, int end, Target t) {
-	return exceptionObject.slice(begin, end, t);
+        return exceptionObject.slice(begin, end, t);
     }
 
     @Override
     public AbstractCREException clone() throws CloneNotSupportedException {
-	AbstractCREException obj = (AbstractCREException) super.clone();
+        AbstractCREException obj = (AbstractCREException) super.clone();
 
-	return obj;
+        return obj;
     }
 
     public void freezeStackTraceElements(StackTraceManager manager) {
-	if (this.stackTrace == null) {
-	    this.stackTrace = manager.getCurrentStackTrace();
-	}
+        if (this.stackTrace == null) {
+            this.stackTrace = manager.getCurrentStackTrace();
+        }
     }
 
     public List<StackTraceElement> getCREStackTrace() {
-	if (this.stackTrace == null) {
-	    return new ArrayList<>();
-	}
-	return new ArrayList<>(this.stackTrace);
+        if (this.stackTrace == null) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(this.stackTrace);
     }
 
     @Override
     public Version since() {
-	throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public String docs() {
-	throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public CClassType[] getInterfaces() {
-	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public CClassType[] getSuperclasses() {
-	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
 }

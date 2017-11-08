@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("PluginInternalException")
 public class CREPluginInternalException extends CREException {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("PluginInternalException");
+
     public CREPluginInternalException(String msg, Target t) {
 	super(msg, t);
     }

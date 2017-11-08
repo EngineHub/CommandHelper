@@ -10,6 +10,9 @@ import com.laytonsmith.core.CHVersion;
 @typeof("void")
 public final class CVoid extends Construct implements Cloneable {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("void");
+
     /**
      * Void values do not normally need to be duplicated, since they are immutable, and for values that have an unknown
      * code target, are always equal. In cases where a void is generated from inside Java, this value should be

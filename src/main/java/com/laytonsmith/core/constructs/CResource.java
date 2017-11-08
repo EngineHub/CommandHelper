@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -13,6 +14,9 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @typeof("resource")
 public class CResource<T> extends Construct {
+
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("resource");
 
     private static final AtomicLong resourcePool = new AtomicLong(0);
 
@@ -109,7 +113,7 @@ public class CResource<T> extends Construct {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.MIXED};
+	return new CClassType[]{Mixed.TYPE};
     }
 
     @Override

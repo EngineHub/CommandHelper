@@ -10,7 +10,6 @@ import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.ObjectModifier;
-import com.laytonsmith.core.natives.interfaces.ObjectType;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -26,6 +25,9 @@ import java.util.EnumSet;
  */
 @typeof("byte_array")
 public class CByteArray extends CArray implements Sizeable, ArrayAccess {
+
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("byte_array");
 
     /**
      * Initial size of the ByteBuffer
@@ -511,12 +513,12 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.build("array")};
+	return new CClassType[]{CArray.TYPE};
     }
 
     @Override
     public CClassType[] getInterfaces() {
-	return new CClassType[]{CClassType.build("Sizeable", "ArrayAccess")};
+	return new CClassType[]{Sizeable.TYPE, ArrayAccess.TYPE};
     }
 
     /**
@@ -525,6 +527,8 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
     @typeof("ByteBackingArray")
     private static class CArrayByteBacking extends CArray {
 
+	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
+	public static final CClassType TYPE = CClassType.get("ByteBackingArray");
 	private final byte[] backing;
 	private String value = null;
 
@@ -609,7 +613,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@Override
 	public CClassType[] getSuperclasses() {
-	    return new CClassType[]{CClassType.build("array")};
+	    return new CClassType[]{CArray.TYPE};
 	}
 
 	@Override
@@ -619,11 +623,14 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@Override
 	public CClassType getContainingClass() {
-	    return new CClassType("byte_array", Target.UNKNOWN);
+	    return CByteArray.TYPE;
 	}
 
 	@typeof("ByteArrayReadOnlyException")
 	public static class CREByteArrayReadOnlyException extends CREReadOnlyException {
+
+	    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+	    public static final CClassType TYPE = CClassType.get("ByteArrayReadOnlyException");
 
 	    public CREByteArrayReadOnlyException(java.lang.String msg, com.laytonsmith.core.constructs.Target t) {
 		super(msg, t);
@@ -660,7 +667,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	    @Override
 	    public CClassType getContainingClass() {
-		return new CClassType("ByteBackingArray", Target.UNKNOWN);
+		return CArrayByteBacking.TYPE;
 	    }
 
 	}

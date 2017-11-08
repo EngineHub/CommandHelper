@@ -15,6 +15,7 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
@@ -111,7 +112,7 @@ public class PlayerManagement {
 				if (p instanceof MCConsoleCommandSender || "CONSOLE".equals(name)) {
 					name = Static.getConsoleName();
 				}
-				if (p instanceof MCBlockCommandSender) {
+				if (p instanceof MCBlockCommandSender || p instanceof MCCommandMinecart) {
 					name = Static.getBlockPrefix() + name;
 				}
 				return new CString(name, t);

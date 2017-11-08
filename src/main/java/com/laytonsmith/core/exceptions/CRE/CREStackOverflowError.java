@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("StackOverflowError")
 public class CREStackOverflowError extends CREError {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("StackOverflowError");
+
     public CREStackOverflowError(String msg, Target t) {
 	super(msg, t);
     }

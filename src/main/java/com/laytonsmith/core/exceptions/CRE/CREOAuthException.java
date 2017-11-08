@@ -13,6 +13,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("OAuthException")
 public class CREOAuthException extends CREException {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("OAuthException");
+
     public CREOAuthException(String msg, Target t) {
 	super(msg, t);
     }

@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("IOException")
 public class CREIOException extends CREException {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("IOException");
+
     public CREIOException(String msg, Target t) {
 	super(msg, t);
     }

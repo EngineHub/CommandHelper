@@ -36,10 +36,10 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
     public enum ConstructType {
 
-	TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT,
-	DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE, CLOSURE, LABEL, SLICE,
-	SYMBOL, IDENTIFIER, BRACE, BRACKET, BYTE_ARRAY, RESOURCE, LOCK, MUTABLE_PRIMITIVE,
-	CLASS_TYPE;
+        TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT,
+        DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE, CLOSURE, LABEL, SLICE,
+        SYMBOL, IDENTIFIER, BRACE, BRACKET, BYTE_ARRAY, RESOURCE, LOCK, MUTABLE_PRIMITIVE,
+        CLASS_TYPE;
     }
 
     private final ConstructType ctype;
@@ -49,7 +49,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
     private transient boolean wasIdentifier = false;
 
     public ConstructType getCType() {
-	return ctype;
+        return ctype;
     }
 
     /**
@@ -58,41 +58,41 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @param target
      */
     public void setTarget(Target target) {
-	this.target = target;
+        this.target = target;
     }
 
     public final String getValue() {
-	return val();
+        return val();
     }
 
     public int getLineNum() {
-	return target.line();
+        return target.line();
     }
 
     public File getFile() {
-	return target.file();
+        return target.file();
     }
 
     public int getColumn() {
-	return target.col();
+        return target.col();
     }
 
     public Target getTarget() {
-	return target;
+        return target;
     }
 
     public Construct(String value, ConstructType ctype, int line_num, File file, int column) {
-	this.value = value;
-	Static.AssertNonNull(value, "The string value may not be null.");
-	this.ctype = ctype;
-	this.target = new Target(line_num, file, column);
+        this.value = value;
+        Static.AssertNonNull(value, "The string value may not be null.");
+        this.ctype = ctype;
+        this.target = new Target(line_num, file, column);
     }
 
     public Construct(String value, ConstructType ctype, Target t) {
-	this.value = value;
-	Static.AssertNonNull(value, "The string value may not be null.");
-	this.ctype = ctype;
-	this.target = t;
+        this.value = value;
+        Static.AssertNonNull(value, "The string value may not be null.");
+        this.ctype = ctype;
+        this.target = t;
     }
 
     /**
@@ -102,15 +102,15 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      */
     @Override
     public String val() {
-	return value;
+        return value;
     }
 
     public void setWasIdentifier(boolean b) {
-	wasIdentifier = b;
+        wasIdentifier = b;
     }
 
     public boolean wasIdentifier() {
-	return wasIdentifier;
+        return wasIdentifier;
     }
 
     /**
@@ -120,17 +120,17 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @return
      */
     public String nval() {
-	return val();
+        return val();
     }
 
     @Override
     public String toString() {
-	return value;
+        return value;
     }
 
     @Override
     public Construct clone() throws CloneNotSupportedException {
-	return (Construct) super.clone();
+        return (Construct) super.clone();
     }
 
     /**
@@ -151,40 +151,40 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @return
      */
     public static String json_encode(Construct c, Target t) throws MarshalException {
-	return JSONValue.toJSONString(json_encode0(c, t));
+        return JSONValue.toJSONString(json_encode0(c, t));
     }
 
     private static Object json_encode0(Construct c, Target t) throws MarshalException {
-	if (c instanceof CString || c instanceof Command) {
-	    return c.val();
-	} else if (c instanceof CVoid) {
-	    return "";
-	} else if (c instanceof CInt) {
-	    return ((CInt) c).getInt();
-	} else if (c instanceof CDouble) {
-	    return ((CDouble) c).getDouble();
-	} else if (c instanceof CBoolean) {
-	    return ((CBoolean) c).getBoolean();
-	} else if (c instanceof CNull) {
-	    return null;
-	} else if (c instanceof CArray) {
-	    CArray ca = (CArray) c;
-	    if (!ca.inAssociativeMode()) {
-		List<Object> list = new ArrayList<Object>();
-		for (int i = 0; i < ca.size(); i++) {
-		    list.add(json_encode0(ca.get(i, t), t));
-		}
-		return list;
-	    } else {
-		Map<String, Object> map = new HashMap<String, Object>();
-		for (String key : ca.stringKeySet()) {
-		    map.put(key, json_encode0(ca.get(key, t), t));
-		}
-		return map;
-	    }
-	} else {
-	    throw new MarshalException("The type of " + c.getClass().getSimpleName() + " is not currently supported", c);
-	}
+        if (c instanceof CString || c instanceof Command) {
+            return c.val();
+        } else if (c instanceof CVoid) {
+            return "";
+        } else if (c instanceof CInt) {
+            return ((CInt) c).getInt();
+        } else if (c instanceof CDouble) {
+            return ((CDouble) c).getDouble();
+        } else if (c instanceof CBoolean) {
+            return ((CBoolean) c).getBoolean();
+        } else if (c instanceof CNull) {
+            return null;
+        } else if (c instanceof CArray) {
+            CArray ca = (CArray) c;
+            if (!ca.inAssociativeMode()) {
+                List<Object> list = new ArrayList<Object>();
+                for (int i = 0; i < ca.size(); i++) {
+                    list.add(json_encode0(ca.get(i, t), t));
+                }
+                return list;
+            } else {
+                Map<String, Object> map = new HashMap<String, Object>();
+                for (String key : ca.stringKeySet()) {
+                    map.put(key, json_encode0(ca.get(key, t), t));
+                }
+                return map;
+            }
+        } else {
+            throw new MarshalException("The type of " + c.getClass().getSimpleName() + " is not currently supported", c);
+        }
     }
 
     /**
@@ -194,98 +194,98 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @return
      */
     public static Construct json_decode(String s, Target t) throws MarshalException {
-	if (s == null) {
-	    return CNull.NULL;
-	}
-	if ("".equals(s.trim())) {
-	    throw new MarshalException();
-	}
-	if (s.startsWith("{")) {
-	    //Object
-	    JSONObject obj = (JSONObject) JSONValue.parse(s);
-	    CArray ca = CArray.GetAssociativeArray(t);
-	    if (obj == null) {
-		//From what I can tell, this happens when the json object is improperly formatted,
-		//so go ahead and throw an exception
-		throw new MarshalException();
-	    }
-	    for (Object key : obj.keySet()) {
-		ca.set(convertJSON(key, t),
-			convertJSON(obj.get(key), t), t);
-	    }
-	    return ca;
-	} else if (s.startsWith("[")) {
-	    //It's an array
-	    JSONArray array = (JSONArray) JSONValue.parse(s);
-	    if (array == null) {
-		throw new MarshalException();
-	    }
-	    CArray carray = new CArray(t);
-	    for (int i = 0; i < array.size(); i++) {
-		carray.push(convertJSON(array.get(i), t), t);
-	    }
-	    return carray;
-	} else {
-	    //It's a single value, but we're gonna wrap it in an array, then deconstruct it
-	    s = "[" + s + "]";
-	    JSONArray array = (JSONArray) JSONValue.parse(s);
-	    if (array == null) {
-		//It's a null value
-		return CNull.NULL;
-	    }
-	    Object o = array.get(0);
-	    return convertJSON(o, t);
-	}
+        if (s == null) {
+            return CNull.NULL;
+        }
+        if ("".equals(s.trim())) {
+            throw new MarshalException();
+        }
+        if (s.startsWith("{")) {
+            //Object
+            JSONObject obj = (JSONObject) JSONValue.parse(s);
+            CArray ca = CArray.GetAssociativeArray(t);
+            if (obj == null) {
+                //From what I can tell, this happens when the json object is improperly formatted,
+                //so go ahead and throw an exception
+                throw new MarshalException();
+            }
+            for (Object key : obj.keySet()) {
+                ca.set(convertJSON(key, t),
+                        convertJSON(obj.get(key), t), t);
+            }
+            return ca;
+        } else if (s.startsWith("[")) {
+            //It's an array
+            JSONArray array = (JSONArray) JSONValue.parse(s);
+            if (array == null) {
+                throw new MarshalException();
+            }
+            CArray carray = new CArray(t);
+            for (int i = 0; i < array.size(); i++) {
+                carray.push(convertJSON(array.get(i), t), t);
+            }
+            return carray;
+        } else {
+            //It's a single value, but we're gonna wrap it in an array, then deconstruct it
+            s = "[" + s + "]";
+            JSONArray array = (JSONArray) JSONValue.parse(s);
+            if (array == null) {
+                //It's a null value
+                return CNull.NULL;
+            }
+            Object o = array.get(0);
+            return convertJSON(o, t);
+        }
     }
 
     private static Construct convertJSON(Object o, Target t) throws MarshalException {
-	if (o instanceof String) {
-	    return new CString((String) o, Target.UNKNOWN);
-	} else if (o instanceof Number) {
-	    Number n = (Number) o;
-	    if (n.longValue() == n.doubleValue()) {
-		//It's an int
-		return new CInt(n.longValue(), Target.UNKNOWN);
-	    } else {
-		//It's a double
-		return new CDouble(n.doubleValue(), Target.UNKNOWN);
-	    }
-	} else if (o instanceof Boolean) {
-	    return CBoolean.get((Boolean) o);
-	} else if (o instanceof java.util.List) {
-	    java.util.List l = (java.util.List) o;
-	    CArray ca = new CArray(t);
-	    for (Object l1 : l) {
-		ca.push(convertJSON(l1, t), t);
-	    }
-	    return ca;
-	} else if (o == null) {
-	    return CNull.NULL;
-	} else if (o instanceof java.util.Map) {
-	    CArray ca = CArray.GetAssociativeArray(t);
-	    for (Object key : ((java.util.Map) o).keySet()) {
-		ca.set(convertJSON(key, t),
-			convertJSON(((java.util.Map) o).get(key), t), t);
-	    }
-	    return ca;
-	} else {
-	    throw new MarshalException(o.getClass().getSimpleName() + " are not currently supported");
-	}
+        if (o instanceof String) {
+            return new CString((String) o, Target.UNKNOWN);
+        } else if (o instanceof Number) {
+            Number n = (Number) o;
+            if (n.longValue() == n.doubleValue()) {
+                //It's an int
+                return new CInt(n.longValue(), Target.UNKNOWN);
+            } else {
+                //It's a double
+                return new CDouble(n.doubleValue(), Target.UNKNOWN);
+            }
+        } else if (o instanceof Boolean) {
+            return CBoolean.get((Boolean) o);
+        } else if (o instanceof java.util.List) {
+            java.util.List l = (java.util.List) o;
+            CArray ca = new CArray(t);
+            for (Object l1 : l) {
+                ca.push(convertJSON(l1, t), t);
+            }
+            return ca;
+        } else if (o == null) {
+            return CNull.NULL;
+        } else if (o instanceof java.util.Map) {
+            CArray ca = CArray.GetAssociativeArray(t);
+            for (Object key : ((java.util.Map) o).keySet()) {
+                ca.set(convertJSON(key, t),
+                        convertJSON(((java.util.Map) o).get(key), t), t);
+            }
+            return ca;
+        } else {
+            throw new MarshalException(o.getClass().getSimpleName() + " are not currently supported");
+        }
     }
 
     @Override
     public int compareTo(Construct c) {
-	if (this.value.contains(" ") || this.value.contains("\t")
-		|| c.value.contains(" ") || c.value.contains("\t")) {
-	    return this.value.compareTo(c.value);
-	}
-	try {
-	    Double d1 = Double.valueOf(this.value);
-	    Double d2 = Double.valueOf(c.value);
-	    return d1.compareTo(d2);
-	} catch (NumberFormatException e) {
-	    return this.value.compareTo(c.value);
-	}
+        if (this.value.contains(" ") || this.value.contains("\t")
+                || c.value.contains(" ") || c.value.contains("\t")) {
+            return this.value.compareTo(c.value);
+        }
+        try {
+            Double d1 = Double.valueOf(this.value);
+            Double d2 = Double.valueOf(c.value);
+            return d1.compareTo(d2);
+        } catch (NumberFormatException e) {
+            return this.value.compareTo(c.value);
+        }
     }
 
     /**
@@ -297,7 +297,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @throws ClassCastException
      */
     public static Construct GetConstruct(Object o) throws ClassCastException {
-	return Construct.GetConstruct(o, false);
+        return Construct.GetConstruct(o, false);
     }
 
     /**
@@ -310,40 +310,40 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @throws ClassCastException
      */
     public static Construct GetConstruct(Object o, boolean allowResources) throws ClassCastException {
-	if (o == null) {
-	    return CNull.NULL;
-	} else if (o instanceof CharSequence) {
-	    return new CString((CharSequence) o, Target.UNKNOWN);
-	} else if (o instanceof Number) {
-	    if (o instanceof Integer || o instanceof Long || o instanceof Byte || o instanceof BigInteger
-		    || o instanceof AtomicInteger || o instanceof Short) {
-		//integral
-		return new CInt(((Number) o).longValue(), Target.UNKNOWN);
-	    } else {
-		//floating point
-		return new CDouble(((Number) o).doubleValue(), Target.UNKNOWN);
-	    }
-	} else if (o instanceof Boolean) {
-	    return CBoolean.get((Boolean) o);
-	} else if (o instanceof Map) {
-	    //associative array
-	    CArray a = CArray.GetAssociativeArray(Target.UNKNOWN);
-	    Map m = (Map) o;
-	    for (Object key : m.keySet()) {
-		a.set(key.toString(), GetConstruct(m.get(key), allowResources), Target.UNKNOWN);
-	    }
-	    return a;
-	} else if (o instanceof Collection) {
-	    //normal array
-	    CArray a = new CArray(Target.UNKNOWN);
-	    Collection l = (Collection) o;
-	    for (Object obj : l) {
-		a.push(GetConstruct(obj, allowResources), Target.UNKNOWN);
-	    }
-	    return a;
-	} else {
-	    throw new ClassCastException(o.getClass().getName() + " cannot be cast to a Construct type");
-	}
+        if (o == null) {
+            return CNull.NULL;
+        } else if (o instanceof CharSequence) {
+            return new CString((CharSequence) o, Target.UNKNOWN);
+        } else if (o instanceof Number) {
+            if (o instanceof Integer || o instanceof Long || o instanceof Byte || o instanceof BigInteger
+                    || o instanceof AtomicInteger || o instanceof Short) {
+                //integral
+                return new CInt(((Number) o).longValue(), Target.UNKNOWN);
+            } else {
+                //floating point
+                return new CDouble(((Number) o).doubleValue(), Target.UNKNOWN);
+            }
+        } else if (o instanceof Boolean) {
+            return CBoolean.get((Boolean) o);
+        } else if (o instanceof Map) {
+            //associative array
+            CArray a = CArray.GetAssociativeArray(Target.UNKNOWN);
+            Map m = (Map) o;
+            for (Object key : m.keySet()) {
+                a.set(key.toString(), GetConstruct(m.get(key), allowResources), Target.UNKNOWN);
+            }
+            return a;
+        } else if (o instanceof Collection) {
+            //normal array
+            CArray a = new CArray(Target.UNKNOWN);
+            Collection l = (Collection) o;
+            for (Object obj : l) {
+                a.push(GetConstruct(obj, allowResources), Target.UNKNOWN);
+            }
+            return a;
+        } else {
+            throw new ClassCastException(o.getClass().getName() + " cannot be cast to a Construct type");
+        }
     }
 
     /**
@@ -365,42 +365,42 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @throws ClassCastException
      */
     public static Object GetPOJO(Construct c) throws ClassCastException {
-	if (c instanceof CNull) {
-	    return null;
-	} else if (c instanceof CString) {
-	    return c.val();
-	} else if (c instanceof CBoolean) {
-	    return Boolean.valueOf(((CBoolean) c).getBoolean());
-	} else if (c instanceof CInt) {
-	    return Long.valueOf(((CInt) c).getInt());
-	} else if (c instanceof CDouble) {
-	    return Double.valueOf(((CDouble) c).getDouble());
-	} else if (c instanceof CArray) {
-	    CArray ca = (CArray) c;
-	    if (ca.inAssociativeMode()) {
-		//SortedMap
-		SortedMap<String, Object> map = new TreeMap<>();
-		for (String key : ca.stringKeySet()) {
-		    map.put(key, GetPOJO(ca.get(key, Target.UNKNOWN)));
-		}
-		return map;
-	    } else {
-		//ArrayList
-		ArrayList<Object> list = new ArrayList<Object>((int) ca.size());
-		for (int i = 0; i < ca.size(); i++) {
-		    list.add(GetPOJO(ca.get(i, Target.UNKNOWN)));
-		}
-		return list;
-	    }
-	} else if (c instanceof CResource) {
-	    return ((CResource) c).getResource();
-	} else {
-	    throw new ClassCastException(c.getClass().getName() + " cannot be cast to a POJO");
-	}
+        if (c instanceof CNull) {
+            return null;
+        } else if (c instanceof CString) {
+            return c.val();
+        } else if (c instanceof CBoolean) {
+            return Boolean.valueOf(((CBoolean) c).getBoolean());
+        } else if (c instanceof CInt) {
+            return Long.valueOf(((CInt) c).getInt());
+        } else if (c instanceof CDouble) {
+            return Double.valueOf(((CDouble) c).getDouble());
+        } else if (c instanceof CArray) {
+            CArray ca = (CArray) c;
+            if (ca.inAssociativeMode()) {
+                //SortedMap
+                SortedMap<String, Object> map = new TreeMap<>();
+                for (String key : ca.stringKeySet()) {
+                    map.put(key, GetPOJO(ca.get(key, Target.UNKNOWN)));
+                }
+                return map;
+            } else {
+                //ArrayList
+                ArrayList<Object> list = new ArrayList<Object>((int) ca.size());
+                for (int i = 0; i < ca.size(); i++) {
+                    list.add(GetPOJO(ca.get(i, Target.UNKNOWN)));
+                }
+                return list;
+            }
+        } else if (c instanceof CResource) {
+            return ((CResource) c).getResource();
+        } else {
+            throw new ClassCastException(c.getClass().getName() + " cannot be cast to a POJO");
+        }
     }
 
     public CString asString() {
-	return new CString(val(), target);
+        return new CString(val(), target);
     }
 
     /**
@@ -420,7 +420,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @return
      */
     protected String getQuote() {
-	return "'" + val().replace("\\", "\\\\").replace("'", "\\'") + "'";
+        return "'" + val().replace("\\", "\\\\").replace("'", "\\'") + "'";
     }
 
     /**
@@ -431,12 +431,12 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @return
      * @throws IllegalArgumentException If the class isn't public facing.
      */
-    public final String typeof() {
-	typeof ann = this.getClass().getAnnotation(typeof.class);
-	if (ann == null) {
-	    throw new IllegalArgumentException();
-	}
-	return ann.value();
+    public final CClassType typeof() {
+        typeof ann = this.getClass().getAnnotation(typeof.class);
+        if (ann == null) {
+            throw new IllegalArgumentException();
+        }
+        return CClassType.get(ann.value());
     }
 
     /**
@@ -447,64 +447,65 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      */
     @Override
     public final String getName() {
-	typeof t = this.getClass().getAnnotation(typeof.class);
-	return t.value();
+        typeof t = this.getClass().getAnnotation(typeof.class);
+        return t.value();
     }
 
     // We provide default instances of these methods, though they should in practice never run.
     @Override
     public String docs() {
-	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Version since() {
-	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public URL getSourceJar() {
-	return ClassDiscovery.GetClassContainer(this.getClass());
+        return ClassDiscovery.GetClassContainer(this.getClass());
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Class<? extends Documentation>[] seeAlso() {
-	return new Class[]{};
+        return new Class[]{};
     }
 
     @Override
     public CClassType[] getInterfaces() {
-	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public CClassType[] getSuperclasses() {
-	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     /**
      * Everything that extends this must be a CLASS
+     *
      * @return
      */
     @Override
     public ObjectType getObjectType() {
-	return ObjectType.CLASS;
+        return ObjectType.CLASS;
     }
 
     /**
-     * By default, all native methodscript objects are public. If this
-     * is not true, this method must be overridden.
+     * By default, all native methodscript objects are public. If this is not true, this method must be overridden.
+     *
      * @return
      */
     @Override
     public Set<ObjectModifier> getObjectModifiers() {
-	return EnumSet.of(ObjectModifier.PUBLIC);
+        return EnumSet.of(ObjectModifier.PUBLIC);
     }
 
     @Override
     public CClassType getContainingClass() {
-	return null;
+        return null;
     }
 
 }

@@ -7,6 +7,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.DocComment;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.ObjectType;
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class ProcedureDefinition extends Construct {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.MIXED};
+	return new CClassType[]{Mixed.TYPE};
     }
 
     @Override

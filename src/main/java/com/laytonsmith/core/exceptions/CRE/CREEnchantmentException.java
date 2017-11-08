@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("EnchantmentException")
 public class CREEnchantmentException extends CREException {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("EnchantmentException");
+
     public CREEnchantmentException(String msg, Target t) {
 	super(msg, t);
     }

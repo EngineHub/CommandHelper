@@ -6,6 +6,8 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.ObjectModifier;
 import com.laytonsmith.core.natives.interfaces.ObjectType;
 import java.util.EnumSet;
@@ -16,6 +18,8 @@ import java.util.Set;
  */
 @typeof("Throwable")
 public class CREThrowable extends AbstractCREException {
+
+    public static final CClassType TYPE = CClassType.get("Throwable");
 
     @ForceImplementation
     public CREThrowable(String msg, Target t) {
@@ -47,9 +51,9 @@ public class CREThrowable extends AbstractCREException {
     @Override
     public CClassType[] getSuperclasses() {
 	if(this.getClass() == CREThrowable.class) {
-	    return new CClassType[]{CClassType.MIXED};
+	    return new CClassType[]{Mixed.TYPE};
 	} else {
-	    return new CClassType[]{CClassType.build(this.getClass().getSuperclass().getAnnotation(typeof.class).value())};
+	    return new CClassType[]{CClassType.get(this.getClass().getSuperclass().getAnnotation(typeof.class).value())};
 	}
     }
 
@@ -60,7 +64,7 @@ public class CREThrowable extends AbstractCREException {
     @Override
     public CClassType[] getInterfaces() {
 	if(this.getClass() == CREThrowable.class) {
-	    return new CClassType[] { CClassType.build("ArrayAccess") };
+	    return new CClassType[] { ArrayAccess.TYPE };
 	} else {
 	    return new CClassType[]{};
 	}

@@ -13,6 +13,9 @@ import com.laytonsmith.core.natives.interfaces.ObjectType;
 @typeof("double")
 public class CDouble extends CNumber implements Cloneable {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("double");
+
     public static final long serialVersionUID = 1L;
     final double val;
 
@@ -57,7 +60,7 @@ public class CDouble extends CNumber implements Cloneable {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.build("number")};
+	return new CClassType[]{CNumber.TYPE};
     }
 
     @Override

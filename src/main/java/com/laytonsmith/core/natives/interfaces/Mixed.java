@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
+import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import java.util.Set;
@@ -13,6 +14,9 @@ import java.util.Set;
  */
 @typeof("mixed")
 public interface Mixed extends Cloneable, Documentation {
+
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("mixed");
 
     public String val();
 

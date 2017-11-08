@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("Error")
 public class CREError extends CREThrowable {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("Error");
+
     public CREError(String msg, Target t) {
 	super(msg, t);
     }

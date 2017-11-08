@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.compiler.KeywordList;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
@@ -39,7 +40,7 @@ public class CKeyword extends CBareString {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.MIXED};
+	return new CClassType[]{Mixed.TYPE};
     }
 
     @Override

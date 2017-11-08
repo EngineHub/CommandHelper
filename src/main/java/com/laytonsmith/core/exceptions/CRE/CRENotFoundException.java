@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("NotFoundException")
 public class CRENotFoundException extends CREException {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("NotFoundException");
+
     public CRENotFoundException(String msg, Target t) {
 	super(msg, t);
     }

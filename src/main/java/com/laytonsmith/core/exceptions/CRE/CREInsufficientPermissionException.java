@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("InsufficientPermissionException")
 public class CREInsufficientPermissionException extends CREException {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("InsufficientPermissionException");
+
     public CREInsufficientPermissionException(String msg, Target t) {
 	super(msg, t);
     }

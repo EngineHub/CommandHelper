@@ -12,6 +12,9 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("Exception")
 public class CREException extends CREThrowable {
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
+    public static final CClassType TYPE = CClassType.get("Exception");
+
     public CREException(String msg, Target t) {
 	super(msg, t);
     }

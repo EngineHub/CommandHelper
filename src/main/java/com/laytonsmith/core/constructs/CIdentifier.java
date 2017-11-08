@@ -2,6 +2,7 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
@@ -36,7 +37,7 @@ public class CIdentifier extends CFunction {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.MIXED};
+	return new CClassType[]{Mixed.TYPE};
     }
 
     @Override

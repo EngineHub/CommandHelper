@@ -80,6 +80,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
 	public void sendResourcePack(String url);
 
+	public void sendTitle(String title, String subtitle, int fadein, int stay, int fadeout);
+
     public void setAllowFlight(boolean flight);
 
     public void setCompassTarget(MCLocation l);

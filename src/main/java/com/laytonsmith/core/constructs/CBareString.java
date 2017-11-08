@@ -25,7 +25,7 @@ public class CBareString extends CString {
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{CClassType.build("string")};
+	return new CClassType[]{CString.TYPE};
     }
 
     @Override
