@@ -18,7 +18,7 @@ $language_data = array(
     'HARDCHAR' => array("\\"),
     'CASE_KEYWORDS' => GESHI_CAPS_NO_CHANGE,
     'QUOTEMARKS' => array('"', "'"),
-    'ESCAPE_CHAR' => array('\\'),
+    'ESCAPE_CHAR' => '\\',
     'ESCAPE_REGEXP' => array(
             //Simple Single Char Escapes
             1 => "#\\\\[nfrtv\$\"\n\\\\]#i",
