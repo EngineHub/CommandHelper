@@ -216,7 +216,11 @@ public class BukkitPlayerListener implements Listener {
 		if (event.getFrom().equals(event.getTo())) {
 			return;
 		}
-		
+
+		if(event.getPlayer().hasMetadata("NPC")) {
+			return;
+		}
+
 		BukkitMCPlayerTeleportEvent pte = new BukkitMCPlayerTeleportEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_TELEPORT, "player_teleport", pte);
 	}
