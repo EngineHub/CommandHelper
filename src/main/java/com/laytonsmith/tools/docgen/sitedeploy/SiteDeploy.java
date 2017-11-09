@@ -987,7 +987,7 @@ public class SiteDeploy {
     }
 
     /**
-     * Pages deployed: index.html privacy_policy.html
+     * Pages deployed: index.html privacy_policy.html sponsors.html
      */
     private void deployFrontPages() {
 	generateQueue.submit(new Runnable() {
@@ -1013,6 +1013,15 @@ public class SiteDeploy {
 	    public void run() {
 		writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/FrontPage", "../../index.html",
 			Arrays.asList(new String[]{"index", "front page"}), "The front page for " + Implementation.GetServerType().getBranding());
+		currentGenerateTask.addAndGet(1);
+	    }
+	});
+	totalGenerateTasks.addAndGet(1);
+	generateQueue.submit(new Runnable() {
+	    @Override
+	    public void run() {
+		writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/Sponsors", "../../sponsors.html",
+			Arrays.asList(new String[]{"index", "front page"}), "Sponsors of MethodScript");
 		currentGenerateTask.addAndGet(1);
 	    }
 	});
