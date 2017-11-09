@@ -37,6 +37,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
+import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.DummyFunction;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -61,6 +62,7 @@ import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.util.HashSet;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 import static com.laytonsmith.testing.StaticTest.Run;
@@ -199,7 +201,7 @@ public class RandomTests {
 		CInt c6 = C.Int(1).clone();
 		CNull c7 = C.Null().clone();
 		CString c8 = C.String("").clone();
-		CVoid c9 = C.Void().clone();
+		Construct c9 = C.Void().clone();
 		Command c10 = new Command("/c", Target.UNKNOWN).clone();
 		IVariable c12 = new IVariable(CClassType.AUTO, "@name", C.Null(), Target.UNKNOWN).clone();
 		Variable c13 = new Variable("$name", "", false, false, Target.UNKNOWN);
@@ -346,6 +348,22 @@ public class RandomTests {
 		} finally {
 			new File("persistence.json").deleteOnExit();
 		}
+	}
+
+	@Test
+	public void testVoidAndReturnedVoidAreTheExactSame() throws Exception {
+	    Environment env = Static.GenerateStandaloneEnvironment(false);
+	    Construct returnedVoid = new ArrayHandling.array_insert().exec(Target.UNKNOWN, env,
+		    C.Array(), C.String(""), C.Int(0));
+	    Construct voidKeyword = Static.resolveConstruct("void", Target.UNKNOWN);
+	    assertTrue(returnedVoid == voidKeyword);
+	}
+
+	@Test
+	public void testVoidAndReturnedVoidAreSEqualsAndOthers() throws Exception {
+	    assertEquals("true", SRun("array_insert(array(), '', 0) === void", fakePlayer));
+	    assertEquals("void", SRun("typeof(array_insert(array(), '', 0))", fakePlayer));
+	    assertEquals("ClassType", SRun("typeof(typeof(array_insert(array(), '', 0)))", fakePlayer));
 	}
 
 //    @Test

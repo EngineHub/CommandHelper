@@ -52,7 +52,7 @@ public class C {
     public static CString String(String s){
         return new CString(s, Target.UNKNOWN);
     }
-    public static CVoid Void(){
+    public static Construct Void(){
         return CVoid.VOID;
     }
     public static IVariable IVariable(String name, Construct val){

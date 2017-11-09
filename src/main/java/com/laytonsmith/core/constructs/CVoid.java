@@ -21,24 +21,7 @@ public final class CVoid extends Construct implements Cloneable {
     public static final CVoid VOID = new CVoid(Target.UNKNOWN);
 
     /**
-     * Constructs a new CVoid object. Generally speaking, this should only be used when creating void values that are
-     * literally created by user code, all internal code should simply use {@link #VOID}. This method DOES check the
-     * target however, and if the target is {@link Target#UNKNOWN}, {@link CVoid#VOID} is returned anyways.
-     *
-     * @param t
-     * @return
-     */
-    public static CVoid GenerateCVoid(Target t) {
-	if (t == Target.UNKNOWN) {
-	    return VOID;
-	} else {
-	    return new CVoid(t);
-	}
-    }
-
-    /**
-     * Private constructor to force usage of {@link #GenerateCVoid(com.laytonsmith.core.constructs.Target)}, which can
-     * return existing objects.
+     * Private constructor, because there can only be one
      *
      * @param t
      */
