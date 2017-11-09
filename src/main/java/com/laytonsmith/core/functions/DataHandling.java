@@ -858,10 +858,12 @@ public class DataHandling {
 		+ "foreach(@array as @value){\n"
 		+ "\tmsg(@value);\n"
 		+ "}"),
+		/*
+		// This is actually borked in real code, so it needs to be fixed. In the meantime, whatever, just remove the example.
 		new ExampleScript("Using \"as\" keyword, with a key", "@array = array(1, 2, 3);\n"
 		+ "foreach(@array as @key: @value){\n"
 		+ "\tmsg(@key . ': ' . @value);\n"
-		+ "}"),
+		+ "}"),*/
 		new ExampleScript("With else clause", "@array = array() # Note empty array\n"
 		+ "foreach(@value in @array){\n"
 		+ "\tmsg(@value);\n"

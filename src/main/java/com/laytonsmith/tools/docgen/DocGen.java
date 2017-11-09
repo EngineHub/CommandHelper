@@ -703,7 +703,7 @@ public class DocGen {
 
 	public final List<MutabilityData> mutability;
 	private static final Pattern EVENT_PATTERN = Pattern.compile("\\{(.*?)\\} *?(.*?) *?\\{(.*?)\\} *?\\{(.*?)\\}");
-	public EventDocInfo(String docs) {
+	public EventDocInfo(String docs, String eventName) {
 	    Matcher m = EVENT_PATTERN.matcher(docs);
 	    if(m.find()) {
 		description = m.group(2).trim();
@@ -726,7 +726,7 @@ public class DocGen {
 		    mutability.add(new MutabilityData(d[0], d.length > 1 ? d[1] : ""));
 		}
 	    } else {
-		throw new RuntimeException("Invalid data");
+		throw new RuntimeException("Invalid data from " + eventName + ": " + docs);
 	    }
 	}
     }

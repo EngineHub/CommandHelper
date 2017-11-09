@@ -22,9 +22,7 @@ import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.natives.interfaces.MixedInterfaceRunner;
 import com.laytonsmith.tools.docgen.DocGen;
-import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -110,7 +108,7 @@ public class APIBuilder {
 		try {
 		    Map<String, Object> event = new TreeMap<>();
 		    event.put("name", e.getName());
-		    DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs());
+		    DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
 		    event.put("desc", edi.description);
 		    Map<String, String> ed = new TreeMap<>();
 		    for (DocGen.EventDocInfo.EventData edd : edi.eventData) {

@@ -1252,7 +1252,8 @@ public class BlockEvents {
                     + " Called when a block fades, melts or disappears based on world conditions."
                     + " {oldblock: The block before the fades (an array with keys 'type' and 'data') |"
                     + " newblock: The block after the fades (an array with keys 'type' and 'data') |"
-                    + " location: the location of the block that will fade}";
+                    + " location: the location of the block that will fade}"
+		    + " {}";
         }
 
         @Override

@@ -51,7 +51,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -1262,7 +1261,7 @@ public class SiteDeploy {
 	    for (Optimizable.OptimizationOption option : options) {
 		list.add("[[../../Optimizer#" + option.name() + "|" + option.name() + "]]");
 	    }
-	    optimizationMessage = StringUtils.Join(list, " <br /> Œ");
+	    optimizationMessage = StringUtils.Join(list, " <br /> ");
 	}
 	page.append(optimizationMessage);
 	page.append("\n|}");
