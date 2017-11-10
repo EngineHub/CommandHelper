@@ -1123,7 +1123,7 @@ public class SiteDeploy {
 			if (f.getClass().getAnnotation(hide.class) != null) {
 			    hiddenFunctions.add(f.getName());
 			}
-			c.add("[[API/functions/" + f.getName() + "|" + f.getName() + "]]");
+			c.add("[[API/functions/" + f.getName() + "|" + f.getName() + "]]()");
 			c.add(di.ret);
 			c.add(di.args);
 			List<String> exc = new ArrayList<>();
