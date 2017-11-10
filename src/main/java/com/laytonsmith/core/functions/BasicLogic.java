@@ -934,7 +934,7 @@ public class BasicLogic {
 	    if (args.length != 2) {
 		throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 	    }
-	    if (args[1].getClass().equals(args[0].getClass())) {
+	    if (args[1].typeof().equals(args[0].typeof())) {
 		if (args[0] instanceof CString && args[1] instanceof CString) {
 		    // Check for actual string equality, so we don't do type massaging
 		    // for numeric strings. Thus '2' !== '2.0'

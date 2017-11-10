@@ -60,8 +60,7 @@ public class GeneralTest {
     @Test
     public void testEquals() throws Exception {
 	// Test that the same class, loaded two different ways, are still equal
-	@SuppressWarnings("unchecked")
-	ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+	ClassMirror<?> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 	ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 	assertTrue(c1.equals(c2));
     }
@@ -69,32 +68,28 @@ public class GeneralTest {
     @Test
     public void testHashCode() throws Exception {
 	// Test that the same class, loaded two different ways, have the same hash code
-	@SuppressWarnings("unchecked")
-	ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+	ClassMirror<?> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 	ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 	assertEquals(c1.hashCode(), c2.hashCode());
     }
 
     @Test
     public void testClassReferenceMirrorName() throws Exception {
-	@SuppressWarnings("unchecked")
-	ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+	ClassMirror<?> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 	ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 	assertEquals(c1.getClassReference(), c2.getClassReference());
     }
 
     @Test
     public void testClassReferenceAnnotation() throws Exception {
-	@SuppressWarnings("unchecked")
-	ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+	ClassMirror<?> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 	ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 	assertEquals(c1.getAnnotations(), c2.getAnnotations());
     }
 
     @Test
     public void testClassFieldReferences() throws Exception {
-	@SuppressWarnings("unchecked")
-	ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+	ClassMirror<?> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 	ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 	List<FieldMirror> c1l = new ArrayList<>(Arrays.asList(c1.getFields()));
 	List<FieldMirror> c2l = new ArrayList<>(Arrays.asList(c2.getFields()));
@@ -113,8 +108,7 @@ public class GeneralTest {
 
     @Test
     public void testClassMethodReferences() throws Exception {
-	@SuppressWarnings("unchecked")
-	ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+	ClassMirror<?> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 	ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 	List<MethodMirror> m1 = Arrays.asList(c1.getMethods());
 	List<MethodMirror> m2 = Arrays.asList(c1.getMethods());
@@ -132,16 +126,14 @@ public class GeneralTest {
 
     @Test
     public void testPackageReferences() throws Exception {
-	@SuppressWarnings("unchecked")
-	ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+	ClassMirror<?> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 	ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 	assertEquals(c1.getPackage(), c2.getPackage());
     }
 
     @Test
     public void testAnnotationValue() throws Exception {
-	@SuppressWarnings("unchecked")
-	ClassMirror<GeneralTest> c1 = (ClassMirror<GeneralTest>) ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
+	ClassMirror<?> c1 = ClassDiscovery.getDefaultInstance().forName(GeneralTest.class.getName());
 	ClassMirror<GeneralTest> c2 = new ClassMirror<>(GeneralTest.class);
 	FieldMirror f1 = c1.getField("field");
 	FieldMirror f2 = c1.getField("field");

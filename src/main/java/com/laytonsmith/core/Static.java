@@ -452,7 +452,7 @@ public final class Static {
             return CNull.NULL;
         }
         if (val.equals("void")) {
-            return CVoid.TYPE;
+            return CVoid.VOID;
         }
         if (INVALID_HEX.matcher(val).matches()) {
             throw new CREFormatException("Hex numbers must only contain digits 0-9, and the letters A-F, but \"" + val + "\" was found.", t);
