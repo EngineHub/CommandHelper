@@ -1,16 +1,12 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCScore;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDisplaySlot;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
 
 public class BukkitMCObjective implements MCObjective {
 

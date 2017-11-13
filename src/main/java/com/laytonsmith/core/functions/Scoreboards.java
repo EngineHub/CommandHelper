@@ -218,7 +218,7 @@ public class Scoreboards {
 		}
 		
 		/**
-		 * @return Array containing only {@link ExceptionType#CREScoreboardException}
+		 * @return Array containing only {@link CREScoreboardException}
 		 */
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1211,8 +1211,11 @@ public class Scoreboards {
 
 		@Override
 		public String docs() {
-			return "void {teamName, array, [scoreboard]} Sets various options about the team from an array,"
-					+ " checking for keys 'friendlyfire', 'collisionrule', 'deathmessagevisibility', 'friendlyinvisibles' and 'nametagvisibility'. " + DEF_MSG;
+			return "void {teamName, array, [scoreboard]} Sets various options about the team from an array. The keys"
+					+ " 'friendlyfire' and 'friendlyinvisibles' must be booleans. The keys 'collisionrule' and"
+					+ " 'deathmessagevisibility' must be one of " + StringUtils.Join(MCOptionStatus.values(), ", ", ", or ")
+					+ ". The key 'nametagvisibility' must be one of " + StringUtils.Join(MCNameTagVisibility.values(), ", ", ", or ")
+					+ "." + DEF_MSG;
 		}
 		
 		@Override

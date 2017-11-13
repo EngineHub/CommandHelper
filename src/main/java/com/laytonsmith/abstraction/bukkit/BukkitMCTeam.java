@@ -6,7 +6,6 @@ import com.laytonsmith.abstraction.MCTeam;
 import com.laytonsmith.abstraction.enums.MCNameTagVisibility;
 import com.laytonsmith.abstraction.enums.MCOption;
 import com.laytonsmith.abstraction.enums.MCOptionStatus;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCNameTagVisibility;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOption;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOptionStatus;
 import org.bukkit.Bukkit;
@@ -143,7 +142,7 @@ public class BukkitMCTeam implements MCTeam {
 
 	@Override
 	public void setNameTagVisibility(MCNameTagVisibility visibility) {
-		t.setNameTagVisibility(BukkitMCNameTagVisibility.getConvertor().getConcreteEnum(visibility));
+		t.setNameTagVisibility(NameTagVisibility.valueOf(visibility.name()));
 	}
 	
 	@Override
