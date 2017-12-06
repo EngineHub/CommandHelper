@@ -133,8 +133,8 @@ public class Main {
 	suite.addMode("docs", docsMode);
 	verifyMode = ArgumentParser.GetParser()
 		.addDescription("Compiles the given file, returning a json describing the errors in the file, or returning"
-                        + " nothing if the file compiles cleanly.")
-                .addArgument("The file to check", "<file>", true);
+			+ " nothing if the file compiles cleanly.")
+		.addArgument("The file to check", "<file>", true);
 	suite.addMode("verify", verifyMode);
 	installCmdlineMode = ArgumentParser.GetParser()
 		.addDescription("Installs MethodScript to your system, so that commandline scripts work. (Currently only unix is supported.)");
@@ -377,36 +377,36 @@ public class Main {
 		ExampleLocalPackageInstaller.run(MethodScriptFileLocations.getDefault().getJarDirectory(),
 			parsedArgs.getStringArgument());
 	    } else if (mode == verifyMode) {
-                String file = parsedArgs.getStringArgument();
-                if("".equals(file)) {
-                    StreamUtils.GetSystemErr().println("File parameter is required.");
-                    System.exit(1);
-                }
-                File f = new File(file);
-                String script = FileUtil.read(f);
-                try {
-                    try {
-                        MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, f, file.endsWith("ms")));
-                    } catch(ConfigCompileException ex) {
-                        Set<ConfigCompileException> s = new HashSet<>(1);
-                        s.add(ex);
-                        throw new ConfigCompileGroupException(s);
-                    }
-                } catch(ConfigCompileGroupException ex) {
-                    List<Map<String, Object>> err = new ArrayList<>();
-                    for(ConfigCompileException e : ex.getList()) {
-                        Map<String, Object> error = new HashMap<>();
-                        error.put("msg", e.getMessage());
-                        error.put("file", e.getFile().getAbsolutePath());
-                        error.put("line", e.getLineNum());
-                        error.put("col", e.getColumn());
-                        // TODO: Need to track target length for this
-                        error.put("len", 0);
-                        err.add(error);
-                    }
-                    String serr = JSONValue.toJSONString(err);
-                    StreamUtils.GetSystemOut().println(serr);
-                }
+		String file = parsedArgs.getStringArgument();
+		if ("".equals(file)) {
+		    StreamUtils.GetSystemErr().println("File parameter is required.");
+		    System.exit(1);
+		}
+		File f = new File(file);
+		String script = FileUtil.read(f);
+		try {
+		    try {
+			MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, f, file.endsWith("ms")));
+		    } catch (ConfigCompileException ex) {
+			Set<ConfigCompileException> s = new HashSet<>(1);
+			s.add(ex);
+			throw new ConfigCompileGroupException(s);
+		    }
+		} catch (ConfigCompileGroupException ex) {
+		    List<Map<String, Object>> err = new ArrayList<>();
+		    for (ConfigCompileException e : ex.getList()) {
+			Map<String, Object> error = new HashMap<>();
+			error.put("msg", e.getMessage());
+			error.put("file", e.getFile().getAbsolutePath());
+			error.put("line", e.getLineNum());
+			error.put("col", e.getColumn());
+			// TODO: Need to track target length for this
+			error.put("len", 0);
+			err.add(error);
+		    }
+		    String serr = JSONValue.toJSONString(err);
+		    StreamUtils.GetSystemOut().println(serr);
+		}
 	    } else if (mode == apiMode) {
 		String function = parsedArgs.getStringArgument();
 		if ("".equals(function)) {
