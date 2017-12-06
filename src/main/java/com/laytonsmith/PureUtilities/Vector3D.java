@@ -81,7 +81,7 @@ public class Vector3D extends Point3D
 	}
 
 	/**
-	 * Returns a new vector of this vector multiplied by another.
+	 * Returns a new vector of this vector divided by another.
 	 *
 	 * @param other the other vector
 	 * @return a new vector
@@ -91,9 +91,9 @@ public class Vector3D extends Point3D
 	}
 
 	/**
-	 * Returns a new vector of this vector multiplied by a value.
+	 * Returns a new vector of this vector divided by a value.
 	 *
-	 * @param m the value to multiply by
+	 * @param m the value to divide by
 	 * @return a new vector
 	 */
 	public Vector3D divide(double m) {
@@ -108,6 +108,9 @@ public class Vector3D extends Point3D
 	 */
 	public Vector3D normalize() {
 		double length = length();
+		if(length == 0.0) {
+			return Vector3D.ZERO;
+		}
 		return new Vector3D(x / length, y / length, z / length);
 	}
 

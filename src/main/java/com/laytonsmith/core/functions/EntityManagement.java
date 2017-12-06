@@ -2677,6 +2677,8 @@ public class EntityManagement {
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
 					specArray.set(entity_spec.KEY_CREEPER_POWERED, CBoolean.get(creeper.isPowered()), t);
+					specArray.set(entity_spec.KEY_CREEPER_MAXFUSETICKS, new CInt(creeper.getMaxFuseTicks(), t), t);
+					specArray.set(entity_spec.KEY_CREEPER_EXPLOSIONRADIUS, new CInt(creeper.getExplosionRadius(), t), t);
 					break;
 				case DONKEY:
 				case MULE:
@@ -2938,6 +2940,8 @@ public class EntityManagement {
 		private static final String KEY_ARMORSTAND_SMALLSIZE = "small";
 		private static final String KEY_ARMORSTAND_VISIBLE = "visible";
 		private static final String KEY_CREEPER_POWERED = "powered";
+		private static final String KEY_CREEPER_MAXFUSETICKS = "maxfuseticks";
+		private static final String KEY_CREEPER_EXPLOSIONRADIUS = "explosionradius";
 		private static final String KEY_DROPPED_ITEM_ITEMSTACK = "itemstack";
 		private static final String KEY_DROPPED_ITEM_PICKUPDELAY = "pickupdelay";
 		private static final String KEY_ENDERCRYSTAL_BASE = "base";
@@ -3187,6 +3191,20 @@ public class EntityManagement {
 						switch (index.toLowerCase()) {
 							case entity_spec.KEY_CREEPER_POWERED:
 								creeper.setPowered(Static.getBoolean(specArray.get(index, t)));
+								break;
+							case entity_spec.KEY_CREEPER_MAXFUSETICKS:
+								try {
+									creeper.setMaxFuseTicks(Static.getInt32(specArray.get(index, t), t));
+								} catch(IllegalArgumentException ex) {
+									throw new CRERangeException("Ticks must not be negative.", t);
+								}
+								break;
+							case entity_spec.KEY_CREEPER_EXPLOSIONRADIUS:
+								try {
+									creeper.setExplosionRadius(Static.getInt32(specArray.get(index, t), t));
+								} catch(IllegalArgumentException ex) {
+									throw new CRERangeException("Radius must not be negative.", t);
+								}
 								break;
 							default:
 								throwException(index, t);

@@ -20,8 +20,10 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -52,9 +54,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import jline.console.ConsoleReader;
+import org.json.simple.JSONValue;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -130,7 +136,9 @@ public class Main {
 		.addArgument("html", "The type of the documentation, defaulting to html. It may be one of the following: " + StringUtils.Join(DocGen.MarkupType.values(), ", ", ", or "), "type", false);
 	suite.addMode("docs", docsMode);
 	verifyMode = ArgumentParser.GetParser()
-		.addDescription("Compiles all the files in the system, simply checking for compile errors, then exits.");
+		.addDescription("Compiles the given file, returning a json describing the errors in the file, or returning"
+			+ " nothing if the file compiles cleanly.")
+		.addArgument("The file to check", "<file>", true);
 	suite.addMode("verify", verifyMode);
 	installCmdlineMode = ArgumentParser.GetParser()
 		.addDescription("Installs MethodScript to your system, so that commandline scripts work. (Currently only unix is supported.)");
@@ -355,8 +363,7 @@ public class Main {
 	    } else if (mode == copyrightMode) {
 		StreamUtils.GetSystemOut().println("The MIT License (MIT)\n"
 			+ "\n"
-			+ "Copyright (c) 2012 Layton Smith, sk89q, Deaygo, \n"
-			+ "t3hk0d3, zml2008, EntityReborn, and albatrossen\n"
+			+ "Copyright (c) 2012-2017 Methodscript Contributors\n"
 			+ "\n"
 			+ "Permission is hereby granted, free of charge, to any person obtaining a copy of \n"
 			+ "this software and associated documentation files (the \"Software\"), to deal in \n"
@@ -405,23 +412,36 @@ public class Main {
 		ExampleLocalPackageInstaller.run(MethodScriptFileLocations.getDefault().getJarDirectory(),
 			parsedArgs.getStringArgument());
 	    } else if (mode == verifyMode) {
-		StreamUtils.GetSystemOut().println("This functionality is not currently implemented!");
-//                    File f = new File(".");
-//                    for (File a : f.listFiles()) {
-//                        if (a.getName().equals("CommandHelper.jar")) {
-//                            //We are in the plugins folder
-//                            f = new File("CommandHelper/bukkit.jar");
-//                            if (!f.exists()) {
-//                                StreamUtils.GetSystemOut().println("In order to run the --test-compile command, you must include the latest build of bukkit (not craftbukkit)"
-//                                        + " in the CommandHelper folder. You MUST rename it to bukkit.jar. See the wiki for more information.");
-//                                System.exit(1);
-//                            }
-//                            break;
-//                        }
-//                    }
-//                    String file = (i + 1 <= l.size() - 1 ? l.get(i + 1).toString().toLowerCase() : null);
-//
-//                    return;
+		String file = parsedArgs.getStringArgument();
+		if ("".equals(file)) {
+		    StreamUtils.GetSystemErr().println("File parameter is required.");
+		    System.exit(1);
+		}
+		File f = new File(file);
+		String script = FileUtil.read(f);
+		try {
+		    try {
+			MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, f, file.endsWith("ms")));
+		    } catch (ConfigCompileException ex) {
+			Set<ConfigCompileException> s = new HashSet<>(1);
+			s.add(ex);
+			throw new ConfigCompileGroupException(s);
+		    }
+		} catch (ConfigCompileGroupException ex) {
+		    List<Map<String, Object>> err = new ArrayList<>();
+		    for (ConfigCompileException e : ex.getList()) {
+			Map<String, Object> error = new HashMap<>();
+			error.put("msg", e.getMessage());
+			error.put("file", e.getFile().getAbsolutePath());
+			error.put("line", e.getLineNum());
+			error.put("col", e.getColumn());
+			// TODO: Need to track target length for this
+			error.put("len", 0);
+			err.add(error);
+		    }
+		    String serr = JSONValue.toJSONString(err);
+		    StreamUtils.GetSystemOut().println(serr);
+		}
 	    } else if (mode == apiMode) {
 		String function = parsedArgs.getStringArgument();
 		if ("".equals(function)) {

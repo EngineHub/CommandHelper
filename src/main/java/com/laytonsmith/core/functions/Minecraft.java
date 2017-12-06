@@ -36,6 +36,7 @@ import com.laytonsmith.abstraction.enums.MCWolfType;
 import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -1348,7 +1349,6 @@ public class Minecraft {
 
 	@api
 	@hide("Deprecated in favor of send_resourcepack")
-	@Deprecated
 	public static class send_texturepack extends AbstractFunction {
 
 		@Override
@@ -1371,6 +1371,7 @@ public class Minecraft {
 				Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
 			p.sendResourcePack(args[1].val());
+			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function send_texturepack() is deprecated for send_resourcepack().", t);
 			return CVoid.VOID;
 		}
 
@@ -1560,6 +1561,34 @@ public class Minecraft {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMaterial i = StaticLayer.GetConvertor().getMaterial(Static.getInt32(args[0], t));
+			if(args.length == 2) {
+				switch(args[1].val()) {
+					case "maxStacksize":
+						return new CInt(i.getMaxStackSize(), t);
+					case "maxDurability":
+						return new CInt(i.getMaxDurability(), t);
+					case "hasGravity":
+						return CBoolean.get(i.hasGravity());
+					case "isBlock":
+						return CBoolean.get(i.isBlock());
+					case "isBurnable":
+						return CBoolean.get(i.isBurnable());
+					case "isEdible":
+						return CBoolean.get(i.isEdible());
+					case "isFlammable":
+						return CBoolean.get(i.isFlammable());
+					case "isOccluding":
+						return CBoolean.get(i.isOccluding());
+					case "isRecord":
+						return CBoolean.get(i.isRecord());
+					case "isSolid":
+						return CBoolean.get(i.isSolid());
+					case "isTransparent":
+						return CBoolean.get(i.isTransparent());
+					default:
+						throw new CREFormatException("Invalid argument for material_info", t);
+				}
+			}
 			CArray ret = CArray.GetAssociativeArray(t);
 			ret.set("maxStacksize", new CInt(i.getMaxStackSize(), t), t);
 			ret.set("maxDurability", new CInt(i.getMaxDurability(), t), t);
@@ -1582,17 +1611,19 @@ public class Minecraft {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
 		public String docs() {
-			return "array {int} Returns an array of info about the material.";
+			return "mixed {int, [trait]} Returns an array of info about the material. If a trait is specified, it"
+					+ " returns only that trait. Available traits: hasGravity, isBlock, isBurnable, isEdible,"
+					+ " isFlammable, isOccluding, isRecord, isSolid, isTransparent, maxDurability, maxStacksize.";
 		}
 
 		@Override
 		public boolean isRestricted() {
-			return true;
+			return false;
 		}
 
 		@Override

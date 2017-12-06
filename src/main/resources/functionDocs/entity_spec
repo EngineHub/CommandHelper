@@ -41,6 +41,8 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | CREEPER
 | 
 * %KEY_CREEPER_POWERED%: If the Creeper is powered or not.
+* %KEY_CREEPER_MAXFUSETICKS%: The max amount of time in server ticks that the Creeper can be primed before exploding.
+* %KEY_CREEPER_EXPLOSIONRADIUS%: The radius of the Creeper's explosion.
 |-
 | DONKEY, MULE
 |
