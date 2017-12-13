@@ -847,7 +847,7 @@ public class StaticTest {
 		}
 
 		@Override
-		public MCRecipe GetNewRecipe(MCRecipeType type, MCItemStack result) {
+		public MCRecipe GetNewRecipe(String key, MCRecipeType type, MCItemStack result) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 

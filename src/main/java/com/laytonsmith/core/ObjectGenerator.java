@@ -1208,23 +1208,30 @@ public class ObjectGenerator {
 		if (r instanceof MCFurnaceRecipe) {
 			ret.set("input", item(((MCFurnaceRecipe) r).getInput(), t), t);
 		} else if (r instanceof MCShapelessRecipe) {
+			MCShapelessRecipe shapeless = (MCShapelessRecipe) r;
 			CArray il = new CArray(t);
-			for (MCItemStack i : ((MCShapelessRecipe) r).getIngredients()) {
+			for (MCItemStack i : shapeless.getIngredients()) {
 				il.push(item(i, t), t);
 			}
 			ret.set("ingredients", il, t);
+			if(shapeless.getKey() != null) {
+				ret.set("key", shapeless.getKey(), t);
+			}
 		} else if (r instanceof MCShapedRecipe) {
-			MCShapedRecipe sr = (MCShapedRecipe) r;
+			MCShapedRecipe shaped = (MCShapedRecipe) r;
 			CArray shape = new CArray(t);
-			for (String line : sr.getShape()) {
+			for (String line : shaped.getShape()) {
 				shape.push(new CString(line, t), t);
 			}
 			CArray imap = CArray.GetAssociativeArray(t);
-			for (Map.Entry<Character, MCItemStack> entry : sr.getIngredientMap().entrySet()) {
+			for (Map.Entry<Character, MCItemStack> entry : shaped.getIngredientMap().entrySet()) {
 				imap.set(entry.getKey().toString(), item(entry.getValue(), t), t);
 			}
 			ret.set("shape", shape, t);
 			ret.set("ingredients", imap, t);
+			if(shaped.getKey() != null) {
+				ret.set("key", shaped.getKey(), t);
+			}
 		}
 		return ret;
 	}
@@ -1242,134 +1249,112 @@ public class ObjectGenerator {
 	}
 
 	public MCRecipe recipe(Construct c, Target t) {
-		if (c instanceof CArray) {
-			CArray recipe = (CArray) c;
-			MCItemStack result = EmptyItem();
-			if (recipe.containsKey("result") && (recipe.get("result", t) instanceof CArray)) {
-				result = item(recipe.get("result", t), t);
+		if(!(c instanceof CArray)) {
+			throw new CRECastException("Expected array but recieved " + c.getCType().name(), t);
+		}
+		CArray recipe = (CArray) c;
 
-				if (recipe.containsKey("type") && (recipe.get("type", t) instanceof CString)) {
-					MCRecipeType recipeType;
-					try {
-						recipeType = MCRecipeType.valueOf(recipe.get("type", t).val());
-					} catch (IllegalArgumentException e) {
-						throw new CREFormatException("Invalid recipe type.", t);
-					}
+		String recipeKey = null;
+		if(recipe.containsKey("key")) {
+			recipeKey = recipe.get("key", t).val();
+		}
 
-					MCRecipe ret;
-					switch(recipeType) {
-						case SHAPED:
-						ret = StaticLayer.GetNewRecipe(MCRecipeType.SHAPED, result);
+		MCRecipeType recipeType;
+		try {
+			recipeType = MCRecipeType.valueOf(recipe.get("type", t).val());
+		} catch (IllegalArgumentException e) {
+			throw new CREFormatException("Invalid recipe type.", t);
+		}
 
-						if(recipe.containsKey("shape") && (recipe.get("shape", t) instanceof CArray)) {
-							CArray sh = (CArray) recipe.get("shape", t);
-							String[] shape = new String[(int) sh.size()];
-							if (sh.size() >= 1 && sh.size() <= 3 && !sh.inAssociativeMode()) {
-								int i = 0;
-								for(Construct row : sh.asList()) {
-									if(row instanceof CString && ((CString) row).val().length() >= 1 && ((CString) row).val().length() <= 3) {
-										shape[i] = row.val();
-										i++;
-									} else {
-										throw new CREFormatException("Shape array is invalid.", t);
-									}
-								}
-							} else {
-								throw new CREFormatException("Shape array is invalid.", t);
-							}
-							((MCShapedRecipe) ret).setShape(shape);
-						} else {
-							throw new CREFormatException("Could not find recipe shape array.", t);
-						}
+		MCItemStack result = item(recipe.get("result", t), t);
 
-						if(recipe.containsKey("ingredients") && (recipe.get("ingredients", t) instanceof CArray)) {
-							CArray ingredients = (CArray) recipe.get("ingredients", t);
-							if(ingredients.inAssociativeMode()) {
-								for(String key : ingredients.stringKeySet()) {
-									int type = 0;
-									int data = 0;
-									if (ingredients.get(key, t) instanceof CString) {
-										CString item = (CString) ingredients.get(key, t);
-										if (item.val().contains(":")) {
-											String[] split = item.val().split(":");
-											type = Integer.valueOf(split[0]);
-											data = Integer.valueOf(split[1]);
-										} else {
-											type = Integer.valueOf(item.val());
-										}
-									} else if (ingredients.get(key, t) instanceof CInt) {
-										type = Integer.valueOf(((CInt) ingredients.get(key, t)).val());
-									} else if (ingredients.get(key, t) instanceof CArray) {
-										MCItemStack item = item(ingredients.get(key, t), t);
-										type = item.getTypeId();
-										data = item.getDurability();
-									} else if (ingredients.get(key, t) instanceof CNull) {
-										type = 0;
-										data = 0;
-									} else {
-										throw new CREFormatException("Item type was not found", t);
-									}
-									((MCShapedRecipe) ret).setIngredient(key.charAt(0), type, data);
-								}
-							} else {
-								throw new CREFormatException("Ingredients array is invalid.", t);
-							}
-						} else {
-							throw new CREFormatException("Could not find recipe ingredient array.", t);
-						}
-						return ret;
-
-						case SHAPELESS:
-						ret = StaticLayer.GetNewRecipe(MCRecipeType.SHAPELESS, result);
-
-						if(recipe.containsKey("ingredients") && (recipe.get("ingredients", t) instanceof CArray)) {
-							CArray ingredients = (CArray) recipe.get("ingredients", t);
-							if(!ingredients.inAssociativeMode()) {
-								for(Construct item : ingredients.asList()) {
-									int type = 0;
-									int data = 0;
-									if (item instanceof CString) {
-										item = (CString) item;
-										if (item.val().contains(":")) {
-											String[] split = item.val().split(":");
-											type = Integer.valueOf(split[0]);
-											data = Integer.valueOf(split[1]);
-										} else {
-											type = Integer.valueOf(item.val());
-										}
-									} else {
-										throw new CREFormatException("Item type was not found", t);
-									}
-									((MCShapelessRecipe) ret).addIngredient(type, data, 1);
-								}
-							} else {
-								throw new CREFormatException("Ingredients array is invalid.", t);
-							}
-						} else {
-							throw new CREFormatException("Could not find recipe ingredient array.", t);
-						}
-						return ret;
-
-						case FURNACE:
-						ret = StaticLayer.GetNewRecipe(MCRecipeType.FURNACE, result);
-
-						if (recipe.containsKey("input") && (recipe.get("input", t) instanceof CArray)) {
-							((MCFurnaceRecipe) ret).setInput(item(recipe.get("input", t), t));
-						} else {
-							throw new CREFormatException("Could not find input item array.", t);
-						}
-						return ret;
-					default:
-						throw new CREFormatException("Could not find valid recipe type.", t);
-					}
-				} else {
-						throw new CREFormatException("Could not find recipe type.", t);
+		MCRecipe ret;
+		try {
+			ret = StaticLayer.GetNewRecipe(recipeKey, recipeType, result);
+		} catch(IllegalArgumentException ex) {
+			throw new CREFormatException(ex.getMessage(), t);
+		}
+		switch(recipeType) {
+			case SHAPED:
+				CArray shaped = Static.getArray(recipe.get("shape", t), t);;
+				String[] shape = new String[(int) shaped.size()];
+				if (shaped.size() < 1 || shaped.size() > 3 || shaped.inAssociativeMode()) {
+					throw new CREFormatException("Shape array is invalid.", t);
 				}
-			} else {
-				throw new CREFormatException("Could not find result item array.", t);
-			}
-		} else {
-			throw new CRECastException("Expected array but recieved " + c, t);
+				int i = 0;
+				for(Construct row : shaped.asList()) {
+					if(row instanceof CString && row.val().length() >= 1 && row.val().length() <= 3) {
+						shape[i] = row.val();
+						i++;
+					} else {
+						throw new CREFormatException("Shape array is invalid.", t);
+					}
+				}
+				((MCShapedRecipe) ret).setShape(shape);
+
+				CArray shapedIngredients = Static.getArray(recipe.get("ingredients", t), t);
+				if(!shapedIngredients.inAssociativeMode()) {
+					throw new CREFormatException("Ingredients array is invalid.", t);
+				}
+				for(String key : shapedIngredients.stringKeySet()) {
+					int type = 0;
+					int data = 0;
+					Construct ingredient = shapedIngredients.get(key, t);
+					if (ingredient instanceof CString) {
+						CString item = (CString) ingredient;
+						if (item.val().contains(":")) {
+							String[] split = item.val().split(":");
+							type = Integer.valueOf(split[0]);
+							data = Integer.valueOf(split[1]);
+						} else {
+							type = Integer.valueOf(item.val());
+						}
+					} else if (ingredient instanceof CInt) {
+						type = Static.getInt32(ingredient, t);
+					} else if (ingredient instanceof CArray) {
+						MCItemStack item = item(ingredient, t);
+						type = item.getTypeId();
+						data = item.getDurability();
+					} else if (ingredient instanceof CNull) {
+						type = 0;
+						data = 0;
+					} else {
+						throw new CREFormatException("Item type was not found", t);
+					}
+					((MCShapedRecipe) ret).setIngredient(key.charAt(0), type, data);
+				}
+				return ret;
+
+			case SHAPELESS:
+				CArray ingredients = Static.getArray(recipe.get("ingredients", t), t);
+				if(ingredients.inAssociativeMode()) {
+					throw new CREFormatException("Ingredients array is invalid.", t);
+				}
+				for(Construct item : ingredients.asList()) {
+					int type = 0;
+					int data = 0;
+					if (item instanceof CString) {
+						if (item.val().contains(":")) {
+							String[] split = item.val().split(":");
+							type = Integer.valueOf(split[0]);
+							data = Integer.valueOf(split[1]);
+						} else {
+							type = Integer.valueOf(item.val());
+						}
+					} else {
+						throw new CREFormatException("Item type was not found", t);
+					}
+					((MCShapelessRecipe) ret).addIngredient(type, data, 1);
+				}
+				return ret;
+
+			case FURNACE:
+				CArray is = Static.getArray(recipe.get("input", t), t);
+				((MCFurnaceRecipe) ret).setInput(item(is, t));
+				return ret;
+
+			default:
+				throw new CREFormatException("Could not find valid recipe type.", t);
 		}
 	}
 

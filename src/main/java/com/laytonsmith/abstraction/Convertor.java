@@ -218,7 +218,7 @@ public interface Convertor {
 	 * @param result the itemstack the recipe will result in
 	 * @return
 	 */
-	public MCRecipe GetNewRecipe(MCRecipeType type, MCItemStack result);
+	public MCRecipe GetNewRecipe(String key, MCRecipeType type, MCItemStack result);
 
 	/**
 	 * Used to convert a generic recipe into the correct type

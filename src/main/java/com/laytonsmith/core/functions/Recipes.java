@@ -68,7 +68,44 @@ public class Recipes {
 
 		@Override
 		public String docs() {
-			return "boolean {RecipeArray} Adds a recipe to the server and returns whether it was added or not. Please read http://wiki.sk89q.com/wiki/CommandHelper/Array_Formatting to see how the recipe array is formatted.";
+			return "boolean {RecipeArray} Adds a recipe to the server and returns whether it was added or not. ----"
+					+ " Please read [[CommandHelper/Array_Formatting|this page]] to see how the recipe array is formatted."
+					+ " The RecipeArray can contain the following keys:"
+					+ " <pre>"
+					+ "   type: The type of recipe. Expected to be 'SHAPED', 'SHAPELESS', or 'FURNACE'.\n"
+					+ "   key: A unique string for this recipe. (shaped and shapeless recipes; MC 1.12+)\n"
+					+ "   result: The result item array of the recipe.\n"
+					+ "   shape: The shape of the recipe. Represented as a 3 index normal array. (shaped recipes)\n"
+					+ "   ingredients: Ingredients array of the recipe. See examples. (shaped and shapeless recipes)\n"
+					+ "   input: The input item array of the recipe. (furnace recipes)"
+					+ " </pre>"
+					+ " ---- Shaped Recipe. Turns 9 stone into obsidian."
+					+ " <pre>"
+					+ "{\n"
+					+ "    key: 'stone_to_obsidian',"
+					+ "    type: 'SHAPED',\n"
+					+ "    result: {type: '49:0'},\n"
+					+ "    shape: {'AAA', 'AAA', 'AAA'},\n"
+					+ "    ingredients: {A: '1:0'}\n"
+					+ "}"
+					+ "</pre>"
+					+ " ---- Shapeless Recipe. Combines tall grass and dirt to make grass."
+					+ "<pre>"
+					+ "{\n"
+					+ "    key: 'dirt_to_grass',"
+					+ "    type: 'SHAPELESS',\n"
+					+ "    result: {type: '2:0'},\n"
+					+ "    ingredients: {'3:0', '31:1'}\n"
+					+ "}"
+					+ "</pre>"
+					+ " ---- Furnace Recipe. Turns grass into dirt through smelting."
+					+ " <pre>"
+					+ "{\n"
+					+ "    type: 'FURNACE',\n"
+					+ "    result: {type: '3:0'},\n"
+					+ "    input: {type: '2:0'}\n"
+					+ "}"
+					+ "</pre>";
 		}
 		
 		@Override
@@ -110,7 +147,7 @@ public class Recipes {
 		@Override
 		public String docs() {
 			return "array {itemArray} Gets all recipes that have a result of the given item. " + 
-					"NOTE: Gets all recipes for result item regardless of meta and enchants, althogh the array has correct data.";
+					"NOTE: Gets all recipes for result item regardless of meta and enchants, although the array has correct data.";
 		}
 		
 		@Override
@@ -188,7 +225,7 @@ public class Recipes {
 
 		@Override
 		public String docs() {
-			return "Void {} Clears all recipes.";
+			return "void {} Clears all recipes.";
 		}
 		
 		@Override
@@ -225,7 +262,7 @@ public class Recipes {
 
 		@Override
 		public String docs() {
-			return "Void {} Resets all recipes to the default recipes.";
+			return "void {} Resets all recipes to the default recipes.";
 		}
 		
 		@Override

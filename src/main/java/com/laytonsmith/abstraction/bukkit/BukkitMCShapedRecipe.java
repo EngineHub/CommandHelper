@@ -17,11 +17,17 @@ public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedReci
 		super(recipe);
 		r = recipe;
 	}
-	
-	public BukkitMCShapedRecipe(MCItemStack result) {
-		this(new ShapedRecipe(((BukkitMCItemStack) result).asItemStack()));
+
+	@Override
+	public String getKey() {
+		try {
+			return r.getKey().getKey();
+		} catch(NoSuchMethodError ex) {
+			// Probably prior to 1.12
+			return null;
+		}
 	}
-	
+
 	@Override
 	public MCRecipeType getRecipeType() {
 		return MCRecipeType.SHAPED;

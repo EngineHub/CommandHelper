@@ -4,6 +4,8 @@ import java.util.Map;
 
 public interface MCShapedRecipe extends MCRecipe {
 
+	public String getKey();
+
 	public Map<Character, MCItemStack> getIngredientMap();
 	
 	@Override

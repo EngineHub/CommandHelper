@@ -8,6 +8,8 @@ import java.util.List;
  */
 public interface MCShapelessRecipe extends MCRecipe {
 
+	public String getKey();
+
 	public MCShapelessRecipe addIngredient(MCItemStack ingredient);
 	
 	public MCShapelessRecipe addIngredient(int type, int data, int amount);
