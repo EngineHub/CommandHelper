@@ -813,7 +813,7 @@ public final class Static {
      * @return
      */
     public static MCEntity getEntityByUuid(UUID id, Target t) {
-	if (injectedEntity != null && injectedEntity.getUniqueId().equals(id)) {
+	if (injectedEntity != null && injectedEntity.getUniqueId().compareTo(id) == 0) {
 	    // This entity is not in the world yet, but it was injected by the event
 	    return injectedEntity;
 	}
@@ -835,7 +835,7 @@ public final class Static {
      * @return
      */
     public static MCLivingEntity getLivingByUUID(UUID id, Target t) {
-	if (injectedEntity != null && injectedEntity.getUniqueId().equals(id)) {
+	if (injectedEntity != null && injectedEntity.getUniqueId().compareTo(id) == 0) {
 	    // This entity is not in the world yet, but it was injected by the event
 	    if (injectedEntity instanceof MCLivingEntity) {
 		return (MCLivingEntity) injectedEntity;
