@@ -27,6 +27,7 @@ public class BukkitMCCreatureSpawner extends BukkitMCBlockState implements MCCre
 	@Override
 	public void setSpawnedType(MCEntityType type) {
 		cs.setSpawnedType(((BukkitMCEntityType) type).getConcrete());
+		cs.update();
 	}
 	
 }
