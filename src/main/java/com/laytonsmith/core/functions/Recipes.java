@@ -53,7 +53,12 @@ public class Recipes {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(Static.getServer().addRecipe(ObjectGenerator.GetGenerator().recipe(args[0], t)));
+			try {
+				return CBoolean.get(Static.getServer().addRecipe(ObjectGenerator.GetGenerator().recipe(args[0], t)));
+			} catch(IllegalStateException ex) {
+				// recipe with the given key probably already exists
+				return CBoolean.FALSE;
+			}
 		}
 
 		@Override
