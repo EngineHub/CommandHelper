@@ -197,10 +197,9 @@ public class EventBinding {
 				throw new CREInsufficientArgumentsException("bind accepts 5 or more parameters", t);
 			}
 			if (!children.get(0).isConst()) {
-				// This ability may be removed in the future, to allow for better compilation checks of event type, once objects are added.
-				// We'll add this warning to gauge impact.
-				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Use of dynamic bind. This may be removed in the future, please"
-						+ " contact the developers to provide feedback if this affects you.", t);
+				// Const event name allows for better compilation checks of event type, once objects are added.
+				// This will throw an exception when linking, so let's give a more specific message here
+				throw new ConfigCompileException("Event names must be constant in bind().", t);
 			}
 			return null;
 		}
