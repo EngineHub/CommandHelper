@@ -105,4 +105,8 @@ public interface MCItemMeta extends AbstractionObject {
     int getRepairCost();
     
     void setRepairCost(int cost);
+
+    boolean isUnbreakable();
+
+    void setUnbreakable(boolean unbreakable);
 }

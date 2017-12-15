@@ -15,14 +15,17 @@ import java.util.Collection;
  */
 public interface MCBlock extends MCMetadatable {
 
+    @Deprecated
     public int getTypeId();
 
     public byte getData();
 
+    @Deprecated
     public void setTypeId(int idata);
 
     public void setData(byte imeta);
 
+	@Deprecated
 	public void setTypeAndData(int type, byte data, boolean physics);
 
 	public double getTemperature();

@@ -143,4 +143,14 @@ public class BukkitMCItemMeta implements MCItemMeta {
 		}
 		return ret;
 	}
+
+	@Override
+	public boolean isUnbreakable() {
+		return im.isUnbreakable();
+	}
+
+	@Override
+	public void setUnbreakable(boolean unbreakable) {
+		im.setUnbreakable(unbreakable);
+	}
 }

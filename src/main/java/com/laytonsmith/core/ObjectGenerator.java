@@ -23,6 +23,7 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCMapMeta;
 import com.laytonsmith.abstraction.MCMetadataValue;
+import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPotionData;
@@ -69,6 +70,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * This file is responsible for converting CH objects into server objects, and
@@ -229,9 +231,9 @@ public class ObjectGenerator {
 			return CNull.NULL;
 		}
 
-		int type = is.getTypeId();
+		MCMaterial mat = is.getType();
 		int data = 0;
-		if(type < 256){
+		if(mat.isBlock()){
 			//Use the data
 			MCMaterialData md = is.getData();
 			if(md != null) {
@@ -243,8 +245,8 @@ public class ObjectGenerator {
 		}
 
 		CArray ret = CArray.GetAssociativeArray(t);
-		ret.set("name", new CString(is.getType().getName(), t), t);
-		ret.set("type", new CInt(type, t), t);
+		ret.set("name", new CString(mat.getName(), t), t);
+		ret.set("type", new CInt(mat.getType(), t), t);
 		ret.set("data", new CInt(data, t), t);
 		ret.set("qty", new CInt(is.getAmount(), t), t);
 		ret.set("enchants", enchants(is.getEnchantments(), t), t);
@@ -297,10 +299,10 @@ public class ObjectGenerator {
 			}
 			mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(type, t));
 		} else {
-			throw new CREFormatException("Could not find item type!", t);
+			throw new CREFormatException("Could not find item name!", t);
 		}
 		if (mat == null) {
-			throw new CRENotFoundException("A material type could not be found based on the given id.", t);
+			throw new CRENotFoundException("A material could not be found based on the given name.", t);
 		}
 		if (mat.getType() == 0) {
 			return EmptyItem();
@@ -341,11 +343,10 @@ public class ObjectGenerator {
 	}
 
 	public Construct itemMeta(MCItemStack is, Target t) {
-		Construct ret, display, lore, color, title, author, pages, owner, stored;
-		CArray enchants, effects;
 		if (!is.hasItemMeta()) {
-			ret = CNull.NULL;
+			return CNull.NULL;
 		} else {
+			Construct display, lore;
 			CArray ma = CArray.GetAssociativeArray(t);
 			MCItemMeta meta = is.getItemMeta();
 			if (meta.hasDisplayName()) {
@@ -361,11 +362,13 @@ public class ObjectGenerator {
 			} else {
 				lore = CNull.NULL;
 			}
-			enchants = enchants(meta.getEnchants(), t);
 			ma.set("display", display, t);
 			ma.set("lore", lore, t);
-			ma.set("enchants", enchants, t);
+			ma.set("enchants", enchants(meta.getEnchants(), t), t);
 			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
+
+			// Version specific ItemMeta
+
 			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
 				Set<MCItemFlag> itemFlags = meta.getItemFlags();
 				CArray flagArray = new CArray(t);
@@ -375,6 +378,10 @@ public class ObjectGenerator {
 					}
 				}
 				ma.set("flags", flagArray, t);
+
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
+					ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t);
+				}
 			}
 
 			// Specific ItemMeta
@@ -429,9 +436,10 @@ public class ObjectGenerator {
 				firework.set("effects", fe, t);
 				ma.set("firework", firework, t);
 			} else if (meta instanceof MCLeatherArmorMeta) {
-				color = color(((MCLeatherArmorMeta) meta).getColor(), t);
+				CArray color = color(((MCLeatherArmorMeta) meta).getColor(), t);
 				ma.set("color", color, t);
 			} else if (meta instanceof MCBookMeta) {
+				Construct title, author, pages;
 				if (((MCBookMeta) meta).hasTitle()) {
 					title = new CString(((MCBookMeta) meta).getTitle(), t);
 				} else {
@@ -454,13 +462,24 @@ public class ObjectGenerator {
 				ma.set("author", author, t);
 				ma.set("pages", pages, t);
 			} else if (meta instanceof MCSkullMeta) {
-				if (((MCSkullMeta) meta).hasOwner()) {
-					owner = new CString(((MCSkullMeta) meta).getOwner(), t);
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_12_X)) {
+					if (((MCSkullMeta) meta).hasOwner()) {
+						MCOfflinePlayer player = ((MCSkullMeta) meta).getOwningPlayer();
+						ma.set("owner", new CString(player.getName(), t), t);
+						ma.set("owneruuid", new CString(player.getUniqueID().toString(), t), t);
+					} else {
+						ma.set("owner", CNull.NULL, t);
+						ma.set("owneruuid", CNull.NULL, t);
+					}
 				} else {
-					owner = CNull.NULL;
+					if (((MCSkullMeta) meta).hasOwner()) {
+						ma.set("owner", new CString(((MCSkullMeta) meta).getOwner(), t), t);
+					} else {
+						ma.set("owner", CNull.NULL, t);
+					}
 				}
-				ma.set("owner", owner, t);
 			} else if (meta instanceof MCEnchantmentStorageMeta) {
+				Construct stored;
 				if (((MCEnchantmentStorageMeta) meta).hasStoredEnchants()) {
 					stored = enchants(((MCEnchantmentStorageMeta) meta).getStoredEnchants(), t);
 				} else {
@@ -469,7 +488,7 @@ public class ObjectGenerator {
 				ma.set("stored", stored, t);
 			} else if (meta instanceof MCPotionMeta) {
 				MCPotionMeta potionmeta = (MCPotionMeta) meta;
-				effects = potions(potionmeta.getCustomEffects(), t);
+				CArray effects = potions(potionmeta.getCustomEffects(), t);
 				ma.set("potions", effects, t);
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
 					MCPotionData potiondata = potionmeta.getBasePotionData();
@@ -502,6 +521,7 @@ public class ObjectGenerator {
 				}
 			} else if (meta instanceof MCMapMeta && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
 				MCColor mapcolor = ((MCMapMeta) meta).getColor();
+				Construct color;
 				if (mapcolor == null) {
 					color = CNull.NULL;
 				} else {
@@ -509,9 +529,8 @@ public class ObjectGenerator {
 				}
 				ma.set("color", color, t);
 			}
-			ret = ma;
+			return ma;
 		}
-		return ret;
 	}
 
 	public MCItemMeta itemMeta(Construct c, MCMaterial mat, Target t) throws ConfigRuntimeException {
@@ -565,20 +584,31 @@ public class ObjectGenerator {
 				if (ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
 					meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
 				}
-				if (ma.containsKey("flags") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-					Construct flags = ma.get("flags", t);
-					if (flags instanceof CArray) {
-						CArray flagArray = (CArray) flags;
-						for (int i = 0; i < flagArray.size(); i++) {
-							Construct flag = flagArray.get(i, t);
-							meta.addItemFlags(MCItemFlag.valueOf(flag.getValue().toUpperCase()));
+
+				// Version specific ItemMeta
+
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
+					if(ma.containsKey("flags")) {
+						Construct flags = ma.get("flags", t);
+						if (flags instanceof CArray) {
+							CArray flagArray = (CArray) flags;
+							for (int i = 0; i < flagArray.size(); i++) {
+								Construct flag = flagArray.get(i, t);
+								meta.addItemFlags(MCItemFlag.valueOf(flag.getValue().toUpperCase()));
+							}
+						} else {
+							throw new CREFormatException("Itemflags was expected to be an array of flags.", t);
 						}
-					} else {
-						throw new CREFormatException("Itemflags was expected to be an array of flags.", t);
+					}
+
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
+						if(ma.containsKey("unbreakable")) {
+							meta.setUnbreakable(Static.getBoolean(ma.get("unbreakable", t)));
+						}
 					}
 				}
 
-				// Specific Item Meta
+				// Specific ItemMeta
 
 				if(meta instanceof MCBlockStateMeta){
 					MCBlockStateMeta bsm = (MCBlockStateMeta) meta;
@@ -714,7 +744,10 @@ public class ObjectGenerator {
 						}
 					}
 				} else if (meta instanceof MCSkullMeta) {
-					if (ma.containsKey("owner")) {
+					if (ma.containsKey("owneruuid")) {
+						UUID id = Static.GetUUID(ma.get("owneruuid", t), t);
+						((MCSkullMeta) meta).setOwningPlayer(Static.getServer().getOfflinePlayer(id));
+					} else if(ma.containsKey("owner")) {
 						Construct owner = ma.get("owner", t);
 						if (!(owner instanceof CNull)) {
 							((MCSkullMeta) meta).setOwner(owner.val());

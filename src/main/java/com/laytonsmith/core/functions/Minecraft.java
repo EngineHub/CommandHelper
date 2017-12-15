@@ -292,7 +292,7 @@ public class Minecraft {
 					+ " a single data value (i.e. 278) or an item array like is returned"
 					+ " from pinv(). Additionally, if a single value, it can also be in"
 					+ " the old item notation (i.e. '35:11'), though for the purposes of this"
-					+ " function, the data is unneccesary.";
+					+ " function, the data is unnecessary.";
 		}
 
 		@Override
