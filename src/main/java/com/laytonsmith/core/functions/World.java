@@ -19,6 +19,7 @@ import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -193,6 +194,7 @@ public class World {
 	}
 
 	@api(environments=CommandHelperEnvironment.class)
+	@hide("Deprecated.")
 	public static class refresh_chunk extends AbstractFunction {
 
 		@Override
@@ -207,8 +209,8 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {[world], x, z | [world], locationArray} Resends the chunk data to all clients, using the specified world, or the current"
-					+ " players world if not provided.";
+			return "void {[world], x, z | [world], locationArray} This is not guaranteed to work reliably! Resends the"
+					+ " chunk data to all clients, using the specified world or current player's world.";
 		}
 
 		@Override
