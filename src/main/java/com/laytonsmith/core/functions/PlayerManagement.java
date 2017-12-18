@@ -85,7 +85,8 @@ import java.util.regex.Pattern;
 public class PlayerManagement {
 
 	public static String docs() {
-		return "This class of functions allow players to be managed";
+		return "This class of functions allow players to be managed. Functions that accept an online player's name will"
+				+ " also accept their UUID.";
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -128,7 +129,9 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[playerName]} Returns the full name of the partial Player name specified or the Player running the command otherwise."
+			return "string {[playerName]} Returns a player's name. If a string is specified, it will attempt to find"
+					+ " a complete match for a partial name. If no string is specified, the current player is returned."
+					+ " UUIDs are also accepted for this and other online player functions."
 					+ " If the command is being run from the console, then the string '" + Static.getConsoleName()
 					+ "' is returned. If the command came from a CommandBlock, the block's name prefixed with "
 					+ Static.getBlockPrefix() + " is returned. If the command is coming from elsewhere,"
