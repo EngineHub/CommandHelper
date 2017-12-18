@@ -7,7 +7,6 @@ import com.laytonsmith.abstraction.MCMaterialData;
 
 public interface MCMaterial extends AbstractionObject {
 	short getMaxDurability();
-	@Deprecated
 	int getType();
 	MCMaterialData getData();
 	String getName();

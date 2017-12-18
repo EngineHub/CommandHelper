@@ -20,6 +20,8 @@ public interface MCBlock extends MCMetadatable {
 
     public byte getData();
 
+    public void setType(MCMaterial mat);
+
     @Deprecated
     public void setTypeId(int idata);
 
