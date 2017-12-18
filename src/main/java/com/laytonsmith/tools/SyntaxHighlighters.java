@@ -63,6 +63,9 @@ public class SyntaxHighlighters {
 		if ("sublime".equals(type)) {
 			return template("/syntax-templates/sublime/default.xml");
 		}
+		if ("sublime3".equals(type)) {
+			return template("/syntax-templates/sublime3/default.sublime-syntax");
+		}
 
 		return "File for the following syntax highlighters are currently available:\n"
 			+ "\tNotepad++ - Use type \"npp\". You may also select a theme, either \"default\" or \"obsidian\"\n"
@@ -85,6 +88,7 @@ public class SyntaxHighlighters {
 			+ "\tnano - Use type\"nano\". Only the default theme is available.\n"
 			+ "\tSublime Text - Use type \"sublime\". Only the default theme is available.\n"
 			+ "\t\tTo install: Place in Sublime Text's ./SublimeText/data/Packages/User folder.\n"
+			+ "\tSublime Text 3 - Use type \"sublime3\".\n"
 			+ "\tAtom - Use type \"atom\". Only the default theme is available.\n"
 			+ "\t\tTo install: Install package language-mscript from the Atom package manager."
 			+ "\n\n"
