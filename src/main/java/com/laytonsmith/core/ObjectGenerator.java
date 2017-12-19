@@ -70,7 +70,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * This file is responsible for converting CH objects into server objects, and
@@ -745,8 +744,10 @@ public class ObjectGenerator {
 					}
 				} else if (meta instanceof MCSkullMeta) {
 					if (ma.containsKey("owneruuid")) {
-						UUID id = Static.GetUUID(ma.get("owneruuid", t), t);
-						((MCSkullMeta) meta).setOwningPlayer(Static.getServer().getOfflinePlayer(id));
+						Construct id = ma.get("owneruuid", t);
+						if(!(id instanceof CNull)) {
+							((MCSkullMeta) meta).setOwningPlayer(Static.getServer().getOfflinePlayer(Static.GetUUID(id, t)));
+						}
 					} else if(ma.containsKey("owner")) {
 						Construct owner = ma.get("owner", t);
 						if (!(owner instanceof CNull)) {
