@@ -85,7 +85,7 @@ public class SyntaxHighlighters {
 			+ "\t\t\t\tsetfiletype commandhelper\n"
 			+ "\t\t\tendif"
 			+ "\t\t(Create directories and files as needed)\n"
-			+ "\tnano - Use type\"nano\". Only the default theme is available.\n"
+			+ "\tnano - Use type \"nano\". Only the default theme is available.\n"
 			+ "\tSublime Text - Use type \"sublime\". Only the default theme is available.\n"
 			+ "\t\tTo install: Place in Sublime Text's ./SublimeText/data/Packages/User folder.\n"
 			+ "\tSublime Text 3 - Use type \"sublime3\".\n"
