@@ -8,7 +8,7 @@ public interface MCPotionMeta extends MCItemMeta {
 
 	public MCPotionData getBasePotionData();
 	public void setBasePotionData(MCPotionData pd);
-	public boolean addCustomEffect(int potionID, int strength, int seconds, boolean ambient, boolean overwrite, Target t);
+	public boolean addCustomEffect(int potionID, int strength, int ticks, boolean ambient, boolean overwrite, Target t);
 	public boolean clearCustomEffects();
 	public List<MCEffect> getCustomEffects();
 	public boolean hasCustomEffect(int id);

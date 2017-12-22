@@ -32,12 +32,12 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 	}
 	
 	@Override
-	public boolean addCustomEffect(int potionID, int strength, int seconds, boolean ambient, boolean overwrite, Target t) {
+	public boolean addCustomEffect(int potionID, int strength, int ticks, boolean ambient, boolean overwrite, Target t) {
 		int maxID = PotionEffectType.values().length;
 		if (potionID < 1 || potionID > maxID) {
 			throw new CRERangeException("Invalid effect ID, must be from 1-" + maxID, t);
 		}
-		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), seconds * 20, strength, ambient);
+		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), ticks, strength, ambient);
 		return pm.addCustomEffect(pe, overwrite);
 	}
 
@@ -50,7 +50,7 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 	public List<MCEffect> getCustomEffects() {
 		List<MCEffect> list = new ArrayList<MCEffect>();
 		for (PotionEffect pe : pm.getCustomEffects()) {
-			list.add(new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration() / 20, pe.isAmbient()));
+			list.add(new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient()));
 		}
 		return list;
 	}

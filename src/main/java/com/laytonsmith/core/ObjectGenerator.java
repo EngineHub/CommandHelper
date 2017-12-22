@@ -773,7 +773,7 @@ public class ObjectGenerator {
 						if (effects instanceof CArray) {
 							for (MCLivingEntity.MCEffect e : potions((CArray) effects, t)) {
 								((MCPotionMeta) meta).addCustomEffect(e.getPotionID(), e.getStrength(),
-										e.getSecondsRemaining(), e.isAmbient(), true, t);
+										e.getTicksRemaining(), e.isAmbient(), true, t);
 							}
 						} else {
 							throw new CREFormatException("Effects was expected to be an array of potion arrays.", t);
@@ -1038,7 +1038,7 @@ public class ObjectGenerator {
 			CArray effect = CArray.GetAssociativeArray(t);
 			effect.set("id", new CInt(eff.getPotionID(), t), t);
 			effect.set("strength", new CInt(eff.getStrength(), t), t);
-			effect.set("seconds", new CInt(eff.getSecondsRemaining(), t), t);
+			effect.set("seconds", new CDouble(eff.getTicksRemaining() / 20.0, t), t);
 			effect.set("ambient", CBoolean.get(eff.isAmbient()), t);
 			effect.set("particles", CBoolean.get(eff.hasParticles()), t);
 			ea.push(effect, t);
@@ -1051,7 +1051,8 @@ public class ObjectGenerator {
 		for (String key : ea.stringKeySet()) {
 			if (ea.get(key, t) instanceof CArray) {
 				CArray effect = (CArray) ea.get(key, t);
-				int potionID = 0, strength = 0, seconds = 30;
+				int potionID = 0, strength = 0;
+				double seconds = 30.0;
 				boolean ambient = false;
 				boolean particles = true;
 				if (effect.containsKey("id")) {
@@ -1063,10 +1064,10 @@ public class ObjectGenerator {
 					strength = Static.getInt32(effect.get("strength", t), t);
 				}
 				if (effect.containsKey("seconds")) {
-					seconds = Static.getInt32(effect.get("seconds", t), t);
-					if(seconds < 0) {
+					seconds = Static.getDouble(effect.get("seconds", t), t);
+					if(seconds < 0.0) {
 						throw new CRERangeException("Seconds cannot be less than 0", t);
-					} else if(seconds > Integer.MAX_VALUE / 20) {
+					} else if(seconds * 20 > Integer.MAX_VALUE) {
 						throw new CRERangeException("Seconds cannot be greater than 107374182", t);
 					}
 				}
@@ -1076,7 +1077,7 @@ public class ObjectGenerator {
 				if (effect.containsKey("particles")) {
 					particles = Static.getBoolean(effect.get("particles", t));
 				}
-				ret.add(new MCLivingEntity.MCEffect(potionID, strength, seconds, ambient, particles));
+				ret.add(new MCLivingEntity.MCEffect(potionID, strength, (int)(seconds * 20), ambient, particles));
 			} else {
 				throw new CREFormatException("Expected a potion array at index" + key, t);
 			}

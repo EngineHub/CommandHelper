@@ -197,18 +197,18 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	/**
 	 * @param potionID - ID of the potion
 	 * @param strength - potion strength
-	 * @param seconds - duration of the potion in seconds
+	 * @param ticks - duration of the potion in server ticks
 	 * @param ambient - make particles less noticable
 	 * @param particles - enable or disable particles entirely
 	 * @param t - target
 	 */
 	@Override
-	public void addEffect(int potionID, int strength, int seconds, boolean ambient, boolean particles, Target t) {
+	public void addEffect(int potionID, int strength, int ticks, boolean ambient, boolean particles, Target t) {
 		PotionEffect pe;
 		if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
-			pe = new PotionEffect(PotionEffectType.getById(potionID), seconds * 20, strength, ambient);
+			pe = new PotionEffect(PotionEffectType.getById(potionID), ticks, strength, ambient);
 		} else {
-			pe = new PotionEffect(PotionEffectType.getById(potionID), seconds * 20, strength, ambient, particles);
+			pe = new PotionEffect(PotionEffectType.getById(potionID), ticks, strength, ambient, particles);
 		}
 		try{
 			if(le != null){
@@ -246,15 +246,13 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public List<MCEffect> getEffects(){
-		List<MCEffect> effects = new ArrayList<MCEffect>();
+		List<MCEffect> effects = new ArrayList<>();
 		for(PotionEffect pe : le.getActivePotionEffects()){
 			MCEffect e;
 			if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
-				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(),
-						pe.getDuration() / 20, pe.isAmbient(), true);
+				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(), true);
 			} else {
-				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(),
-						pe.getDuration() / 20, pe.isAmbient(), pe.hasParticles());
+				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(), pe.hasParticles());
 			}
 			effects.add(e);
 		}

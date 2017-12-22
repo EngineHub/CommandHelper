@@ -823,7 +823,7 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "boolean {entityId, potionID, strength, [seconds], [ambient], [particles]} Effect is 1-23. Seconds"
-					+ " defaults to 30. If the potionID is out of range, a RangeException is thrown, because out of"
+					+ " defaults to 30.0. If the potionID is out of range, a RangeException is thrown, because out of"
 					+ " range potion effects cause the client to crash, fairly hardcore. See"
 					+ " http://www.minecraftwiki.net/wiki/Potion_effects for a complete list of potions that can be"
 					+ " added. To remove an effect, set the seconds to 0. If seconds is less than 0 or greater than"
@@ -848,15 +848,15 @@ public class EntityManagement {
 			int effect = Static.getInt32(args[1], t);
 
 			int strength = Static.getInt32(args[2], t);
-			int seconds = 30;
+			double seconds = 30.0;
 			boolean ambient = false;
 			boolean particles = true;
 			if (args.length >= 4) {
-				seconds = Static.getInt32(args[3], t);
-				if(seconds < 0) {
-					throw new CRERangeException("Seconds cannot be less than 0", t);
-				} else if(seconds > Integer.MAX_VALUE / 20) {
-					throw new CRERangeException("Seconds cannot be greater than 107374182", t);
+				seconds = Static.getDouble(args[3], t);
+				if(seconds < 0.0) {
+					throw new CRERangeException("Seconds cannot be less than 0.0", t);
+				} else if(seconds * 20 > Integer.MAX_VALUE) {
+					throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
 				}
 			}
 			if (args.length == 5) {
@@ -866,10 +866,10 @@ public class EntityManagement {
 				particles = Static.getBoolean(args[5]);
 			}
 
-			if (seconds == 0) {
+			if (seconds == 0.0) {
 				return CBoolean.get(mob.removeEffect(effect));
 			} else {
-				mob.addEffect(effect, strength, seconds, ambient, particles, t);
+				mob.addEffect(effect, strength, (int)(seconds * 20), ambient, particles, t);
 				return CBoolean.TRUE;
 			}
 		}
