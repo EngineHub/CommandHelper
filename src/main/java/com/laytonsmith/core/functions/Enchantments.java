@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -20,6 +21,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -27,9 +29,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 
- */
 public class Enchantments {
 
 	public static String docs() {
@@ -446,15 +445,15 @@ public class Enchantments {
 
 		@Override
 		public String docs() {
-			return "boolean {name, targetItem} Given an enchantment name, and target item id,"
-					+ " returns wether or not that item can be enchanted with that enchantment."
-					+ " Throws an EnchantmentException if the name is not a valid enchantment"
-					+ " type.";
+			return "boolean {name, item} Given an enchantment name and an item array or id,"
+					+ " returns whether or not that item can be enchanted with that enchantment."
+					+ " Throws an EnchantmentException if the name is not a valid enchantment type.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREEnchantmentException.class, CREFormatException.class};
+			return new Class[]{CREEnchantmentException.class, CREFormatException.class, CRECastException.class,
+					CRERangeException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -477,7 +476,12 @@ public class Enchantments {
 			try {
 				String name = Enchantments.ConvertName(args[0].val());
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
-				MCItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), 1, t);
+				MCItemStack is;
+				if(args[1] instanceof CArray) {
+					is = ObjectGenerator.GetGenerator().item(args[1], t);
+				} else {
+					is = Static.ParseItemNotation(null, args[1].val(), 1, t);
+				}
 				return CBoolean.get(e.canEnchantItem(is));
 			} catch (NullPointerException e) {
 				throw new CREEnchantmentException(args[0].val().toUpperCase() + " is not a known enchantment type.", t);
@@ -539,7 +543,7 @@ public class Enchantments {
 	@api
 	public static class get_enchants extends AbstractFunction {
 
-		private static Map<String, CArray> cache = new HashMap<String, CArray>();
+		private static Map<String, CArray> cache = new HashMap<>();
 
 		@Override
 		public String getName() {
@@ -553,13 +557,14 @@ public class Enchantments {
 
 		@Override
 		public String docs() {
-			return "array {item} Given an item id, returns the enchantments that can"
+			return "array {item} Given an item array or id, returns the enchantments that can"
 					+ " be validly added to this item. This may return an empty array.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class, CRERangeException.class,
+					CRENotFoundException.class};
 		}
 
 		@Override
@@ -579,13 +584,19 @@ public class Enchantments {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCItemStack is = Static.ParseItemNotation(this.getName(), args[0].val(), 1, t);
-			/**
+			MCItemStack is;
+			if(args[1] instanceof CArray) {
+				is = ObjectGenerator.GetGenerator().item(args[0], t);
+			} else {
+				is = Static.ParseItemNotation(null, args[0].val(), 1, t);
+			}
+			String name = is.getType().getName();
+			/*
 			 * Because enchantment types won't change from run to run, we can
 			 * cache here, and save time on duplicate lookups.
 			 */
-			if (cache.containsKey(args[0].val())) {
-				return cache.get(args[0].val()).clone();
+			if (cache.containsKey(name)) {
+				return cache.get(name).clone();
 			}
 			CArray ca = new CArray(t);
 			for (MCEnchantment e : StaticLayer.GetEnchantmentValues()) {
@@ -593,7 +604,7 @@ public class Enchantments {
 					ca.push(new CString(e.getName(), t), t);
 				}
 			}
-			cache.put(args[0].val(), ca);
+			cache.put(name, ca);
 			return ca.clone();
 		}
 	}

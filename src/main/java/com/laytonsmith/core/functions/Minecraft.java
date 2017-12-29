@@ -317,11 +317,10 @@ public class Minecraft {
 			if (id instanceof CArray) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t);
 				return new CInt(is.getType().getMaxStackSize(), t);
-			} else if(id instanceof CString) {
-				int seperatorIndex = id.val().indexOf(':');
-				if(seperatorIndex != -1) {
-					id = new CString(id.val().substring(0, seperatorIndex), t);
-				}
+			}
+			int seperatorIndex = id.val().indexOf(':');
+			if(seperatorIndex != -1) {
+				id = new CString(id.val().substring(0, seperatorIndex), t);
 			}
 			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(id, t));
 			if(mat == null) {
@@ -1652,11 +1651,10 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "int {[player/LocationArray], item, [spawnNaturally]} Drops the specified item stack at the specified player's feet (or "
-					+ " at an arbitrary Location, if an array is given), and returns its entity id"
-					+ " Like the vanilla /give command. player defaults to the current player, and qty defaults to 1."
-					+ " item takes an item array."
-					+ " spawnNaturally takes a boolean, which forces the way the item will be spawned. If true, the item will be dropped with a random offset.";
+			return "int {[player/LocationArray], itemArray, [spawnNaturally]} Drops the specified item stack at the"
+					+ " specified player's feet (or at an arbitrary Location, if an array is given), and returns its"
+					+ " entity id. spawnNaturally takes a boolean, which forces the way the item will be spawned. If"
+					+ " true, the item will be dropped with a random velocity.";
 		}
 
 		@Override

@@ -572,32 +572,33 @@ public final class Static {
 	return blockPrefix;
     }
 
-    /**
-     * Returns an item stack from the given item notation. Defaulting to the specified qty, this will throw an exception
-     * if the notation is invalid.
-     *
-     * @param functionName
-     * @param notation
-     * @param qty
-     * @throws ConfigRuntimeException FormatException if the notation is invalid.
-     * @return
-     */
-    public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, Target t) {
-	int type;
-	short data = 0;
-	try {
-	    int separatorIndex = notation.indexOf(':');
-	    if (separatorIndex != -1) {
-		type = Integer.parseInt(notation.substring(0, separatorIndex));
-		data = (short) Integer.parseInt(notation.substring(separatorIndex + 1));
-	    } else {
-		type = Integer.parseInt(notation);
-	    }
-	} catch (NumberFormatException e) {
-	    throw new CREFormatException("Item value passed to " + functionName + " is invalid: " + notation, t);
+	/**
+	 * Returns an item stack from the given item notation. Defaulting to the specified qty, this will throw an exception
+	 * if the notation is invalid.
+	 *
+	 * @param functionName
+	 * @param notation
+	 * @param qty
+	 * @throws CREFormatException If the notation is invalid.
+	 * @return
+	 */
+	@Deprecated
+	public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, Target t) {
+		int type;
+		short data = 0;
+		try {
+			int separatorIndex = notation.indexOf(':');
+			if (separatorIndex != -1) {
+				type = Integer.parseInt(notation.substring(0, separatorIndex));
+				data = (short) Integer.parseInt(notation.substring(separatorIndex + 1));
+			} else {
+				type = Integer.parseInt(notation);
+			}
+		} catch (NumberFormatException e) {
+			throw new CREFormatException("Invalid item notation: " + notation, t);
+		}
+		return StaticLayer.GetItemStack(type, data, qty);
 	}
-	return StaticLayer.GetItemStack(type, data, qty);
-    }
 
     /**
      * Works in reverse from the other ParseItemNotation
