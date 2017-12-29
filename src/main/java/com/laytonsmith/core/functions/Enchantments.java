@@ -585,7 +585,7 @@ public class Enchantments {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCItemStack is;
-			if(args[1] instanceof CArray) {
+			if(args[0] instanceof CArray) {
 				is = ObjectGenerator.GetGenerator().item(args[0], t);
 			} else {
 				is = Static.ParseItemNotation(null, args[0].val(), 1, t);
