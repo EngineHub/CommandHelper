@@ -7,12 +7,13 @@ import com.laytonsmith.abstraction.MCAgeable;
 import com.laytonsmith.abstraction.MCArmorStand;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCChunk;
+import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEnderCrystal;
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCExperienceOrb;
 import com.laytonsmith.abstraction.MCFireball;
+import com.laytonsmith.abstraction.MCFireworkEffect;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCItem;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -26,6 +27,7 @@ import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCTNT;
+import com.laytonsmith.abstraction.MCTameable;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -42,7 +44,7 @@ import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEnderDragonPhase;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
-import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 import com.laytonsmith.abstraction.enums.MCParrotType;
 import com.laytonsmith.abstraction.enums.MCParticle;
@@ -85,7 +87,6 @@ import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
-import com.laytonsmith.core.exceptions.CRE.CREUnageableMobException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
@@ -97,6 +98,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -304,6 +307,59 @@ public class EntityManagement {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class is_tameable extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "is_tameable";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {entityID} Returns true or false if the specified entity is tameable";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_0;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			boolean ret;
+			if (e == null) {
+				ret = false;
+			} else if (e instanceof MCTameable) {
+				ret = true;
+			} else {
+				ret = false;
+			}
+			return CBoolean.get(ret);
 		}
 	}
 
@@ -683,203 +739,6 @@ public class EntityManagement {
 		}
 	}
 
-	@api
-	public static class get_mob_age extends EntityGetterFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREUnageableMobException.class, CRELengthException.class,
-					CREBadEntityException.class};
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
-			if (ent == null) {
-				return CNull.NULL;
-			} else if (ent instanceof MCAgeable) {
-				MCAgeable mob = ((MCAgeable) ent);
-				return new CInt(mob.getAge(), t);
-			} else {
-				throw new CREUnageableMobException("The specified entity does not age", t);
-			}
-		}
-
-		@Override
-		public String getName() {
-			return "get_mob_age";
-		}
-
-		@Override
-		public String docs() {
-			return "int {entityID} Returns the mob's age as an integer. Zero represents the point of adulthood. Throws an"
-					+ " UnageableMobException if the mob is not a type that ages";
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class set_mob_age extends EntityFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREUnageableMobException.class, CRECastException.class,
-					CREBadEntityException.class, CRELengthException.class};
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int age = Static.getInt32(args[1], t);
-			boolean lock = false;
-			if (args.length == 3) {
-				lock = (boolean) Static.getBoolean(args[2]);
-			}
-			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
-			if (ent == null) {
-				return CNull.NULL;
-			} else if (ent instanceof MCAgeable) {
-				MCAgeable mob = ((MCAgeable) ent);
-				mob.setAge(age);
-				mob.setAgeLock(lock);
-				return CVoid.VOID;
-			} else {
-				throw new CREUnageableMobException("The specified entity does not age", t);
-			}
-		}
-
-		@Override
-		public String getName() {
-			return "set_mob_age";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{2, 3};
-		}
-
-		@Override
-		public String docs() {
-			return "void {entityID, int[, lockAge]} sets the age of the mob to the specified int, and locks it at that age"
-					+ " if lockAge is true, but by default it will not. Throws a UnageableMobException if the mob does"
-					+ " not age naturally.";
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class get_mob_effects extends EntityGetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
-			return ObjectGenerator.GetGenerator().potions(mob.getEffects(), t);
-		}
-
-		@Override
-		public String getName() {
-			return "get_mob_effects";
-		}
-
-		@Override
-		public String docs() {
-			return "array {entityID} Returns an array of potion arrays showing"
-					+ " the effects on this mob.";
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{new ExampleScript("Basic use", "msg(get_mob_effects(259))",
-					"{{ambient: false, id: 1, seconds: 30, strength: 1}}")};
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-	}
-
-	@api
-	public static class set_mob_effect extends EntityFunction {
-
-		@Override
-		public String getName() {
-			return "set_mob_effect";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{3, 4, 5, 6};
-		}
-
-		@Override
-		public String docs() {
-			return "boolean {entityId, potionID, strength, [seconds], [ambient], [particles]} Effect is 1-23. Seconds"
-					+ " defaults to 30.0. If the potionID is out of range, a RangeException is thrown, because out of"
-					+ " range potion effects cause the client to crash, fairly hardcore. See"
-					+ " http://www.minecraftwiki.net/wiki/Potion_effects for a complete list of potions that can be"
-					+ " added. To remove an effect, set the seconds to 0. If seconds is less than 0 or greater than"
-					+ " 107374182 a RangeException is thrown. Strength is the number of levels to add to the"
-					+ " base power (effect level 1). Ambient takes a boolean of whether the particles should be less"
-					+ " noticeable. Particles takes a boolean of whether the particles should be visible at all. The"
-					+ " function returns true if the effect was added or removed as desired, and false if it wasn't"
-					+ " (however, this currently only will happen if an effect is attempted to be removed, yet isn't"
-					+ " already on the mob).";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRELengthException.class, CREFormatException.class,
-					CREBadEntityException.class, CRERangeException.class};
-		}
-
-		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
-
-			int effect = Static.getInt32(args[1], t);
-
-			int strength = Static.getInt32(args[2], t);
-			double seconds = 30.0;
-			boolean ambient = false;
-			boolean particles = true;
-			if (args.length >= 4) {
-				seconds = Static.getDouble(args[3], t);
-				if(seconds < 0.0) {
-					throw new CRERangeException("Seconds cannot be less than 0.0", t);
-				} else if(seconds * 20 > Integer.MAX_VALUE) {
-					throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
-				}
-			}
-			if (args.length == 5) {
-				ambient = Static.getBoolean(args[4]);
-			}
-			if (args.length == 6) {
-				particles = Static.getBoolean(args[5]);
-			}
-
-			if (seconds == 0.0) {
-				return CBoolean.get(mob.removeEffect(effect));
-			} else {
-				mob.addEffect(effect, strength, (int)(seconds * 20), ambient, particles, t);
-				return CBoolean.TRUE;
-			}
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
 	@api(environments={CommandHelperEnvironment.class})
 	public static class shoot_projectile extends EntityFunction {
 
@@ -1160,233 +1019,6 @@ public class EntityManagement {
 		}
 	}
 
-	//@api
-	public static class get_mob_target extends EntityGetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(args[0], t);
-			if (le.getTarget(t) == null) {
-				return CNull.NULL;
-			} else {
-				return new CString(le.getTarget(t).getUniqueId().toString(), t);
-			}
-		}
-
-		@Override
-		public String getName() {
-			return "get_mob_target";
-		}
-
-		@Override
-		public String docs() {
-			return "entityID {entityID} Gets the mob's target if it has one, and returns the target's entityID."
-					+ " If there is no target, null is returned instead.";
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	//@api
-	public static class set_mob_target extends EntitySetterFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREBadEntityException.class, CRELengthException.class};
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(args[0], t);
-			MCLivingEntity target = null;
-			if (!(args[1] instanceof CNull)) {
-				target = Static.getLivingEntity(args[1], t);
-			}
-			le.setTarget(target, t);
-			return CVoid.VOID;
-		}
-
-		@Override
-		public String getName() {
-			return "set_mob_target";
-		}
-
-		@Override
-		public String docs() {
-			return "void {entityID, entityID} The first ID is the entity who is targetting, the second is the target."
-					+ " It can also be set to null to clear the current target.";
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class get_mob_equipment extends EntityGetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(args[0], t);
-			MCEntityEquipment eq = le.getEquipment();
-			if (eq == null) {
-				throw new CREBadEntityTypeException("Entities of type \"" + le.getType() + "\" do not have equipment.", t);
-			}
-			Map<MCEquipmentSlot, MCItemStack> eqmap = le.getEquipment().getAllEquipment();
-			CArray ret = CArray.GetAssociativeArray(t);
-			for (MCEquipmentSlot key : eqmap.keySet()) {
-				ret.set(key.name().toLowerCase(), ObjectGenerator.GetGenerator().item(eqmap.get(key), t), t);
-			}
-			return ret;
-		}
-
-		@Override
-		public String getName() {
-			return "get_mob_equipment";
-		}
-
-		@Override
-		public String docs() {
-			return "equipmentArray {entityID} Returns an associative array showing the equipment this mob is wearing."
-					+ " This does not work on most \"dumb\" entities, only mobs (entities with AI).";
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{
-					new ExampleScript("Getting a mob's equipment", "get_mob_equipment(276)", "{boots: null,"
-							+ " chestplate: null, helmet: {data: 0, enchants: {} meta: null, type: 91}, leggings: null,"
-							+ " off_hand: null, weapon: {data: 5, enchants: {} meta: {display: Excalibur, lore: null},"
-							+ " type: 276}}")
-			};
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class set_mob_equipment extends EntitySetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(args[0], t);
-			MCEntityEquipment ee = le.getEquipment();
-			if (ee == null) {
-				throw new CREBadEntityTypeException("Entities of type \"" + le.getType() + "\" do not have equipment.", t);
-			}
-			Map<MCEquipmentSlot, MCItemStack> eq = ee.getAllEquipment();
-			if (args[1] instanceof CNull) {
-				ee.clearEquipment();
-				return CVoid.VOID;
-			} else if (args[1] instanceof CArray) {
-				CArray ea = (CArray) args[1];
-				for (String key : ea.stringKeySet()) {
-					try {
-						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ObjectGenerator.GetGenerator().item(ea.get(key, t), t));
-					} catch (IllegalArgumentException iae) {
-						throw new CREFormatException("Not an equipment slot: " + key, t);
-					}
-				}
-			} else {
-				throw new CREFormatException("Expected argument 2 to be an array", t);
-			}
-			ee.setAllEquipment(eq);
-			return CVoid.VOID;
-		}
-
-		@Override
-		public String getName() {
-			return "set_mob_equipment";
-		}
-
-		@Override
-		public String docs() {
-			return "void {entityID, array} Takes an associative array with keys representing equipment slots and values"
-					+ " of itemArrays, the same used by set_pinv. This does not work on most \"dumb\" entities,"
-					+ " only mobs (entities with AI). Unless a mod, plugin, or future update changes vanilla functionality,"
-					+ " only humanoid mobs will render their equipment slots. The equipment slots are: "
-					+ StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or ");
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "set_mob_equipment(spawn_mob('SKELETON')[0], array(WEAPON: array(type: 261)))", "Gives a bow to a skeleton")
-			};
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class get_max_health extends EntityGetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(args[0], t);
-			return new CDouble(le.getMaxHealth(), t);
-		}
-
-		@Override
-		public String getName() {
-			return "get_max_health";
-		}
-
-		@Override
-		public String docs() {
-			return "double {entityID} Returns the maximum health of this living entity.";
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class set_max_health extends EntitySetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(args[0], t);
-			le.setMaxHealth(Static.getDouble(args[1], t));
-			return CVoid.VOID;
-		}
-
-		@Override
-		public String getName() {
-			return "set_max_health";
-		}
-
-		@Override
-		public String docs() {
-			return "void {entityID, double} Sets the max health of a living entity, players included."
-					+ " This value is persistent, and will not reset even after server restarts.";
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{new ExampleScript("Basic use",
-					"set_max_health(256, 10)", "The entity will now only have 5 hearts max.")};
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
 	@api
 	public static class entity_onfire extends EntityGetterFunction {
 
@@ -1599,11 +1231,7 @@ public class EntityManagement {
 			for (int i = 0; i < qty; i++) {
 				switch (entType.getAbstracted()) {
 					case DROPPED_ITEM:
-						CArray c = CArray.GetAssociativeArray(t);
-						c.set("type", new CInt(1, t), t);
-						c.set("qty", new CInt(qty, t), t);
-						MCItemStack is = ObjectGenerator.GetGenerator().item(c, t);
-						ent = l.getWorld().dropItem(l, is);
+						ent = l.getWorld().dropItem(l, StaticLayer.GetItemStack(1, qty));
 						qty = 0;
 						break;
 					case FALLING_BLOCK:
@@ -1856,87 +1484,6 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class get_equipment_droprates extends EntityGetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntityEquipment eq = Static.getLivingEntity(args[0], t).getEquipment();
-			if (eq.getHolder() instanceof MCPlayer) {
-				throw new CREBadEntityException(getName() + " does not work on players.", t);
-			}
-			CArray ret = CArray.GetAssociativeArray(t);
-			for (Map.Entry<MCEquipmentSlot, Float> ent : eq.getAllDropChances().entrySet()) {
-				ret.set(ent.getKey().name(), new CDouble(ent.getValue(), t), t);
-			}
-			return ret;
-		}
-
-		@Override
-		public String getName() {
-			return "get_equipment_droprates";
-		}
-
-		@Override
-		public String docs() {
-			return "array {entityID} Returns an associative array of the drop rate for each equipment slot."
-					+ " If the rate is 0, the equipment will not drop. If it is 1, it is guaranteed to drop.";
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class set_equipment_droprates extends EntitySetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntityEquipment ee = Static.getLivingEntity(args[0], t).getEquipment();
-			Map<MCEquipmentSlot, Float> eq = ee.getAllDropChances();
-			if (ee.getHolder() instanceof MCPlayer) {
-				throw new CREBadEntityException(getName() + " does not work on players.", t);
-			}
-			if (args[1] instanceof CNull) {
-				for (Map.Entry<MCEquipmentSlot, Float> ent : eq.entrySet()) {
-					eq.put(ent.getKey(), 0F);
-				}
-			} else if (args[1] instanceof CArray) {
-				CArray ea = (CArray) args[1];
-				for (String key : ea.stringKeySet()) {
-					try {
-						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), Static.getDouble32(ea.get(key, t), t));
-					} catch (IllegalArgumentException iae) {
-						throw new CREFormatException("Not an equipment slot: " + key, t);
-					}
-				}
-			} else {
-				throw new CREFormatException("Expected argument 2 to be an array", t);
-			}
-			ee.setAllDropChances(eq);
-			return CVoid.VOID;
-		}
-
-		@Override
-		public String getName() {
-			return "set_equipment_droprates";
-		}
-
-		@Override
-		public String docs() {
-			return "void {entityID, array} Sets the drop chances for each equipment slot on a mob,"
-					+ " but does not work on players. Passing null instead of an array will automatically"
-					+ " set all rates to 0, which will cause nothing to drop. A rate of 1 will guarantee a drop.";
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
 	public static class get_name_visible extends EntityGetterFunction {
 
 		@Override
@@ -1989,104 +1536,6 @@ public class EntityManagement {
 			return "void {entityID, boolean} Sets the visibility of a mob's custom name."
 					+ " True means it will be visible from a distance, like a playername."
 					+ " False means it will only be visible when near the mob.";
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class can_pickup_items extends EntityGetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(Static.getLivingEntity(args[0], t).getCanPickupItems());
-		}
-
-		@Override
-		public String getName() {
-			return "can_pickup_items";
-		}
-
-		@Override
-		public String docs() {
-			return "boolean {entityID} Returns whether the specified living entity can pick up items.";
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class set_can_pickup_items extends EntitySetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(args[0], t).setCanPickupItems(Static.getBoolean(args[1]));
-			return CVoid.VOID;
-		}
-
-		@Override
-		public String getName() {
-			return "set_can_pickup_items";
-		}
-
-		@Override
-		public String docs() {
-			return "void {entityID, boolean} Sets a living entity's ability to pick up items.";
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class get_entity_persistence extends EntityGetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(!Static.getLivingEntity(args[0], t).getRemoveWhenFarAway());
-		}
-
-		@Override
-		public String getName() {
-			return "get_entity_persistence";
-		}
-
-		@Override
-		public String docs() {
-			return "boolean {entityID} Returns whether the specified living entity will despawn. True means it will not.";
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class set_entity_persistence extends EntitySetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(args[0], t).setRemoveWhenFarAway(!Static.getBoolean(args[1]));
-			return CVoid.VOID;
-		}
-
-		@Override
-		public String getName() {
-			return "set_entity_persistence";
-		}
-
-		@Override
-		public String docs() {
-			return "void {entityID, boolean} Sets whether a living entity will despawn. True means it will not.";
 		}
 		
 		@Override
@@ -2224,70 +1673,6 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class get_leashholder extends EntityGetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(args[0], t);
-			if (!le.isLeashed()) {
-				return CNull.NULL;
-			}
-			return new CString(le.getLeashHolder().getUniqueId().toString(), t);
-		}
-
-		@Override
-		public String getName() {
-			return "get_leashholder";
-		}
-
-		@Override
-		public String docs() {
-			return "int {entityID} Returns the entityID of the entity that is holding the given living entity's leash,"
-					+ " or null if it isn't being held.";
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class set_leashholder extends EntitySetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity le = Static.getLivingEntity(args[0], t);
-			MCEntity holder;
-			if (args[1] instanceof CNull) {
-				holder = null;
-			} else {
-				holder = Static.getEntity(args[1], t);
-			}
-			le.setLeashHolder(holder);
-			return CVoid.VOID;
-		}
-
-		@Override
-		public String getName() {
-			return "set_leashholder";
-		}
-
-		@Override
-		public String docs() {
-			return "void {entityID, entityID} The first entity is the entity to be held on a leash, and must be living."
-					+ " The second entity is the holder of the leash. This does not have to be living,"
-					+ " but the only non-living entity that will persist as a holder across restarts is the leash hitch."
-					+ " Bats, enderdragons, players, and withers can not be held by leashes due to minecraft limitations.";
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
 	public static class entity_grounded extends EntityGetterFunction {
 
 		@Override
@@ -2303,198 +1688,6 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "boolean {entityID} returns whether the entity is touching the ground";
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class entity_air extends EntityGetterFunction {
-
-		@Override
-		public String getName() {
-			return "entity_air";
-		}
-
-		@Override
-		public String docs() {
-			return "int {entityID} Returns the amount of air the specified living entity has remaining.";
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CInt(Static.getLivingEntity(args[0], t).getRemainingAir(), t);
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class set_entity_air extends EntitySetterFunction {
-
-		@Override
-		public String getName() {
-			return "set_entity_air";
-		}
-
-		@Override
-		public String docs() {
-			return "void {entityID, int} Sets the amount of air the specified living entity has remaining.";
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(args[0], t).setRemainingAir(Static.getInt32(args[1], t));
-			return CVoid.VOID;
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class entity_max_air extends EntityGetterFunction {
-
-		@Override
-		public String getName() {
-			return "entity_max_air";
-		}
-
-		@Override
-		public String docs() {
-			return "int {entityID} Returns the maximum amount of air the specified living entity can have.";
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CInt(Static.getLivingEntity(args[0], t).getMaximumAir(), t);
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class set_entity_max_air extends EntitySetterFunction {
-
-		@Override
-		public String getName() {
-			return "set_entity_max_air";
-		}
-
-		@Override
-		public String docs() {
-			return "void {entityID, int} Sets the maximum amount of air the specified living entity can have.";
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(args[0], t).setMaximumAir(Static.getInt32(args[1], t));
-			return CVoid.VOID;
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class entity_line_of_sight extends EntityFunction {
-
-		@Override
-		public String getName() {
-			return "entity_line_of_sight";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1, 2, 3};
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRELengthException.class,
-					CREBadEntityException.class};
-		}
-
-		@Override
-		public String docs() {
-			return "array {entityID, [transparents, [maxDistance]]} Returns an array containing all blocks along the"
-					+ " living entity's line of sight. transparents is an array of block IDs, only air by default."
-					+ " maxDistance represents the maximum distance to scan. The server may cap the scan distance,"
-					+ " but probably by not any less than 100 meters.";
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity entity = Static.getLivingEntity(args[0], t);
-			HashSet<Short> transparents = null;
-			int maxDistance = 512;
-			if (args.length >= 2) {
-				CArray givenTransparents = Static.getArray(args[1], t);
-				if (givenTransparents.inAssociativeMode()) {
-					throw new CRECastException("The array must not be associative.", t);
-				}
-				transparents = new HashSet<>();
-				for (Construct blockID : givenTransparents.asList()) {
-					transparents.add(Static.getInt16(blockID, t));
-				}
-			}
-			if (args.length == 3) {
-				maxDistance = Static.getInt32(args[2], t);
-			}
-			CArray lineOfSight = new CArray(t);
-			for (MCBlock block : entity.getLineOfSight(transparents, maxDistance)) {
-				lineOfSight.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), t);
-			}
-			return lineOfSight;
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class entity_can_see extends EntityFunction {
-
-		@Override
-		public String getName() {
-			return "entity_can_see";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{2};
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRELengthException.class, CREBadEntityException.class};
-		}
-
-		@Override
-		public String docs() {
-			return "boolean {entityID, otherEntityID} Returns if the entity can have the other entity in his line of sight."
-					+ " For instance for players this mean that it can have the other entity on its screen and that this one is not hidden by opaque blocks."
-					+ " This uses the same algorithm that hostile mobs use to find the closest player.";
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(Static.getLivingEntity(args[0], t).hasLineOfSight(Static.getEntity(args[1], t)));
 		}
 		
 		@Override
@@ -4062,59 +3255,6 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class damage_entity extends EntityFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRELengthException.class,
-				CREBadEntityTypeException.class, CREBadEntityException.class};
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity entity = Static.getEntity(args[0], t);
-
-			if (!(entity instanceof MCLivingEntity)) {
-				throw new CREBadEntityTypeException("The entity id provided doesn't"
-					+ " belong to a living entity", t);
-			}
-
-			MCLivingEntity living = (MCLivingEntity)entity;
-
-			double damage = Static.getDouble(args[1], t);
-			if (args.length == 3) {
-				MCEntity source = Static.getEntity(args[2], t);
-				living.damage(damage, source);
-			} else {
-				living.damage(damage);
-			}
-
-			return CVoid.VOID;
-		}
-
-		@Override
-		public String getName() {
-			return "damage_entity";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{2, 3};
-		}
-
-		@Override
-		public String docs() {
-			return "void {entityId, amount, [sourceEntityId]} Damage an entity. If given,"
-					+ " the source entity will be attributed as the damager.";
-		}
-		
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
 	public static class entity_fall_distance extends EntityGetterFunction {
 
 		@Override
@@ -4196,92 +3336,6 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
 			return CBoolean.GenerateCBoolean(e.isGlowing(), t);
-		}
-
-		public Version since() {
-			return CHVersion.V3_3_2;
-		}
-	}
-	
-	@api
-	public static class set_entity_gliding extends EntitySetterFunction {
-		public String getName() {
-			return "set_entity_gliding";
-		}
-
-		public String docs() {
-			return "void {entityID, boolean} If possible, makes the entity glide (MC 1.9)";
-		}
-
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			boolean glide = Static.getBoolean(args[1]);
-
-			e.setGliding(glide);
-
-			return CVoid.VOID;
-		}
-
-		public Version since() {
-			return CHVersion.V3_3_2;
-		}
-	}
-
-	@api
-	public static class get_entity_gliding extends EntityGetterFunction {
-		public String getName() {
-			return "get_entity_gliding";
-		}
-
-		public String docs() {
-			return "boolean {entityID} Returns true if the given entity is gliding (MC 1.9)";
-		}
-
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.GenerateCBoolean(Static.getLivingEntity(args[0], t).isGliding(), t);
-		}
-
-		public Version since() {
-			return CHVersion.V3_3_2;
-		}
-	}
-	
-	@api
-	public static class get_entity_ai extends EntityGetterFunction {
-		public String getName() {
-			return "get_entity_ai";
-		}
-
-		public String docs() {
-			return "boolean {entityID} Returns true if the given entity has AI (MC 1.9.2)";
-		}
-
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.GenerateCBoolean(Static.getLivingEntity(args[0], t).hasAI(), t);
-		}
-
-		public Version since() {
-			return CHVersion.V3_3_2;
-		}
-	}
-	
-	@api
-	public static class set_entity_ai extends EntitySetterFunction {
-		public String getName() {
-			return "set_entity_ai";
-		}
-
-		public String docs() {
-			return "void {entityID, boolean} enables or disables the entity AI (MC 1.9.2)";
-		}
-
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			boolean ai = Static.getBoolean(args[1]);
-
-			e.setAI(ai);
-
-			return CVoid.VOID;
 		}
 
 		public Version since() {
@@ -4473,4 +3527,211 @@ public class EntityManagement {
 			return CHVersion.V3_3_2;
 		}
 	}
+
+	@api(environments={CommandHelperEnvironment.class})
+	public static class drop_item extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "drop_item";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "int {[player/LocationArray], itemArray, [spawnNaturally]} Drops the specified item stack at the"
+					+ " specified player's feet (or at an arbitrary Location, if an array is given), and returns its"
+					+ " entity id. spawnNaturally takes a boolean, which forces the way the item will be spawned. If"
+					+ " true, the item will be dropped with a random velocity.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREPlayerOfflineException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_2_0;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCLocation l;
+			MCItemStack is;
+			boolean natural;
+			if (args.length == 1) {
+				if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+					l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getEyeLocation();
+					natural = false;
+				} else {
+					throw new CREPlayerOfflineException("Invalid sender!", t);
+				}
+				is = ObjectGenerator.GetGenerator().item(args[0], t);
+			} else {
+				MCPlayer p;
+				if (args[0] instanceof CArray) {
+					p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+					l = ObjectGenerator.GetGenerator().location(args[0], (p != null ? p.getWorld() : null), t);
+					natural = true;
+				} else {
+					p = Static.GetPlayer(args[0].val(), t);
+					l = p.getEyeLocation();
+					natural = false;
+				}
+				is = ObjectGenerator.GetGenerator().item(args[1], t);
+			}
+			if(is.getTypeId() == 0) {
+				// can't drop air
+				return CNull.NULL;
+			}
+			if (args.length == 3) {
+				natural = Static.getBoolean(args[2]);
+			}
+			MCItem item;
+			if (natural) {
+				item = l.getWorld().dropItemNaturally(l, is);
+			} else {
+				item = l.getWorld().dropItem(l, is);
+			}
+			return new CString(item.getUniqueId().toString(), t);
+		}
+	}
+
+	@api(environments={CommandHelperEnvironment.class})
+	public static class launch_firework extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class,CRERangeException.class,CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCWorld w = null;
+			if(p != null){
+				w = p.getWorld();
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			CArray options;
+			if(args.length == 2){
+				options = Static.getArray(args[1], t);
+			} else {
+				options = CArray.GetAssociativeArray(t);
+			}
+
+			int strength = 2;
+			if(options.containsKey("strength")){
+				strength = Static.getInt32(options.get("strength", t), t);
+				if (strength < 0 || strength > 128) {
+					throw new CRERangeException("Strength must be between 0 and 128", t);
+				}
+			}
+
+			List<MCFireworkEffect> effects = new ArrayList<>();
+			if(options.containsKey("effects")) {
+				Construct cEffects = options.get("effects", t);
+				if(cEffects instanceof CArray){
+					for(Construct c : ((CArray) cEffects).asList()){
+						effects.add(ObjectGenerator.GetGenerator().fireworkEffect((CArray) c, t));
+					}
+				} else {
+					throw new CREFormatException("Firework effects must be an array.", t);
+				}
+			} else {
+				effects.add(ObjectGenerator.GetGenerator().fireworkEffect(options, t));
+			}
+
+			MCFirework firework = loc.getWorld().launchFirework(loc, strength, effects);
+			return new CString(firework.getUniqueId().toString(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "launch_firework";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			Class c;
+			try {
+				//Since MCColor actually depends on a bukkit server, we don't want to require that for
+				//the sake of documentation, so we'll build the color list much more carefully.
+				//Note the false, so we don't actually initialize the class.
+				c = Class.forName(MCColor.class.getName(), false, this.getClass().getClassLoader());
+			} catch (ClassNotFoundException ex) {
+				//Hrm...
+				Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
+				return "";
+			}
+			List<String> names = new ArrayList<String>();
+			for(Field f : c.getFields()){
+				if(f.getType() == MCColor.class){
+					names.add(f.getName());
+				}
+			}
+			return "void {locationArray, [optionsArray]} Launches a firework. The location array specifies where it is launched from,"
+					+ " and the options array is an associative array described below. All parameters in the associative array are"
+					+ " optional, and default to the specified values if not set. The default options being set will make it look like"
+					+ " a normal firework, with a white explosion. ----"
+					+ " The options array may have the following keys:\n"
+					+ "{| cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
+					+ "! Array key !! Description !! Default\n"
+					+ "|-\n"
+					+ "| strength || A number specifying how far up the firework should go || 2\n"
+					+ "|-\n"
+					+ "| flicker || A boolean, determining if the firework will flicker\n || false\n"
+					+ "|-\n"
+					+ "| trail || A boolean, determining if the firework will leave a trail || true\n"
+					+ "|-\n"
+					+ "| colors || An array of colors, or a pipe seperated string of color names (for the named colors only)"
+					+ " for instance: array('WHITE') or 'WHITE<nowiki>|</nowiki>BLUE'. If you want custom colors, you must use an array, though"
+					+ " you can still use color names as an item in the array, for instance: array('ORANGE', array(30, 45, 150))."
+					+ " These colors are used as the primary colors. || 'WHITE'\n"
+					+ "|-\n"
+					+ "| fade || An array of colors to be used as the fade colors. This parameter should be formatted the same as"
+					+ " the colors parameter || array()\n"
+					+ "|-\n"
+					+ "| type || An enum value of one of the firework types, one of: " + StringUtils.Join(MCFireworkType.values(), ", ", " or ")
+					+ " || " + MCFireworkType.BALL.name() + "\n"
+					+ "|}\n"
+					+ "The \"named colors\" can be one of: " + StringUtils.Join(names, ", ", " or ");
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+	}
+
 }

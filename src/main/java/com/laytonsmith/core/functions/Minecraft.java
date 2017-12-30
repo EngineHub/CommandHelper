@@ -2,38 +2,19 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.MCAnimalTamer;
-import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
-import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCFireworkEffect;
-import com.laytonsmith.abstraction.MCItem;
 import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPluginManager;
 import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.abstraction.MCTameable;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.abstraction.entities.MCFirework;
-import com.laytonsmith.abstraction.entities.MCHorse;
-import com.laytonsmith.abstraction.enums.MCCreeperType;
-import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
-import com.laytonsmith.abstraction.enums.MCFireworkType;
-import com.laytonsmith.abstraction.enums.MCMobs;
-import com.laytonsmith.abstraction.enums.MCOcelotType;
-import com.laytonsmith.abstraction.enums.MCPigType;
-import com.laytonsmith.abstraction.enums.MCProfession;
-import com.laytonsmith.abstraction.enums.MCSkeletonType;
-import com.laytonsmith.abstraction.enums.MCWolfType;
-import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.CHLog;
@@ -43,7 +24,6 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -56,19 +36,15 @@ import com.laytonsmith.core.events.drivers.ServerEvents;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
-import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
-import com.laytonsmith.core.exceptions.CRE.CREUntameableMobException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Enumeration;
@@ -335,295 +311,6 @@ public class Minecraft {
 		}
 	}
 
-	@api(environments = {CommandHelperEnvironment.class})
-	public static class spawn_mob extends AbstractFunction {
-		
-		// The max amount of mobs that can be spawned at once by this function.
-		private static final int SPAWN_LIMIT = 10000;
-
-		@Override
-		public String getName() {
-			return "spawn_mob";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1, 2, 3};
-		}
-
-		@Override
-		public String docs() {
-			return "array {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
-					+ " to the location of the player. An array of the entity IDs spawned is returned."
-					+ " ---- mobType can be one of: " + StringUtils.Join(MCMobs.values(), ", ", ", or ", " or ") + "."
-					+ " Spelling matters, but capitalization doesn't. At this time, the function is limited to spawning a maximum of 50 at a time."
-					+ " Further, subtypes can be applied by specifying MOBTYPE:SUBTYPE, for example the sheep subtype can be any of the dye colors: "
-					+ StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or ") + ". COLOR defaults to white if not specified. For mobs with multiple"
-					+ " subtypes, separate each type with a \"-\", currently only zombies which, using ZOMBIE:TYPE1-TYPE2 can be any non-conflicting two of: "
-					+ StringUtils.Join(MCZombieType.values(), ", ", ", or ", " or ") + ", but default to normal zombies. Ocelots may be one of: "
-					+ StringUtils.Join(MCOcelotType.values(), ", ", ", or ", " or ") + ", defaulting to the wild variety. Villagers can have a profession as a subtype: "
-					+ StringUtils.Join(MCProfession.values(), ", ", ", or ", " or ") + ", defaulting to farmer if not specified. Skeletons can be "
-					+ StringUtils.Join(MCSkeletonType.values(), ", ", ", or ", " or ") + ". PigZombies' subtype represents their anger,"
-					+ " and accepts an integer, where 0 is neutral and 400 is the normal response to being attacked. Defaults to 0. Similarly, Slime"
-					+ " and MagmaCube size can be set by integer, otherwise will be a random natural size. If a material is specified as the subtype"
-					+ " for Endermen, they will hold that material, otherwise they will hold nothing. Creepers can be set to "
-					+ StringUtils.Join(MCCreeperType.values(), ", ", ", or ", " or ") + ", wolves can be " + StringUtils.Join(MCWolfType.values(), ", ", ", or ", " or ")
-					+ ", and pigs can be " + StringUtils.Join(MCPigType.values(), ", ", ", or ", " or ") + "."
-					+ " Horses can have three different subTypes, the variant: " + StringUtils.Join(MCHorse.MCHorseVariant.values(), ", ", ", or ", " or ") + ","
-					+ " the color: " + StringUtils.Join(MCHorse.MCHorseColor.values(), ", ", ", or ", " or ") + ","
-					+ " and the pattern: " + StringUtils.Join(MCHorse.MCHorsePattern.values(), ", ", ", or ", " or ") + "."
-					+ " If qty is larger than " + spawn_mob.SPAWN_LIMIT + ", a RangeException will be thrown.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRERangeException.class,
-				CREFormatException.class, CREPlayerOfflineException.class,
-				CREInvalidWorldException.class, CRENotFoundException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			String mob = args[0].val();
-			String secondary = "";
-			if (mob.contains(":")) {
-				secondary = mob.substring(mob.indexOf(':') + 1);
-				mob = mob.substring(0, mob.indexOf(':'));
-			}
-			int qty = 1;
-			if (args.length > 1) {
-				qty = Static.getInt32(args[1], t);
-				if (qty > spawn_mob.SPAWN_LIMIT) {
-					throw new CRERangeException("You can not spawn more than " + spawn_mob.SPAWN_LIMIT
-							+ " mobs at once using the " + this.getName() + " function.", t);
-				}
-			}
-			MCLocation l;
-			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (args.length == 3) {
-				l = ObjectGenerator.GetGenerator().location(args[2], (p != null ? p.getWorld() : null), t);
-			} else if (p != null) {
-				l = p.getLocation();
-			} else {
-				throw new CREPlayerOfflineException("Invalid sender!", t);
-			}
-			
-			if (l == null) { // Happends when executed by a fake player.
-				throw new CRENotFoundException(
-					"Could not find the location of the player (are you running in cmdline mode?)", t);
-			}
-			
-			try{
-				return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll(" ", "")), secondary, qty, l, t);
-			} catch(IllegalArgumentException e){
-				throw new CREFormatException("Invalid mob name: " + mob, t);
-			}
-		}
-	}
-
-	@api(environments={CommandHelperEnvironment.class})
-	public static class tame_mob extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "tame_mob";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
-		}
-
-		@Override
-		public String docs() {
-			return "void {[player], entityID} Tames any tameable mob to the specified player. Offline players are"
-					+ " supported, but this means that partial matches are NOT supported. You must type the players"
-					+ " name exactly. Setting the player to null will untame the mob. If the entity doesn't exist,"
-					+ " nothing happens.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
-					CREBadEntityException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			String player = null;
-			MCPlayer mcPlayer = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (mcPlayer != null) {
-				player = mcPlayer.getName();
-			}
-			Construct entityID = null;
-			if (args.length == 2) {
-				if (args[0] instanceof CNull) {
-					player = null;
-				} else {
-					player = args[0].val();
-				}
-				entityID = args[1];
-			} else {
-				entityID = args[0];
-			}
-			MCLivingEntity e = Static.getLivingEntity(entityID, t);
-			if (e == null) {
-				return CVoid.VOID;
-			} else if (e instanceof MCTameable) {
-				MCTameable mct = ((MCTameable) e);
-				if (player != null) {
-					mct.setOwner(Static.getServer().getOfflinePlayer(player));
-				} else {
-					mct.setOwner(null);
-				}
-				return CVoid.VOID;
-			} else {
-				throw new CREUntameableMobException("The specified entity is not tameable", t);
-			}
-		}
-	}
-
-	@api
-	public static class get_mob_owner extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "get_mob_owner";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		@Override
-		public String docs() {
-			return "string {entityID} Returns the owner's name, or null if the mob is unowned. An UntameableMobException is thrown if"
-					+ " mob isn't tameable to begin with.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
-					CREBadEntityException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			if (e == null) {
-				return CNull.NULL;
-			} else if (e instanceof MCTameable) {
-				MCAnimalTamer at = ((MCTameable) e).getOwner();
-				if (null != at) {
-					return new CString(at.getName(), t);
-				} else {
-					return CNull.NULL;
-				}
-			} else {
-				throw new CREUntameableMobException("The specified entity is not tameable", t);
-			}
-		}
-	}
-
-	@api
-	public static class is_tameable extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "is_tameable";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		@Override
-		public String docs() {
-			return "boolean {entityID} Returns true or false if the specified entity is tameable";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRELengthException.class, CREBadEntityException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity e = Static.getEntity(args[0], t);
-			boolean ret;
-			if (e == null) {
-				ret = false;
-			} else if (e instanceof MCTameable) {
-				ret = true;
-			} else {
-				ret = false;
-			}
-			return CBoolean.get(ret);
-		}
-	}
-
 	@api(environments={CommandHelperEnvironment.class})
 	public static class make_effect extends AbstractFunction {
 
@@ -699,106 +386,6 @@ public class Minecraft {
 			}
 			l.getWorld().playEffect(l, e, data, radius);
 			return CVoid.VOID;
-		}
-	}
-
-	@api
-	public static class set_entity_health extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "set_entity_health";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{2};
-		}
-
-		@Override
-		public String docs() {
-			return "void {entityID, healthPercent} Sets the specified entity's health as a percentage,"
-					+ " where 0 kills it and 100 gives it full health."
-					+ " An exception is thrown if the entityID doesn't exist or isn't a LivingEntity.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREBadEntityException.class,
-					CRERangeException.class, CRELengthException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			double percent = Static.getDouble(args[1], t);
-			if (percent < 0 || percent > 100) {
-				throw new CRERangeException("Health was expected to be a percentage between 0 and 100", t);
-			} else {
-				e.setHealth(percent / 100.0 * e.getMaxHealth());
-			}
-			return CVoid.VOID;
-		}
-	}
-
-	@api
-	public static class get_entity_health extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "get_entity_health";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		@Override
-		public String docs() {
-			return "double {entityID} Returns the entity's health as a percentage of its maximum health."
-					+ " If the specified entity doesn't exist, or is not a LivingEntity, a format exception is thrown.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRELengthException.class, CREBadEntityException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			return new CDouble(e.getHealth() / e.getMaxHealth() * 100.0, t);
 		}
 	}
 
@@ -1223,129 +810,6 @@ public class Minecraft {
 
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
-	public static class launch_firework extends AbstractFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class,CRERangeException.class,CREInvalidWorldException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			MCWorld w = null;
-			if(p != null){
-				w = p.getWorld();
-			}
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			CArray options;
-			if(args.length == 2){
-				options = Static.getArray(args[1], t);
-			} else {
-				options = CArray.GetAssociativeArray(t);
-			}
-
-			int strength = 2;
-			if(options.containsKey("strength")){
-				strength = Static.getInt32(options.get("strength", t), t);
-				if (strength < 0 || strength > 128) {
-					throw new CRERangeException("Strength must be between 0 and 128", t);
-				}
-			}
-
-			List<MCFireworkEffect> effects = new ArrayList<>();
-			if(options.containsKey("effects")) {
-				Construct cEffects = options.get("effects", t);
-				if(cEffects instanceof CArray){
-					for(Construct c : ((CArray) cEffects).asList()){
-						effects.add(ObjectGenerator.GetGenerator().fireworkEffect((CArray) c, t));
-					}
-				} else {
-					throw new CREFormatException("Firework effects must be an array.", t);
-				}
-			} else {
-				effects.add(ObjectGenerator.GetGenerator().fireworkEffect(options, t));
-			}
-
-			MCFirework firework = loc.getWorld().launchFirework(loc, strength, effects);
-			return new CString(firework.getUniqueId().toString(), t);
-		}
-
-		@Override
-		public String getName() {
-			return "launch_firework";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
-		}
-
-		@Override
-		public String docs() {
-			Class c;
-			try {
-				//Since MCColor actually depends on a bukkit server, we don't want to require that for
-				//the sake of documentation, so we'll build the color list much more carefully.
-				//Note the false, so we don't actually initialize the class.
-				c = Class.forName(MCColor.class.getName(), false, this.getClass().getClassLoader());
-			} catch (ClassNotFoundException ex) {
-				//Hrm...
-				Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
-				return "";
-			}
-			List<String> names = new ArrayList<String>();
-			for(Field f : c.getFields()){
-				if(f.getType() == MCColor.class){
-					names.add(f.getName());
-				}
-			}
-			return "void {locationArray, [optionsArray]} Launches a firework. The location array specifies where it is launched from,"
-					+ " and the options array is an associative array described below. All parameters in the associative array are"
-					+ " optional, and default to the specified values if not set. The default options being set will make it look like"
-					+ " a normal firework, with a white explosion. ----"
-					+ " The options array may have the following keys:\n"
-					+ "{| cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
-					+ "! Array key !! Description !! Default\n"
-					+ "|-\n"
-					+ "| strength || A number specifying how far up the firework should go || 2\n"
-					+ "|-\n"
-					+ "| flicker || A boolean, determining if the firework will flicker\n || false\n"
-					+ "|-\n"
-					+ "| trail || A boolean, determining if the firework will leave a trail || true\n"
-					+ "|-\n"
-					+ "| colors || An array of colors, or a pipe seperated string of color names (for the named colors only)"
-					+ " for instance: array('WHITE') or 'WHITE<nowiki>|</nowiki>BLUE'. If you want custom colors, you must use an array, though"
-					+ " you can still use color names as an item in the array, for instance: array('ORANGE', array(30, 45, 150))."
-					+ " These colors are used as the primary colors. || 'WHITE'\n"
-					+ "|-\n"
-					+ "| fade || An array of colors to be used as the fade colors. This parameter should be formatted the same as"
-					+ " the colors parameter || array()\n"
-					+ "|-\n"
-					+ "| type || An enum value of one of the firework types, one of: " + StringUtils.Join(MCFireworkType.values(), ", ", " or ")
-					+ " || " + MCFireworkType.BALL.name() + "\n"
-					+ "|}\n"
-					+ "The \"named colors\" can be one of: " + StringUtils.Join(names, ", ", " or ");
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-	}
-
 	@api
 	@hide("Deprecated in favor of send_resourcepack")
 	public static class send_texturepack extends AbstractFunction {
@@ -1633,89 +1097,6 @@ public class Minecraft {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api(environments={CommandHelperEnvironment.class})
-    public static class drop_item extends AbstractFunction {
-
-		@Override
-        public String getName() {
-            return "drop_item";
-        }
-
-		@Override
-        public Integer[] numArgs() {
-            return new Integer[]{1, 2, 3};
-        }
-
-		@Override
-		public String docs() {
-			return "int {[player/LocationArray], itemArray, [spawnNaturally]} Drops the specified item stack at the"
-					+ " specified player's feet (or at an arbitrary Location, if an array is given), and returns its"
-					+ " entity id. spawnNaturally takes a boolean, which forces the way the item will be spawned. If"
-					+ " true, the item will be dropped with a random velocity.";
-		}
-
-		@Override
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[]{CRECastException.class, CREFormatException.class, CREPlayerOfflineException.class, CREInvalidWorldException.class};
-        }
-
-		@Override
-        public boolean isRestricted() {
-            return true;
-        }
-		@Override
-        public CHVersion since() {
-            return CHVersion.V3_2_0;
-        }
-
-		@Override
-        public Boolean runAsync() {
-            return false;
-        }
-
-		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCLocation l;
-			MCItemStack is;
-			boolean natural;
-			if (args.length == 1) {
-				if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
-					l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getEyeLocation();
-					natural = false;
-				} else {
-					throw new CREPlayerOfflineException("Invalid sender!", t);
-				}
-				is = ObjectGenerator.GetGenerator().item(args[0], t);
-			} else {
-				MCPlayer p;
-				if (args[0] instanceof CArray) {
-					p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-					l = ObjectGenerator.GetGenerator().location(args[0], (p != null ? p.getWorld() : null), t);
-					natural = true;
-				} else {
-					p = Static.GetPlayer(args[0].val(), t);
-					l = p.getEyeLocation();
-					natural = false;
-				}
-				is = ObjectGenerator.GetGenerator().item(args[1], t);
-			}
-			if(is.getTypeId() == 0) {
-				// can't drop air
-				return CNull.NULL;
-			}
-			if (args.length == 3) {
-				natural = Static.getBoolean(args[2]);
-			}
-			MCItem item;
-			if (natural) {
-				item = l.getWorld().dropItemNaturally(l, is);
-			} else {
-				item = l.getWorld().dropItem(l, is);
-			}
-			return new CString(item.getUniqueId().toString(), t);
 		}
 	}
 
