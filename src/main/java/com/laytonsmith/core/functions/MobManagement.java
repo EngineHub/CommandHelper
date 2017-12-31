@@ -24,6 +24,7 @@ import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.abstraction.enums.MCWolfType;
 import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -42,6 +43,7 @@ import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityTypeException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
@@ -165,6 +167,7 @@ public class MobManagement {
 	}
 
 	@api(environments={CommandHelperEnvironment.class})
+	@hide("Deprecated")
 	public static class tame_mob extends AbstractFunction {
 
 		@Override
@@ -263,7 +266,7 @@ public class MobManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
-					CREBadEntityException.class};
+					CREBadEntityException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -283,19 +286,74 @@ public class MobManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			if (e == null) {
-				return CNull.NULL;
-			} else if (e instanceof MCTameable) {
-				MCAnimalTamer at = ((MCTameable) e).getOwner();
-				if (null != at) {
-					return new CString(at.getName(), t);
-				} else {
-					return CNull.NULL;
-				}
-			} else {
+			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
+			if(!(mob instanceof MCTameable)) {
 				throw new CREUntameableMobException("The specified entity is not tameable", t);
 			}
+			MCAnimalTamer owner = ((MCTameable) mob).getOwner();
+			if (owner == null) {
+				return CNull.NULL;
+			} else {
+				return new CString(owner.getName(), t);
+			}
+		}
+	}
+
+	@api
+	public static class set_mob_owner extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_mob_owner";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityID, player} Sets the tameable mob to the specified player. Offline players are"
+					+ " supported, but this means that partial matches are NOT supported. You must type the players"
+					+ " name exactly. Setting the player to null will untame the mob.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
+					CREBadEntityException.class, CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
+			Construct player = args[1];
+			if(!(mob instanceof MCTameable)) {
+				throw new CREUntameableMobException("The specified entity is not tameable", t);
+			}
+			MCTameable mct = ((MCTameable) mob);
+			if (player instanceof CNull) {
+				mct.setOwner(null);
+			} else {
+				mct.setOwner(Static.getServer().getOfflinePlayer(player.val()));
+			}
+			return CVoid.VOID;
 		}
 	}
 
