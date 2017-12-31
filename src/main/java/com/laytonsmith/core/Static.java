@@ -10,7 +10,6 @@ import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
-import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCMetadatable;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -600,27 +599,18 @@ public final class Static {
 		return StaticLayer.GetItemStack(type, data, qty);
 	}
 
-    /**
-     * Works in reverse from the other ParseItemNotation
-     *
-     * @param is
-     * @return
-     */
-    public static String ParseItemNotation(MCItemStack is) {
-	if (is == null) {
-	    return "0";
+	/**
+	 * Works in reverse from the other ParseItemNotation
+	 *
+	 * @param is
+	 * @return
+	 */
+	public static String ParseItemNotation(MCItemStack is) {
+		if (is == null) {
+			return "0";
+		}
+		return is.getTypeId() + (is.getDurability() == 0 ? "" : ":" + Short.toString(is.getDurability()));
 	}
-	String append = null;
-	if (is.getDurability() != 0) {
-	    append = Short.toString(is.getDurability());
-	} else {
-	    MCMaterialData md = is.getData();
-	    if (md != null) {
-		append = Integer.toString(md.getData());
-	    }
-	}
-	return is.getTypeId() + (append == null ? "" : ":" + append);
-    }
 
     public static String ParseItemNotation(MCBlock b) {
 	if (b == null || b.isNull()) {

@@ -20,7 +20,6 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCMapMeta;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
@@ -231,22 +230,10 @@ public class ObjectGenerator {
 		}
 
 		MCMaterial mat = is.getType();
-		int data = 0;
-		if(mat.isBlock()){
-			//Use the data
-			MCMaterialData md = is.getData();
-			if(md != null) {
-				data = md.getData();
-			}
-		} else {
-			//Use the durability
-			data = is.getDurability();
-		}
-
 		CArray ret = CArray.GetAssociativeArray(t);
 		ret.set("name", new CString(mat.getName(), t), t);
 		ret.set("type", new CInt(mat.getType(), t), t);
-		ret.set("data", new CInt(data, t), t);
+		ret.set("data", new CInt(is.getDurability(), t), t);
 		ret.set("qty", new CInt(is.getAmount(), t), t);
 		ret.set("enchants", enchants(is.getEnchantments(), t), t);
 		ret.set("meta", itemMeta(is, t), t);

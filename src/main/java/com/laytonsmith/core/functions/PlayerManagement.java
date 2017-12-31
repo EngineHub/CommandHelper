@@ -937,17 +937,7 @@ public class PlayerManagement {
 			if (index == 6 || index == -1) {
 				//Item in hand
 				MCItemStack is = p.getItemInHand();
-				int data;
-				if (is.getType().isBlock()) {
-					if (is.getData() != null) {
-						data = is.getData().getData();
-					} else {
-						data = 0;
-					}
-				} else {
-					data = is.getDurability();
-				}
-				retVals.add(new CString(is.getTypeId() + ":" + data, t));
+				retVals.add(new CString(is.getTypeId() + ":" + is.getDurability(), t));
 			}
 			if (index == 7 || index == -1) {
 				//World name
