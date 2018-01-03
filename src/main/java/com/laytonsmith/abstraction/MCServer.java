@@ -1,5 +1,7 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.enums.MCBarColor;
+import com.laytonsmith.abstraction.enums.MCBarStyle;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
@@ -116,4 +118,6 @@ public interface MCServer extends AbstractionObject{
 	 * @return The command's captured output, if possible, otherwise an empty string, never null.
 	 */
 	public String dispatchAndCaptureCommand(MCCommandSender commandSender, String cmd);
+
+	MCBossBar createBossBar(String title, MCBarColor color, MCBarStyle style);
 }
