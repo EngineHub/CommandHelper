@@ -16,20 +16,31 @@ public class CREBadEntityException extends CREException {
     public static final CClassType TYPE = CClassType.get("BadEntityException");
 
     public CREBadEntityException(String msg, Target t) {
-	super(msg, t);
+        super(msg, t);
     }
 
     public CREBadEntityException(String msg, Target t, Throwable cause) {
-	super(msg, t, cause);
+        super(msg, t, cause);
     }
 
     @Override
     public String docs() {
-	return "Thrown if an entity is looked up by id, but doesn't exist.";
+        return "Thrown if an entity is looked up by id, but doesn't exist.";
     }
 
     @Override
     public Version since() {
-	return CHVersion.V3_3_1;
+        return CHVersion.V3_3_1;
     }
+
+    @Override
+    public CClassType[] getSuperclasses() {
+        return super.getSuperclasses();
+    }
+
+    @Override
+    public CClassType[] getInterfaces() {
+        return super.getInterfaces();
+    }
+
 }

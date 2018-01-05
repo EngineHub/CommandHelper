@@ -222,10 +222,10 @@ public class Exceptions {
 
 		@Override
 		public String docs() {
-			Set<Class<CREThrowable>> e = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class);
+			Set<Class<? extends CREThrowable>> e = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class);
 			String exceptions = "\nValid Exceptions: ";
 			List<String> ee = new ArrayList<>();
-			for (Class<CREThrowable> c : e) {
+			for (Class<? extends CREThrowable> c : e) {
 				String exceptionType = c.getAnnotation(typeof.class).value();
 				ee.add(exceptionType);
 			}
@@ -279,7 +279,7 @@ public class Exceptions {
 						CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR, "Uncatchable exceptions are no longer supported.", t);
 						throw new CRECastException("An exception type must be specified", t);
 					}
-					Class<Mixed> c;
+					Class<? extends Mixed> c;
 					try {
 						c = NativeTypeList.getNativeClass(args[0].val());
 					} catch (ClassNotFoundException ex) {

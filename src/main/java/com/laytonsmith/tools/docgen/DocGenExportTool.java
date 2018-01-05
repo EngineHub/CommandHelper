@@ -27,32 +27,32 @@ import org.json.simple.JSONValue;
 public class DocGenExportTool {
 	private final ClassDiscovery classDiscovery;
 	private final OutputStream out;
-	
+
 	/**
 	 * Creates a new instance of the DocGenExportTool
 	 * @param classDiscovery
 	 * @param extensionDir
-	 * @param out 
+	 * @param out
 	 */
 	public DocGenExportTool(ClassDiscovery classDiscovery, OutputStream out){
 		this.classDiscovery = classDiscovery;
 		this.out = out;
 	}
-	
+
 	/**
 	 * Triggers the export tool
 	 */
 	public void export(){
-		Set<Class<Function>> functions = classDiscovery
+		Set<Class<? extends Function>> functions = classDiscovery
 				.loadClassesWithAnnotationThatExtend(api.class, Function.class, this.getClass().getClassLoader(), false);
-		Set<Class<Event>> events = classDiscovery
+		Set<Class<? extends Event>> events = classDiscovery
 				.loadClassesWithAnnotationThatExtend(api.class, Event.class, this.getClass().getClassLoader(), false);
 		Map<String, Object> topLevel = new HashMap<String, Object>();
 		List<Map<String, Object>> functionList = new ArrayList<Map<String, Object>>();
 		topLevel.put("functions", functionList);
 		List<Map<String, Object>> eventList = new ArrayList<Map<String, Object>>();
 		topLevel.put("events", eventList);
-		for(Class<Function> functionC : functions){
+		for(Class<? extends Function> functionC : functions){
 			Map<String, Object> function = new HashMap<String, Object>();
 			Function f;
 			try {
@@ -68,10 +68,10 @@ public class DocGenExportTool {
 			function.put("desc", di.desc);
 			functionList.add(function);
 		}
-		
+
 		Pattern eventPattern = Pattern.compile("\\{(.*?)\\} *?(.*?) *?\\{(.*?)\\} *?\\{(.*?)\\}");
 		DocGen.MarkupType type = DocGen.MarkupType.TEXT;
-		for(Class<Event> eventC : events){
+		for(Class<? extends Event> eventC : events){
 			Map<String, Object> event = new HashMap<String, Object>();
 			Event e = ReflectionUtils.newInstance(eventC);
 			Matcher m = eventPattern.matcher(e.docs());
@@ -89,7 +89,7 @@ public class DocGenExportTool {
 				eventList.add(event);
 			}
 		}
-		
+
 		String output = JSONValue.toJSONString(topLevel) + StringUtils.nl();
 		try {
 			out.write(output.getBytes("UTF-8"));

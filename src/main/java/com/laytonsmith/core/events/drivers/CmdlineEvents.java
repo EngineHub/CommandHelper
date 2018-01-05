@@ -88,7 +88,7 @@ public class CmdlineEvents {
 
 		@Override
 		public String docs() {
-			return "Fires off every 5 seconds, with no other side effects.";
+			return "{} Fires off every 5 seconds, with no other side effects. {} {} {}";
 		}
 
 		@Override

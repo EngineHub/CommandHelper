@@ -24,7 +24,7 @@ public class CSlice extends CArray {
 
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     public static final CClassType TYPE = CClassType.get("slice");
-    
+
     private long start;
     private long finish;
     private int direction;
@@ -201,5 +201,15 @@ public class CSlice extends CArray {
     @Override
     public Version since() {
 	return CHVersion.V3_3_1;
+    }
+
+    @Override
+    public CClassType[] getSuperclasses() {
+	return new CClassType[]{CArray.TYPE};
+    }
+
+    @Override
+    public CClassType[] getInterfaces() {
+	return new CClassType[]{};
     }
 }

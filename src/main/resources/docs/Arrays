@@ -35,7 +35,7 @@ msg(@array); // Sends {2, 2}
 msg(@array2); // Sends the original values: {1, 2}
 %%
 
-===array_set using <nowiki>=</nowiki> (or assign())===
+===array_set using %%NOWIKI|=%% (or assign())===
 It is also possible to set the value of an array directly, with {{function|assign}}.
 
 %%CODE|
@@ -184,11 +184,11 @@ If you use {{function|array_push}} on an associative array, it will take the lar
 
 Only strings are acceptable for keys. If you use another data type, it is interpreted perhaps differently than you would want, 
 so note the following conventions:
-*integers are taken as a string
-*null is taken as an empty string: ''
-*doubles are taken as a string
-*true and false are taken as string '1' and '0', respectively.
-*arrays will cause a runtime exception to be thrown.
+* integers are taken as a string
+* null is taken as an empty string: %%NOWIKI|''%%
+* doubles are taken as a string
+* true and false are taken as string '1' and '0', respectively.
+* arrays will cause a runtime exception to be thrown.
 
 One word of warning, the following will not do what you expect:
 %%CODE|
@@ -263,7 +263,7 @@ msg('Hello World!'[0]); // Returns 'H'
 msg('Slice!'[2..]); // Returns 'ice!'
 %%
 
-This works for all data types that implement the [[CommandHelper/Staged/Builtin_Object_Info#ArrayAccess|ArrayAccess]] interface,
+This works for all data types that implement the [[Builtin_Object_Info#ArrayAccess|ArrayAccess]] interface,
 not just strings.
 
 ==Cloning an array==

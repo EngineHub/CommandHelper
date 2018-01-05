@@ -41,7 +41,7 @@ the arguments are going to resolve, before we send them to the array function it
 function. When we are sending ''code'' to a function, as an executable set of instructions, we say we have created a
 '''closure'''.
 
-When we think about the <code>[[CommandHelper/Procedures|proc]]</code> function, we then realize that it's much like a
+When we think about the <code>[[Procedures|proc]]</code> function, we then realize that it's much like a
 closure. When we define the procedure, nothing is run at that time. And in fact, internally, it does create a type of
 closure. Procs are slightly special though, because they do not save environment information (at least variable scope).
 Let's observe the more complicated case with an if statement:
@@ -106,7 +106,7 @@ closure(){
 Execute is used as follows:
 
 %%CODE|
-execute([values...,] <closure>);
+execute([values...,] /*<closure>*/);
 %%
 
 The values may be any value, but the closure must be a closure created with the closure function. A small, self

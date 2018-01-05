@@ -4,9 +4,9 @@ import java.lang.reflect.Array;
 import java.util.List;
 
 /**
- *
- *
+ * Provides various utility methods for working with arrays.
  */
+@SuppressWarnings({"UnnecessaryUnboxing", "unchecked"})
 public class ArrayUtils {
 
 	/**
@@ -106,6 +106,12 @@ public class ArrayUtils {
 	 * as a "default" value for an array, consider using this instead to increase performance.
 	 */
 	public static final Boolean[] EMPTY_BOOLEAN_OBJ_ARRAY = new Boolean[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 
 	/***************************************************************************
@@ -126,16 +132,16 @@ public class ArrayUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> T [] slice(T[] array, int start, int finish){
 		int size = Math.abs(start - finish) + 1;
-		Object [] newArray = new Object[size];
+		Object newArray = Array.newInstance(array.getClass().getComponentType(), size);
 		if(start <= finish){
 			int counter = 0;
 			for(int i = start; i <= finish; i++){
-				newArray[counter++] = array[i];
+				Array.set(newArray, counter++, array[i]);
 			}
 		} else {
 			int counter = 0;
 			for(int i = start; i >= finish; i--){
-				newArray[counter++] = array[i];
+				Array.set(newArray, counter++, array[i]);
 			}
 		}
 		return (T[])newArray;

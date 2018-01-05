@@ -55,7 +55,7 @@ means the same as
 
 (The values are inclusive.)
 
-Additionally, when using the asterisk, you may use the format "*/X" character to mean "every X <time unit>" where
+Additionally, when using the asterisk, you may use the format "*/X" character to mean "every X &lt;time unit&gt;" where
 X is some integer. For instance:
 
 <pre>

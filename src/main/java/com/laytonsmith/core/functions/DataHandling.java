@@ -23,6 +23,7 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.keywords.InKeyword;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
@@ -857,10 +858,12 @@ public class DataHandling {
 		+ "foreach(@array as @value){\n"
 		+ "\tmsg(@value);\n"
 		+ "}"),
+		/*
+		// This is actually borked in real code, so it needs to be fixed. In the meantime, whatever, just remove the example.
 		new ExampleScript("Using \"as\" keyword, with a key", "@array = array(1, 2, 3);\n"
 		+ "foreach(@array as @key: @value){\n"
 		+ "\tmsg(@key . ': ' . @value);\n"
-		+ "}"),
+		+ "}"),*/
 		new ExampleScript("With else clause", "@array = array() # Note empty array\n"
 		+ "foreach(@value in @array){\n"
 		+ "\tmsg(@value);\n"
@@ -1324,7 +1327,7 @@ public class DataHandling {
 		+ "\tfor(assign(@j, 0), @j < 1000, @j++,\n"
 		+ "\t\tbreak(3) #There are only 2 loops to break out of\n"
 		+ "\t)"
-		+ ")"),};
+		+ ")", true),};
 	}
 
 	@Override
@@ -2164,7 +2167,7 @@ public class DataHandling {
 	    ParseTree tree = null;
 	    List<String> varNames = new ArrayList<>();
 	    boolean usesAssign = false;
-	    CClassType returnType = CClassType.AUTO;
+	    CClassType returnType = Auto.TYPE;
 	    if (nodes[0].getData() instanceof CClassType) {
 		returnType = (CClassType) nodes[0].getData();
 		ParseTree[] newNodes = new ParseTree[nodes.length - 1];
@@ -2946,10 +2949,10 @@ public class DataHandling {
 	public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 	    if (nodes.length == 0) {
 		//Empty closure, do nothing.
-		return new CClosure(null, env, CClassType.AUTO, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
+		return new CClosure(null, env, Auto.TYPE, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
 	    }
 	    // Handle the closure type first thing
-	    CClassType returnType = CClassType.AUTO;
+	    CClassType returnType = Auto.TYPE;
 	    if (nodes[0].getData() instanceof CClassType) {
 		returnType = (CClassType) nodes[0].getData();
 		ParseTree[] newNodes = new ParseTree[nodes.length - 1];
@@ -3050,10 +3053,10 @@ public class DataHandling {
 	public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 	    if (nodes.length == 0) {
 		//Empty closure, do nothing.
-		return new CClosure(null, env, CClassType.AUTO, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
+		return new CClosure(null, env, Auto.TYPE, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
 	    }
 	    // Handle the closure type first thing
-	    CClassType returnType = CClassType.AUTO;
+	    CClassType returnType = Auto.TYPE;
 	    if (nodes[0].getData() instanceof CClassType) {
 		returnType = (CClassType) nodes[0].getData();
 		ParseTree[] newNodes = new ParseTree[nodes.length - 1];

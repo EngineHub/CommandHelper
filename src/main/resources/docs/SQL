@@ -12,13 +12,13 @@ To simplify connection information to various databases, MethodScript allows two
 ways of connecting to a server. Either via ''profiles'' or via in code connection
 information. When connecting statically, connection via profiles is the preferred
 solution, since it makes coding easier, and makes it harder to accidentally leak
-database credentials when sharing code. See [[CommandHelper/Staged/Profiles]] for more information
+database credentials when sharing code. See [[Profiles]] for more information
 about setting up profiles in general. Connections to different SQL server types
 may require different connection information, so you'll need to see the connection
 configuration information below for each supported server type. In general, the configuration format
 is as follows:
 
-<pre>
+%%SYNTAX|xml|
 <?xml version="1.0" encoding="UTF-8" ?>
 <profiles>
 	<profile id="profileName">
@@ -30,7 +30,7 @@ is as follows:
 		<password>password</password>
 	</profile>
 </profiles>
-</pre>
+%%
 
 Essentially, the connection information is specified via xml tags per profile, and
 connections can be referenced by id. In the following tables, the Tag column
@@ -64,10 +64,9 @@ specified.
 ! scope="col" width="20%" | Status
 |-
 | file
-| The path to the sql file. If the path is relative, it is considered relative to this file, however
+| The path to the sql file. If the path is relative, it is considered relative to this file, however \
 absolute paths are recommended, to prevent ambiguity.
 | Required
-
 |}
 
 
@@ -163,16 +162,15 @@ the connection information (either a profile name or a connection array) and
 the query itself (and any statement parameters).
 All queries use a "prepared statement" format, which ensures that SQL injections are not possible.
 
-{{TakeNote|text=Though you can bypass prepared queries by doing concatenation, this is
+%%NOTE|Though you can bypass prepared queries by doing concatenation, this is
 extremely bad practice, and will cause a warning to be issued. Query strings should
 be hardcoded and the prepared statement engine will insert the parameters automatically
-and safely.}}
+and safely.%%
 
 The query function returns an array (in the case of a select) or various other
 return types, depending on the SQL statement. For selects, an array of associative arrays
 with the results is returned. For inserts, null is returned, unless the statement used an auto-increment, in which
-case, that value is returned. Deletes and updates return the number of rows affected. All
-other operations return null.
+case, that value is returned. Deletes and updates return the number of rows affected. All other operations return null.
 
 Some common examples follow, though the full SQL language is available.
 
@@ -185,12 +183,12 @@ A simple SELECT:
 /*
  * The returned result would look something like this:
  * array(
- *     array(columnName: 'value1'),
- *     array(columnName: 'value2')
+ *  array(columnName: 'value1'),
+ *  array(columnName: 'value2')
  * )
  */
 foreach(@result, @row){
-	msg(@row['columnName'])
+    msg(@row['columnName'])
 }
 %%
 
@@ -202,8 +200,7 @@ if @id were a string, this would translate into the following code:
 query('profileName', 'SELECT * FROM `table` WHERE id=\''._escape_this_parameter(@id).'\'')
 %%
 
-which as you can see could much more likely lead to errors or unsafe usage, and is much
-harder to read.
+which as you can see could much more likely lead to errors or unsafe usage, and is much harder to read.
 
 A more complex SELECT:
 
@@ -219,17 +216,20 @@ This statement is used for inserting rows into your table. You can use this in t
 The returned result would be the first rownumber that was added (with auto increment) or null.
 
 %%CODE|
-@result = query('profileName', 'INSERT INTO `table` '
-                              .'VALUES(?, ?, ?), (?, ?, ?)'
-                             , 'CommandHelper', 'descCH', 9001,
-                               'WorldEdit', 'descWE', 8999
-                )
+@result = query('profileName', 
+    'INSERT INTO `table` '
+    .'VALUES(?, ?, ?), (?, ?, ?)',
+    'CommandHelper', 'descCH', 9001,
+    'WorldEdit', 'descWE', 8999
+)
 
-@result = query('profileName', 'INSERT INTO `table`(?, ?) '
-                              .'VALUES(?, ?), (?, ?)'
-                             , 'Plugin', 'Description',
-                               'WorldGuard', 'descWG', 'Craftbook', 'descCB'
-                )
+@result = query('profileName', 
+    'INSERT INTO `table`(?, ?) '
+    .'VALUES(?, ?), (?, ?)',
+    'Plugin', 'Description', 
+    'WorldGuard', 'descWG', 
+    'Craftbook', 'descCB'
+)
 
 /*
  * Notice there are no column names in the first example, this means that these are not necessary.
@@ -239,12 +239,13 @@ The returned result would be the first rownumber that was added (with auto incre
  * Going by this the first query is can be changed by this one.
  */
 
-@result = query('profileName', 'INSERT INTO `table`(?, ?, ?)'
-                              .'VALUES(?, ?, ?), (?, ?, ?)'
-                             , 'Plugin', 'Description', 'Downloads',
-                               'CommandHelper', 'descCH', 9001,
-                               'WorldEdit', 'descWE', 8999
-                )
+@result = query('profileName', 
+    'INSERT INTO `table`(?, ?, ?)'
+    .'VALUES(?, ?, ?), (?, ?, ?)',
+    'Plugin', 'Description', 'Downloads',
+    'CommandHelper', 'descCH', 9001,
+    'WorldEdit', 'descWE', 8999
+)
 
 %%
 
@@ -279,19 +280,20 @@ This statement is used for updating existing rows in your table. For example,
 we may want to add 250 downloads to each plugin.
 
 %%CODE|
-@result = query('profileName', 'UPDATE `table`'
-                              .' SET Downloads=Downloads+250'
-                )
+@result = query('profileName', 
+    'UPDATE `table`'
+    .' SET Downloads=Downloads+250'
+)
 
 /*
  * The UPDATE statement also allows for using conditions, as shown below.
  */
 
-@result = query('profileName', 'UPDATE `table`'
-                              .' SET Downloads=Downloads+250'
-                              .' WHERE Plugin=?'
-                             , 'CommandHelper'
-                )
+@result = query('profileName', 
+    'UPDATE `table`'
+    .' SET Downloads=Downloads+250'
+    .' WHERE Plugin=?', 'CommandHelper'
+)
 %%
 
 === DELETE ===

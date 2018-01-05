@@ -10,11 +10,11 @@ The profiles.xml file is located in the <code>prefs/</code> folder, and has at m
 <code>profiles</code> tag. Different functions will require different types of profile information,
 but in general, the bare minimum profile will look like this:
 
-<pre>
+%%SYNTAX|xml|
 <profile id="profileName">
 	<type>profileType</type>
 </profile>
-</pre>
+%%
 
 The profileName is what is referenced in code. For instance, in the {{function|query}} function,
 the first parameter may be either the profile name, or an array specifying the same information as

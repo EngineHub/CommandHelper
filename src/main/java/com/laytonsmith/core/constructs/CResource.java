@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -108,6 +109,16 @@ public class CResource<T> extends Construct {
 	 * @return
 	 */
 	String getString(CResource self);
+    }
+
+    @Override
+    public CClassType[] getSuperclasses() {
+	return new CClassType[]{Mixed.TYPE};
+    }
+
+    @Override
+    public CClassType[] getInterfaces() {
+	return new CClassType[]{};
     }
 
 }

@@ -97,4 +97,16 @@ public final class CNull extends Construct implements Cloneable {
 	return CHVersion.V3_0_1;
     }
 
+    // null is so special, that if some code tries to call these methods on it, we
+    // want to immediately fail, because they need to implement special handling
+    // for this value anyways.
+    @Override
+    public CClassType[] getSuperclasses() {
+	throw new RuntimeException("Cannot call getSuperclasses on null");
+    }
+
+    @Override
+    public CClassType[] getInterfaces() {
+	throw new RuntimeException("Cannot call getInterfaces on null");
+    }
 }

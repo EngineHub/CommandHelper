@@ -35,12 +35,12 @@ msg(_proc1(0))
 
 When we run this script, we get the following error:
 
-<pre>
+%%PRE|
 RangeException: Division by 0!
         proc _proc2:Interpreter:8
         proc _proc1:Interpreter:4
         <<main code>>:Interpreter:11
-</pre>
+%%
 
 This is our ''stack trace''. The problem is that we are dividing by zero. The first
 line of the stack trace tells us what the error type was, and gives us the exception
@@ -53,27 +53,27 @@ will contain a file path. The important information is the code description and 
 number. The code description tells us that this is code defined in the procedure "_proc2",
 and the error is on line 8.
 
-<pre>
+%%PRE|
 8          return(1 / @b)
-</pre>
+%%
 
 If @b is zero, then this would certainly cause the error. However, there is more to the
 stack trace, which is useful, because this line may not be where we actually want to fix
 the error. The next element in the stack trace tells us that _proc2 was called from _proc1,
 on line 4.
 
-<pre>
+%%PRE|
 4          return(_proc2(@a))
-</pre>
+%%
 
 Ok, so this still doesn't help us much, because we don't know where @a came from,
 so lets dig down again into the stack trace. The last element is &lt;&lt;main code&gt;&gt;, which
 means that this is the "top level" of the execution unit. In this case, it means that
 the code is "loose" code, that is, it is not contained inside a procedure. 
 
-<pre>
+%%PRE|
 11 msg(_proc1(0))
-</pre>
+%%
 
 Aha! Now we see where the 0 is coming from, it is hard coded in at this point. Sometimes
 your code is more complicated though, and it's not so obvious where a value is coming from,
@@ -148,13 +148,13 @@ cases, you may be able to find a workaround which prevents the error, but in ALL
 cases if you get a Java stack trace, this is a bug which should be reported. An example
 Java stack trace looks like this:
 
-<pre>
+%%PRE|
 java.io.FileNotFoundException: test.txt
         at java.io.FileInputStream.<init>(FileInputStream.java)
         at java.io.FileInputStream.<init>(FileInputStream.java)
         at com.example.Example.readFile(Example.java:19)
         at com.example.Example.main(Example.java:7)
-</pre>
+%%
 
 If you can determine what was done to cause this error, please include that information
 in the bug report, but often times, this error can be fixed without any information

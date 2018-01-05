@@ -34,4 +34,14 @@ public class CREOAuthException extends CREException {
 	return CHVersion.V3_3_2;
     }
 
+    @Override
+    public CClassType[] getSuperclasses() {
+	return super.getSuperclasses();
+    }
+
+    @Override
+    public CClassType[] getInterfaces() {
+	return super.getInterfaces();
+    }
+
 }

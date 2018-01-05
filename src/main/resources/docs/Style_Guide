@@ -172,6 +172,6 @@ for instance methods.
 
 == Brace Syntax ==
 
-For a full discussion on brace syntax, please see this article: [[CommandHelper/Staged/Brace_Syntax|Brace Syntax]]. Brace
+For a full discussion on brace syntax, please see this article: [[Brace_Syntax|Brace Syntax]]. Brace
 syntax is preferred in all cases over functional syntax where possible, unless otherwise noted. (Most notably tertiary if
 statements.)

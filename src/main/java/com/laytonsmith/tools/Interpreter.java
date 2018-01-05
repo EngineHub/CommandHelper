@@ -101,6 +101,8 @@ import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.functions.Cmdline;
 import com.laytonsmith.core.functions.Echoes;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This is a command line implementation of the in game interpreter mode. This should only be run while the server is
@@ -143,7 +145,14 @@ public final class Interpreter {
      */
     private static final int MAX_COMMAND_HISTORY = 100;
 
-    public static void startWithTTY(String file, List<String> args) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+    public static void startWithTTY(File file, List<String> args, boolean systemExitOnFailure) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+	startWithTTY(file.getCanonicalPath(), args, systemExitOnFailure);
+    }
+
+    public static void startWithTTY(String file, List<String> args) throws Profiles.InvalidProfileException, IOException, DataSourceException, URISyntaxException {
+	startWithTTY(file, args, true);
+    }
+    public static void startWithTTY(String file, List<String> args, boolean systemExitOnFailure) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 	File fromFile = new File(file).getCanonicalFile();
 	Interpreter interpreter = new Interpreter(args, fromFile.getParentFile().getPath(), true);
 	try {
@@ -151,11 +160,15 @@ public final class Interpreter {
 	} catch (ConfigCompileException ex) {
 	    ConfigRuntimeException.HandleUncaughtException(ex, null, null);
 	    StreamUtils.GetSystemOut().println(TermColors.reset());
-	    System.exit(1);
+	    if(systemExitOnFailure) {
+		System.exit(1);
+	    }
 	} catch (ConfigCompileGroupException ex) {
 	    ConfigRuntimeException.HandleUncaughtException(ex, null);
 	    StreamUtils.GetSystemOut().println(TermColors.reset());
-	    System.exit(1);
+	    if(systemExitOnFailure) {
+		System.exit(1);
+	    }
 	}
     }
 
@@ -734,11 +747,7 @@ public final class Interpreter {
 		} catch (InterruptedException ex) {
 		    //
 		}
-		try {
-		    env.getEnv(GlobalEnv.class).GetDaemonManager().waitForThreads();
-		} catch (InterruptedException ex) {
-		    //
-		}
+
 	    } finally {
 		p.stop();
 	    }
@@ -814,6 +823,19 @@ public final class Interpreter {
 	return false;
     }
 
+    /**
+     * Works like {@link #execute(String, List, File)} but reads the file
+     * in for you.
+     * @param script Path the the file
+     * @param args Arguments to be passed to the script
+     * @throws ConfigCompileException If there is a compile error in the script
+     * @throws IOException
+     */
+    public void execute(File script, List<String> args) throws ConfigCompileException, IOException, ConfigCompileGroupException {
+	String scriptString = FileUtil.read(script);
+	execute(scriptString, args, script);
+    }
+
     public static void install() {
 	if (TermColors.SYSTEM == TermColors.SYS.UNIX) {
 	    try {
@@ -835,9 +857,13 @@ public final class Interpreter {
 		if (manDir.exists()) {
 		    //Don't do this installation if the man pages aren't already there.
 		    String manPage = Static.GetStringResource("/interpreter-helpers/manpage");
-		    manPage = DocGenTemplates.DoTemplateReplacement(manPage, DocGenTemplates.GetGenerators());
-		    File manPageFile = new File(manDir, "mscript.1");
-		    FileUtil.write(manPage, manPageFile);
+		    try {
+			manPage = DocGenTemplates.DoTemplateReplacement(manPage, DocGenTemplates.GetGenerators());
+			File manPageFile = new File(manDir, "mscript.1");
+			FileUtil.write(manPage, manPageFile);
+		    } catch (DocGenTemplates.Generator.GenerateException ex) {
+			Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
+		    }
 		}
 	    } catch (IOException e) {
 		StreamUtils.GetSystemErr().println("Cannot install. You must run the command with sudo for it to succeed, however, did you do that?");

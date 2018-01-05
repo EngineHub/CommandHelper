@@ -5,7 +5,7 @@ you want to do one thing or another. This is where the logic operators come in h
 functions that all act relatively the same in the BasicLogic class. Essentially, they compare certain 
 values, then return a boolean.
 
-''Note: The examples in this tutorial primarily use operators, see the page on [[CommandHelper/Staged/Operators|Operators]]''
+''Note: The examples in this tutorial primarily use operators, see the page on [[Operators|Operators]]''
 ''for a refresher, if the operators are unclear.''
 
 ==Basic Usage==
@@ -13,9 +13,9 @@ values, then return a boolean.
 Let's take the {{function|lt}} function into consideration (<code>&lt;</code> operator). 
 lt returns true if the value on the left is less than the value on the right. In a typical 
 algebra class, when comparing two numbers, you would write something like this:
-<pre>
+%%PRE|
 x < y
-</pre>
+%%
 Assuming x is 3 and y is 4, this statement is true. However, if we swap the values, and make x 4 and y 3, 
 the statement is false. Written in code, it would look like this:
 
@@ -23,7 +23,7 @@ the statement is false. Written in code, it would look like this:
 @x < @y
 %%
 
-All the functions in the [[CommandHelper/API#BasicLogic|BasicLogic class]] return a 
+All the functions in the [[API#BasicLogic|BasicLogic class]] return a 
 boolean based on certain conditions. You should be familiar with the lt (less than <code>&lt;</code>), 
 lte (less than or equals to <code>&lt;=</code>), gt (greater than <code>&gt;</code>), 
 gte (greater than or equals <code>&gt;=</code>) functions 

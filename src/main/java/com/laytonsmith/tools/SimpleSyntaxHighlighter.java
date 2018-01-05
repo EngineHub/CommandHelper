@@ -2,397 +2,416 @@ package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Color;
-import com.laytonsmith.PureUtilities.Common.HTMLUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.compiler.KeywordList;
+import com.laytonsmith.core.constructs.NativeTypeList;
+import com.laytonsmith.core.constructs.Token;
+import com.laytonsmith.core.constructs.Token.TType;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
- * The SimpleSyntaxHighlighter class contains a method to do HTML syntax highlighting on
- * a given block of plain text code.
+ * The SimpleSyntaxHighlighter class contains a method to do HTML syntax highlighting on a given block of plain text
+ * code.
  */
 public class SimpleSyntaxHighlighter {
 
-	public static void main(String[] args){
-		StreamUtils.GetSystemOut().println(SimpleSyntaxHighlighter.Highlight("a\na\na\na\na\na\na\na\na\na\na\na"));
+    public static void main(String[] args) throws Exception {
+	List<Token> ts = MethodScriptCompiler.lex("'a string' + '\\''", null, true, true);
+	for(Token t : ts) {
+	    System.out.println(t.type);
+	    System.out.println(t.value);
+	    System.out.println(t.target);
+	    System.out.println("----------------");
 	}
+	StreamUtils.GetSystemOut().println(SimpleSyntaxHighlighter.Highlight("'a string' + ' \\''", true));
+    }
 
-	/**
-	 * A list of keywords in the MethodScript language.
-	 */
-	public static final Set<String> KEYWORDS;
+    /**
+     * A list of keywords in the MethodScript language.
+     */
+    public static final Set<String> KEYWORDS;
 
-	static {
-		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(SimpleSyntaxHighlighter.class));
-		KEYWORDS = Collections.unmodifiableSet(KeywordList.getKeywordNames());
+    static {
+	ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(SimpleSyntaxHighlighter.class));
+	KEYWORDS = Collections.unmodifiableSet(KeywordList.getKeywordNames());
+    }
+
+    private static final EnumMap<ElementTypes, Color> CLASSES = new EnumMap<>(ElementTypes.class);
+
+    static {
+	CLASSES.put(ElementTypes.COMMENT, new Color(0x88, 0x88, 0x88));
+	CLASSES.put(ElementTypes.SMART_COMMENT, new Color(0x88, 0x88, 0x88));
+	CLASSES.put(ElementTypes.SINGLE_STRING, new Color(0xFF, 0x99, 0x00));
+	CLASSES.put(ElementTypes.DOUBLE_STRING, new Color(0xCC, 0x99, 0x00));
+	CLASSES.put(ElementTypes.VAR, new Color(0x00, 0x99, 0x33));
+	CLASSES.put(ElementTypes.DVAR, new Color(0x00, 0xCC, 0xFF));
+	CLASSES.put(ElementTypes.BACKGROUND_COLOR, new Color(0xF9, 0xF9, 0xF9));
+	CLASSES.put(ElementTypes.BORDER_COLOR, new Color(0xA7, 0xD7, 0xF9));
+	CLASSES.put(ElementTypes.KEYWORD, Color.BLUE);
+	CLASSES.put(ElementTypes.LINE_NUMBER, new Color(0xBD, 0xC4, 0xB1));
+	CLASSES.put(ElementTypes.FUNCTION, new Color(0x00, 0x00, 0x00));
+	CLASSES.put(ElementTypes.OBJECT_TYPE, Color.GRAY);
+	CLASSES.put(ElementTypes.COMMAND, Color.MAGENTA);
+    }
+
+    private final EnumMap<ElementTypes, Color> classes;
+    private final String code;
+    private final boolean inPureMscript;
+
+    private SimpleSyntaxHighlighter(EnumMap<ElementTypes, Color> classes, String code, boolean inPureMscript) {
+	this.classes = classes;
+	this.code = code;
+	this.inPureMscript = inPureMscript;
+    }
+
+    private String getColor(ElementTypes type) {
+	Color c = classes.get(type);
+	if (c == null) {
+	    c = CLASSES.get(type);
 	}
+	return "color: #" + getRGB(c) + ";";
+    }
 
-	private static final EnumMap<ElementTypes, Color> CLASSES = new EnumMap<>(ElementTypes.class);
-	static{
-		CLASSES.put(ElementTypes.COMMENT, new Color(0x88, 0x88, 0x88));
-		CLASSES.put(ElementTypes.SINGLE_STRING, new Color(0xFF, 0x99, 0x00));
-		CLASSES.put(ElementTypes.DOUBLE_STRING, new Color(0xCC, 0x99, 0x00));
-		CLASSES.put(ElementTypes.VAR, new Color(0x00, 0x99, 0x33));
-		CLASSES.put(ElementTypes.DVAR, new Color(0x00, 0xCC, 0xFF));
-		CLASSES.put(ElementTypes.BACKGROUND_COLOR, new Color(0xF9, 0xF9, 0xF9));
-		CLASSES.put(ElementTypes.BORDER_COLOR, new Color(0xA7, 0xD7, 0xF9));
-		CLASSES.put(ElementTypes.KEYWORD, Color.BLUE);
-		CLASSES.put(ElementTypes.LINE_NUMBER, new Color(0xBD, 0xC4, 0xB1));
-		CLASSES.put(ElementTypes.FUNCTION, new Color(0x00, 0x00, 0x00));
-	}
+    private String getRGB(Color c) {
+	return String.format("%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());
+    }
 
-	private final EnumMap<ElementTypes, Color> classes;
-	private final String code;
-
-	private SimpleSyntaxHighlighter(EnumMap<ElementTypes, Color> classes, String code){
-		this.classes = classes;
-		this.code = code;
-	}
-
-
-
-	private String getColor(ElementTypes type){
-		Color c = classes.get(type);
-		if(c == null){
-			c = CLASSES.get(type);
+    private String escapeLit(String c) {
+	StringBuilder b = new StringBuilder();
+	c = c.replaceAll("\t", "   ");
+	if (c.length() == 1) {
+	    b.append(DocGenTemplates.escapeWiki(c));
+	} else {
+	    boolean inMultispace = false;
+	    for (int i = 0; i < c.length() - 1; i++) {
+		char c1 = c.charAt(i);
+		if (!Character.isWhitespace(c1)) {
+		    inMultispace = false;
+		    b.append(DocGenTemplates.escapeWiki(Character.toString(c1)));
+		    if(i == c.length() - 2) {
+			// last run, also need to append the last character
+			b.append(DocGenTemplates.escapeWiki(Character.toString(c.charAt(i + 1))));
+		    }
+		    continue;
+		} else if(inMultispace){
+		    if(Character.isWhitespace(c1)) {
+			b.append("&nbsp;");
+			continue;
+		    }
 		}
-		return "color: #" + getRGB(c) + ";";
+		char c2 = c.charAt(i + 1);
+		if(Character.isWhitespace(c1) && Character.isWhitespace(c2)) {
+		    inMultispace = true;
+		    b.append("&nbsp;&nbsp;");
+		    i++;
+		} else {
+		    b.append(c1);
+		    if(i == c.length() - 2) {
+			// last run, also need to append the last character
+			b.append(DocGenTemplates.escapeWiki(Character.toString(c2)));
+		    }
+		}
+	    }
 	}
+	String ret = b.toString();
+	// Oops. Undo this. This is probably not ideal, we should just fix the
+	// docgen class, but even if we do, this fix can stay in place.
+	ret = ret.replaceAll("&amp;percnt", "&percnt");
+	return ret;
+    }
 
-	private String getRGB(Color c){
-		return String.format("%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());
+    private String escapeLit(char c) {
+	return escapeLit(Character.toString(c));
+    }
+
+    private String getOpenSpan(ElementTypes t, String extraStyles){
+	return "<span style=\"" + getColor(t) + "; " + extraStyles + "\">";
+    }
+
+    private String getOpenSpan(ElementTypes t) {
+	return "<span style=\"" + getColor(t) + "\">";
+    }
+    private String getCloseSpan() {
+	return "</span>";
+    }
+
+    private String highlight() throws ConfigCompileException {
+	List<Token> tokens = MethodScriptCompiler.lex(code, null, inPureMscript, true);
+	// take out the last token, which is always a newline
+	tokens = tokens.subList(0, tokens.size() - 1);
+	// if the first token is a newline, also take that out.
+	if (tokens.get(0).type == TType.NEWLINE) {
+	    tokens = tokens.subList(1, tokens.size());
 	}
-
-	private String highlight(){
-		String[] lines = code.split("\r\n|\n\r|\n");
-		StringBuilder out = new StringBuilder();
-		boolean blankLine = false;
-		//We're gonna write a mini parser here, so here's our state variables.
-		boolean inDoubleString = false;
-		boolean inSingleString = false;
-		boolean inLineComment = false;
-		boolean inBlockComment = false;
-		boolean inDollarVar = false;
-		boolean inVar = false;
-		for (int i = 0; i < lines.length; i++) {
-			if (i == 0 && "".equals(lines[0].trim())) {
-				blankLine = true;
-				continue;
+	String newlineString = "<div><span style=\"font-style: italic; " + getColor(ElementTypes.LINE_NUMBER) + "\">"
+		+ "%0" + Integer.toString(tokens.get(tokens.size() - 1).line_num - 1).length() + "d</span>&nbsp;&nbsp;&nbsp;";
+	StringBuilder out = new StringBuilder();
+	int lineNum = 1;
+	out.append(String.format(newlineString, lineNum));
+	for (Token t : tokens) {
+	    if (null != t.type) {
+		switch (t.type) {
+		    case SMART_COMMENT:
+		    case COMMENT:
+			for (String line : t.val().split("\n")) {
+			    out.append(getOpenSpan(t.type == TType.SMART_COMMENT
+					    ? ElementTypes.SMART_COMMENT : ElementTypes.COMMENT))
+				    .append(escapeLit(line))
+				    .append(getCloseSpan());
+			    // If this is the last token, don't do this
+			    // Note that this is a rare instance where reference comparison using == is valid,
+			    // this is not a bug.
+			    if(t != tokens.get(tokens.size() - 1)) {
+				out.append("</div>").append(String.format(newlineString, ++lineNum));
+			    }
 			}
-			StringBuilder lout = new StringBuilder();
-			if (inBlockComment) {
-				lout.append("<span style=\"").append(getColor(ElementTypes.COMMENT)).append("\">");
+			break;
+		    case SMART_STRING:
+			out.append(getOpenSpan(ElementTypes.DOUBLE_STRING)).append("&quot;");
+			out.append(processDoubleString(t.toOutputString()));
+			out.append("&quot;").append(getCloseSpan());
+			break;
+		    case VARIABLE:
+			out.append(getOpenSpan(ElementTypes.DVAR));
+			out.append(escapeLit(t.val()));
+			out.append(getCloseSpan());
+			break;
+		    case FUNC_NAME:
+			if(t.val().equals("__autoconcat__")) {
+			    // This (currently) only happens when there are loose parenthesis. In this
+			    // case, we just want to get rid of this token, so we skip it.
+			    break;
 			}
-			if (inDoubleString) {
-				lout.append("<span style=\"").append(getColor(ElementTypes.DOUBLE_STRING)).append("\">");
-			}
-			if (inSingleString) {
-				lout.append("<span style=\"").append(getColor(ElementTypes.SINGLE_STRING)).append("\">");
-			}
-			String buffer = "";
-			for (int j = 0; j < lines[i].length(); j++) {
-				char c = lines[i].charAt(j);
-				char c2 = (j + 1 < lines[i].length() ? lines[i].charAt(j + 1) : '\0');
-				if(inSingleString || inDoubleString){
-					if(c == '\\' && c2 == '\''){
-						buffer += "\\&apos;";
-						j++;
-						continue;
-					}
-					if (c == '\\' && c2 == '"') {
-						buffer += "\\&quot;";
-						j++;
-						continue;
-					}
-					if(c == '\\' && c2 == '\\'){
-						buffer += "\\\\";
-						j++;
-						continue;
-					}
-				}
-				if (inSingleString && c == '\'') {
-					inSingleString = false;
-					lout.append("<span style=\"").append(getColor(ElementTypes.SINGLE_STRING)).append("\">&apos;").append(HTMLUtils.escapeHTML(buffer))
-							.append("&apos;</span>");
-					buffer = "";
-					continue;
-				}
-				if (inDoubleString && c == '"') {
-					inDoubleString = false;
-					//This also escapes html internally.
-					buffer = processDoubleString(buffer);
-					lout.append("<span style=\"").append(getColor(ElementTypes.DOUBLE_STRING)).append("\">&quot;").append(buffer)
-							.append("&quot;</span>");
-					buffer = "";
-					continue;
-				}
-				if (inVar) {
-					if (!Character.toString(c).matches("[a-zA-Z0-9_]")) {
-						lout.append(buffer).append("</span>");
-						buffer = "";
-						inVar = false;
-					}
-				}
-				if (inDollarVar) {
-					if (!Character.toString(c).matches("[a-zA-Z0-9_]")) {
-						lout.append(buffer).append("</span>");
-						buffer = "";
-						inDollarVar = false;
-					}
-				}
-				if (!inDoubleString && !inSingleString && !inBlockComment && (c == '#' || (c == '/' && c2 == '/'))) {
-					lout.append(processBuffer(buffer)).append("<span style=\"").append(getColor(ElementTypes.COMMENT)).append("\">");
-					if(c == '#'){
-						lout.append("#");
-					} else {
-						lout.append("//");
-						j++;
-					}
-					buffer = "";
-					inLineComment = true;
-					continue;
-				}
-				if (!inDoubleString && !inSingleString && !inLineComment && c == '/' && c2 == '*') {
-					lout.append(processBuffer(buffer));
-					buffer = "";
-					lout.append("<span style=\"").append(getColor(ElementTypes.COMMENT)).append("\">/*");
-					j++;
-					inBlockComment = true;
-					continue;
-				}
-				if (c == '\'' && !inDoubleString && !inLineComment && !inBlockComment) {
-					lout.append(processBuffer(buffer));
-					buffer = "";
-					inSingleString = true;
-					continue;
-				}
-				if (c == '"' && !inSingleString && !inLineComment && !inBlockComment) {
-					lout.append(processBuffer(buffer));
-					buffer = "";
-					inDoubleString = true;
-					continue;
-				}
-				if (c == '*' && c2 == '/') {
-					lout.append(buffer).append("*/</span>");
-					buffer = "";
-					j++;
-					inBlockComment = false;
-					continue;
-				}
-				if (!inDoubleString && !inSingleString && !inLineComment && !inBlockComment && c == '@') {
-					lout.append(processBuffer(buffer)).append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">");
-					buffer = "";
-					inVar = true;
-				}
-				if (!inDoubleString && !inSingleString && !inLineComment && !inBlockComment && c == '$') {
-					lout.append(processBuffer(buffer)).append("<span style=\"").append(getColor(ElementTypes.DVAR)).append("\">$");
-					buffer = "";
-					if (!Character.toString(c2).matches("[a-zA-Z0-9_]")) {
-						//Done, it's final var
-						lout.append("</span>");
-					} else {
-						inDollarVar = true;
-					}
-					continue;
-				}
-				buffer += c;
-			}
-			if(inLineComment){
-				lout.append(buffer);
+			out.append(getOpenSpan(ElementTypes.FUNCTION, "font-style: italic"));
+			out.append("{{function|").append(escapeLit(t.val())).append("}}");
+			out.append(getCloseSpan());
+			break;
+		    case KEYWORD:
+			out.append(getOpenSpan(ElementTypes.KEYWORD));
+			out.append("{{keyword|").append(escapeLit(t.val())).append("}}");
+			out.append(getCloseSpan());
+			break;
+		    case STRING:
+			out.append(getOpenSpan(ElementTypes.SINGLE_STRING));
+			out.append("&apos;").append(escapeLit(t.toOutputString())).append("&apos;");
+			out.append(getCloseSpan());
+			break;
+		    case IVARIABLE:
+			out.append(getOpenSpan(ElementTypes.VAR));
+			out.append(escapeLit(t.val()));
+			out.append(getCloseSpan());
+			break;
+		    case LIT:
+			if(NativeTypeList.getNativeTypeList().contains(t.val())){
+			    out.append(getOpenSpan(ElementTypes.OBJECT_TYPE));
+			    out.append("{{object|").append(t.val()).append("}}");
+			    out.append(getCloseSpan());
 			} else {
-				lout.append(processBuffer(buffer));
+			    out.append(escapeLit(t.val()));
 			}
-			if (inBlockComment || inVar || inLineComment || inDollarVar || inSingleString || inDoubleString) {
-				inVar = false;
-				inLineComment = false;
-				inDollarVar = false;
-				lout.append("</span>");
-			}
-			int lineToOutput = blankLine ? i : i + 1;
-			int lineBufferSize = Integer.toString(lines.length - 1).length();
-			out.append("<span style=\"font-style: italic; ").append(getColor(ElementTypes.LINE_NUMBER))
-					.append("\">").append(String.format("%0" + lineBufferSize + "d", lineToOutput)).append("</span>&nbsp;&nbsp;&nbsp;").append(lout.toString()).append("<br />\n");
+			break;
+		    case COMMAND:
+			out.append(getOpenSpan(ElementTypes.COMMAND));
+			out.append(t.val());
+			out.append(getCloseSpan());
+			break;
+		    case NEWLINE:
+			out.append("</div>").append(String.format(newlineString, ++lineNum));
+			break;
+		    case WHITESPACE:
+			out.append(escapeLit(t.val()));
+			break;
+		    default:
+			out.append(escapeLit(t.val()));
+			break;
 		}
-		return "<div style=\"font-family: 'Consolas','DejaVu Sans','Lucida Console',monospace; background-color: #"
-					+ getRGB(classes.get(ElementTypes.BACKGROUND_COLOR)) + ";"
-					+ " border-color: #" + getRGB(classes.get(ElementTypes.BORDER_COLOR))
-					+ "; border-style: solid; border-width: 1px 0px 1px 0px; margin: 1em 2em;"
-					+ " padding: 0 0 0 1em;\">\n" + out.toString().replace("\t", "&nbsp;&nbsp;&nbsp;") + "</div>\n";
+	    }
 	}
+	out.append("</div>");
+	String totalOutput = "<div style=\"font-family: 'Consolas','DejaVu Sans','Lucida Console',monospace; background-color: #"
+		+ getRGB(classes.get(ElementTypes.BACKGROUND_COLOR)) + ";"
+		+ " border-color: #" + getRGB(classes.get(ElementTypes.BORDER_COLOR))
+		+ "; border-style: solid; border-width: 1px 0px 1px 0px; margin: 1em 2em;"
+		+ " padding: 12px 2px 1em 1em;\" class=\"methodscript_code\">" + out.toString() + "</div>";
+	return totalOutput;
+    }
 
-	private static final String FUNCTION_PATTERN = "([^a-zA-Z0-9_])?([a-zA-Z_]*[a-zA-Z0-9_]+)((?:&nbsp;)*\\()";
+    /**
+     * Processes and highlights double strings
+     *
+     * @param buffer
+     * @return
+     */
+    private String processDoubleString(String value) {
+	StringBuilder b = new StringBuilder();
+	StringBuilder brace = new StringBuilder();
+	boolean inSimpleVar = false;
+	boolean inBrace = false;
+	for (int i = 0; i < value.length(); i++) {
+	    char c = value.charAt(i);
+	    char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
+	    if (c == '\\' && c2 == '@') {
+		b.append("\\@");
+		i++;
+		continue;
+	    }
+	    if (c == '@') {
+		if (Character.isLetterOrDigit(c2) || c2 == '_') {
+		    inSimpleVar = true;
+		    b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">@");
+		    continue;
+		} else if (c2 == '{') {
+		    inBrace = true;
+		    b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">@{</span>");
+		    i++;
+		    continue;
+		}
+	    }
+	    if (inSimpleVar && !(Character.isLetterOrDigit(c) || c == '_')) {
+		inSimpleVar = false;
+		b.append("</span>");
+	    }
+	    if (inBrace && c == '}') {
+		inBrace = false;
+		b.append(processBraceString(brace.toString()));
+		brace = new StringBuilder();
+		b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">}</span>");
+		continue;
+	    }
+	    if (!inBrace) {
+		b.append(escapeLit(c));
+	    } else {
+		brace.append(escapeLit(c));
+	    }
+	}
+	if (inSimpleVar || inBrace) {
+	    b.append("</span>");
+	}
+	return b.toString();
+    }
+
+    /**
+     * Brace strings are more complicated, so do this processing separately.
+     *
+     * @param v
+     * @return
+     */
+    private String processBraceString(String value) {
+	StringBuilder b = new StringBuilder();
+	boolean inVarName = true;
+	boolean inString = false;
+	b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">");
+	for (int i = 0; i < value.length(); i++) {
+	    char c = value.charAt(i);
+	    char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
+	    if (c == '[' && inVarName) {
+		inVarName = false;
+		b.append("</span>");
+	    }
+	    if (c == '[' && !inString) {
+		b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">[</span>");
+		continue;
+	    }
+	    if (c == ']' && !inString) {
+		b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">]</span>");
+		continue;
+	    }
+	    if (c == '\\' && c2 == '\'' && inString) {
+		b.append("\\'");
+		continue;
+	    }
+	    if (c == '\'') {
+		inString = !inString;
+	    }
+	    b.append(escapeLit(c));
+	}
+	if (inVarName) {
+	    b.append("</span>");
+	}
+	return b.toString();
+    }
+
+    /**
+     * Highlights the given code, using the default color scheme.
+     *
+     * @param code The plain text code
+     * @return The HTML highlighted code
+     */
+    public static String Highlight(String code, boolean inPureMscript) throws ConfigCompileException {
+	return new SimpleSyntaxHighlighter(CLASSES, code, inPureMscript).highlight();
+    }
+
+    /**
+     * Highlights the given code, using the specified color scheme. If any elements are missing from the EnumMap, the
+     * default color is used.
+     *
+     * @param colors A list of colors for each element type
+     * @param code The plain text code
+     * @return The HTML highlighted code
+     */
+    public static String Highlight(EnumMap<ElementTypes, Color> colors, String code, boolean inPureMscript) throws ConfigCompileException {
+	return new SimpleSyntaxHighlighter(colors, code, inPureMscript).highlight();
+    }
+
+    public enum ElementTypes {
 	/**
-	 * Unknown buffer text should be sent here for processing for keywords.
-	 * @param buffer
-	 * @return
+	 * Denotes a comment, either line or block
 	 */
-	private String processBuffer(String buffer){
-		buffer = HTMLUtils.escapeHTML(buffer).replace(" ", "&nbsp;");
-		for(String keyword : KEYWORDS){
-			buffer = buffer.replaceAll("([^a-zA-Z0-9_]|^)(" + Pattern.quote(keyword) + ")([^a-zA-Z0-9_]|$)",
-					"$1<span style=\"" + getColor(ElementTypes.KEYWORD) + "\">$2</span>$3");
-		}
-		buffer = buffer.replaceAll(FUNCTION_PATTERN, "$1<span style=\"font-style: italic; " + getColor(ElementTypes.FUNCTION) + "\">$2</span>$3");
-		return buffer;
-	}
-
+	COMMENT,
 	/**
-	 * Processes and highlights double strings
-	 * @param buffer
-	 * @return
+	 *
 	 */
-	private String processDoubleString(String value){
-		StringBuilder b = new StringBuilder();
-		StringBuilder brace = new StringBuilder();
-		boolean inSimpleVar = false;
-		boolean inBrace = false;
-		for(int i = 0; i < value.length(); i++){
-			char c = value.charAt(i);
-			char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
-			if(c == '\\' && c2 == '@'){
-				b.append("\\@");
-				i++;
-				continue;
-			}
-			if(c == '@'){
-				if(Character.isLetterOrDigit(c2) || c2 == '_'){
-					inSimpleVar = true;
-					b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">@");
-					continue;
-				} else if(c2 == '{'){
-					inBrace = true;
-					b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">@{</span>");
-					i++;
-					continue;
-				}
-			}
-			if(inSimpleVar && !(Character.isLetterOrDigit(c) || c == '_')){
-				inSimpleVar = false;
-				b.append("</span>");
-			}
-			if(inBrace && c == '}'){
-				inBrace = false;
-				b.append(processBraceString(brace.toString()));
-				brace = new StringBuilder();
-				b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">}</span>");
-				continue;
-			}
-			if(!inBrace){
-				b.append(HTMLUtils.escapeHTML(Character.toString(c)));
-			} else {
-				brace.append(HTMLUtils.escapeHTML(Character.toString(c)));
-			}
-		}
-		if(inSimpleVar || inBrace){
-			b.append("</span>");
-		}
-		return b.toString();
-	}
-
+	SMART_COMMENT,
 	/**
-	 * Brace strings are more complicated, so do this processing separately.
-	 * @param v
-	 * @return
+	 * Denotes a string with single quotes
 	 */
-	private String processBraceString(String value){
-		StringBuilder b = new StringBuilder();
-		boolean inVarName = true;
-		boolean inString = false;
-		b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">");
-		for(int i = 0; i < value.length(); i++){
-			char c = value.charAt(i);
-			char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
-			if(c == '[' && inVarName){
-				inVarName = false;
-				b.append("</span>");
-			}
-			if(c == '[' && !inString){
-				b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">[</span>");
-				continue;
-			}
-			if(c == ']' && !inString){
-				b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">]</span>");
-				continue;
-			}
-			if(c == '\\' && c2 == '\'' && inString){
-				b.append("\\'");
-				continue;
-			}
-			if(c == '\''){
-				inString = !inString;
-			}
-			b.append(c);
-		}
-		if(inVarName){
-			b.append("</span>");
-		}
-		return b.toString();
-	}
-
+	SINGLE_STRING,
 	/**
-	 * Highlights the given code, using the default color scheme.
-	 * @param code The plain text code
-	 * @return The HTML highlighted code
+	 * Denotes a string with double quotes
 	 */
-	public static String Highlight(String code) {
-		return new SimpleSyntaxHighlighter(CLASSES, code).highlight();
-	}
-
+	DOUBLE_STRING,
 	/**
-	 * Highlights the given code, using the specified color scheme. If any
-	 * elements are missing from the EnumMap, the default color is used.
-	 * @param colors A list of colors for each element type
-	 * @param code The plain text code
-	 * @return The HTML highlighted code
+	 * Denotes a @var
 	 */
-	public static String Highlight(EnumMap<ElementTypes, Color> colors, String code){
-		return new SimpleSyntaxHighlighter(colors, code).highlight();
-	}
-
-	public enum ElementTypes {
-		/**
-		 * Denotes a comment, either line or block
-		 */
-		COMMENT,
-		/**
-		 * Denotes a string with single quotes
-		 */
-		SINGLE_STRING,
-		/**
-		 * Denotes a string with double quotes
-		 */
-		DOUBLE_STRING,
-		/**
-		 * Denotes a @var
-		 */
-		VAR,
-		/**
-		 * Denotes a $var
-		 */
-		DVAR,
-		/**
-		 * The background color of the text field
-		 */
-		BACKGROUND_COLOR,
-		/**
-		 * The border color of the text field
-		 */
-		BORDER_COLOR,
-		/**
-		 * Denotes a keyword, "true", "false", "null", etc.
-		 */
-		KEYWORD,
-		/**
-		 * The color of the line numbers in the left margin
-		 */
-		LINE_NUMBER,
-		/**
-		 * The color of function/proc names
-		 */
-		FUNCTION,
-		;
-	}
+	VAR,
+	/**
+	 * Denotes a $var
+	 */
+	DVAR,
+	/**
+	 * The background color of the text field
+	 */
+	BACKGROUND_COLOR,
+	/**
+	 * The border color of the text field
+	 */
+	BORDER_COLOR,
+	/**
+	 * Denotes a keyword, "true", "false", "null", etc.
+	 */
+	KEYWORD,
+	/**
+	 * The color of the line numbers in the left margin
+	 */
+	LINE_NUMBER,
+	/**
+	 * The color of function/proc names
+	 */
+	FUNCTION,
+	/**
+	 * The color of (known) object types
+	 */
+	OBJECT_TYPE,
+	/**
+	 * The color of commands in msa files
+	 */
+	COMMAND,
+	;
+    }
 }

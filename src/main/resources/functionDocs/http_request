@@ -38,9 +38,11 @@ the same parameter, the result is undefined. Regardless, the parameters will be 
 when passed in as part of the params object, so it is recommended to use this always, especially
 if dealing with user input or other possibly unescaped content. The subtype of the array may be any
 primitive or an array of primitives. Sub arrays are encoded properly. If params is a string, it is
-assumed to be raw POST/PUT data, and added literally to the request body, as is. When used this way,
-you MUST set the method to POST or PUT, or an exception is thrown. The Content-Type header is not set
-for you if this occurs, and will likely need to be set manually.
+assumed to be raw body data, and added literally to the request body, as is. If the parameter is
+a byte_array, that is also encoded exactly as is. The Content-Type header is not set
+for you if this occurs, and will likely need to be set manually. The HTTP/1.1 specification specifically
+notes that servers should ignore the request body for certain methods (i.e. GET), but in practice,
+many servers expect this, and so while it is against the standard, this method still allows it.
 |-
 | cookiejar
 | array
@@ -149,6 +151,12 @@ If this setting is set from non-cdmline mode, it is silently ignored.
 | boolean
 | false
 | If this is true, the method will block until it is complete, and it also won't use the internal thread pool.
+|-
+| log
+| boolean
+| false
+| When initially writing code, it may be useful to get explicit debug information printed out. If this
+is set to true, then detailed debug information will be printed to console.
 |}
 <!-- TODO: This isn't working yet, so just leave it off 
 |-

@@ -31,13 +31,13 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
 /**
- * 
+ *
  */
 public class ItemMeta {
 	public static String docs(){
 		return "These functions manipulate an item's meta data. The items are modified in a player's inventory.";
 	}
-	
+
 	private static final String applicableItemMeta = "<ul>"
 			+ "<li>All items - display (string), lore (array of strings), enchants (An array of enchantment arrays, "
 			+ " which are associative arrays that look like: array(etype: The type of enchantment, elevel:"
@@ -52,7 +52,7 @@ public class ItemMeta {
 			+ "<li>Fireworks - firework (array with strength (int), effects (array of effect arrays (see Example)))</li>"
 			+ "<li>Firework Charges - effect (single Firework effect array)"
 			+ "</ul>";
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_itemmeta extends AbstractFunction {
 
@@ -108,7 +108,7 @@ public class ItemMeta {
 		public String docs() {
 			return "mixed {[player,] inventorySlot} Returns an associative array of known ItemMeta for the slot given,"
 					+ " or null if there isn't any. All items can have a display(name), lore, and/or enchants, "
-					+ " and more info will be available for the items that have it. ---- Returned keys: " 
+					+ " and more info will be available for the items that have it. ---- Returned keys: "
 					+ applicableItemMeta;
 		}
 
@@ -116,24 +116,24 @@ public class ItemMeta {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Demonstrates a generic item without meta", "msg(get_itemmeta(null))", 
+					new ExampleScript("Demonstrates a generic item without meta", "msg(get_itemmeta(null))",
 							"null"),
-					new ExampleScript("Demonstrates a generic item with meta", "msg(get_itemmeta(null))", 
+					new ExampleScript("Demonstrates a generic item with meta", "msg(get_itemmeta(null))",
 							"{display: AmazingSword, enchants: {}, lore: {Look at my sword, my sword is amazing}}"),
-					new ExampleScript("Demonstrates a written book", "msg(get_itemmeta(null))", 
+					new ExampleScript("Demonstrates a written book", "msg(get_itemmeta(null))",
 							"{author: Notch, display: null, enchants: {}, lore: null,"
 							+ " pages: {This is page 1, This is page 2}, title: Example Book}"),
-					new ExampleScript("Demonstrates an EnchantedBook", "msg(get_itemmeta(null))", 
+					new ExampleScript("Demonstrates an EnchantedBook", "msg(get_itemmeta(null))",
 							"{display: null, enchants: {}, lore: null, stored: {{elevel: 1, etype: ARROW_FIRE}}}"),
-					new ExampleScript("Demonstrates a piece of leather armor", "msg(get_itemmeta(null))", 
+					new ExampleScript("Demonstrates a piece of leather armor", "msg(get_itemmeta(null))",
 							"{color: {b: 106, g: 160, r: 64}, display: null, enchants: {}, lore: null}"),
-					new ExampleScript("Demonstrates a skull", "msg(get_itemmeta(null))", 
+					new ExampleScript("Demonstrates a skull", "msg(get_itemmeta(null))",
 							"{display: null, enchants: {}, lore: null, owner: Herobrine}"),
-					new ExampleScript("Demonstrates a custom potion", "msg(get_itemmeta(null))", 
+					new ExampleScript("Demonstrates a custom potion", "msg(get_itemmeta(null))",
 							"{display: null, enchants: {}, lore: null, main: 8,"
 							+ " potions: {{ambient: true, id: 8, seconds: 180, strength: 5}}}"),
 					new ExampleScript("Demonstrates a custom banner", "msg(get_itemmeta(0))",
@@ -145,9 +145,9 @@ public class ItemMeta {
 							+ " trail: true, type: BURST}}, strength: 2}}")
 			};
 		}
-		
+
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class set_itemmeta extends AbstractFunction {
 
@@ -215,27 +215,27 @@ public class ItemMeta {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Demonstrates removing all meta", "set_itemmeta(null, null)", 
+					new ExampleScript("Demonstrates removing all meta", "set_itemmeta(null, null)",
 							"This will make the item in your hand completely ordinary"),
-					new ExampleScript("Demonstrates a generic item with meta", 
-							"set_itemmeta(null, array(display: 'Amazing Sword', lore: array('Look at my sword', 'my sword is amazing')))", 
+					new ExampleScript("Demonstrates a generic item with meta",
+							"set_itemmeta(null, array(display: 'Amazing Sword', lore: array('Look at my sword', 'my sword is amazing')))",
 							"The item in your hands is now amazing"),
-					new ExampleScript("Demonstrates a written book", 
-							"set_itemmeta(null, array(author: 'Writer', pages: array('Once upon a time', 'The end.'), title: 'Epic Story'))", 
+					new ExampleScript("Demonstrates a written book",
+							"set_itemmeta(null, array(author: 'Writer', pages: array('Once upon a time', 'The end.'), title: 'Epic Story'))",
 							"This will write a very short story"),
-					new ExampleScript("Demonstrates an EnchantedBook", 
-							"set_itemmeta(null, array(stored: array(array(elevel: 25, etype: DAMAGE_ALL), array(etype: DURABILITY, elevel: 3))))", 
+					new ExampleScript("Demonstrates an EnchantedBook",
+							"set_itemmeta(null, array(stored: array(array(elevel: 25, etype: DAMAGE_ALL), array(etype: DURABILITY, elevel: 3))))",
 							"This book now contains Unbreaking 3 and Sharpness 25"),
-					new ExampleScript("Demonstrates coloring leather armor", 
-							"set_itemmeta(102, array(color: array(r: 50 b: 150, g: 100)))", 
+					new ExampleScript("Demonstrates coloring leather armor",
+							"set_itemmeta(102, array(color: array(r: 50, b: 150, g: 100)))",
 							"This will make your chestplate blue-ish"),
-					new ExampleScript("Demonstrates a skull", "set_itemmeta(103, array(owner: 'Notch'))", 
+					new ExampleScript("Demonstrates a skull", "set_itemmeta(103, array(owner: 'Notch'))",
 							"This puts Notch's skin on the skull you are wearing"),
-					new ExampleScript("Demonstrates making a custom potion", 
+					new ExampleScript("Demonstrates making a custom potion",
 							"set_itemmeta(5, array(potions: array(array(id: 8, strength: 4, seconds: 90, ambient: true))))",
 							"Turns the potion in slot 5 into a Potion of Leaping V"),
 					new ExampleScript("Demonstrates hiding a potion effect",
@@ -244,7 +244,7 @@ public class ItemMeta {
 							+ " The flag HIDE_POTION_EFFECTS hides specific item meta like book meta, potion effects,"
 							+ " a music disc's author and name, firework meta, map meta, and stored enchantments."),
 					new ExampleScript("Demonstrates making a custom banner",
-							"set_itemmeta(0, array(basecolor: SILVER, patterns: array(array(color: BLACK, shape: SKULL))",
+							"set_itemmeta(0, array(basecolor: SILVER, patterns: array(array(color: BLACK, shape: SKULL))))",
 							"This banner will be silver with a black skull."),
 					new ExampleScript("Demonstrates making a custom firework",
 							"set_itemmeta(null, array('firework': array('strength': 1, 'effects': array(array("
@@ -252,9 +252,9 @@ public class ItemMeta {
 							"This firework will store a green creeper face effect.")
 			};
 		}
-		
+
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_armor_color extends AbstractFunction{
 
@@ -317,9 +317,9 @@ public class ItemMeta {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class set_armor_color extends AbstractFunction{
 
@@ -396,9 +396,9 @@ public class ItemMeta {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class is_leather_armor extends AbstractFunction{
 
@@ -451,6 +451,6 @@ public class ItemMeta {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 }

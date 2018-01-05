@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities.Web;
 
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 
@@ -116,6 +117,9 @@ public final class WebUtility {
 	StringBuilder b = null;
 	BufferedReader in = new BufferedReader(new InputStreamReader(response.getStream()));
 	if (settings.getDownloadTo() == null) {
+	    if(settings.getLogger() != null) {
+		settings.getLogger().log(Level.INFO, "Reading in response body");
+	    }
 	    b = new StringBuilder();
 	    String line;
 	    while ((line = in.readLine()) != null) {
@@ -123,6 +127,9 @@ public final class WebUtility {
 	    }
 	    in.close();
 	} else {
+	    if(settings.getLogger() != null) {
+		settings.getLogger().log(Level.INFO, "Saving file to {0}", settings.getDownloadTo());
+	    }
 	    int r;
 	    OutputStream out = new BufferedOutputStream(new FileOutputStream(settings.getDownloadTo()));
 	    while ((r = in.read()) != -1) {
@@ -166,6 +173,7 @@ public final class WebUtility {
 	    _settings = new RequestSettings();
 	}
 	final RequestSettings settings = _settings;
+	Logger logger = settings.getLogger();
 	HTTPMethod method = settings.getMethod();
 	Map<String, List<String>> headers = settings.getHeaders();
 	Map<String, List<String>> parameters = settings.getParameters();
@@ -174,6 +182,21 @@ public final class WebUtility {
 	final int timeout = settings.getTimeout();
 	String username = settings.getUsername();
 	String password = settings.getPassword();
+	if (logger != null) {
+	    logger.log(Level.INFO, "Using the following settings:\n"
+		    + "HTTP method: {0}\n"
+		    + "Headers: {1}\n"
+		    + "Parameters: {2}\n"
+		    + "Raw parameter Length: {3}\n"
+		    + "Cookie stash: {4}\n"
+		    + "Follow redirects? {5}\n"
+		    + "Timeout: {6}\n"
+		    + "Username: {7}\n"
+		    + "Password length: {8}\n",
+		    new Object[]{method, headers, parameters,
+			settings.getRawParameter() == null ? "null" : settings.getRawParameter().length, cookieStash,
+			followRedirects, timeout, username, password == null ? "null" : password.length()});
+	}
 	//First, let's check to see that the url is properly formatted. If there are parameters,
 	//and this is a GET request, we want to tack them on to the end.
 	if (parameters != null && !parameters.isEmpty() && method == HTTPMethod.GET) {
@@ -185,12 +208,18 @@ public final class WebUtility {
 	    String query = b.toString();
 	    url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "?" + query);
 	}
+	if (logger != null) {
+	    logger.log(Level.INFO, "Using url: {0}", url);
+	}
 
 	Proxy proxy;
 	if (settings.getProxy() == null) {
 	    proxy = Proxy.NO_PROXY;
 	} else {
 	    proxy = settings.getProxy();
+	}
+	if (logger != null) {
+	    logger.log(Level.INFO, "Using proxy: {0}", proxy);
 	}
 	InetSocketAddress addr = (InetSocketAddress) proxy.address();
 	if (addr != null) {
@@ -199,6 +228,9 @@ public final class WebUtility {
 	    }
 	}
 	//FIXME: When given a bad proxy, this causes it to stall forever
+	if (logger != null) {
+	    logger.log(Level.INFO, "Opening connection...");
+	}
 	HttpURLConnection conn = (HttpURLConnection) url.openConnection(/*proxy*/);
 	if (conn instanceof HttpsURLConnection
 		&& (settings.getDisableCertChecking() || settings.getUseDefaultTrustStore() == false
@@ -351,6 +383,9 @@ public final class WebUtility {
 	    }
 	}
 	if (username != null && password != null) {
+	    if (logger != null) {
+		logger.log(Level.INFO, "Using Username/Password authentication, adding Authorization header");
+	    }
 	    conn.setRequestProperty("Authorization", "Basic " + new String(Base64.encodeBase64((username + ":" + password).getBytes("UTF-8")), "UTF-8"));
 	}
 	if (headers != null) {
@@ -359,35 +394,59 @@ public final class WebUtility {
 	    }
 	}
 	conn.setRequestMethod(method.name());
-	if (method == HTTPMethod.POST) {
+	if ((parameters != null && !parameters.isEmpty()) || settings.getRawParameter() != null) {
 	    conn.setDoOutput(true);
-	    String params = "";
+	    byte[] params = ArrayUtils.EMPTY_BYTE_ARRAY;
 	    if (parameters != null && !parameters.isEmpty()) {
-		params = encodeParameters(parameters);
+		if (logger != null) {
+		    logger.log(Level.INFO, "Parameters are added, and content type set to application/x-www-form-urlencoded");
+		}
+		params = encodeParameters(parameters).getBytes("UTF-8");
 		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 	    } else if (settings.getRawParameter() != null) {
+		if (logger != null) {
+		    logger.log(Level.INFO, "Raw parameter is added");
+		}
 		params = settings.getRawParameter();
 	    }
-	    conn.setRequestProperty("Content-Length", Integer.toString(params.length()));
+	    conn.setRequestProperty("Content-Length", Integer.toString(params.length));
+	    if (logger != null) {
+		logger.log(Level.INFO, "Content length is {0}", params.length);
+		logger.log(Level.INFO, "Writing out request now");
+	    }
 	    OutputStream os = new BufferedOutputStream(conn.getOutputStream());
-	    os.write(params.getBytes("UTF-8"));
+	    os.write(params);
 	    os.close();
 	}
-
+	if (logger != null) {
+	    logger.log(Level.INFO, "Output sent");
+	}
 	InputStream is;
 	try {
 	    is = conn.getInputStream();
 	} catch (UnknownHostException e) {
 	    throw e;
 	} catch (Exception e) {
+	    if (logger != null) {
+		logger.log(Level.SEVERE, "Exception occurred, {0} response from server", conn.getResponseCode());
+	    }
 	    is = conn.getErrorStream();
 	}
 	if ("x-gzip".equals(conn.getContentEncoding()) || "gzip".equals(conn.getContentEncoding())) {
+	    if (logger != null) {
+		logger.log(Level.INFO, "Response is gzipped, using a GZIPInputStream");
+	    }
 	    is = new GZIPInputStream(is);
 	} else if ("deflate".equals(conn.getContentEncoding())) {
+	    if (logger != null) {
+		logger.log(Level.INFO, "Response is zipped, using a InflaterInputStream");
+	    }
 	    is = new InflaterInputStream(is);
 	} else if ("identity".equals(conn.getContentEncoding())) {
 	    //This is the default, meaning no transformation is needed.
+	    if (logger != null) {
+		logger.log(Level.INFO, "Response is not compressed");
+	    }
 	}
 	if (is == null) {
 	    throw new IOException("Could not connnect to " + url);

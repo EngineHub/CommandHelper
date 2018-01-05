@@ -3,7 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
@@ -15,8 +15,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.GetFakeServer;
-import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
-import static com.laytonsmith.testing.StaticTest.SRun;
 import static com.laytonsmith.testing.StaticTest.assertCEquals;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -59,8 +57,8 @@ public class MathTest {
         fakeServer = GetFakeServer();
 
         varList = new IVariableList();
-        varList.set(new IVariable(CClassType.AUTO, "var", C.onstruct(1), Target.UNKNOWN));
-        varList.set(new IVariable(CClassType.AUTO, "var2", C.onstruct(2.5), Target.UNKNOWN));
+        varList.set(new IVariable(Auto.TYPE, "var", C.onstruct(1), Target.UNKNOWN));
+        varList.set(new IVariable(Auto.TYPE, "var2", C.onstruct(2.5), Target.UNKNOWN));
         env = Static.GenerateStandaloneEnvironment();
         env.getEnv(GlobalEnv.class).SetVarList(varList);
         env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
@@ -93,8 +91,8 @@ public class MathTest {
     @Test(timeout = 10000)
     public void testDec() throws Exception {
         Math.dec a = new Math.dec();
-        IVariable v = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(CClassType.AUTO, "var", C.onstruct(1), Target.UNKNOWN));
-        IVariable v2 = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(CClassType.AUTO, "var2", C.onstruct(2.5), Target.UNKNOWN));
+        IVariable v = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var", C.onstruct(1), Target.UNKNOWN));
+        IVariable v2 = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var2", C.onstruct(2.5), Target.UNKNOWN));
         assertCEquals(C.onstruct(0), v.ival());
         assertCEquals(C.onstruct(1.5), v2.ival());
         StaticTest.SRun("assign(@var, 0) dec(@var, 2) msg(@var)", fakePlayer);
@@ -112,8 +110,8 @@ public class MathTest {
     @Test(timeout = 10000)
     public void testInc() throws Exception {
         Math.inc a = new Math.inc();
-        IVariable v = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(CClassType.AUTO, "var", C.onstruct(1), Target.UNKNOWN));
-        IVariable v2 = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(CClassType.AUTO, "var2", C.onstruct(2.5), Target.UNKNOWN));
+        IVariable v = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var", C.onstruct(1), Target.UNKNOWN));
+        IVariable v2 = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var2", C.onstruct(2.5), Target.UNKNOWN));
         assertCEquals(C.onstruct(2), v.ival());
         assertCEquals(C.onstruct(3.5), v2.ival());
         StaticTest.SRun("assign(@var, 0) inc(@var, 2) msg(@var)", fakePlayer);
@@ -265,7 +263,7 @@ public class MathTest {
         assertEquals("0.9866142981514303", SRun("tanh(2.5)", null));
         assertEquals("-0.9866142981514303", SRun("tanh(-2.5)", null));
     }
-    
+
     @Test
     public void testClamp() throws Exception {
         assertEquals("8.0", SRun("clamp(8, 1, 10);", null));

@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  *
  */
 public class CommandExecutor {
-	
+
 	/**
 	 * If you're in a hurry, and all you want is to get the output of System.out
 	 * from a process started with a string, this will do it for you.
@@ -38,7 +38,7 @@ public class CommandExecutor {
 	 * @return
 	 */
 	public static String Execute(String [] args) throws InterruptedException, IOException{
-		final List<Byte> output = new ArrayList<Byte>();
+		final List<Byte> output = new ArrayList<>();
 		CommandExecutor c = new CommandExecutor(args);
 		OutputStream os = new BufferedOutputStream(new OutputStream() {
 
@@ -86,7 +86,7 @@ public class CommandExecutor {
 	}
 
 	/**
-	 * Starts this CommandExecutor. Afterwards, you can call .waitFor to wait
+	 * Starts this CommandExecutor. Afterwards, you can call {@link #waitFor()} to wait
 	 * until the process has finished.
 	 * @return
 	 * @throws IOException
@@ -226,6 +226,12 @@ public class CommandExecutor {
 		return this;
 	}
 
+	/**
+	 * Blocks until the underlying process has finished. If the process has already finished, the
+	 * method will return immediately.
+	 * @return The process's exit code
+	 * @throws InterruptedException
+	 */
 	public int waitFor() throws InterruptedException {
 		int ret = process.waitFor();
 		if(out != null){
@@ -248,7 +254,7 @@ public class CommandExecutor {
 	}
 
 	/**
-	 * Sets the inputs and outputs to be System.in, System.out, and StreamUtils.GetSystemErr().
+	 * Sets the inputs and outputs to be System.in, StreamUtils.GetSystemOut(), and StreamUtils.GetSystemErr().
 	 * @return
 	 */
 	public CommandExecutor setSystemInputsAndOutputs(){

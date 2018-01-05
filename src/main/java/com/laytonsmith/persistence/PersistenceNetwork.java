@@ -21,7 +21,7 @@ import java.util.Set;
  * match. All other aspects of how the data is stored and retrieved are
  * abstracted, so you needn't worry about any of those details.
  *
- * 
+ *
  */
 public class PersistenceNetwork {
 
@@ -34,7 +34,8 @@ public class PersistenceNetwork {
 	 * not specify a "**" key, to ensure that all keys will be matched.
 	 *
 	 * @param configuration
-	 * @param defaultURI
+	 * @param defaultURI The URI to be used in the case that no ** filter is
+	 * found in the file
 	 */
 	public PersistenceNetwork(File configuration, URI defaultURI, ConnectionMixinFactory.ConnectionMixinOptions options) throws IOException, DataSourceException {
 		this(FileUtil.read(ensureCreated(configuration)), defaultURI, options);
@@ -56,20 +57,21 @@ public class PersistenceNetwork {
 	 * not specify a "**" key, to ensure that all keys will be matched.
 	 *
 	 * @param configuration
-	 * @param defaultURI
+	 * @param defaultURI The URI to be used in the case that no ** filter is
+	 * found in the file
 	 */
 	public PersistenceNetwork(String configuration, URI defaultURI, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		filter = new DataSourceFilter(configuration, defaultURI);
 		this.options = options;
 		//Data sources are lazily loaded, so we don't need to do anything right now to load them.
 	}
-	
+
 	/**
 	 * Returns the URI describing where this key currently lives, given the filter
 	 * configuration. This is meant for debug purposes only, and not for general use,
  as it breaks the transparency of the PersistenceNetwork.
 	 * @param key
-	 * @return 
+	 * @return
 	 */
 	public URI getKeySource(String [] key){
 		return filter.getConnection(key);
@@ -91,7 +93,7 @@ public class PersistenceNetwork {
 	 * Returns the value for this key, or null if it doesn't exist.
 	 *
 	 * @param key
-	 * @param isMainThread If true, then async connections will fail. This should be set by the calling 
+	 * @param isMainThread If true, then async connections will fail. This should be set by the calling
 	 * code to determine whether or not this thread is considered the "main thread" and if blocking calls
 	 * are acceptable.
 	 * @return
@@ -163,12 +165,12 @@ public class PersistenceNetwork {
 		//This is a slight optimization, instead of looking through ALL the connections, just
 		//look through the ones that have data matching this namespace in them.
 		Set<URI> uris = filter.getAllConnections(namespace);
-		
+
 		Map<String[], String> map = new HashMap<String[], String>();
 		for (URI uri : uris) {
 			Map<String[], String> db = getDataSource(uri).getValues(namespace);
 			//We have to loop through and make sure that this key should actually
-			//come from this connection. It may not, if there are "hidden" keys. 
+			//come from this connection. It may not, if there are "hidden" keys.
 			//The easiest way to do so is to ask the filter if this key == this uri.
 			//The .get here isn't terribly inefficient, because in this case it won't actually
 			//poll the data source.

@@ -1,0 +1,76 @@
+[[Image:CommandHelper_Logo_New.png|center]]
+
+'''CommandHelper''' is an alias, macro, and scripting plugin for Minecraft that lets you:
+
+* Alias commands like ''/battle'' to run ''/warp #battlearena''.
+* Write a script to let players message each other while offline.
+* Create an automated battle arena that automatically resets.
+* Write your own /tp, /time, or /warp
+* Do much more, from the simple to the complex, with zero Java code.
+
+Remember that [https://github.com/EngineHub/commandhelper CommandHelper is open source].
+
+== Installation ==
+
+{{:CommandHelper/Installation}}
+
+== Usage ==
+
+How do you use CommandHelper? We have a set of easy to follow articles that you can read!
+
+* '''Want to setup simple aliases?''' Try the [[Beginner's_Guide|Beginner's Guide]]
+* '''Want to script completely new features?''' Follow the ''Learning Trail'' at the bottom of the page.
+* '''Just want the API?''' See the [[API.html|API reference]].
+* '''Want an example configuration?''' See the [[CommandHelper/Example Script|this example]].
+
+Need more help? Visit the [http://forum.sk89q.com/forums/commandhelper.20/ forums], or chat with us on IRC in [http://skq.me/irc/irc.esper.net/commandhelper/ #CommandHelper on irc.esper.net].
+{{LearningTrail}}
+
+== Tools ==
+
+=== Syntax-coloring editors ===
+
+Tired of writing your scripts in a plain black and white text editor? Try these syntax hightlighters!
+
+* TextWrangler and BBEdit - Mac OS X [http://forum.sk89q.com/threads/textwrangler-bbedit-language-module.382/ Forum Link] - Created by Connor Griffin (Very Outdated)
+* Notepad++ (Default Theme) - Windows [http://forum.sk89q.com/threads/syntax-highlighting-for-notepad.399/ Forum Link] - Created by MrMagical
+* Notepad++ (Obsidian Theme) - Windows [http://forum.sk89q.com/threads/notepad-syntax-highlighter-obsidian-theme.1033/ Forum Link] - Created by TTSDA (based on MrMagical's Highlighter)
+* gedit - GNOME/Cross-platform [http://forum.sk89q.com/threads/gedit-syntax-highlighting.1102/ Forum Link] - Created by MrMagical
+
+If you create a syntax highlighter for your favorite text editor, put a link in the forum, and I'll add it to the wiki!
+
+{{TakeNote|text=To generate up-to-the-minute syntax colors you can also run CommandHelper from the command line using
+<br>
+<code>java -jar CommandHelper.jar syntax npp obsidian</code>
+<br>
+For more detailed instructions, [[SyntaxHighlighting|see here]]}}
+
+== CommandHelper ==
+
+=== Feature requests and bugs ===
+
+Long-term planned features can be found on the [[/Roadmap/|roadmap]], and short term features can be found on the issue tracker. To request your own features or file a bug, use [http://youtrack.sk89q.com/issues/CMDHELPER our issue tracker]. Known bugs can be found on the issue tracker.
+
+If you would to request new functions, it is typically easy to add those, so please post your feature request in the issue tracker. If you happen to find a bug in the program, please let us know so we can fix it!
+
+=== Want to help? ===
+
+CommandHelper is turning into a large project, and I would love for more people to help work on it. Don't know java? Great! There are things for you to do too! If you're interested in any of the following tasks, feel free to get in touch with me, and we can get you started!
+
+* '''Documentation:''' There's lots of complexity in the plugin, and without solid documentation, it is nearly worthless. While some of the documentation is generated programmatically, many pages are not. The auto documentation generator leaves room for more detailed information too -- none of which is currently filled in :( From writing examples for each function, to working on the main documentation, and keeping the current documentation up to speed, there's actually alot to do that has nothing to do with coding!
+* '''Testing:''' While a large portion of CommandHelper has automated tests, there is still no substitute for running [http://builds.enginehub.org/ beta] versions of CommandHelper on a real server. It would be nice to know that several servers have put it through the ringer before a version goes to full release status.
+* '''Programming:''' From adding functions, to writing test cases, to working on the core aspects of CommandHelper, there are many different tasks to conquer.
+
+[[CommandHelper/Next Version|Next version notes staging area]]
+
+=== Donations ===
+
+Do you like the plugin a lot? I certainly don't expect donations, and the any money I receive won't influence the amount of time I spend on the plugin (well, maybe it will), however I do spend a lot of time working on it, and I certainly won't turn anything down if you want to say thank you! If you reeeeally want a feature added to Command Helper, and you're willing to pay money, get in contact with me, and we can discuss contract work, and we can discuss your needs, but otherwise, donations are just a way for you to tell me thanks!
+
+[http://www.laytonsmith.com/#donations Donations]
+
+== Changelog ==
+
+For the full changelog, including the changelog for older releases, see [[Changelog|this page]]
+
+__NOTOC__

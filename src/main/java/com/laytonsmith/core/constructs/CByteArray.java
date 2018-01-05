@@ -9,20 +9,22 @@ import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
-import com.laytonsmith.core.natives.interfaces.Sizable;
+import com.laytonsmith.core.natives.interfaces.ObjectModifier;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
+import com.laytonsmith.core.natives.interfaces.Sizeable;
+import java.util.EnumSet;
 
 /**
  *
  *
  */
 @typeof("byte_array")
-public class CByteArray extends CArray implements Sizable, ArrayAccess {
+public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     public static final CClassType TYPE = CClassType.get("byte_array");
@@ -509,6 +511,16 @@ public class CByteArray extends CArray implements Sizable, ArrayAccess {
 	return CHVersion.V3_3_1;
     }
 
+    @Override
+    public CClassType[] getSuperclasses() {
+	return new CClassType[]{CArray.TYPE};
+    }
+
+    @Override
+    public CClassType[] getInterfaces() {
+	return new CClassType[]{Sizeable.TYPE, ArrayAccess.TYPE};
+    }
+
     /**
      * This is a more efficient implementation of CArray for the backing byte arrays.
      */
@@ -594,6 +606,26 @@ public class CByteArray extends CArray implements Sizable, ArrayAccess {
 	    return CHVersion.V3_3_1;
 	}
 
+	@Override
+	public CClassType[] getInterfaces() {
+	    return new CClassType[0];
+	}
+
+	@Override
+	public CClassType[] getSuperclasses() {
+	    return new CClassType[]{CArray.TYPE};
+	}
+
+	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+	    return EnumSet.of(ObjectModifier.PUBLIC, ObjectModifier.STATIC);
+	}
+
+	@Override
+	public CClassType getContainingClass() {
+	    return CByteArray.TYPE;
+	}
+
 	@typeof("ByteArrayReadOnlyException")
 	public static class CREByteArrayReadOnlyException extends CREReadOnlyException {
 
@@ -616,6 +648,26 @@ public class CByteArray extends CArray implements Sizable, ArrayAccess {
 	    @Override
 	    public Version since() {
 		return CHVersion.V3_3_1;
+	    }
+
+	    @Override
+	    public CClassType[] getInterfaces() {
+		return super.getInterfaces();
+	    }
+
+	    @Override
+	    public CClassType[] getSuperclasses() {
+		return super.getSuperclasses();
+	    }
+
+	    @Override
+	    public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.of(ObjectModifier.PUBLIC, ObjectModifier.STATIC);
+	    }
+
+	    @Override
+	    public CClassType getContainingClass() {
+		return CArrayByteBacking.TYPE;
 	    }
 
 	}

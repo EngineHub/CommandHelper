@@ -4,10 +4,13 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -22,11 +25,14 @@ public class CClassType extends Construct {
     private static final Map<String, CClassType> cache = new HashMap<>();
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     public static final CClassType TYPE = new CClassType("ClassType", Target.UNKNOWN);
-    public static final CClassType AUTO = new CClassType("auto", Target.UNKNOWN);
 
+    /**
+     * This should generally be used instead of creating a new empty array in getInterfaces, if
+     * no interfaces are implemented by this class. This saves memory.
+     */
+    public static final CClassType[] EMPTY_CLASS_ARRAY = new CClassType[0];
 
     static {
-	cache.put("auto", AUTO);
 	cache.put("ClassType", TYPE);
     }
 
@@ -56,6 +62,9 @@ public class CClassType extends Construct {
      * Returns the singular instance of CClassType that represents this type union.
      * string|int and int|string are both considered the same type union, as they
      * are first normalized into a canonical form.
+     *
+     * Use {@link #get(com.laytonsmith.core.constructs.CClassType...)} instead, to
+     * ensure type safety, unless absolutely impossible (comes from user input, for instance).
      * @param types
      * @return
      */
@@ -67,6 +76,23 @@ public class CClassType extends Construct {
 	    cache.put(type, new CClassType(Target.UNKNOWN, t.toArray(new String[t.size()])));
 	}
 	return cache.get(type);
+    }
+
+    /**
+     * Returns the singular instance of CClassType that represents this type union.
+     * string|int and int|string are both considered the same type union, as they
+     * are first normalized into a canonical form.
+     * @param types
+     * @return
+     */
+    public static CClassType get(CClassType ... types) {
+	List<String> stringTypes = new ArrayList<>();
+	for(CClassType t : types) {
+	    // Could be a type union, so we need to break that out
+	    stringTypes.addAll(t.types);
+	}
+
+	return get(stringTypes.toArray(new String[stringTypes.size()]));
     }
 
     /**
@@ -161,6 +187,16 @@ public class CClassType extends Construct {
      */
     public boolean unsafeIsExtendedBy(CClassType checkClass) {
 	return unsafeDoesExtend(checkClass, this);
+    }
+
+    @Override
+    public CClassType[] getSuperclasses() {
+	return new CClassType[]{Mixed.TYPE};
+    }
+
+    @Override
+    public CClassType[] getInterfaces() {
+	return CClassType.EMPTY_CLASS_ARRAY;
     }
 
     /**

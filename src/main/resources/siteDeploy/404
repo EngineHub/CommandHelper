@@ -1,0 +1,21 @@
+
+<div id="code">
+%%CODE|
+// If the webpage can't be found, just throw an exception here
+boolean @pageNotFound = (file_size('REPLACEME') == 0);
+if(@pageNotFound) {
+    string @exceptionMessage = 'The page you were looking for could not be found. Check the URL and try again.';
+    throw(NotFoundException, @exceptionMessage);
+}
+%%
+</div>
+
+'''The page you were looking for could not be found. Check the URL and try again.'''
+
+<script type="text/javascript">
+    pageRender.then(function() {
+        var $code = $("#code");
+        var REPLACEME = window.location.pathname;
+        $code.html($code.html().replace(/REPLACEME/, "/var/www" + REPLACEME));
+    });
+</script>

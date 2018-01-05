@@ -1,6 +1,7 @@
 package com.laytonsmith.tools.pnviewer;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.UI.TextDialog;
 import com.laytonsmith.PureUtilities.Common.AutoFlushObjectOutputStream;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
@@ -355,7 +356,7 @@ public class PNViewer extends javax.swing.JFrame {
 
 						@Override
 						public Map<String[], String> getAllData() throws DataSourceException {
-							return pn.getNamespace(new String[0]);
+							return pn.getNamespace(ArrayUtils.EMPTY_STRING_ARRAY);
 						}
 
 						@Override
@@ -650,7 +651,7 @@ public class PNViewer extends javax.swing.JFrame {
 									try {
 										// Load the data from the PN, and send it on
 										pn = getPersistenceNetwork(remoteFile);
-										Map<String[], String> data = pn.getNamespace(new String[0]);
+										Map<String[], String> data = pn.getNamespace(ArrayUtils.EMPTY_STRING_ARRAY);
 										ByteArrayOutputStream baos = new ByteArrayOutputStream();
 										ObjectOutputStream oos = new ObjectOutputStream(baos);
 										oos.writeObject(data);

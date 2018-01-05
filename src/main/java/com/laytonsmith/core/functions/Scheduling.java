@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.Range;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
@@ -62,6 +63,8 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -515,7 +518,7 @@ public class Scheduling {
 
 		@Override
 		public String generate(String... args) {
-		    String[] timezones = new String[0];
+		    String[] timezones = ArrayUtils.EMPTY_STRING_ARRAY;
 		    try {
 			timezones = TimeZone.getAvailableIDs();
 		    } catch (NullPointerException e) {
@@ -533,7 +536,12 @@ public class Scheduling {
 		    return StringUtils.Join(tz, ", ", " or ", " or ", "Couldn't retrieve the list of timezones!");
 		}
 	    });
-	    return getBundledDocs(map);
+	    try {
+		return getBundledDocs(map);
+	    } catch (DocGenTemplates.Generator.GenerateException ex) {
+		Logger.getLogger(Scheduling.class.getName()).log(Level.SEVERE, null, ex);
+		return getBundledDocs();
+	    }
 	}
 
 	@Override
@@ -697,7 +705,7 @@ public class Scheduling {
 
 	@Override
 	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-	    String[] timezones = new String[0];
+	    String[] timezones = ArrayUtils.EMPTY_STRING_ARRAY;
 	    try {
 		timezones = TimeZone.getAvailableIDs();
 	    } catch (NullPointerException e) {
@@ -731,7 +739,7 @@ public class Scheduling {
 
 	@Override
 	public String docs() {
-	    return "array<string> {} Returns a list of time zones registered on this system.";
+	    return "array&lt;string&gt; {} Returns a list of time zones registered on this system.";
 	}
 
 	@Override

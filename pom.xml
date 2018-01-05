@@ -306,8 +306,6 @@
                         <artifactId>org.apache.oltu.oauth2.client</artifactId>
                         <version>1.0.2</version>
                 </dependency>
-
-
 		<!-- Test libraries -->
 		<!-- Hamcrest must come before powermock -->
 		<dependency>
@@ -809,6 +807,7 @@
                         <!-- Include the default test cases, since we're overwriting them -->
                         <include>**/*Test.java</include>
                         <include>**/Test*.java</include>
+                        <include>**/*Tests.java</include>
                         <include>**/*TestCase.java</include>
 
                         <!-- Include custom, none specific classes -->
