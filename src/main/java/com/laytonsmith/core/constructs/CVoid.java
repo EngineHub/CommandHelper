@@ -62,4 +62,14 @@ public final class CVoid extends Construct implements Cloneable {
 	return CHVersion.V3_0_1;
     }
 
+    @Override
+    public CClassType[] getSuperclasses() {
+	throw new RuntimeException("Cannot call getSuperclasses on void");
+    }
+
+    @Override
+    public CClassType[] getInterfaces() {
+	throw new RuntimeException("Cannot call getInterfaces on void");
+    }
+
 }

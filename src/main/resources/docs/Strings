@@ -45,7 +45,7 @@ msg('Literal backslash: \\');
 Both double quotes and single quotes may be escaped, though double quote characters aren't
 necessarily needed to be escaped. Both of the following lines are the same:
 
-%%CODE|
+%%PRE|
 msg('A \"string\"');
 msg('A "string"');
 %%
@@ -54,7 +54,7 @@ An arbitrary unicode character may be inserted directly via the \u escape sequen
 be \u, followed by the four hex digit code for that symbol. Since UTF-8 is supported directly,
 however, you can add the symbol directly. All the following are equivalent:
 
-%%CODE|
+%%PRE|
 msg('\u2665');
 msg('♥');
 @value = 2665;
@@ -72,6 +72,15 @@ Other escape sequences are supported:
 ! Escape Sequence
 ! Description
 |-
+| \'
+| Inserts a literal single quote character
+|-
+| \"
+| Inserts a literal double quote character
+|-
+| \\&nbsp;
+| Inserts a literal backslash character
+|-
 | \t
 | Insert a tab character
 |-
@@ -80,6 +89,30 @@ Other escape sequences are supported:
 |-
 | \r
 | Insert a carriage return character
+|-
+| \@
+| (Only in double quoted strings) A literal @ symbol, for when this could be confused with a variable
+|-
+| \0
+| Inserts the null character
+|-
+| \uxxxx
+| Inserts the specified UTF-8 character
+|-
+| \Uxxxxxxxx
+| Inserts the specified UTF-16 character
+|-
+| \f
+| Inserts a form feed character
+|-
+| \v
+| Inserts a vertical tab character
+|-
+| \a
+| Inserts an alarm (bell) character
+|-
+| \b
+| Inserts a backspace character
 |}
 
 All other escapes are invalid, and will cause a compile error.

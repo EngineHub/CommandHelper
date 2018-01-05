@@ -341,7 +341,7 @@ public class Regex {
 	public ExampleScript[] examples() throws ConfigCompileException {
 	    return new ExampleScript[]{
 		new ExampleScript("Basic usage", "reg_replace('\\\\d', 'Z', '123abc')"),
-		new ExampleScript("Using backreferences", "reg_replace('abc(\\\\d+)', '$1', 'abc123'"),
+		new ExampleScript("Using backreferences", "reg_replace('abc(\\\\d+)', '$1', 'abc123')"),
 		new ExampleScript("Using backreferences with named captures (Only works if your system is running Java 7)",
 		"reg_replace('abc(?<foo>\\\\d+)', '${foo}', 'abc123')", "123")
 	    };

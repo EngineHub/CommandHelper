@@ -5,12 +5,14 @@ import com.laytonsmith.PureUtilities.ArgumentSuite;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.CommandExecutor;
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.Misc;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
@@ -22,6 +24,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -39,6 +42,7 @@ import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenExportTool;
 import com.laytonsmith.tools.docgen.DocGenUI;
 import com.laytonsmith.tools.docgen.ExtensionDocGen;
+import com.laytonsmith.tools.docgen.sitedeploy.SiteDeploy;
 import com.laytonsmith.tools.pnviewer.PNViewer;
 import java.awt.HeadlessException;
 import java.io.File;
@@ -92,6 +96,7 @@ public class Main {
     private static final ArgumentParser coreFunctionsMode;
     private static final ArgumentParser uiMode;
     private static final ArgumentParser newMode;
+    private static final ArgumentParser siteDeploy;
 
     static {
 	MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
@@ -208,6 +213,37 @@ public class Main {
 			+ " command creates a subshell to run the launcher in, so that the original cmdline shell returns.")
 		.addFlag("in-shell", "Runs the launcher in the same shell process. By default, it creates a new process and causes the initial shell to return.");
 	suite.addMode("ui", uiMode);
+	siteDeploy = ArgumentParser.GetParser()
+		.addDescription("Deploys the documentation site, using the preferences specified in the configuration file. This mechanism completely re-writes"
+			+ " the remote site, so that builds are totally reproduceable.")
+		.addArgument('c', "config", ArgumentParser.Type.STRING,
+			MethodScriptFileLocations.getDefault().getSiteDeployFile().getAbsolutePath(),
+			"The path to the config file for deployment", "configFile", false)
+		.addFlag("generate-prefs", "Generates the preferences file initially, which you can then fill in.")
+		.addFlag("use-local-cache", "Generally, when the uploader runs, it checks the remote server to see if"
+			+ " the file already exists there (and is unchanged compared to the local file). If it is unchanged,"
+			+ " the upload is skipped. However, even checking with the remote to see what the status of the"
+			+ " remote file is takes time. If you are the only one uploading files, then we can simply use"
+			+ " a local cache of what the remote system has, and we can skip the step of checking with the"
+			+ " remote server for any given file. The cache is always populated, whether or not this flag"
+			+ " is set, so if you aren't sure if you can trust the cache, run once without this flag, then"
+			+ " for future runs, you can be sure that the local cache is up to date.")
+		.addFlag("clear-local-cache", "Clears the local cache of all entries, then exits.")
+		.addFlag('d', "do-validation", "Validates all of the uploaded web pages, and prints out a summary of the results."
+			+ " This requires internet connection.")
+		.addFlag("install", "When installing a fresh server, it is useful to have the setup completely automated. If this flag"
+			+ " is set, then the server is assumed to be a fresh ubuntu server, with nothing else on it. In that case,"
+			+ " the server will be installed from scratch automatically. NOTE: This will not account for the fact that"
+			+ " the documentation website is generally configured to allow for multiple versions of documentation. Old"
+			+ " versions will not be accounted for or uploaded. This process, if desired, must be done manually. If this"
+			+ " option is configured, the installation will occur before the upload or processing of files. During installation,"
+			+ " a \"lock\" file will be created, and if that file is present, it is assumed that the installation"
+			+ " has already occured on the instance, and will not be repeated. This is a safety measure to ensure"
+			+ " that the instance will not attempt to be redeployed, making it safe to always add the install"
+			+ " flag. If this flag is set, additional options need to be added to the config file. The remote server"
+			+ " is assumed to be an already running AWS ubuntu instance, with security groups configured and a pem"
+			+ " file available, but no login is necessary.");
+	suite.addMode("site-deploy", siteDeploy);
 	newMode = ArgumentParser.GetParser()
 		.addDescription("Creates a blank script in the specified location with the appropriate permissions, having the correct hashbang, and ready to be executed. If"
 			+ " the specified file already exists, it will refuse to create it, unless --force is set.")
@@ -444,7 +480,20 @@ public class Main {
 		File source = new File(path);
 		String plain = FileUtil.read(source);
 		Security.setSecurityEnabled(false);
-		String optimized = OptimizationUtilities.optimize(plain, source);
+		String optimized;
+		try {
+		    try {
+			optimized = OptimizationUtilities.optimize(plain, source);
+		    } catch(ConfigCompileException ex) {
+			Set<ConfigCompileException> group = new HashSet<>();
+			group.add(ex);
+			throw new ConfigCompileGroupException(group);
+		    }
+		} catch(ConfigCompileGroupException ex) {
+		    ConfigRuntimeException.HandleUncaughtException(ex, null);
+		    System.exit(1);
+		    return;
+		}
 		StreamUtils.GetSystemOut().println(optimized);
 		System.exit(0);
 	    } else if (mode == cmdlineMode) {
@@ -570,7 +619,7 @@ public class Main {
 		    }
 		} else {
 		    try {
-			PNViewer.main(parsedArgs.getStringListArgument().toArray(new String[0]));
+			PNViewer.main(parsedArgs.getStringListArgument().toArray(ArrayUtils.EMPTY_STRING_ARRAY));
 		    } catch (HeadlessException ex) {
 			StreamUtils.GetSystemErr().println("The Persistence Network Viewer may not be run from a headless environment.");
 			System.exit(1);
@@ -589,6 +638,31 @@ public class Main {
 		    ce.start();
 		    System.exit(0);
 		}
+	    } else if(mode == siteDeploy){
+		boolean clearLocalCache = parsedArgs.isFlagSet("clear-local-cache");
+		if(clearLocalCache) {
+		    PersistenceNetwork p = SiteDeploy.getPersistenceNetwork();
+		    if(p == null) {
+			System.out.println("Cannot get reference to persistence network");
+			System.exit(1);
+			return;
+		    }
+		    DaemonManager dm = new DaemonManager();
+		    p.clearKey(dm, new String[]{"site_deploy", "local_cache"});
+		    dm.waitForThreads();
+		    System.out.println("Local cache cleared");
+		    System.exit(0);
+		}
+		boolean generatePrefs = parsedArgs.isFlagSet("generate-prefs");
+		boolean useLocalCache = parsedArgs.isFlagSet("use-local-cache");
+		boolean doValidation = parsedArgs.isFlagSet("do-validation");
+		String configString = parsedArgs.getStringArgument("config");
+		if("".equals(configString)) {
+		    System.err.println("Config file missing, check command and try again");
+		    System.exit(1);
+		}
+		File config = new File(configString);
+		SiteDeploy.run(generatePrefs, useLocalCache, config, "", doValidation);
 	    } else if (mode == newMode) {
 		String li = OSUtils.GetLineEnding();
 		for (String file : parsedArgs.getStringListArgument()) {
@@ -622,10 +696,10 @@ public class Main {
 		+ " you are altogether not using craftbukkit. If this is the case, you can download craftbukkit and place"
 		+ " it in the correct directory (one above this one) or you can download bukkit, rename it to bukkit.jar,"
 		+ " and put it in the CommandHelper directory.";
-	if (Prefs.DebugMode()) {
+	//if (Prefs.DebugMode()) {
 	    ret += " If you're dying for more details, here:\n";
 	    ret += Misc.GetStacktrace(error);
-	}
+	//}
 	return ret;
     }
 

@@ -165,9 +165,9 @@ for(@i = 0, @i < @maxConsumers, @i++){
 
 In this example, after the producer loops through the data, the lock is closed. At this
 point, any future calls to rwait (or rsignal, for that matter) will cause a LockClosedException
-to be thrown. FIXME: I'm not sure about this feature ->All exception types except this will cause the normal error handling process
+to be thrown. FIXME: I'm not sure about this feature -&gt;All exception types except this will cause the normal error handling process
 to occur, but in this case, the routine knows to catch it and silently terminate, though
-it can be caught and handled separately.<-
+it can be caught and handled separately.&lt;-
 
 This will cause the routines that are currently blocked to throw the exception,
 and future calls to rwait will immediately throw as well. This provides a convenient

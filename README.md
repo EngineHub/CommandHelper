@@ -43,3 +43,5 @@ For details about code formatting standards, and other basic information for
 contributors, please see the CONTRIBUTING.txt file.
 
 Portions of CommandHelper are copyright by various contributors.
+
+This project uses BrowserStack (https://www.browserstack.com) for testing the website.

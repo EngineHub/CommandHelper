@@ -205,7 +205,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		if (!"".equals(message.trim())) {
 			message = ": " + message;
 		}
-		
+
 		Target top = Target.UNKNOWN;
 		for (StackTraceElement e : st) {
 			Target t = e.getDefinedAt();
@@ -234,7 +234,7 @@ public class ConfigRuntimeException extends RuntimeException {
 					CArray element = Static.getArray(consElement, t);
 					int line = Static.getInt32(element.get("line", t), t);
 					File file = new File(element.get("file", t).val());
-					int col = 0; // This will need updating eventually
+					int col = element.getColumn();
 					Target stElementTarget = new Target(line, file, col);
 					newSt.add(new StackTraceElement(element.get("id", t).val(), stElementTarget));
 				}
@@ -259,7 +259,7 @@ public class ConfigRuntimeException extends RuntimeException {
 			currentPlayer.sendMessage(player.toString());
 		}
 	}
-	
+
 	private static void PrintMessage(StringBuilder log, StringBuilder console, StringBuilder player, String type, String message, Throwable ex, List<StackTraceElement> st){
 		log.append(type).append(message).append("\n");
 		console.append(TermColors.RED).append(type).append(TermColors.WHITE).append(message).append("\n");
@@ -280,18 +280,18 @@ public class ConfigRuntimeException extends RuntimeException {
 			}
 
 			log.append("\t").append(proc).append(":").append(filepath).append(":")
-					.append(line)/*.append(".")
-					 .append(column)*/.append("\n");
+					.append(line).append(".")
+					 .append(column).append("\n");
 			console.append("\t").append(TermColors.GREEN).append(proc)
 					.append(TermColors.WHITE).append(":")
 					.append(TermColors.YELLOW).append(filepath)
 					.append(TermColors.WHITE).append(":")
-					.append(TermColors.CYAN).append(line)/*.append(".").append(column)*/.append("\n");
+					.append(TermColors.CYAN).append(line).append(".").append(column).append("\n");
 			player.append("\t").append(MCChatColor.GREEN).append(proc)
 					.append(MCChatColor.WHITE).append(":")
 					.append(MCChatColor.YELLOW).append(simplepath)
 					.append(MCChatColor.WHITE).append(":")
-					.append(MCChatColor.AQUA).append(line)/*.append(".").append(column)*/.append("\n");
+					.append(MCChatColor.AQUA).append(line).append(".").append(column).append("\n");
 
 		}
 	}
@@ -554,7 +554,7 @@ public class ConfigRuntimeException extends RuntimeException {
 
 		/**
 		 * In general, only the core elements should change this
-		 * @param target 
+		 * @param target
 		 */
 		void setDefinedAt(Target target) {
 			definedAt = target;

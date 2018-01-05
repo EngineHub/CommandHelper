@@ -97,7 +97,7 @@ public class TemplateBuilder {
 //					//template = template.replaceAll("%%" + Pattern.quote(name) + ".*?%%", customTemplates.get(name));
 //				}
 //			}
-			String [] tmplArgs = new String[0];
+			String [] tmplArgs = ArrayUtils.EMPTY_STRING_ARRAY;
 			if(m.group(2) != null && !m.group(2).equals("")){
 				//We have arguments
 				//remove the initial |, then split

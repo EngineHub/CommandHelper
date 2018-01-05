@@ -5,7 +5,7 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.natives.interfaces.Sizable;
+import com.laytonsmith.core.natives.interfaces.Sizeable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -14,7 +14,7 @@ import java.util.Stack;
  *
  */
 @typeof("mutable_primitive")
-public class CMutablePrimitive extends CArray implements Sizable {
+public class CMutablePrimitive extends CArray implements Sizeable {
 
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     public static final CClassType TYPE = CClassType.get("mutable_primitive");
@@ -150,6 +150,16 @@ public class CMutablePrimitive extends CArray implements Sizable {
     @Override
     public Version since() {
 	return CHVersion.V3_3_1;
+    }
+
+    @Override
+    public CClassType[] getSuperclasses() {
+	return new CClassType[]{CArray.TYPE};
+    }
+
+    @Override
+    public CClassType[] getInterfaces() {
+	return new CClassType[]{Sizeable.TYPE};
     }
 
 }

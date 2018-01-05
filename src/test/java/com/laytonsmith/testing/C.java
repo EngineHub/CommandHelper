@@ -3,6 +3,7 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
@@ -56,7 +57,7 @@ public class C {
         return CVoid.VOID;
     }
     public static IVariable IVariable(String name, Construct val){
-        return new IVariable(CClassType.AUTO, name, val, Target.UNKNOWN);
+        return new IVariable(Auto.TYPE, name, val, Target.UNKNOWN);
     }
     public static Variable Variable(String name, String val){
         return new Variable(name, val, false, false, Target.UNKNOWN);

@@ -34,4 +34,14 @@ public class CREScoreboardException extends CREException {
     public Version since() {
 	return CHVersion.V3_3_1;
     }
+
+    @Override
+    public CClassType[] getSuperclasses() {
+	return super.getSuperclasses();
+    }
+
+    @Override
+    public CClassType[] getInterfaces() {
+	return super.getInterfaces();
+    }
 }

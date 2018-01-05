@@ -21,7 +21,7 @@ public class Token {
     private enum TokenVariant {
 	ADDITIVE, EQUALITY, EXPONENTIAL, IDENTIFIER, LOGICAL_AND, LOGICAL_OR, DEFAULT_AND, DEFAULT_OR,
 	MULTIPLICATIVE, PLUS_MINUS, POSTFIX, RELATIONAL, SYMBOL, UNARY, ASSIGNMENT,
-	SEPARATOR, ATOMIC_LIT, WHITESPACE, KEYWORD
+	SEPARATOR, ATOMIC_LIT, WHITESPACE, KEYWORD, COMMENT
     }
 
     public enum TType {
@@ -39,6 +39,8 @@ public class Token {
 	NEWLINE(TokenVariant.WHITESPACE),
 	MULTILINE_START(TokenVariant.SEPARATOR),
 	MULTILINE_END(TokenVariant.SEPARATOR),
+	COMMENT(TokenVariant.COMMENT),
+	SMART_COMMENT(TokenVariant.COMMENT),
 	COMMAND(),
 	SEPERATOR(TokenVariant.SEPARATOR),
 	STRING(TokenVariant.IDENTIFIER, TokenVariant.ATOMIC_LIT),
@@ -271,8 +273,21 @@ public class Token {
 	    return this.variants.contains(TokenVariant.WHITESPACE);
 	}
 
+	/**
+	 * Returns true if this is a keyword token, i.e. if, else, try, etc
+	 * @return
+	 */
 	public boolean isKeyword() {
 	    return this.variants.contains(TokenVariant.KEYWORD);
+	}
+
+	/**
+	 * Returns true if this is a comment token, either starting with # or // or a smart or non smart
+	 * block comment.
+	 * @return
+	 */
+	public boolean isComment() {
+	    return this.variants.contains(TokenVariant.COMMENT);
 	}
 
     }
@@ -325,9 +340,17 @@ public class Token {
 	return value;
     }
 
+    /**
+     * Returns a string that can be output as useable code. Values that had been escaped internally will
+     * be escaped again. This only affects strings and smart strings. All other tokens return the
+     * same as {@link #val()}
+     * @return
+     */
     public String toOutputString() {
 	if (type.equals(TType.STRING)) {
 	    return value.replace("\\", "\\\\").replace("'", "\\'");
+	} else if(type.equals(TType.SMART_STRING)){
+	    return value.replace("\\", "\\\\").replace("\"", "\\\"");
 	}
 	return value;
     }

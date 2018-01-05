@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
@@ -183,7 +184,7 @@ public class Procedure implements Cloneable {
         CArray arguments = new CArray(Target.UNKNOWN);
         for (String key : originals.keySet()) {
             Construct c = originals.get(key);
-            env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CClassType.AUTO, key, c, Target.UNKNOWN));
+            env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, key, c, Target.UNKNOWN));
             arguments.push(c, t);
         }
         Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel());//new Script(null, null);
@@ -192,7 +193,7 @@ public class Procedure implements Cloneable {
             arguments.set(i, c, t);
             if (varIndex.size() > i) {
                 String varname = varIndex.get(i).getVariableName();
-				if(c instanceof CNull || InstanceofUtil.isInstanceof(c, varIndex.get(i).getDefinedType()) || varIndex.get(i).getDefinedType().equals(CClassType.AUTO)){
+				if(c instanceof CNull || InstanceofUtil.isInstanceof(c, varIndex.get(i).getDefinedType()) || varIndex.get(i).getDefinedType().equals(Auto.TYPE)){
 					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varIndex.get(i).getDefinedType(), varname, c, c.getTarget()));
 				} else {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
@@ -251,7 +252,7 @@ public class Procedure implements Cloneable {
 		// Normal exit, but no return.
 		stManager.popStackTraceElement();
 		// If we got here, then there was no return value. This is fine, but only for returnType void or auto.
-		if(!(returnType.equals(CClassType.AUTO) || returnType.equals(CVoid.TYPE))){
+		if(!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))){
 			throw new CRECastException("Expecting procedure \"" + name + "\" to return a value of type " + returnType.val() + ","
 					+ " but no value was returned.", tree.getTarget());
 		}

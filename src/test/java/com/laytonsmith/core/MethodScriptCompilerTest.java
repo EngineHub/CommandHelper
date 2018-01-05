@@ -596,6 +596,13 @@ public class MethodScriptCompilerTest {
         assertTrue(s.match("/two"));
     }
 
+    @Test public void testSmartCommentBeforeCommand() throws Exception {
+	String config = "/** sc */\n/cmd = msg('');";
+	Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0);
+	s.compile();
+	assertTrue(s.match("/cmd"));
+    }
+
     @Test public void testUnicode() throws Exception{
         SRun("msg('\\u0037 is win!')", fakePlayer);
         verify(fakePlayer).sendMessage("7 is win!");

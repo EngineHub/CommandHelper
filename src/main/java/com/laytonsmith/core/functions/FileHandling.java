@@ -274,6 +274,7 @@ public class FileHandling {
 						try {
 							//It's an SCP transfer
 							returnString = SSHWrapper.SCPReadString(file);
+							SSHWrapper.closeSessions();
 						} catch (IOException ex) {
 							exception = new CREIOException(ex.getMessage(), t, ex);
 						}

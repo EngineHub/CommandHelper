@@ -12,8 +12,6 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.functions.DummyFunction;
-import com.laytonsmith.core.natives.interfaces.TypeofRunnerFor;
-import com.laytonsmith.core.natives.interfaces.TypeofRunnerIface;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.Method;
@@ -23,6 +21,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
+import com.laytonsmith.core.natives.interfaces.MixedInterfaceRunner;
 
 /**
  *
@@ -64,8 +64,8 @@ public class CacheAnnotations {
 		for(Class c : apiClasses){
 			boolean isGetNameExempt = false;
 			if(c.isInterface()){
-				for(Class r : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(TypeofRunnerFor.class)){
-					TypeofRunnerFor f = (TypeofRunnerFor) r.getAnnotation(TypeofRunnerFor.class);
+				for(Class r : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(InterfaceRunnerFor.class)){
+					InterfaceRunnerFor f = (InterfaceRunnerFor) r.getAnnotation(InterfaceRunnerFor.class);
 					if(f.value() == c){
 						isGetNameExempt = c.getAnnotation(typeof.class) != null;
 						c = r;
@@ -79,7 +79,7 @@ public class CacheAnnotations {
 				// Skip this one. These are excused from the normal reporting requirements.
 				continue;
 			}
-			if(!SimpleDocumentation.class.isAssignableFrom(c) && !TypeofRunnerIface.class.isAssignableFrom(c)){
+			if(!SimpleDocumentation.class.isAssignableFrom(c) && !MixedInterfaceRunner.class.isAssignableFrom(c)){
 				uhohs.add(c.getName() + " must implement SimpleDocumentation");
 				continue;
 			}

@@ -18,6 +18,16 @@ public abstract class CNumber extends CPrimitive {
     }
 
     @Override
+    public CClassType[] getSuperclasses() {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public CClassType[] getInterfaces() {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String docs() {
 	return "A number is any double or integer number.";
     }

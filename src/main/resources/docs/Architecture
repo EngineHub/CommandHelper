@@ -55,7 +55,7 @@ You can see that it roughly corresponds with each token being it's own node, and
 "(" denoting a child beginning, "," denoting a sibling, and ")" denoting the end of 
 a node's children. This is more or less how the compiler actually works. In the first 
 stage, things like symbols aren't fully parsed yet, and things like array access 
-notation <nowiki>([ ])</nowiki> complicate things, so the tree looks a bit funny, 
+notation %%NOWIKI|([ ])%% complicate things, so the tree looks a bit funny, 
 but the optimization step turns "1 + 1" into "add(1, 1)", and "@var[1]" to "array_get(@var, 1)" 
 which then finishes up creating a full parse tree where everything is a function.
 
@@ -65,7 +65,7 @@ Optimization is the final compilation step. There is one step that is required t
 finish up the parse tree, which is sort of still a part of compiling, but is in the 
 optimization stage nonetheless. The "%%GET_FUNCTION_FILE|__autoconcat__%%" function is automatically placed 
 in the tree during compiling, which is what the compiler does to offload infix parsing 
-to other code, as well as other complicated constructs like <nowiki>[ ]</nowiki>. 
+to other code, as well as other complicated constructs like %%NOWIKI|[ ]%%. 
 The __autoconcat__ function isn't a function per se, but it implements Function so 
 that it can easily be integrated into the rest of the ecosystem. By the time 
 optimization is done, ALL __autoconcat__ functions will have been converted to something else.

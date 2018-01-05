@@ -1426,7 +1426,7 @@ public class BasicLogic {
 	@Override
 	public String docs() {
 	    return "boolean {var1, var2} Returns the results of a less than operation. Operator syntax"
-		    + " is also supported: @a < @b";
+		    + " is also supported: @a &lt; @b";
 	}
 
 	@Override
@@ -1493,7 +1493,7 @@ public class BasicLogic {
 	@Override
 	public String docs() {
 	    return "boolean {var1, var2} Returns the result of a greater than operation. Operator syntax is also supported:"
-		    + " @a > @b";
+		    + " @a &gt; @b";
 	}
 
 	@Override
@@ -1560,7 +1560,7 @@ public class BasicLogic {
 	@Override
 	public String docs() {
 	    return "boolean {var1, var2} Returns the result of a less than or equal to operation. Operator"
-		    + " syntax is also supported: @a <= @b";
+		    + " syntax is also supported: @a &lt;= @b";
 	}
 
 	@Override
@@ -1628,7 +1628,7 @@ public class BasicLogic {
 	@Override
 	public String docs() {
 	    return "boolean {var1, var2} Returns the result of a greater than or equal to operation. Operator"
-		    + " sytnax is also supported: @a >= @b";
+		    + " sytnax is also supported: @a &gt;= @b";
 	}
 
 	@Override
@@ -1965,7 +1965,7 @@ public class BasicLogic {
 	public String docs() {
 		return "boolean {var1, [var2...]} Returns the boolean value of a logical OR across all arguments. Uses lazy"
 				+ " determination, so once an argument resolves to true, the function returns. Operator syntax is also"
-				+ " supported: @a <nowiki>||</nowiki> @b";
+				+ " supported: @a || @b";
 	}
 
 	@Override
@@ -2242,7 +2242,7 @@ public class BasicLogic {
 		new ExampleScript("Functional usage", "not(false)"),
 		new ExampleScript("Operator syntax, true condition", "!false"),
 		new ExampleScript("Operator syntax, false condition", "!true"),
-		new ExampleScript("Operator syntax, using variable", "!@var"),};
+		new ExampleScript("Operator syntax, using variable", "boolean @var = false;\nmsg(!@var);"),};
 	}
     }
 
@@ -2305,7 +2305,11 @@ public class BasicLogic {
 	@Override
 	public ExampleScript[] examples() throws ConfigCompileException {
 	    return new ExampleScript[]{
-		new ExampleScript("Basic usage", "xor(true, false)"),};
+		new ExampleScript("One of each", "xor(true, false)"),
+		new ExampleScript("One of each", "xor(false, true)"),
+		new ExampleScript("Both true", "xor(true, true)"),
+		new ExampleScript("Both false", "xor(false, false)")
+	    };
 	}
     }
 
@@ -2489,7 +2493,11 @@ public class BasicLogic {
 	@Override
 	public ExampleScript[] examples() throws ConfigCompileException {
 	    return new ExampleScript[]{
-		new ExampleScript("Basic usage", "xnor(true, true)"),};
+		new ExampleScript("Two true values", "xnor(true, true)"),
+		new ExampleScript("One of each", "xnor(true, false)"),
+		new ExampleScript("One of each", "xnor(false, true)"),
+		new ExampleScript("Two false", "xnor(false, false)")
+	    };
 	}
     }
 

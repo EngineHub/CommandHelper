@@ -3,6 +3,7 @@ package com.laytonsmith.core;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
+import java.io.File;
 import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -11,6 +12,7 @@ import org.junit.Test;
  * This class tests optimizations by looking at the tree after optimization occurs to see
  * if it matches expectation.
  *
+ * This is also used to test the lexer/compiler at a low level
  */
 public class OptimizationTest {
 
@@ -337,5 +339,8 @@ public class OptimizationTest {
 	    assertEquals("''", optimize("dand(true, true, '')"));
 	}
 
-
+	@Test
+	public void testCommentBlock() throws Exception {
+	    assertEquals(2, MethodScriptCompiler.lex("/*/ still a comment -()*/", new File("OptimizationTest"), true, true).size());
+	}
 }

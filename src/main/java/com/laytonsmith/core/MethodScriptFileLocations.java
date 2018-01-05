@@ -18,15 +18,15 @@ public class MethodScriptFileLocations extends FileLocations {
     private static MethodScriptFileLocations defaultInstance = null;
 
     public static MethodScriptFileLocations getDefault() {
-        if (defaultInstance == null) {
-            setDefault(new MethodScriptFileLocations());
-        }
-        return defaultInstance;
+	if (defaultInstance == null) {
+	    setDefault(new MethodScriptFileLocations());
+	}
+	return defaultInstance;
     }
 
     public static void setDefault(MethodScriptFileLocations provider) {
-        defaultInstance = provider;
-        FileLocations.setDefault(defaultInstance);
+	defaultInstance = provider;
+	FileLocations.setDefault(defaultInstance);
     }
 
     /**
@@ -35,20 +35,20 @@ public class MethodScriptFileLocations extends FileLocations {
      * @return
      */
     public File getJarFile() {
-        if (MethodScriptFileLocations.class.getProtectionDomain().getCodeSource().getLocation() == null) {
-            //This can happen if we're not running from a jar. Instead, we have to get the folder location.
-            URL url = MethodScriptFileLocations.class.getResource("/" + MethodScriptFileLocations.class.getName().replace('.', '/') + ".class");
-            String s = url.toString();
-            s = s.replaceFirst("file:", "");
-            s = StringUtils.replaceLast(s, Pattern.quote(MethodScriptFileLocations.class.getName().replace('.', '/') + ".class"), "");
-            return new File(s);
-        } else {
-            try {
-                return new File(URLDecoder.decode(MethodScriptFileLocations.class.getProtectionDomain().getCodeSource().getLocation().getFile(), "UTF-8"));
-            } catch (UnsupportedEncodingException ex) {
-                throw new Error(ex);
-            }
-        }
+	if (MethodScriptFileLocations.class.getProtectionDomain().getCodeSource().getLocation() == null) {
+	    //This can happen if we're not running from a jar. Instead, we have to get the folder location.
+	    URL url = MethodScriptFileLocations.class.getResource("/" + MethodScriptFileLocations.class.getName().replace('.', '/') + ".class");
+	    String s = url.toString();
+	    s = s.replaceFirst("file:", "");
+	    s = StringUtils.replaceLast(s, Pattern.quote(MethodScriptFileLocations.class.getName().replace('.', '/') + ".class"), "");
+	    return new File(s);
+	} else {
+	    try {
+		return new File(URLDecoder.decode(MethodScriptFileLocations.class.getProtectionDomain().getCodeSource().getLocation().getFile(), "UTF-8"));
+	    } catch (UnsupportedEncodingException ex) {
+		throw new Error(ex);
+	    }
+	}
     }
 
     /**
@@ -57,38 +57,35 @@ public class MethodScriptFileLocations extends FileLocations {
      * @return
      */
     public File getJarDirectory() {
-        return getJarFile().getParentFile();
+	return getJarFile().getParentFile();
     }
 
     /**
-     * Returns the location of the config directory, i.e. where the preferences
-     * and other config settings are stored.
+     * Returns the location of the config directory, i.e. where the preferences and other config settings are stored.
      *
      * @return
      */
     public File getConfigDirectory() {
-        return new File(getJarDirectory(), Implementation.GetServerType().getBranding() + "/");
+	return new File(getJarDirectory(), Implementation.GetServerType().getBranding() + "/");
     }
 
     /**
-     * Returns the location of the prefs directory, i.e. where the actual
-     * preferences files are stored. This is the prefs directory, not the main
-     * preferences file.
+     * Returns the location of the prefs directory, i.e. where the actual preferences files are stored. This is the
+     * prefs directory, not the main preferences file.
      *
      * @return
      */
     public File getPreferencesDirectory() {
-        return new File(getConfigDirectory(), "prefs/");
+	return new File(getConfigDirectory(), "prefs/");
     }
 
     /**
-     * Returns the location of the preferences file. This is the main
-     * preferences file, not the prefs directory.
+     * Returns the location of the preferences file. This is the main preferences file, not the prefs directory.
      *
      * @return
      */
     public File getPreferencesFile() {
-        return new File(getPreferencesDirectory(), "preferences.ini");
+	return new File(getPreferencesDirectory(), "preferences.ini");
     }
 
     /**
@@ -97,7 +94,7 @@ public class MethodScriptFileLocations extends FileLocations {
      * @return
      */
     public File getCacheDirectory() {
-        return new File(getConfigDirectory(), ".cache/");
+	return new File(getConfigDirectory(), ".cache/");
     }
 
     /**
@@ -106,7 +103,7 @@ public class MethodScriptFileLocations extends FileLocations {
      * @return
      */
     public File getExtensionsDirectory() {
-        return new File(getConfigDirectory(), "extensions/");
+	return new File(getConfigDirectory(), "extensions/");
     }
 
     /**
@@ -115,7 +112,7 @@ public class MethodScriptFileLocations extends FileLocations {
      * @return
      */
     public File getExtensionCacheDirectory() {
-        return new File(getCacheDirectory(), "extensions/");
+	return new File(getCacheDirectory(), "extensions/");
     }
 
     /**
@@ -124,7 +121,7 @@ public class MethodScriptFileLocations extends FileLocations {
      * @return
      */
     public File getLocalPackagesDirectory() {
-        return new File(getConfigDirectory(), "LocalPackages/");
+	return new File(getConfigDirectory(), "LocalPackages/");
     }
 
     /**
@@ -133,7 +130,7 @@ public class MethodScriptFileLocations extends FileLocations {
      * @return
      */
     public File getPersistenceConfig() {
-        return new File(getPreferencesDirectory(), "persistence.ini");
+	return new File(getPreferencesDirectory(), "persistence.ini");
     }
 
     /**
@@ -142,7 +139,7 @@ public class MethodScriptFileLocations extends FileLocations {
      * @return
      */
     public File getDefaultPersistenceDBFile() {
-        return new File(getConfigDirectory(), "persistence.db");
+	return new File(getConfigDirectory(), "persistence.db");
     }
 
     /**
@@ -151,19 +148,27 @@ public class MethodScriptFileLocations extends FileLocations {
      * @return
      */
     public File getProfilerConfigFile() {
-        return new File(getPreferencesDirectory(), "profiler.ini");
+	return new File(getPreferencesDirectory(), "profiler.ini");
     }
 
     /**
-     * Returns the profiles config file location. The profiles config is a
-     * universal repository for saving credentials in a standard location, that
-     * isn't tied to the code base. In general, this file should be ignored by
-     * version control systems.
+     * Returns the location of the site deploy ini file.
+     * 
+     * @return
+     */
+    public File getSiteDeployFile() {
+	return new File(getCmdlineInterpreterDirectory(), "site-deploy.ini");
+    }
+
+    /**
+     * Returns the profiles config file location. The profiles config is a universal repository for saving credentials
+     * in a standard location, that isn't tied to the code base. In general, this file should be ignored by version
+     * control systems.
      *
      * @return
      */
     public File getProfilesFile() {
-        return new File(getPreferencesDirectory(), "profiles.xml");
+	return new File(getPreferencesDirectory(), "profiles.xml");
     }
 
     /**
@@ -172,7 +177,7 @@ public class MethodScriptFileLocations extends FileLocations {
      * @return
      */
     public File getLoggerPreferencesFile() {
-        return new File(getPreferencesDirectory(), "logger-preferences.ini");
+	return new File(getPreferencesDirectory(), "logger-preferences.ini");
     }
 
     /**
@@ -181,7 +186,7 @@ public class MethodScriptFileLocations extends FileLocations {
      * @return
      */
     public File getCmdlineInterpreterDirectory() {
-        return new File(System.getProperty("user.home") + "/.mscript");
+	return new File(System.getProperty("user.home") + "/.mscript");
     }
 
     /**
@@ -190,16 +195,17 @@ public class MethodScriptFileLocations extends FileLocations {
      * @return
      */
     public File getCmdlineInterpreterAutoIncludeFile() {
-        return new File(getCmdlineInterpreterDirectory(), "auto_include.ms");
+	return new File(getCmdlineInterpreterDirectory(), "auto_include.ms");
     }
 
     /**
-     * Return the location of the given extension's directory. This is simply
-     * a wrapper around {@link Extension#getConfigDir}.
+     * Return the location of the given extension's directory. This is simply a wrapper around
+     * {@link Extension#getConfigDir}.
+     *
      * @param ext
-     * @return 
+     * @return
      */
     public File getExtensionDirectory(Extension ext) {
-        return ext.getConfigDir();
+	return ext.getConfigDir();
     }
 }

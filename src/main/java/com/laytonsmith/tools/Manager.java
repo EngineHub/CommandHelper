@@ -1,5 +1,6 @@
 package com.laytonsmith.tools;
 
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
@@ -180,7 +181,7 @@ public class Manager {
 				boolean acceptAllDestination = false;
 				boolean acceptAllSource = false;
 				DaemonManager dm = new DaemonManager();
-				for (String[] key : source.keySet(new String[0])) {
+				for (String[] key : source.keySet(ArrayUtils.EMPTY_STRING_ARRAY)) {
 					if (destination.hasKey(key)) {
 						if (!source.get(key).equals(destination.get(key))) {
 							String data;
@@ -704,7 +705,7 @@ public class Manager {
 			for (URI uri : uris) {
 
 				DataSource ds = DataSourceFactory.GetDataSource(uri, options);
-				Map<String[], String> db = ds.getValues(new String[0]);
+				Map<String[], String> db = ds.getValues(ArrayUtils.EMPTY_STRING_ARRAY);
 				Map<String[], String> map = new HashMap<>();
 				DaemonManager dm = new DaemonManager();
 				try {

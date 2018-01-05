@@ -1,0 +1,136 @@
+
+html {
+    font-family: Lato,Arial,'Helvetica Neue',Helvetica,sans-serif;
+}
+
+.pre {
+    margin: 1em 2em;
+    line-height: 12pt;
+    font-size: 90%;
+    font-family: "Courier New", monospace;
+    background-color: #eee;
+    padding: 1em;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    box-shadow: 0 .3em .3em rgba(0, 0, 0, 0.1);
+    color: #555
+}
+
+.hidden {
+    display: none;
+}
+
+.TakeNote {
+    font-style: italic;
+    margin: 1em 3em;
+    margin-top: 2em;
+    padding: .7em 1.5em;
+    border-top: 2px solid red;
+    border-bottom: 2px solid red;
+    box-shadow: 0 .3em .3em rgba(0,0,0,.1);
+}
+
+.Warning {
+    font-style: italic;
+    margin: 1em 3em;
+    margin-top: 2em;
+    padding: .7em 1.5em;
+    border-top: 2px solid #dfb800;
+    border-bottom: 2px solid #dfb800;
+    box-shadow: 0 .3em .3em rgba(0,0,0,.1);
+}
+
+.bodyXSmall {
+    
+}
+
+.bodyXSmall .methodscript_code {
+    font-size: 60%;
+}
+
+.bodyXSmall .pre {
+    font-size: 50%;
+}
+
+.methodscript_code {
+    font-size: 11pt;
+    line-height: 14pt;
+    box-shadow: 0 .3em .3em rgba(0,0,0,.1);
+    background: #F9F9F9;
+}
+
+.methodscript_code a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.methodscript_code a:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.redLink {
+    color: red;
+}
+
+.maxWidth100Percent {
+    max-width: 100%;
+}
+
+.ppInnerText {
+    color: black;
+    font-size: 11pt;
+}
+
+.ppBlueText {
+    color: #3c508a;
+    font-size: 14pt;
+}
+
+.ppGrayText {
+    color: #424242;
+    font-size: 12pt;
+}
+
+.learningTrail > ul {
+    line-height: 30px;
+}
+
+.center {
+    text-align: center;
+}
+
+#function_tooltip_content .return {
+    color: blue !important;
+}
+
+#function_tooltip_content .name {
+    font-style: italic;
+}
+
+#function_tooltip_content .args {
+    font-weight: bold;
+}
+
+#function_tooltip_content .desc {
+    margin: 2px;
+}
+
+.tt_cursor {
+    cursor: help;
+}
+
+code {
+    padding: 0 0.65em;
+    border: none;
+}
+
+#edit_this_page {
+    font-size: x-small;
+    color: rgba(0, 0, 0, 0.75);
+}
+
+.hiddenFunction {
+    display: none;
+}
+

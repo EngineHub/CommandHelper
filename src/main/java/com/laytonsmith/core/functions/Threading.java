@@ -342,39 +342,39 @@ public class Threading {
 	@seealso({x_new_thread.class})
 	public static class _synchronized extends AbstractFunction {
 		private static final Map<Object, Integer> syncObjectMap = new HashMap<Object, Integer>();
-		
+
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRENullPointerException.class};
 		}
-		
+
 		@Override
 		public boolean isRestricted() {
 			return true;
 		}
-		
+
 		@Override
 		public Boolean runAsync() {
 			return false;
 		}
-		
+
 		@Override
 		public boolean preResolveVariables() {
 			return false;
 		}
-		
+
 		@Override
 		public boolean useSpecialExec() {
 			return true;
 		}
-		
+
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			
+
 			// Get the sync object tree and the code to synchronize.
 			ParseTree syncObjectTree = nodes[0];
 			ParseTree code = nodes[1];
-			
+
 			// Get the sync object (CArray or String value of the Construct).
 			Construct cSyncObject = parent.seval(syncObjectTree, env);
 			if(cSyncObject instanceof CNull) {
@@ -386,7 +386,7 @@ public class Threading {
 			} else {
 				syncObject = cSyncObject.val();
 			}
-			
+
 			// Add String sync objects to the map to be able to synchronize by value.
 			if(syncObject instanceof String) {
 				synchronized(syncObjectMap) {
@@ -403,7 +403,7 @@ public class Threading {
 					}
 				}
 			}
-			
+
 			// Evaluate the code, synchronized by the passed sync object.
 			try {
 				synchronized(syncObject) {
@@ -412,7 +412,7 @@ public class Threading {
 			} catch(RuntimeException e) {
 				throw e;
 			} finally {
-				
+
 				// Remove 1 from the call count or remove the sync object from the map if it was a sync-by-value.
 				if(syncObject instanceof String) {
 					synchronized(syncObjectMap) {
@@ -432,39 +432,39 @@ public class Threading {
 			}
 			return CVoid.VOID;
 		}
-		
+
 		@Override
 		public Construct exec(final Target t, final Environment env, Construct... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "synchronized";
 		}
-		
+
 		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2};
 		}
-		
+
 		@Override
 		public String docs() {
 			return "void {syncObject, code} Synchronizes access to the code block for all calls (from different"
 					+ " threads) with the same syncObject argument."
-					+ " This means that if two threads will call " + getName() + "('example', <code>), the second"
+					+ " This means that if two threads will call " + getName() + "('example', &lt;code&gt;), the second"
 					+ " call will hang the thread until the passed code of the first call has finished executing."
 					+ " If you call this function from within this function on the same thread using the same"
 					+ " syncObject, the code will simply be executed."
 					+ " For more information about synchronization, see:"
 					+ " https://en.wikipedia.org/wiki/Synchronization_(computer_science)";
 		}
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -509,7 +509,7 @@ public class Threading {
 								+ "\nOR\nSome new log message from Thread2.\nSome new log message from Thread1.\n")
 			};
 		}
-		
+
 	}
-	
+
 }

@@ -11,9 +11,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import static org.hamcrest.CoreMatchers.*;
 import org.junit.After;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -144,5 +145,105 @@ public class GeneralTest {
 	assertEquals(f2.loadAnnotation(TestAnnotation.class).value(), "field");
 	assertEquals(m1.loadAnnotation(TestAnnotation.class).value(), "method");
 	assertEquals(m2.loadAnnotation(TestAnnotation.class).value(), "method");
+    }
+
+    /*
+	    A -> B
+	    |
+	    | -> C -> D
+		 |    |
+		 |    | -> F
+		 |
+		 | -> E
+     */
+    public static interface A extends B, C {
+    }
+
+    public static interface B {
+    }
+
+    public static interface C extends D, E {
+    }
+
+    public static interface D extends F {
+    }
+
+    public static interface E {
+    }
+
+    public static interface F {
+    }
+
+    @Test
+    public void testExtendsInterfacesWorks() {
+	// We are testing that interfaces (with complicated inheritance schemes, as seen above)
+	// work. Particularly, does A extend F? (Yes, it does.)
+	assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<A>(A.class), F.class));
+	assertFalse(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<E>(E.class), F.class));
+
+	// It also extends itself
+	assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<A>(A.class), A.class));
+
+	// Just check all of them too
+	assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<A>(A.class), B.class));
+	assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<A>(A.class), C.class));
+	assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<A>(A.class), D.class));
+	assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<A>(A.class), E.class));
+
+	// Just in case, check to make sure that if it isn't a "root" class, it still extends ok
+	assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<C>(C.class), F.class));
+    }
+
+    public static class AConcrete implements A {
+    }
+
+    @Test
+    public void testClassThatImplementsInterfaceExtendsProperly() {
+	// Same thing, but this time make sure the concrete class works.
+	assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), A.class));
+	// just... check all of them.
+	assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), B.class));
+	assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), C.class));
+	assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), D.class));
+	assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), E.class));
+	assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), F.class));
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    public static @interface tag {
+    }
+
+    @tag
+    public static interface TestMe {
+    }
+
+    @Test
+    public void testInterfaceWithAnnotationIsReturned() {
+	// Test that the interface specified is *also* returned
+	Set<ClassMirror<? extends TestMe>> t = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(tag.class, TestMe.class);
+	assertTrue(t.size() == 1);
+    }
+
+    class A2 {}
+
+    @TestAnnotation("")
+    class B2 extends A2 {}
+
+    @Test
+    public void testThatSuperclassesWithoutAnnotationArentReturned() {
+	Set s = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(TestAnnotation.class, A2.class);
+	assertThat(s.size(), is(1));
+    }
+
+    @TestAnnotation("")
+    class A3 {}
+
+    @TestAnnotation("")
+    class B3 extends A3 {}
+
+    @Test
+    public void testThatSuperclassesWithAnnotationAreReturned() {
+	Set s = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(TestAnnotation.class, A3.class);
+	assertThat(s.size(), is(2));
     }
 }

@@ -46,7 +46,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
-import com.laytonsmith.core.natives.interfaces.Sizable;
+import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -73,6 +73,8 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.activation.CommandMap;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -171,6 +173,7 @@ public class Web {
     }
 
     @api
+    @seealso({http_clear_session_cookies.class})
     public static class http_request extends AbstractFunction {
 
 	/**
@@ -276,13 +279,13 @@ public class Web {
 		if (csettings.containsKey("params") && !(csettings.get("params", t) instanceof CNull)) {
 		    if (csettings.get("params", t) instanceof CArray) {
 			CArray params = Static.getArray(csettings.get("params", t), t);
-			Map<String, List<String>> mparams = new HashMap<String, List<String>>();
+			Map<String, List<String>> mparams = new HashMap<>();
 			for (String key : params.stringKeySet()) {
 			    Construct c = params.get(key, t);
-			    List<String> l = new ArrayList<String>();
+			    List<String> l = new ArrayList<>();
 			    if (c instanceof CArray) {
 				for (String kkey : ((CArray) c).stringKeySet()) {
-				    l.add(((CArray) c).get(kkey, t).val());
+				    l.add(((ArrayAccess) c).get(kkey, t).val());
 				}
 			    } else {
 				l.add(c.val());
@@ -291,9 +294,15 @@ public class Web {
 			}
 			settings.setComplexParameters(mparams);
 		    } else {
-			settings.setRawParameter(csettings.get("params", t).val());
-			if (settings.getMethod() != HTTPMethod.POST && settings.getMethod() != HTTPMethod.PUT) {
-			    throw new CREFormatException("You must set the method to POST or PUT to use raw params.", t);
+			if (csettings.get("params", t) instanceof CByteArray) {
+			    CByteArray b = (CByteArray) csettings.get("params", t);
+			    settings.setRawParameter(b.asByteArrayCopy());
+			} else {
+			    try {
+				settings.setRawParameter(csettings.get("params", t).val().getBytes("UTF-8"));
+			    } catch (UnsupportedEncodingException ex) {
+				throw new Error(ex);
+			    }
 			}
 		    }
 		}
@@ -380,17 +389,22 @@ public class Web {
 		    if (download instanceof CNull) {
 			settings.setDownloadTo(null);
 		    } else //TODO: Remove this check and tie into the VFS once that is complete.
-		    if (Static.InCmdLine(environment)) {
-			File file = new File(download.val());
-			if (!file.isAbsolute()) {
-			    file = new File(t.file(), file.getPath());
+		    {
+			if (Static.InCmdLine(environment)) {
+			    File file = new File(download.val());
+			    if (!file.isAbsolute()) {
+				file = new File(t.file(), file.getPath());
+			    }
+			    settings.setDownloadTo(file);
 			}
-			settings.setDownloadTo(file);
 		    }
 		}
 		if (csettings.containsKey("blocking")) {
 		    boolean blocking = Static.getBoolean(csettings.get("blocking", t));
 		    settings.setBlocking(blocking);
+		}
+		if (csettings.containsKey("log") && Static.getBoolean(csettings.get("log", t))) {
+		    settings.setLogger(Logger.getLogger(Web.class.getName()));
 		}
 		settings.setAuthenticationDetails(username, password);
 	    }
@@ -502,7 +516,13 @@ public class Web {
 		}
 	    });
 	    templates.put("CODE", DocGenTemplates.CODE);
-	    return super.getBundledDocs(templates);
+	    try {
+		return super.getBundledDocs(templates);
+	    } catch (DocGenTemplates.Generator.GenerateException ex) {
+		Logger.getLogger(Web.class.getName()).log(Level.SEVERE, null, ex);
+		// just return the unformatted docs, which are more useful than nothing.
+		return super.getBundledDocs();
+	    }
 	}
 
 	@Override
@@ -539,7 +559,7 @@ public class Web {
 		+ "\t)),\n"
 		+ "\tsuccess: closure(@response){\n"
 		+ "\t\t// Handle the server's response\n"
-		+ "\t}}"
+		+ "\t}"
 		+ "));", "<A POST request with json data would be sent to the server>")
 	    };
 	}
@@ -1080,7 +1100,7 @@ public class Web {
 		+ "\t\t\tdisposition: 'inline', // Technically we could leave this off, because it defaults to inline\n"
 		+ "\t\t\tdescription: 'An image',\n"
 		+ "\t)\n"
-		+ "));", "<Would send an html email, and the attached image would show up>"),};
+		+ ")));", "<Would send an html email, and the attached image would show up>"),};
 	}
 
     }

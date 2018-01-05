@@ -21,7 +21,7 @@ import java.util.List;
  */
 //This will be re-added at some point, so get ready!
 //@MustUseOverride
-public interface Function extends FunctionBase, Documentation {
+public interface Function extends FunctionBase, Documentation, Comparable<Function> {
 
     /**
      * Returns the types of catchable exceptions this function can throw. (Uncatchable exceptions need not be listed)
@@ -89,7 +89,7 @@ public interface Function extends FunctionBase, Documentation {
      * @param nodes
      * @return
      */
-    public Construct execs(Target t, Environment env, Script parent, ParseTree ... nodes);    
+    public Construct execs(Target t, Environment env, Script parent, ParseTree ... nodes);
 
 	/**
 	 * Returns an array of example scripts, which are used for documentation purposes.

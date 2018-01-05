@@ -1,5 +1,6 @@
 package com.laytonsmith.persistence;
 
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.MemoryMapFileUtil;
@@ -28,13 +29,13 @@ import java.util.logging.Logger;
  * In general, the most common methods used are getValue and setValue. Note that
  * getValue, setValue, save, and load are synchronized.
  *
- * 
+ *
  */
 @datasource("ser")
 public class SerializedPersistence extends AbstractDataSource {
-	
+
 	private SerializedPersistence(){
-		
+
 	}
 
 	/**
@@ -103,7 +104,7 @@ public class SerializedPersistence extends AbstractDataSource {
 								} else {
 									fis = new FileInputStream(storageLocation);
 									in = new ObjectInputStream(fis);
-									data = (HashMap<String, String>) in.readObject();					
+									data = (HashMap<String, String>) in.readObject();
 								}
 								isLoaded = true;
 							} catch(Throwable t){
@@ -127,7 +128,7 @@ public class SerializedPersistence extends AbstractDataSource {
 			}
 	}
 
-	private byte[] byteData = new byte[0];
+	private byte[] byteData = ArrayUtils.EMPTY_BYTE_ARRAY;
 	private MemoryMapFileUtil writer = null;
 	private MemoryMapFileUtil.DataGrabber grabber = new MemoryMapFileUtil.DataGrabber() {
 

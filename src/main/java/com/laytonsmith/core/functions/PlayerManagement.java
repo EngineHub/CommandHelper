@@ -770,7 +770,7 @@ public class PlayerManagement {
 			} else {
 				sender = Static.GetCommandSender(args[0].val(), t);
 			}
-			
+
 			CArray ret = new CArray(t);
 			if (sender != null) {
 				for (String group : sender.getGroups()) {
@@ -878,7 +878,7 @@ public class PlayerManagement {
 				index = Static.getInt32(args[1], t);
 			}
 			MCPlayer p = Static.GetPlayer(player, t);
-			
+
 			Static.AssertPlayerNonNull(p, t);
 			int maxIndex = 20;
 			if (index < -1 || index > maxIndex) {
