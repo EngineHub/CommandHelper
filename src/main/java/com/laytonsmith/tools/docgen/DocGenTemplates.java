@@ -338,8 +338,8 @@ public class DocGenTemplates {
 				    + (description == null ? " description was null;" : ""));
 			}
 			StringBuilder b = new StringBuilder();
-			b.append("|-\n| ").append(name).append(" || ").append(description)
-				.append(" || ").append(example).append(" || ").append(ds.since().toString()).append("\n");
+			b.append("|-\n| ").append(name).append("\n| ").append(description)
+				.append("\n| ").append(example).append("\n| ").append(ds.since().toString()).append("\n");
 			set.add(b.toString());
 		    } catch (Exception e) {
 			throw new Error(e);

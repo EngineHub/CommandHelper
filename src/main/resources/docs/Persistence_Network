@@ -23,7 +23,7 @@ There are several different connection types supported, and each has a slightly 
 ! scope="col" width="50%" | Description
 ! scope="col" width="30%" | Example
 ! scope="col" width="10%" | Since
-%%persistence_connections%%
+<%persistence_connections%>
 |}
 
 In addition, several modifier types can be specified, which modify the connection type. 

@@ -873,6 +873,9 @@ public final class MethodScriptCompiler {
                 comment_is_block = false;
                 continue;
             } else { //in a literal
+		if(c == '\u00A0'/*nbsp*/) {
+		    throw new ConfigCompileException("NBSP character in script", target);
+		}
                 buf.append(c);
                 continue;
             }

@@ -90,9 +90,11 @@ public class MySQLDataSource extends SQLDataSource {
 	 */
 	public final String getTableCreationQuery(String table) {
 		return "CREATE TABLE IF NOT EXISTS `" + table + "` (\n"
-				+ " -- This is an UNHEX(MD5('key')) binary hash of the unlimited length key column, so the table may have a primary key.\n"
+				+ " -- This is an UNHEX(MD5('key')) binary hash of the unlimited\n"
+				+ " -- length key column, so the table may have a primary key.\n"
 				+ " `" + KEY_HASH_COLUMN + "` BINARY(16) PRIMARY KEY NOT NULL,\n"
-				+ " -- This is the key itself, stored for plaintext readability, and for full text searches for getting values\n"
+				+ " -- This is the key itself, stored for plaintext readability,\n"
+				+ " -- and for full text searches for getting values\n"
 				+ " `" + getKeyColumn() + "` TEXT NOT NULL,\n"
 				+ " -- The value itself, which may be null\n"
 				+ " `" + getValueColumn() + "` MEDIUMTEXT\n"
@@ -198,8 +200,8 @@ public class MySQLDataSource extends SQLDataSource {
 			+ " possible without the potential for corruption in file"
 			+ " based data sources, without risking either data corruption,"
 			+ " or extremely low efficiency. The layout of the table"
-			+ " in the database is required to be of a specific format:"
-			+ getTableCreationQuery("testTable");
+			+ " in the database is required to be of a specific format: <%SYNTAX|sql|"
+			+ getTableCreationQuery("testTable") + "%>";
 	}
 
 	@Override

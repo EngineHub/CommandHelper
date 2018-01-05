@@ -24,6 +24,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -479,7 +480,20 @@ public class Main {
 		File source = new File(path);
 		String plain = FileUtil.read(source);
 		Security.setSecurityEnabled(false);
-		String optimized = OptimizationUtilities.optimize(plain, source);
+		String optimized;
+		try {
+		    try {
+			optimized = OptimizationUtilities.optimize(plain, source);
+		    } catch(ConfigCompileException ex) {
+			Set<ConfigCompileException> group = new HashSet<>();
+			group.add(ex);
+			throw new ConfigCompileGroupException(group);
+		    }
+		} catch(ConfigCompileGroupException ex) {
+		    ConfigRuntimeException.HandleUncaughtException(ex, null);
+		    System.exit(1);
+		    return;
+		}
 		StreamUtils.GetSystemOut().println(optimized);
 		System.exit(0);
 	    } else if (mode == cmdlineMode) {
