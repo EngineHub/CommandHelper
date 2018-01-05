@@ -20,9 +20,9 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCMapMeta;
 import com.laytonsmith.abstraction.MCMetadataValue;
+import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPotionData;
@@ -229,23 +229,11 @@ public class ObjectGenerator {
 			return CNull.NULL;
 		}
 
-		int type = is.getTypeId();
-		int data = 0;
-		if(type < 256){
-			//Use the data
-			MCMaterialData md = is.getData();
-			if(md != null) {
-				data = md.getData();
-			}
-		} else {
-			//Use the durability
-			data = is.getDurability();
-		}
-
+		MCMaterial mat = is.getType();
 		CArray ret = CArray.GetAssociativeArray(t);
-		ret.set("name", new CString(is.getType().getName(), t), t);
-		ret.set("type", new CInt(type, t), t);
-		ret.set("data", new CInt(data, t), t);
+		ret.set("name", new CString(mat.getName(), t), t);
+		ret.set("type", new CInt(mat.getType(), t), t);
+		ret.set("data", new CInt(is.getDurability(), t), t);
 		ret.set("qty", new CInt(is.getAmount(), t), t);
 		ret.set("enchants", enchants(is.getEnchantments(), t), t);
 		ret.set("meta", itemMeta(is, t), t);
@@ -297,10 +285,10 @@ public class ObjectGenerator {
 			}
 			mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(type, t));
 		} else {
-			throw new CREFormatException("Could not find item type!", t);
+			throw new CREFormatException("Could not find item name!", t);
 		}
 		if (mat == null) {
-			throw new CRENotFoundException("A material type could not be found based on the given id.", t);
+			throw new CRENotFoundException("A material could not be found based on the given name.", t);
 		}
 		if (mat.getType() == 0) {
 			return EmptyItem();
@@ -341,11 +329,10 @@ public class ObjectGenerator {
 	}
 
 	public Construct itemMeta(MCItemStack is, Target t) {
-		Construct ret, display, lore, color, title, author, pages, owner, stored;
-		CArray enchants, effects;
 		if (!is.hasItemMeta()) {
-			ret = CNull.NULL;
+			return CNull.NULL;
 		} else {
+			Construct display, lore;
 			CArray ma = CArray.GetAssociativeArray(t);
 			MCItemMeta meta = is.getItemMeta();
 			if (meta.hasDisplayName()) {
@@ -361,11 +348,13 @@ public class ObjectGenerator {
 			} else {
 				lore = CNull.NULL;
 			}
-			enchants = enchants(meta.getEnchants(), t);
 			ma.set("display", display, t);
 			ma.set("lore", lore, t);
-			ma.set("enchants", enchants, t);
+			ma.set("enchants", enchants(meta.getEnchants(), t), t);
 			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
+
+			// Version specific ItemMeta
+
 			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
 				Set<MCItemFlag> itemFlags = meta.getItemFlags();
 				CArray flagArray = new CArray(t);
@@ -375,6 +364,10 @@ public class ObjectGenerator {
 					}
 				}
 				ma.set("flags", flagArray, t);
+
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
+					ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t);
+				}
 			}
 
 			// Specific ItemMeta
@@ -429,9 +422,10 @@ public class ObjectGenerator {
 				firework.set("effects", fe, t);
 				ma.set("firework", firework, t);
 			} else if (meta instanceof MCLeatherArmorMeta) {
-				color = color(((MCLeatherArmorMeta) meta).getColor(), t);
+				CArray color = color(((MCLeatherArmorMeta) meta).getColor(), t);
 				ma.set("color", color, t);
 			} else if (meta instanceof MCBookMeta) {
+				Construct title, author, pages;
 				if (((MCBookMeta) meta).hasTitle()) {
 					title = new CString(((MCBookMeta) meta).getTitle(), t);
 				} else {
@@ -454,13 +448,24 @@ public class ObjectGenerator {
 				ma.set("author", author, t);
 				ma.set("pages", pages, t);
 			} else if (meta instanceof MCSkullMeta) {
-				if (((MCSkullMeta) meta).hasOwner()) {
-					owner = new CString(((MCSkullMeta) meta).getOwner(), t);
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_12_X)) {
+					if (((MCSkullMeta) meta).hasOwner()) {
+						MCOfflinePlayer player = ((MCSkullMeta) meta).getOwningPlayer();
+						ma.set("owner", new CString(player.getName(), t), t);
+						ma.set("owneruuid", new CString(player.getUniqueID().toString(), t), t);
+					} else {
+						ma.set("owner", CNull.NULL, t);
+						ma.set("owneruuid", CNull.NULL, t);
+					}
 				} else {
-					owner = CNull.NULL;
+					if (((MCSkullMeta) meta).hasOwner()) {
+						ma.set("owner", new CString(((MCSkullMeta) meta).getOwner(), t), t);
+					} else {
+						ma.set("owner", CNull.NULL, t);
+					}
 				}
-				ma.set("owner", owner, t);
 			} else if (meta instanceof MCEnchantmentStorageMeta) {
+				Construct stored;
 				if (((MCEnchantmentStorageMeta) meta).hasStoredEnchants()) {
 					stored = enchants(((MCEnchantmentStorageMeta) meta).getStoredEnchants(), t);
 				} else {
@@ -469,7 +474,7 @@ public class ObjectGenerator {
 				ma.set("stored", stored, t);
 			} else if (meta instanceof MCPotionMeta) {
 				MCPotionMeta potionmeta = (MCPotionMeta) meta;
-				effects = potions(potionmeta.getCustomEffects(), t);
+				CArray effects = potions(potionmeta.getCustomEffects(), t);
 				ma.set("potions", effects, t);
 				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
 					MCPotionData potiondata = potionmeta.getBasePotionData();
@@ -502,6 +507,7 @@ public class ObjectGenerator {
 				}
 			} else if (meta instanceof MCMapMeta && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
 				MCColor mapcolor = ((MCMapMeta) meta).getColor();
+				Construct color;
 				if (mapcolor == null) {
 					color = CNull.NULL;
 				} else {
@@ -509,9 +515,8 @@ public class ObjectGenerator {
 				}
 				ma.set("color", color, t);
 			}
-			ret = ma;
+			return ma;
 		}
-		return ret;
 	}
 
 	public MCItemMeta itemMeta(Construct c, MCMaterial mat, Target t) throws ConfigRuntimeException {
@@ -565,20 +570,31 @@ public class ObjectGenerator {
 				if (ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
 					meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
 				}
-				if (ma.containsKey("flags") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-					Construct flags = ma.get("flags", t);
-					if (flags instanceof CArray) {
-						CArray flagArray = (CArray) flags;
-						for (int i = 0; i < flagArray.size(); i++) {
-							Construct flag = flagArray.get(i, t);
-							meta.addItemFlags(MCItemFlag.valueOf(flag.getValue().toUpperCase()));
+
+				// Version specific ItemMeta
+
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
+					if(ma.containsKey("flags")) {
+						Construct flags = ma.get("flags", t);
+						if (flags instanceof CArray) {
+							CArray flagArray = (CArray) flags;
+							for (int i = 0; i < flagArray.size(); i++) {
+								Construct flag = flagArray.get(i, t);
+								meta.addItemFlags(MCItemFlag.valueOf(flag.getValue().toUpperCase()));
+							}
+						} else {
+							throw new CREFormatException("Itemflags was expected to be an array of flags.", t);
 						}
-					} else {
-						throw new CREFormatException("Itemflags was expected to be an array of flags.", t);
+					}
+
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
+						if(ma.containsKey("unbreakable")) {
+							meta.setUnbreakable(Static.getBoolean(ma.get("unbreakable", t)));
+						}
 					}
 				}
 
-				// Specific Item Meta
+				// Specific ItemMeta
 
 				if(meta instanceof MCBlockStateMeta){
 					MCBlockStateMeta bsm = (MCBlockStateMeta) meta;
@@ -714,7 +730,12 @@ public class ObjectGenerator {
 						}
 					}
 				} else if (meta instanceof MCSkullMeta) {
-					if (ma.containsKey("owner")) {
+					if (ma.containsKey("owneruuid")) {
+						Construct id = ma.get("owneruuid", t);
+						if(!(id instanceof CNull)) {
+							((MCSkullMeta) meta).setOwningPlayer(Static.getServer().getOfflinePlayer(Static.GetUUID(id, t)));
+						}
+					} else if(ma.containsKey("owner")) {
 						Construct owner = ma.get("owner", t);
 						if (!(owner instanceof CNull)) {
 							((MCSkullMeta) meta).setOwner(owner.val());
@@ -739,7 +760,7 @@ public class ObjectGenerator {
 						if (effects instanceof CArray) {
 							for (MCLivingEntity.MCEffect e : potions((CArray) effects, t)) {
 								((MCPotionMeta) meta).addCustomEffect(e.getPotionID(), e.getStrength(),
-										e.getSecondsRemaining(), e.isAmbient(), true, t);
+										e.getTicksRemaining(), e.isAmbient(), true, t);
 							}
 						} else {
 							throw new CREFormatException("Effects was expected to be an array of potion arrays.", t);
@@ -1004,7 +1025,7 @@ public class ObjectGenerator {
 			CArray effect = CArray.GetAssociativeArray(t);
 			effect.set("id", new CInt(eff.getPotionID(), t), t);
 			effect.set("strength", new CInt(eff.getStrength(), t), t);
-			effect.set("seconds", new CInt(eff.getSecondsRemaining(), t), t);
+			effect.set("seconds", new CDouble(eff.getTicksRemaining() / 20.0, t), t);
 			effect.set("ambient", CBoolean.get(eff.isAmbient()), t);
 			effect.set("particles", CBoolean.get(eff.hasParticles()), t);
 			ea.push(effect, t);
@@ -1017,7 +1038,8 @@ public class ObjectGenerator {
 		for (String key : ea.stringKeySet()) {
 			if (ea.get(key, t) instanceof CArray) {
 				CArray effect = (CArray) ea.get(key, t);
-				int potionID = 0, strength = 0, seconds = 30;
+				int potionID = 0, strength = 0;
+				double seconds = 30.0;
 				boolean ambient = false;
 				boolean particles = true;
 				if (effect.containsKey("id")) {
@@ -1029,10 +1051,10 @@ public class ObjectGenerator {
 					strength = Static.getInt32(effect.get("strength", t), t);
 				}
 				if (effect.containsKey("seconds")) {
-					seconds = Static.getInt32(effect.get("seconds", t), t);
-					if(seconds < 0) {
+					seconds = Static.getDouble(effect.get("seconds", t), t);
+					if(seconds < 0.0) {
 						throw new CRERangeException("Seconds cannot be less than 0", t);
-					} else if(seconds > Integer.MAX_VALUE / 20) {
+					} else if(seconds * 20 > Integer.MAX_VALUE) {
 						throw new CRERangeException("Seconds cannot be greater than 107374182", t);
 					}
 				}
@@ -1042,7 +1064,7 @@ public class ObjectGenerator {
 				if (effect.containsKey("particles")) {
 					particles = Static.getBoolean(effect.get("particles", t));
 				}
-				ret.add(new MCLivingEntity.MCEffect(potionID, strength, seconds, ambient, particles));
+				ret.add(new MCLivingEntity.MCEffect(potionID, strength, (int)(seconds * 20), ambient, particles));
 			} else {
 				throw new CREFormatException("Expected a potion array at index" + key, t);
 			}
@@ -1208,23 +1230,30 @@ public class ObjectGenerator {
 		if (r instanceof MCFurnaceRecipe) {
 			ret.set("input", item(((MCFurnaceRecipe) r).getInput(), t), t);
 		} else if (r instanceof MCShapelessRecipe) {
+			MCShapelessRecipe shapeless = (MCShapelessRecipe) r;
 			CArray il = new CArray(t);
-			for (MCItemStack i : ((MCShapelessRecipe) r).getIngredients()) {
+			for (MCItemStack i : shapeless.getIngredients()) {
 				il.push(item(i, t), t);
 			}
 			ret.set("ingredients", il, t);
+			if(shapeless.getKey() != null) {
+				ret.set("key", shapeless.getKey(), t);
+			}
 		} else if (r instanceof MCShapedRecipe) {
-			MCShapedRecipe sr = (MCShapedRecipe) r;
+			MCShapedRecipe shaped = (MCShapedRecipe) r;
 			CArray shape = new CArray(t);
-			for (String line : sr.getShape()) {
+			for (String line : shaped.getShape()) {
 				shape.push(new CString(line, t), t);
 			}
 			CArray imap = CArray.GetAssociativeArray(t);
-			for (Map.Entry<Character, MCItemStack> entry : sr.getIngredientMap().entrySet()) {
+			for (Map.Entry<Character, MCItemStack> entry : shaped.getIngredientMap().entrySet()) {
 				imap.set(entry.getKey().toString(), item(entry.getValue(), t), t);
 			}
 			ret.set("shape", shape, t);
 			ret.set("ingredients", imap, t);
+			if(shaped.getKey() != null) {
+				ret.set("key", shaped.getKey(), t);
+			}
 		}
 		return ret;
 	}
@@ -1242,134 +1271,112 @@ public class ObjectGenerator {
 	}
 
 	public MCRecipe recipe(Construct c, Target t) {
-		if (c instanceof CArray) {
-			CArray recipe = (CArray) c;
-			MCItemStack result = EmptyItem();
-			if (recipe.containsKey("result") && (recipe.get("result", t) instanceof CArray)) {
-				result = item(recipe.get("result", t), t);
+		if(!(c instanceof CArray)) {
+			throw new CRECastException("Expected array but recieved " + c.getCType().name(), t);
+		}
+		CArray recipe = (CArray) c;
 
-				if (recipe.containsKey("type") && (recipe.get("type", t) instanceof CString)) {
-					MCRecipeType recipeType;
-					try {
-						recipeType = MCRecipeType.valueOf(recipe.get("type", t).val());
-					} catch (IllegalArgumentException e) {
-						throw new CREFormatException("Invalid recipe type.", t);
-					}
+		String recipeKey = null;
+		if(recipe.containsKey("key")) {
+			recipeKey = recipe.get("key", t).val();
+		}
 
-					MCRecipe ret;
-					switch(recipeType) {
-						case SHAPED:
-						ret = StaticLayer.GetNewRecipe(MCRecipeType.SHAPED, result);
+		MCRecipeType recipeType;
+		try {
+			recipeType = MCRecipeType.valueOf(recipe.get("type", t).val());
+		} catch (IllegalArgumentException e) {
+			throw new CREFormatException("Invalid recipe type.", t);
+		}
 
-						if(recipe.containsKey("shape") && (recipe.get("shape", t) instanceof CArray)) {
-							CArray sh = (CArray) recipe.get("shape", t);
-							String[] shape = new String[(int) sh.size()];
-							if (sh.size() >= 1 && sh.size() <= 3 && !sh.inAssociativeMode()) {
-								int i = 0;
-								for(Construct row : sh.asList()) {
-									if(row instanceof CString && ((CString) row).val().length() >= 1 && ((CString) row).val().length() <= 3) {
-										shape[i] = row.val();
-										i++;
-									} else {
-										throw new CREFormatException("Shape array is invalid.", t);
-									}
-								}
-							} else {
-								throw new CREFormatException("Shape array is invalid.", t);
-							}
-							((MCShapedRecipe) ret).setShape(shape);
-						} else {
-							throw new CREFormatException("Could not find recipe shape array.", t);
-						}
+		MCItemStack result = item(recipe.get("result", t), t);
 
-						if(recipe.containsKey("ingredients") && (recipe.get("ingredients", t) instanceof CArray)) {
-							CArray ingredients = (CArray) recipe.get("ingredients", t);
-							if(ingredients.inAssociativeMode()) {
-								for(String key : ingredients.stringKeySet()) {
-									int type = 0;
-									int data = 0;
-									if (ingredients.get(key, t) instanceof CString) {
-										CString item = (CString) ingredients.get(key, t);
-										if (item.val().contains(":")) {
-											String[] split = item.val().split(":");
-											type = Integer.valueOf(split[0]);
-											data = Integer.valueOf(split[1]);
-										} else {
-											type = Integer.valueOf(item.val());
-										}
-									} else if (ingredients.get(key, t) instanceof CInt) {
-										type = Integer.valueOf(((CInt) ingredients.get(key, t)).val());
-									} else if (ingredients.get(key, t) instanceof CArray) {
-										MCItemStack item = item(ingredients.get(key, t), t);
-										type = item.getTypeId();
-										data = item.getDurability();
-									} else if (ingredients.get(key, t) instanceof CNull) {
-										type = 0;
-										data = 0;
-									} else {
-										throw new CREFormatException("Item type was not found", t);
-									}
-									((MCShapedRecipe) ret).setIngredient(key.charAt(0), type, data);
-								}
-							} else {
-								throw new CREFormatException("Ingredients array is invalid.", t);
-							}
-						} else {
-							throw new CREFormatException("Could not find recipe ingredient array.", t);
-						}
-						return ret;
-
-						case SHAPELESS:
-						ret = StaticLayer.GetNewRecipe(MCRecipeType.SHAPELESS, result);
-
-						if(recipe.containsKey("ingredients") && (recipe.get("ingredients", t) instanceof CArray)) {
-							CArray ingredients = (CArray) recipe.get("ingredients", t);
-							if(!ingredients.inAssociativeMode()) {
-								for(Construct item : ingredients.asList()) {
-									int type = 0;
-									int data = 0;
-									if (item instanceof CString) {
-										item = (CString) item;
-										if (item.val().contains(":")) {
-											String[] split = item.val().split(":");
-											type = Integer.valueOf(split[0]);
-											data = Integer.valueOf(split[1]);
-										} else {
-											type = Integer.valueOf(item.val());
-										}
-									} else {
-										throw new CREFormatException("Item type was not found", t);
-									}
-									((MCShapelessRecipe) ret).addIngredient(type, data, 1);
-								}
-							} else {
-								throw new CREFormatException("Ingredients array is invalid.", t);
-							}
-						} else {
-							throw new CREFormatException("Could not find recipe ingredient array.", t);
-						}
-						return ret;
-
-						case FURNACE:
-						ret = StaticLayer.GetNewRecipe(MCRecipeType.FURNACE, result);
-
-						if (recipe.containsKey("input") && (recipe.get("input", t) instanceof CArray)) {
-							((MCFurnaceRecipe) ret).setInput(item(recipe.get("input", t), t));
-						} else {
-							throw new CREFormatException("Could not find input item array.", t);
-						}
-						return ret;
-					default:
-						throw new CREFormatException("Could not find valid recipe type.", t);
-					}
-				} else {
-						throw new CREFormatException("Could not find recipe type.", t);
+		MCRecipe ret;
+		try {
+			ret = StaticLayer.GetNewRecipe(recipeKey, recipeType, result);
+		} catch(IllegalArgumentException ex) {
+			throw new CREFormatException(ex.getMessage(), t);
+		}
+		switch(recipeType) {
+			case SHAPED:
+				CArray shaped = Static.getArray(recipe.get("shape", t), t);;
+				String[] shape = new String[(int) shaped.size()];
+				if (shaped.size() < 1 || shaped.size() > 3 || shaped.inAssociativeMode()) {
+					throw new CREFormatException("Shape array is invalid.", t);
 				}
-			} else {
-				throw new CREFormatException("Could not find result item array.", t);
-			}
-		} else {
-			throw new CRECastException("Expected array but recieved " + c, t);
+				int i = 0;
+				for(Construct row : shaped.asList()) {
+					if(row instanceof CString && row.val().length() >= 1 && row.val().length() <= 3) {
+						shape[i] = row.val();
+						i++;
+					} else {
+						throw new CREFormatException("Shape array is invalid.", t);
+					}
+				}
+				((MCShapedRecipe) ret).setShape(shape);
+
+				CArray shapedIngredients = Static.getArray(recipe.get("ingredients", t), t);
+				if(!shapedIngredients.inAssociativeMode()) {
+					throw new CREFormatException("Ingredients array is invalid.", t);
+				}
+				for(String key : shapedIngredients.stringKeySet()) {
+					int type = 0;
+					int data = 0;
+					Construct ingredient = shapedIngredients.get(key, t);
+					if (ingredient instanceof CString) {
+						CString item = (CString) ingredient;
+						if (item.val().contains(":")) {
+							String[] split = item.val().split(":");
+							type = Integer.valueOf(split[0]);
+							data = Integer.valueOf(split[1]);
+						} else {
+							type = Integer.valueOf(item.val());
+						}
+					} else if (ingredient instanceof CInt) {
+						type = Static.getInt32(ingredient, t);
+					} else if (ingredient instanceof CArray) {
+						MCItemStack item = item(ingredient, t);
+						type = item.getTypeId();
+						data = item.getDurability();
+					} else if (ingredient instanceof CNull) {
+						type = 0;
+						data = 0;
+					} else {
+						throw new CREFormatException("Item type was not found", t);
+					}
+					((MCShapedRecipe) ret).setIngredient(key.charAt(0), type, data);
+				}
+				return ret;
+
+			case SHAPELESS:
+				CArray ingredients = Static.getArray(recipe.get("ingredients", t), t);
+				if(ingredients.inAssociativeMode()) {
+					throw new CREFormatException("Ingredients array is invalid.", t);
+				}
+				for(Construct item : ingredients.asList()) {
+					int type = 0;
+					int data = 0;
+					if (item instanceof CString) {
+						if (item.val().contains(":")) {
+							String[] split = item.val().split(":");
+							type = Integer.valueOf(split[0]);
+							data = Integer.valueOf(split[1]);
+						} else {
+							type = Integer.valueOf(item.val());
+						}
+					} else {
+						throw new CREFormatException("Item type was not found", t);
+					}
+					((MCShapelessRecipe) ret).addIngredient(type, data, 1);
+				}
+				return ret;
+
+			case FURNACE:
+				CArray is = Static.getArray(recipe.get("input", t), t);
+				((MCFurnaceRecipe) ret).setInput(item(is, t));
+				return ret;
+
+			default:
+				throw new CREFormatException("Could not find valid recipe type.", t);
 		}
 	}
 

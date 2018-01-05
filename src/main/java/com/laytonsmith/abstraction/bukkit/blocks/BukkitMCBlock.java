@@ -54,6 +54,11 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
     }
 
 	@Override
+	public void setType(MCMaterial mat) {
+		b.setType((Material) mat.getHandle());
+	}
+
+	@Override
     public void setTypeId(int idata) {
         b.setTypeId(idata);
     }

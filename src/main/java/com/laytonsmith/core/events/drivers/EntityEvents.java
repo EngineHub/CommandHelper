@@ -16,8 +16,8 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
-import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
@@ -692,20 +692,20 @@ public class EntityEvents {
 				+ " Fired when a living entity spawns on the server."
 				+ " {type: the type of creature spawning | id: the entityID of the creature"
 				+ " | reason: the reason this creature is spawning | location: locationArray of the event}"
-				+ " {type: Spawn a different entity instead. This will fire a new event with a reason of 'CUSTOM'.}"
+				+ " {type: Spawn a different entity instead. This will fire a new event. If the entity type is living,"
+				+ " it will fire creature_spawn event with a reason of 'CUSTOM'.}"
 				+ " {}";
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
-				throws PrefilterNonMatchException {
-			if (event instanceof MCCreatureSpawnEvent) {
-				MCCreatureSpawnEvent e = (MCCreatureSpawnEvent) event;
-				Prefilters.match(prefilter, "type", e.getEntity().getType().name(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "reason", e.getSpawnReason().name(), PrefilterType.MACRO);
-				return true;
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if(!(event instanceof MCCreatureSpawnEvent)) {
+				return false;
 			}
-			return false;
+			MCCreatureSpawnEvent e = (MCCreatureSpawnEvent) event;
+			Prefilters.match(prefilter, "type", e.getEntity().getType().name(), PrefilterType.MACRO);
+			Prefilters.match(prefilter, "reason", e.getSpawnReason().name(), PrefilterType.MACRO);
+			return true;
 		}
 
 		@Override
@@ -714,21 +714,18 @@ public class EntityEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent event)
-				throws EventException {
-			if (event instanceof MCCreatureSpawnEvent) {
-				MCCreatureSpawnEvent e = (MCCreatureSpawnEvent) event;
-				Map<String, Construct> map = evaluate_helper(e);
-
-				map.put("type", new CString(e.getEntity().getType().name(), Target.UNKNOWN));
-				map.put("id", new CString(e.getEntity().getUniqueId().toString(), Target.UNKNOWN));
-				map.put("reason", new CString(e.getSpawnReason().name(), Target.UNKNOWN));
-				map.put("location", ObjectGenerator.GetGenerator().location(e.getLocation()));
-
-				return map;
-			} else {
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if(!(event instanceof MCCreatureSpawnEvent)) {
 				throw new EventException("Could not convert to MCCreatureSpawnEvent");
 			}
+			MCCreatureSpawnEvent e = (MCCreatureSpawnEvent) event;
+			Target t = Target.UNKNOWN;
+			Map<String, Construct> map = evaluate_helper(e);
+			map.put("type", new CString(e.getEntity().getType().name(), t));
+			map.put("id", new CString(e.getEntity().getUniqueId().toString(), t));
+			map.put("reason", new CString(e.getSpawnReason().name(), t));
+			map.put("location", ObjectGenerator.GetGenerator().location(e.getLocation()));
+			return map;
 		}
 
 		@Override
@@ -737,17 +734,17 @@ public class EntityEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			MCCreatureSpawnEvent e = (MCCreatureSpawnEvent) event;
 			if (key.equals("type")) {
-				MCMobs type;
+				MCEntityType type;
 				try {
-					type = MCMobs.valueOf(value.val());
+					type = MCEntityType.valueOf(value.val());
+					e.setType(type);
 				} catch (IllegalArgumentException iae) {
-					throw new CREFormatException(value.val() + " is not a valid mob type.", value.getTarget());
+					throw new CREFormatException(value.val() + " is not a valid entity type.", value.getTarget());
 				}
-				e.setType(type);
+				return true;
 			}
 			return false;
 		}

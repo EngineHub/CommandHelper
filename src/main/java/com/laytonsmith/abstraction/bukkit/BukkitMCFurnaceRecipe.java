@@ -18,10 +18,6 @@ public class BukkitMCFurnaceRecipe extends BukkitMCRecipe implements MCFurnaceRe
 		fr = recipe;
 	}
 	
-	public BukkitMCFurnaceRecipe(MCItemStack result) { // Why? because no one has ever thought to put his in a furnace
-		this(new FurnaceRecipe(((BukkitMCItemStack) result).asItemStack(), Material.PISTON_MOVING_PIECE));
-	}
-	
 	@Override
 	public MCRecipeType getRecipeType() {
 		return MCRecipeType.FURNACE;

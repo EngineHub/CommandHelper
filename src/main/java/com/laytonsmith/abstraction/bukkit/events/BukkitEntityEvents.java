@@ -393,7 +393,7 @@ public class BukkitEntityEvents {
 		}
 		
 		@Override
-		public void setType(MCMobs type) {
+		public void setType(MCEntityType type) {
 			e.setCancelled(true);
 			e.getLocation().getWorld().spawnEntity(e.getLocation(), EntityType.valueOf(type.name()));
 		}

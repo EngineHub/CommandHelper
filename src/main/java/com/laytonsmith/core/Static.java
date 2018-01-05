@@ -573,54 +573,55 @@ public final class Static {
 	return blockPrefix;
     }
 
-    /**
-     * Returns an item stack from the given item notation. Defaulting to the specified qty, this will throw an exception
-     * if the notation is invalid.
-     *
-     * @param functionName
-     * @param notation
-     * @param qty
-     * @throws ConfigRuntimeException FormatException if the notation is invalid.
-     * @return
-     */
-    public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, Target t) {
-	int type;
-	short data = 0;
-	try {
-	    int separatorIndex = notation.indexOf(':');
-	    if (separatorIndex != -1) {
-		type = Integer.parseInt(notation.substring(0, separatorIndex));
-		data = (short) Integer.parseInt(notation.substring(separatorIndex + 1));
-	    } else {
-		type = Integer.parseInt(notation);
-	    }
-	} catch (NumberFormatException e) {
-	    throw new CREFormatException("Item value passed to " + functionName + " is invalid: " + notation, t);
+	/**
+	 * Returns an item stack from the given item notation. Defaulting to the specified qty, this will throw an exception
+	 * if the notation is invalid.
+	 *
+	 * @param functionName
+	 * @param notation
+	 * @param qty
+	 * @throws CREFormatException If the notation is invalid.
+	 * @return
+	 */
+	@Deprecated
+	public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, Target t) {
+		int type;
+		short data = 0;
+		try {
+			int separatorIndex = notation.indexOf(':');
+			if (separatorIndex != -1) {
+				type = Integer.parseInt(notation.substring(0, separatorIndex));
+				data = (short) Integer.parseInt(notation.substring(separatorIndex + 1));
+			} else {
+				type = Integer.parseInt(notation);
+			}
+		} catch (NumberFormatException e) {
+			throw new CREFormatException("Invalid item notation: " + notation, t);
+		}
+		return StaticLayer.GetItemStack(type, data, qty);
 	}
-	return StaticLayer.GetItemStack(type, data, qty);
-    }
 
-    /**
-     * Works in reverse from the other ParseItemNotation
-     *
-     * @param is
-     * @return
-     */
-    public static String ParseItemNotation(MCItemStack is) {
-	if (is == null) {
-	    return "0";
+	/**
+	 * Works in reverse from the other ParseItemNotation
+	 *
+	 * @param is
+	 * @return
+	 */
+	public static String ParseItemNotation(MCItemStack is) {
+		if (is == null) {
+			return "0";
+		}
+		String append = null;
+		if (is.getDurability() != 0) {
+			append = Short.toString(is.getDurability());
+		} else {
+			MCMaterialData md = is.getData();
+			if (md != null) {
+				append = Integer.toString(md.getData());
+			}
+		}
+		return is.getTypeId() + (append == null ? "" : ":" + append);
 	}
-	String append = null;
-	if (is.getDurability() != 0) {
-	    append = Short.toString(is.getDurability());
-	} else {
-	    MCMaterialData md = is.getData();
-	    if (md != null) {
-		append = Integer.toString(md.getData());
-	    }
-	}
-	return is.getTypeId() + (append == null ? "" : ":" + append);
-    }
 
     public static String ParseItemNotation(MCBlock b) {
 	if (b == null || b.isNull()) {
@@ -814,7 +815,7 @@ public final class Static {
      * @return
      */
     public static MCEntity getEntityByUuid(UUID id, Target t) {
-	if (injectedEntity != null && injectedEntity.getUniqueId().equals(id)) {
+	if (injectedEntity != null && injectedEntity.getUniqueId().compareTo(id) == 0) {
 	    // This entity is not in the world yet, but it was injected by the event
 	    return injectedEntity;
 	}
@@ -836,7 +837,7 @@ public final class Static {
      * @return
      */
     public static MCLivingEntity getLivingByUUID(UUID id, Target t) {
-	if (injectedEntity != null && injectedEntity.getUniqueId().equals(id)) {
+	if (injectedEntity != null && injectedEntity.getUniqueId().compareTo(id) == 0) {
 	    // This entity is not in the world yet, but it was injected by the event
 	    if (injectedEntity instanceof MCLivingEntity) {
 		return (MCLivingEntity) injectedEntity;

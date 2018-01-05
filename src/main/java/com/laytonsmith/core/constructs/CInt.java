@@ -19,7 +19,7 @@ public class CInt extends CNumber implements Cloneable {
     final long val;
 
     public CInt(String value, Target t) {
-	super(value, ConstructType.INT, t);
+	super(value, Construct.ConstructType.INT, t);
 	try {
 	    val = Long.parseLong(value);
 	} catch (NumberFormatException e) {
@@ -28,7 +28,7 @@ public class CInt extends CNumber implements Cloneable {
     }
 
     public CInt(long value, Target t) {
-	super(Long.toString(value), ConstructType.INT, t);
+	super(Long.toString(value), Construct.ConstructType.INT, t);
 	val = value;
     }
 

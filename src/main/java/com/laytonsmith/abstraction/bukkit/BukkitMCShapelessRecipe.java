@@ -20,9 +20,15 @@ public class BukkitMCShapelessRecipe extends BukkitMCRecipe implements MCShapele
 		super(recipe);
 		r = recipe;
 	}
-	
-	public BukkitMCShapelessRecipe(MCItemStack result) {
-		this(new ShapelessRecipe(((BukkitMCItemStack) result).asItemStack()));
+
+	@Override
+	public String getKey() {
+		try {
+			return r.getKey().getKey();
+		} catch(NoSuchMethodError ex) {
+			// Probably prior to 1.12
+			return null;
+		}
 	}
 	
 	@Override

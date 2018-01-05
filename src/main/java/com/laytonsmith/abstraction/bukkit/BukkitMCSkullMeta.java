@@ -1,7 +1,9 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCSkullMeta;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.meta.SkullMeta;
 
 public class BukkitMCSkullMeta extends BukkitMCItemMeta implements MCSkullMeta {
@@ -28,8 +30,22 @@ public class BukkitMCSkullMeta extends BukkitMCItemMeta implements MCSkullMeta {
 	}
 
 	@Override
+	public MCOfflinePlayer getOwningPlayer(){
+		return new BukkitMCOfflinePlayer(sm.getOwningPlayer());
+	}
+
+	@Override
 	public boolean setOwner(String owner) {
 		return sm.setOwner(owner);
 	}
 
+	@Override
+	public void setOwningPlayer(MCOfflinePlayer player){
+		try {
+			sm.setOwningPlayer((OfflinePlayer) player.getHandle());
+		} catch(NoSuchMethodError ex) {
+			// probably prior to 1.12.2
+			sm.setOwner(player.getName());
+		}
+	}
 }

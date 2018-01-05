@@ -1,0 +1,115 @@
+%YAML 1.2
+---
+# See http://www.sublimetext.com/docs/3/syntax.html
+#
+# Rework of the outdated Sublime Syntax-Highlighting for MS provided by CH.
+# Author: github.com/Ecconia
+#
+# Install:
+#   Name file: MethodScript.sublime-syntax (Name can be changed.)
+#   Location: Somewhere in the User folder in your Sublime folder (Preferences -> Browse Packages...)
+#
+file_extensions:
+  - ms
+  - msa
+scope: source.mscript
+contexts:
+  main:
+    - include: content
+
+  content:
+    - include: keywords
+
+    # Highlight Operators
+    - match: ([=\<\>\!\|\&]|.=)
+      scope: keyword.operator.mscript
+
+    # Highlight Labels
+    - match: ([a-zA-Z_][a-zA-Z0-9_]+)(?=:)(?=[^\/])
+      scope: keyword.other.mscript
+
+    # Highlight Numerics
+    - match: '[0-9]'
+      scope: constant.numeric.mscript
+
+    # Keywords
+    - match: (\b(%%pipe:keywords%%)\b)(?=[^A-Za-z0-9])
+      scope: constant.language.mscript
+
+    - match: ([\w]+)(\s*\()
+      captures:
+        1: entity.name.function.mscript
+
+    - include: variables
+    - include: quotedstring
+    - include: comments
+
+  comments:
+    # Single line comment
+    - match: (#).*
+      scope: comment.line.numbersign.mscript
+      captures:
+        1: punctuation.definition.comment.mscript
+
+    # Single line comment
+    - match: (\/\/).*
+      scope: comment.line.doubleslash.mscript
+      captures:
+        1: punctuation.definition.comment.mscript
+
+    # Multi-line comment
+    - match: \/\*
+      push: commentsection
+      scope: comment.block.mscript punctuation.definition.comment.mscript
+      with_prototype:
+        - match: \*\/
+          scope: comment.block.mscript punctuation.definition.comment.mscript
+          pop: true
+  commentsection:
+    - meta_scope: comment.block.mscript
+
+  keywords:
+    # Keyword control
+    # These are not up to date but do find for most code.
+    - match: (?<![a-zA-Z0-9_])(auto|notinstanceof|for|do|while|switch|foreach|default|bind|else|catch|closure|if|case|proc|in|finally|false|instanceof|as|iclosure|null|true|try)(?![a-zA-Z0-9_])
+      scope: keyword.control.mscript
+
+  variables:
+    - include: ivariable
+    # Variable
+    - match: '\$[A-Za-z_0-9]*'
+      scope: variable.other.mscript
+
+  ivariable:
+    # IVariable
+    - match: '@[A-Za-z_0-9]+'
+      scope: variable.other.mscript
+
+  quotedstring:
+    #Quoted String Double
+    - match: (")
+      push: quotedsectiondouble
+      captures:
+        1: punctuation.definition.string.begin.mscript
+      with_prototype:
+        - match: (?<!\\)(?:\\\\)*(")
+          pop: true
+          captures:
+            1: punctuation.definition.string.end.mscript
+
+    #Quoted String Single
+    - match: (')
+      push: quotedsectionsingle
+      captures:
+        1: punctuation.definition.string.begin.mscript
+      with_prototype:
+        - match: (?<!\\)(?:\\\\)*(')
+          pop: true
+          captures:
+            1: punctuation.definition.string.end.mscript
+
+  quotedsectionsingle:
+    - meta_scope: string.quoted.single.mscript
+  quotedsectiondouble:
+    - meta_scope: string.quoted.double.mscript
+    - include: ivariable

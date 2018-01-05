@@ -41,9 +41,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
 import java.util.Map;
 
-/**
- *
- */
 public class InventoryManagement {
     public static String docs(){
         return "Provides methods for managing inventory related tasks.";
@@ -711,99 +708,101 @@ public class InventoryManagement {
 
     }
 
-    @api(environments={CommandHelperEnvironment.class})
+	@api(environments={CommandHelperEnvironment.class})
 	public static class pgive_item extends AbstractFunction{
 
 		@Override
-        public String getName() {
-            return "pgive_item";
-        }
+		public String getName() {
+			return "pgive_item";
+		}
 
 		@Override
-        public Integer[] numArgs() {
-            return new Integer[]{2, 3, 4};
-        }
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3, 4};
+		}
 
 		@Override
-        public String docs() {
-            return "int {[player], itemID, qty, [meta]} Gives a player the specified item * qty. The meta argument uses the"
-                    + " same format as set_itemmeta. Unlike set_pinv(), this does not specify a slot. The qty is distributed"
-                    + " in the player's inventory, first filling up slots that have the same item"
-                    + " type, up to the max stack size, then fills up empty slots, until either"
-                    + " the entire inventory is filled, or the entire amount has been given."
-                    + " If the player's inv is full, number of items that were not added is returned, which will be less than"
-                    + " or equal to the quantity provided. Otherwise, returns 0. This function will not touch the player's"
-                    + " armor slots however. Supports 'infinite' stacks by providing a negative number.";
-        }
+		public String docs() {
+			return "int {[player], itemArray | [player], itemID, qty, [meta]} Gives a player the specified item. Unlike"
+					+ " set_pinv(), this does not specify a slot. The qty is distributed in the player's inventory,"
+					+ " first filling up slots that have the same item type, up to the max stack size, then fills up"
+					+ " empty slots, until either the entire inventory is filled, or the entire amount has been given."
+					+ " If the player's inv is full, the number of items that were not added is returned, which will be"
+					+ " less than or equal to the quantity provided. Otherwise, returns 0. This function will not touch"
+					+ " the player's armor slots however.";
+		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREFormatException.class,
-					CREPlayerOfflineException.class, CRENotFoundException.class,
-					CREIllegalArgumentException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CREPlayerOfflineException.class,
+					CRENotFoundException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
-        public boolean isRestricted() {
-            return true;
-        }
+		public boolean isRestricted() {
+			return true;
+		}
 		@Override
-        public Boolean runAsync() {
-            return false;
-        }
+		public Boolean runAsync() {
+			return false;
+		}
 
 		@Override
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-            MCItemStack is;
-			Construct m = null;
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			MCItemStack is;
+			int itemOffset = 0;
 
-            if(args.length == 2){
-                is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
-            } else if(args.length == 3) {
-				if(args[0] instanceof CString) {
-					p = Static.GetPlayer(args[0], t);
-					is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
-				} else {
-					is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
-					m = args[2];
+			if (args.length == 2) {
+				if(args[1] instanceof CArray) {
+					itemOffset = 1;
 				}
+			} else if (args.length == 3) {
+				if (args[0] instanceof CString) { // we assume player here, apparently
+					itemOffset = 1;
+				}
+			} else if (args.length == 4) {
+				itemOffset = 1;
+			}
+
+			if(itemOffset == 0) {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
 			} else {
 				p = Static.GetPlayer(args[0], t);
-				is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
-				m = args[3];
 			}
-			Static.AssertPlayerNonNull(p, t);
 
-			MCItemMeta meta;
-			if (m != null) {
-				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getType(), t);
+			if(args[itemOffset] instanceof CArray) {
+				is = ObjectGenerator.GetGenerator().item(args[itemOffset], t);
 			} else {
-				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getType(), t);
-			}
-			is.setItemMeta(meta);
-			Map<Integer, MCItemStack> h;
-			try {
-				h = p.getInventory().addItem(is);
-			} catch(IllegalArgumentException e) {
-				throw new CREIllegalArgumentException("Item value is invalid", t);
+				is = Static.ParseItemNotation(null, args[itemOffset].val(), Static.getInt32(args[itemOffset + 1], t), t);
+				if(args.length > itemOffset + 2) {
+					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[itemOffset + 2], is.getType(), t));
+				}
 			}
 
-			p.updateInventory();
-
-			if (h.isEmpty()) {
-				return new CInt(0, t);
-			} else {
-				return new CInt(h.get(0).getAmount(), t);
+			MCInventory inv = p.getInventory();
+			if(inv != null) {
+				Map<Integer, MCItemStack> h;
+				try {
+					h = p.getInventory().addItem(is);
+				} catch (IllegalArgumentException e) {
+					throw new CREIllegalArgumentException("Item value is invalid", t);
+				}
+				p.updateInventory();
+				if (!h.isEmpty()) {
+					return new CInt(h.get(0).getAmount(), t);
+				}
 			}
+			return new CInt(0, t);
 		}
 
 		@Override
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
+		public CHVersion since() {
+			return CHVersion.V3_3_0;
+		}
 
-    }
+	}
 
     @api(environments={CommandHelperEnvironment.class})
 	public static class ptake_item extends AbstractFunction{
@@ -907,26 +906,24 @@ public class InventoryManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2, 3, 4};
+			return new Integer[]{1, 2, 3, 4};
 		}
 
 		@Override
 		public String docs() {
-			return "int {[player], itemID, qty, [meta]} Add to a player ender chest the specified item * qty. The meta argument uses the"
-					+ " same format as set_itemmeta. Unlike set_penderchest(), this does not specify a slot. The qty is distributed"
-					+ " in the player's inventory, first filling up slots that have the same item"
-					+ " type, up to the max stack size, then fills up empty slots, until either"
-					+ " the entire inventory is filled, or the entire amount has been given."
-					+ " If the player's inv is full, number of items that were not added is returned, which will be less than"
-					+ " or equal to the quantity provided. Otherwise, returns 0."
-					+ " Supports 'infinite' stacks by providing a negative number.";
+			return "int {[player], itemArray | [player], itemID, qty, [meta]} Adds the specified item to a player's"
+					+ " enderchest. Unlike set_penderchest(), this does not specify a slot. The items are distributed"
+					+ " in the player's inventory, first filling up slots that have the same item type, up to the max"
+					+ " stack size, then fills up empty slots, until either the entire inventory is filled or the"
+					+ " entire amount has been given. If the player's enderchest is full, the number of items that were"
+					+ " not added is returned, which will be less than or equal to the quantity provided. Otherwise,"
+					+ " returns 0.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREFormatException.class,
-					CREPlayerOfflineException.class, CRENotFoundException.class,
-					CREIllegalArgumentException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class, CRERangeException.class,
+					CREPlayerOfflineException.class, CRENotFoundException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -941,46 +938,51 @@ public class InventoryManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p;
 			MCItemStack is;
-			Construct m = null;
+			int itemOffset = 0;
 
 			if (args.length == 2) {
-				is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
-			} else if (args.length == 3) {
-				if (args[0] instanceof CString) {
-					p = Static.GetPlayer(args[0], t);
-					is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
-				} else {
-					is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
-					m = args[2];
+				if(args[1] instanceof CArray) {
+					itemOffset = 1;
 				}
+			} else if (args.length == 3) {
+				if (args[0] instanceof CString) { // we assume player here, apparently
+					itemOffset = 1;
+				}
+			} else if (args.length == 4) {
+				itemOffset = 1;
+			}
+
+			if(itemOffset == 0) {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
 			} else {
 				p = Static.GetPlayer(args[0], t);
-				is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
-				m = args[3];
-			}
-			Static.AssertPlayerNonNull(p, t);
-
-			MCItemMeta meta;
-			if (m != null) {
-				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getType(), t);
-			} else {
-				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getType(), t);
-			}
-			is.setItemMeta(meta);
-			Map<Integer, MCItemStack> h;
-			try {
-				h = p.getEnderChest().addItem(is);
-			} catch(IllegalArgumentException e) {
-				throw new CREIllegalArgumentException("Item value is invalid", t);
 			}
 
-			if (h.isEmpty()) {
-				return new CInt(0, t);
+			if(args[itemOffset] instanceof CArray) {
+				is = ObjectGenerator.GetGenerator().item(args[itemOffset], t);
 			} else {
-				return new CInt(h.get(0).getAmount(), t);
+				is = Static.ParseItemNotation(null, args[itemOffset].val(), Static.getInt32(args[itemOffset + 1], t), t);
+				if(args.length > itemOffset + 2) {
+					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[itemOffset + 2], is.getType(), t));
+				}
 			}
+
+			MCInventory inv = p.getEnderChest();
+			if(inv != null) {
+				Map<Integer, MCItemStack> h;
+				try {
+					h = p.getEnderChest().addItem(is);
+				} catch (IllegalArgumentException e) {
+					throw new CREIllegalArgumentException("Item value is invalid", t);
+				}
+				if (!h.isEmpty()) {
+					return new CInt(h.get(0).getAmount(), t);
+				}
+			}
+			return new CInt(0, t);
 		}
 
 		@Override
@@ -1804,25 +1806,24 @@ public class InventoryManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{3, 4};
+			return new Integer[]{2, 3, 4};
 		}
 
 		@Override
 		public String docs() {
-			return "int {entityID, itemID, qty, [meta] | locationArray, itemID, qty, [meta]} Add to block or entity inventory"
-					+ " the specified item * qty. The meta argument uses the same format as set_itemmeta. Unlike set_inventory(),"
-					+ " this does not specify a slot. The qty is distributed in the inventory, first filling up slots"
-					+ " that have the same item type, up to the max stack size, then fills up empty slots, until either"
-					+ " the entire inventory is filled, or the entire amount has been given."
-					+ " If the inventory is full, number of items that were not added is returned, which will be less than"
-					+ " or equal to the quantity provided. Otherwise, returns 0. Supports 'infinite' stacks by providing"
-					+ " a negative number.";
+			return "int {target, itemArray | target, itemID, qty, [metaArray]} Add to block or entity inventory the"
+					+ " specified item. The target must be a location array or entity UUID. Unlike set_inventory(),"
+					+ " this does not specify a slot. The items are distributed in the inventory, first filling up"
+					+ " slots that have the same item type, up to the max stack size, then fills up empty slots, until"
+					+ " either the entire inventory is filled, or the entire amount has been given. If the inventory is"
+					+ " full, number of items that were not added is returned, which will be less than or equal to the"
+					+ " quantity provided. Otherwise, returns 0.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREFormatException.class,
-                    CRELengthException.class, CREIllegalArgumentException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CRELengthException.class,
+					CREIllegalArgumentException.class, CRENotFoundException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -1837,23 +1838,17 @@ public class InventoryManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-
 			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
-			MCItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
-
-			Construct m = null;
-
-			if (args.length == 4) {
-				m = args[3];
-			}
-
-			MCItemMeta meta;
-			if (m != null) {
-				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getType(), t);
+			MCItemStack is;
+			if(args.length == 2) {
+				is = ObjectGenerator.GetGenerator().item(args[1], t);
 			} else {
-				meta = ObjectGenerator.GetGenerator().itemMeta(CNull.NULL, is.getType(), t);
+				is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
+				if (args.length == 4) {
+					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[3], is.getType(), t));
+				}
 			}
-			is.setItemMeta(meta);
+
 			Map<Integer, MCItemStack> h;
 			try {
 				h = inventory.addItem(is);

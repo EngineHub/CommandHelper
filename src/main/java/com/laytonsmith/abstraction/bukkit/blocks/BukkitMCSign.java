@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction.bukkit.blocks;
 
 import com.laytonsmith.abstraction.MCMaterialData;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
 import org.bukkit.block.Sign;
@@ -40,6 +41,11 @@ public class BukkitMCSign extends BukkitMCBlockState implements MCSign {
     public MCMaterialData getData() {
         return new BukkitMCMaterialData(s.getData());
     }
+
+	@Override
+	public MCMaterial getType() {
+		return new BukkitMCMaterial(s.getType());
+	}
 
 	@Override
     public int getTypeId() {

@@ -1034,7 +1034,7 @@ public final class Interpreter {
 	}
 
 	@Override
-	public MCRecipe GetNewRecipe(MCRecipeType type, MCItemStack result) {
+	public MCRecipe GetNewRecipe(String key, MCRecipeType type, MCItemStack result) {
 	    throw new UnsupportedOperationException("This method is not supported from a shell.");
 	}
 

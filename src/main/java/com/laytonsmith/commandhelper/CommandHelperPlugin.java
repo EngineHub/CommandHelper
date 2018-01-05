@@ -265,8 +265,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 		Prefs.SetColors();
 		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
-		if(new SimpleVersion(System.getProperty("java.version")).lt(new SimpleVersion("1.7"))){
-			CHLog.GetLogger().w(CHLog.Tags.GENERAL, "You appear to be running a version of Java older than Java 7. You should have plans"
+		if(new SimpleVersion(System.getProperty("java.version")).lt(new SimpleVersion("1.8"))){
+			CHLog.GetLogger().w(CHLog.Tags.GENERAL, "You appear to be running a version of Java older than Java 8. You should have plans"
 					+ " to upgrade at some point, as " + Implementation.GetServerType().getBranding() + " may require it at some point.", Target.UNKNOWN);
 		}
 

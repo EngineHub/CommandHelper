@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.abstraction.MCBossBar;
 import com.laytonsmith.abstraction.MCCommandMap;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
@@ -19,6 +20,8 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.pluginmessages.BukkitMCMessenger;
+import com.laytonsmith.abstraction.enums.MCBarColor;
+import com.laytonsmith.abstraction.enums.MCBarStyle;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
@@ -29,6 +32,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
@@ -499,5 +504,15 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public void resetRecipes() {
 		s.resetRecipes();
+	}
+
+	@Override
+	public MCBossBar createBossBar(String title, MCBarColor color, MCBarStyle style) {
+		try {
+			return new BukkitMCBossBar(s.createBossBar(title, BarColor.valueOf(color.name()), BarStyle.valueOf(style.name())));
+		} catch(NoSuchMethodError ex) {
+			// Probably prior to 1.9
+			return null;
+		}
 	}
 }

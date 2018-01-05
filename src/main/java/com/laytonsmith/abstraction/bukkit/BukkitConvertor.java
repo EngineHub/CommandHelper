@@ -77,6 +77,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
@@ -588,14 +589,24 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
-	public MCRecipe GetNewRecipe(MCRecipeType type, MCItemStack result) {
+	public MCRecipe GetNewRecipe(String key, MCRecipeType type, MCItemStack result) {
+		ItemStack is = ((BukkitMCItemStack) result).asItemStack();
 		switch (type) {
 			case FURNACE:
-				return new BukkitMCFurnaceRecipe(result);
+				FurnaceRecipe recipe = new FurnaceRecipe(is, Material.PISTON_MOVING_PIECE);
+				return new BukkitMCFurnaceRecipe(recipe);
 			case SHAPED:
-				return new BukkitMCShapedRecipe(result);
+				if(key != null) {
+					return new BukkitMCShapedRecipe(new ShapedRecipe(new NamespacedKey(CommandHelperPlugin.self, key), is));
+				} else {
+					return new BukkitMCShapedRecipe(new ShapedRecipe(is));
+				}
 			case SHAPELESS:
-				return new BukkitMCShapelessRecipe(result);
+				if(key != null) {
+					return new BukkitMCShapelessRecipe(new ShapelessRecipe(new NamespacedKey(CommandHelperPlugin.self, key), is));
+				} else {
+					return new BukkitMCShapelessRecipe(new ShapelessRecipe(is));
+				}
 		}
 		return null;
 	}

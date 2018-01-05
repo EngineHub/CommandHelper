@@ -1,13 +1,9 @@
 package com.laytonsmith.abstraction;
 
-/**
- * 
- * @author jb_aero
- */
 public interface MCSkullMeta extends MCItemMeta {
-	
-	public boolean hasOwner();
-	public String getOwner();
-	public boolean setOwner(String owner);
-	
+	boolean hasOwner();
+	String getOwner();
+	MCOfflinePlayer getOwningPlayer();
+	boolean setOwner(String owner);
+	void setOwningPlayer(MCOfflinePlayer player);
 }

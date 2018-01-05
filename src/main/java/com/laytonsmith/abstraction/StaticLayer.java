@@ -171,8 +171,8 @@ public final class StaticLayer {
 	return convertor.GetCorrectEntity(e);
     }
 
-    public static MCRecipe GetNewRecipe(MCRecipeType type, MCItemStack result) {
-	return convertor.GetNewRecipe(type, result);
+    public static MCRecipe GetNewRecipe(String key, MCRecipeType type, MCItemStack result) {
+	return convertor.GetNewRecipe(key, type, result);
     }
 
     public static String GetPluginName() {

@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
-	void addEffect(int potionID, int strength, int seconds, boolean ambient, boolean particles, Target t);
+	void addEffect(int potionID, int strength, int ticks, boolean ambient, boolean particles, Target t);
 	public boolean removeEffect(int potionID);
 	/**
 	 * Returns the maximum effect id, inclusive.
@@ -76,21 +76,21 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
 		private int potionID;
 		private int strength;
-		private int secondsRemaining;
+		private int ticksRemaining;
 		private boolean ambient;
 		private boolean particles;
-		public MCEffect(int potionID, int strength, int secondsRemaining, boolean ambient){
+		public MCEffect(int potionID, int strength, int ticks, boolean ambient){
 			this.potionID = potionID;
 			this.strength = strength;
-			this.secondsRemaining = secondsRemaining;
+			this.ticksRemaining = ticks;
 			this.ambient = ambient;
 			this.particles = true;
 		}
 
-		public MCEffect(int potionID, int strength, int secondsRemaining, boolean ambient, boolean particles){
+		public MCEffect(int potionID, int strength, int ticks, boolean ambient, boolean particles){
 			this.potionID = potionID;
 			this.strength = strength;
-			this.secondsRemaining = secondsRemaining;
+			this.ticksRemaining = ticks;
 			this.ambient = ambient;
 			this.particles = particles;
 		}
@@ -103,8 +103,8 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 			return strength;
 		}
 
-		public int getSecondsRemaining() {
-			return secondsRemaining;
+		public int getTicksRemaining() {
+			return ticksRemaining;
 		}
 		
 		public boolean isAmbient() {

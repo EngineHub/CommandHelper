@@ -29,7 +29,10 @@ import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -62,9 +65,12 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -79,7 +85,8 @@ import java.util.regex.Pattern;
 public class PlayerManagement {
 
 	public static String docs() {
-		return "This class of functions allow players to be managed";
+		return "This class of functions allow players to be managed. Functions that accept an online player's name will"
+				+ " also accept their UUID.";
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -122,7 +129,9 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[playerName]} Returns the full name of the partial Player name specified or the Player running the command otherwise."
+			return "string {[playerName]} Returns a player's name. If a string is specified, it will attempt to find"
+					+ " a complete match for a partial name. If no string is specified, the current player is returned."
+					+ " UUIDs are also accepted for this and other online player functions."
 					+ " If the command is being run from the console, then the string '" + Static.getConsoleName()
 					+ "' is returned. If the command came from a CommandBlock, the block's name prefixed with "
 					+ Static.getBlockPrefix() + " is returned. If the command is coming from elsewhere,"
@@ -928,17 +937,7 @@ public class PlayerManagement {
 			if (index == 6 || index == -1) {
 				//Item in hand
 				MCItemStack is = p.getItemInHand();
-				int data;
-				if (is.getType().isBlock()) {
-					if (is.getData() != null) {
-						data = is.getData().getData();
-					} else {
-						data = 0;
-					}
-				} else {
-					data = is.getDurability();
-				}
-				retVals.add(new CString(is.getTypeId() + ":" + data, t));
+				retVals.add(new CString(is.getTypeId() + ":" + is.getDurability(), t));
 			}
 			if (index == 7 || index == -1) {
 				//World name
@@ -2101,8 +2100,8 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "boolean {player, potionID, strength, [seconds], [ambient], [particles]} Effect is 1-23."
-					+ " Seconds defaults to 30. If the potionID is out of range, a RangeException is thrown, because out"
-					+ " of range potion effects cause the client to crash, fairly hardcore. See"
+					+ " Seconds defaults to 30.0. If the potionID is out of range, a RangeException is thrown, because"
+					+ " out of range potion effects cause the client to crash, fairly hardcore. See"
 					+ " http://www.minecraftwiki.net/wiki/Potion_effects for a complete list of potions that can be"
 					+ " added. To remove an effect, set the seconds to 0. Strength is the number of levels to add to the"
 					+ " base power (effect level 1). Ambient takes a boolean of whether the particles should be less"
@@ -2146,15 +2145,15 @@ public class PlayerManagement {
 			}
 
 			int strength = Static.getInt32(args[2], t);
-			int seconds = 30;
+			double seconds = 30.0;
 			boolean ambient = false;
 			boolean particles = true;
 			if (args.length >= 4) {
-				seconds = Static.getInt32(args[3], t);
-				if(seconds < 0) {
-					throw new CRERangeException("Seconds cannot be less than 0", t);
-				} else if(seconds > Integer.MAX_VALUE / 20) {
-					throw new CRERangeException("Seconds cannot be greater than 107374182", t);
+				seconds = Static.getDouble(args[3], t);
+				if(seconds < 0.0) {
+					throw new CRERangeException("Seconds cannot be less than 0.0", t);
+				} else if(seconds * 20 > Integer.MAX_VALUE) {
+					throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
 				}
 			}
 			if (args.length >= 5) {
@@ -2164,10 +2163,10 @@ public class PlayerManagement {
 				particles = Static.getBoolean(args[5]);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			if (seconds == 0) {
+			if (seconds == 0.0) {
 				return CBoolean.get(m.removeEffect(effect));
 			} else {
-				m.addEffect(effect, strength, seconds, ambient, particles, t);
+				m.addEffect(effect, strength, (int)(seconds * 20), ambient, particles, t);
 				return CBoolean.TRUE;
 			}
 		}
@@ -4804,7 +4803,8 @@ public class PlayerManagement {
 	}
 
 	@api
-	public static class get_player_from_entity_id extends AbstractFunction {
+	@hide("Deprecated.")
+	public static class get_player_from_entity_id extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -4849,6 +4849,17 @@ public class PlayerManagement {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function get_player_from_entity_id() is deprecated. Use player().", t);
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
