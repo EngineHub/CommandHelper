@@ -11,7 +11,9 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -47,8 +49,8 @@ public class ClassMirror<T> implements Serializable {
      * Creates a ClassMirror object from an already loaded Class. While this obviously defeats the purpose of not
      * loading the Class into PermGen, this does allow already loaded classes to fit into the ClassMirror ecosystem.
      * Essentially, calls to the ClassMirror are simply forwarded to the Class and the return re-wrapped in sub mirror
-     * types. Some operations are not possible, namely non-runtime annotation processing, but in general, all other
-     * operations work the same.
+     * types. Some operations are not possible, namely non-runtime annotation processing and generics information,
+     * but in general, all other operations work the same.
      *
      * @param c
      */
@@ -291,6 +293,28 @@ public class ClassMirror<T> implements Serializable {
 	    return fields;
 	}
 	return info.fields.toArray(new FieldMirror[info.fields.size()]);
+    }
+
+    /**
+     * This method returns a map for all classes which this class extends/implements of the the generic parameters.
+     * For instance, if a class has the signature {@code class C extends E<String> implements J<Integer>, K} then
+     * this method would return the map: {@code {E: [String], J[Integer], K:[]}}. Note that for the purposes of this
+     * method, interfaces and classes are not distinguished, and while the extended class will be first in the list,
+     * the first item in the list is not necessarily a class.
+     *
+     * @return
+     * @throws IllegalArgumentException If the underlying mechanism backing this ClassMirror object is a real
+     * loaded class, this method will throw an IllegalArgumentException
+     */
+    public Map<ClassReferenceMirror<?>, List<ClassReferenceMirror<?>>> getGenerics() throws IllegalArgumentException {
+	if(underlyingClass != null) {
+	    throw new IllegalArgumentException("Cannot get generics of a real class");
+	}
+	Map<ClassReferenceMirror<?>, List<ClassReferenceMirror<?>>> map = new HashMap<>(info.genericParameters.size());
+	for(Map.Entry<ClassReferenceMirror<?>, List<ClassReferenceMirror<?>>> k : info.genericParameters.entrySet()) {
+	    map.put(k.getKey(), new ArrayList<>(k.getValue()));
+	}
+	return map;
     }
 
     /**
@@ -566,5 +590,13 @@ public class ClassMirror<T> implements Serializable {
 	public ClassReferenceMirror<T> classReferenceMirror;
 	public List<FieldMirror> fields = new ArrayList<>();
 	public List<AbstractMethodMirror> methods = new ArrayList<>();
+	/**
+	 * Maps inherited classes to the generic parameters passed along to the
+	 * inhereted class. For instance, if we have
+	 * class Base implements A<Integer, Long>, B<String> {...} then this object
+	 * would contain {A: [Integer, Long], B: [String]}
+	 */
+	public Map<ClassReferenceMirror<?>, List<ClassReferenceMirror<?>>> genericParameters
+		= new HashMap<>();
     }
 }

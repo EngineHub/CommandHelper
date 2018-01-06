@@ -2,9 +2,9 @@ package com.laytonsmith.PureUtilities.Common.Annotations;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.FieldMirror;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.ExhaustiveVisitor;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CClassType;
 import java.lang.reflect.Constructor;
@@ -127,6 +127,15 @@ public class AnnotationChecks {
 	    throw new Error("Unexpected executable type");
 	}
 	return StringUtils.Join(l, ", ");
+    }
+
+    public static void verifyExhaustiveVisitors() throws ClassNotFoundException {
+	Set<ClassMirror<ExhaustiveVisitor>> toVerify;
+	toVerify = ClassDiscovery.getDefaultInstance()
+		.getClassesThatExtend(ExhaustiveVisitor.class);
+	for(ClassMirror<ExhaustiveVisitor> c : toVerify) {
+	    ExhaustiveVisitor.verify(c);
+	}
     }
 
 }

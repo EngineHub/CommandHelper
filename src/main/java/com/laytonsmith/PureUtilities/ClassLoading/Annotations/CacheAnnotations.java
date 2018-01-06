@@ -51,6 +51,7 @@ public class CacheAnnotations {
 		StreamUtils.GetSystemOut().println("-- Checking for custom compile errors --");
 		AnnotationChecks.checkForceImplementation();
 		AnnotationChecks.checkForTypeInTypeofClasses();
+		AnnotationChecks.verifyExhaustiveVisitors();
 
 		Implementation.setServerType(Implementation.Type.SHELL);
 		List<String> uhohs = new ArrayList<>();
