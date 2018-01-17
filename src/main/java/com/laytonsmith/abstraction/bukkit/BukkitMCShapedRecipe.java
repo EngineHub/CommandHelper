@@ -57,7 +57,7 @@ public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedReci
 
 	@Override
 	public void setIngredient(char key, MCItemStack ingredient) {
-		r.setIngredient(key, ((ItemStack) ingredient).getData());
+		r.setIngredient(key, ((ItemStack) ingredient.getHandle()).getData());
 	}
 
 	@Override

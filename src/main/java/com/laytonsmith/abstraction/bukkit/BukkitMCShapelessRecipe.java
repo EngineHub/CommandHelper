@@ -52,7 +52,7 @@ public class BukkitMCShapelessRecipe extends BukkitMCRecipe implements MCShapele
 
 	@Override
 	public MCShapelessRecipe addIngredient(MCItemStack ingredient) {
-		r.addIngredient(ingredient.getAmount(), ((ItemStack) ingredient).getData());
+		r.addIngredient(ingredient.getAmount(), ((ItemStack) ingredient.getHandle()).getData());
 		return this;
 	}
 }
