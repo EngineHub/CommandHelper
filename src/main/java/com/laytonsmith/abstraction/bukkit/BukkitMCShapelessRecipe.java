@@ -5,14 +5,9 @@ import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import java.util.ArrayList;
 import java.util.List;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 
-/**
- * 
- * @author jb_aero
- */
 public class BukkitMCShapelessRecipe extends BukkitMCRecipe implements MCShapelessRecipe {
 
 	ShapelessRecipe r;
@@ -30,12 +25,12 @@ public class BukkitMCShapelessRecipe extends BukkitMCRecipe implements MCShapele
 			return null;
 		}
 	}
-	
+
 	@Override
 	public MCRecipeType getRecipeType() {
 		return MCRecipeType.SHAPELESS;
 	}
-	
+
 	@Override
 	public Object getHandle() {
 		return r;
@@ -48,7 +43,7 @@ public class BukkitMCShapelessRecipe extends BukkitMCRecipe implements MCShapele
 
 	@Override
 	public List<MCItemStack> getIngredients() {
-		List<MCItemStack> ret = new ArrayList<MCItemStack>();
+		List<MCItemStack> ret = new ArrayList<>();
 		for (ItemStack is : r.getIngredientList()) {
 			ret.add(new BukkitMCItemStack(is));
 		}
@@ -57,37 +52,7 @@ public class BukkitMCShapelessRecipe extends BukkitMCRecipe implements MCShapele
 
 	@Override
 	public MCShapelessRecipe addIngredient(MCItemStack ingredient) {
-		int type = ingredient.getTypeId();
-		int data = 0;
-		if (type < 256) {
-			data = ingredient.getData() != null ? ingredient.getData().getData() : 0;
-		} else {
-			data = ingredient.getDurability();
-		}
-		return this.addIngredient(type, data, ingredient.getAmount());
-	}
-
-	@Override
-	public MCShapelessRecipe addIngredient(int type, int data, int amount) {
-		r.addIngredient(amount, Material.getMaterial(type), data);
-		return this;
-	}
-
-	@Override
-	public MCShapelessRecipe removeIngredient(MCItemStack ingredient) {
-		int type = ingredient.getTypeId();
-		int data = 0;
-		if (type < 256) {
-			data = ingredient.getData() != null ? ingredient.getData().getData() : 0;
-		} else {
-			data = ingredient.getDurability();
-		}
-		return this.removeIngredient(type, data, ingredient.getAmount());
-	}
-
-	@Override
-	public MCShapelessRecipe removeIngredient(int type, int data, int amount) {
-		r.removeIngredient(amount, Material.getMaterial(type), data);
+		r.addIngredient(ingredient.getAmount(), ((ItemStack) ingredient).getData());
 		return this;
 	}
 }

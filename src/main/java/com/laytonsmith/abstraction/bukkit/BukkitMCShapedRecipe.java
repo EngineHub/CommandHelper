@@ -1,9 +1,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCShapedRecipe;
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +38,7 @@ public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedReci
 
 	@Override
 	public Map<Character, MCItemStack> getIngredientMap() {
-		Map<Character, MCItemStack> ret = new HashMap<Character, MCItemStack>();
+		Map<Character, MCItemStack> ret = new HashMap<>();
 		for (Map.Entry<Character, ItemStack> e : r.getIngredientMap().entrySet()) {
 			ret.put(e.getKey(), new BukkitMCItemStack(e.getValue()));
 		}
@@ -58,41 +56,12 @@ public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedReci
 	}
 
 	@Override
-	public MCShapedRecipe setIngredient(char key, MCItemStack ingredient) {
-//		int type = ingredient.getTypeId();
-//		int data = 0;
-//		if (type < 256) {
-//			data = ingredient.getData() != null ? ingredient.getData().getData() : 0;
-//		} else {
-//			data = ingredient.getDurability();
-//		}
-		MCMaterialData data = null;
-		if (ingredient.getTypeId() != 0) {
-			data = ingredient.getData();
-		}
-		return this.setIngredient(key, data);
+	public void setIngredient(char key, MCItemStack ingredient) {
+		r.setIngredient(key, ((ItemStack) ingredient).getData());
 	}
 
 	@Override
-	public MCShapedRecipe setIngredient(char key, int type, int data) {
-		MCMaterialData md = null;
-		if (type != 0) {
-			md = StaticLayer.GetItemStack(type, data, 1).getData();
-		}
-		return this.setIngredient(key, md);
-	}
-	
-	@Override
-	public MCShapedRecipe setIngredient(char key, MCMaterialData data) {
-		if (data != null) {
-			r.setIngredient(key, ((BukkitMCMaterialData)data).md);
-		}
-		return this;
-	}
-
-	@Override
-	public MCShapedRecipe setShape(String[] shape) {
+	public void setShape(String[] shape) {
 		r.shape(shape);
-		return this;
 	}
 }

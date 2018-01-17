@@ -3,21 +3,9 @@ package com.laytonsmith.abstraction;
 import java.util.Map;
 
 public interface MCShapedRecipe extends MCRecipe {
-
-	public String getKey();
-
-	public Map<Character, MCItemStack> getIngredientMap();
-	
-	@Override
-	public MCItemStack getResult();
-	
-	public String[] getShape();
-	
-	public MCShapedRecipe setIngredient(char key, MCItemStack ingredient);
-	
-	public MCShapedRecipe setIngredient(char key, int type, int data);
-	
-	public MCShapedRecipe setIngredient(char key, MCMaterialData data);
-	
-	public MCShapedRecipe setShape(String[] shape);
+	String getKey();
+	Map<Character, MCItemStack> getIngredientMap();
+	String[] getShape();
+	void setIngredient(char key, MCItemStack ingredient);
+	void setShape(String[] shape);
 }

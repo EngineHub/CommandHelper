@@ -1319,31 +1319,26 @@ public class ObjectGenerator {
 					throw new CREFormatException("Ingredients array is invalid.", t);
 				}
 				for(String key : shapedIngredients.stringKeySet()) {
-					int type = 0;
-					int data = 0;
+					MCItemStack is;
 					Construct ingredient = shapedIngredients.get(key, t);
 					if (ingredient instanceof CString) {
 						CString item = (CString) ingredient;
 						if (item.val().contains(":")) {
 							String[] split = item.val().split(":");
-							type = Integer.valueOf(split[0]);
-							data = Integer.valueOf(split[1]);
+							is = StaticLayer.GetItemStack(Integer.valueOf(split[0]), Integer.valueOf(split[1]), 1);
 						} else {
-							type = Integer.valueOf(item.val());
+							is = StaticLayer.GetItemStack(Integer.valueOf(item.val()), 1);
 						}
 					} else if (ingredient instanceof CInt) {
-						type = Static.getInt32(ingredient, t);
+						is = StaticLayer.GetItemStack(Static.getInt32(ingredient, t), 1);
 					} else if (ingredient instanceof CArray) {
-						MCItemStack item = item(ingredient, t);
-						type = item.getTypeId();
-						data = item.getDurability();
+						is = item(ingredient, t);
 					} else if (ingredient instanceof CNull) {
-						type = 0;
-						data = 0;
+						is = StaticLayer.GetItemStack(0, 0);
 					} else {
-						throw new CREFormatException("Item type was not found", t);
+						throw new CREFormatException("Item was not found", t);
 					}
-					((MCShapedRecipe) ret).setIngredient(key.charAt(0), type, data);
+					((MCShapedRecipe) ret).setIngredient(key.charAt(0), is);
 				}
 				return ret;
 
@@ -1352,21 +1347,21 @@ public class ObjectGenerator {
 				if(ingredients.inAssociativeMode()) {
 					throw new CREFormatException("Ingredients array is invalid.", t);
 				}
-				for(Construct item : ingredients.asList()) {
-					int type = 0;
-					int data = 0;
-					if (item instanceof CString) {
-						if (item.val().contains(":")) {
-							String[] split = item.val().split(":");
-							type = Integer.valueOf(split[0]);
-							data = Integer.valueOf(split[1]);
+				for(Construct ingredient : ingredients.asList()) {
+					MCItemStack is;
+					if (ingredient instanceof CString) {
+						if (ingredient.val().contains(":")) {
+							String[] split = ingredient.val().split(":");
+							is = StaticLayer.GetItemStack(Integer.valueOf(split[0]), Integer.valueOf(split[1]), 1);
 						} else {
-							type = Integer.valueOf(item.val());
+							is = StaticLayer.GetItemStack(Integer.valueOf(ingredient.val()), 1);
 						}
+					} else if (ingredient instanceof CArray) {
+						is = item(ingredient, t);
 					} else {
-						throw new CREFormatException("Item type was not found", t);
+						throw new CREFormatException("Item was not found", t);
 					}
-					((MCShapelessRecipe) ret).addIngredient(type, data, 1);
+					((MCShapelessRecipe) ret).addIngredient(is);
 				}
 				return ret;
 

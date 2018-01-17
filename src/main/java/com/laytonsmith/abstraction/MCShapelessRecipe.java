@@ -2,21 +2,8 @@ package com.laytonsmith.abstraction;
 
 import java.util.List;
 
-/**
- * 
- * @author jb_aero
- */
 public interface MCShapelessRecipe extends MCRecipe {
-
-	public String getKey();
-
-	public MCShapelessRecipe addIngredient(MCItemStack ingredient);
-	
-	public MCShapelessRecipe addIngredient(int type, int data, int amount);
-	
-	public List<MCItemStack> getIngredients();
-	
-	public MCShapelessRecipe removeIngredient(MCItemStack ingredient);
-	
-	public MCShapelessRecipe removeIngredient(int type, int data, int amount);
+	String getKey();
+	MCShapelessRecipe addIngredient(MCItemStack ingredient);
+	List<MCItemStack> getIngredients();
 }
