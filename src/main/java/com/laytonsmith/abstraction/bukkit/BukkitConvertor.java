@@ -202,7 +202,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public MCItemStack GetItemStack(String type, int qty) {
-		Material mat = Material.matchMaterial(type);
+		Material mat = Material.getMaterial(type);
 		if (mat == null) {
 			return null;
 		}
@@ -210,7 +210,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public MCItemStack GetItemStack(String type, int data, int qty) {
-		Material mat = Material.matchMaterial(type);
+		Material mat = Material.getMaterial(type);
 		if (mat == null) {
 			return null;
 		}

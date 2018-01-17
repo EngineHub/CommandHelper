@@ -31,7 +31,7 @@ public class BukkitMCItemFactory implements MCItemFactory {
 	@Override
 	public MCItemMeta asMetaFor(MCItemMeta meta, MCMaterial material) {
 		ItemMeta bmeta = ((BukkitMCItemMeta) meta).asItemMeta();
-		Material bmat = Material.getMaterial(material.getType());
+		Material bmat = (Material) material.getHandle();
 		return BukkitConvertor.BukkitGetCorrectMeta(f.asMetaFor(bmeta, bmat));
 	}
 
@@ -50,7 +50,7 @@ public class BukkitMCItemFactory implements MCItemFactory {
 		if(material == null){
 			return null;
 		}
-		ItemMeta im = f.getItemMeta(Material.getMaterial(material.getType()));
+		ItemMeta im = f.getItemMeta((Material) material.getHandle());
 		return BukkitConvertor.BukkitGetCorrectMeta(im);
 	}
 
@@ -64,7 +64,7 @@ public class BukkitMCItemFactory implements MCItemFactory {
 	@Override
 	public boolean isApplicable(MCItemMeta meta, MCMaterial material) {
 		ItemMeta bmeta = ((BukkitMCItemMeta) meta).asItemMeta();
-		Material bmat = Material.getMaterial(material.getType());
+		Material bmat = (Material) material.getHandle();
 		return f.isApplicable(bmeta, bmat);
 	}
 

@@ -19,6 +19,7 @@ public interface MCItemStack extends AbstractionObject{
 	void setTypeId(int type);
 	int maxStackSize();
 	int getAmount();
+	void setAmount(int amt);
 	void setData(int data);
 	boolean hasItemMeta();
 	MCItemMeta getItemMeta();

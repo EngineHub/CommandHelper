@@ -249,16 +249,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
 		try {
 			Particle type = Particle.valueOf(pa.name());
-			if(data != null) {
-				Object particleData = null;
-				if(type.getDataType().equals(MaterialData.class) && data instanceof MCMaterialData) {
-					particleData = ((MCMaterialData) data).getHandle();
-				} else if(type.getDataType().equals(ItemStack.class) && data instanceof MCItemStack) {
-					particleData = ((MCItemStack) data).getHandle();
-				}
-				w.spawnParticle(type, ((BukkitMCLocation) l).asLocation(), count, offsetX, offsetY, offsetZ, velocity, particleData);
+			Location loc = ((BukkitMCLocation) l).asLocation();
+			if(data != null && type.getDataType().equals(ItemStack.class) && data instanceof MCItemStack) {
+				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, ((MCItemStack) data).getHandle());
 			} else {
-				w.spawnParticle(type, ((BukkitMCLocation) l).asLocation(), count, offsetX, offsetY, offsetZ, velocity);
+				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);
 			}
 		} catch(NoClassDefFoundError ex) {
 			// probably prior to 1.9

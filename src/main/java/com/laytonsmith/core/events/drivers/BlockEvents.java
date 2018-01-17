@@ -1128,7 +1128,7 @@ public class BlockEvents {
 	    } else if (prefilter.containsKey("newtype")) {
 		Construct v = prefilter.get("newtype");
 		if (v instanceof CInt) {
-		    if (newBlock.getTypeId() != ((CInt) v).getInt()) {
+		    if (newBlock.getType().getType() != ((CInt) v).getInt()) {
 			return false;
 		    }
 		} else {

@@ -10,10 +10,6 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
-/**
- *
- * 
- */
 public class BukkitMCLocation implements MCLocation {
     Location l;
     public BukkitMCLocation(Location l) {
@@ -92,12 +88,9 @@ public class BukkitMCLocation implements MCLocation {
     }
 
 	@Override
-    public MCBlock getBlock() {
-        if (l == null || l.getBlock() == null) {
-            return null;
-        }
-        return new BukkitMCBlock(l.getBlock());
-    }
+	public MCBlock getBlock() {
+		return new BukkitMCBlock(l.getBlock());
+	}
 
     public Location _Location() {
         return l;
