@@ -22,6 +22,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
@@ -577,11 +578,12 @@ public class Sandbox {
 
 		@Override
 		public String docs() {
-			return "void {path} Reads and compiles specified *.ms files. This can be used for files already compiled"
+			return "int {path} Reads and compiles specified *.ms files. This can be used for files already compiled"
 					+ " with include(). Scripts that then include() these files will use the updated code."
 					+ " The path can be a directory or file. It is executed recursively through all subdirectories."
 					+ " If there's a compile error in any of the files, the function will throw an exception and other"
-					+ " scripts will continue to use the previous version of the code when included.";
+					+ " scripts will continue to use the previous version of the code when included. Returns number"
+					+ " of files recompiled.";
 		}
 
 		@Override
@@ -607,17 +609,21 @@ public class Sandbox {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			File file = Static.GetFileFromArgument(args[0].val(), env, t, null);
-			if(Security.CheckSecurity(file.getAbsolutePath())) {
+			int num = 0;
+			if(Security.CheckSecurity(file)) {
 				if (file.isDirectory()) {
-					IncludeCache.addAll(compileDirectory(file, t));
+					HashMap<File, ParseTree> files = compileDirectory(file, t);
+					IncludeCache.addAll(files);
+					num = files.size();
 				} else if (IncludeCache.has(file)) {
 					IncludeCache.add(file, compileFile(file, t));
+					num = 1;
 				}
 			} else {
 				throw new CRESecurityException("The script cannot access " + file
 						+ " due to restrictions imposed by the base-dir setting.", t);
 			}
-			return CVoid.VOID;
+			return new CInt(num, t);
 		}
 
 		private HashMap<File, ParseTree> compileDirectory(File file, Target t) {
