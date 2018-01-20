@@ -531,182 +531,189 @@ public class InventoryManagement {
 		}
 	}
 
-    @api(environments={CommandHelperEnvironment.class})
+	@api(environments={CommandHelperEnvironment.class})
 	public static class phas_item extends AbstractFunction{
 
 		@Override
-        public String getName() {
-            return "phas_item";
-        }
+		public String getName() {
+			return "phas_item";
+		}
 
 		@Override
-        public Integer[] numArgs() {
-            return new Integer[]{1, 2};
-        }
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
 
 		@Override
-        public String docs() {
-            return "int {[player], itemId} Returns the quantity of the specified item"
-                    + " that the player is carrying (including armor slots)."
-                    + " This counts across all slots in"
-                    + " inventory. Recall that 0 is false, and anything else is true,"
-                    + " so this can be used to get the total, or just see if they have"
-                    + " the item. itemId can be either a plain number, or a 0:0 number,"
-                    + " indicating a data value.";
-        }
+		public String docs() {
+			return "int {[player], item} Returns the quantity of the specified item that the player is carrying"
+					+ " (including armor slots). This counts across all slots in inventory. Recall that 0 is false, and"
+					+ " anything else is true, so this can be used to get the total, or just see if they have the item."
+					+ ITEM_MATCHING;
+		}
 
 		@Override
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[]{CREPlayerOfflineException.class, CREFormatException.class,
-                CRECastException.class, CRENotFoundException.class};
-        }
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREFormatException.class, CRERangeException.class,
+				CRECastException.class, CRENotFoundException.class};
+		}
 
 		@Override
-        public boolean isRestricted() {
-            return true;
-        }
+		public boolean isRestricted() {
+			return true;
+		}
 		@Override
-        public Boolean runAsync() {
-            return false;
-        }
+		public Boolean runAsync() {
+			return false;
+		}
 
 		@Override
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-            String item;
-            if(args.length == 1){
-                item = args[0].val();
-            } else {
-                p = Static.GetPlayer(args[0], t);
-                item = args[1].val();
-            }
-			Static.AssertPlayerNonNull(p, t);
-            MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
-            MCPlayerInventory inv = p.getInventory();
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			MCItemStack is;
+			Construct c;
+			CArray ca = null;
+			if(args.length == 1) {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				c = args[0];
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				c = args[1];
+			}
+
+			if(c instanceof CArray) {
+				ca = (CArray) c;
+				is = ObjectGenerator.GetGenerator().item(ca, t);
+			} else {
+				is = Static.ParseItemNotation(null, c.val(), 1, t);
+			}
+
+			MCPlayerInventory inv = p.getInventory();
 			if (inv == null) {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
-			
-            int total = 0;
-            for(int i = 0; i < 36; i++){
-                MCItemStack iis = inv.getItem(i);
-                total += total(is, iis);
-            }
-            total += total(is, inv.getBoots());
-            total += total(is, inv.getLeggings());
-            total += total(is, inv.getChestplate());
-            total += total(is, inv.getHelmet());
-            if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
-                total += total(is, inv.getItemInOffHand());
-            }
-            return new CInt(total, t);
-        }
 
-        private int total(MCItemStack is, MCItemStack iis){
-            if(iis.getTypeId() == is.getTypeId() && iis.getData().getData() == is.getData().getData()){
-                int i = iis.getAmount();
-                if(i < 0){
-                    //Infinite stack
-                    i = iis.maxStackSize();
-                }
-                return i;
-            }
-            return 0;
-        }
+			int total = 0;
+			for(int i = 0; i < 36; i++){
+				MCItemStack iis = inv.getItem(i);
+				total += total(ca, is, iis, t);
+			}
+			total += total(ca, is, inv.getBoots(), t);
+			total += total(ca, is, inv.getLeggings(), t);
+			total += total(ca, is, inv.getChestplate(), t);
+			total += total(ca, is, inv.getHelmet(), t);
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+				total += total(ca, is, inv.getItemInOffHand(), t);
+			}
+			return new CInt(total, t);
+		}
+
+		private int total(CArray map, MCItemStack is, MCItemStack iis, Target t){
+			if(IsMatch(map, is, iis, t)) {
+				return iis.getAmount();
+			}
+			return 0;
+		}
 
 		@Override
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
+		public CHVersion since() {
+			return CHVersion.V3_3_0;
+		}
 
-    }
+	}
 
-    @api(environments={CommandHelperEnvironment.class})
+	@api(environments={CommandHelperEnvironment.class})
 	public static class pitem_slot extends AbstractFunction{
 
 		@Override
-        public String getName() {
-            return "pitem_slot";
-        }
+		public String getName() {
+			return "pitem_slot";
+		}
 
 		@Override
-        public Integer[] numArgs() {
-            return new Integer[]{1, 2};
-        }
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
 
 		@Override
-        public String docs() {
-            return "array {[player], itemID} Given an item id, returns the slot numbers"
-                    + " that the matching item has at least one item in.";
-        }
+		public String docs() {
+			return "array {[player], item} Given an item array, returns the slot numbers"
+					+ " that the matching item has at least one item in." + ITEM_MATCHING;
+		}
 
 		@Override
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[]{CRECastException.class, CREFormatException.class,
-                CREPlayerOfflineException.class, CRENotFoundException.class};
-        }
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class,
+				CREPlayerOfflineException.class, CRENotFoundException.class};
+		}
 
 		@Override
-        public boolean isRestricted() {
-            return true;
-        }
+		public boolean isRestricted() {
+			return true;
+		}
 		@Override
-        public Boolean runAsync() {
-            return false;
-        }
+		public Boolean runAsync() {
+			return false;
+		}
 
 		@Override
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-            String item;
-            if(args.length == 1){
-                item = args[0].val();
-            } else {
-                p = Static.GetPlayer(args[0], t);
-                item = args[1].val();
-            }
-			Static.AssertPlayerNonNull(p, t);
-            MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
-            MCPlayerInventory inv = p.getInventory();
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			Construct item;
+			CArray ca = null;
+			if(args.length == 1){
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				item = args[0];
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				item = args[1];
+			}
+			MCItemStack is;
+			if(item instanceof CArray) {
+				ca = (CArray) item;
+				is = ObjectGenerator.GetGenerator().item(ca, t);
+			} else {
+				is = Static.ParseItemNotation(null, item.val(), 1, t);
+			}
+
+			MCPlayerInventory inv = p.getInventory();
 			if (inv == null) {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
-            CArray ca = new CArray(t);
-            for(int i = 0; i < 36; i++){
-                if(match(is, inv.getItem(i))){
-                    ca.push(new CInt(i, t), t);
-                }
-            }
-            if(match(is, inv.getBoots())){
-                ca.push(new CInt(100, t), t);
-            }
-            if(match(is, inv.getLeggings())){
-                ca.push(new CInt(101, t), t);
-            }
-            if(match(is, inv.getChestplate())){
-                ca.push(new CInt(102, t), t);
-            }
-            if(match(is, inv.getHelmet())){
-                ca.push(new CInt(103, t), t);
-            }
-            if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9) && match(is, inv.getItemInOffHand())){
-                ca.push(new CInt(-106, t), t);
-            }
-            return ca;
-        }
-
-        private boolean match(MCItemStack is, MCItemStack iis){
-            return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
-        }
+			CArray ret = new CArray(t);
+			for(int i = 0; i < 36; i++){
+				if(IsMatch(ca, is, inv.getItem(i), t)){
+					ret.push(new CInt(i, t), t);
+				}
+			}
+			if(IsMatch(ca, is, inv.getBoots(), t)){
+				ret.push(new CInt(100, t), t);
+			}
+			if(IsMatch(ca, is, inv.getLeggings(), t)){
+				ret.push(new CInt(101, t), t);
+			}
+			if(IsMatch(ca, is, inv.getChestplate(), t)){
+				ret.push(new CInt(102, t), t);
+			}
+			if(IsMatch(ca, is, inv.getHelmet(), t)){
+				ret.push(new CInt(103, t), t);
+			}
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9) && IsMatch(ca, is, inv.getItemInOffHand(), t)){
+				ret.push(new CInt(-106, t), t);
+			}
+			return ret;
+		}
 
 		@Override
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
+		public CHVersion since() {
+			return CHVersion.V3_3_0;
+		}
 
-    }
+	}
 
 	@api(environments={CommandHelperEnvironment.class})
 	public static class pgive_item extends AbstractFunction{
@@ -804,97 +811,105 @@ public class InventoryManagement {
 
 	}
 
-    @api(environments={CommandHelperEnvironment.class})
+	@api(environments={CommandHelperEnvironment.class})
 	public static class ptake_item extends AbstractFunction{
 
 		@Override
-        public String getName() {
-            return "ptake_item";
-        }
+		public String getName() {
+			return "ptake_item";
+		}
 
 		@Override
-        public Integer[] numArgs() {
-            return new Integer[]{2, 3};
-        }
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3};
+		}
 
 		@Override
-        public String docs() {
-            return "int {[player], itemID, qty} Works in reverse of pgive_item(), but"
-                    + " returns the number of items actually taken, which will be"
-                    + " from 0 to qty.";
-        }
+		public String docs() {
+			return "int {[player], itemArray | [player], itemID, qty} Works in reverse of pgive_item(), but returns the"
+					+ " number of items actually taken, which will be from 0 to qty." + ITEM_MATCHING;
+		}
 
 		@Override
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[]{CRECastException.class, CREPlayerOfflineException.class,
-                CREFormatException.class, CRENotFoundException.class};
-        }
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class, CRERangeException.class,
+				CREFormatException.class, CRENotFoundException.class};
+		}
 
 		@Override
-        public boolean isRestricted() {
-            return true;
-        }
+		public boolean isRestricted() {
+			return true;
+		}
 		@Override
-        public Boolean runAsync() {
-            return false;
-        }
+		public Boolean runAsync() {
+			return false;
+		}
 
 		@Override
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-            MCItemStack is;
-            if(args.length == 2){
-                is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
-            } else {
-                p = Static.GetPlayer(args[0], t);
-                is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
-            }
-            int total = is.getAmount();
-            int remaining = is.getAmount();
-			Static.AssertPlayerNonNull(p, t);
-            MCPlayerInventory inv = p.getInventory();
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			MCItemStack is;
+			int itemOffset = 0;
+			CArray ca = null;
+
+			if (args.length == 2) {
+				if(args[1] instanceof CArray) {
+					itemOffset = 1;
+				}
+			} else if(args.length == 3) {
+				itemOffset = 1;
+			}
+
+			if(itemOffset == 0) {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			} else {
+				p = Static.GetPlayer(args[0], t);
+			}
+
+			if(args[itemOffset] instanceof CArray) {
+				ca = (CArray) args[itemOffset];
+				is = ObjectGenerator.GetGenerator().item(ca, t);
+			} else {
+				is = Static.ParseItemNotation(null, args[itemOffset].val(), Static.getInt32(args[itemOffset + 1], t), t);
+			}
+
+			int total = is.getAmount();
+			int remaining = is.getAmount();
+			MCPlayerInventory inv = p.getInventory();
 			if (inv == null) {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
-			
-            for(int i = 35; i >= 0; i--){
-                MCItemStack iis = inv.getItem(i);
-                if(remaining <= 0){
-                    break;
-                }
-                if(match(is, iis)){
-                    //Take the minimum of either: remaining, or iis.getAmount()
-                    int toTake = java.lang.Math.min(remaining, iis.getAmount());
-                    remaining -= toTake;
-                    int replace = iis.getAmount() - toTake;
-                    if(replace == 0){
-                        inv.setItem(i, StaticLayer.GetItemStack(0, 0));
-                    } else {
-                        inv.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), replace));
-                    }
-                }
-            }
-            inv.updateViewers();
-            return new CInt(total - remaining, t);
 
-        }
+			for(int i = 35; i >= 0; i--){
+				MCItemStack iis = inv.getItem(i);
+				if(remaining <= 0){
+					break;
+				}
+				if (IsMatch(ca, is, iis, t)) {
+					//Take the minimum of either: remaining, or iis.getAmount()
+					int toTake = java.lang.Math.min(remaining, iis.getAmount());
+					remaining -= toTake;
+					int replace = iis.getAmount() - toTake;
+					if(replace == 0){
+						inv.clear(i);
+					} else {
+						iis.setAmount(replace);
+						inv.setItem(i, iis);
+					}
+				}
+			}
+			inv.updateViewers();
+			return new CInt(total - remaining, t);
 
-        private boolean match(MCItemStack is, MCItemStack iis){
-            if(is.getData() == null && iis.getData() == null) {
-                return is.getTypeId() == iis.getTypeId();
-            } else if(is.getData() == null || iis.getData() == null) {
-                return false;
-            } else {
-                return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
-            }
-        }
+		}
 
 		@Override
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
-    }
+		public CHVersion since() {
+			return CHVersion.V3_3_0;
+		}
+	}
 
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pgive_enderchest_item extends AbstractFunction {
@@ -1001,20 +1016,19 @@ public class InventoryManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2, 3};
+			return new Integer[]{1, 2, 3};
 		}
 
 		@Override
 		public String docs() {
-			return "int {[player], itemID, qty} Works in reverse of pgive_enderchest_item(), but"
-					+ " returns the number of items actually taken, which will be"
-					+ " from 0 to qty.";
+			return "int {[player], itemArray | [player], itemID, qty} Works in reverse of pgive_enderchest_item(), but"
+					+ " returns the number of items actually taken, which will be from 0 to qty." + ITEM_MATCHING;
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREPlayerOfflineException.class,
-				CREFormatException.class, CRENotFoundException.class};
+				CREFormatException.class, CRENotFoundException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -1029,17 +1043,35 @@ public class InventoryManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p;
 			MCItemStack is;
+			int itemOffset = 0;
+			CArray ca = null;
+
 			if (args.length == 2) {
-				is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
+				if(args[1] instanceof CArray) {
+					itemOffset = 1;
+				}
+			} else if(args.length == 3){
+				itemOffset = 1;
+			}
+
+			if(itemOffset == 0) {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
 			} else {
 				p = Static.GetPlayer(args[0], t);
-				is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
 			}
+
+			if(args[itemOffset] instanceof CArray) {
+				ca = (CArray) args[itemOffset];
+				is = ObjectGenerator.GetGenerator().item(ca, t);
+			} else {
+				is = Static.ParseItemNotation(null, args[itemOffset].val(), Static.getInt32(args[itemOffset + 1], t), t);
+			}
+
 			int total = is.getAmount();
 			int remaining = is.getAmount();
-			Static.AssertPlayerNonNull(p, t);
 			MCInventory inv = p.getEnderChest();
 			if (inv == null) {
 				throw new CRENotFoundException(
@@ -1051,25 +1083,21 @@ public class InventoryManagement {
 				if (remaining <= 0) {
 					break;
 				}
-				if (match(is, iis)) {
+				if (IsMatch(ca, is, iis, t)) {
 					//Take the minimum of either: remaining, or iis.getAmount()
 					int toTake = java.lang.Math.min(remaining, iis.getAmount());
 					remaining -= toTake;
 					int replace = iis.getAmount() - toTake;
 					if (replace == 0) {
-						inv.setItem(i, StaticLayer.GetItemStack(0, 0));
+						inv.clear(i);
 					} else {
-						inv.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), replace));
+						iis.setAmount(replace);
+						inv.setItem(i, iis);
 					}
 				}
 			}
 			inv.updateViewers();
 			return new CInt(total - remaining, t);
-
-		}
-
-		private boolean match(MCItemStack is, MCItemStack iis) {
-			return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
 		}
 
 		@Override
@@ -1879,19 +1907,20 @@ public class InventoryManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{3};
+			return new Integer[]{2, 3};
 		}
 
 		@Override
 		public String docs() {
-			return "int {entityID, itemID, qty | locationArray, itemID, qty} Works in reverse of add_to_inventory(), but"
-					+ " returns the number of items actually taken, which will be from 0 to qty.";
+			return "int {target, itemArray | target, itemID, qty} Works in reverse of add_to_inventory(), but"
+					+ " returns the number of items actually taken, which will be from 0 to qty. Target must be a"
+					+ " location array or entity UUID." + ITEM_MATCHING;
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREFormatException.class,
-                    CRELengthException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CRERangeException.class,
+                    CRELengthException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -1906,10 +1935,17 @@ public class InventoryManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-
 			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
 			Integer size = inventory.getSize();
-			MCItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
+			CArray ca = null;
+
+			MCItemStack is;
+			if(args.length == 2) {
+				ca = (CArray) args[1];
+				is = ObjectGenerator.GetGenerator().item(ca, t);
+			} else {
+				is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
+			}
 
 			int total = is.getAmount();
 			int remaining = is.getAmount();
@@ -1918,25 +1954,21 @@ public class InventoryManagement {
 				if (remaining <= 0) {
 					break;
 				}
-				if (match(is, iis)) {
+				if (IsMatch(ca, is, iis, t)) {
 					//Take the minimum of either: remaining, or iis.getAmount()
 					int toTake = java.lang.Math.min(remaining, iis.getAmount());
 					remaining -= toTake;
 					int replace = iis.getAmount() - toTake;
 					if (replace == 0) {
-						inventory.setItem(i, StaticLayer.GetItemStack(0, 0));
+						inventory.clear(i);
 					} else {
-						inventory.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), replace));
+						iis.setAmount(replace);
+						inventory.setItem(i, iis);
 					}
 				}
 			}
 			inventory.updateViewers();
 			return new CInt(total - remaining, t);
-
-		}
-
-		private boolean match(MCItemStack is, MCItemStack iis) {
-			return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
 		}
 
 		@Override
@@ -2169,5 +2201,58 @@ public class InventoryManagement {
 		} else {
 			return inv;
 		}
+	}
+
+	private static final String ITEM_MATCHING = " ---- The item array also serves as a map for what to compare."
+			+ " If included in the array, the value for the key \"data\", as well as \"display\", \"lore\" and "
+			+ " \"enchants\" from the meta array, will be compared to the items in the inventory."
+			+ " More keys may be added in the future.";
+
+	/**
+	 * Gets whether or not the two items are a match based on the given item array map.
+	 * @param map The original item array map of what to compare
+	 * @param is The MCItemStack to compare all other items with, converted from the item array map
+	 * @param iis The current MCItemStack we're comparing
+	 * @param t
+	 * @return Whether or not the items are a match
+	 */
+	private static boolean IsMatch(CArray map, MCItemStack is, MCItemStack iis, Target t) {
+		if(!is.getType().equals(iis.getType())) {
+			return false;
+		}
+		if((map == null || map.containsKey("data")) && is.getDurability() != iis.getDurability()) {
+			return false;
+		}
+		if(map != null && map.containsKey("meta")) {
+			Construct c = map.get("meta", t);
+			if(c instanceof CNull) {
+				if(iis.hasItemMeta()) {
+					return false;
+				}
+			} else {
+				if(!iis.hasItemMeta()) {
+					return false;
+				}
+				CArray metamap = (CArray) c;
+				MCItemMeta im = is.getItemMeta();
+				MCItemMeta iim = iis.getItemMeta();
+				if(metamap.containsKey("display")) {
+					if(im.hasDisplayName()) {
+						if(!iim.hasDisplayName() || !im.getDisplayName().equals(iim.getDisplayName())) {
+							return false;
+						}
+					} else if(iim.hasDisplayName()) {
+						return false;
+					}
+				}
+				if(metamap.containsKey("lore") && im.hasLore() && !im.getLore().equals(iim.getLore())) {
+					return false;
+				}
+				if(metamap.containsKey("enchants") && !im.getEnchants().equals(iim.getEnchants())) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 }

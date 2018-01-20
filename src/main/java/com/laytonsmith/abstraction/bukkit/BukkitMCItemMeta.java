@@ -71,7 +71,7 @@ public class BukkitMCItemMeta implements MCItemMeta {
 
 	@Override
 	public Map<MCEnchantment, Integer> getEnchants() {
-		Map<MCEnchantment, Integer> map = new HashMap<MCEnchantment, Integer>();
+		Map<MCEnchantment, Integer> map = new HashMap<>();
 		for(Entry<Enchantment, Integer> entry : im.getEnchants().entrySet()) {
 			map.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
 		}
@@ -99,7 +99,7 @@ public class BukkitMCItemMeta implements MCItemMeta {
 
 	@Override
 	public boolean equals(Object obj) {
-		return im.equals(obj);
+		return obj instanceof MCItemMeta && im.equals(((MCItemMeta) obj).getHandle());
 	}
 
 	@Override

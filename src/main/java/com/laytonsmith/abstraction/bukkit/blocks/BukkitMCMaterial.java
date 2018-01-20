@@ -95,9 +95,8 @@ public class BukkitMCMaterial implements MCMaterial {
 	}
 
 	@Override
-	@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 	public boolean equals(Object obj) {
-		return m.equals(obj);
+		return obj instanceof MCMaterial && m.equals(((MCMaterial) obj).getHandle());
 	}
 
 	@Override
