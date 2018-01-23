@@ -218,7 +218,7 @@ public class BukkitEntityEvents {
 
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCProjectileHitEvent implements MCProjectileHitEvent {
-		
+
 		ProjectileHitEvent phe;
 
 		public BukkitMCProjectileHitEvent(Event event) {
@@ -229,7 +229,7 @@ public class BukkitEntityEvents {
 		public Object _GetObject() {
 			return phe;
 		}
-		
+
 		@Override
 		public MCProjectile getEntity() {
 			return new BukkitMCProjectile(phe.getEntity());
@@ -239,13 +239,37 @@ public class BukkitEntityEvents {
 		public MCEntityType getEntityType() {
 			return BukkitMCEntityType.valueOfConcrete(phe.getEntityType());
 		}
-		
+
+		@Override
+		public MCEntity getHitEntity() {
+			try {
+				return BukkitConvertor.BukkitGetCorrectEntity(phe.getHitEntity());
+			} catch(NoSuchMethodError ex) {
+				// Probably prior to 1.11
+				return null;
+			}
+		}
+
+		@Override
+		public MCBlock getHitBlock() {
+			try {
+				Block blk = phe.getHitBlock();
+				if(blk == null){
+					return null;
+				}
+				return new BukkitMCBlock(blk);
+			} catch(NoSuchMethodError ex) {
+				// Probably prior to 1.11
+				return null;
+			}
+		}
+
 		public static BukkitMCProjectileHitEvent _instantiate(MCProjectile p) {
 			return new BukkitMCProjectileHitEvent(
 					new ProjectileHitEvent(
 							((BukkitMCProjectile) p).asProjectile()));
 		}
-		
+
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
