@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -152,9 +154,8 @@ public class CClassType extends Construct {
      *
      * @param superClass
      * @return
-     * @throws ClassNotFoundException
      */
-    public boolean doesExtend(CClassType superClass) throws ClassNotFoundException {
+    public boolean doesExtend(CClassType superClass) {
 	return doesExtend(this, superClass);
     }
 
@@ -223,17 +224,23 @@ public class CClassType extends Construct {
      * @throws ClassNotFoundException If the specified class type cannot be found
      * @return
      */
-    public static boolean doesExtend(CClassType checkClass, CClassType superClass) throws ClassNotFoundException {
+    public static boolean doesExtend(CClassType checkClass, CClassType superClass) {
 	if (checkClass.equals(superClass)) {
 	    // more efficient check
 	    return true;
 	}
 	for (CClassType tCheck : checkClass.getTypes()) {
 	    for (CClassType tSuper : superClass.getTypes()) {
-		Class cSuper = NativeTypeList.getNativeClass(tSuper.val());
-		Class cCheck = NativeTypeList.getNativeClass(tCheck.val());
-		if (!cSuper.isAssignableFrom(cCheck)) {
-		    return false;
+		try {
+		    // TODO: This is currently being done in a very lazy way. It needs to be reworked.
+		    // For now, this is ok, but will not work once user types are added.
+		    Class cSuper = NativeTypeList.getNativeClass(tSuper.val());
+		    Class cCheck = NativeTypeList.getNativeClass(tCheck.val());
+		    if (!cSuper.isAssignableFrom(cCheck)) {
+			return false;
+		    }
+		} catch (ClassNotFoundException ex) {
+		    throw new RuntimeException(ex);
 		}
 	    }
 	}
@@ -247,15 +254,10 @@ public class CClassType extends Construct {
      *
      * @param checkClass
      * @param superClass
-     * @throws Error If the specified class type cannot be found
      * @return
      */
-    public static boolean unsafeDoesExtend(CClassType checkClass, CClassType superClass) throws Error {
-	try {
-	    return doesExtend(checkClass, superClass);
-	} catch (ClassNotFoundException ex) {
-	    throw new Error(ex);
-	}
+    public static boolean unsafeDoesExtend(CClassType checkClass, CClassType superClass) {
+	return doesExtend(checkClass, superClass);
     }
 
     @Override

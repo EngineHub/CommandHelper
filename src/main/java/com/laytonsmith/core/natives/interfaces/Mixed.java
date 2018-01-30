@@ -83,4 +83,29 @@ public interface Mixed extends Cloneable, Documentation {
      */
     public CClassType getContainingClass();
 
+    /**
+     * Generally speaking, we cannot use Java's instanceof keyword to determine if something is an instanceof, because
+     * user classes do not extend the hierarchy of objects in MethodScript. Essentially, we need to extend Java's
+     * instanceof keyword, so in order to do that, we must compare objects with a custom method, rather than rely on
+     * Java's keyword.
+     *
+     * This method works with CClassTypes.
+     * @param type
+     * @return
+     * @throws ClassNotFoundException If the CClassType does not reflect a known type
+     */
+    public boolean isInstanceOf(CClassType type) throws ClassNotFoundException;
+
+    /**
+     * Generally speaking, we cannot use Java's instanceof keyword to determine if something is an instanceof, because
+     * user classes do not extend the hierarchy of objects in MethodScript. Essentially, we need to extend Java's
+     * instanceof keyword, so in order to do that, we must compare objects with a custom method, rather than rely on
+     * Java's keyword.
+     *
+     * This method works with class type directly.
+     * @param type
+     * @return
+     */
+    public boolean isInstanceOf(Class<? extends Mixed> type);
+
 }

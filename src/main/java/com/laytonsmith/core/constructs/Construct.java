@@ -513,4 +513,14 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         return null;
     }
 
+    @Override
+    public boolean isInstanceOf(CClassType type) {
+	return this.typeof().doesExtend(type);
+    }
+
+    @Override
+    public boolean isInstanceOf(Class<? extends Mixed> type) {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 }
