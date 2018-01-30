@@ -24,6 +24,7 @@ import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CSecureString;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -602,6 +603,7 @@ public class Cmdline {
 
     @api
     @noboilerplate
+    @seealso(StringHandling.decrypt_secure_string.class)
     public static class prompt_pass extends AbstractFunction {
 
 	@Override
@@ -638,7 +640,7 @@ public class Cmdline {
 	    try {
 		reader = new jline.console.ConsoleReader();
 		reader.setExpandEvents(false);
-		return new CString(reader.readLine(Static.MCToANSIColors(prompt), cha), t);
+		return new CSecureString(reader.readLine(Static.MCToANSIColors(prompt), cha).toCharArray(), t);
 	    } catch (IOException ex) {
 		throw new CREIOException(ex.getMessage(), t);
 	    } finally {
@@ -661,15 +663,27 @@ public class Cmdline {
 
 	@Override
 	public String docs() {
-	    return "string {prompt, [mask]} Prompts the user for a password. This only works in cmdline mode. If mask is true (default),"
+	    return "secure_string {prompt, [mask]} Prompts the user for a password. This only works in cmdline mode. If mask is true (default),"
 		    + " then the password displays * characters for each password character they type. If mask is false, the field"
-		    + " stays blank as they type. What they type is returned once they hit enter.";
+		    + " stays blank as they type. What they type is returned once they hit enter. The value returned is a secure_string,"
+		    + " so to get the actual password, you must use decrypt_secure_string.";
 	}
 
 	@Override
 	public Version since() {
 	    return CHVersion.V3_3_1;
 	}
+
+	@Override
+	public ExampleScript[] examples() throws ConfigCompileException {
+	    return new ExampleScript[]{
+		new ExampleScript("Basic usage", "prompt_pass('password: ');", "Would wait for the user to type in a password"),
+		new ExampleScript("Decrypting the password", "@password = prompt_pass('password: ');\n"
+			+ "msg(@password);\n"
+			+ "msg(decrypt_secure_string(@password));", "password: ****\n**secure string**\n{p,a,s,s}")
+	    };
+	}
+
 
     }
 

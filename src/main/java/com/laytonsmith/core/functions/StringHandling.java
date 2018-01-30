@@ -2248,9 +2248,16 @@ public class StringHandling {
 	public ExampleScript[] examples() throws ConfigCompileException {
 	    return new ExampleScript[]{
 		new ExampleScript("Demonstrates secure value", "msg(secure_string(\"test\"));"),
-		new ExampleScript("Demonstrates common useage", "@secure = secure_string(array('p','a','s','s'));\n"
+		new ExampleScript("Demonstrates common useage", "secure_string @secure = secure_string(array('p','a','s','s'));\n"
 		+ "msg(@secure); // Won't print the actual password to screen\n"
-		+ "msg(decrypt_secure_string(@secure)); // Prints the actual password (as a char array)")
+		+ "msg(decrypt_secure_string(@secure)); // Prints the actual password (as a char array)"),
+		new ExampleScript("Demonstrates compatibility with other functions", "@profile = array(\n"
+			+ "\tuser: 'username',\n\tpassword: secure_string('password')\n"
+			+ ");\n"
+			+ "msg(@profile);"),
+		new ExampleScript("Demonstrates compability with string class", "string @sec = secure_string('password');"
+			+ " // Not an error, because secure_string extends string\n"
+			+ "msg(decrypt_secure_string(@sec));")
 	    };
 	}
     }
@@ -2277,8 +2284,18 @@ public class StringHandling {
 
 	@Override
 	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-	    CSecureString secure = ArgumentValidation.getObject(args[0], t, CSecureString.class);
-	    return secure.getDecryptedCharCArray();
+	    if(args[0] instanceof CSecureString) {
+		CSecureString secure = ArgumentValidation.getObject(args[0], t, CSecureString.class);
+		return secure.getDecryptedCharCArray();
+	    } else if(args[0] instanceof CString){
+		CArray array = new CArray(Target.UNKNOWN, args[0].val().length());
+		for(char c : args[0].val().toCharArray()) {
+		    array.push(new CString(c, t), t);
+		}
+		return array;
+	    } else {
+		throw new CRECastException("Can only accept strings in " + getName(), t);
+	    }
 	}
 
 	@Override
@@ -2293,12 +2310,29 @@ public class StringHandling {
 
 	@Override
 	public String docs() {
-	    return "array {secure_string} Decrypts a secure_string into a char array. See the examples in {{function|secure_string}}.";
+	    return "array {string} Decrypts a secure_string into a char array. To keep backwards compatibility with"
+		    + " strings in general, this function also accepts normal strings, which are not decrypted, but"
+		    + " instead simply returned in the same format as if it were a secure_string."
+		    + " See the examples in {{function|secure_string}}.";
 	}
 
 	@Override
 	public Version since() {
 	    return CHVersion.V3_3_2;
+	}
+
+	@Override
+	public ExampleScript[] examples() throws ConfigCompileException {
+	    return new ExampleScript[]{
+		new ExampleScript("Use of secure_string and string", "string @secure = secure_string('secure');\n"
+			+ "string @insecure = 'insecure';\n"
+			+ "msg(@secure);\n"
+			+ "msg(@insecure);\n"
+			+ "msg(decrypt_secure_string(@secure));\n"
+			+ "msg(decrypt_secure_string(@insecure));\n"
+			+ "msg(typeof(@secure));\n"
+			+ "msg(typeof(@insecure));\n")
+	    };
 	}
 
     }

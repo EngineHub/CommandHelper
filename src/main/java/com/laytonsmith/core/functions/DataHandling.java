@@ -3427,7 +3427,8 @@ public class DataHandling {
 	    return "string {item} Creates a new construct that is the \"toString\" of an item."
 		    + " For arrays, an human readable version is returned; this should not be"
 		    + " used directly, as the format is not guaranteed to remain consistent. Booleans return \"true\""
-		    + " or \"false\" and null returns \"null\".";
+		    + " or \"false\" and null returns \"null\". Strings (and subclasses of strings) are simply returned"
+		    + " as is.";
 	}
 
 	@Override
@@ -3447,6 +3448,9 @@ public class DataHandling {
 
 	@Override
 	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+	    if(args[0] instanceof CString) {
+		return args[0];
+	    }
 	    return new CString(args[0].val(), t);
 	}
 
