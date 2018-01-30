@@ -64,7 +64,7 @@ public class BukkitMCEnchantment implements MCEnchantment{
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof BukkitMCEnchantment?e.equals(((BukkitMCEnchantment)obj).e):false);
+		return obj instanceof MCEnchantment && e.equals(((MCEnchantment) obj).getHandle());
 	}
 
 	@Override

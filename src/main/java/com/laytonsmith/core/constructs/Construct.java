@@ -8,7 +8,6 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.natives.interfaces.MixedInterfaceRunner;
 import com.laytonsmith.core.natives.interfaces.ObjectModifier;
 import com.laytonsmith.core.natives.interfaces.ObjectType;
 import java.io.File;
@@ -20,6 +19,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -57,6 +57,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      *
      * @param target
      */
+    @Override
     public void setTarget(Target target) {
         this.target = target;
     }
@@ -148,7 +149,9 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * </table>
      *
      * @param c
+     * @param t
      * @return
+     * @throws com.laytonsmith.core.exceptions.MarshalException
      */
     public static String json_encode(Construct c, Target t) throws MarshalException {
         return JSONValue.toJSONString(json_encode0(c, t));
@@ -191,7 +194,9 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * Takes a string and converts it into a Construct
      *
      * @param s
+     * @param t
      * @return
+     * @throws com.laytonsmith.core.exceptions.MarshalException
      */
     public static Construct json_decode(String s, Target t) throws MarshalException {
         if (s == null) {
@@ -329,8 +334,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             //associative array
             CArray a = CArray.GetAssociativeArray(Target.UNKNOWN);
             Map m = (Map) o;
-            for (Object key : m.keySet()) {
-                a.set(key.toString(), GetConstruct(m.get(key), allowResources), Target.UNKNOWN);
+            for (Entry<?, ?> entry : (Set<Entry<?, ?>>) m.entrySet()) {
+                a.set(entry.getKey().toString(), GetConstruct(entry.getValue(), allowResources), Target.UNKNOWN);
             }
             return a;
         } else if (o instanceof Collection) {
@@ -380,15 +385,15 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             if (ca.inAssociativeMode()) {
                 //SortedMap
                 SortedMap<String, Object> map = new TreeMap<>();
-                for (String key : ca.stringKeySet()) {
-                    map.put(key, GetPOJO(ca.get(key, Target.UNKNOWN)));
+                for (Entry<String, Construct> entry : ca.getAssociativeArray().entrySet()) {
+                    map.put(entry.getKey(), GetPOJO(entry.getValue()));
                 }
                 return map;
             } else {
                 //ArrayList
                 ArrayList<Object> list = new ArrayList<Object>((int) ca.size());
-                for (int i = 0; i < ca.size(); i++) {
-                    list.add(GetPOJO(ca.get(i, Target.UNKNOWN)));
+                for (Construct construct : ca.getArray()) {
+                    list.add(GetPOJO(construct));
                 }
                 return list;
             }

@@ -77,10 +77,6 @@ import java.util.List;
 import java.util.Map;
 
 
-/**
- *
- * @author EntityReborn
- */
 public class EntityEvents {
     public static String docs(){
         return "Contains events related to an entity";
@@ -357,20 +353,35 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{id: <macro> The entityID | type: <macro> the entity type of the projectile}"
+			return "{id: <macro> The entityID | type: <macro> the entity type of the projectile | hittype: <string>"
+					+ " the type of object hit, either ENTITY or BLOCK}"
 					+ " Fires when a projectile collides with something."
 					+ " {type | id: the entityID of the projectile |"
-					+ " location: where it makes contact | shooter}"
+					+ " location: where it makes contact | shooter | hittype (MC 1.11) | hit: the entity id or block"
+					+ " location array of the hit object. (MC 1.11)}"
 					+ " {shooter: the entityID of the mob/player that fired"
 					+ " the projectile, or null if it is from a dispenser}"
 					+ " {id}";
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter,
-				BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			if (event instanceof MCProjectileHitEvent) {
 				MCProjectileHitEvent e = (MCProjectileHitEvent) event;
+				if(prefilter.containsKey("hittype")) {
+					String hittype = prefilter.get("hittype").val();
+					if(hittype.equals("ENTITY")) {
+						if(e.getHitEntity() == null) {
+							return false;
+						}
+					} else if(hittype.equals("BLOCK")) {
+						if(e.getHitBlock() == null) {
+							return false;
+						}
+					} else {
+						return false;
+					}
+				}
 				Prefilters.match(prefilter, "id", e.getEntity().getUniqueId().toString(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "type", e.getEntityType().name(), PrefilterType.MACRO);
 				return true;
@@ -388,30 +399,36 @@ public class EntityEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent event)
-				throws EventException {
-			if (event instanceof MCProjectileHitEvent) {
-				Target t = Target.UNKNOWN;
-				MCProjectileHitEvent e = (MCProjectileHitEvent) event;
-				Map<String, Construct> ret = evaluate_helper(e);
-				MCProjectile pro = e.getEntity();
-				ret.put("id", new CString(pro.getUniqueId().toString(), t));
-				ret.put("type", new CString(pro.getType().name(), t));
-				CArray loc = ObjectGenerator.GetGenerator().location(pro.getLocation());
-				ret.put("location", loc);
-				MCProjectileSource shooter = pro.getShooter();
-				if (shooter instanceof MCBlockProjectileSource) {
-					ret.put("shooter", ObjectGenerator.GetGenerator().location(
-							((MCBlockProjectileSource) shooter).getBlock().getLocation()));
-				} else if (shooter instanceof MCEntity) {
-					ret.put("shooter", new CString(((MCEntity) shooter).getUniqueId().toString(), t));
-				} else {
-					ret.put("shooter", CNull.NULL);
-				}
-				return ret;
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			Target t = Target.UNKNOWN;
+			MCProjectileHitEvent e = (MCProjectileHitEvent) event;
+			Map<String, Construct> ret = evaluate_helper(e);
+			MCProjectile pro = e.getEntity();
+			ret.put("id", new CString(pro.getUniqueId().toString(), t));
+			ret.put("type", new CString(pro.getType().name(), t));
+			CArray loc = ObjectGenerator.GetGenerator().location(pro.getLocation());
+			ret.put("location", loc);
+			MCProjectileSource shooter = pro.getShooter();
+			if(shooter instanceof MCBlockProjectileSource) {
+				ret.put("shooter", ObjectGenerator.GetGenerator().location(
+						((MCBlockProjectileSource) shooter).getBlock().getLocation()));
+			} else if(shooter instanceof MCEntity) {
+				ret.put("shooter", new CString(((MCEntity) shooter).getUniqueId().toString(), t));
 			} else {
-				throw new EventException("Could not convert to ProjectileHit");
+				ret.put("shooter", CNull.NULL);
 			}
+			MCBlock hitblock = e.getHitBlock();
+			if(hitblock != null) {
+				ret.put("hit", ObjectGenerator.GetGenerator().location(hitblock.getLocation(), false));
+				ret.put("hittype", new CString("BLOCK", t));
+			} else {
+				MCEntity hitentity = e.getHitEntity();
+				if(hitentity != null) {
+					ret.put("hit", new CString(hitentity.getUniqueId().toString(), t));
+					ret.put("hittype", new CString("ENTITY", t));
+				}
+			}
+			return ret;
 		}
 
 		@Override
@@ -420,8 +437,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCProjectileHitEvent) {
 				MCProjectileHitEvent e = (MCProjectileHitEvent) event;
 				if (key.equalsIgnoreCase("shooter")) {
