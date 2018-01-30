@@ -119,7 +119,7 @@ public class ArrayHandlingTest {
 		assertCEquals(C.onstruct(true), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(1)));
 		assertCEquals(C.onstruct(false), a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(55)));
 	}
-	
+
 	@Test(timeout = 10000)
 	public void testArraySContains() throws CancelCommandException {
 		ArrayHandling.array_scontains a = new ArrayHandling.array_scontains();
@@ -236,7 +236,7 @@ public class ArrayHandlingTest {
 		verify(fakePlayer).sendMessage("{a: a, c: c}");
 	}
 
-	@Test(timeout = 10000)
+	@Test()
 	public void testStringSlice() throws Exception {
 		SRun("msg('slice'[2..])", fakePlayer);
 		verify(fakePlayer).sendMessage("ice");
@@ -314,19 +314,19 @@ public class ArrayHandlingTest {
 	@Test public void testArrayUnique4() throws Exception {
 		assertEquals("{1, 1}", SRun("array_unique(array(1, '1', 1), true)", fakePlayer));
 	}
-	
+
 	@Test public void testArrayGetClone() throws Exception { // This is expected to be a deep clone.
 		Run("@a = array(array(array('value'))); @b = @a[]; @b[0][0][0] = 'changedValue'; msg(@a[0][0][0]); msg(@b[0][0][0]);", fakePlayer);
 		verify(fakePlayer).sendMessage("value");
 		verify(fakePlayer).sendMessage("changedValue");
 	}
-	
+
 	@Test public void testArrayDeepClone() throws Exception {
 		Run("@a = array(array(array('value'))); @b = array_deep_clone(@a); @b[0][0][0] = 'changedValue'; msg(@a[0][0][0]); msg(@b[0][0][0]);", fakePlayer);
 		verify(fakePlayer).sendMessage("value");
 		verify(fakePlayer).sendMessage("changedValue");
 	}
-	
+
 	@Test public void testArrayShallowClone() throws Exception {
 		Run("@a = array(array('value')); @b = array_shallow_clone(@a); @b[0][0] = 'changedValue'; msg(equals(@a[0][0], @b[0][0]));"
 				+ "msg(ref_equals(@a, @b)); msg(@a[0][0])", fakePlayer);
@@ -334,12 +334,12 @@ public class ArrayHandlingTest {
 		verify(fakePlayer).sendMessage("false");
 		verify(fakePlayer).sendMessage("changedValue");
 	}
-	
+
 	@Test public void testArrayGetCloneRefCouples() throws Exception {
 		Run("@a = array('Meow'); @b = array(@a, @a, array(@a)); @c = @b[]; msg((ref_equals(@c[0], @c[1]) && ref_equals(@c[0], @c[2][0])));", fakePlayer);
 		verify(fakePlayer).sendMessage("true");
 	}
-	
+
 	@Test public void testArrayGetCloneRecursiveArray() throws Exception {
 		Run("@a = array(); @b = array(); @a[0] = @b; @b[0] = @a; @c = @a[]; msg((ref_equals(@c[0], @c[0][0][0]) && ref_equals(@c, @c[0][0])));", fakePlayer);
 		verify(fakePlayer).sendMessage("true");

@@ -5,6 +5,7 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.ObjectType;
@@ -20,8 +21,8 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     public static final CClassType TYPE = CClassType.get("string");
 
-    public CString(String value, Target t){
-        super(value==null?"":value, ConstructType.STRING, t);
+    public CString(String value, Target t) {
+	super(value == null ? "" : value, ConstructType.STRING, t);
     }
 
     public CString(char value, Target t) {
@@ -43,10 +44,10 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
     }
 
     @Override
-    public Construct get(String index, Target t) {
+    public final Construct get(String index, Target t) {
 	try {
-	    int i = (int) Integer.parseInt(index);
-	    return new CString(this.val().charAt(i), t);
+	    int i = Integer.parseInt(index);
+	    return get(i, t);
 	} catch (NumberFormatException e) {
 	    throw new CREFormatException("Expecting numerical index, but recieved " + index, t);
 	}
@@ -77,7 +78,7 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 
     @Override
     public Construct get(int index, Target t) throws ConfigRuntimeException {
-	return get(Integer.toString(index), t);
+	return new CString(this.val().charAt(index), t);
     }
 
     @Override
@@ -87,11 +88,11 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 
     @Override
     public Set<Construct> keySet() {
-	throw new UnsupportedOperationException("Not supported.");
+	throw new CREIndexOverflowException("Not supported.", Target.UNKNOWN);
     }
 
     @Override
-    public Construct get(Construct index, Target t) throws ConfigRuntimeException {
+    public final Construct get(Construct index, Target t) throws ConfigRuntimeException {
 	int i = Static.getInt32(index, t);
 	return get(i, t);
     }

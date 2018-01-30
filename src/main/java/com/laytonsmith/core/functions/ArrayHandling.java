@@ -223,53 +223,25 @@ public class ArrayHandling {
 		    }
 		}
 	    } else if (args[0] instanceof ArrayAccess) {
+		ArrayAccess aa = (ArrayAccess) args[0];
 		if (index instanceof CSlice) {
-		    ArrayAccess aa = (ArrayAccess) args[0];
 		    //It's a range
-		    long start = ((CSlice) index).getStart();
-		    long finish = ((CSlice) index).getFinish();
+		    int start = (int)((CSlice) index).getStart();
+		    int finish = (int)((CSlice) index).getFinish();
 		    try {
 			//Convert negative indexes
 			if (start < 0) {
-			    start = aa.val().length() + start;
+			    start = (int)aa.size() + start;
 			}
 			if (finish < 0) {
-			    finish = aa.val().length() + finish;
+			    finish = (int)aa.size() + finish + 1;
 			}
-			if (finish < start) {
-			    //return an empty array in cases where the indexes don't make sense
-			    return new CString("", t);
-			}
-			StringBuilder b = new StringBuilder();
-			String val = aa.val();
-			for (long i = start; i <= finish; i++) {
-			    try {
-				b.append(val.charAt((int) i));
-			    } catch (StringIndexOutOfBoundsException e) {
-				throw new CRERangeException("String bounds out of range. Tried to get character at index " + i + ", but indicies only go up to " + (val.length() - 1), t);
-			    }
-			}
-			return new CString(b.toString(), t);
+			return aa.slice(start, finish, t);
 		    } catch (NumberFormatException e) {
 			throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
 		    }
 		} else {
-		    try {
-			return new CString(args[0].val().charAt(Static.getInt32(index, t)), t);
-		    } catch (ConfigRuntimeException e) {
-			if (e instanceof CRECastException) {
-			    if (args[0] instanceof CArray) {
-				throw new CRECastException("Expecting an integer index for the array, but found \"" + index
-					+ "\". (Array is not associative, and cannot accept string keys here.)", t);
-			    } else {
-				throw new CRECastException("Expecting an array, but \"" + args[0] + "\" was found.", t);
-			    }
-			} else {
-			    throw e;
-			}
-		    } catch (StringIndexOutOfBoundsException e) {
-			throw new CRERangeException("No index at " + index, t);
-		    }
+		    return aa.get(index, t);
 		}
 	    } else {
 		throw new CRECastException("Argument 1 of array_get must be an array", t);
@@ -1170,12 +1142,12 @@ public class ArrayHandling {
 
 	@Override
 	public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-	    if (args[0] instanceof ArrayAccess) {
-		ArrayAccess ca = (ArrayAccess) args[0];
+	    if (args[0] instanceof CArray) {
+		CArray ca = Static.getArray(args[0], t);
 		CArray ca2 = new CArray(t);
-		for (Construct c : ca.keySet()) {
+		ca.keySet().forEach((c) -> {
 		    ca2.push(ca.get(c.val(), t), t);
-		}
+		});
 		return ca2;
 	    } else {
 		throw new CRECastException(this.getName() + " expects arg 1 to be an array", t);
