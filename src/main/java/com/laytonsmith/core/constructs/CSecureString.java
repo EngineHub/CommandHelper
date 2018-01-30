@@ -5,12 +5,17 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -46,13 +51,13 @@ public class CSecureString extends CString {
     private void construct(byte[] val) {
 	try {
 	    SecureRandom rand = SecureRandom.getInstanceStrong();
-	    byte[] keyBytes = new byte[128];
+	    byte[] keyBytes = new byte[24];
 	    rand.nextBytes(keyBytes);
-	    byte[] ivBytes = new byte[128];
-	     SecretKeySpec key = new SecretKeySpec(keyBytes, "DES");
+	    byte[] ivBytes = new byte[8];
+	     SecretKeySpec key = new SecretKeySpec(keyBytes, "DESede");
 	    IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
-	    Cipher encrypter = Cipher.getInstance("DES/CBC/PKCS5Padding");
-	    decrypter = Cipher.getInstance("DES/CBC/PKCS5Padding");
+	    Cipher encrypter = Cipher.getInstance("DESede/CBC/PKCS5Padding");
+	    decrypter = Cipher.getInstance("DESede/CBC/PKCS5Padding");
 	    encrypter.init(Cipher.ENCRYPT_MODE, key, ivSpec);
 	    decrypter.init(Cipher.DECRYPT_MODE, key, ivSpec);
 	    encrypted = new byte[encrypter.getOutputSize(val.length)];
@@ -94,6 +99,18 @@ public class CSecureString extends CString {
 	}
     }
 
+    public CArray getDecryptedCharCArray() {
+	char[] array = getDecryptedCharArray();
+	CArray carray = new CArray(Target.UNKNOWN, array.length);
+	for(char c : array) {
+	    if(c == '\0') {
+		continue;
+	    }
+	    carray.push(new CString(c, Target.UNKNOWN), Target.UNKNOWN);
+	}
+	return carray;
+    }
+
     @Override
     public String docs() {
 	return "A secure_string is a string which cannot normally be toString'd, and whose underlying representation"
@@ -120,5 +137,47 @@ public class CSecureString extends CString {
     public CClassType[] getInterfaces() {
 	return new CClassType[]{};
     }
+
+    static {
+	fixKeyLength();
+	//Security.setProperty("crypto.policy", "unlimited");
+    }
+    public static void fixKeyLength() {
+    String errorString = "Failed manually overriding key-length permissions.";
+    int newMaxKeyLength;
+    try {
+        if ((newMaxKeyLength = Cipher.getMaxAllowedKeyLength("AES")) < 256) {
+            Class c = Class.forName("javax.crypto.CryptoAllPermissionCollection");
+            Constructor con = c.getDeclaredConstructor();
+            con.setAccessible(true);
+            Object allPermissionCollection = con.newInstance();
+            Field f = c.getDeclaredField("all_allowed");
+            f.setAccessible(true);
+            f.setBoolean(allPermissionCollection, true);
+
+            c = Class.forName("javax.crypto.CryptoPermissions");
+            con = c.getDeclaredConstructor();
+            con.setAccessible(true);
+            Object allPermissions = con.newInstance();
+            f = c.getDeclaredField("perms");
+            f.setAccessible(true);
+            ((Map) f.get(allPermissions)).put("*", allPermissionCollection);
+
+            c = Class.forName("javax.crypto.JceSecurityManager");
+            f = c.getDeclaredField("defaultPolicy");
+            f.setAccessible(true);
+            Field mf = Field.class.getDeclaredField("modifiers");
+            mf.setAccessible(true);
+            mf.setInt(f, f.getModifiers() & ~Modifier.FINAL);
+            f.set(null, allPermissions);
+
+            newMaxKeyLength = Cipher.getMaxAllowedKeyLength("AES");
+        }
+    } catch (Exception e) {
+        throw new RuntimeException(errorString, e);
+    }
+    if (newMaxKeyLength < 256)
+        throw new RuntimeException(errorString); // hack failed
+}
 
 }
