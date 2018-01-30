@@ -8,6 +8,7 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.KeywordList;
+import com.laytonsmith.core.constructs.CDecimal;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CIdentifier;
@@ -1465,11 +1466,21 @@ public final class MethodScriptCompiler {
                 Construct c = Static.resolveConstruct(t.val(), t.target);
                 if (c instanceof CString && fileOptions.isStrict()) {
                     compilerErrors.add(new ConfigCompileException("Bare strings are not allowed in strict mode", t.target));
-                } else if (c instanceof CInt && next1.type == TType.DOT && next2.type == TType.LIT) {
-                    // make CDouble here because otherwise Long.parseLong() will remove
+                } else if ((c instanceof CInt || c instanceof CDecimal) && next1.type == TType.DOT && next2.type == TType.LIT) {
+                    // make CDouble/CDecimal here because otherwise Long.parseLong() will remove
                     // minus zero before decimals and leading zeroes after decimals
                     try {
-                        c = new CDouble(Double.parseDouble(t.val() + '.' + next2.val()), t.target);
+			if(t.value.startsWith("0m")) {
+			    // CDecimal
+			    String neg = "";
+			    if(prev1.value.equals('-')) {
+				neg = "-";
+			    }
+			    c = new CDecimal(neg + t.value.substring(2) + '.' + next2.value, t.target);
+			} else {
+			    // CDouble
+			    c = new CDouble(Double.parseDouble(t.val() + '.' + next2.val()), t.target);
+			}
                         i += 2;
                     } catch (NumberFormatException e) {
                         // Not a double

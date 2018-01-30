@@ -27,6 +27,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.CDecimal;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -422,12 +423,15 @@ public final class Static {
     /**
      * Regex patterns
      */
-    private static final Pattern INVALID_HEX = Pattern.compile("0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*");
-    private static final Pattern VALID_HEX = Pattern.compile("0x[a-fA-F0-9]+");
-    private static final Pattern INVALID_BINARY = Pattern.compile("\"0b[0-1]*[^0-1]+[0-1]*\"");
-    private static final Pattern VALID_BINARY = Pattern.compile("0b[0-1]+");
-    private static final Pattern INVALID_OCTAL = Pattern.compile("0o[0-7]*[^0-7]+[0-7]*");
-    private static final Pattern VALID_OCTAL = Pattern.compile("0o[0-7]+");
+    private static final Pattern INVALID_HEX = Pattern.compile("-?0x[a-fA-F0-9]*[^a-fA-F0-9]+[a-fA-F0-9]*");
+    private static final Pattern VALID_HEX = Pattern.compile("-?0x[a-fA-F0-9]+");
+    private static final Pattern INVALID_BINARY = Pattern.compile("-?0b[01]*[^01]+[01]*");
+    private static final Pattern VALID_BINARY = Pattern.compile("-?0b[01]+");
+    private static final Pattern INVALID_OCTAL = Pattern.compile("-?0o[0-7]*[^0-7]+[0-7]*");
+    private static final Pattern VALID_OCTAL = Pattern.compile("-?0o[0-7]+");
+    private static final Pattern VALID_DECIMAL = Pattern.compile("-?0m[0-9]+");
+    private static final Pattern INVALID_DECIMAL = Pattern.compile("-?0m[0-9]*[^0-9]+[0-9]*");
+
 
     /**
      * Given a string input, creates and returns a Construct of the appropriate type. This takes into account that null,
@@ -473,6 +477,12 @@ public final class Static {
 	}
 	if (VALID_OCTAL.matcher(val).matches()) {
 	    return new CInt(Long.parseLong(val.substring(2), 8), t);
+	}
+	if(INVALID_DECIMAL.matcher(val).matches()) {
+	    throw new CREFormatException("Decimal numbers must only contain digits, but \"" + val + "\" was found.", t);
+	}
+	if(VALID_DECIMAL.matcher(val).matches()) {
+	    return new CDecimal(val.substring(2), t);
 	}
 	try {
 	    return new CInt(Long.parseLong(val), t);

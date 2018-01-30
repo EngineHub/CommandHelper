@@ -2,7 +2,6 @@ package com.laytonsmith.PureUtilities;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassReferenceMirror;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -44,7 +43,7 @@ import java.util.Set;
  *
  * <pre><code>
  *
- * public static interface UserIDVisitable {
+ *   public static interface UserIDVisitable {
  *	void accept(UserIDVisitor v);
  *    }
  *    public static interface UserIDVisitor {
@@ -237,7 +236,6 @@ public class ExhaustiveVisitor<T> {
 		    + " public void visit(" + searchFor.getName().replace("$", ".") + ") in class "
 		    + this.getClass().getName());
 	}
-	candidate.setAccessible(true);
 	try {
 	    candidate.invoke(this, object);
 	} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
