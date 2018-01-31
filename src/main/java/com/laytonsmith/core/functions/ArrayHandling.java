@@ -1145,9 +1145,9 @@ public class ArrayHandling {
 	    if (args[0] instanceof CArray) {
 		CArray ca = Static.getArray(args[0], t);
 		CArray ca2 = new CArray(t);
-		ca.keySet().forEach((c) -> {
-		    ca2.push(ca.get(c.val(), t), t);
-		});
+		for(Construct c : ca.keySet()) {
+		    ca2.push(ca.get(c, t), t);
+		}
 		return ca2;
 	    } else {
 		throw new CRECastException(this.getName() + " expects arg 1 to be an array", t);
