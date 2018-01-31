@@ -7,8 +7,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.material.MaterialData;
 
-public class BukkitMCMinecart extends BukkitMCVehicle
-		implements MCMinecart {
+public class BukkitMCMinecart extends BukkitMCVehicle implements MCMinecart {
 
 	Minecart m;
 

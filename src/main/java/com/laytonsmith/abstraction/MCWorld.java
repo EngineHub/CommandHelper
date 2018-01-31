@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -22,102 +20,98 @@ import com.laytonsmith.core.constructs.Target;
 
 import java.util.List;
 
-/**
- *
- *
- */
 public interface MCWorld extends MCMetadatable {
-	public List<MCPlayer> getPlayers();
-	public List<MCEntity> getEntities();
-    public List<MCLivingEntity> getLivingEntities();
+	List<MCPlayer> getPlayers();
+	List<MCEntity> getEntities();
+	List<MCLivingEntity> getLivingEntities();
 
-    public String getName();
-	public long getSeed();
-	public MCWorldEnvironment getEnvironment();
-	public String getGenerator();
-	public MCWorldType getWorldType();
+	String getName();
+	long getSeed();
+	MCWorldEnvironment getEnvironment();
+	String getGenerator();
+	MCWorldType getWorldType();
 
 	int getSeaLevel();
 	int getMaxHeight();
 
-	public MCDifficulty getDifficulty();
-	public void setDifficulty(MCDifficulty difficulty);
-	public boolean getPVP();
-	public void setPVP(boolean pvp);
-	public String[] getGameRules();
-	public String getGameRuleValue(String gameRule);
-	public boolean setGameRuleValue(MCGameRule gameRule, String value);
-	public MCWorldBorder getWorldBorder();
+	MCDifficulty getDifficulty();
+	void setDifficulty(MCDifficulty difficulty);
+	boolean getPVP();
+	void setPVP(boolean pvp);
+	String[] getGameRules();
+	String getGameRuleValue(String gameRule);
+	boolean setGameRuleValue(MCGameRule gameRule, String value);
+	MCWorldBorder getWorldBorder();
 
-    public MCBlock getBlockAt(int x, int y, int z);
-	public MCChunk getChunkAt(int x, int z);
-	public MCChunk getChunkAt(MCBlock b);
-	public MCChunk getChunkAt(MCLocation l);
-	public MCChunk[] getLoadedChunks();
+	MCBlock getBlockAt(int x, int y, int z);
+	MCChunk getChunkAt(int x, int z);
+	MCChunk getChunkAt(MCBlock b);
+	MCChunk getChunkAt(MCLocation l);
+	MCChunk[] getLoadedChunks();
 
-	public boolean regenerateChunk(int x, int y);
+	boolean regenerateChunk(int x, int y);
 
-    public MCEntity spawn(MCLocation l, Class mobType);
+	MCEntity spawn(MCLocation l, Class mobType);
 
-	public MCEntity spawn(MCLocation l, MCEntityType entType);
+	MCEntity spawn(MCLocation l, MCEntityType entType);
 
-	public MCEntity spawn(MCLocation l, MCEntityType.MCVanillaEntityType entityType);
+	MCEntity spawn(MCLocation l, MCEntityType.MCVanillaEntityType entityType);
 
-	public boolean generateTree(MCLocation l, MCTreeType treeType);
+	boolean generateTree(MCLocation l, MCTreeType treeType);
 
-	public void playEffect(MCLocation l, MCEffect mCEffect, int data, int radius);
-	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data);
+	void playEffect(MCLocation l, MCEffect mCEffect, int data, int radius);
+	void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data);
 
-	public void playSound(MCLocation l, MCSound sound, float volume, float pitch);
-	public void playSound(MCLocation l, String sound, float volume, float pitch);
-	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch);
-	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch);
+	void playSound(MCLocation l, MCSound sound, float volume, float pitch);
+	void playSound(MCLocation l, String sound, float volume, float pitch);
+	void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch);
+	void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch);
 
-    public MCItem dropItemNaturally(MCLocation l, MCItemStack is);
+	MCItem dropItemNaturally(MCLocation l, MCItemStack is);
 
-    public MCItem dropItem(MCLocation l, MCItemStack is);
+	MCItem dropItem(MCLocation l, MCItemStack is);
 
-	public MCLightningStrike strikeLightning(MCLocation GetLocation);
+	MCLightningStrike strikeLightning(MCLocation GetLocation);
 
-	public MCLightningStrike strikeLightningEffect(MCLocation GetLocation);
+	MCLightningStrike strikeLightningEffect(MCLocation GetLocation);
 
-    public void setStorm(boolean b);
-	public void setThundering(boolean b);
-	public void setWeatherDuration(int time);
-	public void setThunderDuration(int time);
-	public boolean isStorming();
-	public boolean isThundering();
+	void setStorm(boolean b);
+	void setThundering(boolean b);
+	void setWeatherDuration(int time);
+	void setThunderDuration(int time);
+	boolean isStorming();
+	boolean isThundering();
 
-    public MCLocation getSpawnLocation();
-    public void setSpawnLocation(int x, int y, int z);
+	MCLocation getSpawnLocation();
+	void setSpawnLocation(int x, int y, int z);
 
-    public void refreshChunk(int x, int z);
-	public void loadChunk(int x, int z);
- 	public void unloadChunk(int x, int z);
+	void refreshChunk(int x, int z);
+	void loadChunk(int x, int z);
+	void unloadChunk(int x, int z);
 
-    public void setTime(long time);
+	void setTime(long time);
 
-    public long getTime();
+	long getTime();
 
-    public CArray spawnMob(MCMobs name, String subClass, int qty, MCLocation location, Target t);
+	CArray spawnMob(MCMobs name, String subClass, int qty, MCLocation location, Target t);
 
-	public MCFallingBlock spawnFallingBlock(MCLocation loc, int type, byte data);
+	MCFallingBlock spawnFallingBlock(MCLocation loc, int type, byte data);
 
-	public MCFirework launchFirework(MCLocation l, int strength, List<MCFireworkEffect> effects);
+	MCFirework launchFirework(MCLocation l, int strength, List<MCFireworkEffect> effects);
 
-	public MCBiomeType getBiome(int x, int z);
+	MCBiomeType getBiome(int x, int z);
 
-    public void setBiome(int x, int z, MCBiomeType type);
+	void setBiome(int x, int z, MCBiomeType type);
 
-    public MCBlock getHighestBlockAt(int x, int z);
+	MCBlock getHighestBlockAt(int x, int z);
 
-    public void explosion(double x, double y, double z, float size, boolean safe);
+	void explosion(double x, double y, double z, float size, boolean safe);
 
 	/**
 	 * This method performs some check on the world to ensure it exists.
 	 * @return
 	 */
-	public boolean exists();
+	boolean exists();
 
-	public void save();
+	void save();
 }

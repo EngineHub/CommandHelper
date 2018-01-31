@@ -3,11 +3,6 @@ package com.laytonsmith.abstraction.enums;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.core.constructs.Construct.ConstructType;
 
-/**
- * Gamerule names
- *
- * @author Hekta
- */
 @MEnum("GameRule")
 public enum MCGameRule {
 	COMMANDBLOCKOUTPUT("commandBlockOutput"),
@@ -44,11 +39,11 @@ public enum MCGameRule {
 		this.ruleType = type;
 	}
 
-    public String getGameRule() {
-        return this.gameRule;
-    }
+	public String getGameRule() {
+		return this.gameRule;
+	}
 
-    public ConstructType getRuleType() {
+	public ConstructType getRuleType() {
 		return this.ruleType;
 	}
 }

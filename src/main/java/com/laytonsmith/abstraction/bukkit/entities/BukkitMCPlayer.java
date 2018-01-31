@@ -7,7 +7,6 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -39,7 +38,6 @@ import org.bukkit.Server;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -51,13 +49,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- *
- * 
- */
 public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCCommandSender, MCOfflinePlayer {
 
-    Player p;
+	Player p;
 
 	public BukkitMCPlayer(Entity player) {
 		super(player);
@@ -65,104 +59,104 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	public Player _Player() {
-        return p;
-    }
+		return p;
+	}
 
 	@Override
-    public boolean canSee(MCPlayer p) {
-        return this.p.canSee(((BukkitMCPlayer)p)._Player());
-    }
+	public boolean canSee(MCPlayer p) {
+		return this.p.canSee(((BukkitMCPlayer)p)._Player());
+	}
 
 	@Override
-    public void chat(String chat) {
-        p.chat(chat);
-    }
+	public void chat(String chat) {
+		p.chat(chat);
+	}
 
 	@Override
-    public InetSocketAddress getAddress() {
-        return p.getAddress();
-    }
+	public InetSocketAddress getAddress() {
+		return p.getAddress();
+	}
 
 	@Override
-    public boolean getAllowFlight() {
-        return p.getAllowFlight();
-    }
+	public boolean getAllowFlight() {
+		return p.getAllowFlight();
+	}
 
 	@Override
-    public MCLocation getCompassTarget() {
-        return new BukkitMCLocation(p.getCompassTarget());
-    }
+	public MCLocation getCompassTarget() {
+		return new BukkitMCLocation(p.getCompassTarget());
+	}
 
 	@Override
-    public String getDisplayName() {
-        return p.getDisplayName();
-    }
+	public String getDisplayName() {
+		return p.getDisplayName();
+	}
 
 	@Override
-    public float getExp() {
-        return p.getExp();
-    }
+	public float getExp() {
+		return p.getExp();
+	}
 
 	@Override
-    public long getFirstPlayed() {
+	public long getFirstPlayed() {
 		return p.getFirstPlayed();
 	}
 
 	@Override
-    public MCPlayerInventory getInventory() {
-        if (p == null || p.getInventory() == null) {
-            return null;
-        }
-        return new BukkitMCPlayerInventory(p.getInventory());
-    }
+	public MCPlayerInventory getInventory() {
+		if(p == null || p.getInventory() == null) {
+			return null;
+		}
+		return new BukkitMCPlayerInventory(p.getInventory());
+	}
 
 	@Override
-    public MCItemStack getItemAt(Integer slot) {
-        if (slot == null) {
-            return new BukkitMCItemStack(p.getItemInHand());
-        }
-        ItemStack is = null;
-        //Special slots
-        if (slot == 100) {
-            is = p.getInventory().getBoots();
-        } else if (slot == 101) {
-            is = p.getInventory().getLeggings();
-        } else if (slot == 102) {
-            is = p.getInventory().getChestplate();
-        } else if (slot == 103) {
-            is = p.getInventory().getHelmet();
-        } else if (slot == -106) {
+	public MCItemStack getItemAt(Integer slot) {
+		if(slot == null) {
+			return new BukkitMCItemStack(p.getItemInHand());
+		}
+		ItemStack is = null;
+		//Special slots
+		if(slot == 100) {
+			is = p.getInventory().getBoots();
+		} else if(slot == 101) {
+			is = p.getInventory().getLeggings();
+		} else if(slot == 102) {
+			is = p.getInventory().getChestplate();
+		} else if(slot == 103) {
+			is = p.getInventory().getHelmet();
+		} else if(slot == -106) {
 			is = p.getInventory().getItemInOffHand();
 		}
-        if (slot >= 0 && slot <= 35) {
-            is = p.getInventory().getItem(slot);
-        }
-        if (is == null) {
-            return null;
-        } else {
-            return new BukkitMCItemStack(is);
-        }
-    }
+		if(slot >= 0 && slot <= 35) {
+			is = p.getInventory().getItem(slot);
+		}
+		if(is == null) {
+			return null;
+		} else {
+			return new BukkitMCItemStack(is);
+		}
+	}
 
 	@Override
-    public long getLastPlayed() {
+	public long getLastPlayed() {
 		return p.getLastPlayed();
 	}
 
 	@Override
-    public int getLevel() {
-        return p.getLevel();
-    }
+	public int getLevel() {
+		return p.getLevel();
+	}
 
 	@Override
-    public MCPlayer getPlayer() {
-        return new BukkitMCPlayer(p);
-    }
+	public MCPlayer getPlayer() {
+		return new BukkitMCPlayer(p);
+	}
 
 	@Override
-    public long getPlayerTime() {
-        return p.getPlayerTime();
-    }
+	public long getPlayerTime() {
+		return p.getPlayerTime();
+	}
 
 	@Override
 	public MCWeather getPlayerWeather() {
@@ -170,9 +164,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-    public int getRemainingFireTicks() {
-        return p.getFireTicks();
-    }
+	public int getRemainingFireTicks() {
+		return p.getFireTicks();
+	}
 
 	@Override
 	public int getTotalExperience()
@@ -189,7 +183,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public int getExpAtLevel() {
 		int level = p.getLevel();
 		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
-			if (level > 30) {
+			if(level > 30) {
 				return (int) (3.5 * Math.pow(level, 2) - 151.5 * level + 2220);
 			}
 			if(level > 15) {
@@ -197,10 +191,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			}
 			return 17 * level;
 		} else {
-			if (level > 30) {
+			if(level > 30) {
 				return (int) (4.5 * Math.pow(level, 2) - 162.5 * level + 2220);
 			}
-			if (level > 15) {
+			if(level > 15) {
 				return (int) (2.5 * Math.pow(level, 2) - 40.5 * level + 360);
 			}
 			return (int) (Math.pow(level, 2) + 6 * level);
@@ -228,29 +222,29 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 	
 	@Override
-    public void giveExp(int xp) {
-        p.giveExp(xp);
-    }
+	public void giveExp(int xp) {
+		p.giveExp(xp);
+	}
 
 	@Override
-    public boolean hasPlayedBefore() {
+	public boolean hasPlayedBefore() {
 		return p.hasPlayedBefore();
 	}
 
 	@Override
-    public boolean isBanned() {
-        return p.isBanned();
-    }
+	public boolean isBanned() {
+		return p.isBanned();
+	}
 
 	@Override
-    public boolean isOnline() {
-        return p.isOnline();
-    }
+	public boolean isOnline() {
+		return p.isOnline();
+	}
 
 	@Override
-    public boolean isOp() {
-        return p.isOp();
-    }
+	public boolean isOp() {
+		return p.isOp();
+	}
 
 	@Override
 	public boolean hasPermission(String perm) {
@@ -267,9 +261,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		// As in https://github.com/sk89q/WorldEdit/blob/master/
 		// worldedit-bukkit/src/main/java/com/sk89q/wepif/DinnerPermsResolver.java#L112-L126
 		List<String> groupNames = new ArrayList<String>();
-		for (PermissionAttachmentInfo permAttach : p.getEffectivePermissions()) {
+		for(PermissionAttachmentInfo permAttach : p.getEffectivePermissions()) {
 			String perm = permAttach.getPermission();
-			if (!(perm.startsWith(Static.groupPrefix) && permAttach.getValue())) {
+			if(!(perm.startsWith(Static.groupPrefix) && permAttach.getValue())) {
 				continue;
 			}
 			groupNames.add(perm.substring(Static.groupPrefix.length(), perm.length()));
@@ -288,9 +282,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-    public boolean isSneaking() {
-        return p.isSneaking();
-    }
+	public boolean isSneaking() {
+		return p.isSneaking();
+	}
 	
 	@Override
 	public boolean isSprinting() {
@@ -298,33 +292,33 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-    public boolean isWhitelisted() {
-        return p.isWhitelisted();
-    }
+	public boolean isWhitelisted() {
+		return p.isWhitelisted();
+	}
 
 	@Override
-    public void kickPlayer(String message) {
-        p.kickPlayer(message);
-    }
+	public void kickPlayer(String message) {
+		p.kickPlayer(message);
+	}
 
 	@Override
-    public boolean removeEffect(int potionID) {
+	public boolean removeEffect(int potionID) {
 		PotionEffectType t = PotionEffectType.getById(potionID);
 		boolean hasIt = false;
 		for(PotionEffect pe : p.getActivePotionEffects()) {
-			if (pe.getType() == t) {
+			if(pe.getType() == t) {
 				hasIt = true;
 				break;
 			}
 		}
 		p.removePotionEffect(t);
 		return hasIt;
-    }
+	}
 
 	@Override
-    public void resetPlayerTime() {
-        p.resetPlayerTime();
-    }
+	public void resetPlayerTime() {
+		p.resetPlayerTime();
+	}
 
 	@Override
 	public void resetPlayerWeather() {
@@ -332,16 +326,16 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-    public void sendMessage(String string) {
+	public void sendMessage(String string) {
 		//The client doesn't like tabs
 		string = string.replaceAll("\t", "    ");
-        p.sendMessage(string);
-    }
+		p.sendMessage(string);
+	}
 
 	@Override
 	public void sendResourcePack(String url) {
-            p.setResourcePack(url);
-    }
+			p.setResourcePack(url);
+	}
 
 	@Override
 	public void sendTitle(String title, String subtitle, int fadein, int stay, int fadeout) {
@@ -362,24 +356,24 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-    public void setAllowFlight(boolean flight) {
-        p.setAllowFlight(flight);
-    }
+	public void setAllowFlight(boolean flight) {
+		p.setAllowFlight(flight);
+	}
 
 	@Override
-    public void setCompassTarget(MCLocation l) {
+	public void setCompassTarget(MCLocation l) {
 		p.setCompassTarget(((BukkitMCLocation) l)._Location());
 	}
 
 	@Override
-    public void setDisplayName(String name) {
-        p.setDisplayName(name);
-    }
+	public void setDisplayName(String name) {
+		p.setDisplayName(name);
+	}
 
 	@Override
-    public void setExp(float i) {
-        p.setExp(i);
-    }
+	public void setExp(float i) {
+		p.setExp(i);
+	}
 
 	@Override
 	public void setFlying(boolean flight) {
@@ -387,14 +381,14 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-    public void setLevel(int xp) {
-        p.setLevel(xp);
-    }
+	public void setLevel(int xp) {
+		p.setLevel(xp);
+	}
 
 	@Override
-    public void setPlayerTime(Long time, boolean relative) {
-        p.setPlayerTime(time, relative);
-    }
+	public void setPlayerTime(Long time, boolean relative) {
+		p.setPlayerTime(time, relative);
+	}
 
 	@Override
 	public void setPlayerWeather(MCWeather type) {
@@ -402,9 +396,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-    public void setRemainingFireTicks(int i) {
-        p.setFireTicks(i);
-    }
+	public void setRemainingFireTicks(int i) {
+		p.setFireTicks(i);
+	}
 
 	@Override
 	public void setSpectatorTarget(MCEntity entity) {
@@ -430,15 +424,15 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-    public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        Server server = Bukkit.getServer();
-        String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+	public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+		Server server = Bukkit.getServer();
+		String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
 
-        Class serverClass = Class.forName("org.bukkit.craftbukkit." + version + ".CraftServer");
+		Class serverClass = Class.forName("org.bukkit.craftbukkit." + version + ".CraftServer");
 
-        if (!server.getClass().isAssignableFrom(serverClass)) {
-            throw new IllegalStateException("Running server isn't CraftBukkit");
-        }
+		if(!server.getClass().isAssignableFrom(serverClass)) {
+			throw new IllegalStateException("Running server isn't CraftBukkit");
+		}
 
 		// Since 1.7.8
 		Class nmsMinecraftServerClass = Class.forName("net.minecraft.server." + version + ".MinecraftServer");
@@ -474,44 +468,44 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public void setTotalExperience(int total)
 	{
-        p.setTotalExperience(total);
+		p.setTotalExperience(total);
 	}
 
 	@Override
-    public void setVanished(boolean set, MCPlayer to) {
-        if (!set) {
-            p.showPlayer(((BukkitMCPlayer)to)._Player());
-        } else {
-            p.hidePlayer(((BukkitMCPlayer)to)._Player());
-        }
-    }
+	public void setVanished(boolean set, MCPlayer to) {
+		if(!set) {
+			p.showPlayer(((BukkitMCPlayer)to)._Player());
+		} else {
+			p.hidePlayer(((BukkitMCPlayer)to)._Player());
+		}
+	}
 
 	@Override
-    public void setWhitelisted(boolean value) {
-        p.setWhitelisted(value);
-    }
+	public void setWhitelisted(boolean value) {
+		p.setWhitelisted(value);
+	}
 
 	@Override
-    public void setPlayerListName(String listName) {
-        p.setPlayerListName(listName);
-    }
+	public void setPlayerListName(String listName) {
+		p.setPlayerListName(listName);
+	}
 
 	@Override
-    public String getPlayerListName() {
-        return p.getPlayerListName();
-    }
+	public String getPlayerListName() {
+		return p.getPlayerListName();
+	}
 
 	@Override
-    public boolean isNewPlayer() {
-        //Note the reversed logic here. If they have NOT played before, they are
-        //a new player.
-        return !p.hasPlayedBefore();
-    }
+	public boolean isNewPlayer() {
+		//Note the reversed logic here. If they have NOT played before, they are
+		//a new player.
+		return !p.hasPlayedBefore();
+	}
 
 	@Override
-    public String getHost() {
-        return Static.GetHost(this);
-    }
+	public String getHost() {
+		return Static.GetHost(this);
+	}
 
 	@Override
 	public void sendBlockChange(MCLocation loc, int material, byte data) {
@@ -648,7 +642,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public MCLocation getBedSpawnLocation() {
 		Location loc = p.getBedSpawnLocation();
-		return loc == null ? null : new BukkitMCLocation(loc);
+		if(loc == null) {
+			return null;
+		}
+		return new BukkitMCLocation(loc);
 	}
 
 	@Override

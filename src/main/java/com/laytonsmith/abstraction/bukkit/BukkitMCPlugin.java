@@ -1,49 +1,42 @@
-
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCPlugin;
 import org.bukkit.plugin.Plugin;
 
-/**
- *
- * 
- */
 public class BukkitMCPlugin implements MCPlugin {
 
-    Plugin p;
-    public BukkitMCPlugin(Plugin plugin) {
-        this.p = plugin;
-    }
-    
-    public BukkitMCPlugin(AbstractionObject a){
-        this((Plugin)null);
-        if(a instanceof MCPlugin){
-            this.p = ((Plugin)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
-    }
-    
-	@Override
-    public Plugin getHandle(){
-        return p;
-    }
+	Plugin p;
+	public BukkitMCPlugin(Plugin plugin) {
+		this.p = plugin;
+	}
+
+	public BukkitMCPlugin(AbstractionObject a){
+		this((Plugin)null);
+		if(a instanceof MCPlugin){
+			this.p = ((Plugin)a.getHandle());
+		} else {
+			throw new ClassCastException();
+		}
+	}
 
 	@Override
-    public boolean isEnabled() {
-        return p.isEnabled();
-    }
-    
+	public Plugin getHandle(){
+		return p;
+	}
+
 	@Override
-    public boolean isInstanceOf(Class c) {
-        if (c.isInstance(p)) {
-            return true;
-        }
-        
-        return false;
-    }
+	public boolean isEnabled() {
+		return p.isEnabled();
+	}
+
+	@Override
+	public boolean isInstanceOf(Class c) {
+		if(c.isInstance(p)) {
+			return true;
+		}
+		return false;
+	}
 	
 	@Override
 	public String toString() {
@@ -52,7 +45,7 @@ public class BukkitMCPlugin implements MCPlugin {
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof BukkitMCPlugin?p.equals(((BukkitMCPlugin)obj).p):false);
+		return obj instanceof BukkitMCPlugin && p.equals(((BukkitMCPlugin) obj).p);
 	}
 
 	@Override
@@ -64,5 +57,5 @@ public class BukkitMCPlugin implements MCPlugin {
 	public String getName() {
 		return p.getName();
 	}
-    
+
 }

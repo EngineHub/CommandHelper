@@ -6,19 +6,10 @@ import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.enums.MCTreeType;
 import java.util.List;
 
-/**
- *
- * @author KingFisher
- */
 public interface MCStructureGrowEvent extends MCWorldEvent {
-
-	public List<MCBlockState> getBlocks();
-
-	public MCLocation getLocation();
-
-	public MCPlayer getPlayer();
-
-	public MCTreeType getSpecies();
-
-	public boolean isFromBonemeal();
+	List<MCBlockState> getBlocks();
+	MCLocation getLocation();
+	MCPlayer getPlayer();
+	MCTreeType getSpecies();
+	boolean isFromBonemeal();
 }

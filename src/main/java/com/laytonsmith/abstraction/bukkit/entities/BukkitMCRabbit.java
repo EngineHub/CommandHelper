@@ -16,14 +16,15 @@ public class BukkitMCRabbit extends BukkitMCAgeable implements MCRabbit {
 	}
 
 	public BukkitMCRabbit(AbstractionObject ao){
-        super((LivingEntity)ao.getHandle());
-        this.r = (Rabbit) ao.getHandle();
-    }
-	
+		super((LivingEntity)ao.getHandle());
+		this.r = (Rabbit) ao.getHandle();
+	}
+
 	@Override
 	public MCRabbitType getRabbitType() {
 		return MCRabbitType.valueOf(r.getRabbitType().name());
 	}
+
 	@Override
 	public void setRabbitType(MCRabbitType type) {
 		r.setRabbitType(Rabbit.Type.valueOf(type.name()));

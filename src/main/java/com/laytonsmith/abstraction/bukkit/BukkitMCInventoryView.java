@@ -8,18 +8,14 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import org.bukkit.inventory.InventoryView;
 
-/**
- *
- * 
- */
 public class BukkitMCInventoryView implements MCInventoryView {
-	
+
 	InventoryView iv;
 
 	public BukkitMCInventoryView(InventoryView iv) {
 		this.iv = iv;
 	}
-	
+
 	@Override
 	public String toString() {
 		return iv.toString();
@@ -27,7 +23,7 @@ public class BukkitMCInventoryView implements MCInventoryView {
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof BukkitMCInventoryView?iv.equals(((BukkitMCInventoryView)obj).iv):false);
+		return obj instanceof BukkitMCInventoryView && iv.equals(((BukkitMCInventoryView) obj).iv);
 	}
 
 	@Override
@@ -74,12 +70,12 @@ public class BukkitMCInventoryView implements MCInventoryView {
 	public String getTitle() {
 		return iv.getTitle();
 	}
-	
+
 	@Override
 	public MCInventoryType getType() {
 		return MCInventoryType.valueOf(this.iv.getType().name());
 	}
-	
+
 	@Override
 	public void setCursor(MCItemStack item) {
 		iv.setCursor(((BukkitMCItemStack)item).__ItemStack());
@@ -89,5 +85,4 @@ public class BukkitMCInventoryView implements MCInventoryView {
 	public void setItem(int slot, MCItemStack item) {
 		iv.setItem(slot, (((BukkitMCItemStack)item).__ItemStack()));
 	}
-	
 }

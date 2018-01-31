@@ -4,8 +4,7 @@ import com.laytonsmith.annotations.MEnum;
 
 /**
  * Scoreboard displayslots
- * 
- * @author jb_aero
+ *
  */
 @MEnum("DisplaySlot")
 public enum MCDisplaySlot {

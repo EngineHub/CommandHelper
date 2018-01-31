@@ -42,7 +42,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	@Override
 	public Map<MCBodyPart, Vector3D> getAllPoses() {
 		Map<MCBodyPart, Vector3D> slots = new EnumMap<MCBodyPart, Vector3D>(MCBodyPart.class);
-		for (MCBodyPart key : MCBodyPart.values()) {
+		for(MCBodyPart key : MCBodyPart.values()) {
 			switch (key) {
 				case Head:
 					slots.put(key, getHeadPose());
@@ -69,10 +69,10 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setAllPoses(Map<MCBodyPart, Vector3D> posemap) {
-		Vector3D pose = null;
-		for (MCBodyPart key : posemap.keySet()) {
-			pose = posemap.get(key);
-			switch (key) {
+		Vector3D pose;
+		for(Map.Entry<MCBodyPart, Vector3D> part : posemap.entrySet()) {
+			pose = part.getValue();
+			switch(part.getKey()) {
 				case Head:
 					setHeadPose(pose);
 					break;
@@ -112,7 +112,11 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setBoots(MCItemStack item) {
-		as.setBoots(item == null ? null : ((BukkitMCItemStack) item).asItemStack());
+		if(item == null) {
+			as.setBoots(null);
+		} else {
+			as.setBoots(((BukkitMCItemStack) item).asItemStack());
+		}
 	}
 
 	@Override
@@ -132,7 +136,11 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setChestplate(MCItemStack item) {
-		as.setChestplate(item == null ? null : ((BukkitMCItemStack) item).asItemStack());
+		if(item == null) {
+			as.setChestplate(null);
+		} else {
+			as.setChestplate(((BukkitMCItemStack) item).asItemStack());
+		}
 	}
 
 	@Override
@@ -142,7 +150,11 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setHelmet(MCItemStack item) {
-		as.setHelmet(item == null ? null : ((BukkitMCItemStack) item).asItemStack());
+		if(item == null) {
+			as.setHelmet(null);
+		} else {
+			as.setHelmet(((BukkitMCItemStack) item).asItemStack());
+		}
 	}
 
 	@Override

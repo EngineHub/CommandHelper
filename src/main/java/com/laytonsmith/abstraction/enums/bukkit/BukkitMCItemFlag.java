@@ -14,7 +14,8 @@ import org.bukkit.inventory.ItemFlag;
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,
 		forAbstractEnum = MCItemFlag.class,
-		forConcreteEnum = ItemFlag.class)
+		forConcreteEnum = ItemFlag.class
+)
 public class BukkitMCItemFlag extends EnumConvertor<MCItemFlag, ItemFlag> {
 	private static BukkitMCItemFlag instance;
 

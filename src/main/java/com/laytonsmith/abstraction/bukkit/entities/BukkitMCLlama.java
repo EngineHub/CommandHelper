@@ -48,9 +48,9 @@ public class BukkitMCLlama extends BukkitMCChestedHorse implements MCLlama {
 	public static class BukkitMCLlamaColor extends EnumConvertor<MCLlamaColor, Llama.Color>{
 
 		private static BukkitMCLlamaColor instance;
-		
+
 		public static BukkitMCLlamaColor getConvertor() {
-			if (instance == null) {
+			if(instance == null) {
 				instance = new BukkitMCLlamaColor();
 			}
 			return instance;

@@ -28,10 +28,6 @@ import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- * @author KingFisher
- */
 public class WorldEvents {
 
 	private WorldEvents() {
@@ -80,7 +76,7 @@ public class WorldEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (e instanceof MCWorldLoadEvent) {
+			if(e instanceof MCWorldLoadEvent) {
 				Prefilters.match(prefilter, "world", ((MCWorldEvent) e).getWorld().getName(), Prefilters.PrefilterType.MACRO);
 				return true;
 			} else {
@@ -128,7 +124,7 @@ public class WorldEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (e instanceof MCWorldUnloadEvent) {
+			if(e instanceof MCWorldUnloadEvent) {
 				Prefilters.match(prefilter, "world", ((MCWorldEvent) e).getWorld().getName(), Prefilters.PrefilterType.MACRO);
 				return true;
 			} else {
@@ -176,7 +172,7 @@ public class WorldEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (e instanceof MCWorldSaveEvent) {
+			if(e instanceof MCWorldSaveEvent) {
 				Prefilters.match(prefilter, "world", ((MCWorldEvent) e).getWorld().getName(), Prefilters.PrefilterType.MACRO);
 				return true;
 			} else {
@@ -225,7 +221,7 @@ public class WorldEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (e instanceof MCStructureGrowEvent) {
+			if(e instanceof MCStructureGrowEvent) {
 				MCStructureGrowEvent event = (MCStructureGrowEvent) e;
 				Prefilters.match(prefilter, "world", event.getWorld().getName(), Prefilters.PrefilterType.MACRO);
 				if(prefilter.containsKey("player")) {
@@ -252,7 +248,7 @@ public class WorldEvents {
 			MCStructureGrowEvent event = (MCStructureGrowEvent) e;
 			List<MCBlockState> blocks = event.getBlocks();
 			CArray a = new CArray(Target.UNKNOWN, blocks.size());
-			for (MCBlockState block : blocks) {
+			for(MCBlockState block : blocks) {
 				a.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), Target.UNKNOWN);
 			}
 			r.put("blocks", a);

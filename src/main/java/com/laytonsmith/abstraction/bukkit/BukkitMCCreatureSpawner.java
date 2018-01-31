@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCCreatureSpawner;
@@ -7,12 +6,8 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import org.bukkit.block.CreatureSpawner;
 
-/**
- *
- * 
- */
 public class BukkitMCCreatureSpawner extends BukkitMCBlockState implements MCCreatureSpawner{
-	
+
 	CreatureSpawner cs;
 	public BukkitMCCreatureSpawner(CreatureSpawner cs){
 		super(cs);
@@ -29,5 +24,4 @@ public class BukkitMCCreatureSpawner extends BukkitMCBlockState implements MCCre
 		cs.setSpawnedType(((BukkitMCEntityType) type).getConcrete());
 		cs.update();
 	}
-	
 }

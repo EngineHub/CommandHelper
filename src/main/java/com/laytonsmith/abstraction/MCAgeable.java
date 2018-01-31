@@ -1,19 +1,13 @@
 package com.laytonsmith.abstraction;
 
-/**
- * 
- * @author jb_aero
- */
 public interface MCAgeable extends MCLivingEntity {
-
-	public boolean getCanBreed();
-	public void setCanBreed(boolean breed);
-	public int getAge();
-	public void setAge(int age);
-	public boolean getAgeLock();
-	public void setAgeLock(boolean lock);
-	public boolean isAdult();
-	public void setAdult();
-	public void setBaby();
-	
+	boolean getCanBreed();
+	void setCanBreed(boolean breed);
+	int getAge();
+	void setAge(int age);
+	boolean getAgeLock();
+	void setAgeLock(boolean lock);
+	boolean isAdult();
+	void setAdult();
+	void setBaby();
 }

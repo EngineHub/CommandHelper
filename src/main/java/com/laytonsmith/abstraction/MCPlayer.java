@@ -6,171 +6,83 @@ import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCWeather;
-
 import java.net.InetSocketAddress;
 
-/**
- *
- * 
- */
-public interface MCPlayer extends MCCommandSender, MCHumanEntity,
-        MCOfflinePlayer {
-
-
-    public boolean canSee(MCPlayer p);
-
-    public void chat(String chat);
-
-    public InetSocketAddress getAddress();
-
-    public boolean getAllowFlight();
-
-    public MCLocation getCompassTarget();
-
-    public String getDisplayName();
-
-    public float getExp();
-
-	public float getFlySpeed();
-	
-	public void setFlySpeed(float speed);
-
+public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlayer {
+	boolean canSee(MCPlayer p);
+	void chat(String chat);
+	InetSocketAddress getAddress();
+	boolean getAllowFlight();
+	MCLocation getCompassTarget();
+	String getDisplayName();
+	float getExp();
+	float getFlySpeed();
+	void setFlySpeed(float speed);
 	@Override
-    public MCPlayerInventory getInventory();
-
-    public MCItemStack getItemAt(Integer slot);
-
-    public int getLevel();
-
-    public String getPlayerListName();
-
-    public long getPlayerTime();
-
-	public MCWeather getPlayerWeather();
-
-    public int getRemainingFireTicks();
-
-	public MCScoreboard getScoreboard();
-
-	public int getTotalExperience();
-
-	public int getExpToLevel();
-
-	public int getExpAtLevel();
-
-    public MCEntity getSpectatorTarget();
-
-	public float getWalkSpeed();
-	
-	public void setWalkSpeed(float speed);
-
-    public void giveExp(int xp);
-
-    public boolean isSneaking();
-	
-	public boolean isSprinting();
-
-    public void kickPlayer(String message);
-
+	MCPlayerInventory getInventory();
+	MCItemStack getItemAt(Integer slot);
+	int getLevel();
+	String getPlayerListName();
+	long getPlayerTime();
+	MCWeather getPlayerWeather();
+	int getRemainingFireTicks();
+	MCScoreboard getScoreboard();
+	int getTotalExperience();
+	int getExpToLevel();
+	int getExpAtLevel();
+	MCEntity getSpectatorTarget();
+	float getWalkSpeed();
+	void setWalkSpeed(float speed);
+	void giveExp(int xp);
+	boolean isSneaking();
+	boolean isSprinting();
+	void kickPlayer(String message);
 	@Override
-    public boolean removeEffect(int effect);
-
-    public void resetPlayerTime();
-
-	public void resetPlayerWeather();
-
-	public void sendResourcePack(String url);
-
-	public void sendTitle(String title, String subtitle, int fadein, int stay, int fadeout);
-
-    public void setAllowFlight(boolean flight);
-
-    public void setCompassTarget(MCLocation l);
-
-    public void setDisplayName(String name);
-
-    public void setExp(float i);
-
-	public void setFlying(boolean flight);
-
-    public void setLevel(int xp);
-
-    public void setPlayerListName(String listName);
-
-    public void setPlayerTime(Long time, boolean relative);
-
-	public void setPlayerWeather(MCWeather type);
-
-    public void setRemainingFireTicks(int i);
-
-	public void setScoreboard(MCScoreboard board);
-
-    public void setSpectatorTarget(MCEntity entity);
-
-    public void setTempOp(Boolean value) throws Exception;
-
-    public void setTotalExperience(int total);
-
-    public void setVanished(boolean set, MCPlayer to);
-
-    public boolean isNewPlayer();
-
-    public String getHost();
-
-	public void sendBlockChange(MCLocation loc, int material, byte data);
-
-	public void sendSignTextChange(MCLocation loc, String[] lines);
-
-	/**
-	 * Unlike {@see MCEntity#getLocation}, this will work when not run on the server
-	 * thread, but this does mean that the data recieved may be slightly outdated.
-	 * @return
-	 */
-	@Override
-	public MCLocation asyncGetLocation();
-
-	public void playNote(MCLocation loc, MCInstrument instrument, MCNote note);
-	
-	public void playSound(MCLocation l, MCSound sound, float volume, float pitch);
-	
-	public void playSound(MCLocation l, String sound, float volume, float pitch);
-
-	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch);
-
-	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch);
-
-	public void stopSound(MCSound sound);
-
-	public void stopSound(String sound);
-
-	public void stopSound(MCSound sound, MCSoundCategory category);
-
-	public void stopSound(String sound, MCSoundCategory category);
-
+	boolean removeEffect(int effect);
+	void resetPlayerTime();
+	void resetPlayerWeather();
+	void sendResourcePack(String url);
+	void sendTitle(String title, String subtitle, int fadein, int stay, int fadeout);
+	void setAllowFlight(boolean flight);
+	void setCompassTarget(MCLocation l);
+	void setDisplayName(String name);
+	void setExp(float i);
+	void setFlying(boolean flight);
+	void setLevel(int xp);
+	void setPlayerListName(String listName);
+	void setPlayerTime(Long time, boolean relative);
+	void setPlayerWeather(MCWeather type);
+	void setRemainingFireTicks(int i);
+	void setScoreboard(MCScoreboard board);
+	void setSpectatorTarget(MCEntity entity);
+	void setTempOp(Boolean value) throws Exception;
+	void setTotalExperience(int total);
+	void setVanished(boolean set, MCPlayer to);
+	boolean isNewPlayer();
+	String getHost();
+	void sendBlockChange(MCLocation loc, int material, byte data);
+	void sendSignTextChange(MCLocation loc, String[] lines);
+	void playNote(MCLocation loc, MCInstrument instrument, MCNote note);
+	void playSound(MCLocation l, MCSound sound, float volume, float pitch);
+	void playSound(MCLocation l, String sound, float volume, float pitch);
+	void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch);
+	void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch);
+	void stopSound(MCSound sound);
+	void stopSound(String sound);
+	void stopSound(MCSound sound, MCSoundCategory category);
+	void stopSound(String sound, MCSoundCategory category);
 	void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data);
-
-    int getFoodLevel();
-
-    void setFoodLevel(int f);
-
-    float getSaturation();
-
-    void setSaturation(float s);
-
-    float getExhaustion();
-
-    void setExhaustion(float e);
-
-	public void setBedSpawnLocation(MCLocation l, boolean forced);
-
-	public void sendPluginMessage(String channel, byte[] message);
-
+	int getFoodLevel();
+	void setFoodLevel(int f);
+	float getSaturation();
+	void setSaturation(float s);
+	float getExhaustion();
+	void setExhaustion(float e);
+	void setBedSpawnLocation(MCLocation l, boolean forced);
+	void sendPluginMessage(String channel, byte[] message);
 	@Override
-	public boolean isOp();
-
-	public void setOp(boolean bln);
-
-	public boolean isFlying();
-
-	public void updateInventory();
+	boolean isOp();
+	void setOp(boolean bln);
+	boolean isFlying();
+	void updateInventory();
 }

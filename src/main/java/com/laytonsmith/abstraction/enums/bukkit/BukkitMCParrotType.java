@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.Implementation;
@@ -19,7 +18,7 @@ public class BukkitMCParrotType extends EnumConvertor<MCParrotType, Parrot.Varia
 	private static BukkitMCParrotType instance;
 
 	public static BukkitMCParrotType getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new BukkitMCParrotType();
 		}
 		return instance;

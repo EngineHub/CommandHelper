@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCLocation;
@@ -12,50 +10,46 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-/**
- *
- * 
- */
 public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOfflinePlayer{
 
-    OfflinePlayer op;
-    BukkitMCOfflinePlayer(OfflinePlayer offlinePlayer) {
-        super(offlinePlayer);
-        this.op = offlinePlayer;
-    }
+	OfflinePlayer op;
+	BukkitMCOfflinePlayer(OfflinePlayer offlinePlayer) {
+		super(offlinePlayer);
+		this.op = offlinePlayer;
+	}
 
 	@Override
-    public boolean isOnline() {
-        return op.isOnline();
-    }
+	public boolean isOnline() {
+		return op.isOnline();
+	}
 
 	@Override
-    public String getName() {
-        return op.getName();
-    }
+	public String getName() {
+		return op.getName();
+	}
 
 	@Override
-    public boolean isBanned() {
-        return op.isBanned();
-    }
+	public boolean isBanned() {
+		return op.isBanned();
+	}
 
 	@Override
-    public boolean isWhitelisted() {
-        return op.isWhitelisted();
-    }
+	public boolean isWhitelisted() {
+		return op.isWhitelisted();
+	}
 
 	@Override
-    public void setWhitelisted(boolean value) {
-        op.setWhitelisted(value);
-    }
+	public void setWhitelisted(boolean value) {
+		op.setWhitelisted(value);
+	}
 
 	@Override
-    public MCPlayer getPlayer() {
-        if(op instanceof Player) {
-            return new BukkitMCPlayer(((Player)op));
-        }
-        return null;
-    }
+	public MCPlayer getPlayer() {
+		if(op instanceof Player) {
+			return new BukkitMCPlayer(((Player)op));
+		}
+		return null;
+	}
 
 	@Override
 	public long getFirstPlayed() {
@@ -75,8 +69,11 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
 	@Override
 	public MCLocation getBedSpawnLocation() {
 		Location loc = op.getBedSpawnLocation();
-		return loc == null ? null : new BukkitMCLocation(loc);
-    }
+		if(loc == null) {
+			return null;
+		}
+		return new BukkitMCLocation(loc);
+	}
 
 	@Override
 	public UUID getUniqueID() {

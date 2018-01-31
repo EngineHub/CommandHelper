@@ -5,9 +5,9 @@ import com.laytonsmith.abstraction.entities.MCFishHook;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 
 public interface MCPlayerFishEvent extends MCPlayerEvent {
-	public MCEntity getCaught();
-	public int getExpToDrop();
-	public MCFishHook getHook();
-	public MCFishingState getState();
-	public void setExpToDrop(int exp);
+	MCEntity getCaught();
+	int getExpToDrop();
+	MCFishHook getHook();
+	MCFishingState getState();
+	void setExpToDrop(int exp);
 }

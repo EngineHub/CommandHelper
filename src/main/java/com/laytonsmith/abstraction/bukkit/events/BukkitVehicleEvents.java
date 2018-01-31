@@ -24,12 +24,8 @@ import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.vehicle.VehicleMoveEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 
-/**
- * 
- * @author jb_aero
- */
 public class BukkitVehicleEvents {
-	
+
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCVehicleEntityCollideEvent extends BukkitMCVehicleEvent
 			implements MCVehicleEnitityCollideEvent {
@@ -39,10 +35,10 @@ public class BukkitVehicleEvents {
 			super(event);
 			vec = (VehicleEntityCollisionEvent) event;
 		}
-		
+
 		@Override
 		public MCEntity getEntity() {
-			if (vec.getEntity() == null) {
+			if(vec.getEntity() == null) {
 				return null;
 			}
 			return BukkitConvertor.BukkitGetCorrectEntity(vec.getEntity());
@@ -73,7 +69,7 @@ public class BukkitVehicleEvents {
 			return MCCollisionType.ENTITY;
 		}
 	}
-	
+
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCVehicleBlockCollideEvent extends BukkitMCVehicleEvent
 			implements MCVehicleBlockCollideEvent {
@@ -83,7 +79,7 @@ public class BukkitVehicleEvents {
 			super(event);
 			vbc = (VehicleBlockCollisionEvent) event;
 		}
-		
+
 		@Override
 		public MCBlock getBlock() {
 			return new BukkitMCBlock(vbc.getBlock());
@@ -94,39 +90,37 @@ public class BukkitVehicleEvents {
 			return MCCollisionType.BLOCK;
 		}
 	}
-	
+
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCVehicleEnterEvent extends BukkitMCVehicleEvent
-			implements MCVehicleEnterExitEvent {
+	public static class BukkitMCVehicleEnterEvent extends BukkitMCVehicleEvent implements MCVehicleEnterExitEvent {
 
 		VehicleEnterEvent vee;
 		public BukkitMCVehicleEnterEvent(VehicleEnterEvent event) {
 			super(event);
 			vee = event;
 		}
-		
+
 		@Override
 		public MCEntity getEntity() {
-			if (vee.getEntered() == null) {
+			if(vee.getEntered() == null) {
 				return null;
 			}
 			return BukkitConvertor.BukkitGetCorrectEntity(vee.getEntered());
 		}
 	}
-	
+
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCVehicleExitEvent extends BukkitMCVehicleEvent
-			implements MCVehicleEnterExitEvent {
+	public static class BukkitMCVehicleExitEvent extends BukkitMCVehicleEvent implements MCVehicleEnterExitEvent {
 
 		VehicleExitEvent vee;
 		public BukkitMCVehicleExitEvent(VehicleExitEvent event) {
 			super(event);
 			vee = event;
 		}
-		
+
 		@Override
 		public MCEntity getEntity() {
-			if (vee.getExited() == null) {
+			if(vee.getExited() == null) {
 				return null;
 			}
 			return BukkitConvertor.BukkitGetCorrectEntity(vee.getExited());
@@ -134,8 +128,7 @@ public class BukkitVehicleEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCVehicleMoveEvent extends BukkitMCVehicleEvent
-			implements MCVehicleMoveEvent {
+	public static class BukkitMCVehicleMoveEvent extends BukkitMCVehicleEvent implements MCVehicleMoveEvent {
 
 		VehicleMoveEvent vme;
 		int threshold;
@@ -177,8 +170,7 @@ public class BukkitVehicleEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCVehicleDestroyEvent extends BukkitMCVehicleEvent
-			implements MCVehicleDestroyEvent {
+	public static class BukkitMCVehicleDestroyEvent extends BukkitMCVehicleEvent implements MCVehicleDestroyEvent {
 
 		VehicleDestroyEvent vee;
 		public BukkitMCVehicleDestroyEvent(VehicleDestroyEvent event) {
@@ -188,7 +180,7 @@ public class BukkitVehicleEvents {
 
 		@Override
 		public MCEntity getAttacker() {
-			if (vee.getAttacker() == null) {
+			if(vee.getAttacker() == null) {
 				return null;
 			}
 			return BukkitConvertor.BukkitGetCorrectEntity(vee.getAttacker());
@@ -204,7 +196,7 @@ public class BukkitVehicleEvents {
 
 		@Override
 		public MCEntity getVehicle() {
-			if (ve.getVehicle() instanceof org.bukkit.entity.Vehicle) {
+			if(ve.getVehicle() instanceof org.bukkit.entity.Vehicle) {
 				return BukkitConvertor.BukkitGetCorrectEntity(ve.getVehicle());
 			}
 			return null;

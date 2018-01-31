@@ -7,10 +7,6 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
 
-/**
- *
- * @author import
- */
 public class BukkitMCFallingBlock extends BukkitMCEntity implements MCFallingBlock {
 	FallingBlock f;
 	

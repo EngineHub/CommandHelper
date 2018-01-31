@@ -6,31 +6,27 @@ import com.laytonsmith.abstraction.enums.MCOptionStatus;
 
 import java.util.Set;
 
-/**
- * 
- * @author jb_aero
- */
 public interface MCTeam {
-	public void addEntry(String entry);
-	public boolean allowFriendlyFire();
-	public boolean canSeeFriendlyInvisibles();
-	public String getDisplayName();
-	public String getName();
-	public MCNameTagVisibility getNameTagVisibility();
-	public MCOptionStatus getOption(MCOption option);
-	public Set<String> getEntries();
-	public String getPrefix();
-	public MCScoreboard getScoreboard();
-	public int getSize();
-	public String getSuffix();
-	public boolean hasEntry(String entry);
-	public boolean removeEntry(String entry);
-	public void setAllowFriendlyFire(boolean enabled);
-	public void setCanSeeFriendlyInvisibles(boolean enabled);
-	public void setDisplayName(String displayName);
-	public void setNameTagVisibility(MCNameTagVisibility visibility);
-	public void setOption(MCOption option, MCOptionStatus status);
-	public void setPrefix(String prefix);
-	public void setSuffix(String suffix);
-	public void unregister();
+	void addEntry(String entry);
+	boolean allowFriendlyFire();
+	boolean canSeeFriendlyInvisibles();
+	String getDisplayName();
+	String getName();
+	MCNameTagVisibility getNameTagVisibility();
+	MCOptionStatus getOption(MCOption option);
+	Set<String> getEntries();
+	String getPrefix();
+	MCScoreboard getScoreboard();
+	int getSize();
+	String getSuffix();
+	boolean hasEntry(String entry);
+	boolean removeEntry(String entry);
+	void setAllowFriendlyFire(boolean enabled);
+	void setCanSeeFriendlyInvisibles(boolean enabled);
+	void setDisplayName(String displayName);
+	void setNameTagVisibility(MCNameTagVisibility visibility);
+	void setOption(MCOption option, MCOptionStatus status);
+	void setPrefix(String prefix);
+	void setSuffix(String suffix);
+	void unregister();
 }

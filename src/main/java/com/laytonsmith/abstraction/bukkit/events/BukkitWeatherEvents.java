@@ -13,72 +13,69 @@ import org.bukkit.event.weather.ThunderChangeEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.weather.WeatherEvent;
 
-/**
- * @author jacobwgillespie
- */
 public final class BukkitWeatherEvents {
 
-    public static abstract class BukkitMCWeatherEvent implements MCWeatherEvent {
+	public static abstract class BukkitMCWeatherEvent implements MCWeatherEvent {
 
-        private final WeatherEvent _event;
+		private final WeatherEvent _event;
 
-        public BukkitMCWeatherEvent(WeatherEvent event) {
-            _event = event;
-        }
+		public BukkitMCWeatherEvent(WeatherEvent event) {
+			_event = event;
+		}
 
-        @Override
-        public Object _GetObject() {
-            return _event;
-        }
+		@Override
+		public Object _GetObject() {
+			return _event;
+		}
 
-        @Override
-        public MCWorld getWorld() {
-            return new BukkitMCWorld(_event.getWorld());
-        }
-    }
+		@Override
+		public MCWorld getWorld() {
+			return new BukkitMCWorld(_event.getWorld());
+		}
+	}
 
-    public static class BukkitMCLightningStrikeEvent extends BukkitMCWeatherEvent implements MCLightningStrikeEvent {
+	public static class BukkitMCLightningStrikeEvent extends BukkitMCWeatherEvent implements MCLightningStrikeEvent {
 
-        private final LightningStrikeEvent _event;
+		private final LightningStrikeEvent _event;
 
-        public BukkitMCLightningStrikeEvent(LightningStrikeEvent event) {
-            super(event);
-            _event = event;
-        }
+		public BukkitMCLightningStrikeEvent(LightningStrikeEvent event) {
+			super(event);
+			_event = event;
+		}
 
-        @Override
-        public MCLightningStrike getLightning() {
-            return new BukkitMCLightningStrike(_event.getLightning());
-        }
-    }
+		@Override
+		public MCLightningStrike getLightning() {
+			return new BukkitMCLightningStrike(_event.getLightning());
+		}
+	}
 
-    public static class BukkitMCThunderChangeEvent extends BukkitMCWeatherEvent implements MCThunderChangeEvent {
+	public static class BukkitMCThunderChangeEvent extends BukkitMCWeatherEvent implements MCThunderChangeEvent {
 
-        private final ThunderChangeEvent _event;
+		private final ThunderChangeEvent _event;
 
-        public BukkitMCThunderChangeEvent(ThunderChangeEvent event) {
-            super(event);
-            _event = event;
-        }
+		public BukkitMCThunderChangeEvent(ThunderChangeEvent event) {
+			super(event);
+			_event = event;
+		}
 
-        @Override
-        public boolean toThunderState() {
-            return _event.toThunderState();
-        }
-    }
+		@Override
+		public boolean toThunderState() {
+			return _event.toThunderState();
+		}
+	}
 
-    public static class BukkitMCWeatherChangeEvent extends BukkitMCWeatherEvent implements MCWeatherChangeEvent {
+	public static class BukkitMCWeatherChangeEvent extends BukkitMCWeatherEvent implements MCWeatherChangeEvent {
 
-        private final WeatherChangeEvent _event;
+		private final WeatherChangeEvent _event;
 
-        public BukkitMCWeatherChangeEvent(WeatherChangeEvent event) {
-            super(event);
-            _event = event;
-        }
+		public BukkitMCWeatherChangeEvent(WeatherChangeEvent event) {
+			super(event);
+			_event = event;
+		}
 
-        @Override
-        public boolean toWeatherState() {
-            return _event.toWeatherState();
-        }
-    }
+		@Override
+		public boolean toWeatherState() {
+			return _event.toWeatherState();
+		}
+	}
 }

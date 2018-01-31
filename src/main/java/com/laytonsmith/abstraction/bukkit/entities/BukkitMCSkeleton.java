@@ -10,10 +10,6 @@ import com.laytonsmith.core.constructs.Target;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Skeleton;
 
-/**
- *
- * @author Hekta
- */
 public class BukkitMCSkeleton extends BukkitMCLivingEntity implements MCSkeleton {
 
 	public BukkitMCSkeleton(Entity skeleton) {

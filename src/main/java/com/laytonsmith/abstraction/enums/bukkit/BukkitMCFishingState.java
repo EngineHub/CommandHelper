@@ -12,9 +12,9 @@ import org.bukkit.event.player.PlayerFishEvent;
 		forConcreteEnum=PlayerFishEvent.State.class
 )
 public class BukkitMCFishingState extends EnumConvertor<MCFishingState, PlayerFishEvent.State> {
-	
+
 	private static BukkitMCFishingState instance;
-	
+
 	public static BukkitMCFishingState getConvertor(){
 		if(instance == null){
 			instance = new BukkitMCFishingState();

@@ -22,15 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- * 
- */
 public class BukkitMCInventory implements MCInventory {
 	private Inventory i;
-    public BukkitMCInventory(Inventory inventory) {
-        this.i = inventory;
-    }
+	public BukkitMCInventory(Inventory inventory) {
+		this.i = inventory;
+	}
 
 	@Override
 	public MCInventoryType getType() {
@@ -47,7 +43,7 @@ public class BukkitMCInventory implements MCInventory {
 		try {
 			return new BukkitMCItemStack(i.getItem(slot));
 		} catch (ArrayIndexOutOfBoundsException aioobe) {
-			if (slot > 0 && slot < getSize()) {
+			if(slot > 0 && slot < getSize()) {
 				CHLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
 						+ " accessible, however the server implementation does not give access."
 						+ " This is the fault of the server and can't be helped by "
@@ -57,14 +53,14 @@ public class BukkitMCInventory implements MCInventory {
 			}
 			return null;
 		}
-    }
+	}
 
 	@Override
 	public void setItem(int slot, MCItemStack stack) {
 		try {
 			this.i.setItem(slot, stack == null ? null : ((BukkitMCItemStack) stack).is);
 		} catch (ArrayIndexOutOfBoundsException aioobe) {
-			if (slot > 0 && slot < getSize()) {
+			if(slot > 0 && slot < getSize()) {
 				CHLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
 						+ " accessible, however the server implementation does not give access."
 						+ " This is the fault of the server and can't be helped by "
@@ -73,13 +69,13 @@ public class BukkitMCInventory implements MCInventory {
 				throw new CRERangeException("No slot " + slot + " exists in the given inventory", Target.UNKNOWN);
 			}
 		}
-    }
-	
+	}
+
 	@Override
 	public void clear() {
 		i.clear();
 	}
-	
+
 	@Override
 	public void clear(int index) {
 		i.clear(index);
@@ -97,20 +93,19 @@ public class BukkitMCInventory implements MCInventory {
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof BukkitMCInventory?i.equals(((BukkitMCInventory)obj).i):false);
+		return obj instanceof BukkitMCInventory && i.equals(((BukkitMCInventory) obj).i);
 	}
 
 	@Override
 	public int hashCode() {
 		return i.hashCode();
 	}
-	
+
 	@Override
 	public Map<Integer, MCItemStack> addItem(MCItemStack stack) {
 		Map<Integer, ItemStack> h = i.addItem(stack==null?null:((BukkitMCItemStack)stack).is);
-		Map<Integer, MCItemStack> m = new HashMap<Integer, MCItemStack>();
-		
-		for (Map.Entry<Integer, ItemStack> entry : h.entrySet()) {
+		Map<Integer, MCItemStack> m = new HashMap<>();
+		for(Map.Entry<Integer, ItemStack> entry : h.entrySet()) {
 			Integer key = entry.getKey();
 			ItemStack value = entry.getValue();
 			m.put(key, new BukkitMCItemStack(value));
@@ -120,29 +115,27 @@ public class BukkitMCInventory implements MCInventory {
 
 	@Override
 	public List<MCHumanEntity> getViewers() {
-		List<MCHumanEntity> retn = new ArrayList<MCHumanEntity>();
-		
-		for (HumanEntity human: i.getViewers()) {
+		List<MCHumanEntity> retn = new ArrayList<>();
+		for(HumanEntity human: i.getViewers()) {
 			retn.add(new BukkitMCHumanEntity((human)));
 		}
-		
 		return retn;
 	}
 
 	@Override
 	public void updateViewers() {
-		for (HumanEntity human: i.getViewers()) {
+		for(HumanEntity human: i.getViewers()) {
 			if(human instanceof Player) {
 				((Player) human).updateInventory();
 			}
 		}
 	}
-	
+
 	@Override
 	public MCInventoryHolder getHolder() {
 		return new BukkitMCInventoryHolder(i.getHolder());
 	}
-	
+
 	@Override
 	public String getTitle() {
 		return i.getTitle();

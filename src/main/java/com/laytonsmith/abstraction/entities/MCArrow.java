@@ -4,9 +4,9 @@ import com.laytonsmith.abstraction.MCProjectile;
 
 public interface MCArrow extends MCProjectile {
 
-	public int getKnockbackStrength();
-	public void setKnockbackStrength(int strength);
+	int getKnockbackStrength();
+	void setKnockbackStrength(int strength);
 
-	public boolean isCritical();
-	public void setCritical(boolean critical);
+	boolean isCritical();
+	void setCritical(boolean critical);
 }

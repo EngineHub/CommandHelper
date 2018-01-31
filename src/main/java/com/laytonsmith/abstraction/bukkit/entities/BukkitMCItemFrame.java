@@ -10,10 +10,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.inventory.ItemStack;
 
-/**
- *
- * @author Hekta
- */
 public class BukkitMCItemFrame extends BukkitMCHanging implements MCItemFrame {
 
 	public BukkitMCItemFrame(Entity frame) {

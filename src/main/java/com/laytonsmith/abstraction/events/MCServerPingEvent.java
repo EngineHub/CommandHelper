@@ -6,25 +6,13 @@ import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Set;
 
-/**
- * 
- * @author jb_aero
- */
 public interface MCServerPingEvent extends BindableEvent {
-
-	public InetAddress getAddress();
-
-	public int getMaxPlayers();
-
-	public String getMOTD();
-
-	public int getNumPlayers();
-
-	public void setMaxPlayers(int max);
-
-	public void setMOTD(String motd);
-
-	public Set<MCPlayer> getPlayers();
-
-	public void setPlayers(Collection<MCPlayer> players);
+	InetAddress getAddress();
+	int getMaxPlayers();
+	String getMOTD();
+	int getNumPlayers();
+	void setMaxPlayers(int max);
+	void setMOTD(String motd);
+	Set<MCPlayer> getPlayers();
+	void setPlayers(Collection<MCPlayer> players);
 }

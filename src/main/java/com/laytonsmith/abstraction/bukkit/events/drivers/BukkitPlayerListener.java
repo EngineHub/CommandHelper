@@ -23,36 +23,32 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * 
- */
 public class BukkitPlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
-    public void onFoodLevelChange(FoodLevelChangeEvent e) {
+	public void onFoodLevelChange(FoodLevelChangeEvent e) {
 		BukkitMCFoodLevelChangeEvent pke = new BukkitMCFoodLevelChangeEvent(e);
 		EventUtils.TriggerListener(Driver.FOOD_LEVEL_CHANGED, "food_level_changed", pke);
-    }
-	
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerKick(PlayerKickEvent e) {
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPlayerKick(PlayerKickEvent e) {
 		BukkitMCPlayerKickEvent pke = new BukkitMCPlayerKickEvent(e);
 		EventUtils.TriggerListener(Driver.PLAYER_KICK, "player_kick", pke);
-    }
-	
+	}
+
 	@EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerBedEnter(PlayerBedEnterEvent e) {
+	public void onPlayerBedEnter(PlayerBedEnterEvent e) {
 		BukkitMCPlayerBedEvent be = new BukkitMCPlayerBedEvent(e);
 		EventUtils.TriggerListener(Driver.PLAYER_BED_EVENT, "player_enter_bed", be);
-    }
-	
+	}
+
 	@EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerBedLeave(PlayerBedLeaveEvent e) {
+	public void onPlayerBedLeave(PlayerBedLeaveEvent e) {
 		BukkitMCPlayerBedEvent be = new BukkitMCPlayerBedEvent(e);
 		EventUtils.TriggerListener(Driver.PLAYER_BED_EVENT, "player_leave_bed", be);
-    }
-    
+	}
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerLogin(PlayerLoginEvent e) {
 		BukkitMCPlayerLoginEvent ple = new BukkitMCPlayerLoginEvent(e);
@@ -89,25 +85,22 @@ public class BukkitPlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled=true)
 	public void onPlayerChat(final AsyncPlayerChatEvent event) {
-		if(CommandHelperPlugin.self.interpreterListener
-                .isInInterpreterMode(event.getPlayer().getName())){
-            //They are in interpreter mode, so we want it to handle this, not everything else.
-            return;
-        }
-		
+		if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(event.getPlayer().getName())){
+			//They are in interpreter mode, so we want it to handle this, not everything else.
+			return;
+		}
+
 		if(event.isAsynchronous()){
 			//The async event gets priority, and if cancelled, doesn't trigger a normal player_chat event.
 			BukkitMCPlayerChatEvent pce = new BukkitMCPlayerChatEvent(event);
 			EventUtils.TriggerListener(Driver.PLAYER_CHAT, "async_player_chat", pce);
-
 			if(event.isCancelled()){
 				return;
 			}
 		}
-		
-		if (EventUtils.GetEvents(Driver.PLAYER_CHAT) != null
-			&& !EventUtils.GetEvents(Driver.PLAYER_CHAT).isEmpty()) {
-			if (event.isAsynchronous()) {
+
+		if(EventUtils.GetEvents(Driver.PLAYER_CHAT) != null && !EventUtils.GetEvents(Driver.PLAYER_CHAT).isEmpty()) {
+			if(event.isAsynchronous()) {
 				//We have to do the full processing on the main server thread, and
 				//block on it as well, so if we cancel it or something, the change
 				//will actually take effect. The easiest way to do this is to cancel the
@@ -203,7 +196,7 @@ public class BukkitPlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
-		if (event.getFrom().equals(event.getPlayer().getWorld())) {
+		if(event.getFrom().equals(event.getPlayer().getWorld())) {
 			return;
 		}
 
@@ -213,10 +206,10 @@ public class BukkitPlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
-		if (event.getFrom().equals(event.getTo())) {
+		if(event.getFrom().equals(event.getTo())) {
 			return;
 		}
-		
+
 		BukkitMCPlayerTeleportEvent pte = new BukkitMCPlayerTeleportEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_TELEPORT, "player_teleport", pte);
 	}
@@ -304,10 +297,10 @@ public class BukkitPlayerListener implements Listener {
 				lastLocations.put(p, movedTo);
 				continue;
 			}
-			if (last.distance(movedTo) > threshold) {
+			if(last.distance(movedTo) > threshold) {
 				BukkitMCPlayerMoveEvent pme = new BukkitMCPlayerMoveEvent(event, threshold, last);
 				EventUtils.TriggerListener(Driver.PLAYER_MOVE, "player_move", pme);
-				if (!pme.isCancelled()) {
+				if(!pme.isCancelled()) {
 					lastLocations.put(p, movedTo);
 				}
 			}
@@ -318,14 +311,13 @@ public class BukkitPlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onNewRespawnLocation(PlayerRespawnEvent event) {
 		for(Integer i : PlayerEvents.GetThresholdList()) {
-			PlayerEvents.GetLastLocations(i).put(event.getPlayer().getName(),
-					new BukkitMCLocation(event.getRespawnLocation()));
+			PlayerEvents.GetLastLocations(i).put(event.getPlayer().getName(), new BukkitMCLocation(event.getRespawnLocation()));
 		}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onNewTeleportLocation(PlayerTeleportEvent event) {
-		if (event.getFrom().equals(event.getTo())) {
+		if(event.getFrom().equals(event.getTo())) {
 			return;
 		}
 		if(!event.isCancelled()) {

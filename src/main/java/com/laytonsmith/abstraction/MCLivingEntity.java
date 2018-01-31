@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -7,72 +6,67 @@ import com.laytonsmith.core.constructs.Target;
 import java.util.HashSet;
 import java.util.List;
 
-/**
- *
- * 
- */
 public interface MCLivingEntity extends MCEntity, MCProjectileSource {
-
 	void addEffect(int potionID, int strength, int ticks, boolean ambient, boolean particles, Target t);
-	public boolean removeEffect(int potionID);
+	boolean removeEffect(int potionID);
 	/**
 	 * Returns the maximum effect id, inclusive.
 	 * @return 
 	 */
-	public int getMaxEffect();
-	public List<MCEffect> getEffects();
-    public void damage(double amount);
-    public void damage(double amount, MCEntity source);
-	public boolean getCanPickupItems();
-	public boolean getRemoveWhenFarAway();
+	int getMaxEffect();
+	List<MCEffect> getEffects();
+	void damage(double amount);
+	void damage(double amount, MCEntity source);
+	boolean getCanPickupItems();
+	boolean getRemoveWhenFarAway();
 
 	/**
 	 * With the addition of ArmorStands, this can be null. At the time of this writing,
 	 * ArmorStands are the only LivingEntity with such a limitation, and a workaround has been added.
 	 */
-	public MCEntityEquipment getEquipment();
-    public double getEyeHeight();
-    public double getEyeHeight(boolean ignoreSneaking);
-    public MCLocation getEyeLocation();
-    public double getHealth();
-    public MCPlayer getKiller();
-    public double getLastDamage();
-    public MCEntity getLeashHolder();
-	public MCLivingEntity getTarget(Target t);
-	public MCBlock getTargetBlock(HashSet<Short> transparent, int maxDistance);
-    public MCBlock getTargetSpace(int maxDistance);
-	public List<MCBlock> getLineOfSight(HashSet<Short> transparent, int maxDistance);
-	public boolean hasLineOfSight(MCEntity other);
-    public double getMaxHealth();
-    public int getMaximumAir();
-    public int getMaximumNoDamageTicks();
-    public int getNoDamageTicks();
-    public int getRemainingAir();
-    public boolean isGliding();
-	public boolean isLeashed();
-	public boolean hasAI();
-	public void resetMaxHealth();
-	public void setCanPickupItems(boolean pickup);
-	public void setRemoveWhenFarAway(boolean remove);
-    public void setHealth(double health);
-    public void setLastDamage(double damage);
-    public void setLeashHolder(MCEntity holder);
-	public void setMaxHealth(double health);
-    public void setMaximumAir(int ticks);
-    public void setMaximumNoDamageTicks(int ticks);
-    public void setNoDamageTicks(int ticks);
-    public void setRemainingAir(int ticks);
-	public void setTarget(MCLivingEntity target, Target t);
-	public void setGliding(Boolean glide);
-	public void setAI(Boolean ai);
+	MCEntityEquipment getEquipment();
+	double getEyeHeight();
+	double getEyeHeight(boolean ignoreSneaking);
+	MCLocation getEyeLocation();
+	double getHealth();
+	MCPlayer getKiller();
+	double getLastDamage();
+	MCEntity getLeashHolder();
+	MCLivingEntity getTarget(Target t);
+	MCBlock getTargetBlock(HashSet<Short> transparent, int maxDistance);
+	MCBlock getTargetSpace(int maxDistance);
+	List<MCBlock> getLineOfSight(HashSet<Short> transparent, int maxDistance);
+	boolean hasLineOfSight(MCEntity other);
+	double getMaxHealth();
+	int getMaximumAir();
+	int getMaximumNoDamageTicks();
+	int getNoDamageTicks();
+	int getRemainingAir();
+	boolean isGliding();
+	boolean isLeashed();
+	boolean hasAI();
+	void resetMaxHealth();
+	void setCanPickupItems(boolean pickup);
+	void setRemoveWhenFarAway(boolean remove);
+	void setHealth(double health);
+	void setLastDamage(double damage);
+	void setLeashHolder(MCEntity holder);
+	void setMaxHealth(double health);
+	void setMaximumAir(int ticks);
+	void setMaximumNoDamageTicks(int ticks);
+	void setNoDamageTicks(int ticks);
+	void setRemainingAir(int ticks);
+	void setTarget(MCLivingEntity target, Target t);
+	void setGliding(Boolean glide);
+	void setAI(Boolean ai);
 
 	/**
 	 * Kills the entity. In some cases, this will be equivalent to setHealth(0), but
 	 * may not be, so this method should be used instead.
 	 */
-	public void kill();
+	void kill();
 
-	public static class MCEffect{
+	class MCEffect{
 
 		private int potionID;
 		private int strength;
@@ -106,7 +100,7 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 		public int getTicksRemaining() {
 			return ticksRemaining;
 		}
-		
+
 		public boolean isAmbient() {
 			return ambient;
 		}

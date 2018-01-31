@@ -11,90 +11,90 @@ import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
 public class BukkitMCLocation implements MCLocation {
-    Location l;
-    public BukkitMCLocation(Location l) {
-        this.l = l;
-    }
+	Location l;
+	public BukkitMCLocation(Location l) {
+		this.l = l;
+	}
 
-    public BukkitMCLocation(AbstractionObject a) {
-        if (a instanceof MCLocation) {
-            this.l = ((Location)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
-    }
-
-	@Override
-    public Object getHandle() {
-        return l;
-    }
+	public BukkitMCLocation(AbstractionObject a) {
+		if (a instanceof MCLocation) {
+			this.l = ((Location)a.getHandle());
+		} else {
+			throw new ClassCastException();
+		}
+	}
 
 	@Override
-    public double getX() {
-        return l.getX();
-    }
+	public Object getHandle() {
+		return l;
+	}
 
 	@Override
-    public double getY() {
-        return l.getY();
-    }
+	public double getX() {
+		return l.getX();
+	}
 
 	@Override
-    public double getZ() {
-        return l.getZ();
-    }
+	public double getY() {
+		return l.getY();
+	}
+
+	@Override
+	public double getZ() {
+		return l.getZ();
+	}
 
 	@Override
 	public double distance(MCLocation o) {
 		return l.distance(((BukkitMCLocation)o)._Location());
 	}
-	
+
 	@Override
 	public double distanceSquared(MCLocation o) {
 		return l.distanceSquared(((BukkitMCLocation)o)._Location());
 	}
 
 	@Override
-    public MCWorld getWorld() {
-        if (l.getWorld() == null) {
-            return null;
-        }
-        return new BukkitMCWorld(l.getWorld());
-    }
+	public MCWorld getWorld() {
+		if (l.getWorld() == null) {
+			return null;
+		}
+		return new BukkitMCWorld(l.getWorld());
+	}
 
 	@Override
-    public float getYaw() {
-        return l.getYaw();
-    }
+	public float getYaw() {
+		return l.getYaw();
+	}
 
 	@Override
-    public float getPitch() {
-        return l.getPitch();
-    }
+	public float getPitch() {
+		return l.getPitch();
+	}
 
 	@Override
-    public int getBlockX() {
-        return l.getBlockX();
-    }
+	public int getBlockX() {
+		return l.getBlockX();
+	}
 
 	@Override
-    public int getBlockY() {
-        return l.getBlockY();
-    }
+	public int getBlockY() {
+		return l.getBlockY();
+	}
 
 	@Override
-    public int getBlockZ() {
-        return l.getBlockZ();
-    }
+	public int getBlockZ() {
+		return l.getBlockZ();
+	}
 
 	@Override
 	public MCBlock getBlock() {
 		return new BukkitMCBlock(l.getBlock());
 	}
 
-    public Location _Location() {
-        return l;
-    }
+	public Location _Location() {
+		return l;
+	}
 
 	@Override
 	public void setX(double x) {
@@ -112,14 +112,14 @@ public class BukkitMCLocation implements MCLocation {
 	}
 
 	@Override
-    public void setPitch(float p) {
-        l.setPitch(p);
-    }
+	public void setPitch(float p) {
+		l.setPitch(p);
+	}
 
 	@Override
-    public void setYaw(float y) {
-        l.setYaw(y);
-    }
+	public void setYaw(float y) {
+		l.setYaw(y);
+	}
 
 	@Override
 	public MCLocation add(MCLocation vec) {
@@ -161,14 +161,14 @@ public class BukkitMCLocation implements MCLocation {
 		return new BukkitMCLocation(l.subtract(x, y, z));
 	}
 
-    @Override
-    public MCLocation clone() {
-        return new BukkitMCLocation(l.clone());
-    }
+	@Override
+	public MCLocation clone() {
+		return new BukkitMCLocation(l.clone());
+	}
 
-    public Location asLocation() {
-        return l;
-    }
+	public Location asLocation() {
+		return l;
+	}
 
 	@Override
 	public String toString() {

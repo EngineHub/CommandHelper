@@ -24,10 +24,6 @@ import org.bukkit.util.Vector;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- *
- * 
- */
 public class BukkitVehicleListener implements Listener{
     
 	@EventHandler(priority= EventPriority.LOWEST)
@@ -35,13 +31,13 @@ public class BukkitVehicleListener implements Listener{
 		BukkitMCVehicleEnterEvent vee = new BukkitMCVehicleEnterEvent(event);
 		EventUtils.TriggerListener(Driver.VEHICLE_ENTER, "vehicle_enter", vee);
 	}
-	
+
 	@EventHandler(priority= EventPriority.LOWEST)
 	public void onExit(VehicleExitEvent event) {
 		BukkitMCVehicleExitEvent vee = new BukkitMCVehicleExitEvent(event);
 		EventUtils.TriggerListener(Driver.VEHICLE_LEAVE, "vehicle_leave", vee);
 	}
-	
+
 	@EventHandler(priority= EventPriority.LOWEST)
 	public void onBlockCollide(VehicleBlockCollisionEvent event) {
 		if (event.getVehicle() instanceof Animals && event.getVehicle().getPassenger() == null) {

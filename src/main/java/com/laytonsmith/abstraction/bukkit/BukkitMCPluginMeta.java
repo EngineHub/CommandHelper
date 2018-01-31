@@ -8,10 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
-/**
- *
- * 
- */
 public class BukkitMCPluginMeta extends MCPluginMeta implements PluginMessageListener {
 
 	Plugin plugin;
@@ -19,7 +15,7 @@ public class BukkitMCPluginMeta extends MCPluginMeta implements PluginMessageLis
 		super();
 		this.plugin = plugin;
 	}
-	
+
 	@Override
 	public void closeOutgoingChannel0(String channel) {
 		Bukkit.getMessenger().unregisterOutgoingPluginChannel(plugin, channel);
@@ -50,5 +46,4 @@ public class BukkitMCPluginMeta extends MCPluginMeta implements PluginMessageLis
 	public void onPluginMessageReceived(String channel, Player player, byte[] message) {
 		triggerOnMessage(new BukkitMCPlayer(player), channel, message);
 	}
-	
 }

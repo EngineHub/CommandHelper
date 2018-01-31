@@ -13,19 +13,19 @@ public class BukkitMCHanging extends BukkitMCEntity implements MCHanging {
 		super(e);
 		this.h = (Hanging) e;
 	}
-	
+
 	@Override
 	public MCBlockFace getFacing() {
 		String dir = h.getFacing().name();
 		return MCBlockFace.valueOf(dir);
 	}
-	
+
 	@Override
 	public void setFacingDirection(MCBlockFace direction) {
 		BlockFace dir = BlockFace.valueOf(direction.name());
 		h.setFacingDirection(dir);
 	}
-	
+
 	@Override
 	public boolean setFacingDirection(MCBlockFace direction, boolean force) {
 		BlockFace dir = BlockFace.valueOf(direction.name());

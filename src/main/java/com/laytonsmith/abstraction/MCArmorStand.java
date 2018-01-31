@@ -11,13 +11,13 @@ public interface MCArmorStand {
 	 *
 	 * @return A map of body part keys and angle vector values
 	 */
-	public Map<MCBodyPart, Vector3D> getAllPoses();
+	Map<MCBodyPart, Vector3D> getAllPoses();
 
 	/**
 	 * Set all poses at once.
 	 * @param posemap A map of body part keys and angle vector values
 	 */
-	public void setAllPoses(Map<MCBodyPart, Vector3D> posemap);
+	void setAllPoses(Map<MCBodyPart, Vector3D> posemap);
 
 	/**
 	 * Returns the item the armor stand is

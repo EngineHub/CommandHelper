@@ -7,17 +7,13 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Entity;
 
-/**
- *
- * @author import
- */
 public class BukkitMCChunk implements MCChunk {
 	Chunk c;
 
 	public BukkitMCChunk(Chunk c) {
 		this.c = c;
 	}
-	
+
 	@Override
 	public int getX() {
 		return c.getX();
@@ -32,7 +28,7 @@ public class BukkitMCChunk implements MCChunk {
 	public MCEntity[] getEntities() {
 		Entity[] entities = c.getEntities();
 		MCEntity[] r = new MCEntity[entities.length];
-		for (int i = 0 ; i < r.length ; i++) {
+		for(int i = 0 ; i < r.length ; i++) {
 			r[i] = new BukkitMCEntity(entities[i]);
 		}
 		return r;
@@ -42,7 +38,7 @@ public class BukkitMCChunk implements MCChunk {
 	public MCWorld getWorld() {
 		return new BukkitMCWorld(c.getWorld());
 	}
-	
+
 	@Override
 	public Object getHandle() {
 		return c;
@@ -50,7 +46,7 @@ public class BukkitMCChunk implements MCChunk {
 
 	@Override
 	public boolean equals(Object o) {
-		return o instanceof MCChunk ? this.c.equals(((BukkitMCChunk)o).c) : false;
+		return o instanceof MCChunk && this.c.equals(((BukkitMCChunk) o).c);
 	}
 
 	@Override

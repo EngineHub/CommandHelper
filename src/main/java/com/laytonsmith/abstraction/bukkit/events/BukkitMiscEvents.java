@@ -21,15 +21,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-/**
- *
- * 
- */
 public class BukkitMiscEvents {
+
 	public static class BukkitMCServerCommandEvent implements MCServerCommandEvent {
 		ServerCommandEvent sce;
 		MCCommandSender sender;
-		
+
 		public BukkitMCServerCommandEvent(ServerCommandEvent sce, MCCommandSender sender){
 			this.sce = sce;
 			this.sender = sender;
@@ -55,12 +52,12 @@ public class BukkitMiscEvents {
 			return sender;
 		}
 	}
-	
+
 	/*
 	 * Not an actual event, but making it one.
 	 */
 	public static class BukkitMCPluginIncomingMessageEvent implements MCPluginIncomingMessageEvent {
-		
+
 		Player player;
 		String channel;
 		byte[] bytes;
@@ -70,8 +67,7 @@ public class BukkitMiscEvents {
 			this.channel = channel;
 			this.bytes = bytes;
 		}
-		
-		
+
 		@Override
 		public String getChannel() {
 			return channel;
@@ -153,13 +149,13 @@ public class BukkitMiscEvents {
 		@Override
 		public void setPlayers(Collection<MCPlayer> players) {
 			Set<Player> ps = new HashSet<>();
-			for (MCPlayer player : players) {
+			for(MCPlayer player : players) {
 				ps.add((Player) player.getHandle());
 			}
 			try {
 				Iterator<Player> iterator = slp.iterator();
 				while (iterator.hasNext()) {
-					if (!ps.contains(iterator.next())) {
+					if(!ps.contains(iterator.next())) {
 						iterator.remove();
 					}
 				}
@@ -183,7 +179,7 @@ public class BukkitMiscEvents {
 			this.alias = alias;
 			this.args = args;
 		}
-		
+
 		@Override
 		public Object _GetObject() {
 			return comp;

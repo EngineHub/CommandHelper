@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;

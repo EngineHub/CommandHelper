@@ -3,11 +3,8 @@ package com.laytonsmith.abstraction;
 import java.util.List;
 
 public interface MCMetadatable extends AbstractionObject {
-	public List<MCMetadataValue> getMetadata(String metadataKey);
-
-	public boolean hasMetadata(String metadataKey);
-
-	public void removeMetadata(String metadataKey, MCPlugin owningPlugin);
-
-	public void setMetadata(String metadataKey, MCMetadataValue newMetadataValue);
+	List<MCMetadataValue> getMetadata(String metadataKey);
+	boolean hasMetadata(String metadataKey);
+	void removeMetadata(String metadataKey, MCPlugin owningPlugin);
+	void setMetadata(String metadataKey, MCMetadataValue newMetadataValue);
 }

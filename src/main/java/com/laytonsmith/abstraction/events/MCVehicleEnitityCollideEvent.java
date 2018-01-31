@@ -3,9 +3,9 @@ package com.laytonsmith.abstraction.events;
 import com.laytonsmith.abstraction.MCEntity;
 
 public interface MCVehicleEnitityCollideEvent extends MCVehicleCollideEvent {
-	public MCEntity getEntity();
-	public boolean isCollisionCancelled();
-	public boolean isPickupCancelled();
-	public void setCollisionCancelled(boolean cancel);
-	public void setPickupCancelled(boolean cancel);
+	MCEntity getEntity();
+	boolean isCollisionCancelled();
+	boolean isPickupCancelled();
+	void setCollisionCancelled(boolean cancel);
+	void setPickupCancelled(boolean cancel);
 }

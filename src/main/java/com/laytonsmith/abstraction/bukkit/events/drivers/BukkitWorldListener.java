@@ -11,10 +11,6 @@ import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 
-/**
- *
- * 
- */
 public class BukkitWorldListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)

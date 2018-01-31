@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.Implementation;
@@ -10,9 +9,9 @@ import com.laytonsmith.core.Static;
 import org.bukkit.Particle;
 
 @abstractionenum(
-	implementation = Implementation.Type.BUKKIT,
-	forAbstractEnum = MCParticle.class,
-	forConcreteEnum = Particle.class
+		implementation = Implementation.Type.BUKKIT,
+		forAbstractEnum = MCParticle.class,
+		forConcreteEnum = Particle.class
 )
 public class BukkitMCParticle extends EnumConvertor<MCParticle, Particle> {
 	private static BukkitMCParticle instance;

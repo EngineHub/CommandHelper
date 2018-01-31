@@ -9,10 +9,6 @@ import java.util.Map;
 import org.bukkit.command.Command;
 import org.bukkit.command.SimpleCommandMap;
 
-/**
- * 
- * @author jb_aero
- */
 public class BukkitMCCommandMap implements MCCommandMap {
 
 	SimpleCommandMap scm;
@@ -29,7 +25,7 @@ public class BukkitMCCommandMap implements MCCommandMap {
 	public void clearCommands() {
 		scm.clearCommands();
 	}
-	
+
 	@Override
 	public boolean isCommand(String name) {
 		return scm.getCommand(name) != null;
@@ -37,13 +33,17 @@ public class BukkitMCCommandMap implements MCCommandMap {
 
 	@Override
 	public MCCommand getCommand(String name) {
-		return scm.getCommand(name) == null ? null : new BukkitMCCommand(scm.getCommand(name));
+		Command cmd = scm.getCommand(name);
+		if(cmd == null) {
+			return null;
+		}
+		return new BukkitMCCommand(cmd);
 	}
 
 	@Override
 	public List<MCCommand> getCommands() {
-		List<MCCommand> cmds = new ArrayList<MCCommand>();
-		for (Command c : scm.getCommands()) {
+		List<MCCommand> cmds = new ArrayList<>();
+		for(Command c : scm.getCommands()) {
 			cmds.add(new BukkitMCCommand(c));
 		}
 		return cmds;
@@ -62,7 +62,7 @@ public class BukkitMCCommandMap implements MCCommandMap {
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean unregister(MCCommand cmd) {
-		if (cmd.isRegistered()) {
+		if(cmd.isRegistered()) {
 			((Map<String,Command>) ReflectionUtils.get(scm.getClass(), scm, "knownCommands")).remove(cmd.getName());
 			return cmd.unregister(this);
 		} else {

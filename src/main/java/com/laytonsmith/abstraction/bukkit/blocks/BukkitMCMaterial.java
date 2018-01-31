@@ -8,26 +8,23 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
 
-/**
- *
- * 
- */
 public class BukkitMCMaterial implements MCMaterial {
-    Material m;
 
-    public BukkitMCMaterial(Material type) {
-        this.m = type;
-    }
+	Material m;
 
-	@Override
-    public short getMaxDurability() {
-        return this.m.getMaxDurability();
-    }
+	public BukkitMCMaterial(Material type) {
+		this.m = type;
+	}
 
 	@Override
-    public int getType() {
-        return m.getId();
-    }
+	public short getMaxDurability() {
+		return this.m.getMaxDurability();
+	}
+
+	@Override
+	public int getType() {
+		return m.getId();
+	}
 
 	@Override
 	public MCMaterialData getData() {
@@ -40,9 +37,9 @@ public class BukkitMCMaterial implements MCMaterial {
 	}
 
 	@Override
-    public int getMaxStackSize() {
-        return m.getMaxStackSize();
-    }
+	public int getMaxStackSize() {
+		return m.getMaxStackSize();
+	}
 
 	@Override
 	public boolean hasGravity() {

@@ -13,12 +13,12 @@ public class BukkitMCFurnaceRecipe extends BukkitMCRecipe implements MCFurnaceRe
 		super(recipe);
 		fr = recipe;
 	}
-	
+
 	@Override
 	public MCRecipeType getRecipeType() {
 		return MCRecipeType.FURNACE;
 	}
-	
+
 	@Override
 	public MCItemStack getResult() {
 		return new BukkitMCItemStack(fr.getResult());

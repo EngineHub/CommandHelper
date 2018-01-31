@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCWorld;
@@ -11,12 +10,8 @@ import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 
-/**
- *
- * 
- */
 public class BukkitMCWorldCreator implements MCWorldCreator {
-	
+
 	WorldCreator creator;
 	public BukkitMCWorldCreator(String name){
 		creator = new WorldCreator(name);
@@ -46,13 +41,13 @@ public class BukkitMCWorldCreator implements MCWorldCreator {
 		creator.seed(seed);
 		return this;
 	}
-	
+
 	@Override
 	public MCWorldCreator generator(String generator) {
 		creator.generator(generator);
 		return this;
 	}
-	
+
 	@Override
 	public MCWorldCreator copy(MCWorld toCopy) {
 		creator.copy((World) toCopy.getHandle());

@@ -7,19 +7,15 @@ import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.event.block.Action;
 
-/**
- *
- * 
- */
 @abstractionenum(
 		implementation= Implementation.Type.BUKKIT,
 		forAbstractEnum=MCAction.class,
 		forConcreteEnum=Action.class
 )
 public class BukkitMCAction extends EnumConvertor<MCAction, Action>{
-	
+
 	private static BukkitMCAction instance;
-	
+
 	public static BukkitMCAction getConvertor(){
 		if(instance == null){
 			instance = new BukkitMCAction();

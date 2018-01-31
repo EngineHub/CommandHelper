@@ -5,11 +5,7 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCEntityToggleGlideEvent extends BindableEvent {
-
-	public boolean isGliding();
-
-	public MCEntity getEntity();
-
-	public MCEntityType getEntityType();
-
+	boolean isGliding();
+	MCEntity getEntity();
+	MCEntityType getEntityType();
 }

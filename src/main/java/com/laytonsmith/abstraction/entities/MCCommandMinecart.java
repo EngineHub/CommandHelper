@@ -3,8 +3,8 @@ package com.laytonsmith.abstraction.entities;
 import com.laytonsmith.abstraction.MCCommandSender;
 
 public interface MCCommandMinecart extends MCMinecart, MCCommandSender {
-	public String getName();
-	public void setName(String cmd);
-	public String getCommand();
-	public void setCommand(String cmd);
+	String getName();
+	void setName(String cmd);
+	String getCommand();
+	void setCommand(String cmd);
 }

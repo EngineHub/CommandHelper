@@ -12,14 +12,14 @@ import org.bukkit.projectiles.BlockProjectileSource;
 import org.bukkit.projectiles.ProjectileSource;
 
 public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
-	
+
 	Projectile proj;
 
 	public BukkitMCProjectile(Entity e) {
 		super(e);
 		this.proj = (Projectile) e;
 	}
-	
+
 	@Override
 	public boolean doesBounce() {
 		return proj.doesBounce();
@@ -28,18 +28,18 @@ public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 	@Override
 	public MCProjectileSource getShooter() {
 		ProjectileSource source = proj.getShooter();
-		
+
 		if (source instanceof BlockProjectileSource) {
 			return new BukkitMCBlockProjectileSource((BlockProjectileSource) source);
 		}
-		
+
 		if (source instanceof Entity) {
 			MCEntity e = BukkitConvertor.BukkitGetCorrectEntity((Entity) source);
 			if (e instanceof MCProjectileSource) {
 				return (MCProjectileSource) e;
 			}
 		}
-		
+
 		return null;
 	}
 

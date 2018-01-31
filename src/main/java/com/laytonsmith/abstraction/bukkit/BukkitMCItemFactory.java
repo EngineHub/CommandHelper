@@ -10,10 +10,6 @@ import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-/**
- * 
- * @author jb_aero
- */
 public class BukkitMCItemFactory implements MCItemFactory {
 
 	ItemFactory f;

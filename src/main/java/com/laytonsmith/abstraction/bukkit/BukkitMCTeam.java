@@ -71,12 +71,12 @@ public class BukkitMCTeam implements MCTeam {
 	public Set<String> getEntries() {
 		Set<String> ret = new HashSet<String>();
 		try {
-			for (String e : t.getEntries()) {
+			for(String e : t.getEntries()) {
 				ret.add(e);
 			}
 		} catch(NoSuchMethodError ex){
 			// Probably 1.8.5 or prior
-			for (OfflinePlayer o : (Set<OfflinePlayer>) ReflectionUtils.invokeMethod(t, "getPlayers")) {
+			for(OfflinePlayer o : (Set<OfflinePlayer>) ReflectionUtils.invokeMethod(t, "getPlayers")) {
 				ret.add(o.getName());
 			}
 		}

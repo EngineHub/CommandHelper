@@ -9,7 +9,7 @@ public interface MCAbstractHorse extends MCTameable, MCVehicle, MCInventoryHolde
 
 	double getJumpStrength();
 	void setJumpStrength(double strength);
-	
+
 	int getDomestication();
 	int getMaxDomestication();
 	void setDomestication(int level);

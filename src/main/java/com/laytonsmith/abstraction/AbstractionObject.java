@@ -10,25 +10,25 @@ package com.laytonsmith.abstraction;
  * 
  */
 public interface AbstractionObject {
-    /**
-     * The underlying object that the abstraction object wraps. This can be used in combination with
-     * instanceof MCType to determine if the wrapped type can be cast to Type.
-     * @return 
-     */
-    public Object getHandle();
+	/**
+	 * The underlying object that the abstraction object wraps. This can be used in combination with
+	 * instanceof MCType to determine if the wrapped type can be cast to Type.
+	 * @return
+	 */
+	Object getHandle();
 }
 
 /*
 public BukkitMC<>(AbstractionObject a){
-    this((<>)null);
-    if(a instanceof MC<>){
-        this.<> = ((<>)a.getHandle());
-    } else {
-        throw new ClassCastException();
-    }
+	this((<>)null);
+	if(a instanceof MC<>){
+		this.<> = ((<>)a.getHandle());
+	} else {
+		throw new ClassCastException();
+	}
 }
 
 public Object getHandle(){
-    return <>;
+	return <>;
 }
  */

@@ -8,10 +8,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.inventory.ItemStack;
 
-/**
- *
- * @author Hekta
- */
 public class BukkitMCThrownPotion extends BukkitMCProjectile implements MCThrownPotion {
 
 	public BukkitMCThrownPotion(Entity potion) {

@@ -7,16 +7,10 @@ import com.laytonsmith.core.events.BindableEvent;
 import java.util.List;
 
 public interface MCEntityExplodeEvent extends BindableEvent {
-
-	public MCEntity getEntity();
-	
-	public List<MCBlock> getBlocks();
-	
-	public void setBlocks(List<MCBlock> blocks);
-	
-	public MCLocation getLocation();
-	
-	public float getYield();
-	
-	public void setYield(float power);
+	MCEntity getEntity();
+	List<MCBlock> getBlocks();
+	void setBlocks(List<MCBlock> blocks);
+	MCLocation getLocation();
+	float getYield();
+	void setYield(float power);
 }

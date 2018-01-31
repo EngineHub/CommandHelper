@@ -1,109 +1,101 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.laytonsmith.abstraction;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- *
- */
 public interface MCColor {
 
 	/**
-     * White, or (0xFF,0xFF,0xFF) in (R,G,B)
-     */
-    public static final MCColor WHITE = StaticLayer.GetConvertor().GetColor(0xFF, 0xFF, 0xFF);
+	 * White, or (0xFF,0xFF,0xFF) in (R,G,B)
+	 */
+	MCColor WHITE = StaticLayer.GetConvertor().GetColor(0xFF, 0xFF, 0xFF);
 
-    /**
-     * Silver, or (0xC0,0xC0,0xC0) in (R,G,B)
-     */
-    public static final MCColor SILVER = StaticLayer.GetConvertor().GetColor(0xC0, 0xC0, 0xC0);
+	/**
+	 * Silver, or (0xC0,0xC0,0xC0) in (R,G,B)
+	 */
+	 MCColor SILVER = StaticLayer.GetConvertor().GetColor(0xC0, 0xC0, 0xC0);
 
-    /**
-     * Gray, or (0x80,0x80,0x80) in (R,G,B)
-     */
-    public static final MCColor GRAY = StaticLayer.GetConvertor().GetColor(0x80, 0x80, 0x80);
+	/**
+	 * Gray, or (0x80,0x80,0x80) in (R,G,B)
+	 */
+	 MCColor GRAY = StaticLayer.GetConvertor().GetColor(0x80, 0x80, 0x80);
 
-    /**
-     * Black, or (0x00,0x00,0x00) in (R,G,B)
-     */
-    public static final MCColor BLACK = StaticLayer.GetConvertor().GetColor(0x00, 0x00, 0x00);
+	/**
+	 * Black, or (0x00,0x00,0x00) in (R,G,B)
+	 */
+	 MCColor BLACK = StaticLayer.GetConvertor().GetColor(0x00, 0x00, 0x00);
 
-    /**
-     * Red, or (0xFF,0x00,0x00) in (R,G,B)
-     */
-    public static final MCColor RED = StaticLayer.GetConvertor().GetColor(0xFF, 0x00, 0x00);
+	/**
+	 * Red, or (0xFF,0x00,0x00) in (R,G,B)
+	 */
+	 MCColor RED = StaticLayer.GetConvertor().GetColor(0xFF, 0x00, 0x00);
 
-    /**
-     * Maroon, or (0x80,0x00,0x00) in (R,G,B)
-     */
-    public static final MCColor MAROON = StaticLayer.GetConvertor().GetColor(0x80, 0x00, 0x00);
+	/**
+	 * Maroon, or (0x80,0x00,0x00) in (R,G,B)
+	 */
+	 MCColor MAROON = StaticLayer.GetConvertor().GetColor(0x80, 0x00, 0x00);
 
-    /**
-     * Yellow, or (0xFF,0xFF,0x00) in (R,G,B)
-     */
-    public static final MCColor YELLOW = StaticLayer.GetConvertor().GetColor(0xFF, 0xFF, 0x00);
+	/**
+	 * Yellow, or (0xFF,0xFF,0x00) in (R,G,B)
+	 */
+	 MCColor YELLOW = StaticLayer.GetConvertor().GetColor(0xFF, 0xFF, 0x00);
 
-    /**
-     * Olive, or (0x80,0x80,0x00) in (R,G,B)
-     */
-    public static final MCColor OLIVE = StaticLayer.GetConvertor().GetColor(0x80, 0x80, 0x00);
+	/**
+	 * Olive, or (0x80,0x80,0x00) in (R,G,B)
+	 */
+	 MCColor OLIVE = StaticLayer.GetConvertor().GetColor(0x80, 0x80, 0x00);
 
-    /**
-     * Lime, or (0x00,0xFF,0x00) in (R,G,B)
-     */
-    public static final MCColor LIME = StaticLayer.GetConvertor().GetColor(0x00, 0xFF, 0x00);
+	/**
+	 * Lime, or (0x00,0xFF,0x00) in (R,G,B)
+	 */
+	 MCColor LIME = StaticLayer.GetConvertor().GetColor(0x00, 0xFF, 0x00);
 
-    /**
-     * Green, or (0x00,0x80,0x00) in (R,G,B)
-     */
-    public static final MCColor GREEN = StaticLayer.GetConvertor().GetColor(0x00, 0x80, 0x00);
+	/**
+	 * Green, or (0x00,0x80,0x00) in (R,G,B)
+	 */
+	 MCColor GREEN = StaticLayer.GetConvertor().GetColor(0x00, 0x80, 0x00);
 
-    /**
-     * Aqua, or (0x00,0xFF,0xFF) in (R,G,B)
-     */
-    public static final MCColor AQUA = StaticLayer.GetConvertor().GetColor(0x00, 0xFF, 0xFF);
+	/**
+	 * Aqua, or (0x00,0xFF,0xFF) in (R,G,B)
+	 */
+	 MCColor AQUA = StaticLayer.GetConvertor().GetColor(0x00, 0xFF, 0xFF);
 
-    /**
-     * Teal, or (0x00,0x80,0x80) in (R,G,B)
-     */
-    public static final MCColor TEAL = StaticLayer.GetConvertor().GetColor(0x00, 0x80, 0x80);
+	/**
+	 * Teal, or (0x00,0x80,0x80) in (R,G,B)
+	 */
+	 MCColor TEAL = StaticLayer.GetConvertor().GetColor(0x00, 0x80, 0x80);
 
-    /**
-     * Blue, or (0x00,0x00,0xFF) in (R,G,B)
-     */
-    public static final MCColor BLUE = StaticLayer.GetConvertor().GetColor(0x00, 0x00, 0xFF);
+	/**
+	 * Blue, or (0x00,0x00,0xFF) in (R,G,B)
+	 */
+	 MCColor BLUE = StaticLayer.GetConvertor().GetColor(0x00, 0x00, 0xFF);
 
-    /**
-     * Navy, or (0x00,0x00,0x80) in (R,G,B)
-     */
-    public static final MCColor NAVY = StaticLayer.GetConvertor().GetColor(0x00, 0x00, 0x80);
+	/**
+	 * Navy, or (0x00,0x00,0x80) in (R,G,B)
+	 */
+	 MCColor NAVY = StaticLayer.GetConvertor().GetColor(0x00, 0x00, 0x80);
 
-    /**
-     * Fuchsia, or (0xFF,0x00,0xFF) in (R,G,B)
-     */
-    public static final MCColor FUCHSIA = StaticLayer.GetConvertor().GetColor(0xFF, 0x00, 0xFF);
+	/**
+	 * Fuchsia, or (0xFF,0x00,0xFF) in (R,G,B)
+	 */
+	 MCColor FUCHSIA = StaticLayer.GetConvertor().GetColor(0xFF, 0x00, 0xFF);
 
-    /**
-     * Purple, or (0x80,0x00,0x80) in (R,G,B)
-     */
-    public static final MCColor PURPLE = StaticLayer.GetConvertor().GetColor(0x80, 0x00, 0x80);
+	/**
+	 * Purple, or (0x80,0x00,0x80) in (R,G,B)
+	 */
+	 MCColor PURPLE = StaticLayer.GetConvertor().GetColor(0x80, 0x00, 0x80);
 
-    /**
-     * Orange, or (0xFF,0xA5,0x00) in (R,G,B)
-     */
-    public static final MCColor ORANGE = StaticLayer.GetConvertor().GetColor(0xFF, 0xA5, 0x00);
+	/**
+	 * Orange, or (0xFF,0xA5,0x00) in (R,G,B)
+	 */
+	MCColor ORANGE = StaticLayer.GetConvertor().GetColor(0xFF, 0xA5, 0x00);
 
 	/**
 	 * A mapping of string color name values to the standard MCColor objects.
 	 * Note that the map is immutable, so any attempts to write to it will fail.
 	 */
-	public static final Map<String, MCColor> STANDARD_COLORS = Internal.buildColors();
+	Map<String, MCColor> STANDARD_COLORS = Internal.buildColors();
 
 	int getRed();
 	int getGreen();
@@ -118,7 +110,7 @@ public interface MCColor {
 	 */
 	MCColor build(int red, int green, int blue);
 
-	static class Internal {
+	class Internal {
 		private static Map<String, MCColor> buildColors(){
 			Map<String, MCColor> map = new HashMap<>();
 			map.put("AQUA", AQUA);

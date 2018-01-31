@@ -5,10 +5,6 @@ import com.laytonsmith.abstraction.entities.MCEnderDragonPart;
 import org.bukkit.entity.EnderDragonPart;
 import org.bukkit.entity.Entity;
 
-/**
- *
- * @author Hekta
- */
 public class BukkitMCEnderDragonPart extends BukkitMCComplexEntityPart implements MCEnderDragonPart {
 
 	public BukkitMCEnderDragonPart(Entity part) {

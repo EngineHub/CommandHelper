@@ -6,29 +6,25 @@ import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCInventoryAction;
 import com.laytonsmith.abstraction.enums.MCSlotType;
 
-/**
- *
- * @author jb_aero
- */
 public interface MCInventoryClickEvent extends MCInventoryInteractEvent {
-	public MCInventoryAction getAction();
-	public MCClickType getClickType();
-	
-	public MCItemStack getCurrentItem();
-	public MCItemStack getCursor();
-	public int getSlot();
-	public int getRawSlot();
-	public int getHotbarButton();
-	public MCSlotType getSlotType();
+	MCInventoryAction getAction();
+	MCClickType getClickType();
+
+	MCItemStack getCurrentItem();
+	MCItemStack getCursor();
+	int getSlot();
+	int getRawSlot();
+	int getHotbarButton();
+	MCSlotType getSlotType();
 	@Override
-	public MCHumanEntity getWhoClicked();
+	MCHumanEntity getWhoClicked();
 
-	public boolean isLeftClick();
-	public boolean isRightClick();
-	public boolean isShiftClick();
-	public boolean isCreativeClick();
-	public boolean isKeyboardClick();
+	boolean isLeftClick();
+	boolean isRightClick();
+	boolean isShiftClick();
+	boolean isCreativeClick();
+	boolean isKeyboardClick();
 
-	public void setCurrentItem(MCItemStack slot);
-	public void setCursor(MCItemStack cursor);
+	void setCurrentItem(MCItemStack slot);
+	void setCursor(MCItemStack cursor);
 }

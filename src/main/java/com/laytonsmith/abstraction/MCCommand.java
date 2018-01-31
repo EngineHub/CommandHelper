@@ -3,54 +3,29 @@ package com.laytonsmith.abstraction;
 import java.util.List;
 
 public interface MCCommand extends AbstractionObject {
-
-	public List<String> getAliases();
-	
-	public String getDescription();
-	
-	public String getLabel();
-	
-	public String getName();
-	
-	public String getPermission();
-	
-	public String getPermissionMessage();
-	
-	public String getUsage();
-	
-	public MCCommand setAliases(List<String> aliases);
-	
-	public MCCommand setDescription(String desc);
-	
-	public MCCommand setLabel(String name);
-	
-	public MCCommand setPermission(String perm);
-	
-	public MCCommand setPermissionMessage(String permmsg);
-	
-	public MCCommand setUsage(String example);
-	
-	public boolean testPermission(MCCommandSender target);
-	
-	public boolean testPermissionSilent(MCCommandSender target);
-	
-	public boolean register(MCCommandMap map);
-	
-	public boolean isRegistered();
-	
-	public boolean unregister(MCCommandMap map);
-
-	public MCPlugin getPlugin();
-	
-	public MCPlugin getExecutor();
-	
-	public MCPlugin getTabCompleter();
-	
-	public void setExecutor(MCPlugin plugin);
-	
-	public void setTabCompleter(MCPlugin plugin);
-	
-	public List<String> handleTabComplete(MCCommandSender sender, String alias, String[] args);
-	
-	public boolean handleCustomCommand(MCCommandSender sender, String label, String[] args);
+	List<String> getAliases();
+	String getDescription();
+	String getLabel();
+	String getName();
+	String getPermission();
+	String getPermissionMessage();
+	String getUsage();
+	MCCommand setAliases(List<String> aliases);
+	MCCommand setDescription(String desc);
+	MCCommand setLabel(String name);
+	MCCommand setPermission(String perm);
+	MCCommand setPermissionMessage(String permmsg);
+	MCCommand setUsage(String example);
+	boolean testPermission(MCCommandSender target);
+	boolean testPermissionSilent(MCCommandSender target);
+	boolean register(MCCommandMap map);
+	boolean isRegistered();
+	boolean unregister(MCCommandMap map);
+	MCPlugin getPlugin();
+	MCPlugin getExecutor();
+	MCPlugin getTabCompleter();
+	void setExecutor(MCPlugin plugin);
+	void setTabCompleter(MCPlugin plugin);
+	List<String> handleTabComplete(MCCommandSender sender, String alias, String[] args);
+	boolean handleCustomCommand(MCCommandSender sender, String label, String[] args);
 }

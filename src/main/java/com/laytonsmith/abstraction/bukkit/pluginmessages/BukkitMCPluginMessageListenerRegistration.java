@@ -13,5 +13,4 @@ public class BukkitMCPluginMessageListenerRegistration implements MCPluginMessag
 	public BukkitMCPluginMessageListenerRegistration(PluginMessageListenerRegistration registration) {
 		this.registration = registration;
 	}
-	
 }

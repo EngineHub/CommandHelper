@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.abstractionenum;
@@ -18,10 +17,10 @@ import com.laytonsmith.core.constructs.Target;
  * does allow for enums themselves to be abstracted away from a particular platform.
  */
 public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends Enum> {
-	
+
 	private Class<? extends Abstracted> abstractedClass;
 	private Class<? extends Concrete> concreteClass;
-	
+
 	/**
 	 * This is changed reflectively by the startup mechanism. Please do not
 	 * change the name of this variable.
@@ -36,7 +35,7 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 		this.abstractedClass = (Class<Abstracted>)annotation.forAbstractEnum();
 		this.concreteClass = (Class<Concrete>)annotation.forConcreteEnum();
 	}
-	
+
 	/**
 	 * Given a concrete Enum, returns the abstract version. This is generally
 	 * called in platform specific code. The platform is given a platform specific
@@ -58,7 +57,7 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Can be overridden by subclasses that have a non 1:1 mapping. It should
 	 * return the abstract enum, given a concrete enum. This should be used in the case
@@ -70,7 +69,7 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 	protected Abstracted getAbstractedEnumCustom(Concrete concrete) throws IllegalArgumentException {
 		return (Abstracted) Enum.valueOf(abstractedClass, concrete.name());
 	}
-	
+
 	/**
 	 * Given an abstract Enum, returns the concrete version. This is generally
 	 * called in platform specific code. The platform is given an abstract
@@ -85,14 +84,14 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 		if(abstracted == null){
 			return null;
 		}
-		try{
+		try {
 			return getConcreteEnumCustom(abstracted);
 		} catch(IllegalArgumentException e){
 			doLog(abstractedClass, concreteClass, abstracted);
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Can be overridden by subclasses that have a non 1:1 mapping. It should
 	 * return the concrete enum, given an abstract enum. This should be used in the case
@@ -104,7 +103,7 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 	protected Concrete getConcreteEnumCustom(Abstracted abstracted) throws IllegalArgumentException {
 		return (Concrete) Enum.valueOf(concreteClass, abstracted.name());
 	}
-	
+
 	private void doLog(Class from, Class to, Enum value){
 		String message = from.getSimpleName() + "." + value.name() + " missing a match in " + to.getName();
 		LogLevel level = LogLevel.WARNING;

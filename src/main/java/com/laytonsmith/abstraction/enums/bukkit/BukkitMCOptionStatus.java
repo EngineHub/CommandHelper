@@ -18,9 +18,9 @@ import com.laytonsmith.core.Static;
 public class BukkitMCOptionStatus extends EnumConvertor<MCOptionStatus, OptionStatus>{
 
 	private static BukkitMCOptionStatus instance;
-	
+
 	public static BukkitMCOptionStatus getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new BukkitMCOptionStatus();
 		}
 		return instance;

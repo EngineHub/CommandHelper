@@ -17,10 +17,6 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-/**
- *
- * 
- */
 public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHumanEntity {
     
     HumanEntity he;
@@ -29,7 +25,7 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 		super(humanEntity);
 		he = (HumanEntity) humanEntity;
 	}
-	
+
 	public HumanEntity asHumanEntity() {
 		return he;
 	}
@@ -128,12 +124,12 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 	public MCInventory getEnderChest() {
 		return new BukkitMCInventory(he.getEnderChest());
 	}
-	
+
 	@Override
 	public MCInventoryView openWorkbench(MCLocation loc, boolean force) {
 		return new BukkitMCInventoryView(he.openWorkbench((Location)loc.getHandle(), force));
 	}
-	
+
 	@Override
 	public MCInventoryView openEnchanting(MCLocation loc, boolean force) {
 		return new BukkitMCInventoryView(he.openEnchanting((Location)loc.getHandle(), force));

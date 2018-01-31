@@ -17,7 +17,7 @@ public class BukkitMCCraftingInventory extends BukkitMCInventory implements MCCr
 	@Override
 	public MCItemStack[] getMatrix() {
 		MCItemStack[] matrix = new MCItemStack[ci.getMatrix().length];
-		for (int i=0; i<matrix.length; i++) {
+		for(int i=0; i<matrix.length; i++) {
 			matrix[i] = ci.getMatrix()[i] == null ? null : new BukkitMCItemStack(ci.getMatrix()[i]);
 		}
 		return matrix;
@@ -30,13 +30,17 @@ public class BukkitMCCraftingInventory extends BukkitMCInventory implements MCCr
 
 	@Override
 	public MCItemStack getResult() {
-		return ci.getResult() == null ? null : new BukkitMCItemStack(ci.getResult());
+		ItemStack is = ci.getResult();
+		if(is == null) {
+			return null;
+		}
+		return new BukkitMCItemStack(is);
 	}
 
 	@Override
 	public void setMatrix(MCItemStack[] contents) {
 		ItemStack[] matrix = new ItemStack[contents.length];
-		for (int i=0; i<matrix.length; i++) {
+		for(int i=0; i<matrix.length; i++) {
 			matrix[i] = contents[i] == null ? null : ((BukkitMCItemStack) contents[i]).asItemStack();
 		}
 		ci.setMatrix(matrix);
@@ -44,6 +48,10 @@ public class BukkitMCCraftingInventory extends BukkitMCInventory implements MCCr
 
 	@Override
 	public void setResult(MCItemStack result) {
-		ci.setResult(result == null ? null : ((BukkitMCItemStack) result).asItemStack());
+		if(result == null) {
+			ci.setResult(null);
+		} else {
+			ci.setResult(((BukkitMCItemStack) result).asItemStack());
+		}
 	}
 }

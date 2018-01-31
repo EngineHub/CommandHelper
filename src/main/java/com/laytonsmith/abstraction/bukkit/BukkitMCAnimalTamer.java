@@ -11,56 +11,53 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.HumanEntity;
 
-/**
- *
- * 
- */
 public class BukkitMCAnimalTamer implements MCAnimalTamer{
-    AnimalTamer at;
-    public BukkitMCAnimalTamer(AnimalTamer at){
-        this.at = at;
-    }
-    
-    public BukkitMCAnimalTamer(AbstractionObject a){
-        this((AnimalTamer)null);
-        if(a instanceof MCAnimalTamer){
-            this.at = ((AnimalTamer)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
-    }
-    
+
+	AnimalTamer at;
+	public BukkitMCAnimalTamer(AnimalTamer at){
+		this.at = at;
+	}
+
+	public BukkitMCAnimalTamer(AbstractionObject a){
+		this((AnimalTamer)null);
+		if(a instanceof MCAnimalTamer){
+			this.at = ((AnimalTamer)a.getHandle());
+		} else {
+			throw new ClassCastException();
+		}
+	}
+
 	@Override
-    public Object getHandle(){
-        return at;
-    }
+	public Object getHandle(){
+		return at;
+	}
 
 	public AnimalTamer _tamer() {
 		return at;
 	}
 
-    public MCOfflinePlayer getOfflinePlayer() {
-        if(at instanceof OfflinePlayer){
-            return new BukkitMCOfflinePlayer((OfflinePlayer)at);
-        }
-        return null;
-    }
+	public MCOfflinePlayer getOfflinePlayer() {
+		if(at instanceof OfflinePlayer){
+			return new BukkitMCOfflinePlayer((OfflinePlayer)at);
+		}
+		return null;
+	}
 
-    public boolean isOfflinePlayer() {
-        return at instanceof OfflinePlayer;
-    }
+	public boolean isOfflinePlayer() {
+		return at instanceof OfflinePlayer;
+	}
 
-    public boolean isHumanEntity() {
-        return at instanceof HumanEntity;
-    }
+	public boolean isHumanEntity() {
+		return at instanceof HumanEntity;
+	}
 
-    public MCHumanEntity getHumanEntity() {
-        if(at instanceof HumanEntity){
-            return new BukkitMCHumanEntity((HumanEntity)at);
-        }
-        return null;
-    }
-	
+	public MCHumanEntity getHumanEntity() {
+		if(at instanceof HumanEntity){
+			return new BukkitMCHumanEntity((HumanEntity)at);
+		}
+		return null;
+	}
+
 	@Override
 	public String toString() {
 		return at.toString();
@@ -68,7 +65,7 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer{
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof BukkitMCAnimalTamer?at.equals(((BukkitMCAnimalTamer)obj).at):false);
+		return obj instanceof BukkitMCAnimalTamer && at.equals(((BukkitMCAnimalTamer) obj).at);
 	}
 
 	@Override

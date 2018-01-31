@@ -9,7 +9,7 @@ import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Entity;
 
 public class BukkitMCEnderCrystal extends BukkitMCEntity implements MCEnderCrystal{
-	
+
 	EnderCrystal ec;
 
 	public BukkitMCEnderCrystal(Entity ec) {
