@@ -6,6 +6,7 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.ObjectType;
@@ -68,7 +69,11 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 	if (begin >= end) {
 	    return new CString("", t);
 	}
-	return new CString(this.val().substring(begin, end), t);
+	try {
+	    return new CString(this.val().substring(begin, end), t);
+	} catch (StringIndexOutOfBoundsException e) {
+	    throw new CRERangeException("String bounds out of range. Indices only go up to " + (this.val().length() - 1), t);
+	}
     }
 
     @Override
@@ -78,7 +83,11 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 
     @Override
     public Construct get(int index, Target t) throws ConfigRuntimeException {
-	return new CString(this.val().charAt(index), t);
+	try {
+	    return new CString(this.val().charAt(index), t);
+	} catch (StringIndexOutOfBoundsException e) {
+	    throw new CRERangeException("No character at index " + index + ". Indices only go up to " + (this.val().length() - 1), t);
+	}
     }
 
     @Override

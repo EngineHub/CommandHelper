@@ -22,6 +22,8 @@ import static com.laytonsmith.testing.StaticTest.assertReturn;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -237,9 +239,33 @@ public class ArrayHandlingTest {
 	}
 
 	@Test()
-	public void testStringSlice() throws Exception {
+	public void testStringSlice1() throws Exception {
 		SRun("msg('slice'[2..])", fakePlayer);
 		verify(fakePlayer).sendMessage("ice");
+	}
+
+	@Test()
+	public void testStringSlice2() throws Exception {
+		try {
+			SRun("msg('slice'[2..8])", fakePlayer);
+			fail("Did not expect this test to pass.");
+		} catch (ConfigRuntimeException e) {
+		}
+	}
+
+	@Test()
+	public void testStringGet1() throws Exception {
+		SRun("msg('get'[1])", fakePlayer);
+		verify(fakePlayer).sendMessage("e");
+	}
+
+	@Test()
+	public void testStringGet2() throws Exception {
+		try {
+			SRun("msg('get'[5])", fakePlayer);
+			fail("Did not expect this test to pass.");
+		} catch (ConfigRuntimeException e) {
+		}
 	}
 
 	@Test public void testArraySort1() throws Exception{
