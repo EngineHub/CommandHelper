@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.entities.MCAbstractHorse;
 import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.Entity;
+import org.bukkit.inventory.InventoryHolder;
 
 public class BukkitMCAbstractHorse extends BukkitMCTameable implements MCAbstractHorse {
 
@@ -54,11 +55,11 @@ public class BukkitMCAbstractHorse extends BukkitMCTameable implements MCAbstrac
 
 	@Override
 	public void setSaddle(MCItemStack stack) {
-		ah.getInventory().setItem(0, ((BukkitMCItemStack)stack).asItemStack());
+		((InventoryHolder) ah).getInventory().setItem(0, ((BukkitMCItemStack)stack).asItemStack());
 	}
 
 	@Override
 	public MCItemStack getSaddle() {
-		return new BukkitMCItemStack(ah.getInventory().getItem(0));
+		return new BukkitMCItemStack(((InventoryHolder) ah).getInventory().getItem(0));
 	}
 }

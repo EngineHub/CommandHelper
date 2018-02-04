@@ -32,12 +32,12 @@ public class BukkitMCLlama extends BukkitMCChestedHorse implements MCLlama {
 
 	@Override
 	public void setSaddle(MCItemStack stack) {
-		ah.getInventory().setItem(1, ((BukkitMCItemStack)stack).asItemStack());
+		l.getInventory().setItem(1, ((BukkitMCItemStack)stack).asItemStack());
 	}
 
 	@Override
 	public MCItemStack getSaddle() {
-		return new BukkitMCItemStack(ah.getInventory().getItem(1));
+		return new BukkitMCItemStack(l.getInventory().getItem(1));
 	}
 
 	@abstractionenum(
