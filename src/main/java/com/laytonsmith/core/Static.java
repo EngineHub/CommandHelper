@@ -1,11 +1,11 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.DateUtils;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.XMLDocument;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
@@ -349,8 +349,17 @@ public final class Static {
      * @throws NotInitializedYetException
      */
     public static SimpleVersion getVersion() throws NotInitializedYetException {
-	SimpleVersion v = com.laytonsmith.commandhelper.CommandHelperPlugin.version;
-	if (v == null) {
+	SimpleVersion v = null;
+	if(Implementation.GetServerType() == Implementation.Type.BUKKIT) {
+	    v = com.laytonsmith.commandhelper.CommandHelperPlugin.version;
+	} else {
+	    try {
+		v = Main.loadSelfVersion();
+	    } catch (Exception ex) {
+		//Ignored
+	    }
+	}
+	if(v == null) {
 	    throw new NotInitializedYetException("The plugin has not been initialized yet");
 	}
 	return v;

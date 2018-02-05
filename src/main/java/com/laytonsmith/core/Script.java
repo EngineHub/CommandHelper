@@ -4,6 +4,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -375,32 +376,30 @@ public class Script {
 						}
 						throw e;
 					} catch(Exception e){
-						String version = "Unknown";
-						try{
-							version = Main.loadSelfVersion();
-						} catch(Exception ex){
-							//Ignored
-						}
 						String brand = Implementation.GetServerType().getBranding();
-						outer: for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()){
-							for(FunctionBase b : tracker.getFunctions()){
-								if(b.getName().equals(f.getName())){
+						SimpleVersion version = Static.getVersion();
+
+						String culprit = brand;
+						outer: for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()) {
+							for(FunctionBase b : tracker.getFunctions()) {
+								if(b.getName().equals(f.getName())) {
 									//This extension provided the function, so its the culprit. Report this
 									//name instead of the core plugin's name.
-									for(Extension extension : tracker.getExtensions()){
-										brand = extension.getName();
+									for(Extension extension : tracker.getExtensions()) {
+										culprit = extension.getName();
 										break outer;
 									}
 								}
 							}
 						}
-						String emsg = TermColors.RED + "Uh oh! You've found an error in " + TermColors.CYAN + brand + TermColors.RED
-								 + ".\nThis is an error caused while running your code, so you may be able to find a workaround,"
-								+ " but is ultimately an error in " + brand
-								+ " itself.\nThe line of code that caused the error was this:\n" + TermColors.WHITE;
+
+						String emsg = TermColors.RED + "Uh oh! You've found an error in " + TermColors.CYAN + culprit + TermColors.RED + ".\n"
+								+ "This happened while running your code, so you may be able to find a workaround,"
+								+ " but is ultimately an issue in " + culprit + ".\n"
+								+ "The following code caused the error:\n" + TermColors.WHITE;
+
 						List<String> args2 = new ArrayList<>();
 						Map<String, String> vars = new HashMap<>();
-
 						for(Construct cc : args){
 							if(cc instanceof IVariable){
 								Construct ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable)cc).getVariableName(), cc.getTarget()).ival();
@@ -420,44 +419,46 @@ public class Script {
 								args2.add(cc.val());
 							}
 						}
+						if(!vars.isEmpty()){
+							emsg += StringUtils.Join(vars, " = ", "\n") + "\n";
+						}
+						emsg += f.getName() + "(";
+						emsg += StringUtils.Join(args2, ", ");
+						emsg += ")\n";
+
+						emsg += TermColors.RED + "on or around "
+								+ TermColors.YELLOW + m.getTarget().file() + TermColors.WHITE + ":" + TermColors.CYAN
+								+ m.getTarget().line() + TermColors.RED + ".\n";
+
 						//Server might not be available in this platform, so let's be sure to ignore those exceptions
-						String modVersion = "Unsupported platform";
+						String modVersion;
 						try{
 							modVersion = StaticLayer.GetConvertor().GetServer().getAPIVersion();
 						} catch(Exception ex){
 							modVersion = Implementation.GetServerType().name();
 						}
-						if(!vars.isEmpty()){
-							emsg += StringUtils.Join(vars, " = ", "\n") + "\n";
-						}
+
 						String extensionData = "";
 						for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()){
 							for(Extension extension : tracker.getExtensions()){
 								try {
 									extensionData += TermColors.CYAN + extension.getName() + TermColors.RED
-											+ " (version " + TermColors.RESET + extension.getVersion() + TermColors.RED + ");\n";
+											+ " (" + TermColors.RESET + extension.getVersion() + TermColors.RED + ")\n";
 								} catch(AbstractMethodError ex){
 									// This happens with an old style extensions. Just skip it.
-									extensionData += TermColors.CYAN + "Unknown Extension" + TermColors.RED
-											+ " (unknown version);\n";
+									extensionData += TermColors.CYAN + "Unknown Extension" + TermColors.RED + "\n";
 								}
 							}
 						}
 						if(extensionData.equals("")){
-							extensionData = "No extensions are loaded.\n";
+							extensionData = "NONE\n";
 						}
-						emsg += f.getName() + "(";
-						emsg += StringUtils.Join(args2, ", ");
-						emsg += ")\n" + TermColors.RED + "on or around "
-								+ TermColors.YELLOW + m.getTarget().file() + TermColors.WHITE + ":" + TermColors.CYAN + m.getTarget().line() + TermColors.RED
-								+ ".\nPlease report this error to the developers, and be sure to include the version numbers:\n"
-								+ TermColors.CYAN + "Server " + TermColors.RED + "version: " + TermColors.RESET + modVersion + TermColors.RED + ";\n"
-								+ TermColors.CYAN + Implementation.GetServerType().getBranding() + TermColors.RED + " version: " + TermColors.RESET
-									+ version + TermColors.RED + ";\n"
-								+ "Loaded extensions and versions:\n"
-								+ extensionData
-								+ "Here's the stacktrace:\n" + TermColors.RESET;
-						emsg += Static.GetStacktraceString(e);
+
+						emsg += "Please report this to the developers, and be sure to include the version numbers:\n"
+								+ TermColors.CYAN + "Server" + TermColors.RED + " version: " + TermColors.RESET + modVersion + TermColors.RED + ";\n"
+								+ TermColors.CYAN + brand + TermColors.RED + " version: " + TermColors.RESET + version + TermColors.RED + ";\n"
+								+ "Loaded extensions and versions:\n" + extensionData
+								+ "Here's the stacktrace:\n" + TermColors.RESET + Static.GetStacktraceString(e);
 						Static.getLogger().log(Level.SEVERE, emsg);
 						throw new CancelCommandException(null, Target.UNKNOWN);
 					}
