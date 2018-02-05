@@ -2014,7 +2014,7 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(undeadhorse.getSaddle(), t), t);
 					break;
 				case SNOWMAN:
-					if(Static.getVersion().gte(MCVersion.MC1_9_4)) {
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9_4)) {
 						MCSnowman snowman = (MCSnowman) entity;
 						specArray.set(entity_spec.KEY_SNOWMAN_DERP, CBoolean.GenerateCBoolean(snowman.isDerp(), t), t);
 					}
@@ -2885,7 +2885,7 @@ public class EntityManagement {
 					}
 					break;
 				case SNOWMAN:
-					if(Static.getVersion().gte(MCVersion.MC1_9_4)) {
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9_4)) {
 						MCSnowman snowman = (MCSnowman) entity;
 						for(String index : specArray.stringKeySet()) {
 							switch (index.toLowerCase()) {
