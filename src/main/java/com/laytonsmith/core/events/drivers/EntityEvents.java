@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityType;
@@ -1546,8 +1547,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			return false;
 		}
 
@@ -1572,11 +1572,12 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <string match> the entity type | block: <item match> The block id }"
+			return "{type: <string match> the entity type"
+					+ " | blockname: <string match> The block name the entity is interacting with."
+					+ " | block: <item match> (deprecated) The numeric block id }"
 					+ " Fires when a non-player entity physically interacts with and triggers a block."
 					+ " (eg. pressure plates, redstone ore, farmland, tripwire, and wooden button)"
-					+ " {entity: the ID of the entity that interacted with the block"
-					+ " | block: the block ID with which the entity interacted "
+					+ " {entity: the ID of the entity that interacted with the block | blockname | block (deprecated)"
 					+ " | location: the location of the interaction}"
 					+ " {}"
 					+ " {}";
@@ -1586,8 +1587,10 @@ public class EntityEvents {
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if (e instanceof MCEntityInteractEvent) {
 				MCEntityInteractEvent event = (MCEntityInteractEvent) e;
+				MCMaterial mat = event.getBlock().getType();
 				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.STRING_MATCH);
-				Prefilters.match(prefilter, "block", event.getBlock().getTypeId(), PrefilterType.ITEM_MATCH);
+				Prefilters.match(prefilter, "blockname", mat.getName(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "block", mat.getType(), PrefilterType.ITEM_MATCH);
 				return true;
 			}
 			return false;
@@ -1602,10 +1605,12 @@ public class EntityEvents {
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			if (e instanceof MCEntityInteractEvent) {
 				MCEntityInteractEvent event = (MCEntityInteractEvent) e;
+				MCMaterial mat = event.getBlock().getType();
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(event);
 				ret.put("entity", new CString(event.getEntity().getUniqueId().toString(), t));
-				ret.put("block", new CInt(event.getBlock().getTypeId(), t));
+				ret.put("blockname", new CString(mat.getName(), t));
+				ret.put("block", new CInt(mat.getType(), t));
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 				return ret;
 			} else {
