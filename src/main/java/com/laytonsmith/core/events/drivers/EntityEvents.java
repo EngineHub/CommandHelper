@@ -1430,21 +1430,30 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> the type of entity | block: <math match> the blockID of the portal"
+			return "{type: <macro> the type of entity | block: <math match> (deprecated) the block numeric id of the portal"
+					+ " | portaltype: <string match> The type of portal (PORTAL or END_PORTAL)"
 					+ " world: <macro> the world in which the portal was entered }"
 					+ " Fires when an entity touches a portal block."
-					+ " {id: the entityID of the entity | location: the location of the block touched | type | block}"
+					+ " {id: the entityID of the entity | location: the location of the block touched | type"
+					+ " | block (deprecated) | portaltype }"
 					+ " {}"
 					+ " {}";
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
-				throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if (e instanceof MCEntityEnterPortalEvent) {
 				MCEntityEnterPortalEvent event = (MCEntityEnterPortalEvent) e;
 				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "block", event.getLocation().getBlock().getTypeId(), PrefilterType.MATH_MATCH);
+				if(prefilter.containsKey("portaltype")) {
+					MCMaterial mat = event.getLocation().getBlock().getType();
+					if(!prefilter.get("portaltype").val().equals(mat.getName())) {
+						return false;
+					}
+				} else if(prefilter.containsKey("block")) {
+					int type = event.getLocation().getBlock().getTypeId();
+					Prefilters.match(prefilter, "block", type, PrefilterType.MATH_MATCH);
+				}
 				Prefilters.match(prefilter, "world", event.getLocation().getWorld().getName(), PrefilterType.MACRO);
 				return true;
 			}
@@ -1457,16 +1466,17 @@ public class EntityEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e)
-				throws EventException {
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			if (e instanceof MCEntityEnterPortalEvent) {
 				MCEntityEnterPortalEvent event = (MCEntityEnterPortalEvent) e;
+				MCMaterial mat = event.getLocation().getBlock().getType();
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(event);
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
 				ret.put("type", new CString(event.getEntity().getType().name(), t));
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
-				ret.put("block", new CInt(event.getLocation().getBlock().getTypeId(), t));
+				ret.put("portaltype", new CString(mat.getName(), t));
+				ret.put("block", new CInt(mat.getType(), t));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCPortalEnterEvent");
@@ -1474,8 +1484,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			return false;
 		}
 
