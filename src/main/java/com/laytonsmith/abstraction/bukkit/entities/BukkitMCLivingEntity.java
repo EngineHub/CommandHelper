@@ -297,7 +297,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public boolean getRemoveWhenFarAway() {
-			return le.getRemoveWhenFarAway();
+		return le.getRemoveWhenFarAway();
 	}
 
 	@Override
@@ -338,7 +338,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	@Override
 	public MCEntity getLeashHolder() {
 		if(le.isLeashed()) {
-			BukkitConvertor.BukkitGetCorrectEntity(le.getLeashHolder());
+			return BukkitConvertor.BukkitGetCorrectEntity(le.getLeashHolder());
 		}
 		return null;
 	}
