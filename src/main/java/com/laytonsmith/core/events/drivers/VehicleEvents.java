@@ -532,9 +532,9 @@ public class VehicleEvents {
 		public String docs() {
 			return "{vehicletype: <macro> the entitytype of the vehicle} "
 					+ "Fires when a vehicle is destroyed."
-					+ " {vehicletype | vehicle: entityID | passenger: entityID"
-					+ " | damager: If the source of damage is a player this will contain their name, otherwise it will be"
-					+ " the entityID of the damager (only available when an entity causes damage)"
+					+ " {vehicletype | vehicle: entityID"
+					+ " | damager: If the source of damage is a player this will contain their name, otherwise it will"
+					+ " be the entityID of the damager (only available when an entity causes damage)"
 					+ " | shooter: The name of the player who shot, otherwise the entityID"
 					+ " (only available when damager is a projectile)}"
 					+ " {}"
@@ -567,7 +567,7 @@ public class VehicleEvents {
 				MCEntity damager = ((MCVehicleDestroyEvent) event).getAttacker();
 				if(damager instanceof MCPlayer) {
 					ret.put("damager", new CString(((MCPlayer) damager).getName(), Target.UNKNOWN));
-				} else {
+				} else if(damager != null) {
 					ret.put("damager", new CString(damager.getUniqueId().toString(), Target.UNKNOWN));
 				}
 				if(damager instanceof MCProjectile) {
