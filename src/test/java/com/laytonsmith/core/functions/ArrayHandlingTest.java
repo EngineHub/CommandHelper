@@ -283,6 +283,11 @@ public class ArrayHandlingTest {
 		verify(fakePlayer).sendMessage("{002, 03, 1}");
 	}
 
+	@Test public void testAssociativeArraySort() throws Exception{
+		Run("msg(array_sort(array('a': '002', 'b': '1', 'c': '03')))", fakePlayer);
+		verify(fakePlayer).sendMessage("{1, 002, 03}");
+	}
+
 	@Test public void testArrayImplode1() throws Exception{
 		Run("msg(array_implode(array(1,2,3,4,5,6,7,8,9,1,2,3,4,5)))", fakePlayer);
 		verify(fakePlayer).sendMessage("1 2 3 4 5 6 7 8 9 1 2 3 4 5");

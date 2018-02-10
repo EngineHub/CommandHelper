@@ -836,15 +836,14 @@ public class CArray extends Construct implements ArrayAccess {
 	}
 
 	public void sort(final SortType sort) {
-		List<Construct> list = array;
 		if (this.associative_mode) {
-			list = new ArrayList(associative_array.values());
+			array = new ArrayList(associative_array.values());
 			this.associative_array.clear();
 			this.associative_array = null;
 			this.associative_mode = false;
 			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Attempting to sort an associative array; key values will be lost.", this.getTarget());
 		}
-		Collections.sort(array, new Comparator<Construct>() {
+		array.sort(new Comparator<Construct>() {
 			@Override
 			public int compare(Construct o1, Construct o2) {
 				//o1 < o2 -> -1
@@ -923,7 +922,6 @@ public class CArray extends Construct implements ArrayAccess {
 				return o1.compareTo(o2);
 			}
 		});
-		this.array = list;
 		this.setDirty();
 	}
 
