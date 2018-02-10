@@ -12,6 +12,7 @@ import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -20,6 +21,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
@@ -623,13 +625,14 @@ public class Echoes {
 
 		@Override
 		public String docs() {
-			return "void {message, [permission]} Broadcasts a message to all players on the server."
-					+ " If permission is given, only players with that permission will see the broadcast.";
+			return "void {message, [permission] | message, [players]} Broadcasts a message to all or some players."
+					+ " If permission is given, only players with that permission will see the broadcast."
+					+ " If an array is given, only players in the list will see the broadcast.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRENullPointerException.class};
+			return new Class[]{CREFormatException.class};
 		}
 
 		@Override
@@ -644,13 +647,24 @@ public class Echoes {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CNull) {
-				throw new CRENullPointerException("Trying to broadcast null won't work", t);
-			}
 			final MCServer server = Static.getServer();
 			String permission = null;
-			if(args.length == 2 && !(args[1] instanceof CNull)) {
-				permission = args[1].val();
+			if(args.length == 2) {
+				if(args[1] instanceof CArray) {
+					CArray array = (CArray) args[1];
+					if(!array.isAssociative()) {
+						for(Construct p : array.asList()) {
+							try {
+								Static.GetPlayer(p, t).sendMessage(args[0].val());
+							} catch(CREPlayerOfflineException cre) {
+								// ignore offline players
+							}
+						}
+						return CVoid.VOID;
+					}
+					throw new CREFormatException("Expected a normal array or permission as the second parameter.", t);
+				}
+				permission = args[1].nval();
 			}
 			if(permission == null) {
 				server.broadcastMessage(args[0].val());
