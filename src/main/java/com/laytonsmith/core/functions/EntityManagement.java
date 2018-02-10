@@ -381,7 +381,7 @@ public class EntityManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-			new ExampleScript("Sample output", "entity_loc(5048)",
+			new ExampleScript("Sample output", "entity_loc('091a595d-3d2f-4df4-b493-951dc4bed7f2')",
 					"{0: -3451.96, 1: 65.0, 2: 718.521, 3: world, 4: -170.9, 5: 35.5, pitch: 35.5,"
 					+ " world: world, x: -3451.96, y: 65.0, yaw: -170.9, z: 718.521}")
 			};
@@ -429,14 +429,17 @@ public class EntityManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Teleporting an entity to you", "set_entity_loc(386, ploc())",
+				new ExampleScript("Teleporting an entity to you",
+						"set_entity_loc('091a595d-3d2f-4df4-b493-951dc4bed7f2', ploc())",
 						"The entity will teleport to the block you are standing on."),
-				new ExampleScript("Teleporting an entity to another", "set_entity_loc(201, entity_location(10653))",
+				new ExampleScript("Teleporting an entity to another",
+						"set_entity_loc('091a595d-3d2f-4df4-b493-951dc4bed7f2', entity_loc('82ed3624-b86b-41ef-9cde-4f3ea818b8e5'))",
 						"The entity will teleport to the other and face the same direction, if they both exist."),
 				new ExampleScript("Setting location with a normal array",
-						"set_entity_loc(465, array(214, 64, 1812, 'world', -170, 10))", "This set location and direction."),
+						"set_entity_loc('82ed3624-b86b-41ef-9cde-4f3ea818b8e5', array(214, 64, 1812, 'world', -170, 10))",
+						"This set location and direction."),
 				new ExampleScript("Setting location with an associative array",
-				"set_entity_loc(852, array(x: 214, y: 64, z: 1812, world: 'world', yaw: -170, pitch: 10))",
+						"set_entity_loc('82ed3624-b86b-41ef-9cde-4f3ea818b8e5', array(x: 214, y: 64, z: 1812, world: 'world', yaw: -170, pitch: 10))",
 						"This also sets location and direction")
 			};
 		}
@@ -473,7 +476,8 @@ public class EntityManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("A stationary entity", "msg(entity_velocity(235))",
+				new ExampleScript("A stationary entity",
+						"msg(entity_velocity('091a595d-3d2f-4df4-b493-951dc4bed7f2'))",
 						"{magnitude: 0.0, x: 0.0, y: 0.0, z: 0.0}")
 			};
 		}
@@ -510,9 +514,11 @@ public class EntityManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Setting a bounce with a normal array", "set_entity_velocity(235, array(0, 0.5, 0))",
+				new ExampleScript("Setting a bounce with a normal array",
+						"set_entity_velocity('091a595d-3d2f-4df4-b493-951dc4bed7f2', array(0, 0.5, 0))",
 						"The entity just hopped, unless it was an item frame or painting."),
-				new ExampleScript("Setting a bounce with an associative array", "set_entity_velocity(235, array(y: 0.5))",
+				new ExampleScript("Setting a bounce with an associative array",
+						"set_entity_velocity('091a595d-3d2f-4df4-b493-951dc4bed7f2', array(y: 0.5))",
 						"The entity just hopped, unless it was an item frame or painting.")
 			};
 		}
