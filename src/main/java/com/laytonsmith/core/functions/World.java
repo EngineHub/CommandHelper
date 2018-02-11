@@ -471,11 +471,11 @@ public class World {
 				}
 				world = m.getWorld();
 			}
-			if(world == null) { // Happends when m is a fake console or null command sender.
+			if(world == null) { // Happens when m is a fake console or null command sender.
 				throw new CREInvalidWorldException("No world specified", t);
 			}
 			MCChunk[] chunks = world.getLoadedChunks();
-			if(chunks == null) { // Happends when m is a fake player.
+			if(chunks == null) { // Happens when m is a fake player.
 				throw new CRENotFoundException(
 					"Could not find the chunk objects of the world (are you running in cmdline mode?)", t);
 			}
@@ -692,7 +692,7 @@ public class World {
 		}
 	}
 
-	private static final SortedMap<String, Construct> TimeLookup = new TreeMap<String, Construct>();
+	private static final SortedMap<String, Construct> TimeLookup = new TreeMap<>();
 
 	static {
 		synchronized (World.class) {
@@ -1818,6 +1818,56 @@ public class World {
 			double pitch = java.lang.Math.atan(dY/distanceXZ) * -180 / java.lang.Math.PI;
 
 			return new CDouble(pitch, t);
+		}
+	}
+
+	@api(environments={CommandHelperEnvironment.class})
+	public static class get_vector extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_vector";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CREFormatException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "array {location, [magnitude]} Returns a vector from the yaw and pitch in a location array."
+					+ " The second parameter, that defines the magnitude of the vector, defaults to 1.0.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			Vector3D v = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t).getDirection();
+			if(args.length == 2) {
+				v = v.multiply(Static.getDouble(args[1], t));
+			}
+			return ObjectGenerator.GetGenerator().vector(v);
 		}
 	}
 

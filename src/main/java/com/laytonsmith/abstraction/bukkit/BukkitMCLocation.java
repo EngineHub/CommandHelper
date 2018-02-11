@@ -192,7 +192,8 @@ public class BukkitMCLocation implements MCLocation {
 
 	@Override
 	public Vector3D getDirection() {
-		return new Vector3D(l.getDirection().getX(), l.getDirection().getY(), l.getDirection().getZ());
+		Vector v = l.getDirection();
+		return new Vector3D(v.getX(), v.getY(), v.getZ());
 	}
 
 	@Override
