@@ -437,7 +437,7 @@ public class ArrayHandling {
 				CArray array = (CArray) args[0];
 				int initialSize = (int) array.size();
 				for(int i = 1; i < args.length; i++) {
-					((CArray) args[0]).push(args[i], t);
+					array.push(args[i], t);
 					for(ArrayAccess.ArrayAccessIterator iterator : env.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(((ArrayAccess) args[0]))) {
 						//This is always pushing after the current index.
 						//Given that this is the last one, we don't need to waste
@@ -846,17 +846,16 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CArray) {
-				if(!((CArray) args[0]).inAssociativeMode()) {
+				CArray ca = (CArray) args[0];
+				if(!ca.inAssociativeMode()) {
 					try {
 						int index = Static.getInt32(args[1], t);
-						CArray ca = (CArray) args[0];
-						return CBoolean.get(index <= ca.size() - 1);
+						return CBoolean.get(index < ca.size());
 					} catch (ConfigRuntimeException e) {
-						//They sent a key that is a string. Obviously it doesn't exist.
+						//They probably sent a key that can't be translated into an int, so it doesn't exist here.
 						return CBoolean.FALSE;
 					}
 				} else {
-					CArray ca = (CArray) args[0];
 					return CBoolean.get(ca.containsKey(args[1].val()));
 				}
 			} else {

@@ -289,12 +289,14 @@ public class CArray extends Construct implements ArrayAccess {
 	 */
 	@Override
 	public Set<Construct> keySet() {
-		Set<Construct> set = !associative_mode ? new LinkedHashSet<>(array.size()) : new LinkedHashSet<>(associative_array.size());
+		Set<Construct> set;
 		if(!associative_mode) {
+			set = new LinkedHashSet<>(array.size());
 			for(int i = 0; i < array.size(); i++) {
 				set.add(new CInt(i, Target.UNKNOWN));
 			}
 		} else {
+			set = new LinkedHashSet<>(associative_array.size());
 			for(String key : associative_array.keySet()) {
 				set.add(new CString(key, Target.UNKNOWN));
 			}
@@ -309,15 +311,15 @@ public class CArray extends Construct implements ArrayAccess {
 	 * @return
 	 */
 	public Set<String> stringKeySet() {
-		Set<String> set = !associative_mode ? new LinkedHashSet<>(array.size()) : new HashSet<>(associative_array.size());
 		if(!associative_mode) {
+			Set<String> set = new LinkedHashSet<>(array.size());
 			for(int i = 0; i < array.size(); i++) {
 				set.add(Integer.toString(i));
 			}
+			return set;
 		} else {
-			set = associative_array.keySet();
+			return associative_array.keySet();
 		}
-		return set;
 	}
 
 	private void setAssociative() {
