@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldBorder;
 import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCGameRule;
@@ -43,6 +44,7 @@ import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
 import java.io.IOException;
@@ -1623,7 +1625,7 @@ public class World {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{3};
+			return new Integer[]{2, 3};
 		}
 
 		@Override
@@ -1643,9 +1645,11 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "locationArray {location_from, location_to, distance} Returns a location that is the specified"
-					+ " distance from the first location along a vector to the second location. The target location's"
-					+ " world is ignored.";
+			return "locationArray {origin, target, [distance] | origin, direction, [distance]} Returns a location that"
+					+ " is the specified distance from the origin location along a vector. ---- If a target location is"
+					+ " specified, the vector is gotten from that. (the target's world is ignored) If a direction is"
+					+ " specified, that vector is use instead. Distance defaults to 1. Direction can be one of "
+					+ StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override
@@ -1656,16 +1660,37 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
+			double distance = 1;
+			if(args.length == 3) {
+				distance = Static.getNumber(args[2], t);
+			}
+			Vector3D vector;
+			if(args[1] instanceof CArray) {
+				MCLocation to = ObjectGenerator.GetGenerator().location(args[1], loc.getWorld(), t);
+				vector = to.toVector().subtract(loc.toVector()).normalize();
+			} else {
+				try {
+					MCBlockFace facing = MCBlockFace.valueOf(args[1].val().toUpperCase());
+					vector = new Vector3D(facing.getModX(), facing.getModY(), facing.getModZ()).normalize();
+				} catch (IllegalArgumentException iae) {
+					throw new CREFormatException("Expected a location array or direction.", t);
+				}
+			}
+			loc.add(vector.multiply(distance));
+			return ObjectGenerator.GetGenerator().location(loc);
+		}
 
-			MCLocation from = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
-			MCLocation to = ObjectGenerator.GetGenerator().location(args[1], from.getWorld(), t);
-
-			double distance = Static.getNumber(args[2], t);
-
-			Vector3D vector = to.toVector().subtract(from.toVector()).normalize();
-
-			MCLocation shifted_from = from.add(vector.multiply(distance));
-			return ObjectGenerator.GetGenerator().location(shifted_from, false);
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Using a target location to teleport the player towards it.",
+				"set_ploc(location_shift(ploc(), pcursor()));",
+				"{0: 0.0, 1: 64.0, 2: 1.0, 3: world, 4: 0.0, 5: 90.0, x: 0.0, y: 64.0, z: 1.0, world: world, yaw: 0.0, pitch: 90.0}"),
+				new ExampleScript("Using a direction to get the block 2 meters above the player's targeted block.",
+				"location_shift(pcursor(), 'UP', 2)",
+				"{0: 0.0, 1: 66.0, 2: 0.0, 3: world, 4: 0.0, 5: 0.0, x: 0.0, y: 66.0, z: 0.0, world: world, yaw: 0.0, pitch: 0.0}"),
+			};
 		}
 	}
 
