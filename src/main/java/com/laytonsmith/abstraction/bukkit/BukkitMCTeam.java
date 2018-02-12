@@ -57,6 +57,7 @@ public class BukkitMCTeam implements MCTeam {
 
 	@Override
 	public MCNameTagVisibility getNameTagVisibility() {
+		// deprecated in 1.9
 		NameTagVisibility ntv = t.getNameTagVisibility();
 		return MCNameTagVisibility.valueOf(ntv.name());
 	}
@@ -69,7 +70,7 @@ public class BukkitMCTeam implements MCTeam {
 
 	@Override
 	public Set<String> getEntries() {
-		Set<String> ret = new HashSet<String>();
+		Set<String> ret = new HashSet<>();
 		try {
 			for(String e : t.getEntries()) {
 				ret.add(e);

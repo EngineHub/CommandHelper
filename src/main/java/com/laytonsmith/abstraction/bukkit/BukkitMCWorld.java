@@ -32,7 +32,6 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOcelotType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSkeletonType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSoundCategory;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTreeType;
@@ -331,6 +330,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public void refreshChunk(int x, int z) {
+		// deprecated in 1.8 due to inconsistency
 		w.refreshChunk(x, z);
 	}
 
@@ -561,7 +561,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					break;
 				case ZOMBIE:
 					mobType = Zombie.class;
-					if(!(subClass.equals("")) && version.gte(MCVersion.MC1_11)){
+					if(!subClass.equals("") && version.gte(MCVersion.MC1_11)){
 						for(int i = 0; i < subTypes.length; i++){
 							try {
 								MCZombieType ztype = MCZombieType.valueOf(subTypes[i]);
@@ -694,11 +694,9 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					}
 				} else if(e instanceof Skeleton){
 					Skeleton sk = (Skeleton) e;
-					MCSkeletonType stype;
 					for(String type : subTypes) {
 						try {
-							stype = MCSkeletonType.valueOf(type);
-							sk.setSkeletonType(BukkitMCSkeletonType.getConvertor().getConcreteEnum(stype));
+							sk.setSkeletonType(Skeleton.SkeletonType.valueOf(type));
 						} catch (IllegalArgumentException ex){
 							throw new CREFormatException(type + " is not a skeleton type", t);
 						}
@@ -744,35 +742,17 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 										z.setVillager(true);
 										break;
 									case VILLAGER_BLACKSMITH:
-										if(version.gte(MCVersion.MC1_9)) {
-											z.setVillagerProfession(Villager.Profession.BLACKSMITH);
-										} else {
-											z.setVillager(true);
-										}
-										break;
 									case VILLAGER_BUTCHER:
-										if(version.gte(MCVersion.MC1_9)) {
-											z.setVillagerProfession(Villager.Profession.BUTCHER);
-										} else {
-											z.setVillager(true);
-										}
-										break;
 									case VILLAGER_LIBRARIAN:
-										if(version.gte(MCVersion.MC1_9)) {
-											z.setVillagerProfession(Villager.Profession.LIBRARIAN);
-										} else {
-											z.setVillager(true);
-										}
-										break;
 									case VILLAGER_PRIEST:
-										if(version.gte(MCVersion.MC1_9)) {
-											z.setVillagerProfession(Villager.Profession.PRIEST);
+										if(version.gte(MCVersion.MC1_9)) { // < MC 1.11
+											z.setVillagerProfession(Villager.Profession.valueOf(type.substring(9).toUpperCase()));
 										} else {
 											z.setVillager(true);
 										}
 										break;
 									case HUSK:
-										if(version.gt(MCVersion.MC1_9_X) && version.lt(MCVersion.MC1_11)) {
+										if(version.gte(MCVersion.MC1_10)) { // < MC 1.11
 											z.setVillagerProfession(Villager.Profession.HUSK);
 										}
 										break;

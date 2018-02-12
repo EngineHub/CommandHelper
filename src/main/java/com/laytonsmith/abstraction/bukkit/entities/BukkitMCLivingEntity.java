@@ -52,16 +52,19 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public double getMaxHealth() {
+		// Deprecated in 1.11
 		return le.getMaxHealth();
 	}
 
 	@Override
 	public void setMaxHealth(double health) {
+		// Deprecated in 1.11
 		le.setMaxHealth(health);
 	}
 
 	@Override
 	public void resetMaxHealth() {
+		// Deprecated in 1.11
 		le.resetMaxHealth();
 	}
 

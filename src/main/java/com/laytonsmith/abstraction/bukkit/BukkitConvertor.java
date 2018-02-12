@@ -599,12 +599,14 @@ public class BukkitConvertor extends AbstractConvertor {
 				if(key != null) {
 					return new BukkitMCShapedRecipe(new ShapedRecipe(new NamespacedKey(CommandHelperPlugin.self, key), is));
 				} else {
+					// deprecated in 1.12
 					return new BukkitMCShapedRecipe(new ShapedRecipe(is));
 				}
 			case SHAPELESS:
 				if(key != null) {
 					return new BukkitMCShapelessRecipe(new ShapelessRecipe(new NamespacedKey(CommandHelperPlugin.self, key), is));
 				} else {
+					// deprecated in 1.12
 					return new BukkitMCShapelessRecipe(new ShapelessRecipe(is));
 				}
 		}

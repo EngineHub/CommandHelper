@@ -47,6 +47,7 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 
 	@Override
 	public MCItemStack getItemInHand() {
+		// deprecated in 1.9
 		ItemStack is = he.getItemInHand();
 		return is == null ? null : new BukkitMCItemStack(is);
 	}
@@ -78,6 +79,7 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 
 	@Override
 	public void setItemInHand(MCItemStack item) {
+		// deprecated in 1.9
 		he.setItemInHand(((BukkitMCItemStack)item).asItemStack());
 	}
 

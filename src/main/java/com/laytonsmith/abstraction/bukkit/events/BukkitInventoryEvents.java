@@ -230,6 +230,7 @@ public class BukkitInventoryEvents {
 
 		@Override
 		public void setCursor(MCItemStack cursor) {
+			// deprecated in 1.5 because it can create client/server desync
 			ic.setCursor(((BukkitMCItemStack) cursor).asItemStack());
 		}
 

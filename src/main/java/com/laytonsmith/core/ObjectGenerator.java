@@ -897,7 +897,6 @@ public class ObjectGenerator {
 	 * @param t the Target
 	 * @return the vector array
 	 */
-	@Deprecated
 	public CArray vector(Vector3D vector, Target t) {
 		CArray ca = CArray.GetAssociativeArray(t);
 		//Integral keys first

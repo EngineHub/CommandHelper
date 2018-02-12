@@ -473,6 +473,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void setVanished(boolean set, MCPlayer to) {
+		// show/hide was deprecated in 1.12.2
+		// will need to change this to include a plugin argument
 		if(!set) {
 			p.showPlayer(((BukkitMCPlayer)to)._Player());
 		} else {

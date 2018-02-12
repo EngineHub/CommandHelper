@@ -805,54 +805,6 @@ public class Minecraft {
 	}
 
 	@api
-	@hide("Deprecated in favor of send_resourcepack")
-	public static class send_texturepack extends AbstractFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer p = Static.GetPlayer(args[0], t);
-			p.sendResourcePack(args[1].val());
-			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function send_texturepack() is deprecated for send_resourcepack().", t);
-			return CVoid.VOID;
-		}
-
-		@Override
-		public String getName() {
-			return "send_texturepack";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{2};
-		}
-
-		@Override
-		public String docs() {
-			return "void {player, url} Deprecated in favor of send_resourcepack().";
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
 	public static class send_resourcepack extends AbstractFunction {
 
 		@Override

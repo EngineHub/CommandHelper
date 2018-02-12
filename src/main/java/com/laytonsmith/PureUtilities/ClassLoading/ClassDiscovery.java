@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -240,9 +241,10 @@ public class ClassDiscovery {
 
             String url;
             try {
-                url = URLDecoder.decode(rootLocation.toString(), "UTF8");
+                url = URLDecoder.decode(rootLocation.toString(), "UTF-8");
             } catch (UnsupportedEncodingException ex) {
-                url = URLDecoder.decode(rootLocation.toString());
+                // apparently this should never happen, but we have to catch it anyway
+                url = null;
             }
 
             if (url == null) {
