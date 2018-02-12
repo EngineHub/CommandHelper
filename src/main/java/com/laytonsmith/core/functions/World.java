@@ -38,6 +38,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
@@ -1868,6 +1869,57 @@ public class World {
 				v = v.multiply(Static.getDouble(args[1], t));
 			}
 			return ObjectGenerator.GetGenerator().vector(v);
+		}
+	}
+
+	@api
+	public static class distance extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "distance";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CREFormatException.class, CREInvalidWorldException.class,
+					CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "double {locationA, locationB} Returns the distance between two locations.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCLocation loc1 = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCLocation loc2 = ObjectGenerator.GetGenerator().location(args[1], null, t);
+			try {
+				return new CDouble(loc1.distance(loc2), t);
+			} catch (IllegalArgumentException iae) {
+				throw new CREIllegalArgumentException("Cannot measure distance between two different worlds.", t);
+			}
 		}
 	}
 
