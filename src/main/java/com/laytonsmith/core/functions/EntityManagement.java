@@ -1361,7 +1361,8 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "mixed {entityID} Returns the ID of the given entity's vehicle, or null if it doesn't have one.";
+			return "mixed {entityID} Returns the ID of the given entity's vehicle, or null if it doesn't have one."
+					+ " If the entity is on top of a stack of other entities, this returns the bottom most entity.";
 		}
 
 		@Override
