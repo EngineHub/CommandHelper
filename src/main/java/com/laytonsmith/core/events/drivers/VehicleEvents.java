@@ -47,6 +47,9 @@ import java.util.Set;
 import java.util.UUID;
 
 public class VehicleEvents {
+	public static String docs() {
+		return "Contains events related to vehicle entity types.";
+	}
 
 	@api
 	public static class vehicle_enter extends AbstractEvent {

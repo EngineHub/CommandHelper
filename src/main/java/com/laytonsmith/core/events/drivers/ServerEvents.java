@@ -39,6 +39,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class ServerEvents {
+	public static String docs() {
+		return "Contains non-specific server-wide events.";
+	}
 
 	@api
 	public static class server_command extends AbstractEvent {

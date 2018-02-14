@@ -604,7 +604,7 @@ public class BlockEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro match> | cause: <macro match> | world: <string match>}"
+			return "{player: <macro> | cause: <macro> | world: <string match>}"
 					+ "This event is called when a block or entity is ignited."
 					+ "{player: The player's name | ignitingentity: entity ID, if entity is ignited"
 					+ " | ignitingblock: (deprecated) block ID, if block is ignited"

@@ -1070,7 +1070,7 @@ public class EntityEvents {
 
 		@Override
         public String docs() {
-            return "{player: <macro match> | item: <item match>} "
+            return "{player: <macro> | item: <item match>} "
                     + "This event is called when a player drops an item. "
                     + "{player: The player | item: An item array representing "
                     + "the item being dropped. } "
@@ -1149,7 +1149,7 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro match> | item: <item match>} "
+			return "{player: <macro> | item: <item match>} "
 				+ "This event is called when a player picks up an item."
 				+ "{player: The player | item: An item array representing "
 				+ "the item being picked up | "
@@ -1235,7 +1235,7 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{id: <macro match> The entityID | damager: <macro match>} "
+			return "{id: <macro> The entityID | damager: <macro>} "
 					+ "This event is called when a player is damaged by another entity."
 					+ "{player: The player being damaged | damager: The type of entity causing damage"
 					+ " | amount: raw amount of damage caused | finalamount: health player will lose after modifiers"
