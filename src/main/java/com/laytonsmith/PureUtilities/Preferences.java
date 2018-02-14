@@ -208,7 +208,7 @@ public class Preferences {
 		    }
 		}
 	    case FILE:
-		if(value == null || "".equals(value)) {
+		if(value == null || "".equals(value.trim())) {
 		    return null;
 		}
 		return new File(value);
@@ -241,6 +241,10 @@ public class Preferences {
     /**
      * Returns the value of a preference, cast to the appropriate type.
      *
+     * @deprecated Instead of using this type-unsafe version, you should use
+     * the typesafe versions instead, which add an extra check to make sure
+     * the values will be returned correctly, and throw a more meaningful
+     * exception if not.
      * @param name
      * @return
      */
@@ -249,6 +253,80 @@ public class Preferences {
 	    prefs.get(name).objectValue = getObject(prefs.get(name).value, prefs.get(name));
 	}
 	return prefs.get(name).objectValue;
+    }
+    
+    private Object getSafePreference(String name, Type type) {
+        if(prefs.get(name).allowed != type) {
+            throw new IllegalArgumentException("Expecting " + prefs.get(name).allowed + " but " + type + " was requested");
+        }
+        return getPreference(name);
+    }
+    
+    /**
+     * Returns the given boolean preference.
+     * @param name The name of the preference
+     * @return The preference value, as a boolean
+     * @throws IllegalArgumentException If the preference was not defined as
+     * being a boolean
+     */
+    public Boolean getBooleanPreference(String name) {
+        return (Boolean)getSafePreference(name, Type.BOOLEAN);
+    }
+    
+    /**
+     * Returns the given double preference.
+     * @param name The name of the preference
+     * @return The preference value, as a double
+     * @throws IllegalArgumentException If the preference was not defined as
+     * being a double
+     */
+    public Double getDoublePreference(String name) {
+        return (Double)getSafePreference(name, Type.DOUBLE);
+    }
+    
+    /**
+     * Returns the given File preference. If the preference was blank, then
+     * null is returned.
+     * @param name The name of the preference
+     * @return The preference value, as a File
+     * @throws IllegalArgumentException If the preference was not defined as
+     * being a File
+     */
+    public File getFilePreference(String name) {
+        return (File)getSafePreference(name, Type.FILE);
+    }
+    
+    /**
+     * Returns the given integer preference.
+     * @param name The name of the preference
+     * @return The preference value, as an integer
+     * @throws IllegalArgumentException If the preference was not defined as
+     * being an integer
+     */
+    public Integer getIntegerPreference(String name) {
+        return (Integer)getSafePreference(name, Type.INT);
+    }
+    
+    /**
+     * Returns the given number preference.
+     * @param name The name of the preference
+     * @return The preference value, as a number
+     * @throws IllegalArgumentException If the preference was not defined as
+     * being a number
+     */
+    public Number getNumberPreference(String name) {
+        return (Number)getSafePreference(name, Type.NUMBER);
+    }
+    
+    /**
+     * Returns the given string preference.
+     * @param name The name of the preference
+     * @return The preference value, as a string
+     * @throws IllegalArgumentException If the preference was not defined as
+     * being a string
+     */
+    public String getStringPreference(String name) {
+        return (String)getSafePreference(name, Type.STRING);
     }
 
     private void save() {
