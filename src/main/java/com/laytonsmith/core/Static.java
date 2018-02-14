@@ -70,6 +70,7 @@ import java.lang.reflect.Array;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -1237,7 +1238,7 @@ public final class Static {
 	ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 	options.setWorkingDirectory(platformFolder);
 	PersistenceNetwork persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
-		new URI("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/')), options);
+		new URI(URLEncoder.encode("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/'), "UTF-8")), options);
 	GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
 		new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, platformFolder,
 		new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile()), new TaskManager());
