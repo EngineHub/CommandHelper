@@ -3,6 +3,8 @@ package com.laytonsmith.PureUtilities;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URLDecoder;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -24,12 +26,12 @@ public class ZipReaderTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        File parent = new File(ZipReaderTest.class.getResource("/test.zip").getFile());
+        File parent = new File(URLDecoder.decode(ZipReaderTest.class.getResource("/test.zip").getFile(), "UTF-8"));
         TestZip = new File(parent, "file.txt");
         
-        TestFile = new File(ZipReaderTest.class.getResource("/test.txt").getFile());
+        TestFile = new File(URLDecoder.decode(ZipReaderTest.class.getResource("/test.txt").getFile(), "UTF-8"));
         
-        File nestedParent = new File(ZipReaderTest.class.getResource("/testNested.zip").getFile());
+        File nestedParent = new File(URLDecoder.decode(ZipReaderTest.class.getResource("/testNested.zip").getFile(), "UTF-8"));
         TestNestedZip = new File(nestedParent, "innerZip.zip" + File.separator + "test.txt");        
     }
     
