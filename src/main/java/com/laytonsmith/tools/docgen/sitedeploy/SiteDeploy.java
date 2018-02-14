@@ -24,6 +24,7 @@ import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.ExampleScript;
@@ -493,7 +494,7 @@ public class SiteDeploy {
 			    String name = null;
 			    if (ll instanceof String) {
 				name = page = (String) ll;
-			    } else if (l instanceof Map) {
+			    } else if (ll instanceof Map) {
 				@SuppressWarnings("unchecked")
 				Map<String, String> p = (Map<String, String>) ll;
 				if (p.entrySet().size() != 1) {
@@ -900,7 +901,7 @@ public class SiteDeploy {
 		    g.put("bodyEscaped", new Generator() {
 			@Override
 			public String generate(String... args) {
-			    String s = b.replaceAll("\\\\", "\\\\\\\\").replaceAll("'", "\\\\'").replaceAll("\n", "\\\\n");
+			    String s = b.replaceAll("\\\\", "\\\\\\\\").replaceAll("'", "\\\\'").replaceAll("\r?\n", "\\\\n");
 			    s = s.replaceAll("<script.*?</script>", "");
 			    return s;
 			}
@@ -1100,7 +1101,7 @@ public class SiteDeploy {
 			}
 			List<List<String>> d = data.get(functionClass.getEnclosingClass());
 			List<String> c = new ArrayList<>();
-			// function name, returns, arguments, throws, description, since, restricted
+			// function name, returns, arguments, throws, description, restricted
 			final Function f;
 			try {
 			    f = ReflectionUtils.instantiateUnsafe(functionClass);
@@ -1147,14 +1148,12 @@ public class SiteDeploy {
 			    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 			}
 			c.add(desc.toString());
-			c.add(f.since().toString());
 			c.add("<span class=\"api_" + (f.isRestricted() ? "yes" : "no") + "\">" + (f.isRestricted() ? "Yes" : "No")
 				+ "</span>");
 			d.add(c);
 		    }
 		    // data is now constructed.
 		    StringBuilder b = new StringBuilder();
-		    b.append("<p>INTRO GOES HERE</p>\n");
 		    b.append("<ul id=\"TOC\">");
 		    for (Class<?> clazz : data.keySet()) {
 			b.append("<li><a href=\"#").append(clazz.getSimpleName())
@@ -1178,9 +1177,8 @@ public class SiteDeploy {
 				    + "! scope=\"col\" width=\"5%\" | Returns\n"
 				    + "! scope=\"col\" width=\"10%\" | Arguments\n"
 				    + "! scope=\"col\" width=\"10%\" | Throws\n"
-				    + "! scope=\"col\" width=\"61%\" | Description\n"
-				    + "! scope=\"col\" width=\"3%\" | Since\n"
-				    + "! scope=\"col\" width=\"5%\" | Restricted\n");
+				    + "! scope=\"col\" width=\"64%\" | Description\n"
+				    + "! scope=\"col\" width=\"5%\" | <span class=\"abbr\" title=\"Restricted\">Res</span>\n");
 			    for (List<String> row : clazzData) {
 				b.append("|-");
 				if (hiddenFunctions.contains(row.get(0))) {
@@ -1358,15 +1356,122 @@ public class SiteDeploy {
 	    f.getName() + " api", f.getName() + " example", f.getName() + " description"}), description);
     }
 
-    private void deployEventAPI() {
-//	generateQueue.submit(new Runnable() {
-//	    @Override
-//	    public void run() {
-//		currentGenerateTask.addAndGet(1);
-//	    }
-//	});
-//	totalGenerateTasks.addAndGet(1);
-    }
+	private void deployEventAPI() {
+		generateQueue.submit(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Set<Class<? extends Event>> eventClasses
+							= new TreeSet<>(new Comparator<Class<? extends Event>>() {
+						@Override
+						public int compare(Class<? extends Event> o1, Class<? extends Event> o2) {
+							Event f1 = ReflectionUtils.instantiateUnsafe(o1);
+							Event f2 = ReflectionUtils.instantiateUnsafe(o2);
+							return f1.getName().compareTo(f2.getName());
+						}
+					});
+					eventClasses.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, Event.class));
+					// A map of where it maps the enclosing class to the list of event rows, which contains a list of table cells.
+					Map<Class<?>, List<List<String>>> data = new TreeMap<>(new Comparator<Class<?>>() {
+						@Override
+						public int compare(Class<?> o1, Class<?> o2) {
+							return o1.getCanonicalName().compareTo(o2.getCanonicalName());
+						}
+					});
+					for (Class<? extends Event> eventClass : eventClasses) {
+						if (!data.containsKey(eventClass.getEnclosingClass())) {
+							data.put(eventClass.getEnclosingClass(), new ArrayList<>());
+						}
+						List<List<String>> d = data.get(eventClass.getEnclosingClass());
+						List<String> c = new ArrayList<>();
+						// event name, description, prefilters, data, mutable
+						final Event e;
+						try {
+							e = ReflectionUtils.instantiateUnsafe(eventClass);
+						} catch (ReflectionUtils.ReflectionException ex) {
+							throw new RuntimeException("While trying to construct " + eventClass + ", got the following", ex);
+						}
+						final DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
+						if (e.since().equals(CHVersion.V0_0_0)) {
+							// Don't add these
+							continue;
+						}
+						c.add(e.getName());
+						c.add(edi.description);
+						List<String> pre = new ArrayList<>();
+						if(!edi.prefilter.isEmpty()) {
+							for(DocGen.EventDocInfo.PrefilterData pdata : edi.prefilter) {
+								pre.add("<p><strong>" + pdata.name + "</strong>: " + pdata.formatDescription(DocGen.MarkupType.HTML) + "</p>");
+							}
+						}
+						c.add(StringUtils.Join(pre, ""));
+						List<String> ed = new ArrayList<>();
+						if(!edi.eventData.isEmpty()) {
+							for(DocGen.EventDocInfo.EventData edata : edi.eventData) {
+								ed.add("<p><strong>" + edata.name + "</strong>"
+										+ (!edata.description.isEmpty() ? ": " + edata.description : "") + "</p>");
+							}
+						}
+						c.add(StringUtils.Join(ed, ""));
+						List<String> mut = new ArrayList<>();
+						if(!edi.mutability.isEmpty()) {
+							for(DocGen.EventDocInfo.MutabilityData mdata : edi.mutability) {
+								mut.add("<p><strong>" + mdata.name + "</strong>"
+										+ (!mdata.description.isEmpty() ? ": " + mdata.description : "") + "</p>");
+							}
+						}
+						c.add(StringUtils.Join(mut, ""));
+						d.add(c);
+					}
+					// data is now constructed.
+					StringBuilder b = new StringBuilder();
+					b.append("<ul id=\"TOC\">");
+					for (Class<?> clazz : data.keySet()) {
+						b.append("<li><a href=\"#").append(clazz.getSimpleName())
+								.append("\">").append(clazz.getSimpleName()).append("</a></li>");
+					}
+					b.append("</ul>\n");
+					for (Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
+						Class<?> clazz = e.getKey();
+						List<List<String>> clazzData = e.getValue();
+						if (clazzData.isEmpty()) {
+							// If there are no events in the class, don't display it.
+							continue;
+						}
+						try {
+							b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
+							String docs = (String) ReflectionUtils.invokeMethod(clazz, null, "docs");
+							b.append("<div>").append(docs).append("</div>\n\n");
+							b.append("{|\n|-\n");
+							b.append("! scope=\"col\" width=\"7%\" | Event Name\n"
+									+ "! scope=\"col\" width=\"30%\" | Description\n"
+									+ "! scope=\"col\" width=\"20%\" | Prefilters\n"
+									+ "! scope=\"col\" width=\"25%\" | Event Data\n"
+									+ "! scope=\"col\" width=\"18%\" | Mutable Fields\n");
+							for (List<String> row : clazzData) {
+								b.append("|-");
+								b.append("\n");
+								for (String cell : row) {
+									b.append("| ").append(cell).append("\n");
+								}
+							}
+							b.append("|}\n");
+							b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
+						} catch (Error ex) {
+							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
+						}
+					}
+					writePage("Event API", b.toString(), "Event_API.html",
+							Arrays.asList(new String[]{"API", "events"}),
+							"A list of all " + Implementation.GetServerType().getBranding() + " events");
+					currentGenerateTask.addAndGet(1);
+				} catch (Error ex) {
+					ex.printStackTrace(System.err);
+				}
+			}
+		});
+		totalGenerateTasks.addAndGet(1);
+	}
 
     private void deployFunctions() {
 //	generateQueue.submit(new Runnable() {

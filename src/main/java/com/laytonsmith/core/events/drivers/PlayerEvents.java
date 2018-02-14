@@ -808,7 +808,7 @@ public class PlayerEvents {
 					+ " | button: <string match> left or right. If they left or right clicked |"
 					+ " item: <item match> The item they are holding when they interacted |"
 					+ " hand: <string match> The hand the player clicked with |"
-					+ " player: <macro match> The player that triggered the event} "
+					+ " player: <macro> The player that triggered the event} "
 					+ "Fires when a player left or right clicks a block or the air"
 					+ "{action: One of either: left_click_block, right_click_block, left_click_air, or right_click_air |"
 					+ "block: The id of the block they clicked, or 0 if they clicked the air. If they clicked the air, "

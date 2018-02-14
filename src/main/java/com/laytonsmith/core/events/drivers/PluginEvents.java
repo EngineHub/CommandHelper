@@ -21,6 +21,10 @@ import java.util.Map;
  * @author Jason Unger <entityreborn@gmail.com>
  */
 public class PluginEvents {
+	public static String docs() {
+		return "Contains events related to generic plugin messaging.";
+	}
+
 	@api
 	public static class plugin_message_received extends AbstractEvent {
 

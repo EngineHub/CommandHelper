@@ -810,7 +810,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "equipmentArray {entityID} Returns an associative array showing the equipment this mob is wearing."
+			return "array {entityID} Returns an associative array showing the equipment this mob is wearing."
 					+ " This does not work on most \"dumb\" entities, only mobs (entities with AI).";
 		}
 
