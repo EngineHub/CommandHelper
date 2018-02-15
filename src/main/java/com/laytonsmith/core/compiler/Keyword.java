@@ -53,41 +53,38 @@ public abstract class Keyword implements Documentation {
 	return k == null ? null : k.value();
     }
 
-    /**
-     * Convenience function to allow keywords to more easily check if this is a valid code block. If not, a
-     * {@link ConfigCompileException} is thrown for you. A code block is considered valid if it has is a cbrace device,
-     * and has 0 or 1 arguments. The message is what should be shown if the node is not a cbrace device at all. If the
-     * argument count is wrong, this function creates the error message.
-     *
-     * @param node The node to check
-     * @param message The message to display if the node is not a cbrace device.
-     * @throws ConfigCompileException
-     */
-    protected void validateCodeBlock(ParseTree node, String message) throws ConfigCompileException {
-	if (node.getChildren().size() > 1) {
-	    throw new ConfigCompileException("Unexpected number of arguments in code block", node.getTarget());
+	/**
+	 * Convenience function to allow keywords to more easily check if this is a valid code block. If not, a
+	 * {@link ConfigCompileException} is thrown for you. A code block is considered valid if it has is a cbrace device,
+	 * and has 0 or 1 arguments. The message is what should be shown if the node is not a cbrace device at all. If the
+	 * argument count is wrong, this function creates the error message.
+	 *
+	 * @param node The node to check
+	 * @param message The message to display if the node is not a cbrace device.
+	 * @throws ConfigCompileException
+	 */
+	protected void validateCodeBlock(ParseTree node, String message) throws ConfigCompileException {
+		// Note: If any of these checks are changed, the isValidCodeBlock(ParseTree node) method has to be updated too
+		// to keep it in sync.
+		if(node.getChildren().size() > 1) {
+			throw new ConfigCompileException("Unexpected number of arguments in code block", node.getTarget());
+		}
+		if(!isCodeBlock(node)) {
+			throw new ConfigCompileException(message, node.getTarget());
+		}
 	}
-	if (!isCodeBlock(node)) {
-	    throw new ConfigCompileException(message, node.getTarget());
-	}
-    }
 
-    /**
-     * Returns true if {@link #validateCodeBlock(com.laytonsmith.core.ParseTree, java.lang.String)} would not cause an
-     * exception to be thrown. This is useful for conditionally doing something with the keyword if a code block exists,
-     * which is often the case for functions that are also keywords.
-     *
-     * @param node
-     * @return
-     */
-    protected boolean isValidCodeBlock(ParseTree node) {
-	try {
-	    validateCodeBlock(node, "");
-	    return true;
-	} catch (ConfigCompileException ex) {
-	    return false;
+	/**
+	 * Returns true if {@link #validateCodeBlock(com.laytonsmith.core.ParseTree, java.lang.String)} would not cause an
+	 * exception to be thrown. This is useful for conditionally doing something with the keyword if a code block exists,
+	 * which is often the case for functions that are also keywords.
+	 *
+	 * @param node
+	 * @return
+	 */
+	protected boolean isValidCodeBlock(ParseTree node) {
+		return node.getChildren().size() <= 1 && isCodeBlock(node);
 	}
-    }
 
     /**
      * Returns true if the node is a code block or not. The argument count to the block is not considered.
