@@ -642,7 +642,7 @@ public class SiteDeploy {
 			    continue;
 			}
 			// == on String, yes this is what I want
-			if(error == errors[0]) {
+			if (error == errors[0]) {
 			    System.out.println(Static.MCToANSIColors("Response for "
 				    + MCChatColor.AQUA + e.getKey() + MCChatColor.PLAIN_WHITE + ":"));
 			}
@@ -1257,7 +1257,7 @@ public class SiteDeploy {
 	page.append("| <div style=\"background-color: ");
 	page.append(f.isRestricted() ? "red" : "green");
 	page.append("; font-weight: bold; text-align: center;\">"
-		).append(f.isRestricted() ? "Yes" : "No").append("</div>\n"
+	).append(f.isRestricted() ? "Yes" : "No").append("</div>\n"
 		+ "|-\n"
 		+ "! scope=\"row\" | Optimizations\n"
 		+ "| ");
@@ -1356,122 +1356,122 @@ public class SiteDeploy {
 	    f.getName() + " api", f.getName() + " example", f.getName() + " description"}), description);
     }
 
-	private void deployEventAPI() {
-		generateQueue.submit(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					Set<Class<? extends Event>> eventClasses
-							= new TreeSet<>(new Comparator<Class<? extends Event>>() {
-						@Override
-						public int compare(Class<? extends Event> o1, Class<? extends Event> o2) {
-							Event f1 = ReflectionUtils.instantiateUnsafe(o1);
-							Event f2 = ReflectionUtils.instantiateUnsafe(o2);
-							return f1.getName().compareTo(f2.getName());
-						}
-					});
-					eventClasses.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, Event.class));
-					// A map of where it maps the enclosing class to the list of event rows, which contains a list of table cells.
-					Map<Class<?>, List<List<String>>> data = new TreeMap<>(new Comparator<Class<?>>() {
-						@Override
-						public int compare(Class<?> o1, Class<?> o2) {
-							return o1.getCanonicalName().compareTo(o2.getCanonicalName());
-						}
-					});
-					for (Class<? extends Event> eventClass : eventClasses) {
-						if (!data.containsKey(eventClass.getEnclosingClass())) {
-							data.put(eventClass.getEnclosingClass(), new ArrayList<>());
-						}
-						List<List<String>> d = data.get(eventClass.getEnclosingClass());
-						List<String> c = new ArrayList<>();
-						// event name, description, prefilters, data, mutable
-						final Event e;
-						try {
-							e = ReflectionUtils.instantiateUnsafe(eventClass);
-						} catch (ReflectionUtils.ReflectionException ex) {
-							throw new RuntimeException("While trying to construct " + eventClass + ", got the following", ex);
-						}
-						final DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
-						if (e.since().equals(CHVersion.V0_0_0)) {
-							// Don't add these
-							continue;
-						}
-						c.add(e.getName());
-						c.add(edi.description);
-						List<String> pre = new ArrayList<>();
-						if(!edi.prefilter.isEmpty()) {
-							for(DocGen.EventDocInfo.PrefilterData pdata : edi.prefilter) {
-								pre.add("<p><strong>" + pdata.name + "</strong>: " + pdata.formatDescription(DocGen.MarkupType.HTML) + "</p>");
-							}
-						}
-						c.add(StringUtils.Join(pre, ""));
-						List<String> ed = new ArrayList<>();
-						if(!edi.eventData.isEmpty()) {
-							for(DocGen.EventDocInfo.EventData edata : edi.eventData) {
-								ed.add("<p><strong>" + edata.name + "</strong>"
-										+ (!edata.description.isEmpty() ? ": " + edata.description : "") + "</p>");
-							}
-						}
-						c.add(StringUtils.Join(ed, ""));
-						List<String> mut = new ArrayList<>();
-						if(!edi.mutability.isEmpty()) {
-							for(DocGen.EventDocInfo.MutabilityData mdata : edi.mutability) {
-								mut.add("<p><strong>" + mdata.name + "</strong>"
-										+ (!mdata.description.isEmpty() ? ": " + mdata.description : "") + "</p>");
-							}
-						}
-						c.add(StringUtils.Join(mut, ""));
-						d.add(c);
-					}
-					// data is now constructed.
-					StringBuilder b = new StringBuilder();
-					b.append("<ul id=\"TOC\">");
-					for (Class<?> clazz : data.keySet()) {
-						b.append("<li><a href=\"#").append(clazz.getSimpleName())
-								.append("\">").append(clazz.getSimpleName()).append("</a></li>");
-					}
-					b.append("</ul>\n");
-					for (Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
-						Class<?> clazz = e.getKey();
-						List<List<String>> clazzData = e.getValue();
-						if (clazzData.isEmpty()) {
-							// If there are no events in the class, don't display it.
-							continue;
-						}
-						try {
-							b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
-							String docs = (String) ReflectionUtils.invokeMethod(clazz, null, "docs");
-							b.append("<div>").append(docs).append("</div>\n\n");
-							b.append("{|\n|-\n");
-							b.append("! scope=\"col\" width=\"7%\" | Event Name\n"
-									+ "! scope=\"col\" width=\"30%\" | Description\n"
-									+ "! scope=\"col\" width=\"20%\" | Prefilters\n"
-									+ "! scope=\"col\" width=\"25%\" | Event Data\n"
-									+ "! scope=\"col\" width=\"18%\" | Mutable Fields\n");
-							for (List<String> row : clazzData) {
-								b.append("|-");
-								b.append("\n");
-								for (String cell : row) {
-									b.append("| ").append(cell).append("\n");
-								}
-							}
-							b.append("|}\n");
-							b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
-						} catch (Error ex) {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
-						}
-					}
-					writePage("Event API", b.toString(), "Event_API.html",
-							Arrays.asList(new String[]{"API", "events"}),
-							"A list of all " + Implementation.GetServerType().getBranding() + " events");
-					currentGenerateTask.addAndGet(1);
-				} catch (Error ex) {
-					ex.printStackTrace(System.err);
+    private void deployEventAPI() {
+	generateQueue.submit(new Runnable() {
+	    @Override
+	    public void run() {
+		try {
+		    Set<Class<? extends Event>> eventClasses
+			    = new TreeSet<>(new Comparator<Class<? extends Event>>() {
+				@Override
+				public int compare(Class<? extends Event> o1, Class<? extends Event> o2) {
+				    Event f1 = ReflectionUtils.instantiateUnsafe(o1);
+				    Event f2 = ReflectionUtils.instantiateUnsafe(o2);
+				    return f1.getName().compareTo(f2.getName());
 				}
+			    });
+		    eventClasses.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, Event.class));
+		    // A map of where it maps the enclosing class to the list of event rows, which contains a list of table cells.
+		    Map<Class<?>, List<List<String>>> data = new TreeMap<>(new Comparator<Class<?>>() {
+			@Override
+			public int compare(Class<?> o1, Class<?> o2) {
+			    return o1.getCanonicalName().compareTo(o2.getCanonicalName());
 			}
-		});
-		totalGenerateTasks.addAndGet(1);
-	}
+		    });
+		    for (Class<? extends Event> eventClass : eventClasses) {
+			if (!data.containsKey(eventClass.getEnclosingClass())) {
+			    data.put(eventClass.getEnclosingClass(), new ArrayList<>());
+			}
+			List<List<String>> d = data.get(eventClass.getEnclosingClass());
+			List<String> c = new ArrayList<>();
+			// event name, description, prefilters, data, mutable
+			final Event e;
+			try {
+			    e = ReflectionUtils.instantiateUnsafe(eventClass);
+			} catch (ReflectionUtils.ReflectionException ex) {
+			    throw new RuntimeException("While trying to construct " + eventClass + ", got the following", ex);
+			}
+			final DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
+			if (e.since().equals(CHVersion.V0_0_0)) {
+			    // Don't add these
+			    continue;
+			}
+			c.add(e.getName());
+			c.add(edi.description);
+			List<String> pre = new ArrayList<>();
+			if (!edi.prefilter.isEmpty()) {
+			    for (DocGen.EventDocInfo.PrefilterData pdata : edi.prefilter) {
+				pre.add("<p><strong>" + pdata.name + "</strong>: " + pdata.formatDescription(DocGen.MarkupType.HTML) + "</p>");
+			    }
+			}
+			c.add(StringUtils.Join(pre, ""));
+			List<String> ed = new ArrayList<>();
+			if (!edi.eventData.isEmpty()) {
+			    for (DocGen.EventDocInfo.EventData edata : edi.eventData) {
+				ed.add("<p><strong>" + edata.name + "</strong>"
+					+ (!edata.description.isEmpty() ? ": " + edata.description : "") + "</p>");
+			    }
+			}
+			c.add(StringUtils.Join(ed, ""));
+			List<String> mut = new ArrayList<>();
+			if (!edi.mutability.isEmpty()) {
+			    for (DocGen.EventDocInfo.MutabilityData mdata : edi.mutability) {
+				mut.add("<p><strong>" + mdata.name + "</strong>"
+					+ (!mdata.description.isEmpty() ? ": " + mdata.description : "") + "</p>");
+			    }
+			}
+			c.add(StringUtils.Join(mut, ""));
+			d.add(c);
+		    }
+		    // data is now constructed.
+		    StringBuilder b = new StringBuilder();
+		    b.append("<ul id=\"TOC\">");
+		    for (Class<?> clazz : data.keySet()) {
+			b.append("<li><a href=\"#").append(clazz.getSimpleName())
+				.append("\">").append(clazz.getSimpleName()).append("</a></li>");
+		    }
+		    b.append("</ul>\n");
+		    for (Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
+			Class<?> clazz = e.getKey();
+			List<List<String>> clazzData = e.getValue();
+			if (clazzData.isEmpty()) {
+			    // If there are no events in the class, don't display it.
+			    continue;
+			}
+			try {
+			    b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
+			    String docs = (String) ReflectionUtils.invokeMethod(clazz, null, "docs");
+			    b.append("<div>").append(docs).append("</div>\n\n");
+			    b.append("{|\n|-\n");
+			    b.append("! scope=\"col\" width=\"7%\" | Event Name\n"
+				    + "! scope=\"col\" width=\"30%\" | Description\n"
+				    + "! scope=\"col\" width=\"20%\" | Prefilters\n"
+				    + "! scope=\"col\" width=\"25%\" | Event Data\n"
+				    + "! scope=\"col\" width=\"18%\" | Mutable Fields\n");
+			    for (List<String> row : clazzData) {
+				b.append("|-");
+				b.append("\n");
+				for (String cell : row) {
+				    b.append("| ").append(cell).append("\n");
+				}
+			    }
+			    b.append("|}\n");
+			    b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
+			} catch (Error ex) {
+			    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
+			}
+		    }
+		    writePage("Event API", b.toString(), "Event_API.html",
+			    Arrays.asList(new String[]{"API", "events"}),
+			    "A list of all " + Implementation.GetServerType().getBranding() + " events");
+		    currentGenerateTask.addAndGet(1);
+		} catch (Error ex) {
+		    ex.printStackTrace(System.err);
+		}
+	    }
+	});
+	totalGenerateTasks.addAndGet(1);
+    }
 
     private void deployFunctions() {
 //	generateQueue.submit(new Runnable() {
