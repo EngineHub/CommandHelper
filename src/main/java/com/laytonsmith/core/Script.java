@@ -484,7 +484,7 @@ public class Script {
 		}
 		boolean case_sensitive = Prefs.CaseSensitive();
 		String[] cmds = command.split(" ");
-		List<String> args = new ArrayList<String>(Arrays.asList(cmds));
+		List<String> args = new ArrayList<>(Arrays.asList(cmds));
 		boolean isAMatch = true;
 		StringBuilder lastVar = new StringBuilder();
 		int lastJ = 0;
@@ -557,7 +557,7 @@ public class Script {
 
 	public List<Variable> getVariables(String command) {
 		String[] cmds = command.split(" ");
-		List<String> args = new ArrayList<String>(Arrays.asList(cmds));
+		List<String> args = new ArrayList<>(Arrays.asList(cmds));
 
 		StringBuilder lastVar = new StringBuilder();
 
