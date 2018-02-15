@@ -841,10 +841,10 @@ public class Script {
 					if(k < thatCommand.size()) {
 						Construct c2 = thatCommand.get(k);
 						
-						// Commands are not ambigous if they have unequal commands or literals at
+						// Commands are not ambigous if they have unequal commands or strings at
 						// the same argument position.
 						if(c1.getCType() == c2.getCType()
-								&& (c1.getCType() == ConstructType.LITERAL || c1.getCType() == ConstructType.COMMAND)) {
+								&& (c1.getCType() == ConstructType.STRING || c1.getCType() == ConstructType.COMMAND)) {
 							if(c1.nval() != c2.nval() && (c1.nval() == null || !c1.nval().equals(c2.nval()))) {
 								break matchScope;
 							}
