@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import java.net.URL;
 import java.util.EnumSet;
@@ -93,5 +94,32 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
     public CClassType getContainingClass() {
 	return null;
     }
+
+    /**
+     * Returns the typeof this Construct, as a string. Not all constructs are annotated with the @typeof annotation, in
+     * which case this is considered a "private" object, which can't be directly accessed via MethodScript. In this
+     * case, an IllegalArgumentException is thrown.
+     *
+     * @return
+     * @throws IllegalArgumentException If the class isn't public facing.
+     */
+    @Override
+    public final CClassType typeof() {
+        return Construct.typeof(this);
+    }
+
+    @Override
+    public boolean isInstanceOf(CClassType type) throws ClassNotFoundException {
+	return Construct.isInstanceof(this, type);
+    }
+
+
+
+    @Override
+    public boolean isInstanceOf(Class<? extends Mixed> type) {
+	return Construct.isInstanceof(this, type);
+    }
+
+
 
 }

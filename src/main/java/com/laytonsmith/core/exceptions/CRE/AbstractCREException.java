@@ -252,4 +252,19 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public boolean isInstanceOf(CClassType type) throws ClassNotFoundException {
+	return Construct.isInstanceof(this, type);
+    }
+
+    @Override
+    public boolean isInstanceOf(Class<? extends Mixed> type) {
+	return Construct.isInstanceof(this, type);
+    }
+
+    @Override
+    public CClassType typeof() {
+	return Construct.typeof(this);
+    }
+
 }

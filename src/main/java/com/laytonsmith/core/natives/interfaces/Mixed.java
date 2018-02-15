@@ -108,4 +108,14 @@ public interface Mixed extends Cloneable, Documentation {
      */
     public boolean isInstanceOf(Class<? extends Mixed> type);
 
+    /**
+     * Returns the typeof this value, as a CClassType object. Not all constructs are annotated with the @typeof annotation, in
+     * which case this is considered a "private" object, which can't be directly accessed via MethodScript. In this
+     * case, an IllegalArgumentException is thrown.
+     *
+     * @return
+     * @throws IllegalArgumentException If the class isn't public facing.
+     */
+    public CClassType typeof();
+
 }

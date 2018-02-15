@@ -437,7 +437,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @throws IllegalArgumentException If the class isn't public facing.
      */
     public final CClassType typeof() {
-        typeof ann = this.getClass().getAnnotation(typeof.class);
+	return typeof(this);
+    }
+
+    public static CClassType typeof(Mixed that) {
+        typeof ann = that.getClass().getAnnotation(typeof.class);
         if (ann == null) {
             throw new IllegalArgumentException();
         }
@@ -513,14 +517,22 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         return null;
     }
 
+    public static boolean isInstanceof(Mixed that, CClassType type) {
+	return that.typeof().doesExtend(type);
+    }
+
+    public static boolean isInstanceof(Mixed that, Class<? extends Mixed> type) {
+	return that.typeof().doesExtend(CClassType.get(type.getAnnotation(typeof.class).value()));
+    }
+
     @Override
     public boolean isInstanceOf(CClassType type) {
-	return this.typeof().doesExtend(type);
+	return isInstanceof(this, type);
     }
 
     @Override
     public boolean isInstanceOf(Class<? extends Mixed> type) {
-	throw new UnsupportedOperationException("Not supported yet.");
+	return isInstanceof(this, type);
     }
 
 }
