@@ -5,20 +5,10 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.core.events.BindableEvent;
 
-/**
- *
- * @author EntityReborn
- */
 public interface MCEntityTargetEvent extends BindableEvent {
-
-    public MCEntity getTarget();
-
-    public void setTarget(MCEntity target);
-
-    public MCEntity getEntity();
-
-    public MCEntityType getEntityType();
-
-    public MCTargetReason getReason();
-
+	MCEntity getTarget();
+	void setTarget(MCEntity target);
+	MCEntity getEntity();
+	MCEntityType getEntityType();
+	MCTargetReason getReason();
 }

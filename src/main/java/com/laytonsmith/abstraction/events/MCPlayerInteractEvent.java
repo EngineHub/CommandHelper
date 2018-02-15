@@ -6,20 +6,10 @@ import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 
-/**
- *
- * 
- */
 public interface MCPlayerInteractEvent extends MCPlayerEvent{
-
-    public MCAction getAction();
-
-    public MCBlock getClickedBlock();
-
-    public MCBlockFace getBlockFace();
-    
-    public MCItemStack getItem();
-    
-    public MCEquipmentSlot getHand();
-    
+	MCAction getAction();
+	MCBlock getClickedBlock();
+	MCBlockFace getBlockFace();
+	MCItemStack getItem();
+	MCEquipmentSlot getHand();
 }

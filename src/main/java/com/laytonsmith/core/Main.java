@@ -13,6 +13,7 @@ import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
+import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
@@ -20,7 +21,6 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -704,17 +704,17 @@ public class Main {
     }
 
     @SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
-    public static String loadSelfVersion() throws Exception {
+    public static SimpleVersion loadSelfVersion() throws Exception {
 	File file = new File(new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()), "plugin.yml");
 	ZipReader reader = new ZipReader(file);
 	if (!reader.exists()) {
-	    throw new Exception(new FileNotFoundException(String.format("%s does not exist", file.getPath())));
+	    throw new FileNotFoundException(String.format("%s does not exist", file.getPath()));
 	}
 	try {
 	    String contents = reader.getFileContents();
 	    Yaml yaml = new Yaml();
 	    Map<String, Object> map = (Map<String, Object>) yaml.load(contents);
-	    return (String) map.get("version");
+	    return new SimpleVersion((String) map.get("version"));
 	} catch (RuntimeException | IOException ex) {
 	    throw new Exception(ex);
 	}

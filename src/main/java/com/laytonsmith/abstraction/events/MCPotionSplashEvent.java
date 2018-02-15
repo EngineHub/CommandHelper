@@ -3,12 +3,8 @@ package com.laytonsmith.abstraction.events;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import java.util.Set;
 
-/**
- * 
- * @author jb_aero
- */
 public interface MCPotionSplashEvent extends MCProjectileHitEvent {
-	public Set<MCLivingEntity> getAffectedEntities();
-	public double getIntensity(MCLivingEntity le);
-	public void setIntensity(MCLivingEntity le, double intensity);
+	Set<MCLivingEntity> getAffectedEntities();
+	double getIntensity(MCLivingEntity le);
+	void setIntensity(MCLivingEntity le, double intensity);
 }

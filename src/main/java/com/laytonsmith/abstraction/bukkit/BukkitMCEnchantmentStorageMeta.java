@@ -7,12 +7,7 @@ import java.util.Map;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 
-/**
- *
- * @author jb_aero
- */
-public class BukkitMCEnchantmentStorageMeta extends BukkitMCItemMeta implements
-		MCEnchantmentStorageMeta {
+public class BukkitMCEnchantmentStorageMeta extends BukkitMCItemMeta implements MCEnchantmentStorageMeta {
 
 	EnchantmentStorageMeta es;
 	public BukkitMCEnchantmentStorageMeta(EnchantmentStorageMeta im) {
@@ -21,8 +16,7 @@ public class BukkitMCEnchantmentStorageMeta extends BukkitMCItemMeta implements
 	}
 
 	@Override
-	public boolean addStoredEnchant(MCEnchantment ench, int level,
-			boolean ignoreRestriction) {
+	public boolean addStoredEnchant(MCEnchantment ench, int level, boolean ignoreRestriction) {
 		return es.addStoredEnchant(((BukkitMCEnchantment) ench).__Enchantment(), level, ignoreRestriction);
 	}
 
@@ -33,7 +27,7 @@ public class BukkitMCEnchantmentStorageMeta extends BukkitMCItemMeta implements
 
 	@Override
 	public Map<MCEnchantment, Integer> getStoredEnchants() {
-		Map<MCEnchantment,Integer> ret = new HashMap<MCEnchantment,Integer>();
+		Map<MCEnchantment,Integer> ret = new HashMap<>();
 		for (Map.Entry<Enchantment,Integer> entry : es.getStoredEnchants().entrySet()) {
 			ret.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
 		}

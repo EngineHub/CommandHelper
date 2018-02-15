@@ -100,11 +100,6 @@ public class TestStatic {
         assertNotNull(Static.getLogger());
     }
 
-    @Test(expected=NotInitializedYetException.class)
-    public void testGetVersion() {
-        Static.getVersion();
-    }
-
     @Test
     public void testResolveConstruct() {
         assertTrue(Static.resolveConstruct("1", Target.UNKNOWN) instanceof CInt);

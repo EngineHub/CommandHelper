@@ -6,10 +6,6 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.core.events.BindableEvent;
 
-/**
- *
- * @author jb_aero
- */
 public interface MCCreatureSpawnEvent extends BindableEvent {
 	MCLivingEntity getEntity();
 	MCLocation getLocation();

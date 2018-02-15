@@ -12,10 +12,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- *
- *
- */
 @MDynamicEnum("EntityType")
 public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MCVanillaEntityType,Concrete> {
 
@@ -48,18 +44,18 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	}
 
 	public static MCEntityType valueOf(String test) throws IllegalArgumentException {
-		if (mappings == null) {
+		if(mappings == null) {
 			return null;
 		}
 		MCEntityType ret = mappings.get(test);
-		if (ret == null) {
+		if(ret == null) {
 			throw new IllegalArgumentException("Unknown entity type: " + test);
 		}
 		return ret;
 	}
 
 	public static MCEntityType valueOfVanillaType(MCVanillaEntityType type) {
-		if (vanilla == null) {
+		if(vanilla == null) {
 			return null;
 		}
 		return vanilla.get(type);
@@ -69,9 +65,9 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	 * @return Names of available entity types
 	 */
 	public static Set<String> types() {
-		if (NULL == null) { // docs mode
+		if(NULL == null) { // docs mode
 			Set<String> dummy = new HashSet<>();
-			for (final MCVanillaEntityType t : MCVanillaEntityType.values()) {
+			for(final MCVanillaEntityType t : MCVanillaEntityType.values()) {
 				dummy.add(t.name());
 			}
 			return dummy;
@@ -83,9 +79,9 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	 * @return Our own EntityType list
 	 */
 	public static Collection<MCEntityType> values() {
-		if (NULL == null) { // docs mode
+		if(NULL == null) { // docs mode
 			ArrayList<MCEntityType> dummy = new ArrayList<>();
-			for (final MCVanillaEntityType t : MCVanillaEntityType.values()) {
+			for(final MCVanillaEntityType t : MCVanillaEntityType.values()) {
 				dummy.add(new MCEntityType<Object>(t, null) {
 					@Override
 					public String name() {

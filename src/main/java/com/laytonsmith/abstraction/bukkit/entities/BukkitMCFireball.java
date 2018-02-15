@@ -6,10 +6,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.util.Vector;
 
-/**
- * 
- * @author jb_aero
- */
 public class BukkitMCFireball extends BukkitMCProjectile implements MCFireball {
 
 	Fireball f;

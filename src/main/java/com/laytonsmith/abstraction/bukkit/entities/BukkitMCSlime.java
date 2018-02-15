@@ -5,10 +5,6 @@ import com.laytonsmith.abstraction.entities.MCSlime;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Slime;
 
-/**
- *
- * @author Hekta
- */
 public class BukkitMCSlime extends BukkitMCLivingEntity implements MCSlime {
 
 	public BukkitMCSlime(Entity slime) {

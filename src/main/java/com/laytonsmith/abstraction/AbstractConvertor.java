@@ -14,12 +14,8 @@ import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- *
- * 
- */
 public abstract class AbstractConvertor implements Convertor{
-	
+
 	private final List<Runnable> shutdownHooks = new ArrayList<>();
 
 	@Override
@@ -43,7 +39,7 @@ public abstract class AbstractConvertor implements Convertor{
 			iter.remove();
 		}
 	}
-	
+
 	/**
 	 * Runs the task either now or later. In the case of a default Convertor,
 	 * it just runs the task now.
@@ -58,7 +54,7 @@ public abstract class AbstractConvertor implements Convertor{
 	@Override
 	public <T> T runOnMainThreadAndWait(Callable<T> callable) throws Exception{
 		return (T) callable.call();
-	}				
+	}
 
 	@Override
 	public MCWorldCreator getWorldCreator(String worldName) {

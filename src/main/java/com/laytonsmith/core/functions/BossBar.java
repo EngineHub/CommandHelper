@@ -57,6 +57,40 @@ public class BossBar {
 	}
 
 	@api
+	public static class get_bars extends BossBarFunction {
+
+		@Override
+		public String getName() {
+			return "get_bars";
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Gets an array of boss bar ids currently in use.";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			CArray ca = new CArray(t);
+			for(String id : bars.keySet()) {
+				ca.push(new CString(id, t), t);
+			}
+			return ca;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+	}
+
+	@api
 	public static class create_bar extends BossBarFunction {
 
 		@Override

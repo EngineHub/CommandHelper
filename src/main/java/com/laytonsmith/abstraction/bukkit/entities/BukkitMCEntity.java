@@ -34,10 +34,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- *
- *
- */
 public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	Entity e;
@@ -70,26 +66,25 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	@Override
 	public MCEntityDamageEvent getLastDamageCause() {
 		EntityDamageEvent ldc = e.getLastDamageCause();
-		if (ldc == null) {
+		if(ldc == null) {
 			return null;
 		}
-		if (ldc instanceof EntityDamageByEntityEvent) {
-			return new BukkitEntityEvents.BukkitMCEntityDamageByEntityEvent(
-					(EntityDamageByEntityEvent) ldc);
+		if(ldc instanceof EntityDamageByEntityEvent) {
+			return new BukkitEntityEvents.BukkitMCEntityDamageByEntityEvent(ldc);
 		}
 		return new BukkitEntityEvents.BukkitMCEntityDamageEvent(ldc);
 	}
 
 	public MCLivingEntity getLivingEntity() {
-		if (e instanceof LivingEntity) {
-			return new BukkitMCLivingEntity((LivingEntity) e);
+		if(e instanceof LivingEntity) {
+			return new BukkitMCLivingEntity(e);
 		}
 		return null;
 	}
 
 	@Override
 	public MCLocation getLocation() {
-		if (e.getLocation() == null) {
+		if(e.getLocation() == null) {
 			return null;
 		}
 		return new BukkitMCLocation(e.getLocation());
@@ -103,9 +98,9 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	@Override
 	public List<MCEntity> getNearbyEntities(double x, double y, double z) {
 		List<Entity> lst = e.getNearbyEntities(x, y, z);
-		List<MCEntity> retn = new ArrayList<MCEntity>();
+		List<MCEntity> retn = new ArrayList<>();
 
-		for (Entity e : lst) {
+		for(Entity e : lst) {
 			retn.add(BukkitConvertor.BukkitGetCorrectEntity(e));
 		}
 
@@ -114,6 +109,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public MCEntity getPassenger() {
+		// Deprecated in 1.11.2
 		return BukkitConvertor.BukkitGetCorrectEntity(e.getPassenger());
 	}
 
@@ -150,7 +146,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public MCWorld getWorld() {
-		if (e == null || e.getWorld() == null) {
+		if(e == null || e.getWorld() == null) {
 			return null;
 		}
 		return new BukkitMCWorld(e.getWorld());
@@ -253,9 +249,9 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public String getCustomName() {
-		if (Static.getServer().getMinecraftVersion().ordinal() < MCVersion.MC1_8.ordinal()) {
-			if (e instanceof LivingEntity) {
-				return ((LivingEntity) e).getCustomName();
+		if(Static.getServer().getMinecraftVersion().ordinal() < MCVersion.MC1_8.ordinal()) {
+			if(e instanceof LivingEntity) {
+				return e.getCustomName();
 			} else {
 				throw new IllegalArgumentException("This can only be used on LivingEntities prior to MC1.8.");
 			}
@@ -265,9 +261,9 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public boolean isCustomNameVisible() {
-		if (Static.getServer().getMinecraftVersion().ordinal() < MCVersion.MC1_8.ordinal()) {
-			if (e instanceof LivingEntity) {
-				return ((LivingEntity) e).isCustomNameVisible();
+		if(Static.getServer().getMinecraftVersion().ordinal() < MCVersion.MC1_8.ordinal()) {
+			if(e instanceof LivingEntity) {
+				return e.isCustomNameVisible();
 			} else {
 				throw new IllegalArgumentException("This can only be used on LivingEntities prior to MC1.8.");
 			}
@@ -277,9 +273,9 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public void setCustomName(String name) {
-		if (Static.getServer().getMinecraftVersion().ordinal() < MCVersion.MC1_8.ordinal()) {
-			if (e instanceof LivingEntity) {
-				((LivingEntity) e).setCustomName(name);
+		if(Static.getServer().getMinecraftVersion().ordinal() < MCVersion.MC1_8.ordinal()) {
+			if(e instanceof LivingEntity) {
+				e.setCustomName(name);
 			} else {
 				throw new IllegalArgumentException("This can only be used on LivingEntities prior to MC1.8.");
 			}
@@ -289,9 +285,9 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	@Override
 	public void setCustomNameVisible(boolean visible) {
-		if (Static.getServer().getMinecraftVersion().ordinal() < MCVersion.MC1_8.ordinal()) {
-			if (e instanceof LivingEntity) {
-				((LivingEntity) e).setCustomNameVisible(visible);
+		if(Static.getServer().getMinecraftVersion().ordinal() < MCVersion.MC1_8.ordinal()) {
+			if(e instanceof LivingEntity) {
+				e.setCustomNameVisible(visible);
 			} else {
 				throw new IllegalArgumentException("This can only be used on LivingEntities prior to MC1.8.");
 			}
@@ -299,16 +295,6 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 		e.setCustomNameVisible(visible);
 	}
 
-	/**
-	 * This only works with craftbukkit
-	 *
-	 * @return
-	 */
-	@Override
-	public MCLocation asyncGetLocation() {
-		return new BukkitMCLocation(e.getLocation());
-	}
-	
 	@Override
 	public boolean isGlowing() {
 		try {
@@ -318,7 +304,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public void setGlowing(Boolean glow) {
 		try {

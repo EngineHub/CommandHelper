@@ -2,10 +2,6 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-/**
- *
- * @author Hekta
- */
 @MEnum("Difficulty")
 public enum MCDifficulty {
 	PEACEFUL(0),
@@ -19,7 +15,7 @@ public enum MCDifficulty {
 		this.value = value;
 	}
 
-    public int getValue() {
-        return this.value;
-    }
+	public int getValue() {
+		return this.value;
+	}
 }

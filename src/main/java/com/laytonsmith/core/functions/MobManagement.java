@@ -633,8 +633,9 @@ public class MobManagement {
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{new ExampleScript("Basic use", "msg(get_mob_effects(259))",
-					"{{ambient: false, id: 1, seconds: 30, strength: 1}}")};
+			return new ExampleScript[]{new ExampleScript("Basic use",
+					"msg(get_mob_effects('091a595d-3d2f-4df4-b493-951dc4bed7f2'))",
+					"{{ambient: false, id: 1, seconds: 30.0, strength: 1}}")};
 		}
 		
 		@Override
@@ -809,17 +810,18 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "equipmentArray {entityID} Returns an associative array showing the equipment this mob is wearing."
+			return "array {entityID} Returns an associative array showing the equipment this mob is wearing."
 					+ " This does not work on most \"dumb\" entities, only mobs (entities with AI).";
 		}
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Getting a mob's equipment", "get_mob_equipment(276)", "{boots: null,"
-							+ " chestplate: null, helmet: {data: 0, enchants: {} meta: null, type: 91}, leggings: null,"
-							+ " off_hand: null, weapon: {data: 5, enchants: {} meta: {display: Excalibur, lore: null},"
-							+ " type: 276}}")
+					new ExampleScript("Getting a mob's equipment",
+							"get_mob_equipment('091a595d-3d2f-4df4-b493-951dc4bed7f2')",
+							"{boots: null, chestplate: null, helmet: {data: 0, enchants: {} meta: null, name:"
+							+ " JACK_O_LANTERN}, leggings: null, off_hand: null, weapon: {data: 5, enchants: {} meta:"
+							+ " {display: Excalibur, lore: null}, name: DIAMOND_SWORD}}")
 			};
 		}
 		
@@ -876,7 +878,9 @@ public class MobManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "set_mob_equipment(spawn_mob('SKELETON')[0], array(WEAPON: array(type: 261)))", "Gives a bow to a skeleton")
+				new ExampleScript("Basic usage",
+						"set_mob_equipment(spawn_mob('SKELETON')[0], array(WEAPON: array(name: BOW)))",
+						"Gives a bow to a skeleton")
 			};
 		}
 		
@@ -935,7 +939,8 @@ public class MobManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{new ExampleScript("Basic use",
-					"set_max_health(256, 10)", "The entity will now only have 5 hearts max.")};
+					"set_max_health('091a595d-3d2f-4df4-b493-951dc4bed7f2', 10.0)",
+					"The entity will now only have 5 hearts max (10 half-hearts).")};
 		}
 		
 		@Override

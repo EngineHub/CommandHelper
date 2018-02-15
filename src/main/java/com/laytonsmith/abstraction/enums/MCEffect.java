@@ -1,12 +1,7 @@
-
 package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-/**
- *
- * 
- */
 @MEnum("Effect")
 public enum MCEffect {
 	/**
@@ -103,22 +98,22 @@ public enum MCEffect {
 	TILE_DUST("blockdust")
 	;
 
-    private final int id;
+	private final int id;
 	private final String particleName;
 
-    private MCEffect(int id) {
-        this.id = id;
+	MCEffect(int id) {
+		this.id = id;
 		particleName = null;
-    }
+	}
 
-	private MCEffect(String particleName){
+	MCEffect(String particleName){
 		this.id = 0;
 		this.particleName = particleName;
 	}
 
-    public int getId() {
-        return this.id;
-    }
+	public int getId() {
+		return this.id;
+	}
 
 	public String getName(){
 		return particleName;

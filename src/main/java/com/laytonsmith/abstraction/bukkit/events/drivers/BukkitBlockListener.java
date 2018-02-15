@@ -2,11 +2,8 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.events.BukkitBlockEvents;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -21,38 +18,34 @@ import org.bukkit.event.block.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 
-/**
- *
- * 
- */
-public class BukkitBlockListener implements Listener{
+public class BukkitBlockListener implements Listener {
 
 	@EventHandler(priority=EventPriority.LOWEST)
-    public void onPistonExtend(final BlockPistonExtendEvent e){
+	public void onPistonExtend(final BlockPistonExtendEvent e){
 		BukkitBlockEvents.BukkitMCBlockPistonExtendEvent mce = new BukkitBlockEvents.BukkitMCBlockPistonExtendEvent(e);
-        EventUtils.TriggerListener(Driver.PISTON_EXTEND, "piston_extend", mce);
-    }
-	
+		EventUtils.TriggerListener(Driver.PISTON_EXTEND, "piston_extend", mce);
+	}
+
 	@EventHandler(priority=EventPriority.LOWEST)
-    public void onPistonRetract(final BlockPistonRetractEvent e){
+	public void onPistonRetract(final BlockPistonRetractEvent e){
 		BukkitBlockEvents.BukkitMCBlockPistonRetractEvent mce = new BukkitBlockEvents.BukkitMCBlockPistonRetractEvent(e);
-        EventUtils.TriggerListener(Driver.PISTON_RETRACT, "piston_retract", mce);
-    }
-	
+		EventUtils.TriggerListener(Driver.PISTON_RETRACT, "piston_retract", mce);
+	}
+
 	@EventHandler(priority=EventPriority.LOWEST)
-    public void onSignChange(SignChangeEvent e){
+	public void onSignChange(SignChangeEvent e){
 		BukkitBlockEvents.BukkitMCSignChangeEvent mce = new BukkitBlockEvents.BukkitMCSignChangeEvent(e);
-        EventUtils.TriggerListener(Driver.SIGN_CHANGED, "sign_changed", mce);
-    }
-	
+		EventUtils.TriggerListener(Driver.SIGN_CHANGED, "sign_changed", mce);
+	}
+
 	@EventHandler(priority=EventPriority.LOWEST)
-    public void onBlockPlace(BlockPlaceEvent e){
+	public void onBlockPlace(BlockPlaceEvent e){
 		BukkitBlockEvents.BukkitMCBlockPlaceEvent bpe = new BukkitBlockEvents.BukkitMCBlockPlaceEvent(e);
-        EventUtils.TriggerListener(Driver.BLOCK_PLACE, "block_place", bpe);
-    }
+		EventUtils.TriggerListener(Driver.BLOCK_PLACE, "block_place", bpe);
+	}
 
 	private static boolean ignorebreak = false;
-	
+
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onBlockBreak(BlockBreakEvent e){
 		if(ignorebreak){
@@ -72,12 +65,12 @@ public class BukkitBlockListener implements Listener{
 			} finally {
 				ignorebreak = false;
 			}
-			if (!chevent.isCancelled()) {
+			if(!chevent.isCancelled()) {
 				Block block = chevent.getBlock();
 				block.setType(Material.AIR);
 				Location loc = block.getLocation();
 				loc.add(0.5, 0.5, 0.5);
-				for (MCItemStack item : bbe.getDrops()) {
+				for(MCItemStack item : bbe.getDrops()) {
 					block.getWorld().dropItemNaturally(loc, (ItemStack) item.getHandle());
 				}
 				int amt = chevent.getExpToDrop();
@@ -94,7 +87,7 @@ public class BukkitBlockListener implements Listener{
 		BukkitBlockEvents.BukkitMCBlockDispenseEvent bde = new BukkitBlockEvents.BukkitMCBlockDispenseEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_DISPENSE, "block_dispense", bde);
 	}
-	
+
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onBlockBurn(BlockBurnEvent e){
 		BukkitBlockEvents.BukkitMCBlockBurnEvent bbe = new BukkitBlockEvents.BukkitMCBlockBurnEvent(e);

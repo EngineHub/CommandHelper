@@ -9,16 +9,16 @@ import com.laytonsmith.core.Static;
 import org.bukkit.block.banner.PatternType;
 
 @abstractionenum(
-	implementation = Implementation.Type.BUKKIT,
-	forAbstractEnum = MCPatternShape.class,
-	forConcreteEnum = PatternType.class
+		implementation = Implementation.Type.BUKKIT,
+		forAbstractEnum = MCPatternShape.class,
+		forConcreteEnum = PatternType.class
 )
 public class BukkitMCPatternShape extends EnumConvertor<MCPatternShape, PatternType> {
 
 	private static BukkitMCPatternShape instance;
 
 	public static BukkitMCPatternShape getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new BukkitMCPatternShape();
 		}
 		return instance;

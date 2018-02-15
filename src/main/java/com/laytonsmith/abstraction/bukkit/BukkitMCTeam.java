@@ -57,6 +57,7 @@ public class BukkitMCTeam implements MCTeam {
 
 	@Override
 	public MCNameTagVisibility getNameTagVisibility() {
+		// deprecated in 1.9
 		NameTagVisibility ntv = t.getNameTagVisibility();
 		return MCNameTagVisibility.valueOf(ntv.name());
 	}
@@ -69,14 +70,14 @@ public class BukkitMCTeam implements MCTeam {
 
 	@Override
 	public Set<String> getEntries() {
-		Set<String> ret = new HashSet<String>();
+		Set<String> ret = new HashSet<>();
 		try {
-			for (String e : t.getEntries()) {
+			for(String e : t.getEntries()) {
 				ret.add(e);
 			}
 		} catch(NoSuchMethodError ex){
 			// Probably 1.8.5 or prior
-			for (OfflinePlayer o : (Set<OfflinePlayer>) ReflectionUtils.invokeMethod(t, "getPlayers")) {
+			for(OfflinePlayer o : (Set<OfflinePlayer>) ReflectionUtils.invokeMethod(t, "getPlayers")) {
 				ret.add(o.getName());
 			}
 		}

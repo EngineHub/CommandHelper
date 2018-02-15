@@ -3,38 +3,20 @@ package com.laytonsmith.abstraction.events;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCPlayer;
 
-/**
- *
- * 
- */
 public interface MCPlayerDeathEvent extends MCEntityDeathEvent {
-
 	@Override
-	public MCPlayer getEntity();
-
-	public String getDeathMessage();
-
-	public void setDeathMessage(String nval);
-
-	public boolean getKeepLevel();
-	
-	public void setKeepLevel(boolean keepLevel);
-
-	public boolean getKeepInventory();
-	
-	public void setKeepInventory(boolean keepLevel);
-	
-	public int getNewExp();
-	
-	public void setNewExp(int exp);
-	
-	public int getNewLevel();
-	
-	public void setNewLevel(int level);
-	
-	public int getNewTotalExp();
-	
-	public void setNewTotalExp(int totalExp);
-	
-	public MCEntity getKiller();
+	MCPlayer getEntity();
+	String getDeathMessage();
+	void setDeathMessage(String nval);
+	boolean getKeepLevel();
+	void setKeepLevel(boolean keepLevel);
+	boolean getKeepInventory();
+	void setKeepInventory(boolean keepLevel);
+	int getNewExp();
+	void setNewExp(int exp);
+	int getNewLevel();
+	void setNewLevel(int level);
+	int getNewTotalExp();
+	void setNewTotalExp(int totalExp);
+	MCEntity getKiller();
 }

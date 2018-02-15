@@ -6,10 +6,6 @@ import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.event.inventory.ClickType;
 
-/**
- * 
- * @author jb_aero
- */
 @abstractionenum(
 		implementation= Implementation.Type.BUKKIT,
 		forAbstractEnum=MCClickType.class,
@@ -18,9 +14,9 @@ import org.bukkit.event.inventory.ClickType;
 public class BukkitMCClickType extends EnumConvertor<MCClickType, ClickType>{
 
 	private static BukkitMCClickType instance;
-	
+
 	public static BukkitMCClickType getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new BukkitMCClickType();
 		}
 		return instance;

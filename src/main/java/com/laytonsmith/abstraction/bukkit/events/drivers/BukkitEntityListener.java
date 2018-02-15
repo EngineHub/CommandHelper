@@ -12,10 +12,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
-/**
- *
- * 
- */
 public class BukkitEntityListener implements Listener {
 
 	@EventIdentifier(event = Driver.CREATURE_SPAWN, className = "org.bukkit.event.entity.CreatureSpawnEvent")
@@ -24,15 +20,13 @@ public class BukkitEntityListener implements Listener {
 		EventUtils.TriggerListener(Driver.CREATURE_SPAWN, "creature_spawn", cse);
 	}
 
-	@EventIdentifier(event = Driver.PLAYER_INTERACT_ENTITY,
-			className = "org.bukkit.event.player.PlayerInteractEntityEvent")
+	@EventIdentifier(event = Driver.PLAYER_INTERACT_ENTITY, className = "org.bukkit.event.player.PlayerInteractEntityEvent")
 	public void onClickEnt(Event event) {
 		BukkitMCPlayerInteractEntityEvent piee = new BukkitMCPlayerInteractEntityEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_INTERACT_ENTITY, "player_interact_entity", piee);
 	}
 
-	@EventIdentifier(event = Driver.PLAYER_INTERACT_AT_ENTITY,
-			className = "org.bukkit.event.player.PlayerInteractAtEntityEvent")
+	@EventIdentifier(event = Driver.PLAYER_INTERACT_AT_ENTITY, className = "org.bukkit.event.player.PlayerInteractAtEntityEvent")
 	public void onClickAtEnt(Event event) {
 		BukkitMCPlayerInteractAtEntityEvent piaee = new BukkitMCPlayerInteractAtEntityEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_INTERACT_AT_ENTITY, "player_interact_at_entity", piaee);
@@ -42,7 +36,7 @@ public class BukkitEntityListener implements Listener {
 	public void onItemDrop(Event event) {
 		BukkitMCPlayerDropItemEvent pdie = new BukkitMCPlayerDropItemEvent(event);
 		EventUtils.TriggerListener(Driver.ITEM_DROP, "item_drop", pdie);
-    }
+	}
 
 	@EventIdentifier(event = Driver.ITEM_PICKUP, className = "org.bukkit.event.player.PlayerPickupItemEvent")
 	public void onItemPickup(Event event) {
@@ -53,13 +47,13 @@ public class BukkitEntityListener implements Listener {
 	@EventIdentifier(event = Driver.ENTITY_DEATH, className = "org.bukkit.event.entity.EntityDeathEvent")
 	public void onEntityDeath(Event event) {
 		BukkitMCEntityDeathEvent ede;
-		if (event instanceof PlayerDeathEvent) {
+		if(event instanceof PlayerDeathEvent) {
 			ede = new BukkitPlayerEvents.BukkitMCPlayerDeathEvent(event);
 		} else {
 			ede = new BukkitMCEntityDeathEvent(event);
 		}
 		EventUtils.TriggerListener(Driver.ENTITY_DEATH, "entity_death", ede);
-		if (event instanceof PlayerDeathEvent) {
+		if(event instanceof PlayerDeathEvent) {
 			EventUtils.TriggerListener(Driver.PLAYER_DEATH, "player_death", ede);
 		}
 	}
@@ -71,16 +65,16 @@ public class BukkitEntityListener implements Listener {
 		if(target == null || !(target instanceof MCPlayer)) {
 			return;
 		}
-        EventUtils.TriggerListener(Driver.TARGET_ENTITY, "target_player", ete);
-    }
+		EventUtils.TriggerListener(Driver.TARGET_ENTITY, "target_player", ete);
+	}
 
 	@EventIdentifier(event = Driver.ENTITY_DAMAGE, className = "org.bukkit.event.entity.EntityDamageEvent")
 	public void onEntityDamage(Event event) {
 		BukkitMCEntityDamageEvent ede;
-		if (event instanceof EntityDamageByEntityEvent) {
+		if(event instanceof EntityDamageByEntityEvent) {
 			ede = new BukkitMCEntityDamageByEntityEvent(event);
 			EventUtils.TriggerListener(Driver.ENTITY_DAMAGE, "entity_damage", ede);
-			if (ede.getEntity() instanceof MCPlayer) {
+			if(ede.getEntity() instanceof MCPlayer) {
 				EventUtils.TriggerListener(Driver.ENTITY_DAMAGE_PLAYER, "entity_damage_player", ede);
 			}
 		} else {

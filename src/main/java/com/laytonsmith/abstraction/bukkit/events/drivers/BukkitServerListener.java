@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCLocation;
@@ -14,19 +12,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 
-/**
- *
- *
- */
 public class BukkitServerListener implements Listener{
-
-	//@EventHandler(priority= EventPriority.LOWEST)
-	public void onServerCommandEvent(ServerCommandEvent e){
-
-	}
 
 	@EventHandler(priority= EventPriority.LOWEST)
 	public void onPing(ServerListPingEvent event) {

@@ -4,10 +4,6 @@ import com.laytonsmith.abstraction.entities.MCPig;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Pig;
 
-/**
- * 
- * @author jb_aero
- */
 public class BukkitMCPig extends BukkitMCAgeable implements MCPig {
 
 	Pig p;

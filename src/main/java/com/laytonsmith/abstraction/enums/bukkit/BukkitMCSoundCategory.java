@@ -9,9 +9,9 @@ import com.laytonsmith.core.Static;
 import org.bukkit.SoundCategory;
 
 @abstractionenum(
-	implementation = Implementation.Type.BUKKIT,
-	forAbstractEnum = MCSoundCategory.class,
-	forConcreteEnum = SoundCategory.class
+		implementation = Implementation.Type.BUKKIT,
+		forAbstractEnum = MCSoundCategory.class,
+		forConcreteEnum = SoundCategory.class
 )
 public class BukkitMCSoundCategory extends EnumConvertor<MCSoundCategory, SoundCategory> {
 	private static BukkitMCSoundCategory instance;

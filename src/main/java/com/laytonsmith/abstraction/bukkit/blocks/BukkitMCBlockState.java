@@ -11,13 +11,13 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCMetadatable;
 import org.bukkit.block.BlockState;
 
 public class BukkitMCBlockState extends BukkitMCMetadatable implements MCBlockState {
-    
-    BlockState bs;
 
-    public BukkitMCBlockState(BlockState state) {
+	BlockState bs;
+
+	public BukkitMCBlockState(BlockState state) {
 		super(state);
-        this.bs = state;
-    }
+		this.bs = state;
+	}
 
 	@Override
 	public BlockState getHandle() {
@@ -25,9 +25,9 @@ public class BukkitMCBlockState extends BukkitMCMetadatable implements MCBlockSt
 	}
 
 	@Override
-    public MCMaterialData getData() {
-        return new BukkitMCMaterialData(bs.getData());
-    }
+	public MCMaterialData getData() {
+		return new BukkitMCMaterialData(bs.getData());
+	}
 
 	@Override
 	public MCMaterial getType() {
@@ -45,9 +45,9 @@ public class BukkitMCBlockState extends BukkitMCMetadatable implements MCBlockSt
 	}
 
 	@Override
-    public int getTypeId() {
-        return bs.getTypeId();
-    }
+	public int getTypeId() {
+		return bs.getTypeId();
+	}
 
 	@Override
 	public MCBlock getBlock() {

@@ -1,21 +1,16 @@
 package com.laytonsmith.abstraction;
 
-/**
- *
- * @author MariuszT
- */
 public interface MCTravelAgent extends AbstractionObject {
+	boolean createPortal(MCLocation location);
+	MCLocation findOrCreate(MCLocation location);
+	MCLocation findPortal(MCLocation location);
 
-	public boolean createPortal(MCLocation location);
-	public MCLocation findOrCreate(MCLocation location);
-	public MCLocation findPortal(MCLocation location);
+	boolean getCanCreatePortal();
+	void setCanCreatePortal(boolean create);
 
-	public boolean getCanCreatePortal();
-	public void setCanCreatePortal(boolean create);
+	int getCreationRadius();
+	MCTravelAgent setCreationRadius(int radius);
 
-	public int getCreationRadius();
-	public MCTravelAgent setCreationRadius(int radius);
-
-	public int getSearchRadius();
-	public MCTravelAgent setSearchRadius(int radius);
+	int getSearchRadius();
+	MCTravelAgent setSearchRadius(int radius);
 }

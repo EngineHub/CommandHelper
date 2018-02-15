@@ -6,15 +6,11 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.core.events.BindableEvent;
 
-/**
- *
- * @author EntityReborn
- */
 public interface MCBlockPlaceEvent extends BindableEvent{
-    public MCPlayer getPlayer();
-    public MCBlock getBlock();
-    public MCBlock getBlockAgainst();
-    public MCBlockState getBlockReplacedState();
-    public MCItemStack getItemInHand();
-    public boolean canBuild();
+	MCPlayer getPlayer();
+	MCBlock getBlock();
+	MCBlock getBlockAgainst();
+	MCBlockState getBlockReplacedState();
+	MCItemStack getItemInHand();
+	boolean canBuild();
 }

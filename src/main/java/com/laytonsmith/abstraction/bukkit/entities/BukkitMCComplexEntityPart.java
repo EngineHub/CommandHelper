@@ -6,10 +6,6 @@ import com.laytonsmith.abstraction.entities.MCComplexLivingEntity;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.Entity;
 
-/**
- *
- * @author Hekta
- */
 public class BukkitMCComplexEntityPart extends BukkitMCEntity implements MCComplexEntityPart {
 
 	public BukkitMCComplexEntityPart(Entity part) {

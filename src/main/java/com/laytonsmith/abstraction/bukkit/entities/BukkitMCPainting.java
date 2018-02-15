@@ -6,11 +6,8 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCArt;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Painting;
 
-/**
- * 
- */
 public class BukkitMCPainting extends BukkitMCHanging implements MCPainting {
-	
+
 	Painting p;
 
 	public BukkitMCPainting(Entity painting) {

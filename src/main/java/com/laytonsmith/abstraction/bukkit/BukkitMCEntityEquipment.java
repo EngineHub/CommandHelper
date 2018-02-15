@@ -11,10 +11,6 @@ import org.bukkit.inventory.EntityEquipment;
 import java.util.EnumMap;
 import java.util.Map;
 
-/**
- *
- * @author jb_aero
- */
 public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
 	private EntityEquipment ee;
@@ -22,7 +18,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	public BukkitMCEntityEquipment(EntityEquipment equipment) {
 		this.ee = equipment;
 	}
-	
+
 	@Override
 	public void clearEquipment() {
 		ee.clear();
@@ -32,7 +28,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	public int getSize() {
 		return MCEquipmentSlot.values().length;
 	}
-	
+
 	@Override
 	public MCEntity getHolder() {
 		return BukkitConvertor.BukkitGetCorrectEntity(ee.getHolder());
@@ -40,29 +36,29 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
 	@Override
 	public Map<MCEquipmentSlot, MCItemStack> getAllEquipment() {
-		Map<MCEquipmentSlot, MCItemStack> slots = new EnumMap<MCEquipmentSlot, MCItemStack>(MCEquipmentSlot.class);
-		for (MCEquipmentSlot key : MCEquipmentSlot.values()) {
-			switch (key) {
-			case WEAPON:
-				slots.put(key, getWeapon());
-				break;
-			case OFF_HAND:
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
-					slots.put(key, getItemInOffHand());
-				}
-				break;
-			case HELMET:
-				slots.put(key, getHelmet());
-				break;
-			case CHESTPLATE:
-				slots.put(key, getChestplate());
-				break;
-			case LEGGINGS:
-				slots.put(key, getLeggings());
-				break;
-			case BOOTS:
-				slots.put(key, getBoots());
-				break;
+		Map<MCEquipmentSlot, MCItemStack> slots = new EnumMap<>(MCEquipmentSlot.class);
+		for(MCEquipmentSlot key : MCEquipmentSlot.values()) {
+			switch(key) {
+				case WEAPON:
+					slots.put(key, getWeapon());
+					break;
+				case OFF_HAND:
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+						slots.put(key, getItemInOffHand());
+					}
+					break;
+				case HELMET:
+					slots.put(key, getHelmet());
+					break;
+				case CHESTPLATE:
+					slots.put(key, getChestplate());
+					break;
+				case LEGGINGS:
+					slots.put(key, getLeggings());
+					break;
+				case BOOTS:
+					slots.put(key, getBoots());
+					break;
 			}
 		}
 		return slots;
@@ -70,39 +66,39 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
 	@Override
 	public void setAllEquipment(Map<MCEquipmentSlot, MCItemStack> slots) {
-		MCItemStack stack = null;
-		for (MCEquipmentSlot key : slots.keySet()) {
-			stack = slots.get(key);
-			switch (key) {
-			case WEAPON:
-				setWeapon(stack);
-				break;
-			case OFF_HAND:
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
-					setItemInOffHand(stack);
-				}
-				break;
-			case HELMET:
-				setHelmet(stack);
-				break;
-			case CHESTPLATE:
-				setChestplate(stack);
-				break;
-			case LEGGINGS:
-				setLeggings(stack);
-				break;
-			case BOOTS:
-				setBoots(stack);
-				break;
+		MCItemStack stack;
+		for(Map.Entry<MCEquipmentSlot, MCItemStack> entry : slots.entrySet()) {
+			stack = entry.getValue();
+			switch(entry.getKey()) {
+				case WEAPON:
+					setWeapon(stack);
+					break;
+				case OFF_HAND:
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+						setItemInOffHand(stack);
+					}
+					break;
+				case HELMET:
+					setHelmet(stack);
+					break;
+				case CHESTPLATE:
+					setChestplate(stack);
+					break;
+				case LEGGINGS:
+					setLeggings(stack);
+					break;
+				case BOOTS:
+					setBoots(stack);
+					break;
 			}
 		}
 	}
-	
+
 	@Override
 	public Map<MCEquipmentSlot, Float> getAllDropChances() {
-		Map<MCEquipmentSlot, Float> slots = new EnumMap<MCEquipmentSlot, Float>(MCEquipmentSlot.class);
-		for (MCEquipmentSlot key : MCEquipmentSlot.values()) {
-			switch (key) {
+		Map<MCEquipmentSlot, Float> slots = new EnumMap<>(MCEquipmentSlot.class);
+		for(MCEquipmentSlot key : MCEquipmentSlot.values()) {
+			switch(key) {
 				case WEAPON:
 					slots.put(key, getWeaponDropChance());
 					break;
@@ -127,13 +123,13 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 		}
 		return slots;
 	}
-	
+
 	@Override
 	public void setAllDropChances(Map<MCEquipmentSlot, Float> slots) {
 		float chance;
-		for (MCEquipmentSlot key : slots.keySet()) {
-			chance = slots.get(key);
-			switch (key) {
+		for(Map.Entry<MCEquipmentSlot, Float> entry : slots.entrySet()) {
+			chance = entry.getValue();
+			switch(entry.getKey()) {
 				case WEAPON:
 					setWeaponDropChance(chance);
 					break;

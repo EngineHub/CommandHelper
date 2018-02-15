@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.Implementation;
@@ -7,19 +6,16 @@ import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.GameMode;
 
-/**
- *
- * 
- */
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,
-forAbstractEnum = MCGameMode.class,
-forConcreteEnum = GameMode.class)
+		forAbstractEnum = MCGameMode.class,
+		forConcreteEnum = GameMode.class
+)
 public class BukkitMCGameMode extends EnumConvertor<MCGameMode, GameMode> {
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCGameMode instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCGameMode getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCGameMode();
 		}
 		return instance;

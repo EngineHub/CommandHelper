@@ -8,10 +8,6 @@ import com.laytonsmith.core.constructs.Target;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Zombie;
 
-/**
- *
- * @author Hekta
- */
 public class BukkitMCZombie extends BukkitMCLivingEntity implements MCZombie {
 
 	public BukkitMCZombie(Entity zombie) {

@@ -2,25 +2,17 @@ package com.laytonsmith.abstraction;
 
 import java.util.List;
 
-/**
- * 
- * @author jb_aero
- */
 public interface MCBookMeta extends MCItemMeta {
-
-	public boolean hasTitle();
-	public boolean hasAuthor();
-	public boolean hasPages();
-	
-	public String getTitle();
-	public String getAuthor();
-	public List<String> getPages();
-	public int getPageCount();
-	
-	public void addPage(String... pages);
-	
-	public boolean setTitle(String title);
-	public void setAuthor(String author);
-	public void setPages(List<String> pages);
-	public void setPages(String... pages);
+	boolean hasTitle();
+	boolean hasAuthor();
+	boolean hasPages();
+	String getTitle();
+	String getAuthor();
+	List<String> getPages();
+	int getPageCount();
+	void addPage(String... pages);
+	boolean setTitle(String title);
+	void setAuthor(String author);
+	void setPages(List<String> pages);
+	void setPages(String... pages);
 }

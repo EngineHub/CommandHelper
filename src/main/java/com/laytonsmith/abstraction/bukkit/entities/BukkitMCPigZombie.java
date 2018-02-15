@@ -5,10 +5,6 @@ import com.laytonsmith.abstraction.entities.MCPigZombie;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.PigZombie;
 
-/**
- *
- * @author Hekta
- */
 public class BukkitMCPigZombie extends BukkitMCZombie implements MCPigZombie {
 
 	public BukkitMCPigZombie(Entity zombie) {

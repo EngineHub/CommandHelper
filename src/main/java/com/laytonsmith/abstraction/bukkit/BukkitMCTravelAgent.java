@@ -5,16 +5,12 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCTravelAgent;
 import org.bukkit.TravelAgent;
 
-/**
- *
- * @author MariuszT
- */
 public class BukkitMCTravelAgent implements MCTravelAgent {
 
-    TravelAgent a;
-    public BukkitMCTravelAgent(TravelAgent a) {
-        this.a = a;
-    }
+	TravelAgent a;
+	public BukkitMCTravelAgent(TravelAgent a) {
+		this.a = a;
+	}
 	
 	public BukkitMCTravelAgent(AbstractionObject o) {
 		a = (TravelAgent)o;

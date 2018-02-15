@@ -6,18 +6,14 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import java.util.Map;
 
-/**
- *
- * @author cgallarno
- */
 public interface MCEnchantItemEvent extends MCInventoryEvent {
-	public MCBlock getEnchantBlock();
-	public MCPlayer GetEnchanter();
-	public Map<MCEnchantment, Integer> getEnchantsToAdd();
-	public void setEnchantsToAdd(Map<MCEnchantment, Integer> enchants);
-	public MCItemStack getItem();
-	public void setItem(MCItemStack i);
-	public void setExpLevelCost(int level);
-	public int getExpLevelCost();
-	public int whichButton();
+	MCBlock getEnchantBlock();
+	MCPlayer GetEnchanter();
+	Map<MCEnchantment, Integer> getEnchantsToAdd();
+	void setEnchantsToAdd(Map<MCEnchantment, Integer> enchants);
+	MCItemStack getItem();
+	void setItem(MCItemStack i);
+	void setExpLevelCost(int level);
+	int getExpLevelCost();
+	int whichButton();
 }

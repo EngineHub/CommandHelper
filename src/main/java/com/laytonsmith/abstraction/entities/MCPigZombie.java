@@ -1,14 +1,9 @@
 package com.laytonsmith.abstraction.entities;
 
-/**
- *
- * @author Hekta
- */
 public interface MCPigZombie extends MCZombie {
+	int getAnger();
+	void setAnger(int anger);
 
-	public int getAnger();
-	public void setAnger(int anger);
-
-	public boolean isAngry();
-	public void setAngry(boolean isAngry);
+	boolean isAngry();
+	void setAngry(boolean isAngry);
 }

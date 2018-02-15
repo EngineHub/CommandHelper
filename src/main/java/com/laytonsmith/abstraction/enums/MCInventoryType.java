@@ -1,12 +1,7 @@
-
 package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-/**
- *
- * 
- */
 @MEnum("InventoryType")
 public enum MCInventoryType {
 	BREWING,

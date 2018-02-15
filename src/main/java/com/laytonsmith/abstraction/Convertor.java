@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
@@ -22,14 +21,13 @@ import java.util.concurrent.Callable;
  * things. You can get an instance of the current Convertor by looking for the
  * <code>@convert</code> tag. StaticLayer wraps all the functionality for you
  * however.
- * @author layton
  */
 public interface Convertor {
 
-    public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch);
-    public Class GetServerEventMixin();
+	MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch);
+	Class GetServerEventMixin();
 
-    public MCEnchantment[] GetEnchantmentValues();
+	MCEnchantment[] GetEnchantmentValues();
 
 	/**
 	 * Returns the enchantment, given an enchantment name (or a string'd number).
@@ -37,57 +35,57 @@ public interface Convertor {
 	 * @param name
 	 * @return
 	 */
-    public MCEnchantment GetEnchantmentByName(String name);
+	MCEnchantment GetEnchantmentByName(String name);
 
-    public MCServer GetServer();
+	MCServer GetServer();
 
-	public MCItemStack GetItemStack(int type, int qty);
+	MCItemStack GetItemStack(int type, int qty);
 
-	public MCItemStack GetItemStack(int type, int data, int qty);
+	MCItemStack GetItemStack(int type, int data, int qty);
 
-	public MCItemStack GetItemStack(MCMaterial type, int qty);
+	MCItemStack GetItemStack(MCMaterial type, int qty);
 
-	public MCItemStack GetItemStack(MCMaterial type, int data, int qty);
+	MCItemStack GetItemStack(MCMaterial type, int data, int qty);
 
-	public MCItemStack GetItemStack(String type, int qty);
+	MCItemStack GetItemStack(String type, int qty);
 
-	public MCItemStack GetItemStack(String type, int data, int qty);
+	MCItemStack GetItemStack(String type, int data, int qty);
 
-	public MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded);
+	MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded);
 
-    public void Startup(CommandHelperPlugin chp);
+	void Startup(CommandHelperPlugin chp);
 
-    public int LookupItemId(String materialName);
+	int LookupItemId(String materialName);
 
-    public String LookupMaterialName(int id);
+	String LookupMaterialName(int id);
 
-	public MCMaterial getMaterial(int id);
+	MCMaterial getMaterial(int id);
 
-	public MCMaterial GetMaterial(String name);
+	MCMaterial GetMaterial(String name);
 
-	public MCMetadataValue GetMetadataValue(Object value, MCPlugin plugin);
+	MCMetadataValue GetMetadataValue(Object value, MCPlugin plugin);
 
-    /**
-     * A future runnable is run on a server accessible thread at roughly the time specified in the future.
-     * This is no guarantee however, as the particular server implementation may make this hard to do. The
-     * value returned is
+	/**
+	 * A future runnable is run on a server accessible thread at roughly the time specified in the future.
+	 * This is no guarantee however, as the particular server implementation may make this hard to do. The
+	 * value returned is
 	 * @param dm
 	 * @param ms
-     * @param r
-     * @return
-     */
-    public int SetFutureRunnable(DaemonManager dm, long ms, Runnable r);
+	 * @param r
+	 * @return
+	 */
+	int SetFutureRunnable(DaemonManager dm, long ms, Runnable r);
 
 	/**
 	 * Clears all future runnables, but does not interrupt existing ones.
 	 */
-    public void ClearAllRunnables();
+	void ClearAllRunnables();
 
 	/**
 	 * Clears a future runnable task by id.
 	 * @param id
 	 */
-    public void ClearFutureRunnable(int id);
+	void ClearFutureRunnable(int id);
 
 	/**
 	 * Adds a future repeater
@@ -97,11 +95,11 @@ public interface Convertor {
 	 * @param r
 	 * @return
 	 */
-    public int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r);
+	int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r);
 
-    public MCEntity GetCorrectEntity(MCEntity e);
+	MCEntity GetCorrectEntity(MCEntity e);
 
-	public MCItemMeta GetCorrectMeta(MCItemMeta im);
+	MCItemMeta GetCorrectMeta(MCItemMeta im);
 
 	/**
 	 * Returns the entities at the specified location, or null
@@ -109,15 +107,15 @@ public interface Convertor {
 	 * @param loc
 	 * @return
 	 */
-	public List<MCEntity> GetEntitiesAt(MCLocation loc, double radius);
+	List<MCEntity> GetEntitiesAt(MCLocation loc, double radius);
 
 	/**
 	 * Gets the inventory of the specified entity, or null if the entity id
 	 * is invalid
-	 * @param entityID
+	 * @param entity
 	 * @return
 	 */
-	public MCInventory GetEntityInventory(MCEntity entity);
+	MCInventory GetEntityInventory(MCEntity entity);
 
 	/**
 	 * Returns the inventory of the block at the specified location, if it is
@@ -125,7 +123,7 @@ public interface Convertor {
 	 * @param location
 	 * @return
 	 */
-	public MCInventory GetLocationInventory(MCLocation location);
+	MCInventory GetLocationInventory(MCLocation location);
 
 	/**
 	 * Run whenever the server is shutting down (or restarting). There is no
@@ -134,13 +132,13 @@ public interface Convertor {
 	 * yourself.
 	 * @param r
 	 */
-	public void addShutdownHook(Runnable r);
+	void addShutdownHook(Runnable r);
 
 	/**
 	 * Runs all the registered shutdown hooks. This should only be called by the shutdown mechanism.
 	 * After running, each Runnable will be removed from the queue.
 	 */
-	public void runShutdownHooks();
+	void runShutdownHooks();
 
 	/**
 	 * Runs some task on the "main" thread, possibly now, possibly in the future, and
@@ -150,7 +148,7 @@ public interface Convertor {
 	 * @param dm
 	 * @param r
 	 */
-	public void runOnMainThreadLater(DaemonManager dm, Runnable r);
+	void runOnMainThreadLater(DaemonManager dm, Runnable r);
 
 	/**
 	 * Works like runOnMainThreadLater, but waits for the task to finish.
@@ -159,14 +157,14 @@ public interface Convertor {
 	 * @return
 	 * @throws java.lang.Exception
 	 */
-	public <T> T runOnMainThreadAndWait(Callable<T> callable) throws Exception;
+	<T> T runOnMainThreadAndWait(Callable<T> callable) throws Exception;
 
 	/**
 	 * Returns a MCWorldCreator object for the given world name.
 	 * @param worldName
 	 * @return
 	 */
-	public MCWorldCreator getWorldCreator(String worldName);
+	MCWorldCreator getWorldCreator(String worldName);
 
 	/**
 	 * Gets a note object, which can be used to play a sound
@@ -175,7 +173,7 @@ public interface Convertor {
 	 * @param sharp If the note should be a sharp (only applies to some tones)
 	 * @return
 	 */
-	public MCNote GetNote(int octave, MCTone tone, boolean sharp);
+	MCNote GetNote(int octave, MCTone tone, boolean sharp);
 
 	/**
 	 * Returns a color object for this server.
@@ -184,7 +182,7 @@ public interface Convertor {
 	 * @param blue
 	 * @return
 	 */
-	public MCColor GetColor(int red, int green, int blue);
+	MCColor GetColor(int red, int green, int blue);
 
 	/**
 	 * Returns a color object given the color name. The color
@@ -194,22 +192,22 @@ public interface Convertor {
 	 * @param t
 	 * @return
 	 */
-	public MCColor GetColor(String colorName, Target t) throws CREFormatException;
+	MCColor GetColor(String colorName, Target t) throws CREFormatException;
 
 	/**
 	 * Returns a pattern object
 	 * @param color
 	 * @param shape
 	 */
-	public MCPattern GetPattern(MCDyeColor color, MCPatternShape shape);
+	MCPattern GetPattern(MCDyeColor color, MCPatternShape shape);
 
 	/**
 	 * Returns an MCFirework which can be built.
 	 * @return
 	 */
-	public MCFireworkBuilder GetFireworkBuilder();
+	MCFireworkBuilder GetFireworkBuilder();
 
-	public MCPluginMeta GetPluginMeta();
+	MCPluginMeta GetPluginMeta();
 
 	/**
 	 * Creates a new properly typed recipe instance
@@ -218,7 +216,7 @@ public interface Convertor {
 	 * @param result the itemstack the recipe will result in
 	 * @return
 	 */
-	public MCRecipe GetNewRecipe(String key, MCRecipeType type, MCItemStack result);
+	MCRecipe GetNewRecipe(String key, MCRecipeType type, MCItemStack result);
 
 	/**
 	 * Used to convert a generic recipe into the correct type
@@ -226,38 +224,38 @@ public interface Convertor {
 	 * @param unspecific type
 	 * @return specific type
 	 */
-	public MCRecipe GetRecipe(MCRecipe unspecific);
+	MCRecipe GetRecipe(MCRecipe unspecific);
 
 	/**
 	 *
 	 * @param name
 	 * @return a new MCCommand instance
 	 */
-	public MCCommand getNewCommand(String name);
+	MCCommand getNewCommand(String name);
 
 	/**
 	 *
-	 * @param an ambiguous MCCommandSender
+	 * @param unspecific an ambiguous MCCommandSender
 	 * @return a properly typed MCCommandSender
 	 */
-	public MCCommandSender GetCorrectSender(MCCommandSender unspecific);
+	MCCommandSender GetCorrectSender(MCCommandSender unspecific);
 
 	/**
 	 * Returns the name of CommandHelper by parsing the plugin.yml file.
 	 * @return
 	 */
-	public String GetPluginName();
+	String GetPluginName();
 
 	/**
 	 * Returns a MCPlugin instance of CommandHelper.
 	 * @return
 	 */
-	public MCPlugin GetPlugin();
+	MCPlugin GetPlugin();
 
 	/**
 	 * Returns the name of the current user, or null if this doesn't make sense in the given platform.
 	 * @param env The runtime environment, in case the convertor needs it
 	 * @return The username
 	 */
-	public String GetUser(Environment env);
+	String GetUser(Environment env);
 }

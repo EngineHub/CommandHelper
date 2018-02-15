@@ -628,13 +628,18 @@ public class PlayerManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Demonstrates finding a non-air block", "msg(pcursor())", "{0: -127, 1: 75, 2: 798, 3: world, x: -127, y: 75, z: 798, world: world}"),
-					new ExampleScript("Demonstrates looking above the skyline", "msg(pcursor())",
+					new ExampleScript("Demonstrates finding a non-air block",
+							"msg(pcursor())",
+							"{0: -127, 1: 75, 2: 798, 3: world, x: -127, y: 75, z: 798, world: world}"),
+					new ExampleScript("Demonstrates looking above the skyline",
+							"msg(pcursor())",
 							"(Throws RangeException: No block in sight, or block too far)"),
 					new ExampleScript("Demonstrates getting your target while ignoring torches and bedrock",
-							"msg(pcursor(array(50, 7)))", "{0: -127, 1: 75, 2: 798, 3: world, x: -127, y: 75, z: 798, world: world}"),
+							"msg(pcursor(array(50, 7)))",
+							"{0: -127, 1: 75, 2: 798, 3: world, x: -127, y: 75, z: 798, world: world}"),
 					new ExampleScript("Demonstrates getting Notch's target while ignoring air, water, and lava",
-							"msg(pcursor('Notch', array(0, 8, 9, 10, 11)))", "{0: -127, 1: 75, 2: 798, 3: world, x: -127, y: 75, z: 798, world: world}")
+							"msg(pcursor('Notch', array(0, 8, 9, 10, 11)))",
+							"{0: -127, 1: 75, 2: 798, 3: world, x: -127, y: 75, z: 798, world: world}")
 			};
 		}
 	}
@@ -2174,11 +2179,14 @@ public class PlayerManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Give player Notch nausea for 30 seconds", "set_peffect('Notch', 9, 30)",
+				new ExampleScript("Give player Notch nausea for 30 seconds",
+						"set_peffect('Notch', 9, 30)",
 						"The player will experience a wobbly screen."),
-				new ExampleScript("Make player ArenaPlayer unable to jump for 10 minutes", "set_peffect('ArenaPlayer', 8, -16, 600)",
+				new ExampleScript("Make player ArenaPlayer unable to jump for 10 minutes",
+						"set_peffect('ArenaPlayer', 8, -16, 600)",
 						"From the player's perspective, they will not even leave the ground."),
-				new ExampleScript("Remove poison from yourself", "set_peffect(player(), 19, 1, 0)",
+				new ExampleScript("Remove poison from yourself",
+						"set_peffect(player(), 19, 1, 0)",
 						"You are now unpoisoned. Note, it does not matter what you set strength to here.")
 			};
 		}
@@ -4734,8 +4742,10 @@ public class PlayerManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Demonstrates a player that has played", "pfirst_played('Notch')", ":13558362167593"),
-					new ExampleScript("Demonstrates a player that has not played", "pfirst_played('Herobrine')", ":0")
+					new ExampleScript("Demonstrates a player that has played",
+							"pfirst_played('Notch')", "13558362167593"),
+					new ExampleScript("Demonstrates a player that has not played",
+							"pfirst_played('Herobrine')", "0")
 			};
 		}
 
@@ -4796,8 +4806,10 @@ public class PlayerManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Demonstrates a player that has played", "plast_played('Notch')", ":13558362167593"),
-					new ExampleScript("Demonstrates a player that has not played", "plast_played('Herobrine')", ":0")
+					new ExampleScript("Demonstrates a player that has played",
+							"plast_played('Notch')", "13558362167593"),
+					new ExampleScript("Demonstrates a player that has not played",
+							"plast_played('Herobrine')", "0")
 			};
 		}
 	}

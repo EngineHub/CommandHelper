@@ -4,10 +4,6 @@ import com.laytonsmith.abstraction.entities.MCWitherSkull;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.WitherSkull;
 
-/**
- *
- * @author Veyyn
- */
 public class BukkitMCWitherSkull extends BukkitMCFireball implements MCWitherSkull {
 
 	private final WitherSkull _skull;

@@ -5,8 +5,6 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCItemDespawnEvent extends BindableEvent {
-
-	public MCItem getEntity();
-	
-	public MCLocation getLocation();
+	MCItem getEntity();
+	MCLocation getLocation();
 }

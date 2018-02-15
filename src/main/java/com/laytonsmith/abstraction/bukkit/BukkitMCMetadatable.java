@@ -20,11 +20,9 @@ public class BukkitMCMetadatable implements MCMetadatable {
 	public List<MCMetadataValue> getMetadata(String metadataKey) {
 		List<MetadataValue> lst = _metadatable.getMetadata(metadataKey);
 		List<MCMetadataValue> retn = new ArrayList<>();
-		
 		for(MetadataValue val : lst) {
 			retn.add(new BukkitMCMetadataValue(val));
 		}
-		
 		return retn;
 	}
 
@@ -55,7 +53,7 @@ public class BukkitMCMetadatable implements MCMetadatable {
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof BukkitMCMetadatable?_metadatable.equals(((BukkitMCMetadatable)obj)._metadatable):false);
+		return obj instanceof BukkitMCMetadatable && _metadatable.equals(((BukkitMCMetadatable) obj)._metadatable);
 	}
 
 	@Override

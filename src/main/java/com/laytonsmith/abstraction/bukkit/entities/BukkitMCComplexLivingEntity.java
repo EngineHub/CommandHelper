@@ -10,10 +10,6 @@ import org.bukkit.entity.Entity;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- *
- * @author Hekta
- */
 public class BukkitMCComplexLivingEntity extends BukkitMCLivingEntity implements MCComplexLivingEntity {
 
 	public BukkitMCComplexLivingEntity(Entity complex) {
@@ -28,7 +24,7 @@ public class BukkitMCComplexLivingEntity extends BukkitMCLivingEntity implements
 	@Override
 	public Set<MCComplexEntityPart> getParts() {
 		Set<MCComplexEntityPart> parts = new HashSet<>();
-		for (ComplexEntityPart part : getHandle().getParts()) {
+		for(ComplexEntityPart part : getHandle().getParts()) {
 			parts.add((MCComplexEntityPart) BukkitConvertor.BukkitGetCorrectEntity(part));
 		}
 		return parts;

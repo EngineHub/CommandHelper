@@ -7,10 +7,6 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Villager;
 
-/**
- *
- * @author Hekta
- */
 public class BukkitMCVillager extends BukkitMCAgeable implements MCVillager {
 
 	public BukkitMCVillager(Entity villager) {

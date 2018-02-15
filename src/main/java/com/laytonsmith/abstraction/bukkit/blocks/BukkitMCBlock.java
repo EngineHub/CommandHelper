@@ -33,25 +33,45 @@ import java.util.Collection;
 
 public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
-    Block b;
+	Block b;
 
-    public BukkitMCBlock(Block b){
+	public BukkitMCBlock(Block b){
 		super(b);
-        this.b = b;
-    }
-    
+		this.b = b;
+	}
+
+	public Block __Block() {
+		return b;
+	}
+
 	@Override
-    public int getTypeId(){
-        if(b == null){
-            return 0;
-        }
-        return b.getTypeId();
-    }
-    
+	public String toString() {
+		return b.toString();
+	}
+
 	@Override
-    public byte getData(){
-        return b.getData();
-    }
+	public boolean isNull() {
+		return b == null;
+	}
+
+	@Override
+	public MCMaterial getType() {
+		Material type = b.getType();
+		return type == null ? null : new BukkitMCMaterial(type);
+	}
+
+	@Override
+	public int getTypeId(){
+		if(b == null){
+			return 0;
+		}
+		return b.getTypeId();
+	}
+
+	@Override
+	public byte getData(){
+		return b.getData();
+	}
 
 	@Override
 	public void setType(MCMaterial mat) {
@@ -59,23 +79,18 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	}
 
 	@Override
-    public void setTypeId(int idata) {
-        b.setTypeId(idata);
-    }
+	public void setTypeId(int idata) {
+		b.setTypeId(idata);
+	}
 
 	@Override
-    public void setData(byte imeta) {
-        b.setData(imeta);
-    }
+	public void setData(byte imeta) {
+		b.setData(imeta);
+	}
 
 	@Override
 	public void setTypeAndData(int type, byte data, boolean physics) {
 		b.setTypeIdAndData(type, data, physics);
-	}
-
-	@Override
-	public double getTemperature() {
-		return b.getTemperature();
 	}
 
 	@Override
@@ -88,51 +103,41 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	}
 
 	@Override
-	public MCMaterial getType() {
-		Material type = b.getType();
-		return type == null ? null : new BukkitMCMaterial(type);
+	public MCWorld getWorld() {
+		return new BukkitMCWorld(b.getWorld());
 	}
 
 	@Override
-    public MCWorld getWorld() {
-        return new BukkitMCWorld(b.getWorld());
-    }
+	public int getX() {
+		return b.getX();
+	}
 
 	@Override
-    public int getX() {
-        return b.getX();
-    }
+	public int getY() {
+		return b.getY();
+	}
 
 	@Override
-    public int getY() {
-        return b.getY();
-    }
+	public int getZ() {
+		return b.getZ();
+	}
 
 	@Override
-    public int getZ() {
-        return b.getZ();
-    }
-
-    public Block __Block() {
-        return b;
-    }
-
-	@Override
-    public MCSign getSign() {
-        return new BukkitMCSign((Sign)b.getState());
-    }
+	public MCSign getSign() {
+		return new BukkitMCSign((Sign)b.getState());
+	}
 
 	@Override
 	public boolean isSign() {
 		Material type = b.getType();
 		return (type == Material.SIGN || type == Material.SIGN_POST || type == Material.WALL_SIGN);
 	}
-	
+
 	@Override
 	public MCCommandBlock getCommandBlock() {
 		return new BukkitMCCommandBlock((CommandBlock)b.getState());
 	}
-	
+
 	@Override
 	public boolean isCommandBlock() {
 		return Command.class.isAssignableFrom(b.getType().getData());
@@ -149,19 +154,14 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	}
 
 	@Override
-    public boolean isNull() {
-        return b == null;
-    }
+	public Collection<MCItemStack> getDrops() {
+		Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
+		for(ItemStack is : b.getDrops()){
+			collection.add(new BukkitMCItemStack(is));
+		}
+		return collection;
+	}
 
-	@Override
-    public Collection<MCItemStack> getDrops() {
-        Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
-        for(ItemStack is : b.getDrops()){
-            collection.add(new BukkitMCItemStack(is));
-        }
-        return collection;
-    }
-	
 	@Override
 	public Collection<MCItemStack> getDrops(MCItemStack tool) {
 		Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
@@ -169,11 +169,6 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 			collection.add(new BukkitMCItemStack(is));
 		}
 		return collection;
-	}
-
-	@Override
-	public String toString() {
-		return b.toString();
 	}
 
 	@Override
@@ -207,6 +202,11 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	}
 
 	@Override
+	public double getTemperature() {
+		return b.getTemperature();
+	}
+
+	@Override
 	public int getLightLevel() {
 		return b.getLightLevel();
 	}
@@ -216,12 +216,12 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 		// this is not useful
 		return b.getBlockPower();
 	}
-	
+
 	@Override
 	public boolean isBlockPowered() {
 		return b.isBlockPowered();
 	}
-	
+
 	@Override
 	public boolean isBlockIndirectlyPowered() {
 		return b.isBlockIndirectlyPowered();

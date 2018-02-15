@@ -6,10 +6,6 @@ import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.scoreboard.DisplaySlot;
 
-/**
- * 
- * @author jb_aero
- */
 @abstractionenum(
 		implementation= Implementation.Type.BUKKIT,
 		forAbstractEnum=MCDisplaySlot.class,
@@ -18,9 +14,9 @@ import org.bukkit.scoreboard.DisplaySlot;
 public class BukkitMCDisplaySlot extends EnumConvertor<MCDisplaySlot, DisplaySlot>{
 
 	private static BukkitMCDisplaySlot instance;
-	
+
 	public static BukkitMCDisplaySlot getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new BukkitMCDisplaySlot();
 		}
 		return instance;

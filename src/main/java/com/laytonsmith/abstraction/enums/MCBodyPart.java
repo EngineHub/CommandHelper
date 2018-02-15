@@ -31,7 +31,8 @@ public enum MCBodyPart {
 	WingRight(false);
 
 	private boolean existsForHumanoids;
-	private MCBodyPart(boolean existsForHumanoids) {
+
+	MCBodyPart(boolean existsForHumanoids) {
 		this.existsForHumanoids = existsForHumanoids;
 	}
 
@@ -45,8 +46,8 @@ public enum MCBodyPart {
 
 	public static List<MCBodyPart> humanoidParts() {
 		List<MCBodyPart> bodyPartArrayList = new ArrayList<MCBodyPart>();
-		for (MCBodyPart part : values()) {
-			if (part.isHumanoidPart()) {
+		for(MCBodyPart part : values()) {
+			if(part.isHumanoidPart()) {
 				bodyPartArrayList.add(part);
 			}
 		}

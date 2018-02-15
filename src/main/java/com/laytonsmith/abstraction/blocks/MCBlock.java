@@ -9,80 +9,51 @@ import com.laytonsmith.abstraction.MCWorld;
 
 import java.util.Collection;
 
-/**
- *
- * 
- */
 public interface MCBlock extends MCMetadatable {
+	boolean isNull();
 
-    @Deprecated
-    public int getTypeId();
-
-    public byte getData();
-
-    public void setType(MCMaterial mat);
-
-    @Deprecated
-    public void setTypeId(int idata);
-
-    public void setData(byte imeta);
-
+	MCMaterial getType();
 	@Deprecated
-	public void setTypeAndData(int type, byte data, boolean physics);
+	int getTypeId();
+	byte getData();
+	void setType(MCMaterial mat);
+	@Deprecated
+	void setTypeId(int idata);
+	void setData(byte imeta);
+	@Deprecated
+	void setTypeAndData(int type, byte data, boolean physics);
 
-	public double getTemperature();
+	MCBlockState getState();
 
-    public MCBlockState getState();
+	MCWorld getWorld();
+	int getX();
+	int getY();
+	int getZ();
+	MCLocation getLocation();
 
-    public MCMaterial getType();
+	MCSign getSign();
+	boolean isSign();
+	MCCommandBlock getCommandBlock();
+	boolean isCommandBlock();
+	MCDispenser getDispenser();
+	boolean isDispenser();
 
-    public MCWorld getWorld();
+	boolean isSolid();
+	boolean isFlammable();
+	boolean isTransparent();
+	boolean isOccluding();
+	boolean isBurnable();
 
-    public int getX();
+	Collection<MCItemStack> getDrops();
+	Collection<MCItemStack> getDrops(MCItemStack tool);
 
-    public int getY();
+	double getTemperature();
+	int getLightLevel();
 
-    public int getZ();
+	int getBlockPower();
+	boolean isBlockPowered();
+	boolean isBlockIndirectlyPowered();
 
-	public MCLocation getLocation();
-
-    public MCSign getSign();
-
-    public boolean isSign();
-	
-	public MCCommandBlock getCommandBlock();
-	
-	public boolean isCommandBlock();
-
-	public MCDispenser getDispenser();
-
-	public boolean isDispenser();
-
-    public boolean isNull();
-	
-	public boolean isSolid();
-	
-	public boolean isFlammable();
-	
-	public boolean isTransparent();
-	
-	public boolean isOccluding();
-	
-	public boolean isBurnable();
-
-    public Collection<MCItemStack> getDrops();
-
-	public Collection<MCItemStack> getDrops(MCItemStack tool);
-
-	public int getLightLevel();
-
-	public int getBlockPower();
-	
-	public boolean isBlockPowered();
-	
-	public boolean isBlockIndirectlyPowered();
-
-	public MCBlock getRelative(MCBlockFace face);
-
-	public MCBlockFace getFace(MCBlock get);
+	MCBlock getRelative(MCBlockFace face);
+	MCBlockFace getFace(MCBlock get);
 }

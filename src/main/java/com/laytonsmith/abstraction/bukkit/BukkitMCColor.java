@@ -1,31 +1,21 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCColor;
 import org.bukkit.Color;
 
-/**
- *
- * 
- */
 public class BukkitMCColor implements MCColor {
-	
+
 	private static final BukkitMCColor builder = new BukkitMCColor();
 	public static MCColor GetMCColor(Color c){
 		return builder.build(c.getRed(), c.getGreen(), c.getBlue());
 	}
-	
+
 	public static Color GetColor(MCColor c){
 		return Color.fromRGB(c.getRed(), c.getGreen(), c.getBlue());
 	}
-	
-	private BukkitMCColor(){
-		//
-	}
-	
+
+	private BukkitMCColor(){}
+
 	private int red;
 	private int green;
 	private int blue;
@@ -66,26 +56,22 @@ public class BukkitMCColor implements MCColor {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if(obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if(getClass() != obj.getClass()) {
 			return false;
 		}
 		final BukkitMCColor other = (BukkitMCColor) obj;
-		if (this.red != other.red) {
+		if(this.red != other.red) {
 			return false;
 		}
-		if (this.green != other.green) {
+		if(this.green != other.green) {
 			return false;
 		}
-		if (this.blue != other.blue) {
+		if(this.blue != other.blue) {
 			return false;
 		}
 		return true;
 	}
-	
-	
-
-	
 }

@@ -1,6 +1,20 @@
 
-html {
+html body {
     font-family: Lato,Arial,'Helvetica Neue',Helvetica,sans-serif;
+    color: #333;
+}
+
+table th .abbr {
+    border-bottom: 1px dotted #333;
+}
+
+table td {
+    padding: 0.5em 0.5em;
+    line-height: 1.25em;
+}
+
+table td p {
+    margin: 0 0 0.25em 0;
 }
 
 .pre {

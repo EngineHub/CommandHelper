@@ -1,12 +1,7 @@
-
 package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-/**
- *
- * 
- */
 @MEnum("Tone")
 public enum MCTone {
 	G,
@@ -15,5 +10,5 @@ public enum MCTone {
 	C,
 	D,
 	E,
-	F;
+	F
 }

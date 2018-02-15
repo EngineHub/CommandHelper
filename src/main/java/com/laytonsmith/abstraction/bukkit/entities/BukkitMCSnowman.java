@@ -11,7 +11,7 @@ public class BukkitMCSnowman extends BukkitMCLivingEntity implements MCSnowman {
 	public BukkitMCSnowman(Entity snowman) {
 		super(snowman);
 	}
-	
+
 	public BukkitMCSnowman(AbstractionObject ao) {
 		this((Snowman) ao.getHandle());
 	}

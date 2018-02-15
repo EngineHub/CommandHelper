@@ -18,36 +18,34 @@
         "Exceptions",
         "Events",
         {"Execution_Queue": "Execution Queue"},
-        "Profiler",
         {"Understanding_References": "Understanding References"},
-        "Debugging",
-        "SQL",
         {"Array_Iteration": "Array Iteration"},
-        "Closures"
+        "Closures",
+        "SQL",
+        "Debugging",
+        "Profiler"
     ]},
     {"Select Functions/Classes": [
         "Meta",
-        "WE-WG",
-        "Economy",
         "Regex",
         "IRC"
     ]},
     {"API": [
         {"API.html": "API"},
-        {"Interpreter_Mode": "Interpreter Mode"},
-        {"Event_API": "Event API"},
-        {"Builtin_Object_Info": "Builtin Object Info"}
+        {"Event_API.html": "Event API"},
+        {"Builtin_Object_Info": "Builtin Object Info"},
+        {"Interpreter_Mode": "Interpreter Mode"}
     ]},
     {"Tools": [
+        {"Persistence_Network": "Persistence Network"},
+        {"SyntaxHighlighting": "Syntax Highlighting"},
+        {"Local_Packages": "Local Packages"},
+        {"CommandLineTools": "Command Line Tools"},
         {"Server_Profiler-Debugger": "Profiling/Debugging Server"},
         {"Data_Manager": "Data Manager"},
-        {"Local_Packages": "Local Packages"},
         "Optimizer",
         {"Command_Line_Scripting": "Command Line Scripting"},
-        {"Persistence_Network": "Persistence Network"},
-        "Logging",
-        {"CommandLineTools": "Command Line Tools"},
-        {"SyntaxHighlighting": "Syntax Highlighting"}
+        "Logging"
     ]},
     {"Future/Next Version": [
         {"Next_Version": "Next Version"},

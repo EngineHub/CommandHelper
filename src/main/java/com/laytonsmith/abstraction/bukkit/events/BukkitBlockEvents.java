@@ -38,34 +38,30 @@ import org.bukkit.util.Vector;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * @author EntityReborn
- */
 public class BukkitBlockEvents {
 	
 	// Stub for actual events below.
 	public static class BukkitMCBlockPistonEvent implements MCBlockPistonEvent {
 		BlockPistonEvent event;
 
-        public BukkitMCBlockPistonEvent(BlockPistonEvent e) {
-            event = e;
-        }
+		public BukkitMCBlockPistonEvent(BlockPistonEvent e) {
+			event = e;
+		}
 
 		@Override
-        public Object _GetObject() {
-            return event;
-        }
+		public Object _GetObject() {
+			return event;
+		}
 
 		@Override
-        public MCBlockFace getDirection() {
-            return BukkitMCBlockFace.getConvertor().getAbstractedEnum(event.getDirection());
-        }
+		public MCBlockFace getDirection() {
+			return BukkitMCBlockFace.getConvertor().getAbstractedEnum(event.getDirection());
+		}
 
 		@Override
-        public MCBlock getBlock() {
-            return new BukkitMCBlock(event.getBlock());
-        }
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(event.getBlock());
+		}
 
 		@Override
 		public boolean isSticky() {
@@ -83,8 +79,8 @@ public class BukkitBlockEvents {
 		}
 	}
 
-    @abstraction(type = Implementation.Type.BUKKIT)
-    public static class BukkitMCBlockPistonExtendEvent extends BukkitMCBlockPistonEvent implements MCBlockPistonExtendEvent {
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockPistonExtendEvent extends BukkitMCBlockPistonEvent implements MCBlockPistonExtendEvent {
 		BlockPistonExtendEvent event;
 		
 		public BukkitMCBlockPistonExtendEvent(BlockPistonExtendEvent e) {
@@ -96,16 +92,16 @@ public class BukkitBlockEvents {
 		public List<MCBlock> getPushedBlocks() {
 			List<MCBlock> blocks = new ArrayList<>();
 			
-			for (Block b : event.getBlocks()) {
+			for(Block b : event.getBlocks()) {
 				blocks.add(new BukkitMCBlock(b));
 			}
 			
 			return blocks;
 		}
-    }
+	}
 	
 	@abstraction(type = Implementation.Type.BUKKIT)
-    public static class BukkitMCBlockPistonRetractEvent extends BukkitMCBlockPistonEvent implements MCBlockPistonRetractEvent {
+	public static class BukkitMCBlockPistonRetractEvent extends BukkitMCBlockPistonEvent implements MCBlockPistonRetractEvent {
 		BlockPistonRetractEvent event;
 		
 		public BukkitMCBlockPistonRetractEvent(BlockPistonRetractEvent e) {
@@ -117,33 +113,33 @@ public class BukkitBlockEvents {
 		public MCLocation getRetractedLocation() {
 			return new BukkitMCLocation(event.getRetractLocation());
 		}
-    }
+	}
 	
 	@abstraction(type = Implementation.Type.BUKKIT)
-    public static class BukkitMCBlockBreakEvent implements MCBlockBreakEvent {
+	public static class BukkitMCBlockBreakEvent implements MCBlockBreakEvent {
 
-        BlockBreakEvent event;
-        boolean dropsModified = false;
-        List<MCItemStack> drops = null;
+		BlockBreakEvent event;
+		boolean dropsModified = false;
+		List<MCItemStack> drops = null;
 
-        public BukkitMCBlockBreakEvent(BlockBreakEvent e) {
-            event = e;
-        }
-
-		@Override
-        public Object _GetObject() {
-            return event;
-        }
+		public BukkitMCBlockBreakEvent(BlockBreakEvent e) {
+			event = e;
+		}
 
 		@Override
-        public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(event.getPlayer());
-        }
+		public Object _GetObject() {
+			return event;
+		}
 
 		@Override
-        public MCBlock getBlock() {
-            return new BukkitMCBlock(event.getBlock());
-        }
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(event.getPlayer());
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(event.getBlock());
+		}
 
 		@Override
 		public int getExpToDrop() {
@@ -157,7 +153,7 @@ public class BukkitBlockEvents {
 
 		@Override
 		public List<MCItemStack> getDrops() {
-        	return this.drops;
+			return this.drops;
 		}
 
 		@Override
@@ -168,74 +164,74 @@ public class BukkitBlockEvents {
 
 		@Override
 		public boolean isModified() {
-        	return dropsModified;
+			return dropsModified;
 		}
-    }
-
-    @abstraction(type = Implementation.Type.BUKKIT)
-    public static class BukkitMCBlockPlaceEvent implements MCBlockPlaceEvent {
-
-        BlockPlaceEvent event;
-
-        public BukkitMCBlockPlaceEvent(BlockPlaceEvent e) {
-            event = e;
-        }
-
-		@Override
-        public Object _GetObject() {
-            return event;
-        }
-
-		@Override
-        public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(event.getPlayer());
-        }
-
-		@Override
-        public MCBlock getBlock() {
-            return new BukkitMCBlock(event.getBlock());
-        }
-
-		@Override
-        public MCBlock getBlockAgainst() {
-            return new BukkitMCBlock(event.getBlockAgainst());
-        }
-
-		@Override
-        public MCItemStack getItemInHand() {
-            return new BukkitMCItemStack(event.getItemInHand());
-        }
-
-		@Override
-        public boolean canBuild() {
-            return event.canBuild();
-        }
-
-		@Override
-        public MCBlockState getBlockReplacedState() {
-            return new BukkitMCBlockState(event.getBlockReplacedState());
-        }
-    }
+	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-    public static class BukkitMCBlockBurnEvent implements MCBlockBurnEvent {
+	public static class BukkitMCBlockPlaceEvent implements MCBlockPlaceEvent {
 
-        BlockBurnEvent event;
+		BlockPlaceEvent event;
 
-        public BukkitMCBlockBurnEvent(BlockBurnEvent e) {
-            event = e;
-        }
-
-		@Override
-        public Object _GetObject() {
-            return event;
-        }
+		public BukkitMCBlockPlaceEvent(BlockPlaceEvent e) {
+			event = e;
+		}
 
 		@Override
-        public MCBlock getBlock() {
-            return new BukkitMCBlock(event.getBlock());
-        }
-    }
+		public Object _GetObject() {
+			return event;
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(event.getPlayer());
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(event.getBlock());
+		}
+
+		@Override
+		public MCBlock getBlockAgainst() {
+			return new BukkitMCBlock(event.getBlockAgainst());
+		}
+
+		@Override
+		public MCItemStack getItemInHand() {
+			return new BukkitMCItemStack(event.getItemInHand());
+		}
+
+		@Override
+		public boolean canBuild() {
+			return event.canBuild();
+		}
+
+		@Override
+		public MCBlockState getBlockReplacedState() {
+			return new BukkitMCBlockState(event.getBlockReplacedState());
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockBurnEvent implements MCBlockBurnEvent {
+
+		BlockBurnEvent event;
+
+		public BukkitMCBlockBurnEvent(BlockBurnEvent e) {
+			event = e;
+		}
+
+		@Override
+		public Object _GetObject() {
+			return event;
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(event.getBlock());
+		}
+	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCBlockIgniteEvent extends BukkitMCBlockEvent
@@ -255,7 +251,7 @@ public class BukkitBlockEvents {
 
 		@Override
 		public MCEntity getIgnitingEntity() {
-			if (event.getIgnitingEntity() != null) {
+			if(event.getIgnitingEntity() != null) {
 				return new BukkitMCEntity(event.getIgnitingEntity());
 			}
 
@@ -264,7 +260,7 @@ public class BukkitBlockEvents {
 
 		@Override
 		public MCBlock getIgnitingBlock() {
-			if (event.getIgnitingBlock() != null) {
+			if(event.getIgnitingBlock() != null) {
 				return new BukkitMCBlock(event.getIgnitingBlock());
 			}
 
@@ -273,7 +269,7 @@ public class BukkitBlockEvents {
 
 		@Override
 		public MCPlayer getPlayer() {
-			if (event.getPlayer() != null) {
+			if(event.getPlayer() != null) {
 				return new BukkitMCPlayer(event.getPlayer());
 			}
 
@@ -313,67 +309,67 @@ public class BukkitBlockEvents {
 		public void setCancelled(boolean cancelled) { event.setCancelled(cancelled); }
 	}
 
-    @abstraction(type = Implementation.Type.BUKKIT)
-    public static class BukkitMCSignChangeEvent implements MCSignChangeEvent {
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCSignChangeEvent implements MCSignChangeEvent {
 
-        SignChangeEvent pie;
+		SignChangeEvent pie;
 
-        public BukkitMCSignChangeEvent(SignChangeEvent e) {
-            pie = e;
-        }
+		public BukkitMCSignChangeEvent(SignChangeEvent e) {
+			pie = e;
+		}
 
-        public static BukkitMCSignChangeEvent _instantiate(MCBlock sign, MCPlayer player, CArray signtext) {
-            String[] text = new String[4];
-            for (int i = 0; i < signtext.size(); i++) {
-                text[i] = signtext.get(i, Target.UNKNOWN).toString();
-            }
-            return new BukkitMCSignChangeEvent(new SignChangeEvent(( (BukkitMCBlock) sign ).__Block(), ( (BukkitMCPlayer) player )._Player(),
-                    text));
-        }
-
-		@Override
-        public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(pie.getPlayer());
-        }
+		public static BukkitMCSignChangeEvent _instantiate(MCBlock sign, MCPlayer player, CArray signtext) {
+			String[] text = new String[4];
+			for(int i = 0; i < signtext.size(); i++) {
+				text[i] = signtext.get(i, Target.UNKNOWN).toString();
+			}
+			return new BukkitMCSignChangeEvent(new SignChangeEvent(( (BukkitMCBlock) sign ).__Block(), ( (BukkitMCPlayer) player )._Player(),
+					text));
+		}
 
 		@Override
-        public CString getLine(int index) {
-            return new CString(pie.getLine(index), Target.UNKNOWN);
-        }
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(pie.getPlayer());
+		}
 
 		@Override
-        public CArray getLines() {
-            CArray retn = new CArray(Target.UNKNOWN);
-
-            for (int i = 0; i < 4; i++) {
-                retn.push(new CString(pie.getLine(i), Target.UNKNOWN), Target.UNKNOWN);
-            }
-
-            return retn;
-        }
+		public CString getLine(int index) {
+			return new CString(pie.getLine(index), Target.UNKNOWN);
+		}
 
 		@Override
-        public void setLine(int index, String text) {
-            pie.setLine(index, text);
-        }
+		public CArray getLines() {
+			CArray retn = new CArray(Target.UNKNOWN);
+
+			for(int i = 0; i < 4; i++) {
+				retn.push(new CString(pie.getLine(i), Target.UNKNOWN), Target.UNKNOWN);
+			}
+
+			return retn;
+		}
 
 		@Override
-        public void setLines(String[] text) {
-            for (int i = 0; i < 4; i++) {
-                pie.setLine(i, text[i]);
-            }
-        }
+		public void setLine(int index, String text) {
+			pie.setLine(index, text);
+		}
 
 		@Override
-        public MCBlock getBlock() {
-            return new BukkitMCBlock(pie.getBlock());
-        }
+		public void setLines(String[] text) {
+			for(int i = 0; i < 4; i++) {
+				pie.setLine(i, text[i]);
+			}
+		}
 
 		@Override
-        public Object _GetObject() {
-            return pie;
-        }
-    }
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(pie.getBlock());
+		}
+
+		@Override
+		public Object _GetObject() {
+			return pie;
+		}
+	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCBlockEvent implements MCBlockEvent {
@@ -413,7 +409,7 @@ public class BukkitBlockEvents {
 
 		@Override
 		public void setItem(MCItemStack item) {
-			if (item == null || item.getType().getName() == "AIR") {
+			if(item == null || item.getType().getName() == "AIR") {
 				throw new CREIllegalArgumentException("Due to Bukkit's handling of this event, the item cannot be set to null."
 						+ " Until they change this, workaround by cancelling the event and manipulating the block"
 						+ " using inventory functions.", Target.UNKNOWN);

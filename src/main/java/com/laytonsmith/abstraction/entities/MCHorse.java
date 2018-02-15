@@ -8,40 +8,40 @@ import com.laytonsmith.annotations.MEnum;
 
 public interface MCHorse extends MCTameable, MCVehicle, MCInventoryHolder {
 	@MEnum("HorseVariant")
-	public enum MCHorseVariant {
+	enum MCHorseVariant {
 		HORSE, DONKEY, MULE, SKELETON, ZOMBIE
 	}
 	@MEnum("HorseColor")
-	public enum MCHorseColor {
+	enum MCHorseColor {
 		BLACK, BROWN, CHESTNUT, CREAMY, DARK_BROWN, GRAY, WHITE
 	}
 	@MEnum("HorsePattern")
-	public enum MCHorsePattern {
+	enum MCHorsePattern {
 		NONE, SOCKS, WHITEFIELD, WHITE_DOTS, BLACK_DOTS
 	}
-	
-	public MCHorseVariant getVariant();
-	public MCHorseColor getColor();
-	public MCHorsePattern getPattern();
-	
-	public void setVariant(MCHorseVariant variant);
-	public void setColor(MCHorseColor color);
-	public void setPattern(MCHorsePattern pattern);
-	
-	public double getJumpStrength();
-	public void setJumpStrength(double strength);
-	
-	public boolean hasChest();
-	public void setHasChest(boolean hasChest);
-	
-	public int getDomestication();
-	public int getMaxDomestication();
-	public void setDomestication(int level);
-	public void setMaxDomestication(int level);
-	
+
+	MCHorseVariant getVariant();
+	MCHorseColor getColor();
+	MCHorsePattern getPattern();
+
+	void setVariant(MCHorseVariant variant);
+	void setColor(MCHorseColor color);
+	void setPattern(MCHorsePattern pattern);
+
+	double getJumpStrength();
+	void setJumpStrength(double strength);
+
+	boolean hasChest();
+	void setHasChest(boolean hasChest);
+
+	int getDomestication();
+	int getMaxDomestication();
+	void setDomestication(int level);
+	void setMaxDomestication(int level);
+
 	// Inventory
-	public void setSaddle(MCItemStack stack);
-	public MCItemStack getSaddle();
-	public void setArmor(MCItemStack stack);
-	public MCItemStack getArmor();
+	void setSaddle(MCItemStack stack);
+	MCItemStack getSaddle();
+	void setArmor(MCItemStack stack);
+	MCItemStack getArmor();
 }

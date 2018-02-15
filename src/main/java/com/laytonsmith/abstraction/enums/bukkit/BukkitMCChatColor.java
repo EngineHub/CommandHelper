@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.Implementation;
@@ -7,19 +6,16 @@ import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.ChatColor;
 
-/**
- *
- * 
- */
 @abstractionenum(
 		implementation = Implementation.Type.BUKKIT,
-forAbstractEnum = MCChatColor.class,
-forConcreteEnum = ChatColor.class)
+		forAbstractEnum = MCChatColor.class,
+		forConcreteEnum = ChatColor.class
+)
 public class BukkitMCChatColor extends EnumConvertor<MCChatColor, ChatColor> {
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCChatColor instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCChatColor getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCChatColor();
 		}
 		return instance;
@@ -46,8 +42,4 @@ public class BukkitMCChatColor extends EnumConvertor<MCChatColor, ChatColor> {
 		}
 		return super.getConcreteEnumCustom(abstracted);
 	}
-	
-	
-	
-	
 }

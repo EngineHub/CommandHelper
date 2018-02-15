@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.enums.MCBiomeType;
@@ -11,10 +10,6 @@ import org.bukkit.block.Biome;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
- *
- * 
- */
 public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 
 	public BukkitMCBiomeType(MCVanillaBiomeType vanillaBiomeType, Biome biome) {
@@ -28,12 +23,16 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 
 	@Override
 	public String concreteName() {
-		return getConcrete() == null ? "null" : getConcrete().name();
+		Biome b = getConcrete();
+		if(b == null) {
+			return "null";
+		}
+		return b.name();
 	}
 
 	public static BukkitMCBiomeType valueOfConcrete(Biome test) {
-		for (MCBiomeType t : mappings.values()) {
-			if (((BukkitMCBiomeType) t).getConcrete().equals(test)) {
+		for(MCBiomeType t : mappings.values()) {
+			if(((BukkitMCBiomeType) t).getConcrete().equals(test)) {
 				return (BukkitMCBiomeType) t;
 			}
 		}
@@ -54,10 +53,10 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 		mappings = new HashMap<>();
 		NULL = new BukkitMCBiomeType(MCVanillaBiomeType.UNKNOWN, null);
 		ArrayList<Biome> counted = new ArrayList<>();
-		for (MCVanillaBiomeType v : MCVanillaBiomeType.values()) {
-			if (v.existsInCurrent()) {
+		for(MCVanillaBiomeType v : MCVanillaBiomeType.values()) {
+			if(v.existsInCurrent()) {
 				Biome type = getBukkitType(v);
-				if (type == null) {
+				if(type == null) {
 					CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not find a matching biome type for " + v.name()
 							+ ". This is an error, please report this to the bug tracker.", Target.UNKNOWN);
 					continue;
@@ -68,8 +67,8 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 				counted.add(type);
 			}
 		}
-		for (Biome b : Biome.values()) {
-			if (!counted.contains(b)) {
+		for(Biome b : Biome.values()) {
+			if(!counted.contains(b)) {
 				mappings.put(b.name(), new BukkitMCBiomeType(MCVanillaBiomeType.UNKNOWN, b));
 			}
 		}

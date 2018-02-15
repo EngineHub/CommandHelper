@@ -5,7 +5,6 @@ import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCGamemodeChangeEvent extends BindableEvent {
-
-	public MCPlayer getPlayer();
-	public MCGameMode getNewGameMode();
+	MCPlayer getPlayer();
+	MCGameMode getNewGameMode();
 }

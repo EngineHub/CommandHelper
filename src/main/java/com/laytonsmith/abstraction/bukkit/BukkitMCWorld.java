@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
@@ -11,7 +9,6 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLightningStrike;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldBorder;
@@ -35,7 +32,6 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOcelotType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSkeletonType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSoundCategory;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTreeType;
@@ -65,12 +61,12 @@ import java.util.List;
 
 public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
-    World w;
+	World w;
 
-    public BukkitMCWorld(World w) {
+	public BukkitMCWorld(World w) {
 		super(w);
-        this.w = w;
-    }
+		this.w = w;
+	}
 
 	@Override
 	public boolean equals(Object o) {
@@ -87,28 +83,28 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 		return this.w.toString();
 	}
 
-    public BukkitMCWorld(AbstractionObject a){
-        this((World)null);
-        if(a instanceof MCWorld){
-            this.w = ((World)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
-    }
+	public BukkitMCWorld(AbstractionObject a){
+		this((World)null);
+		if(a instanceof MCWorld){
+			this.w = ((World)a.getHandle());
+		} else {
+			throw new ClassCastException();
+		}
+	}
 
 	@Override
-    public World getHandle(){
-        return w;
-    }
+	public World getHandle(){
+		return w;
+	}
 
-    public World __World() {
-        return w;
-    }
+	public World __World() {
+		return w;
+	}
 
 	@Override
 	public List<MCPlayer> getPlayers() {
 		List<MCPlayer> list = new ArrayList<>();
-		for (Player p : w.getPlayers()) {
+		for(Player p : w.getPlayers()) {
 			list.add(new BukkitMCPlayer(p));
 		}
 		return list;
@@ -117,7 +113,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public List<MCEntity> getEntities() {
 		List<MCEntity> list = new ArrayList<>();
-		for (Entity e : w.getEntities()) {
+		for(Entity e : w.getEntities()) {
 			list.add(new BukkitMCEntity(e));
 		}
 		return list;
@@ -126,16 +122,16 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public List<MCLivingEntity> getLivingEntities() {
 		List<MCLivingEntity> list = new ArrayList<>();
-		for (LivingEntity e : w.getLivingEntities()) {
+		for(LivingEntity e : w.getLivingEntities()) {
 			list.add(new BukkitMCLivingEntity(e));
 		}
 		return list;
 	}
 
 	@Override
-    public String getName() {
-        return w.getName();
-    }
+	public String getName() {
+		return w.getName();
+	}
 
 	@Override
 	public long getSeed() {
@@ -164,7 +160,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public String[] getGameRules() {
-    	return w.getGameRules();
+		return w.getGameRules();
 	}
 
 	@Override
@@ -217,9 +213,9 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-    public MCEntity spawn(MCLocation l, Class mobType) {
-        return BukkitConvertor.BukkitGetCorrectEntity(w.spawn(((BukkitMCLocation) l).l, mobType));
-    }
+	public MCEntity spawn(MCLocation l, Class mobType) {
+		return BukkitConvertor.BukkitGetCorrectEntity(w.spawn(((BukkitMCLocation) l).l, mobType));
+	}
 
 	@Override
 	public MCEntity spawn(MCLocation l, MCEntityType entType) {
@@ -272,7 +268,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 			w.playSound((Location) l.getHandle(), sound, volume, pitch);
 		} catch(NoSuchMethodError ex) {
 			// probably prior to 1.9, so send to all players in world
-			for (Player p : w.getPlayers()) {
+			for(Player p : w.getPlayers()) {
 				p.playSound(((BukkitMCLocation) l).asLocation(), sound, volume, pitch);
 			}
 		}
@@ -301,14 +297,14 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-    public MCItem dropItemNaturally(MCLocation l, MCItemStack is) {
-        return new BukkitMCItem(w.dropItemNaturally(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));
-    }
+	public MCItem dropItemNaturally(MCLocation l, MCItemStack is) {
+		return new BukkitMCItem(w.dropItemNaturally(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));
+	}
 
 	@Override
-    public MCItem dropItem(MCLocation l, MCItemStack is) {
-        return new BukkitMCItem(w.dropItem(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));
-    }
+	public MCItem dropItem(MCLocation l, MCItemStack is) {
+		return new BukkitMCItem(w.dropItem(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is));
+	}
 
 	@Override
 	public MCLightningStrike strikeLightning(MCLocation GetLocation) {
@@ -323,48 +319,49 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-    public void setStorm(boolean b) {
-        w.setStorm(b);
-    }
+	public void setStorm(boolean b) {
+		w.setStorm(b);
+	}
 
 	@Override
-    public MCLocation getSpawnLocation() {
-        return new BukkitMCLocation(w.getSpawnLocation());
-    }
+	public MCLocation getSpawnLocation() {
+		return new BukkitMCLocation(w.getSpawnLocation());
+	}
 
 	@Override
-    public void refreshChunk(int x, int z) {
-        w.refreshChunk(x, z);
-    }
+	public void refreshChunk(int x, int z) {
+		// deprecated in 1.8 due to inconsistency
+		w.refreshChunk(x, z);
+	}
 
 	@Override
 	public void loadChunk(int x, int z) {
- 		w.loadChunk(x, z);
- 	}
+		w.loadChunk(x, z);
+	}
 
 	@Override
- 	public void unloadChunk(int x, int z) {
- 		w.unloadChunk(x, z);
- 	}
+	public void unloadChunk(int x, int z) {
+		w.unloadChunk(x, z);
+	}
 
 
 	@Override
-    public void setTime(long time) {
-        w.setTime(time);
-    }
+	public void setTime(long time) {
+		w.setTime(time);
+	}
 
 	@Override
-    public long getTime() {
-        return w.getTime();
-    }
+	public long getTime() {
+		return w.getTime();
+	}
 
 	@Override
-    public MCBiomeType getBiome(int x, int z) {
+	public MCBiomeType getBiome(int x, int z) {
 		return BukkitMCBiomeType.valueOfConcrete(w.getBiome(x, z));
 	}
 
 	@Override
-    public void setBiome(int x, int z, MCBiomeType type) {
+	public void setBiome(int x, int z, MCBiomeType type) {
 		w.setBiome(x, z, ((BukkitMCBiomeType) type).getConcrete());
 	}
 
@@ -380,14 +377,14 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-    public void explosion(double x, double y, double z, float size, boolean safe) {
-        w.createExplosion(x, y, z, size, !safe, !safe);
-    }
+	public void explosion(double x, double y, double z, float size, boolean safe) {
+		w.createExplosion(x, y, z, size, !safe, !safe);
+	}
 
 	@Override
-    public void setSpawnLocation(int x, int y, int z) {
-        w.setSpawnLocation(x, y, z);
-    }
+	public void setSpawnLocation(int x, int y, int z) {
+		w.setSpawnLocation(x, y, z);
+	}
 
 	@Override
 	public CArray spawnMob(MCMobs name, String subClass, int qty, MCLocation l, Target t) {
@@ -443,7 +440,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 				case HORSE:
 					mobType = Horse.class;
 					if(!(subClass.equals("")) && version.gte(MCVersion.MC1_11)){
-						for (String type : subTypes) {
+						for(String type : subTypes) {
 							try {
 								MCHorse.MCHorseVariant htype = MCHorse.MCHorseVariant.valueOf(type);
 								switch(htype) {
@@ -514,7 +511,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					mobType = Skeleton.class;
 					if(!(subClass.equals("")) && version.gte(MCVersion.MC1_11)){
 						MCSkeletonType stype = MCSkeletonType.NORMAL;
-						for (String type : subTypes) {
+						for(String type : subTypes) {
 							try {
 								stype = MCSkeletonType.valueOf(type);
 							} catch (IllegalArgumentException ex){
@@ -564,7 +561,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					break;
 				case ZOMBIE:
 					mobType = Zombie.class;
-					if(!(subClass.equals("")) && version.gte(MCVersion.MC1_11)){
+					if(!subClass.equals("") && version.gte(MCVersion.MC1_11)){
 						for(int i = 0; i < subTypes.length; i++){
 							try {
 								MCZombieType ztype = MCZombieType.valueOf(subTypes[i]);
@@ -600,16 +597,16 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 		} catch (NoClassDefFoundError e) {
 			throw new CREFormatException("No mob of type " + name + " exists", t);
 		}
-		for (int i = 0; i < qty; i++) {
+		for(int i = 0; i < qty; i++) {
 			Entity e = w.spawn(location, mobType);
-			if (name == MCMobs.SPIDERJOCKEY) {
+			if(name == MCMobs.SPIDERJOCKEY) {
 				e.setPassenger(w.spawn(location, Skeleton.class));
 			}
-			if (!subClass.equals("")) { //if subClass is blank, none of this needs to run at all
+			if(!subClass.equals("")) { //if subClass is blank, none of this needs to run at all
 				if(e instanceof Sheep){
 					Sheep s = (Sheep) e;
-					MCDyeColor color = MCDyeColor.WHITE;
-					for (String type : subTypes) {
+					MCDyeColor color;
+					for(String type : subTypes) {
 						try {
 							color = MCDyeColor.valueOf(type);
 							s.setColor(BukkitMCDyeColor.getConvertor().getConcreteEnum(color));
@@ -619,8 +616,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					}
 				} else if(e instanceof Ocelot){
 					Ocelot o = (Ocelot) e;
-					MCOcelotType otype = MCOcelotType.WILD_OCELOT;
-					for (String type : subTypes) {
+					MCOcelotType otype;
+					for(String type : subTypes) {
 						try {
 							otype = MCOcelotType.valueOf(type);
 							o.setCatType(BukkitMCOcelotType.getConvertor().getConcreteEnum(otype));
@@ -630,7 +627,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					}
 				} else if(e instanceof Creeper){
 					Creeper c = (Creeper) e;
-					for (String type : subTypes) {
+					for(String type : subTypes) {
 						try {
 							MCCreeperType ctype = MCCreeperType.valueOf(type);
 							switch (ctype) {
@@ -646,7 +643,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					}
 				} else if(e instanceof Wolf){
 					Wolf w = (Wolf) e;
-					for (String type : subTypes) {
+					for(String type : subTypes) {
 						try {
 							MCWolfType wtype = MCWolfType.valueOf(type);
 							switch (wtype) {
@@ -665,8 +662,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					}
 				} else if(e instanceof Villager){
 					Villager v = (Villager) e;
-					MCProfession job = MCProfession.FARMER;
-					for (String type : subTypes){
+					MCProfession job;
+					for(String type : subTypes){
 						try {
 							job = MCProfession.valueOf(type);
 							v.setProfession(BukkitMCProfession.getConvertor().getConcreteEnum(job));
@@ -676,7 +673,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					}
 				} else if(e instanceof Enderman){
 					Enderman en = (Enderman) e;
-					for (String type : subTypes){
+					for(String type : subTypes){
 						try {
 							MaterialData held = new MaterialData(Material.valueOf(type));
 							en.setCarriedMaterial(held);
@@ -686,7 +683,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					}
 				} else if(e instanceof Slime){
 					Slime sl = (Slime) e;
-					for (String type : subTypes) {
+					for(String type : subTypes) {
 						if(!"".equals(type)){
 							try{
 								sl.setSize(Integer.parseInt(type));
@@ -697,19 +694,17 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					}
 				} else if(e instanceof Skeleton){
 					Skeleton sk = (Skeleton) e;
-					MCSkeletonType stype = MCSkeletonType.NORMAL;
-					for (String type : subTypes) {
+					for(String type : subTypes) {
 						try {
-							stype = MCSkeletonType.valueOf(type);
-							sk.setSkeletonType(BukkitMCSkeletonType.getConvertor().getConcreteEnum(stype));
+							sk.setSkeletonType(Skeleton.SkeletonType.valueOf(type));
 						} catch (IllegalArgumentException ex){
 							throw new CREFormatException(type + " is not a skeleton type", t);
 						}
 					}
 				} else if(e instanceof Zombie){
-					if (e instanceof PigZombie) {
+					if(e instanceof PigZombie) {
 						PigZombie pz = (PigZombie) e;
-						for (String value : subTypes) {
+						for(String value : subTypes) {
 							if(value.equals("BABY")) {
 								pz.setBaby(true);
 								continue;
@@ -722,7 +717,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 						}
 					} else if(version.gte(MCVersion.MC1_11) && e instanceof ZombieVillager) {
 						ZombieVillager zv = (ZombieVillager) e;
-						for (String type : subTypes){
+						for(String type : subTypes){
 							if(type.equals("BABY")) {
 								zv.setBaby(true);
 								continue;
@@ -736,7 +731,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 						}
 					} else {
 						Zombie z = (Zombie) e;
-						for (String type : subTypes) {
+						for(String type : subTypes) {
 							try {
 								MCZombieType ztype = MCZombieType.valueOf(type);
 								switch (ztype) {
@@ -747,35 +742,17 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 										z.setVillager(true);
 										break;
 									case VILLAGER_BLACKSMITH:
-										if (version.gte(MCVersion.MC1_9)) {
-											z.setVillagerProfession(Villager.Profession.BLACKSMITH);
-										} else {
-											z.setVillager(true);
-										}
-										break;
 									case VILLAGER_BUTCHER:
-										if (version.gte(MCVersion.MC1_9)) {
-											z.setVillagerProfession(Villager.Profession.BUTCHER);
-										} else {
-											z.setVillager(true);
-										}
-										break;
 									case VILLAGER_LIBRARIAN:
-										if (version.gte(MCVersion.MC1_9)) {
-											z.setVillagerProfession(Villager.Profession.LIBRARIAN);
-										} else {
-											z.setVillager(true);
-										}
-										break;
 									case VILLAGER_PRIEST:
-										if (version.gte(MCVersion.MC1_9)) {
-											z.setVillagerProfession(Villager.Profession.PRIEST);
+										if(version.gte(MCVersion.MC1_9)) { // < MC 1.11
+											z.setVillagerProfession(Villager.Profession.valueOf(type.substring(9).toUpperCase()));
 										} else {
 											z.setVillager(true);
 										}
 										break;
 									case HUSK:
-										if (version.gt(MCVersion.MC1_9_X) && version.lt(MCVersion.MC1_11)) {
+										if(version.gte(MCVersion.MC1_10)) { // < MC 1.11
 											z.setVillagerProfession(Villager.Profession.HUSK);
 										}
 										break;
@@ -787,7 +764,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					}
 				} else if(e instanceof Pig){
 					Pig p = (Pig) e;
-					for (String type : subTypes) {
+					for(String type : subTypes) {
 						try {
 							MCPigType ptype = MCPigType.valueOf(type);
 							switch (ptype) {
@@ -803,7 +780,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					}
 				} else if(e instanceof Horse) {
 					Horse h = (Horse) e;
-					for (String type : subTypes) {
+					for(String type : subTypes) {
 						if(version.lt(MCVersion.MC1_11)){
 							try {
 								MCHorse.MCHorseVariant htype = MCHorse.MCHorseVariant.valueOf(type);
@@ -832,8 +809,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 			}
 			ids.push(new CString(e.getUniqueId().toString(), t), t);
 		}
-        return ids;
-    }
+		return ids;
+	}
 
 	@Override
 	public boolean exists() {
@@ -888,7 +865,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	public MCChunk[] getLoadedChunks() {
 		Chunk[] chunks = w.getLoadedChunks();
 		MCChunk[] MCChunks = new MCChunk[chunks.length];
-		for (int i = 0; i < chunks.length; i++) {
+		for(int i = 0; i < chunks.length; i++) {
 			MCChunks[i] = new BukkitMCChunk(chunks[i]);
 		}
 		return MCChunks;

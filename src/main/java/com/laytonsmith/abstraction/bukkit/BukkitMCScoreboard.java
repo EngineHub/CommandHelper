@@ -36,7 +36,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	@Override
 	public MCObjective getObjective(MCDisplaySlot slot) {
 		Objective o = s.getObjective(BukkitMCDisplaySlot.getConvertor().getConcreteEnum(slot));
-		if (o == null) {
+		if(o == null) {
 			return null;
 		}
 		return new BukkitMCObjective(o);
@@ -45,7 +45,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	@Override
 	public MCObjective getObjective(String name) {
 		Objective o = s.getObjective(name);
-		if (o == null) {
+		if(o == null) {
 			return null;
 		}
 		return new BukkitMCObjective(o);
@@ -53,8 +53,8 @@ public class BukkitMCScoreboard implements MCScoreboard {
 
 	@Override
 	public Set<MCObjective> getObjectives() {
-		Set<MCObjective> ret = new HashSet<MCObjective>();
-		for (Objective o : s.getObjectives()) {
+		Set<MCObjective> ret = new HashSet<>();
+		for(Objective o : s.getObjectives()) {
 			ret.add(new BukkitMCObjective(o));
 		}
 		return ret;
@@ -62,8 +62,8 @@ public class BukkitMCScoreboard implements MCScoreboard {
 
 	@Override
 	public Set<MCObjective> getObjectivesByCriteria(String criteria) {
-		Set<MCObjective> ret = new HashSet<MCObjective>();
-		for (Objective o : s.getObjectivesByCriteria(criteria)) {
+		Set<MCObjective> ret = new HashSet<>();
+		for(Objective o : s.getObjectivesByCriteria(criteria)) {
 			ret.add(new BukkitMCObjective(o));
 		}
 		return ret;
@@ -86,7 +86,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 			// Probably 1.8.6 or prior
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			Object t = ReflectionUtils.invokeMethod(s, "getPlayerTeam", player);
-			if (t == null) {
+			if(t == null) {
 				return null;
 			}
 			return new BukkitMCTeam((Team) t);
@@ -96,7 +96,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	@Override
 	public Set<MCScore> getScores(String entry) {
 		Set<MCScore> ret = new HashSet<>();
-		for (Score o : s.getScores(entry)) {
+		for(Score o : s.getScores(entry)) {
 			ret.add(new BukkitMCScore(o));
 		}
 		return ret;
@@ -114,7 +114,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 	@Override
 	public Set<MCTeam> getTeams() {
 		Set<MCTeam> ret = new HashSet<>();
-		for (Team t : s.getTeams()) {
+		for(Team t : s.getTeams()) {
 			ret.add(new BukkitMCTeam(t));
 		}
 		return ret;
@@ -137,10 +137,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof MCScoreboard) {
-			return s.equals(((BukkitMCScoreboard) obj).s);
-		}
-		return false;
+		return obj instanceof MCScoreboard && s.equals(((BukkitMCScoreboard) obj).s);
 	}
 
 	@Override

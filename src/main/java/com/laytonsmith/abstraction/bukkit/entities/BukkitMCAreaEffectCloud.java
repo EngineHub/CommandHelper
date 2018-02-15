@@ -46,7 +46,7 @@ public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEff
 	@Override
 	public List<MCLivingEntity.MCEffect> getCustomEffects(){
 		List<MCLivingEntity.MCEffect> list = new ArrayList<>();
-		for (PotionEffect pe : aec.getCustomEffects()) {
+		for(PotionEffect pe : aec.getCustomEffects()) {
 			list.add(new MCLivingEntity.MCEffect(pe.getType().getId(), pe.getAmplifier(),
 					pe.getDuration(), pe.isAmbient(), pe.hasParticles()));
 		}
@@ -91,7 +91,7 @@ public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEff
 	@Override
 	public MCProjectileSource getSource() {
 		ProjectileSource source = aec.getSource();
-		if (source instanceof BlockProjectileSource) {
+		if(source instanceof BlockProjectileSource) {
 			return new BukkitMCBlockProjectileSource((BlockProjectileSource) source);
 		}
 		return (MCProjectileSource) BukkitConvertor.BukkitGetCorrectEntity((Entity) source);

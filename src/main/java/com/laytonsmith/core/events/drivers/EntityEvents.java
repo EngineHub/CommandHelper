@@ -14,6 +14,7 @@ import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityType;
@@ -1069,7 +1070,7 @@ public class EntityEvents {
 
 		@Override
         public String docs() {
-            return "{player: <macro match> | item: <item match>} "
+            return "{player: <macro> | item: <item match>} "
                     + "This event is called when a player drops an item. "
                     + "{player: The player | item: An item array representing "
                     + "the item being dropped. } "
@@ -1148,7 +1149,7 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro match> | item: <item match>} "
+			return "{player: <macro> | item: <item match>} "
 				+ "This event is called when a player picks up an item."
 				+ "{player: The player | item: An item array representing "
 				+ "the item being picked up | "
@@ -1234,7 +1235,7 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{id: <macro match> The entityID | damager: <macro match>} "
+			return "{id: <macro> The entityID | damager: <macro>} "
 					+ "This event is called when a player is damaged by another entity."
 					+ "{player: The player being damaged | damager: The type of entity causing damage"
 					+ " | amount: raw amount of damage caused | finalamount: health player will lose after modifiers"
@@ -1429,21 +1430,30 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> the type of entity | block: <math match> the blockID of the portal"
+			return "{type: <macro> the type of entity | block: <math match> (deprecated) the block numeric id of the portal"
+					+ " | portaltype: <string match> The type of portal (PORTAL or END_PORTAL)"
 					+ " world: <macro> the world in which the portal was entered }"
 					+ " Fires when an entity touches a portal block."
-					+ " {id: the entityID of the entity | location: the location of the block touched | type | block}"
+					+ " {id: the entityID of the entity | location: the location of the block touched | type"
+					+ " | block (deprecated) | portaltype }"
 					+ " {}"
 					+ " {}";
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
-				throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if (e instanceof MCEntityEnterPortalEvent) {
 				MCEntityEnterPortalEvent event = (MCEntityEnterPortalEvent) e;
 				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "block", event.getLocation().getBlock().getTypeId(), PrefilterType.MATH_MATCH);
+				if(prefilter.containsKey("portaltype")) {
+					MCMaterial mat = event.getLocation().getBlock().getType();
+					if(!prefilter.get("portaltype").val().equals(mat.getName())) {
+						return false;
+					}
+				} else if(prefilter.containsKey("block")) {
+					int type = event.getLocation().getBlock().getTypeId();
+					Prefilters.match(prefilter, "block", type, PrefilterType.MATH_MATCH);
+				}
 				Prefilters.match(prefilter, "world", event.getLocation().getWorld().getName(), PrefilterType.MACRO);
 				return true;
 			}
@@ -1456,16 +1466,17 @@ public class EntityEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e)
-				throws EventException {
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			if (e instanceof MCEntityEnterPortalEvent) {
 				MCEntityEnterPortalEvent event = (MCEntityEnterPortalEvent) e;
+				MCMaterial mat = event.getLocation().getBlock().getType();
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(event);
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
 				ret.put("type", new CString(event.getEntity().getType().name(), t));
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
-				ret.put("block", new CInt(event.getLocation().getBlock().getTypeId(), t));
+				ret.put("portaltype", new CString(mat.getName(), t));
+				ret.put("block", new CInt(mat.getType(), t));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCPortalEnterEvent");
@@ -1473,8 +1484,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			return false;
 		}
 
@@ -1546,8 +1556,7 @@ public class EntityEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			return false;
 		}
 
@@ -1572,11 +1581,12 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <string match> the entity type | block: <item match> The block id }"
+			return "{type: <string match> the entity type"
+					+ " | blockname: <string match> The block name the entity is interacting with."
+					+ " | block: <item match> (deprecated) The numeric block id }"
 					+ " Fires when a non-player entity physically interacts with and triggers a block."
 					+ " (eg. pressure plates, redstone ore, farmland, tripwire, and wooden button)"
-					+ " {entity: the ID of the entity that interacted with the block"
-					+ " | block: the block ID with which the entity interacted "
+					+ " {entity: the ID of the entity that interacted with the block | blockname | block (deprecated)"
 					+ " | location: the location of the interaction}"
 					+ " {}"
 					+ " {}";
@@ -1586,8 +1596,10 @@ public class EntityEvents {
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if (e instanceof MCEntityInteractEvent) {
 				MCEntityInteractEvent event = (MCEntityInteractEvent) e;
+				MCMaterial mat = event.getBlock().getType();
 				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.STRING_MATCH);
-				Prefilters.match(prefilter, "block", event.getBlock().getTypeId(), PrefilterType.ITEM_MATCH);
+				Prefilters.match(prefilter, "blockname", mat.getName(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "block", mat.getType(), PrefilterType.ITEM_MATCH);
 				return true;
 			}
 			return false;
@@ -1602,10 +1614,12 @@ public class EntityEvents {
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			if (e instanceof MCEntityInteractEvent) {
 				MCEntityInteractEvent event = (MCEntityInteractEvent) e;
+				MCMaterial mat = event.getBlock().getType();
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(event);
 				ret.put("entity", new CString(event.getEntity().getUniqueId().toString(), t));
-				ret.put("block", new CInt(event.getBlock().getTypeId(), t));
+				ret.put("blockname", new CString(mat.getName(), t));
+				ret.put("block", new CInt(mat.getType(), t));
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 				return ret;
 			} else {

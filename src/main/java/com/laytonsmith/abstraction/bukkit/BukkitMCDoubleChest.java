@@ -1,16 +1,11 @@
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-/**
- *
- * 
- */
 public class BukkitMCDoubleChest extends BukkitMCInventory {
-	
+
 	Inventory left;
 	Inventory right;
 	public BukkitMCDoubleChest(Inventory left, Inventory right){
@@ -35,32 +30,32 @@ public class BukkitMCDoubleChest extends BukkitMCInventory {
 
 	@Override
 	public void setItem(int slot, MCItemStack stack) {
-		ItemStack is = (ItemStack)((BukkitMCItemStack)stack).getHandle();
+		ItemStack is = (ItemStack) stack.getHandle();
 		if(slot < left.getSize()){
 			left.setItem(slot, is);
 		} else {
 			right.setItem(slot - left.getSize(), is);
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		return left.toString() + ":" + right.toString();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if(obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if(getClass() != obj.getClass()) {
 			return false;
 		}
 		final BukkitMCDoubleChest other = (BukkitMCDoubleChest) obj;
-		if (this.left != other.left && (this.left == null || !this.left.equals(other.left))) {
+		if(this.left != other.left && (this.left == null || !this.left.equals(other.left))) {
 			return false;
 		}
-		if (this.right != other.right && (this.right == null || !this.right.equals(other.right))) {
+		if(this.right != other.right && (this.right == null || !this.right.equals(other.right))) {
 			return false;
 		}
 		return true;
@@ -73,5 +68,4 @@ public class BukkitMCDoubleChest extends BukkitMCInventory {
 		hash = 59 * hash + (this.right != null ? this.right.hashCode() : 0);
 		return hash;
 	}
-	
 }

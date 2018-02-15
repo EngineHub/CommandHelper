@@ -54,14 +54,14 @@ public enum MCVersion implements Version {
 
 	public static MCVersion match(String[] source) {
 		String[] parts = new String[Math.min(3, source.length)];
-		for (int i = 0; i < parts.length; i++) {
+		for(int i = 0; i < parts.length; i++) {
 			parts[i] = source[i];
 		}
 		String attempt = "MC" + StringUtils.Join(parts, "_");
 		try {
 			return valueOf(attempt);
 		} catch (IllegalArgumentException iae) {
-			if (parts.length == 3) {
+			if(parts.length == 3) {
 				parts[2] = "0".equals(parts[2]) ? null : "X";
 				attempt = "MC" + StringUtils.Join(parts[2] == null ? new String[]{parts[0], parts[1]} : parts, "_");
 				try {
@@ -76,7 +76,7 @@ public enum MCVersion implements Version {
 					}
 				}
 			}
-			if (parts.length == 2) {
+			if(parts.length == 2) {
 				parts[1] = "X";
 				attempt = "MC" + StringUtils.Join(parts, "_");
 				try {
@@ -92,7 +92,7 @@ public enum MCVersion implements Version {
 	@Override
 	public int getMajor() {
 		String form = name().split("_")[0].substring(2);
-		if ("X".equals(form)) {
+		if("X".equals(form)) {
 			return -1;
 		}
 		return Integer.valueOf(form);
@@ -101,7 +101,7 @@ public enum MCVersion implements Version {
 	@Override
 	public int getMinor() {
 		String form = name().split("_")[1];
-		if ("X".equals(form)) {
+		if("X".equals(form)) {
 			return -1;
 		}
 		return Integer.valueOf(form);
@@ -110,13 +110,13 @@ public enum MCVersion implements Version {
 	@Override
 	public int getSupplemental() {
 		String[] parts = name().split("_");
-		if (parts.length > 2) {
-			if ("X".equals(parts[2])) {
+		if(parts.length > 2) {
+			if("X".equals(parts[2])) {
 				return -1;
 			}
 			return Integer.valueOf(parts[2]);
 		}
-		if (getMinor() == -1) {
+		if(getMinor() == -1) {
 			return -1;
 		}
 		return Integer.valueOf(parts[2]);
@@ -124,33 +124,21 @@ public enum MCVersion implements Version {
 
 	@Override
 	public boolean lt(Version other) {
-		if (other instanceof MCVersion) {
-			return this.ordinal() < ((MCVersion) other).ordinal();
-		}
-		return false;
+		return other instanceof MCVersion && this.ordinal() < ((MCVersion) other).ordinal();
 	}
 
 	@Override
 	public boolean lte(Version other) {
-		if (other instanceof MCVersion) {
-			return !(this.ordinal() > ((MCVersion) other).ordinal());
-		}
-		return false;
+		return other instanceof MCVersion && !(this.ordinal() > ((MCVersion) other).ordinal());
 	}
 
 	@Override
 	public boolean gt(Version other) {
-		if (other instanceof MCVersion) {
-			return this.ordinal() > ((MCVersion) other).ordinal();
-		}
-		return false;
+		return other instanceof MCVersion && this.ordinal() > ((MCVersion) other).ordinal();
 	}
 
 	@Override
 	public boolean gte(Version other) {
-		if (other instanceof MCVersion) {
-			return !(this.ordinal() < ((MCVersion) other).ordinal());
-		}
-		return false;
+		return other instanceof MCVersion && !(this.ordinal() < ((MCVersion) other).ordinal());
 	}
 }

@@ -39,7 +39,7 @@ public enum CHVersion implements Version {
 		LATEST = latest;
 	}
 
-	private CHVersion(String version) {
+	CHVersion(String version) {
 		this.version = new SimpleVersion(version);
 	}
 

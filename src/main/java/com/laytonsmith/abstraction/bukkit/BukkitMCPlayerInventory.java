@@ -1,35 +1,26 @@
-
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayerInventory;
-import com.laytonsmith.abstraction.enums.MCVersion;
-import com.laytonsmith.core.Static;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 
-/**
- *
- * 
- */
 public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlayerInventory {
 
-    private PlayerInventory i;
-    public BukkitMCPlayerInventory(PlayerInventory inventory) {
+	private PlayerInventory i;
+	public BukkitMCPlayerInventory(PlayerInventory inventory) {
 		super(inventory);
-        this.i = inventory;
-    }
-    
-    public BukkitMCPlayerInventory(AbstractionObject a){
-        this((PlayerInventory)null);
-        if(a instanceof MCPlayerInventory){
-            this.i = ((PlayerInventory)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
-    }
+		this.i = inventory;
+	}
+
+	public BukkitMCPlayerInventory(AbstractionObject a){
+		this((PlayerInventory)null);
+		if(a instanceof MCPlayerInventory){
+			this.i = ((PlayerInventory)a.getHandle());
+		} else {
+			throw new ClassCastException();
+		}
+	}
 
 	@Override
 	public void setHelmet(MCItemStack stack) {
@@ -61,35 +52,35 @@ public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlay
 	}
 
 	@Override
-    public MCItemStack getHelmet() {
-        return new BukkitMCItemStack(this.i.getHelmet());
-    }
+	public MCItemStack getHelmet() {
+		return new BukkitMCItemStack(this.i.getHelmet());
+	}
 
 	@Override
-    public MCItemStack getChestplate() {
-        return new BukkitMCItemStack(this.i.getChestplate());
-    }
+	public MCItemStack getChestplate() {
+		return new BukkitMCItemStack(this.i.getChestplate());
+	}
 
 	@Override
-    public MCItemStack getLeggings() {
-        return new BukkitMCItemStack(this.i.getLeggings());
-    }
+	public MCItemStack getLeggings() {
+		return new BukkitMCItemStack(this.i.getLeggings());
+	}
 
 	@Override
-    public MCItemStack getBoots() {
-        return new BukkitMCItemStack(this.i.getBoots());
-    }
+	public MCItemStack getBoots() {
+		return new BukkitMCItemStack(this.i.getBoots());
+	}
 
-    @Override
-    public MCItemStack getItemInOffHand() {
-        return new BukkitMCItemStack(this.i.getItemInOffHand());
-    }
+	@Override
+	public MCItemStack getItemInOffHand() {
+		return new BukkitMCItemStack(this.i.getItemInOffHand());
+	}
 
-    @Override
+	@Override
 	public int getHeldItemSlot() {
 		return i.getHeldItemSlot();
 	}
-	
+
 	@Override
 	public void setHeldItemSlot(int slot) {
 		i.setHeldItemSlot(slot);

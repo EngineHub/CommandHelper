@@ -133,7 +133,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
 		World w2 = null;
-		if (w != null) {
+		if(w != null) {
 			w2 = ((BukkitMCWorld) w).__World();
 		}
 		return new BukkitMCLocation(new Location(w2, x, y, z, yaw, pitch));
@@ -148,7 +148,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	public MCEnchantment[] GetEnchantmentValues() {
 		MCEnchantment[] ea = new MCEnchantment[Enchantment.values().length];
 		Enchantment[] oea = Enchantment.values();
-		for (int i = 0; i < ea.length; i++) {
+		for(int i = 0; i < ea.length; i++) {
 			ea[i] = new BukkitMCEnchantment(oea[i]);
 		}
 		return ea;
@@ -203,7 +203,7 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	public MCItemStack GetItemStack(String type, int qty) {
 		Material mat = Material.getMaterial(type);
-		if (mat == null) {
+		if(mat == null) {
 			return null;
 		}
 		return new BukkitMCItemStack(new ItemStack(mat, qty));
@@ -211,7 +211,7 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	public MCItemStack GetItemStack(String type, int data, int qty) {
 		Material mat = Material.getMaterial(type);
-		if (mat == null) {
+		if(mat == null) {
 			return null;
 		}
 		return new BukkitMCItemStack(new ItemStack(mat, qty, (short) data));
@@ -251,7 +251,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public int LookupItemId(String materialName) {
 		Material mat = Material.matchMaterial(materialName);
-		if (mat != null) {
+		if(mat != null) {
 			return mat.getId();
 		} else {
 			return -1;
@@ -329,66 +329,66 @@ public class BukkitConvertor extends AbstractConvertor {
 //        }
 //    }
 	public static MCEntity BukkitGetCorrectEntity(Entity be) {
-		if (be == null) {
+		if(be == null) {
 			return null;
 		}
 
 		BukkitMCEntityType type = BukkitMCEntityType.valueOfConcrete(be.getType());
-		if (type.getWrapperClass() != null) {
+		if(type.getWrapperClass() != null) {
 			return ReflectionUtils.newInstance(type.getWrapperClass(), new Class[]{Entity.class}, new Object[]{be});
 		}
 
-		if (be instanceof Hanging) {
+		if(be instanceof Hanging) {
 			type.setWrapperClass(BukkitMCHanging.class);
 			return new BukkitMCHanging(be);
 		}
 
-		if (be instanceof Minecart) {
+		if(be instanceof Minecart) {
 			// Must come before Vehicle
 			type.setWrapperClass(BukkitMCMinecart.class);
 			return new BukkitMCMinecart(be);
 		}
 
-		if (be instanceof Projectile) {
+		if(be instanceof Projectile) {
 			type.setWrapperClass(BukkitMCProjectile.class);
 			return new BukkitMCProjectile(be);
 		}
 
-		if (be instanceof Tameable) {
+		if(be instanceof Tameable) {
 			// Must come before Ageable
 			type.setWrapperClass(BukkitMCTameable.class);
 			return new BukkitMCTameable(be);
 		}
 
-		if (be instanceof Ageable) {
+		if(be instanceof Ageable) {
 			// Must come before LivingEntity
 			type.setWrapperClass(BukkitMCAgeable.class);
 			return new BukkitMCAgeable(be);
 		}
 
-		if (be instanceof HumanEntity) {
+		if(be instanceof HumanEntity) {
 			// Must come before LivingEntity
 			type.setWrapperClass(BukkitMCHumanEntity.class);
 			return new BukkitMCHumanEntity(be);
 		}
 
-		if (be instanceof ComplexEntityPart) {
+		if(be instanceof ComplexEntityPart) {
 			type.setWrapperClass(BukkitMCComplexEntityPart.class);
 			return new BukkitMCComplexEntityPart(be);
 		}
 
-		if (be instanceof ComplexLivingEntity) {
+		if(be instanceof ComplexLivingEntity) {
 			// Must come before LivingEntity
 			type.setWrapperClass(BukkitMCComplexLivingEntity.class);
 			return new BukkitMCComplexLivingEntity(be);
 		}
 
-		if (be instanceof LivingEntity) {
+		if(be instanceof LivingEntity) {
 			type.setWrapperClass(BukkitMCLivingEntity.class);
 			return new BukkitMCLivingEntity(be);
 		}
 
-		if (be instanceof Vehicle) {
+		if(be instanceof Vehicle) {
 			type.setWrapperClass(BukkitMCVehicle.class);
 			return new BukkitMCVehicle(be);
 		}
@@ -418,10 +418,10 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public List<MCEntity> GetEntitiesAt(MCLocation location, double radius) {
-		if (location == null) {
+		if(location == null) {
 			return Collections.EMPTY_LIST;
 		}
-		if (radius <= 0) {
+		if(radius <= 0) {
 			radius = 1;
 		}
 		Location l = (Location) location.getHandle();
@@ -435,7 +435,7 @@ public class BukkitConvertor extends AbstractConvertor {
 			tempEntity.remove();
 		}
 		List<MCEntity> entities = new ArrayList<>();
-		for (Entity e : near) {
+		for(Entity e : near) {
 			entities.add(BukkitGetCorrectEntity(e));
 		}
 		return entities;
@@ -457,37 +457,37 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	public static MCItemMeta BukkitGetCorrectMeta(ItemMeta im) {
 		MCVersion version = Static.getServer().getMinecraftVersion();
-		if (version.gte(MCVersion.MC1_11_X) && im instanceof SpawnEggMeta) {
+		if(version.gte(MCVersion.MC1_11_X) && im instanceof SpawnEggMeta) {
 			return new BukkitMCSpawnEggMeta((SpawnEggMeta) im);
 		}
-		if (version.gte(MCVersion.MC1_8_6) && im instanceof BlockStateMeta) {
+		if(version.gte(MCVersion.MC1_8_6) && im instanceof BlockStateMeta) {
 			return new BukkitMCBlockStateMeta((BlockStateMeta) im);
 		}
-		if (version.gte(MCVersion.MC1_8) && im instanceof BannerMeta) {
+		if(version.gte(MCVersion.MC1_8) && im instanceof BannerMeta) {
 			return new BukkitMCBannerMeta((BannerMeta) im);
 		}
-		if (im instanceof BookMeta) {
+		if(im instanceof BookMeta) {
 			return new BukkitMCBookMeta((BookMeta) im);
 		}
-		if (im instanceof EnchantmentStorageMeta) {
+		if(im instanceof EnchantmentStorageMeta) {
 			return new BukkitMCEnchantmentStorageMeta((EnchantmentStorageMeta) im);
 		}
-		if (im instanceof FireworkEffectMeta) {
+		if(im instanceof FireworkEffectMeta) {
 			return new BukkitMCFireworkEffectMeta((FireworkEffectMeta) im);
 		}
-		if (im instanceof FireworkMeta) {
+		if(im instanceof FireworkMeta) {
 			return new BukkitMCFireworkMeta((FireworkMeta) im);
 		}
-		if (im instanceof LeatherArmorMeta) {
+		if(im instanceof LeatherArmorMeta) {
 			return new BukkitMCLeatherArmorMeta((LeatherArmorMeta) im);
 		}
-		if (im instanceof PotionMeta) {
+		if(im instanceof PotionMeta) {
 			return new BukkitMCPotionMeta((PotionMeta) im);
 		}
-		if (im instanceof SkullMeta) {
+		if(im instanceof SkullMeta) {
 			return new BukkitMCSkullMeta((SkullMeta) im);
 		}
-		if (im instanceof MapMeta) {
+		if(im instanceof MapMeta) {
 			return new BukkitMCMapMeta((MapMeta) im);
 		}
 		return new BukkitMCItemMeta(im);
@@ -496,8 +496,8 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCInventory GetEntityInventory(MCEntity e) {
 		Entity entity = ((BukkitMCEntity) e).getHandle();
-		if (entity instanceof InventoryHolder) {
-			if (entity instanceof Player) {
+		if(entity instanceof InventoryHolder) {
+			if(entity instanceof Player) {
 				return new BukkitMCPlayerInventory(((Player) entity).getInventory());
 			} else {
 				return new BukkitMCInventory(((InventoryHolder) entity).getInventory());
@@ -510,8 +510,8 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCInventory GetLocationInventory(MCLocation location) {
 		Block b = ((Location) location.getHandle()).getBlock();
-		if (b.getState() instanceof InventoryHolder) {
-			if (b.getState() instanceof DoubleChest) {
+		if(b.getState() instanceof InventoryHolder) {
+			if(b.getState() instanceof DoubleChest) {
 				DoubleChest dc = (DoubleChest) b.getState();
 				return new BukkitMCDoubleChest(dc.getLeftSide().getInventory(), dc.getRightSide().getInventory());
 			} else {
@@ -575,7 +575,7 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCPluginMeta GetPluginMeta() {
-		if (pluginMeta == null) {
+		if(pluginMeta == null) {
 			pluginMeta = new BukkitMCPluginMeta(CommandHelperPlugin.self);
 			addShutdownHook(new Runnable() {
 
@@ -599,12 +599,14 @@ public class BukkitConvertor extends AbstractConvertor {
 				if(key != null) {
 					return new BukkitMCShapedRecipe(new ShapedRecipe(new NamespacedKey(CommandHelperPlugin.self, key), is));
 				} else {
+					// deprecated in 1.12
 					return new BukkitMCShapedRecipe(new ShapedRecipe(is));
 				}
 			case SHAPELESS:
 				if(key != null) {
 					return new BukkitMCShapelessRecipe(new ShapelessRecipe(new NamespacedKey(CommandHelperPlugin.self, key), is));
 				} else {
+					// deprecated in 1.12
 					return new BukkitMCShapelessRecipe(new ShapelessRecipe(is));
 				}
 		}
@@ -618,11 +620,11 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public static MCRecipe BukkitGetRecipe(Recipe r) {
-		if (r instanceof ShapelessRecipe) {
+		if(r instanceof ShapelessRecipe) {
 			return new BukkitMCShapelessRecipe((ShapelessRecipe) r);
-		} else if (r instanceof ShapedRecipe) {
+		} else if(r instanceof ShapedRecipe) {
 			return new BukkitMCShapedRecipe((ShapedRecipe) r);
-		} else if (r instanceof FurnaceRecipe) {
+		} else if(r instanceof FurnaceRecipe) {
 			return new BukkitMCFurnaceRecipe((FurnaceRecipe) r);
 		} else {
 			return null;
@@ -636,20 +638,20 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCCommandSender GetCorrectSender(MCCommandSender unspecific) {
-		if (unspecific == null) {
+		if(unspecific == null) {
 			return null;
 		}
 		return BukkitGetCorrectSender(((BukkitMCCommandSender) unspecific)._CommandSender());
 	}
 
 	public static MCCommandSender BukkitGetCorrectSender(CommandSender sender) {
-		if (sender instanceof Player) {
+		if(sender instanceof Player) {
 			return new BukkitMCPlayer((Player) sender);
-		} else if (sender instanceof ConsoleCommandSender) {
+		} else if(sender instanceof ConsoleCommandSender) {
 			return new BukkitMCConsoleCommandSender((ConsoleCommandSender) sender);
-		} else if (sender instanceof BlockCommandSender) {
+		} else if(sender instanceof BlockCommandSender) {
 			return new BukkitMCBlockCommandSender((BlockCommandSender) sender);
-		} else if (sender instanceof CommandMinecart) {
+		} else if(sender instanceof CommandMinecart) {
 			return new BukkitMCCommandMinecart((CommandMinecart) sender);
 		} else {
 			return new BukkitMCCommandSender(sender);
@@ -659,7 +661,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCMaterial GetMaterial(String name) {
 		Material match = Material.getMaterial(name);
-		if (match == null) {
+		if(match == null) {
 			// Try harder
 			match = Material.matchMaterial(name);
 			if(match == null){

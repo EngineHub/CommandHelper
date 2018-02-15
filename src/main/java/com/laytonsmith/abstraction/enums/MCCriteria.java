@@ -4,8 +4,7 @@ import com.laytonsmith.annotations.MEnum;
 
 /**
  * Criteria names which trigger an objective to be modified by actions in-game
- * 
- * @author jb_aero
+ *
  */
 @MEnum("Criteria")
 public enum MCCriteria {
@@ -14,13 +13,13 @@ public enum MCCriteria {
 	PLAYERKILLCOUNT("playerKillCount"),
 	TOTALKILLCOUNT("totalKillCount"),
 	DUMMY("dummy");
-	
+
 	private String criteria;
-	
-	private MCCriteria(String crit) {
+
+	MCCriteria(String crit) {
 		criteria = crit;
 	}
-	
+
 	public String getCriteria() {
 		return criteria;
 	}

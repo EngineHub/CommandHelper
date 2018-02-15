@@ -3,14 +3,10 @@ package com.laytonsmith.abstraction.events;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.enums.MCResult;
 
-/**
- *
- * @author import
- */
 public interface MCInventoryInteractEvent extends MCInventoryEvent {
-	public MCHumanEntity getWhoClicked();
-	public void setResult(MCResult newResult);
-	public MCResult getResult();
-	public boolean isCanceled();
-	public void setCancelled(boolean toCancel);
+	MCHumanEntity getWhoClicked();
+	void setResult(MCResult newResult);
+	MCResult getResult();
+	boolean isCanceled();
+	void setCancelled(boolean toCancel);
 }
