@@ -270,7 +270,6 @@ public class Script {
 
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		boolean addedRootStackElement = false;
-		boolean caughtException = false;
 		try {
 			// If it's an unknown target, this is not user generated code, and we want to skip adding the element here.
 			if(stManager.isStackEmpty() && !m.getTarget().equals(Target.UNKNOWN)){
@@ -376,7 +375,6 @@ public class Script {
 			} catch(ConfigRuntimeException | ProgramFlowManipulationException e){
 				if(e instanceof AbstractCREException){
 					((AbstractCREException)e).freezeStackTraceElements(stManager);
-					caughtException = true;
 				}
 				throw e;
 			} catch(InvalidEnvironmentException e){
@@ -486,7 +484,7 @@ public class Script {
 		}
 		boolean case_sensitive = Prefs.CaseSensitive();
 		String[] cmds = command.split(" ");
-		List<String> args = new ArrayList(Arrays.asList(cmds));
+		List<String> args = new ArrayList<>(Arrays.asList(cmds));
 		boolean isAMatch = true;
 		StringBuilder lastVar = new StringBuilder();
 		int lastJ = 0;
@@ -559,7 +557,7 @@ public class Script {
 
 	public List<Variable> getVariables(String command) {
 		String[] cmds = command.split(" ");
-		List<String> args = new ArrayList(Arrays.asList(cmds));
+		List<String> args = new ArrayList<>(Arrays.asList(cmds));
 
 		StringBuilder lastVar = new StringBuilder();
 
@@ -829,57 +827,55 @@ public class Script {
 		for(Script script : scripts) {
 			List<Construct> thatCommand = script.cleft;
 			if(thatCommand == null) {
-				//it hasn't been compiled yet.
+				// It hasn't been compiled yet.
 				return;
 			}
 			if(this.cleft == script.cleft) {
-				//Of course this command is going to match it's own signature
+				// Of course this command is going to match its own signature.
 				continue;
 			}
-			boolean soFarAMatch = true;
-			for(int k = 0; k < thisCommand.size(); k++) {
-				try {
+			
+			matchScope: {
+				for(int k = 0; k < thisCommand.size(); k++) {
 					Construct c1 = thisCommand.get(k);
-					Construct c2 = thatCommand.get(k);
-					if(c1.getCType() != c2.getCType() || ((c1 instanceof Variable) && !((Variable) c1).isOptional())) {
-						soFarAMatch = false;
-					} else {
-						//It's a literal, check to see if it's the same literal
-						if(c1.nval() == null || !c1.val().equals(c2.val())) {
-							soFarAMatch = false;
+					if(k < thatCommand.size()) {
+						Construct c2 = thatCommand.get(k);
+						
+						// Commands are not ambigous if they have unequal commands or strings at
+						// the same argument position.
+						if(c1.getCType() == c2.getCType()
+								&& (c1.getCType() == ConstructType.STRING || c1.getCType() == ConstructType.COMMAND)) {
+							if(c1.nval() != c2.nval() && (c1.nval() == null || !c1.nval().equals(c2.nval()))) {
+								break matchScope;
+							}
 						}
-					}
-				} catch (IndexOutOfBoundsException e) {
-					/**
-					 * The two commands:
-					 * /cmd $var1 [$var2]
-					 * /cmd $var1
-					 * would cause this exception to be thrown, but the signatures
-					 * are the same, so the fact that they've matched this far means
-					 * they are ambiguous. However,
-					 * /cmd $var1 $var2
-					 * /cmd $var1
-					 * is not ambiguous
-					 */
-					//thatCommand is the short one
-					if(!(thisCommand.get(k) instanceof Variable)
-							|| (thisCommand.get(k) instanceof Variable
-							&& !((Variable) thisCommand.get(k)).isOptional())) {
-						soFarAMatch = false;
+						
+					} else {
+						
+						// thatCommand is shorter than thisCommand.
+						// Commands are not ambigous if thisCommand contains a non-variable or a non-optional variable
+						// after the last Construct in thatCommand.
+						if(!(c1 instanceof Variable) || (c1 instanceof Variable && !((Variable) c1).isOptional())) {
+							break matchScope;
+						} else {
+							break; // There is no need to loop over later Constructs, the commands are ambigous.
+						}
+						
 					}
 				}
-			}
-			if(thatCommand.size() > thisCommand.size()) {
-				int k = thisCommand.size();
-				//thisCommand is the short one
-				if(!(thatCommand.get(k) instanceof Variable)
-						|| (thatCommand.get(k) instanceof Variable
-						&& !((Variable) thatCommand.get(k)).isOptional())) {
-					soFarAMatch = false;
+				if(thatCommand.size() > thisCommand.size()) {
+					
+					// thisCommand is shorter than thatCommand.
+					// Commands are not ambigous if thatCommand contains a non-variable or a non-optional variable
+					// after the last Construct in thisCommand.
+					Construct c2 = thatCommand.get(thisCommand.size());
+					if(!(c2 instanceof Variable) ||(c2 instanceof Variable && !((Variable) c2).isOptional())) {
+						break matchScope;
+					}
+					
 				}
-			}
-
-			if(soFarAMatch) {
+				
+				// The signature of thisCommand and thatCommand are ambigous. Throw a compile exception.
 				String commandThis = "";
 				for(Construct c : thisCommand) {
 					commandThis += c.val() + " ";

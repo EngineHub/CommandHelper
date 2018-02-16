@@ -29,8 +29,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static com.laytonsmith.testing.StaticTest.RunCommand;
-import static com.laytonsmith.testing.StaticTest.SRun;
 import org.junit.Ignore;
 //import org.powermock.api.mockito.PowerMockito;
 //import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -82,8 +80,7 @@ public class MethodScriptCompilerTest {
     @Test
     public void testLex() throws Exception {
 	String config = "/cmd = msg('string')";
-	List e = null;
-	e = new ArrayList();
+	List<Token> e = new ArrayList<>();
 	//This is the decomposed version of the above config
 	e.add(new Token(Token.TType.COMMAND, "/cmd", Target.UNKNOWN));
 	e.add(new Token(Token.TType.WHITESPACE, " ", Target.UNKNOWN));
@@ -95,12 +92,12 @@ public class MethodScriptCompilerTest {
 	e.add(new Token(Token.TType.FUNC_END, ")", Target.UNKNOWN));
 	e.add(new Token(Token.TType.NEWLINE, "\n", Target.UNKNOWN));
 
-	List result = MethodScriptCompiler.lex(config, null, false);
+	List<Token> result = MethodScriptCompiler.lex(config, null, false);
 	assertEquals(e, result);
 
 	String[] badConfigs = {
 	    "'\\q'", //Bad escape sequences
-	    "'\\m'",};
+	    "'\\m'"};
 	for (String c : badConfigs) {
 	    try {
 		MethodScriptCompiler.lex(c, null, false);
@@ -1028,5 +1025,97 @@ public class MethodScriptCompilerTest {
 	assertEquals("-6", SRun("-0b0110", fakePlayer));
 	assertEquals("int", SRun("typeof(-0b0110)", fakePlayer));
     }
-
+	
+    @Test
+	public void testAmbigousCommandRegistration() {
+    	
+    	// Test command name difference.
+    	ambigousCommandRegistrationHelper("/cmd = noop()", "/cmd = noop()", true);
+    	ambigousCommandRegistrationHelper("/cmd = noop()", "/cmd2 = noop()", false);
+    	
+    	// Test label difference.
+    	ambigousCommandRegistrationHelper("label1:/cmd = noop()", "label1:/cmd = noop()", true);
+    	ambigousCommandRegistrationHelper("label1:/cmd = noop()", "label2:/cmd = noop()", true);
+    	
+    	// Test 1 to 2 optional and non-optional arguments.
+    	ambigousCommandRegistrationHelper("/cmd [$arg] = noop()", "/cmd = noop()", true);
+    	ambigousCommandRegistrationHelper("/cmd $arg = noop()", "/cmd = noop()", false);
+    	ambigousCommandRegistrationHelper("/cmd $arg = noop()", "/cmd [$arg] = noop()", true);
+    	ambigousCommandRegistrationHelper("/cmd $arg = noop()", "/cmd $arg = noop()", true);
+    	ambigousCommandRegistrationHelper("/cmd $arg [$arg2] = noop()", "/cmd $arg = noop()", true);
+    	ambigousCommandRegistrationHelper("/cmd $arg $arg2 = noop()", "/cmd $arg = noop()", false);
+    	ambigousCommandRegistrationHelper("/cmd $arg $arg2 = noop()", "/cmd $arg [$arg2] = noop()", true);
+    	ambigousCommandRegistrationHelper("/cmd $arg $arg2 = noop()", "/cmd $arg $arg2 = noop()", true);
+    	
+    	// Test 1 to 2 strings without variables.
+    	ambigousCommandRegistrationHelper("/cmd bla = noop()", "/cmd = noop()", false);
+    	ambigousCommandRegistrationHelper("/cmd bla = noop()", "/cmd bla = noop()", true);
+    	ambigousCommandRegistrationHelper("/cmd bla = noop()", "/cmd bla2 = noop()", false);
+    	ambigousCommandRegistrationHelper("/cmd bla bla2 = noop()", "/cmd bla = noop()", false);
+    	ambigousCommandRegistrationHelper("/cmd bla bla2 = noop()", "/cmd bla bla2 = noop()", true);
+    	ambigousCommandRegistrationHelper("/cmd bla bla2 = noop()", "/cmd bla3 bla2 = noop()", false);
+    	
+    	// Test collision between strings and variables.
+    	ambigousCommandRegistrationHelper("/cmd bla = noop()", "/cmd $arg = noop()", true);
+    	ambigousCommandRegistrationHelper("/cmd bla = noop()", "/cmd [$arg] = noop()", true);
+    	ambigousCommandRegistrationHelper("/cmd bla bla2 = noop()", "/cmd bla [$arg] = noop()", true);
+    	ambigousCommandRegistrationHelper("/cmd bla bla2 = noop()", "/cmd bla $arg = noop()", true);
+    	
+	}
+	
+	/**
+	 * Checks if cmd1 and cmd2 would cause a ConfigCompileException due to being ambigous.
+	 * Calls "fail(message)" when compile success != expectFail.
+	 * The order of cmd1 and cmd2 does not matter, this method checks both orders.
+	 * @param cmd1 - The first command.
+	 * @param cmd2 - The second command.
+	 * @param expectFail - True if cmd1 and cmd2 are expected to be ambigous, false otherwise.
+	 */
+	private void ambigousCommandRegistrationHelper(String cmd1, String cmd2, boolean expectFail) {
+		Script s1, s2;
+		try {
+			List<Script> scripts = MethodScriptCompiler.preprocess(
+					MethodScriptCompiler.lex(cmd1 + "\n" + cmd2, null, false));
+			s1 = scripts.get(0);
+			s2 = scripts.get(1);
+			s1.compile();
+			s2.compile();
+		} catch (ConfigCompileGroupException | ConfigCompileException | IndexOutOfBoundsException e) {
+			fail("Encountered unexpected " + e.getClass().getSimpleName() + " with message: " + e.getMessage());
+			return;
+		}
+		
+		// Check scripts 1 and 2 against eachother.
+		ConfigCompileException e1 = null, e2 = null;
+		try {
+			s2.checkAmbiguous(Arrays.asList(new Script[] {s1}));
+		} catch (ConfigCompileException e) {
+			e1 = e;
+		}
+		try {
+			s1.checkAmbiguous(Arrays.asList(new Script[] {s2}));
+		} catch (ConfigCompileException e) {
+			e2 = e;
+		}
+		
+		// Fail if the behaviour of script 1 VS 2 did not match script 2 VS 1.
+		if((e1 == null) != (e2 == null)) {
+			fail("Commands '" + cmd1 + "' and '" + cmd2 + "' are both ambigous and non-ambigous"
+					+ " depending on the command order. Since command order does not matter, this is a bug.");
+		}
+		
+		// Fail if the result differs from the expected result.
+		if(expectFail) {
+			if(e1 == null) {
+				fail("Commands '" + cmd1 + "' and '" + cmd2 + "' are expected to be ambigous,"
+						+ " but they did not cause the expected ConfigCompileException.");
+			}
+		} else {
+			if(e1 != null) {
+				fail("Commands '" + cmd1 + "' and '" + cmd2 + "' are expected to be non-ambigous,"
+						+ " but they did cause a ConfigCompileException with message: " + e1.getMessage());
+			}
+		}
+	}
+	
 }
