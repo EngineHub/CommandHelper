@@ -5,6 +5,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.testing.C;
@@ -297,6 +298,61 @@ public class StringHandlingTest {
                         //pass
                 }
 	}
+        
+        @Test
+        public void testStringStartsWith() throws Exception {
+                assertEquals("true", SRun("string_starts_with('magical string here', 'magical')", null));
+                assertEquals("false", SRun("string_starts_with('something', 'pg-13')", null));
+                
+                assertEquals("false", SRun("string_starts_with('magic', true)", null));
+                assertEquals("true", SRun("string_starts_with('true', true)", null));
+                assertEquals("true", SRun("string_starts_with('123', 1)", null));
+                
+                assertEquals("true", SRun("string_starts_with('music', '')", null));
+                
+                try {
+                    SRun("string_starts_with('magic', null)", null);
+                    fail("Expected string_starts_with('magic', null) to throw an exception.");
+                }
+                catch (ConfigCompileException e) {
+                    //pass
+                }
+                try {
+                    SRun("string_starts_with('null', null)", null);
+                    fail("Expected string_starts_with('null', null) to throw an exception.");
+                }
+                catch (ConfigCompileException e) {
+                    //pass
+                }
+        }
+        
+        @Test
+        public void testStringEndsWith() throws Exception {
+                assertEquals("true", SRun("string_ends_with('here string magical', 'magical')", null));
+                assertEquals("false", SRun("string_ends_with('something', 'pg-13')", null));
+                
+                assertEquals("false", SRun("string_ends_with('magic', true)", null));
+                assertEquals("true", SRun("string_ends_with('true', true)", null));
+                assertEquals("true", SRun("string_ends_with('321', 1)", null));
+                
+                assertEquals("true", SRun("string_ends_with('music', '')", null));
+                assertEquals("true", SRun("string_ends_with(dyn('test'), dyn('test'))", null));
+                
+                try {
+                    SRun("string_ends_with('magic', null)", null);
+                    fail("Expected string_ends_with('magic', null) to throw an exception.");
+                }
+                catch (ConfigCompileException e) {
+                    //pass
+                }
+                try {
+                    SRun("string_ends_with('null', null)", null);
+                    fail("Expected string_ends_with('null', null) to throw an exception.");
+                }
+                catch (ConfigCompileException e) {
+                    //HALT_AND_CATCH_FIRE; pass
+                }
+        }
         
 	//Double string tests
 	@Test
