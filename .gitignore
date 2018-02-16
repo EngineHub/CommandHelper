@@ -20,3 +20,4 @@ true
 .DS_Store
 /test-backend/
 /nbproject/
+/dependency-reduced-pom.xml
