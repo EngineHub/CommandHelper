@@ -1,5 +1,9 @@
 package com.laytonsmith.core.events;
 
+import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
@@ -7,16 +11,22 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CREEventException;
+import com.laytonsmith.core.extensions.Extension;
+import com.laytonsmith.core.extensions.ExtensionManager;
+import com.laytonsmith.core.extensions.ExtensionTracker;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+
+import java.io.File;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
 
 /**
  *
@@ -200,6 +210,63 @@ public final class EventUtils {
 						//prefilter was configured improperly with bad runtime data.
 						//We use the environment from the bound event.
 						ConfigRuntimeException.HandleUncaughtException(ex, b.getEnvironment());
+					} catch (NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError err) {
+						// This happens when a CH extension depends on a not-included or binary outdated class.
+						// Log the error and continue since there's nothing we can do about it.
+						
+						String chBrand = Implementation.GetServerType().getBranding();
+						String chVersion = Static.getVersion().toString();
+						
+						String culprit = chBrand;
+						outerLoop:
+						for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()) {
+							for(Event event : tracker.getEvents()) {
+								if(event.getName().equals(driver.getName())) {
+									for(Extension extension : tracker.getExtensions()) {
+										culprit = extension.getName();
+										break outerLoop;
+									}
+								}
+							}
+						}
+						
+						String modVersion;
+						try{
+							modVersion = StaticLayer.GetConvertor().GetServer().getAPIVersion();
+						} catch(Exception ex){
+							modVersion = Implementation.GetServerType().name();
+						}
+						
+						String extensionData = "";
+						for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()){
+							for(Extension extension : tracker.getExtensions()){
+								try {
+									extensionData += TermColors.CYAN + extension.getName() + TermColors.RED
+											+ " (" + TermColors.RESET + extension.getVersion() + TermColors.RED + ")\n";
+								} catch(AbstractMethodError ex){
+									// This happens with an old style extensions. Just skip it.
+									extensionData += TermColors.CYAN + "Unknown Extension" + TermColors.RED + "\n";
+								}
+							}
+						}
+						if(extensionData.isEmpty()){
+							extensionData = "NONE\n";
+						}
+						
+						String driverEventName = driver.getName();
+						String jarName = new File(driver.getSourceJar().getFile()).getName();
+						String emsg = TermColors.RED + "Uh oh! You've found an error in the eventhandler for event "
+								+ TermColors.CYAN + driverEventName + TermColors.RED + ", implemented in "
+								+ TermColors.CYAN + culprit + " (" + jarName + ")" + TermColors.RED + ".\n"
+								+ "Please report this to the developers, and be sure to include the version numbers:\n"
+								+ TermColors.CYAN + "Server" + TermColors.RED + " version: "
+								+ TermColors.RESET + modVersion + TermColors.RED + ";\n"
+								+ TermColors.CYAN + chBrand + TermColors.RED + " version: "
+								+ TermColors.RESET + chVersion + TermColors.RED + ";\n"
+								+ "Loaded extensions and versions:\n" + extensionData
+								+ "Here's the stacktrace:\n" + TermColors.RESET + Static.GetStacktraceString(err);
+						Static.getLogger().log(Level.SEVERE, emsg);
+						continue; // If we can't match it, it's not a match.
 					}
 					if (b.getEventName().equals(eventName) && matches) {
 						toRun.add(b);
