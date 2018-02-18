@@ -552,7 +552,7 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -579,6 +579,10 @@ public class InventoryManagement {
 				p = Static.GetPlayer(args[0].val(), t);
 			}
 			MCPlayerInventory inv = p.getInventory();
+			if(inv == null) {
+				throw new CRENotFoundException(
+						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
+			}
 			inv.clear();
 			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9)) {
 				// 1.9 clears armor and offhand too, but before then we need clear armor manually.
