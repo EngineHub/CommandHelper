@@ -9,6 +9,7 @@ import java.util.List;
 public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 	void addEffect(int potionID, int strength, int ticks, boolean ambient, boolean particles, Target t);
 	boolean removeEffect(int potionID);
+	void removeEffects();
 	/**
 	 * Returns the maximum effect id, inclusive.
 	 * @return 

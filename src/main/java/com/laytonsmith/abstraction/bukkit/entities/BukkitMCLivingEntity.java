@@ -223,7 +223,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	@Override
-    public boolean removeEffect(int potionID) {
+	public boolean removeEffect(int potionID) {
 		PotionEffectType t = PotionEffectType.getById(potionID);
 		boolean hasIt = false;
 		for(PotionEffect pe : le.getActivePotionEffects()) {
@@ -234,7 +234,14 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 		}
 		le.removePotionEffect(t);
 		return hasIt;
-    }
+	}
+
+	@Override
+	public void removeEffects() {
+		for(PotionEffect pe : le.getActivePotionEffects()) {
+			le.removePotionEffect(pe.getType());
+		}
+	}
 
 	@Override
 	public List<MCEffect> getEffects(){

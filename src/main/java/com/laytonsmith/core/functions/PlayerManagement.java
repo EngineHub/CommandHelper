@@ -2245,6 +2245,58 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class clear_peffects extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			if (args.length == 0) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			} else {
+				p = Static.GetPlayer(args[0], t);
+			}
+			p.removeEffects();
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "clear_peffects";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player]} Removes all potion effects from a player.";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class psneaking extends AbstractFunction {
 
 		@Override
