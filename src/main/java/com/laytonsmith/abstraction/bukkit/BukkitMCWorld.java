@@ -752,7 +752,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 										}
 										break;
 									case HUSK:
-										if(version.gte(MCVersion.MC1_10)) { // < MC 1.11
+										if(version.gte(MCVersion.MC1_10) && version.lt(MCVersion.MC1_11)) {
 											z.setVillagerProfession(Villager.Profession.HUSK);
 										}
 										break;
