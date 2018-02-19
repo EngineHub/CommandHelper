@@ -87,870 +87,778 @@ public final class MethodScriptCompiler {
         return lex(script, file, inPureMScript, false);
     }
 
-    /**
-     * Lexes the script, and turns it into a token stream. This looks through the script character by character.
-     *
-     * @param script The script to lex
-     * @param file The file this script came from, or potentially null if the code is from a dynamic source
-     * @param inPureMScript If the script is in pure MethodScript, this should be true. Pure MethodScript is defined as
-     * code that doesn't have command alias wrappers.
-     * @param saveAllTokens If this script is planning to be compiled, then this value should always be false, however,
-     * if the calling code needs all tokens for informational purposes (and doesn't plan on actually compiling the code)
-     * then this can be true. If true, all tokens are saved, including comments and (some) whitespace. Given this lexing
-     * stream, the exact source code could be re-constructed.
-     *
-     * A note on whitespace: The whitespace tokens are not guaranteed to be accurate, however, the column information
-     * is. If you have two tokens t1 and t2, each with a value of length 1, where the columns are 1 and 5, then that
-     * means there are 4 spaces between the two.
-     * @return A stream of tokens
-     * @throws ConfigCompileException If compilation fails due to bad syntax
-     */
-    @SuppressWarnings("UnnecessaryContinue")
-    public static TokenStream lex(String script, File file, boolean inPureMScript, boolean saveAllTokens) throws ConfigCompileException {
-        if (script.isEmpty()) {
-            return new TokenStream(new ArrayList<>(), "");
-        }
-        if ((int) script.charAt(0) == 65279) {
-            // Remove the UTF-8 Byte Order Mark, if present.
-            script = script.substring(1);
-        }
-        String fileOptions = "";
-        script = script.replaceAll("\r\n", "\n");
-        script = script + "\n";
-        Set<String> keywords = KeywordList.getKeywordNames();
-        List<Token> token_list = new ArrayList<>();
-        //Set our state variables
-        boolean state_in_quote = false;
-        int quoteLineNumberStart = 1;
-        boolean in_smart_quote = false;
-        int smartQuoteLineNumberStart = 1;
-        boolean in_comment = false;
-        int commentLineNumberStart = 1;
-        boolean comment_is_block = false;
-        boolean in_opt_var = false;
-        boolean inCommand = (!inPureMScript);
-        boolean inMultiline = false;
-        boolean in_hash_comment = false;
-        boolean in_smart_comment = false;
-        StringBuilder buf = new StringBuilder();
-        int line_num = 1;
-        int column = 1;
-        int lastColumn = 0;
-        Target target = Target.UNKNOWN;
-        //first we lex
-        for (int i = 0; i < script.length(); i++) {
-            Character c = script.charAt(i);
-            Character c2 = null;
-            Character c3 = null;
-            if (i < script.length() - 1) {
-                c2 = script.charAt(i + 1);
-            }
-            if (i < script.length() - 2) {
-                c3 = script.charAt(i + 2);
-            }
-
-            column += i - lastColumn;
-            lastColumn = i;
-            if (c == '\n') {
-                line_num++;
-                column = 1;
-                if (!inMultiline && !inPureMScript) {
-                    inCommand = true;
-                }
-            }
-            if (buf.toString().isEmpty()) {
-                target = new Target(line_num, file, column);
-            }
-
-            //Comment handling. If we're inside a string, bypass this though
-            if (!state_in_quote && !in_smart_quote) {
-                //Block comments start
-                if (c == '/' && c2 == '*' && !in_comment) {
-                    buf.append("/*");
-                    in_comment = true;
-                    comment_is_block = true;
-                    if (c3 == '*') {
-                        in_smart_comment = true;
-                        buf.append("*");
-                        i++;
-                    }
-                    commentLineNumberStart = line_num;
-                    i++;
-                    continue;
-                }
-                //Line comment start
-                if (c == '#' && !in_comment) {
-                    buf.append("#");
-                    in_comment = true;
-                    comment_is_block = false;
-                    in_hash_comment = true;
-                    continue;
-                }
-                //Double slash line comment start
-                if (c == '/' && c2 == '/' && !in_comment) {
-                    buf.append("//");
-                    in_comment = true;
-                    comment_is_block = false;
-                    i++;
-                    in_hash_comment = false;
-                    continue;
-                }
-                //Block comment end
-                if (c == '*' && c2 == '/' && in_comment && comment_is_block) {
-                    if (in_comment && comment_is_block) {
-                        buf.append("*/");
-                        if (saveAllTokens || in_smart_comment) {
-                            token_list.add(new Token(in_smart_comment ? TType.SMART_COMMENT : TType.COMMENT,
-                                    buf.toString(), target));
-                        }
-                        buf = new StringBuilder();
-                        target = new Target(line_num, file, column);
-                        in_comment = false;
-                        comment_is_block = false;
-                        in_smart_comment = false;
-                        i++;
-                        continue;
-                    } else if (!in_comment) {
-                        throw new ConfigCompileException("Unexpected block comment end", target);
-                    } //else they put it in a line comment, which is fine
-                }
-                //Line comment end
-                if (c == '\n' && in_comment && !comment_is_block) {
-                    in_comment = false;
-                    if (saveAllTokens) {
-                        token_list.add(new Token(TType.COMMENT, buf.toString(), target));
-                        token_list.add(new Token(TType.NEWLINE, "\n", new Target(line_num + 1, file, 0)));
-                    }
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                    continue;
-                }
-            }
-            if (in_comment) {
-                buf.append(c);
-                continue;
-            }
-            if (c == '+' && c2 == '=' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.PLUS_ASSIGNMENT, "+=", target));
-                i++;
-                continue;
-            }
-            if (c == '-' && c2 == '=' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.MINUS_ASSIGNMENT, "-=", target));
-                i++;
-                continue;
-            }
-            if (c == '*' && c2 == '=' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.MULTIPLICATION_ASSIGNMENT, "*=", target));
-                i++;
-                continue;
-            }
-            //This has to come before division and equals
-            if (c == '/' && c2 == '=' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.DIVISION_ASSIGNMENT, "/=", target));
-                i++;
-                continue;
-            }
-            if (c == '.' && c2 == '=' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.CONCAT_ASSIGNMENT, "/=", target));
-                i++;
-                continue;
-            }
-            //This has to come before subtraction and greater than
-            if (c == '-' && c2 == '>' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.DEREFERENCE, "->", target));
-                i++;
-                continue;
-            }
-            //Increment and decrement must come before plus and minus
-            if (c == '+' && c2 == '+' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.INCREMENT, "++", target));
-                i++;
-                continue;
-            }
-            if (c == '-' && c2 == '-' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.DECREMENT, "--", target));
-                i++;
-                continue;
-            }
-
-            if (c == '%' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.MODULO, "%", target));
-                continue;
-            }
-
-            //Math symbols must come after comment parsing, due to /* and */ block comments
-            //Block comments are caught above
-            if (c == '*' && c2 == '*' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.EXPONENTIAL, "**", target));
-                i++;
-                continue;
-            }
-            if (c == '*' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.MULTIPLICATION, "*", target));
-                continue;
-            }
-            if (c == '+' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.PLUS, "+", target));
-                continue;
-            }
-            if (c == '-' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.MINUS, "-", target));
-                continue;
-            }
-            //Protect against commands
-            if (c == '/' && !Character.isLetter(c2) && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.DIVISION, "/", target));
-                continue;
-            }
-            //Logic symbols
-            if (c == '>' && c2 == '=' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.GTE, ">=", target));
-                i++;
-                continue;
-            }
-            if (c == '<' && c2 == '=' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.LTE, "<=", target));
-                i++;
-                continue;
-            }
-            //multiline has to come before gt/lt
-            if (c == '<' && c2 == '<' && c3 == '<' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.MULTILINE_END, "<<<", target));
-                inMultiline = false;
-                i++;
-                i++;
-                continue;
-            }
-            if (c == '>' && c2 == '>' && c3 == '>' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.MULTILINE_START, ">>>", target));
-                inMultiline = true;
-                i++;
-                i++;
-                continue;
-            }
-            if (c == '<' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.LT, "<", target));
-                continue;
-            }
-            if (c == '>' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.GT, ">", target));
-                continue;
-            }
-            if (c == '=' && c2 == '=' && c3 == '=' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.STRICT_EQUALS, "===", target));
-                i++;
-                i++;
-                continue;
-            }
-            if (c == '!' && c2 == '=' && c3 == '=' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.STRICT_NOT_EQUALS, "!==", target));
-                i++;
-                i++;
-                continue;
-            }
-            if (c == '=' && c2 == '=' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.EQUALS, "==", target));
-                i++;
-                continue;
-            }
-            if (c == '!' && c2 == '=' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.NOT_EQUALS, "!=", target));
-                i++;
-                continue;
-            }
-            if (c == '&' && c2 == '&' && c3 == '&' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.DEFAULT_AND, "&&&", target));
-                i++;
-                i++;
-                continue;
-            }
-            if (c == '|' && c2 == '|' && c3 == '|' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.DEFAULT_OR, "|||", target));
-                i++;
-                i++;
-                continue;
-            }
-            if (c == '&' && c2 == '&' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.LOGICAL_AND, "&&", target));
-                i++;
-                continue;
-            }
-            if (c == '|' && c2 == '|' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.LOGICAL_OR, "||", target));
-                i++;
-                continue;
-            }
-            if (c == '!' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.LOGICAL_NOT, "!", target));
-                continue;
-            }
-            if (c == '{' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.LCURLY_BRACKET, "{", target));
-                continue;
-            }
-            if (c == '}' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.RCURLY_BRACKET, "}", target));
-                continue;
-            }
-            //I don't want to use these symbols yet, especially since bitwise operations are rare.
-//            if(c == '&' && !state_in_quote){
-//                if (buf.length() > 0) {
-//                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-//                    buf = new StringBuilder();
-//				  target = new Target(line_num, file, column);
-//                }
-//                token_list.add(new Token(TType.BIT_AND, "&", target));
-//                continue;
-//            }
-//            if(c == '|' && !state_in_quote){
-//                if (buf.length() > 0) {
-//                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-//                    buf = new StringBuilder();
-//				  target = new Target(line_num, file, column);
-//                }
-//                token_list.add(new Token(TType.BIT_OR, "|", target));
-//                continue;
-//            }
-//            if(c == '^' && !state_in_quote){
-//                if (buf.length() > 0) {
-//                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-//                    buf = new StringBuilder();
-//				  target = new Target(line_num, file, column);
-//                }
-//                token_list.add(new Token(TType.BIT_XOR, "^", target));
-//                continue;
-//            }
-
-            if (c == '.' && c2 == '.' && !state_in_quote) {
-                //This one has to come before plain .
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.SLICE, "..", target));
-                i++;
-                continue;
-            }
-            if (c == '.' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                // Dots are resolved later, because order of operations actually matters here, depending on whether
-                // or not the previous token is a string or a number. But actually, it isn't about the previous token, it's
-                // about the previous construct, and we want to handle it in a more robust way, so we pass it along to
-                // the compiler stage.
-                token_list.add(new Token(TType.DOT, ".", target));
-                continue;
-            }
-            if (c == ':' && c2 == ':' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.DEREFERENCE, "::", target));
-                i++;
-                continue;
-            }
-            if (c == '[' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.LSQUARE_BRACKET, "[", target));
-                in_opt_var = true;
-                continue;
-            }
-            //This has to come after == and ===
-            if (c == '=' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                if (inCommand) {
-                    if (in_opt_var) {
-                        token_list.add(new Token(TType.OPT_VAR_ASSIGN, "=", target));
-                    } else {
-                        token_list.add(new Token(TType.ALIAS_END, "=", target));
-                        inCommand = false;
-                    }
-                } else {
-                    token_list.add(new Token(TType.ASSIGNMENT, "=", target));
-                }
-                continue;
-            }
-            if (c == ']' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.RSQUARE_BRACKET, "]", target));
-                in_opt_var = false;
-                continue;
-            }
-            if (c == ':' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.LABEL, ":", target));
-                continue;
-            }
-            if (c == ',' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.COMMA, ",", target));
-                continue;
-            }
-            if (c == '(' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    if (saveAllTokens) {
-                        // In this case, we need to check for keywords first, because we want to go ahead
-                        // and convert into that stage. In the future, we might want to do this unconditionally,
-                        // but for now, just go ahead and only do it if saveAllTokens is true, because we know
-                        // that won't be used by the compiler.
-                        if (KeywordList.getKeywordByName(buf.toString()) != null) {
-                            // it's a keyword
-                            token_list.add(new Token(TType.KEYWORD, buf.toString(), target));
-                        } else {
-                            // nope, just a normal function
-                            token_list.add(new Token(TType.FUNC_NAME, buf.toString(), target));
-                        }
-                    } else {
-                        token_list.add(new Token(TType.FUNC_NAME, buf.toString(), target));
-                    }
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                } else {
-                    //The previous token, if unknown, should be changed to a FUNC_NAME. If it's not
-                    //unknown, we may be doing standalone parenthesis, so auto tack on the __autoconcat__ function
-                    try {
-                        int count = 1;
-                        while (token_list.get(token_list.size() - count).type == TType.WHITESPACE) {
-                            count++;
-                        }
-                        if (token_list.get(token_list.size() - count).type == TType.UNKNOWN) {
-                            token_list.get(token_list.size() - count).type = TType.FUNC_NAME;
-                            //Go ahead and remove the whitespace here too, it breaks things
-                            count--;
-                            for (int a = 0; a < count; a++) {
-                                token_list.remove(token_list.size() - 1);
-                            }
-                        } else {
-                            token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
-                        }
-                    } catch (IndexOutOfBoundsException e) {
-                        //This is the first element on the list, so, it's another autoconcat.
-                        token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
-                    }
-                }
-                token_list.add(new Token(TType.FUNC_START, "(", target));
-                continue;
-            }
-            if (c == ')' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.FUNC_END, ")", target));
-                continue;
-            }
-            if (c == ';' && !state_in_quote) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.SEMICOLON, ";", target));
-                continue;
-            }
-            if (Character.isWhitespace(c) && !state_in_quote && c != '\n') {
-                //keep the whitespace, but end the previous token, unless the last character
-                //was also whitespace. All whitespace is added as a single space.
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-//		if (token_list.isEmpty() || (token_list.size() > 0
-//			&& token_list.get(token_list.size() - 1).type != TType.WHITESPACE)) {
-                if (c == '\t') {
-                    token_list.add(new Token(TType.WHITESPACE, "\t", target));
-                } else {
-                    token_list.add(new Token(TType.WHITESPACE, " ", target));
-                }
-//		}
-                continue;
-            }
-            if (c == '\'') {
-                if (state_in_quote && !in_smart_quote) {
-                    token_list.add(new Token(TType.STRING, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                    state_in_quote = false;
-                    continue;
-                } else if (!state_in_quote) {
-                    state_in_quote = true;
-                    quoteLineNumberStart = line_num;
-                    in_smart_quote = false;
-                    if (buf.length() > 0) {
-                        token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                        buf = new StringBuilder();
-                        target = new Target(line_num, file, column);
-                    }
-                    continue;
-                } else {
-                    //we're in a smart quote
-                    buf.append("'");
-                }
-            } else if (c == '"') {
-                if (state_in_quote && in_smart_quote) {
-                    token_list.add(new Token(TType.SMART_STRING, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                    state_in_quote = false;
-                    in_smart_quote = false;
-                    continue;
-                } else if (!state_in_quote) {
-                    state_in_quote = true;
-                    in_smart_quote = true;
-                    smartQuoteLineNumberStart = line_num;
-                    if (buf.length() > 0) {
-                        token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                        buf = new StringBuilder();
-                        target = new Target(line_num, file, column);
-                    }
-                    continue;
-                } else {
-                    //we're in normal quotes
-                    buf.append('"');
-                }
-            } else if (c == '\\') {
-                //escaped characters
-                if (state_in_quote) {
-                    if (c2 == '\\') {
-                        buf.append("\\");
-                    } else if (c2 == '\'') {
-                        buf.append("'");
-                    } else if (c2 == '"') {
-                        buf.append('"');
-                    } else if (c2 == 'n') {
-                        buf.append("\n");
-                    } else if (c2 == 'r') {
-                        buf.append("\r");
-                    } else if (c2 == 't') {
-                        buf.append("\t");
-                    } else if (c2 == '@' && in_smart_quote) {
-                        buf.append("\\@");
-                    } else if (c2 == '0') {
-                        buf.append('\0');
-                    } else if (c2 == 'f') {
-                        // Form feed
-                        buf.append("\f");
-                    } else if (c2 == 'v') {
-                        // Vertical tab
-                        buf.append("\u000B");
-                    } else if (c2 == 'a') {
-                        // Alarm
-                        buf.append("\u0007");
-                    } else if (c2 == 'b') {
-                        buf.append("\u0008");
-                    } else if (c2 == 'u') {
-                        //Grab the next 4 characters, and check to see if they are numbers
-                        StringBuilder unicode = new StringBuilder();
-                        for (int m = 0; m < 4; m++) {
-                            unicode.append(script.charAt(i + 2 + m));
-                        }
-                        try {
-                            Integer.parseInt(unicode.toString(), 16);
-                        } catch (NumberFormatException e) {
-                            throw new ConfigCompileException("Unrecognized unicode escape sequence", target);
-                        }
-                        buf.append(Character.toChars(Integer.parseInt(unicode.toString(), 16)));
-                        i += 4;
-                    } else if (c2 == 'U') {
-                        //Grab the next 8 characters, and check to see if they are numbers
-                        StringBuilder unicode = new StringBuilder();
-                        for (int m = 0; m < 8; m++) {
-                            unicode.append(script.charAt(i + 2 + m));
-                        }
-                        try {
-                            Integer.parseInt(unicode.toString(), 16);
-                        } catch (NumberFormatException e) {
-                            throw new ConfigCompileException("Unrecognized unicode escape sequence", target);
-                        }
-                        buf.append(Character.toChars(Integer.parseInt(unicode.toString(), 16)));
-                        i += 8;
-                    } else {
-                        //Since we might expand this list later, don't let them
-                        //use unescaped backslashes
-                        throw new ConfigCompileException("The escape sequence \\" + c2 + " is not a recognized escape sequence", target);
-                    }
-
-                    i++;
-                    continue;
-                } else {
-                    //Control character backslash
-                    token_list.add(new Token(TType.SEPERATOR, "\\", target));
-                }
-            } else if (state_in_quote) {
-                buf.append(c);
-                continue;
-            } else if (c == '\n' && !comment_is_block) {
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuilder();
-                    target = new Target(line_num, file, column);
-                }
-                token_list.add(new Token(TType.NEWLINE, "\n", target));
-                in_comment = false;
-                comment_is_block = false;
-                continue;
-            } else { //in a literal
-		if(c == '\u00A0'/*nbsp*/) {
-		    throw new ConfigCompileException("NBSP character in script", target);
+	/**
+	 * Lexes the script, and turns it into a token stream. This looks through the script character by character.
+	 *
+	 * @param script The script to lex
+	 * @param file The file this script came from, or potentially null if the code is from a dynamic source
+	 * @param inPureMScript If the script is in pure MethodScript, this should be true. Pure MethodScript is defined as
+	 * code that doesn't have command alias wrappers.
+	 * @param saveAllTokens If this script is planning to be compiled, then this value should always be false, however,
+	 * if the calling code needs all tokens for informational purposes (and doesn't plan on actually compiling the code)
+	 * then this can be true. If true, all tokens are saved, including comments and (some) whitespace. Given this lexing
+	 * stream, the exact source code could be re-constructed.
+	 *
+	 * A note on whitespace: The whitespace tokens are not guaranteed to be accurate, however, the column information
+	 * is. If you have two tokens t1 and t2, each with a value of length 1, where the columns are 1 and 5, then that
+	 * means there are 4 spaces between the two.
+	 * @return A stream of tokens
+	 * @throws ConfigCompileException If compilation fails due to bad syntax
+	 */
+	public static TokenStream lex(String script, File file, boolean inPureMScript, boolean saveAllTokens) throws ConfigCompileException {
+		if(script.isEmpty()) {
+			return new TokenStream(new ArrayList<>(), "");
 		}
-                buf.append(c);
-                continue;
-            }
-        } //end lexing
-        if (state_in_quote) {
-            if (in_smart_quote) {
-                throw new ConfigCompileException("Unended string literal. You started the last double quote on line " + smartQuoteLineNumberStart, target);
-            } else {
-                throw new ConfigCompileException("Unended string literal. You started the last single quote on line " + quoteLineNumberStart, target);
-            }
-        }
-        if (in_comment || comment_is_block) {
-            throw new ConfigCompileException("Unended block comment. You started the comment on line " + commentLineNumberStart, target);
-        }
-        //look at the tokens, and get meaning from them. Also, look for improper symbol locations,
-        //and go ahead and absorb unary +- into the token
-        for (int i = 0; i < token_list.size(); i++) {
-            Token t = token_list.get(i);
-            Token prev2 = i - 2 >= 0 ? token_list.get(i - 2) : new Token(TType.UNKNOWN, "", t.target);
-            Token prev1 = i - 1 >= 0 ? token_list.get(i - 1) : new Token(TType.UNKNOWN, "", t.target);
-            Token next = i + 1 < token_list.size() ? token_list.get(i + 1) : new Token(TType.UNKNOWN, "", t.target);
+		if((int) script.charAt(0) == 65279) {
+			// Remove the UTF-8 Byte Order Mark, if present.
+			script = script.substring(1);
+		}
+		StringBuilder fileOptions = new StringBuilder();
+		StringBuilder fileOptionsBuf = null;
+		script = script.replaceAll("\r\n", "\n");
+		script = script + "\n";
+		Set<String> keywords = KeywordList.getKeywordNames();
+		List<Token> token_list = new ArrayList<>();
+		
+		// Set our state variables.
+		boolean state_in_quote = false;
+		int quoteLineNumberStart = 1;
+		boolean in_smart_quote = false;
+		int smartQuoteLineNumberStart = 1;
+		boolean in_comment = false;
+		int commentLineNumberStart = 1;
+		boolean comment_is_block = false;
+		boolean in_opt_var = false;
+		boolean inCommand = (!inPureMScript);
+		boolean inMultiline = false;
+		boolean in_hash_comment = false;
+		boolean in_smart_comment = false;
+		boolean in_file_options = false;
+		int fileOptionsLineNumberStart = 1;
+		
+		StringBuilder buf = new StringBuilder();
+		int line_num = 1;
+		int column = 1;
+		int lastColumn = 0;
+		Target target = Target.UNKNOWN;
+		
+		// Lex the script character by character.
+		for(int i = 0; i < script.length(); i++) {
+			Character c = script.charAt(i);
+			Character c2 = null;
+			if(i < script.length() - 1) {
+				c2 = script.charAt(i + 1);
+			}
+			
+			column += i - lastColumn;
+			lastColumn = i;
+			if(c == '\n') {
+				line_num++;
+				column = 1;
+				if(!inMultiline && !inPureMScript) {
+					inCommand = true;
+				}
+			}
+			if(buf.length() == 0) {
+				target = new Target(line_num, file, column);
+			}
+			
+			// Comment handling. This is bypassed if we are in a string.
+			if(!state_in_quote && !in_smart_quote) {
+				switch(c) {
+					
+					// Block comments start (/* and /**) and Double slash line comment start (//).
+					case '/': {
+						if(!in_comment) {
+							if(c2 == '*') { // "/*" or "/**".
+								buf.append("/*");
+								in_comment = true;
+								comment_is_block = true;
+								if(i < script.length() - 2 && script.charAt(i + 2) == '*') { // "/**".
+									in_smart_comment = true;
+									buf.append("*");
+									i++;
+								}
+								commentLineNumberStart = line_num;
+								i++;
+								
+								// Handle file option tokens.
+								if(saveAllTokens && fileOptionsBuf != null && fileOptionsBuf.length() > 0) {
+									token_list.add(new Token(
+											TType.FILE_OPTIONS_STRING, fileOptionsBuf.toString(), target));
+									fileOptions.append(fileOptionsBuf);
+									fileOptionsBuf = new StringBuilder();
+								}
+								
+								continue;
+							} else if(c2 == '/') { // "//".
+								buf.append("//");
+								in_comment = true;
+								comment_is_block = false;
+								i++;
+								
+								// Handle file option tokens.
+								if(saveAllTokens && fileOptionsBuf != null && fileOptionsBuf.length() > 0) {
+									token_list.add(new Token(
+											TType.FILE_OPTIONS_STRING, fileOptionsBuf.toString(), target));
+									fileOptions.append(fileOptionsBuf);
+									fileOptionsBuf = new StringBuilder();
+								}
+								
+								continue;
+							}
+						}
+						break;
+					}
+					
+					// Line comment start (#).
+					case '#': {
+						if(!in_comment) { // "#".
+							buf.append("#");
+							in_comment = true;
+							comment_is_block = false;
+							in_hash_comment = true;
+							
+							// Handle file option tokens.
+							if(saveAllTokens && fileOptionsBuf != null && fileOptionsBuf.length() > 0) {
+								token_list.add(new Token(
+										TType.FILE_OPTIONS_STRING, fileOptionsBuf.toString(), target));
+								fileOptions.append(fileOptionsBuf);
+								fileOptionsBuf = new StringBuilder();
+							}
+							
+							continue;
+						}
+						break;
+					}
+					
+					// Block comment end (*/).
+					case '*': {
+						if(in_comment && comment_is_block && c2 == '/') { // "*/".
+							if(saveAllTokens || in_smart_comment) {
+								buf.append("*/");
+								token_list.add(new Token(in_smart_comment ? TType.SMART_COMMENT : TType.COMMENT,
+										buf.toString(), target));
+							}
+							buf = new StringBuilder();
+							target = new Target(line_num, file, column);
+							in_comment = false;
+							comment_is_block = false;
+							in_smart_comment = false;
+							i++;
+							continue;
+						}
+						break;
+					}
+					
+					// Line comment end (\n).
+					case '\n': {
+						if(in_comment && !comment_is_block) { // "\n".
+							in_comment = false;
+							in_hash_comment = false;
+							if(saveAllTokens) {
+								token_list.add(new Token(TType.COMMENT, buf.toString(), target));
+								token_list.add(new Token(TType.NEWLINE, "\n", new Target(line_num + 1, file, 0)));
+							}
+							buf = new StringBuilder();
+							target = new Target(line_num, file, column);
+							continue;
+						}
+						break;
+					}
+				}
+			}
+			
+			// If we are in a comment, add the character to the buffer.
+			if(in_comment) {
+				buf.append(c);
+				continue;
+			}
+			
+			// If we are in file options, add the character to the buffer if it's not a file options end character.
+			if(in_file_options) {
+				// For a '>' character outside of a comment, '\>' would have to be used in file options.
+				// Other characters than '>'cannot be escaped.
+				// If support for more escaped characters would be desired in the future, it could be added here.
+				switch(c) {
+					case '\\': {
+						if(c2 == '>') { // "\>".
+							fileOptions.append('>');
+							i++;
+							continue;
+						}
+					}
+					case '>': {
+						if(saveAllTokens) {
+							token_list.add(new Token(TType.FILE_OPTIONS_STRING, fileOptionsBuf.toString(), target));
+							token_list.add(new Token(TType.FILE_OPTIONS_END, ">", target));
+						}
+						fileOptions.append(fileOptionsBuf);
+						fileOptionsBuf = null;
+						in_file_options = false;
+						continue;
+					}
+				}
+				fileOptions.append(c);
+				continue;
+			}
+			
+			// Handle non-comment non-quoted characters.
+			if(!state_in_quote) {
+				// We're not in a comment or quoted string, handle: +=, -=, *=, /=, .=, ->, ++, --, %, **, *, +, -, /,
+				// >=, <=, <<<, >>>, <, >, ===, !==, ==, !=, &&&, |||, &&, ||, !, {, }, .., ., ::, [, =, ], :, comma,
+				// (, ), ;, and whitespace.
+				matched: {
+					Token token;
+					switch(c) {
+						case '+': {
+							if(c2 == '=') { // "+=".
+								token = new Token(TType.PLUS_ASSIGNMENT, "+=", target);
+								i++;
+							} else if(c2 == '+') { // "++".
+								token = new Token(TType.INCREMENT, "++", target);
+								i++;
+							} else { // "+".
+								token = new Token(TType.PLUS, "+", target);
+							}
+							break;
+						}
+						case '-': {
+							if(c2 == '=') { // "-=".
+								token = new Token(TType.MINUS_ASSIGNMENT, "-=", target);
+								i++;
+							} else if(c2 == '-') { // "--".
+								token = new Token(TType.DECREMENT, "--", target);
+								i++;
+							} else if(c2 == '>') { // "->".
+								token = new Token(TType.DEREFERENCE, "->", target);
+								i++;
+							} else { // "-".
+								token = new Token(TType.MINUS, "-", target);
+							}
+							break;
+						}
+						case '*': {
+							if(c2 == '=') { // "*=".
+								token = new Token(TType.MULTIPLICATION_ASSIGNMENT, "*=", target);
+								i++;
+							} else if(c2 == '*') { // "**".
+								token = new Token(TType.EXPONENTIAL, "**", target);
+								i++;
+							} else { // "*".
+								token = new Token(TType.MULTIPLICATION, "*", target);
+							}
+							break;
+						}
+						case '/': {
+							if(c2 == '=') { // "/=".
+								token = new Token(TType.DIVISION_ASSIGNMENT, "/=", target);
+								i++;
+							} else { // "/".
+								// Protect against matching commands.
+								if(Character.isLetter(c2)) {
+									break matched; // Pretend that division didn't match.
+								}
+								token = new Token(TType.DIVISION, "/", target);
+							}
+							break;
+						}
+						case '.': {
+							if(c2 == '=') { // ".=".
+								token = new Token(TType.CONCAT_ASSIGNMENT, ".=", target);
+								i++;
+							} else if(c2 == '.') { // "..".
+								token = new Token(TType.SLICE, "..", target);
+								i++;
+							} else { // ".".
+								token = new Token(TType.DOT, ".", target);
+							}
+							break;
+						}
+						case '%': {
+							token = new Token(TType.MODULO, "%", target);
+							break;
+						}
+						case '>': {
+							if(c2 == '=') { // ">=".
+								token = new Token(TType.GTE, ">=", target);
+								i++;
+							} else if(c2 == '>' && i < script.length() - 2 && script.charAt(i + 2) == '>') { // ">>>".
+								token = new Token(TType.MULTILINE_START, ">>>", target);
+								inMultiline = true;
+								i += 2;
+							} else { // ">".
+								token = new Token(TType.GT, ">", target);
+							}
+							break;
+						}
+						case '<': {
+							if(c2 == '!') { // "<!".
+								if(line_num != 1 || column != 1) {
+									throw new ConfigCompileException(
+											"File options start is only allowed at the top of a file", target);
+								}
+								
+								// Add previous characters as UNKNOWN token. Note that this will never happen as long
+								// as '<!' has to be the first token in a script, but this is more update proof.
+								if(buf.length() > 0) {
+									token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+									buf = new StringBuilder();
+									target = new Target(line_num, file, column);
+								}
+								
+								if(saveAllTokens) {
+									token_list.add(new Token(TType.FILE_OPTIONS_START, "<!", target));
+								}
+								fileOptionsBuf = new StringBuilder();
+								in_file_options = true;
+								fileOptionsLineNumberStart = line_num;
+								i++;
+								continue;
+							} else if(c2 == '=') { // "<=".
+								token = new Token(TType.LTE, "<=", target);
+								i++;
+							} else if(c2 == '<' && i < script.length() - 2 && script.charAt(i + 2) == '<') { // "<<<".
+								token = new Token(TType.MULTILINE_END, "<<<", target);
+								inMultiline = false;
+								i += 2;
+							} else { // "<".
+								token = new Token(TType.LT, "<", target);
+							}
+							break;
+						}
+						case '=': {
+							if(c2 == '=') {
+								if(i < script.length() - 2 && script.charAt(i + 2) == '=') { // "===".
+									token = new Token(TType.STRICT_EQUALS, "===", target);
+									i += 2;
+								} else { // "==".
+									token = new Token(TType.EQUALS, "==", target);
+									i++;
+								}
+							} else { // "=".
+								if(inCommand) {
+									if(in_opt_var) {
+										token = new Token(TType.OPT_VAR_ASSIGN, "=", target);
+									} else {
+										token = new Token(TType.ALIAS_END, "=", target);
+										inCommand = false;
+									}
+								} else {
+									token = new Token(TType.ASSIGNMENT, "=", target);
+								}
+							}
+							break;
+						}
+						case '!': {
+							if(c2 == '=') {
+								if(i < script.length() - 2 && script.charAt(i + 2) == '=') { // "!==".
+									token = new Token(TType.STRICT_NOT_EQUALS, "!==", target);
+									i += 2;
+								} else { // "!=".
+									token = new Token(TType.NOT_EQUALS, "!=", target);
+									i++;
+								}
+							} else { // "!".
+								token = new Token(TType.LOGICAL_NOT, "!", target);
+							}
+							break;
+						}
+						case '&': {
+							if(c2 == '&') {
+								if(i < script.length() - 2 && script.charAt(i + 2) == '&') { // "&&&".
+									token = new Token(TType.DEFAULT_AND, "&&&", target);
+									i += 2;
+								} else { // "&&".
+									token = new Token(TType.LOGICAL_AND, "&&", target);
+									i++;
+								}
+							} else { // "&".
+								// Bitwise symbols are not used yet.
+								break matched; // Pretend that bitwise AND didn't match.
+//								token = new Token(TType.BIT_AND, "&", target);
+							}
+							break;
+						}
+						case '|': {
+							if(c2 == '|') {
+								if(i < script.length() - 2 && script.charAt(i + 2) == '|') { // "|||".
+									token = new Token(TType.DEFAULT_OR, "|||", target);
+									i += 2;
+								} else { // "||".
+									token = new Token(TType.LOGICAL_OR, "||", target);
+									i++;
+								}
+							} else { // "|".
+								// Bitwise symbols are not used yet.
+								break matched; // Pretend that bitwise OR didn't match.
+//								token = new Token(TType.BIT_OR, "|", target);
+							}
+							break;
+						}
+						// Bitwise symbols are not used yet.
+//						case '^': {
+//							token = new Token(TType.BIT_XOR, "^", target);
+//							break;
+//						}
+						case ':': {
+							if(c2 == ':') { // "::".
+								token = new Token(TType.DEREFERENCE, "::", target);
+								i++;
+							} else { // ":".
+								token = new Token(TType.LABEL, ":", target);
+							}
+							break;
+						}
+						case '{': {
+							token = new Token(TType.LCURLY_BRACKET, "{", target);
+							break;
+						}
+						case '}': {
+							token = new Token(TType.RCURLY_BRACKET, "}", target);
+							break;
+						}
+						case '[': {
+							token = new Token(TType.LSQUARE_BRACKET, "[", target);
+							in_opt_var = true;
+							break;
+						}
+						case ']': {
+							token = new Token(TType.RSQUARE_BRACKET, "]", target);
+							in_opt_var = false;
+							break;
+						}
+						case ',': {
+							token = new Token(TType.COMMA, ",", target);
+							break;
+						}
+						case ';': {
+							token = new Token(TType.SEMICOLON, ";", target);
+							break;
+						}
+						case '(': {
+							token = new Token(TType.FUNC_START, "(", target);
+							
+							// Handle the buffer or previous token, with the knowledge that a FUNC_START follows.
+							if(buf.length() > 0) {
+								if(saveAllTokens) {
+									// In this case, we need to check for keywords first, because we want to go ahead
+									// and convert into that stage. In the future, we might want to do this
+									// unconditionally, but for now, just go ahead and only do it if saveAllTokens is
+									// true, because we know that won't be used by the compiler.
+									if(KeywordList.getKeywordByName(buf.toString()) != null) {
+										// It's a keyword.
+										token_list.add(new Token(TType.KEYWORD, buf.toString(), target));
+									} else {
+										// It's not a keyword, but a normal function.
+										token_list.add(new Token(TType.FUNC_NAME, buf.toString(), target));
+									}
+								} else {
+									token_list.add(new Token(TType.FUNC_NAME, buf.toString(), target));
+								}
+								buf = new StringBuilder();
+								target = new Target(line_num, file, column);
+							} else {
+								// The previous token, if unknown, should be changed to a FUNC_NAME. If it's not
+								// unknown, we may be doing standalone parenthesis, so auto tack on the __autoconcat__
+								// function.
+								try {
+									int count = 1;
+									while(token_list.get(token_list.size() - count).type == TType.WHITESPACE) {
+										count++;
+									}
+									if(token_list.get(token_list.size() - count).type == TType.UNKNOWN) {
+										token_list.get(token_list.size() - count).type = TType.FUNC_NAME;
+										// Go ahead and remove the whitespace here too, they break things.
+										count--;
+										for(int a = 0; a < count; a++) {
+											token_list.remove(token_list.size() - 1);
+										}
+									} else {
+										token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
+									}
+								} catch (IndexOutOfBoundsException e) {
+									// This is the first element on the list, so, it's another autoconcat.
+									token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
+								}
+							}
+							break;
+						}
+						case ')': {
+							token = new Token(TType.FUNC_END, ")", target);
+							break;
+						}
+						case ' ': { // Whitespace case #1.
+							token = new Token(TType.WHITESPACE, " ", target);
+							break;
+						}
+						case '\t': { // Whitespace case #2 (TAB).
+							token = new Token(TType.WHITESPACE, "\t", target);
+							break;
+						}
+						default: {
+							// No match was found at this point, so continue matching below.
+							break matched;
+						}
+					}
+					
+					// Add previous characters as UNKNOWN token.
+					if(buf.length() > 0) {
+						token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+						buf = new StringBuilder();
+						target = new Target(line_num, file, column);
+					}
+					
+					// Add the new token to the token list.
+					token_list.add(token);
+					
+					// Continue lexing.
+					continue;
+				}
+			}
+			
+			// Handle non-comment characters that might start or stop a quoted string.
+			switch(c) {
+				case '\'': {
+					if(state_in_quote && !in_smart_quote) {
+						token_list.add(new Token(TType.STRING, buf.toString(), target));
+						buf = new StringBuilder();
+						target = new Target(line_num, file, column);
+						state_in_quote = false;
+						continue;
+					} else if(!state_in_quote) {
+						state_in_quote = true;
+						quoteLineNumberStart = line_num;
+						in_smart_quote = false;
+						if(buf.length() > 0) {
+							token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+							buf = new StringBuilder();
+							target = new Target(line_num, file, column);
+						}
+						continue;
+					} else {
+						// We're in a smart quote.
+						buf.append("'");
+					}
+					break;
+				}
+				case '"': {
+					if(state_in_quote && in_smart_quote) {
+						token_list.add(new Token(TType.SMART_STRING, buf.toString(), target));
+						buf = new StringBuilder();
+						target = new Target(line_num, file, column);
+						state_in_quote = false;
+						in_smart_quote = false;
+						continue;
+					} else if(!state_in_quote) {
+						state_in_quote = true;
+						in_smart_quote = true;
+						smartQuoteLineNumberStart = line_num;
+						if(buf.length() > 0) {
+							token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+							buf = new StringBuilder();
+							target = new Target(line_num, file, column);
+						}
+						continue;
+					} else {
+						// We're in normal quotes.
+						buf.append('"');
+					}
+					break;
+				}
+				case '\n': {
+					
+					// Append a newline to the buffer if it's quoted.
+					if(state_in_quote) {
+						buf.append(c);
+					} else {
+						// Newline is not quoted. Move the buffer to an UNKNOWN token and add a NEWLINE token.
+						if(buf.length() > 0) {
+							token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+							buf = new StringBuilder();
+							target = new Target(line_num, file, column);
+						}
+						token_list.add(new Token(TType.NEWLINE, "\n", target));
+					}
+					continue;
+				}
+				case '\\': {
+					// Handle escaped characters in quotes or a single "\" seperator token otherwise.
+					
+					// Handle backslash character outside of quotes.
+					if(!state_in_quote) {
+						token_list.add(new Token(TType.SEPERATOR, "\\", target));
+						break;
+					}
+					
+					// Handle an escape sign in a quote.
+					switch(c2) {
+						case '\\':
+						case '\'':
+						case '"' : buf.append(c2);   break;
+						case 'n': buf.append('\n'); break;
+						case 'r': buf.append('\r'); break;
+						case 't': buf.append('\t'); break;
+						case '0' : buf.append('\0'); break;
+						case 'f' : buf.append('\f'); break; // Form feed.
+						case 'v' : buf.append('\u000B'); break; // Vertical TAB.
+						case 'a' : buf.append('\u0007'); break; // Alarm.
+						case 'b' : buf.append('\u0008'); break; // Backspace.
+						case 'u' : { // Unicode (4 characters).
+							// Grab the next 4 characters, and check to see if they are numbers.
+							if(i + 5 >= script.length()) {
+								throw new ConfigCompileException("Unrecognized unicode escape sequence", target);
+							}
+							String unicode = script.substring(i + 2, i + 6);
+							int unicodeNum;
+							try {
+								unicodeNum = Integer.parseInt(unicode, 16);
+							} catch (NumberFormatException e) {
+								throw new ConfigCompileException(
+										"Unrecognized unicode escape sequence: \\u" + unicode, target);
+							}
+							buf.append(Character.toChars(unicodeNum));
+							i += 4;
+							break;
+						}
+						case 'U' : { // Unicode (8 characters).
+							// Grab the next 8 characters and check to see if they are numbers.
+							if(i + 9 >= script.length()) {
+								throw new ConfigCompileException("Unrecognized unicode escape sequence", target);
+							}
+							String unicode = script.substring(i + 2, i + 10);
+							int unicodeNum;
+							try {
+								unicodeNum = Integer.parseInt(unicode, 16);
+							} catch (NumberFormatException e) {
+								throw new ConfigCompileException(
+										"Unrecognized unicode escape sequence: \\u" + unicode, target);
+							}
+							buf.append(Character.toChars(unicodeNum));
+							i += 8;
+							break;
+						}
+						case '@': {
+							if(!in_smart_quote) {
+								throw new ConfigCompileException("The escape sequence \\@ is not"
+										+ " a recognized escape sequence in a non-smart string", target);
+							}
+							buf.append("\\@");
+							break;
+						}
+						default: {
+							// Since we might expand this list later, don't let them use unescaped backslashes.
+							throw new ConfigCompileException(
+									"The escape sequence \\" + c2 + " is not a recognized escape sequence", target);
+						}
+					}
+					i++;
+					continue;
+				}
+				default: {
+					
+					// At this point, only non-comment and non-escaped characters that are not part of a
+					// quote start/end are left.
+					// Disallow Non-Breaking Space Characters.
+					if(!state_in_quote && c == '\u00A0'/*nbsp*/) {
+						throw new ConfigCompileException("NBSP character in script", target);
+					}
+					
+					// Add the characters that didn't match anything to the buffer.
+					buf.append(c);
+					continue;
+				}
+			}
+		} // End of lexing.
+		
+		// Handle unended file options.
+		if(in_file_options) {
+			throw new ConfigCompileException("Unended file options. You started the the file options on line "
+					+ fileOptionsLineNumberStart, target);
+		}
+		
+		// Handle unended string literals.
+		if(state_in_quote) {
+			if(in_smart_quote) {
+				throw new ConfigCompileException("Unended string literal. You started the last double quote on line "
+						+ smartQuoteLineNumberStart, target);
+			} else {
+				throw new ConfigCompileException("Unended string literal. You started the last single quote on line "
+						+ quoteLineNumberStart, target);
+			}
+		}
+		
+		// Handle unended comment blocks. Since a newline is added to the end of the script, line comments are ended.
+		if(in_comment || comment_is_block) {
+			throw new ConfigCompileException("Unended block comment. You started the comment on line "
+					+ commentLineNumberStart, target);
+		}
+		
+		// Look at the tokens and get meaning from them. Also, look for improper symbol locations
+		// and go ahead and absorb unary +- into the token.
+		for(int i = 0; i < token_list.size(); i++) {
+			Token t = token_list.get(i);
+			Token prev2 = i - 2 >= 0 ? token_list.get(i - 2) : new Token(TType.UNKNOWN, "", t.target);
+			Token prev1 = i - 1 >= 0 ? token_list.get(i - 1) : new Token(TType.UNKNOWN, "", t.target);
+			Token next = i + 1 < token_list.size() ? token_list.get(i + 1) : new Token(TType.UNKNOWN, "", t.target);
 
-            // Combine whitespace tokens into one
-            if (t.type == TType.WHITESPACE && next.type == TType.WHITESPACE) {
-                t = new Token(TType.WHITESPACE, t.val() + next.val(), t.target);
-                token_list.set(i, t);
-                token_list.remove(i + 1);
-                i--; // rescan this token
-                continue;
-            }
-
-            if (t.type == TType.UNKNOWN && prev1.type.isPlusMinus() && !prev2.type.isIdentifier()
-                    && !prev2.type.equals(TType.FUNC_END)
-                    && !IVAR_PATTERN.matcher(t.val()).matches()
-                    && !VAR_PATTERN.matcher(t.val()).matches()) { // Last boolean makes -@b equal to - @b, instead of a string.
-                //It is a negative/positive number. Absorb the sign
-                t.value = prev1.value + t.value;
-                token_list.remove(i - 1);
-                i--;
-            }
-
-            if (t.type.equals(TType.UNKNOWN)) {
-                if (t.val().charAt(0) == '/' && t.val().length() > 1) {
-                    t.type = TType.COMMAND;
-                } else if (VAR_PATTERN.matcher(t.val()).matches()) {
-                    t.type = TType.VARIABLE;
-                } else if (IVAR_PATTERN.matcher(t.val()).matches()) {
-                    t.type = TType.IVARIABLE;
-                } else if (t.val().charAt(0) == '@') {
-                    throw new ConfigCompileException("IVariables must match the regex: " + IVAR_PATTERN, target);
-                } else if (t.val().equals("$")) {
-                    t.type = TType.FINAL_VAR;
-                } else if (keywords.contains(t.val())) {
-                    t.type = TType.KEYWORD;
-                } else if (t.val().matches("[\t ]*")) {
-                    t.type = TType.WHITESPACE;
-                } else {
-                    t.type = TType.LIT;
-                }
-            }
-            //Skip this check if we're not in pure mscript
-            if (inPureMScript) {
-                if (t.type.isSymbol() && !t.type.isUnary() && !next.type.isUnary()) {
-                    if (prev1.type.equals(TType.FUNC_START) || prev1.type.equals(TType.COMMA)
-                            || next.type.equals(TType.FUNC_END) || next.type.equals(TType.COMMA)
-                            || prev1.type.isSymbol() || next.type.isSymbol()) {
-                        throw new ConfigCompileException("Unexpected symbol (" + t.val() + ")", t.getTarget());
-                    }
-                }
-            }
-
-        }
-        return new TokenStream(token_list, fileOptions);
-    }
+			// Combine whitespace tokens into one.
+			if(t.type == TType.WHITESPACE && next.type == TType.WHITESPACE) {
+				t.value += next.val();
+				token_list.remove(i + 1);
+				i--; // rescan this token
+				continue;
+			}
+			
+			// Convert "-" + number to -number if allowed.
+			if(t.type == TType.UNKNOWN && prev1.type.isPlusMinus() // Convert "± UNKNOWN".
+					&& !prev2.type.isIdentifier() // Don't convert "number/string/var ± ...".
+					&& !prev2.type.equals(TType.FUNC_END) // Don't convert "func() ± ...".
+					&& !IVAR_PATTERN.matcher(t.val()).matches() // Don't convert "± @var".
+					&& !VAR_PATTERN.matcher(t.val()).matches()) { // Don't convert "± $var".
+				// It is a negative/positive number: Absorb the sign.
+				t.value = prev1.value + t.value;
+				token_list.remove(i - 1);
+				i--;
+			}
+			
+			// Assign a type to all UNKNOWN tokens.
+			if(t.type == TType.UNKNOWN) {
+				if(t.val().charAt(0) == '/' && t.val().length() > 1) {
+					t.type = TType.COMMAND;
+				} else if(t.val().equals("$")) {
+					t.type = TType.FINAL_VAR;
+				} else if(VAR_PATTERN.matcher(t.val()).matches()) {
+					t.type = TType.VARIABLE;
+				} else if(IVAR_PATTERN.matcher(t.val()).matches()) {
+					t.type = TType.IVARIABLE;
+				} else if(t.val().charAt(0) == '@') {
+					throw new ConfigCompileException("IVariables must match the regex: " + IVAR_PATTERN, target);
+				} else if(keywords.contains(t.val())) {
+					t.type = TType.KEYWORD;
+				} else if(t.val().matches("[\t ]*")) {
+					t.type = TType.WHITESPACE;
+				} else {
+					t.type = TType.LIT;
+				}
+			}
+			
+			// Skip this check if we're not in pure mscript.
+			if(inPureMScript) {
+				if(t.type.isSymbol() && !t.type.isUnary() && !next.type.isUnary()) {
+					if(prev1.type.equals(TType.FUNC_START) || prev1.type.equals(TType.COMMA)
+							|| next.type.equals(TType.FUNC_END) || next.type.equals(TType.COMMA)
+							|| prev1.type.isSymbol() || next.type.isSymbol()) {
+						throw new ConfigCompileException("Unexpected symbol (" + t.val() + ")", t.getTarget());
+					}
+				}
+			}
+			
+		}
+		
+		// Return the result.
+		return new TokenStream(token_list, fileOptions.toString());
+	}
 
     /**
      * This function breaks the token stream into parts, separating the aliases/MethodScript from the command triggers
