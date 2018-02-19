@@ -113,12 +113,12 @@ public final class MethodScriptCompiler {
 			// Remove the UTF-8 Byte Order Mark, if present.
 			script = script.substring(1);
 		}
-		StringBuilder fileOptions = new StringBuilder();
+		final StringBuilder fileOptions = new StringBuilder();
 		StringBuilder fileOptionsBuf = null;
 		script = script.replaceAll("\r\n", "\n");
 		script = script + "\n";
-		Set<String> keywords = KeywordList.getKeywordNames();
-		List<Token> token_list = new ArrayList<>();
+		final Set<String> keywords = KeywordList.getKeywordNames();
+		final List<Token> token_list = new ArrayList<>();
 		
 		// Set our state variables.
 		boolean state_in_quote = false;
@@ -131,7 +131,6 @@ public final class MethodScriptCompiler {
 		boolean in_opt_var = false;
 		boolean inCommand = (!inPureMScript);
 		boolean inMultiline = false;
-		boolean in_hash_comment = false;
 		boolean in_smart_comment = false;
 		boolean in_file_options = false;
 		int fileOptionsLineNumberStart = 1;
@@ -194,7 +193,6 @@ public final class MethodScriptCompiler {
 							} else if(c2 == '/') { // "//".
 								buf.append("//");
 								in_comment = true;
-								comment_is_block = false;
 								i++;
 								
 								// Handle file option tokens.
@@ -216,8 +214,6 @@ public final class MethodScriptCompiler {
 						if(!in_comment) { // "#".
 							buf.append("#");
 							in_comment = true;
-							comment_is_block = false;
-							in_hash_comment = true;
 							
 							// Handle file option tokens.
 							if(saveAllTokens && fileOptionsBuf != null && fileOptionsBuf.length() > 0) {
@@ -255,7 +251,6 @@ public final class MethodScriptCompiler {
 					case '\n': {
 						if(in_comment && !comment_is_block) { // "\n".
 							in_comment = false;
-							in_hash_comment = false;
 							if(saveAllTokens) {
 								token_list.add(new Token(TType.COMMENT, buf.toString(), target));
 								token_list.add(new Token(TType.NEWLINE, "\n", new Target(line_num + 1, file, 0)));
