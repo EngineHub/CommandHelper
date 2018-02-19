@@ -52,6 +52,7 @@ import java.util.EmptyStackException;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -855,136 +856,167 @@ public final class MethodScriptCompiler {
 		return new TokenStream(token_list, fileOptions.toString());
 	}
 
-    /**
-     * This function breaks the token stream into parts, separating the aliases/MethodScript from the command triggers
-     *
-     * @param tokenStream
-     * @return
-     * @throws ConfigCompileException
-     */
-    public static List<Script> preprocess(TokenStream tokenStream) throws ConfigCompileException {
-        if (tokenStream == null || tokenStream.isEmpty()) {
-            return new ArrayList<>();
-        }
-        //First, pull out the duplicate newlines
-        ArrayList<Token> temp = new ArrayList<>();
-        for (int i = 0; i < tokenStream.size(); i++) {
-            try {
-                if (tokenStream.get(i).type.equals(TType.NEWLINE)) {
-                    temp.add(new Token(TType.NEWLINE, "\n", tokenStream.get(i).target));
-                    while (tokenStream.get(++i).type.equals(TType.NEWLINE)) {
-                    }
-                }
-                if (tokenStream.get(i).type != TType.WHITESPACE) {
-                    temp.add(tokenStream.get(i));
-                }
-            } catch (IndexOutOfBoundsException e) {
-            }
-        }
-
-        if (temp.size() > 0 && temp.get(0).type.equals(TType.NEWLINE)) {
-            temp.remove(0);
-        }
-
-        tokenStream.clear();
-        tokenStream.addAll(temp);
-
-        //Handle multiline constructs
-        ArrayList<Token> tokens1_1 = new ArrayList<>();
-        boolean inside_multiline = false;
-        Token thisToken = null;
-        for (int i = 0; i < tokenStream.size(); i++) {
-            Token prevToken = i - 1 >= tokenStream.size() ? tokenStream.get(i - 1) : new Token(TType.UNKNOWN, "", Target.UNKNOWN);
-            thisToken = tokenStream.get(i);
-            Token nextToken = i + 1 < tokenStream.size() ? tokenStream.get(i + 1) : new Token(TType.UNKNOWN, "", Target.UNKNOWN);
-            //take out newlines between the = >>> and <<< tokens (also the tokens)
-            if (thisToken.type.equals(TType.ALIAS_END) && nextToken.val().equals(">>>")) {
-                inside_multiline = true;
-                tokens1_1.add(thisToken);
-                i++;
-                continue;
-            }
-            if (thisToken.val().equals("<<<")) {
-                if (!inside_multiline) {
-                    throw new ConfigCompileException("Found multiline end symbol, and no multiline start found",
-                            thisToken.target);
-                }
-                inside_multiline = false;
-                continue;
-            }
-            if (thisToken.val().equals(">>>") && inside_multiline) {
-                throw new ConfigCompileException("Did not expect a multiline start symbol here, are you missing a multiline end symbol above this line?", thisToken.target);
-            }
-            if (thisToken.val().equals(">>>") && !prevToken.type.equals(TType.ALIAS_END)) {
-                throw new ConfigCompileException("Multiline symbol must follow the alias_end (=) symbol", thisToken.target);
-            }
-
-            //If we're not in a multiline construct, or we are in it and it's not a newline, add
-            //it
-            if (!inside_multiline || !thisToken.type.equals(TType.NEWLINE)) {
-                tokens1_1.add(thisToken);
-            }
-        }
-
-        assert thisToken != null;
-
-        if (inside_multiline) {
-            throw new ConfigCompileException("Expecting a multiline end symbol, but your last multiline alias appears to be missing one.", thisToken.target);
-        }
-
-        //take out newlines that are behind a \
-        ArrayList<Token> tokens2 = new ArrayList<>();
-        for (int i = 0; i < tokens1_1.size(); i++) {
-            // For now, just remove comments
-            if (tokens1_1.get(i).type.isComment()) {
-                tokens1_1.remove(i);
-                i--;
-                continue;
-            }
-            if (!tokens1_1.get(i).type.equals(TType.STRING) && tokens1_1.get(i).val().equals("\\") && tokens1_1.size() > i
-                    && tokens1_1.get(i + 1).type.equals(TType.NEWLINE)) {
-                tokens2.add(tokens1_1.get(i));
-                i++;
-                continue;
-            }
-            tokens2.add(tokens1_1.get(i));
-        }
-
-        //Now that we have all lines minified, we should be able to split
-        //on newlines, and easily find the left and right sides
-        List<Token> left = new ArrayList<>();
-        List<Token> right = new ArrayList<>();
-        List<Script> scripts = new ArrayList<>();
-        boolean inLeft = true;
-        for (Token t : tokens2) {
-            if (inLeft) {
-                if (t.type == TType.ALIAS_END) {
-                    inLeft = false;
-                } else {
-                    left.add(t);
-                }
-            } else if (t.type == TType.NEWLINE) {
-                inLeft = true;
-                // Check for spurious symbols, which indicate an issue with the
-                // script, but ignore any whitespace.
-                for (int j = left.size() - 1; j >= 0; j--) {
-                    if (left.get(j).type == TType.NEWLINE) {
-                        if (j > 0 && left.get(j - 1).type != TType.WHITESPACE) {
-                            throw new ConfigCompileException("Unexpected token: " + left.get(j - 1).val(), left.get(j - 1).getTarget());
-                        }
-                    }
-                }
-                Script s = new Script(left, right, null, tokenStream.getFileOptions());
-                scripts.add(s);
-                left = new ArrayList<>();
-                right = new ArrayList<>();
-            } else {
-                right.add(t);
-            }
-        }
-        return scripts;
-    }
-
+	/**
+	 * This function breaks the token stream into parts, separating the aliases/MethodScript from the command triggers
+	 *
+	 * @param tokenStream
+	 * @return
+	 * @throws ConfigCompileException
+	 */
+	public static List<Script> preprocess(TokenStream tokenStream) throws ConfigCompileException {
+		if(tokenStream == null || tokenStream.isEmpty()) {
+			return new ArrayList<>();
+		}
+		
+		// Remove leading and duplicate newlines.
+		int index = 0;
+		int startIndex = 0;
+		while(startIndex < tokenStream.size() && tokenStream.get(startIndex).type == TType.NEWLINE) {
+			startIndex++; // Skip leading newlines.
+		}
+		for(int i = startIndex; i < tokenStream.size(); i++) {
+			Token token = tokenStream.get(i);
+			if(token.type == TType.NEWLINE) {
+				while(i + 1 < tokenStream.size() && tokenStream.get(i + 1).type == TType.NEWLINE) {
+					i++; // Skip duplicate newlines.
+				}
+				tokenStream.set(index++, token);
+			} else if(token.type != TType.WHITESPACE) {
+				tokenStream.set(index++, token);
+			}
+		}
+		for(int i = tokenStream.size() - 1; i >= index; i--) {
+			tokenStream.remove(i); // Remove remaining handled tokens.
+		}
+		
+		// Handle multiline constructs.
+		// Take out newlines between the '= >>>' and '<<<' tokens (also removing the '>>>' and '<<<' tokens).
+		// Also remove comments and also remove newlines that are behind a '\'.
+		boolean inside_multiline = false;
+		Token token = null;
+		for(int i = 0; i < tokenStream.size(); i++) {
+			token = tokenStream.get(i);
+			
+			switch(token.type) {
+				case ALIAS_END: { // "=".
+					if(i + 1 < tokenStream.size() && tokenStream.get(i + 1).type == TType.MULTILINE_START) { // "= >>>".
+						inside_multiline = true;
+						tokenStream.remove(i + 1); // Remove multiline start (>>>).
+					}
+					continue;
+				}
+				case MULTILINE_END: { // "<<<".
+					
+					// Handle multiline end token (<<<) without start.
+					if(!inside_multiline) {
+						throw new ConfigCompileException(
+								"Found multiline end symbol, and no multiline start found", token.target);
+					}
+					
+					inside_multiline = false;
+					tokenStream.remove(i--); // Remove multiline end (<<<) and compensate for it in i.
+					continue;
+				}
+				case MULTILINE_START: { // ">>>".
+					
+					// Handle multiline start token (>>>) while already in multiline.
+					if(inside_multiline) {
+						throw new ConfigCompileException("Did not expect a multiline start symbol here,"
+								+ " are you missing a multiline end symbol above this line?", token.target);
+					}
+					
+					// Handle multiline start token (>>>) without alias end (=) in front.
+					if(i > 0 && tokenStream.get(i - 1).type != TType.ALIAS_END) {
+						throw new ConfigCompileException(
+								"Multiline symbol must follow the alias_end (=) symbol", token.target);
+					}
+					continue;
+				}
+				case NEWLINE: { // "\n".
+					
+					// Skip newlines that are inside a multiline construct.
+					if(inside_multiline) {
+						tokenStream.remove(i--); // Remove newline and compensate for it in i.
+					}
+					continue;
+				}
+				
+				// Remove comments.
+				case COMMENT:
+				case SMART_COMMENT: {
+					tokenStream.remove(i--); // Remove comment and compensate for it in i.
+					continue;
+				}
+				default: {
+					
+					// Remove newlines that are behind a '\'.
+					if(token.type != TType.STRING && token.val().equals("\\") && i + 1 < tokenStream.size()
+							&& tokenStream.get(i + 1).type == TType.NEWLINE) {
+						tokenStream.remove(i + 1); // Remove newline.
+					}
+				}
+			}
+		}
+		
+		assert token != null;
+		
+		// Handle missing multiline end token.
+		if(inside_multiline) {
+			throw new ConfigCompileException("Expecting a multiline end symbol, but your last multiline alias appears to be missing one.", token.target);
+		}
+		
+		// Now that we have all lines minified, we should be able to split on newlines
+		// and easily find the left and right sides.
+		List<Token> left = new ArrayList<>();
+		List<Token> right = new ArrayList<>();
+		List<Script> scripts = new ArrayList<>();
+		tokenLoop:
+		for(Iterator<Token> it = tokenStream.iterator(); it.hasNext();) {
+			Token t = it.next();
+			
+			// Add all tokens until ALIAS_END (=) or end of stream.
+			while(t.type != TType.ALIAS_END) {
+				if(!it.hasNext()) {
+					break tokenLoop; // End of stream.
+				}
+				left.add(t);
+				t = it.next();
+			}
+			
+			// Add all tokens until NEWLINE (\n).
+			while(t.type != TType.NEWLINE) {
+				assert it.hasNext(); // All files end with a newline, so end of stream should be impossible here.
+				right.add(t);
+				t = it.next();
+			}
+			
+			// Create a new script for the obtained left and right if end of stream has not been reached.
+			if(t.type == TType.NEWLINE) {
+				
+				// Check for spurious symbols, which indicate an issue with the script, but ignore any whitespace.
+				for(int j = left.size() - 1; j >= 0; j--) {
+					if(left.get(j).type == TType.NEWLINE) {
+						if(j > 0 && left.get(j - 1).type != TType.WHITESPACE) {
+							throw new ConfigCompileException(
+									"Unexpected token: " + left.get(j - 1).val(), left.get(j - 1).getTarget());
+						}
+					}
+				}
+				
+				// Create a new script from the command descriptor (left) and code (right) and add it to the list.
+				Script s = new Script(left, right, null, tokenStream.getFileOptions());
+				scripts.add(s);
+				
+				// Create new left and right array for the next script.
+				left = new ArrayList<>();
+				right = new ArrayList<>();
+			}
+		}
+		
+		// Return the scripts.
+		return scripts;
+	}
+	
     /**
      * Compiles the token stream into a valid ParseTree. This also includes optimization and reduction.
      *
@@ -995,7 +1027,6 @@ public final class MethodScriptCompiler {
      * methods may cause compile errors. Any function that can optimize static occurrences and throws a
      * {@link ConfigRuntimeException} will have that exception converted to a ConfigCompileException.
      */
-    @SuppressWarnings("UnnecessaryContinue")
     public static ParseTree compile(TokenStream stream) throws ConfigCompileException, ConfigCompileGroupException {
         Set<ConfigCompileException> compilerErrors = new HashSet<>();
         if (stream == null || stream.isEmpty()) {
@@ -1215,7 +1246,7 @@ public final class MethodScriptCompiler {
                     throw new ConfigCompileException("Unexpected parenthesis", t.target);
                 }
                 parens--;
-                ParseTree function = parents.pop();
+                parents.pop(); // Pop function.
                 if (constructCount.peek().get() > 1) {
                     //We need to autoconcat some stuff
                     int stacks = constructCount.peek().get();
@@ -1654,11 +1685,10 @@ public final class MethodScriptCompiler {
         // Walk the children
         for (ParseTree child : tree.getChildren()) {
             if (child.getData() instanceof CFunction) {
-                FunctionBase f = null;
                 if (child.getData().val().charAt(0) != '_' || child.getData().val().charAt(1) == '_') {
                     // This will throw an exception if the function doesn't exist.
                     try {
-                        f = FunctionList.getFunction(child.getData());
+                        FunctionList.getFunction(child.getData());
                     } catch (ConfigCompileException ex) {
                         compilerErrors.add(ex);
                     }
