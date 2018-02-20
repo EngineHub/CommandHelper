@@ -532,6 +532,71 @@ public class InventoryManagement {
 	}
 
 	@api(environments={CommandHelperEnvironment.class})
+	public static class clear_pinv extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "clear_pinv";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player]} Clears a player's entire inventory (including armor).";
+
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CRENotFoundException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			if(args.length == 0) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			} else {
+				p = Static.GetPlayer(args[0].val(), t);
+			}
+			MCPlayerInventory inv = p.getInventory();
+			if(inv == null) {
+				throw new CRENotFoundException(
+						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
+			}
+			inv.clear();
+			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9)) {
+				// 1.9 clears armor and offhand too, but before then we need clear armor manually.
+				MCItemStack empty = StaticLayer.GetItemStack("AIR", 0);
+				inv.setBoots(empty);
+				inv.setLeggings(empty);
+				inv.setChestplate(empty);
+				inv.setHelmet(empty);
+			}
+			return CVoid.VOID;
+		}
+	}
+
+	@api(environments={CommandHelperEnvironment.class})
 	public static class phas_item extends AbstractFunction{
 
 		@Override

@@ -8,6 +8,8 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -85,6 +87,7 @@ public class Script {
 	private final long compileTime;
 	private String label;
 	private Environment CurrentEnv;
+        private FileOptions fileOptions;
 
 	@Override
 	public String toString() {
@@ -121,12 +124,13 @@ public class Script {
 		return b.toString();
 	}
 
-	public Script(List<Token> left, List<Token> right, String label) {
+	public Script(List<Token> left, List<Token> right, String label, FileOptions fileOptions) {
 		this.left = left;
 		this.fullRight = right;
 		this.left_vars = new HashMap<>();
 		this.label = label;
 		compileTime = System.currentTimeMillis();
+                this.fileOptions = fileOptions;
 	}
 
 	private Script(){
@@ -818,7 +822,7 @@ public class Script {
 		right.add(temp);
 		cright = new ArrayList<>();
 		for(List<Token> l : right) {
-			cright.add(MethodScriptCompiler.compile(l));
+			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions)));
 		}
 	}
 

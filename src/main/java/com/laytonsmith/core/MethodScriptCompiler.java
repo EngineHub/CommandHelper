@@ -8,6 +8,7 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.KeywordList;
+import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.CDecimal;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
@@ -66,8 +67,6 @@ public final class MethodScriptCompiler {
 
     private final static EnumSet<Optimizable.OptimizationOption> NO_OPTIMIZATIONS = EnumSet.noneOf(Optimizable.OptimizationOption.class);
 
-    private final static FileOptions fileOptions = new FileOptions(new HashMap<String, String>());
-
     private MethodScriptCompiler() {
     }
 
@@ -84,7 +83,7 @@ public final class MethodScriptCompiler {
      * @return A stream of tokens
      * @throws ConfigCompileException If compilation fails due to bad syntax
      */
-    public static List<Token> lex(String script, File file, boolean inPureMScript) throws ConfigCompileException {
+    public static TokenStream lex(String script, File file, boolean inPureMScript) throws ConfigCompileException {
         return lex(script, file, inPureMScript, false);
     }
 
@@ -107,14 +106,15 @@ public final class MethodScriptCompiler {
      * @throws ConfigCompileException If compilation fails due to bad syntax
      */
     @SuppressWarnings("UnnecessaryContinue")
-    public static List<Token> lex(String script, File file, boolean inPureMScript, boolean saveAllTokens) throws ConfigCompileException {
+    public static TokenStream lex(String script, File file, boolean inPureMScript, boolean saveAllTokens) throws ConfigCompileException {
         if (script.isEmpty()) {
-            return new ArrayList<>();
+            return new TokenStream(new ArrayList<>(), "");
         }
         if ((int) script.charAt(0) == 65279) {
             // Remove the UTF-8 Byte Order Mark, if present.
             script = script.substring(1);
         }
+        String fileOptions = "";
         script = script.replaceAll("\r\n", "\n");
         script = script + "\n";
         Set<String> keywords = KeywordList.getKeywordNames();
@@ -949,7 +949,7 @@ public final class MethodScriptCompiler {
             }
 
         }
-        return token_list;
+        return new TokenStream(token_list, fileOptions);
     }
 
     /**
@@ -959,7 +959,7 @@ public final class MethodScriptCompiler {
      * @return
      * @throws ConfigCompileException
      */
-    public static List<Script> preprocess(List<Token> tokenStream) throws ConfigCompileException {
+    public static List<Script> preprocess(TokenStream tokenStream) throws ConfigCompileException {
         if (tokenStream == null || tokenStream.isEmpty()) {
             return new ArrayList<>();
         }
@@ -983,7 +983,8 @@ public final class MethodScriptCompiler {
             temp.remove(0);
         }
 
-        tokenStream = temp;
+        tokenStream.clear();
+        tokenStream.addAll(temp);
 
         //Handle multiline constructs
         ArrayList<Token> tokens1_1 = new ArrayList<>();
@@ -1070,7 +1071,7 @@ public final class MethodScriptCompiler {
                         }
                     }
                 }
-                Script s = new Script(left, right, null);
+                Script s = new Script(left, right, null, tokenStream.getFileOptions());
                 scripts.add(s);
                 left = new ArrayList<>();
                 right = new ArrayList<>();
@@ -1092,7 +1093,7 @@ public final class MethodScriptCompiler {
      * {@link ConfigRuntimeException} will have that exception converted to a ConfigCompileException.
      */
     @SuppressWarnings("UnnecessaryContinue")
-    public static ParseTree compile(List<Token> stream) throws ConfigCompileException, ConfigCompileGroupException {
+    public static ParseTree compile(TokenStream stream) throws ConfigCompileException, ConfigCompileGroupException {
         Set<ConfigCompileException> compilerErrors = new HashSet<>();
         if (stream == null || stream.isEmpty()) {
             return null;
@@ -1111,7 +1112,9 @@ public final class MethodScriptCompiler {
                 tempStream.add(t);
             }
         }
-        stream = tempStream;
+        stream.clear();
+        stream.addAll(tempStream);
+        FileOptions fileOptions = stream.getFileOptions();
 
         ParseTree tree = new ParseTree(fileOptions);
         tree.setData(CNull.NULL);
@@ -1814,7 +1817,7 @@ public final class MethodScriptCompiler {
             // if this function is expecting the precense of soem code element, but the child gets optimized out, this
             // would cause an error, even though the user did in fact provide code in that section.
             try {
-                ((Optimizable) func).optimizeDynamic(tree.getTarget(), children, fileOptions);
+                ((Optimizable) func).optimizeDynamic(tree.getTarget(), children, tree.getFileOptions());
             } catch (ConfigCompileException ex) {
                 // If an error occurs, we will skip the rest of this element
                 compilerErrors.add(ex);
@@ -1952,7 +1955,7 @@ public final class MethodScriptCompiler {
             //However, as a special function, we *might* be able to get a const proc out of this
             //Let's see.
             try {
-                ParseTree root = new ParseTree(new CFunction(__autoconcat__, Target.UNKNOWN), fileOptions);
+                ParseTree root = new ParseTree(new CFunction(__autoconcat__, Target.UNKNOWN), tree.getFileOptions());
                 Script fakeScript = Script.GenerateScript(root, "*");
                 Environment env = null;
                 try {
@@ -2153,7 +2156,7 @@ public final class MethodScriptCompiler {
             return CVoid.VOID;
         }
         if (script == null) {
-            script = new Script(null, null, env.getEnv(GlobalEnv.class).GetLabel());
+            script = new Script(null, null, env.getEnv(GlobalEnv.class).GetLabel(), new FileOptions(new HashMap<>()));
         }
         if (vars != null) {
             Map<String, Variable> varMap = new HashMap<>();

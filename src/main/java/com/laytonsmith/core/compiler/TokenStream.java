@@ -14,12 +14,12 @@ import java.util.Map;
 public class TokenStream extends ArrayList<Token> {
 	FileOptions fileOptions;
 
-	TokenStream(List<Token> list, FileOptions options) {
+	public TokenStream(List<Token> list, FileOptions options) {
 		super(list);
 		this.fileOptions = options;
 	}
 
-	TokenStream(List<Token> list, String fileOptions) {
+	public TokenStream(List<Token> list, String fileOptions) {
 		super(list);
 		this.fileOptions = parseFileOptions(fileOptions);
 	}
