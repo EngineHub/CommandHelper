@@ -53,8 +53,11 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -109,6 +112,7 @@ public final class MethodScriptCompiler {
 	public static TokenStream lex(String script, File file, boolean inPureMScript, boolean saveAllTokens) throws ConfigCompileException {
 		if(script.isEmpty()) {
 			return new TokenStream(new ArrayList<>(), "");
+			return new TokenStream(new LinkedList<>(), "");
 		}
 		if((int) script.charAt(0) == 65279) {
 			// Remove the UTF-8 Byte Order Mark, if present.
@@ -119,7 +123,7 @@ public final class MethodScriptCompiler {
 		script = script.replaceAll("\r\n", "\n");
 		script = script + "\n";
 		final Set<String> keywords = KeywordList.getKeywordNames();
-		final List<Token> token_list = new ArrayList<>();
+		final TokenStream token_list = new TokenStream();
 		
 		// Set our state variables.
 		boolean state_in_quote = false;
@@ -559,21 +563,23 @@ public final class MethodScriptCompiler {
 								// unknown, we may be doing standalone parenthesis, so auto tack on the __autoconcat__
 								// function.
 								try {
-									int count = 1;
-									while(token_list.get(token_list.size() - count).type == TType.WHITESPACE) {
+									int count = 0;
+									Iterator<Token> it = token_list.descendingIterator();
+									Token t;
+									while((t = it.next()).type == TType.WHITESPACE) {
 										count++;
 									}
-									if(token_list.get(token_list.size() - count).type == TType.UNKNOWN) {
-										token_list.get(token_list.size() - count).type = TType.FUNC_NAME;
+									if(t.type == TType.UNKNOWN) {
+										t.type = TType.FUNC_NAME;
 										// Go ahead and remove the whitespace here too, they break things.
 										count--;
 										for(int a = 0; a < count; a++) {
-											token_list.remove(token_list.size() - 1);
+											token_list.removeLast();
 										}
 									} else {
 										token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
 									}
-								} catch (IndexOutOfBoundsException e) {
+								} catch (NoSuchElementException e) {
 									// This is the first element on the list, so, it's another autoconcat.
 									token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
 								}
@@ -792,31 +798,48 @@ public final class MethodScriptCompiler {
 		
 		// Look at the tokens and get meaning from them. Also, look for improper symbol locations
 		// and go ahead and absorb unary +- into the token.
-		for(int i = 0; i < token_list.size(); i++) {
-			Token t = token_list.get(i);
-			Token prev2 = i - 2 >= 0 ? token_list.get(i - 2) : new Token(TType.UNKNOWN, "", t.target);
-			Token prev1 = i - 1 >= 0 ? token_list.get(i - 1) : new Token(TType.UNKNOWN, "", t.target);
-			Token next = i + 1 < token_list.size() ? token_list.get(i + 1) : new Token(TType.UNKNOWN, "", t.target);
-
+		ListIterator<Token> it = token_list.listIterator(0);
+		while(it.hasNext()) {
+			Token t = it.next();
+			
 			// Combine whitespace tokens into one.
-			if(t.type == TType.WHITESPACE && next.type == TType.WHITESPACE) {
-				t.value += next.val();
-				token_list.remove(i + 1);
-				i--; // rescan this token
-				continue;
+			if(t.type == TType.WHITESPACE && it.hasNext()) {
+				Token next;
+				if((next = it.next()).type == TType.WHITESPACE) {
+					t.value += next.val();
+					it.remove(); // Remove 'next'.
+				} else {
+					it.previous(); // Select 'next' <--.
+				}
+				it.previous(); // Select 't' <--.
+				it.next(); // Select 't' -->.
 			}
 			
 			// Convert "-" + number to -number if allowed.
-			if(t.type == TType.UNKNOWN && prev1.type.isPlusMinus() // Convert "± UNKNOWN".
-					&& !prev2.type.isIdentifier() // Don't convert "number/string/var ± ...".
-					&& !prev2.type.equals(TType.FUNC_END) // Don't convert "func() ± ...".
-					&& !IVAR_PATTERN.matcher(t.val()).matches() // Don't convert "± @var".
-					&& !VAR_PATTERN.matcher(t.val()).matches()) { // Don't convert "± $var".
-				// It is a negative/positive number: Absorb the sign.
-				t.value = prev1.value + t.value;
-				token_list.remove(i - 1);
-				i--;
+			it.previous(); // Select 't' <--.
+			if(it.hasPrevious()) {
+				Token prev1 = it.previous(); // Select 'prev1' <--.
+				if(it.hasPrevious()) {
+					Token prev2 = it.previous(); // Select 'prev2' <--.
+					if(t.type == TType.UNKNOWN && prev1.type.isPlusMinus() // Convert "± UNKNOWN".
+							&& !prev2.type.isIdentifier() // Don't convert "number/string/var ± ...".
+							&& prev2.type != TType.FUNC_END // Don't convert "func() ± ...".
+							&& !IVAR_PATTERN.matcher(t.val()).matches() // Don't convert "± @var".
+							&& !VAR_PATTERN.matcher(t.val()).matches()) { // Don't convert "± $var".
+						// It is a negative/positive number: Absorb the sign.
+						t.value = prev1.value + t.value;
+						it.next(); // Select 'prev2' -->.
+						it.next(); // Select 'prev1' -->.
+						it.remove(); // Remove 'prev1'.
+					} else {
+						it.next(); // Select 'prev2' -->.
+						it.next(); // Select 'prev1' -->.
+					}
+				} else {
+					it.next(); // Select 'prev1' -->.
+				}
 			}
+			it.next(); // Select 't' -->.
 			
 			// Assign a type to all UNKNOWN tokens.
 			if(t.type == TType.UNKNOWN) {
@@ -841,19 +864,30 @@ public final class MethodScriptCompiler {
 			
 			// Skip this check if we're not in pure mscript.
 			if(inPureMScript) {
-				if(t.type.isSymbol() && !t.type.isUnary() && !next.type.isUnary()) {
-					if(prev1.type.equals(TType.FUNC_START) || prev1.type.equals(TType.COMMA)
-							|| next.type.equals(TType.FUNC_END) || next.type.equals(TType.COMMA)
-							|| prev1.type.isSymbol() || next.type.isSymbol()) {
-						throw new ConfigCompileException("Unexpected symbol (" + t.val() + ")", t.getTarget());
+				if(it.hasNext()) {
+					Token next = it.next(); // Select 'next' -->.
+					it.previous(); // Select 'next' <--.
+					it.previous(); // Select 't' <--.
+					if(t.type.isSymbol() && !t.type.isUnary() && !next.type.isUnary()) {
+						if(it.hasPrevious()) {
+							Token prev1 = it.previous(); // Select 'prev1' <--.
+							if(prev1.type.equals(TType.FUNC_START) || prev1.type.equals(TType.COMMA)
+									|| next.type.equals(TType.FUNC_END) || next.type.equals(TType.COMMA)
+									|| prev1.type.isSymbol() || next.type.isSymbol()) {
+								throw new ConfigCompileException("Unexpected symbol (" + t.val() + ")", t.getTarget());
+							}
+							it.next(); // Select 'prev1' -->.
+						}
 					}
+					it.next(); // Select 't' -->.
 				}
 			}
 			
 		}
 		
-		// Return the result.
-		return new TokenStream(token_list, fileOptions.toString());
+		// Set file options and return the result.
+		token_list.setFileOptions(fileOptions.toString());
+		return token_list;
 	}
 
 	/**
@@ -868,40 +902,74 @@ public final class MethodScriptCompiler {
 			return new ArrayList<>();
 		}
 		
-		// Remove leading and duplicate newlines.
-		int index = 0;
 		int startIndex = 0;
-		while(startIndex < tokenStream.size() && tokenStream.get(startIndex).type == TType.NEWLINE) {
-			startIndex++; // Skip leading newlines.
+		// Remove leading newlines.
+		while(!tokenStream.isEmpty() && tokenStream.getFirst().type == TType.NEWLINE) {
+			tokenStream.removeFirst(); // Remove leading newlines.
 		}
-		for(int i = startIndex; i < tokenStream.size(); i++) {
-			Token token = tokenStream.get(i);
-			if(token.type == TType.NEWLINE) {
-				while(i + 1 < tokenStream.size() && tokenStream.get(i + 1).type == TType.NEWLINE) {
-					i++; // Skip duplicate newlines.
+		
+		// Return an empty list if there were only newlines.
+		if(tokenStream.isEmpty()) {
+			return new ArrayList<>();
+		}
+		
+		// Remove whitespaces and duplicate newlines.
+		{
+			ListIterator<Token> it = tokenStream.listIterator(0);
+			Token token = it.next();
+			outerLoop:
+			while(true) {
+				switch(token.type) {
+					case WHITESPACE: {
+						it.remove(); // Remove whitespaces.
+						if(!it.hasNext()) {
+							break outerLoop;
+						}
+						token = it.next();
+						continue outerLoop;
+					}
+					case NEWLINE: {
+						while(true) {
+							if(!it.hasNext()) {
+								break outerLoop;
+							} else if((token = it.next()).type == TType.NEWLINE) {
+								it.remove(); // Remove duplicate newlines.
+							} else {
+								continue outerLoop;
+							}
+						}
+					}
+					default: {
+						if(!it.hasNext()) {
+							break outerLoop;
+						}
+						token = it.next();
+						continue outerLoop;
+					}
 				}
-				tokenStream.set(index++, token);
-			} else if(token.type != TType.WHITESPACE) {
-				tokenStream.set(index++, token);
 			}
-		}
-		for(int i = tokenStream.size() - 1; i >= index; i--) {
-			tokenStream.remove(i); // Remove remaining handled tokens.
 		}
 		
 		// Handle multiline constructs.
 		// Take out newlines between the '= >>>' and '<<<' tokens (also removing the '>>>' and '<<<' tokens).
 		// Also remove comments and also remove newlines that are behind a '\'.
 		boolean inside_multiline = false;
+		ListIterator<Token> it = tokenStream.listIterator(0);
 		Token token = null;
-		for(int i = 0; i < tokenStream.size(); i++) {
-			token = tokenStream.get(i);
+		while(it.hasNext()) {
+			token = it.next();
 			
 			switch(token.type) {
 				case ALIAS_END: { // "=".
-					if(i + 1 < tokenStream.size() && tokenStream.get(i + 1).type == TType.MULTILINE_START) { // "= >>>".
-						inside_multiline = true;
-						tokenStream.remove(i + 1); // Remove multiline start (>>>).
+					if(it.hasNext()) {
+						if(it.next().type == TType.MULTILINE_START) { // "= >>>".
+							inside_multiline = true;
+							it.remove(); // Remove multiline start (>>>).
+							it.previous(); // Select 'token' <---.
+							it.next(); // Select 'token' -->.
+						} else {
+							it.previous(); // Select 'next' <---.
+						}
 					}
 					continue;
 				}
@@ -914,7 +982,7 @@ public final class MethodScriptCompiler {
 					}
 					
 					inside_multiline = false;
-					tokenStream.remove(i--); // Remove multiline end (<<<) and compensate for it in i.
+					it.remove(); // Remove multiline end (<<<).
 					continue;
 				}
 				case MULTILINE_START: { // ">>>".
@@ -926,17 +994,20 @@ public final class MethodScriptCompiler {
 					}
 					
 					// Handle multiline start token (>>>) without alias end (=) in front.
-					if(i > 0 && tokenStream.get(i - 1).type != TType.ALIAS_END) {
+					it.previous(); // Select 'token' <--.
+					if(!it.hasPrevious() || it.previous().type != TType.ALIAS_END) {
 						throw new ConfigCompileException(
 								"Multiline symbol must follow the alias_end (=) symbol", token.target);
 					}
+					it.next(); // Select 'prev' -->.
+					it.next(); // Select 'token' -->.
 					continue;
 				}
 				case NEWLINE: { // "\n".
 					
 					// Skip newlines that are inside a multiline construct.
 					if(inside_multiline) {
-						tokenStream.remove(i--); // Remove newline and compensate for it in i.
+						it.remove(); // Remove newline.
 					}
 					continue;
 				}
@@ -944,15 +1015,20 @@ public final class MethodScriptCompiler {
 				// Remove comments.
 				case COMMENT:
 				case SMART_COMMENT: {
-					tokenStream.remove(i--); // Remove comment and compensate for it in i.
+					it.remove(); // Remove comment.
 					continue;
 				}
 				default: {
 					
 					// Remove newlines that are behind a '\'.
-					if(token.type != TType.STRING && token.val().equals("\\") && i + 1 < tokenStream.size()
-							&& tokenStream.get(i + 1).type == TType.NEWLINE) {
-						tokenStream.remove(i + 1); // Remove newline.
+					if(token.type != TType.STRING && token.val().equals("\\") && it.hasNext()) {
+						if(it.next().type == TType.NEWLINE) {
+							it.remove(); // Remove newline.
+							it.previous(); // Select 'token' <--.
+							it.next(); // Select 'token' -->.
+						} else {
+							it.previous(); // Select 'next' <--.
+						}
 					}
 				}
 			}
@@ -971,7 +1047,7 @@ public final class MethodScriptCompiler {
 		List<Token> right = new ArrayList<>();
 		List<Script> scripts = new ArrayList<>();
 		tokenLoop:
-		for(Iterator<Token> it = tokenStream.iterator(); it.hasNext();) {
+		for(it = tokenStream.listIterator(0); it.hasNext();) {
 			Token t = it.next();
 			
 			// Add all tokens until ALIAS_END (=) or end of stream.
@@ -1039,16 +1115,17 @@ public final class MethodScriptCompiler {
         } catch (Exception e) {
             unknown = Target.UNKNOWN;
         }
-
-        List<Token> tempStream = new ArrayList<>(stream.size());
-        for (Token t : stream) {
-            if (!t.type.isWhitespace()) {
-                tempStream.add(t);
-            }
+        
+        // Remove all newlines and whitespaces.
+        ListIterator<Token> it = stream.listIterator(0);
+        while(it.hasNext()) {
+        	if(it.next().type.isWhitespace()) {
+        		it.remove();
+        	}
         }
-        stream.clear();
-        stream.addAll(tempStream);
-        FileOptions fileOptions = stream.getFileOptions();
+        
+        // Get the file options.
+        final FileOptions fileOptions = stream.getFileOptions();
 
         ParseTree tree = new ParseTree(fileOptions);
         tree.setData(CNull.NULL);
@@ -1080,13 +1157,14 @@ public final class MethodScriptCompiler {
 
         int bracketCount = 0;
 
-        for (int i = 0; i < stream.size(); i++) {
-            t = stream.get(i);
-            //Token prev2 = i - 2 >= 0 ? stream.get(i - 2) : new Token(TType.UNKNOWN, "", t.target);
-            Token prev1 = i - 1 >= 0 ? stream.get(i - 1) : new Token(TType.UNKNOWN, "", t.target);
-            Token next1 = i + 1 < stream.size() ? stream.get(i + 1) : new Token(TType.UNKNOWN, "", t.target);
-            Token next2 = i + 2 < stream.size() ? stream.get(i + 2) : new Token(TType.UNKNOWN, "", t.target);
-            Token next3 = i + 3 < stream.size() ? stream.get(i + 3) : new Token(TType.UNKNOWN, "", t.target);
+        // Create a Token array to iterate over, rather than using the LinkedList's O(n) get() method.
+        Token[] tokenArray = stream.toArray(new Token[stream.size()]);
+        for (int i = 0; i < tokenArray.length; i++) {
+            t = tokenArray[i];
+            Token prev1 = i - 1 >= 0 ? tokenArray[i - 1] : new Token(TType.UNKNOWN, "", t.target);
+            Token next1 = i + 1 < stream.size() ? tokenArray[i + 1] : new Token(TType.UNKNOWN, "", t.target);
+            Token next2 = i + 2 < stream.size() ? tokenArray[i + 2] : new Token(TType.UNKNOWN, "", t.target);
+            Token next3 = i + 3 < stream.size() ? tokenArray[i + 3] : new Token(TType.UNKNOWN, "", t.target);
 
             // Brace handling
             if (t.type == TType.LCURLY_BRACKET) {
@@ -1410,7 +1488,7 @@ public final class MethodScriptCompiler {
 			if(t.value.startsWith("0m")) {
 			    // CDecimal
 			    String neg = "";
-			    if(prev1.value.equals('-')) {
+			    if(prev1.value.equals("-")) {
 				neg = "-";
 			    }
 			    c = new CDecimal(neg + t.value.substring(2) + '.' + next2.value, t.target);
