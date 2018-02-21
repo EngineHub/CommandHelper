@@ -111,7 +111,6 @@ public final class MethodScriptCompiler {
 	 */
 	public static TokenStream lex(String script, File file, boolean inPureMScript, boolean saveAllTokens) throws ConfigCompileException {
 		if(script.isEmpty()) {
-			return new TokenStream(new ArrayList<>(), "");
 			return new TokenStream(new LinkedList<>(), "");
 		}
 		if((int) script.charAt(0) == 65279) {
@@ -902,7 +901,6 @@ public final class MethodScriptCompiler {
 			return new ArrayList<>();
 		}
 		
-		int startIndex = 0;
 		// Remove leading newlines.
 		while(!tokenStream.isEmpty() && tokenStream.getFirst().type == TType.NEWLINE) {
 			tokenStream.removeFirst(); // Remove leading newlines.
