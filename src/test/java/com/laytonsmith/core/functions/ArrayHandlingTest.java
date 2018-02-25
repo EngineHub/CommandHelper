@@ -254,6 +254,12 @@ public class ArrayHandlingTest {
 	}
 
 	@Test()
+	public void testStringSlice3() throws Exception {
+		SRun("msg('slice'[1..3])", fakePlayer);
+		verify(fakePlayer).sendMessage("lic");
+	}
+
+	@Test()
 	public void testStringGet1() throws Exception {
 		SRun("msg('get'[1])", fakePlayer);
 		verify(fakePlayer).sendMessage("e");

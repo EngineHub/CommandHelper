@@ -66,7 +66,7 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 
     @Override
     public Construct slice(int begin, int end, Target t) {
-	if (begin >= end) {
+	if (begin > end) {
 	    return new CString("", t);
 	}
 	try {

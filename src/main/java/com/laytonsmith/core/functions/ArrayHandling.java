@@ -233,9 +233,9 @@ public class ArrayHandling {
 							start = (int)aa.size() + start;
 						}
 						if(finish < 0) {
-							finish = (int)aa.size() + finish + 1;
+							finish = (int)aa.size() + finish;
 						}
-						return aa.slice(start, finish, t);
+						return aa.slice(start, finish + 1, t);
 					} catch (NumberFormatException e) {
 						throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
 					}
