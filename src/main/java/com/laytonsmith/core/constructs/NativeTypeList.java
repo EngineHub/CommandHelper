@@ -15,19 +15,24 @@ import java.util.Set;
  */
 public class NativeTypeList {
 
+    private static Set<String> nativeTypes;
+
     /**
      * Returns a list of all the known native classes.
      *
      * @return
      */
     public static Set<String> getNativeTypeList() {
-	Set<String> ret = new HashSet<>();
+	if(nativeTypes != null) {
+	    return nativeTypes;
+	}
+	nativeTypes = new HashSet<>();
 	for (ClassMirror<? extends Mixed> c : ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(typeof.class, Mixed.class)) {
-	    ret.add(c.loadAnnotation(typeof.class).value());
+	    nativeTypes.add(c.loadAnnotation(typeof.class).value());
 	}
 	// Also add this one in
-	ret.add("mixed");
-	return ret;
+	nativeTypes.add("mixed");
+	return nativeTypes;
     }
 
     /**
@@ -70,7 +75,7 @@ public class NativeTypeList {
      * @param methodscriptType
      * @return
      * @throws ClassNotFoundException If the methodscript type could not be found
-     * @throws IllegalArgumentExceptio If the underlying type isn't a java interface or abstract class
+     * @throws IllegalArgumentException If the underlying type isn't a java interface or abstract class
      */
     public static Class<? extends MixedInterfaceRunner> getInterfaceRunnerFor(String methodscriptType) throws
 	    ClassNotFoundException, IllegalArgumentException {
