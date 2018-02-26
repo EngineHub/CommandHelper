@@ -2,8 +2,8 @@
 package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.constructs.Token;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -11,8 +11,13 @@ import java.util.Map;
  *
  * 
  */
-public class TokenStream extends ArrayList<Token> {
-	FileOptions fileOptions;
+public class TokenStream extends LinkedList<Token> {
+	private FileOptions fileOptions;
+
+	public TokenStream() {
+		super();
+		this.fileOptions = null;
+	}
 
 	public TokenStream(List<Token> list, FileOptions options) {
 		super(list);
@@ -24,8 +29,16 @@ public class TokenStream extends ArrayList<Token> {
 		this.fileOptions = parseFileOptions(fileOptions);
 	}
 
+	public void setFileOptions(String fileOptions) {
+		this.fileOptions = parseFileOptions(fileOptions);
+	}
+
+	public void setFileOptions(FileOptions fileOptions) {
+		this.fileOptions = fileOptions;
+	}
+
 	public FileOptions getFileOptions() {
-		return fileOptions;
+		return this.fileOptions;
 	}
 
 	private static FileOptions parseFileOptions(String options) {

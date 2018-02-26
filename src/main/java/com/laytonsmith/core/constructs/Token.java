@@ -91,7 +91,10 @@ public class Token {
 	DIVISION_ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL, TokenVariant.MULTIPLICATIVE),
 	CONCAT_ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL, TokenVariant.ADDITIVE),
 	SEMICOLON(TokenVariant.SEPARATOR),
-	KEYWORD(TokenVariant.KEYWORD);
+	KEYWORD(TokenVariant.KEYWORD),
+	FILE_OPTIONS_START(TokenVariant.SEPARATOR),
+	FILE_OPTIONS_STRING(),
+	FILE_OPTIONS_END(TokenVariant.SEPARATOR);
 
 	private final Set<TokenVariant> variants = EnumSet.noneOf(TokenVariant.class);
 

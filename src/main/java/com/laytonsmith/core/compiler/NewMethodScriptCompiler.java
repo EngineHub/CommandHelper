@@ -66,7 +66,7 @@ public class NewMethodScriptCompiler {
 			//function, but we need to parse the left ourselves
 			//We *should* only have (bare) strings, numbers, brackets on the left
 			List<Token> left = new ArrayList<Token>();
-			TokenStream right = new TokenStream(new ArrayList<Token>(), tokenStream.fileOptions);
+			TokenStream right = new TokenStream(new ArrayList<Token>(), tokenStream.getFileOptions());
 			boolean inLeft = true;
 			boolean hasLabel = false;
 			for (Token t : stream) {

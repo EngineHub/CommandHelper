@@ -211,7 +211,7 @@ class CompilerObject {
 				} else if (keywords.contains(t.val())) {
 					return new CKeyword(t.val(), t.getTarget());
 				} else {
-					if (stream.fileOptions.isStrict()) {
+					if (stream.getFileOptions().isStrict()) {
 						throw new ConfigCompileException("Bare strings not allowed in strict mode. (" + t.val() + ")", t.getTarget());
 					} else {
 						return new CString(t.val(), t.getTarget());
