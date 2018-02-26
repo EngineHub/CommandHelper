@@ -1062,6 +1062,7 @@ public class StringHandling {
     }
 
     @api
+    @seealso({string_contains.class})
     public static class string_position extends AbstractFunction implements Optimizable {
 
         @Override
@@ -1122,6 +1123,73 @@ public class StringHandling {
                     OptimizationOption.CONSTANT_OFFLINE,
                     OptimizationOption.CACHE_RETURN);
         }
+    }
+
+    @api
+    @seealso({string_position.class})
+    public static class string_contains extends AbstractFunction implements Optimizable {
+
+	@Override
+	public Class<? extends CREThrowable>[] thrown() {
+	    return new Class[]{CRENullPointerException.class};
+	}
+
+	@Override
+	public boolean isRestricted() {
+	    return false;
+	}
+
+	@Override
+	public Boolean runAsync() {
+	    return null;
+	}
+
+	@Override
+	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+	    String haystack = args[0].nval();
+            String needle = args[1].nval();
+            Static.AssertNonCNull(t, args);
+	    return CBoolean.get(haystack.contains(needle));
+	}
+
+	@Override
+	public String getName() {
+	    return "string_contains";
+	}
+
+	@Override
+	public Integer[] numArgs() {
+	    return new Integer[]{2};
+	}
+
+	@Override
+	public String docs() {
+	    return "boolean {haystack, needle} Returns true if the string needle is found anywhere within the string haystack."
+		    + " This is functionally equivalent to string_postion(@haystack, @needle) != -1, but is generally clearer.";
+	}
+
+	@Override
+	public Version since() {
+	    return CHVersion.V3_3_2;
+	}
+
+	@Override
+	public Set<OptimizationOption> optimizationOptions() {
+	    return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE,
+		    OptimizationOption.CACHE_RETURN,
+		    OptimizationOption.NO_SIDE_EFFECTS);
+	}
+
+	@Override
+	public ExampleScript[] examples() throws ConfigCompileException {
+	    return new ExampleScript[]{
+		new ExampleScript("Basic usage", "string_contains('haystack', 'hay');"),
+		new ExampleScript("Not found", "string_contains('abcd', 'wxyz');")
+	    };
+	}
+
+
+
     }
 
     @api
