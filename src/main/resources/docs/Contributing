@@ -1,0 +1,131 @@
+If you wish to contribute code to CommandHelper, first of all, thank you! CommandHelper has grown into a very large 
+project, and the user base is expanding faster than a single person can develop for. While there are many ways to 
+actually write code, this article outlines the only "officially supported" workflow. You'll need knowledge of a few 
+tools, and a good command of Java to get started though, and so many concepts may be beyond the scope of this article.
+
+All contributions must be released according to the 
+[https://github.com/sk89q/commandhelper/blob/master/LICENSE.txt MIT submission license], including the 
+[https://github.com/sk89q/commandhelper/blob/master/SPECIAL_LICENSE.txt special license] for core code, and is expected 
+to conform to the [https://github.com/sk89q/commandhelper/blob/master/CONTRIBUTING.txt code standards]. All code must be 
+submitted as a pull request via github to be considered.
+
+Due to the shear size of CommandHelper, it may not be a good starting point for someone that is wishing to get into open 
+source development. However, with dedication, patience, and some critical thinking, you'll definitely be able to 
+contribute. The code in CommandHelper is fairly well organized, follows good 
+[http://en.wikipedia.org/wiki/Software_design_pattern software engineering design patterns], is unit tested, abstracted, 
+and is generally geared towards long term stability and maintainability. Generally speaking, it is not important to 
+fully understand the entirety of the code base before working on it, but you'll need to understand the 
+[[CommandHelper/Staged/Architecture|Basic Architecture]] before you'll be able to understand where to even begin. The 
+purpose of this article is not to help you understand how to add code to the project, but instead is meant to help you 
+get set up and building the code locally.
+
+== Tools ==
+
+For the most part, the only tool you need is NetBeans. You can download NetBeans [https://netbeans.org/downloads/ here]. 
+The Java SE version is sufficient for CommandHelper, so download that version. NetBeans comes integrated with all the 
+tools we normally need to do things with CommandHelper, but you may want to look at the Advanced Tools section below if 
+you have to do more advanced things from the command line. 
+
+=== Advanced Tools ===
+
+CommandHelper uses [http://git-scm.com/downloads git] and [http://maven.apache.org/download.cgi maven] for source 
+control and build system, respectively. If you need to do more advanced things with the project, you'll need to download 
+these tools separately and use them from the command line. Follow the directions to download and install them. If you 
+can run <code>git --version</code> and <code>mvn --version</code> from the command line, you have successfully set them 
+up. It is assumed that you know the basics of [http://git-scm.com/documentation git] and 
+[http://maven.apache.org/guides/getting-started/ maven], and so topics like commiting and pulling won't be addressed.
+
+==== Rebasing ====
+
+When submitting a PR, you may have to rebase. If you have several commits, and they are all logically a part of the same 
+code change, and they haven't yet been reviewed, you'll want to ''rebase'' your commits. 
+[http://gitready.com/advanced/2009/02/10/squashing-commits-with-rebase.html This article] goes in depth about how to 
+squash your commits, but the gist is this: If you have 4 commits that you need to rebase, then you would run 
+<code>git rebase -i HEAD~4</code> to combine the previous 4 commits. If the commit has been reviewed, do NOT rebase at 
+that point, because then the reviewer will have to look at the entire diff again, instead of just looking at the diff 
+from the last time they reviewed the changes. Additionally, if you have several logically separate code changes, it is 
+ok to have them remain separate commits, and is in fact encouraged, so they can selectively be reverted if need be.
+
+== Cloning the project ==
+
+If you intend on submitting code changes, you'll need a fork of the project. You can create a fork on github, and then 
+clone from there. Don't worry, if you clone directly from the main repo (which you won't have commit access to) you can 
+easily create a fork later, and point the remote to there instead. The main repo is read only, so if you only want to 
+build and make changes locally, it is ok to just use the main repo's access url. The access url can be found on the 
+project's github page at the top, and looks like <code>git@github.com:user/project.git</code>. This is the address 
+you'll need. If you don't have a public/private key set up with github, or you don't have a github account at all 
+(you'll need one to contribute, though not to simply pull), you'll need the http url instead: 
+<code>https://github.com/user/project.git</code> and will have to enter your password (or leave it blank for anonymous 
+access). This url will vary depending on whether or not you are checking out from the main project, or your own fork. 
+Click next. You'll probably want to start off with the "master" branch, though you can select any other branches you 
+want too. If you don't get a particular branch right now, that's ok, you can get them later. Set the destination 
+directory (probably ~/NetBeansProjects) and project name, then click finish. It will ask if you want to open the project 
+afterwards. Since CommandHelper is a maven project, it will identify it properly without any extra requirements, so go 
+ahead and open it at this time.
+
+=== Cloning with NetBeans ===
+
+To clone the project directly in NetBeans, go to the Team -> Git -> Clone... menu. Enter the access url in the 
+Repository URL field. Depending on whether or not you are using HTTP or SSH, you will see a different interface below. 
+Enter your connection details to continue. If you don't have a public/private key set up with github, you'll need to use 
+the HTTP access url, and you'll enter your username and password.
+
+=== Cloning from the command line ===
+
+To clone from the command line, create a new directory, cd into it, and run <code>git clone ACCESS_URL .</code> where 
+the access url is the one we found above. After a moment, all the files will be checked out into this folder. Since the 
+project is a maven project, you won't need to do anything extra for NetBeans (or other IDEs) to recognize it properly.
+
+== Building the project ==
+
+Building the project is equally straightforward, since it uses maven. Maven manages downloading all dependencies, which 
+are specified in the pom, automatically. The first time you build the project it will take a very long time, because it 
+must initially download all the dependencies, which for a completely clean install will be a very large number. You must 
+be connected to the internet for the initial build, but the dependencies are all cached on your system, so future builds 
+won't take nearly as long, and won't require a network connection.
+
+=== Building in NetBeans ===
+
+To build the project in NetBeans, right click the project, and select "Build". If you have just switched branches, or 
+something else if going wrong with the build, select "Clean and Build" instead. Cleaning the project clears out all 
+compiled files, and recompiles all sources, but is otherwise the same as a normal build. Notice on the top toolbar, 
+there is a dropdown box that says &lt;default config&gt;. Among possible choices, there will be the "provisional-build" 
+option, which is provided to maven by CommandHelper's pom file. This ''build profile'' causes maven to skip tests, which 
+is useful if you are constantly rebuilding during development, or there are failing tests preventing you from actually 
+compiling a binary. You may select that build profile before building, if desired. Note though that you should build in 
+the default config before committing, to make sure that none of the unit tests fail on your code.
+
+=== Building from command line ===
+
+Building from the command line is equally simple. Run <code>mvn install</code> to do the equivalent of the "Build" 
+option in NetBeans, or <code>mvn clean install</code> to clean and build. If you need to set the build profile, use the 
+-P option, so <code>mvn -Pprovisional-build clean install</code> for instance. You can also use the other targets, such 
+as <code>package</code> to create a release zip, which can't be done from NetBeans.
+
+== Submitting a PR ==
+
+To submit a PR, you must have created a fork, and set up a remote for your fork. NetBeans 7.3 allows for all of this to 
+be done from directly inside the GUI, but previous versions required the command line to do some of these things. First, 
+you'll want to make sure that your code is up-to-date against the "upstream" repo, that is, the main repository. Finish 
+all your changes, and commit them to your local repo. Then, pull from the upstream repo to ensure the commit can be 
+cleanly merged (fix any conflict should they arise) and then push to your fork. Once you have pushed, go to your fork in 
+github and click Pull Request. Enter a description of the PR, and submit. Once submitted, you can continue to update 
+this branch, and the new commits will be reflected in the existing PR, however, adding more commits may slow the time it 
+takes to process your PR, so it is a good idea to create a branch and work on that if you need to continue working while 
+the PR is being reviewed. 
+
+=== Pulling from upstream in NetBeans ===
+
+In NetBeans 7.3, you can right click the project and select Git -> Remote -> Pull from upsream... to pull from another 
+remote. 
+
+=== Pulling from upstream on command line ===
+
+First, you must add the upstream repo as a remote. To add a remote, run <code>git remote add NAME ACCESS_URL</code> The 
+name can be whatever you like (maybe "upstream" is a good choice) and the access url is the url of the repo you forked 
+from. From that point on, you can run <code>git pull upstream master</code> to pull from the master branch of the 
+upstream repository. You will not be able to push to CommandHelper's main repository, but in general to do so you would 
+run <code>git push upstream master</code>.
+
+{{LearningTrail}}
+

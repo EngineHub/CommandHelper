@@ -1,0 +1,51 @@
+Many of the features MethodScript offers are valid to be used from the command line. As more and more features are 
+added, the potential for MethodScript to be a scripting language used throughout your system, even for non-minecraft 
+related things, increases. To this end, MethodScript now has all the basic capabilities needed to write scripts from the 
+command line.
+
+==Installation==
+To install MethodScript on your system, download the CommandHelper jar, and place it in a sensible location. If you are 
+already running a Minecraft server with CommandHelper installed, the jar file there will suffice, though you may wish to 
+place a copy of it elsewhere, as otherwise your persistance databases and settings will be combined. (Keep in mind that 
+using serialized persistance is NOT thread safe, and so you run the risk of corrupting your database by having two 
+instances of CH running at once, if they are both writing to the persistence db.)
+
+Run the command:
+<pre>sudo java -jar CommandHelper.jar --install-cmdline</pre>
+This will install MethodScript to your system, as a globally accessible interpreter. To uninstall, run:
+<pre>sudo java -jar CommandHelper.jar --uninstall-cmdline</pre>
+
+This currently only works on unix systems, but Windows will be supported eventually.
+
+==Usage==
+
+The main difference between MethodScript being run from CH scripts and running on your system is that Minecraft specific 
+functions will not work. All other functions will work, or at least attempt to work just the same. To facilitate 
+commandline usage, a few extra features have been added, namely the sys_out, sys_err, and exit functions. These 
+functions will not be quite as useful in game, but will still work to some extent. Additionally, command line parameters 
+can be sent to your script, and those are placed into the @arguments variable, which is defined before your script runs, 
+as an array, as well as the $ vars, which will be populated from $1 - $[x] where the number is the position of the 
+variable on the command line. $, the final var, is also defined, and it contains all the arguments passed in, 
+concatenated together. $0 is a specially defined variable, and is the same as Bash's $0 variable, which is the path that 
+this script was executed with. Due to its less often usage, it is excluded from @arguments and $.
+
+All functions work basically the same, minor differences may exist, but they are noted in the documentation. The glaring 
+exception to this is that calls to Minecraft functions will not work at all, and in fact, may simple error out by 
+throwing a stack trace or something. This is not a bug per-se, you must simply not use those functions.
+
+To use the cmdline tools, there are three methods. First, the cmdline interpreter can be accessed by simply running 
+<code>mscript</code>. This simply runs the command line interpreter, which is in fact the engine for all the other 
+methods. The second method is to use <code>mscript <filename></code>. This executes the file, assuming it is a valid 
+pure mscript file.
+
+Finally, you may execute a MethodScript file on unix systems by executing it directly. To do so, be sure to put 
+<code>#!/usr/bin/env /usr/local/bin/mscript</code> at the top of your file, then set the file's execution bit, 
+using <code>chmod +x <filename></code>. Then, you may simply run <code>./script.ms</code> (assuming the filename is 
+script.ms). Using the cmdline tool "new" you can create a blank file with the file set up correctly. 
+[[CommandLineTools#Tool listing|See this page]]
+
+Arguments may be passed to the program as such: <code>./script.ms "Argument 1" "Argument 2"</code>, which will be 
+available via the means outlined above.
+
+Please note that while probably already massively useful, this is an work in progress feature, and may have plenty of 
+bugs, and is not intended for widespread adoption yet, though is being officially supported.

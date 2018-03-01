@@ -674,13 +674,14 @@ public class Main {
 		    f.createNewFile();
 		    f.setExecutable(true);
 		    FileUtil.write("#!/usr/bin/env /usr/local/bin/mscript"
-			    + li + li
-			    + "/**" + li
-			    + " * Name: " + f.getName() + li
-			    + " * Author: " + StaticLayer.GetConvertor().GetUser(null) + li
-			    + " * Creation Date: " + new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy-MM-dd", Target.UNKNOWN)).val() + li
-			    + " * Description: " + li
-			    + " */" + li + li, f, true);
+			    + li
+			    + "<!" + li
+			    + "\tstrict;" + li
+			    + "\tname: " + f.getName() + ";" + li
+			    + "\tauthor: " + StaticLayer.GetConvertor().GetUser(null) + ";" + li
+			    + "\tcreated: " + new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy-MM-dd", Target.UNKNOWN)).val() + ";" + li
+			    + "\tdescription: " + ";" + li
+			    + ">" + li + li, f, true);
 		}
 	    } else {
 		throw new Error("Should not have gotten here");

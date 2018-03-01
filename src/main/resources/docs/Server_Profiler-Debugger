@@ -1,0 +1,163 @@
+
+CommandHelper comes bundled with a server wide event debugger and profiler. In fact, this can be used by itself, even if 
+you don't use the rest of the plugin at all. To explain this feature fully, it should first be explained what a profiler 
+and debugger actually are, a bit about Bukkit itself, and who the intended users of this feature are.
+
+==What is a profiler?==
+A profiler allows you to get statistics about the performance of a particular portion of software. For instance, let's 
+say you write some software, and it writes out information to a file. In general, to see how well this performs, you use 
+this pseudo code:
+
+<%SYNTAX|java|
+int start = System.currentTimeInMillis(); //Get the current time, as a Unix timestamp. This is our "start time"
+myFunctionThatWritesOutAFile(); //Call the function we are wishing to profile
+int timeToRun = System.currentTimeInMillis() - start; //This is now how long it took our function to run
+%>
+
+Ok, so now we know how long it took to run. We could echo this out or log it to a file, or do any number of things with 
+this information. But now, what if there were other factors involved? What if maybe sometimes we ended up writing a 
+large file out, or maybe we're trying to test it out on different computers, and some of them are slower than others? 
+Maybe we want to get an average case for this. In order to calculate an average, we have to get several runs of the 
+function to test it. This is where perf4j comes in. Perf4j is a framework that allows for easy calculations of 
+statistical information about a process. We simply have to log the information we are interested in to file, and perf4j 
+converts it into an easy to digest summary of the data. We will discuss this more below, when we talk about how to 
+actually activate the profiler in CommandHelper.
+
+==What is a debugger?==
+In general, a debugger is a program that hooks into another program, and allows us to see information about that program 
+at a given snapshot in time. More complex debuggers will allow us to pause program execution, and dynamically examine 
+parts of the program, but in general, the simplest debugger is a print statement. If we were writing a program, and we 
+wanted to see what the following value was:
+
+<%SYNTAX|java|
+String fileContents = SomeClass.ReadInFile("/path/to/file.txt"); //Read in a file
+%>
+
+then the simplest thing we can do is:
+
+<%SYNTAX|java|
+System.out.println(fileContents); //Print the file contents to the screen
+%>
+
+This is a simplistic form of debugging. How CommandHelper fits in with all of this is discussed below.
+
+==Who is this feature meant for?==
+===Profiler===
+The profiler is meant for anyone that wants to dig down further and analyze the performance of their server. Let's say 
+that you've recently installed several plugins, and now your server performance has slowed to a crawl. Instead of 
+uninstalling these plugins one at a time, we can log performance, and quickly determine which plugin is the problem. 
+
+Also, developers of other plugins can take advantage of this, by installing CommandHelper next to their plugin, and 
+having CommandHelper log performance of their plugin. This will allow them to figure out what parts of the plugin need 
+to be focused on for improvement.
+
+===Debugger===
+The debugger is designed to help server owners diagnose problems for event related issues. Say that we have two plugins 
+that aren't behaving well together. We can turn on the debugger, target that particular event, and print out information 
+about what plugins did what, and in what order as well. 
+
+In addition to server owners, the debugger can provide more information for plugin authors. It's decently difficult to 
+set up a proper debugging environment for your plugin, so instead, it may be easy enough to install CommandHelper, and 
+have it log information about events as your plugin is running.
+
+==A word on Bukkit and Events==
+Ok, so now we know what a Profiler and Debugger are, but what exactly can be done with CommandHelper specifically? 
+CommandHelper has a play-dirty mode already. This mode allows for CommandHelper to hook deep in to Bukkit's event 
+system. By default, play-dirty mode is off, because I break many rules to get it to work properly. Essentially what 
+happens is that CommandHelper ''injects'' it's own event firing system into Bukkit, essentially replacing Bukkit's own 
+system. With play-dirty mode, all events actually fire off through CommandHelper. The original purpose of this was to be 
+able to fully manage commands. Since CommandHelper doesn't do anything initially when you install it, any action taken 
+by the plugin is a direct command from the server administrator. Because of this, I take certain liberties to overwrite 
+and manipulate other plugin's behavior, which would normally be unacceptable. 
+
+With this framework in place however, it is very easy for us to see and respond to any event on the server, even events 
+that are being delivered to other plugins. So, for the profiler, we simply start a timer right before we fire the event, 
+and stop it right after it finishes. For the debugger, we spit out information about information in the event, which 
+plugin it's going to, and what listener is responding to it. With the addition of the perf4j framework, we can also then 
+aggregate performance data.
+
+==Usage==
+Both the performance logger and debugger can be enabled on-the-fly, through standard CommandHelper functions. These 
+functions are both restricted by default, and can be completely disabled (and are by default) in the preferences file. 
+Set allow-debug-logging to true and allow-profiling to true to enable the respective functions. To properly use the 
+profiler, the debugger must also be enabled. To enable the entire operation to occur, CommandHelper must be allowed to 
+inject into the event system, so play-dirty mode must be on as well. There are also preferences to establish where data 
+is logged to, the debug-log-file, and profiling-file settings. These both support date and timestamp variables, so you 
+can automatically segment your log files by time.
+===Debugger===
+The debugger has several levels of verbosity. The lower the verbosity level, the less information is displayed. This is 
+a double edged sword. On one hand, less information is easier to understand, but may not contain the information you 
+actually want. On the other hand, too much information can cause data blindness, the information we want is there, but 
+it's buried deep within noise, and so isn't useful. This is why there are three mechanisms for focusing the information 
+that is displayed. Verbosity, event filters, and plugin filters. 
+
+The main function to enable logging is the debug_log_events function.
+
+<%CODE|
+debug_log_events(toEnable, [level, [logToScreen]]) 
+%>
+
+toEnable is a boolean, and turns debugging on or off. level is an integer from 1-5, and sets the verbosity level of the 
+output. logToScreen is a boolean, which defaults to false. If set to true, in addition to logging to a file, it will log 
+to the server console. This can be useful for plugin developers, but if you are running a server, then logging to 
+console will cause the same information to log to to two places. If you a server owner, it is better to use the tail -f 
+command on a unix machine to view the debug data live. 
+
+This will enable the debugger, but we haven't set any filters yet. Output won't actually occur until we set filters 
+though, because the event filter is a whitelist filter.
+
+<%CODE|
+set_debug_event_filter(arrayOfEventsToDisplay)
+%>
+
+This takes an array of the event types we are interested in. Calling this function will replace the old filter. The list 
+of all the valid event types can be displayed by calling dump_listeners(null), which will display all the event types. 
+Provide an array of event types you are interested, and they will be logged. If you '''really''' are interested in every 
+single event, you can call set_debug_event_filter('*'), which will add all the events.
+
+In addition, you can add filters to narrow which plugins you are interested in with the set_debug_plugin_filter. This is 
+a semi-whitelist. If the list is empty, all plugins are logged, but if you add 1+ plugins to the list, only those 
+plugins are shown. The name of the plugin may not be it's commonly referred to name. To determine a plugin's name, you 
+can use the dump_listeners() function.
+
+<%CODE|
+set_debug_plugin_filter(arrayOfEventsToDisplay)
+%>
+
+===Profiler===
+The profiler is activated using the enable_performance_logging function. Events are filtered using the 
+set_debug_event_filter and set_debug_plugin_filter, though debugging and performance logging can be activated separately 
+from each other.
+
+If an event is logged, it is written out to the performance logging file, and then CH itself is done. So how do we get 
+performance data from this? First, you must download the 
+[http://repository.codehaus.org/org/perf4j/perf4j/0.9.16/perf4j-0.9.16.jar perf4j library]. Place this file in the 
+folder that your logs are being created in, then open up a terminal, and run <code>java -jar perf4j.jar --help</code>. 
+This will display all the actions you can do with perf4j. Once of the more useful features is to create an aggregate 
+summary of all the data. <code>java -jar perf4j.jar nameOfLogFile.log -o aggregate.csv -f csv</code> will create a csv 
+file that can be opened in excel. There are other options as well. (I have not quite yet figured out how to generate 
+graphs.)
+
+==Example Scripts==
+These tools can be controlled on the fly from within a script. Here are example scripts that will start and stop the 
+profiler/debugger, and can be modified to suit your needs.
+<%ALIAS|
+/dump = console(dump_listeners(player_command_preprocess, 5)) msg(concat(color(red), 'Dumped.'))
+
+/go = >>>
+	set_debug_event_filter('*')
+	debug_log_events(true, 1, true)
+	set_debug_plugin_filter(array())
+	enable_performance_logging(true)
+	msg(concat(color(gold), 'Performance logging started'))
+<<<
+
+/halt = >>>
+	debug_log_events(false, 1)
+	enable_performance_logging(false)
+	msg(concat(color(gold), 'Performance logging stopped'))
+<<<
+%>
+
+{{LearningTrail}}
+

@@ -1,0 +1,12 @@
+CommandHelper has a built in logger, which allows for subsystems to be individually monitored and logged. There are 
+various settings that affect what data is logged, and how it is shown. There are two steps to configuring the logger, 
+but reasonable defaults have been selected for you. To change the main settings, go to logs/debug/loggerPreferences.txt, 
+which is the configuration settings for the logger. You can adjust settings on the individual subsystems from here.
+
+In addition, if a message would be logged to file, depending on other settings, it will also be displayed on screen. The 
+following rules apply if the message is set to be logged based on your settings:
+
+If debug mode is on, all messages are logged to the screen too. If show-warnings is true, warnings and errors are shown 
+on screen. Otherwise, just error messages are shown on screen. Assuming your preferences are set correctly, the console 
+will color code the output as well.
+

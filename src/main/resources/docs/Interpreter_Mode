@@ -1,0 +1,50 @@
+Interpreter mode is a mode that allows you to easily run mscripts from within game, straight from the chat bar! To enter 
+interpreter mode, type /interpreter. You must have the interpreter enabled in your preferences file, and the user must 
+have the commandhelper.interpreter permission. Once you are in interpreter mode, your chat bar turns into a script 
+window, and you cannot chat anymore (well, you could with the chat function... :D). In order to leave interpreter mode, 
+type a single dash(-) on a line on its own. Now, when you "chat", you can run arbitrary mscripts. To enter multiline 
+mode, type >>> on a line of its own. Now when you hit enter, the line is added to an ongoing script, which isn't run 
+until you end the script with <<<. You can cancel the script by exiting interpreter mode with a single dash.
+
+So, what happens when you actually run a script? Well, the script is run exactly how you typed it in. If there are 
+errors with the script, you'll be notified with an exception, but otherwise scripts will run normally. So, calling:
+<%CODE|
+msg('hi!')
+%>
+will cause the word 'hi!' to appear on your screen. One thing to note about the output of a script: just like typical 
+scripts, if a command ultimately outputs a command, that command is run. The only difference is that other output will 
+also be displayed on screen, unlike in regular scripts, where it is just ignored. So, for instance, say you have this 
+script in your config file:
+<%ALIAS|
+/test = pinfo()
+%>
+Running the command /test will actually not do anything in this case. That's because pinfo() returns an array, but 
+otherwise doesn't have any visible effects. When running pinfo() in interpreter mode though, the array will be printed 
+out to your screen. This will allow you to play around with scripts much more easily, without having to worry about 
+echoing everything out. One thing to note about the returned output is that all output returned in this fashion will 
+display on screen starting with a colon. This is to help you differentiate what the output is compared to what the 
+script is causing. For example:
+<%CODE|
+msg('')
+%>
+would cause the following output:
+<pre>
+
+:
+</pre>
+(note the completely blank line above the colon). This is because msg(&apos;&apos;) outputs an empty string to 
+the screen, and it itself returns void, which is displayed as an empty string. All output that would normally be ignored 
+by CH is shown in green, and output that CH would act on (running a command) is shown in yellow. All errors are shown in 
+red. Also note that the die function does not return anything, which is different than returning void. Due to the 
+underlying mechanism, if a script runs {{function|die}}, no output will be returned at all, which is in fact the same 
+behavior in normal scripts.
+
+Running:
+<%CODE|
+msg('Hello World!') This is normally ignored
+%>
+
+Outputs:<br />
+Hello World!<br />
+:<span style='color: green'>This is normally ignored</span>
+

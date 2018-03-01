@@ -533,6 +533,9 @@ public class DocGenTemplates {
 	@Override
 	public String generate(String... args) throws GenerateException {
 	    String code = StringUtils.Join(args, "|");
+	    if(code.endsWith("\n")) {
+		code = code.replaceAll("\n$", "");
+	    }
 	    String out;
 	    try {
 		out = SimpleSyntaxHighlighter.Highlight(code, false);
@@ -552,6 +555,9 @@ public class DocGenTemplates {
 	@Override
 	public String generate(String... args) throws GenerateException {
 	    String code = StringUtils.Join(args, "|");
+	    if(code.endsWith("\n")) {
+		code = code.replaceAll("\n$", "");
+	    }
 	    String out;
 	    try {
 		out = SimpleSyntaxHighlighter.Highlight(code, true);
@@ -760,5 +766,30 @@ public class DocGenTemplates {
 	public String generate(String... args) throws GenerateException {
 	    return new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy", Target.UNKNOWN)).val();
 	}
+    };
+
+    /**
+     * Returns the standard {{unimplemented}} template
+     */
+    public static Generator UNIMPLEMENTED = (args) -> {
+	return "{{Warning|text=THESE FEATURES ARE NOT IMPLEMENTED YET. This page only serves as a preview of how the"
+		+ " shown features will work, and as a guide for how the implementation will occur}}";
+    };
+
+    /**
+     * Returns a Q&A style table arg 0 is the question, arg 1 is the answer
+     */
+    public static Generator QA = (args) -> {
+	return "{| width=\"100%\" cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n" +
+		"|-\n" +
+		"! scope=\"col\" width=\"3%\" |\n" +
+		"! scope=\"col\" |\n" +
+		"|-\n" +
+		"| '''Q:'''\n" +
+		"| '''" + args[0].replaceAll("\n", " ") + "'''\n" +
+		"|- \n" +
+		"| '''A:''' \n" +
+		"| " + args[1].replaceAll("\n", " ") + "\n" +
+		"|}";
     };
 }

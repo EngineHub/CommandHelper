@@ -1,0 +1,205 @@
+
+Event handling allows users to register MScripts to be triggered in many other places, not just on a command. This 
+expands the usefulness of CommandHelper to the point where it is roughly equivalent to any other plugin that can be 
+written for Minecraft.
+
+==main.ms==
+In order to initially register an event, you must include a hook inside a "main" function. Upon server startup, any 
+script in main.ms will be run. This should be used as an opportunity to register your initial hooks. Now, this doesn't 
+prevent you from registering a hook elsewhere in a script, but for the common case, you'll want to put your hooks in 
+here. You can also use this opportunity to do other things, perhaps writing out to the console or something, but 
+typically only event registrations will be in here. This does work as a "server start" event, but it gets re-run 
+whenever you /reloadaliases also.
+==Registering an Event==
+To register an event, use the {{function|bind}} function. Let's take a look at the function's signature:
+<%CODE|
+bind(string eventName, array options, array prefilter, @event_object, [@custom_params...]) {
+ <code>
+}
+%>
+If you note, this looks very similar to the {{function|proc}} function. In essence, it's basically the same, except 
+CommandHelper is responsible for calling the function, when the specified event occurs, not you. The options object 
+allows you to set certain options for this event, including setting a custom event id, and event priority. The prefilter 
+allows you to tell the event handler to pre-filter which events are intercepted (Prefilters are a more complicated 
+subject, and have their own [[CommandHelper/Events/Prefilters|wiki page]]). Both the options parameter and the prefilter 
+parameter may be null. The information in the @event_object depends on the event. Each event sends different parameters. 
+Finally, the custom params are discussed below in the scope section. So, let's look at the <code>player_interact</code> 
+event, which occurs whenever the player left or right clicks a block or the air, and show a few use cases. First, we 
+need to know the event's signature though, which can be looked up in the [[CommandHelper/Event API|Event API]].
+
+player_interact:
+* @event['action']: One of either: left_click_block, right_click_block, left_click_air, or right_click_air
+* @event['block']: The id of the block they clicked, or 0 if they clicked the air. If they clicked the air, neither \
+facing or location will be present.
+* @event['player']: The player associated with this event
+* @event['facing']: The (lowercase) face of the block they clicked.
+* @event['location']: The (x, y, z, world) location of the block they clicked 
+
+<%CODE|
+bind(player_interact, null, null, @event) {
+     if(@event['action'] == 'left_click_block') {
+          msg('You just left clicked a block with id ' . @event['block']);
+     }
+}
+%>
+
+So, what's going on here? @event contains the event data. It is an associative array that contains at least the 
+following information:
+* "type" - The event type. Normally you've already got this data, because you registered it, however, wildcard events \
+may be possible in the future.
+* "macrotype" - This determines what kind of data there will be in the rest of the event
+The rest of the data in the event is dependent on the event type, and this information can be looked up in the event 
+table.
+
+So, what happens? If the player left clicks a block, it will tell them the block id they just clicked. Not terribly 
+useful by itself, but that should give you an idea of how events work in general.
+
+==Unregistering an Event==
+Each event returns some piece of data that uniquely identifies this registration. To unregister an event, you need to 
+know this data (i.e., store it in a variable). This data is not guaranteed to be unique across reloads of the server 
+however, so persisting it across reloads doesn't make sense. If you need to always know what the event id is, you can 
+force a particular id on the event. This id must be unique across all events. To ensure the data is unique compared to 
+automatically generated event ids, you may not register an id with the following syntax: "string:int". This formatting 
+is enforced by the function. To unregister the handler, use the {{function|unbind}} function. Let's look at actual code 
+to more clearly see usage.
+<%CODE|
+// Automatically generated id
+@event_id = bind(player_interact, null, null, @event) {
+        '' #Handling code for event
+};
+
+unbind(@event_id); // This was the id returned by bind()
+%>
+
+In the case where we assign our own id, so that we can persist, or otherwise always know what our event's id is, we can 
+use the following syntax
+<%CODE|
+bind(player_interact, array(id: 'interact-123'), null, @event) {
+    '' // Handling code
+}
+
+unbind('interact-123');
+%>
+
+In addition, an event may unregister itself from within the handler by running <code>unbind()</code> without any 
+arguments. This will cause the handler to no longer run, but it will finish running this last time. This is useful for 
+onetime event handlers, perhaps if the event was registered in a command.
+
+<%CODE|
+bind(player_interact, null, null, @event) {
+     // Event handling code goes here
+     unbind();
+}
+%>
+
+==Running inside an event handler==
+The context of events are sometimes different than when a command is run. For instance, in a mob spawn event, no player 
+is involved, so {{function|player}} will return null. For player based events however, player() does return the player 
+that triggered the event.
+
+===Scope===
+Events have the same type of scope as functions, i.e. only variables passed in are assigned. This is what the custom 
+params are for. If you need to have these values passed in to the event, you may do that with these extra parameters. 
+The values are copied over ''at bind time'', not at event run time. Though the values in the variables may be changed 
+during the execution of the script, they are reset to the bind time values each time the function is triggered. Using 
+{{function|import}} and {{function|export}} is a good way to get data in and out of the event handlers, if needed, 
+though you may consider redesigning if you're doing it this way, because there is likely a simpler way.
+
+===Return===
+Any values {{function|return}}ed from the code are ignored, but will cause the event handler to stop running, which can 
+be a convenient way to stop the handler short.
+
+==Order of events==
+Event handlers (the code inside a <code>bind</code>) are fired off in order from highest to lowest, then monitor. All 
+CommandHelper events are cancellable; that is to say that if an event is cancelled, a flag is set and 
+{{function|is_cancelled}} will return true, and if the underlying minecraft event is also cancellable, it will also be 
+cancelled. To cancel an event, call <code>cancel([state])</code> in your code. The rest of your code will continue 
+running, so if you need to stop after cancelling, you should <code>return()</code>. 
+
+Handler priorities are handled as such: Suppose we have three events registered, at high, low, and lowest. The handler 
+at high gets the event first. The handler is free to modify event parameters, which will then be passed to the low 
+priority handler, which is then allowed to further modify the event as required, and then it is passed on further to the 
+lowest priority handler, which is also free to edit the event parameters. Finally, the monitor level handlers are 
+allowed to see a read-only version of the event. This chain can be modified in two ways. First, a handler may call 
+{{function|lock}} on an event, which will cause calls to <code>modify_event</code> by lower priority handlers to fail. 
+Events essentially become read only at that point, however handlers may still react otherwise. In addition, parameters 
+may be sent to <code>lock()</code>, which will only lock the specified event parameters, leaving the rest of the 
+parameters freely editable by lower priority handlers. The second option a higher priority handler has, is to 
+{{function|consume}} an event. If an event is consumed, it is not even passed to lower priority handlers (except 
+monitor). This will prevent lower priority events from even seeing the event in the first place.
+
+<!-- Not added yet!
+Another mechanism in place to help deal with priority issues is to register a callback that is run after an event is 
+executed (assuming it actually is executed). The opposite effect, running a callback if an event ''fails'' to execute 
+is also possible. These two effects can be managed using the {{function|when_triggered}} and {{function|when_cancelled}} 
+functions. They each receive a "read only" copy of the event.
+-->
+
+So, what is the purpose of all this complexity in handler priorities? When handlers fight, things can get messy, and 
+simply having 5 or 6 priority levels isn't usually enough flexibility to specify the desired behavior. For instance, 
+if a handler absolutely needs to read the original value of an event parameter and act on the event externally, but only 
+trigger something else as long as some other parameter is some value upon it actually triggering, this would be 
+impossible without the callbacks. Or if a handler wants to act on some event, and other events also acting on it would 
+cause issues, it can consume the event, and not have to worry about undesired behavior. This is why choosing a priority 
+is important, and the priority you choose should be based on the following guidelines:
+* Lowest: Lowest priority handlers should expect to not be able to edit parameters, or even run, but should instead be \
+a "default" occurrence, should nothing else choose to deal with this event.
+* Low: Handlers that don't need to run at all, but would like to be able to edit and see at least some events should \
+register at low priority.
+* Normal: Normal priority handlers intend on being run as they expect, but there would be not be a big loss if they \
+weren't able to run as intended.
+* High: Handlers that play an important role, but don't need absolute say over an event should register as a high \
+priority handler.
+* Highest: Highest level handlers receive the event first. Handlers that need to have absolute say about the event \
+should register at this level.
+* Monitor: Monitor level handlers receive the event last, and cannot edit the event in any way. This should be used \
+for logging type handlers. In general, if the handler hooks in to game functionality (even if it doesn't intend on \
+modifying the event) it should register at Lowest or Low. The exception to this is if a handler wants to get the event \
+even if it is cancelled or consumed, at which point it is appropriate to use monitor. Monitor level handlers still \
+receive cancelled and consumed events, and can check the status of those flags with the <code>is_cancelled()</code> \
+and <code>is_consumed()</code> functions.
+
+In the event that two or more handlers register at the same priority, other handlers will receive the event even if it 
+is consumed (however, they can not cause it to stop being consumed) and they can still modify the event parameters 
+(though they cannot "unlock" the event for lower priority handlers). The order that handlers fire in within priorities 
+is determined by bind order.
+
+==Debugging==
+If you are having trouble getting a script to do what you want, especially if you have many scripts running, it may be 
+helpful to use some of the debugging tools at your disposal. {{function|dump_events}} will print out all the currently 
+bound events, including their exact location in your script, so you can easily refer to it. Also, if you need to get 
+meta information at runtime, you can
+use the following code snippet:
+
+<%CODE|
+bind(event_name, array(priority: monitor), null, @event) {
+    console(event_meta());
+}
+%>
+
+Because the event handler is registered at monitor level, it will run last, and it will print out meta information about 
+the active event, including information about what handlers received, locked, consumed, modified, or cancelled events. 
+Because logging information for {{function|event_meta}} does use marginally more resources, history is only logged if 
+debug mode is on (this can be set in preferences.txt).
+
+<!--==Timeouts and Intervals==
+In addition to events, you may also register code to run at some specified time in the future, or at some given 
+interval. You can use the {{function|set_timeout}} and {{function|set_interval}} functions for this. The signature for 
+both is the same:
+<pre>
+set_interval(interval_in_seconds, [id], &lt;code&gt;)
+set_timeout(time_to_wait_in_seconds, [id], &lt;code&gt;)
+</pre>
+
+<code>set_timeout</code> allows you to wait x seconds, then run some code. <code>set_interval</code> allows you to run 
+some code every x seconds. Much the same way <code>bind</code> works, a unique id is returned that represents this 
+interval or timeout's closure, and you may <code>unbind</code> the interval or timeout. If you need to know the the id 
+of the event, you may also force an id on the event, subject to the same restrictions as <code>bind</code>'s 
+restrictions on ids. These functions are much like Javascript's setInterval and setTimeout functions if you are familiar 
+with that language, and in fact are modeled after it.
+==Manually Triggering Events==
+Sometimes it may be desirable to manually trigger an event. Each event has it's own requirements for exactly what is 
+required to fire it, but all the events use the {{function|trigger}} function. The exact requirements can be found in 
+the documentation with the event in the Event API.
+==Example==-->
+

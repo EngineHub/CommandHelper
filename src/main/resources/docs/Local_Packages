@@ -1,0 +1,86 @@
+Local Packages are a intermediate feature that allow you to break up your scripts and alias files into smaller, more 
+manageable chunks; as the name suggests, packages. Unlike {{function|include}} and auto_include.ms, this allows you to 
+break the alias files out into more files, as well as automatically including certain other ms files. Local Packages 
+have limitations; They are meant as an intermediate feature before snap-ins are completed. These limitations will become 
+clear if you are not careful in your design of packages. 
+
+== Local Packages ==
+For both Simple Directory Packages, and MSLP zips, the following functionality applies. Local Packages are placed in the 
+plugins/CommandHelper/LocalPackages folder. Any number of nested folders may be placed inside, CommandHelper recursively 
+scans the folders for relevant files. Unrecognized files are simply skipped, so you can have extra things in the folder, 
+such as ReadMe files, or some such. For the sake of forward compatibility, only .txt files are guaranteed to never be 
+used, so you should avoid adding other file types, in the event they are used in the future.
+
+== Simple Directory Packages ==
+
+This is the easiest and most straightforward use of Local Packages. Files that end in <code>.ms</code> or 
+<code>.msa</code> and are simple ascii files on the file system are read in and compiled. <code>.ms</code> files are 
+pure mscript; no aliases may be defined here, and these files should work the same as any other file you might 
+{{function|include}}. <code>.msa</code> files are the equivalent of the (by default) aliases.msa file. They must follow 
+the exact same format as the aliases.msa file. One special exception is <code>auto_include.ms</code> files in the 
+LocalPackages directory. These work exactly like the main <code>auto_include.ms</code> file, in that they are compiled, 
+cached, and included before every script run. This means this is the perfect place to define procs or other variables 
+that you need to be in scope for your scripts. All auto_includes are essentially run at the same time, and there is no 
+guarantee of run order.
+
+Folders may be indefinitely nested, and CH will recurse into them as deep as necessary. The one exception is if the 
+folder name ends in <code>.disabled</code>, in which case the entire folder is ignored. This gives you a handy way to 
+"remove" scripts from your system, temporarily.
+
+== MSLP Zips ==
+
+A <code>.mslp</code> file may also be placed anywhere in the directory structure. A MSLP file is simply a zip file, with 
+the file extension changed. Within the MSLP file, the exact same rules apply as with the Simple Directory Package 
+structure. <code>.ms</code> and <code>.msa</code> files.
+
+This mechanism allows for easier distribution of a self-contained script, but has the disadvantage of not being easily 
+edited, however, a simple unzip operation will take care of that.
+
+There is a packager built in. You may create a mslp by simply running 
+<code>java -jar CommandHelper.jar --mslp path/to/toplevel/folder</code>. In addition to creating the mslp, it will 
+attempt to compile it first, failing to create the mslp if compilation errors are present. The name of the mslp is 
+decided by the name of the folder; i.e. myScripts/ will become myScripts.mslp.
+
+== Disadvantages ==
+
+The order in which files load is undefined. This means that dependencies among seperate "projects" is not usually a good 
+idea. You may be able to game the system by naming files one thing or another, but in general that method will not be 
+reliable. However, you ''can'' reliably handle dependencies ''within'' a package by putting includes in your 
+auto_include.ms file, and using the <code>.library</code> mechanism.
+
+== Inter-Package Interaction ==
+
+Usually programs have a "main" file, which is the thing that is guaranteed to run first. This is the starting point of a 
+program usually. Local Packages can emulate this behavior, but within different "projects", the load order is completely 
+undefined, and there is currently no mechanism for defining this. The one exception to this rule is that the main 
+<code>auto_include.ms</code> will always run first. However, using the <code>.library</code> mechanism, along with 
+careful file layouts will allow you to move pure ms files around, yet still guarantee their load order. A folder that 
+ends in <code>.library</code> works the exact same way as a <code>.disabled</code> folder, the name is just a convention 
+that hints at that folder's purpose. Files that are included inside of the <code>.library</code> folder are not directly 
+loaded by the Package mechanism, but can still be loaded by your code using an {{function|include}}. <code>.msa</code> 
+files are not really affected by this, since all aliases are global anyways, and even if one depends on another, they 
+will all get loaded before any are used. <code>.ms</code> files may get affected by this, since they are executed as 
+soon as they are run, and one file may define a proc that another file needs to use, and if the load order is incorrect, 
+it would fail.
+
+Typical package structure may look like this then:
+<pre>
+plugins/CommandHelper/LocalPackages/
+--MyPackage/
+----main.msa #Defines the commands used by this package
+----main.ms #Initializes events, first running include('includes.library/file.ms')
+----includes.library/
+------file.ms #Defines several procs used in main.ms, and also possibly main.msa
+--AnotherPackage/
+----main.msa #More commands
+----main.ms #More events and an include
+----folder.library/
+------name.ms
+</pre>
+
+Since the Local Package mechanism is really just a way to organize your own personal scripts, if you try and distribute 
+packages, you may run into namespace conflicts. This is again a limitation of Local Packages that will be addressed with 
+Snap-Ins.
+
+{{LearningTrail}}
+

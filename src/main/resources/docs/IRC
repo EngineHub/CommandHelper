@@ -1,0 +1,96 @@
+%%UNIMPLEMENTED%%
+
+IRC commands allow a server to send and process IRC messages. Since IRC is two-way, there are functions that can send 
+messages, and events that are fired when a message is received. Before either can happen however, a connection to the 
+server must be created.
+
+==Creating connection==
+To create a connection, you must know two things, the server url, and the username. (The username is up to you to pick.) 
+Because joining a server is a blocking process, and can take a moment, creating a connection is multithreaded. However, 
+the script itself does not block, but instead can call a function once it's done, which will allow for further actions 
+if you must wait for a connection before you take action. Usually this can be ignored though, because the connect 
+function takes much effort to use reasonable defaults if no callback is given, and usually if a connection isn't up, the 
+messages you are sending can be discarded anyways. Also keep in mind that when the server restarts, the connection would 
+also restart as well.
+
+To connect, use the following code:
+
+<%CODE|
+irc_connect('irc.esper.net', 'CommandBot', array('#CommandHelper'))
+%>
+
+That's it! Since no callback was provided, and a channel list was given, the following defaults will happen: It will 
+attempt to connect to irc.esper.net. Once joined, it will pick the name CommandBot. If the connection to the server 
+could not be established, it will echo a message to the console, and try again in 10 seconds, in case the server is just 
+unreachable temporarily, however, this likely means you are connecting to an invalid server. If the name is already 
+taken, it will try CommandBot_, then CommandBot__, etc until it gets a name that isn't taken. It will occasionally try 
+to change names back to CommandBot once it becomes available. Once it joins, it will join the channel #CommandHelper 
+(and others if provided). Now that it has joined, you can send messages, and events will activate.
+
+So, what if we want to change the default behavior? You can provide a callback function, and it will be called when 
+either the connection fails or succeeds. (It will not try again automatically.) You may also optionally provide an array 
+of channels to join if the connection is successful, and those will automatically be joined. The callback function 
+accepts a few parameters: The server name, so that if needed, this callback can be linked to the appropriate request, 
+the name attempted, a boolean which indicates if the join was successful, an error code (null if @success was true, a 
+string otherwise) and an array of channels that were joined. Here is an example of a callback that might be used:
+
+<%CODE|
+# Define our callback first
+proc(_irc_callback, @server, @username, @success, @error, @channels,
+     if(@success,
+          # We joined successfully, so lets greet all the channels we joined
+          foreach(@channels, @channel,
+              # Sending a message is discussed below
+              irc_message(@username, @channel, 'Oh, hai!')
+          )
+          , #else
+          # The connection wasn't successful, lets try again if it was just because the username was taken
+          if(equals(@error, 'USERNAME_TAKEN'),
+               irc_connect(@server, concat(@username, '_'), @channels, _irc_callback)
+          )
+     )
+)
+
+# Fire off the connect now
+irc_connect('irc.esper.net', 'CommandBot', array('#CommandHelper', '#MyServer'), _irc_callback)
+%>
+
+This method more or less duplicates the behavior of the default behavior, which the exception of trying to change names 
+continually if the initial name is taken. Now that we have connected, we are free to send messages without causing 
+exceptions. In our success handler, we also could have done things like authenticate with the server.
+
+==Sending messages==
+There are a few functions for sending a message. All of them have a switch that can be set that will make them throw an 
+exception, instead of simply ignoring the message if the connection is invalid (which can be caused by the connection 
+not being up yet, even though it will eventually connect).
+
+irc_message(@username, @channel, @msg, [@throw]) accepts the following parameters, @username, which is the name of the 
+bot that is connected, which represents a valid connection, @channel, which is the channel we are sending to, @msg, 
+which is the message to send. Optionally, you can also send a boolean, @throw, which defaults to false. If false, if you 
+try to send to an invalid connection, nothing happens, the error is just ignored, but if true, the function will throw 
+an exception, which can be caught in case you need to take alternate action if the message is not successfully sent.
+
+irc_message_bypass works the exact same way, however it bypasses the messages queue and immediately sends a message to 
+the channel. irc_message queues messages, so that if many messages are immediately queued, it will delay sending them, 
+to avoid setting off spam filters.
+
+irc_command(@username, @channel, @msg, [@throw]) works very similarly to irc_message, except it sends a command (which 
+should start with a '/'). There is a difference between a command and a normal message, so this distinction allows 
+greater flexibility in what you send to the channel.
+
+==Connection Identifiers==
+A quick note on connection identifiers: It is possible to have multiple connections up to different servers. Since 
+usernames are unique across individual servers, the username is typically enough to differentiate between connections. 
+However, if you have multiple connections to different servers with the same username, you must use the full identifier 
+for the connection, which is the format username@url[:repeater] (example: CommandBot@irc.esper.net:_). It is acceptable 
+to always use the full identifier, even if the username alone would be enough to identify the connection. The url is the 
+url of the server, and the username is the username that was selected. The optional repeater part is for in case there 
+is no connection matching username@url, it will check for a connection that otherwise matches, but has any number of 
+repeaters on the end. By default, it is empty, and won't match any connection if an alternate was selected 
+automatically. (Keep in mind that the default repeater is '_').
+
+==Receiving messages==
+
+==Possible errors==
+
+

@@ -1,0 +1,7 @@
+MethodScript uses Java style regexes, so in general, any regex guides you find online for Java will apply to 
+MethodScript as well, with the obvious caveat that the actual functions used in Java will vary. Regex is a non-trivial 
+subject, and entire websites have been dedicated to it, so it is not in the scope of this wiki to cover it. For further 
+reading, [http://www.regular-expressions.info/ see this website]. A "test harness" script is also provided with the 
+[[CommandLineTools#examples|installable Local Packages]]. The package to install is 
+"RegexTestHarness".
+

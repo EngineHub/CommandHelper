@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ObjectGenerator;
@@ -34,6 +35,7 @@ import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.functions.ArrayHandling;
+import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -60,6 +62,8 @@ import static org.mockito.Mockito.*;
 import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.awt.HeadlessException;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  *
@@ -351,6 +355,35 @@ public class RandomTests {
 	assertEquals("true", SRun("array_insert(array(), '', 0) === void", fakePlayer));
 	assertEquals("void", SRun("typeof(array_insert(array(), '', 0))", fakePlayer));
 	assertEquals("ClassType", SRun("typeof(typeof(array_insert(array(), '', 0)))", fakePlayer));
+    }
+
+    @Test
+    public void testFunctionsAreOnlyDefinedOnce() throws Exception {
+	Set<String> uhohs = new HashSet<>();
+	Set<Class<Function>> set = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(Function.class);
+	for(Class<Function> cf1 : set) {
+	    for(Class<Function> cf2 : set) {
+		if(cf1 == cf2) {
+		    continue;
+		}
+		api cf1a = cf1.getAnnotation(api.class);
+		api cf2a = cf2.getAnnotation(api.class);
+		if(cf1a == null || cf2a == null) {
+		    continue;
+		}
+		if(!Arrays.equals(cf1a.platform(), cf2a.platform())) {
+		    continue;
+		}
+		Function f1 = ReflectionUtils.instantiateUnsafe(cf1);
+		Function f2 = ReflectionUtils.instantiateUnsafe(cf2);
+		if(f1.getName().equals(f2.getName())) {
+		    uhohs.add(f1.getName() + " is implemented in two places, " + cf1 + " and " + cf2);
+		}
+	    }
+	}
+	if(!uhohs.isEmpty()) {
+	    fail(StringUtils.Join(uhohs, "\n"));
+	}
     }
 
 //    @Test

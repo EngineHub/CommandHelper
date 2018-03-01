@@ -1,0 +1,61 @@
+The profiler is a built in mechanism to assist you in debugging troublesome scripts that take longer than expected. In 
+general, CH is designed to be fast; performance is a key concern, but being that you have very fine control over its 
+operation, it is always possible to make a poorly designed script that takes too long to complete. Various mechanisms 
+exist to help you fix a script that takes too long (namely the [[Execution_Queue|Execution Queue]]) but 
+''identifying'' a laggy script can be a challenge. This is where the profiler comes in.
+
+== Usage ==
+
+The profiler is controlled with the profiler.config file, which is created in the CommandHelper directory. There are a 
+few settings of interest, each documented in the file. To turn profiling on, set the "profiler-on" switch to true. Note 
+that profiling can introduce up to a one millisecond lag '''per triggered profile point''', (untriggered profile points 
+take about .001ms) so turning profiling on and leaving it on during normal server operation is not recommended.
+
+Setting the granularity to a higher setting will cause more profile points to be triggered, so if debugging in a live 
+scenario, it is best to turn the granularity to a lower number. Typically, 1 is sufficient to identify general slow 
+points in your script, which can then be moved to a test server, with a high granularity.
+
+
+== MethodScript Inefficiencies ==
+It is possible that you identify slow spots in MethodScript itself. That is great! Setting the granularity to 5 will 
+spit out how long each and every native function takes, and if you find that there are functions that take exceedingly 
+long, then file a bug report, and hopefully performance can be improved.
+
+
+== What types of information is profiled? ==
+The profiler shows different information based on your granularity, but this chart shows the general types of 
+information shown. As you go to more verbose, more information is shown, as well as the lower levels' information.
+
+{|
+|-
+| 1 - Only high level information is shown about how long aliases, events, execution queue, and \
+set_timeout/set_interval tasks took.
+|-
+| 2 - Loop times are shown; for, foreach, while, and dowhile. The parameters passed to the loops will be displayed as \
+well, so you can differentiate between various loop sizes.
+|-
+| 3 - Procedure execution times are shown. The parameters passed to the procedure will be displayed as well, so you \
+can differentiate between various procedure executions.
+|-
+| 4 - File IO times are shown. Sometimes, file IO will appear out of sequence, because IO is sometimes asynchronous, \
+however, the times will still be recorded. The following functions run times will be shown: read(), get_values(), \
+get_value(), store_value(), clear_value(), has_value().
+|-
+| 5 - Every single function is individually profiled. The parameters passed to each function will be shown as well. \
+WARNING: This is extremely CPU intensive, and should only be used on a test server. Note that execution times may \
+appear out of order when using asynchronous tasks, such as set_timeout, etc. This is normal. Compilation times are \
+also logged, per file.
+|}
+
+== Java Garbage Collection ==
+Sometimes, the java garbage collector introduces slowness, which can't be controlled at all. The profiler can't do \
+anything about this, but it will tell you when the GC was run on the individual profile points, which will allow you \
+to adjust your times accordingly. This will typically invalidate that set of results however, so it is good to know \
+what results are considered "calibrated". The Garbage Collector tends to add at LEAST 5 ms, though this will vary \
+greatly from machine to machine.
+
+== Comparing Results ==
+Results can't really be compared with each other, unless it came from the same server under similar loads. The results \
+are only meaningful when compared against benchmarks, which can be set by running a few simple commands that do almost \
+nothing, and comparing against that, or comparing against two different scripts run at the same time.
+

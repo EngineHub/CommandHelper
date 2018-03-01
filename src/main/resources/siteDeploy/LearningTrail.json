@@ -26,7 +26,6 @@
         "Profiler"
     ]},
     {"Select Functions/Classes": [
-        "Meta",
         "Regex",
         "IRC"
     ]},
@@ -48,9 +47,8 @@
         "Logging"
     ]},
     {"Future/Next Version": [
-        {"Next_Version": "Next Version"},
         "Roadmap",
-        "Dev"
+        {"Dev": "Development Versions"}
     ]},
     {"Development": [
         "Architecture",

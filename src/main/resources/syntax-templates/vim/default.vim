@@ -16,6 +16,8 @@ syn region smartstring start=/"/ skip=/\\"/ end=/"/
 	\ contains=ivariable,smartIVariable
 syn region smartIVariable start="@{" end="}" contained
 syn match ivariable /@[a-zA-Z0-9_]\+/
+syn region fileOptions start="<!" end='>'
+syn match fileOptionsLabel /\v(%%pipe:fileOptions%%)(:|;)/ containedin=fileOptions
 syn match variable /\$[a-zA-Z0-9_]\+/
 syn match finalvar /\$[^a-zA-Z0-9_]/
 syn match label /[a-zA-Z_][a-zA-Z0-9_]\+:/
@@ -35,5 +37,7 @@ highlight smartstring ctermfg=3 guifg=orange
 highlight ivariable ctermfg=green guifg=green
 highlight smartIVariable ctermfg=green guifg=green
 highlight variable ctermfg=LightCyan guifg=LightCyan
-highlight finalvar ctermfg=#008080 guifg=#008080
+highlight finalvar ctermfg=DarkCyan guifg=DarkCyan
 highlight label ctermfg=yellow guifg=yellow
+highlight fileOptions ctermfg=grey guifg=grey
+highlight fileOptionsLabel ctermfg=blue guifg=blue

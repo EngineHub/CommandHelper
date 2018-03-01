@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.enums.MCChatColor;
@@ -20,10 +21,12 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.functions.Function;
+import java.lang.reflect.Field;
 
 public class SyntaxHighlighters {
 
@@ -171,7 +174,11 @@ public class SyntaxHighlighters {
                 }
             }
             base.addAll(set);
-        }
+        } else if(datalist.equalsIgnoreCase("fileOptions")) {
+	    for(Field f : FileOptions.class.getDeclaredFields()) {
+		base.add(f.getName());
+	    }
+	}
         String header = "";
         String spliter = "IMPROPER FORMATTING";
         String footer = "";

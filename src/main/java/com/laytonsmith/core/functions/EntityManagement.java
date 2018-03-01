@@ -602,66 +602,6 @@ public class EntityManagement {
 	}
 
 	@api
-	public static class get_entity_breedable extends EntityGetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity ent = Static.getEntity(args[0], t);
-			if(ent instanceof MCAgeable) {
-				return CBoolean.get(((MCAgeable) ent).getCanBreed());
-			} else {
-				throw new CREBadEntityException("Entity ID must be from an ageable entity!", t);
-			}
-		}
-
-		@Override
-		public String getName() {
-			return "get_entity_breedable";
-		}
-
-		@Override
-		public String docs() {
-			return "boolean {entityID} Returns if an entity is set to be breedable.";
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class set_entity_breedable extends EntitySetterFunction {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			boolean breed = Static.getBoolean(args[1]);
-			MCEntity ent = Static.getEntity(args[0], t);
-			if(ent instanceof MCAgeable) {
-				((MCAgeable) ent).setCanBreed(breed);
-			} else {
-				throw new CREBadEntityException("Entity ID must be from an ageable entity!", t);
-			}
-			return CVoid.VOID;
-		}
-
-		@Override
-		public String getName() {
-			return "set_entity_breedable";
-		}
-
-		@Override
-		public String docs() {
-			return "void {entityID, boolean} Set an entity to be breedable.";
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
 	public static class get_entity_age extends EntityGetterFunction {
 
 		@Override

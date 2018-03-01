@@ -1,0 +1,37 @@
+
+This page lists several frequently asked questions, with a quick, succinct answer, and links to further resources on the 
+topic, if applicable.
+
+==General==
+<%QA|How do I create aliases?|Aliases are put in the aliases.msa file for global aliases, and added in game with the 
+/alias command for user aliases. To refresh your aliases after making changes to the aliases.msa file (or any CH script 
+file) use /reloadaliases from either in game, or the console.%>
+
+<%QA|How do I run CommandHelper commands from other plugins?|Prefix the alias with /runalias%>
+
+<%QA|What is the .cache folder?|The .cache folder contains files that speed up the startup. Deleting it will cause the 
+next startup to take slightly longer, but otherwise will have no effect, and can be beneficial to delete every once and 
+a while to clear out old, unused cache files%>
+
+==Persistance==
+<%QA|Why is "persistance" misspelled? Isn't it "persistence"?|Yes, and I fixed it :p%>
+
+
+==Common Errors==
+<%QA|I got a compile error. What does that mean?|It means you have messed up your syntax somewhere. There's a huge range 
+of possible errors, so you'll have to read the error message carefully, and try to understand what it's telling you. If 
+an error message is unclear (or wrong) it may be a bug in CommandHelper, so jump on IRC and ask, or make a post on the 
+forum, but try to understand what the message says before you ask for help.%>
+
+==Dev builds, Bug reporting, Releases==
+<%QA|Where can I report bugs?|http://youtrack.sk89q.com%>
+<%QA|Where can I get the latest dev builds?|http://builds.enginehub.org/job/commandhelper/ Note that the latest build is 
+the only version that is supported however, so if you're using a random build, expect to have to upgrade if we can't 
+quickly figure out a problem you're having.%>
+<%QA|When will the next release be available?|Releases happen when they are ready. Because this is a 100% volunteer 
+project, IRL always comes first, and so it's very hard to predict a time based ETA. Having said that, feature based ETAs 
+are possible; that is, "after feature X, Y, and Z are complete, and there are no bugs left, we will release". If you are 
+dying for new features, the development builds are generally quite stable. CommandHelper is a well tested piece of 
+software; there are over 500 unit tests, and it is a high priority to keep tests from failing, as well as continually 
+add more tests as new features are added. Having said that, there still may be bugs, and it still may break things, so 
+always keep backups, especially if you are running it on a production server.%>
