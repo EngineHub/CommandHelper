@@ -1,0 +1,67 @@
+File options are a way to granularly control options for a single file. Some file options affect the compiler directly,
+others are simply used by the reflection mechanism to provide info during runtime. Unrecognized file options are
+ignored, but are otherwise not an error, however, you should prefix all custom file options with "x-" to prevent future
+conflicts if new file options are introduced.
+
+The general format of a file option is: <code>option: value;</code> where the semicolon is optional for the last value.
+However, some file options are booleans. For booleans, either "true" or "on" are considered positive values, and "false"
+or "off" are considered negative values. Furthermore, leaving the value off entirely, e.g. <code>option;</code> is
+equivalent to <code>option: on;</code>
+
+The file options must be defined at the top of the file, and can only be proceeded by comments, and start with 
+<code>&lt;!</code> and end with 
+<code>&gt;</code>. Newlines within the file options are acceptable. If, within the value, you need a literal
+&gt; or semicolon, you must escape it with \, so <code>\&gt;</code> or <code>\;</code>.
+
+Some examples:
+
+== Examples ==
+<%CODE|<! strict >%>
+Enables strict mode.
+
+<%CODE|<!
+    strict;
+    description: A description of this file;
+>%>
+Enables strict mode and adds a description to the file
+
+<%CODE|<!    
+    strict: off;
+    description: Description
+>%>
+Disables strict mode for this file and adds a description.
+
+Below, the various file options and their effects are described:
+
+== strict ==
+
+Enables strict mode for just this single file. See the page on [[Strict_Mode|strict mode]] for a discussion of what this
+mode actually does.
+
+== suppressWarnings ==
+
+Suppresses the given compiler warnings for this file. The list should be comma separated, but can contain multiple 
+types.
+
+'''Note: There are currently no compiler warnings defined in this directive, but the existing compiler warnings will \
+be backported into this system'''
+
+== name ==
+
+This should be the name of the file. If it exists, and the file name does not match this value, the compilation will 
+fail.
+
+== author ==
+
+The author of this file. This value is not used currently, but will eventually be available in the reflection 
+information.
+
+== created ==
+
+The date this file was created. This value is not used by the compiler, but is perhaps useful information for future 
+readers of the script. This will eventually be available in the reflection information.
+
+== description ==
+
+A description of this file. This value is not used by the compiler, but is perhaps useful information for future 
+readers of the script. This will eventually be available in the reflection information.

@@ -1,0 +1,122 @@
+
+Strict mode places the compiler in an much more restrictive mode, where backwards compatibility is not as much of a
+concern, and where things that would have been compiler warnings previously will be turned into compiler errors, and
+generally causes the compiler to be more pedantic.
+
+{{Warning|text=Note, putting your files in strict mode may require more work when upgrading, as your scripts may no
+longer compile. Future additions to strict mode will be implemented, and if your scripts do not conform, you will
+have to upgrade them.}}
+
+Conforming to strict mode has its advantages, however. Errors that would have gone unnoticed are highlighted much more
+quickly. Strict mode enforces better programming practices and clearer and cleaner code. Strict mode will be expanded
+in the future, and those expansions will be listed below, so that you can begin to write conformant code, and it will
+not break once strict mode expands to include those options. However, unlisted modes may be added in the future with no
+notice, however, they will then be added to this documentation.
+
+One guarantee is that code that is written to conform to strict mode will always run the same in non-strict mode.
+
+Strict mode can be enabled per file with the appropriate [[File_Options|file option]] or globally with a config setting.
+
+== No Bare Strings ==
+
+A bare string is a string without quotes.
+
+<%CODE|
+string s = bareString;
+string s = "notABareString";
+string s = 'alsoNotABareString';
+%>
+
+Using bare strings runs the risk that an identifier (such as a keyword) will be introduced in the future, which has
+the same name as the bare string. In this case, the compiler will use the functionality of the identifier, rather
+than the string, and your code could suddenly change without you knowing, causing hard to diagnose bugs. Thus, in strict
+mode, bare strings are not allowed, you must quote all strings.
+
+== Auto Concatenation ==
+
+(not yet implemented)
+
+Auto concatenation is when two objects with no operator between them are taken to be concatenated, with a space added
+between.
+
+<%CODE|
+msg('this' 'is' 'concatenated'); // auto concatenation
+msg('this' . ' is' . ' also' . ' concatenated'); // explicit concatenation
+%>
+
+While less code to write, this has the unfortunate side effect that the whole script must be wrapped in a concatenation
+block, which means that for each line of code, the concatenation effect must also run, even in cases where the 
+concatenation doesn't make sense. This adds overhead to the code for no extra value in 99% of cases, and so strict
+mode disallows this feature, requiring explicit concatenation operators, at the benefit of decreased code runtime.
+
+== Statement semicolons ==
+
+(not yet implemented)
+
+Semicolons are used to denote end of statements, and they are currently allowed in code, but they are completely
+optional, and unused. In strict mode, they must be used. Not all constructs are statements, however. For instance, a 
+msg() call is a statement, but a for loop and a proc definition are not.
+
+<%CODE|
+msg('hi'); // <- required semicolon
+foreach(int @i : 1..10) {
+
+} // No semicolon required
+%>
+
+While this seems arbitrary, separating statements is required in two cases. Using the ++ or -- operators, it is
+ambiguous whether the operator is meant to apply to the previous value (postfix) or following value (prefix). In the
+future, direct closure execution will be allowed with parenthesis:
+
+<%CODE|
+closure @c = closure(string @value){};
+
+@c('value');
+%>
+
+However, since parenthesis are also allowed to be used to group values together, it would be ambiguous if the
+parenthesis were simply a grouping mechanism, or if they are intended to execute the previous closure. In non-strict
+mode, the semicolons will be required in these cases only when the behavior is not clear, however, in strict mode,
+semicolons are required on all statements.
+
+Some languages solve this same problem with newlines, instead of semicolons. However, MethodScript has a design 
+principal which states that whitespace should never be used as code.
+
+== Object typing ==
+
+(not implemented yet)
+
+In strict mode, all newly defined variables (and procedure definitions) must be typed. For instance:
+
+<%CODE|
+string @s;
+string @a = 'a';
+
+int @i = 5;
+
+int proc _myproc(string @m) {
+    return 5;
+}
+%>
+
+Adding type safety to your code is a well documented advantage, as it allows the compiler to more easily and quickly 
+detect invalid code, as you cannot in the future assign a value of a different type to a variable that was defined with
+another type. In non-strict mode, types are still allowed, and have the same behavior, but untyped values are assumed
+to have the type ''auto''. This type is still allowed in strict mode, but the declaration must be explicit.
+
+<%CODE|
+auto @x = 'string';
+@x = 5;
+@x = array();
+%>
+
+Please see the page on [[Cross_Casting|cross casting]] for a further discussion on the auto keyword.
+
+== Compiler Warnings ==
+
+(not yet implemented)
+
+Compiler warnings, such as deprecations and others are normally warned about, but compilation continues. In strict mode,
+these warnings instead trigger a compile error, and must be fixed immediately. However, in combination with the 
+suppressWarnings file option, individual warnings can be ignored, and these will trigger neither a compiler warning or
+a compiler error.

@@ -1,3 +1,5 @@
+%%UNIMPLEMENTED%%
+
 Cross casting is a feature of MethodScript that allows for rapid scripting, while
 maintaining strong type safety elsewhere. Cross casting is less stringent than a
 fully strongly typed system though, so it should be used sparingly, and only if

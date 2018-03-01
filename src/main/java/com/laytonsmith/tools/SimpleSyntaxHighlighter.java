@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Color;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.compiler.KeywordList;
+import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
@@ -14,6 +15,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The SimpleSyntaxHighlighter class contains a method to do HTML syntax highlighting on a given block of plain text
@@ -22,14 +24,15 @@ import java.util.Set;
 public class SimpleSyntaxHighlighter {
 
     public static void main(String[] args) throws Exception {
-	List<Token> ts = MethodScriptCompiler.lex("'a string' + '\\''", null, true, true);
+	String script = "<!\nstrict: on;\n>";
+	List<Token> ts = MethodScriptCompiler.lex(script, null, true, true);
 	for(Token t : ts) {
 	    System.out.println(t.type);
 	    System.out.println(t.value);
 	    System.out.println(t.target);
 	    System.out.println("----------------");
 	}
-	StreamUtils.GetSystemOut().println(SimpleSyntaxHighlighter.Highlight("'a string' + ' \\''", true));
+	StreamUtils.GetSystemOut().println(SimpleSyntaxHighlighter.Highlight(null, script, true));
     }
 
     /**
@@ -58,6 +61,9 @@ public class SimpleSyntaxHighlighter {
 	CLASSES.put(ElementTypes.FUNCTION, new Color(0x00, 0x00, 0x00));
 	CLASSES.put(ElementTypes.OBJECT_TYPE, Color.GRAY);
 	CLASSES.put(ElementTypes.COMMAND, Color.MAGENTA);
+	CLASSES.put(ElementTypes.FILE_OPTIONS_BLOCK, Color.DARK_GRAY);
+	CLASSES.put(ElementTypes.FILE_OPTIONS_KEY, Color.BLUE);
+	CLASSES.put(ElementTypes.FILE_OPTIONS_VALUE, Color.GRAY);
     }
 
     private final EnumMap<ElementTypes, Color> classes;
@@ -71,6 +77,9 @@ public class SimpleSyntaxHighlighter {
     }
 
     private String getColor(ElementTypes type) {
+	if(classes == null) {
+	    return null;
+	}
 	Color c = classes.get(type);
 	if (c == null) {
 	    c = CLASSES.get(type);
@@ -131,29 +140,31 @@ public class SimpleSyntaxHighlighter {
     }
 
     private String getOpenSpan(ElementTypes t, String extraStyles){
-	return "<span style=\"" + getColor(t) + "; " + extraStyles + "\">";
+	return "<span class=\"" + t.name().toLowerCase() + "\" "
+		+ (getColor(t) == null ? "" : "style=\"" + getColor(t) + "; ") + extraStyles + "\">";
     }
 
     private String getOpenSpan(ElementTypes t) {
-	return "<span style=\"" + getColor(t) + "\">";
+	return "<span class=\"" + t.name().toLowerCase() + "\" "
+		+ (getColor(t) == null ? "" : "style=\"" + getColor(t) + "\"") + ">";
     }
     private String getCloseSpan() {
 	return "</span>";
     }
 
     private String highlight() throws ConfigCompileException {
-	List<Token> tokens = MethodScriptCompiler.lex(code, null, inPureMscript, true);
+	TokenStream tokens = MethodScriptCompiler.lex(code, null, inPureMscript, true);
 	// take out the last token, which is always a newline
-	tokens = tokens.subList(0, tokens.size() - 1);
+	tokens.remove(tokens.size() - 1);
 	// if the first token is a newline, also take that out.
 	if (tokens.get(0).type == TType.NEWLINE) {
-	    tokens = tokens.subList(1, tokens.size());
+	    tokens.remove(0);
 	}
 	String newlineString = "<div><span style=\"font-style: italic; " + getColor(ElementTypes.LINE_NUMBER) + "\">"
 		+ "%0" + Integer.toString(tokens.get(tokens.size() - 1).line_num - 1).length() + "d</span>&nbsp;&nbsp;&nbsp;";
 	StringBuilder out = new StringBuilder();
-	int lineNum = 1;
-	out.append(String.format(newlineString, lineNum));
+	AtomicInteger lineNum = new AtomicInteger(1);
+	out.append(String.format(newlineString, lineNum.get()));
 	for (Token t : tokens) {
 	    if (null != t.type) {
 		switch (t.type) {
@@ -168,7 +179,7 @@ public class SimpleSyntaxHighlighter {
 			    // Note that this is a rare instance where reference comparison using == is valid,
 			    // this is not a bug.
 			    if(t != tokens.get(tokens.size() - 1)) {
-				out.append("</div>").append(String.format(newlineString, ++lineNum));
+				out.append("</div>").append(String.format(newlineString, lineNum.addAndGet(1)));
 			    }
 			}
 			break;
@@ -222,10 +233,23 @@ public class SimpleSyntaxHighlighter {
 			out.append(getCloseSpan());
 			break;
 		    case NEWLINE:
-			out.append("</div>").append(String.format(newlineString, ++lineNum));
+			out.append("</div>").append(String.format(newlineString, lineNum.addAndGet(1)));
 			break;
 		    case WHITESPACE:
 			out.append(escapeLit(t.val()));
+			break;
+		    case FILE_OPTIONS_START:
+			out.append(getOpenSpan(ElementTypes.FILE_OPTIONS_BLOCK));
+			out.append(escapeLit(t.val()));
+			out.append(getCloseSpan());
+			break;
+		    case FILE_OPTIONS_END:
+			out.append(getOpenSpan(ElementTypes.FILE_OPTIONS_BLOCK));
+			out.append(escapeLit(t.val()));
+			out.append(getCloseSpan());
+			break;
+		    case FILE_OPTIONS_STRING:
+			out.append(processFileOptionsString(newlineString, lineNum, tokens.getRawFileOptions()));
 			break;
 		    default:
 			out.append(escapeLit(t.val()));
@@ -234,12 +258,73 @@ public class SimpleSyntaxHighlighter {
 	    }
 	}
 	out.append("</div>");
-	String totalOutput = "<div style=\"font-family: 'Consolas','DejaVu Sans','Lucida Console',monospace; background-color: #"
-		+ getRGB(classes.get(ElementTypes.BACKGROUND_COLOR)) + ";"
-		+ " border-color: #" + getRGB(classes.get(ElementTypes.BORDER_COLOR))
-		+ "; border-style: solid; border-width: 1px 0px 1px 0px; margin: 1em 2em;"
+	String totalOutput = "<div style=\"font-family: 'Consolas','DejaVu Sans','Lucida Console',monospace; "
+		+ (classes == null ? "" : "background-color: #"
+		    + getRGB(classes.get(ElementTypes.BACKGROUND_COLOR)) + ";"
+		    + " border-color: #" + getRGB(classes.get(ElementTypes.BORDER_COLOR))
+		    + "; ")
+		+ " border-style: solid; border-width: 1px 0px 1px 0px; margin: 1em 2em;"
 		+ " padding: 12px 2px 1em 1em;\" class=\"methodscript_code\">" + out.toString() + "</div>";
 	return totalOutput;
+    }
+
+    private String processFileOptionsString(String newLineString, AtomicInteger lineNum, String value) {
+	boolean inKey = true;
+	StringBuilder builder = new StringBuilder();
+	builder.append(getOpenSpan(ElementTypes.FILE_OPTIONS_KEY));
+	for(int i = 0; i < value.length(); i++) {
+	    char c = value.charAt(i);
+	    char c2 = '\0';
+	    if(i + 1 < value.length()) {
+		c2 = value.charAt(i + 1);
+	    }
+	    if(c == '\n') {
+		builder.append(getCloseSpan())
+			.append("</div>")
+			.append(String.format(newLineString, lineNum.addAndGet(1)))
+			.append(getOpenSpan(inKey ? ElementTypes.FILE_OPTIONS_KEY : ElementTypes.FILE_OPTIONS_VALUE));
+		continue;
+	    }
+	    if(inKey) {
+		if(c == ':') {
+		    inKey = false;
+		    builder.append(getCloseSpan())
+			    .append(getOpenSpan(ElementTypes.FILE_OPTIONS_BLOCK))
+			    .append(':')
+			    .append(getCloseSpan())
+			    .append(getOpenSpan(ElementTypes.FILE_OPTIONS_VALUE));
+		    continue;
+		}
+		if(c == ';') {
+		    builder.append(getCloseSpan())
+			    .append(getOpenSpan(ElementTypes.FILE_OPTIONS_BLOCK))
+			    .append(';')
+			    .append(getCloseSpan())
+			    .append(getOpenSpan(ElementTypes.FILE_OPTIONS_KEY));
+		    continue;
+		}
+		builder.append(c);
+	    } else {
+		if(c == '\\' && c2 == ';') {
+		    builder.append("\\;");
+		    i++;
+		    continue;
+		}
+		if(c == ';') {
+		    builder.append(getCloseSpan())
+			    .append(getOpenSpan(ElementTypes.FILE_OPTIONS_BLOCK))
+			    .append(';')
+			    .append(getCloseSpan());
+		    inKey = true;
+		    builder.append(getOpenSpan(ElementTypes.FILE_OPTIONS_KEY));
+		    continue;
+		}
+		builder.append(c);
+	    }
+	}
+	builder.append(getCloseSpan());
+
+	return builder.toString();
     }
 
     /**
@@ -412,6 +497,18 @@ public class SimpleSyntaxHighlighter {
 	 * The color of commands in msa files
 	 */
 	COMMAND,
+	/**
+	 * The color of a file options block
+	 */
+	FILE_OPTIONS_BLOCK,
+	/**
+	 * The color of a key in the file options
+	 */
+	FILE_OPTIONS_KEY,
+	/**
+	 * The color of a value in the file options
+	 */
+	FILE_OPTIONS_VALUE,
 	;
     }
 }

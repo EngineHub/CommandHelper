@@ -23,7 +23,9 @@
         "Closures",
         "SQL",
         "Debugging",
-        "Profiler"
+        "Profiler",
+        {"File_Options": "File Options"},
+        {"Strict_Mode": "Strict Mode"}
     ]},
     {"Select Functions/Classes": [
         "Regex",
