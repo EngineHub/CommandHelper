@@ -13,7 +13,6 @@ import java.util.Map;
 public class TokenStream extends LinkedList<Token> {
 
 	private FileOptions fileOptions;
-	private String rawFileOptions;
 
 	public TokenStream() {
 		super();
@@ -31,7 +30,6 @@ public class TokenStream extends LinkedList<Token> {
 	}
 
 	public void setFileOptions(String fileOptions) {
-		this.rawFileOptions = fileOptions;
 		this.fileOptions = parseFileOptions(fileOptions);
 	}
 
@@ -41,16 +39,6 @@ public class TokenStream extends LinkedList<Token> {
 
 	public FileOptions getFileOptions() {
 		return this.fileOptions;
-	}
-
-	/**
-	 * Returns the file options as they were originally passed in. This should only be used in special cases (syntax
-	 * highlighters, etc)
-	 *
-	 * @return
-	 */
-	public String getRawFileOptions() {
-		return rawFileOptions;
 	}
 
 	private static FileOptions parseFileOptions(String options) {

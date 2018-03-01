@@ -118,7 +118,6 @@ public final class MethodScriptCompiler {
 			script = script.substring(1);
 		}
 		final StringBuilder fileOptions = new StringBuilder();
-		StringBuilder fileOptionsBuf = null;
 		script = script.replaceAll("\r\n", "\n");
 		script = script + "\n";
 		final Set<String> keywords = KeywordList.getKeywordNames();
@@ -166,6 +165,33 @@ public final class MethodScriptCompiler {
 				target = new Target(line_num, file, column);
 			}
 			
+			// If we are in file options, add the character to the buffer if it's not a file options end character.
+			if(in_file_options) {
+				// For a '>' character outside of a comment, '\>' would have to be used in file options.
+				// Other characters than '>'cannot be escaped.
+				// If support for more escaped characters would be desired in the future, it could be added here.
+				switch(c) {
+					case '\\': {
+						if(c2 == '>') { // "\>".
+							fileOptions.append('>');
+							i++;
+							continue;
+						}
+					}
+					case '>': {
+						if(saveAllTokens) {
+							token_list.add(new Token(TType.FILE_OPTIONS_STRING, 
+									fileOptions.toString(), target));
+							token_list.add(new Token(TType.FILE_OPTIONS_END, ">", target));
+						}
+						in_file_options = false;
+						continue;
+					}
+				}
+				fileOptions.append(c);
+				continue;
+			}
+			
 			// Comment handling. This is bypassed if we are in a string.
 			if(!state_in_quote && !in_smart_quote) {
 				switch(c) {
@@ -184,29 +210,11 @@ public final class MethodScriptCompiler {
 								}
 								commentLineNumberStart = line_num;
 								i++;
-								
-								// Handle file option tokens.
-								if(saveAllTokens && fileOptionsBuf != null && fileOptionsBuf.length() > 0) {
-									token_list.add(new Token(
-											TType.FILE_OPTIONS_STRING, fileOptionsBuf.toString(), target));
-									fileOptions.append(fileOptionsBuf);
-									fileOptionsBuf = new StringBuilder();
-								}
-								
 								continue;
 							} else if(c2 == '/') { // "//".
 								buf.append("//");
 								in_comment = true;
-								i++;
-								
-								// Handle file option tokens.
-								if(saveAllTokens && fileOptionsBuf != null && fileOptionsBuf.length() > 0) {
-									token_list.add(new Token(
-											TType.FILE_OPTIONS_STRING, fileOptionsBuf.toString(), target));
-									fileOptions.append(fileOptionsBuf);
-									fileOptionsBuf = new StringBuilder();
-								}
-								
+								i++;								
 								continue;
 							}
 						}
@@ -218,15 +226,6 @@ public final class MethodScriptCompiler {
 						if(!in_comment) { // "#".
 							buf.append("#");
 							in_comment = true;
-							
-							// Handle file option tokens.
-							if(saveAllTokens && fileOptionsBuf != null && fileOptionsBuf.length() > 0) {
-								token_list.add(new Token(
-										TType.FILE_OPTIONS_STRING, fileOptionsBuf.toString(), target));
-								fileOptions.append(fileOptionsBuf);
-								fileOptionsBuf = new StringBuilder();
-							}
-							
 							continue;
 						}
 						break;
@@ -273,35 +272,7 @@ public final class MethodScriptCompiler {
 				buf.append(c);
 				continue;
 			}
-			
-			// If we are in file options, add the character to the buffer if it's not a file options end character.
-			if(in_file_options) {
-				// For a '>' character outside of a comment, '\>' would have to be used in file options.
-				// Other characters than '>'cannot be escaped.
-				// If support for more escaped characters would be desired in the future, it could be added here.
-				switch(c) {
-					case '\\': {
-						if(c2 == '>') { // "\>".
-							fileOptions.append('>');
-							i++;
-							continue;
-						}
-					}
-					case '>': {
-						if(saveAllTokens) {
-							token_list.add(new Token(TType.FILE_OPTIONS_STRING, fileOptionsBuf.toString(), target));
-							token_list.add(new Token(TType.FILE_OPTIONS_END, ">", target));
-						}
-						fileOptions.append(fileOptionsBuf);
-						fileOptionsBuf = null;
-						in_file_options = false;
-						continue;
-					}
-				}
-				fileOptions.append(c);
-				continue;
-			}
-			
+		
 			// Handle non-comment non-quoted characters.
 			if(!state_in_quote) {
 				// We're not in a comment or quoted string, handle: +=, -=, *=, /=, .=, ->, ++, --, %, **, *, +, -, /,
@@ -392,14 +363,7 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '<': {
-							if(c2 == '!') { // "<!".
-								if(line_num != 1 || column != 1) {
-									throw new ConfigCompileException(
-											"File options start is only allowed at the top of a file", target);
-								}
-								
-								// Add previous characters as UNKNOWN token. Note that this will never happen as long
-								// as '<!' has to be the first token in a script, but this is more update proof.
+							if(c2 == '!') { // "<!".								
 								if(buf.length() > 0) {
 									token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 									buf = new StringBuilder();
@@ -409,7 +373,6 @@ public final class MethodScriptCompiler {
 								if(saveAllTokens) {
 									token_list.add(new Token(TType.FILE_OPTIONS_START, "<!", target));
 								}
-								fileOptionsBuf = new StringBuilder();
 								in_file_options = true;
 								fileOptionsLineNumberStart = line_num;
 								i++;
@@ -880,12 +843,28 @@ public final class MethodScriptCompiler {
 					}
 					it.next(); // Select 't' -->.
 				}
-			}
-			
+			}		
 		}
 		
-		// Set file options and return the result.
+		// Set file options
 		token_list.setFileOptions(fileOptions.toString());
+		// Make sure that the file options are the first non-comment code in the file
+		{
+			boolean foundCode = false;
+			for (Token t : token_list) {
+				if(t.type.isFileOption()) {
+					if(foundCode) {
+						throw new ConfigCompileException("File options must be the first non-comment section in the"
+								+ " code", t.target);
+					}
+					break;
+				}
+				if(!t.type.isComment() && !t.type.isWhitespace()) {
+					foundCode = true;
+				}
+			}
+		}
+		
 		return token_list;
 	}
 
