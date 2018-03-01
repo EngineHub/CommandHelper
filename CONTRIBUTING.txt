@@ -20,6 +20,12 @@ Avoid lines longer than about 120 characters. When wrapping lines, follow these 
 Use tabs for indentions, NOT spaces. This allows for tab length to be set by the client,
 and also allows for quicker backspacing if deleting indentation.
 
+The following settings should be used in your IDE:
+
+- Do not expand tabs to spaces
+- Number of spaces per indent should be 4
+- Tab size should be 4
+
 * Brace style
 Braces should be on the same line as the statement.
 	if(condition) {
