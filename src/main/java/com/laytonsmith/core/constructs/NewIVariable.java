@@ -9,7 +9,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  */
 public class NewIVariable extends Construct {
 
-	private String name;
+	private final String name;
 
 	public NewIVariable(String name, Target t) {
 		super("", ConstructType.IVARIABLE, t);

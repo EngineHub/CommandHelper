@@ -117,7 +117,7 @@ public class EchoesTest {
 		assertEquals(String.format("\u00A7%s", "a"), SRun("color(a)", fakePlayer));
 	}
 
-	private static String a = new color().exec(Target.UNKNOWN, null, new CString("a", Target.UNKNOWN)).val();
+	private static final String a = new color().exec(Target.UNKNOWN, null, new CString("a", Target.UNKNOWN)).val();
 
 	@Test
 	public void testColorize1() throws Exception {

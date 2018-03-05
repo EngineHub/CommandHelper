@@ -188,7 +188,7 @@ class CompilerObject {
 			throw new ConfigCompileException("Unmatched closing parenthesis. (Did you put too many right parenthesis?)", t);
 		}
 	}
-	private static List<String> keywords = Arrays.asList(new String[]{"else", "bind", "proc"});
+	private static final List<String> keywords = Arrays.asList(new String[]{"else", "bind", "proc"});
 
 	private Construct resolveIdentifier(Token t) throws ConfigCompileException {
 		switch(t.type) {

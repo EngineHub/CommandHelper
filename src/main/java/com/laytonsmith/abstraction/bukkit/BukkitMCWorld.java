@@ -438,7 +438,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					break;
 				case HORSE:
 					mobType = Horse.class;
-					if(!(subClass.equals("")) && version.gte(MCVersion.MC1_11)) {
+					if(!(subClass.isEmpty()) && version.gte(MCVersion.MC1_11)) {
 						for(String type : subTypes) {
 							try {
 								MCHorse.MCHorseVariant htype = MCHorse.MCHorseVariant.valueOf(type);
@@ -508,7 +508,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					break;
 				case SKELETON:
 					mobType = Skeleton.class;
-					if(!(subClass.equals("")) && version.gte(MCVersion.MC1_11)) {
+					if(!(subClass.isEmpty()) && version.gte(MCVersion.MC1_11)) {
 						MCSkeletonType stype = MCSkeletonType.NORMAL;
 						for(String type : subTypes) {
 							try {
@@ -560,7 +560,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					break;
 				case ZOMBIE:
 					mobType = Zombie.class;
-					if(!subClass.equals("") && version.gte(MCVersion.MC1_11)) {
+					if(!subClass.isEmpty() && version.gte(MCVersion.MC1_11)) {
 						for(int i = 0; i < subTypes.length; i++) {
 							try {
 								MCZombieType ztype = MCZombieType.valueOf(subTypes[i]);
@@ -601,7 +601,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 			if(name == MCMobs.SPIDERJOCKEY) {
 				e.setPassenger(w.spawn(location, Skeleton.class));
 			}
-			if(!subClass.equals("")) { //if subClass is blank, none of this needs to run at all
+			if(!subClass.isEmpty()) { //if subClass is blank, none of this needs to run at all
 				if(e instanceof Sheep) {
 					Sheep s = (Sheep) e;
 					MCDyeColor color;

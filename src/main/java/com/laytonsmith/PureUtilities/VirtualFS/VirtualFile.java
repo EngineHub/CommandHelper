@@ -12,8 +12,8 @@ public class VirtualFile {
 	 */
 	private static final String[] RESTRICTED_CHARS = new String[]{"?", "%", "*", ":", "|", "\"", "<", ">", " "};
 
-	private String path;
-	private boolean isAbsolute;
+	private final String path;
+	private final boolean isAbsolute;
 
 	public VirtualFile(String path) {
 		String working = path;

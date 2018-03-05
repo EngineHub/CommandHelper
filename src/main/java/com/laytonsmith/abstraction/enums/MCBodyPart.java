@@ -30,7 +30,7 @@ public enum MCBodyPart {
 	WingLeft(false),
 	WingRight(false);
 
-	private boolean existsForHumanoids;
+	private final boolean existsForHumanoids;
 
 	MCBodyPart(boolean existsForHumanoids) {
 		this.existsForHumanoids = existsForHumanoids;

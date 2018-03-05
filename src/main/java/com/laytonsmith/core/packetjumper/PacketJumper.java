@@ -18,10 +18,12 @@ import java.util.logging.Logger;
  */
 public class PacketJumper {
 
+	@SuppressWarnings("FieldMayBeFinal")
 	private static boolean started = false;
 	private static SortedSet<PacketInfo> packetInfo;
+	@SuppressWarnings("FieldMayBeFinal")
 	private static Thread initializingThread = null;
-	private static String protocolDocs = "";
+	private static final String protocolDocs = "";
 
 	public static void startup() {
 		if(true) {

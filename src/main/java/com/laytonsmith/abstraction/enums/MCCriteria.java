@@ -14,7 +14,7 @@ public enum MCCriteria {
 	TOTALKILLCOUNT("totalKillCount"),
 	DUMMY("dummy");
 
-	private String criteria;
+	private final String criteria;
 
 	MCCriteria(String crit) {
 		criteria = crit;

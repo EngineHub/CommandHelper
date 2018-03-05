@@ -23,7 +23,7 @@ import java.util.Set;
  */
 public class DataSourceFactory {
 
-	private static Map<URI, DataSource> dataSourcePool = new HashMap<>();
+	private static final Map<URI, DataSource> dataSourcePool = new HashMap<>();
 
 	/**
 	 * Given a connection uri and the connection options, creates and returns a new DataSource object, which can be used

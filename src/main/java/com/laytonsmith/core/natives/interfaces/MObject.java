@@ -64,7 +64,7 @@ public class MObject {
 		return Construct(MObject.class, data);
 	}
 
-	private Map<String, Construct> fields = new HashMap<String, Construct>();
+	private final Map<String, Construct> fields = new HashMap<String, Construct>();
 
 	/**
 	 * If a field can have an alias, this should return the proper name given this alias. If this is not an alias,
@@ -157,9 +157,7 @@ public class MObject {
 					//val is now set correctly, guaranteed.
 					f.set(this, val);
 					//These exceptions cannot happen.
-				} catch(IllegalArgumentException ex) {
-					throw new Error(ex);
-				} catch(IllegalAccessException ex) {
+				} catch(IllegalArgumentException | IllegalAccessException ex) {
 					throw new Error(ex);
 				}
 			}

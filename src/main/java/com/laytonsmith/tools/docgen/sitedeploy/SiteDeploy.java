@@ -347,7 +347,7 @@ public class SiteDeploy {
 		this.doValidation = doValidation;
 		this.showTemplateCredit = showTemplateCredit;
 		this.validatorUrl = validatorUrl;
-		if(githubBaseUrl.equals("")) {
+		if(githubBaseUrl.isEmpty()) {
 			githubBaseUrl = DEFAULT_GITHUB_BASE_URL;
 		}
 		this.githubBaseUrl = githubBaseUrl;

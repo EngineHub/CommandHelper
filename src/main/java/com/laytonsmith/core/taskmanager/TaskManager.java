@@ -11,7 +11,7 @@ public class TaskManager {
 	/**
 	 * An internal list of the tasks.
 	 */
-	private List<TaskHandler> tasks;
+	private final List<TaskHandler> tasks;
 
 	/**
 	 * Creates a new TaskManager

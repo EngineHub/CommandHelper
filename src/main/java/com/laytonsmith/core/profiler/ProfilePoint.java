@@ -8,10 +8,10 @@ import com.laytonsmith.core.LogLevel;
  */
 public class ProfilePoint implements Comparable<ProfilePoint> {
 
-	private String name;
+	private final String name;
 	private String message;
 	boolean GCRun;
-	private Profiler parent;
+	private final Profiler parent;
 	private LogLevel granularity;
 
 	public ProfilePoint(String name, Profiler parent) {

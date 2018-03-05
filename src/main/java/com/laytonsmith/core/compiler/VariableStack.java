@@ -16,7 +16,7 @@ import java.util.Stack;
  */
 public final class VariableStack {
 
-	private Stack<Map<String, Construct>> vars;
+	private final Stack<Map<String, Construct>> vars;
 
 	public VariableStack() {
 		vars = new Stack<Map<String, Construct>>();

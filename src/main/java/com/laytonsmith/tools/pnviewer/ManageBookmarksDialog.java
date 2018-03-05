@@ -88,7 +88,7 @@ public final class ManageBookmarksDialog extends javax.swing.JDialog {
 
 	private static class BookmarkList {
 
-		private List<Bookmark> bookmarks = new ArrayList<>();
+		private final List<Bookmark> bookmarks = new ArrayList<>();
 
 		private void addBookmark(Bookmark b) {
 			bookmarks.add(b);
@@ -283,19 +283,16 @@ public final class ManageBookmarksDialog extends javax.swing.JDialog {
 					break;
 				}
 			}
-		} catch(ClassNotFoundException ex) {
-			java.util.logging.Logger.getLogger(ManageBookmarksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch(InstantiationException ex) {
-			java.util.logging.Logger.getLogger(ManageBookmarksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch(IllegalAccessException ex) {
-			java.util.logging.Logger.getLogger(ManageBookmarksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch(javax.swing.UnsupportedLookAndFeelException ex) {
+		} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
 			java.util.logging.Logger.getLogger(ManageBookmarksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
+		//</editor-fold>
+		
 		//</editor-fold>
 
 		/* Create and display the dialog */
 		java.awt.EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				ManageBookmarksDialog dialog = new ManageBookmarksDialog(new javax.swing.JFrame(), true);
 				dialog.addWindowListener(new java.awt.event.WindowAdapter() {

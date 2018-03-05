@@ -3384,7 +3384,7 @@ public class PlayerManagement {
 			Enumeration e = p.propertyNames();
 			while(e.hasMoreElements()) {
 				String name = e.nextElement().toString();
-				TimeLookup.put(name, new CString(p.getProperty(name).toString(), Target.UNKNOWN));
+				TimeLookup.put(name, new CString(p.getProperty(name), Target.UNKNOWN));
 			}
 		} catch(IOException ex) {
 			Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);

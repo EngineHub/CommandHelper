@@ -42,7 +42,7 @@ public class XGUI {
 	}
 
 	private static Map<Integer, Window> windows = new HashMap<>();
-	private static AtomicInteger windowIDs = new AtomicInteger(0);
+	private static final AtomicInteger windowIDs = new AtomicInteger(0);
 
 	static {
 		StaticLayer.GetConvertor().addShutdownHook(new Runnable() {

@@ -166,7 +166,7 @@ public class DocGenUIHandler {
 	private void doExamples() throws ConfigCompileException, XPathExpressionException, IOException, DataSourceException, Exception {
 		//So they are alphabetical, so we always have a consistent upload order, to
 		//facilitate tracing problems.
-		SortedSet<String> names = new TreeSet<String>();
+		SortedSet<String> names = new TreeSet<>();
 		for(FunctionBase base : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
 			String name = base.getName();
 			if(base.appearInDocumentation()) {
@@ -187,7 +187,7 @@ public class DocGenUIHandler {
 		try {
 			File root = new File(DocGenUIHandler.class.getResource("/docs").toURI());
 			ZipReader reader = new ZipReader(root);
-			Queue<File> q = new LinkedList<File>();
+			Queue<File> q = new LinkedList<>();
 			q.addAll(Arrays.asList(reader.listFiles()));
 			while(q.peek() != null) {
 				ZipReader r = new ZipReader(q.poll());
@@ -335,7 +335,7 @@ public class DocGenUIHandler {
 		try {
 			int count = 0;
 			ZipReader reader = new ZipReader(new File(DocGenUIHandler.class.getResource("/docs").toURI()));
-			Queue<File> q = new LinkedList<File>();
+			Queue<File> q = new LinkedList<>();
 			q.addAll(Arrays.asList(reader.listFiles()));
 			while(q.peek() != null) {
 				ZipReader r = new ZipReader(q.poll());
@@ -411,7 +411,7 @@ public class DocGenUIHandler {
 		if(strings.length % 2 != 0) {
 			throw new Error("Only an even number of parameters may be passed to mapCreator");
 		}
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		for(int i = 0; i < strings.length; i += 2) {
 			map.put(strings[i], strings[i + 1]);
 		}
@@ -431,11 +431,7 @@ public class DocGenUIHandler {
 				throw new APIException(doc.getNode("/api/error/@info"));
 			}
 			return doc;
-		} catch(XPathExpressionException e) {
-			throw new APIException(e);
-		} catch(SAXException e) {
-			throw new APIException(e);
-		} catch(IOException e) {
+		} catch(XPathExpressionException | SAXException | IOException e) {
 			throw new APIException(e);
 		}
 	}
@@ -459,7 +455,7 @@ public class DocGenUIHandler {
 	 * @throws IOException
 	 */
 	private static HTTPResponse getPage(URL url, Map<String, String> params, boolean useURL) throws IOException {
-		Map<String, List<String>> headers = new HashMap<String, List<String>>(baseHeaders);
+		Map<String, List<String>> headers = new HashMap<>(baseHeaders);
 		if(params != null && !params.isEmpty() && useURL) {
 			StringBuilder b = new StringBuilder(url.getQuery() == null ? "" : url.getQuery());
 			if(b.length() != 0) {

@@ -309,7 +309,7 @@ public class Echoes {
 	@api
 	public static class color extends AbstractFunction implements Optimizable {
 
-		private Map<String, CString> colors = new TreeMap<>();
+		private final Map<String, CString> colors = new TreeMap<>();
 		private static final String symbols = "0123456789abcdefABCDEFmMnNoOlLkKrR";
 		public static final Set<Character> COLOR_SYMBOLS;
 

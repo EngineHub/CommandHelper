@@ -60,12 +60,12 @@ public class Federation {
 	/**
 	 * When this is 0, the shutdown hooks will de-register with the DaemonManager.
 	 */
-	private int serverCount = 0;
+	private final int serverCount = 0;
 	private final Object serverCountLock = new Object();
 
-	private Map<String, FederationConnection> federationConnections = new HashMap<>();
-	private Map<String, FederationServer> federationServers = new HashMap<>();
-	private Socket masterSocket = null;
+	private final Map<String, FederationConnection> federationConnections = new HashMap<>();
+	private final Map<String, FederationServer> federationServers = new HashMap<>();
+	private final Socket masterSocket = null;
 
 //	/**
 //	 * If the master socket dies, we need to establish a new one. This method

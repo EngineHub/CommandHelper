@@ -107,13 +107,13 @@ public class DataType {
 		return this.type == type.type;
 	}
 
-	private static DataType MIXED = new DataType(DataTypes.MIXED, null);
+	private static final DataType MIXED = new DataType(DataTypes.MIXED, null);
 
 	public static DataType MIXED() {
 		return MIXED;
 	}
 
-	private static DataType PRIMITIVE = new DataType(DataTypes.PRIMITIVE, null);
+	private static final DataType PRIMITIVE = new DataType(DataTypes.PRIMITIVE, null);
 
 	public static DataType PRIMITIVE() {
 		return PRIMITIVE;

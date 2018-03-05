@@ -375,7 +375,7 @@ public class Reflection {
 			return false;
 		}
 
-		private static Map<String, List<String>> funcs = new HashMap<String, List<String>>();
+		private static final Map<String, List<String>> funcs = new HashMap<String, List<String>>();
 
 		private void initf() {
 			for(FunctionBase f : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {

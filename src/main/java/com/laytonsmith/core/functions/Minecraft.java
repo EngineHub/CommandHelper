@@ -70,7 +70,7 @@ public class Minecraft {
 			Enumeration e = p1.propertyNames();
 			while(e.hasMoreElements()) {
 				String name = e.nextElement().toString();
-				DataValueLookup.put(name, new CString(p1.getProperty(name).toString(), Target.UNKNOWN));
+				DataValueLookup.put(name, new CString(p1.getProperty(name), Target.UNKNOWN));
 			}
 		} catch(IOException ex) {
 			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
@@ -82,7 +82,7 @@ public class Minecraft {
 			Enumeration e = p2.propertyNames();
 			while(e.hasMoreElements()) {
 				String name = e.nextElement().toString();
-				DataNameLookup.put(name, new CString(p2.getProperty(name).toString(), Target.UNKNOWN));
+				DataNameLookup.put(name, new CString(p2.getProperty(name), Target.UNKNOWN));
 			}
 		} catch(IOException ex) {
 			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);

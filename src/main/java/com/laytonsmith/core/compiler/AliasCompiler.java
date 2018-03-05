@@ -417,9 +417,9 @@ public class AliasCompiler {
 
 	public static class AliasToken {
 
-		private String token;
-		private AliasTokenType type;
-		private Target t;
+		private final String token;
+		private final AliasTokenType type;
+		private final Target t;
 
 		public AliasToken(String token, AliasTokenType type, Target t) {
 			this.token = token;

@@ -15,8 +15,8 @@ import java.util.List;
  */
 class OptimizerObject {
 
-	private ParseTree root;
-	private CompilerEnvironment env;
+	private final ParseTree root;
+	private final CompilerEnvironment env;
 
 	public OptimizerObject(ParseTree root, Environment compilerEnvironment) {
 		this.root = root;

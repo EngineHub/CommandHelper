@@ -671,11 +671,11 @@ public class MethodScriptCompilerTest {
 		try {
 			SRun("(+ * 2)", fakePlayer);
 			fail("Did not expect test to pass");
-		} catch(ConfigCompileException e) {
+		} catch(ConfigCompileException | ConfigRuntimeException e) {
 			//pass
-		} catch(ConfigRuntimeException e) {
-			//pass?
 		}
+		//pass?
+		
 	}
 
 	@Test

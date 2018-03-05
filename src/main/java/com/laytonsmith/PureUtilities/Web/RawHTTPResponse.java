@@ -8,8 +8,8 @@ import java.net.HttpURLConnection;
  */
 public class RawHTTPResponse {
 
-	private HttpURLConnection connection;
-	private InputStream stream;
+	private final HttpURLConnection connection;
+	private final InputStream stream;
 
 	public RawHTTPResponse(HttpURLConnection connection, InputStream stream) {
 		this.connection = connection;

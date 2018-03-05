@@ -3203,19 +3203,23 @@ public class EntityManagement {
 	@api
 	public static class set_entity_glowing extends EntitySetterFunction {
 
+		@Override
 		public String getName() {
 			return "set_entity_glowing";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, boolean} If true, applies glowing effect to the entity (MC 1.9)";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getEntity(args[0], t).setGlowing(Static.getBoolean(args[1]));
 			return CVoid.VOID;
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
@@ -3224,19 +3228,23 @@ public class EntityManagement {
 	@api
 	public static class get_entity_glowing extends EntityGetterFunction {
 
+		@Override
 		public String getName() {
 			return "get_entity_glowing";
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID} Returns true if the entity is glowing (MC 1.9)";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
 			return CBoolean.GenerateCBoolean(e.isGlowing(), t);
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
@@ -3245,18 +3253,22 @@ public class EntityManagement {
 	@api
 	public static class get_entity_silent extends EntityGetterFunction {
 
+		@Override
 		public String getName() {
 			return "get_entity_silent";
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID} Returns true if the entity produces sounds (MC 1.9.4)";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return CBoolean.GenerateCBoolean(Static.getEntity(args[0], t).isSilent(), t);
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
@@ -3265,20 +3277,24 @@ public class EntityManagement {
 	@api
 	public static class set_entity_silent extends EntitySetterFunction {
 
+		@Override
 		public String getName() {
 			return "set_entity_silent";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, boolean} Sets whether or not entity produces sounds (MC 1.9.4)";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
 			e.setSilent(Static.getBoolean(args[1]));
 			return CVoid.VOID;
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
@@ -3287,18 +3303,22 @@ public class EntityManagement {
 	@api
 	public static class get_entity_gravity extends EntityGetterFunction {
 
+		@Override
 		public String getName() {
 			return "get_entity_gravity";
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID} Returns true if gravity applies to the entity (MC 1.10)";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return CBoolean.GenerateCBoolean(Static.getEntity(args[0], t).hasGravity(), t);
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
@@ -3307,20 +3327,24 @@ public class EntityManagement {
 	@api
 	public static class set_entity_gravity extends EntitySetterFunction {
 
+		@Override
 		public String getName() {
 			return "set_entity_gravity";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, boolean} Sets whether or not gravity applies to the entity (MC 1.10)";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
 			e.setHasGravity(Static.getBoolean(args[1]));
 			return CVoid.VOID;
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
@@ -3329,18 +3353,22 @@ public class EntityManagement {
 	@api
 	public static class get_entity_invulnerable extends EntityGetterFunction {
 
+		@Override
 		public String getName() {
 			return "get_entity_invulnerable";
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID} Returns true if the entity cannot be damaged (MC 1.9.2)";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return CBoolean.GenerateCBoolean(Static.getEntity(args[0], t).isInvulnerable(), t);
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
@@ -3349,21 +3377,25 @@ public class EntityManagement {
 	@api
 	public static class set_entity_invulnerable extends EntitySetterFunction {
 
+		@Override
 		public String getName() {
 			return "set_entity_invulnerable";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, boolean} If set to true the entity cannot be damaged, except by players in"
 					+ " creative mode (MC 1.9.2)";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
 			e.setInvulnerable(Static.getBoolean(args[1]));
 			return CVoid.VOID;
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
@@ -3372,14 +3404,17 @@ public class EntityManagement {
 	@api
 	public static class get_scoreboard_tags extends EntityGetterFunction {
 
+		@Override
 		public String getName() {
 			return "get_scoreboard_tags";
 		}
 
+		@Override
 		public String docs() {
 			return "array {entityID} Returns an array of scoreboard tags for this entity. (MC 1.10.2)";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
 			CArray tags = new CArray(t);
@@ -3389,6 +3424,7 @@ public class EntityManagement {
 			return tags;
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
@@ -3397,19 +3433,23 @@ public class EntityManagement {
 	@api
 	public static class add_scoreboard_tag extends EntitySetterFunction {
 
+		@Override
 		public String getName() {
 			return "add_scoreboard_tag";
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID, tag} Adds a tag to the entity. Returns whether or not it was successful. (MC 1.10.2)";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
 			return CBoolean.get(e.addScoreboardTag(args[1].val()));
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
@@ -3418,19 +3458,23 @@ public class EntityManagement {
 	@api
 	public static class remove_scoreboard_tag extends EntitySetterFunction {
 
+		@Override
 		public String getName() {
 			return "remove_scoreboard_tag";
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID, tag} Removes a tag from the entity. Returns whether or not it was successful. (MC 1.10.2)";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
 			return CBoolean.get(e.removeScoreboardTag(args[1].val()));
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}

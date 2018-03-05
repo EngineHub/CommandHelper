@@ -27,19 +27,19 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 	/**
 	 * A constant is a construct that is defined in source like ${this}. The value must be passed in at compile time.
 	 */
-	private Map<String, Construct> constants = new HashMap<String, Construct>();
+	private final Map<String, Construct> constants = new HashMap<String, Construct>();
 
 	/**
 	 * A list of included parse trees. These likely will have come from other files, but the compilation result should
 	 * have been cached.
 	 */
-	private List<ParseTree> includes = new ArrayList<ParseTree>();
+	private final List<ParseTree> includes = new ArrayList<ParseTree>();
 
 	/**
 	 * A list of assigned vars are kept here, so when in strict mode, if a variable hasn't been declared yet, it will be
 	 * a compiler error.
 	 */
-	private Stack<Set<String>> knownVars = new Stack<Set<String>>();
+	private final Stack<Set<String>> knownVars = new Stack<Set<String>>();
 
 	//TODO: Need to figure out how to do known procs.
 	public void setConstant(String name, Construct value) {

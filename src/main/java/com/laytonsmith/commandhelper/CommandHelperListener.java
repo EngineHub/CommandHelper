@@ -57,7 +57,7 @@ public class CommandHelperListener implements Listener {
 	 * List of global aliases.
 	 */
 	private AliasCore ac;
-	private CommandHelperPlugin plugin;
+	private final CommandHelperPlugin plugin;
 
 	public CommandHelperListener(CommandHelperPlugin plugin) {
 		this.plugin = plugin;

@@ -47,10 +47,12 @@ public class ServerEvents {
 	@api
 	public static class server_command extends AbstractEvent {
 
+		@Override
 		public String getName() {
 			return "server_command";
 		}
 
+		@Override
 		public String docs() {
 			return "{prefix: <string match> The first part of the command, i.e. 'cmd' in '/cmd blah blah'}"
 					+ "This event is fired off when any command is run from the console or commandblock. This fires"
@@ -61,14 +63,17 @@ public class ServerEvents {
 					+ "{}";
 		}
 
+		@Override
 		public Driver driver() {
 			return Driver.SERVER_COMMAND;
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_2;
 		}
 
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCServerCommandEvent)) {
 				return false;
@@ -88,6 +93,7 @@ public class ServerEvents {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			if(!(e instanceof MCServerCommandEvent)) {
 				throw new EventException("Cannot convert e to MCServerCommandEvent");
@@ -100,6 +106,7 @@ public class ServerEvents {
 			return map;
 		}
 
+		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if(event instanceof MCServerCommandEvent) {
 				MCServerCommandEvent e = (MCServerCommandEvent) event;

@@ -54,7 +54,7 @@ public class MSLPMaker {
 				ConfigRuntimeException.HandleUncaughtException(ex, null);
 			}
 		}
-		List<Script> allScripts = new ArrayList<Script>();
+		List<Script> allScripts = new ArrayList<>();
 		for(AliasCore.LocalPackage.FileInfo fi : localPackage.getMSAFiles()) {
 			List<Script> tempScripts;
 			try {

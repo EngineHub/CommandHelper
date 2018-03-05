@@ -29,13 +29,7 @@ public class GenericTreeNode<T> implements Cloneable {
 				clone.data = (T) obj;
 				clone.children = new ArrayList<GenericTreeNode<T>>(children);
 				clone.optimized = optimized;
-			} catch(IllegalAccessException ex) {
-				throw new CloneNotSupportedException();
-			} catch(IllegalArgumentException ex) {
-				throw new CloneNotSupportedException();
-			} catch(InvocationTargetException ex) {
-				throw new CloneNotSupportedException();
-			} catch(NoSuchMethodException e) {
+			} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException ex) {
 				throw new CloneNotSupportedException();
 			}
 		}

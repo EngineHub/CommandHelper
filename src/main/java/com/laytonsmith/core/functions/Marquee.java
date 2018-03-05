@@ -30,7 +30,7 @@ public class Marquee {
 	}
 
 	//TODO: This should be removed in favor of a common runtime environment stash
-	private static Map<String, com.laytonsmith.PureUtilities.Marquee> marqeeMap = new HashMap<String, com.laytonsmith.PureUtilities.Marquee>();
+	private static final Map<String, com.laytonsmith.PureUtilities.Marquee> marqeeMap = new HashMap<String, com.laytonsmith.PureUtilities.Marquee>();
 
 	@api
 	public static class marquee extends AbstractFunction {

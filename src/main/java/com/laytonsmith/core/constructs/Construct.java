@@ -436,6 +436,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
 	 */
+	@Override
 	public final CClassType typeof() {
 		return typeof(this);
 	}

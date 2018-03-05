@@ -153,9 +153,7 @@ public class Manager {
 				try {
 					source = DataSourceFactory.GetDataSource(ssource, mixinOptions);
 					break;
-				} catch(DataSourceException ex) {
-					pl(RED + ex.getMessage());
-				} catch(URISyntaxException ex) {
+				} catch(DataSourceException | URISyntaxException ex) {
 					pl(RED + ex.getMessage());
 				}
 			} while(true);
@@ -167,9 +165,7 @@ public class Manager {
 				try {
 					destination = DataSourceFactory.GetDataSource(sdestination, mixinOptions);
 					break;
-				} catch(DataSourceException ex) {
-					pl(RED + ex.getMessage());
-				} catch(URISyntaxException ex) {
+				} catch(DataSourceException | URISyntaxException ex) {
 					pl(RED + ex.getMessage());
 				}
 			} while(true);
@@ -262,11 +258,7 @@ public class Manager {
 					//
 				}
 				break;
-			} catch(DataSourceException ex) {
-				pl(RED + ex.getMessage());
-			} catch(ReadOnlyException ex) {
-				pl(RED + ex.getMessage());
-			} catch(IOException ex) {
+			} catch(DataSourceException | ReadOnlyException | IOException ex) {
 				pl(RED + ex.getMessage());
 			}
 		} while(true);
@@ -302,9 +294,7 @@ public class Manager {
 			} else if(choice.equalsIgnoreCase("yes")) {
 				pl("No, you have to type YES exactly.");
 			}
-		} catch(DataSourceException ex) {
-			pl(RED + ex.getMessage());
-		} catch(IOException ex) {
+		} catch(DataSourceException | IOException ex) {
 			pl(RED + ex.getMessage());
 		}
 	}
@@ -638,9 +628,7 @@ public class Manager {
 				}
 				pl(GREEN + "If this is being done as part of an entire transfer process, don't forget to set " + output.toString()
 						+ " as your main Persistence Network configuration file.");
-			} catch(IOException ex) {
-				Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
-			} catch(DataSourceException ex) {
+			} catch(IOException | DataSourceException ex) {
 				Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}

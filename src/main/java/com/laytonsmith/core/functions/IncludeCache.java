@@ -19,7 +19,7 @@ import java.util.HashMap;
 public class IncludeCache {
 
 	private static final CHLog.Tags TAG = CHLog.Tags.INCLUDES;
-	private static HashMap<File, ParseTree> cache = new HashMap<>();
+	private static final HashMap<File, ParseTree> cache = new HashMap<>();
 
 	static void add(File file, ParseTree tree) {
 		cache.put(file, tree);

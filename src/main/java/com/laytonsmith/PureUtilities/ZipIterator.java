@@ -13,7 +13,7 @@ import java.util.zip.ZipInputStream;
  */
 public class ZipIterator {
 
-	private File zip;
+	private final File zip;
 
 	public ZipIterator(File zip) {
 		this.zip = zip;

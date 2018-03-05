@@ -209,7 +209,7 @@ public class StaticTest {
 		//TODO
 	}
 
-	private static ArrayList<String> tested = new ArrayList<String>();
+	private static final ArrayList<String> tested = new ArrayList<String>();
 
 	public static void TestExec(Function f, MCCommandSender p, String commandType) throws Exception {
 		if(tested.contains(f.getName() + String.valueOf(p))) {
@@ -657,7 +657,7 @@ public class StaticTest {
 	public static class TestConvertor extends AbstractConvertor {
 
 		private static MCServer fakeServer;
-		private RunnableQueue queue = new RunnableQueue("TestConvertorRunnableQueue");
+		private final RunnableQueue queue = new RunnableQueue("TestConvertorRunnableQueue");
 
 		@Override
 		public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
@@ -975,14 +975,13 @@ public class StaticTest {
 			} else {
 				ret = f.get(in);
 			}
-		} catch(IllegalArgumentException ex) {
+		} catch(IllegalArgumentException | IllegalAccessException ex) {
 			//This shouldn't happen ever, since we are using the class provided by in, and sending
 			//get/set in as well.
 			fail(ex.getMessage());
-		} catch(IllegalAccessException ex) {
-			//This shouldn't happen ever, since we set it to accessible
-			fail(ex.getMessage());
-		} catch(NoSuchFieldException ex) {
+		}
+		//This shouldn't happen ever, since we set it to accessible
+		 catch(NoSuchFieldException ex) {
 			fail("No such field \"" + name + "\" exists in the class " + in.getClass().getName());
 		} catch(SecurityException ex) {
 			fail("A security policy is preventing the test from getting \"" + name + "\" in the object provided.");

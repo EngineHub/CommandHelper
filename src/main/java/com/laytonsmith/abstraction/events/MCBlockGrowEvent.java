@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.blocks.MCBlockState;
 
 public interface MCBlockGrowEvent extends MCBlockEvent {
 
+	@Override
 	MCBlock getBlock();
 
 	MCBlockState getNewState();

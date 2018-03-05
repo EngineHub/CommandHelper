@@ -6,7 +6,7 @@ package com.laytonsmith.core.profiler;
  */
 final class GarbageCollectionDetector {
 
-	private Profiler profiler;
+	private final Profiler profiler;
 
 	public GarbageCollectionDetector(Profiler profiler) {
 		this.profiler = profiler;

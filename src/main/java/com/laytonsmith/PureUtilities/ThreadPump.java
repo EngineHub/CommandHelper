@@ -15,10 +15,10 @@ import java.util.concurrent.Callable;
  */
 public abstract class ThreadPump {
 
-	private int minHoldTime;
-	private int maxHoldTime;
-	private int waitTime;
-	private Queue<Runnable> eventPump;
+	private final int minHoldTime;
+	private final int maxHoldTime;
+	private final int waitTime;
+	private final Queue<Runnable> eventPump;
 	private int startStack;
 	private boolean pumpStarted;
 	private final String threadName;

@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class BukkitMCInventory implements MCInventory {
 
-	private Inventory i;
+	private final Inventory i;
 
 	public BukkitMCInventory(Inventory inventory) {
 		this.i = inventory;

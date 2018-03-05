@@ -9,7 +9,7 @@ import com.laytonsmith.core.constructs.Target;
 public abstract class LoopManipulationException extends ProgramFlowManipulationException {
 
 	private int times;
-	private String name;
+	private final String name;
 
 	protected LoopManipulationException(int times, String name, Target t) {
 		super(t);

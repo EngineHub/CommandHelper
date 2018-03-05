@@ -59,7 +59,7 @@ public final class WebUtility {
 	private WebUtility() {
 	}
 	private static int urlRetrieverPoolId = 0;
-	private static ExecutorService urlRetrieverPool = Executors.newCachedThreadPool(new ThreadFactory() {
+	private static final ExecutorService urlRetrieverPool = Executors.newCachedThreadPool(new ThreadFactory() {
 		@Override
 		public Thread newThread(Runnable r) {
 			return new Thread(r, "URLRetrieverThread-" + (++urlRetrieverPoolId));

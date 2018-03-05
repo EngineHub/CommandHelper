@@ -39,8 +39,8 @@ import java.util.logging.Logger;
  */
 public class CommandHelperInterpreterListener implements Listener {
 
-	private Set<String> interpreterMode = Collections.synchronizedSet(new HashSet<String>());
-	private CommandHelperPlugin plugin;
+	private final Set<String> interpreterMode = Collections.synchronizedSet(new HashSet<String>());
+	private final CommandHelperPlugin plugin;
 	Map<String, String> multilineMode = new HashMap<String, String>();
 
 	public boolean isInInterpreterMode(String player) {

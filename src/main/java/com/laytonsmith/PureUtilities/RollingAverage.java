@@ -10,10 +10,10 @@ import java.util.Arrays;
  */
 public class RollingAverage {
 
-	private Double[] data;
+	private final Double[] data;
 	private int insertionIndex;
-	private int dataSize;
-	private double initialValue;
+	private final int dataSize;
+	private final double initialValue;
 
 	/**
 	 * Creates a new rolling average object.

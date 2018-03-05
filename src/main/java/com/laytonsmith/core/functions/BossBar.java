@@ -38,7 +38,7 @@ public class BossBar {
 		return "Functions to create and manage boss bars in Minecraft.";
 	}
 
-	private static Map<String, MCBossBar> bars = new HashMap<>();
+	private static final Map<String, MCBossBar> bars = new HashMap<>();
 
 	public static abstract class BossBarFunction extends AbstractFunction {
 

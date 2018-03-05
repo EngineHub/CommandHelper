@@ -942,7 +942,7 @@ public class Meta {
 		public CArray exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray c = new CArray(t);
 			for(Locale l : Locale.getAvailableLocales()) {
-				if(!l.getCountry().equals("")) {
+				if(!l.getCountry().isEmpty()) {
 					c.push(new CString(l.toString(), t), t);
 				}
 			}

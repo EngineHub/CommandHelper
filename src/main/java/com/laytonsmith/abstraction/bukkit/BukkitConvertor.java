@@ -201,6 +201,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		return new BukkitMCItemStack(new ItemStack(((BukkitMCMaterial) type).getHandle(), qty, (short) data));
 	}
 
+	@Override
 	public MCItemStack GetItemStack(String type, int qty) {
 		Material mat = Material.getMaterial(type);
 		if(mat == null) {
@@ -209,6 +210,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		return new BukkitMCItemStack(new ItemStack(mat, qty));
 	}
 
+	@Override
 	public MCItemStack GetItemStack(String type, int data, int qty) {
 		Material mat = Material.getMaterial(type);
 		if(mat == null) {
@@ -217,6 +219,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		return new BukkitMCItemStack(new ItemStack(mat, qty, (short) data));
 	}
 
+	@Override
 	public MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded) {
 		return new BukkitMCPotionData(new PotionData(
 				BukkitMCPotionType.getConvertor().getConcreteEnum(type), extended, upgraded));

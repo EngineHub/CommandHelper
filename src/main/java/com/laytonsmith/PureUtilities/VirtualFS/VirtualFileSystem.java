@@ -67,7 +67,7 @@ public class VirtualFileSystem {
 	private final VirtualFileSystemSettings settings;
 	protected final File root;
 	public final File symlinkFile;
-	private BigInteger quota = new BigInteger("-1");
+	private final BigInteger quota = new BigInteger("-1");
 	private BigInteger FSSize = new BigInteger("0");
 	private Thread fsSizeThread;
 	private final List<FileSystemLayer> currentTmpFiles = new ArrayList<FileSystemLayer>();

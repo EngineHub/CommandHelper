@@ -543,7 +543,7 @@ public class Enchantments {
 	@api
 	public static class get_enchants extends AbstractFunction {
 
-		private static Map<String, CArray> cache = new HashMap<>();
+		private static final Map<String, CArray> cache = new HashMap<>();
 
 		@Override
 		public String getName() {

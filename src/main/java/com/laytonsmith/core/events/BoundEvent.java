@@ -35,7 +35,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	private final Priority priority;
 	private final Map<String, Construct> prefilter;
 	private final String eventObjName;
-	private Environment originalEnv;
+	private final Environment originalEnv;
 	private final ParseTree tree; //The code closure for this event
 	private final Driver driver; //For efficiency sake, cache it here
 	private static int EventID = 0;

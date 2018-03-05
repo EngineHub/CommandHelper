@@ -15,7 +15,7 @@ import java.util.List;
 
 public class BukkitMCBossBar implements MCBossBar {
 
-	private BossBar bb;
+	private final BossBar bb;
 
 	public BukkitMCBossBar(BossBar bb) {
 		this.bb = bb;

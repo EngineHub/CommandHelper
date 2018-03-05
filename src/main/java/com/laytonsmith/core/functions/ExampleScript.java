@@ -244,7 +244,7 @@ public class ExampleScript {
 		String playerOut = playerOutput.toString().trim();
 		String finalOut = finalOutput.toString().trim();
 
-		String out = (playerOut.equals("") ? "" : playerOut) + (finalOut.equals("") || !playerOut.trim().equals("") ? "" : ":" + finalOut);
+		String out = (playerOut.isEmpty() ? "" : playerOut) + (finalOut.isEmpty() || !playerOut.trim().isEmpty() ? "" : ":" + finalOut);
 		if(thrown != null) {
 			out += thrown;
 		}

@@ -200,8 +200,8 @@ public interface DataSource extends SimpleDocumentation {
 				+ " by SCP connections, for instance: ssh:yml://user@host:/path/to/file/over/ssh.yml. This will only work with public-key authentication"
 				+ " however, since there is no practical way to input your password otherwise. Since this is a remote IO connection, async is implied if this"
 				+ " modifier is set.", CHVersion.V3_3_1);
-		private CHVersion since;
-		private String documentation;
+		private final CHVersion since;
+		private final String documentation;
 
 		private DataSourceModifier(String documentation, CHVersion since) {
 			this.documentation = documentation;

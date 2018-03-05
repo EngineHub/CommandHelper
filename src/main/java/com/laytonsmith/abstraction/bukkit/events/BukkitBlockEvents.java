@@ -89,6 +89,7 @@ public class BukkitBlockEvents {
 			event = e;
 		}
 
+		@Override
 		public List<MCBlock> getPushedBlocks() {
 			List<MCBlock> blocks = new ArrayList<>();
 
@@ -111,6 +112,7 @@ public class BukkitBlockEvents {
 			event = e;
 		}
 
+		@Override
 		public MCLocation getRetractedLocation() {
 			return new BukkitMCLocation(event.getRetractLocation());
 		}

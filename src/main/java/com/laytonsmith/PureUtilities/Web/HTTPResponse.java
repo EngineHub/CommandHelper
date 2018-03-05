@@ -13,11 +13,11 @@ import java.util.Set;
 public final class HTTPResponse {
 
 	private String rawResponse = null;
-	private List<HTTPHeader> headers = new LinkedList<HTTPHeader>();
-	private String responseText;
-	private int responseCode;
-	private String content;
-	private String httpVersion;
+	private final List<HTTPHeader> headers = new LinkedList<HTTPHeader>();
+	private final String responseText;
+	private final int responseCode;
+	private final String content;
+	private final String httpVersion;
 
 	/**
 	 * Creates a new HTTP Response object, which wraps all the data that a HTTP response would contain.

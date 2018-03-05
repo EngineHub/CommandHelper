@@ -1264,7 +1264,7 @@ public final class MethodScriptCompiler {
 				arrayGet.addChild(myIndex);
 
 				// Check if the @var[...] had a negating "-" in front. If so, add a neg().
-				if(minusArrayStack.size() != 0 && arrayStack.size() + 1 == minusArrayStack.peek().get()) {
+				if(!minusArrayStack.isEmpty() && arrayStack.size() + 1 == minusArrayStack.peek().get()) {
 					if(!next1.type.equals(TType.LSQUARE_BRACKET)) { // Wait if there are more array_get's comming.
 						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
 						negTree.addChild(arrayGet);
@@ -1355,7 +1355,7 @@ public final class MethodScriptCompiler {
 				}
 
 				// Handle "-func(args)" and "-func(args)[index]".
-				if(minusFuncStack.size() != 0 && minusFuncStack.peek().get() == parens + 1) {
+				if(!minusFuncStack.isEmpty() && minusFuncStack.peek().get() == parens + 1) {
 					if(next1.type.equals(TType.LSQUARE_BRACKET)) {
 						// Move the negation to the array_get which contains this function.
 						minusArrayStack.push(new AtomicInteger(arrayStack.size() + 1)); // +1 because the bracket isn't counted yet.

@@ -401,11 +401,7 @@ public class Persistence {
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Clearing value: " + namespace, t);
 			try {
 				environment.getEnv(GlobalEnv.class).GetPersistenceNetwork().clearKey(environment.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + namespace).split("\\."));
-			} catch(DataSourceException ex) {
-				throw new CREIOException(ex.getMessage(), t, ex);
-			} catch(ReadOnlyException ex) {
-				throw new CREIOException(ex.getMessage(), t, ex);
-			} catch(IOException ex) {
+			} catch(DataSourceException | ReadOnlyException | IOException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
 			} catch(IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t, e);

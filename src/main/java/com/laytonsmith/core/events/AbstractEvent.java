@@ -114,7 +114,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 				env.getEnv(GlobalEnv.class).SetLabel(label);
 				MethodScriptCompiler.execute(tree, env, null, null);
 			} catch(CancelCommandException ex) {
-				if(ex.getMessage() != null && !ex.getMessage().equals("")) {
+				if(ex.getMessage() != null && !ex.getMessage().isEmpty()) {
 					StreamUtils.GetSystemOut().println(ex.getMessage());
 				}
 			} catch(FunctionReturnException ex) {

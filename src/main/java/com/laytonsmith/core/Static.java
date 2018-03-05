@@ -98,7 +98,7 @@ public final class Static {
 
 	private static final Logger logger = Logger.getLogger("CommandHelper");
 
-	private static Map<String, String> hostCache = new HashMap<String, String>();
+	private static final Map<String, String> hostCache = new HashMap<String, String>();
 
 	private static final String consoleName = "~console";
 
@@ -650,7 +650,7 @@ public final class Static {
 		return b.getTypeId() + (data == 0 ? "" : ":" + Byte.toString(data));
 	}
 
-	private static Map<String, MCCommandSender> injectedPlayers = new HashMap<>();
+	private static final Map<String, MCCommandSender> injectedPlayers = new HashMap<>();
 	private static MCEntity injectedEntity;
 	private static final Pattern DASHLESS_PATTERN = Pattern.compile("^([A-Fa-f0-9]{8})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{12})$");
 

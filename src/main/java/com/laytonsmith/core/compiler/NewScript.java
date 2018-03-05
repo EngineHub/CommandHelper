@@ -35,7 +35,7 @@ public class NewScript {
 			first = false;
 			if(c instanceof Variable) {
 				Variable var = (Variable) c;
-				if(var.isOptional() && !var.getDefault().trim().equals("")) {
+				if(var.isOptional() && !var.getDefault().trim().isEmpty()) {
 					b.append("[").append(var.getVariableName()).append("='").append(var.getDefault()).append("']");
 				} else if(var.isOptional()) {
 					b.append("[").append(var.getVariableName()).append("]");

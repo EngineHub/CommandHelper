@@ -57,7 +57,7 @@ public final class Prefs {
 		SCREAM_ERRORS("scream-errors"),
 		INTERPRETER_TIMEOUT("interpreter-timeout"),
 		STRICT_MODE("strict-mode");
-		private String name;
+		private final String name;
 
 		private PNames(String name) {
 			this.name = name;

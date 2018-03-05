@@ -90,8 +90,8 @@ public interface PackagePermission extends SimpleDocumentation {
 		OPTIONAL("If this permission is not granted, some features of the package may not work, but all of the main features will work."
 				+ " User experience may be impacted though.", CHVersion.V3_3_1);
 
-		private String docs;
-		private CHVersion since;
+		private final String docs;
+		private final CHVersion since;
 
 		private Requirement(String docs, CHVersion since) {
 			this.docs = docs;
@@ -137,8 +137,8 @@ public interface PackagePermission extends SimpleDocumentation {
 				+ " if this permission is granted. You should be sure you"
 				+ " trust this package before granting this permission. ", CHVersion.V3_3_1);
 
-		private String docs;
-		private CHVersion since;
+		private final String docs;
+		private final CHVersion since;
 
 		private ThreatLevel(String docs, CHVersion since) {
 			this.docs = docs;

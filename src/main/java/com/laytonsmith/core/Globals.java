@@ -13,7 +13,7 @@ public final class Globals {
 	private Globals() {
 	}
 
-	private static Map<String, Construct> global_construct = new HashMap<>();
+	private static final Map<String, Construct> global_construct = new HashMap<>();
 
 	/**
 	 * Sets a variable in the global registry.

@@ -8,7 +8,7 @@ import org.bukkit.WorldBorder;
 
 public class BukkitMCWorldBorder implements AbstractionObject, MCWorldBorder {
 
-	private WorldBorder wb;
+	private final WorldBorder wb;
 
 	BukkitMCWorldBorder(WorldBorder wb) {
 		this.wb = wb;

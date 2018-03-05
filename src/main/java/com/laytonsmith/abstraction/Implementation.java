@@ -90,11 +90,7 @@ public final class Implementation {
 									checkEnumConvertors(convertor, abstractEnum, concreteEnum, false);
 									checkEnumConvertors(convertor, concreteEnum, abstractEnum, true);
 
-								} catch(IllegalAccessException ex) {
-									throw new Error(ex);
-								} catch(IllegalArgumentException ex) {
-									throw new Error(ex);
-								} catch(InvocationTargetException ex) {
+								} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 									throw new Error(ex);
 								} catch(NoSuchMethodException ex) {
 									throw new Error(serverType.getBranding() + ": The method with signature public static " + c.getName() + " getConvertor() was not found in " + c.getName()

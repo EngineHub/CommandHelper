@@ -63,14 +63,14 @@ import java.util.zip.ZipFile;
  */
 public class AliasCore {
 
-	private File aliasConfig;
-	private File auxAliases;
-	private File prefFile;
-	private File mainFile;
+	private final File aliasConfig;
+	private final File auxAliases;
+	private final File prefFile;
+	private final File mainFile;
 	//AliasConfig config;
 	private List<Script> scripts;
 	static final Logger logger = Logger.getLogger("Minecraft");
-	private Set<String> echoCommand = new HashSet<String>();
+	private final Set<String> echoCommand = new HashSet<String>();
 	public List<File> autoIncludes;
 	public static CommandHelperPlugin parent;
 
@@ -645,9 +645,9 @@ public class AliasCore {
 				return file;
 			}
 		}
-		private List<File> autoIncludes = new ArrayList<File>();
-		private List<FileInfo> ms = new ArrayList<FileInfo>();
-		private List<FileInfo> msa = new ArrayList<FileInfo>();
+		private final List<File> autoIncludes = new ArrayList<File>();
+		private final List<FileInfo> ms = new ArrayList<FileInfo>();
+		private final List<FileInfo> msa = new ArrayList<FileInfo>();
 
 		public List<FileInfo> getMSFiles() {
 			return new ArrayList<FileInfo>(ms);

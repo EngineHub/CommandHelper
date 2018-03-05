@@ -39,7 +39,7 @@ public class ClassDiscoveryCache {
 	 */
 	private static final int READ_SIZE = 2048;
 
-	private File cacheDir;
+	private final File cacheDir;
 	private ProgressIterator progress;
 	private Logger logger;
 

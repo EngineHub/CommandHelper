@@ -1763,10 +1763,12 @@ public class EntityEvents {
 	@api
 	public static class entity_toggle_glide extends AbstractEvent {
 
+		@Override
 		public String getName() {
 			return "entity_toggle_glide";
 		}
 
+		@Override
 		public String docs() {
 			return "{type: <macro> The entity type of the entity | id: <macro> The entity id of the entity | player: <macro> The player triggering the event}"
 					+ " This event is called when an entity toggles it's gliding state (Using Elytra)."
@@ -1776,6 +1778,7 @@ public class EntityEvents {
 					+ " {}";
 		}
 
+		@Override
 		public boolean matches(Map<String, Construct> filter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCEntityToggleGlideEvent) {
 				MCEntityToggleGlideEvent evt = (MCEntityToggleGlideEvent) e;
@@ -1792,10 +1795,12 @@ public class EntityEvents {
 			return false;
 		}
 
+		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
 			return null;
 		}
 
+		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCEntityToggleGlideEvent) {
 				MCEntityToggleGlideEvent evt = (MCEntityToggleGlideEvent) e;
@@ -1818,14 +1823,17 @@ public class EntityEvents {
 			}
 		}
 
+		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) throws ConfigRuntimeException {
 			return false;
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
 
+		@Override
 		public Driver driver() {
 			return Driver.ENTITY_TOGGLE_GLIDE;
 		}

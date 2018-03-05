@@ -465,7 +465,7 @@ public class Script {
 						}
 					}
 				}
-				if(extensionData.equals("")) {
+				if(extensionData.isEmpty()) {
 					extensionData = "NONE\n";
 				}
 

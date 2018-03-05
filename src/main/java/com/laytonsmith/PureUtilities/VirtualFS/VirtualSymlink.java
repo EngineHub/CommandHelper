@@ -9,8 +9,8 @@ import java.io.File;
  */
 public class VirtualSymlink {
 
-	private VirtualFile virtual;
-	private File real;
+	private final VirtualFile virtual;
+	private final File real;
 
 	public VirtualSymlink(VirtualFile virtual, File real) {
 		this.virtual = virtual;

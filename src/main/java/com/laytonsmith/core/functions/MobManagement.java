@@ -1441,14 +1441,17 @@ public class MobManagement {
 	@api
 	public static class set_entity_gliding extends EntityManagement.EntitySetterFunction {
 
+		@Override
 		public String getName() {
 			return "set_entity_gliding";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, boolean} If possible, makes the entity glide (MC 1.9)";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			boolean glide = Static.getBoolean(args[1]);
@@ -1458,6 +1461,7 @@ public class MobManagement {
 			return CVoid.VOID;
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
@@ -1466,18 +1470,22 @@ public class MobManagement {
 	@api
 	public static class get_entity_gliding extends EntityManagement.EntityGetterFunction {
 
+		@Override
 		public String getName() {
 			return "get_entity_gliding";
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID} Returns true if the given entity is gliding (MC 1.9)";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return CBoolean.GenerateCBoolean(Static.getLivingEntity(args[0], t).isGliding(), t);
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
@@ -1486,18 +1494,22 @@ public class MobManagement {
 	@api
 	public static class get_entity_ai extends EntityManagement.EntityGetterFunction {
 
+		@Override
 		public String getName() {
 			return "get_entity_ai";
 		}
 
+		@Override
 		public String docs() {
 			return "boolean {entityID} Returns true if the given entity has AI (MC 1.9.2)";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return CBoolean.GenerateCBoolean(Static.getLivingEntity(args[0], t).hasAI(), t);
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
@@ -1506,14 +1518,17 @@ public class MobManagement {
 	@api
 	public static class set_entity_ai extends EntityManagement.EntitySetterFunction {
 
+		@Override
 		public String getName() {
 			return "set_entity_ai";
 		}
 
+		@Override
 		public String docs() {
 			return "void {entityID, boolean} enables or disables the entity AI (MC 1.9.2)";
 		}
 
+		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			boolean ai = Static.getBoolean(args[1]);
@@ -1523,6 +1538,7 @@ public class MobManagement {
 			return CVoid.VOID;
 		}
 
+		@Override
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}

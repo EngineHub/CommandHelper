@@ -129,7 +129,7 @@ public class DocGenTemplates {
 				f.setAccessible(true);
 				if(Generator.class.isAssignableFrom(f.getType()) && Modifier.isStatic(f.getModifiers())) {
 					String[] tmplArgs = ArrayUtils.EMPTY_STRING_ARRAY;
-					if(m.group(2) != null && !m.group(2).equals("")) {
+					if(m.group(2) != null && !m.group(2).isEmpty()) {
 						//We have arguments
 						//remove the initial |, then split (noting that empty arguments is still an argument)
 						tmplArgs = m.group(2).substring(1).split("\\|", -1);
@@ -259,7 +259,7 @@ public class DocGenTemplates {
 			try {
 				if(generators.containsKey(name)) {
 					String[] tmplArgs = ArrayUtils.EMPTY_STRING_ARRAY;
-					if(m.group(2) != null && !m.group(2).equals("")) {
+					if(m.group(2) != null && !m.group(2).isEmpty()) {
 						//We have arguments
 						//remove the initial |, then split
 						tmplArgs = m.group(2).substring(1).split("\\|");

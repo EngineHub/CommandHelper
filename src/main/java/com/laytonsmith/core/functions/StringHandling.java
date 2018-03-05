@@ -2200,7 +2200,7 @@ public class StringHandling {
 			if(times < 0) {
 				throw new CRERangeException("Expecting a value >= 0, but " + times + " was found.", t);
 			}
-			if(times == 0 || string.equals("")) {
+			if(times == 0 || string.isEmpty()) {
 				return new CString("", t);
 			}
 			String s = repeat(string, times);

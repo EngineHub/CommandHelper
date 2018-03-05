@@ -97,7 +97,7 @@ public class TemplateBuilder {
 //				}
 //			}
 			String[] tmplArgs = ArrayUtils.EMPTY_STRING_ARRAY;
-			if(m.group(2) != null && !m.group(2).equals("")) {
+			if(m.group(2) != null && !m.group(2).isEmpty()) {
 				//We have arguments
 				//remove the initial |, then split
 				tmplArgs = m.group(2).substring(1).split("\\|");

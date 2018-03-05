@@ -1528,7 +1528,7 @@ public class World {
 				try {
 					MCGameRule gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
 					String value = world.getGameRuleValue(gameRule.getGameRule());
-					if(value.equals("")) {
+					if(value.isEmpty()) {
 						throw new CREFormatException("The gamerule \"" + args[1].val()
 								+ "\" does not exist in this version.", t);
 					}

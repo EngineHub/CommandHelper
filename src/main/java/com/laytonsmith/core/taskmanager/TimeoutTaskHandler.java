@@ -9,7 +9,7 @@ import com.laytonsmith.core.constructs.Target;
 @taskhandler(properties = {})
 public class TimeoutTaskHandler extends TaskHandler {
 
-	private Runnable killTaskRunnable;
+	private final Runnable killTaskRunnable;
 
 	public TimeoutTaskHandler(int id, Target t, Runnable killTaskRunnable) {
 		super(CoreTaskType.TIMEOUT, id, t);

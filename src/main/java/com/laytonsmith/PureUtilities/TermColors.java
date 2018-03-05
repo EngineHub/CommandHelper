@@ -153,7 +153,7 @@ public final class TermColors {
 	@color
 	public static String RESET = special("reset");
 
-	private static Map<String, String> defaults = new HashMap<String, String>();
+	private static final Map<String, String> defaults = new HashMap<String, String>();
 	private static List<Field> fields = null;
 
 	private static List<Field> fields() {
@@ -164,9 +164,7 @@ public final class TermColors {
 					fields.add(f);
 					try {
 						defaults.put(f.getName(), (String) f.get(null));
-					} catch(IllegalArgumentException ex) {
-						Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
-					} catch(IllegalAccessException ex) {
+					} catch(IllegalArgumentException | IllegalAccessException ex) {
 						Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
@@ -182,9 +180,7 @@ public final class TermColors {
 		for(Field f : fields()) {
 			try {
 				f.set(null, defaults.get(f.getName()));
-			} catch(IllegalArgumentException ex) {
-				Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
-			} catch(IllegalAccessException ex) {
+			} catch(IllegalArgumentException | IllegalAccessException ex) {
 				Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -197,9 +193,7 @@ public final class TermColors {
 		for(Field f : fields()) {
 			try {
 				f.set(null, "");
-			} catch(IllegalArgumentException ex) {
-				Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
-			} catch(IllegalAccessException ex) {
+			} catch(IllegalArgumentException | IllegalAccessException ex) {
 				Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}

@@ -47,7 +47,7 @@ class LexerObject {
 	int lastColumn = 0;
 	Target target = Target.UNKNOWN;
 	final boolean usingNonPure;
-	private static SortedSet<TokenMap> tokenMap = new TreeSet<TokenMap>();
+	private static final SortedSet<TokenMap> tokenMap = new TreeSet<TokenMap>();
 
 	private static class TokenMap implements Comparable<TokenMap> {
 

@@ -252,7 +252,7 @@ public class ClassDiscovery {
 			}
 			final File rootLocationFile;
 			if(!classCache.containsKey(rootLocation)) {
-				classCache.put(rootLocation, Collections.synchronizedSet(new HashSet<ClassMirror<?>>()));
+				classCache.put(rootLocation, Collections.synchronizedSet(new HashSet<>()));
 			} else {
 				classCache.get(rootLocation).clear();
 			}
@@ -398,7 +398,7 @@ public class ClassDiscovery {
 		}
 		urlCache.add(url);
 		dirtyURLs.add(url);
-		classCache.put(url, new HashSet<ClassMirror<?>>());
+		classCache.put(url, new HashSet<>());
 	}
 
 	/**
@@ -722,7 +722,7 @@ public class ClassDiscovery {
 		if(superClass.getAnnotation(annotation) != null) {
 			// The mechanism above won't automatically add this class, so we need to add it
 			// ourselves here.
-			mirrors.add(new ClassMirror<T>(superClass));
+			mirrors.add(new ClassMirror<>(superClass));
 		}
 		return mirrors;
 	}

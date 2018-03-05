@@ -19,10 +19,10 @@ public final class Marquee {
 		void stringPortion(String portion, Marquee self);
 	}
 	private String text;
-	private int maxChars;
-	private int delay;
+	private final int maxChars;
+	private final int delay;
 	private boolean run;
-	private MarqueeCallback callback;
+	private final MarqueeCallback callback;
 
 	public Marquee(String string, int maxChars, int delay, MarqueeCallback callback) {
 		this.maxChars = maxChars;

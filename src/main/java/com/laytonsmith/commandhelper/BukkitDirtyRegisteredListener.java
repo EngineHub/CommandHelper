@@ -85,11 +85,7 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 			if(!(e instanceof BukkitDirtyRegisteredListener) && e instanceof RegisteredListener) {
 				try {
 					return super.add(Generate((RegisteredListener) e));
-				} catch(NoSuchFieldException ex) {
-					Logger.getLogger(BukkitDirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
-				} catch(IllegalArgumentException ex) {
-					Logger.getLogger(BukkitDirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
-				} catch(IllegalAccessException ex) {
+				} catch(NoSuchFieldException | IllegalArgumentException | IllegalAccessException ex) {
 					Logger.getLogger(BukkitDirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			} else {

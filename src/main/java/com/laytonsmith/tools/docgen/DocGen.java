@@ -252,10 +252,7 @@ public class DocGen {
 					}
 				}
 				classDocs = (String) m.invoke(o, (Object[]) null);
-			} catch(IllegalAccessException ex) {
-			} catch(IllegalArgumentException ex) {
-			} catch(InvocationTargetException ex) {
-			} catch(NoSuchMethodException e) {
+			} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException ex) {
 			} catch(Exception e) {
 				e.printStackTrace(StreamUtils.GetSystemErr());
 				StreamUtils.GetSystemErr().println("Continuing however.");

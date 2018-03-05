@@ -257,7 +257,7 @@ public class PublicSuffix {
 	}
 
 	private void dump(final Map<String, SubdomainNode> node, final int offset) {
-		if(node == null || node.size() == 0) {
+		if(node == null || node.isEmpty()) {
 			return;
 		}
 		for(Map.Entry<String, SubdomainNode> e : node.entrySet()) {

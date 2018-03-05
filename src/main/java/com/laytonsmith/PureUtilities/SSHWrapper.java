@@ -407,7 +407,7 @@ public class SSHWrapper {
 		// -1
 
 		if(b == 1 || b == 2) {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			int c;
 			do {
 				c = in.read();
@@ -436,7 +436,7 @@ public class SSHWrapper {
 		}
 
 		if(b == 1 || b == 2) {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			int c;
 			do {
 				c = in.read();

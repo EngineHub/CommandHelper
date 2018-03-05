@@ -22,8 +22,8 @@ public @interface api {
 	public enum Platforms {
 		INTERPRETER_JAVA(null, "Java Interpreter"),
 		COMPILER_BASH(new BashPlatformResolver(), "Bash Compiler");
-		private PlatformResolver resolver;
-		private String platformName;
+		private final PlatformResolver resolver;
+		private final String platformName;
 
 		/**
 		 * Returns the platform specific resolver, which is able to override base functionality, which will be adjusted

@@ -9,7 +9,7 @@ import org.bukkit.FireworkEffect;
 
 public class BukkitMCFireworkBuilder implements MCFireworkBuilder {
 
-	private FireworkEffect.Builder builder;
+	private final FireworkEffect.Builder builder;
 
 	public BukkitMCFireworkBuilder() {
 		builder = FireworkEffect.builder();

@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
-	private EntityEquipment ee;
+	private final EntityEquipment ee;
 
 	public BukkitMCEntityEquipment(EntityEquipment equipment) {
 		this.ee = equipment;

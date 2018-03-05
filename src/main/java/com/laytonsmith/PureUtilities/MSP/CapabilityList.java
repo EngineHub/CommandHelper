@@ -10,8 +10,8 @@ import java.util.Map;
  */
 public class CapabilityList {
 
-	private Map<Capability, CapabilityValue> caps = new HashMap<Capability, CapabilityValue>();
-	private Connection connection;
+	private final Map<Capability, CapabilityValue> caps = new HashMap<Capability, CapabilityValue>();
+	private final Connection connection;
 
 	/**
 	 * Creates a new CapabilityList object.

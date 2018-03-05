@@ -7,7 +7,7 @@ import org.bukkit.entity.ShulkerBullet;
 
 public class BukkitMCShulkerBullet extends BukkitMCProjectile implements MCShulkerBullet {
 
-	private ShulkerBullet sb;
+	private final ShulkerBullet sb;
 
 	public BukkitMCShulkerBullet(Entity be) {
 		super(be);

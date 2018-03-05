@@ -21,8 +21,8 @@ import java.util.Map;
  */
 public class ArgumentSuite {
 
-	private Map<String, ArgumentParser> suite;
-	private Map<String, String> aliases;
+	private final Map<String, ArgumentParser> suite;
+	private final Map<String, String> aliases;
 	private String description;
 
 	public ArgumentSuite() {
@@ -211,9 +211,9 @@ public class ArgumentSuite {
 
 	public static class ArgumentSuiteResults {
 
-		private ArgumentParser mode;
-		private ArgumentParserResults results;
-		private String modeName;
+		private final ArgumentParser mode;
+		private final ArgumentParserResults results;
+		private final String modeName;
 
 		private ArgumentSuiteResults(String modeName, ArgumentParser mode, ArgumentParserResults results) {
 			this.modeName = modeName;
@@ -292,9 +292,7 @@ public class ArgumentSuite {
 				}
 				System.exit(0);
 			}
-		} catch(ResultUseException ex) {
-			showHelp(suite);
-		} catch(ValidationException ex) {
+		} catch(ResultUseException | ValidationException ex) {
 			showHelp(suite);
 		}
 	}
