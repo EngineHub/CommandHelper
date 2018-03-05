@@ -49,7 +49,7 @@ public class RedisDataSource extends AbstractDataSource {
 			}
 			if(queryString.containsKey("timeout")){
 				timeout = Integer.parseInt(queryString.get("timeout"));
-				shardInfo.setTimeout(timeout);
+				shardInfo.setSoTimeout(timeout);
 			}
 			if(queryString.containsKey("password")){
 				password = queryString.get("password");

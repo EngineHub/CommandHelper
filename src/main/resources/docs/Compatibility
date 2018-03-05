@@ -13,6 +13,20 @@ Also note that CommandHelper may still be backwards and forward compatible to a 
 ! scope="col" width="40%" | Milestone
 ! scope="col" width="50%" | Compatibility
 |-
+| ??
+| ??
+| Updated several dependencies
+* com.jcraft:jsch ..................................... 0.1.51 -> 0.1.54
+* commons-codec:commons-codec .............................. 1.9 -> 1.11
+* jline:jline ........................................... 2.11 -> 2.14.5
+* junit:junit ............................................. 4.11 -> 4.12
+* mysql:mysql-connector-java ........................ 5.1.30 -> 8.0.9-rc
+* org.mockito:mockito-core ............................. 1.9.5 -> 2.15.0
+* org.ow2.asm:asm-all ................................ 5.0.4 -> 6.0_BETA
+* org.xerial:sqlite-jdbc ......................... 3.7.15-M1 -> 3.21.0.1
+* org.yaml:snakeyaml ...................................... 1.13 -> 1.20
+* redis.clients:jedis ................................... 2.5.1 -> 2.9.0
+|-
 | [http://builds.enginehub.org/job/commandhelper/9876 #3219-]
 | [https://github.com/EngineHub/CommandHelper/commit/4d970d0dc2edb1a7a648904df01af148bba761e1 4d970d0]
 | Updated for Spigot 1.12.1
