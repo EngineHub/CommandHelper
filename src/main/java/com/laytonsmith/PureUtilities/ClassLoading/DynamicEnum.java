@@ -3,7 +3,7 @@ package com.laytonsmith.PureUtilities.ClassLoading;
 /**
  *
  */
-public abstract class DynamicEnum<Abstracted extends Enum,Concrete> {
+public abstract class DynamicEnum<Abstracted extends Enum, Concrete> {
 
 	protected Abstracted abstracted;
 	protected Concrete concrete;
@@ -31,6 +31,7 @@ public abstract class DynamicEnum<Abstracted extends Enum,Concrete> {
 
 	/**
 	 * Override me in Implementation if needed
+	 *
 	 * @return
 	 */
 	public Concrete getConcrete() {

@@ -4,6 +4,7 @@ package com.laytonsmith.PureUtilities;
  *
  */
 public interface SignalType {
+
 	/**
 	 * Returns the default action of the signal.
 	 *
@@ -12,8 +13,7 @@ public interface SignalType {
 	DefaultAction getDefaultAction();
 
 	/**
-	 * Some signals are not catchable. If this returns true, this is one of
-	 * those signals.
+	 * Some signals are not catchable. If this returns true, this is one of those signals.
 	 *
 	 * @return
 	 */
@@ -31,16 +31,14 @@ public interface SignalType {
 	 */
 	public static enum DefaultAction {
 		/**
-		 * Abnormal termination of the process. The process is terminated with
-		 * all the consequences of _exit() except that the status made available
-		 * to wait() and waitpid() indicates abnormal termination by the
-		 * specified signal.
+		 * Abnormal termination of the process. The process is terminated with all the consequences of _exit() except
+		 * that the status made available to wait() and waitpid() indicates abnormal termination by the specified
+		 * signal.
 		 */
 		TERMINATE,
 		/**
-		 * Abnormal termination of the process. Additionally,
-		 * implementation-defined abnormal termination actions, such as creation
-		 * of a core file, may occur.
+		 * Abnormal termination of the process. Additionally, implementation-defined abnormal termination actions, such
+		 * as creation of a core file, may occur.
 		 */
 		ACTION_TERMINATE,
 		/**

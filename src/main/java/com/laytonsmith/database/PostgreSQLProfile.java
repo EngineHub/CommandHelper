@@ -73,7 +73,7 @@ public class PostgreSQLProfile extends SQLProfile {
 	public String getConnectionString() throws SQLException {
 		try {
 			Class.forName(org.postgresql.Driver.class.getName());
-		} catch(ClassNotFoundException ex){
+		} catch (ClassNotFoundException ex) {
 			throw new SQLException("Could not load PostgreSQL, check your installation and try again");
 		}
 		try {

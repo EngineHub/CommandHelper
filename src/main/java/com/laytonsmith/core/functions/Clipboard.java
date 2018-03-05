@@ -28,129 +28,129 @@ import java.io.IOException;
  */
 public class Clipboard {
 
-    public static String docs() {
-	return "Provides functions for managing the system clipboard";
-    }
-
-    @SuppressWarnings("FieldMayBeFinal") // No it can't, shut up ide
-    private static java.awt.datatransfer.Clipboard clipboard;
-
-    static {
-	try {
-	    clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-	} catch (HeadlessException ex) {
-	    clipboard = null;
-	}
-    }
-
-    @api
-    @noboilerplate
-    public static class get_clipboard extends AbstractFunction {
-
-	@Override
-	public Class<? extends CREThrowable>[] thrown() {
-	    return new Class[]{CREFormatException.class, CREInsufficientPermissionException.class};
+	public static String docs() {
+		return "Provides functions for managing the system clipboard";
 	}
 
-	@Override
-	public boolean isRestricted() {
-	    return true;
-	}
+	@SuppressWarnings("FieldMayBeFinal") // No it can't, shut up ide
+	private static java.awt.datatransfer.Clipboard clipboard;
 
-	@Override
-	public Boolean runAsync() {
-	    return null;
-	}
-
-	@Override
-	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-	    Cmdline.requireCmdlineMode(environment, this, t);
-	    Transferable tr = clipboard.getContents(null);
-	    if (tr.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+	static {
 		try {
-		    String data = (String) tr.getTransferData(DataFlavor.stringFlavor);
-		    return new CString(data, t);
-		} catch (UnsupportedFlavorException ex) {
-		    // Can't happen
-		    throw new RuntimeException(ex);
-		} catch (IOException ex) {
-		    throw new CREIOException(ex.getMessage(), t, ex);
+			clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		} catch (HeadlessException ex) {
+			clipboard = null;
 		}
-	    } else {
-		throw new CREFormatException("Clipboard value does not support parsing as text", t);
-	    }
 	}
 
-	@Override
-	public String getName() {
-	    return "get_clipboard";
+	@api
+	@noboilerplate
+	public static class get_clipboard extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREInsufficientPermissionException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Cmdline.requireCmdlineMode(environment, this, t);
+			Transferable tr = clipboard.getContents(null);
+			if (tr.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+				try {
+					String data = (String) tr.getTransferData(DataFlavor.stringFlavor);
+					return new CString(data, t);
+				} catch (UnsupportedFlavorException ex) {
+					// Can't happen
+					throw new RuntimeException(ex);
+				} catch (IOException ex) {
+					throw new CREIOException(ex.getMessage(), t, ex);
+				}
+			} else {
+				throw new CREFormatException("Clipboard value does not support parsing as text", t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "get_clipboard";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {[flavor]} Returns the contents of the system clipboard. Can only be used in cmdline mode. Flavor defaults to null, and is currently unused. Only strings are currently supported."
+					+ " If a string version of the clipboard contents cannot be parsed, a FormatException is thrown.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
 	}
 
-	@Override
-	public Integer[] numArgs() {
-	    return new Integer[]{0, 1};
+	@api
+	@noboilerplate
+	public static class set_clipboard extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInsufficientPermissionException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Cmdline.requireCmdlineMode(environment, this, t);
+			String data = args[0].val();
+			StringSelection s = new StringSelection(data);
+			clipboard.setContents(s, s);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_clipboard";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {value, [flavor]} Sets the contents of the system clipboard, to the given value. Can only be used in cmdline mode. Flavor defaults to null, and is currently unused. Only strings are currently supported.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+
 	}
-
-	@Override
-	public String docs() {
-	    return "string {[flavor]} Returns the contents of the system clipboard. Can only be used in cmdline mode. Flavor defaults to null, and is currently unused. Only strings are currently supported."
-		    + " If a string version of the clipboard contents cannot be parsed, a FormatException is thrown.";
-	}
-
-	@Override
-	public Version since() {
-	    return CHVersion.V3_3_2;
-	}
-
-    }
-
-    @api
-    @noboilerplate
-    public static class set_clipboard extends AbstractFunction {
-
-	@Override
-	public Class<? extends CREThrowable>[] thrown() {
-	    return new Class[]{CREInsufficientPermissionException.class};
-	}
-
-	@Override
-	public boolean isRestricted() {
-	    return true;
-	}
-
-	@Override
-	public Boolean runAsync() {
-	    return null;
-	}
-
-	@Override
-	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-	    Cmdline.requireCmdlineMode(environment, this, t);
-	    String data = args[0].val();
-	    StringSelection s = new StringSelection(data);
-	    clipboard.setContents(s, s);
-	    return CVoid.VOID;
-	}
-
-	@Override
-	public String getName() {
-	    return "set_clipboard";
-	}
-
-	@Override
-	public Integer[] numArgs() {
-	    return new Integer[]{1, 2};
-	}
-
-	@Override
-	public String docs() {
-	    return "void {value, [flavor]} Sets the contents of the system clipboard, to the given value. Can only be used in cmdline mode. Flavor defaults to null, and is currently unused. Only strings are currently supported.";
-	}
-
-	@Override
-	public Version since() {
-	    return CHVersion.V3_3_2;
-	}
-
-    }
 }

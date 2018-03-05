@@ -11,10 +11,11 @@ import org.bukkit.event.inventory.InventoryType;
 		forAbstractEnum = MCInventoryType.class,
 		forConcreteEnum = InventoryType.class)
 public class BukkitMCInventoryType extends EnumConvertor<MCInventoryType, InventoryType> {
+
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCInventoryType instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCInventoryType getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCInventoryType();
 		}
 		return instance;

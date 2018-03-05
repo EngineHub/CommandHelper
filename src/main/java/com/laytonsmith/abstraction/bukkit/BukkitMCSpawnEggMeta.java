@@ -18,7 +18,7 @@ public class BukkitMCSpawnEggMeta extends BukkitMCItemMeta implements MCSpawnEgg
 	@Override
 	public MCEntityType getSpawnedType() {
 		EntityType type = sem.getSpawnedType();
-		if(type == null){
+		if (type == null) {
 			return null;
 		}
 		return BukkitMCEntityType.valueOfConcrete(sem.getSpawnedType());

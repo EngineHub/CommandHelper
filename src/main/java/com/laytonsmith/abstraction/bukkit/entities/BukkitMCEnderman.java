@@ -8,6 +8,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.material.MaterialData;
 
 public class BukkitMCEnderman extends BukkitMCLivingEntity implements MCEnderman {
+
 	Enderman e;
 
 	public BukkitMCEnderman(Entity ent) {

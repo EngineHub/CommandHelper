@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction.bukkit.blocks;
 
 import com.laytonsmith.abstraction.MCItemStack;
@@ -35,7 +33,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
 	Block b;
 
-	public BukkitMCBlock(Block b){
+	public BukkitMCBlock(Block b) {
 		super(b);
 		this.b = b;
 	}
@@ -61,15 +59,15 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	}
 
 	@Override
-	public int getTypeId(){
-		if(b == null){
+	public int getTypeId() {
+		if (b == null) {
 			return 0;
 		}
 		return b.getTypeId();
 	}
 
 	@Override
-	public byte getData(){
+	public byte getData() {
 		return b.getData();
 	}
 
@@ -96,8 +94,8 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	@Override
 	public MCBlockState getState() {
 		BlockState bs = b.getState();
-		if(bs instanceof CreatureSpawner){
-			return new BukkitMCCreatureSpawner((CreatureSpawner)bs);
+		if (bs instanceof CreatureSpawner) {
+			return new BukkitMCCreatureSpawner((CreatureSpawner) bs);
 		}
 		return new BukkitMCBlockState(bs);
 	}
@@ -124,7 +122,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
 	@Override
 	public MCSign getSign() {
-		return new BukkitMCSign((Sign)b.getState());
+		return new BukkitMCSign((Sign) b.getState());
 	}
 
 	@Override
@@ -135,7 +133,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
 	@Override
 	public MCCommandBlock getCommandBlock() {
-		return new BukkitMCCommandBlock((CommandBlock)b.getState());
+		return new BukkitMCCommandBlock((CommandBlock) b.getState());
 	}
 
 	@Override
@@ -145,18 +143,18 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
 	@Override
 	public MCDispenser getDispenser() {
-		return new BukkitMCDispenser((Dispenser)b.getState());
+		return new BukkitMCDispenser((Dispenser) b.getState());
 	}
 
 	@Override
 	public boolean isDispenser() {
-		return(b.getType() == Material.DISPENSER);
+		return (b.getType() == Material.DISPENSER);
 	}
 
 	@Override
 	public Collection<MCItemStack> getDrops() {
 		Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
-		for(ItemStack is : b.getDrops()){
+		for (ItemStack is : b.getDrops()) {
 			collection.add(new BukkitMCItemStack(is));
 		}
 		return collection;
@@ -165,7 +163,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	@Override
 	public Collection<MCItemStack> getDrops(MCItemStack tool) {
 		Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
-		for(ItemStack is : b.getDrops(((BukkitMCItemStack) tool).asItemStack())){
+		for (ItemStack is : b.getDrops(((BukkitMCItemStack) tool).asItemStack())) {
 			collection.add(new BukkitMCItemStack(is));
 		}
 		return collection;
@@ -234,6 +232,6 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
 	@Override
 	public MCBlockFace getFace(MCBlock block) {
-		return BukkitMCBlockFace.getConvertor().getAbstractedEnum(b.getFace(((BukkitMCBlock)block).b));
+		return BukkitMCBlockFace.getConvertor().getAbstractedEnum(b.getFace(((BukkitMCBlock) block).b));
 	}
 }

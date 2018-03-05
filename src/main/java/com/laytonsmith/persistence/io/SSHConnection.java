@@ -10,10 +10,11 @@ import java.net.URI;
  *
  *
  */
-public class SSHConnection implements ConnectionMixin{
+public class SSHConnection implements ConnectionMixin {
 
 	String connection;
-	public SSHConnection(URI uri){
+
+	public SSHConnection(URI uri) {
 		connection = uri.getSchemeSpecificPart();
 	}
 

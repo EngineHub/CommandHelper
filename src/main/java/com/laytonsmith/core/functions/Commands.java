@@ -78,6 +78,7 @@ public class Commands {
 
 		/**
 		 * For setting the completion code of a command that exists but might not be registered yet
+		 *
 		 * @param t
 		 * @param environment
 		 * @param cmd
@@ -175,7 +176,7 @@ public class Commands {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREFormatException.class,
-					CRENotFoundException.class};
+				CRENotFoundException.class};
 		}
 
 		@Override
@@ -271,39 +272,39 @@ public class Commands {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Register the /hug <player> command.",
-						"register_command('hug', array(\n"
-						+ "\t'description': 'Spread the love!',\n"
-						+ "\t'usage': '/hug <player>',\n"
-						+ "\t'permission': 'perms.hugs',\n"
-						+ "\t'noPermMsg': 'You do not have permission to give hugs to players (Sorry :o).',\n"
-						+ "\t'tabcompleter': closure(@alias, @sender, @args) {\n"
-						+ "\t\t\tif(array_size(@args) == 0) {\n"
-						+ "\t\t\t\treturn(all_players());\n"
-						+ "\t\t\t}\n"
-						+ "\t\t\t@search = @args[array_size(@args) - 1];\n"
-						+ "\t\t\treturn(array_filter(all_players(), closure(@index, @player) {\n"
-						+ "\t\t\t\treturn(equals_ic(@search, substr(@player, 0, length(@search))));\n"
-						+ "\t\t\t}));\n"
-						+ "\t\t},\n"
-						+ "\t'aliases':array('hugg', 'hugs'),\n"
-						+ "\t'executor': closure(@alias, @sender, @args) {\n"
-						+ "\t\t\tif(array_size(@args) == 1) {\n"
-						+ "\t\t\t\tif(ponline(@args[0])) {\n"
-						+ "\t\t\t\t\tbroadcast(colorize('&4'.@sender.' &6hugs &4'.@args[0]));\n"
-						+ "\t\t\t\t} else {\n"
-						+ "\t\t\t\t\ttmsg(@sender, colorize('&cThe given player is not online.'));\n"
-						+ "\t\t\t\t}\n"
-						+ "\t\t\t\treturn(true);\n"
-						+ "\t\t\t}\n"
-						+ "\t\t\treturn(false);\n"
-						+ "\t\t}\n"
-						+ "));",
-						"Registers the /hug command.")
+				"register_command('hug', array(\n"
+				+ "\t'description': 'Spread the love!',\n"
+				+ "\t'usage': '/hug <player>',\n"
+				+ "\t'permission': 'perms.hugs',\n"
+				+ "\t'noPermMsg': 'You do not have permission to give hugs to players (Sorry :o).',\n"
+				+ "\t'tabcompleter': closure(@alias, @sender, @args) {\n"
+				+ "\t\t\tif(array_size(@args) == 0) {\n"
+				+ "\t\t\t\treturn(all_players());\n"
+				+ "\t\t\t}\n"
+				+ "\t\t\t@search = @args[array_size(@args) - 1];\n"
+				+ "\t\t\treturn(array_filter(all_players(), closure(@index, @player) {\n"
+				+ "\t\t\t\treturn(equals_ic(@search, substr(@player, 0, length(@search))));\n"
+				+ "\t\t\t}));\n"
+				+ "\t\t},\n"
+				+ "\t'aliases':array('hugg', 'hugs'),\n"
+				+ "\t'executor': closure(@alias, @sender, @args) {\n"
+				+ "\t\t\tif(array_size(@args) == 1) {\n"
+				+ "\t\t\t\tif(ponline(@args[0])) {\n"
+				+ "\t\t\t\t\tbroadcast(colorize('&4'.@sender.' &6hugs &4'.@args[0]));\n"
+				+ "\t\t\t\t} else {\n"
+				+ "\t\t\t\t\ttmsg(@sender, colorize('&cThe given player is not online.'));\n"
+				+ "\t\t\t\t}\n"
+				+ "\t\t\t\treturn(true);\n"
+				+ "\t\t\t}\n"
+				+ "\t\t\treturn(false);\n"
+				+ "\t\t}\n"
+				+ "));",
+				"Registers the /hug command.")
 			};
 		}
 	}
@@ -342,6 +343,7 @@ public class Commands {
 
 		/**
 		 * For setting the execution code of a command that exists but might not be registered yet
+		 *
 		 * @param t
 		 * @param environment
 		 * @param cmd
@@ -406,7 +408,7 @@ public class Commands {
 			}
 			Collection<MCCommand> commands = map.getCommands();
 			CArray ret = CArray.GetAssociativeArray(t);
-			for(MCCommand command : commands) {
+			for (MCCommand command : commands) {
 				CArray ca = CArray.GetAssociativeArray(t);
 				ca.set("name", new CString(command.getName(), t), t);
 				ca.set("description", new CString(command.getDescription(), t), t);
@@ -468,7 +470,6 @@ public class Commands {
 		public Boolean runAsync() {
 			return false;
 		}
-
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {

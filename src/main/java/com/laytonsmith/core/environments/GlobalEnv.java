@@ -27,8 +27,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
- * A global environment is always available at runtime, and contains the objects that the
- * core functionality uses.
+ * A global environment is always available at runtime, and contains the objects that the core functionality uses.
  */
 public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
@@ -40,7 +39,6 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	//Anything else varies based on the particular needs of
 	//that field. Note that lists, maps, and other reference based objects don't
 	//need to use MutableObjects, as they are inherently Mutable themselves.
-
 	private ExecutionQueue executionQueue = null;
 	private Profiler profiler = null;
 	//This is changed reflectively in a test, please don't rename.
@@ -64,6 +62,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
 	/**
 	 * Creates a new GlobalEnvironment. All fields in the constructor are required, and cannot be null.
+	 *
 	 * @param queue The ExecutionQueue object to use
 	 * @param profiler The Profiler to use
 	 * @param network The pre-configured PersistenecNetwork object to use
@@ -72,7 +71,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @param taskManager The TaskManager object to use
 	 */
 	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistenceNetwork network,
-					 File root, Profiles profiles, TaskManager taskManager) {
+			File root, Profiles profiles, TaskManager taskManager) {
 		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
 		Static.AssertNonNull(profiler, "Profiler cannot be null");
 		Static.AssertNonNull(network, "PersistenceNetwork cannot be null");
@@ -101,7 +100,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		return persistenceNetwork;
 	}
 
-	public TaskManager GetTaskManager(){
+	public TaskManager GetTaskManager() {
 		return taskManager.getObject();
 	}
 
@@ -130,8 +129,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	/**
-	 * Clears the value of a flag from the flag list, causing further calls to
-	 * GetFlag(name) to return null.
+	 * Clears the value of a flag from the flag list, causing further calls to GetFlag(name) to return null.
 	 *
 	 * @param name
 	 */
@@ -148,9 +146,8 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	/**
-	 * Use this if you would like to stick a custom variable in the environment.
-	 * It should be discouraged to use this for more than one shot transfers.
-	 * Typically, an setter and getter should be made to wrap the element.
+	 * Use this if you would like to stick a custom variable in the environment. It should be discouraged to use this
+	 * for more than one shot transfers. Typically, an setter and getter should be made to wrap the element.
 	 *
 	 * @param name
 	 * @param var
@@ -163,8 +160,8 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	/**
-	 * Returns the custom value to which the specified key is mapped, or null if
-	 * this map contains no mapping for the key.
+	 * Returns the custom value to which the specified key is mapped, or null if this map contains no mapping for the
+	 * key.
 	 *
 	 * @param name
 	 * @return
@@ -186,29 +183,31 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		}
 		if (cloneVars && iVariableList != null) {
 			clone.iVariableList = (IVariableList) iVariableList.clone();
-		} else if(!cloneVars){
+		} else if (!cloneVars) {
 			clone.iVariableList = new IVariableList();
 		}
 		return clone;
 	}
 
 	private boolean cloneVars = true;
+
 	/**
-	 * Determines whether or not, when cloning this environment, the variable list should be cloned
-	 * as well.
+	 * Determines whether or not, when cloning this environment, the variable list should be cloned as well.
+	 *
 	 * @param set
 	 */
-	public void setCloneVars(boolean set){
+	public void setCloneVars(boolean set) {
 		this.cloneVars = set;
 	}
 
-	public boolean getCloneVars(){
+	public boolean getCloneVars() {
 		return this.cloneVars;
 	}
 
 	/**
-	 * Gets the current working directory. It is guaranteed that this will be
-	 * a folder, not a file, and that it will not be null.
+	 * Gets the current working directory. It is guaranteed that this will be a folder, not a file, and that it will not
+	 * be null.
+	 *
 	 * @return
 	 */
 	public File GetRootFolder() {
@@ -216,15 +215,15 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	/**
-	 * Sets the root working directory. It cannot be null, or a file, it
-	 * must be a directory.
+	 * Sets the root working directory. It cannot be null, or a file, it must be a directory.
+	 *
 	 * @param file
 	 * @throws NullPointerException If file is null
 	 * @throws IllegalArgumentException If the file specified is not a directory.
 	 */
-	public void SetRootFolder(File file){
+	public void SetRootFolder(File file) {
 		Static.AssertNonNull(file, "Root file cannot be null");
-		if(file.isFile()){
+		if (file.isFile()) {
 			throw new IllegalArgumentException("File provided to SetRootFolder must be a folder, not a file. (" + file.toString() + " was found.)");
 		}
 		this.root.setObject(file);
@@ -239,9 +238,8 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	/**
-	 * Returns the Map of known procedures in this environment. If the list of
-	 * procedures is currently empty, a new one is created and stored in the
-	 * environment.
+	 * Returns the Map of known procedures in this environment. If the list of procedures is currently empty, a new one
+	 * is created and stored in the environment.
 	 *
 	 * @return
 	 */
@@ -257,9 +255,8 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	/**
-	 * This function will return the variable list in this environment. If the
-	 * environment doesn't contain a variable list, an empty one is created, and
-	 * stored in the environment.
+	 * This function will return the variable list in this environment. If the environment doesn't contain a variable
+	 * list, an empty one is created, and stored in the environment.
 	 *
 	 * @return
 	 */
@@ -282,27 +279,27 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		this.label = label;
 	}
 
-	public DaemonManager GetDaemonManager(){
+	public DaemonManager GetDaemonManager() {
 		return daemonManager;
 	}
 
 	/**
-	 * Turns dynamic scripting mode on or off. If this is true, that means
-	 * that the script came from a dynamic source, such as eval, or other sources
-	 * other than the file system.
+	 * Turns dynamic scripting mode on or off. If this is true, that means that the script came from a dynamic source,
+	 * such as eval, or other sources other than the file system.
+	 *
 	 * @param dynamicScriptingMode
 	 */
-	public void SetDynamicScriptingMode(boolean dynamicScriptingMode){
+	public void SetDynamicScriptingMode(boolean dynamicScriptingMode) {
 		this.dynamicScriptingMode = dynamicScriptingMode;
 	}
 
 	/**
-	 * Returns whether or not dynamic script mode is on or off. If this is true, that means
-	 * that the script came from a dynamic source, such as eval, or other sources
-	 * other than the file system.
+	 * Returns whether or not dynamic script mode is on or off. If this is true, that means that the script came from a
+	 * dynamic source, such as eval, or other sources other than the file system.
+	 *
 	 * @return
 	 */
-	public boolean GetDynamicScriptingMode(){
+	public boolean GetDynamicScriptingMode() {
 		return this.dynamicScriptingMode;
 	}
 
@@ -310,53 +307,58 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		return this.profiles;
 	}
 
-	public void SetEvent(BoundEvent.ActiveEvent e){
-        event = e;
-    }
+	public void SetEvent(BoundEvent.ActiveEvent e) {
+		event = e;
+	}
 
-    /**
-     * Returns the active event, or null if not in scope.
-     * @return
-     */
-    public BoundEvent.ActiveEvent GetEvent(){
-        return event;
-    }
+	/**
+	 * Returns the active event, or null if not in scope.
+	 *
+	 * @return
+	 */
+	public BoundEvent.ActiveEvent GetEvent() {
+		return event;
+	}
 
 	/**
 	 * Sets the interrupted flag. Interrupted scripts should halt immediately.
+	 *
 	 * @param interrupted
 	 */
-	public synchronized void SetInterrupt(boolean interrupted){
+	public synchronized void SetInterrupt(boolean interrupted) {
 		interrupt = interrupted;
 	}
 
 	/**
 	 * Returns true if this script has been interrupted, and should immediately halt execution.
+	 *
 	 * @return
 	 */
-	public synchronized boolean IsInterrupted(){
+	public synchronized boolean IsInterrupted() {
 		return interrupt;
 	}
 
 	/**
-	 * Returns the array access list. Note that the returned array is threadsafe,
-	 * though iteration over the list requires manual synchronization on the list.
+	 * Returns the array access list. Note that the returned array is threadsafe, though iteration over the list
+	 * requires manual synchronization on the list.
+	 *
 	 * @return
 	 */
-	public List<ArrayAccess.ArrayAccessIterator> GetArrayAccessIterators(){
+	public List<ArrayAccess.ArrayAccessIterator> GetArrayAccessIterators() {
 		return arrayAccessList;
 	}
 
 	/**
 	 * Returns a list of all ArrayAccessIterators for the specified array.
+	 *
 	 * @param array
 	 * @return
 	 */
-	public List<ArrayAccess.ArrayAccessIterator> GetArrayAccessIteratorsFor(ArrayAccess array){
+	public List<ArrayAccess.ArrayAccessIterator> GetArrayAccessIteratorsFor(ArrayAccess array) {
 		List<ArrayAccess.ArrayAccessIterator> list = new ArrayList<>();
-		synchronized(arrayAccessList){
-			for(ArrayAccess.ArrayAccessIterator value : arrayAccessList){
-				if(value.underlyingArray() == array){
+		synchronized (arrayAccessList) {
+			for (ArrayAccess.ArrayAccessIterator value : arrayAccessList) {
+				if (value.underlyingArray() == array) {
 					list.add(value);
 				}
 			}
@@ -366,12 +368,13 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
 	/**
 	 * Returns the StacKTraceManager for the currently running thread.
+	 *
 	 * @return
 	 */
-	public StackTraceManager GetStackTraceManager(){
+	public StackTraceManager GetStackTraceManager() {
 		Thread currentThread = Thread.currentThread();
-		synchronized(stackTraceManagers) {
-			if(!stackTraceManagers.containsKey(currentThread)){
+		synchronized (stackTraceManagers) {
+			if (!stackTraceManagers.containsKey(currentThread)) {
 				StackTraceManager manager = new StackTraceManager();
 				stackTraceManagers.put(currentThread, manager);
 				return manager;

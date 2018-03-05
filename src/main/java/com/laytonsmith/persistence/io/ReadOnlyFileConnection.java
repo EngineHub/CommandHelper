@@ -7,10 +7,11 @@ import java.net.URI;
 
 /**
  *
- * 
+ *
  */
-public class ReadOnlyFileConnection extends ReadWriteFileConnection{
-	public ReadOnlyFileConnection(URI uri, File workingDirectory, String blankDataModel) throws IOException{
+public class ReadOnlyFileConnection extends ReadWriteFileConnection {
+
+	public ReadOnlyFileConnection(URI uri, File workingDirectory, String blankDataModel) throws IOException {
 		super(uri, workingDirectory, blankDataModel);
 	}
 

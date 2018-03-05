@@ -12,34 +12,34 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("NotFoundException")
 public class CRENotFoundException extends CREException {
 
-    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final CClassType TYPE = CClassType.get("NotFoundException");
+	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
+	public static final CClassType TYPE = CClassType.get("NotFoundException");
 
-    public CRENotFoundException(String msg, Target t) {
-	super(msg, t);
-    }
+	public CRENotFoundException(String msg, Target t) {
+		super(msg, t);
+	}
 
-    public CRENotFoundException(String msg, Target t, Throwable cause) {
-	super(msg, t, cause);
-    }
+	public CRENotFoundException(String msg, Target t, Throwable cause) {
+		super(msg, t, cause);
+	}
 
-    @Override
-    public String docs() {
-	return "Thrown if data was not found, but expected.";
-    }
+	@Override
+	public String docs() {
+		return "Thrown if data was not found, but expected.";
+	}
 
-    @Override
-    public Version since() {
-	return CHVersion.V3_3_1;
-    }
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	return super.getSuperclasses();
-    }
+	@Override
+	public CClassType[] getSuperclasses() {
+		return super.getSuperclasses();
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	return super.getInterfaces();
-    }
+	@Override
+	public CClassType[] getInterfaces() {
+		return super.getInterfaces();
+	}
 }

@@ -10,25 +10,25 @@ import java.io.InputStream;
  */
 class RemoteDeploymentMethod implements DeploymentMethod {
 
-    String remote;
+	String remote;
 
-    public RemoteDeploymentMethod(String remote) {
-	this.remote = remote;
-    }
+	public RemoteDeploymentMethod(String remote) {
+		this.remote = remote;
+	}
 
-    @Override
-    public boolean deploy(InputStream data, String toLocation) throws IOException {
-	return SSHWrapper.SCPWrite(data, remote + toLocation);
-    }
+	@Override
+	public boolean deploy(InputStream data, String toLocation) throws IOException {
+		return SSHWrapper.SCPWrite(data, remote + toLocation);
+	}
 
-    @Override
-    public void finish() {
-	SSHWrapper.closeSessions();
-    }
+	@Override
+	public void finish() {
+		SSHWrapper.closeSessions();
+	}
 
-    @Override
-    public String getID() {
-	return remote;
-    }
+	@Override
+	public String getID() {
+		return remote;
+	}
 
 }

@@ -11,33 +11,34 @@ import org.bukkit.plugin.PluginManager;
 public class BukkitMCPluginManager implements MCPluginManager {
 
 	PluginManager p;
+
 	public BukkitMCPluginManager(PluginManager pluginManager) {
 		this.p = pluginManager;
 	}
 
-	public BukkitMCPluginManager(AbstractionObject a){
-		this((PluginManager)null);
-		if(a instanceof MCPluginManager){
-			this.p = ((PluginManager)a.getHandle());
+	public BukkitMCPluginManager(AbstractionObject a) {
+		this((PluginManager) null);
+		if (a instanceof MCPluginManager) {
+			this.p = ((PluginManager) a.getHandle());
 		} else {
 			throw new ClassCastException();
 		}
 	}
 
 	@Override
-	public Object getHandle(){
+	public Object getHandle() {
 		return p;
 	}
 
 	@Override
 	public MCPlugin getPlugin(String name) {
-		if(p.getPlugin(name) == null){
+		if (p.getPlugin(name) == null) {
 			return null;
 		}
 		return new BukkitMCPlugin(p.getPlugin(name));
 	}
 
-	public PluginManager __PluginManager(){
+	public PluginManager __PluginManager() {
 		return p;
 	}
 

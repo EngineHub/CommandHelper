@@ -8,15 +8,16 @@ import org.bukkit.inventory.PlayerInventory;
 public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlayerInventory {
 
 	private PlayerInventory i;
+
 	public BukkitMCPlayerInventory(PlayerInventory inventory) {
 		super(inventory);
 		this.i = inventory;
 	}
 
-	public BukkitMCPlayerInventory(AbstractionObject a){
-		this((PlayerInventory)null);
-		if(a instanceof MCPlayerInventory){
-			this.i = ((PlayerInventory)a.getHandle());
+	public BukkitMCPlayerInventory(AbstractionObject a) {
+		this((PlayerInventory) null);
+		if (a instanceof MCPlayerInventory) {
+			this.i = ((PlayerInventory) a.getHandle());
 		} else {
 			throw new ClassCastException();
 		}
@@ -24,29 +25,29 @@ public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlay
 
 	@Override
 	public void setHelmet(MCItemStack stack) {
-		this.i.setHelmet(((BukkitMCItemStack)stack).__ItemStack());
+		this.i.setHelmet(((BukkitMCItemStack) stack).__ItemStack());
 	}
 
 	@Override
 	public void setChestplate(MCItemStack stack) {
-		this.i.setChestplate(((BukkitMCItemStack)stack).__ItemStack());
+		this.i.setChestplate(((BukkitMCItemStack) stack).__ItemStack());
 	}
 
 	@Override
 	public void setLeggings(MCItemStack stack) {
-		this.i.setLeggings(((BukkitMCItemStack)stack).__ItemStack());
+		this.i.setLeggings(((BukkitMCItemStack) stack).__ItemStack());
 	}
 
 	@Override
 	public void setBoots(MCItemStack stack) {
-		this.i.setBoots(((BukkitMCItemStack)stack).__ItemStack());
+		this.i.setBoots(((BukkitMCItemStack) stack).__ItemStack());
 	}
 
 	@Override
 	public void setItemInOffHand(MCItemStack stack) {
 		try {
 			this.i.setItemInOffHand(((BukkitMCItemStack) stack).__ItemStack());
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// probably before 1.9
 		}
 	}

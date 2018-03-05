@@ -7,6 +7,7 @@ import org.bukkit.inventory.meta.MapMeta;
 public class BukkitMCMapMeta extends BukkitMCItemMeta implements MCMapMeta {
 
 	MapMeta mm;
+
 	public BukkitMCMapMeta(MapMeta im) {
 		super(im);
 		mm = im;
@@ -14,7 +15,7 @@ public class BukkitMCMapMeta extends BukkitMCItemMeta implements MCMapMeta {
 
 	@Override
 	public MCColor getColor() {
-		if(mm.hasColor()) {
+		if (mm.hasColor()) {
 			return BukkitMCColor.GetMCColor(mm.getColor());
 		}
 		return null;

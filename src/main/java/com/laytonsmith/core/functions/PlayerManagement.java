@@ -254,7 +254,7 @@ public class PlayerManagement {
 					throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 				}
 				for (MCPlayer player : world.getPlayers()) {
-					if(player.isOnline()){
+					if (player.isOnline()) {
 						players.push(new CString(player.getName(), t), t);
 					}
 				}
@@ -467,7 +467,7 @@ public class PlayerManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CRELengthException.class, CREPlayerOfflineException.class,
-					CREFormatException.class, CREInvalidWorldException.class};
+				CREFormatException.class, CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -489,13 +489,13 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l;
-			if (args.length <= 2){
-				if(!(args[args.length - 1] instanceof CArray)){
+			if (args.length <= 2) {
+				if (!(args[args.length - 1] instanceof CArray)) {
 					throw new CRECastException("Expecting an array at parameter " + args.length + " of set_ploc", t);
 				}
 				CArray ca = (CArray) args[args.length - 1];
 
-				if(args.length == 2){
+				if (args.length == 2) {
 					p = Static.GetPlayer(args[0], t);
 				} else {
 					Static.AssertPlayerNonNull(p, t);
@@ -505,19 +505,19 @@ public class PlayerManagement {
 
 				// set yaw/pitch to current player values if not given
 				MCLocation ploc = p.getLocation();
-				if(ca.isAssociative()){
-					if(!(ca.containsKey("yaw"))){
+				if (ca.isAssociative()) {
+					if (!(ca.containsKey("yaw"))) {
 						l.setYaw(ploc.getYaw());
 					}
-					if(!(ca.containsKey("pitch"))){
+					if (!(ca.containsKey("pitch"))) {
 						l.setPitch(ploc.getPitch());
 					}
-				} else if(ca.size() < 5){
+				} else if (ca.size() < 5) {
 					l.setYaw(ploc.getYaw());
 					l.setPitch(ploc.getPitch());
 				}
 			} else {
-				if(args.length == 4){
+				if (args.length == 4) {
 					p = Static.GetPlayer(args[0], t);
 				} else {
 					Static.AssertPlayerNonNull(p, t);
@@ -529,7 +529,7 @@ public class PlayerManagement {
 				float yaw = 0;
 				float pitch = 0;
 				MCLocation ploc = p.getLocation();
-				if(ploc != null){
+				if (ploc != null) {
 					yaw = ploc.getYaw();
 					pitch = ploc.getPitch();
 				}
@@ -566,7 +566,7 @@ public class PlayerManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREPlayerOfflineException.class, CRERangeException.class,
-					CREFormatException.class, CRECastException.class, CREPluginInternalException.class};
+				CREFormatException.class, CRECastException.class, CREPluginInternalException.class};
 		}
 
 		@Override
@@ -584,10 +584,10 @@ public class PlayerManagement {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			HashSet<Short> trans = null;
 			if (args.length == 1) {
-				if(args[0] instanceof CArray) {
+				if (args[0] instanceof CArray) {
 					CArray ta = (CArray) args[0];
 					trans = new HashSet<Short>();
-					for (int i=0; i < ta.size(); i++) {
+					for (int i = 0; i < ta.size(); i++) {
 						trans.add(Static.getInt16(ta.get(i, t), t));
 					}
 				} else {
@@ -595,10 +595,10 @@ public class PlayerManagement {
 				}
 			} else if (args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
-				if(args[1] instanceof CArray) {
+				if (args[1] instanceof CArray) {
 					CArray ta = (CArray) args[1];
 					trans = new HashSet<Short>();
-					for (int i=0; i < ta.size(); i++) {
+					for (int i = 0; i < ta.size(); i++) {
 						trans.add(Static.getInt16(ta.get(i, t), t));
 					}
 				} else {
@@ -628,18 +628,18 @@ public class PlayerManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Demonstrates finding a non-air block",
-							"msg(pcursor())",
-							"{0: -127, 1: 75, 2: 798, 3: world, x: -127, y: 75, z: 798, world: world}"),
-					new ExampleScript("Demonstrates looking above the skyline",
-							"msg(pcursor())",
-							"(Throws RangeException: No block in sight, or block too far)"),
-					new ExampleScript("Demonstrates getting your target while ignoring torches and bedrock",
-							"msg(pcursor(array(50, 7)))",
-							"{0: -127, 1: 75, 2: 798, 3: world, x: -127, y: 75, z: 798, world: world}"),
-					new ExampleScript("Demonstrates getting Notch's target while ignoring air, water, and lava",
-							"msg(pcursor('Notch', array(0, 8, 9, 10, 11)))",
-							"{0: -127, 1: 75, 2: 798, 3: world, x: -127, y: 75, z: 798, world: world}")
+				new ExampleScript("Demonstrates finding a non-air block",
+				"msg(pcursor())",
+				"{0: -127, 1: 75, 2: 798, 3: world, x: -127, y: 75, z: 798, world: world}"),
+				new ExampleScript("Demonstrates looking above the skyline",
+				"msg(pcursor())",
+				"(Throws RangeException: No block in sight, or block too far)"),
+				new ExampleScript("Demonstrates getting your target while ignoring torches and bedrock",
+				"msg(pcursor(array(50, 7)))",
+				"{0: -127, 1: 75, 2: 798, 3: world, x: -127, y: 75, z: 798, world: world}"),
+				new ExampleScript("Demonstrates getting Notch's target while ignoring air, water, and lava",
+				"msg(pcursor('Notch', array(0, 8, 9, 10, 11)))",
+				"{0: -127, 1: 75, 2: 798, 3: world, x: -127, y: 75, z: 798, world: world}")
 			};
 		}
 	}
@@ -665,12 +665,12 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(args.length > 0){
+			if (args.length > 0) {
 				p = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCBlock b = p.getTargetSpace(512);
-			if(b == null) {
+			if (b == null) {
 				throw new CRERangeException("No block in sight, or block too far", t);
 			}
 			return ObjectGenerator.GetGenerator().location(b.getLocation(), false);
@@ -1001,7 +1001,7 @@ public class PlayerManagement {
 			if (index == 19 || index == -1) {
 				retVals.add(CBoolean.get(p.isSprinting()));
 			}
-			if(index == 20 || index == -1){
+			if (index == 20 || index == -1) {
 				retVals.add(new CString(p.getUniqueId().toString(), t));
 			}
 			if (retVals.size() == 1) {
@@ -1367,7 +1367,7 @@ public class PlayerManagement {
 				if (l != null) {
 					// guarantee yaw in the 0 - 359.9~ range
 					float yaw = l.getYaw() % 360.0f;
-					if(yaw < 0.0f) {
+					if (yaw < 0.0f) {
 						yaw += 360.0f;
 					}
 					float pitch = l.getPitch();
@@ -1436,11 +1436,11 @@ public class PlayerManagement {
 			l.setPitch(pitch);
 			l.setYaw(yaw);
 			MCEntity vehicle = null;
-			if(toSet.isInsideVehicle()) {
+			if (toSet.isInsideVehicle()) {
 				vehicle = toSet.getVehicle();
 			}
 			toSet.teleport(l);
-			if(vehicle != null) {
+			if (vehicle != null) {
 				vehicle.setPassenger(toSet);
 			}
 			return CVoid.VOID;
@@ -1468,7 +1468,7 @@ public class PlayerManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREPlayerOfflineException.class,
-					CRENotFoundException.class};
+				CRENotFoundException.class};
 		}
 
 		@Override
@@ -1680,7 +1680,7 @@ public class PlayerManagement {
 				xp = Static.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			if(xp < 0 || xp > 100) {
+			if (xp < 0 || xp > 100) {
 				throw new CRERangeException("Experience percentage must be from 0 to 100.", t);
 			}
 			m.setExp(((float) xp) / 100.0F);
@@ -1933,7 +1933,7 @@ public class PlayerManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREPlayerOfflineException.class,
-					CRERangeException.class};
+				CRERangeException.class};
 		}
 
 		@Override
@@ -1965,7 +1965,7 @@ public class PlayerManagement {
 			} else {
 				xp = Static.getInt32(args[0], t);
 			}
-			if(xp < 0) {
+			if (xp < 0) {
 				throw new CRERangeException("Experience can't be negative", t);
 			}
 			Static.AssertPlayerNonNull(m, t);
@@ -2119,7 +2119,7 @@ public class PlayerManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREPlayerOfflineException.class, CRECastException.class,
-						CRERangeException.class};
+				CRERangeException.class};
 		}
 
 		@Override
@@ -2155,9 +2155,9 @@ public class PlayerManagement {
 			boolean particles = true;
 			if (args.length >= 4) {
 				seconds = Static.getDouble(args[3], t);
-				if(seconds < 0.0) {
+				if (seconds < 0.0) {
 					throw new CRERangeException("Seconds cannot be less than 0.0", t);
-				} else if(seconds * 20 > Integer.MAX_VALUE) {
+				} else if (seconds * 20 > Integer.MAX_VALUE) {
 					throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
 				}
 			}
@@ -2171,7 +2171,7 @@ public class PlayerManagement {
 			if (seconds == 0.0) {
 				return CBoolean.get(m.removeEffect(effect));
 			} else {
-				m.addEffect(effect, strength, (int)(seconds * 20), ambient, particles, t);
+				m.addEffect(effect, strength, (int) (seconds * 20), ambient, particles, t);
 				return CBoolean.TRUE;
 			}
 		}
@@ -2180,14 +2180,14 @@ public class PlayerManagement {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Give player Notch nausea for 30 seconds",
-						"set_peffect('Notch', 9, 30)",
-						"The player will experience a wobbly screen."),
+				"set_peffect('Notch', 9, 30)",
+				"The player will experience a wobbly screen."),
 				new ExampleScript("Make player ArenaPlayer unable to jump for 10 minutes",
-						"set_peffect('ArenaPlayer', 8, -16, 600)",
-						"From the player's perspective, they will not even leave the ground."),
+				"set_peffect('ArenaPlayer', 8, -16, 600)",
+				"From the player's perspective, they will not even leave the ground."),
 				new ExampleScript("Remove poison from yourself",
-						"set_peffect(player(), 19, 1, 0)",
-						"You are now unpoisoned. Note, it does not matter what you set strength to here.")
+				"set_peffect(player(), 19, 1, 0)",
+				"You are now unpoisoned. Note, it does not matter what you set strength to here.")
 			};
 		}
 	}
@@ -2737,7 +2737,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String target = args[0].val();
 			boolean ban = Static.getBoolean(args[1]);
-			if(target.length() > 16) {
+			if (target.length() > 16) {
 				MCOfflinePlayer pl = Static.GetUser(target, t);
 				if (pl == null) {
 					throw new CRENotFoundException(
@@ -2748,7 +2748,7 @@ public class PlayerManagement {
 					throw new CRENotFoundException(this.getName() + " could not get offline player's name", t);
 				}
 			}
-			if(ban) {
+			if (ban) {
 				Static.getServer().banName(target);
 			} else {
 				Static.getServer().unbanName(target);
@@ -2811,7 +2811,7 @@ public class PlayerManagement {
 				speed = Static.getDouble(args[0], t);
 			}
 
-			if(speed < -1 || speed > 1) {
+			if (speed < -1 || speed > 1) {
 				throw new CRERangeException("Speed must be between -1 and 1", t);
 			}
 			Static.AssertPlayerNonNull(m, t);
@@ -2932,7 +2932,7 @@ public class PlayerManagement {
 				speed = Static.getDouble(args[0], t);
 			}
 
-			if(speed < -1 || speed > 1) {
+			if (speed < -1 || speed > 1) {
 				throw new CRERangeException("Speed must be between -1 and 1", t);
 			}
 			Static.AssertPlayerNonNull(m, t);
@@ -3625,7 +3625,7 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(args.length == 1) {
+			if (args.length == 1) {
 				m = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
@@ -3681,9 +3681,9 @@ public class PlayerManagement {
 				offset = 1;
 			}
 			Static.AssertPlayerNonNull(m, t);
-			if(args[offset] instanceof CNull) {
+			if (args[offset] instanceof CNull) {
 				m.resetPlayerWeather();
-			} else if(Static.getBoolean(args[offset])) {
+			} else if (Static.getBoolean(args[offset])) {
 				m.setPlayerWeather(MCWeather.DOWNFALL);
 			} else {
 				m.setPlayerWeather(MCWeather.CLEAR);
@@ -3720,7 +3720,7 @@ public class PlayerManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREPlayerOfflineException.class,
-					CRELengthException.class, CREIllegalArgumentException.class};
+				CRELengthException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -3747,8 +3747,8 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(m, t);
 			try {
 				m.setPlayerListName(listName);
-			} catch(IllegalArgumentException e) {
-				if(listName.length() > 16) {
+			} catch (IllegalArgumentException e) {
+				if (listName.length() > 16) {
 					throw new CRELengthException("set_list_name([player,] name)"
 							+ " expects name to be 16 characters or less for MineCraft versions prior to 1.8.", t);
 				} else {
@@ -3961,7 +3961,7 @@ public class PlayerManagement {
 			if (v.length() > 10) {
 				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING,
 						"The call to " + getName() + " has been cancelled, because the magnitude was greater than 10."
-								+ " (It was " + v.length() + ")", t);
+						+ " (It was " + v.length() + ")", t);
 				return CBoolean.FALSE;
 			}
 			Static.AssertPlayerNonNull(p, t);
@@ -4026,10 +4026,10 @@ public class PlayerManagement {
 
 			String[] lines = new String[4];
 
-			if(args.length == 2 || args.length == 3) {
+			if (args.length == 2 || args.length == 3) {
 				//Lines are in an array
 				CArray lineArray = Static.getArray(args[1 + offset], t);
-				if(lineArray.size() != 4) {
+				if (lineArray.size() != 4) {
 					throw new CRECastException("Line array must have 4 elements.", t);
 				}
 				lines[0] = lineArray.get(0, t).val();
@@ -4061,7 +4061,7 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "void {[player], locationArray, 1, 2, 3, 4 | [player], locationArray, lineArray} Changes a signs' text, but only temporarily, and only for the specified player."
-				   + " This can be used to \"fake\" sign text for a player. LineArray, if used, must have 4 elements.";
+					+ " This can be used to \"fake\" sign text for a player. LineArray, if used, must have 4 elements.";
 		}
 
 		@Override
@@ -4415,8 +4415,8 @@ public class PlayerManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CRELengthException.class,
-					CREPlayerOfflineException.class, CREFormatException.class,
-					CRENullPointerException.class};
+				CREPlayerOfflineException.class, CREFormatException.class,
+				CRENullPointerException.class};
 		}
 
 		@Override
@@ -4500,7 +4500,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(m, t);
 
-			if(args[locationIndex] instanceof CArray) {
+			if (args[locationIndex] instanceof CArray) {
 				CArray ca = (CArray) args[locationIndex];
 				l = ObjectGenerator.GetGenerator().location(ca, m.getWorld(), t);
 				l.add(0, 1, 0); // someone decided to match ploc() here
@@ -4520,7 +4520,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pvehicle extends AbstractFunction {
 
 		@Override
@@ -4536,7 +4536,7 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "mixed {[player]} Returns ID of vehicle which player is in or null if player is outside the vehicle";
-			}
+		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -4574,7 +4574,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pvehicle_leave extends AbstractFunction {
 
 		@Override
@@ -4595,7 +4595,7 @@ public class PlayerManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREPlayerOfflineException.class};
-	}
+		}
 
 		@Override
 		public boolean isRestricted() {
@@ -4624,7 +4624,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_offline_players extends AbstractFunction {
 
 		@Override
@@ -4677,13 +4677,13 @@ public class PlayerManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Simple usage", "get_offline_players()", "{Bill, Bob, Joe, Fred}")
+				new ExampleScript("Simple usage", "get_offline_players()", "{Bill, Bob, Joe, Fred}")
 			};
 		}
 
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class phas_played extends AbstractFunction {
 
 		@Override
@@ -4731,14 +4731,14 @@ public class PlayerManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Demonstrates a player that has played", "phas_played('Notch')", ":true"),
-					new ExampleScript("Demonstrates a player that has not played", "phas_played('Herobrine')", ":false")
+				new ExampleScript("Demonstrates a player that has played", "phas_played('Notch')", ":true"),
+				new ExampleScript("Demonstrates a player that has not played", "phas_played('Herobrine')", ":false")
 			};
 		}
 
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pfirst_played extends AbstractFunction {
 
 		@Override
@@ -4776,7 +4776,7 @@ public class PlayerManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{0,1};
+			return new Integer[]{0, 1};
 		}
 
 		@Override
@@ -4794,16 +4794,16 @@ public class PlayerManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Demonstrates a player that has played",
-							"pfirst_played('Notch')", "13558362167593"),
-					new ExampleScript("Demonstrates a player that has not played",
-							"pfirst_played('Herobrine')", "0")
+				new ExampleScript("Demonstrates a player that has played",
+				"pfirst_played('Notch')", "13558362167593"),
+				new ExampleScript("Demonstrates a player that has not played",
+				"pfirst_played('Herobrine')", "0")
 			};
 		}
 
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class plast_played extends AbstractFunction {
 
 		@Override
@@ -4840,7 +4840,7 @@ public class PlayerManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{0,1};
+			return new Integer[]{0, 1};
 		}
 
 		@Override
@@ -4858,10 +4858,10 @@ public class PlayerManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Demonstrates a player that has played",
-							"plast_played('Notch')", "13558362167593"),
-					new ExampleScript("Demonstrates a player that has not played",
-							"plast_played('Herobrine')", "0")
+				new ExampleScript("Demonstrates a player that has played",
+				"plast_played('Notch')", "13558362167593"),
+				new ExampleScript("Demonstrates a player that has not played",
+				"plast_played('Herobrine')", "0")
 			};
 		}
 	}
@@ -4971,6 +4971,7 @@ public class PlayerManagement {
 			return CHVersion.V3_3_1;
 		}
 	}
+
 	@api
 	@seealso({set_pflight.class})
 	public static class set_pflying extends AbstractFunction {
@@ -5017,12 +5018,12 @@ public class PlayerManagement {
 				flight = Static.getBoolean(args[1]);
 			}
 			Static.AssertPlayerNonNull(p, t);
-			if(!p.getAllowFlight()) {
+			if (!p.getAllowFlight()) {
 				throw new CREIllegalArgumentException("Player must have the ability to fly. Set with set_pflight()", t);
 			}
 			// This is needed in order for the player to enter flight mode whilst standing on the ground.
-			if(flight
-			&& p.isOnGround()) {
+			if (flight
+					&& p.isOnGround()) {
 				Vector3D v = p.getVelocity();
 				// 0.08 was chosen as it does not change the player's position, whereas higher values do.
 				Vector3D newV = v.add(new Vector3D(v.X(), v.Y() + 0.08, v.Z()));
@@ -5084,11 +5085,11 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
-			if(p.getGameMode() != MCGameMode.SPECTATOR) {
+			if (p.getGameMode() != MCGameMode.SPECTATOR) {
 				throw new CREIllegalArgumentException("Player must be in spectator mode.", t);
 			}
 			MCEntity e = p.getSpectatorTarget();
-			if(e == null) {
+			if (e == null) {
 				return CNull.NULL;
 			}
 			return new CString(e.getUniqueId().toString(), t);
@@ -5123,7 +5124,7 @@ public class PlayerManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREPlayerOfflineException.class, CREIllegalArgumentException.class,
-					CREBadEntityException.class};
+				CREBadEntityException.class};
 		}
 
 		@Override
@@ -5147,10 +5148,10 @@ public class PlayerManagement {
 				offset = 1;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			if(p.getGameMode() != MCGameMode.SPECTATOR) {
+			if (p.getGameMode() != MCGameMode.SPECTATOR) {
 				throw new CREIllegalArgumentException("Player must be in spectator mode.", t);
 			}
-			if(args[offset] instanceof CNull) {
+			if (args[offset] instanceof CNull) {
 				p.setSpectatorTarget(null);
 			} else {
 				p.setSpectatorTarget(Static.getLivingEntity(args[offset], t));
@@ -5170,8 +5171,8 @@ public class PlayerManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREInvalidWorldException.class,CRELengthException.class, CREFormatException.class,
-					CREPlayerOfflineException.class};
+			return new Class[]{CREInvalidWorldException.class, CRELengthException.class, CREFormatException.class,
+				CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -5197,7 +5198,7 @@ public class PlayerManagement {
 				throw new CREFormatException("Sound name '" + args[1].val() + "' is invalid.", t);
 			}
 
-			if(args.length == 3) {
+			if (args.length == 3) {
 				MCSoundCategory category;
 				try {
 					category = MCSoundCategory.valueOf(args[2].val().toUpperCase());
@@ -5240,8 +5241,8 @@ public class PlayerManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREInvalidWorldException.class,CRELengthException.class, CREFormatException.class,
-					CREPlayerOfflineException.class};
+			return new Class[]{CREInvalidWorldException.class, CRELengthException.class, CREFormatException.class,
+				CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -5260,7 +5261,7 @@ public class PlayerManagement {
 
 			MCPlayer p = Static.GetPlayer(args[0], t);
 			String sound = args[1].val();
-			if(args.length == 3) {
+			if (args.length == 3) {
 				MCSoundCategory category;
 				try {
 					category = MCSoundCategory.valueOf(args[2].val().toUpperCase());
@@ -5319,7 +5320,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			String materialName;
-			if(args.length == 2) {
+			if (args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				materialName = args[1].val();
 			} else {
@@ -5329,7 +5330,7 @@ public class PlayerManagement {
 			}
 
 			MCMaterial mat = StaticLayer.GetMaterial(materialName);
-			if(mat == null){
+			if (mat == null) {
 				throw new CREFormatException("Material name is invalid.", t);
 			}
 
@@ -5366,7 +5367,7 @@ public class PlayerManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRELengthException.class, CREFormatException.class, CREPlayerOfflineException.class,
-					CRERangeException.class, CRECastException.class};
+				CRERangeException.class, CRECastException.class};
 		}
 
 		@Override
@@ -5384,7 +5385,7 @@ public class PlayerManagement {
 			MCPlayer p;
 			String materialName;
 			int cooldown;
-			if(args.length == 3) {
+			if (args.length == 3) {
 				p = Static.GetPlayer(args[0], t);
 				materialName = args[1].val();
 				cooldown = Static.getInt32(args[2], t);
@@ -5396,11 +5397,11 @@ public class PlayerManagement {
 			}
 
 			MCMaterial mat = StaticLayer.GetMaterial(materialName);
-			if(mat == null){
+			if (mat == null) {
 				throw new CREFormatException("Material name is invalid.", t);
 			}
 
-			if(cooldown < 0){
+			if (cooldown < 0) {
 				throw new CRERangeException("Cooldowns cannot be negative.", t);
 			}
 

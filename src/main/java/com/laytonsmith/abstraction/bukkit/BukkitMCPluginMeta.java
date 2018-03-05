@@ -11,7 +11,8 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 public class BukkitMCPluginMeta extends MCPluginMeta implements PluginMessageListener {
 
 	Plugin plugin;
-	public BukkitMCPluginMeta(Plugin plugin){
+
+	public BukkitMCPluginMeta(Plugin plugin) {
 		super();
 		this.plugin = plugin;
 	}
@@ -28,7 +29,7 @@ public class BukkitMCPluginMeta extends MCPluginMeta implements PluginMessageLis
 
 	@Override
 	protected void sendIncomingMessage0(MCPlayer player, String channel, byte[] message) {
-		Player p = ((BukkitMCPlayer)player)._Player();
+		Player p = ((BukkitMCPlayer) player)._Player();
 		Bukkit.getMessenger().dispatchIncomingMessage(p, channel, message);
 	}
 

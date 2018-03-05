@@ -12,6 +12,7 @@ import java.util.logging.Logger;
  * This class wraps a single HTTP cookie.
  */
 public final class Cookie implements Comparable<Cookie> {
+
 	private String name;
 	private String value;
 	private String domain;
@@ -21,11 +22,11 @@ public final class Cookie implements Comparable<Cookie> {
 	private boolean secureOnly = false;
 
 	/**
-	 * Given an unparsed value, this adds a new cookie to this cookie list
-	 * after parsing the string into a proper cookie, and setting the fields
-	 * appropriately.
+	 * Given an unparsed value, this adds a new cookie to this cookie list after parsing the string into a proper
+	 * cookie, and setting the fields appropriately.
+	 *
 	 * @param unparsedValue
-	 * @param currentURL 
+	 * @param currentURL
 	 */
 	public Cookie(String unparsedValue, URL currentURL) {
 		//Split on ;
@@ -75,21 +76,23 @@ public final class Cookie implements Comparable<Cookie> {
 			path = currentURL.getPath();
 		}
 	}
-	
+
 	/**
-	 * Creates a cookie with only the required parameters set. That is, it creates
-	 * a session cookie with httpOnly and secure set to false.
+	 * Creates a cookie with only the required parameters set. That is, it creates a session cookie with httpOnly and
+	 * secure set to false.
+	 *
 	 * @param domain The domain under which this cookie applies
 	 * @param name The name of this cookie
 	 * @param value The value of this cookie
 	 * @param path The path under which this cookie applies in the domain
 	 */
-	public Cookie(String name, String value, String domain, String path){
+	public Cookie(String name, String value, String domain, String path) {
 		this(name, value, domain, path, 0, false, false);
 	}
 
 	/**
 	 * Creates a cookie with all of the various parameters set.
+	 *
 	 * @param domain The domain under which this cookie applies
 	 * @param name The name of this cookie
 	 * @param value The value of this cookie
@@ -115,6 +118,7 @@ public final class Cookie implements Comparable<Cookie> {
 
 	/**
 	 * Returns the domain of this cookie.
+	 *
 	 * @return
 	 */
 	public String getDomain() {
@@ -123,6 +127,7 @@ public final class Cookie implements Comparable<Cookie> {
 
 	/**
 	 * Returns the name of this cookie.
+	 *
 	 * @return
 	 */
 	public String getName() {
@@ -131,6 +136,7 @@ public final class Cookie implements Comparable<Cookie> {
 
 	/**
 	 * Returns the value of this cookie.
+	 *
 	 * @return
 	 */
 	public String getValue() {
@@ -139,6 +145,7 @@ public final class Cookie implements Comparable<Cookie> {
 
 	/**
 	 * Returns the path under which this cookie applies.
+	 *
 	 * @return
 	 */
 	public String getPath() {
@@ -146,8 +153,8 @@ public final class Cookie implements Comparable<Cookie> {
 	}
 
 	/**
-	 * Returns the expiration time of this cookie, in unix time. If the
-	 * expiration is 0, the cookie never expires.
+	 * Returns the expiration time of this cookie, in unix time. If the expiration is 0, the cookie never expires.
+	 *
 	 * @return
 	 */
 	public long getExpiration() {
@@ -156,6 +163,7 @@ public final class Cookie implements Comparable<Cookie> {
 
 	/**
 	 * Returns true if this cookie only applies in http, not https requests.
+	 *
 	 * @return
 	 */
 	public boolean isHttpOnly() {
@@ -164,28 +172,29 @@ public final class Cookie implements Comparable<Cookie> {
 
 	/**
 	 * Returns true if this cookie is only applicable in https, not http requests.
+	 *
 	 * @return
 	 */
 	public boolean isSecureOnly() {
 		return secureOnly;
 	}
-	
-	
+
 	/**
 	 * Returns true if the cookie is currently expired.
-	 * @return 
+	 *
+	 * @return
 	 */
-	public boolean isExpired(){
+	public boolean isExpired() {
 		return isExpired(System.currentTimeMillis());
 	}
-	
+
 	/**
 	 * Returns true if the cookie will be or was expired at the given time.
-	 * @param time The time to check against to determine if the cookie
-	 * will be expired at that time.
-	 * @return 
+	 *
+	 * @param time The time to check against to determine if the cookie will be expired at that time.
+	 * @return
 	 */
-	public boolean isExpired(long time){
+	public boolean isExpired(long time) {
 		return expiration != 0 && expiration < time;
 	}
 

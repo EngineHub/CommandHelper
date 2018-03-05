@@ -8,10 +8,8 @@ import com.laytonsmith.annotations.MEnum;
 @MEnum("InventoryAction")
 public enum MCInventoryAction {
 	/**
-	 * Nothing will happen from the click.
-	 * There may be cases where nothing will happen and this is value is
-	 * not provided, but it is guaranteed that this value is accurate
-	 * when given.
+	 * Nothing will happen from the click. There may be cases where nothing will happen and this is value is not
+	 * provided, but it is guaranteed that this value is accurate when given.
 	 */
 	NOTHING,
 	/**
@@ -35,8 +33,7 @@ public enum MCInventoryAction {
 	 */
 	PLACE_ALL,
 	/**
-	 * Some of the items from the cursor are moved to the clicked slot
-	 * (usually up to the max stack size).
+	 * Some of the items from the cursor are moved to the clicked slot (usually up to the max stack size).
 	 */
 	PLACE_SOME,
 	/**
@@ -68,8 +65,7 @@ public enum MCInventoryAction {
 	 */
 	MOVE_TO_OTHER_INVENTORY,
 	/**
-	 * The clicked item is moved to the hotbar, and the item currently
-	 * there is re-added to the player's inventory.
+	 * The clicked item is moved to the hotbar, and the item currently there is re-added to the player's inventory.
 	 */
 	HOTBAR_MOVE_AND_READD,
 	/**
@@ -81,13 +77,12 @@ public enum MCInventoryAction {
 	 */
 	CLONE_STACK,
 	/**
-	 * The inventory is searched for the same material, and they are put
-	 * on the cursor up to {@link org.bukkit.Material#getMaxStackSize()}.
+	 * The inventory is searched for the same material, and they are put on the cursor up to
+	 * {@link org.bukkit.Material#getMaxStackSize()}.
 	 */
 	COLLECT_TO_CURSOR,
 	/**
 	 * An unrecognized ClickType.
 	 */
-	UNKNOWN,
-	;
+	UNKNOWN,;
 }

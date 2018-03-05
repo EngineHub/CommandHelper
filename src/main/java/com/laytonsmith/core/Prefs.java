@@ -270,7 +270,7 @@ public final class Prefs {
 	public static Boolean ScreamErrors() {
 		return (Boolean) pref(PNames.SCREAM_ERRORS);
 	}
-	
+
 	public static Boolean StrictMode() {
 		return (Boolean) pref(PNames.STRICT_MODE);
 	}

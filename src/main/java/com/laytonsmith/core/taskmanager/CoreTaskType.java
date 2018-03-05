@@ -20,14 +20,13 @@ public enum CoreTaskType implements TaskType {
 			+ " aspects about this task.", CHVersion.V3_3_1),
 	ASYNC_TASK("Async Task", "An async task is some task that various individual functions use to do some processing off of the main"
 			+ " thread. Usually, once the processing is complete, the task will return control to the main thread, and execute"
-			+ " some user defined callback.", CHVersion.V3_3_1),
-	;
+			+ " some user defined callback.", CHVersion.V3_3_1),;
 
 	private final String displayName;
 	private final String docs;
 	private final Version version;
 
-	private CoreTaskType(String displayName, String docs, Version version){
+	private CoreTaskType(String displayName, String docs, Version version) {
 		this.displayName = displayName;
 		this.docs = docs;
 		this.version = version;

@@ -12,10 +12,11 @@ import org.bukkit.Instrument;
 		forConcreteEnum = Instrument.class
 )
 public class BukkitMCInstrument extends EnumConvertor<MCInstrument, Instrument> {
+
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument();
 		}
 		return instance;

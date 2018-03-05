@@ -12,10 +12,11 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 		forConcreteEnum = TeleportCause.class
 )
 public class BukkitMCTeleportCause extends EnumConvertor<MCTeleportCause, TeleportCause> {
+
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause();
 		}
 		return instance;

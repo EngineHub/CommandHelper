@@ -11,6 +11,7 @@ import org.bukkit.inventory.ShapelessRecipe;
 public class BukkitMCShapelessRecipe extends BukkitMCRecipe implements MCShapelessRecipe {
 
 	ShapelessRecipe r;
+
 	public BukkitMCShapelessRecipe(ShapelessRecipe recipe) {
 		super(recipe);
 		r = recipe;
@@ -20,7 +21,7 @@ public class BukkitMCShapelessRecipe extends BukkitMCRecipe implements MCShapele
 	public String getKey() {
 		try {
 			return r.getKey().getKey();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably prior to 1.12
 			return null;
 		}

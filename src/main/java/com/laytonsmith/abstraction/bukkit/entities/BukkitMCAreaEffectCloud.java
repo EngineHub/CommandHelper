@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCColor;
@@ -24,7 +23,7 @@ import org.bukkit.projectiles.ProjectileSource;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEffectCloud{
+public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEffectCloud {
 
 	AreaEffectCloud aec;
 
@@ -39,14 +38,14 @@ public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEff
 	}
 
 	@Override
-	public MCColor getColor(){
+	public MCColor getColor() {
 		return BukkitMCColor.GetMCColor(aec.getColor());
 	}
 
 	@Override
-	public List<MCLivingEntity.MCEffect> getCustomEffects(){
+	public List<MCLivingEntity.MCEffect> getCustomEffects() {
 		List<MCLivingEntity.MCEffect> list = new ArrayList<>();
-		for(PotionEffect pe : aec.getCustomEffects()) {
+		for (PotionEffect pe : aec.getCustomEffects()) {
 			list.add(new MCLivingEntity.MCEffect(pe.getType().getId(), pe.getAmplifier(),
 					pe.getDuration(), pe.isAmbient(), pe.hasParticles()));
 		}
@@ -54,116 +53,116 @@ public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEff
 	}
 
 	@Override
-	public int getDuration(){
+	public int getDuration() {
 		return aec.getDuration();
 	}
 
 	@Override
-	public int getDurationOnUse(){
+	public int getDurationOnUse() {
 		return aec.getDurationOnUse();
 	}
 
 	@Override
-	public MCParticle getParticle(){
+	public MCParticle getParticle() {
 		return BukkitMCParticle.getConvertor().getAbstractedEnum(aec.getParticle());
 	}
 
 	@Override
-	public float getRadius(){
+	public float getRadius() {
 		return aec.getRadius();
 	}
 
 	@Override
-	public float getRadiusOnUse(){
+	public float getRadiusOnUse() {
 		return aec.getRadiusOnUse();
 	}
 
 	@Override
-	public float getRadiusPerTick(){
+	public float getRadiusPerTick() {
 		return aec.getRadiusPerTick();
 	}
 
 	@Override
-	public int getReapplicationDelay(){
+	public int getReapplicationDelay() {
 		return aec.getReapplicationDelay();
 	}
 
 	@Override
 	public MCProjectileSource getSource() {
 		ProjectileSource source = aec.getSource();
-		if(source instanceof BlockProjectileSource) {
+		if (source instanceof BlockProjectileSource) {
 			return new BukkitMCBlockProjectileSource((BlockProjectileSource) source);
 		}
 		return (MCProjectileSource) BukkitConvertor.BukkitGetCorrectEntity((Entity) source);
 	}
 
 	@Override
-	public int getWaitTime(){
+	public int getWaitTime() {
 		return aec.getWaitTime();
 	}
 
 	@Override
-	public void addCustomEffect(MCLivingEntity.MCEffect effect){
+	public void addCustomEffect(MCLivingEntity.MCEffect effect) {
 		PotionEffect pe = new PotionEffect(PotionEffectType.getById(effect.getPotionID()),
 				effect.getTicksRemaining(), effect.getStrength(), effect.isAmbient(), effect.hasParticles());
 		aec.addCustomEffect(pe, true);
 	}
 
 	@Override
-	public void clearCustomEffects(){
+	public void clearCustomEffects() {
 		aec.clearCustomEffects();
 	}
 
 	@Override
-	public void setBasePotionData(MCPotionData pd){
+	public void setBasePotionData(MCPotionData pd) {
 		aec.setBasePotionData((PotionData) pd.getHandle());
 	}
 
 	@Override
-	public void setColor(MCColor color){
+	public void setColor(MCColor color) {
 		aec.setColor(BukkitMCColor.GetColor(color));
 	}
 
 	@Override
-	public void setDuration(int ticks){
+	public void setDuration(int ticks) {
 		aec.setDuration(ticks);
 	}
 
 	@Override
-	public void setDurationOnUse(int ticks){
+	public void setDurationOnUse(int ticks) {
 		aec.setDurationOnUse(ticks);
 	}
 
 	@Override
-	public void setParticle(MCParticle particle){
+	public void setParticle(MCParticle particle) {
 		aec.setParticle(BukkitMCParticle.getConvertor().getConcreteEnum(particle));
 	}
 
 	@Override
-	public void setRadius(float radius){
+	public void setRadius(float radius) {
 		aec.setRadius(radius);
 	}
 
 	@Override
-	public void setRadiusOnUse(float radius){
+	public void setRadiusOnUse(float radius) {
 		aec.setRadiusOnUse(radius);
 	}
 
 	@Override
-	public void setRadiusPerTick(float radius){
+	public void setRadiusPerTick(float radius) {
 		aec.setRadiusPerTick(radius);
 	}
 
 	@Override
-	public void setReapplicationDelay(int ticks){
+	public void setReapplicationDelay(int ticks) {
 		aec.setReapplicationDelay(ticks);
 	}
 
 	@Override
 	public void setSource(MCProjectileSource source) {
-		if(source == null){
+		if (source == null) {
 			aec.setSource(null);
-		} else if(source instanceof MCBlockProjectileSource){
+		} else if (source instanceof MCBlockProjectileSource) {
 			aec.setSource((BlockProjectileSource) source.getHandle());
 		} else {
 			aec.setSource((ProjectileSource) source.getHandle());
@@ -171,7 +170,7 @@ public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEff
 	}
 
 	@Override
-	public void setWaitTime(int ticks){
+	public void setWaitTime(int ticks) {
 		aec.setWaitTime(ticks);
 	}
 

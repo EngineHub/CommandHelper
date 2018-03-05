@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 @MDynamicEnum("EntityType")
-public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MCVanillaEntityType,Concrete> {
+public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MCVanillaEntityType, Concrete> {
 
 	// To be filled by the implementer
 	protected static Map<String, MCEntityType> mappings;
@@ -44,18 +44,18 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	}
 
 	public static MCEntityType valueOf(String test) throws IllegalArgumentException {
-		if(mappings == null) {
+		if (mappings == null) {
 			return null;
 		}
 		MCEntityType ret = mappings.get(test);
-		if(ret == null) {
+		if (ret == null) {
 			throw new IllegalArgumentException("Unknown entity type: " + test);
 		}
 		return ret;
 	}
 
 	public static MCEntityType valueOfVanillaType(MCVanillaEntityType type) {
-		if(vanilla == null) {
+		if (vanilla == null) {
 			return null;
 		}
 		return vanilla.get(type);
@@ -65,9 +65,9 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	 * @return Names of available entity types
 	 */
 	public static Set<String> types() {
-		if(NULL == null) { // docs mode
+		if (NULL == null) { // docs mode
 			Set<String> dummy = new HashSet<>();
-			for(final MCVanillaEntityType t : MCVanillaEntityType.values()) {
+			for (final MCVanillaEntityType t : MCVanillaEntityType.values()) {
 				dummy.add(t.name());
 			}
 			return dummy;
@@ -79,9 +79,9 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	 * @return Our own EntityType list
 	 */
 	public static Collection<MCEntityType> values() {
-		if(NULL == null) { // docs mode
+		if (NULL == null) { // docs mode
 			ArrayList<MCEntityType> dummy = new ArrayList<>();
-			for(final MCVanillaEntityType t : MCVanillaEntityType.values()) {
+			for (final MCVanillaEntityType t : MCVanillaEntityType.values()) {
 				dummy.add(new MCEntityType<Object>(t, null) {
 					@Override
 					public String name() {
@@ -135,9 +135,8 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		EVOKER_FANGS(false, MCVersion.MC1_11),
 		EXPERIENCE_ORB(true),
 		/**
-		 * Spawn with world.spawnFallingBlock()
-		 * I'm not sure what version we switched to FALLING_BLOCK from FALLING_SAND,
-		 * but it was after 1.0
+		 * Spawn with world.spawnFallingBlock() I'm not sure what version we switched to FALLING_BLOCK from
+		 * FALLING_SAND, but it was after 1.0
 		 */
 		FALLING_BLOCK(true),
 		FIREBALL(true),

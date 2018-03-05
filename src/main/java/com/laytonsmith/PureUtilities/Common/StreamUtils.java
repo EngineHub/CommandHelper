@@ -12,14 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Streams are hard sometimes. This class abstracts most of the functionality
- * that is commonly used.
+ * Streams are hard sometimes. This class abstracts most of the functionality that is commonly used.
  *
  */
 public class StreamUtils {
 
 	/**
 	 * Copies from one stream to another
+	 *
 	 * @param out
 	 * @param in
 	 * @throws IOException
@@ -34,14 +34,14 @@ public class StreamUtils {
 	}
 
 	/**
-	 * Given an input stream, a UTF-8 encoded string is returned, which
-	 * is a reasonable assumption for most textual data. This assumes
-	 * that the stream is finite, i.e. not a streaming socket, for instance, and
-	 * reads until the stream reaches the end.
+	 * Given an input stream, a UTF-8 encoded string is returned, which is a reasonable assumption for most textual
+	 * data. This assumes that the stream is finite, i.e. not a streaming socket, for instance, and reads until the
+	 * stream reaches the end.
+	 *
 	 * @param out
 	 * @return
 	 */
-	public static String GetString(InputStream in){
+	public static String GetString(InputStream in) {
 		try {
 			return GetString(in, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
@@ -50,19 +50,19 @@ public class StreamUtils {
 	}
 
 	/**
-	 * Gets a string from an input stream, assuming the given encoding. This assumes
-	 * that the stream is finite, i.e. not a streaming socket, for instance, and
-	 * reads until the stream reaches the end.
+	 * Gets a string from an input stream, assuming the given encoding. This assumes that the stream is finite, i.e. not
+	 * a streaming socket, for instance, and reads until the stream reaches the end.
+	 *
 	 * @param in
 	 * @param encoding
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	public static String GetString(InputStream in, String encoding) throws UnsupportedEncodingException{
-		if(encoding == null){
+	public static String GetString(InputStream in, String encoding) throws UnsupportedEncodingException {
+		if (encoding == null) {
 			encoding = "UTF-8";
 		}
-		if(in == null){
+		if (in == null) {
 			throw new NullPointerException();
 		}
 		InputStreamReader input;
@@ -71,20 +71,21 @@ public class StreamUtils {
 		final char[] buffer = new char[CHARS_PER_PAGE];
 		StringBuilder output = new StringBuilder(CHARS_PER_PAGE);
 		try {
-		    for(int read = input.read(buffer, 0, buffer.length);
-			    read != -1;
-			    read = input.read(buffer, 0, buffer.length)) {
-			output.append(buffer, 0, read);
-		    }
-		} catch (IOException ignore) { }
+			for (int read = input.read(buffer, 0, buffer.length);
+					read != -1;
+					read = input.read(buffer, 0, buffer.length)) {
+				output.append(buffer, 0, read);
+			}
+		} catch (IOException ignore) {
+		}
 
 		return output.toString();
 
 	}
 
 	/**
-	 * Fully reads in a stream, as efficiently as possible, and returns a
-	 * byte array.
+	 * Fully reads in a stream, as efficiently as possible, and returns a byte array.
+	 *
 	 * @param in
 	 * @return
 	 * @throws IOException
@@ -93,19 +94,19 @@ public class StreamUtils {
 		BufferedInputStream bis = new BufferedInputStream(in);
 		List<Byte> bytes = new ArrayList<Byte>();
 		int i;
-		while((i = bis.read()) != -1){
-			bytes.add(((byte)i));
+		while ((i = bis.read()) != -1) {
+			bytes.add(((byte) i));
 		}
 		return ArrayUtils.unbox(bytes.toArray(new Byte[bytes.size()]));
 	}
 
 	/**
-	 * Assuming a UTF-8 encoded string is provided, returns an InputStream
-	 * for that String.
+	 * Assuming a UTF-8 encoded string is provided, returns an InputStream for that String.
+	 *
 	 * @param contents
 	 * @return
 	 */
-	public static InputStream GetInputStream(String contents){
+	public static InputStream GetInputStream(String contents) {
 		try {
 			return GetInputStream(contents, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
@@ -114,23 +115,24 @@ public class StreamUtils {
 	}
 
 	/**
-	 * Returns an InputStream for a given string, using the given
-	 * encoding.
+	 * Returns an InputStream for a given string, using the given encoding.
+	 *
 	 * @param contents
 	 * @param encoding
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	public static InputStream GetInputStream(String contents, String encoding) throws UnsupportedEncodingException{
+	public static InputStream GetInputStream(String contents, String encoding) throws UnsupportedEncodingException {
 		return new ByteArrayInputStream(contents.getBytes(encoding));
 	}
 
 	/**
-	 * Returns System.out, but wrapped in a UTF-8 capable output stream. This is required, because
-	 * higher order characters cannot print by default in Java.
+	 * Returns System.out, but wrapped in a UTF-8 capable output stream. This is required, because higher order
+	 * characters cannot print by default in Java.
+	 *
 	 * @return A new PrintStream object, based on System.out
 	 */
-	public static PrintStream GetSystemOut(){
+	public static PrintStream GetSystemOut() {
 		try {
 			return new PrintStream(System.out, true, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
@@ -139,11 +141,12 @@ public class StreamUtils {
 	}
 
 	/**
-	 * Returns System.err, but wrapped in a UTF-8 capable output stream. This is required, because
-	 * higher order characters cannot print by default in Java.
+	 * Returns System.err, but wrapped in a UTF-8 capable output stream. This is required, because higher order
+	 * characters cannot print by default in Java.
+	 *
 	 * @return A new PrintStream object, based on System.err
 	 */
-	public static PrintStream GetSystemErr(){
+	public static PrintStream GetSystemErr() {
 		try {
 			return new PrintStream(System.err, true, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {

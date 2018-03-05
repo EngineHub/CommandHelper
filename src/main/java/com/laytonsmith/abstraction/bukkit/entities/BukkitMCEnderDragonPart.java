@@ -17,6 +17,6 @@ public class BukkitMCEnderDragonPart extends BukkitMCComplexEntityPart implement
 
 	@Override
 	public EnderDragonPart getHandle() {
-		return (EnderDragonPart)super.getHandle();
+		return (EnderDragonPart) super.getHandle();
 	}
 }

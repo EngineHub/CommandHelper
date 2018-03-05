@@ -7,7 +7,10 @@ import com.laytonsmith.core.events.BindableEvent;
 import java.util.List;
 
 public interface MCInventoryEvent extends BindableEvent {
+
 	MCInventory getInventory();
+
 	MCInventoryView getView();
+
 	List<MCHumanEntity> getViewers();
 }

@@ -69,62 +69,62 @@ public enum MCBlockFace {
 
 	public MCBlockFace getOppositeFace() {
 		switch (this) {
-		case NORTH:
-			return MCBlockFace.SOUTH;
+			case NORTH:
+				return MCBlockFace.SOUTH;
 
-		case SOUTH:
-			return MCBlockFace.NORTH;
+			case SOUTH:
+				return MCBlockFace.NORTH;
 
-		case EAST:
-			return MCBlockFace.WEST;
+			case EAST:
+				return MCBlockFace.WEST;
 
-		case WEST:
-			return MCBlockFace.EAST;
+			case WEST:
+				return MCBlockFace.EAST;
 
-		case UP:
-			return MCBlockFace.DOWN;
+			case UP:
+				return MCBlockFace.DOWN;
 
-		case DOWN:
-			return MCBlockFace.UP;
+			case DOWN:
+				return MCBlockFace.UP;
 
-		case NORTH_EAST:
-			return MCBlockFace.SOUTH_WEST;
+			case NORTH_EAST:
+				return MCBlockFace.SOUTH_WEST;
 
-		case NORTH_WEST:
-			return MCBlockFace.SOUTH_EAST;
+			case NORTH_WEST:
+				return MCBlockFace.SOUTH_EAST;
 
-		case SOUTH_EAST:
-			return MCBlockFace.NORTH_WEST;
+			case SOUTH_EAST:
+				return MCBlockFace.NORTH_WEST;
 
-		case SOUTH_WEST:
-			return MCBlockFace.NORTH_EAST;
+			case SOUTH_WEST:
+				return MCBlockFace.NORTH_EAST;
 
-		case WEST_NORTH_WEST:
-			return MCBlockFace.EAST_SOUTH_EAST;
+			case WEST_NORTH_WEST:
+				return MCBlockFace.EAST_SOUTH_EAST;
 
-		case NORTH_NORTH_WEST:
-			return MCBlockFace.SOUTH_SOUTH_EAST;
+			case NORTH_NORTH_WEST:
+				return MCBlockFace.SOUTH_SOUTH_EAST;
 
-		case NORTH_NORTH_EAST:
-			return MCBlockFace.SOUTH_SOUTH_WEST;
+			case NORTH_NORTH_EAST:
+				return MCBlockFace.SOUTH_SOUTH_WEST;
 
-		case EAST_NORTH_EAST:
-			return MCBlockFace.WEST_SOUTH_WEST;
+			case EAST_NORTH_EAST:
+				return MCBlockFace.WEST_SOUTH_WEST;
 
-		case EAST_SOUTH_EAST:
-			return MCBlockFace.WEST_NORTH_WEST;
+			case EAST_SOUTH_EAST:
+				return MCBlockFace.WEST_NORTH_WEST;
 
-		case SOUTH_SOUTH_EAST:
-			return MCBlockFace.NORTH_NORTH_WEST;
+			case SOUTH_SOUTH_EAST:
+				return MCBlockFace.NORTH_NORTH_WEST;
 
-		case SOUTH_SOUTH_WEST:
-			return MCBlockFace.NORTH_NORTH_EAST;
+			case SOUTH_SOUTH_WEST:
+				return MCBlockFace.NORTH_NORTH_EAST;
 
-		case WEST_SOUTH_WEST:
-			return MCBlockFace.EAST_NORTH_EAST;
+			case WEST_SOUTH_WEST:
+				return MCBlockFace.EAST_NORTH_EAST;
 
-		case SELF:
-			return MCBlockFace.SELF;
+			case SELF:
+				return MCBlockFace.SELF;
 		}
 
 		return MCBlockFace.SELF;

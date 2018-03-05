@@ -12,10 +12,11 @@ import org.bukkit.ChatColor;
 		forConcreteEnum = ChatColor.class
 )
 public class BukkitMCChatColor extends EnumConvertor<MCChatColor, ChatColor> {
+
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCChatColor instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCChatColor getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCChatColor();
 		}
 		return instance;
@@ -23,7 +24,7 @@ public class BukkitMCChatColor extends EnumConvertor<MCChatColor, ChatColor> {
 
 	@Override
 	protected MCChatColor getAbstractedEnumCustom(ChatColor concrete) {
-		switch(concrete){
+		switch (concrete) {
 			case MAGIC:
 				return MCChatColor.RANDOM;
 			case RESET:
@@ -34,7 +35,7 @@ public class BukkitMCChatColor extends EnumConvertor<MCChatColor, ChatColor> {
 
 	@Override
 	protected ChatColor getConcreteEnumCustom(MCChatColor abstracted) {
-		switch(abstracted){
+		switch (abstracted) {
 			case RANDOM:
 				return ChatColor.MAGIC;
 			case PLAIN_WHITE:

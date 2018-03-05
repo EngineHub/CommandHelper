@@ -33,8 +33,7 @@ import java.util.List;
 public class ConfigRuntimeException extends RuntimeException {
 
 	/**
-	 * Creates a new instance of <code>ConfigRuntimeException</code> without
-	 * detail message.
+	 * Creates a new instance of <code>ConfigRuntimeException</code> without detail message.
 	 */
 	protected ConfigRuntimeException() {
 	}
@@ -49,46 +48,39 @@ public class ConfigRuntimeException extends RuntimeException {
 	}
 
 	/**
-	 * This returns the environment that was set when the exception was thrown.
-	 * It may be null, though that's due to an incomplete swapover, and should
-	 * be fixed.
+	 * This returns the environment that was set when the exception was thrown. It may be null, though that's due to an
+	 * incomplete swapover, and should be fixed.
 	 */
 	public Environment getEnv() {
 		return this.env;
 	}
 
 	/**
-	 * A reaction is a pre-programmed response to the exception bubbling all the
-	 * way up. One of these reaction types must be set by user code (or defaults
-	 * to REPORT), and the correct action will occur.
+	 * A reaction is a pre-programmed response to the exception bubbling all the way up. One of these reaction types
+	 * must be set by user code (or defaults to REPORT), and the correct action will occur.
 	 */
 	public static enum Reaction {
 		/**
-		 * This exception should be ignored, because a handler dealt with it as
-		 * desired. The plugin is no longer responsible for dealing with this
-		 * exception
+		 * This exception should be ignored, because a handler dealt with it as desired. The plugin is no longer
+		 * responsible for dealing with this exception
 		 */
 		IGNORE,
 		/**
-		 * No handler knew how to deal with this exception, or they chose not to
-		 * handle it. The plugin should handle it by using the default action
-		 * for an uncaught exception
+		 * No handler knew how to deal with this exception, or they chose not to handle it. The plugin should handle it
+		 * by using the default action for an uncaught exception
 		 */
 		REPORT,
 		/**
-		 * A handler knew how to deal with this exception, and furthermore, it
-		 * escalated it to a more serious category. Though the behavior may be
-		 * undefined, the plugin should pass the exception up further.
+		 * A handler knew how to deal with this exception, and furthermore, it escalated it to a more serious category.
+		 * Though the behavior may be undefined, the plugin should pass the exception up further.
 		 */
 		FATAL
 	}
 
 	/**
-	 * If a exception bubbles all the way up to the top, this should be called
-	 * first, to see what reaction the plugin should take. Generally speaking,
-	 * you'll want to use {@link #HandleUncaughtException} instead of this,
-	 * though if you need to take custom action, you can determine the user's
-	 * preferred reaction with this method.
+	 * If a exception bubbles all the way up to the top, this should be called first, to see what reaction the plugin
+	 * should take. Generally speaking, you'll want to use {@link #HandleUncaughtException} instead of this, though if
+	 * you need to take custom action, you can determine the user's preferred reaction with this method.
 	 *
 	 * @param e
 	 * @return
@@ -123,8 +115,8 @@ public class ConfigRuntimeException extends RuntimeException {
 	}
 
 	/**
-	 * Compile errors are always handled with the default mechanism, but to
-	 * standardize error handling, this method must be used.
+	 * Compile errors are always handled with the default mechanism, but to standardize error handling, this method must
+	 * be used.
 	 *
 	 * @param e
 	 * @param optionalMessage
@@ -149,9 +141,8 @@ public class ConfigRuntimeException extends RuntimeException {
 	}
 
 	/**
-	 * If there's nothing special you want to do with the exception, you can
-	 * send it here, and it will take the default action for an uncaught
-	 * exception.
+	 * If there's nothing special you want to do with the exception, you can send it here, and it will take the default
+	 * action for an uncaught exception.
 	 *
 	 * @param e
 	 * @param r
@@ -161,9 +152,8 @@ public class ConfigRuntimeException extends RuntimeException {
 	}
 
 	/**
-	 * If there's nothing special you want to do with the exception, you can
-	 * send it here, and it will take the default action for an uncaught
-	 * exception.
+	 * If there's nothing special you want to do with the exception, you can send it here, and it will take the default
+	 * action for an uncaught exception.
 	 *
 	 * @param e
 	 * @param r
@@ -182,10 +172,9 @@ public class ConfigRuntimeException extends RuntimeException {
 	}
 
 	/**
-	 * If the Reaction returned by GetReaction is to report the exception, this
-	 * function should be used to standardize the report format. If the error
-	 * message wouldn't be very useful by itself, or if a hint is desired, an
-	 * optional message may be provided (null otherwise).
+	 * If the Reaction returned by GetReaction is to report the exception, this function should be used to standardize
+	 * the report format. If the error message wouldn't be very useful by itself, or if a hint is desired, an optional
+	 * message may be provided (null otherwise).
 	 *
 	 * @param e
 	 * @param optionalMessage
@@ -215,12 +204,12 @@ public class ConfigRuntimeException extends RuntimeException {
 		StringBuilder console = new StringBuilder();
 		StringBuilder player = new StringBuilder();
 		PrintMessage(log, console, player, type, message, ex, st);
-		if(ex != null){
+		if (ex != null) {
 			// Otherwise, a CCE
-			if(ex.getCause() != null && ex.getCause() instanceof ConfigRuntimeException){
+			if (ex.getCause() != null && ex.getCause() instanceof ConfigRuntimeException) {
 				ex = (ConfigRuntimeException) ex.getCause();
 			}
-			while(ex instanceof CRECausedByWrapper) {
+			while (ex instanceof CRECausedByWrapper) {
 				Target t = ex.getTarget();
 				log.append("Caused by:\n");
 				console.append(TermColors.CYAN).append("Caused by:\n");
@@ -228,7 +217,7 @@ public class ConfigRuntimeException extends RuntimeException {
 				CArray exception = ((CRECausedByWrapper) ex).getException();
 				CArray stackTrace = Static.getArray(exception.get("stackTrace", t), t);
 				List<StackTraceElement> newSt = new ArrayList<>();
-				for(Construct consElement : stackTrace.asList()){
+				for (Construct consElement : stackTrace.asList()) {
 					CArray element = Static.getArray(consElement, t);
 					int line = Static.getInt32(element.get("line", t), t);
 					File file = new File(element.get("file", t).val());
@@ -258,7 +247,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
 	}
 
-	private static void PrintMessage(StringBuilder log, StringBuilder console, StringBuilder player, String type, String message, Throwable ex, List<StackTraceElement> st){
+	private static void PrintMessage(StringBuilder log, StringBuilder console, StringBuilder player, String type, String message, Throwable ex, List<StackTraceElement> st) {
 		log.append(type).append(message).append("\n");
 		console.append(TermColors.RED).append(type).append(TermColors.WHITE).append(message).append("\n");
 		player.append(MCChatColor.RED).append(type).append(MCChatColor.WHITE).append(message).append("\n");
@@ -279,7 +268,7 @@ public class ConfigRuntimeException extends RuntimeException {
 
 			log.append("\t").append(proc).append(":").append(filepath).append(":")
 					.append(line).append(".")
-					 .append(column).append("\n");
+					.append(column).append("\n");
 			console.append("\t").append(TermColors.GREEN).append(proc)
 					.append(TermColors.WHITE).append(":")
 					.append(TermColors.YELLOW).append(filepath)
@@ -300,8 +289,8 @@ public class ConfigRuntimeException extends RuntimeException {
 			p = e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer();
 		}
 		List<StackTraceElement> st = new ArrayList<>();
-		if(e instanceof AbstractCREException){
-			st = ((AbstractCREException)e).getCREStackTrace();
+		if (e instanceof AbstractCREException) {
+			st = ((AbstractCREException) e).getCREStackTrace();
 		}
 		DoReport(e.getMessage(), AbstractCREException.getExceptionName(e), e, st, p);
 		if (Prefs.DebugMode()) {
@@ -346,17 +335,14 @@ public class ConfigRuntimeException extends RuntimeException {
 	}
 
 	/**
-	 * To standardize the warning messages displayed, this function should be
-	 * used. It checks the preference setting for warnings to see if the warning
-	 * should be shown to begin with, if checkPref is true. The exception is
-	 * simply used to get an error message, and is otherwise unused. If the
-	 * exception is a ConfigRuntimeException, it is displayed specially
-	 * (including line number and file)
+	 * To standardize the warning messages displayed, this function should be used. It checks the preference setting for
+	 * warnings to see if the warning should be shown to begin with, if checkPref is true. The exception is simply used
+	 * to get an error message, and is otherwise unused. If the exception is a ConfigRuntimeException, it is displayed
+	 * specially (including line number and file)
 	 *
 	 * @param e
 	 * @param optionalMessage
-	 * @throws NullPointerException If both the exception and message are null
-	 * (or empty)
+	 * @throws NullPointerException If both the exception and message are null (or empty)
 	 */
 	public static void DoWarning(Exception e, String optionalMessage, boolean checkPrefs) {
 		if (e == null && (optionalMessage == null || optionalMessage.isEmpty())) {
@@ -386,12 +372,13 @@ public class ConfigRuntimeException extends RuntimeException {
 	private Target target;
 
 	/**
-	 * Creates a new ConfigRuntimeException. If the exception is intended to be
-	 * uncatchable, use {@link #CreateUncatchableException} instead.
+	 * Creates a new ConfigRuntimeException. If the exception is intended to be uncatchable, use
+	 * {@link #CreateUncatchableException} instead.
 	 *
 	 * @param msg The message to be displayed
 	 * @param t The code target this exception is being thrown from
-	 * @deprecated Use the {@link #BuildException(java.lang.String, com.laytonsmith.core.functions.Exceptions.ExceptionType, com.laytonsmith.core.constructs.Target) } method instead.
+	 * @deprecated Use the {@link #BuildException(java.lang.String, com.laytonsmith.core.functions.Exceptions.ExceptionType, com.laytonsmith.core.constructs.Target)
+	 * } method instead.
 	 */
 	@Deprecated
 	public ConfigRuntimeException(String msg, Target t) {
@@ -399,15 +386,17 @@ public class ConfigRuntimeException extends RuntimeException {
 	}
 
 	/**
-	 * Creates a new ConfigRuntimeException. If the exception is intended to be
-	 * uncatchable, use {@link #CreateUncatchableException(java.lang.String, com.laytonsmith.core.constructs.Target, java.lang.Throwable) }
+	 * Creates a new ConfigRuntimeException. If the exception is intended to be uncatchable, use {@link #CreateUncatchableException(java.lang.String, com.laytonsmith.core.constructs.Target, java.lang.Throwable)
+	 * }
 	 * instead.
+	 *
 	 * @param msg The message to be displayed
 	 * @param t The code target this exception is being thrown from
-	 * @param cause The chained cause. This is not used for normal execution, but is helpful
-	 * when debugging errors. Where exceptions are triggered by Java code (as opposed to organic
-	 * MethodScript errors) this version should always be preferred.
-	 * @deprecated Use the {@link #BuildException(java.lang.String, com.laytonsmith.core.functions.Exceptions.ExceptionType, com.laytonsmith.core.constructs.Target, java.lang.Throwable) } method instead.
+	 * @param cause The chained cause. This is not used for normal execution, but is helpful when debugging errors.
+	 * Where exceptions are triggered by Java code (as opposed to organic MethodScript errors) this version should
+	 * always be preferred.
+	 * @deprecated Use the {@link #BuildException(java.lang.String, com.laytonsmith.core.functions.Exceptions.ExceptionType, com.laytonsmith.core.constructs.Target, java.lang.Throwable)
+	 * } method instead.
 	 */
 	@Deprecated
 	public ConfigRuntimeException(String msg, Target t, Throwable cause) {
@@ -419,7 +408,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		this.target = t;
 	}
 
-	public void setTarget(Target t){
+	public void setTarget(Target t) {
 		this.target = t;
 	}
 
@@ -430,13 +419,11 @@ public class ConfigRuntimeException extends RuntimeException {
 //        this(msg, null, line_num, null);
 //    }
 	/**
-	 * Creates an uncatchable exception. This should rarely be used. An
-	 * uncatchable exception is one where the user code is unable to catch the
-	 * exception, and the type of the exception is null. Generally, this should
-	 * only be used for completely fatal errors, for instance, a break/continue
-	 * being used in top level code, or other user errors that would be compile
-	 * errors, except the facilities aren't there yet for catching such an error
-	 * in the compiler, or for errors in MethodScript itself.
+	 * Creates an uncatchable exception. This should rarely be used. An uncatchable exception is one where the user code
+	 * is unable to catch the exception, and the type of the exception is null. Generally, this should only be used for
+	 * completely fatal errors, for instance, a break/continue being used in top level code, or other user errors that
+	 * would be compile errors, except the facilities aren't there yet for catching such an error in the compiler, or
+	 * for errors in MethodScript itself.
 	 *
 	 * @param msg
 	 * @param t
@@ -447,14 +434,11 @@ public class ConfigRuntimeException extends RuntimeException {
 	}
 
 	/**
-	 * Creates an uncatchable exception with a cause. This should rarely be
-	 * used. An uncatchable exception is one where the user code is unable to
-	 * catch the exception, and the type of the exception is null. Generally,
-	 * this should only be used for completely fatal errors, for instance, a
-	 * break/continue being used in top level code, or other user errors that
-	 * would be compile errors, except the facilities aren't there yet for
-	 * catching such an error in the compiler, or for errors in MethodScript
-	 * itself.
+	 * Creates an uncatchable exception with a cause. This should rarely be used. An uncatchable exception is one where
+	 * the user code is unable to catch the exception, and the type of the exception is null. Generally, this should
+	 * only be used for completely fatal errors, for instance, a break/continue being used in top level code, or other
+	 * user errors that would be compile errors, except the facilities aren't there yet for catching such an error in
+	 * the compiler, or for errors in MethodScript itself.
 	 *
 	 * @param msg
 	 * @param t
@@ -488,10 +472,11 @@ public class ConfigRuntimeException extends RuntimeException {
 	}
 
 	/**
-	 * A stacktrace contains 1 or more stack trace elements. A new stacktrace
-	 * element is added each time an exception bubbles up past a procedure.
+	 * A stacktrace contains 1 or more stack trace elements. A new stacktrace element is added each time an exception
+	 * bubbles up past a procedure.
 	 */
 	public static class StackTraceElement {
+
 		private final String procedureName;
 		private Target definedAt;
 
@@ -529,19 +514,19 @@ public class ConfigRuntimeException extends RuntimeException {
 			return procedureName + " (Defined at " + definedAt + ")";
 		}
 
-		public CArray getObjectFor(){
+		public CArray getObjectFor() {
 			CArray element = new CArray(Target.UNKNOWN);
 			element.set("id", getProcedureName());
 			try {
 				String name = "Unknown file";
-				if(getDefinedAt().file() != null){
+				if (getDefinedAt().file() != null) {
 					name = getDefinedAt().file().getCanonicalPath();
 				}
 				element.set("file", name);
 			} catch (IOException ex) {
 				// This shouldn't happen, but if it does, we want to fall back to something marginally useful
 				String name = "Unknown file";
-				if(getDefinedAt().file() != null){
+				if (getDefinedAt().file() != null) {
 					name = getDefinedAt().file().getAbsolutePath();
 				}
 				element.set("file", getDefinedAt().file().getAbsolutePath());
@@ -552,6 +537,7 @@ public class ConfigRuntimeException extends RuntimeException {
 
 		/**
 		 * In general, only the core elements should change this
+		 *
 		 * @param target
 		 */
 		void setDefinedAt(Target target) {

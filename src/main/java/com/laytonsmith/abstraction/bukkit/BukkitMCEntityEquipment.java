@@ -37,13 +37,13 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	@Override
 	public Map<MCEquipmentSlot, MCItemStack> getAllEquipment() {
 		Map<MCEquipmentSlot, MCItemStack> slots = new EnumMap<>(MCEquipmentSlot.class);
-		for(MCEquipmentSlot key : MCEquipmentSlot.values()) {
-			switch(key) {
+		for (MCEquipmentSlot key : MCEquipmentSlot.values()) {
+			switch (key) {
 				case WEAPON:
 					slots.put(key, getWeapon());
 					break;
 				case OFF_HAND:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+					if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
 						slots.put(key, getItemInOffHand());
 					}
 					break;
@@ -67,14 +67,14 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	@Override
 	public void setAllEquipment(Map<MCEquipmentSlot, MCItemStack> slots) {
 		MCItemStack stack;
-		for(Map.Entry<MCEquipmentSlot, MCItemStack> entry : slots.entrySet()) {
+		for (Map.Entry<MCEquipmentSlot, MCItemStack> entry : slots.entrySet()) {
 			stack = entry.getValue();
-			switch(entry.getKey()) {
+			switch (entry.getKey()) {
 				case WEAPON:
 					setWeapon(stack);
 					break;
 				case OFF_HAND:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+					if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
 						setItemInOffHand(stack);
 					}
 					break;
@@ -97,13 +97,13 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	@Override
 	public Map<MCEquipmentSlot, Float> getAllDropChances() {
 		Map<MCEquipmentSlot, Float> slots = new EnumMap<>(MCEquipmentSlot.class);
-		for(MCEquipmentSlot key : MCEquipmentSlot.values()) {
-			switch(key) {
+		for (MCEquipmentSlot key : MCEquipmentSlot.values()) {
+			switch (key) {
 				case WEAPON:
 					slots.put(key, getWeaponDropChance());
 					break;
 				case OFF_HAND:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+					if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
 						slots.put(key, getOffHandDropChance());
 					}
 					break;
@@ -127,14 +127,14 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	@Override
 	public void setAllDropChances(Map<MCEquipmentSlot, Float> slots) {
 		float chance;
-		for(Map.Entry<MCEquipmentSlot, Float> entry : slots.entrySet()) {
+		for (Map.Entry<MCEquipmentSlot, Float> entry : slots.entrySet()) {
 			chance = entry.getValue();
-			switch(entry.getKey()) {
+			switch (entry.getKey()) {
 				case WEAPON:
 					setWeaponDropChance(chance);
 					break;
 				case OFF_HAND:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
+					if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
 						setOffHandDropChance(chance);
 					}
 					break;
@@ -156,7 +156,6 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
 	// For the purposes of faking a normal inventory, we most likely will not be accessing
 	// anything below this line, but they are here for flexibility and completion
-	
 	@Override
 	public MCItemStack getWeapon() {
 		return new BukkitMCItemStack(ee.getItemInHand());

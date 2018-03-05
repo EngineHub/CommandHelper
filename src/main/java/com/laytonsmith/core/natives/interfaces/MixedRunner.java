@@ -13,37 +13,36 @@ import java.util.Set;
 @InterfaceRunnerFor(Mixed.class)
 public class MixedRunner extends AbstractMixedInterfaceRunner {
 
-    @Override
-    public String docs() {
-	return "The root datatype. All datatypes extend mixed.";
-    }
+	@Override
+	public String docs() {
+		return "The root datatype. All datatypes extend mixed.";
+	}
 
-    @Override
-    public Version since() {
-	return CHVersion.V3_0_1;
-    }
+	@Override
+	public Version since() {
+		return CHVersion.V3_0_1;
+	}
 
-    // Interestingly, this is the only class that will return empty arrays for both
-    // of these methods.
+	// Interestingly, this is the only class that will return empty arrays for both
+	// of these methods.
+	@Override
+	public CClassType[] getSuperclasses() {
+		return new CClassType[]{};
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	return new CClassType[]{};
-    }
+	@Override
+	public CClassType[] getInterfaces() {
+		return new CClassType[]{};
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	return new CClassType[]{};
-    }
+	@Override
+	public ObjectType getObjectType() {
+		return ObjectType.CLASS;
+	}
 
-    @Override
-    public ObjectType getObjectType() {
-	return ObjectType.CLASS;
-    }
-
-    @Override
-    public Set<ObjectModifier> getObjectModifiers() {
-	return EnumSet.of(ObjectModifier.PUBLIC);
-    }
+	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.of(ObjectModifier.PUBLIC);
+	}
 
 }

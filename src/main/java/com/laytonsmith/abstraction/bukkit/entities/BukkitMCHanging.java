@@ -9,6 +9,7 @@ import org.bukkit.entity.Hanging;
 public class BukkitMCHanging extends BukkitMCEntity implements MCHanging {
 
 	Hanging h;
+
 	public BukkitMCHanging(Entity e) {
 		super(e);
 		this.h = (Hanging) e;

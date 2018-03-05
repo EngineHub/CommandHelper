@@ -42,6 +42,7 @@ import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import java.util.Map;
 
 public class InventoryEvents {
+
 	public static String docs() {
 		return "Contains events related to inventory.";
 	}
@@ -76,7 +77,7 @@ public class InventoryEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if(event instanceof MCInventoryClickEvent) {
+			if (event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 
 				Prefilters.match(prefilter, "action", e.getAction().name(), PrefilterType.MACRO);
@@ -97,13 +98,13 @@ public class InventoryEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCInventoryClickEvent) {
+			if (event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 				Map<String, Construct> map = evaluate_helper(event);
 
 				map.put("player", new CString(e.getWhoClicked().getName(), Target.UNKNOWN));
 				CArray viewers = new CArray(Target.UNKNOWN);
-				for(MCHumanEntity viewer : e.getViewers()) {
+				for (MCHumanEntity viewer : e.getViewers()) {
 					viewers.push(new CString(viewer.getName(), Target.UNKNOWN), Target.UNKNOWN);
 				}
 				map.put("viewers", viewers);
@@ -126,7 +127,7 @@ public class InventoryEvents {
 
 				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN);
 				MCInventory inv = e.getInventory();
-				for(int i = 0; i < inv.getSize(); i++) {
+				for (int i = 0; i < inv.getSize(); i++) {
 					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN), Target.UNKNOWN);
 				}
 				map.put("inventory", items);
@@ -146,14 +147,14 @@ public class InventoryEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if(event instanceof MCInventoryClickEvent) {
+			if (event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 
-				if(key.equalsIgnoreCase("slotitem")) {
+				if (key.equalsIgnoreCase("slotitem")) {
 					e.setCurrentItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
-				if(key.equalsIgnoreCase("cursoritem")) {
+				if (key.equalsIgnoreCase("cursoritem")) {
 					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
@@ -163,7 +164,7 @@ public class InventoryEvents {
 
 		@Override
 		public void cancel(BindableEvent o, boolean state) {
-			MCInventoryClickEvent ic = ((MCInventoryClickEvent)o);
+			MCInventoryClickEvent ic = ((MCInventoryClickEvent) o);
 			ic.setCancelled(state);
 			StaticLayer.GetServer().getPlayer(ic.getWhoClicked().getName()).updateInventory();
 		}
@@ -197,7 +198,7 @@ public class InventoryEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if(event instanceof MCInventoryDragEvent) {
+			if (event instanceof MCInventoryDragEvent) {
 				MCInventoryDragEvent e = (MCInventoryDragEvent) event;
 
 				Prefilters.match(prefilter, "world", e.getWhoClicked().getWorld().getName(), PrefilterType.MACRO);
@@ -216,7 +217,7 @@ public class InventoryEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCInventoryDragEvent) {
+			if (event instanceof MCInventoryDragEvent) {
 				MCInventoryDragEvent e = (MCInventoryDragEvent) event;
 				Map<String, Construct> map = evaluate_helper(event);
 
@@ -225,19 +226,19 @@ public class InventoryEvents {
 				map.put("oldcursoritem", ObjectGenerator.GetGenerator().item(e.getOldCursor(), Target.UNKNOWN));
 
 				CArray slots = new CArray(Target.UNKNOWN);
-				for(Integer slot : e.getInventorySlots()) {
+				for (Integer slot : e.getInventorySlots()) {
 					slots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN);
 				}
 				map.put("slots", slots);
 
 				CArray rawSlots = new CArray(Target.UNKNOWN);
-				for(Integer slot : e.getRawSlots()) {
+				for (Integer slot : e.getRawSlots()) {
 					rawSlots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN);
 				}
 				map.put("rawslots", rawSlots);
 
 				CArray newItems = CArray.GetAssociativeArray(Target.UNKNOWN);
-				for(Map.Entry<Integer, MCItemStack> ni : e.getNewItems().entrySet()) {
+				for (Map.Entry<Integer, MCItemStack> ni : e.getNewItems().entrySet()) {
 					Integer key = ni.getKey();
 					MCItemStack value = ni.getValue();
 					newItems.set(key.intValue(), ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN), Target.UNKNOWN);
@@ -246,7 +247,7 @@ public class InventoryEvents {
 
 				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN);
 				MCInventory inv = e.getInventory();
-				for(int i = 0; i < inv.getSize(); i++) {
+				for (int i = 0; i < inv.getSize(); i++) {
 					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN), Target.UNKNOWN);
 				}
 				map.put("inventory", items);
@@ -268,10 +269,10 @@ public class InventoryEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if(event instanceof MCInventoryDragEvent) {
+			if (event instanceof MCInventoryDragEvent) {
 				MCInventoryDragEvent e = (MCInventoryDragEvent) event;
 
-				if(key.equalsIgnoreCase("cursoritem")) {
+				if (key.equalsIgnoreCase("cursoritem")) {
 					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
@@ -281,7 +282,7 @@ public class InventoryEvents {
 
 		@Override
 		public void cancel(BindableEvent o, boolean state) {
-			MCInventoryDragEvent id = ((MCInventoryDragEvent)o);
+			MCInventoryDragEvent id = ((MCInventoryDragEvent) o);
 			id.setCancelled(state);
 			StaticLayer.GetServer().getPlayer(id.getWhoClicked().getName()).updateInventory();
 		}
@@ -324,7 +325,7 @@ public class InventoryEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCInventoryOpenEvent) {
+			if (event instanceof MCInventoryOpenEvent) {
 				MCInventoryOpenEvent e = (MCInventoryOpenEvent) event;
 				Map<String, Construct> map = evaluate_helper(event);
 
@@ -333,7 +334,7 @@ public class InventoryEvents {
 				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN);
 				MCInventory inv = e.getInventory();
 
-				for(int i = 0; i < inv.getSize(); i++) {
+				for (int i = 0; i < inv.getSize(); i++) {
 					Construct c = ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN);
 					items.set(i, c, Target.UNKNOWN);
 				}
@@ -396,7 +397,7 @@ public class InventoryEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCInventoryCloseEvent) {
+			if (event instanceof MCInventoryCloseEvent) {
 				MCInventoryCloseEvent e = (MCInventoryCloseEvent) event;
 				Map<String, Construct> map = evaluate_helper(event);
 
@@ -405,7 +406,7 @@ public class InventoryEvents {
 				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN);
 				MCInventory inv = e.getInventory();
 
-				for(int i = 0; i < inv.getSize(); i++) {
+				for (int i = 0; i < inv.getSize(); i++) {
 					Construct c = ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN);
 					items.set(i, c, Target.UNKNOWN);
 				}
@@ -474,7 +475,7 @@ public class InventoryEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCEnchantItemEvent) {
+			if (event instanceof MCEnchantItemEvent) {
 				MCEnchantItemEvent e = (MCEnchantItemEvent) event;
 				Map<String, Construct> map = evaluate_helper(event);
 
@@ -508,20 +509,20 @@ public class InventoryEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if(event instanceof MCEnchantItemEvent) {
+			if (event instanceof MCEnchantItemEvent) {
 				MCEnchantItemEvent e = (MCEnchantItemEvent) event;
 
-				if(key.equalsIgnoreCase("levels")) {
+				if (key.equalsIgnoreCase("levels")) {
 					e.setExpLevelCost(Static.getInt32(value, value.getTarget()));
 					return true;
 				}
 
-				if(key.equalsIgnoreCase("item")) {
+				if (key.equalsIgnoreCase("item")) {
 					e.setItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
 
-				if(key.equalsIgnoreCase("enchants")) {
+				if (key.equalsIgnoreCase("enchants")) {
 					e.setEnchantsToAdd((ObjectGenerator.GetGenerator().enchants((CArray) value, value.getTarget())));
 					return true;
 				}
@@ -570,7 +571,7 @@ public class InventoryEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCPrepareItemEnchantEvent) {
+			if (event instanceof MCPrepareItemEnchantEvent) {
 				MCPrepareItemEnchantEvent e = (MCPrepareItemEnchantEvent) event;
 				Map<String, Construct> map = evaluate_helper(event);
 
@@ -582,7 +583,7 @@ public class InventoryEvents {
 				int[] expCosts = e.getExpLevelCostsOffered();
 				CArray expCostsCArray = new CArray(Target.UNKNOWN);
 
-				for(int i = 0; i < expCosts.length; i++) {
+				for (int i = 0; i < expCosts.length; i++) {
 					int j = expCosts[i];
 					expCostsCArray.push(new CInt(j, Target.UNKNOWN), i, Target.UNKNOWN);
 				}
@@ -611,22 +612,22 @@ public class InventoryEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if(event instanceof MCPrepareItemEnchantEvent) {
+			if (event instanceof MCPrepareItemEnchantEvent) {
 				MCPrepareItemEnchantEvent e = (MCPrepareItemEnchantEvent) event;
 
-				if(key.equalsIgnoreCase("item")) {
+				if (key.equalsIgnoreCase("item")) {
 					e.setItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
 
-				if(key.equalsIgnoreCase("expcosts")) {
-					if(value instanceof CArray) {
+				if (key.equalsIgnoreCase("expcosts")) {
+					if (value instanceof CArray) {
 						CArray CexpCosts = (CArray) value;
-						if(!CexpCosts.inAssociativeMode()) {
+						if (!CexpCosts.inAssociativeMode()) {
 							int[] ExpCosts = e.getExpLevelCostsOffered();
 
-							for(int i = 0; i <= 2; i++) {
-								if(CexpCosts.get(i, value.getTarget()) instanceof CInt) {
+							for (int i = 0; i <= 2; i++) {
+								if (CexpCosts.get(i, value.getTarget()) instanceof CInt) {
 									ExpCosts[i] = (int) ((CInt) CexpCosts.get(i, value.getTarget())).getInt();
 								} else {
 									throw new CREFormatException("Expected an intger at index " + i + "!", value.getTarget());
@@ -669,7 +670,7 @@ public class InventoryEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if(event instanceof MCItemHeldEvent) {
+			if (event instanceof MCItemHeldEvent) {
 				return true;
 			}
 			return false;
@@ -682,7 +683,7 @@ public class InventoryEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCItemHeldEvent) {
+			if (event instanceof MCItemHeldEvent) {
 				MCItemHeldEvent e = (MCItemHeldEvent) event;
 				Map<String, Construct> ret = evaluate_helper(e);
 				ret.put("to", new CInt(e.getNewSlot(), Target.UNKNOWN));
@@ -700,9 +701,9 @@ public class InventoryEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if(event instanceof MCItemHeldEvent) {
+			if (event instanceof MCItemHeldEvent) {
 				MCItemHeldEvent e = (MCItemHeldEvent) event;
-				if("to".equals(key)) {
+				if ("to".equals(key)) {
 					e.getPlayer().getInventory().setHeldItemSlot(Static.getInt32(value, value.getTarget()));
 					return true;
 				}
@@ -736,7 +737,7 @@ public class InventoryEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if(event instanceof MCItemSwapEvent) {
+			if (event instanceof MCItemSwapEvent) {
 				MCItemSwapEvent e = (MCItemSwapEvent) event;
 
 				Prefilters.match(prefilter, "player", e.getPlayer().getName(), PrefilterType.MACRO);
@@ -755,7 +756,7 @@ public class InventoryEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCItemSwapEvent) {
+			if (event instanceof MCItemSwapEvent) {
 				MCItemSwapEvent e = (MCItemSwapEvent) event;
 				Map<String, Construct> ret = evaluate_helper(e);
 				ret.put("main_hand", ObjectGenerator.GetGenerator().item(e.getMainHandItem(), Target.UNKNOWN));
@@ -773,13 +774,13 @@ public class InventoryEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if(event instanceof MCItemSwapEvent) {
+			if (event instanceof MCItemSwapEvent) {
 				MCItemSwapEvent e = (MCItemSwapEvent) event;
-				if("main_hand".equals(key)) {
+				if ("main_hand".equals(key)) {
 					e.setMainHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
-				if("off_hand".equals(key)) {
+				if ("off_hand".equals(key)) {
 					e.setOffHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
@@ -814,7 +815,7 @@ public class InventoryEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if(event instanceof MCPrepareItemCraftEvent) {
+			if (event instanceof MCPrepareItemCraftEvent) {
 				return true;
 			}
 			return false;
@@ -827,12 +828,12 @@ public class InventoryEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCPrepareItemCraftEvent) {
+			if (event instanceof MCPrepareItemCraftEvent) {
 				MCPrepareItemCraftEvent e = (MCPrepareItemCraftEvent) event;
 				Map<String, Construct> ret = evaluate_helper(e);
 				Target t = Target.UNKNOWN;
 				CArray viewers = new CArray(t);
-				for(MCHumanEntity v : e.getViewers()) {
+				for (MCHumanEntity v : e.getViewers()) {
 					viewers.push(new CString(v.getName(), t), t);
 				}
 				ret.put("viewers", viewers);
@@ -840,7 +841,7 @@ public class InventoryEvents {
 				ret.put("isRepair", CBoolean.get(e.isRepair()));
 				CArray matrix = CArray.GetAssociativeArray(t);
 				MCItemStack[] mi = e.getInventory().getMatrix();
-				for(int i=0; i<mi.length; i++) {
+				for (int i = 0; i < mi.length; i++) {
 					matrix.set(i, ObjectGenerator.GetGenerator().item(mi[i], t), t);
 				}
 				ret.put("matrix", matrix);

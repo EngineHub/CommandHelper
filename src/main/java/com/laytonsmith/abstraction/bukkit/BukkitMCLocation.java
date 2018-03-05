@@ -11,14 +11,16 @@ import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
 public class BukkitMCLocation implements MCLocation {
+
 	Location l;
+
 	public BukkitMCLocation(Location l) {
 		this.l = l;
 	}
 
 	public BukkitMCLocation(AbstractionObject a) {
 		if (a instanceof MCLocation) {
-			this.l = ((Location)a.getHandle());
+			this.l = ((Location) a.getHandle());
 		} else {
 			throw new ClassCastException();
 		}
@@ -46,12 +48,12 @@ public class BukkitMCLocation implements MCLocation {
 
 	@Override
 	public double distance(MCLocation o) {
-		return l.distance(((BukkitMCLocation)o)._Location());
+		return l.distance(((BukkitMCLocation) o)._Location());
 	}
 
 	@Override
 	public double distanceSquared(MCLocation o) {
-		return l.distanceSquared(((BukkitMCLocation)o)._Location());
+		return l.distanceSquared(((BukkitMCLocation) o)._Location());
 	}
 
 	@Override

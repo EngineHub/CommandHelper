@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SimpleSyntaxHighlighter {
 
 	public static void main(String[] args) throws Exception {
-	String script = "<!\nstrict: on;\n>";
+		String script = "<!\nstrict: on;\n>";
 		List<Token> ts = MethodScriptCompiler.lex(script, null, true, true);
 		for (Token t : ts) {
 			System.out.println(t.type);

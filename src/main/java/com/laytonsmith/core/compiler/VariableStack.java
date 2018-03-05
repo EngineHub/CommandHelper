@@ -12,35 +12,37 @@ import java.util.Stack;
 
 /**
  *
- * 
+ *
  */
 public final class VariableStack {
+
 	private Stack<Map<String, Construct>> vars;
-	public VariableStack(){
+
+	public VariableStack() {
 		vars = new Stack<Map<String, Construct>>();
 		pushScope();
 	}
-	
-	public void pushScope(){
+
+	public void pushScope() {
 		vars.push(new HashMap<String, Construct>());
 	}
-	
-	public void popScope(){
+
+	public void popScope() {
 		vars.pop();
 	}
-	
-	private Construct get(String name, Target t){
+
+	private Construct get(String name, Target t) {
 		List<Map<String, Construct>> varsReversed = new ArrayList<Map<String, Construct>>();
 		Collections.reverse(varsReversed);
-		for(Map<String, Construct> map : varsReversed){
-			if(map.containsKey(name)){
+		for (Map<String, Construct> map : varsReversed) {
+			if (map.containsKey(name)) {
 				return map.get(name);
 			}
 		}
 		return new CString("", t);
 	}
-	
-	public void assign(String name, Construct value){
+
+	public void assign(String name, Construct value) {
 		vars.peek().put(name, value);
 	}
 }

@@ -114,7 +114,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 		List<Block> lst = getLineOfSight(transparent, maxDistance, 512);
 		List<MCBlock> retn = new ArrayList<>();
 
-		for(Block b : lst) {
+		for (Block b : lst) {
 			retn.add(new BukkitMCBlock(b));
 		}
 
@@ -157,37 +157,37 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	private List<Block> getLineOfSight(HashSet<Short> transparent, int maxDistance, int maxLength) {
-		if(maxDistance > 512) {
+		if (maxDistance > 512) {
 			maxDistance = 512;
 		}
 		ArrayList<Block> blocks = new ArrayList<>();
 		Iterator<Block> itr = new BlockIterator(le, maxDistance);
 
-		while(itr.hasNext()) {
+		while (itr.hasNext()) {
 			Block block = itr.next();
 			blocks.add(block);
-			if(maxLength != 0 && blocks.size() > maxLength) {
+			if (maxLength != 0 && blocks.size() > maxLength) {
 				blocks.remove(0);
 			}
 			int id = block.getTypeId();
-			if(transparent == null) {
+			if (transparent == null) {
 				if (id != 0) {
 					break;
 				}
 			} else {
-				if(!transparent.contains((short) id)) {
+				if (!transparent.contains((short) id)) {
 					break;
 				}
 			}
 		}
 		return blocks;
 	}
-	
+
 	@Override
 	public boolean hasAI() {
 		try {
 			return le.hasAI();
-		} catch(NoSuchMethodError ex){
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9.2
 			return true;
 		}
@@ -196,16 +196,16 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	@Override
 	public void addEffect(int potionID, int strength, int ticks, boolean ambient, boolean particles, Target t) {
 		PotionEffect pe;
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
+		if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
 			pe = new PotionEffect(PotionEffectType.getById(potionID), ticks, strength, ambient);
 		} else {
 			pe = new PotionEffect(PotionEffectType.getById(potionID), ticks, strength, ambient, particles);
 		}
-		try{
-			if(le != null){
+		try {
+			if (le != null) {
 				le.addPotionEffect(pe, true);
 			}
-		} catch(NullPointerException e){
+		} catch (NullPointerException e) {
 			Logger.getLogger(BukkitMCLivingEntity.class.getName()).log(Level.SEVERE,
 					"Bukkit appears to have derped. This is a problem with Bukkit, not CommandHelper."
 					+ "The effect should have still been applied.", e);
@@ -213,11 +213,11 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	@Override
-	public int getMaxEffect(){
+	public int getMaxEffect() {
 		try {
-			PotionEffectType[] arr = (PotionEffectType[])ReflectionUtils.get(PotionEffectType.class, "byId");
+			PotionEffectType[] arr = (PotionEffectType[]) ReflectionUtils.get(PotionEffectType.class, "byId");
 			return arr.length - 1;
-		} catch(ReflectionUtils.ReflectionException e){
+		} catch (ReflectionUtils.ReflectionException e) {
 			return Integer.MAX_VALUE;
 		}
 	}
@@ -226,8 +226,8 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public boolean removeEffect(int potionID) {
 		PotionEffectType t = PotionEffectType.getById(potionID);
 		boolean hasIt = false;
-		for(PotionEffect pe : le.getActivePotionEffects()) {
-			if(pe.getType() == t) {
+		for (PotionEffect pe : le.getActivePotionEffects()) {
+			if (pe.getType() == t) {
 				hasIt = true;
 				break;
 			}
@@ -238,17 +238,17 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public void removeEffects() {
-		for(PotionEffect pe : le.getActivePotionEffects()) {
+		for (PotionEffect pe : le.getActivePotionEffects()) {
 			le.removePotionEffect(pe.getType());
 		}
 	}
 
 	@Override
-	public List<MCEffect> getEffects(){
+	public List<MCEffect> getEffects() {
 		List<MCEffect> effects = new ArrayList<>();
-		for(PotionEffect pe : le.getActivePotionEffects()){
+		for (PotionEffect pe : le.getActivePotionEffects()) {
 			MCEffect e;
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
+			if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
 				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(), true);
 			} else {
 				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(), pe.hasParticles());
@@ -289,7 +289,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public MCEntityEquipment getEquipment() {
-		if(le.getEquipment() == null) {
+		if (le.getEquipment() == null) {
 			return null;
 		}
 		return new BukkitMCEntityEquipment(le.getEquipment());
@@ -317,11 +317,11 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public MCLivingEntity getTarget(Target t) {
-		if(!(le instanceof Creature)) {
+		if (!(le instanceof Creature)) {
 			throw new CREBadEntityException("This type of mob does not have a target API", t);
 		}
 		LivingEntity target = ((Creature) le).getTarget();
-		if(target == null) {
+		if (target == null) {
 			return null;
 		}
 		return new BukkitMCLivingEntity(target);
@@ -332,22 +332,22 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 		if (!(le instanceof Creature)) {
 			throw new CREBadEntityException("This type of mob does not have a target API", t);
 		}
-		if(target == null) {
+		if (target == null) {
 			((Creature) le).setTarget(null);
 		} else {
 			((Creature) le).setTarget(((BukkitMCLivingEntity) target).asLivingEntity());
 		}
 	}
-	
+
 	@Override
-	public void kill(){
+	public void kill() {
 		le.setLastDamageCause(new EntityDamageEvent(le, EntityDamageEvent.DamageCause.CUSTOM, le.getHealth()));
 		le.setHealth(0D);
 	}
 
 	@Override
 	public MCEntity getLeashHolder() {
-		if(le.isLeashed()) {
+		if (le.isLeashed()) {
 			return BukkitConvertor.BukkitGetCorrectEntity(le.getLeashHolder());
 		}
 		return null;
@@ -360,7 +360,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public void setLeashHolder(MCEntity holder) {
-		if(holder == null) {
+		if (holder == null) {
 			le.setLeashHolder(null);
 		} else {
 			le.setLeashHolder(((BukkitMCEntity) holder).getHandle());
@@ -371,7 +371,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public boolean isGliding() {
 		try {
 			return le.isGliding();
-		} catch(NoSuchMethodError ex){
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9
 			return false;
 		}
@@ -381,7 +381,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public void setGliding(Boolean glide) {
 		try {
 			le.setGliding(glide);
-		} catch(NoSuchMethodError ex){
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9
 		}
 	}
@@ -390,7 +390,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public void setAI(Boolean ai) {
 		try {
 			le.setAI(ai);
-		} catch(NoSuchMethodError ex){
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9.2
 		}
 	}

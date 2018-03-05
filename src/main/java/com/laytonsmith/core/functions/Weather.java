@@ -31,7 +31,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.UUID;
 
 /**
- * 
+ *
  */
 public class Weather {
 
@@ -39,7 +39,7 @@ public class Weather {
 		return "Provides functions to control the weather";
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class lightning extends AbstractFunction {
 
 		@Override
@@ -118,7 +118,7 @@ public class Weather {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class storm extends AbstractFunction {
 
 		@Override
@@ -149,13 +149,13 @@ public class Weather {
 				w = Static.getServer().getWorld(args[1].val());
 				duration = Static.getInt32(args[2], t);
 			}
-			if(w == null) {
+			if (w == null) {
 				MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-				if(sender instanceof MCPlayer) {
+				if (sender instanceof MCPlayer) {
 					w = ((MCPlayer) sender).getWorld();
-				} else if(sender instanceof MCBlockCommandSender) {
+				} else if (sender instanceof MCBlockCommandSender) {
 					w = ((MCBlockCommandSender) sender).getBlock().getWorld();
-				} else if(sender instanceof MCCommandMinecart) {
+				} else if (sender instanceof MCCommandMinecart) {
 					w = ((MCCommandMinecart) sender).getWorld();
 				}
 			}
@@ -181,7 +181,7 @@ public class Weather {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREFormatException.class,
-					CREInvalidWorldException.class};
+				CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -199,8 +199,8 @@ public class Weather {
 			return false;
 		}
 	}
-	
-	@api(environments=CommandHelperEnvironment.class)
+
+	@api(environments = CommandHelperEnvironment.class)
 	public static class set_thunder extends AbstractFunction {
 
 		@Override
@@ -260,12 +260,12 @@ public class Weather {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
-	@api(environments=CommandHelperEnvironment.class)
+
+	@api(environments = CommandHelperEnvironment.class)
 	public static class has_storm extends AbstractFunction {
-		
+
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREInvalidWorldException.class};
@@ -318,10 +318,10 @@ public class Weather {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
-	@api(environments=CommandHelperEnvironment.class)
+
+	@api(environments = CommandHelperEnvironment.class)
 	public static class has_thunder extends AbstractFunction {
 
 		@Override
@@ -376,6 +376,6 @@ public class Weather {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 }

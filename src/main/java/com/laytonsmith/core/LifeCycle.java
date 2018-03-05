@@ -10,6 +10,7 @@ import com.laytonsmith.core.extensions.MSExtension;
  */
 @MSExtension("Core")
 public class LifeCycle extends AbstractExtension {
+
 	@Override
 	public Version getVersion() {
 		return CHVersion.LATEST;

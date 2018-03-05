@@ -5,8 +5,8 @@ package com.laytonsmith.core;
  */
 public class MainSandbox {
 
-    public static void main(String[] argv) throws Exception {
+	public static void main(String[] argv) throws Exception {
 
-    }
+	}
 
 }

@@ -20,40 +20,40 @@ import org.bukkit.plugin.PluginManager;
 
 public class BukkitBlockListener implements Listener {
 
-	@EventHandler(priority=EventPriority.LOWEST)
-	public void onPistonExtend(final BlockPistonExtendEvent e){
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPistonExtend(final BlockPistonExtendEvent e) {
 		BukkitBlockEvents.BukkitMCBlockPistonExtendEvent mce = new BukkitBlockEvents.BukkitMCBlockPistonExtendEvent(e);
 		EventUtils.TriggerListener(Driver.PISTON_EXTEND, "piston_extend", mce);
 	}
 
-	@EventHandler(priority=EventPriority.LOWEST)
-	public void onPistonRetract(final BlockPistonRetractEvent e){
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPistonRetract(final BlockPistonRetractEvent e) {
 		BukkitBlockEvents.BukkitMCBlockPistonRetractEvent mce = new BukkitBlockEvents.BukkitMCBlockPistonRetractEvent(e);
 		EventUtils.TriggerListener(Driver.PISTON_RETRACT, "piston_retract", mce);
 	}
 
-	@EventHandler(priority=EventPriority.LOWEST)
-	public void onSignChange(SignChangeEvent e){
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onSignChange(SignChangeEvent e) {
 		BukkitBlockEvents.BukkitMCSignChangeEvent mce = new BukkitBlockEvents.BukkitMCSignChangeEvent(e);
 		EventUtils.TriggerListener(Driver.SIGN_CHANGED, "sign_changed", mce);
 	}
 
-	@EventHandler(priority=EventPriority.LOWEST)
-	public void onBlockPlace(BlockPlaceEvent e){
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onBlockPlace(BlockPlaceEvent e) {
 		BukkitBlockEvents.BukkitMCBlockPlaceEvent bpe = new BukkitBlockEvents.BukkitMCBlockPlaceEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_PLACE, "block_place", bpe);
 	}
 
 	private static boolean ignorebreak = false;
 
-	@EventHandler(priority=EventPriority.LOWEST)
-	public void onBlockBreak(BlockBreakEvent e){
-		if(ignorebreak){
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onBlockBreak(BlockBreakEvent e) {
+		if (ignorebreak) {
 			return;
 		}
 		BukkitBlockEvents.BukkitMCBlockBreakEvent bbe = new BukkitBlockEvents.BukkitMCBlockBreakEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_BREAK, "block_break", bbe);
-		if(bbe.isModified() && !e.isCancelled()) {
+		if (bbe.isModified() && !e.isCancelled()) {
 			e.setCancelled(true);
 			// If we've modified the drops, create a new event for other plugins (eg. block loggers, region protection)
 			BlockBreakEvent chevent = new BlockBreakEvent(e.getBlock(), e.getPlayer());
@@ -65,16 +65,16 @@ public class BukkitBlockListener implements Listener {
 			} finally {
 				ignorebreak = false;
 			}
-			if(!chevent.isCancelled()) {
+			if (!chevent.isCancelled()) {
 				Block block = chevent.getBlock();
 				block.setType(Material.AIR);
 				Location loc = block.getLocation();
 				loc.add(0.5, 0.5, 0.5);
-				for(MCItemStack item : bbe.getDrops()) {
+				for (MCItemStack item : bbe.getDrops()) {
 					block.getWorld().dropItemNaturally(loc, (ItemStack) item.getHandle());
 				}
 				int amt = chevent.getExpToDrop();
-				if(amt > 0) {
+				if (amt > 0) {
 					ExperienceOrb exp = (ExperienceOrb) block.getWorld().spawnEntity(loc, EntityType.EXPERIENCE_ORB);
 					exp.setExperience(amt);
 				}
@@ -88,14 +88,14 @@ public class BukkitBlockListener implements Listener {
 		EventUtils.TriggerListener(Driver.BLOCK_DISPENSE, "block_dispense", bde);
 	}
 
-	@EventHandler(priority=EventPriority.LOWEST)
-	public void onBlockBurn(BlockBurnEvent e){
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onBlockBurn(BlockBurnEvent e) {
 		BukkitBlockEvents.BukkitMCBlockBurnEvent bbe = new BukkitBlockEvents.BukkitMCBlockBurnEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_BURN, "block_burn", bbe);
 	}
 
-	@EventHandler(priority=EventPriority.LOWEST)
-	public void onBlockFromTo(BlockFromToEvent e){
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onBlockFromTo(BlockFromToEvent e) {
 		BukkitBlockEvents.BukkitMCBlockFromToEvent bbe = new BukkitBlockEvents.BukkitMCBlockFromToEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_FROM_TO, "block_from_to", bbe);
 	}
@@ -121,6 +121,6 @@ public class BukkitBlockListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockFade(BlockFadeEvent e) {
 		BukkitBlockEvents.BukkitMCBlockFadeEvent bfe = new BukkitBlockEvents.BukkitMCBlockFadeEvent(e);
-		EventUtils.TriggerListener(Driver. BLOCK_FADE, "block_fade", bfe);
+		EventUtils.TriggerListener(Driver.BLOCK_FADE, "block_fade", bfe);
 	}
 }

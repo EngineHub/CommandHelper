@@ -5,6 +5,8 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCEntityEnterPortalEvent extends BindableEvent {
+
 	MCEntity getEntity();
+
 	MCLocation getLocation();
 }

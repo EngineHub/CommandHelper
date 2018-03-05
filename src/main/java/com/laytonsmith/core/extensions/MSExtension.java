@@ -8,8 +8,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface MSExtension {
+
 	/**
 	 * The name of the extension.
+	 *
 	 * @return String
 	 */
 	String value();

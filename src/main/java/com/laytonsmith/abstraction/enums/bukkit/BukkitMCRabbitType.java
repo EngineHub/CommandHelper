@@ -9,16 +9,16 @@ import com.laytonsmith.core.Static;
 import org.bukkit.entity.Rabbit;
 
 @abstractionenum(
-		implementation=Implementation.Type.BUKKIT,
-		forAbstractEnum=MCRabbitType.class,
-		forConcreteEnum=Rabbit.Type.class
+		implementation = Implementation.Type.BUKKIT,
+		forAbstractEnum = MCRabbitType.class,
+		forConcreteEnum = Rabbit.Type.class
 )
 public class BukkitMCRabbitType extends EnumConvertor<MCRabbitType, Rabbit.Type> {
 
 	private static BukkitMCRabbitType instance;
 
 	public static BukkitMCRabbitType getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new BukkitMCRabbitType();
 		}
 		return instance;
@@ -26,7 +26,7 @@ public class BukkitMCRabbitType extends EnumConvertor<MCRabbitType, Rabbit.Type>
 
 	@Override
 	protected Rabbit.Type getConcreteEnumCustom(MCRabbitType abstracted) {
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
+		if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
 			return null;
 		}
 		return super.getConcreteEnumCustom(abstracted);

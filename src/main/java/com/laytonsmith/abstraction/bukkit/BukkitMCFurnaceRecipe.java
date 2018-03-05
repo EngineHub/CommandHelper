@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 public class BukkitMCFurnaceRecipe extends BukkitMCRecipe implements MCFurnaceRecipe {
 
 	FurnaceRecipe fr;
+
 	public BukkitMCFurnaceRecipe(FurnaceRecipe recipe) {
 		super(recipe);
 		fr = recipe;

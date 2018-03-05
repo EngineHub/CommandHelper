@@ -8,20 +8,21 @@ import org.bukkit.inventory.Recipe;
 public abstract class BukkitMCRecipe implements MCRecipe {
 
 	Recipe r;
+
 	protected BukkitMCRecipe(Recipe rec) {
 		r = rec;
 	}
-	
+
 	@Override
 	public Object getHandle() {
 		return r;
 	}
-	
+
 	@Override
 	public MCItemStack getResult() {
 		return new BukkitMCItemStack(r.getResult());
 	}
-	
+
 	@Override
 	public abstract MCRecipeType getRecipeType();
 
@@ -39,5 +40,5 @@ public abstract class BukkitMCRecipe implements MCRecipe {
 	public String toString() {
 		return r.toString();
 	}
-	
+
 }

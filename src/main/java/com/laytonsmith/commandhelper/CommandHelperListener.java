@@ -48,92 +48,92 @@ import java.util.logging.Logger;
  */
 public class CommandHelperListener implements Listener {
 
-    /**
-     * Logger.
-     */
-    private static final Logger logger = Logger.getLogger("Minecraft");
+	/**
+	 * Logger.
+	 */
+	private static final Logger logger = Logger.getLogger("Minecraft");
 
-    /**
-     * List of global aliases.
-     */
-    private AliasCore ac;
-    private CommandHelperPlugin plugin;
+	/**
+	 * List of global aliases.
+	 */
+	private AliasCore ac;
+	private CommandHelperPlugin plugin;
 
-    public CommandHelperListener(CommandHelperPlugin plugin) {
-        this.plugin = plugin;
-    }
+	public CommandHelperListener(CommandHelperPlugin plugin) {
+		this.plugin = plugin;
+	}
 
-    /**
-     * Load global aliases.
-     */
-    public void loadGlobalAliases() {
-        ac = CommandHelperPlugin.getCore();
-    }
+	/**
+	 * Load global aliases.
+	 */
+	public void loadGlobalAliases() {
+		ac = CommandHelperPlugin.getCore();
+	}
 
-    /**
-     * Find and run aliases for a player for a given command.
-     *
-     * @param command
-     * @return
-     */
-    public boolean runAlias(String command, MCPlayer player) throws DataSourceException {
-        return CommandHelperPlugin.getCore().alias(command, player);
-    }
+	/**
+	 * Find and run aliases for a player for a given command.
+	 *
+	 * @param command
+	 * @return
+	 */
+	public boolean runAlias(String command, MCPlayer player) throws DataSourceException {
+		return CommandHelperPlugin.getCore().alias(command, player);
+	}
 
-    /**
-     * Called when a player attempts to use a command
-     *
-     * @param event Relevant event details
-     */
-    @EventHandler(priority= EventPriority.LOWEST)
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-        if(CommandHelperPlugin.self.interpreterListener
-                .isInInterpreterMode(event.getPlayer().getName())){
-            //They are in interpreter mode, so we want it to handle this, not everything else.
-            return;
-        }
-        MCPlayerCommandEvent mpce = new BukkitPlayerEvents.BukkitMCPlayerCommandEvent(event);
-        EventUtils.TriggerListener(Driver.PLAYER_COMMAND, "player_command", mpce);
-        if(mpce.isCancelled()){
-            return;
-        }
-        String cmd = event.getMessage();        
-        MCPlayer player = new BukkitMCPlayer(event.getPlayer());
-        BukkitDirtyRegisteredListener.PlayDirty();
+	/**
+	 * Called when a player attempts to use a command
+	 *
+	 * @param event Relevant event details
+	 */
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+		if (CommandHelperPlugin.self.interpreterListener
+				.isInInterpreterMode(event.getPlayer().getName())) {
+			//They are in interpreter mode, so we want it to handle this, not everything else.
+			return;
+		}
+		MCPlayerCommandEvent mpce = new BukkitPlayerEvents.BukkitMCPlayerCommandEvent(event);
+		EventUtils.TriggerListener(Driver.PLAYER_COMMAND, "player_command", mpce);
+		if (mpce.isCancelled()) {
+			return;
+		}
+		String cmd = event.getMessage();
+		MCPlayer player = new BukkitMCPlayer(event.getPlayer());
+		BukkitDirtyRegisteredListener.PlayDirty();
 
-        if (!Prefs.PlayDirty()) {
-            if (event.isCancelled()) {
-                return;
-            }
-        } //If we are playing dirty, ignore the cancelled flag
+		if (!Prefs.PlayDirty()) {
+			if (event.isCancelled()) {
+				return;
+			}
+		} //If we are playing dirty, ignore the cancelled flag
 
-        try {
-            if (runAlias(event.getMessage(), player)) {
-                event.setCancelled(true);
-                if(Prefs.PlayDirty()){
-                    //Super cancel the event
-                    BukkitDirtyRegisteredListener.setCancelled(event);
-                }
-            }
-        } catch (InternalException e) {
-            logger.log(Level.SEVERE, e.getMessage());
-        } catch (ConfigRuntimeException e) {
-            logger.log(Level.WARNING, e.getMessage());
-        } catch (Throwable e) {
-            player.sendMessage(MCChatColor.RED + "Command failed with following reason: " + e.getMessage());
-            //Obviously the command is registered, but it somehow failed. Cancel the event.
-            event.setCancelled(true);
-            e.printStackTrace();
-        }
-    }
+		try {
+			if (runAlias(event.getMessage(), player)) {
+				event.setCancelled(true);
+				if (Prefs.PlayDirty()) {
+					//Super cancel the event
+					BukkitDirtyRegisteredListener.setCancelled(event);
+				}
+			}
+		} catch (InternalException e) {
+			logger.log(Level.SEVERE, e.getMessage());
+		} catch (ConfigRuntimeException e) {
+			logger.log(Level.WARNING, e.getMessage());
+		} catch (Throwable e) {
+			player.sendMessage(MCChatColor.RED + "Command failed with following reason: " + e.getMessage());
+			//Obviously the command is registered, but it somehow failed. Cancel the event.
+			event.setCancelled(true);
+			e.printStackTrace();
+		}
+	}
 
-    @EventHandler(priority= EventPriority.NORMAL)
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        Static.HostnameCache(event.getPlayer().getName(), event.getPlayer().getAddress());
-    }
-    
-    @EventHandler(priority= EventPriority.NORMAL)
-    public void onPlayerLogin(PlayerLoginEvent event){
-        Static.SetPlayerHost(event.getPlayer().getName(), event.getHostname());
-    }
+	@EventHandler(priority = EventPriority.NORMAL)
+	public void onPlayerJoin(PlayerJoinEvent event) {
+		Static.HostnameCache(event.getPlayer().getName(), event.getPlayer().getAddress());
+	}
+
+	@EventHandler(priority = EventPriority.NORMAL)
+	public void onPlayerLogin(PlayerLoginEvent event) {
+		Static.SetPlayerHost(event.getPlayer().getName(), event.getHostname());
+	}
 }

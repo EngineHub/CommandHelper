@@ -11,13 +11,14 @@ import org.bukkit.entity.Wolf;
 public class BukkitMCWolf extends BukkitMCTameable implements MCWolf {
 
 	Wolf w;
+
 	public BukkitMCWolf(Entity be) {
 		super(be);
 		this.w = (Wolf) be;
 	}
 
-	public BukkitMCWolf(AbstractionObject ao){
-		super((LivingEntity)ao.getHandle());
+	public BukkitMCWolf(AbstractionObject ao) {
+		super((LivingEntity) ao.getHandle());
 		this.w = (Wolf) ao.getHandle();
 	}
 

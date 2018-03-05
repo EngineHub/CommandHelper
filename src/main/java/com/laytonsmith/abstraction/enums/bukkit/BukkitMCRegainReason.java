@@ -12,10 +12,11 @@ import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 		forConcreteEnum = RegainReason.class
 )
 public class BukkitMCRegainReason extends EnumConvertor<MCRegainReason, RegainReason> {
+
 	private static BukkitMCRegainReason INST;
 
 	public static BukkitMCRegainReason getConvertor() {
-		if(INST == null) {
+		if (INST == null) {
 			INST = new BukkitMCRegainReason();
 		}
 		return INST;

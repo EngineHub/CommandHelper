@@ -70,9 +70,8 @@ public final class EventUtils {
 	}
 
 	/**
-	 * Looks through all the events for an event with id <code>id</code>. Once
-	 * found, removes it. If no event with that id is registered, nothing
-	 * happens.
+	 * Looks through all the events for an event with id <code>id</code>. Once found, removes it. If no event with that
+	 * id is registered, nothing happens.
 	 *
 	 * @param id
 	 */
@@ -124,8 +123,7 @@ public final class EventUtils {
 	}
 
 	/**
-	 * This should be used in the case the plugin is disabled, or /reloadalises
-	 * is run.
+	 * This should be used in the case the plugin is disabled, or /reloadalises is run.
 	 */
 	public static void UnregisterAll() {
 		event_handles.clear();
@@ -156,7 +154,7 @@ public final class EventUtils {
 							} catch (UnsupportedOperationException ex) {
 								// The event will stay null, and be caught below
 							}
-							if(convertedEvent == null){
+							if (convertedEvent == null) {
 								throw new CREBindException(eventName + " doesn't support the use of trigger() yet.", t);
 							} else if (driver.matches(b.getPrefilter(), convertedEvent)) {
 								toRun.add(b);
@@ -213,46 +211,46 @@ public final class EventUtils {
 					} catch (NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError err) {
 						// This happens when a CH extension depends on a not-included or binary outdated class.
 						// Log the error and continue since there's nothing we can do about it.
-						
+
 						String chBrand = Implementation.GetServerType().getBranding();
 						String chVersion = Static.getVersion().toString();
-						
+
 						String culprit = chBrand;
 						outerLoop:
-						for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()) {
-							for(Event event : tracker.getEvents()) {
-								if(event.getName().equals(driver.getName())) {
-									for(Extension extension : tracker.getExtensions()) {
+						for (ExtensionTracker tracker : ExtensionManager.getTrackers().values()) {
+							for (Event event : tracker.getEvents()) {
+								if (event.getName().equals(driver.getName())) {
+									for (Extension extension : tracker.getExtensions()) {
 										culprit = extension.getName();
 										break outerLoop;
 									}
 								}
 							}
 						}
-						
+
 						String modVersion;
-						try{
+						try {
 							modVersion = StaticLayer.GetConvertor().GetServer().getAPIVersion();
-						} catch(Exception ex){
+						} catch (Exception ex) {
 							modVersion = Implementation.GetServerType().name();
 						}
-						
+
 						String extensionData = "";
-						for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()){
-							for(Extension extension : tracker.getExtensions()){
+						for (ExtensionTracker tracker : ExtensionManager.getTrackers().values()) {
+							for (Extension extension : tracker.getExtensions()) {
 								try {
 									extensionData += TermColors.CYAN + extension.getName() + TermColors.RED
 											+ " (" + TermColors.RESET + extension.getVersion() + TermColors.RED + ")\n";
-								} catch(AbstractMethodError ex){
+								} catch (AbstractMethodError ex) {
 									// This happens with an old style extensions. Just skip it.
 									extensionData += TermColors.CYAN + "Unknown Extension" + TermColors.RED + "\n";
 								}
 							}
 						}
-						if(extensionData.isEmpty()){
+						if (extensionData.isEmpty()) {
 							extensionData = "NONE\n";
 						}
-						
+
 						String driverEventName = driver.getName();
 						String jarName = new File(driver.getSourceJar().getFile()).getName();
 						String emsg = TermColors.RED + "Uh oh! You've found an error in the eventhandler for event "
@@ -280,10 +278,9 @@ public final class EventUtils {
 	}
 
 	/**
-	 * Triggers an event by name. The event name is the primary filter for this
-	 * event, but to increase event lookup efficiency, the driver is required.
-	 * This will run in O(n), where n is the number of bound events driven by
-	 * type <code>type</code>.
+	 * Triggers an event by name. The event name is the primary filter for this event, but to increase event lookup
+	 * efficiency, the driver is required. This will run in O(n), where n is the number of bound events driven by type
+	 * <code>type</code>.
 	 *
 	 * @param type
 	 * @param eventName
@@ -341,8 +338,7 @@ public final class EventUtils {
 	}
 
 	/**
-	 * Verifies that the event name given is a valid event name. If not, an
-	 * IllegalArgumentException is thrown.
+	 * Verifies that the event name given is a valid event name. If not, an IllegalArgumentException is thrown.
 	 *
 	 * @param name The name of the event to validate
 	 * @throws IllegalArgumentException if the event name is invalid

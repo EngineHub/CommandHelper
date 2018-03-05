@@ -13,48 +13,48 @@ public class CEntry extends Construct {
     Construct construct;
 
     public CEntry(String value, Target t) {
-	super(value, ConstructType.ENTRY, t);
-	throw new UnsupportedOperationException("CEntry Constructs cannot use this constructor");
+        super(value, ConstructType.ENTRY, t);
+        throw new UnsupportedOperationException("CEntry Constructs cannot use this constructor");
     }
 
     public CEntry(Construct key, Construct value, Target t) {
-	super(key.val() + ":(CEntry)", ConstructType.ENTRY, t);
-	this.ckey = key;
-	this.construct = value;
+        super(key.val() + ":(CEntry)", ConstructType.ENTRY, t);
+        this.ckey = key;
+        this.construct = value;
     }
 
     @Override
     public String val() {
-	return construct.val();
+        return construct.val();
     }
 
     public Construct construct() {
-	return this.construct;
+        return this.construct;
     }
 
     @Override
     public boolean isDynamic() {
-	return false;
+        return false;
     }
 
     @Override
     public Version since() {
-	return super.since();
+        return super.since();
     }
 
     @Override
     public String docs() {
-	return super.docs();
+        return super.docs();
     }
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{Mixed.TYPE};
+        return new CClassType[]{Mixed.TYPE};
     }
 
     @Override
     public CClassType[] getInterfaces() {
-	return new CClassType[]{};
+        return new CClassType[]{};
     }
 
 }

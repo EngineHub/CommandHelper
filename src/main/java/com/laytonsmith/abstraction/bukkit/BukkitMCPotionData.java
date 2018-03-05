@@ -8,27 +8,28 @@ import org.bukkit.potion.PotionData;
 public class BukkitMCPotionData implements MCPotionData {
 
 	PotionData pd;
+
 	public BukkitMCPotionData(PotionData poda) {
 		pd = poda;
 	}
 
 	@Override
-	public MCPotionType getType(){
+	public MCPotionType getType() {
 		return BukkitMCPotionType.getConvertor().getAbstractedEnum(pd.getType());
 	}
 
 	@Override
-	public boolean isExtended(){
+	public boolean isExtended() {
 		return pd.isExtended();
 	}
 
 	@Override
-	public boolean isUpgraded(){
+	public boolean isUpgraded() {
 		return pd.isUpgraded();
 	}
 
 	@Override
-	public Object getHandle(){
+	public Object getHandle() {
 		return pd;
 	}
 

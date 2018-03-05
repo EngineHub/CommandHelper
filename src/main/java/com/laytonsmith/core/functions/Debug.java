@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
@@ -29,7 +27,7 @@ import java.io.IOException;
 import java.util.Set;
 
 /**
- * 
+ *
  */
 public class Debug {
 
@@ -37,8 +35,7 @@ public class Debug {
 //    public static int EVENT_LOGGING_LEVEL = 1;
 //    public static final Set<Event.Type> EVENT_LOGGING_FILTER = new HashSet<Event.Type>();
 //    public static final Set<String> EVENT_PLUGIN_FILTER = new HashSet<String>();
-    //public static boolean LOG_TO_SCREEN = false;
-
+	//public static boolean LOG_TO_SCREEN = false;
 //    public static void DoLog(Event.Type filter, int verbosity, String message) {
 //        synchronized (EVENT_LOGGING_FILTER) {
 //            if (EVENT_LOGGING && EVENT_LOGGING_FILTER.contains(filter) && EVENT_LOGGING_LEVEL >= verbosity) {
@@ -58,13 +55,12 @@ public class Debug {
 //            return EVENT_PLUGIN_FILTER.contains(plugin.getClass().getSimpleName().toUpperCase());
 //        }
 //    }
-
-    public static String docs() {
-        return "Provides methods for viewing data about both CommandHelper and the other plugins in your server. Though not meant to"
-                + " be called by normal scripts, these methods are available everywhere other methods are available. Note that for"
-                + " some of these functions to even work, play-dirty mode must set to on. These are most useful in conjuction with"
-                + " interpreter mode.";
-    }
+	public static String docs() {
+		return "Provides methods for viewing data about both CommandHelper and the other plugins in your server. Though not meant to"
+				+ " be called by normal scripts, these methods are available everywhere other methods are available. Note that for"
+				+ " some of these functions to even work, play-dirty mode must set to on. These are most useful in conjuction with"
+				+ " interpreter mode.";
+	}
 
 //    @api
 //    public static class dump_listeners extends AbstractFunction {
@@ -195,57 +191,57 @@ public class Debug {
 //            return Static.strJoin(list, ", ");
 //        }
 //    }
-
-    @api(environments={GlobalEnv.class})
-    public static class debug extends AbstractFunction {
-
-		@Override
-        public String getName() {
-            return "debug";
-        }
+	@api(environments = {GlobalEnv.class})
+	public static class debug extends AbstractFunction {
 
 		@Override
-        public Integer[] numArgs() {
-            return new Integer[]{1};
-        }
+		public String getName() {
+			return "debug";
+		}
 
 		@Override
-        public String docs() {
-            return "void {message} Manually logs a timestamped message to the debug log and the console, if debug-mode is set to true in the preferences";
-        }
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
 
 		@Override
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[]{CREIOException.class};
-        }
+		public String docs() {
+			return "void {message} Manually logs a timestamped message to the debug log and the console, if debug-mode is set to true in the preferences";
+		}
 
 		@Override
-        public boolean isRestricted() {
-            return true;
-        }
-		@Override
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIOException.class};
+		}
 
 		@Override
-        public Boolean runAsync() {
-            return true;
-        }
+		public boolean isRestricted() {
+			return true;
+		}
 
 		@Override
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            if (Prefs.DebugMode()) {
-                try {
-                    Static.LogDebug(MethodScriptFileLocations.getDefault().getConfigDirectory(), args[0].val(), LogLevel.DEBUG);
-                } catch (IOException ex) {
-                    throw new CREIOException(ex.getMessage(), t, ex);
-                }
-            }
-            return CVoid.VOID;
-        }
-    }
-	
+		public CHVersion since() {
+			return CHVersion.V3_3_0;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return true;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if (Prefs.DebugMode()) {
+				try {
+					Static.LogDebug(MethodScriptFileLocations.getDefault().getConfigDirectory(), args[0].val(), LogLevel.DEBUG);
+				} catch (IOException ex) {
+					throw new CREIOException(ex.getMessage(), t, ex);
+				}
+			}
+			return CVoid.VOID;
+		}
+	}
+
 	@api
 	public static class trace extends AbstractFunction {
 
@@ -266,9 +262,9 @@ public class Debug {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof IVariable){
-				if(Prefs.DebugMode()){
-					IVariable ivar = (IVariable)args[0];
+			if (args[0] instanceof IVariable) {
+				if (Prefs.DebugMode()) {
+					IVariable ivar = (IVariable) args[0];
 					Construct val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar.getVariableName(), t);
 					StreamUtils.GetSystemOut().println(ivar.getVariableName() + ": " + val.val());
 				}
@@ -306,7 +302,7 @@ public class Debug {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 
 //    @api
@@ -365,7 +361,6 @@ public class Debug {
 //            return CVoid.VOID;
 //        }
 //    }
-
 //    @api
 //    public static class set_debug_event_filter extends AbstractFunction {
 //
@@ -440,7 +435,6 @@ public class Debug {
 //            return CVoid.VOID;
 //        }
 //    }
-
 //    @api
 //    public static class set_debug_plugin_filter extends AbstractFunction {
 //
@@ -496,9 +490,8 @@ public class Debug {
 //            return CVoid.VOID;
 //        }
 //    }
-	
 	@api
-	public static class dump_threads extends AbstractFunction{
+	public static class dump_threads extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -519,7 +512,7 @@ public class Debug {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
 			CArray carray = new CArray(t);
-			for(Thread thread : threadSet){
+			for (Thread thread : threadSet) {
 				carray.push(new CString(thread.getName(), t), t);
 			}
 			return carray;
@@ -545,9 +538,9 @@ public class Debug {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	@noboilerplate
 	public static class heap_dump extends AbstractFunction {
@@ -570,9 +563,9 @@ public class Debug {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			File file = new File("dump.bin");
-			try{
+			try {
 				HeapDumper.dumpHeap(file.getAbsolutePath(), true);
-			} catch(Throwable tt){
+			} catch (Throwable tt) {
 				throw new CREPluginInternalException("Could not create a heap dump: " + tt.getMessage(), t, tt);
 			}
 			return CVoid.VOID;
@@ -600,6 +593,6 @@ public class Debug {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 }

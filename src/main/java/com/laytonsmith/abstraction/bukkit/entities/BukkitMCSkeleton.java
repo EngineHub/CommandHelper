@@ -21,14 +21,14 @@ public class BukkitMCSkeleton extends BukkitMCLivingEntity implements MCSkeleton
 
 	@Override
 	public MCSkeletonType getSkeletonType() {
-		return MCSkeletonType.valueOf(((Skeleton)getHandle()).getSkeletonType().name());
+		return MCSkeletonType.valueOf(((Skeleton) getHandle()).getSkeletonType().name());
 	}
 
 	@Override
 	public void setSkeletonType(MCSkeletonType type) {
 		try {
 			((Skeleton) getHandle()).setSkeletonType(Skeleton.SkeletonType.valueOf(type.name()));
-		} catch(UnsupportedOperationException ex){
+		} catch (UnsupportedOperationException ex) {
 			// 1.11 or later
 			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR,
 					"Cannot change Skeleton to Stray or WitherSkeleton in Minecraft 1.11+", Target.UNKNOWN);

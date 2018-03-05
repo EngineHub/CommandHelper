@@ -78,7 +78,7 @@ public class Environment {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
-					CRENotFoundException.class};
+				CRENotFoundException.class};
 		}
 
 		@Override
@@ -225,11 +225,11 @@ public class Environment {
 			int data;
 			byte meta = 0;
 			try {
-				if(dataAndMeta.length == 2) {
+				if (dataAndMeta.length == 2) {
 					meta = Byte.parseByte(dataAndMeta[1]); // Throws NumberFormatException.
 				}
 				data = Integer.parseInt(dataAndMeta[0]); // Throws NumberFormatException.
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				throw new CREFormatException("id must be formatted as such: 'x:y' where x and y are integers", t);
 			}
 			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
@@ -239,7 +239,7 @@ public class Environment {
 			}
 			try {
 				b.setTypeAndData(data, meta, physics);
-			} catch(IllegalArgumentException ex){
+			} catch (IllegalArgumentException ex) {
 				throw new CREFormatException("Invalid block meta data: \"" + id + "\"", t);
 			}
 
@@ -840,7 +840,7 @@ public class Environment {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CRERangeException.class,
-						CREFormatException.class, CREPlayerOfflineException.class};
+				CREFormatException.class, CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -908,9 +908,9 @@ public class Environment {
 				if (ttone.trim().endsWith("#")) {
 					sharped = true;
 				}
-				try{
+				try {
 					n = StaticLayer.GetConvertor().GetNote(octave, tone, sharped);
-				} catch(IllegalArgumentException e){
+				} catch (IllegalArgumentException e) {
 					throw new CREFormatException(e.getMessage(), t);
 				}
 			} else {
@@ -953,8 +953,8 @@ public class Environment {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREInvalidWorldException.class,
-					CRECastException.class, CREFormatException.class,
-					CREPlayerOfflineException.class};
+				CRECastException.class, CREFormatException.class,
+				CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -992,7 +992,7 @@ public class Environment {
 			if (sa.containsKey("category")) {
 				try {
 					category = MCSoundCategory.valueOf(sa.get("category", t).val().toUpperCase());
-				} catch (IllegalArgumentException iae){
+				} catch (IllegalArgumentException iae) {
 					throw new CREFormatException("Sound category '" + sa.get("category", t).val() + "' is invalid.", t);
 				}
 			}
@@ -1015,7 +1015,7 @@ public class Environment {
 					players.add(Static.GetPlayer(args[2], t));
 				}
 
-				if(category == null) {
+				if (category == null) {
 					for (MCPlayer p : players) {
 						p.playSound(loc, sound, volume, pitch);
 					}
@@ -1025,7 +1025,7 @@ public class Environment {
 					}
 				}
 
-			} else if(category == null){
+			} else if (category == null) {
 				loc.getWorld().playSound(loc, sound, volume, pitch);
 			} else {
 				loc.getWorld().playSound(loc, sound, category, volume, pitch);
@@ -1070,8 +1070,8 @@ public class Environment {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREInvalidWorldException.class,
-					CRECastException.class, CREFormatException.class,
-					CREPlayerOfflineException.class};
+				CRECastException.class, CREFormatException.class,
+				CREPlayerOfflineException.class};
 		}
 
 		@Override
@@ -1105,7 +1105,7 @@ public class Environment {
 			if (sa.containsKey("category")) {
 				try {
 					category = MCSoundCategory.valueOf(sa.get("category", t).val().toUpperCase());
-				} catch (IllegalArgumentException iae){
+				} catch (IllegalArgumentException iae) {
 					throw new CREFormatException("Sound category '" + sa.get("category", t).val() + "' is invalid.", t);
 				}
 			}
@@ -1128,7 +1128,7 @@ public class Environment {
 					players.add(Static.GetPlayer(args[2], t));
 				}
 
-				if(category == null) {
+				if (category == null) {
 					for (MCPlayer p : players) {
 						p.playSound(loc, path, volume, pitch);
 					}
@@ -1137,7 +1137,7 @@ public class Environment {
 						p.playSound(loc, path, category, volume, pitch);
 					}
 				}
-			} else if(category == null){
+			} else if (category == null) {
 				loc.getWorld().playSound(loc, path, volume, pitch);
 			} else {
 				loc.getWorld().playSound(loc, path, category, volume, pitch);
@@ -1198,8 +1198,8 @@ public class Environment {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
 			MCBlock b = l.getBlock();
-			if(args.length == 2) {
-				switch(args[1].val()) {
+			if (args.length == 2) {
+				switch (args[1].val()) {
 					case "solid":
 						return CBoolean.get(b.isSolid());
 					case "flammable":
@@ -1230,7 +1230,7 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1,2};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
@@ -1257,7 +1257,7 @@ public class Environment {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREInvalidWorldException.class,
-					CREFormatException.class};
+				CREFormatException.class};
 		}
 
 		@Override
@@ -1309,7 +1309,7 @@ public class Environment {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREInvalidWorldException.class,
-					CREFormatException.class};
+				CREFormatException.class};
 		}
 
 		@Override
@@ -1354,7 +1354,7 @@ public class Environment {
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 			CheckMode mode;
-			if(args.length == 2) {
+			if (args.length == 2) {
 				try {
 					mode = CheckMode.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException e) {
@@ -1364,7 +1364,7 @@ public class Environment {
 				mode = CheckMode.BOTH; // Default to BOTH to make it backwards compatible.
 			}
 			boolean ret;
-			switch(mode) {
+			switch (mode) {
 				case BOTH: {
 					ret = loc.getBlock().isBlockPowered() || loc.getBlock().isBlockIndirectlyPowered();
 					break;
@@ -1383,21 +1383,21 @@ public class Environment {
 			}
 			return CBoolean.get(ret);
 		}
-		
+
 		public enum CheckMode {
 			BOTH,
 			DIRECT_ONLY,
 			INDIRECT_ONLY
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_block_power extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREInvalidWorldException.class,
-					CREFormatException.class};
+				CREFormatException.class};
 		}
 
 		@Override
@@ -1544,7 +1544,7 @@ public class Environment {
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
 				throws ConfigRuntimeException {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
-			if(loc.getBlock().isCommandBlock()) {
+			if (loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				return new CString(cb.getCommand(), t);
 			} else {
@@ -1596,15 +1596,15 @@ public class Environment {
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
 				throws ConfigRuntimeException {
 			String cmd = null;
-			if(args.length == 2 && !(args[1] instanceof CNull)) {
-				if(!(args[1] instanceof CString)) {
+			if (args.length == 2 && !(args[1] instanceof CNull)) {
+				if (!(args[1] instanceof CString)) {
 					throw new CRECastException("Parameter 2 of " + getName() + " must be a string or null", t);
 				}
 				cmd = args[1].val();
 			}
 
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
-			if(loc.getBlock().isCommandBlock()) {
+			if (loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				cb.setCommand(cmd);
 				return CVoid.VOID;
@@ -1656,7 +1656,7 @@ public class Environment {
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
 				throws ConfigRuntimeException {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
-			if(loc.getBlock().isCommandBlock()) {
+			if (loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				return new CString(cb.getName(), t);
 			} else {
@@ -1708,15 +1708,15 @@ public class Environment {
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args
 		) throws ConfigRuntimeException {
 			String name = null;
-			if(args.length == 2 && !(args[1] instanceof CNull)) {
-				if(!(args[1] instanceof CString)) {
+			if (args.length == 2 && !(args[1] instanceof CNull)) {
+				if (!(args[1] instanceof CString)) {
 					throw new CRECastException("Parameter 2 of " + getName() + " must be a string or null", t);
 				}
 				name = args[1].val();
 			}
 
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
-			if(loc.getBlock().isCommandBlock()) {
+			if (loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				cb.setName(name);
 				return CVoid.VOID;

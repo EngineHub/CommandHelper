@@ -15,7 +15,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 
 /**
- * 
+ *
  * @author jb_aero
  */
 public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
@@ -51,7 +51,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 	public void setVariant(MCHorseVariant variant) {
 		try {
 			h.setVariant(BukkitMCHorseVariant.getConvertor().getConcreteEnum(variant));
-		} catch(UnsupportedOperationException ex){
+		} catch (UnsupportedOperationException ex) {
 			// 1.11 or later
 			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR,
 					"Cannot change Horse variant in Minecraft 1.11+", Target.UNKNOWN);
@@ -87,7 +87,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 	public void setHasChest(boolean hasChest) {
 		try {
 			h.setCarryingChest(hasChest);
-		} catch(UnsupportedOperationException ex){
+		} catch (UnsupportedOperationException ex) {
 			// 1.11 or later
 			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR,
 					"Horse cannot have chest in Minecraft 1.11+", Target.UNKNOWN);
@@ -116,7 +116,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 
 	@Override
 	public void setSaddle(MCItemStack stack) {
-		h.getInventory().setSaddle(((BukkitMCItemStack)stack).asItemStack());
+		h.getInventory().setSaddle(((BukkitMCItemStack) stack).asItemStack());
 	}
 
 	@Override
@@ -126,7 +126,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 
 	@Override
 	public void setArmor(MCItemStack stack) {
-		h.getInventory().setArmor(((BukkitMCItemStack)stack).asItemStack());
+		h.getInventory().setArmor(((BukkitMCItemStack) stack).asItemStack());
 	}
 
 	@Override
@@ -135,11 +135,11 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 	}
 
 	@abstractionenum(
-			implementation= Implementation.Type.BUKKIT,
-			forAbstractEnum=MCHorseVariant.class,
-			forConcreteEnum=Horse.Variant.class
+			implementation = Implementation.Type.BUKKIT,
+			forAbstractEnum = MCHorseVariant.class,
+			forConcreteEnum = Horse.Variant.class
 	)
-	public static class BukkitMCHorseVariant extends EnumConvertor<MCHorseVariant, Horse.Variant>{
+	public static class BukkitMCHorseVariant extends EnumConvertor<MCHorseVariant, Horse.Variant> {
 
 		private static BukkitMCHorseVariant instance;
 
@@ -176,11 +176,11 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 	}
 
 	@abstractionenum(
-			implementation= Implementation.Type.BUKKIT,
-			forAbstractEnum=MCHorseColor.class,
-			forConcreteEnum=Horse.Color.class
+			implementation = Implementation.Type.BUKKIT,
+			forAbstractEnum = MCHorseColor.class,
+			forConcreteEnum = Horse.Color.class
 	)
-	public static class BukkitMCHorseColor extends EnumConvertor<MCHorseColor, Horse.Color>{
+	public static class BukkitMCHorseColor extends EnumConvertor<MCHorseColor, Horse.Color> {
 
 		private static BukkitMCHorseColor instance;
 
@@ -193,11 +193,11 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 	}
 
 	@abstractionenum(
-			implementation= Implementation.Type.BUKKIT,
-			forAbstractEnum=MCHorsePattern.class,
-			forConcreteEnum=Horse.Style.class
+			implementation = Implementation.Type.BUKKIT,
+			forAbstractEnum = MCHorsePattern.class,
+			forConcreteEnum = Horse.Style.class
 	)
-	public static class BukkitMCHorsePattern extends EnumConvertor<MCHorsePattern, Horse.Style>{
+	public static class BukkitMCHorsePattern extends EnumConvertor<MCHorsePattern, Horse.Style> {
 
 		private static BukkitMCHorsePattern instance;
 

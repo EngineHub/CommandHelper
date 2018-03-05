@@ -12,24 +12,24 @@ import com.laytonsmith.core.constructs.CClassType;
 @InterfaceRunnerFor(ArrayAccess.class)
 public class ArrayAccessRunner extends AbstractMixedInterfaceRunner {
 
-    @Override
-    public String docs() {
-	return "Provides access to an object using the square bracket notation.";
-    }
+	@Override
+	public String docs() {
+		return "Provides access to an object using the square bracket notation.";
+	}
 
-    @Override
-    public Version since() {
-	return CHVersion.V3_3_1;
-    }
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	return new CClassType[]{Mixed.TYPE, Sizeable.TYPE};
-    }
+	@Override
+	public CClassType[] getSuperclasses() {
+		return new CClassType[]{Mixed.TYPE, Sizeable.TYPE};
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	return new CClassType[]{};
-    }
+	@Override
+	public CClassType[] getInterfaces() {
+		return new CClassType[]{};
+	}
 
 }

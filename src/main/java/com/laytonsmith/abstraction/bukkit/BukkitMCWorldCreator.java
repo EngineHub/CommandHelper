@@ -13,7 +13,8 @@ import org.bukkit.WorldType;
 public class BukkitMCWorldCreator implements MCWorldCreator {
 
 	WorldCreator creator;
-	public BukkitMCWorldCreator(String name){
+
+	public BukkitMCWorldCreator(String name) {
 		creator = new WorldCreator(name);
 	}
 

@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
@@ -64,7 +62,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public boolean canSee(MCPlayer p) {
-		return this.p.canSee(((BukkitMCPlayer)p)._Player());
+		return this.p.canSee(((BukkitMCPlayer) p)._Player());
 	}
 
 	@Override
@@ -104,7 +102,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public MCPlayerInventory getInventory() {
-		if(p == null || p.getInventory() == null) {
+		if (p == null || p.getInventory() == null) {
 			return null;
 		}
 		return new BukkitMCPlayerInventory(p.getInventory());
@@ -112,26 +110,26 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public MCItemStack getItemAt(Integer slot) {
-		if(slot == null) {
+		if (slot == null) {
 			return new BukkitMCItemStack(p.getItemInHand());
 		}
 		ItemStack is = null;
 		//Special slots
-		if(slot == 100) {
+		if (slot == 100) {
 			is = p.getInventory().getBoots();
-		} else if(slot == 101) {
+		} else if (slot == 101) {
 			is = p.getInventory().getLeggings();
-		} else if(slot == 102) {
+		} else if (slot == 102) {
 			is = p.getInventory().getChestplate();
-		} else if(slot == 103) {
+		} else if (slot == 103) {
 			is = p.getInventory().getHelmet();
-		} else if(slot == -106) {
+		} else if (slot == -106) {
 			is = p.getInventory().getItemInOffHand();
 		}
-		if(slot >= 0 && slot <= 35) {
+		if (slot >= 0 && slot <= 35) {
 			is = p.getInventory().getItem(slot);
 		}
-		if(is == null) {
+		if (is == null) {
 			return null;
 		} else {
 			return new BukkitMCItemStack(is);
@@ -169,8 +167,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-	public int getTotalExperience()
-	{
+	public int getTotalExperience() {
 		return p.getTotalExperience();
 	}
 
@@ -182,19 +179,19 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public int getExpAtLevel() {
 		int level = p.getLevel();
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
-			if(level > 30) {
+		if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
+			if (level > 30) {
 				return (int) (3.5 * Math.pow(level, 2) - 151.5 * level + 2220);
 			}
-			if(level > 15) {
+			if (level > 15) {
 				return (int) (1.5 * Math.pow(level, 2) - 29.5 * level + 360);
 			}
 			return 17 * level;
 		} else {
-			if(level > 30) {
+			if (level > 30) {
 				return (int) (4.5 * Math.pow(level, 2) - 162.5 * level + 2220);
 			}
-			if(level > 15) {
+			if (level > 15) {
 				return (int) (2.5 * Math.pow(level, 2) - 40.5 * level + 360);
 			}
 			return (int) (Math.pow(level, 2) + 6 * level);
@@ -205,12 +202,12 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void setFlySpeed(float speed) {
 		p.setFlySpeed(speed);
 	}
-	
+
 	@Override
 	public float getFlySpeed() {
 		return p.getFlySpeed();
 	}
-	
+
 	@Override
 	public void setWalkSpeed(float speed) {
 		p.setWalkSpeed(speed);
@@ -220,7 +217,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public float getWalkSpeed() {
 		return p.getWalkSpeed();
 	}
-	
+
 	@Override
 	public void giveExp(int xp) {
 		p.giveExp(xp);
@@ -261,9 +258,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		// As in https://github.com/sk89q/WorldEdit/blob/master/
 		// worldedit-bukkit/src/main/java/com/sk89q/wepif/DinnerPermsResolver.java#L112-L126
 		List<String> groupNames = new ArrayList<String>();
-		for(PermissionAttachmentInfo permAttach : p.getEffectivePermissions()) {
+		for (PermissionAttachmentInfo permAttach : p.getEffectivePermissions()) {
 			String perm = permAttach.getPermission();
-			if(!(perm.startsWith(Static.groupPrefix) && permAttach.getValue())) {
+			if (!(perm.startsWith(Static.groupPrefix) && permAttach.getValue())) {
 				continue;
 			}
 			groupNames.add(perm.substring(Static.groupPrefix.length(), perm.length()));
@@ -285,7 +282,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public boolean isSneaking() {
 		return p.isSneaking();
 	}
-	
+
 	@Override
 	public boolean isSprinting() {
 		return p.isSprinting();
@@ -305,8 +302,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public boolean removeEffect(int potionID) {
 		PotionEffectType t = PotionEffectType.getById(potionID);
 		boolean hasIt = false;
-		for(PotionEffect pe : p.getActivePotionEffects()) {
-			if(pe.getType() == t) {
+		for (PotionEffect pe : p.getActivePotionEffects()) {
+			if (pe.getType() == t) {
 				hasIt = true;
 				break;
 			}
@@ -334,22 +331,22 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void sendResourcePack(String url) {
-			p.setResourcePack(url);
+		p.setResourcePack(url);
 	}
 
 	@Override
 	public void sendTitle(String title, String subtitle, int fadein, int stay, int fadeout) {
-		if(title == null) {
+		if (title == null) {
 			// If the title is null the subtitle won't be displayed. This is unintuitive.
 			title = "";
 		}
 		try {
 			p.sendTitle(title, subtitle, fadein, stay, fadeout);
-		} catch(NoSuchMethodError ex1){
+		} catch (NoSuchMethodError ex1) {
 			// Probably prior to 1.11, try the deprecated method
 			try {
 				p.sendTitle(title, subtitle);
-			} catch(NoSuchMethodError ex2){
+			} catch (NoSuchMethodError ex2) {
 				// Probably prior to 1.8.7, no title API
 			}
 		}
@@ -403,12 +400,12 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public void setSpectatorTarget(MCEntity entity) {
 		try {
-			if(entity == null){
+			if (entity == null) {
 				p.setSpectatorTarget(null);
 				return;
 			}
 			p.setSpectatorTarget((Entity) entity.getHandle());
-		} catch(NoSuchMethodError ex){
+		} catch (NoSuchMethodError ex) {
 			// Probably 1.8.6 or prior
 		}
 	}
@@ -417,7 +414,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public MCEntity getSpectatorTarget() {
 		try {
 			return BukkitConvertor.BukkitGetCorrectEntity(p.getSpectatorTarget());
-		} catch(NoSuchMethodError ex){
+		} catch (NoSuchMethodError ex) {
 			// Probably 1.8.6 or prior
 			return null;
 		}
@@ -430,7 +427,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 		Class serverClass = Class.forName("org.bukkit.craftbukkit." + version + ".CraftServer");
 
-		if(!server.getClass().isAssignableFrom(serverClass)) {
+		if (!server.getClass().isAssignableFrom(serverClass)) {
 			throw new IllegalStateException("Running server isn't CraftBukkit");
 		}
 
@@ -440,13 +437,14 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
 		/*n.m.s.OpList*/ Object opSet = ReflectionUtils.get(Class.forName("net.minecraft.server." + version + ".PlayerList"), nmsPlayerList, "operators");
 		//opSet.getClass().getSuperclass() == n.m.s.JsonList
-		Map/*<String, n.m.s.OpListEntry>*/ d = (Map)ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
-		if(value){
+		Map/*<String, n.m.s.OpListEntry>*/ d = (Map) ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
+		if (value) {
 			/*n.m.s.OpListEntry*/ Class nmsOpListEntry = Class.forName("net.minecraft.server." + version + ".OpListEntry");
 			Class nmsGameProfile;
 			try {
 				/*com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("com.mojang.authlib.GameProfile");
-			} catch (ClassNotFoundException eee){
+			} catch (ClassNotFoundException eee) {
+
 				// Prior to 1.8
 				/*net.minecraft.util.com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("net.minecraft.util.com.mojang.authlib.GameProfile");
 			}
@@ -466,8 +464,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-	public void setTotalExperience(int total)
-	{
+	public void setTotalExperience(int total) {
 		p.setTotalExperience(total);
 	}
 
@@ -475,10 +472,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void setVanished(boolean set, MCPlayer to) {
 		// show/hide was deprecated in 1.12.2
 		// will need to change this to include a plugin argument
-		if(!set) {
-			p.showPlayer(((BukkitMCPlayer)to)._Player());
+		if (!set) {
+			p.showPlayer(((BukkitMCPlayer) to)._Player());
 		} else {
-			p.hidePlayer(((BukkitMCPlayer)to)._Player());
+			p.hidePlayer(((BukkitMCPlayer) to)._Player());
 		}
 	}
 
@@ -523,13 +520,13 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void playNote(MCLocation loc, MCInstrument instrument, MCNote note) {
 		p.playNote((Location) loc.getHandle(), BukkitMCInstrument.getConvertor().getConcreteEnum(instrument), (Note) note.getHandle());
 	}
-	
+
 	@Override
 	public void playSound(MCLocation l, MCSound sound, float volume, float pitch) {
 		p.playSound(((BukkitMCLocation) l).asLocation(),
 				((BukkitMCSound) sound).getConcrete(), volume, pitch);
 	}
-	
+
 	@Override
 	public void playSound(MCLocation l, String sound, float volume, float pitch) {
 		p.playSound(((BukkitMCLocation) l).asLocation(), sound, volume, pitch);
@@ -540,7 +537,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		try {
 			p.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
 					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
-		} catch(NoClassDefFoundError ex) {
+		} catch (NoClassDefFoundError ex) {
 			// probably prior to 1.11, ignore category
 			playSound(l, sound, volume, pitch);
 		}
@@ -551,7 +548,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		try {
 			p.playSound((Location) l.getHandle(), sound,
 					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
-		} catch(NoClassDefFoundError ex) {
+		} catch (NoClassDefFoundError ex) {
 			// probably prior to 1.11, ignore category
 			playSound(l, sound, volume, pitch);
 		}
@@ -561,7 +558,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void stopSound(MCSound sound) {
 		try {
 			p.stopSound(((BukkitMCSound) sound).getConcrete());
-		} catch(NoSuchMethodError ex){
+		} catch (NoSuchMethodError ex) {
 			// probably prior to 1.10
 		}
 	}
@@ -570,7 +567,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void stopSound(String sound) {
 		try {
 			p.stopSound(sound);
-		} catch(NoSuchMethodError ex){
+		} catch (NoSuchMethodError ex) {
 			// probably prior to 1.10
 		}
 	}
@@ -580,7 +577,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		try {
 			p.stopSound(((BukkitMCSound) sound).getConcrete(),
 					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category));
-		} catch(NoClassDefFoundError ex){
+		} catch (NoClassDefFoundError ex) {
 			// probably prior to 1.11, ignore category
 			stopSound(sound);
 		}
@@ -590,7 +587,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void stopSound(String sound, MCSoundCategory category) {
 		try {
 			p.stopSound(sound, BukkitMCSoundCategory.getConvertor().getConcreteEnum(category));
-		} catch(NoClassDefFoundError ex){
+		} catch (NoClassDefFoundError ex) {
 			// probably prior to 1.11, ignore category
 			stopSound(sound);
 		}
@@ -601,12 +598,12 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		try {
 			Particle type = Particle.valueOf(pa.name());
 			Location loc = ((BukkitMCLocation) l).asLocation();
-			if(data != null && type.getDataType().equals(ItemStack.class) && data instanceof MCItemStack) {
+			if (data != null && type.getDataType().equals(ItemStack.class) && data instanceof MCItemStack) {
 				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, ((MCItemStack) data).getHandle());
 			} else {
 				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);
 			}
-		} catch(NoClassDefFoundError ex) {
+		} catch (NoClassDefFoundError ex) {
 			// probably prior to 1.9
 		}
 	}
@@ -644,7 +641,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public MCLocation getBedSpawnLocation() {
 		Location loc = p.getBedSpawnLocation();
-		if(loc == null) {
+		if (loc == null) {
 			return null;
 		}
 		return new BukkitMCLocation(loc);

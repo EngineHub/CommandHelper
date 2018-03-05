@@ -10,5 +10,6 @@ public interface MCLlama extends MCChestedHorse {
 	}
 
 	MCLlamaColor getLlamaColor();
+
 	void setLlamaColor(MCLlamaColor color);
 }

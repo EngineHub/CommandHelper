@@ -8,7 +8,8 @@ public class BukkitMCDoubleChest extends BukkitMCInventory {
 
 	Inventory left;
 	Inventory right;
-	public BukkitMCDoubleChest(Inventory left, Inventory right){
+
+	public BukkitMCDoubleChest(Inventory left, Inventory right) {
 		super(left);
 	}
 
@@ -20,7 +21,7 @@ public class BukkitMCDoubleChest extends BukkitMCInventory {
 	@Override
 	public MCItemStack getItem(int slot) {
 		ItemStack is;
-		if(slot < left.getSize()){
+		if (slot < left.getSize()) {
 			is = left.getItem(slot);
 		} else {
 			is = right.getItem(slot - left.getSize());
@@ -31,7 +32,7 @@ public class BukkitMCDoubleChest extends BukkitMCInventory {
 	@Override
 	public void setItem(int slot, MCItemStack stack) {
 		ItemStack is = (ItemStack) stack.getHandle();
-		if(slot < left.getSize()){
+		if (slot < left.getSize()) {
 			left.setItem(slot, is);
 		} else {
 			right.setItem(slot - left.getSize(), is);
@@ -45,17 +46,17 @@ public class BukkitMCDoubleChest extends BukkitMCInventory {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj == null) {
+		if (obj == null) {
 			return false;
 		}
-		if(getClass() != obj.getClass()) {
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
 		final BukkitMCDoubleChest other = (BukkitMCDoubleChest) obj;
-		if(this.left != other.left && (this.left == null || !this.left.equals(other.left))) {
+		if (this.left != other.left && (this.left == null || !this.left.equals(other.left))) {
 			return false;
 		}
-		if(this.right != other.right && (this.right == null || !this.right.equals(other.right))) {
+		if (this.right != other.right && (this.right == null || !this.right.equals(other.right))) {
 			return false;
 		}
 		return true;

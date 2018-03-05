@@ -89,4 +89,3 @@ public class BukkitMCWorldBorder implements AbstractionObject, MCWorldBorder {
 		return wb;
 	}
 }
-

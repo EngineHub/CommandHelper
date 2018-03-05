@@ -47,6 +47,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class VehicleEvents {
+
 	public static String docs() {
 		return "Contains events related to vehicle entity types.";
 	}
@@ -71,7 +72,7 @@ public class VehicleEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if(event instanceof MCVehicleEnterExitEvent) {
+			if (event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "passengertype", e.getEntity().getType().name(), PrefilterType.MACRO);
@@ -87,7 +88,7 @@ public class VehicleEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCVehicleEnterExitEvent) {
+			if (event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(e);
@@ -95,8 +96,8 @@ public class VehicleEvents {
 				ret.put("passengertype", new CString(e.getEntity().getType().name(), t));
 				ret.put("vehicle", new CString(e.getVehicle().getUniqueId().toString(), t));
 				ret.put("passenger", new CString(e.getEntity().getUniqueId().toString(), t));
-				if(e.getEntity().getType().getAbstracted() == MCEntityType.MCVanillaEntityType.PLAYER) {
-					ret.put("player", new CString(((MCPlayer)e.getEntity()).getName(), t));
+				if (e.getEntity().getType().getAbstracted() == MCEntityType.MCVanillaEntityType.PLAYER) {
+					ret.put("player", new CString(((MCPlayer) e.getEntity()).getName(), t));
 				} else {
 					ret.put("player", CNull.NULL);
 				}
@@ -142,7 +143,7 @@ public class VehicleEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if(event instanceof MCVehicleEnterExitEvent) {
+			if (event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "passengertype", e.getEntity().getType().name(), PrefilterType.MACRO);
@@ -158,7 +159,7 @@ public class VehicleEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCVehicleEnterExitEvent) {
+			if (event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(e);
@@ -166,8 +167,8 @@ public class VehicleEvents {
 				ret.put("passengertype", new CString(e.getEntity().getType().name(), t));
 				ret.put("vehicle", new CString(e.getVehicle().getUniqueId().toString(), t));
 				ret.put("passenger", new CString(e.getEntity().getUniqueId().toString(), t));
-				if(e.getEntity().getType().getAbstracted() == MCEntityType.MCVanillaEntityType.PLAYER) {
-					ret.put("player", new CString(((MCPlayer)e.getEntity()).getName(), t));
+				if (e.getEntity().getType().getAbstracted() == MCEntityType.MCVanillaEntityType.PLAYER) {
+					ret.put("player", new CString(((MCPlayer) e.getEntity()).getName(), t));
 				} else {
 					ret.put("player", CNull.NULL);
 				}
@@ -219,15 +220,15 @@ public class VehicleEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCVehicleCollideEvent) {
+			if (e instanceof MCVehicleCollideEvent) {
 				MCVehicleCollideEvent event = (MCVehicleCollideEvent) e;
 				Prefilters.match(prefilter, "type", event.getVehicle().getType().name(), PrefilterType.MACRO);
-				if(prefilter.containsKey("collisiontype")) {
-					if(!event.getCollisionType().name().equals(prefilter.get("collisiontype").val())) {
+				if (prefilter.containsKey("collisiontype")) {
+					if (!event.getCollisionType().name().equals(prefilter.get("collisiontype").val())) {
 						return false;
 					}
 				}
-				switch(event.getCollisionType()) {
+				switch (event.getCollisionType()) {
 					case BLOCK:
 						Prefilters.match(prefilter, "hittype", Static.ParseItemNotation(((MCVehicleBlockCollideEvent) event)
 								.getBlock()), PrefilterType.ITEM_MATCH);
@@ -236,10 +237,10 @@ public class VehicleEvents {
 						Prefilters.match(prefilter, "hittype", ((MCVehicleEnitityCollideEvent) event)
 								.getEntity().getType().name(), PrefilterType.MACRO);
 						break;
-						default:
-							throw ConfigRuntimeException.CreateUncatchableException("Greetings from the future! If you are seeing this message,"
-									+ " Minecraft has reached the point where vehicles can hit things that are neither"
-									+ " a block nor an entity. Please report this error to developers.", Target.UNKNOWN);
+					default:
+						throw ConfigRuntimeException.CreateUncatchableException("Greetings from the future! If you are seeing this message,"
+								+ " Minecraft has reached the point where vehicles can hit things that are neither"
+								+ " a block nor an entity. Please report this error to developers.", Target.UNKNOWN);
 				}
 				return true;
 			}
@@ -253,7 +254,7 @@ public class VehicleEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCVehicleCollideEvent) {
+			if (event instanceof MCVehicleCollideEvent) {
 				MCVehicleCollideEvent e = (MCVehicleCollideEvent) event;
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(e);
@@ -264,7 +265,7 @@ public class VehicleEvents {
 				Construct entity = CNull.NULL;
 				boolean collide = true;
 				boolean pickup = false;
-				switch(e.getCollisionType()) {
+				switch (e.getCollisionType()) {
 					case BLOCK:
 						block = ObjectGenerator.GetGenerator().location(
 								((MCVehicleBlockCollideEvent) e).getBlock().getLocation());
@@ -275,10 +276,10 @@ public class VehicleEvents {
 						collide = !vec.isCollisionCancelled();
 						pickup = !vec.isPickupCancelled();
 						break;
-						default:
-							throw ConfigRuntimeException.CreateUncatchableException("Greetings from the future! If you are seeing this message,"
-									+ " Minecraft has reached the point where vehicles can hit things that are neither"
-									+ " a block nor an entity. Please report this error to developers.", t);
+					default:
+						throw ConfigRuntimeException.CreateUncatchableException("Greetings from the future! If you are seeing this message,"
+								+ " Minecraft has reached the point where vehicles can hit things that are neither"
+								+ " a block nor an entity. Please report this error to developers.", t);
 				}
 				ret.put("block", block);
 				ret.put("entity", entity);
@@ -297,13 +298,13 @@ public class VehicleEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if(event instanceof MCVehicleEnitityCollideEvent) {
+			if (event instanceof MCVehicleEnitityCollideEvent) {
 				MCVehicleEnitityCollideEvent e = (MCVehicleEnitityCollideEvent) event;
-				if(key.equals("collide")) {
+				if (key.equals("collide")) {
 					e.setCollisionCancelled(!Static.getBoolean(value));
 					return true;
 				}
-				if(key.equals("pickup")) {
+				if (key.equals("pickup")) {
 					e.setPickupCancelled(!Static.getBoolean(value));
 					return true;
 				}
@@ -319,19 +320,19 @@ public class VehicleEvents {
 
 	private static final Set<Integer> thresholdList = new HashSet<>();
 
-	public static Set<Integer> GetThresholdList(){
+	public static Set<Integer> GetThresholdList() {
 		return thresholdList;
 	}
 
 	private static final Map<Integer, Map<UUID, MCLocation>> lastVehicleLocations = new HashMap<>();
 
-	public static Map<UUID, MCLocation> GetLastLocations(Integer i){
-		if(!lastVehicleLocations.containsKey(i)) {
+	public static Map<UUID, MCLocation> GetLastLocations(Integer i) {
+		if (!lastVehicleLocations.containsKey(i)) {
 			HashMap<UUID, MCLocation> newLocation = new HashMap<>();
 			lastVehicleLocations.put(i, newLocation);
 			return newLocation;
 		}
-		return(lastVehicleLocations.get(i));
+		return (lastVehicleLocations.get(i));
 	}
 
 	@api
@@ -369,7 +370,7 @@ public class VehicleEvents {
 		public void bind(BoundEvent event) {
 			int threshold = 1;
 			Map<String, Construct> prefilters = event.getPrefilter();
-			if(prefilters.containsKey("threshold")) {
+			if (prefilters.containsKey("threshold")) {
 				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
 			}
 			thresholdList.add(threshold);
@@ -379,15 +380,15 @@ public class VehicleEvents {
 		public void unbind(BoundEvent event) {
 			int threshold = 1;
 			Map<String, Construct> prefilters = event.getPrefilter();
-			if(prefilters.containsKey("threshold")) {
+			if (prefilters.containsKey("threshold")) {
 				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
 			}
-			for(BoundEvent b : EventUtils.GetEvents(event.getDriver())) {
-				if(b.getId().equals(event.getId())) {
+			for (BoundEvent b : EventUtils.GetEvents(event.getDriver())) {
+				if (b.getId().equals(event.getId())) {
 					continue;
 				}
-				if(b.getPrefilter().containsKey("threshold")) {
-					if(threshold == Static.getInt(b.getPrefilter().get("threshold"), Target.UNKNOWN)) {
+				if (b.getPrefilter().containsKey("threshold")) {
+					if (threshold == Static.getInt(b.getPrefilter().get("threshold"), Target.UNKNOWN)) {
 						return;
 					}
 				}
@@ -398,7 +399,7 @@ public class VehicleEvents {
 
 		@Override
 		public void cancel(BindableEvent o, boolean state) {
-			if(o instanceof MCVehicleMoveEvent) {
+			if (o instanceof MCVehicleMoveEvent) {
 				((MCVehicleMoveEvent) o).setCancelled(state);
 			}
 		}
@@ -415,37 +416,37 @@ public class VehicleEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCVehicleMoveEvent) {
+			if (e instanceof MCVehicleMoveEvent) {
 				MCVehicleMoveEvent event = (MCVehicleMoveEvent) e;
-				if(prefilter.containsKey("threshold")) {
-					if(Static.getInt(prefilter.get("threshold"), Target.UNKNOWN) != event.getThreshold()) {
+				if (prefilter.containsKey("threshold")) {
+					if (Static.getInt(prefilter.get("threshold"), Target.UNKNOWN) != event.getThreshold()) {
 						return false;
 					}
-				} else if(event.getThreshold() != 1) {
+				} else if (event.getThreshold() != 1) {
 					return false;
 				}
-				if(prefilter.containsKey("world")
+				if (prefilter.containsKey("world")
 						&& !prefilter.get("world").val().equals(event.getFrom().getWorld().getName())) {
 					return false;
 				}
-				if(prefilter.containsKey("from")) {
+				if (prefilter.containsKey("from")) {
 					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("from"), event.getVehicle().getVehicle().getWorld(), Target.UNKNOWN);
 					MCLocation loc = event.getFrom();
-					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()) {
+					if (loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()) {
 						return false;
 					}
 				}
-				if(prefilter.containsKey("to")) {
+				if (prefilter.containsKey("to")) {
 					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("to"), event.getVehicle().getVehicle().getWorld(), Target.UNKNOWN);
 					MCLocation loc = event.getFrom();
-					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()) {
+					if (loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()) {
 						return false;
 					}
 				}
 
 				Prefilters.match(prefilter, "vehicletype", event.getVehicle().getType().name(), PrefilterType.MACRO);
 				MCEntity passenger = event.getVehicle().getPassenger();
-				if(passenger != null) {
+				if (passenger != null) {
 					Prefilters.match(prefilter, "passengertype", passenger.getType().name(), PrefilterType.MACRO);
 				}
 
@@ -458,7 +459,7 @@ public class VehicleEvents {
 		public BindableEvent convert(CArray manualObject, Target t) {
 
 			MCEntity e = Static.getEntity(manualObject.get("id", Target.UNKNOWN), Target.UNKNOWN);
-			if(!(e instanceof MCVehicle)) {
+			if (!(e instanceof MCVehicle)) {
 				throw new CREBadEntityException("The id was not a vehicle", Target.UNKNOWN);
 			}
 
@@ -469,7 +470,7 @@ public class VehicleEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCVehicleMoveEvent) {
+			if (event instanceof MCVehicleMoveEvent) {
 				MCVehicleMoveEvent e = (MCVehicleMoveEvent) event;
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = new HashMap<>();
@@ -481,7 +482,7 @@ public class VehicleEvents {
 
 				MCEntity passenger = e.getVehicle().getPassenger();
 
-				if(passenger == null) {
+				if (passenger == null) {
 					ret.put("passenger", CNull.NULL);
 					ret.put("passengertype", CNull.NULL);
 					ret.put("player", CNull.NULL);
@@ -492,13 +493,12 @@ public class VehicleEvents {
 					ret.put("passengertype", new CString(passengertype.name(), t));
 					ret.put("passenger", new CString(passenger.getUniqueId().toString(), t));
 
-					if(passengertype.getAbstracted() == MCEntityType.MCVanillaEntityType.PLAYER) {
+					if (passengertype.getAbstracted() == MCEntityType.MCVanillaEntityType.PLAYER) {
 						ret.put("player", new CString(((MCPlayer) e.getVehicle().getPassenger()).getName(), t));
 					} else {
 						ret.put("player", CNull.NULL);
 					}
 				}
-
 
 				return ret;
 			} else {
@@ -546,7 +546,7 @@ public class VehicleEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if(event instanceof MCVehicleDestroyEvent) {
+			if (event instanceof MCVehicleDestroyEvent) {
 				MCVehicleDestroyEvent e = (MCVehicleDestroyEvent) event;
 				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO);
 				return true;
@@ -561,25 +561,25 @@ public class VehicleEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if(event instanceof MCVehicleDestroyEvent) {
+			if (event instanceof MCVehicleDestroyEvent) {
 				MCVehicleDestroyEvent e = (MCVehicleDestroyEvent) event;
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(e);
 				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
 				ret.put("vehicle", new CString(e.getVehicle().getUniqueId().toString(), t));
 				MCEntity damager = ((MCVehicleDestroyEvent) event).getAttacker();
-				if(damager instanceof MCPlayer) {
+				if (damager instanceof MCPlayer) {
 					ret.put("damager", new CString(((MCPlayer) damager).getName(), Target.UNKNOWN));
-				} else if(damager != null) {
+				} else if (damager != null) {
 					ret.put("damager", new CString(damager.getUniqueId().toString(), Target.UNKNOWN));
 				}
-				if(damager instanceof MCProjectile) {
+				if (damager instanceof MCProjectile) {
 					MCProjectileSource shooter = ((MCProjectile) damager).getShooter();
-					if(shooter instanceof MCPlayer) {
+					if (shooter instanceof MCPlayer) {
 						ret.put("shooter", new CString(((MCPlayer) shooter).getName(), Target.UNKNOWN));
-					} else if(shooter instanceof MCEntity) {
+					} else if (shooter instanceof MCEntity) {
 						ret.put("shooter", new CString(((MCEntity) shooter).getUniqueId().toString(), Target.UNKNOWN));
-					} else if(shooter instanceof MCBlockProjectileSource) {
+					} else if (shooter instanceof MCBlockProjectileSource) {
 						ret.put("shooter", ObjectGenerator.GetGenerator().location(((MCBlockProjectileSource) shooter).getBlock().getLocation()));
 					}
 				}

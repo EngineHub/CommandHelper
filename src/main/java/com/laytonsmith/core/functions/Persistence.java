@@ -37,7 +37,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * 
+ *
  */
 @core
 public class Persistence {
@@ -51,7 +51,7 @@ public class Persistence {
 				+ " process safe).";
 	}
 
-	@api(environments={GlobalEnv.class})
+	@api(environments = {GlobalEnv.class})
 	@noboilerplate
 	@seealso({get_value.class, clear_value.class, com.laytonsmith.tools.docgen.templates.PersistenceNetwork.class})
 	public static class store_value extends AbstractFunction {
@@ -113,7 +113,7 @@ public class Persistence {
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Storing: " + key + " -> " + value, t);
 			try {
 				env.getEnv(GlobalEnv.class).GetPersistenceNetwork().set(env.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + key).split("\\."), value);
-			} catch(IllegalArgumentException e){
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			} catch (Exception ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
@@ -133,7 +133,7 @@ public class Persistence {
 		}
 	}
 
-	@api(environments={GlobalEnv.class})
+	@api(environments = {GlobalEnv.class})
 	@noboilerplate
 	@seealso({store_value.class, get_values.class, has_value.class, com.laytonsmith.tools.docgen.templates.PersistenceNetwork.class})
 	public static class get_value extends AbstractFunction {
@@ -181,7 +181,7 @@ public class Persistence {
 					obj = env.getEnv(GlobalEnv.class).GetPersistenceNetwork().get(("storage." + namespace).split("\\."));
 				} catch (DataSourceException ex) {
 					throw new CREIOException(ex.getMessage(), t, ex);
-				} catch(IllegalArgumentException e){
+				} catch (IllegalArgumentException e) {
 					throw new CREFormatException(e.getMessage(), t, e);
 				}
 				if (obj == null) {
@@ -210,7 +210,7 @@ public class Persistence {
 		}
 	}
 
-	@api(environments={GlobalEnv.class})
+	@api(environments = {GlobalEnv.class})
 	@noboilerplate
 	@seealso({com.laytonsmith.tools.docgen.templates.PersistenceNetwork.class})
 	public static class get_values extends AbstractFunction {
@@ -254,8 +254,7 @@ public class Persistence {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Getting values", "store_value('x.top.a',true)\nstore_value('x.top.b',false)\nmsg(get_values('x'))"),
-			};
+				new ExampleScript("Getting values", "store_value('x.top.a',true)\nstore_value('x.top.b',false)\nmsg(get_values('x'))"),};
 		}
 
 		@Override
@@ -271,7 +270,7 @@ public class Persistence {
 				list = p.getNamespace(keyChain.toArray(new String[keyChain.size()]));
 			} catch (DataSourceException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
-			} catch(IllegalArgumentException e){
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t, e);
 			}
 			CArray ca = CArray.GetAssociativeArray(t);
@@ -299,7 +298,7 @@ public class Persistence {
 		}
 	}
 
-	@api(environments={GlobalEnv.class})
+	@api(environments = {GlobalEnv.class})
 	@noboilerplate
 	@seealso({get_value.class, com.laytonsmith.tools.docgen.templates.PersistenceNetwork.class})
 	public static class has_value extends AbstractFunction {
@@ -345,7 +344,7 @@ public class Persistence {
 				return CBoolean.get(env.getEnv(GlobalEnv.class).GetPersistenceNetwork().hasKey(("storage." + GetNamespace(args, null, getName(), t)).split("\\.")));
 			} catch (DataSourceException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
-			} catch(IllegalArgumentException e){
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t, e);
 			}
 		}
@@ -356,7 +355,7 @@ public class Persistence {
 		}
 	}
 
-	@api(environments={GlobalEnv.class})
+	@api(environments = {GlobalEnv.class})
 	@noboilerplate
 	@seealso({store_value.class, com.laytonsmith.tools.docgen.templates.PersistenceNetwork.class})
 	public static class clear_value extends AbstractFunction {
@@ -408,7 +407,7 @@ public class Persistence {
 				throw new CREIOException(ex.getMessage(), t, ex);
 			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
-			} catch(IllegalArgumentException e){
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t, e);
 			}
 			return CVoid.VOID;
@@ -421,9 +420,8 @@ public class Persistence {
 	}
 
 	/**
-	 * Generates the namespace for this value, given an array of constructs. If
-	 * the entire list of arguments isn't supposed to be part of the namespace,
-	 * the value to be excluded may be specified.
+	 * Generates the namespace for this value, given an array of constructs. If the entire list of arguments isn't
+	 * supposed to be part of the namespace, the value to be excluded may be specified.
 	 *
 	 * @param args
 	 * @param exclude

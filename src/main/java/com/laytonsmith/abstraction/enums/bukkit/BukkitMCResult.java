@@ -16,7 +16,7 @@ public class BukkitMCResult extends EnumConvertor<MCResult, Result> {
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCResult instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCResult getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCResult();
 		}
 		return instance;

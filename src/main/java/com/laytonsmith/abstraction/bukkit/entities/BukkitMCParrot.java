@@ -8,6 +8,7 @@ import org.bukkit.entity.Parrot;
 public class BukkitMCParrot extends BukkitMCTameable implements MCParrot {
 
 	Parrot p;
+
 	public BukkitMCParrot(Entity be) {
 		super(be);
 		this.p = (Parrot) be;

@@ -11,6 +11,7 @@ import org.bukkit.inventory.ShapedRecipe;
 public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedRecipe {
 
 	ShapedRecipe r;
+
 	public BukkitMCShapedRecipe(ShapedRecipe recipe) {
 		super(recipe);
 		r = recipe;
@@ -20,7 +21,7 @@ public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedReci
 	public String getKey() {
 		try {
 			return r.getKey().getKey();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably prior to 1.12
 			return null;
 		}
@@ -30,7 +31,7 @@ public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedReci
 	public MCRecipeType getRecipeType() {
 		return MCRecipeType.SHAPED;
 	}
-	
+
 	@Override
 	public Object getHandle() {
 		return r;

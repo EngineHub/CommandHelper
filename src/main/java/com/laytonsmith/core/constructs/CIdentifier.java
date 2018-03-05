@@ -10,39 +10,40 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  */
 public class CIdentifier extends CFunction {
 
-    private final ParseTree contained;
-    public CIdentifier(String type, ParseTree c, Target t){
-        super(type, t);
-        contained = c;
-    }
+	private final ParseTree contained;
 
-    @Override
-    public boolean isDynamic() {
-        return contained.getData().isDynamic();
-    }
+	public CIdentifier(String type, ParseTree c, Target t) {
+		super(type, t);
+		contained = c;
+	}
 
-    public ParseTree contained(){
-        return contained;
-    }
+	@Override
+	public boolean isDynamic() {
+		return contained.getData().isDynamic();
+	}
 
-    @Override
-    public Version since() {
-	return super.since();
-    }
+	public ParseTree contained() {
+		return contained;
+	}
 
-    @Override
-    public String docs() {
-	return super.docs();
-    }
+	@Override
+	public Version since() {
+		return super.since();
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	return new CClassType[]{Mixed.TYPE};
-    }
+	@Override
+	public String docs() {
+		return super.docs();
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	return new CClassType[]{};
-    }
+	@Override
+	public CClassType[] getSuperclasses() {
+		return new CClassType[]{Mixed.TYPE};
+	}
+
+	@Override
+	public CClassType[] getInterfaces() {
+		return new CClassType[]{};
+	}
 
 }

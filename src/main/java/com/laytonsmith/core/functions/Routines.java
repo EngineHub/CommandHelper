@@ -1,4 +1,3 @@
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.core;
@@ -8,7 +7,8 @@ import com.laytonsmith.annotations.core;
  */
 @core
 public class Routines {
-	public static String docs(){
+
+	public static String docs() {
 		return "This class of functions provides Routines capabilities. Currently all these functions"
 				+ " are only available via cmdline.";
 	}

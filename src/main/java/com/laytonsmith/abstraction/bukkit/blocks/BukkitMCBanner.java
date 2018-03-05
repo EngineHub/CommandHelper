@@ -14,6 +14,7 @@ import java.util.List;
 public class BukkitMCBanner extends BukkitMCBlockState implements MCBanner {
 
 	Banner b;
+
 	public BukkitMCBanner(Banner block) {
 		super(block);
 		b = block;
@@ -22,7 +23,7 @@ public class BukkitMCBanner extends BukkitMCBlockState implements MCBanner {
 	@Override
 	public MCDyeColor getBaseColor() {
 		return BukkitMCDyeColor.getConvertor().getAbstractedEnum(b.getBaseColor());
-    }
+	}
 
 	@Override
 	public void setBaseColor(MCDyeColor color) {
@@ -38,7 +39,7 @@ public class BukkitMCBanner extends BukkitMCBlockState implements MCBanner {
 	public List<MCPattern> getPatterns() {
 		List<Pattern> bukkitPatterns = b.getPatterns();
 		List<MCPattern> patterns = new ArrayList<>(bukkitPatterns.size());
-		for(Pattern p : bukkitPatterns) {
+		for (Pattern p : bukkitPatterns) {
 			patterns.add(new BukkitMCPattern(p));
 		}
 		return patterns;

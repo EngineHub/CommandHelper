@@ -8,12 +8,13 @@ import org.bukkit.TravelAgent;
 public class BukkitMCTravelAgent implements MCTravelAgent {
 
 	TravelAgent a;
+
 	public BukkitMCTravelAgent(TravelAgent a) {
 		this.a = a;
 	}
-	
+
 	public BukkitMCTravelAgent(AbstractionObject o) {
-		a = (TravelAgent)o;
+		a = (TravelAgent) o;
 	}
 
 	@Override
@@ -34,17 +35,17 @@ public class BukkitMCTravelAgent implements MCTravelAgent {
 
 	@Override
 	public boolean createPortal(MCLocation location) {
-		return a.createPortal(((BukkitMCLocation)location).asLocation());
+		return a.createPortal(((BukkitMCLocation) location).asLocation());
 	}
 
 	@Override
 	public MCLocation findOrCreate(MCLocation location) {
-		return new BukkitMCLocation(a.findOrCreate(((BukkitMCLocation)location).asLocation()));
+		return new BukkitMCLocation(a.findOrCreate(((BukkitMCLocation) location).asLocation()));
 	}
 
 	@Override
 	public MCLocation findPortal(MCLocation location) {
-		return new BukkitMCLocation(a.findPortal(((BukkitMCLocation)location).asLocation()));
+		return new BukkitMCLocation(a.findPortal(((BukkitMCLocation) location).asLocation()));
 	}
 
 	@Override

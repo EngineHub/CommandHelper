@@ -60,8 +60,8 @@ public class BukkitMetadata {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREBadEntityException.class, CRECastException.class,
-					CREFormatException.class, CREInvalidPluginException.class, CRELengthException.class,
-					CREInvalidWorldException.class, CREPlayerOfflineException.class};
+				CREFormatException.class, CREInvalidPluginException.class, CRELengthException.class,
+				CREInvalidWorldException.class, CREPlayerOfflineException.class};
 		}
 	}
 
@@ -92,15 +92,15 @@ public class BukkitMetadata {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Attaches the string 'example' at the key 'key' to the player running the function, and outputs all values attached at the same key.",
-						"set_metadata('key', 'example')\nmsg(get_metadata('rank'))", "<would set the value in the metadata>"),
+				"set_metadata('key', 'example')\nmsg(get_metadata('rank'))", "<would set the value in the metadata>"),
 				new ExampleScript("Attaches the name of the player running the function at the key 'aKey' to the block at the given location, and outputs all values attached to the same block and at the same key.",
-						"assign(@block, array('x': 100, 'y': 63, 'z': 0))\nset_metadata(@block, 'aKey', player())\nmsg(get_metadata(@block, 'aKey'))", "<would set the value in the metadata>"),
+				"assign(@block, array('x': 100, 'y': 63, 'z': 0))\nset_metadata(@block, 'aKey', player())\nmsg(get_metadata(@block, 'aKey'))", "<would set the value in the metadata>"),
 				new ExampleScript("Attaches the boolean value true at the key 'my.key' to the entity whose the id is 1001, and outputs the value attached to the same entity and at the same key by" + StaticLayer.GetPluginName() + ".",
-						"assign(@entity, 1001)\nset_metadata(@entity, 'my.key', true)\nmsg(get_metadata(@entity, 'my.key', '" + StaticLayer.GetPluginName() + "'))", "<would set the value in the metadata>"),
+				"assign(@entity, 1001)\nset_metadata(@entity, 'my.key', true)\nmsg(get_metadata(@entity, 'my.key', '" + StaticLayer.GetPluginName() + "'))", "<would set the value in the metadata>"),
 				new ExampleScript("Attaches an array at the key 'anotherKey' to the world named 'world', and outputs all values attached to the same world and at the same key.",
-						"set_metadata('world', 'anotherKey', array(1, 50, 3))\nmsg(get_metadata('world', 'anotherKey'))", "<would set the value in the metadata>"),
+				"set_metadata('world', 'anotherKey', array(1, 50, 3))\nmsg(get_metadata('world', 'anotherKey'))", "<would set the value in the metadata>"),
 				new ExampleScript("Attaches null at the key 'key' to the player named 'player', and outputs the value attached to the same player and at the same key by" + StaticLayer.GetPluginName() + ".",
-						"assign(@peid, pinfo()[13])\nset_metadata(@peid, 'key', null)\nmsg(get_metadata(@peid, 'key', '" + StaticLayer.GetPluginName() + "'))", "<would set the value in the metadata>")
+				"assign(@peid, pinfo()[13])\nset_metadata(@peid, 'key', null)\nmsg(get_metadata(@peid, 'key', '" + StaticLayer.GetPluginName() + "'))", "<would set the value in the metadata>")
 			};
 		}
 
@@ -128,7 +128,7 @@ public class BukkitMetadata {
 				return values;
 			}
 		}
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
@@ -180,7 +180,7 @@ public class BukkitMetadata {
 				return CBoolean.FALSE;
 			}
 		}
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
@@ -230,7 +230,7 @@ public class BukkitMetadata {
 			metadatable.setMetadata(key, ObjectGenerator.GetGenerator().metadataValue(value, plugin));
 			return CVoid.VOID;
 		}
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
@@ -275,7 +275,7 @@ public class BukkitMetadata {
 			}
 			return CVoid.VOID;
 		}
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;

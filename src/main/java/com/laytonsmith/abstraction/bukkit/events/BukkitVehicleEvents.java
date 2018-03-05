@@ -31,6 +31,7 @@ public class BukkitVehicleEvents {
 			implements MCVehicleEnitityCollideEvent {
 
 		VehicleEntityCollisionEvent vec;
+
 		public BukkitMCVehicleEntityCollideEvent(VehicleCollisionEvent event) {
 			super(event);
 			vec = (VehicleEntityCollisionEvent) event;
@@ -38,7 +39,7 @@ public class BukkitVehicleEvents {
 
 		@Override
 		public MCEntity getEntity() {
-			if(vec.getEntity() == null) {
+			if (vec.getEntity() == null) {
 				return null;
 			}
 			return BukkitConvertor.BukkitGetCorrectEntity(vec.getEntity());
@@ -75,6 +76,7 @@ public class BukkitVehicleEvents {
 			implements MCVehicleBlockCollideEvent {
 
 		VehicleBlockCollisionEvent vbc;
+
 		public BukkitMCVehicleBlockCollideEvent(VehicleCollisionEvent event) {
 			super(event);
 			vbc = (VehicleBlockCollisionEvent) event;
@@ -95,6 +97,7 @@ public class BukkitVehicleEvents {
 	public static class BukkitMCVehicleEnterEvent extends BukkitMCVehicleEvent implements MCVehicleEnterExitEvent {
 
 		VehicleEnterEvent vee;
+
 		public BukkitMCVehicleEnterEvent(VehicleEnterEvent event) {
 			super(event);
 			vee = event;
@@ -102,7 +105,7 @@ public class BukkitVehicleEvents {
 
 		@Override
 		public MCEntity getEntity() {
-			if(vee.getEntered() == null) {
+			if (vee.getEntered() == null) {
 				return null;
 			}
 			return BukkitConvertor.BukkitGetCorrectEntity(vee.getEntered());
@@ -113,6 +116,7 @@ public class BukkitVehicleEvents {
 	public static class BukkitMCVehicleExitEvent extends BukkitMCVehicleEvent implements MCVehicleEnterExitEvent {
 
 		VehicleExitEvent vee;
+
 		public BukkitMCVehicleExitEvent(VehicleExitEvent event) {
 			super(event);
 			vee = event;
@@ -120,7 +124,7 @@ public class BukkitVehicleEvents {
 
 		@Override
 		public MCEntity getEntity() {
-			if(vee.getExited() == null) {
+			if (vee.getExited() == null) {
 				return null;
 			}
 			return BukkitConvertor.BukkitGetCorrectEntity(vee.getExited());
@@ -173,6 +177,7 @@ public class BukkitVehicleEvents {
 	public static class BukkitMCVehicleDestroyEvent extends BukkitMCVehicleEvent implements MCVehicleDestroyEvent {
 
 		VehicleDestroyEvent vee;
+
 		public BukkitMCVehicleDestroyEvent(VehicleDestroyEvent event) {
 			super(event);
 			vee = event;
@@ -180,7 +185,7 @@ public class BukkitVehicleEvents {
 
 		@Override
 		public MCEntity getAttacker() {
-			if(vee.getAttacker() == null) {
+			if (vee.getAttacker() == null) {
 				return null;
 			}
 			return BukkitConvertor.BukkitGetCorrectEntity(vee.getAttacker());
@@ -190,13 +195,14 @@ public class BukkitVehicleEvents {
 	public static class BukkitMCVehicleEvent implements MCVehicleEvent {
 
 		VehicleEvent ve;
+
 		public BukkitMCVehicleEvent(VehicleEvent event) {
 			ve = event;
 		}
 
 		@Override
 		public MCEntity getVehicle() {
-			if(ve.getVehicle() instanceof org.bukkit.entity.Vehicle) {
+			if (ve.getVehicle() instanceof org.bukkit.entity.Vehicle) {
 				return BukkitConvertor.BukkitGetCorrectEntity(ve.getVehicle());
 			}
 			return null;

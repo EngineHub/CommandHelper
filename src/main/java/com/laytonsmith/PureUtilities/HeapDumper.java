@@ -7,14 +7,13 @@ import javax.management.MBeanServer;
 public class HeapDumper {
 	// This is the name of the HotSpot Diagnostic MBean
 
-	private static final String HOTSPOT_BEAN_NAME =
-			"com.sun.management:type=HotSpotDiagnostic";
+	private static final String HOTSPOT_BEAN_NAME
+			= "com.sun.management:type=HotSpotDiagnostic";
 	// field to store the hotspot diagnostic MBean 
 	private static volatile HotSpotDiagnosticMXBean hotspotMBean;
 
 	/**
-	 * Call this method from your application whenever you want to dump the heap
-	 * snapshot into a file.
+	 * Call this method from your application whenever you want to dump the heap snapshot into a file.
 	 *
 	 * @param fileName name of the heap dump file
 	 * @param live flag that tells whether to dump only the live objects
@@ -47,9 +46,9 @@ public class HeapDumper {
 	private static HotSpotDiagnosticMXBean getHotspotMBean() {
 		try {
 			MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-			HotSpotDiagnosticMXBean bean =
-					ManagementFactory.newPlatformMXBeanProxy(server,
-					HOTSPOT_BEAN_NAME, HotSpotDiagnosticMXBean.class);
+			HotSpotDiagnosticMXBean bean
+					= ManagementFactory.newPlatformMXBeanProxy(server,
+							HOTSPOT_BEAN_NAME, HotSpotDiagnosticMXBean.class);
 			return bean;
 		} catch (RuntimeException re) {
 			throw re;

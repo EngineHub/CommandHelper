@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction.bukkit.blocks;
 
 import com.laytonsmith.abstraction.blocks.MCSign;

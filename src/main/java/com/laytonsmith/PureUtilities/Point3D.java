@@ -3,8 +3,7 @@ package com.laytonsmith.PureUtilities;
 /**
  * Represents a point in 3D space.
  */
-public class Point3D
-{
+public class Point3D {
 
 	/**
 	 * A Point3D located at [0, 0, 0] (zero)

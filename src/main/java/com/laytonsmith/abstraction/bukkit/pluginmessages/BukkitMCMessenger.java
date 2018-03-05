@@ -13,6 +13,7 @@ import org.bukkit.plugin.messaging.PluginMessageListenerRegistration;
  * @author Jason Unger <entityreborn@gmail.com>
  */
 public class BukkitMCMessenger implements MCMessenger {
+
 	Messenger messenger;
 
 	public BukkitMCMessenger(Messenger messager) {
@@ -24,8 +25,8 @@ public class BukkitMCMessenger implements MCMessenger {
 		PluginMessageListenerRegistration reg;
 
 		reg = messenger.registerIncomingPluginChannel(
-			CommandHelperPlugin.self, channel, 
-			CommandHelperMessageListener.getInstance());
+				CommandHelperPlugin.self, channel,
+				CommandHelperMessageListener.getInstance());
 
 		return new BukkitMCPluginMessageListenerRegistration(reg);
 	}
@@ -38,8 +39,8 @@ public class BukkitMCMessenger implements MCMessenger {
 	@Override
 	public void unregisterIncomingPluginChannel(String channel) {
 		messenger.unregisterIncomingPluginChannel(
-			CommandHelperPlugin.self, channel, 
-			CommandHelperMessageListener.getInstance()
+				CommandHelperPlugin.self, channel,
+				CommandHelperMessageListener.getInstance()
 		);
 	}
 
@@ -51,7 +52,7 @@ public class BukkitMCMessenger implements MCMessenger {
 	@Override
 	public void closeAllChannels() {
 		Set<String> chans = getIncomingChannels();
-		for(String chan : chans) {
+		for (String chan : chans) {
 			unregisterIncomingPluginChannel(chan);
 		}
 	}

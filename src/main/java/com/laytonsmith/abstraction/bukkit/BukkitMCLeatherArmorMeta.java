@@ -6,7 +6,9 @@ import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 public class BukkitMCLeatherArmorMeta extends BukkitMCItemMeta implements MCLeatherArmorMeta {
+
 	LeatherArmorMeta lam;
+
 	public BukkitMCLeatherArmorMeta(LeatherArmorMeta im) {
 		super(im);
 		lam = im;
@@ -14,7 +16,7 @@ public class BukkitMCLeatherArmorMeta extends BukkitMCItemMeta implements MCLeat
 
 	public BukkitMCLeatherArmorMeta(AbstractionObject o) {
 		super(o);
-		lam = (LeatherArmorMeta)o;
+		lam = (LeatherArmorMeta) o;
 	}
 
 	@Override
@@ -26,5 +28,5 @@ public class BukkitMCLeatherArmorMeta extends BukkitMCItemMeta implements MCLeat
 	public void setColor(MCColor color) {
 		lam.setColor(BukkitMCColor.GetColor(color));
 	}
-	
+
 }

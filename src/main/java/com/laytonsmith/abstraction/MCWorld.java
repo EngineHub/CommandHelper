@@ -21,32 +21,51 @@ import com.laytonsmith.core.constructs.Target;
 import java.util.List;
 
 public interface MCWorld extends MCMetadatable {
+
 	List<MCPlayer> getPlayers();
+
 	List<MCEntity> getEntities();
+
 	List<MCLivingEntity> getLivingEntities();
 
 	String getName();
+
 	long getSeed();
+
 	MCWorldEnvironment getEnvironment();
+
 	String getGenerator();
+
 	MCWorldType getWorldType();
 
 	int getSeaLevel();
+
 	int getMaxHeight();
 
 	MCDifficulty getDifficulty();
+
 	void setDifficulty(MCDifficulty difficulty);
+
 	boolean getPVP();
+
 	void setPVP(boolean pvp);
+
 	String[] getGameRules();
+
 	String getGameRuleValue(String gameRule);
+
 	boolean setGameRuleValue(MCGameRule gameRule, String value);
+
 	MCWorldBorder getWorldBorder();
 
 	MCBlock getBlockAt(int x, int y, int z);
+
 	MCChunk getChunkAt(int x, int z);
+
 	MCChunk getChunkAt(MCBlock b);
+
 	MCChunk getChunkAt(MCLocation l);
+
 	MCChunk[] getLoadedChunks();
 
 	boolean regenerateChunk(int x, int y);
@@ -60,11 +79,15 @@ public interface MCWorld extends MCMetadatable {
 	boolean generateTree(MCLocation l, MCTreeType treeType);
 
 	void playEffect(MCLocation l, MCEffect mCEffect, int data, int radius);
+
 	void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data);
 
 	void playSound(MCLocation l, MCSound sound, float volume, float pitch);
+
 	void playSound(MCLocation l, String sound, float volume, float pitch);
+
 	void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch);
+
 	void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch);
 
 	MCItem dropItemNaturally(MCLocation l, MCItemStack is);
@@ -76,17 +99,25 @@ public interface MCWorld extends MCMetadatable {
 	MCLightningStrike strikeLightningEffect(MCLocation GetLocation);
 
 	void setStorm(boolean b);
+
 	void setThundering(boolean b);
+
 	void setWeatherDuration(int time);
+
 	void setThunderDuration(int time);
+
 	boolean isStorming();
+
 	boolean isThundering();
 
 	MCLocation getSpawnLocation();
+
 	void setSpawnLocation(int x, int y, int z);
 
 	void refreshChunk(int x, int z);
+
 	void loadChunk(int x, int z);
+
 	void unloadChunk(int x, int z);
 
 	void setTime(long time);
@@ -109,6 +140,7 @@ public interface MCWorld extends MCMetadatable {
 
 	/**
 	 * This method performs some check on the world to ensure it exists.
+	 *
 	 * @return
 	 */
 	boolean exists();

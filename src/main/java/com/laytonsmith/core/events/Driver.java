@@ -4,8 +4,8 @@ import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.Static;
 
 /**
- * This class is an enum class that represents all the types of events that CH is aware of. The
- * reason an enum is required, is because events can more easily be sorted and found this way.
+ * This class is an enum class that represents all the types of events that CH is aware of. The reason an enum is
+ * required, is because events can more easily be sorted and found this way.
  *
  */
 public enum Driver {
@@ -26,7 +26,6 @@ public enum Driver {
 	REDSTONE_CHANGED,
 	NOTE_PLAY,
 	BLOCK_FADE,
-
 	/**
 	 * Entity events
 	 */
@@ -51,7 +50,6 @@ public enum Driver {
 	TARGET_ENTITY,
 	ENTITY_TOGGLE_GLIDE(MCVersion.MC1_9),
 	FIREWORK_EXPLODE(MCVersion.MC1_8_X),
-
 	/**
 	 * Inventory events
 	 */
@@ -64,7 +62,6 @@ public enum Driver {
 	ITEM_SWAP(MCVersion.MC1_9),
 	ITEM_PRE_CRAFT,
 	ITEM_PRE_ENCHANT,
-
 	/**
 	 * Player events
 	 */
@@ -95,18 +92,15 @@ public enum Driver {
 	TAB_COMPLETE,
 	WORLD_CHANGED,
 	FOOD_LEVEL_CHANGED,
-
 	/**
 	 * Plugin events
 	 */
 	PLUGIN_MESSAGE_RECEIVED,
-
 	/**
 	 * Server events
 	 */
 	SERVER_COMMAND,
 	SERVER_PING,
-
 	/**
 	 * Vehicle events
 	 */
@@ -115,14 +109,12 @@ public enum Driver {
 	VEHICLE_LEAVE,
 	VEHICLE_MOVE,
 	VEHICLE_DESTROY,
-
 	/**
 	 * Weather events
 	 */
 	LIGHTNING_STRIKE,
 	THUNDER_CHANGE,
 	WEATHER_CHANGE,
-
 	/**
 	 * World events
 	 */
@@ -130,13 +122,11 @@ public enum Driver {
 	WORLD_LOAD,
 	WORLD_UNLOAD,
 	WORLD_SAVE,
-
 	/**
 	 * Cmdline events
 	 */
 	CMDLINE_PROMPT_INPUT,
 	SHUTDOWN,
-
 	/**
 	 * Extension events, used by events fired from the extension system.
 	 */

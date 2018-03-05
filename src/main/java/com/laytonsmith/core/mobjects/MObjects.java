@@ -9,13 +9,14 @@ public class MObjects {
 
 	private MObjects() {
 	}
-	
+
 	/**
 	 * Returns the name of the object, as provided by the annotation.
+	 *
 	 * @param object
-	 * @return 
+	 * @return
 	 */
-	public static String getObjectName(MObject object){
+	public static String getObjectName(MObject object) {
 		return object.getClass().getAnnotation(mobject.class).value();
 	}
 }

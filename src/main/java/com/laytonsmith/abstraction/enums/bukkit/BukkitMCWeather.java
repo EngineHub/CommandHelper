@@ -7,16 +7,16 @@ import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.WeatherType;
 
 @abstractionenum(
-		implementation=Implementation.Type.BUKKIT,
-		forAbstractEnum=MCWeather.class,
-		forConcreteEnum=WeatherType.class
+		implementation = Implementation.Type.BUKKIT,
+		forAbstractEnum = MCWeather.class,
+		forConcreteEnum = WeatherType.class
 )
 public class BukkitMCWeather extends EnumConvertor<MCWeather, WeatherType> {
 
 	private static BukkitMCWeather instance;
 
 	public static BukkitMCWeather getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new BukkitMCWeather();
 		}
 		return instance;

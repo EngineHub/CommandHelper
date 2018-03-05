@@ -21,19 +21,20 @@ import org.bukkit.inventory.meta.Repairable;
 
 /**
  *
- * 
+ *
  */
 public class BukkitMCItemMeta implements MCItemMeta {
 
 	ItemMeta im;
+
 	public BukkitMCItemMeta(ItemMeta im) {
 		this.im = im;
 	}
 
 	public BukkitMCItemMeta(AbstractionObject o) {
-		im = (ItemMeta)o;
+		im = (ItemMeta) o;
 	}
-	
+
 	@Override
 	public boolean hasDisplayName() {
 		return im.hasDisplayName();
@@ -63,7 +64,7 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	public void setLore(List<String> lore) {
 		im.setLore(lore);
 	}
-	
+
 	@Override
 	public boolean hasEnchants() {
 		return im.hasEnchants();
@@ -72,17 +73,17 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	@Override
 	public Map<MCEnchantment, Integer> getEnchants() {
 		Map<MCEnchantment, Integer> map = new HashMap<>();
-		for(Entry<Enchantment, Integer> entry : im.getEnchants().entrySet()) {
+		for (Entry<Enchantment, Integer> entry : im.getEnchants().entrySet()) {
 			map.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
 		}
 		return map;
 	}
-	
+
 	@Override
 	public boolean addEnchant(MCEnchantment ench, int level, boolean ignoreLevelRestriction) {
 		return im.addEnchant(((BukkitMCEnchantment) ench).__Enchantment(), level, ignoreLevelRestriction);
 	}
-	
+
 	@Override
 	public boolean removeEnchant(MCEnchantment ench) {
 		return im.removeEnchant(((BukkitMCEnchantment) ench).__Enchantment());
@@ -92,7 +93,7 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	public Object getHandle() {
 		return im;
 	}
-	
+
 	public ItemMeta asItemMeta() {
 		return im;
 	}
@@ -111,34 +112,34 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	public String toString() {
 		return im.toString();
 	}
-	
+
 	@Override
 	public boolean hasRepairCost() {
 		return ((Repairable) im).hasRepairCost();
 	}
-	
+
 	@Override
 	public int getRepairCost() {
 		return ((Repairable) im).getRepairCost();
 	}
-	
+
 	@Override
 	public void setRepairCost(int cost) {
 		((Repairable) im).setRepairCost(cost);
 	}
-	
+
 	@Override
 	public void addItemFlags(MCItemFlag... flags) {
-		for(MCItemFlag flag : flags) {
+		for (MCItemFlag flag : flags) {
 			im.addItemFlags(ItemFlag.valueOf(flag.name()));
 		}
 	}
-	
+
 	@Override
 	public Set<MCItemFlag> getItemFlags() {
 		Set<ItemFlag> flags = im.getItemFlags();
 		Set<MCItemFlag> ret = new HashSet<>(flags.size());
-		for(ItemFlag flag : flags) {
+		for (ItemFlag flag : flags) {
 			ret.add(MCItemFlag.valueOf(flag.name()));
 		}
 		return ret;

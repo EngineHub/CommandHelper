@@ -8,6 +8,7 @@ import org.bukkit.inventory.meta.BookMeta;
 public class BukkitMCBookMeta extends BukkitMCItemMeta implements MCBookMeta {
 
 	BookMeta bm;
+
 	public BukkitMCBookMeta(BookMeta im) {
 		super(im);
 		this.bm = im;

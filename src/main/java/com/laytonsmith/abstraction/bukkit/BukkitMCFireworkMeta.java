@@ -11,6 +11,7 @@ import java.util.List;
 public class BukkitMCFireworkMeta extends BukkitMCItemMeta implements MCFireworkMeta {
 
 	FireworkMeta fm;
+
 	public BukkitMCFireworkMeta(FireworkMeta im) {
 		super(im);
 		fm = im;
@@ -34,14 +35,14 @@ public class BukkitMCFireworkMeta extends BukkitMCItemMeta implements MCFirework
 	@Override
 	public List<MCFireworkEffect> getEffects() {
 		List<MCFireworkEffect> effects = new ArrayList<>();
-		for(FireworkEffect effect : fm.getEffects()) {
+		for (FireworkEffect effect : fm.getEffects()) {
 			effects.add(new BukkitMCFireworkEffect(effect));
 		}
 		return effects;
 	}
 
 	@Override
-	public void addEffect(MCFireworkEffect effect){
+	public void addEffect(MCFireworkEffect effect) {
 		fm.addEffect((FireworkEffect) effect.getHandle());
 	}
 

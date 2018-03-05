@@ -10,6 +10,7 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 public class BukkitMCEnchantmentStorageMeta extends BukkitMCItemMeta implements MCEnchantmentStorageMeta {
 
 	EnchantmentStorageMeta es;
+
 	public BukkitMCEnchantmentStorageMeta(EnchantmentStorageMeta im) {
 		super(im);
 		this.es = im;
@@ -27,8 +28,8 @@ public class BukkitMCEnchantmentStorageMeta extends BukkitMCItemMeta implements 
 
 	@Override
 	public Map<MCEnchantment, Integer> getStoredEnchants() {
-		Map<MCEnchantment,Integer> ret = new HashMap<>();
-		for (Map.Entry<Enchantment,Integer> entry : es.getStoredEnchants().entrySet()) {
+		Map<MCEnchantment, Integer> ret = new HashMap<>();
+		for (Map.Entry<Enchantment, Integer> entry : es.getStoredEnchants().entrySet()) {
 			ret.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
 		}
 		return ret;

@@ -16,7 +16,7 @@ public class BukkitMCShulkerBullet extends BukkitMCProjectile implements MCShulk
 
 	@Override
 	public void setTarget(MCEntity entity) {
-		if(entity == null) {
+		if (entity == null) {
 			sb.setTarget(null);
 		} else {
 			sb.setTarget((Entity) entity.getHandle());
@@ -26,7 +26,7 @@ public class BukkitMCShulkerBullet extends BukkitMCProjectile implements MCShulk
 	@Override
 	public MCEntity getTarget() {
 		Entity e = sb.getTarget();
-		if(e == null) {
+		if (e == null) {
 			return null;
 		}
 		return new BukkitMCEntity(sb.getTarget());

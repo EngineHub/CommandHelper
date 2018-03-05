@@ -12,24 +12,24 @@ import com.laytonsmith.core.natives.interfaces.AbstractMixedInterfaceRunner;
 @InterfaceRunnerFor(CNumber.class)
 public class CNumberRunner extends AbstractMixedInterfaceRunner {
 
-    @Override
-    public String docs() {
-	return "A number is any double or integer number.";
-    }
+	@Override
+	public String docs() {
+		return "A number is any double or integer number.";
+	}
 
-    @Override
-    public Version since() {
-	return CHVersion.V3_0_1;
-    }
+	@Override
+	public Version since() {
+		return CHVersion.V3_0_1;
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	return new CClassType[]{CPrimitive.TYPE};
-    }
+	@Override
+	public CClassType[] getSuperclasses() {
+		return new CClassType[]{CPrimitive.TYPE};
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	return new CClassType[]{};
-    }
+	@Override
+	public CClassType[] getInterfaces() {
+		return new CClassType[]{};
+	}
 
 }

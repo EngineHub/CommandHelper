@@ -1,4 +1,3 @@
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
@@ -30,35 +29,38 @@ import org.xml.sax.SAXException;
  */
 @core
 public class ResourceManager {
-	public static String docs(){
+
+	public static String docs() {
 		return "This class contains functions for resource management. This entire class of functions WILL"
 				+ " be deprecated at some point in the future, so don't rely too heavily on it.";
 	}
-	
+
 	public static enum ResourceTypes {
 		XML_DOCUMENT(XMLDocument.class),
 		STRING_BUILDER(StringBuffer.class),
 		RANDOM(Random.class);
 		private final Class<?> type;
-		private ResourceTypes(Class<?> type){
+
+		private ResourceTypes(Class<?> type) {
 			this.type = type;
 		}
-		
-		public Class<?> getType(){
+
+		public Class<?> getType() {
 			return type;
 		}
-		
-		public static ResourceTypes getResourceByType(Class<?> type){
-			for(ResourceTypes c : values()){
-				if(c.getType() == type){
+
+		public static ResourceTypes getResourceByType(Class<?> type) {
+			for (ResourceTypes c : values()) {
+				if (c.getType() == type) {
 					return c;
 				}
 			}
 			throw new IllegalArgumentException();
 		}
 	}
-	
+
 	private static final Map<Long, CResource<?>> resources = new HashMap<>();
+
 	static {
 		StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
@@ -68,18 +70,19 @@ public class ResourceManager {
 			}
 		});
 	}
-	
+
 	/**
-	 * This is used to get the appropriately cast resource from a CResource. If the
-	 * types aren't matched up, an appropriate exception is thrown.
+	 * This is used to get the appropriately cast resource from a CResource. If the types aren't matched up, an
+	 * appropriate exception is thrown.
+	 *
 	 * @param <T>
 	 * @param resource
 	 * @param type
 	 * @param t
-	 * @return 
+	 * @return
 	 */
-	public static <T> T GetResource(CResource<?> resource, Class<T> type, Target t){
-		if(type.isAssignableFrom(resource.getResource().getClass())){
+	public static <T> T GetResource(CResource<?> resource, Class<T> type, Target t) {
+		if (type.isAssignableFrom(resource.getResource().getClass())) {
 			return (T) resource.getResource();
 		} else {
 			throw new CRECastException("Unexpected resource type. Expected resource of type "
@@ -87,7 +90,7 @@ public class ResourceManager {
 					+ ResourceTypes.getResourceByType(resource.getResource().getClass()).name() + " instead.", t);
 		}
 	}
-	
+
 	@api
 	public static class res_create_resource extends AbstractFunction {
 
@@ -110,19 +113,19 @@ public class ResourceManager {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			ResourceTypes type;
 			Construct data = null;
-			try{
+			try {
 				type = ResourceTypes.valueOf(args[0].val());
-			} catch(IllegalArgumentException e){
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}
-			if(args.length > 1){
+			if (args.length > 1) {
 				data = args[1];
 			}
 			CResource<?> resource;
-			switch(type){
+			switch (type) {
 				case XML_DOCUMENT:
 					try {
-						if(data == null){
+						if (data == null) {
 							throw new CRENullPointerException("data cannot be empty", t);
 						}
 						resource = new CResource<XMLDocument>(new XMLDocument(data.val()), t);
@@ -171,7 +174,7 @@ public class ResourceManager {
 					+ " Barring resources that you intend on keeping around indefinitely, each call"
 					+ " to res_create_resource should be paired with a res_free_resource, being careful"
 					+ " to catch any exceptions and still calling res_free_resource anyways. Each resource"
-					+ " has its own data to create the resource. Type may be one of: " 
+					+ " has its own data to create the resource. Type may be one of: "
 					+ StringUtils.Join(ResourceTypes.values(), ", ", ", or ");
 		}
 
@@ -179,11 +182,12 @@ public class ResourceManager {
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class res_free_resource extends AbstractFunction {
+
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CRENotFoundException.class};
@@ -201,9 +205,9 @@ public class ResourceManager {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CResource){
+			if (args[0] instanceof CResource) {
 				CResource<?> resource = (CResource<?>) args[0];
-				if(resources.containsKey(resource.getId())){
+				if (resources.containsKey(resource.getId())) {
 					resources.remove(resource.getId());
 					return CVoid.VOID;
 				} else {

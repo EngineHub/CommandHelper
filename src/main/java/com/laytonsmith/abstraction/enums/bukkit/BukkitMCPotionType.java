@@ -16,7 +16,7 @@ public class BukkitMCPotionType extends EnumConvertor<MCPotionType, PotionType> 
 	private static BukkitMCPotionType instance;
 
 	public static BukkitMCPotionType getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new BukkitMCPotionType();
 		}
 		return instance;

@@ -19,7 +19,7 @@ public class BukkitMCCommandMinecart extends BukkitMCMinecart implements MCComma
 	public String getCommand() {
 		return cm.getCommand();
 	}
-	
+
 	@Override
 	public String getName() {
 		return cm.getName();

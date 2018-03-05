@@ -4,14 +4,24 @@ import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCVehicle;
 
 public interface MCMinecart extends MCVehicle {
+
 	void setDamage(double damage);
+
 	double getDamage();
+
 	double getMaxSpeed();
+
 	void setMaxSpeed(double speed);
+
 	boolean isSlowWhenEmpty();
+
 	void setSlowWhenEmpty(boolean slow);
+
 	void setDisplayBlock(MCMaterialData material);
+
 	MCMaterialData getDisplayBlock();
+
 	void setDisplayBlockOffset(int offset);
+
 	int getDisplayBlockOffset();
 }

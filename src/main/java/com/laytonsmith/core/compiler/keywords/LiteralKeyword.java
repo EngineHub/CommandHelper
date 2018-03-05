@@ -15,7 +15,7 @@ public abstract class LiteralKeyword extends Keyword {
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
-		if(list.get(keywordPosition).getData() instanceof CLabel) {
+		if (list.get(keywordPosition).getData() instanceof CLabel) {
 			list.set(keywordPosition, new ParseTree(new CLabel(getValue(list.get(keywordPosition).getTarget())),
 					list.get(keywordPosition).getFileOptions()));
 		} else {
@@ -29,7 +29,7 @@ public abstract class LiteralKeyword extends Keyword {
 
 	@Override
 	public String docs() {
-	    return "Returns a literal " + getName() + " value.";
+		return "Returns a literal " + getName() + " value.";
 	}
 
 }

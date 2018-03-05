@@ -7,16 +7,16 @@ import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.event.inventory.InventoryAction;
 
 @abstractionenum(
-		implementation= Implementation.Type.BUKKIT,
-		forAbstractEnum=MCInventoryAction.class,
-		forConcreteEnum=InventoryAction.class
+		implementation = Implementation.Type.BUKKIT,
+		forAbstractEnum = MCInventoryAction.class,
+		forConcreteEnum = InventoryAction.class
 )
-public class BukkitMCInventoryAction extends EnumConvertor<MCInventoryAction, InventoryAction>{
+public class BukkitMCInventoryAction extends EnumConvertor<MCInventoryAction, InventoryAction> {
 
 	private static BukkitMCInventoryAction instance;
 
 	public static BukkitMCInventoryAction getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new BukkitMCInventoryAction();
 		}
 		return instance;

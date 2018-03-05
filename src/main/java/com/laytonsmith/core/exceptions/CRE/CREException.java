@@ -12,34 +12,34 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("Exception")
 public class CREException extends CREThrowable {
 
-    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final CClassType TYPE = CClassType.get("Exception");
+	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
+	public static final CClassType TYPE = CClassType.get("Exception");
 
-    public CREException(String msg, Target t) {
-	super(msg, t);
-    }
+	public CREException(String msg, Target t) {
+		super(msg, t);
+	}
 
-    public CREException(String msg, Target t, Throwable cause) {
-	super(msg, t, cause);
-    }
+	public CREException(String msg, Target t, Throwable cause) {
+		super(msg, t, cause);
+	}
 
-    @Override
-    public String docs() {
-	return "A generic exception. All normal exceptions extend this type.";
-    }
+	@Override
+	public String docs() {
+		return "A generic exception. All normal exceptions extend this type.";
+	}
 
-    @Override
-    public Version since() {
-	return CHVersion.V3_3_1;
-    }
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	return super.getSuperclasses();
-    }
+	@Override
+	public CClassType[] getSuperclasses() {
+		return super.getSuperclasses();
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	return super.getInterfaces();
-    }
+	@Override
+	public CClassType[] getInterfaces() {
+		return super.getInterfaces();
+	}
 }

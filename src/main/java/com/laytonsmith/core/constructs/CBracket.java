@@ -10,40 +10,40 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  */
 public class CBracket extends Construct {
 
-    ParseTree code;
+	ParseTree code;
 
-    public CBracket(ParseTree code) {
-	super(code.toString(), ConstructType.BRACKET, code.getTarget());
-	this.code = code;
-    }
+	public CBracket(ParseTree code) {
+		super(code.toString(), ConstructType.BRACKET, code.getTarget());
+		this.code = code;
+	}
 
-    @Override
-    public boolean isDynamic() {
-	return true;
-    }
+	@Override
+	public boolean isDynamic() {
+		return true;
+	}
 
-    public ParseTree getNode() {
-	return code;
-    }
+	public ParseTree getNode() {
+		return code;
+	}
 
-    @Override
-    public Version since() {
-	return super.since();
-    }
+	@Override
+	public Version since() {
+		return super.since();
+	}
 
-    @Override
-    public String docs() {
-	return super.docs();
-    }
+	@Override
+	public String docs() {
+		return super.docs();
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	return new CClassType[]{Mixed.TYPE};
-    }
+	@Override
+	public CClassType[] getSuperclasses() {
+		return new CClassType[]{Mixed.TYPE};
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	return new CClassType[]{};
-    }
+	@Override
+	public CClassType[] getInterfaces() {
+		return new CClassType[]{};
+	}
 
 }

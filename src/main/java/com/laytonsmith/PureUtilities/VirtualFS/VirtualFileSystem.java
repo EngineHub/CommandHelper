@@ -22,46 +22,40 @@ import org.apache.commons.io.FileUtils;
 
 /**
  * <p>
- * A virtual file system allows for strict control over a corresponding
- * real file system. Reads and writes from the file system can be granularly controlled
- * by a configuration, and things like file system quotas, file creation, and things can
- * be restricted. All files in the virtual file system map to a real file, but where
- * exactly on the real file system that is, is not exposed to the API user. Reads
- * and writes will not be allowed outside of the root file system, so to delete a
- * virtual file system simply requires deletion of that folder. All virtual files
- * use a Unix style file path, and the root is whatever the root of the file system
- * is. Primitive operations include reading and writing to the file system, iterating
- * through the files, deleting files, and reading meta information about files.
- * 
+ * A virtual file system allows for strict control over a corresponding real file system. Reads and writes from the file
+ * system can be granularly controlled by a configuration, and things like file system quotas, file creation, and things
+ * can be restricted. All files in the virtual file system map to a real file, but where exactly on the real file system
+ * that is, is not exposed to the API user. Reads and writes will not be allowed outside of the root file system, so to
+ * delete a virtual file system simply requires deletion of that folder. All virtual files use a Unix style file path,
+ * and the root is whatever the root of the file system is. Primitive operations include reading and writing to the file
+ * system, iterating through the files, deleting files, and reading meta information about files.
+ *
  * <p>
- * All accesses can be controlled on a per file or per directory basis, and limits
- * can be placed on folder depth, or total file system size.
- * 
+ * All accesses can be controlled on a per file or per directory basis, and limits can be placed on folder depth, or
+ * total file system size.
+ *
  * <p>
- * The file system as a whole can also be <em>cordoned off</em>, meaning that the
- * files that are created by outside processes don't appear as part of the virtual
- * file system. In this case, a virtual manifest will used to determine which files are actually
- * in the virtual file system. Reads and writes to files not in this manifest will
- * be denied, however creation of new files will be allowed, assuming a file doesn't
- * already exist there, and non-included files will not be shown in file listings.
- * External processes will not inherently be blocked from accessing these manifested
+ * The file system as a whole can also be <em>cordoned off</em>, meaning that the files that are created by outside
+ * processes don't appear as part of the virtual file system. In this case, a virtual manifest will used to determine
+ * which files are actually in the virtual file system. Reads and writes to files not in this manifest will be denied,
+ * however creation of new files will be allowed, assuming a file doesn't already exist there, and non-included files
+ * will not be shown in file listings. External processes will not inherently be blocked from accessing these manifested
  * files, however, so only accesses through the virtual file system will be restricted.
- * 
+ *
  * <p>
- * The virtual file system will create a directory at the root of the file system,
- * <code>.vfsmeta</code>, which will contain all the information stored by the virtual
- * file system itself, and reads and writes to this special directory will always
- * fail.
- * 
+ * The virtual file system will create a directory at the root of the file system, <code>.vfsmeta</code>, which will
+ * contain all the information stored by the virtual file system itself, and reads and writes to this special directory
+ * will always fail.
+ *
  * <p>
- * Symlinks can be added, which map directories inside the virtual file system to
- * other directories on the real file system, and these links appear completely
- * transparent to the file system. This allows for non-continuous file systems
- * to appear continuous internally. Additionally, remote file systems can be mounted
- * via ssh, and they will appear continuous.
- * 
+ * Symlinks can be added, which map directories inside the virtual file system to other directories on the real file
+ * system, and these links appear completely transparent to the file system. This allows for non-continuous file systems
+ * to appear continuous internally. Additionally, remote file systems can be mounted via ssh, and they will appear
+ * continuous.
+ *
  */
 public class VirtualFileSystem {
+
 	private static final String META_DIRECTORY_PATH = ".vfsmeta";
 	public static final VirtualFile META_DIRECTORY = new VirtualFile("/" + META_DIRECTORY_PATH);
 	private static final String TMP_DIRECTORY_PATH = META_DIRECTORY_PATH + "/tmp";
@@ -69,7 +63,7 @@ public class VirtualFileSystem {
 	public static final String SYMLINK_FILE_NAME = "symlinks.txt";
 	public static final String MANIFEST_FILE_NAME = "manifest.txt";
 	public static final String SETTINGS_FILE_NAME = "settings.yml";
-	
+
 	private final VirtualFileSystemSettings settings;
 	protected final File root;
 	public final File symlinkFile;
@@ -78,12 +72,13 @@ public class VirtualFileSystem {
 	private Thread fsSizeThread;
 	private final List<FileSystemLayer> currentTmpFiles = new ArrayList<FileSystemLayer>();
 	private final Map<VirtualGlob, URI> symlinks = new HashMap<VirtualGlob, URI>();
-	
+
 	private static final Map<String, Constructor> FSLProviders = new HashMap<String, Constructor>();
+
 	static {
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(VirtualFileSystem.class));
 		Set<ClassMirror<?>> fslayerClasses = ClassDiscovery.getDefaultInstance().getClassesWithAnnotation(FileSystemLayer.fslayer.class);
-		for(ClassMirror<?> clazzMirror : fslayerClasses){
+		for (ClassMirror<?> clazzMirror : fslayerClasses) {
 			try {
 				Class<?> clazz = clazzMirror.loadClass();
 				Constructor<?> constructor = clazz.getConstructor(VirtualFile.class, VirtualFileSystem.class, String.class);
@@ -97,31 +92,30 @@ public class VirtualFileSystem {
 			}
 		}
 	}
-	
-	
-	
+
 	/**
-	 * Creates a new VirtualFileSystem, at the root specified. If the root
-	 * doesn't exist, it will automatically be created.
+	 * Creates a new VirtualFileSystem, at the root specified. If the root doesn't exist, it will automatically be
+	 * created.
+	 *
 	 * @param root
-	 * @param settings The settings object, which represents this file system's settings. If null,
-	 * it is assumed this is a fresh installation, and will be handled accordingly.
+	 * @param settings The settings object, which represents this file system's settings. If null, it is assumed this is
+	 * a fresh installation, and will be handled accordingly.
 	 * @throws IOException If the file system cannot be initialized at this location
 	 */
-	public VirtualFileSystem(final File root, VirtualFileSystemSettings settings) throws IOException{
-		this.settings = settings==null?new VirtualFileSystemSettings(""):settings;
+	public VirtualFileSystem(final File root, VirtualFileSystemSettings settings) throws IOException {
+		this.settings = settings == null ? new VirtualFileSystemSettings("") : settings;
 		this.root = root;
 		install();
 		symlinkFile = new File(root, META_DIRECTORY_PATH + "/" + SYMLINK_FILE_NAME);
 		//TODO: If it is cordoned off, we don't need this thread either, we need a different
 		//thread, but it only needs to run once
-		if(this.settings.hasQuota()){
+		if (this.settings.hasQuota()) {
 			//We need to kick off a thread to determine the current FS size.
 			fsSizeThread = new Thread(new Runnable() {
 
 				@Override
 				public void run() {
-					while(true){
+					while (true) {
 						try {
 							FSSize = FileUtils.sizeOfDirectoryAsBigInteger(root);
 							//Sleep for a minute before running again.
@@ -138,56 +132,56 @@ public class VirtualFileSystem {
 		}
 		//TODO: Kick off the tmp file deleter thread
 	}
-	
-	private void install() throws IOException{
-		if(!root.exists()){
+
+	private void install() throws IOException {
+		if (!root.exists()) {
 			root.mkdirs();
 		}
 		File meta = new File(root, META_DIRECTORY_PATH);
 		meta.mkdir();
-		
+
 		File settingsFile = new File(meta, SETTINGS_FILE_NAME);
 		File manifest = new File(meta, MANIFEST_FILE_NAME);
 		File symlinks = new File(meta, SYMLINK_FILE_NAME);
 		File tmpDir = new File(meta, "tmp");
-		
-		if(!settingsFile.exists()){
+
+		if (!settingsFile.exists()) {
 			settingsFile.createNewFile();
 		}
-		
-		if(!manifest.exists()){
+
+		if (!manifest.exists()) {
 			manifest.createNewFile();
 		}
-		
-		if(!symlinks.exists()){
+
+		if (!symlinks.exists()) {
 			symlinks.createNewFile();
 		}
-		
-		if(!tmpDir.exists()){
+
+		if (!tmpDir.exists()) {
 			tmpDir.mkdirs();
 		}
-		
+
 	}
-	
-	private void assertReadPermission(VirtualFile file){
-		Boolean hidden = (Boolean)settings.getSetting(file, VirtualFileSystemSetting.HIDDEN);
-		if(hidden){
+
+	private void assertReadPermission(VirtualFile file) {
+		Boolean hidden = (Boolean) settings.getSetting(file, VirtualFileSystemSetting.HIDDEN);
+		if (hidden) {
 			throw new PermissionException(file.getPath() + " cannot be read.");
 		}
 	}
-	
-	private void assertWritePermission(VirtualFile file){
-		Boolean readOnly = (Boolean)settings.getSetting(file, VirtualFileSystemSetting.READONLY);
-		Boolean hidden = (Boolean)settings.getSetting(file, VirtualFileSystemSetting.HIDDEN);
-		if(readOnly || hidden){
+
+	private void assertWritePermission(VirtualFile file) {
+		Boolean readOnly = (Boolean) settings.getSetting(file, VirtualFileSystemSetting.READONLY);
+		Boolean hidden = (Boolean) settings.getSetting(file, VirtualFileSystemSetting.HIDDEN);
+		if (readOnly || hidden) {
 			throw new PermissionException(file.getPath() + " cannot be written to.");
 		}
 	}
-	
-	private FileSystemLayer normalize(VirtualFile virtual) throws IOException{
+
+	private FileSystemLayer normalize(VirtualFile virtual) throws IOException {
 		URI uri = null;
-		for(VirtualGlob vg : symlinks.keySet()){
-			if(vg.matches(virtual)){
+		for (VirtualGlob vg : symlinks.keySet()) {
+			if (vg.matches(virtual)) {
 				uri = symlinks.get(vg);
 				break;
 			}
@@ -198,11 +192,11 @@ public class VirtualFileSystem {
 		//both a) who we need to instantiate to provide the fslayer for
 		//us, and b) what the symlink actually is. Default to no
 		//symlink, with a file: provider.
-		if(uri != null){
+		if (uri != null) {
 			provider = uri.getScheme();
 			symlink = uri.getSchemeSpecificPart();
 		}
-		if(FSLProviders.containsKey(provider)){
+		if (FSLProviders.containsKey(provider)) {
 			FileSystemLayer fsl;
 			try {
 				fsl = (FileSystemLayer) FSLProviders.get(provider).newInstance(virtual, this, symlink);
@@ -217,248 +211,244 @@ public class VirtualFileSystem {
 			throw new Error("Unknown provider for " + provider);
 		}
 	}
-	
+
 	/**
-	 * Reads bytes from a file.
-	 * Requires read permission.
+	 * Reads bytes from a file. Requires read permission.
+	 *
 	 * @param file
-	 * @return 
+	 * @return
 	 */
-	public byte[] read(VirtualFile file){
+	public byte[] read(VirtualFile file) {
 		try {
 			return StreamUtils.GetBytes(readAsStream(file));
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
-	
+
 	/**
-	 * Writes an InputStream to a file.
-	 * Requires write permission.
+	 * Writes an InputStream to a file. Requires write permission.
+	 *
 	 * @param file
-	 * @param data 
+	 * @param data
 	 */
-	public void write(VirtualFile file, InputStream data){
+	public void write(VirtualFile file, InputStream data) {
 		try {
 			write(file, StreamUtils.GetBytes(data));
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
-	
+
 	/**
-	 * Reads a file as a stream.
-	 * Requires read permission.
+	 * Reads a file as a stream. Requires read permission.
+	 *
 	 * @param file
-	 * @return 
+	 * @return
 	 */
-	public InputStream readAsStream(VirtualFile file) throws IOException{
+	public InputStream readAsStream(VirtualFile file) throws IOException {
 		assertReadPermission(file);
 		FileSystemLayer real = normalize(file);
 		return real.getInputStream();
 	}
-	
+
 	/**
-	 * Writes the bytes out to a file.
-	 * Requires write permission.
+	 * Writes the bytes out to a file. Requires write permission.
+	 *
 	 * @param file
-	 * @param bytes 
+	 * @param bytes
 	 */
-	public void write(VirtualFile file, byte[] bytes) throws IOException{
+	public void write(VirtualFile file, byte[] bytes) throws IOException {
 		assertWritePermission(file);
 		FileSystemLayer real = normalize(file);
 		real.writeByteArray(bytes);
 	}
-	
+
 	/**
 	 * Convenience method to write out a plain string.
+	 *
 	 * @param file
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	public String readUTFString(VirtualFile file) throws IOException{
+	public String readUTFString(VirtualFile file) throws IOException {
 		return new String(read(file), "UTF-8");
 	}
-	
+
 	/**
 	 * Convenience method to read in a plain string.
+	 *
 	 * @param file
 	 * @param string
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	public void writeUTFString(VirtualFile file, String string) throws IOException{
+	public void writeUTFString(VirtualFile file, String string) throws IOException {
 		write(file, string.getBytes("UTF-8"));
 	}
-	
+
 	/**
-	 * Lists the files and folders in this directory. Note that the
-	 * . and .. directory will not be
-	 * present. If this is cordoned off, it will be the virtual file
-	 * listing.
-	 * Requires read permission.
+	 * Lists the files and folders in this directory. Note that the . and .. directory will not be present. If this is
+	 * cordoned off, it will be the virtual file listing. Requires read permission.
+	 *
 	 * @param directory
-	 * @return 
+	 * @return
 	 */
-	public VirtualFile [] list(VirtualFile directory) throws IOException{
+	public VirtualFile[] list(VirtualFile directory) throws IOException {
 		assertReadPermission(directory);
-		if(settings.isCordonedOff()){
+		if (settings.isCordonedOff()) {
 			throw new UnsupportedOperationException("Not yet implemented.");
 		} else {
 			FileSystemLayer real = normalize(directory);
 			return real.listFiles();
 		}
 	}
-	
+
 	/**
-	 * Deletes a file or folder. Note that if this is cordoned off, and
-	 * this is a directory, the directory may appear to be empty according
-	 * to {@see #list}, but it won't be deleted if other files are actually
-	 * living in it, but regardless, the entry will be removed from the manifest,
-	 * and further calls to list will show it having been deleted.
-	 * Requires write permission.
+	 * Deletes a file or folder. Note that if this is cordoned off, and this is a directory, the directory may appear to
+	 * be empty according to {
+	 *
+	 * @see #list}, but it won't be deleted if other files are actually living in it, but regardless, the entry will be
+	 * removed from the manifest, and further calls to list will show it having been deleted. Requires write permission.
 	 * @param file
-	 * @return 
+	 * @return
 	 */
-	public void delete(VirtualFile file) throws IOException{
+	public void delete(VirtualFile file) throws IOException {
 		assertWritePermission(file);
-		if(settings.isCordonedOff()){
+		if (settings.isCordonedOff()) {
 			throw new UnsupportedOperationException("Not implemented yet.");
 		} else {
 			normalize(file).delete();
 		}
 	}
-	
+
 	/**
-	 * Works the same as {@see #delete}, but the file will be
-	 * deleted upon exit of the JVM.
-	 * Requires write permission.
+	 * Works the same as {
+	 *
+	 * @see #delete}, but the file will be deleted upon exit of the JVM. Requires write permission.
 	 * @param file
 	 */
-	public void deleteOnExit(VirtualFile file) throws IOException{
+	public void deleteOnExit(VirtualFile file) throws IOException {
 		assertWritePermission(file);
-		if(settings.isCordonedOff()){
+		if (settings.isCordonedOff()) {
 			throw new UnsupportedOperationException("Not implemented yet.");
 		} else {
 			normalize(file).deleteOnExit();
 		}
 	}
-	
+
 	/**
-	 * Returns true if the file represented by this VirtualFile
-	 * actually exists on the file system.
-	 * Requires read permission.
+	 * Returns true if the file represented by this VirtualFile actually exists on the file system. Requires read
+	 * permission.
+	 *
 	 * @param file
-	 * @return 
+	 * @return
 	 */
-	public boolean exists(VirtualFile file) throws IOException{
+	public boolean exists(VirtualFile file) throws IOException {
 		assertReadPermission(file);
 		return normalize(file).exists();
 	}
-	
+
 	/**
-	 * Returns true if this file can be read. If the file doesn't
-	 * exist, returns false.
-	 * Requires read permission.
+	 * Returns true if this file can be read. If the file doesn't exist, returns false. Requires read permission.
+	 *
 	 * @param file
-	 * @return 
+	 * @return
 	 */
-	public boolean canRead(VirtualFile file) throws IOException{
+	public boolean canRead(VirtualFile file) throws IOException {
 		assertReadPermission(file);
-		if(!exists(file)){
+		if (!exists(file)) {
 			return false;
 		}
 		return normalize(file).canRead();
 	}
-	
+
 	/**
-	 * Returns true if this file can be written to. 
-	 * Requires read permission.
+	 * Returns true if this file can be written to. Requires read permission.
+	 *
 	 * @param file
-	 * @return 
+	 * @return
 	 */
-	public boolean canWrite(VirtualFile file) throws IOException{
+	public boolean canWrite(VirtualFile file) throws IOException {
 		assertReadPermission(file);
 		return normalize(file).canWrite();
 	}
-	
+
 	/**
-	 * Returns true if the abstract path represented by this file
-	 * is absolute, that is, if it starts with a forward slash.
-	 * Does not require any permissions, because it simply deals with
-	 * the virtual file path.
+	 * Returns true if the abstract path represented by this file is absolute, that is, if it starts with a forward
+	 * slash. Does not require any permissions, because it simply deals with the virtual file path.
+	 *
 	 * @param file
-	 * @return 
+	 * @return
 	 */
-	public boolean isAbsolute(VirtualFile file){
+	public boolean isAbsolute(VirtualFile file) {
 		return file.isAbsolute();
 	}
-	
+
 	/**
-	 * Returns true if this path represented by the VirtualFile path is a directory.
-	 * If no file or folder exists, false is returned.
-	 * Requires read permissions.
+	 * Returns true if this path represented by the VirtualFile path is a directory. If no file or folder exists, false
+	 * is returned. Requires read permissions.
+	 *
 	 * @param fileOrFolder
-	 * @return 
+	 * @return
 	 */
-	public boolean isDirectory(VirtualFile fileOrFolder) throws IOException{
+	public boolean isDirectory(VirtualFile fileOrFolder) throws IOException {
 		assertReadPermission(fileOrFolder);
-		if(!exists(fileOrFolder)){
+		if (!exists(fileOrFolder)) {
 			return false;
 		}
 		return normalize(fileOrFolder).isDirectory();
 	}
-	
+
 	/**
-	 * Returns true if this path represented by the VirtualFile path is
-	 * a file. If no file or folder exists, false is returned.
-	 * Requires read permissions.
+	 * Returns true if this path represented by the VirtualFile path is a file. If no file or folder exists, false is
+	 * returned. Requires read permissions.
+	 *
 	 * @param fileOrFolder
-	 * @return 
+	 * @return
 	 */
-	public boolean isFile(VirtualFile fileOrFolder) throws IOException{
+	public boolean isFile(VirtualFile fileOrFolder) throws IOException {
 		assertReadPermission(fileOrFolder);
-		if(!exists(fileOrFolder)){
+		if (!exists(fileOrFolder)) {
 			return false;
 		}
 		return normalize(fileOrFolder).isFile();
 	}
-	
+
 	/**
-	 * Creates the directory specified by the VirtualFile path, and any
-	 * parent directories as needed.
-	 * Requires write permissions.
-	 * @param directory 
+	 * Creates the directory specified by the VirtualFile path, and any parent directories as needed. Requires write
+	 * permissions.
+	 *
+	 * @param directory
 	 */
-	public void mkdirs(VirtualFile directory) throws IOException{
+	public void mkdirs(VirtualFile directory) throws IOException {
 		assertWritePermission(directory);
 		normalize(directory).mkdirs();
 	}
-	
+
 	/**
-	 * Creates a new, empty file at this location, if no file already
-	 * exists at this location.
-	 * Requires write permissions.
-	 * @param file 
+	 * Creates a new, empty file at this location, if no file already exists at this location. Requires write
+	 * permissions.
+	 *
+	 * @param file
 	 */
-	public void createEmptyFile(VirtualFile file) throws IOException{
+	public void createEmptyFile(VirtualFile file) throws IOException {
 		assertWritePermission(file);
-		if(exists(file)){
+		if (exists(file)) {
 			return;
 		}
 		normalize(file).createNewFile();
 	}
-	
+
 	/**
-	 * Creates a new temporary file, which is guaranteed to be unique, and
-	 * will definitely exist for this session. The file is likely to be deleted
-	 * at the start of the next session however, and so must not be relied on to
-	 * continue to exist. Temporary files do count towards the quota if enabled,
-	 * but will be deleted by the system automatically. You must have read and
-	 * write permissions to / to create a temp file.
+	 * Creates a new temporary file, which is guaranteed to be unique, and will definitely exist for this session. The
+	 * file is likely to be deleted at the start of the next session however, and so must not be relied on to continue
+	 * to exist. Temporary files do count towards the quota if enabled, but will be deleted by the system automatically.
+	 * You must have read and write permissions to / to create a temp file.
+	 *
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	public VirtualFile createTempFile() throws IOException{
+	public VirtualFile createTempFile() throws IOException {
 		assertWritePermission(new VirtualFile("/"));
 		assertReadPermission(new VirtualFile("/"));
 		String filename = "/" + TMP_DIRECTORY_PATH + "/" + UUID.randomUUID().toString() + ".tmp";
@@ -469,5 +459,5 @@ public class VirtualFileSystem {
 		real.createNewFile();
 		return path;
 	}
-					
+
 }

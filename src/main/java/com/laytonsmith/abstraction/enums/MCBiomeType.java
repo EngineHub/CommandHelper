@@ -25,11 +25,11 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 	}
 
 	public static MCBiomeType valueOf(String test) throws IllegalArgumentException {
-		if(mappings == null) {
+		if (mappings == null) {
 			return null;
 		}
 		MCBiomeType ret = mappings.get(test);
-		if(ret == null) {
+		if (ret == null) {
 			throw new IllegalArgumentException("Unknown biome type: " + test);
 		}
 		return ret;
@@ -43,9 +43,9 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 	 * @return Names of available entity types
 	 */
 	public static Set<String> types() {
-		if(NULL == null) { // docs mode
+		if (NULL == null) { // docs mode
 			Set<String> dummy = new HashSet<>();
-			for(final MCVanillaBiomeType t : MCVanillaBiomeType.values()) {
+			for (final MCVanillaBiomeType t : MCVanillaBiomeType.values()) {
 				dummy.add(t.name());
 			}
 			return dummy;
@@ -57,9 +57,9 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 	 * @return Our own EntityType list
 	 */
 	public static Collection<MCBiomeType> values() {
-		if(NULL == null) { // docs mode
+		if (NULL == null) { // docs mode
 			ArrayList<MCBiomeType> dummy = new ArrayList<>();
-			for(final MCVanillaBiomeType t : MCVanillaBiomeType.values()) {
+			for (final MCVanillaBiomeType t : MCVanillaBiomeType.values()) {
 				dummy.add(new MCBiomeType<Object>(t, null) {
 					@Override
 					public String name() {

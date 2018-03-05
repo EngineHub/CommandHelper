@@ -7,20 +7,20 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.util.List;
 
 /**
- * A wrapper for simple function/keywords, where a code block merely
- * follows the function call, and adds the code block to the end of
- * the function. For instance, the transformation where myFunctionKeyword(@arg){code();}
- * should be turned into myFunctionKeyword(@arg, code()).
+ * A wrapper for simple function/keywords, where a code block merely follows the function call, and adds the code block
+ * to the end of the function. For instance, the transformation where myFunctionKeyword(@arg){code();} should be turned
+ * into myFunctionKeyword(@arg, code()).
  */
 public abstract class SimpleBlockKeywordFunction extends Keyword {
 
 	/**
-	 * This is the standalone version of the {@link #process(java.util.List, int)} function. All
-	 * values must be passed in.
+	 * This is the standalone version of the {@link #process(java.util.List, int)} function. All values must be passed
+	 * in.
+	 *
 	 * @param keywordName The keyword name
 	 * @param functionArgumentCount The function clause argument count
-	 * @param isStandaloneFunction Whether or not this is a standalone function (that is, it can be used
-	 * without a block following it)
+	 * @param isStandaloneFunction Whether or not this is a standalone function (that is, it can be used without a block
+	 * following it)
 	 * @param list The current list
 	 * @param keywordPosition The keyword position
 	 * @return
@@ -29,20 +29,20 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 	public static int doProcess(String keywordName, Integer[] functionArgumentCount, boolean isStandaloneFunction, List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
 
 		Target t = list.get(keywordPosition).getTarget();
-		if(list.size() > keywordPosition + 1){
+		if (list.size() > keywordPosition + 1) {
 			ParseTree code = list.get(keywordPosition + 1);
-			if(isCodeBlock(code)){
+			if (isCodeBlock(code)) {
 				// This is a valid format, but we need to make sure that there is only one argument passed
 				// to the while so far.
 				Integer[] validArgs = functionArgumentCount;
 				// If this is null, we don't care about argument count.
-				if(validArgs != null){
+				if (validArgs != null) {
 					// If the valid argument count is only 1, we will use that value
 					// in the error message to make it more precise. Otherwise, use a more
 					// generic error message
 					int firstClauseArgumentCount = list.get(keywordPosition).getChildren().size();
-					if(validArgs.length == 1){
-						if(firstClauseArgumentCount != validArgs[0]){
+					if (validArgs.length == 1) {
+						if (firstClauseArgumentCount != validArgs[0]) {
 							throw new ConfigCompileException("\"" + keywordName + "\" blocks "
 									+ (firstClauseArgumentCount > validArgs[0] ? "may only" : "must") + " have " + validArgs[0]
 									+ " argument" + (validArgs[0] == 1 ? "" : "s") + " passed to the"
@@ -50,16 +50,16 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 						}
 					} else {
 						boolean error = true;
-						for(int i : validArgs){
-							if(firstClauseArgumentCount == i){
+						for (int i : validArgs) {
+							if (firstClauseArgumentCount == i) {
 								error = false;
 								break;
 							}
 						}
-						if(error){
+						if (error) {
 							throw new ConfigCompileException("\"" + keywordName + "\" blocks may not have " + firstClauseArgumentCount
-								+ " argument" + (firstClauseArgumentCount == 1 ? "" : "s") + " passed to the "
-								+ keywordName + " condition", t);
+									+ " argument" + (firstClauseArgumentCount == 1 ? "" : "s") + " passed to the "
+									+ keywordName + " condition", t);
 						}
 					}
 				}
@@ -67,7 +67,7 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 				list.remove(keywordPosition + 1);
 			}
 		} else {
-			if(!isStandaloneFunction){
+			if (!isStandaloneFunction) {
 				throw new ConfigCompileException("Missing code block, following \"" + keywordName + "\"", t);
 			}
 		}
@@ -80,21 +80,21 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 	}
 
 	/**
-	 * Functions may be standalone, that is, myFunctionKeyword() may be valid without
-	 * a code block behind it. If this is the case, this should return true. By
-	 * default, we return true always.
+	 * Functions may be standalone, that is, myFunctionKeyword() may be valid without a code block behind it. If this is
+	 * the case, this should return true. By default, we return true always.
+	 *
 	 * @return
 	 */
-	protected boolean isStandaloneFunction(){
+	protected boolean isStandaloneFunction() {
 		return true;
 	}
 
 	/**
-	 * Returns the number of arguments that are allowed to be passed to the function portion
-	 * of the keyword. For instance, if myFunctionKeyword(@a){ } is the format that
-	 * is used, then this should return {1}. This is independent of the function's
-	 * normal argument count, as this allows for more precise error messages. If the
+	 * Returns the number of arguments that are allowed to be passed to the function portion of the keyword. For
+	 * instance, if myFunctionKeyword(@a){ } is the format that is used, then this should return {1}. This is
+	 * independent of the function's normal argument count, as this allows for more precise error messages. If the
 	 * number of arguments can vary, send null.
+	 *
 	 * @return
 	 */
 	protected abstract Integer[] getFunctionArgumentCount();

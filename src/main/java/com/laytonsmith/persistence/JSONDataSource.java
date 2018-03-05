@@ -13,13 +13,13 @@ import org.json.simple.JSONValue;
 
 /**
  *
- * 
+ *
  */
 @datasource("json")
 public class JSONDataSource extends StringSerializableDataSource {
-	
+
 	private JSONDataSource() {
-		
+
 	}
 
 	public JSONDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
@@ -61,15 +61,15 @@ public class JSONDataSource extends StringSerializableDataSource {
 	@Override
 	public String docs() {
 		return "JSON {json:///path/to/file.json} This type stores data in JSON"
-			+ " format. All the pros and cons of yml apply here, but instead"
-			+ " of using the yml style to store the data, values are stored"
-			+ " in a JSON medium. The JSON will be an array, where each"
-			+ " namespace is its own array or value, so 'name.of.key'"
-			+ " = 'value' would be stored as such:"
-			+ " {\"name\":{\"of\":{\"key\":\"value\"}}}. Due to lack of"
-			+ " support for pretty printing in the json library currently used,"
-			+ " prettyprint is unsupported, however it is intended to be"
-			+ " supported in the future.";
+				+ " format. All the pros and cons of yml apply here, but instead"
+				+ " of using the yml style to store the data, values are stored"
+				+ " in a JSON medium. The JSON will be an array, where each"
+				+ " namespace is its own array or value, so 'name.of.key'"
+				+ " = 'value' would be stored as such:"
+				+ " {\"name\":{\"of\":{\"key\":\"value\"}}}. Due to lack of"
+				+ " support for pretty printing in the json library currently used,"
+				+ " prettyprint is unsupported, however it is intended to be"
+				+ " supported in the future.";
 	}
 
 	@Override

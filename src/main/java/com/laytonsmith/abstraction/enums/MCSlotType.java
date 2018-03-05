@@ -13,7 +13,8 @@ public enum MCSlotType {
 	 */
 	CONTAINER,
 	/**
-	 * A slot in the crafting matrix, or the input slot in a furnace inventory, the potion slot in the brewing stand, or the enchanting slot.
+	 * A slot in the crafting matrix, or the input slot in a furnace inventory, the potion slot in the brewing stand, or
+	 * the enchanting slot.
 	 */
 	CRAFTING,
 	/**

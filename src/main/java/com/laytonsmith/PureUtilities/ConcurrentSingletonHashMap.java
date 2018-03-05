@@ -6,20 +6,21 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * This class provides a generic way to have a threadsafe map of singleton values, where a key maps to a single value, and
- * where the value is only created if it doesn't exist and only once.
+ * This class provides a generic way to have a threadsafe map of singleton values, where a key maps to a single value,
+ * and where the value is only created if it doesn't exist and only once.
  *
  * There is a decent amount of complexity involved in this task, and so this class wraps the functionality. The class
  * extends Map, so it can generally be used in place of other Map objects.
  *
  * Insertions will trigger synchronization, but given it is a singleton pool, this is assumed to not happen frequently.
- * The put and remove methods will trigger an exception if they are called. Only the internal generator is allowed to insert values
- * into the internal map, and values are not allowed to be removed.
+ * The put and remove methods will trigger an exception if they are called. Only the internal generator is allowed to
+ * insert values into the internal map, and values are not allowed to be removed.
+ *
  * @author cailin
  */
-public class ConcurrentSingletonHashMap<T, V> implements Map<T, V>{
+public class ConcurrentSingletonHashMap<T, V> implements Map<T, V> {
 
-    /*
+	/*
      * You might notice that no fields in this class are volatile. Normally, when you double lock, you must do
      * something like this to be totally correct:
      *
@@ -48,119 +49,122 @@ public class ConcurrentSingletonHashMap<T, V> implements Map<T, V>{
      * we never get a value that is partially constructed in the get() method.
      *
      *
-     */
-    private final Map<T, V> map = new ConcurrentHashMap<>();
-    private final ValueGenerator<T, V> generator;
+	 */
+	private final Map<T, V> map = new ConcurrentHashMap<>();
+	private final ValueGenerator<T, V> generator;
 
-    public interface ValueGenerator<T, V> {
-	V generate(T key);
-    }
+	public interface ValueGenerator<T, V> {
 
-    public ConcurrentSingletonHashMap(ValueGenerator<T, V> generator) {
-	this.generator = generator;
-    }
-
-    @Override
-    public int size() {
-	return map.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-	return map.isEmpty();
-    }
-
-    @Override
-    public boolean containsKey(Object key) {
-	return map.containsKey(key);
-    }
-
-    @Override
-    public boolean containsValue(Object value) {
-	return map.containsValue(value);
-    }
-
-    @Override
-    public V get(Object key) {
-	@SuppressWarnings("unchecked")
-	T k = (T) key;
-	// Usual case, it already exists. No synchronization.
-	if(map.containsKey(k)) {
-	    return map.get(k);
+		V generate(T key);
 	}
-	// It does not exist. We must now synchronize.
-	synchronized(map) {
-	    // It may have since been created since we got the lock
-	    if(map.containsKey(k)) {
-		return map.get(k);
-	    }
-	    // It truly does not exist, so now we must create it, put it in the map, then return it.
-	    V value = generator.generate(k);
-	    map.put(k, value);
-	    return value;
+
+	public ConcurrentSingletonHashMap(ValueGenerator<T, V> generator) {
+		this.generator = generator;
 	}
-    }
 
-    /**
-     * This method unconditionally throws an exception.
-     * @param key
-     * @param value
-     * @return
-     * @throws UnsupportedOperationException Put operations are not allowed, and so this exception is always thrown.
-     */
-    @Override
-    public V put(T key, V value) {
-	throw new UnsupportedOperationException("Put operations are not allowed in " + this.getClass().getSimpleName());
-    }
+	@Override
+	public int size() {
+		return map.size();
+	}
 
-    /**
-     * This method unconditionally throws an exception.
-     * @param key
-     * @return
-     * @throws UnsupportedOperationException Remove operations are not allowed, and so this exception is always thrown.
-     */
-    @Override
-    public V remove(Object key) {
-	throw new UnsupportedOperationException("Remove operations are not allowed in " + this.getClass().getSimpleName());
-    }
+	@Override
+	public boolean isEmpty() {
+		return map.isEmpty();
+	}
 
-    /**
-     * This method unconditionally throws an exception.
-     * @param m
-     * @return
-     * @throws UnsupportedOperationException Put operations are not allowed, and so this exception is always thrown.
-     */
-    @Override
-    public void putAll(Map<? extends T, ? extends V> m) {
-	throw new UnsupportedOperationException("Put operations are not allowed in " + this.getClass().getSimpleName());
-    }
+	@Override
+	public boolean containsKey(Object key) {
+		return map.containsKey(key);
+	}
 
-    /**
-     * This method unconditionally throws an exception.
-     * @param key
-     * @return
-     * @throws UnsupportedOperationException Remove operations are not allowed, and so this exception is always thrown.
-     */
-    @Override
-    public void clear() {
-	throw new UnsupportedOperationException("Remove operations are not allowed in " + this.getClass().getSimpleName());
-    }
+	@Override
+	public boolean containsValue(Object value) {
+		return map.containsValue(value);
+	}
 
-    @Override
-    public Set<T> keySet() {
-	return map.keySet();
-    }
+	@Override
+	public V get(Object key) {
+		@SuppressWarnings("unchecked")
+		T k = (T) key;
+		// Usual case, it already exists. No synchronization.
+		if (map.containsKey(k)) {
+			return map.get(k);
+		}
+		// It does not exist. We must now synchronize.
+		synchronized (map) {
+			// It may have since been created since we got the lock
+			if (map.containsKey(k)) {
+				return map.get(k);
+			}
+			// It truly does not exist, so now we must create it, put it in the map, then return it.
+			V value = generator.generate(k);
+			map.put(k, value);
+			return value;
+		}
+	}
 
-    @Override
-    public Collection<V> values() {
-	return map.values();
-    }
+	/**
+	 * This method unconditionally throws an exception.
+	 *
+	 * @param key
+	 * @param value
+	 * @return
+	 * @throws UnsupportedOperationException Put operations are not allowed, and so this exception is always thrown.
+	 */
+	@Override
+	public V put(T key, V value) {
+		throw new UnsupportedOperationException("Put operations are not allowed in " + this.getClass().getSimpleName());
+	}
 
-    @Override
-    public Set<Entry<T, V>> entrySet() {
-	return map.entrySet();
-    }
+	/**
+	 * This method unconditionally throws an exception.
+	 *
+	 * @param key
+	 * @return
+	 * @throws UnsupportedOperationException Remove operations are not allowed, and so this exception is always thrown.
+	 */
+	@Override
+	public V remove(Object key) {
+		throw new UnsupportedOperationException("Remove operations are not allowed in " + this.getClass().getSimpleName());
+	}
 
+	/**
+	 * This method unconditionally throws an exception.
+	 *
+	 * @param m
+	 * @return
+	 * @throws UnsupportedOperationException Put operations are not allowed, and so this exception is always thrown.
+	 */
+	@Override
+	public void putAll(Map<? extends T, ? extends V> m) {
+		throw new UnsupportedOperationException("Put operations are not allowed in " + this.getClass().getSimpleName());
+	}
 
+	/**
+	 * This method unconditionally throws an exception.
+	 *
+	 * @param key
+	 * @return
+	 * @throws UnsupportedOperationException Remove operations are not allowed, and so this exception is always thrown.
+	 */
+	@Override
+	public void clear() {
+		throw new UnsupportedOperationException("Remove operations are not allowed in " + this.getClass().getSimpleName());
+	}
+
+	@Override
+	public Set<T> keySet() {
+		return map.keySet();
+	}
+
+	@Override
+	public Collection<V> values() {
+		return map.values();
+	}
+
+	@Override
+	public Set<Entry<T, V>> entrySet() {
+		return map.entrySet();
+	}
 
 }

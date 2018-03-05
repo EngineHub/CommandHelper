@@ -122,8 +122,7 @@ public enum MCDamageCause {
 	 */
 	FALLING_BLOCK,
 	/**
-	 * Damage caused in retaliation to another attack by the Thorns
-	 * enchantment.
+	 * Damage caused in retaliation to another attack by the Thorns enchantment.
 	 * <p />
 	 * Damage: 1-4 (Thorns)
 	 */
@@ -159,8 +158,7 @@ public enum MCDamageCause {
 	 */
 	ENTITY_SWEEP_ATTACK,
 	/**
-	 * Damage caused when an entity is colliding with too many entities due
-	 * to the maxEntityCramming game rule.
+	 * Damage caused when an entity is colliding with too many entities due to the maxEntityCramming game rule.
 	 * <p />
 	 * Damage: 6
 	 */

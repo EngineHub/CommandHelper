@@ -48,7 +48,7 @@ public class CheckOverrides extends AbstractProcessor {
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-		if(!enabled){
+		if (!enabled) {
 			processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "CheckOverrides processor is turned off!");
 			return false;
 		}
@@ -128,9 +128,9 @@ public class CheckOverrides extends AbstractProcessor {
 									//Oh, there aren't any. Well, I don't know why this would happen.
 									Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, e);
 								}
-								try{
+								try {
 									argTypes[i] = Class.forName(args[i]);
-								} catch(ClassNotFoundException ex){
+								} catch (ClassNotFoundException ex) {
 									//Won't happen
 								}
 							}
@@ -148,9 +148,9 @@ public class CheckOverrides extends AbstractProcessor {
 						//and remove all the methods with this name and type. We can, however,
 						//avoid removing methods with different number of arguments, since we
 						//can guarantee those aren't overridden.
-						for(Method method : c.getDeclaredMethods()){
-							if(method.getName().equals(methodName)
-									&& method.getParameterTypes().length == argTypes.length){
+						for (Method method : c.getDeclaredMethods()) {
+							if (method.getName().equals(methodName)
+									&& method.getParameterTypes().length == argTypes.length) {
 								methods.get(c).remove(method);
 							}
 						}
@@ -233,10 +233,10 @@ public class CheckOverrides extends AbstractProcessor {
 				final StringBuilder b = new StringBuilder();
 				b.append("There ")
 						.append(StringUtils.PluralTemplateHelper(stringMethodsInError.size(),
-						"is a method which overrides or implements a method in a super class/super interface,"
-						+ " but doesn't use the @Override tag. Please tag this method",
-						"are %d methods which override or implement a method in a super class/super interface"
-						+ " but don't use the @Override tag. Please tag these methods"))
+								"is a method which overrides or implements a method in a super class/super interface,"
+								+ " but doesn't use the @Override tag. Please tag this method",
+								"are %d methods which override or implement a method in a super class/super interface"
+								+ " but don't use the @Override tag. Please tag these methods"))
 						.append(" with @Override to continue the build process.")
 						.append(StringUtils.nl)
 						.append(StringUtils.Join(stringMethodsInError, StringUtils.nl));
@@ -269,8 +269,7 @@ public class CheckOverrides extends AbstractProcessor {
 	}
 
 	/**
-	 * Checks to see if an argument signature is compatible. That is, if the
-	 * parameter types match.
+	 * Checks to see if an argument signature is compatible. That is, if the parameter types match.
 	 *
 	 * @param superArgs The super class arguments to check
 	 * @param subArgs The sub class arguments to check
@@ -337,8 +336,7 @@ public class CheckOverrides extends AbstractProcessor {
 	}
 
 	/**
-	 * Returns a list of potentially overriding methods in a class. That is, the
-	 * non-private, non-static methods.
+	 * Returns a list of potentially overriding methods in a class. That is, the non-private, non-static methods.
 	 *
 	 * @param c
 	 * @return
@@ -356,8 +354,7 @@ public class CheckOverrides extends AbstractProcessor {
 	}
 
 	/**
-	 * Returns a list of overridable methods in a class. This includes
-	 * non-static, non-private, non-final methods.
+	 * Returns a list of overridable methods in a class. This includes non-static, non-private, non-final methods.
 	 *
 	 * @param c
 	 * @return

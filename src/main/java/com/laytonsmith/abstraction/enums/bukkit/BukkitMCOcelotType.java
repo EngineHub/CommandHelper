@@ -7,16 +7,16 @@ import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.entity.Ocelot;
 
 @abstractionenum(
-		implementation=Implementation.Type.BUKKIT,
-		forAbstractEnum=MCOcelotType.class,
-		forConcreteEnum=Ocelot.Type.class
+		implementation = Implementation.Type.BUKKIT,
+		forAbstractEnum = MCOcelotType.class,
+		forConcreteEnum = Ocelot.Type.class
 )
 public class BukkitMCOcelotType extends EnumConvertor<MCOcelotType, Ocelot.Type> {
 
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCOcelotType instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCOcelotType getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCOcelotType();
 		}
 		return instance;

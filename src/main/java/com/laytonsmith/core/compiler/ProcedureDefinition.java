@@ -17,56 +17,55 @@ import java.util.List;
  */
 public class ProcedureDefinition extends Construct {
 
-    String name;
-    DocComment comment;
-    Environment env;
-    List<String> varNames;
-    List<ParseTree> varDefaults;
-    ParseTree code;
+	String name;
+	DocComment comment;
+	Environment env;
+	List<String> varNames;
+	List<ParseTree> varDefaults;
+	ParseTree code;
 
-    public ProcedureDefinition(String name, DocComment comment, List<String> varNames, List<ParseTree> varDefaults, ParseTree code, Target target) {
-	super(name, Construct.ConstructType.FUNCTION, target);
-    }
-
-    @Override
-    public boolean isDynamic() {
-	boolean ret = true;
-	for (ParseTree defs : varDefaults) {
-	    if (defs.isDynamic()) {
-		ret = false;
-		break;
-	    }
+	public ProcedureDefinition(String name, DocComment comment, List<String> varNames, List<ParseTree> varDefaults, ParseTree code, Target target) {
+		super(name, Construct.ConstructType.FUNCTION, target);
 	}
-	if (code.isDynamic()) {
-	    ret = false;
+
+	@Override
+	public boolean isDynamic() {
+		boolean ret = true;
+		for (ParseTree defs : varDefaults) {
+			if (defs.isDynamic()) {
+				ret = false;
+				break;
+			}
+		}
+		if (code.isDynamic()) {
+			ret = false;
+		}
+		return ret;
 	}
-	return ret;
-    }
 
-    @Override
-    public Version since() {
-	return super.since();
-    }
+	@Override
+	public Version since() {
+		return super.since();
+	}
 
-    @Override
-    public String docs() {
-	return super.docs();
-    }
+	@Override
+	public String docs() {
+		return super.docs();
+	}
 
+	@Override
+	public CClassType[] getSuperclasses() {
+		return new CClassType[]{Mixed.TYPE};
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	return new CClassType[]{Mixed.TYPE};
-    }
+	@Override
+	public CClassType[] getInterfaces() {
+		return new CClassType[]{};
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	return new CClassType[]{};
-    }
-
-    @Override
-    public ObjectType getObjectType() {
-	return super.getObjectType();
-    }
+	@Override
+	public ObjectType getObjectType() {
+		return super.getObjectType();
+	}
 
 }

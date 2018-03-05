@@ -36,8 +36,8 @@ public class Enchantments {
 	}
 
 	/**
-	 * Converts the wiki version string to the bukkit version string. If the
-	 * specified string isn't in the wiki, the string is returned unchanged.
+	 * Converts the wiki version string to the bukkit version string. If the specified string isn't in the wiki, the
+	 * string is returned unchanged.
 	 *
 	 * @param wikiVersion
 	 * @return
@@ -78,13 +78,13 @@ public class Enchantments {
 			return "DURABILITY";
 		} else if (lc.equals("FORTUNE")) {
 			return "LOOT_BONUS_BLOCKS";
-		} else if (lc.equals("POWER")){
+		} else if (lc.equals("POWER")) {
 			return "ARROW_DAMAGE";
-		} else if(lc.equals("PUNCH")){
+		} else if (lc.equals("PUNCH")) {
 			return "ARROW_KNOCKBACK";
-		} else if(lc.equals("FLAME")){
+		} else if (lc.equals("FLAME")) {
 			return "ARROW_FIRE";
-		} else if(lc.equals("INFINITY")){
+		} else if (lc.equals("INFINITY")) {
 			return "ARROW_INFINITE";
 		} else {
 			return wikiVersion;
@@ -92,8 +92,8 @@ public class Enchantments {
 	}
 
 	/**
-	 * Converts the roman numeral into an integer (as a string). If the value
-	 * passed in is already an integer, it is returned as is.
+	 * Converts the roman numeral into an integer (as a string). If the value passed in is already an integer, it is
+	 * returned as is.
 	 *
 	 * @param romanNumeral
 	 * @return
@@ -177,7 +177,7 @@ public class Enchantments {
 		return 0;
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class enchant_inv extends AbstractFunction {
 
 		@Override
@@ -273,7 +273,7 @@ public class Enchantments {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class enchant_rm_inv extends AbstractFunction {
 
 		@Override
@@ -322,7 +322,7 @@ public class Enchantments {
 				offset = 0;
 			}
 			Static.AssertPlayerNonNull(m, t);
-			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull?null:Static.getInt32(args[1 - offset], t));
+			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull ? null : Static.getInt32(args[1 - offset], t));
 			if (is == null) {
 				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
@@ -355,7 +355,7 @@ public class Enchantments {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_enchant_inv extends AbstractFunction {
 
 		@Override
@@ -453,7 +453,7 @@ public class Enchantments {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREEnchantmentException.class, CREFormatException.class, CRECastException.class,
-					CRERangeException.class, CRENotFoundException.class};
+				CRERangeException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -477,7 +477,7 @@ public class Enchantments {
 				String name = Enchantments.ConvertName(args[0].val());
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
 				MCItemStack is;
-				if(args[1] instanceof CArray) {
+				if (args[1] instanceof CArray) {
 					is = ObjectGenerator.GetGenerator().item(args[1], t);
 				} else {
 					is = Static.ParseItemNotation(null, args[1].val(), 1, t);
@@ -564,7 +564,7 @@ public class Enchantments {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREFormatException.class, CRECastException.class, CRERangeException.class,
-					CRENotFoundException.class};
+				CRENotFoundException.class};
 		}
 
 		@Override
@@ -585,7 +585,7 @@ public class Enchantments {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCItemStack is;
-			if(args[0] instanceof CArray) {
+			if (args[0] instanceof CArray) {
 				is = ObjectGenerator.GetGenerator().item(args[0], t);
 			} else {
 				is = Static.ParseItemNotation(null, args[0].val(), 1, t);
@@ -658,9 +658,9 @@ public class Enchantments {
 			}
 		}
 	}
-	
+
 	@api
-	public static class enchantment_list extends AbstractFunction{
+	public static class enchantment_list extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -681,7 +681,7 @@ public class Enchantments {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEnchantment[] enchantments = StaticLayer.GetEnchantmentValues();
 			CArray ret = new CArray(t);
-			for(MCEnchantment e : enchantments){
+			for (MCEnchantment e : enchantments) {
 				ret.push(new CString(e.getName(), t), t);
 			}
 			return ret;
@@ -709,6 +709,6 @@ public class Enchantments {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 }

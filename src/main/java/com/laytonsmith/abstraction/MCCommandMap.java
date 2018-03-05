@@ -5,10 +5,11 @@ import java.util.List;
 public interface MCCommandMap extends AbstractionObject {
 
 	void clearCommands();
+
 	boolean isCommand(String name);
 
 	/**
-	 * 
+	 *
 	 * @param name name of the command
 	 * @return a command if found, or null if one isn't
 	 */
@@ -17,7 +18,7 @@ public interface MCCommandMap extends AbstractionObject {
 	List<MCCommand> getCommands();
 
 	/**
-	 * 
+	 *
 	 * @param fallback the text added to the start of the command if the chosen name is already taken
 	 * @param cmd
 	 * @return
@@ -25,7 +26,7 @@ public interface MCCommandMap extends AbstractionObject {
 	boolean register(String fallback, MCCommand cmd);
 
 	/**
-	 * 
+	 *
 	 * @param label
 	 * @param fallback the text added to the start of the command if the chosen name is already taken
 	 * @param cmd

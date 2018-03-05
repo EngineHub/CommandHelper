@@ -6,23 +6,25 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import org.bukkit.material.MaterialData;
 
-public class BukkitMCMaterialData implements MCMaterialData{
+public class BukkitMCMaterialData implements MCMaterialData {
+
 	MaterialData md;
-	public BukkitMCMaterialData(MaterialData md){
+
+	public BukkitMCMaterialData(MaterialData md) {
 		this.md = md;
 	}
 
-	public BukkitMCMaterialData(AbstractionObject a){
-		this((MaterialData)null);
-		if(a instanceof MCMaterialData){
-			this.md = ((MaterialData)a.getHandle());
+	public BukkitMCMaterialData(AbstractionObject a) {
+		this((MaterialData) null);
+		if (a instanceof MCMaterialData) {
+			this.md = ((MaterialData) a.getHandle());
 		} else {
 			throw new ClassCastException();
 		}
 	}
 
 	@Override
-	public Object getHandle(){
+	public Object getHandle() {
 		return md;
 	}
 

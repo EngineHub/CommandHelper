@@ -6,6 +6,7 @@ import org.bukkit.block.CommandBlock;
 public class BukkitMCCommandBlock extends BukkitMCBlockState implements MCCommandBlock {
 
 	CommandBlock cb;
+
 	public BukkitMCCommandBlock(CommandBlock block) {
 		super(block);
 		cb = block;

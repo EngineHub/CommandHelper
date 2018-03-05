@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
@@ -7,15 +6,16 @@ import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 
 public class BukkitMCCreeper extends BukkitMCLivingEntity implements MCCreeper {
+
 	Creeper creeper;
 
 	public BukkitMCCreeper(Entity c) {
 		super(c);
 		creeper = (Creeper) c;
 	}
-	
+
 	public BukkitMCCreeper(AbstractionObject ao) {
-		this ((Creeper) ao.getHandle());
+		this((Creeper) ao.getHandle());
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class BukkitMCCreeper extends BukkitMCLivingEntity implements MCCreeper {
 	public int getMaxFuseTicks() {
 		try {
 			return creeper.getMaxFuseTicks();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably prior to 1.12.2
 			return 30;
 		}
@@ -42,7 +42,7 @@ public class BukkitMCCreeper extends BukkitMCLivingEntity implements MCCreeper {
 	public void setMaxFuseTicks(int ticks) {
 		try {
 			creeper.setMaxFuseTicks(ticks);
-		} catch(NoSuchMethodError ex){
+		} catch (NoSuchMethodError ex) {
 			// Probably prior to 1.12.2
 		}
 	}
@@ -51,7 +51,7 @@ public class BukkitMCCreeper extends BukkitMCLivingEntity implements MCCreeper {
 	public int getExplosionRadius() {
 		try {
 			return creeper.getExplosionRadius();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably prior to 1.12.2
 			return 3;
 		}
@@ -61,7 +61,7 @@ public class BukkitMCCreeper extends BukkitMCLivingEntity implements MCCreeper {
 	public void setExplosionRadius(int radius) {
 		try {
 			creeper.setExplosionRadius(radius);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably prior to 1.12.2
 		}
 	}

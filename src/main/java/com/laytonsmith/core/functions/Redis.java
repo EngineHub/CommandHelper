@@ -1,4 +1,3 @@
-
 package com.laytonsmith.core.functions;
 
 //import com.laytonsmith.PureUtilities.Version;
@@ -13,15 +12,15 @@ package com.laytonsmith.core.functions;
 //import java.util.Arrays;
 //import java.util.List;
 //import redis.clients.jedis.Jedis;
-
 /**
  *
  */
 public class Redis {
-	public static String docs(){
+
+	public static String docs() {
 		return "This class of functions provides hooks into a redis system.";
 	}
-	
+
 //	@api 
 //	public static class redis extends AbstractFunction {
 //		

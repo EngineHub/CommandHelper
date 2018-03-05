@@ -12,14 +12,16 @@ import java.net.URL;
  *
  *
  */
-public class WebConnection implements ConnectionMixin{
+public class WebConnection implements ConnectionMixin {
+
 	URL source;
-	public WebConnection(URI uri, boolean useHTTPS) throws MalformedURLException{
+
+	public WebConnection(URI uri, boolean useHTTPS) throws MalformedURLException {
 		URI newURI;
 		try {
-			newURI = new URI("http" + (useHTTPS?"s":"") + "://" + uri.getHost() + uri.getPath()
-				+ (uri.getQuery()==null?"":"?" + uri.getQuery())
-				+ (uri.getFragment()==null?"":"#" + uri.getFragment()));
+			newURI = new URI("http" + (useHTTPS ? "s" : "") + "://" + uri.getHost() + uri.getPath()
+					+ (uri.getQuery() == null ? "" : "?" + uri.getQuery())
+					+ (uri.getFragment() == null ? "" : "#" + uri.getFragment()));
 		} catch (URISyntaxException ex) {
 			//This shouldn't happen, because the URI we received should be correct. If this happens, it's my fault :x
 			throw new Error("Bad URI?");

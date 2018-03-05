@@ -17,7 +17,7 @@ public class BukkitMCIronGolem extends BukkitMCLivingEntity implements MCIronGol
 
 	@Override
 	public IronGolem getHandle() {
-		return (IronGolem)super.getHandle();
+		return (IronGolem) super.getHandle();
 	}
 
 	@Override

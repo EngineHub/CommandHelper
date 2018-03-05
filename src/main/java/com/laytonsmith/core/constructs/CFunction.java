@@ -15,91 +15,91 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  */
 public class CFunction extends Construct {
 
-    public static final long serialVersionUID = 1L;
-    private transient Function function;
+	public static final long serialVersionUID = 1L;
+	private transient Function function;
 
-    public CFunction(String name, Target t) {
-	super(name, ConstructType.FUNCTION, t);
-    }
-
-    @Override
-    public String toString() {
-	return getValue();
-    }
-
-    @Override
-    public CFunction clone() throws CloneNotSupportedException {
-	return (CFunction) super.clone();
-    }
-
-    @Override
-    public boolean isDynamic() {
-	return true;
-    }
-
-    /**
-     * Returns the underlying function for this construct.
-     *
-     * @return
-     * @throws com.laytonsmith.core.exceptions.ConfigCompileException
-     */
-    public Function getFunction() throws ConfigCompileException {
-	if (function == null) {
-	    function = (Function) FunctionList.getFunction(val(), this.getTarget());
+	public CFunction(String name, Target t) {
+		super(name, ConstructType.FUNCTION, t);
 	}
-	return function;
-    }
 
-    /**
-     * This function should only be called by the compiler.
-     *
-     * @param f
-     */
-    public void setFunction(FunctionBase f) {
-	function = (Function) f;
-    }
+	@Override
+	public String toString() {
+		return getValue();
+	}
 
-    /**
-     * Returns true if the Construct is a function, and is of the specified type.
-     *
-     * @param possibleFunction
-     * @param ofType
-     * @return
-     */
-    public static boolean IsFunction(Construct possibleFunction, Class<? extends Function> ofType) {
-	Function f = ReflectionUtils.newInstance(ofType);
-	return possibleFunction instanceof CFunction && possibleFunction.val().equals(f.getName());
-    }
+	@Override
+	public CFunction clone() throws CloneNotSupportedException {
+		return (CFunction) super.clone();
+	}
 
-    /**
-     * Returns true if the data in the ParseTree is a funciton, and is of the specified type.
-     *
-     * @param tree
-     * @param ofType
-     * @return
-     */
-    public static boolean IsFunction(ParseTree tree, Class<? extends Function> ofType) {
-	return IsFunction(tree.getData(), ofType);
-    }
+	@Override
+	public boolean isDynamic() {
+		return true;
+	}
 
-    @Override
-    public Version since() {
-	return super.since();
-    }
+	/**
+	 * Returns the underlying function for this construct.
+	 *
+	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
+	 */
+	public Function getFunction() throws ConfigCompileException {
+		if (function == null) {
+			function = (Function) FunctionList.getFunction(val(), this.getTarget());
+		}
+		return function;
+	}
 
-    @Override
-    public String docs() {
-	return super.docs();
-    }
+	/**
+	 * This function should only be called by the compiler.
+	 *
+	 * @param f
+	 */
+	public void setFunction(FunctionBase f) {
+		function = (Function) f;
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	return new CClassType[]{Mixed.TYPE};
-    }
+	/**
+	 * Returns true if the Construct is a function, and is of the specified type.
+	 *
+	 * @param possibleFunction
+	 * @param ofType
+	 * @return
+	 */
+	public static boolean IsFunction(Construct possibleFunction, Class<? extends Function> ofType) {
+		Function f = ReflectionUtils.newInstance(ofType);
+		return possibleFunction instanceof CFunction && possibleFunction.val().equals(f.getName());
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	return new CClassType[]{};
-    }
+	/**
+	 * Returns true if the data in the ParseTree is a funciton, and is of the specified type.
+	 *
+	 * @param tree
+	 * @param ofType
+	 * @return
+	 */
+	public static boolean IsFunction(ParseTree tree, Class<? extends Function> ofType) {
+		return IsFunction(tree.getData(), ofType);
+	}
+
+	@Override
+	public Version since() {
+		return super.since();
+	}
+
+	@Override
+	public String docs() {
+		return super.docs();
+	}
+
+	@Override
+	public CClassType[] getSuperclasses() {
+		return new CClassType[]{Mixed.TYPE};
+	}
+
+	@Override
+	public CClassType[] getInterfaces() {
+		return new CClassType[]{};
+	}
 
 }

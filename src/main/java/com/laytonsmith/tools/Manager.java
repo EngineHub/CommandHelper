@@ -90,7 +90,6 @@ public class Manager {
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
 
-
 		pl("Starting the Data Manager...");
 		try {
 			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
@@ -119,7 +118,7 @@ public class Manager {
 				merge();
 			} else if (input.equalsIgnoreCase("interpreter")) {
 				new Interpreter(null, System.getProperty("user.dir"));
-			} else if (input.equalsIgnoreCase("hidden-keys")){
+			} else if (input.equalsIgnoreCase("hidden-keys")) {
 				hiddenKeys();
 			} else if (input.equalsIgnoreCase("exit")) {
 				pl("Thanks for using the " + CYAN + BOLD + "Data Manager!" + reset());
@@ -275,7 +274,7 @@ public class Manager {
 	}
 
 	public static void cleardb() {
-		try{
+		try {
 			pl(RED + "Are you absolutely sure you want to clear out your database? " + BLINKON + "No backup is going to be made." + BLINKOFF);
 			pl(WHITE + "This will completely wipe your persistence information out. (No other data will be changed)");
 			pl("[YES/No]");
@@ -286,16 +285,16 @@ public class Manager {
 					p("Ok, here we go... ");
 					Set<String[]> keySet = persistenceNetwork.getNamespace(new String[]{}).keySet();
 					DaemonManager dm = new DaemonManager();
-					for(String [] key : keySet){
+					for (String[] key : keySet) {
 						try {
 							persistenceNetwork.clearKey(dm, key);
 						} catch (ReadOnlyException ex) {
 							pl(RED + "Read only data source found: " + ex.getMessage());
 						}
 					}
-					try{
+					try {
 						dm.waitForThreads();
-					} catch(InterruptedException e){
+					} catch (InterruptedException e) {
 						//
 					}
 					pl("Done!");
@@ -303,9 +302,9 @@ public class Manager {
 			} else if (choice.equalsIgnoreCase("yes")) {
 				pl("No, you have to type YES exactly.");
 			}
-		} catch(DataSourceException ex){
+		} catch (DataSourceException ex) {
 			pl(RED + ex.getMessage());
-		} catch(IOException ex){
+		} catch (IOException ex) {
 			pl(RED + ex.getMessage());
 		}
 	}
@@ -325,74 +324,76 @@ public class Manager {
 
 			pl("Type " + MAGENTA + "help <command>" + WHITE + " for more details about a specific command");
 		} else {
-			if(null != args[0])switch (args[0]) {
-				case "refactor":
-					pl("This tool allows you to granularly move individual keys from one datasource to another."
-							+ " Unlike the merge tool, this works with individual keys, not necessarily keys that are"
-							+ " within a particular data source. There are three required inputs, the transfer key pattern,"
-							+ " the input configuration file, and the output configuration file. Data is transferred from"
-							+ " one configuration to the other, that is, it is added in the new place, and removed in the old place."
-							+ " This tool is more complicated"
-							+ " than the merge tool, so consider using the other tool for simple tasks.");
-					break;
-				case "upgrade":
-					pl("Converts any old formatted data into the new format. Any data that doesn't explicitely"
-							+ " match the old format is not touched. Do not use this utility unless specifically"
-							+ " told to during upgrade notices.");
-					break;
-				case "print":
-					pl("Prints out the information in your persistence file. Entries may be narrowed down by"
-							+ " specifying the namespace (for instance " + MAGENTA + "print storage.warp" + WHITE
-							+ " will show only that data.) This is namespace based, so you"
-							+ " must provide the entire namespace that your are trying to narrow down."
-							+ "(" + MAGENTA + "print storage" + WHITE + " is valid, but " + MAGENTA + "print stor"
-							+ WHITE + " is not)");
-					break;
-				case "cleardb":
-					pl("Wipes your database clean of CommandHelper's persistence entries, but not other data. This"
-							+ " includes any data that CommandHelper would have inserted into the database, or data"
-							+ " that CommandHelper otherwise knows how to use. If using Serialized Persistence (ser), this"
-							+ " means the entire file. For other data backends, this may vary slightly, for instance,"
-							+ " an SQL backend would only have the CH specific tables truncated, but the rest of the"
-							+ " database would remain untouched.");
-					break;
-				case "edit":
-					pl("Allows you to manually edit the values in the database. You have the option to add or edit an existing"
-							+ " value, delete a single value, or view the value of an individual key.");
-					break;
-				case "interpreter":
-					pl("Generally speaking, works the same as the in game interpreter mode, but none"
-							+ " of the minecraft related functions will work. You should not"
-							+ " run this while the server is operational.");
-					break;
-				case "merge":
-					pl("The merge tool allows you to shuffle persisted data around as entire databases, not as individual keys, however."
-							+ " You specify the source database, and the output database, and it copies all the database entries. This"
-							+ " can be used to an extent to import and export values, but it is not granular at all. Key conflicts are"
-							+ " handled by prompting the user for an action, whether to overwrite the destination's value, or to keep"
-							+ " it as is. Thusly, this operation is very safe from accidentally deleting your data. Keys that don't exist"
-							+ " in the destination already are simply copied, and keys that have the same value are skipped. No changes"
-							+ " are made to the source database.");
-					break;
-				case "hidden-keys":
-					pl("The hidden-keys tool allows you to locate any \"hidden keys,\" that is, keys that exist in a data source,"
-							+ " but can't be accessed normally. This can happen if you make changes to your persistence.ini file"
-							+ " but don't refactor or otherwise migrate the data when you \"hide\" the keys. For instance, say you"
-							+ " only have \"**=sqlite://persistence.db\" in your file, and you store some value in \"storage.a\". Later, you"
-							+ " add \"storage.a=json://file.json\" to your persistence.ini file, but you don't refactor. The value stored"
-							+ " at \"storage.a\" in the sqlite file is now inaccessible, and if you store another value in \"storage.a,\" the"
-							+ " new value would be stored in file.json, and the original value in the sqlite file would simply be dead"
-							+ " memory. This wouldn't cause any direct issues, but if a significant number of keys are \"dead,\" this would"
-							+ " take up hard disk space for no reason. Additionally, refactors could have unexpected results.\n\n"
-							+ "You will have the option to view or delete the hidden keys. Viewing them will print out a summary"
-							+ " of all the keys, and deleting them will allow you to wholesale delete them.");
-					break;
-				case "exit":
-					pl("Exits the data manager");
-					break;
-				default:
-					pl("That's not a recognized command: '" + args[0] + "'");
-					break;
+			if (null != args[0]) {
+				switch (args[0]) {
+					case "refactor":
+						pl("This tool allows you to granularly move individual keys from one datasource to another."
+								+ " Unlike the merge tool, this works with individual keys, not necessarily keys that are"
+								+ " within a particular data source. There are three required inputs, the transfer key pattern,"
+								+ " the input configuration file, and the output configuration file. Data is transferred from"
+								+ " one configuration to the other, that is, it is added in the new place, and removed in the old place."
+								+ " This tool is more complicated"
+								+ " than the merge tool, so consider using the other tool for simple tasks.");
+						break;
+					case "upgrade":
+						pl("Converts any old formatted data into the new format. Any data that doesn't explicitely"
+								+ " match the old format is not touched. Do not use this utility unless specifically"
+								+ " told to during upgrade notices.");
+						break;
+					case "print":
+						pl("Prints out the information in your persistence file. Entries may be narrowed down by"
+								+ " specifying the namespace (for instance " + MAGENTA + "print storage.warp" + WHITE
+								+ " will show only that data.) This is namespace based, so you"
+								+ " must provide the entire namespace that your are trying to narrow down."
+								+ "(" + MAGENTA + "print storage" + WHITE + " is valid, but " + MAGENTA + "print stor"
+								+ WHITE + " is not)");
+						break;
+					case "cleardb":
+						pl("Wipes your database clean of CommandHelper's persistence entries, but not other data. This"
+								+ " includes any data that CommandHelper would have inserted into the database, or data"
+								+ " that CommandHelper otherwise knows how to use. If using Serialized Persistence (ser), this"
+								+ " means the entire file. For other data backends, this may vary slightly, for instance,"
+								+ " an SQL backend would only have the CH specific tables truncated, but the rest of the"
+								+ " database would remain untouched.");
+						break;
+					case "edit":
+						pl("Allows you to manually edit the values in the database. You have the option to add or edit an existing"
+								+ " value, delete a single value, or view the value of an individual key.");
+						break;
+					case "interpreter":
+						pl("Generally speaking, works the same as the in game interpreter mode, but none"
+								+ " of the minecraft related functions will work. You should not"
+								+ " run this while the server is operational.");
+						break;
+					case "merge":
+						pl("The merge tool allows you to shuffle persisted data around as entire databases, not as individual keys, however."
+								+ " You specify the source database, and the output database, and it copies all the database entries. This"
+								+ " can be used to an extent to import and export values, but it is not granular at all. Key conflicts are"
+								+ " handled by prompting the user for an action, whether to overwrite the destination's value, or to keep"
+								+ " it as is. Thusly, this operation is very safe from accidentally deleting your data. Keys that don't exist"
+								+ " in the destination already are simply copied, and keys that have the same value are skipped. No changes"
+								+ " are made to the source database.");
+						break;
+					case "hidden-keys":
+						pl("The hidden-keys tool allows you to locate any \"hidden keys,\" that is, keys that exist in a data source,"
+								+ " but can't be accessed normally. This can happen if you make changes to your persistence.ini file"
+								+ " but don't refactor or otherwise migrate the data when you \"hide\" the keys. For instance, say you"
+								+ " only have \"**=sqlite://persistence.db\" in your file, and you store some value in \"storage.a\". Later, you"
+								+ " add \"storage.a=json://file.json\" to your persistence.ini file, but you don't refactor. The value stored"
+								+ " at \"storage.a\" in the sqlite file is now inaccessible, and if you store another value in \"storage.a,\" the"
+								+ " new value would be stored in file.json, and the original value in the sqlite file would simply be dead"
+								+ " memory. This wouldn't cause any direct issues, but if a significant number of keys are \"dead,\" this would"
+								+ " take up hard disk space for no reason. Additionally, refactors could have unexpected results.\n\n"
+								+ "You will have the option to view or delete the hidden keys. Viewing them will print out a summary"
+								+ " of all the keys, and deleting them will allow you to wholesale delete them.");
+						break;
+					case "exit":
+						pl("Exits the data manager");
+						break;
+					default:
+						pl("That's not a recognized command: '" + args[0] + "'");
+						break;
+				}
 			}
 		}
 	}
@@ -441,7 +442,7 @@ public class Manager {
 
 	public static boolean doView(String key) {
 		try {
-			String [] k = key.split("\\.");
+			String[] k = key.split("\\.");
 			if (!persistenceNetwork.hasKey(k)) {
 				pl(RED + "That value is not set!");
 				return true;
@@ -460,12 +461,12 @@ public class Manager {
 			Construct c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(valueScript, null, true)), env, null, null);
 			String value = Construct.json_encode(c, Target.UNKNOWN);
 			pl(CYAN + "Adding: " + WHITE + value);
-			String [] k = key.split("\\.");
+			String[] k = key.split("\\.");
 			DaemonManager dm = new DaemonManager();
 			persistenceNetwork.set(dm, k, value);
-			try{
+			try {
 				dm.waitForThreads();
-			} catch(InterruptedException e){
+			} catch (InterruptedException e) {
 				//
 			}
 			return true;
@@ -477,13 +478,13 @@ public class Manager {
 
 	public static boolean doRemove(String key) {
 		try {
-			String [] k = key.split("\\.");
+			String[] k = key.split("\\.");
 			if (persistenceNetwork.hasKey(k)) {
 				DaemonManager dm = new DaemonManager();
 				persistenceNetwork.clearKey(dm, k);
-				try{
+				try {
 					dm.waitForThreads();
-				} catch(InterruptedException e){
+				} catch (InterruptedException e) {
 					//
 				}
 				return true;
@@ -497,19 +498,19 @@ public class Manager {
 	}
 
 	public static void print(String[] args) {
-		try{
+		try {
 			int count = 0;
-			for(String [] key : persistenceNetwork.getNamespace(new String[]{}).keySet()){
+			for (String[] key : persistenceNetwork.getNamespace(new String[]{}).keySet()) {
 				count++;
 				pl(CYAN + StringUtils.Join(key, ".") + ": " + WHITE + persistenceNetwork.get(key));
 			}
 			pl(BLUE + count + " items found");
-		} catch(Exception e){
+		} catch (Exception e) {
 			pl(RED + e.getMessage());
 		}
 	}
 
-	public static void refactor(){
+	public static void refactor() {
 		pl("This tool allows you to granularly move individual keys from one datasource to another."
 				+ " Unlike the merge tool, this works with individual keys, not necessarily keys that are"
 				+ " within a particular data source. There are three required inputs, the transfer key pattern,"
@@ -520,12 +521,12 @@ public class Manager {
 		pl("Would you like to continue? [" + GREEN + "Y" + WHITE + "/"
 				+ RED + "N" + WHITE + "]");
 		String choice = prompt();
-		if("Y".equals(choice)){
+		if ("Y".equals(choice)) {
 			String filter;
 			File input;
 			File output;
-			while(true){
-				while(true){
+			while (true) {
+				while (true) {
 					pl("What keys are you interested in transferring? The filter should be in the same format as the persistence.ini file, i.e."
 							+ " \"storage.test\" or \"storage.test.**\". If a wildcard is used, multiple keys may be moved, otherwise, only one will"
 							+ " be.");
@@ -533,39 +534,39 @@ public class Manager {
 					break;
 				}
 				File def = MethodScriptFileLocations.getDefault().getPersistenceConfig();
-				while(true) {
+				while (true) {
 					pl("What is the input configuration (where keys will be read in from, then deleted)? Leave blank for the default, which is " + def.toString()
 							+ ". The path should be relative to " + jarLocation.toString());
 					String sinput = prompt();
-					if("".equals(sinput.trim())){
+					if ("".equals(sinput.trim())) {
 						input = def;
 					} else {
 						File temp = new File(sinput);
-						if(!temp.isAbsolute()){
+						if (!temp.isAbsolute()) {
 							temp = new File(jarLocation, sinput);
 						}
 						input = temp;
 					}
-					if(!input.exists() || !input.isFile()){
+					if (!input.exists() || !input.isFile()) {
 						pl(RED + input.toString() + " isn't a file. Please enter an existing file.");
 					} else {
 						break;
 					}
 				}
-				while(true){
+				while (true) {
 					pl("What is the output configuration (where keys will be written to)? The path should be relative to " + jarLocation.toString());
 					String soutput = prompt();
-					if("".equals(soutput.trim())){
+					if ("".equals(soutput.trim())) {
 						pl(RED + "The output cannot be empty");
 						continue;
 					} else {
 						File temp = new File(soutput);
-						if(!temp.isAbsolute()){
+						if (!temp.isAbsolute()) {
 							temp = new File(jarLocation, soutput);
 						}
 						output = temp;
 					}
-					if(!output.exists() || !output.isFile()){
+					if (!output.exists() || !output.isFile()) {
 						pl(RED + output.toString() + " isn't a file. Please enter an existing file.");
 					} else {
 						break;
@@ -576,8 +577,8 @@ public class Manager {
 				pl("The input configuration is \"" + MAGENTA + input.toString() + WHITE + "\".");
 				pl("The output configuration is \"" + MAGENTA + output.toString() + WHITE + "\".");
 				pl("Is this correct? [" + GREEN + "Y" + WHITE + "/"
-					+ RED + "N" + WHITE + "]");
-				if("Y".equals(prompt())){
+						+ RED + "N" + WHITE + "]");
+				if ("Y".equals(prompt())) {
 					break;
 				}
 			}
@@ -599,15 +600,15 @@ public class Manager {
 				boolean errors = false;
 				int transferred = 0;
 				int skipped = 0;
-				for(String [] k : inputData.keySet()){
+				for (String[] k : inputData.keySet()) {
 					String key = StringUtils.Join(k, ".");
-					if(p.matcher(key).matches()){
+					if (p.matcher(key).matches()) {
 						pl(GREEN + "transferring " + YELLOW + key);
 						//This key matches, so we need to add it to the output network, and then remove it
 						//from the input network
-						if(pnoutput.getKeySource(k).equals(pninput.getKeySource(k))){
+						if (pnoutput.getKeySource(k).equals(pninput.getKeySource(k))) {
 							continue; //Don't transfer it if it's the same source, otherwise we would
-									  //end up just deleting it.
+							//end up just deleting it.
 						}
 						try {
 							pnoutput.set(dm, k, inputData.get(k));
@@ -630,7 +631,7 @@ public class Manager {
 				}
 				pl(YELLOW + StringUtils.PluralTemplateHelper(transferred, "%d key was", "%d keys were") + " transferred.");
 				pl(YELLOW + StringUtils.PluralTemplateHelper(skipped, "%d key was", "%d keys were") + " skipped.");
-				if(errors){
+				if (errors) {
 					pl(YELLOW + "Other than the errors listed above, all keys were transferred successfully.");
 				} else {
 					pl(GREEN + "Done!");
@@ -645,30 +646,30 @@ public class Manager {
 		}
 	}
 
-	public static void hiddenKeys(){
+	public static void hiddenKeys() {
 		String action;
-		while(true){
+		while (true) {
 			pl(WHITE + "Would you like to \"" + GREEN + "view" + WHITE + "\" or \"" + RED + "delete" + WHITE + "\" the hidden keys (default: view)? [view/delete]");
 			action = prompt();
-			if("".equals(action)){
+			if ("".equals(action)) {
 				action = "view";
 			}
-			if("view".equals(action) || "delete".equals(action)){
+			if ("view".equals(action) || "delete".equals(action)) {
 				break;
 			} else {
 				pl(RED + "Invalid selection.");
 			}
 		}
 		File configuration = MethodScriptFileLocations.getDefault().getPersistenceConfig();
-		while(true){
+		while (true) {
 			pl("Currently, " + configuration.getAbsolutePath() + " is being used as the persistence config file, but you may"
 					+ " specify another (blank to use the default).");
 			String file = prompt();
-			if("".equals(file)){
+			if ("".equals(file)) {
 				break;
 			} else {
 				File f = new File(file);
-				if(f.exists()){
+				if (f.exists()) {
 					configuration = f;
 					break;
 				} else {
@@ -678,15 +679,15 @@ public class Manager {
 		}
 		pl(YELLOW + "Using " + configuration.getAbsolutePath() + " as our Persistence Network config.");
 		File workingDirectory = MethodScriptFileLocations.getDefault().getConfigDirectory();
-		while(true){
+		while (true) {
 			pl("Currently, " + workingDirectory.getAbsolutePath() + " is being used as the default \"working directory\" for the"
 					+ " persistence config file, but you may specify another (blank to use the default).");
 			String file = prompt();
-			if("".equals(file)){
+			if ("".equals(file)) {
 				break;
 			} else {
 				File f = new File(file);
-				if(f.exists()){
+				if (f.exists()) {
 					workingDirectory = f;
 					break;
 				} else {
@@ -709,10 +710,10 @@ public class Manager {
 				Map<String[], String> map = new HashMap<>();
 				DaemonManager dm = new DaemonManager();
 				try {
-					for(String[] key : db.keySet()){
-						if(!filter.getConnection(key).equals(uri)){
+					for (String[] key : db.keySet()) {
+						if (!filter.getConnection(key).equals(uri)) {
 							map.put(key, db.get(key));
-							if("delete".equals(action)){
+							if ("delete".equals(action)) {
 								ds.clearKey(dm, key);
 							}
 						}
@@ -721,48 +722,48 @@ public class Manager {
 				} catch (ReadOnlyException ex) {
 					pl(RED + "Cannot delete any keys from " + uri + " as it is marked as read only, so it is being skipped.");
 				}
-				if("delete".equals(action)){
+				if ("delete".equals(action)) {
 					try {
 						dm.waitForThreads();
 					} catch (InterruptedException ex) {
 						// Ignored
 					}
 				}
-				if(!map.isEmpty()){
+				if (!map.isEmpty()) {
 					noneFound = false;
-					if("view".equals(action)){
+					if ("view".equals(action)) {
 						pl("Found " + StringUtils.PluralTemplateHelper(map.size(), "one hidden key", "%d hidden keys") + " in data source "
-							+ MAGENTA + uri.toString());
-						for(String[] key : map.keySet()){
+								+ MAGENTA + uri.toString());
+						for (String[] key : map.keySet()) {
 							pl("\t" + GREEN + StringUtils.Join(key, ".") + WHITE + ":" + CYAN + map.get(key));
 						}
-						if(ds.hasModifier(DataSource.DataSourceModifier.READONLY)){
+						if (ds.hasModifier(DataSource.DataSourceModifier.READONLY)) {
 							pl(YELLOW + "This data source is marked as read only, and the keys cannot be deleted from it by this utility.");
 						}
 						pl();
 					}
 				}
 			}
-			if(noneFound){
+			if (noneFound) {
 				pl(GREEN + "Done searching, no hidden keys were found.");
 			} else {
-				if("delete".equals(action)){
+				if ("delete".equals(action)) {
 					pl(GREEN + "Done, " + StringUtils.PluralTemplateHelper(runningTotal, "one hidden key was", "%d hidden keys were") + " deleted.");
 				} else {
 					pl(GREEN + "Found " + StringUtils.PluralTemplateHelper(runningTotal, "one hidden key", "%d hidden keys") + " in total.");
 				}
 			}
-		} catch(URISyntaxException | IOException | DataSourceException ex){
+		} catch (URISyntaxException | IOException | DataSourceException ex) {
 			pl(RED + ex.getMessage());
 			ex.printStackTrace(StreamUtils.GetSystemErr());
 		}
 	}
 
-	private static void pl(){
+	private static void pl() {
 		out.println();
 	}
 
-	private static void pl(String string){
+	private static void pl(String string) {
 		out.println(string + WHITE);
 	}
 }

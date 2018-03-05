@@ -17,43 +17,43 @@ import java.util.logging.Logger;
  */
 class LocalDeploymentMethod implements DeploymentMethod {
 
-    String rootDirectory;
+	String rootDirectory;
 
-    public LocalDeploymentMethod(String rootDirectory) {
-	this.rootDirectory = rootDirectory;
-    }
-
-    @Override
-    public boolean deploy(InputStream data, String toLocation) {
-	File outLoc = new File(rootDirectory, toLocation);
-	try {
-	    byte[] d = StreamUtils.GetBytes(data);
-	    String currentFile;
-	    try {
-		currentFile = SiteDeploy.getLocalMD5(new FileInputStream(outLoc));
-	    } catch (FileNotFoundException ex) {
-		// Doesn't exist, so just set the currentFile to INVALID
-		currentFile = "INVALID";
-	    }
-	    String newFile = SiteDeploy.getLocalMD5(new ByteArrayInputStream(d));
-	    if (currentFile.equals(newFile)) {
-		return false;
-	    }
-	    FileUtil.write(d, outLoc, FileUtil.OVERWRITE, true);
-	} catch (IOException ex) {
-	    Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
-	    return false;
+	public LocalDeploymentMethod(String rootDirectory) {
+		this.rootDirectory = rootDirectory;
 	}
-	return true;
-    }
 
-    @Override
-    public void finish() {
-    }
+	@Override
+	public boolean deploy(InputStream data, String toLocation) {
+		File outLoc = new File(rootDirectory, toLocation);
+		try {
+			byte[] d = StreamUtils.GetBytes(data);
+			String currentFile;
+			try {
+				currentFile = SiteDeploy.getLocalMD5(new FileInputStream(outLoc));
+			} catch (FileNotFoundException ex) {
+				// Doesn't exist, so just set the currentFile to INVALID
+				currentFile = "INVALID";
+			}
+			String newFile = SiteDeploy.getLocalMD5(new ByteArrayInputStream(d));
+			if (currentFile.equals(newFile)) {
+				return false;
+			}
+			FileUtil.write(d, outLoc, FileUtil.OVERWRITE, true);
+		} catch (IOException ex) {
+			Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+			return false;
+		}
+		return true;
+	}
 
-    @Override
-    public String getID() {
-	return rootDirectory;
-    }
+	@Override
+	public void finish() {
+	}
+
+	@Override
+	public String getID() {
+		return rootDirectory;
+	}
 
 }

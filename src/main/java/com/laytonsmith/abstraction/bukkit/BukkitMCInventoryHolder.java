@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.MCInventoryHolder;
 import org.bukkit.inventory.InventoryHolder;
 
 public class BukkitMCInventoryHolder implements MCInventoryHolder {
+
 	InventoryHolder holder;
 
 	public BukkitMCInventoryHolder(InventoryHolder i) {

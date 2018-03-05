@@ -10,9 +10,10 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOfflinePlayer{
+public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOfflinePlayer {
 
 	OfflinePlayer op;
+
 	BukkitMCOfflinePlayer(OfflinePlayer offlinePlayer) {
 		super(offlinePlayer);
 		this.op = offlinePlayer;
@@ -45,8 +46,8 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
 
 	@Override
 	public MCPlayer getPlayer() {
-		if(op instanceof Player) {
-			return new BukkitMCPlayer(((Player)op));
+		if (op instanceof Player) {
+			return new BukkitMCPlayer(((Player) op));
 		}
 		return null;
 	}
@@ -69,7 +70,7 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
 	@Override
 	public MCLocation getBedSpawnLocation() {
 		Location loc = op.getBedSpawnLocation();
-		if(loc == null) {
+		if (loc == null) {
 			return null;
 		}
 		return new BukkitMCLocation(loc);

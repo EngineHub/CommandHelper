@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
@@ -8,13 +7,14 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
 
 public class BukkitMCFallingBlock extends BukkitMCEntity implements MCFallingBlock {
+
 	FallingBlock f;
-	
+
 	public BukkitMCFallingBlock(Entity e) {
 		super(e);
 		this.f = (FallingBlock) e;
 	}
-	
+
 	@Override
 	public byte getBlockData() {
 		return f.getBlockData();
@@ -44,5 +44,5 @@ public class BukkitMCFallingBlock extends BukkitMCEntity implements MCFallingBlo
 	public FallingBlock getHandle() {
 		return f;
 	}
-	
+
 }

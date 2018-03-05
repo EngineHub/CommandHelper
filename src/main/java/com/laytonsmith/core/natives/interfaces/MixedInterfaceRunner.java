@@ -12,71 +12,80 @@ import java.util.Set;
  */
 public interface MixedInterfaceRunner extends Mixed {
 
-    /**
-     * See {@link Mixed#docs()}
-     * @return
-     */
-    @ForceImplementation
-    @Override
-    String docs();
+	/**
+	 * See {@link Mixed#docs()}
+	 *
+	 * @return
+	 */
+	@ForceImplementation
+	@Override
+	String docs();
 
-    /**
-     * See {@link Mixed#since()}
-     * @return
-     */
-    @ForceImplementation
-    @Override
-    Version since();
+	/**
+	 * See {@link Mixed#since()}
+	 *
+	 * @return
+	 */
+	@ForceImplementation
+	@Override
+	Version since();
 
-    /**
-     * See {@link Mixed#getSuperclasses()}
-     * @return
-     */
-    @ForceImplementation
-    @Override
-    CClassType [] getSuperclasses();
+	/**
+	 * See {@link Mixed#getSuperclasses()}
+	 *
+	 * @return
+	 */
+	@ForceImplementation
+	@Override
+	CClassType[] getSuperclasses();
 
-    /**
-     * See {@link Mixed#getInterfaces()}
-     * @return
-     */
-    @ForceImplementation
-    @Override
-    CClassType [] getInterfaces();
+	/**
+	 * See {@link Mixed#getInterfaces()}
+	 *
+	 * @return
+	 */
+	@ForceImplementation
+	@Override
+	CClassType[] getInterfaces();
 
-    /**
-     * See {@link Mixed#getSourceJar()}
-     * @return
-     */
-    @Override
-    URL getSourceJar();
+	/**
+	 * See {@link Mixed#getSourceJar()}
+	 *
+	 * @return
+	 */
+	@Override
+	URL getSourceJar();
 
-    /**
-     * See {@link Mixed#getName()}
-     * @return
-     */
-    @Override
-    String getName();
+	/**
+	 * See {@link Mixed#getName()}
+	 *
+	 * @return
+	 */
+	@Override
+	String getName();
 
-    /**
-     * See {@link Mixed#getObjectType()}
-     * @return
-     */
-    @Override
-    ObjectType getObjectType();
+	/**
+	 * See {@link Mixed#getObjectType()}
+	 *
+	 * @return
+	 */
+	@Override
+	ObjectType getObjectType();
 
-    /**
-     * See {@link Mixed#getObjectModifiers()}
-     * @return
-     */
-    @Override
-    Set<ObjectModifier> getObjectModifiers();
+	/**
+	 * See {@link Mixed#getObjectModifiers()}
+	 *
+	 * @return
+	 */
+	@Override
+	Set<ObjectModifier> getObjectModifiers();
 
-    /**
-     * See {@link Mixed#getContainingClass()}
-     * @return
-     */
-    @Override
-    CClassType getContainingClass();
+	/**
+	 * See {@link Mixed#getContainingClass()}
+	 *
+	 * @return
+	 */
+	@Override
+	CClassType getContainingClass();
 
 }

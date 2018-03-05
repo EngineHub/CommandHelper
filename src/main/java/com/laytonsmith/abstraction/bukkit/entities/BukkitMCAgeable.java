@@ -15,9 +15,9 @@ public class BukkitMCAgeable extends BukkitMCLivingEntity implements MCAgeable {
 		this.a = (Ageable) be;
 	}
 
-	public BukkitMCAgeable(AbstractionObject ao){
-		super((LivingEntity)ao.getHandle());
-		this.a = ((Ageable)ao.getHandle());
+	public BukkitMCAgeable(AbstractionObject ao) {
+		super((LivingEntity) ao.getHandle());
+		this.a = ((Ageable) ao.getHandle());
 	}
 
 	@Override

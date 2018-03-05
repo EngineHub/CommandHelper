@@ -12,10 +12,11 @@ import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 		forConcreteEnum = TargetReason.class
 )
 public class BukkitMCTargetReason extends EnumConvertor<MCTargetReason, TargetReason> {
+
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCTargetReason instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCTargetReason getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCTargetReason();
 		}
 		return instance;

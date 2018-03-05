@@ -13,20 +13,20 @@ import java.util.List;
 @Keyword.keyword("default")
 public class DefaultKeyword extends Keyword {
 
-    @Override
-    public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
-	return keywordPosition;
-    }
+	@Override
+	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
+		return keywordPosition;
+	}
 
-    @Override
-    public String docs() {
-	return "Works similar to a case definition, but defines the default case, which runs if no defined cases"
-		+ " match.";
-    }
+	@Override
+	public String docs() {
+		return "Works similar to a case definition, but defines the default case, which runs if no defined cases"
+				+ " match.";
+	}
 
-    @Override
-    public Version since() {
-	return CHVersion.V3_3_1;
-    }
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
+	}
 
 }

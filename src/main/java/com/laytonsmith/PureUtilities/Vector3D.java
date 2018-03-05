@@ -3,8 +3,7 @@ package com.laytonsmith.PureUtilities;
 /**
  * Represents both a point in 3D space and a vector representing a direction and magnitude.
  */
-public class Vector3D extends Point3D
-{
+public class Vector3D extends Point3D {
 
 	/**
 	 * A Vector3D with x, y and z initialized at 0.
@@ -39,9 +38,8 @@ public class Vector3D extends Point3D
 	}
 
 	/**
-	 * Returns a new vector of this vector added to another.
-	 * While functionally similar to <code>translate()</code>, this method will
-	 * return a Vector3D whereas <code>translate()</code> returns a Point3D.
+	 * Returns a new vector of this vector added to another. While functionally similar to <code>translate()</code>,
+	 * this method will return a Vector3D whereas <code>translate()</code> returns a Point3D.
 	 *
 	 * @param other the other vector
 	 * @return a new vector
@@ -101,14 +99,14 @@ public class Vector3D extends Point3D
 	}
 
 	/**
-	 * Returns a new vector that is a normalized version of this vector.
-	 * The new vector will have the same direction, but a magnitude of one.
+	 * Returns a new vector that is a normalized version of this vector. The new vector will have the same direction,
+	 * but a magnitude of one.
 	 *
 	 * @return a new vector
 	 */
 	public Vector3D normalize() {
 		double length = length();
-		if(length == 0.0) {
+		if (length == 0.0) {
 			return Vector3D.ZERO;
 		}
 		return new Vector3D(x / length, y / length, z / length);

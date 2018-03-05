@@ -13,40 +13,40 @@ import com.laytonsmith.core.natives.interfaces.ObjectType;
  */
 public class ProcedureUsage extends Construct {
 
-    ProcedureDefinition definition;
+	ProcedureDefinition definition;
 
-    public ProcedureUsage(String name, Target t) {
-	super(name, ConstructType.FUNCTION, t);
-    }
+	public ProcedureUsage(String name, Target t) {
+		super(name, ConstructType.FUNCTION, t);
+	}
 
-    @Override
-    public boolean isDynamic() {
-	return definition.isDynamic();
-    }
+	@Override
+	public boolean isDynamic() {
+		return definition.isDynamic();
+	}
 
-    @Override
-    public Version since() {
-	return super.since();
-    }
+	@Override
+	public Version since() {
+		return super.since();
+	}
 
-    @Override
-    public String docs() {
-	return super.docs();
-    }
+	@Override
+	public String docs() {
+		return super.docs();
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	return new CClassType[]{Mixed.TYPE};
-    }
+	@Override
+	public CClassType[] getSuperclasses() {
+		return new CClassType[]{Mixed.TYPE};
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	return new CClassType[]{};
-    }
+	@Override
+	public CClassType[] getInterfaces() {
+		return new CClassType[]{};
+	}
 
-    @Override
-    public ObjectType getObjectType() {
-	return super.getObjectType();
-    }
+	@Override
+	public ObjectType getObjectType() {
+		return super.getObjectType();
+	}
 
 }

@@ -13,6 +13,7 @@ import java.util.List;
 public class BukkitMCFireworkEffect implements MCFireworkEffect {
 
 	FireworkEffect fe;
+
 	public BukkitMCFireworkEffect(FireworkEffect fe) {
 		this.fe = fe;
 	}
@@ -23,7 +24,7 @@ public class BukkitMCFireworkEffect implements MCFireworkEffect {
 	}
 
 	@Override
-	public boolean hasTrail(){
+	public boolean hasTrail() {
 		return fe.hasTrail();
 	}
 
@@ -31,7 +32,7 @@ public class BukkitMCFireworkEffect implements MCFireworkEffect {
 	public List<MCColor> getColors() {
 		List<Color> colors = fe.getColors();
 		List<MCColor> c = new ArrayList<>();
-		for(Color cc : colors){
+		for (Color cc : colors) {
 			c.add(BukkitMCColor.GetMCColor(cc));
 		}
 		return c;
@@ -41,7 +42,7 @@ public class BukkitMCFireworkEffect implements MCFireworkEffect {
 	public List<MCColor> getFadeColors() {
 		List<Color> colors = fe.getFadeColors();
 		List<MCColor> c = new ArrayList<>();
-		for(Color cc : colors){
+		for (Color cc : colors) {
 			c.add(BukkitMCColor.GetMCColor(cc));
 		}
 		return c;
@@ -53,22 +54,22 @@ public class BukkitMCFireworkEffect implements MCFireworkEffect {
 	}
 
 	@Override
-	public FireworkEffect getHandle(){
+	public FireworkEffect getHandle() {
 		return fe;
 	}
 
 	@Override
-	public boolean equals(Object obj){
+	public boolean equals(Object obj) {
 		return obj instanceof BukkitMCFireworkEffect && fe.equals(obj);
 	}
 
 	@Override
-	public int hashCode(){
+	public int hashCode() {
 		return fe.hashCode();
 	}
 
 	@Override
-	public String toString(){
+	public String toString() {
 		return fe.toString();
 	}
 }

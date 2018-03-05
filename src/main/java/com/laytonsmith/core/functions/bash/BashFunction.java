@@ -10,14 +10,14 @@ import java.net.URL;
 
 /**
  * This is a marker interface to make Bash functions separate.
- * 
+ *
  */
 public abstract class BashFunction implements FunctionBase, CompiledFunction, Documentation {
 
 	@Override
-    public boolean appearInDocumentation() {
-        return true;
-    }    
+	public boolean appearInDocumentation() {
+		return true;
+	}
 
 	@Override
 	public PackagePermission getPermission() {
@@ -30,22 +30,22 @@ public abstract class BashFunction implements FunctionBase, CompiledFunction, Do
 	}
 
 	private static final Class[] EMPTY_CLASS = new Class[0];
-	
+
 	@Override
 	public Class<? extends Documentation>[] seeAlso() {
 		return EMPTY_CLASS;
 	}
-	
+
 	@Override
 	public final boolean isCore() {
 		Class c = this.getClass();
-		do{
-			if(c.getAnnotation(core.class) != null){
+		do {
+			if (c.getAnnotation(core.class) != null) {
 				return true;
 			}
 			c = c.getDeclaringClass();
-		} while(c != null);
+		} while (c != null);
 		return false;
 	}
-	
+
 }

@@ -16,15 +16,15 @@ public class SQLiteProfile extends SQLProfile {
 
 	public SQLiteProfile(String id, Map<String, String> elements) throws Profiles.InvalidProfileException {
 		super(id, elements);
-		if(!elements.containsKey("file")){
+		if (!elements.containsKey("file")) {
 			throw new Profiles.InvalidProfileException("\"file\" parameter is required for profile \"" + id + "\"");
 		}
 		file = elements.get("file");
 	}
 
-	public File getFile(){
+	public File getFile() {
 		File f = new File(file);
-		if(!f.isAbsolute()){
+		if (!f.isAbsolute()) {
 			f = new File(MethodScriptFileLocations.getDefault().getProfilesFile(), f.getPath());
 		}
 		return f;

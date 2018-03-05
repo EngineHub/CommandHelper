@@ -21,10 +21,9 @@ public enum CHVersion implements Version {
 	final SimpleVersion version;
 
 	/**
-	 * This points to the latest version in the series. This should normally
-	 * only be used for things that report the <i>current</i> version, not
-	 * things that are versioned. This is not an actual enum within the class,
-	 * this is a static member of the class which points to the an actual enum.
+	 * This points to the latest version in the series. This should normally only be used for things that report the
+	 * <i>current</i> version, not things that are versioned. This is not an actual enum within the class, this is a
+	 * static member of the class which points to the an actual enum.
 	 */
 	public static final CHVersion LATEST;
 

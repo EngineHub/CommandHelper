@@ -25,13 +25,14 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.Set;
 
 /**
- * 
+ *
  */
 public class PluginMeta {
-	public static String docs(){
+
+	public static String docs() {
 		return "This class contains the functions use to communicate with other plugins and the server in general.";
 	}
-	
+
 	@api
 	public static class fake_incoming_plugin_message extends AbstractFunction {
 
@@ -55,7 +56,7 @@ public class PluginMeta {
 			MCPluginMeta meta = StaticLayer.GetConvertor().GetPluginMeta();
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
-			if(args.length == 3){
+			if (args.length == 3) {
 				offset = 1;
 				p = Static.GetPlayer(args[0], t);
 			}
@@ -87,9 +88,9 @@ public class PluginMeta {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class send_plugin_message extends AbstractFunction {
 
@@ -113,7 +114,7 @@ public class PluginMeta {
 
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
-			if(args.length == 3){
+			if (args.length == 3) {
 				offset = 1;
 				p = Static.GetPlayer(args[0], t);
 			}
@@ -145,9 +146,9 @@ public class PluginMeta {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class register_channel extends AbstractFunction {
 
@@ -174,13 +175,13 @@ public class PluginMeta {
 						"Could not find the internal Messenger object (are you running in cmdline mode?)", t);
 			}
 			String channel = args[0].toString();
-			
+
 			if (!messenger.isIncomingChannelRegistered(channel)) {
 				messenger.registerIncomingPluginChannel(channel);
 			} else {
 				throw new CREPluginChannelException("The channel '" + channel + "' is already registered.", t);
 			}
-			
+
 			return CVoid.VOID;
 		}
 
@@ -205,7 +206,7 @@ public class PluginMeta {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class unregister_channel extends AbstractFunction {
 
@@ -232,13 +233,13 @@ public class PluginMeta {
 						"Could not find the internal Messenger object (are you running in cmdline mode?)", t);
 			}
 			String channel = args[0].toString();
-			
+
 			if (messenger.isIncomingChannelRegistered(channel)) {
 				messenger.unregisterIncomingPluginChannel(channel);
 			} else {
 				throw new CREPluginChannelException("The channel '" + channel + "' is not registered.", t);
 			}
-			
+
 			return CVoid.VOID;
 		}
 
@@ -262,7 +263,7 @@ public class PluginMeta {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class is_channel_registered extends AbstractFunction {
 
@@ -312,7 +313,7 @@ public class PluginMeta {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class get_registered_channels extends AbstractFunction {
 
@@ -340,11 +341,11 @@ public class PluginMeta {
 			}
 			Set<String> chans = messenger.getIncomingChannels();
 			CArray arr = new CArray(t);
-			
+
 			for (String chan : chans) {
 				arr.push(new CString(chan, t), t);
 			}
-			
+
 			return arr;
 		}
 

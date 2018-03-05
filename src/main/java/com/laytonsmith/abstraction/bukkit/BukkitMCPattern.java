@@ -10,6 +10,7 @@ import org.bukkit.block.banner.Pattern;
 public class BukkitMCPattern implements MCPattern {
 
 	Pattern pattern;
+
 	public BukkitMCPattern(Pattern p) {
 		pattern = p;
 	}
@@ -36,7 +37,7 @@ public class BukkitMCPattern implements MCPattern {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof BukkitMCPattern && pattern.equals(((BukkitMCPattern)obj).pattern);
+		return obj instanceof BukkitMCPattern && pattern.equals(((BukkitMCPattern) obj).pattern);
 	}
 
 	@Override

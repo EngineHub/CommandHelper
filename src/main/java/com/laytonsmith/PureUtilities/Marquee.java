@@ -3,16 +3,18 @@ package com.laytonsmith.PureUtilities;
 /**
  * A generic class for creating a text marquee.
  *
- * 
+ *
  */
 public final class Marquee {
 
 	public interface MarqueeCallback {
+
 		/**
-		 * Sends the correct portion of the string, as well as a reference to this Marquee object,
-		 * in case it needs to be stopped or otherwise changed.
+		 * Sends the correct portion of the string, as well as a reference to this Marquee object, in case it needs to
+		 * be stopped or otherwise changed.
+		 *
 		 * @param portion
-		 * @param self 
+		 * @param self
 		 */
 		void stringPortion(String portion, Marquee self);
 	}
@@ -36,10 +38,10 @@ public final class Marquee {
 		if (!text.endsWith(" ")) {
 			text = text + " ";
 		}
-		if(text.length() < maxChars){
+		if (text.length() < maxChars) {
 			//Pad with spaces, so we still get the marquee effect
 			StringBuilder b = new StringBuilder();
-			for(int i = 0; i < maxChars - text.length(); i++){
+			for (int i = 0; i < maxChars - text.length(); i++) {
 				b.append(" ");
 			}
 			text += b.toString();
@@ -56,7 +58,7 @@ public final class Marquee {
 		if (name.length() > 10) {
 			name = text.substring(0, 10);
 		}
-		
+
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -71,9 +73,9 @@ public final class Marquee {
 							//reset it once we go over the length
 							loopPointer = 0;
 						}
-						
+
 						callback.stringPortion(composite, Marquee.this);
-						
+
 						Thread.sleep(delay);
 					}
 				} catch (Exception ex) { //We want an exception to kill us, but we also want to rethrow it as a runtime exception.

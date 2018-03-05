@@ -7,19 +7,19 @@ import com.laytonsmith.core.constructs.Construct;
 
 /**
  *
- * 
+ *
  */
-public class BashPlatformResolver implements PlatformResolver{
+public class BashPlatformResolver implements PlatformResolver {
 
 	@Override
-    public String outputConstant(Construct c) {
-        if(c instanceof CString){
-            return "\"" + c.val() + "\"";
-        } else if(c instanceof CArray){
-            throw new RuntimeException("Not implemented yet");
-        } else {
-            return c.val();
-        }
-    }
-    
+	public String outputConstant(Construct c) {
+		if (c instanceof CString) {
+			return "\"" + c.val() + "\"";
+		} else if (c instanceof CArray) {
+			throw new RuntimeException("Not implemented yet");
+		} else {
+			return c.val();
+		}
+	}
+
 }

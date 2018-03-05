@@ -30,8 +30,7 @@ public abstract class AbstractDataSource implements DataSource {
 	private ConnectionMixin connectionMixin;
 	private ConnectionMixinFactory.ConnectionMixinOptions mixinOptions;
 	private boolean inTransaction = false;
-			
-	
+
 	protected AbstractDataSource() {
 		try {
 			uri = new URI("");
@@ -51,14 +50,15 @@ public abstract class AbstractDataSource implements DataSource {
 			}
 		}
 	}
-	
+
 	/**
 	 * Gets the connection mixin for this connection type.
+	 *
 	 * @return
-	 * @throws DataSourceException 
+	 * @throws DataSourceException
 	 */
-	protected ConnectionMixin getConnectionMixin() throws DataSourceException{
-		if(connectionMixin == null){
+	protected ConnectionMixin getConnectionMixin() throws DataSourceException {
+		if (connectionMixin == null) {
 			connectionMixin = ConnectionMixinFactory.GetConnectionMixin(uri, modifiers, mixinOptions, getBlankDataModel());
 		}
 		return connectionMixin;
@@ -78,15 +78,15 @@ public abstract class AbstractDataSource implements DataSource {
 		checkGet(leadKey);
 		return getValues0(leadKey);
 	}
-	
+
 	/**
-	 * By default, we use the naive method to get the values, by getting the keys in step 1, then
-	 * performing x gets to retrieve the values. This can probably be optimized
-	 * to reduce the number of get calls in some data sources, and should be overridden if so.
+	 * By default, we use the naive method to get the values, by getting the keys in step 1, then performing x gets to
+	 * retrieve the values. This can probably be optimized to reduce the number of get calls in some data sources, and
+	 * should be overridden if so.
 	 */
 	protected Map<String[], String> getValues0(String[] leadKey) throws DataSourceException {
 		Map<String[], String> map = new HashMap<>();
-		for(String [] key : getNamespace(leadKey)){
+		for (String[] key : getNamespace(leadKey)) {
 			map.put(key, get(key));
 		}
 		return map;
@@ -103,18 +103,18 @@ public abstract class AbstractDataSource implements DataSource {
 		inTransaction = false;
 		stopTransaction0(dm, rollback);
 	}
-	
+
 	/**
-	 * Returns true if we are currently in a transaction. Inside of the call to
-	 * stopTransaction, this will be false.
-	 * @return 
+	 * Returns true if we are currently in a transaction. Inside of the call to stopTransaction, this will be false.
+	 *
+	 * @return
 	 */
-	public boolean inTransaction(){
+	public boolean inTransaction() {
 		return inTransaction;
 	}
-	
+
 	protected abstract void startTransaction0(DaemonManager dm);
-	
+
 	protected abstract void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException;
 
 	@Override
@@ -122,36 +122,37 @@ public abstract class AbstractDataSource implements DataSource {
 		checkSet(key);
 		return set0(dm, key, value);
 	}
-	
+
 	/**
-	 * Subclasses should implement this, instead of set(), as our version of set() does some standard validation
-	 * on the input.
+	 * Subclasses should implement this, instead of set(), as our version of set() does some standard validation on the
+	 * input.
+	 *
 	 * @param key
 	 * @param value
 	 * @return
 	 * @throws ReadOnlyException
 	 * @throws DataSourceException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	protected abstract boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException;
-	
+
 	/**
-	 * Subclasses should implement this, instead of get(), as our version of get() does
-	 * some standard validation on the input.
+	 * Subclasses should implement this, instead of get(), as our version of get() does some standard validation on the
+	 * input.
+	 *
 	 * @param key
-	 * @return 
+	 * @return
 	 */
 	protected abstract String get0(String[] key) throws DataSourceException;
 
 	/**
-	 * The default implementation of string simply walks through keySet, and
-	 * manually joins the keys together. If an implementation can provide a
-	 * more efficient method, this should be overridden.
+	 * The default implementation of string simply walks through keySet, and manually joins the keys together. If an
+	 * implementation can provide a more efficient method, this should be overridden.
 	 *
 	 * @return
 	 */
 	@Override
-	public Set<String> stringKeySet(String [] keyBase) throws DataSourceException {
+	public Set<String> stringKeySet(String[] keyBase) throws DataSourceException {
 		Set<String> keys = new TreeSet<String>();
 		for (String[] key : keySet(keyBase)) {
 			keys.add(StringUtils.Join(key, "."));
@@ -195,52 +196,52 @@ public abstract class AbstractDataSource implements DataSource {
 			modifiers.add(DataSourceModifier.READONLY);
 			modifiers.add(DataSourceModifier.ASYNC);
 		}
-		if (modifier == DataSourceModifier.SSH){
+		if (modifier == DataSourceModifier.SSH) {
 			modifiers.add(DataSourceModifier.ASYNC);
 		}
 		modifiers.add(modifier);
 	}
-		
 
 	@Override
 	public final boolean hasKey(String[] key) throws DataSourceException {
 		checkGet(key);
 		return hasKey0(key);
 	}
-	
+
 	/**
-	 * By default, returns true if the value stored is non-null. In general,
-	 * if clearKey0 is overridden, this should be as well.
+	 * By default, returns true if the value stored is non-null. In general, if clearKey0 is overridden, this should be
+	 * as well.
+	 *
 	 * @param key
 	 * @return
-	 * @throws DataSourceException 
+	 * @throws DataSourceException
 	 */
-	protected boolean hasKey0(String[] key) throws DataSourceException{
+	protected boolean hasKey0(String[] key) throws DataSourceException {
 		return get(key) != null;
 	}
-	
+
 	@Override
-	public final void clearKey(DaemonManager dm, String [] key) throws ReadOnlyException, DataSourceException, IOException{
+	public final void clearKey(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
 		checkSet(key);
 		clearKey0(dm, key);
 	}
-	
+
 	/**
-	 * By default, setting the value to null should clear the value,
-	 * but that can be overridden if a data source has a better method.
+	 * By default, setting the value to null should clear the value, but that can be overridden if a data source has a
+	 * better method.
+	 *
 	 * @param key
 	 * @throws ReadOnlyException
 	 * @throws DataSourceException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	protected void clearKey0(DaemonManager dm, String [] key) throws ReadOnlyException, DataSourceException, IOException{
-		set(dm, key, null);		
+	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
+		set(dm, key, null);
 	}
 
 	/**
-	 * This method checks for invalid or non-sensical combinations of
-	 * modifiers, and throws an exception if any combinations exist that are
-	 * strange.
+	 * This method checks for invalid or non-sensical combinations of modifiers, and throws an exception if any
+	 * combinations exist that are strange.
 	 *
 	 * @throws DataSourceException
 	 */
@@ -275,12 +276,11 @@ public abstract class AbstractDataSource implements DataSource {
 	}
 
 	/**
-	 * This method checks to see if a set operation should simply throw a
-	 * ReadOnlyException based on the modifiers.
+	 * This method checks to see if a set operation should simply throw a ReadOnlyException based on the modifiers.
 	 */
-	private void checkSet(String [] key) throws ReadOnlyException {
-		for(String namespace : key){
-			if("_".equals(namespace)){
+	private void checkSet(String[] key) throws ReadOnlyException {
+		for (String namespace : key) {
+			if ("_".equals(namespace)) {
 				throw new IllegalArgumentException("In the key \"" + StringUtils.Join(key, ".") + ", the namespace \"_\" is not allowed."
 						+ " (Namespaces may contain an underscore, but may not be just an underscore.)");
 			}
@@ -291,19 +291,19 @@ public abstract class AbstractDataSource implements DataSource {
 	}
 
 	/**
-	 * This method checks to see if get operations should re-populate at
-	 * this time. If the data set is transient, it will do so.
+	 * This method checks to see if get operations should re-populate at this time. If the data set is transient, it
+	 * will do so.
 	 */
 	private void checkGet(String[] key) throws DataSourceException {
-		for(String namespace : key){
-			if("_".equals(namespace)){
+		for (String namespace : key) {
+			if ("_".equals(namespace)) {
 				throw new IllegalArgumentException("In the key \"" + StringUtils.Join(key, ".") + ", the namespace \"_\" is not allowed."
 						+ " (Namespaces may contain an underscore, but may not be just an underscore.)");
 			}
 		}
-		if(this.getModifiers().contains(DataSource.DataSourceModifier.TRANSIENT)){
-            this.populate();
-        }
+		if (this.getModifiers().contains(DataSource.DataSourceModifier.TRANSIENT)) {
+			this.populate();
+		}
 		if (hasModifier(DataSourceModifier.TRANSIENT)) {
 			populate();
 		}
@@ -313,26 +313,25 @@ public abstract class AbstractDataSource implements DataSource {
 	public final Set<DataSourceModifier> getModifiers() {
 		return EnumSet.copyOf(modifiers);
 	}
-	
+
 	/**
-	 * Subclasses that need a certain type of file to be the "blank" version
-	 * of a data model can override this. By default, null is
-	 * returned.
+	 * Subclasses that need a certain type of file to be the "blank" version of a data model can override this. By
+	 * default, null is returned.
 	 *
 	 * @return
 	 */
 	protected String getBlankDataModel() {
 		return "";
 	}
-	
+
 	@Override
-	public String toString(){
+	public String toString() {
 		StringBuilder b = new StringBuilder();
-		for(DataSourceModifier m : modifiers){
+		for (DataSourceModifier m : modifiers) {
 			b.append(m.getName().toLowerCase()).append(":");
 		}
 		b.append(uri.toString());
 		return b.toString();
 	}
-	
+
 }

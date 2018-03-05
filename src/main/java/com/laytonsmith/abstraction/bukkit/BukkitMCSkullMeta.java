@@ -9,6 +9,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 public class BukkitMCSkullMeta extends BukkitMCItemMeta implements MCSkullMeta {
 
 	SkullMeta sm;
+
 	public BukkitMCSkullMeta(SkullMeta im) {
 		super(im);
 		this.sm = im;
@@ -30,7 +31,7 @@ public class BukkitMCSkullMeta extends BukkitMCItemMeta implements MCSkullMeta {
 	}
 
 	@Override
-	public MCOfflinePlayer getOwningPlayer(){
+	public MCOfflinePlayer getOwningPlayer() {
 		return new BukkitMCOfflinePlayer(sm.getOwningPlayer());
 	}
 
@@ -40,10 +41,10 @@ public class BukkitMCSkullMeta extends BukkitMCItemMeta implements MCSkullMeta {
 	}
 
 	@Override
-	public void setOwningPlayer(MCOfflinePlayer player){
+	public void setOwningPlayer(MCOfflinePlayer player) {
 		try {
 			sm.setOwningPlayer((OfflinePlayer) player.getHandle());
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// probably prior to 1.12.2
 			sm.setOwner(player.getName());
 		}

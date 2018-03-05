@@ -8,6 +8,7 @@ import org.bukkit.scoreboard.Score;
 public class BukkitMCScore implements MCScore {
 
 	Score s;
+
 	public BukkitMCScore(Score score) {
 		s = score;
 	}

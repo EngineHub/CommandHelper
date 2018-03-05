@@ -1,9 +1,10 @@
 package com.laytonsmith.tools.docgen.templates;
 
 /**
- * 
+ *
  */
 public class ArrayIteration extends Template {
+
 	@Override
 	public String getName() {
 		return "Array_Iteration";
@@ -13,5 +14,5 @@ public class ArrayIteration extends Template {
 	public String getDisplayName() {
 		return "Array Iteration";
 	}
-	
+
 }

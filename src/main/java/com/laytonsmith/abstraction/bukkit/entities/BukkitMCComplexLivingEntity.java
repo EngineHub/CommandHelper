@@ -18,13 +18,13 @@ public class BukkitMCComplexLivingEntity extends BukkitMCLivingEntity implements
 
 	@Override
 	public ComplexLivingEntity getHandle() {
-		return (ComplexLivingEntity)super.getHandle();
+		return (ComplexLivingEntity) super.getHandle();
 	}
 
 	@Override
 	public Set<MCComplexEntityPart> getParts() {
 		Set<MCComplexEntityPart> parts = new HashSet<>();
-		for(ComplexEntityPart part : getHandle().getParts()) {
+		for (ComplexEntityPart part : getHandle().getParts()) {
 			parts.add((MCComplexEntityPart) BukkitConvertor.BukkitGetCorrectEntity(part));
 		}
 		return parts;

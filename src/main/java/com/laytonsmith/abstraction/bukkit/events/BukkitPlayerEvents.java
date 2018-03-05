@@ -57,22 +57,23 @@ import java.util.List;
 
 public class BukkitPlayerEvents {
 
-	@abstraction(type=Implementation.Type.BUKKIT)
+	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCFoodLevelChangeEvent implements MCFoodLevelChangeEvent {
+
 		FoodLevelChangeEvent event;
 
 		public BukkitMCFoodLevelChangeEvent(FoodLevelChangeEvent event) {
 			this.event = event;
 		}
-		
+
 		@Override
 		public MCHumanEntity getEntity() {
 			return new BukkitMCHumanEntity(event.getEntity());
 		}
-		
+
 		@Override
 		public int getDifference() {
-			return ((Player)event.getEntity()).getFoodLevel() - getFoodLevel();
+			return ((Player) event.getEntity()).getFoodLevel() - getFoodLevel();
 		}
 
 		@Override
@@ -101,7 +102,7 @@ public class BukkitPlayerEvents {
 		}
 	}
 
-	@abstraction(type=Implementation.Type.BUKKIT)
+	@abstraction(type = Implementation.Type.BUKKIT)
 	public static abstract class BukkitMCPlayerEvent implements MCPlayerEvent {
 
 		PlayerEvent pe;
@@ -122,6 +123,7 @@ public class BukkitPlayerEvents {
 	}
 
 	public static class BukkitMCPlayerItemConsumeEvent extends BukkitMCPlayerEvent implements MCPlayerItemConsumeEvent {
+
 		PlayerItemConsumeEvent pic;
 
 		public BukkitMCPlayerItemConsumeEvent(PlayerItemConsumeEvent event) {
@@ -145,7 +147,8 @@ public class BukkitPlayerEvents {
 		}
 	}
 
-	public static class BukkitMCPlayerBedEvent  extends BukkitMCPlayerEvent implements MCPlayerBedEvent {
+	public static class BukkitMCPlayerBedEvent extends BukkitMCPlayerEvent implements MCPlayerBedEvent {
+
 		MCBlock block;
 		PlayerEvent event;
 
@@ -167,10 +170,11 @@ public class BukkitPlayerEvents {
 		}
 	}
 
-	public static class BukkitMCPlayerKickEvent  extends BukkitMCPlayerEvent implements MCPlayerKickEvent {
+	public static class BukkitMCPlayerKickEvent extends BukkitMCPlayerEvent implements MCPlayerKickEvent {
+
 		PlayerKickEvent e;
 
-		public BukkitMCPlayerKickEvent(PlayerKickEvent e){
+		public BukkitMCPlayerKickEvent(PlayerKickEvent e) {
 			super(e);
 			this.e = e;
 		}
@@ -206,8 +210,9 @@ public class BukkitPlayerEvents {
 		}
 	}
 
-	@abstraction(type=Implementation.Type.BUKKIT)
-	public static class BukkitMCPlayerTeleportEvent  extends BukkitMCPlayerEvent implements MCPlayerTeleportEvent {
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerTeleportEvent extends BukkitMCPlayerEvent implements MCPlayerTeleportEvent {
+
 		PlayerTeleportEvent e;
 
 		public BukkitMCPlayerTeleportEvent(PlayerTeleportEvent e) {
@@ -237,14 +242,14 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public void setTo(MCLocation newloc) {
-			World w = ((BukkitMCWorld)newloc.getWorld()).__World();
+			World w = ((BukkitMCWorld) newloc.getWorld()).__World();
 			Location loc = new Location(
-				w,
-				newloc.getX(),
-				newloc.getY(),
-				newloc.getZ(),
-				newloc.getPitch(),
-				newloc.getYaw()
+					w,
+					newloc.getX(),
+					newloc.getY(),
+					newloc.getZ(),
+					newloc.getPitch(),
+					newloc.getYaw()
 			);
 			e.setTo(loc);
 		}
@@ -260,10 +265,11 @@ public class BukkitPlayerEvents {
 		}
 	}
 
-	@abstraction(type=Implementation.Type.BUKKIT)
+	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCPlayerPortalEvent extends BukkitMCPlayerTeleportEvent implements MCPlayerPortalEvent {
 
 		PlayerPortalEvent p;
+
 		public BukkitMCPlayerPortalEvent(PlayerPortalEvent event) {
 			super(event);
 			p = event;
@@ -291,14 +297,15 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public MCLocation getTo() {
-			if(e.getTo() == null) {
+			if (e.getTo() == null) {
 				return null;
 			}
 			return new BukkitMCLocation(e.getTo());
 		}
 	}
 
-	public static class BukkitMCPlayerLoginEvent  extends BukkitMCPlayerEvent implements MCPlayerLoginEvent {
+	public static class BukkitMCPlayerLoginEvent extends BukkitMCPlayerEvent implements MCPlayerLoginEvent {
+
 		PlayerLoginEvent event;
 
 		public BukkitMCPlayerLoginEvent(PlayerLoginEvent e) {
@@ -348,6 +355,7 @@ public class BukkitPlayerEvents {
 	}
 
 	public static class BukkitMCPlayerPreLoginEvent implements MCPlayerPreLoginEvent {
+
 		PlayerPreLoginEvent event;
 
 		public BukkitMCPlayerPreLoginEvent(PlayerPreLoginEvent e) {
@@ -391,9 +399,10 @@ public class BukkitPlayerEvents {
 
 	}
 
-	@abstraction(type=Implementation.Type.BUKKIT)
-	public static class BukkitMCPlayerChatEvent  extends BukkitMCPlayerEvent
-	implements MCPlayerChatEvent{
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerChatEvent extends BukkitMCPlayerEvent
+			implements MCPlayerChatEvent {
+
 		AsyncPlayerChatEvent pce;
 
 		public BukkitMCPlayerChatEvent(AsyncPlayerChatEvent event) {
@@ -406,8 +415,8 @@ public class BukkitPlayerEvents {
 			pce = event.pce;
 		}
 
-		public static BukkitMCPlayerChatEvent _instantiate(MCPlayer player, String message, String format){
-			AsyncPlayerChatEvent apce = new AsyncPlayerChatEvent(false, ((BukkitMCPlayer)player)._Player(), message,
+		public static BukkitMCPlayerChatEvent _instantiate(MCPlayer player, String message, String format) {
+			AsyncPlayerChatEvent apce = new AsyncPlayerChatEvent(false, ((BukkitMCPlayer) player)._Player(), message,
 					new HashSet<>(Bukkit.getServer().getOnlinePlayers()));
 			apce.setFormat(format);
 			return new BukkitMCPlayerChatEvent(apce);
@@ -426,7 +435,7 @@ public class BukkitPlayerEvents {
 		@Override
 		public List<MCPlayer> getRecipients() {
 			List<MCPlayer> players = new ArrayList<>();
-			for(Player p : pce.getRecipients()){
+			for (Player p : pce.getRecipients()) {
 				players.add(new BukkitMCPlayer(p));
 			}
 			return players;
@@ -435,8 +444,8 @@ public class BukkitPlayerEvents {
 		@Override
 		public void setRecipients(List<MCPlayer> list) {
 			pce.getRecipients().clear();
-			for(MCPlayer p  : list){
-				pce.getRecipients().add(((BukkitMCPlayer)p)._Player());
+			for (MCPlayer p : list) {
+				pce.getRecipients().add(((BukkitMCPlayer) p)._Player());
 			}
 		}
 
@@ -451,8 +460,9 @@ public class BukkitPlayerEvents {
 		}
 	}
 
-	@abstraction(type=Implementation.Type.BUKKIT)
-	public static class BukkitMCPlayerQuitEvent  extends BukkitMCPlayerEvent implements MCPlayerQuitEvent{
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerQuitEvent extends BukkitMCPlayerEvent implements MCPlayerQuitEvent {
+
 		PlayerQuitEvent pce;
 
 		public BukkitMCPlayerQuitEvent(PlayerQuitEvent event) {
@@ -460,8 +470,8 @@ public class BukkitPlayerEvents {
 			pce = event;
 		}
 
-		public static BukkitMCPlayerQuitEvent _instantiate(MCPlayer player, String message){
-			return new BukkitMCPlayerQuitEvent(new PlayerQuitEvent(((BukkitMCPlayer)player)._Player(), message));
+		public static BukkitMCPlayerQuitEvent _instantiate(MCPlayer player, String message) {
+			return new BukkitMCPlayerQuitEvent(new PlayerQuitEvent(((BukkitMCPlayer) player)._Player(), message));
 		}
 
 		@Override
@@ -475,12 +485,12 @@ public class BukkitPlayerEvents {
 		}
 	}
 
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerJoinEvent extends BukkitMCPlayerEvent implements MCPlayerJoinEvent {
 
-	@abstraction(type=Implementation.Type.BUKKIT)
-	public static class BukkitMCPlayerJoinEvent  extends BukkitMCPlayerEvent implements MCPlayerJoinEvent{
 		PlayerJoinEvent pje;
 
-		public BukkitMCPlayerJoinEvent(PlayerJoinEvent e){
+		public BukkitMCPlayerJoinEvent(PlayerJoinEvent e) {
 			super(e);
 			pje = e;
 		}
@@ -496,24 +506,25 @@ public class BukkitPlayerEvents {
 		}
 
 		public static PlayerJoinEvent _instantiate(MCPlayer player, String message) {
-			return new PlayerJoinEvent(((BukkitMCPlayer)player)._Player(), message);
+			return new PlayerJoinEvent(((BukkitMCPlayer) player)._Player(), message);
 		}
 	}
 
-	@abstraction(type=Implementation.Type.BUKKIT)
-	public static class BukkitMCPlayerInteractEvent extends BukkitMCPlayerEvent implements MCPlayerInteractEvent{
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerInteractEvent extends BukkitMCPlayerEvent implements MCPlayerInteractEvent {
+
 		PlayerInteractEvent pie;
 
-		public BukkitMCPlayerInteractEvent(PlayerInteractEvent e){
+		public BukkitMCPlayerInteractEvent(PlayerInteractEvent e) {
 			super(e);
 			pie = e;
 		}
 
 		public static BukkitMCPlayerInteractEvent _instantiate(MCPlayer player, MCAction action, MCItemStack itemstack,
-				MCBlock clickedBlock, MCBlockFace clickedFace){
-			return new BukkitMCPlayerInteractEvent(new PlayerInteractEvent(((BukkitMCPlayer)player)._Player(),
-					BukkitMCAction.getConvertor().getConcreteEnum(action), ((BukkitMCItemStack)itemstack).__ItemStack(),
-					((BukkitMCBlock)clickedBlock).__Block(), BlockFace.valueOf(clickedFace.name())));
+				MCBlock clickedBlock, MCBlockFace clickedFace) {
+			return new BukkitMCPlayerInteractEvent(new PlayerInteractEvent(((BukkitMCPlayer) player)._Player(),
+					BukkitMCAction.getConvertor().getConcreteEnum(action), ((BukkitMCItemStack) itemstack).__ItemStack(),
+					((BukkitMCBlock) clickedBlock).__Block(), BlockFace.valueOf(clickedFace.name())));
 		}
 
 		@Override
@@ -535,23 +546,24 @@ public class BukkitPlayerEvents {
 		public MCItemStack getItem() {
 			return new BukkitMCItemStack(pie.getItem());
 		}
-		
+
 		@Override
 		public MCEquipmentSlot getHand() {
 			try {
-				if(pie.getHand() == EquipmentSlot.HAND) {
+				if (pie.getHand() == EquipmentSlot.HAND) {
 					return MCEquipmentSlot.WEAPON;
 				}
 				return MCEquipmentSlot.OFF_HAND;
-			} catch(NoSuchMethodError e) {
+			} catch (NoSuchMethodError e) {
 				// before Bukkit 1.9
 				return MCEquipmentSlot.WEAPON;
 			}
 		}
 	}
 
-	@abstraction(type=Implementation.Type.BUKKIT)
+	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCPlayerRespawnEvent extends BukkitMCPlayerEvent implements MCPlayerRespawnEvent {
+
 		PlayerRespawnEvent pre;
 
 		public BukkitMCPlayerRespawnEvent(PlayerRespawnEvent event) {
@@ -560,13 +572,13 @@ public class BukkitPlayerEvents {
 		}
 
 		public static BukkitMCPlayerRespawnEvent _instantiate(MCPlayer player, MCLocation location, boolean isBedSpawn) {
-			return new BukkitMCPlayerRespawnEvent(new PlayerRespawnEvent(((BukkitMCPlayer)player)._Player(),
-					((BukkitMCLocation)location)._Location(), isBedSpawn));
+			return new BukkitMCPlayerRespawnEvent(new PlayerRespawnEvent(((BukkitMCPlayer) player)._Player(),
+					((BukkitMCLocation) location)._Location(), isBedSpawn));
 		}
 
 		@Override
 		public void setRespawnLocation(MCLocation location) {
-			pre.setRespawnLocation(((BukkitMCLocation)location)._Location());
+			pre.setRespawnLocation(((BukkitMCLocation) location)._Location());
 		}
 
 		@Override
@@ -580,8 +592,9 @@ public class BukkitPlayerEvents {
 		}
 	}
 
-	@abstraction(type=Implementation.Type.BUKKIT)
+	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCPlayerDeathEvent extends BukkitMCEntityDeathEvent implements MCPlayerDeathEvent {
+
 		PlayerDeathEvent pde;
 
 		public BukkitMCPlayerDeathEvent(Event event) {
@@ -590,10 +603,10 @@ public class BukkitPlayerEvents {
 		}
 
 		public static BukkitMCPlayerDeathEvent _instantiate(MCPlayer entity, List<MCItemStack> listOfDrops,
-				int droppedExp, String deathMessage){
+				int droppedExp, String deathMessage) {
 			List<ItemStack> drops = new ArrayList<>();
 
-			return new BukkitMCPlayerDeathEvent(new PlayerDeathEvent(((BukkitMCPlayer)entity)._Player(), drops, droppedExp, deathMessage));
+			return new BukkitMCPlayerDeathEvent(new PlayerDeathEvent(((BukkitMCPlayer) entity)._Player(), drops, droppedExp, deathMessage));
 		}
 
 		@Override
@@ -667,18 +680,19 @@ public class BukkitPlayerEvents {
 		}
 	}
 
-	@abstraction(type=Implementation.Type.BUKKIT)
-	public static class BukkitMCPlayerCommandEvent extends BukkitMCPlayerEvent implements MCPlayerCommandEvent{
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerCommandEvent extends BukkitMCPlayerEvent implements MCPlayerCommandEvent {
+
 		PlayerCommandPreprocessEvent pcpe;
 		boolean isCancelled = false;
 
-		public BukkitMCPlayerCommandEvent(PlayerCommandPreprocessEvent pcpe){
+		public BukkitMCPlayerCommandEvent(PlayerCommandPreprocessEvent pcpe) {
 			super(pcpe);
 			this.pcpe = pcpe;
 		}
 
 		@Override
-		public String getCommand(){
+		public String getCommand() {
 			return pcpe.getMessage();
 		}
 
@@ -689,8 +703,8 @@ public class BukkitPlayerEvents {
 			isCancelled = true;
 		}
 
-		public static BukkitMCPlayerCommandEvent _instantiate(MCPlayer entity, String command){
-			return new BukkitMCPlayerCommandEvent(new PlayerCommandPreprocessEvent(((BukkitMCPlayer)entity)._Player(), command));
+		public static BukkitMCPlayerCommandEvent _instantiate(MCPlayer entity, String command) {
+			return new BukkitMCPlayerCommandEvent(new PlayerCommandPreprocessEvent(((BukkitMCPlayer) entity)._Player(), command));
 		}
 
 		@Override
@@ -704,11 +718,12 @@ public class BukkitPlayerEvents {
 		}
 	}
 
-	@abstraction(type=Implementation.Type.BUKKIT)
-	public static class BukkitMCWorldChangedEvent extends BukkitMCPlayerEvent implements MCWorldChangedEvent{
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCWorldChangedEvent extends BukkitMCPlayerEvent implements MCWorldChangedEvent {
+
 		PlayerChangedWorldEvent pcwe;
 
-		public BukkitMCWorldChangedEvent(PlayerChangedWorldEvent e){
+		public BukkitMCWorldChangedEvent(PlayerChangedWorldEvent e) {
 			super(e);
 			pcwe = e;
 		}
@@ -723,13 +738,14 @@ public class BukkitPlayerEvents {
 			return new BukkitMCWorld(pcwe.getPlayer().getWorld());
 		}
 
-		public static BukkitMCWorldChangedEvent _instantiate(MCPlayer entity, MCWorld from){
-			return new BukkitMCWorldChangedEvent(new PlayerChangedWorldEvent(((BukkitMCPlayer)entity)._Player(), ((BukkitMCWorld)from).__World()));
+		public static BukkitMCWorldChangedEvent _instantiate(MCPlayer entity, MCWorld from) {
+			return new BukkitMCWorldChangedEvent(new PlayerChangedWorldEvent(((BukkitMCPlayer) entity)._Player(), ((BukkitMCWorld) from).__World()));
 		}
 	}
 
 	public static class BukkitMCPlayerFishEvent extends BukkitMCPlayerEvent
-	implements MCPlayerFishEvent {
+			implements MCPlayerFishEvent {
+
 		PlayerFishEvent e;
 
 		public BukkitMCPlayerFishEvent(PlayerFishEvent event) {
@@ -739,7 +755,7 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public MCEntity getCaught() {
-			if(e.getCaught() == null) {
+			if (e.getCaught() == null) {
 				return null;
 			}
 			return BukkitConvertor.BukkitGetCorrectEntity(e.getCaught());
@@ -767,6 +783,7 @@ public class BukkitPlayerEvents {
 	}
 
 	public static class BukkitMCGamemodeChangeEvent extends BukkitMCPlayerEvent implements MCGamemodeChangeEvent {
+
 		PlayerGameModeChangeEvent gmc;
 
 		public BukkitMCGamemodeChangeEvent(PlayerGameModeChangeEvent event) {
@@ -781,6 +798,7 @@ public class BukkitPlayerEvents {
 	}
 
 	public static class BukkitMCChatTabCompleteEvent extends BukkitMCPlayerEvent implements MCChatTabCompleteEvent {
+
 		PlayerChatTabCompleteEvent tc;
 
 		public BukkitMCChatTabCompleteEvent(PlayerChatTabCompleteEvent event) {
@@ -805,6 +823,7 @@ public class BukkitPlayerEvents {
 	}
 
 	public static class BukkitMCExpChangeEvent extends BukkitMCPlayerEvent implements MCExpChangeEvent {
+
 		PlayerExpChangeEvent ec;
 
 		public BukkitMCExpChangeEvent(PlayerExpChangeEvent event) {
@@ -825,6 +844,7 @@ public class BukkitPlayerEvents {
 
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCPlayerEditBookEvent extends BukkitMCPlayerEvent implements MCPlayerEditBookEvent {
+
 		PlayerEditBookEvent pebe;
 
 		public BukkitMCPlayerEditBookEvent(PlayerEditBookEvent event) {
@@ -865,6 +885,7 @@ public class BukkitPlayerEvents {
 
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCPlayerToggleFlightEvent extends BukkitMCPlayerEvent implements MCPlayerToggleFlightEvent {
+
 		PlayerToggleFlightEvent ptfe;
 
 		public BukkitMCPlayerToggleFlightEvent(PlayerToggleFlightEvent event) {
@@ -890,6 +911,7 @@ public class BukkitPlayerEvents {
 
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCPlayerToggleSneakEvent extends BukkitMCPlayerEvent implements MCPlayerToggleSneakEvent {
+
 		PlayerToggleSneakEvent ptse;
 
 		public BukkitMCPlayerToggleSneakEvent(PlayerToggleSneakEvent event) {
@@ -915,6 +937,7 @@ public class BukkitPlayerEvents {
 
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCPlayerToggleSprintEvent extends BukkitMCPlayerEvent implements MCPlayerToggleSprintEvent {
+
 		PlayerToggleSprintEvent ptse;
 
 		public BukkitMCPlayerToggleSprintEvent(PlayerToggleSprintEvent event) {
@@ -940,6 +963,7 @@ public class BukkitPlayerEvents {
 
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCPlayerMoveEvent extends BukkitMCPlayerEvent implements MCPlayerMoveEvent {
+
 		PlayerMoveEvent pme;
 		int threshold;
 		MCLocation from;
@@ -954,17 +978,23 @@ public class BukkitPlayerEvents {
 		@Override
 		public int getThreshold() {
 			return threshold;
-		};
+		}
+
+		;
 
 		@Override
 		public MCLocation getFrom() {
 			return new BukkitMCLocation(from);
-		};
+		}
+
+		;
 
 		@Override
 		public MCLocation getTo() {
 			return new BukkitMCLocation(pme.getTo());
-		};
+		}
+
+		;
 
 		@Override
 		public boolean isCancelled() {

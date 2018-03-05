@@ -24,15 +24,15 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 	@Override
 	public String concreteName() {
 		Biome b = getConcrete();
-		if(b == null) {
+		if (b == null) {
 			return "null";
 		}
 		return b.name();
 	}
 
 	public static BukkitMCBiomeType valueOfConcrete(Biome test) {
-		for(MCBiomeType t : mappings.values()) {
-			if(((BukkitMCBiomeType) t).getConcrete().equals(test)) {
+		for (MCBiomeType t : mappings.values()) {
+			if (((BukkitMCBiomeType) t).getConcrete().equals(test)) {
 				return (BukkitMCBiomeType) t;
 			}
 		}
@@ -53,10 +53,10 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 		mappings = new HashMap<>();
 		NULL = new BukkitMCBiomeType(MCVanillaBiomeType.UNKNOWN, null);
 		ArrayList<Biome> counted = new ArrayList<>();
-		for(MCVanillaBiomeType v : MCVanillaBiomeType.values()) {
-			if(v.existsInCurrent()) {
+		for (MCVanillaBiomeType v : MCVanillaBiomeType.values()) {
+			if (v.existsInCurrent()) {
 				Biome type = getBukkitType(v);
-				if(type == null) {
+				if (type == null) {
 					CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not find a matching biome type for " + v.name()
 							+ ". This is an error, please report this to the bug tracker.", Target.UNKNOWN);
 					continue;
@@ -67,8 +67,8 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 				counted.add(type);
 			}
 		}
-		for(Biome b : Biome.values()) {
-			if(!counted.contains(b)) {
+		for (Biome b : Biome.values()) {
+			if (!counted.contains(b)) {
 				mappings.put(b.name(), new BukkitMCBiomeType(MCVanillaBiomeType.UNKNOWN, b));
 			}
 		}
@@ -76,8 +76,8 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 
 	private static Biome getBukkitType(MCVanillaBiomeType v) {
 		// A switch statement for values that don't translate directly to a Bukkit value
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
-			switch(v){
+		if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
+			switch (v) {
 				case ICE_PLAINS:
 					return Biome.ICE_FLATS;
 				case MUSHROOM_SHORE:

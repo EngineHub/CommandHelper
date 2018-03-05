@@ -14,7 +14,7 @@ public class BukkitMCComplexEntityPart extends BukkitMCEntity implements MCCompl
 
 	@Override
 	public ComplexEntityPart getHandle() {
-		return (ComplexEntityPart)super.getHandle();
+		return (ComplexEntityPart) super.getHandle();
 	}
 
 	@Override

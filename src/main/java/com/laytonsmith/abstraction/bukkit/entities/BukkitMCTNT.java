@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCEntity;
@@ -7,6 +6,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.TNTPrimed;
 
 public class BukkitMCTNT extends BukkitMCEntity implements MCTNT {
+
 	TNTPrimed tnt;
 
 	public BukkitMCTNT(Entity e) {
@@ -16,7 +16,7 @@ public class BukkitMCTNT extends BukkitMCEntity implements MCTNT {
 
 	@Override
 	public MCEntity getSource() {
-		if(tnt.getSource() == null) {
+		if (tnt.getSource() == null) {
 			return null;
 		}
 		return new BukkitMCEntity(tnt.getSource());

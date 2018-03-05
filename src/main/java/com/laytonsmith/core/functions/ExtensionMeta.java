@@ -32,6 +32,7 @@ import java.util.Set;
  * @author Jason Unger <entityreborn@gmail.com>
  */
 public class ExtensionMeta {
+
 	public static String docs() {
 		return "Provides the ability for finding out information about installed"
 				+ " extensions, including events and functions.";
@@ -119,9 +120,9 @@ public class ExtensionMeta {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Wrapping a block of code that uses extension functions",
-						"if(function_exists('my_function')){\n"
-						+ "\tmy_function()\n"
-						+ "}\n", "<No errors will occur if the extension that contains my_function() isn't loaded>")
+				"if(function_exists('my_function')){\n"
+				+ "\tmy_function()\n"
+				+ "}\n", "<No errors will occur if the extension that contains my_function() isn't loaded>")
 			};
 		}
 
@@ -176,7 +177,7 @@ public class ExtensionMeta {
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
-			 return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 
 		@Override
@@ -248,7 +249,7 @@ public class ExtensionMeta {
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
-			 return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 
 		@Override
@@ -288,7 +289,7 @@ public class ExtensionMeta {
 			CArray retn = CArray.GetAssociativeArray(t);
 
 			if (args.length == 0) {
-				for (URL url: trackers.keySet()) {
+				for (URL url : trackers.keySet()) {
 					ExtensionTracker trk = trackers.get(url);
 					CArray trkdata;
 
@@ -308,7 +309,7 @@ public class ExtensionMeta {
 					} else {
 						funcs = (CArray) trkdata.get("functions", t);
 					}
-					for (FunctionBase func: trk.getFunctions()) {
+					for (FunctionBase func : trk.getFunctions()) {
 						if (!funcs.contains(func.getName())) {
 							funcs.push(new CString(func.getName(), t), t);
 						}
@@ -322,7 +323,7 @@ public class ExtensionMeta {
 					} else {
 						events = (CArray) trkdata.get("events", t);
 					}
-					for (Event event: trk.getEvents()) {
+					for (Event event : trk.getEvents()) {
 						events.push(new CString(event.getName(), t), t);
 					}
 					events.sort(CArray.SortType.STRING_IC);

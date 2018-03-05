@@ -13,7 +13,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  *
- * 
+ *
  */
 public final class ZipMaker {
 
@@ -21,9 +21,8 @@ public final class ZipMaker {
 	}
 
 	/**
-	 * Makes a zip file using all the files in the directory specified. The
-	 * filename is used to place the zip file at the same level as the
-	 * starting directory.
+	 * Makes a zip file using all the files in the directory specified. The filename is used to place the zip file at
+	 * the same level as the starting directory.
 	 *
 	 * @param startingDir The directory to zip up
 	 * @param filename The name of the zip file to create
@@ -31,21 +30,20 @@ public final class ZipMaker {
 	public static void MakeZip(File startingDir, String filename) throws IOException {
 		MakeZip(startingDir, filename, false);
 	}
-	
+
 	/**
-	 * Makes a zip file using all the files in the directory specified. The
-	 * filename is used to place the zip file at the same level as the
-	 * starting directory.
+	 * Makes a zip file using all the files in the directory specified. The filename is used to place the zip file at
+	 * the same level as the starting directory.
 	 *
 	 * @param startingDir The directory to zip up
 	 * @param filename The name of the zip file to create
-	 * @param createTopLevelFolder If true, then files in the zip will be created inside a folder
-	 * named the same as the filename (minus extension)
+	 * @param createTopLevelFolder If true, then files in the zip will be created inside a folder named the same as the
+	 * filename (minus extension)
 	 */
 	public static void MakeZip(File startingDir, String filename, boolean createTopLevelFolder) throws IOException {
 		String topLevel = "";
-		if(createTopLevelFolder){
-			if(filename.lastIndexOf(".") == -1){
+		if (createTopLevelFolder) {
+			if (filename.lastIndexOf(".") == -1) {
 				topLevel = filename + "/";
 			} else {
 				topLevel = filename.substring(0, filename.lastIndexOf(".")) + "/";

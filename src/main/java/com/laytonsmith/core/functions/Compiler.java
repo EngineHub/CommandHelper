@@ -147,12 +147,10 @@ public class Compiler {
 		private final static String ASSIGN = new DataHandling.assign().getName();
 
 		/**
-		 * __autoconcat__ has special optimization techniques needed, since it's
-		 * really a part of the compiler itself, and not so much a function. It
-		 * being a function is merely a convenience, so we can defer processing
-		 * until after parsing. While it is tightly coupled with the compiler,
-		 * this is ok, since it's really a compiler mechanism more than a
-		 * function.
+		 * __autoconcat__ has special optimization techniques needed, since it's really a part of the compiler itself,
+		 * and not so much a function. It being a function is merely a convenience, so we can defer processing until
+		 * after parsing. While it is tightly coupled with the compiler, this is ok, since it's really a compiler
+		 * mechanism more than a function.
 		 *
 		 * @param list
 		 * @param returnSConcat
@@ -222,7 +220,7 @@ public class Compiler {
 						//As an incredibly special case, because (@value = !@value) is supported, and
 						//! hasn't been reduced yet, we want to check for that case, and if present, grab
 						//two symbols.
-						if(list.get(index).getData() instanceof CSymbol && list.get(index).getData().val().equals("!")){
+						if (list.get(index).getData() instanceof CSymbol && list.get(index).getData().val().equals("!")) {
 							ac.addChild(list.get(index));
 							list.remove(index);
 						}
@@ -302,9 +300,9 @@ public class Compiler {
 							// We actually need to get all the remaining children, and shove them into an autoconcat
 							List<ParseTree> ac = new ArrayList<>();
 							list.set(i, conversion);
-							for(int k = i + 1; k < list.size(); k++){
+							for (int k = i + 1; k < list.size(); k++) {
 								ParseTree m = list.get(k);
-								if(m.getData() instanceof CSymbol && ((CSymbol)m.getData()).isUnary()){
+								if (m.getData() instanceof CSymbol && ((CSymbol) m.getData()).isUnary()) {
 									ac.add(m);
 									list.remove(k);
 									k--;
@@ -394,7 +392,7 @@ public class Compiler {
 					}
 					// default and
 					for (int i = 0; i < list.size() - 1; i++) {
-					    ParseTree node = list.get(i + 1);
+						ParseTree node = list.get(i + 1);
 						if (node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isDefaultAnd()) {
 							CSymbol sy = (CSymbol) node.getData();
 							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
@@ -409,7 +407,7 @@ public class Compiler {
 
 					// default or
 					for (int i = 0; i < list.size() - 1; i++) {
-					    ParseTree node = list.get(i + 1);
+						ParseTree node = list.get(i + 1);
 						if (node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isDefaultOr()) {
 							CSymbol sy = (CSymbol) node.getData();
 							ParseTree conversion = new ParseTree(new CFunction(sy.convert(), node.getTarget()), node.getFileOptions());
@@ -456,13 +454,13 @@ public class Compiler {
 			}
 
 			// Look for typed assignments
-			for(int k = 0; k < list.size(); k++){
-				if(list.get(k).getData() instanceof CClassType){
-					if(k == list.size() - 1){
+			for (int k = 0; k < list.size(); k++) {
+				if (list.get(k).getData() instanceof CClassType) {
+					if (k == list.size() - 1) {
 						throw new ConfigCompileException("Unexpected ClassType", list.get(k).getTarget());
 					}
-					if(list.get(k + 1).getData() instanceof CFunction){
-						switch(list.get(k + 1).getData().val()){
+					if (list.get(k + 1).getData() instanceof CFunction) {
+						switch (list.get(k + 1).getData().val()) {
 							// closure is missing from this, because "closure" is both a ClassType and a keyword,
 							// and since keywords take priority over __autoconcat__, it will have already been
 							// handled by the time we reach this code.
@@ -477,7 +475,7 @@ public class Compiler {
 							default:
 								throw new ConfigCompileException("Unexpected ClassType \"" + list.get(k).getData().val() + "\"", list.get(k).getTarget());
 						}
-					} else if(list.get(k + 1).getData() instanceof IVariable){
+					} else if (list.get(k + 1).getData() instanceof IVariable) {
 						// Not an assignment, a random variable declaration though.
 						ParseTree node = new ParseTree(new CFunction(ASSIGN, list.get(k).getTarget()), list.get(k).getFileOptions());
 						node.addChild(list.get(k));
@@ -485,11 +483,11 @@ public class Compiler {
 						node.addChild(new ParseTree(CNull.UNDEFINED, list.get(k).getFileOptions()));
 						list.set(k, node);
 						list.remove(k + 1);
-					} else if(list.get(k + 1).getData() instanceof CLabel){
+					} else if (list.get(k + 1).getData() instanceof CLabel) {
 						ParseTree node = new ParseTree(new CFunction(ASSIGN, list.get(k).getTarget()), list.get(k).getFileOptions());
 						ParseTree labelNode = new ParseTree(new CLabel(node.getData()), list.get(k).getFileOptions());
 						labelNode.addChild(list.get(k));
-						labelNode.addChild(new ParseTree(((CLabel)list.get(k + 1).getData()).cVal(), list.get(k).getFileOptions()));
+						labelNode.addChild(new ParseTree(((CLabel) list.get(k + 1).getData()).cVal(), list.get(k).getFileOptions()));
 						labelNode.addChild(new ParseTree(CNull.UNDEFINED, list.get(k).getFileOptions()));
 						list.set(k, labelNode);
 						list.remove(k + 1);
@@ -582,10 +580,10 @@ public class Compiler {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String s = null;
-			if(args.length == 1){
+			if (args.length == 1) {
 				s = args[0].val();
 			}
-			if(s == null){
+			if (s == null) {
 				throw new NullPointerException();
 			} else {
 				throw new NullPointerException(s);
@@ -719,10 +717,10 @@ public class Compiler {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() != 1){
+			if (children.size() != 1) {
 				throw new ConfigCompileException(getName() + " can only take one parameter", t);
 			}
-			if(!(children.get(0).getData() instanceof CString)){
+			if (!(children.get(0).getData() instanceof CString)) {
 				throw new ConfigCompileException("Only hardcoded strings may be passed into " + getName(), t);
 			}
 			String value = children.get(0).getData().val();
@@ -731,45 +729,45 @@ public class Compiler {
 			boolean inBrace = false;
 			boolean inSimpleVar = false;
 			ParseTree root = new ParseTree(new CFunction(new StringHandling.concat().getName(), t), fileOptions);
-			for(int i = 0; i < value.length(); i++){
+			for (int i = 0; i < value.length(); i++) {
 				char c = value.charAt(i);
 				char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
-				if(c == '\\' && c2 == '@'){
+				if (c == '\\' && c2 == '@') {
 					b.append("@");
 					i++;
 					continue;
 				}
-				if(c == '@'){
-					if(c2 == '{'){
+				if (c == '@') {
+					if (c2 == '{') {
 						//Start of a complex variable
 						inBrace = true;
 						i++; // Don't include this
-					} else if(Character.isLetterOrDigit(c2) || c2 == '_'){
+					} else if (Character.isLetterOrDigit(c2) || c2 == '_') {
 						//Start of a simple variable
 						inSimpleVar = true;
 					} else {
 						// Loose @, this is a compile error
 						throw new ConfigCompileException("Unexpected \"@\" in string. If you want a literal at sign, escape it with \"\\@\".", t);
 					}
-					if(b.length() > 0){
+					if (b.length() > 0) {
 						root.addChild(new ParseTree(new CString(b.toString(), t), fileOptions));
 						b = new StringBuilder();
 					}
 					continue;
 				}
-				if(inSimpleVar && !(Character.isLetterOrDigit(c) || c == '_')){
+				if (inSimpleVar && !(Character.isLetterOrDigit(c) || c == '_')) {
 					// End of simple var. The buffer is the variable name.
 					String vname = b.toString();
 					b = new StringBuilder();
 					root.addChild(new ParseTree(new IVariable("@" + vname, t), fileOptions));
 					inSimpleVar = false;
 				}
-				if(inBrace && c == '}'){
+				if (inBrace && c == '}') {
 					// End of complex var. Still more parsing to be done though.
 					String complex = b.toString().trim();
 					b = new StringBuilder();
 					inBrace = false;
-					if(complex.matches("[a-zA-Z0-9_]+")){
+					if (complex.matches("[a-zA-Z0-9_]+")) {
 						//This is a simple variable name.
 						root.addChild(new ParseTree(new IVariable("@" + complex, t), fileOptions));
 					} else {
@@ -780,15 +778,15 @@ public class Compiler {
 				}
 				b.append(c);
 			}
-			if(inBrace){
+			if (inBrace) {
 				throw new ConfigCompileException("Missing end brace (}) in double string", t);
 			}
-			if(inSimpleVar){
+			if (inSimpleVar) {
 				root.addChild(new ParseTree(new IVariable("@" + b.toString(), t), fileOptions));
-			} else if(b.length() > 0){
+			} else if (b.length() > 0) {
 				root.addChild(new ParseTree(new CString(b.toString(), t), fileOptions));
 			}
-			if(root.numberOfChildren() == 1){
+			if (root.numberOfChildren() == 1) {
 				return root.getChildAt(0);
 			}
 			//throw new ConfigCompileException("Doubly quoted strings are not yet supported...", t);

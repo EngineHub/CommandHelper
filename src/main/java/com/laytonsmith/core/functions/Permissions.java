@@ -17,7 +17,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
 /**
- * 
+ *
  */
 public class Permissions {
 
@@ -26,7 +26,7 @@ public class Permissions {
 				+ " system in place, however, and so not all functions may be supported on a given system.";
 	}
 
-	@api(environments={CommandHelperEnvironment.class, GlobalEnv.class})
+	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
 	public static class has_permission extends AbstractFunction {
 
 		@Override
@@ -90,11 +90,11 @@ public class Permissions {
 					}
 				}
 			}
-			
+
 			if (sender == null) {
 				return CBoolean.FALSE; // Return false for null command senders.
 			}
-			
+
 			if ((Static.getConsoleName().equals(sender.getName().toLowerCase())
 					|| sender.getName().startsWith(Static.getBlockPrefix()))
 					&& !sender.isPermissionSet(permission)) {

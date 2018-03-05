@@ -20,7 +20,7 @@ public class BukkitMCMetadatable implements MCMetadatable {
 	public List<MCMetadataValue> getMetadata(String metadataKey) {
 		List<MetadataValue> lst = _metadatable.getMetadata(metadataKey);
 		List<MCMetadataValue> retn = new ArrayList<>();
-		for(MetadataValue val : lst) {
+		for (MetadataValue val : lst) {
 			retn.add(new BukkitMCMetadataValue(val));
 		}
 		return retn;
@@ -33,12 +33,12 @@ public class BukkitMCMetadatable implements MCMetadatable {
 
 	@Override
 	public void removeMetadata(String metadataKey, MCPlugin owningPlugin) {
-		_metadatable.removeMetadata(metadataKey, ((BukkitMCPlugin)owningPlugin).getHandle());
+		_metadatable.removeMetadata(metadataKey, ((BukkitMCPlugin) owningPlugin).getHandle());
 	}
 
 	@Override
 	public void setMetadata(String metadataKey, MCMetadataValue newMetadataValue) {
-		_metadatable.setMetadata(metadataKey, ((BukkitMCMetadataValue)newMetadataValue).getHandle());
+		_metadatable.setMetadata(metadataKey, ((BukkitMCMetadataValue) newMetadataValue).getHandle());
 	}
 
 	@Override

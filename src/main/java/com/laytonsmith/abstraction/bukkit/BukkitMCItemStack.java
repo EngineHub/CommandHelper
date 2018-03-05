@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
@@ -16,48 +14,50 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
 public class BukkitMCItemStack implements MCItemStack {
+
 	ItemStack is;
-	public BukkitMCItemStack(ItemStack is){
+
+	public BukkitMCItemStack(ItemStack is) {
 		this.is = is;
 	}
 
-	public BukkitMCItemStack(AbstractionObject a){
-		this((ItemStack)null);
-		if(a instanceof MCItemStack){
-			this.is = ((ItemStack)a.getHandle());
+	public BukkitMCItemStack(AbstractionObject a) {
+		this((ItemStack) null);
+		if (a instanceof MCItemStack) {
+			this.is = ((ItemStack) a.getHandle());
 		} else {
 			throw new ClassCastException();
 		}
 	}
 
 	@Override
-	public Object getHandle(){
+	public Object getHandle() {
 		return is;
 	}
 
 	@Override
-	public MCMaterialData getData(){
-		if(is == null){
+	public MCMaterialData getData() {
+		if (is == null) {
 			return null;
 		}
 		MaterialData md = is.getData();
-		if(md == null){
+		if (md == null) {
 			return null;
 		}
 		return new BukkitMCMaterialData(md);
 	}
 
 	@Override
-	public short getDurability(){
-		if(is == null){
+	public short getDurability() {
+		if (is == null) {
 			return 0;
 		}
 		return is.getDurability();
 	}
 
 	@Override
-	public int getTypeId(){
-		if(is == null){
+	public int getTypeId() {
+		if (is == null) {
 			return 0;
 		}
 		return is.getTypeId();
@@ -65,7 +65,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public void setDurability(short data) {
-		if(is == null){
+		if (is == null) {
 			return;
 		}
 		is.setDurability(data);
@@ -73,44 +73,44 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public void addEnchantment(MCEnchantment e, int level) {
-		if(is == null){
+		if (is == null) {
 			return;
 		}
-		is.addEnchantment(((BukkitMCEnchantment)e).__Enchantment(), level);
+		is.addEnchantment(((BukkitMCEnchantment) e).__Enchantment(), level);
 	}
 
 	@Override
-	public void addUnsafeEnchantment(MCEnchantment e, int level){
-		if(is == null){
+	public void addUnsafeEnchantment(MCEnchantment e, int level) {
+		if (is == null) {
 			return;
 		}
-		is.addUnsafeEnchantment(((BukkitMCEnchantment)e).__Enchantment(), level);
+		is.addUnsafeEnchantment(((BukkitMCEnchantment) e).__Enchantment(), level);
 	}
 
 	@Override
-	public Map<MCEnchantment, Integer> getEnchantments(){
+	public Map<MCEnchantment, Integer> getEnchantments() {
 		Map<MCEnchantment, Integer> map = new HashMap<>();
 		try {
-			for(Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()){
+			for (Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()) {
 				map.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
 			}
-		} catch(NullPointerException npe) {
+		} catch (NullPointerException npe) {
 			// Probably invalid enchantment, always return map
 		}
 		return map;
 	}
 
 	@Override
-	public void removeEnchantment(MCEnchantment e){
-		if(is == null){
+	public void removeEnchantment(MCEnchantment e) {
+		if (is == null) {
 			return;
 		}
-		is.removeEnchantment(((BukkitMCEnchantment)e).__Enchantment());
+		is.removeEnchantment(((BukkitMCEnchantment) e).__Enchantment());
 	}
 
 	@Override
 	public MCMaterial getType() {
-		if(is == null){
+		if (is == null) {
 			return null;
 		}
 		return new BukkitMCMaterial(is.getType());
@@ -118,7 +118,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public void setTypeId(int type) {
-		if(is == null){
+		if (is == null) {
 			return;
 		}
 		is.setTypeId(type);
@@ -126,7 +126,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public int getAmount() {
-		if(is == null){
+		if (is == null) {
 			return 0;
 		}
 		return is.getAmount();
@@ -134,7 +134,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public void setAmount(int amt) {
-		if(is == null) {
+		if (is == null) {
 			return;
 		}
 		is.setAmount(amt);
@@ -146,15 +146,15 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public void setData(int data) {
-		if(is == null){
+		if (is == null) {
 			return;
 		}
-		is.setData(new MaterialData(is.getTypeId(), (byte)data));
+		is.setData(new MaterialData(is.getTypeId(), (byte) data));
 	}
 
 	@Override
 	public int maxStackSize() {
-		if(is == null){
+		if (is == null) {
 			return 0;
 		}
 		return is.getMaxStackSize();
@@ -163,7 +163,7 @@ public class BukkitMCItemStack implements MCItemStack {
 	public ItemStack asItemStack() {
 		return is;
 	}
-	
+
 	@Override
 	public String toString() {
 		return is.toString();
@@ -183,7 +183,7 @@ public class BukkitMCItemStack implements MCItemStack {
 	public boolean hasItemMeta() {
 		return is.hasItemMeta();
 	}
-	
+
 	@Override
 	public MCItemMeta getItemMeta() {
 		return BukkitConvertor.BukkitGetCorrectMeta(is.getItemMeta());
@@ -198,6 +198,6 @@ public class BukkitMCItemStack implements MCItemStack {
 			is.setItemMeta(null);
 			return;
 		}
-		is.setItemMeta(((BukkitMCItemMeta)im).asItemMeta());
+		is.setItemMeta(((BukkitMCItemMeta) im).asItemMeta());
 	}
 }

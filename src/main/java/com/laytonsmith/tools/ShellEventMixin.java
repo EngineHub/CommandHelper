@@ -1,4 +1,3 @@
-
 package com.laytonsmith.tools;
 
 import com.laytonsmith.core.constructs.Construct;
@@ -14,17 +13,17 @@ import java.util.Map;
  *
  */
 public class ShellEventMixin implements EventMixinInterface {
-	
+
 	AbstractEvent event;
-	
-	public ShellEventMixin(AbstractEvent e){
+
+	public ShellEventMixin(AbstractEvent e) {
 		this.event = e;
 	}
 
 	@Override
 	public void cancel(BindableEvent e, boolean state) {
-		if(e instanceof CancellableEvent){
-			((CancellableEvent)e).cancel(state);
+		if (e instanceof CancellableEvent) {
+			((CancellableEvent) e).cancel(state);
 		}
 	}
 

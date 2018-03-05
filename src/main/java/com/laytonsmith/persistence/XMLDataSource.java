@@ -1,4 +1,3 @@
-
 package com.laytonsmith.persistence;
 
 import com.laytonsmith.core.CHVersion;
@@ -7,45 +6,46 @@ import java.net.URI;
 
 /**
  *
- * 
+ *
  */
 //@datasource("xml")
-public class XMLDataSource extends StringSerializableDataSource{
-	private XMLDataSource(){
-		
+public class XMLDataSource extends StringSerializableDataSource {
+
+	private XMLDataSource() {
+
 	}
-	
-    public XMLDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
-        super(uri, options);
-    }
 
-    @Override
-    protected void populateModel(String data) throws DataSourceException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    protected String serializeModel() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+	public XMLDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
+		super(uri, options);
+	}
 
 	@Override
-    public DataSourceModifier[] implicitModifiers() {
-        return null;
-    }
+	protected void populateModel(String data) throws DataSourceException {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
 	@Override
-    public DataSourceModifier[] invalidModifiers() {
-        return null;
-    }
+	protected String serializeModel() {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
 	@Override
-    public String docs() {
-        return "XML {xml://path/to/xml/file.xml} --";
-    }
+	public DataSourceModifier[] implicitModifiers() {
+		return null;
+	}
 
 	@Override
-    public CHVersion since() {
-        return CHVersion.V0_0_0;
-    }
+	public DataSourceModifier[] invalidModifiers() {
+		return null;
+	}
+
+	@Override
+	public String docs() {
+		return "XML {xml://path/to/xml/file.xml} --";
+	}
+
+	@Override
+	public CHVersion since() {
+		return CHVersion.V0_0_0;
+	}
 }

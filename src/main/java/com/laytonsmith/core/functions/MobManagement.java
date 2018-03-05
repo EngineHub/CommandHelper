@@ -60,7 +60,8 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class MobManagement {
-	public static String docs(){
+
+	public static String docs() {
 		return "These functions manage specifically living entities. If the entity specified is not living, a"
 				+ " BadEntityTypeException will be thrown.";
 	}
@@ -108,7 +109,7 @@ public class MobManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CRERangeException.class, CREFormatException.class,
-					CREPlayerOfflineException.class, CREInvalidWorldException.class, CRENotFoundException.class};
+				CREPlayerOfflineException.class, CREInvalidWorldException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -130,42 +131,42 @@ public class MobManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			String mob = args[0].val();
 			String secondary = "";
-			if(mob.contains(":")) {
+			if (mob.contains(":")) {
 				secondary = mob.substring(mob.indexOf(':') + 1);
 				mob = mob.substring(0, mob.indexOf(':'));
 			}
 			int qty = 1;
-			if(args.length > 1) {
+			if (args.length > 1) {
 				qty = Static.getInt32(args[1], t);
-				if(qty > spawn_mob.SPAWN_LIMIT) {
+				if (qty > spawn_mob.SPAWN_LIMIT) {
 					throw new CRERangeException("You can not spawn more than " + spawn_mob.SPAWN_LIMIT
 							+ " mobs at once using the " + this.getName() + " function.", t);
 				}
 			}
 			MCLocation l;
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(args.length == 3) {
+			if (args.length == 3) {
 				l = ObjectGenerator.GetGenerator().location(args[2], (p != null ? p.getWorld() : null), t);
-			} else if(p != null) {
+			} else if (p != null) {
 				l = p.getLocation();
 			} else {
 				throw new CREPlayerOfflineException("Invalid sender!", t);
 			}
 
-			if(l == null) { // Happends when executed by a fake player.
+			if (l == null) { // Happends when executed by a fake player.
 				throw new CRENotFoundException(
 						"Could not find the location of the player (are you running in cmdline mode?)", t);
 			}
 
-			try{
+			try {
 				return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll(" ", "")), secondary, qty, l, t);
-			} catch(IllegalArgumentException e){
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException("Invalid mob name: " + mob, t);
 			}
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	@hide("Deprecated")
 	public static class tame_mob extends AbstractFunction {
 
@@ -190,7 +191,7 @@ public class MobManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
-					CREBadEntityException.class};
+				CREBadEntityException.class};
 		}
 
 		@Override
@@ -212,12 +213,12 @@ public class MobManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String player = null;
 			MCPlayer mcPlayer = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(mcPlayer != null) {
+			if (mcPlayer != null) {
 				player = mcPlayer.getName();
 			}
 			Construct entityID = null;
-			if(args.length == 2) {
-				if(args[0] instanceof CNull) {
+			if (args.length == 2) {
+				if (args[0] instanceof CNull) {
 					player = null;
 				} else {
 					player = args[0].val();
@@ -227,11 +228,11 @@ public class MobManagement {
 				entityID = args[0];
 			}
 			MCLivingEntity e = Static.getLivingEntity(entityID, t);
-			if(e == null) {
+			if (e == null) {
 				return CVoid.VOID;
-			} else if(e instanceof MCTameable) {
+			} else if (e instanceof MCTameable) {
 				MCTameable mct = ((MCTameable) e);
-				if(player != null) {
+				if (player != null) {
 					mct.setOwner(Static.getServer().getOfflinePlayer(player));
 				} else {
 					mct.setOwner(null);
@@ -265,7 +266,7 @@ public class MobManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
-					CREBadEntityException.class, CREIllegalArgumentException.class};
+				CREBadEntityException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -286,11 +287,11 @@ public class MobManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
-			if(!(mob instanceof MCTameable)) {
+			if (!(mob instanceof MCTameable)) {
 				throw new CREUntameableMobException("The specified entity is not tameable", t);
 			}
 			MCAnimalTamer owner = ((MCTameable) mob).getOwner();
-			if(owner == null) {
+			if (owner == null) {
 				return CNull.NULL;
 			} else {
 				return new CString(owner.getName(), t);
@@ -321,7 +322,7 @@ public class MobManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
-					CREBadEntityException.class, CREIllegalArgumentException.class};
+				CREBadEntityException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -343,11 +344,11 @@ public class MobManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
 			Construct player = args[1];
-			if(!(mob instanceof MCTameable)) {
+			if (!(mob instanceof MCTameable)) {
 				throw new CREUntameableMobException("The specified entity is not tameable", t);
 			}
 			MCTameable mct = ((MCTameable) mob);
-			if(player instanceof CNull) {
+			if (player instanceof CNull) {
 				mct.setOwner(null);
 			} else {
 				mct.setOwner(Static.getServer().getOfflinePlayer(player.val()));
@@ -379,7 +380,7 @@ public class MobManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREBadEntityException.class,
-					CRERangeException.class, CRELengthException.class};
+				CRERangeException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -401,7 +402,7 @@ public class MobManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
 			double percent = Static.getDouble(args[1], t);
-			if(percent < 0 || percent > 100) {
+			if (percent < 0 || percent > 100) {
 				throw new CRERangeException("Health was expected to be a percentage between 0 and 100", t);
 			} else {
 				e.setHealth(percent / 100.0 * e.getMaxHealth());
@@ -463,8 +464,8 @@ public class MobManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
 
-			if(ent instanceof MCAgeable){
-				return CBoolean.get(((MCAgeable)ent).getCanBreed());
+			if (ent instanceof MCAgeable) {
+				return CBoolean.get(((MCAgeable) ent).getCanBreed());
 			} else {
 				throw new CREBadEntityException("Entity ID must be from an ageable entity!", t);
 			}
@@ -495,8 +496,8 @@ public class MobManagement {
 
 			MCEntity ent = Static.getEntity(args[0], t);
 
-			if(ent instanceof MCAgeable){
-				((MCAgeable)ent).setCanBreed(breed);
+			if (ent instanceof MCAgeable) {
+				((MCAgeable) ent).setCanBreed(breed);
 			} else {
 				throw new CREBadEntityException("Entity ID must be from an ageable entity!", t);
 			}
@@ -513,7 +514,7 @@ public class MobManagement {
 		public String docs() {
 			return "void {entityID, boolean} Set an entity to be breedable.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -526,15 +527,15 @@ public class MobManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREUnageableMobException.class, CRELengthException.class,
-					CREBadEntityException.class};
+				CREBadEntityException.class};
 		}
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
-			if(ent == null) {
+			if (ent == null) {
 				return CNull.NULL;
-			} else if(ent instanceof MCAgeable) {
+			} else if (ent instanceof MCAgeable) {
 				MCAgeable mob = ((MCAgeable) ent);
 				return new CInt(mob.getAge(), t);
 			} else {
@@ -552,7 +553,7 @@ public class MobManagement {
 			return "int {entityID} Returns the mob's age as an integer. Zero represents the point of adulthood. Throws an"
 					+ " UnageableMobException if the mob is not a type that ages";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -565,20 +566,20 @@ public class MobManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREUnageableMobException.class, CRECastException.class,
-					CREBadEntityException.class, CRELengthException.class};
+				CREBadEntityException.class, CRELengthException.class};
 		}
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int age = Static.getInt32(args[1], t);
 			boolean lock = false;
-			if(args.length == 3) {
+			if (args.length == 3) {
 				lock = (boolean) Static.getBoolean(args[2]);
 			}
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
-			if(ent == null) {
+			if (ent == null) {
 				return CNull.NULL;
-			} else if(ent instanceof MCAgeable) {
+			} else if (ent instanceof MCAgeable) {
 				MCAgeable mob = ((MCAgeable) ent);
 				mob.setAge(age);
 				mob.setAgeLock(lock);
@@ -604,7 +605,7 @@ public class MobManagement {
 					+ " if lockAge is true, but by default it will not. Throws a UnageableMobException if the mob does"
 					+ " not age naturally.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -634,10 +635,10 @@ public class MobManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{new ExampleScript("Basic use",
-					"msg(get_mob_effects('091a595d-3d2f-4df4-b493-951dc4bed7f2'))",
-					"{{ambient: false, id: 1, seconds: 30.0, strength: 1}}")};
+				"msg(get_mob_effects('091a595d-3d2f-4df4-b493-951dc4bed7f2'))",
+				"{{ambient: false, id: 1, seconds: 30.0, strength: 1}}")};
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -676,7 +677,7 @@ public class MobManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRELengthException.class, CREFormatException.class,
-					CREBadEntityException.class, CRERangeException.class};
+				CREBadEntityException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -689,29 +690,29 @@ public class MobManagement {
 			double seconds = 30.0;
 			boolean ambient = false;
 			boolean particles = true;
-			if(args.length >= 4) {
+			if (args.length >= 4) {
 				seconds = Static.getDouble(args[3], t);
-				if(seconds < 0.0) {
+				if (seconds < 0.0) {
 					throw new CRERangeException("Seconds cannot be less than 0.0", t);
-				} else if(seconds * 20 > Integer.MAX_VALUE) {
+				} else if (seconds * 20 > Integer.MAX_VALUE) {
 					throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
 				}
 			}
-			if(args.length == 5) {
+			if (args.length == 5) {
 				ambient = Static.getBoolean(args[4]);
 			}
-			if(args.length == 6) {
+			if (args.length == 6) {
 				particles = Static.getBoolean(args[5]);
 			}
 
-			if(seconds == 0.0) {
+			if (seconds == 0.0) {
 				return CBoolean.get(mob.removeEffect(effect));
 			} else {
-				mob.addEffect(effect, strength, (int)(seconds * 20), ambient, particles, t);
+				mob.addEffect(effect, strength, (int) (seconds * 20), ambient, particles, t);
 				return CBoolean.TRUE;
 			}
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -725,7 +726,7 @@ public class MobManagement {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
-			if(le.getTarget(t) == null) {
+			if (le.getTarget(t) == null) {
 				return CNull.NULL;
 			} else {
 				return new CString(le.getTarget(t).getUniqueId().toString(), t);
@@ -742,7 +743,7 @@ public class MobManagement {
 			return "entityID {entityID} Gets the mob's target if it has one, and returns the target's entityID."
 					+ " If there is no target, null is returned instead.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -761,7 +762,7 @@ public class MobManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCLivingEntity target = null;
-			if(!(args[1] instanceof CNull)) {
+			if (!(args[1] instanceof CNull)) {
 				target = Static.getLivingEntity(args[1], t);
 			}
 			le.setTarget(target, t);
@@ -778,7 +779,7 @@ public class MobManagement {
 			return "void {entityID, entityID} The first ID is the entity who is targetting, the second is the target."
 					+ " It can also be set to null to clear the current target.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -792,12 +793,12 @@ public class MobManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCEntityEquipment eq = le.getEquipment();
-			if(eq == null) {
+			if (eq == null) {
 				throw new CREBadEntityTypeException("Entities of type \"" + le.getType() + "\" do not have equipment.", t);
 			}
 			Map<MCEquipmentSlot, MCItemStack> eqmap = le.getEquipment().getAllEquipment();
 			CArray ret = CArray.GetAssociativeArray(t);
-			for(MCEquipmentSlot key : eqmap.keySet()) {
+			for (MCEquipmentSlot key : eqmap.keySet()) {
 				ret.set(key.name().toLowerCase(), ObjectGenerator.GetGenerator().item(eqmap.get(key), t), t);
 			}
 			return ret;
@@ -817,14 +818,14 @@ public class MobManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-					new ExampleScript("Getting a mob's equipment",
-							"get_mob_equipment('091a595d-3d2f-4df4-b493-951dc4bed7f2')",
-							"{boots: null, chestplate: null, helmet: {data: 0, enchants: {} meta: null, name:"
-							+ " JACK_O_LANTERN}, leggings: null, off_hand: null, weapon: {data: 5, enchants: {} meta:"
-							+ " {display: Excalibur, lore: null}, name: DIAMOND_SWORD}}")
+				new ExampleScript("Getting a mob's equipment",
+				"get_mob_equipment('091a595d-3d2f-4df4-b493-951dc4bed7f2')",
+				"{boots: null, chestplate: null, helmet: {data: 0, enchants: {} meta: null, name:"
+				+ " JACK_O_LANTERN}, leggings: null, off_hand: null, weapon: {data: 5, enchants: {} meta:"
+				+ " {display: Excalibur, lore: null}, name: DIAMOND_SWORD}}")
 			};
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -838,16 +839,16 @@ public class MobManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCEntityEquipment ee = le.getEquipment();
-			if(ee == null) {
+			if (ee == null) {
 				throw new CREBadEntityTypeException("Entities of type \"" + le.getType() + "\" do not have equipment.", t);
 			}
 			Map<MCEquipmentSlot, MCItemStack> eq = ee.getAllEquipment();
-			if(args[1] instanceof CNull) {
+			if (args[1] instanceof CNull) {
 				ee.clearEquipment();
 				return CVoid.VOID;
-			} else if(args[1] instanceof CArray) {
+			} else if (args[1] instanceof CArray) {
 				CArray ea = (CArray) args[1];
-				for(String key : ea.stringKeySet()) {
+				for (String key : ea.stringKeySet()) {
 					try {
 						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ObjectGenerator.GetGenerator().item(ea.get(key, t), t));
 					} catch (IllegalArgumentException iae) {
@@ -879,11 +880,11 @@ public class MobManagement {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage",
-						"set_mob_equipment(spawn_mob('SKELETON')[0], array(WEAPON: array(name: BOW)))",
-						"Gives a bow to a skeleton")
+				"set_mob_equipment(spawn_mob('SKELETON')[0], array(WEAPON: array(name: BOW)))",
+				"Gives a bow to a skeleton")
 			};
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -908,7 +909,7 @@ public class MobManagement {
 		public String docs() {
 			return "double {entityID} Returns the maximum health of this living entity.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -939,10 +940,10 @@ public class MobManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{new ExampleScript("Basic use",
-					"set_max_health('091a595d-3d2f-4df4-b493-951dc4bed7f2', 10.0)",
-					"The entity will now only have 5 hearts max (10 half-hearts).")};
+				"set_max_health('091a595d-3d2f-4df4-b493-951dc4bed7f2', 10.0)",
+				"The entity will now only have 5 hearts max (10 half-hearts).")};
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -955,11 +956,11 @@ public class MobManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntityEquipment eq = Static.getLivingEntity(args[0], t).getEquipment();
-			if(eq.getHolder() instanceof MCPlayer) {
+			if (eq.getHolder() instanceof MCPlayer) {
 				throw new CREBadEntityException(getName() + " does not work on players.", t);
 			}
 			CArray ret = CArray.GetAssociativeArray(t);
-			for(Map.Entry<MCEquipmentSlot, Float> ent : eq.getAllDropChances().entrySet()) {
+			for (Map.Entry<MCEquipmentSlot, Float> ent : eq.getAllDropChances().entrySet()) {
 				ret.set(ent.getKey().name(), new CDouble(ent.getValue(), t), t);
 			}
 			return ret;
@@ -989,16 +990,16 @@ public class MobManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntityEquipment ee = Static.getLivingEntity(args[0], t).getEquipment();
 			Map<MCEquipmentSlot, Float> eq = ee.getAllDropChances();
-			if(ee.getHolder() instanceof MCPlayer) {
+			if (ee.getHolder() instanceof MCPlayer) {
 				throw new CREBadEntityException(getName() + " does not work on players.", t);
 			}
-			if(args[1] instanceof CNull) {
-				for(Map.Entry<MCEquipmentSlot, Float> ent : eq.entrySet()) {
+			if (args[1] instanceof CNull) {
+				for (Map.Entry<MCEquipmentSlot, Float> ent : eq.entrySet()) {
 					eq.put(ent.getKey(), 0F);
 				}
-			} else if(args[1] instanceof CArray) {
+			} else if (args[1] instanceof CArray) {
 				CArray ea = (CArray) args[1];
-				for(String key : ea.stringKeySet()) {
+				for (String key : ea.stringKeySet()) {
 					try {
 						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), Static.getDouble32(ea.get(key, t), t));
 					} catch (IllegalArgumentException iae) {
@@ -1047,7 +1048,7 @@ public class MobManagement {
 		public String docs() {
 			return "boolean {entityID} Returns whether the specified living entity can pick up items.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1072,7 +1073,7 @@ public class MobManagement {
 		public String docs() {
 			return "void {entityID, boolean} Sets a living entity's ability to pick up items.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1096,7 +1097,7 @@ public class MobManagement {
 		public String docs() {
 			return "boolean {entityID} Returns whether the specified living entity will despawn. True means it will not.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1121,7 +1122,7 @@ public class MobManagement {
 		public String docs() {
 			return "void {entityID, boolean} Sets whether a living entity will despawn. True means it will not.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1134,7 +1135,7 @@ public class MobManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
-			if(!le.isLeashed()) {
+			if (!le.isLeashed()) {
 				return CNull.NULL;
 			}
 			return new CString(le.getLeashHolder().getUniqueId().toString(), t);
@@ -1150,7 +1151,7 @@ public class MobManagement {
 			return "int {entityID} Returns the entityID of the entity that is holding the given living entity's leash,"
 					+ " or null if it isn't being held.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1164,7 +1165,7 @@ public class MobManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			MCEntity holder;
-			if(args[1] instanceof CNull) {
+			if (args[1] instanceof CNull) {
 				holder = null;
 			} else {
 				holder = Static.getEntity(args[1], t);
@@ -1185,7 +1186,7 @@ public class MobManagement {
 					+ " but the only non-living entity that will persist as a holder across restarts is the leash hitch."
 					+ " Bats, enderdragons, players, and withers can not be held by leashes due to minecraft limitations.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1209,7 +1210,7 @@ public class MobManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CInt(Static.getLivingEntity(args[0], t).getRemainingAir(), t);
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1234,7 +1235,7 @@ public class MobManagement {
 			Static.getLivingEntity(args[0], t).setRemainingAir(Static.getInt32(args[1], t));
 			return CVoid.VOID;
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1258,7 +1259,7 @@ public class MobManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CInt(Static.getLivingEntity(args[0], t).getMaximumAir(), t);
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1283,7 +1284,7 @@ public class MobManagement {
 			Static.getLivingEntity(args[0], t).setMaximumAir(Static.getInt32(args[1], t));
 			return CVoid.VOID;
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1306,7 +1307,7 @@ public class MobManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CRELengthException.class,
-					CREBadEntityException.class};
+				CREBadEntityException.class};
 		}
 
 		@Override
@@ -1322,26 +1323,26 @@ public class MobManagement {
 			MCLivingEntity entity = Static.getLivingEntity(args[0], t);
 			HashSet<Short> transparents = null;
 			int maxDistance = 512;
-			if(args.length >= 2) {
+			if (args.length >= 2) {
 				CArray givenTransparents = Static.getArray(args[1], t);
-				if(givenTransparents.inAssociativeMode()) {
+				if (givenTransparents.inAssociativeMode()) {
 					throw new CRECastException("The array must not be associative.", t);
 				}
 				transparents = new HashSet<>();
-				for(Construct blockID : givenTransparents.asList()) {
+				for (Construct blockID : givenTransparents.asList()) {
 					transparents.add(Static.getInt16(blockID, t));
 				}
 			}
-			if(args.length == 3) {
+			if (args.length == 3) {
 				maxDistance = Static.getInt32(args[2], t);
 			}
 			CArray lineOfSight = new CArray(t);
-			for(MCBlock block : entity.getLineOfSight(transparents, maxDistance)) {
+			for (MCBlock block : entity.getLineOfSight(transparents, maxDistance)) {
 				lineOfSight.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), t);
 			}
 			return lineOfSight;
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1377,7 +1378,7 @@ public class MobManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return CBoolean.get(Static.getLivingEntity(args[0], t).hasLineOfSight(Static.getEntity(args[1], t)));
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1397,15 +1398,15 @@ public class MobManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
 
-			if(!(entity instanceof MCLivingEntity)) {
+			if (!(entity instanceof MCLivingEntity)) {
 				throw new CREBadEntityTypeException("The entity id provided doesn't"
-					+ " belong to a living entity", t);
+						+ " belong to a living entity", t);
 			}
 
-			MCLivingEntity living = (MCLivingEntity)entity;
+			MCLivingEntity living = (MCLivingEntity) entity;
 
 			double damage = Static.getDouble(args[1], t);
-			if(args.length == 3) {
+			if (args.length == 3) {
 				MCEntity source = Static.getEntity(args[2], t);
 				living.damage(damage, source);
 			} else {
@@ -1430,7 +1431,7 @@ public class MobManagement {
 			return "void {entityId, amount, [sourceEntityId]} Damage an entity. If given,"
 					+ " the source entity will be attributed as the damager.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1439,6 +1440,7 @@ public class MobManagement {
 
 	@api
 	public static class set_entity_gliding extends EntityManagement.EntitySetterFunction {
+
 		public String getName() {
 			return "set_entity_gliding";
 		}
@@ -1463,6 +1465,7 @@ public class MobManagement {
 
 	@api
 	public static class get_entity_gliding extends EntityManagement.EntityGetterFunction {
+
 		public String getName() {
 			return "get_entity_gliding";
 		}
@@ -1479,9 +1482,10 @@ public class MobManagement {
 			return CHVersion.V3_3_2;
 		}
 	}
-	
+
 	@api
 	public static class get_entity_ai extends EntityManagement.EntityGetterFunction {
+
 		public String getName() {
 			return "get_entity_ai";
 		}
@@ -1498,9 +1502,10 @@ public class MobManagement {
 			return CHVersion.V3_3_2;
 		}
 	}
-	
+
 	@api
 	public static class set_entity_ai extends EntityManagement.EntitySetterFunction {
+
 		public String getName() {
 			return "set_entity_ai";
 		}

@@ -16,10 +16,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This tool reads a file that contains full verbosity profiling data and
- * creates a summary of the data.
+ * This tool reads a file that contains full verbosity profiling data and creates a summary of the data.
  */
 public class ProfilerSummary {
+
 	private static final Pattern PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2} \\d{1,2}:\\d{2}\\.\\d{2}:\\s*\\[(\\d+\\.\\d+)ms\\]\\[Lvl:(4|5)\\]:\\s*Executing function: ([a-zA-Z_]+[a-zA-Z0-9_]*)\\(.*\\).*");
 
 	/**
@@ -27,14 +27,13 @@ public class ProfilerSummary {
 	 */
 	private String data;
 	/**
-	 * Data that is below this percentage of total time is ignored. Defaults to
-	 * 0.
+	 * Data that is below this percentage of total time is ignored. Defaults to 0.
 	 */
 	private double ignorePercentage = 0D;
 
 	/**
-	 * Creates a new ProfileAnalyzer object from an InputStream. It is expected
-	 * that the input stream will contain UTF-8 encoded data.
+	 * Creates a new ProfileAnalyzer object from an InputStream. It is expected that the input stream will contain UTF-8
+	 * encoded data.
 	 *
 	 * @param input
 	 */
@@ -52,9 +51,8 @@ public class ProfilerSummary {
 	}
 
 	/**
-	 * Any functions that use up less than this percentage of total time are
-	 * omitted from the report. This allows summaries to be more concise and
-	 * show only the largest bottlenecks, instead of all data.
+	 * Any functions that use up less than this percentage of total time are omitted from the report. This allows
+	 * summaries to be more concise and show only the largest bottlenecks, instead of all data.
 	 *
 	 * @param percentage
 	 */
@@ -66,8 +64,7 @@ public class ProfilerSummary {
 	}
 
 	/**
-	 * Returns a human readable getAnalysis of functions, given the arguments 
-	 * provided.
+	 * Returns a human readable getAnalysis of functions, given the arguments provided.
 	 *
 	 * @return Human readable results.
 	 */
@@ -78,7 +75,7 @@ public class ProfilerSummary {
 		boolean foundLevel5 = false;
 		while (m.find()) {
 			String function = m.group(3);
-			if("5".equals(m.group(2))){
+			if ("5".equals(m.group(2))) {
 				foundLevel5 = true;
 			}
 			Double time = Double.parseDouble(m.group(1));
@@ -89,7 +86,7 @@ public class ProfilerSummary {
 				functionData.put(function, time);
 			}
 		}
-		if(!foundLevel5){
+		if (!foundLevel5) {
 			return "Analysis can only be done on a profile summary file, which was created with verbosity level 5.";
 		}
 		int originalSize = functionData.size();
@@ -104,7 +101,7 @@ public class ProfilerSummary {
 		StringBuilder b = new StringBuilder();
 		b.append("Profiler data summary:\n\n");
 		b.append(StringUtils.PluralTemplateHelper(functionData.size(), "One function was", "%d functions were")).append(" profiled in total");
-		if(originalSize == functionData.size()){
+		if (originalSize == functionData.size()) {
 			b.append(".");
 		} else {
 			b.append(", and ");
@@ -116,7 +113,7 @@ public class ProfilerSummary {
 		Map<String, Double> sortedMap = sortByValue(functionData);
 		List<String> keySet = new ArrayList<>(sortedMap.keySet());
 		Collections.reverse(keySet);
-		for(String f : keySet){
+		for (String f : keySet) {
 			b.append(TermColors.WHITE).append(f).append(TermColors.RESET).append(": ").append(String.format("%.3f", sortedMap.get(f))).append(" ms\n");
 		}
 		return b.toString();

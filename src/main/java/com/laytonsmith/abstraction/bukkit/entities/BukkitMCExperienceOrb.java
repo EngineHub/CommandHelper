@@ -1,4 +1,3 @@
-
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCExperienceOrb;
@@ -17,14 +16,14 @@ public class BukkitMCExperienceOrb extends BukkitMCEntity implements MCExperienc
 		super(eo);
 		this.eo = (ExperienceOrb) eo;
 	}
-	
+
 	@Override
-	public int getExperience(){
+	public int getExperience() {
 		return eo.getExperience();
 	}
-	
+
 	@Override
-	public void setExperience(int amount){
+	public void setExperience(int amount) {
 		eo.setExperience(amount);
 	}
 }

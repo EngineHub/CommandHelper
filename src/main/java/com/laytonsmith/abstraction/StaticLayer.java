@@ -23,20 +23,20 @@ public final class StaticLayer {
 	private static Convertor convertor = null;
 
 	static {
-	InitConvertor();
+		InitConvertor();
 	}
 
 	private static synchronized void InitConvertor() {
 		Set<Class<?>> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(convert.class);
-		for(Class<?> c : classes) {
+		for (Class<?> c : classes) {
 			if (!Convertor.class.isAssignableFrom(c)) {
 				StreamUtils.GetSystemErr().println("The Convertor " + c.getSimpleName() + " doesn't implement Convertor!");
 			}
 			convert convert = c.getAnnotation(convert.class);
-			if(convert.type() == Implementation.GetServerType()) {
+			if (convert.type() == Implementation.GetServerType()) {
 				//This is what we're looking for, instatiate it.
 				try {
-					if(convertor != null) {
+					if (convertor != null) {
 						//Uh... There are more than one implementations for this server type
 						System.out.println("More than one Convertor for this server type was detected!");
 					}
@@ -47,7 +47,7 @@ public final class StaticLayer {
 				}
 			}
 		}
-		if(convertor == null) {
+		if (convertor == null) {
 			StreamUtils.GetSystemErr().println("Could not find a suitable convertor! You will experience serious issues with this plugin.");
 		}
 	}

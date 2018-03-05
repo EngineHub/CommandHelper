@@ -17,10 +17,11 @@ import org.bukkit.inventory.ItemFlag;
 		forConcreteEnum = ItemFlag.class
 )
 public class BukkitMCItemFlag extends EnumConvertor<MCItemFlag, ItemFlag> {
+
 	private static BukkitMCItemFlag instance;
 
 	public static BukkitMCItemFlag getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new BukkitMCItemFlag();
 		}
 		return instance;
@@ -28,7 +29,7 @@ public class BukkitMCItemFlag extends EnumConvertor<MCItemFlag, ItemFlag> {
 
 	@Override
 	protected ItemFlag getConcreteEnumCustom(MCItemFlag abstracted) {
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
+		if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
 			return null;
 		}
 		return super.getConcreteEnumCustom(abstracted);

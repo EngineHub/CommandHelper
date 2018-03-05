@@ -13,6 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class BukkitMCItemFactory implements MCItemFactory {
 
 	ItemFactory f;
+
 	public BukkitMCItemFactory(ItemFactory itemFactory) {
 		this.f = itemFactory;
 	}
@@ -43,7 +44,7 @@ public class BukkitMCItemFactory implements MCItemFactory {
 
 	@Override
 	public MCItemMeta getItemMeta(MCMaterial material) {
-		if(material == null){
+		if (material == null) {
 			return null;
 		}
 		ItemMeta im = f.getItemMeta((Material) material.getHandle());

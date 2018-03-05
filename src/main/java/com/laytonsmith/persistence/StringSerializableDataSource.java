@@ -11,32 +11,30 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * For data sources that can input and output strings as the complete
- * data model, this class should be extended. The data source may not
- * be written to file, but it is for sure going to be stored (or at least retrievable)
- * from a UTF-8 encoded string.
+ * For data sources that can input and output strings as the complete data model, this class should be extended. The
+ * data source may not be written to file, but it is for sure going to be stored (or at least retrievable) from a UTF-8
+ * encoded string.
  *
  */
 public abstract class StringSerializableDataSource extends AbstractDataSource {
+
 	/**
 	 * A reference to the DataSourceModel used by the set and get methods.
 	 */
 	protected DataSourceModel model;
-	
+
 	/**
-	 * When a transaction starts or stops, this is set to true. If this
-	 * is true, populate will run, then set this to false, and if this is false,
-	 * populate will simply return.
+	 * When a transaction starts or stops, this is set to true. If this is true, populate will run, then set this to
+	 * false, and if this is false, populate will simply return.
 	 */
 	private boolean doPopulate = true;
 	/**
-	 * If in a transaction, and we made a change, we know we need to write it out
-	 * when the transaction finishes.
+	 * If in a transaction, and we made a change, we know we need to write it out when the transaction finishes.
 	 */
 	private boolean hasChanges = false;
-	
-	protected StringSerializableDataSource(){
-		
+
+	protected StringSerializableDataSource() {
+
 	}
 
 	protected StringSerializableDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
@@ -44,8 +42,7 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 	}
 
 	/**
-	 * Writes the stringified data to whatever output is associated with
-	 * this data source.
+	 * Writes the stringified data to whatever output is associated with this data source.
 	 *
 	 * @throws IOException
 	 */
@@ -66,19 +63,20 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 
 	/**
 	 * {@inheritDoc}
-	 * 
-	 * When we rollback, we simply re-populate the data, instead of tracking
-	 * changes that happened since the transaction started.
+	 *
+	 * When we rollback, we simply re-populate the data, instead of tracking changes that happened since the transaction
+	 * started.
+	 *
 	 * @param rollback
 	 * @throws DataSourceException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	@Override
 	protected final void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
 		doPopulate = true;
-		if(hasChanges){
+		if (hasChanges) {
 			hasChanges = false;
-			if(rollback){
+			if (rollback) {
 				populate();
 			} else {
 				try {
@@ -93,8 +91,8 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 
 	@Override
 	public void populate() throws DataSourceException {
-		if(inTransaction()){
-			if(doPopulate){
+		if (inTransaction()) {
+			if (doPopulate) {
 				doPopulate = false;
 			} else {
 				return;
@@ -113,8 +111,8 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 	public Set<String[]> keySet(String[] keyBase) {
 		Set<String[]> keys = new HashSet<>();
 		String kb = StringUtils.Join(keyBase, ".");
-		for(String[] key : model.keySet()){
-			if(StringUtils.Join(key, ".").startsWith(kb)){
+		for (String[] key : model.keySet()) {
+			if (StringUtils.Join(key, ".").startsWith(kb)) {
 				keys.add(key);
 			}
 		}
@@ -136,7 +134,7 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 			return false;
 		}
 		model.set(key, value);
-		if(!inTransaction()){
+		if (!inTransaction()) {
 			//We need to output the model now
 			writeData(dm, serializeModel());
 		} else {
@@ -154,17 +152,15 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 	protected abstract void populateModel(String data) throws DataSourceException;
 
 	/**
-	 * Serializes the underlying model to a string, which can be written out
-	 * to disk/network
+	 * Serializes the underlying model to a string, which can be written out to disk/network
 	 *
 	 * @return
 	 */
 	protected abstract String serializeModel();
 
 	/**
-	 * Subclasses that need a certain type of file to be the "blank" version
-	 * of a data model can override this. By default, an empty string is
-	 * returned.
+	 * Subclasses that need a certain type of file to be the "blank" version of a data model can override this. By
+	 * default, an empty string is returned.
 	 *
 	 * @return
 	 */
@@ -178,5 +174,5 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 		// By default, we assume that string based data sources don't need disconnecting.
 		// If this assumption is bad, the subclass can override this method.
 	}
-	
+
 }

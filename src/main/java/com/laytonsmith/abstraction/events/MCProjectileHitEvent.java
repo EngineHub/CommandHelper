@@ -7,8 +7,12 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCProjectileHitEvent extends BindableEvent {
+
 	MCProjectile getEntity();
+
 	MCEntityType getEntityType();
+
 	MCEntity getHitEntity();
+
 	MCBlock getHitBlock();
 }

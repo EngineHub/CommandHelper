@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCLocation;
@@ -24,21 +22,21 @@ import org.bukkit.util.Vector;
 import java.util.Map;
 import java.util.UUID;
 
-public class BukkitVehicleListener implements Listener{
-    
-	@EventHandler(priority= EventPriority.LOWEST)
+public class BukkitVehicleListener implements Listener {
+
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onEnter(VehicleEnterEvent event) {
 		BukkitMCVehicleEnterEvent vee = new BukkitMCVehicleEnterEvent(event);
 		EventUtils.TriggerListener(Driver.VEHICLE_ENTER, "vehicle_enter", vee);
 	}
 
-	@EventHandler(priority= EventPriority.LOWEST)
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onExit(VehicleExitEvent event) {
 		BukkitMCVehicleExitEvent vee = new BukkitMCVehicleExitEvent(event);
 		EventUtils.TriggerListener(Driver.VEHICLE_LEAVE, "vehicle_leave", vee);
 	}
 
-	@EventHandler(priority= EventPriority.LOWEST)
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockCollide(VehicleBlockCollisionEvent event) {
 		if (event.getVehicle() instanceof Animals && event.getVehicle().getPassenger() == null) {
 			return;
@@ -47,7 +45,7 @@ public class BukkitVehicleListener implements Listener{
 		EventUtils.TriggerListener(Driver.VEHICLE_COLLIDE, "vehicle_collide", vbc);
 	}
 
-	@EventHandler(priority= EventPriority.LOWEST)
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onEntityCollide(VehicleEntityCollisionEvent event) {
 		if (event.getVehicle().getPassenger() != event.getEntity()) {
 			BukkitMCVehicleEntityCollideEvent vec = new BukkitMCVehicleEntityCollideEvent(event);
@@ -60,9 +58,9 @@ public class BukkitVehicleListener implements Listener{
 		Location from = event.getFrom();
 		Location to = event.getTo();
 		UUID id = event.getVehicle().getUniqueId();
-		for(Integer threshold : VehicleEvents.GetThresholdList()) {
+		for (Integer threshold : VehicleEvents.GetThresholdList()) {
 			Map<UUID, MCLocation> lastLocations = VehicleEvents.GetLastLocations(threshold);
-			if(!lastLocations.containsKey(id)) {
+			if (!lastLocations.containsKey(id)) {
 				lastLocations.put(id, new BukkitMCLocation(from));
 				continue;
 			}
@@ -85,7 +83,7 @@ public class BukkitVehicleListener implements Listener{
 		}
 	}
 
-	@EventHandler(priority= EventPriority.LOWEST)
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onVehicleDestroy(VehicleDestroyEvent event) {
 		BukkitMCVehicleDestroyEvent vee = new BukkitMCVehicleDestroyEvent(event);
 		EventUtils.TriggerListener(Driver.VEHICLE_DESTROY, "vehicle_destroy", vee);

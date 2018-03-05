@@ -166,7 +166,7 @@ public class DataTransformations {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ca = Static.getArray(args[0], t);
 			boolean prettyPrint = false;
-			if(args.length == 2){
+			if (args.length == 2) {
 				prettyPrint = Static.getBoolean(args[1]);
 			}
 			DumperOptions options = new DumperOptions();
@@ -175,9 +175,9 @@ public class DataTransformations {
 				options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 			}
 			Yaml yaml = new Yaml(options);
-			try{
+			try {
 				return new CString(yaml.dump(Construct.GetPOJO(ca)), t);
-			} catch(ClassCastException ex){
+			} catch (ClassCastException ex) {
 				throw new CRECastException(ex.getMessage(), t);
 			}
 		}
@@ -230,10 +230,10 @@ public class DataTransformations {
 			Exception cause = null;
 			try {
 				ret = yaml.load(data);
-			} catch(ScannerException | ParserException ex){
+			} catch (ScannerException | ParserException ex) {
 				cause = ex;
 			}
-			if(!(ret instanceof Map) && !(ret instanceof Collection)){
+			if (!(ret instanceof Map) && !(ret instanceof Collection)) {
 				throw new CREFormatException("Improperly formatted YML", t, cause);
 			}
 			return Construct.GetConstruct(ret);
@@ -285,18 +285,18 @@ public class DataTransformations {
 			Properties props = new Properties();
 			CArray arr = Static.getArray(args[0], t);
 			String comment = null;
-			if(args.length == 2){
+			if (args.length == 2) {
 				comment = args[1].val();
 			}
-			if(!arr.inAssociativeMode()){
+			if (!arr.inAssociativeMode()) {
 				throw new CRECastException("Expecting an associative array", t);
 			}
-			for(String key : arr.stringKeySet()){
+			for (String key : arr.stringKeySet()) {
 				Construct c = arr.get(key, t);
 				String val;
-				if(c instanceof CNull){
+				if (c instanceof CNull) {
 					val = "";
-				} else if(c instanceof CArray){
+				} else if (c instanceof CArray) {
 					throw new CRECastException("Arrays cannot be encoded with ini_encode.", t);
 				} else {
 					val = c.val();
@@ -369,7 +369,7 @@ public class DataTransformations {
 				throw new CREFormatException(ex.getMessage(), t);
 			}
 			CArray arr = CArray.GetAssociativeArray(t);
-			for(String key : props.stringPropertyNames()){
+			for (String key : props.stringPropertyNames()) {
 				arr.set(key, props.getProperty(key));
 			}
 			return arr;

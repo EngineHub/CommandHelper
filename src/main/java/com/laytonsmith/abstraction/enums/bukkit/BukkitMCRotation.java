@@ -11,11 +11,12 @@ import org.bukkit.Rotation;
 		forAbstractEnum = MCRotation.class,
 		forConcreteEnum = Rotation.class
 )
-public class BukkitMCRotation extends EnumConvertor<MCRotation, Rotation>{
+public class BukkitMCRotation extends EnumConvertor<MCRotation, Rotation> {
+
 	private static BukkitMCRotation instance;
 
 	public static BukkitMCRotation getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCRotation();
 		}
 		return instance;

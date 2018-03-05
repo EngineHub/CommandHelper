@@ -12,36 +12,36 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("FormatException")
 public class CREFormatException extends CREException {
 
-    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final CClassType TYPE = CClassType.get("FormatException");
+	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
+	public static final CClassType TYPE = CClassType.get("FormatException");
 
-    public CREFormatException(String msg, Target t) {
-	super(msg, t);
-    }
+	public CREFormatException(String msg, Target t) {
+		super(msg, t);
+	}
 
-    public CREFormatException(String msg, Target t, Throwable cause) {
-	super(msg, t, cause);
-    }
+	public CREFormatException(String msg, Target t, Throwable cause) {
+		super(msg, t, cause);
+	}
 
-    @Override
-    public String docs() {
-	return "This exception is thrown if a function expected a string to be"
-		+ " formatted in a particular way, but it could not interpret the given"
-		+ " value.";
-    }
+	@Override
+	public String docs() {
+		return "This exception is thrown if a function expected a string to be"
+				+ " formatted in a particular way, but it could not interpret the given"
+				+ " value.";
+	}
 
-    @Override
-    public Version since() {
-	return CHVersion.V3_3_1;
-    }
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	return super.getSuperclasses();
-    }
+	@Override
+	public CClassType[] getSuperclasses() {
+		return super.getSuperclasses();
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	return super.getInterfaces();
-    }
+	@Override
+	public CClassType[] getInterfaces() {
+		return super.getInterfaces();
+	}
 }

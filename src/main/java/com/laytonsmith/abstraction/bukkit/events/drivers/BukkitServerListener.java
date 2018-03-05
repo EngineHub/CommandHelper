@@ -14,27 +14,27 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 
-public class BukkitServerListener implements Listener{
+public class BukkitServerListener implements Listener {
 
-	@EventHandler(priority= EventPriority.LOWEST)
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPing(ServerListPingEvent event) {
 		BukkitMiscEvents.BukkitMCServerPingEvent pe = new BukkitMiscEvents.BukkitMCServerPingEvent(event);
 		EventUtils.TriggerListener(Driver.SERVER_PING, "server_ping", pe);
 	}
 
-	@EventHandler(priority=EventPriority.LOWEST)
-	public void onBlockPhysics(BlockPhysicsEvent event){
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onBlockPhysics(BlockPhysicsEvent event) {
 		Map<MCLocation, Boolean> locations = ServerEvents.getRedstoneMonitors();
-		if(locations.isEmpty()){
+		if (locations.isEmpty()) {
 			// Bail as quickly as we can if this isn't being used.
 			return;
 		}
 		final MCLocation blockLocation = new BukkitMCLocation(event.getBlock().getLocation());
-		if(locations.containsKey(blockLocation)){
+		if (locations.containsKey(blockLocation)) {
 			// This is a monitored location, so we will be triggering the event.
 			boolean wasPowered = locations.get(blockLocation);
 			final boolean isPowered = blockLocation.getBlock().isBlockPowered();
-			if(wasPowered != isPowered){
+			if (wasPowered != isPowered) {
 				// It was changed, so set the state appropriately now.
 				locations.put(blockLocation, isPowered);
 				EventUtils.TriggerListener(Driver.REDSTONE_CHANGED, "redstone_changed", new MCRedstoneChangedEvent() {

@@ -11,15 +11,12 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This class represents a data source model. The underlying model is just a map
- * of values or maps, but this class abstracts accessing and storing the data.
- * If a value in a model can be more efficiently lazily loaded, this class
- * perhaps should not be used, but for non event driven models, it should
- * suffice for many cases. If a data source inherently has a better way to store
- * the data, then it may choose to not use this class. Note: Not all data
- * sources can store a key in both namespace.value and namespace.value.other, in
- * that case, to make namespace.value's actual value, it should be stored as
- * namespace.value._
+ * This class represents a data source model. The underlying model is just a map of values or maps, but this class
+ * abstracts accessing and storing the data. If a value in a model can be more efficiently lazily loaded, this class
+ * perhaps should not be used, but for non event driven models, it should suffice for many cases. If a data source
+ * inherently has a better way to store the data, then it may choose to not use this class. Note: Not all data sources
+ * can store a key in both namespace.value and namespace.value.other, in that case, to make namespace.value's actual
+ * value, it should be stored as namespace.value._
  *
  */
 public final class DataSourceModel {
@@ -53,15 +50,15 @@ public final class DataSourceModel {
 					//Special case, this is a reserved key
 					build(((Map<String, Object>) node).get(key), treeNode);
 				} else {
-					GenericTreeNode<Pair<String, String>> newNode =
-							new GenericTreeNode<>(new Pair<String, String>(key, null));
+					GenericTreeNode<Pair<String, String>> newNode
+							= new GenericTreeNode<>(new Pair<String, String>(key, null));
 					treeNode.addChild(newNode);
 					build(((Map<String, Object>) node).get(key), newNode);
 				}
 			}
 		} else {
 			//This is the node we want to put the data in
-			treeNode.data.setValue(node==null?null:node.toString());
+			treeNode.data.setValue(node == null ? null : node.toString());
 		}
 	}
 

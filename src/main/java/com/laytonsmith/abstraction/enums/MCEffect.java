@@ -14,7 +14,6 @@ public enum MCEffect {
 	POTION_BREAK(2002),
 	SMOKE(2000),
 	VILLAGER_PLANT_GROW(2005),
-
 	/**
 	 * SOUND
 	 */
@@ -56,10 +55,8 @@ public enum MCEffect {
 	WITHER_SHOOT(1024),
 	ZOMBIE_CONVERTED_VILLAGER(1027),
 	ZOMBIE_INFECT(1026),
-
 	/**
-	 * PARTICLE
-	 * Deprecated in favor of the Particle API
+	 * PARTICLE Deprecated in favor of the Particle API
 	 */
 	FIREWORKS_SPARK("fireworksSpark"),
 	CRIT("crit"),
@@ -95,8 +92,7 @@ public enum MCEffect {
 	LARGE_SMOKE("largesmoke"),
 	//ITEM_BREAK("iconcrack"), // crashes clients without correct data
 	TILE_BREAK("blockcrack"),
-	TILE_DUST("blockdust")
-	;
+	TILE_DUST("blockdust");
 
 	private final int id;
 	private final String particleName;
@@ -106,7 +102,7 @@ public enum MCEffect {
 		particleName = null;
 	}
 
-	MCEffect(String particleName){
+	MCEffect(String particleName) {
 		this.id = 0;
 		this.particleName = particleName;
 	}
@@ -115,7 +111,7 @@ public enum MCEffect {
 		return this.id;
 	}
 
-	public String getName(){
+	public String getName() {
 		return particleName;
 	}
 }

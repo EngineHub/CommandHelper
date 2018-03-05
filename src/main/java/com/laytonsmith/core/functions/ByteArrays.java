@@ -25,11 +25,12 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteOrder;
 
 /**
- * 
+ *
  */
 @core
 public class ByteArrays {
-	public static String docs(){
+
+	public static String docs() {
 		return "This class contains all the methods needed to manipulate a byte array primitive. Since"
 				+ " byte arrays would be very inefficient to implement using a normal array, this data type"
 				+ " allows for more efficient operations, while still allowing for low level data access."
@@ -40,7 +41,7 @@ public class ByteArrays {
 				+ " a short is 16 bits, an int is 32 bits, a long is 64 bits. UTF-8 strings are supported"
 				+ " directly. The byte array is automatically resized as needed.";
 	}
-	
+
 	@api
 	public static class byte_array extends ba {
 
@@ -63,19 +64,19 @@ public class ByteArrays {
 		public String docs() {
 			return "byte_array {} Returns a new byte array primitive, which can be operated on with the ba_ series of functions.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "byte_array";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_as_array extends ba {
 
@@ -98,19 +99,19 @@ public class ByteArrays {
 					+ " interfaced with the byte array primitives. This operation is discouraged, because normal arrays are very"
 					+ " inefficient for dealing with low level bit data.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_as_array";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_rewind extends ba {
 
@@ -130,19 +131,19 @@ public class ByteArrays {
 		public String docs() {
 			return "void {byte_array} Rewinds the byte array marker to 0.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_rewind";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_get_byte extends ba_get {
 
@@ -152,7 +153,7 @@ public class ByteArrays {
 			Integer pos = get_getPos(args, t);
 			try {
 				return new CInt(ba.getByte(pos), t);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e){
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
@@ -162,19 +163,19 @@ public class ByteArrays {
 			return "int {byte_array, [pos]} Returns an int, read in as an 8 bit byte, from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_get_byte";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_get_char extends ba_get {
 
@@ -182,9 +183,9 @@ public class ByteArrays {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
-			try{
+			try {
 				return new CString(ba.getChar(pos), t);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e){
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
@@ -194,19 +195,19 @@ public class ByteArrays {
 			return "string {byte_array, [pos]} Returns a one character string, read in as an 32 bit char, from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_get_char";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_get_short extends ba_get {
 
@@ -214,9 +215,9 @@ public class ByteArrays {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
-			try{
+			try {
 				return new CInt(ba.getShort(pos), t);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e){
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
@@ -226,18 +227,18 @@ public class ByteArrays {
 			return "int {byte_array, [pos]} Returns an int, read in as a 16 bit short, from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
-			
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_get_short";
 		}
 	}
-	
+
 	@api
 	public static class ba_get_int extends ba_get {
 
@@ -245,9 +246,9 @@ public class ByteArrays {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
-			try{
+			try {
 				return new CInt(ba.getInt(pos), t);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e){
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
@@ -257,19 +258,19 @@ public class ByteArrays {
 			return "int {byte_array, [pos]} Returns an int, read in as a 32 bit int, from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_get_int";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_get_long extends ba_get {
 
@@ -289,19 +290,19 @@ public class ByteArrays {
 			return "int {byte_array, [pos]} Returns an int, read in as a 64 bit long, from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_get_long";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_get_float extends ba_get {
 
@@ -321,19 +322,19 @@ public class ByteArrays {
 			return "double {byte_array, [pos]} Returns a double, read in as a 32 bit float, from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_get_float";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_get_double extends ba_get {
 
@@ -343,7 +344,7 @@ public class ByteArrays {
 			Integer pos = get_getPos(args, t);
 			try {
 				return new CDouble(ba.getDouble(pos), t);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e){
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
@@ -353,18 +354,18 @@ public class ByteArrays {
 			return "double {byte_array, [pos]} Returns a double, read in as a 64 bit double, from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_get_double";
 		}
 	}
-	
+
 	@api
 	public static class ba_get_bytes extends ba_get {
 
@@ -378,12 +379,12 @@ public class ByteArrays {
 			CByteArray ba = getBA(args, t);
 			int size = Static.getInt32(args[1], t);
 			Integer pos = null;
-			if(args.length == 3){
+			if (args.length == 3) {
 				pos = Static.getInt32(args[2], t);
 			}
 			try {
 				return ba.getBytes(size, pos);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e){
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
@@ -393,19 +394,19 @@ public class ByteArrays {
 			return "byte_array {byte_array, length, [pos]} Returns a new byte_array primitive, starting from pos (or wherever the marker is"
 					+ " by default) to length.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_get_bytes";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_get_string extends ba_get {
 
@@ -414,16 +415,16 @@ public class ByteArrays {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
 			String encoding = null;
-			if(args.length == 3){
+			if (args.length == 3) {
 				encoding = args[2].nval();
 			}
-			try{
+			try {
 				return new CString(ba.readUTF8String(pos, encoding), t);
-			} catch(UnsupportedEncodingException e){
+			} catch (UnsupportedEncodingException e) {
 				throw new CREFormatException(e.getMessage(), t);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e){
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
-			} catch(NegativeArraySizeException e){
+			} catch (NegativeArraySizeException e) {
 				throw new CREFormatException("Invalid data", t);
 			}
 		}
@@ -435,19 +436,19 @@ public class ByteArrays {
 					+ " with a 32 bit integer, then the string bytes. (This will be the case is the byte_array was encoded"
 					+ " with ba_set_string.) The encoding of the string may be set, but defaults to UTF-8.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_get_string";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_put_byte extends ba_put {
 
@@ -465,19 +466,19 @@ public class ByteArrays {
 			return "void {byte_array, int, [pos]} Writes an int, interpreted as an 8 bit byte, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_put_byte";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_put_char extends ba_put {
 
@@ -486,7 +487,7 @@ public class ByteArrays {
 			CByteArray ba = getBA(args, t);
 			String b = args[1].val();
 			char c = '\0';
-			if(b.length() > 0){
+			if (b.length() > 0) {
 				c = b.charAt(0);
 			}
 			Integer pos = set_getPos(args, t);
@@ -499,19 +500,19 @@ public class ByteArrays {
 			return "void {byte_array, string, [pos]} Writes the first character of the string, interpreted as an 32 bit char, starting from the given position, or wherever the"
 					+ " marker is currently at by default. If the string is empty, a \\0 is written instead.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_put_char";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_put_short extends ba_put {
 
@@ -529,19 +530,19 @@ public class ByteArrays {
 			return "void {byte_array, int, [pos]} Writes an int, interpreted as an 16 bit short, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_put_short";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_put_int extends ba_put {
 
@@ -559,18 +560,18 @@ public class ByteArrays {
 			return "void {byte_array, int, [pos]} Writes an int, interpreted as a 32 bit int, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_put_int";
 		}
 	}
-	
+
 	@api
 	public static class ba_put_long extends ba_put {
 
@@ -588,19 +589,19 @@ public class ByteArrays {
 			return "void {byte_array, int, [pos]} Writes an int, interpreted as a 64 bit, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_put_long";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_put_float extends ba_put {
 
@@ -618,19 +619,19 @@ public class ByteArrays {
 			return "void {byte_array, double, [pos]} Writes a double, interpreted as a 32 bit float, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_put_float";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_put_double extends ba_put {
 
@@ -648,19 +649,19 @@ public class ByteArrays {
 			return "void {byte_array, double, [pos]} Writes a double, interpreted as a 64 bit double, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_put_double";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_put_bytes extends ba_put {
 
@@ -678,19 +679,19 @@ public class ByteArrays {
 			return "void {destination_byte_array, source_byte_array, [pos]} Writes the contents of the source_byte_array into this byte array,"
 					+ " starting at pos, or wherever the marker is currently at by default.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_put_bytes";
 		}
-		
+
 	}
-	
+
 	@api
 	public static class ba_put_string extends ba_put {
 
@@ -700,14 +701,14 @@ public class ByteArrays {
 			String s = args[1].val();
 			Integer pos = set_getPos(args, t);
 			String encoding = null;
-			if(args.length == 3){
+			if (args.length == 3) {
 				encoding = args[2].nval();
 			}
-			try{
+			try {
 				ba.writeUTF8String(s, pos, encoding);
-			} catch(IndexOutOfBoundsException e){
+			} catch (IndexOutOfBoundsException e) {
 				throw new CRERangeException(e.getMessage(), t);
-			} catch(UnsupportedEncodingException e){
+			} catch (UnsupportedEncodingException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}
 			return CVoid.VOID;
@@ -720,17 +721,17 @@ public class ByteArrays {
 					+ " in a different manner, then use the string-byte_array conversion methods in StringHandling, however"
 					+ " strings written in this manner are compatible with ba_get_string. The encoding may be set, but defaults to UTF-8.";
 		}
-		
+
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "ba_put_string";
 		}
-		
+
 	}
 
 	@api
@@ -831,27 +832,27 @@ public class ByteArrays {
 		}
 
 	}
-	
-	private static CByteArray getBA(Construct [] args, Target t){
+
+	private static CByteArray getBA(Construct[] args, Target t) {
 		return Static.getByteArray(args[0], t);
 	}
-	
-	private static Integer get_getPos(Construct [] args, Target t){
-		if(args.length == 2){
+
+	private static Integer get_getPos(Construct[] args, Target t) {
+		if (args.length == 2) {
 			return Static.getInt32(args[1], t);
 		} else {
 			return null;
 		}
 	}
-	
-	private static Integer set_getPos(Construct [] args, Target t){
-		if(args.length == 3){
+
+	private static Integer set_getPos(Construct[] args, Target t) {
+		if (args.length == 3) {
 			return Static.getInt32(args[2], t);
 		} else {
 			return null;
 		}
 	}
-	
+
 	private static abstract class ba extends AbstractFunction {
 
 		@Override
@@ -869,16 +870,16 @@ public class ByteArrays {
 			return false;
 		}
 	}
-	
+
 	public static abstract class ba_put extends ba {
 
 		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{2, 3};
 		}
-		
+
 	}
-	
+
 	public static abstract class ba_get extends ba {
 
 		@Override
@@ -890,7 +891,7 @@ public class ByteArrays {
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
 		}
-		
+
 	}
-	
+
 }

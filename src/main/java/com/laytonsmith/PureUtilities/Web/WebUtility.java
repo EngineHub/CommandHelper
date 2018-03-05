@@ -477,7 +477,7 @@ public final class WebUtility {
 				} else {
 					boolean innerFirst = true;
 					for (String value : values) {
-						if(!innerFirst) {
+						if (!innerFirst) {
 							b.append("&");
 						}
 						innerFirst = false;

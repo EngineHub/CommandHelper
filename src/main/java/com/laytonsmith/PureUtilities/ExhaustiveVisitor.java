@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * In programming, a Visitor pattern (also called Double Dispatch) is used to provide an easy and type safe way
- * of selecting the method to handle an object of a specific type, without resorting to usage of {@code instanceof}
- * chains or a {@code switch} statement. Consider the following example:
+ * In programming, a Visitor pattern (also called Double Dispatch) is used to provide an easy and type safe way of
+ * selecting the method to handle an object of a specific type, without resorting to usage of {@code instanceof} chains
+ * or a {@code switch} statement. Consider the following example:
  *
  * <pre><code>
  * interface UserID {}
@@ -177,139 +177,142 @@ import java.util.Set;
  *   }
  * </code></pre>
  *
- * This code has multiple advantages: No need to change the base classes, less code overall, no code duplication,
- * and no extra visitor interfaces need be created and maintained. With the addition of the compiler changes, this also
- * becomes a compile error if you forget a required implementation of visit().
+ * This code has multiple advantages: No need to change the base classes, less code overall, no code duplication, and no
+ * extra visitor interfaces need be created and maintained. With the addition of the compiler changes, this also becomes
+ * a compile error if you forget a required implementation of visit().
  *
- * The VisitorInfo annotation is optional, but if provided, will control whether or not only direct subclasses must
- * be implemented, or if all known subclasses must be.
+ * The VisitorInfo annotation is optional, but if provided, will control whether or not only direct subclasses must be
+ * implemented, or if all known subclasses must be.
  *
  *
  * @author cailin
  */
 public class ExhaustiveVisitor<T> {
 
-    /**
-     * The name of the visit method
-     */
-    private static final String VISIT = "visit";
-
-    @Target(ElementType.TYPE)
-    @Retention(RetentionPolicy.RUNTIME)
-    public static @interface VisitorInfo {
 	/**
-	 * If true, then the visitor subclass is only required to implement methods that represent direct
-	 * subclasses of the base class. If an object needs visiting, it simply uses the method for which it
-	 * extends from. If this is false, then all possible subclass values must be implemented, even if they
-	 * simply call other visit methods. The default is false.
-	 * @return
+	 * The name of the visit method
 	 */
-	boolean directSubclassOnly() default false;
-    }
+	private static final String VISIT = "visit";
 
-    /**
-     * Calls the appropriate subclassed method based on the runtime type of the parameter passed in.
-     * @param object
-     */
-    public final void visit(T object) {
-	VisitorInfo info = this.getClass().getDeclaredAnnotation(VisitorInfo.class);
-	Method candidate = null;
-	Class<?> searchFor = object.getClass();
-	for(Method m : this.getClass().getMethods()) {
-	    if(VISIT.equals(m.getName())) {
-		Class<?> visitParam = m.getParameterTypes()[0];
-		if(info != null && info.directSubclassOnly()) {
-		    if(visitParam.isAssignableFrom(searchFor)) {
-			candidate = m;
-			break;
-		    }
-		} else {
-		    if(visitParam == searchFor) {
-			candidate = m;
-			break;
-		    }
-		}
-	    }
-	}
-	if(candidate == null) {
-	    throw new NoSuchMethodError("Missing implementation of method with signature (or superclass of): "
-		    + " public void visit(" + searchFor.getName().replace("$", ".") + ") in class "
-		    + this.getClass().getName());
-	}
-	try {
-	    candidate.invoke(this, object);
-	} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-	    throw new RuntimeException(ex);
-	}
-    }
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface VisitorInfo {
 
-    public static void verify(ClassMirror<? extends ExhaustiveVisitor> classMirror) throws ClassNotFoundException {
-	Class<? extends ExhaustiveVisitor> clazz = classMirror.loadClass();
-	System.out.println("Verifying " + clazz);
-	VisitorInfo info = clazz.getAnnotation(VisitorInfo.class);
-	Class<?> baseClass = classMirror.getGenerics()
-		.get(new ClassMirror<>(ExhaustiveVisitor.class).getClassReference()).get(0).loadClass();
-	List<String> uhohs = new ArrayList<>();
-	// Make sure all public visit methods have only one parameter (which extends T) and return void
-	Set<Class<?>> handledClasses = new HashSet<>();
-	for(Method m : clazz.getMethods()) {
-	    if(m.getDeclaringClass() == ExhaustiveVisitor.class) {
-		// This is the method defined in this class, which doesn't need to be checked. Skip it.
-		continue;
-	    }
-	    if(VISIT.equals(m.getName()) && (m.getModifiers() & Modifier.PUBLIC) != 0) {
-		if(m.getReturnType() != void.class) {
-		    uhohs.add("Return type of public visit() methods must be void, but "
-			    + clazz.getName() + " " + m + " does not conform");
-		}
-		if(m.getParameterTypes().length != 1) {
-		    uhohs.add("Public visit() methods must accept exactly one parameter, but"
-			    + clazz.getName() + " " + m + " does not conform");
-		} else {
-		    Class<?> param = m.getParameterTypes()[0];
-		    if(baseClass.isAssignableFrom(param)) {
-			handledClasses.add(param);
-		    } else {
-			uhohs.add("Public visit() methods parameters must extend the given base class's type, but the"
-				+ " parameter of method " + m + " in " + clazz.getName()
-				+ " has a disjoint type than "
-				+ baseClass.getName() + ". Make the method non-public, or rename it, if you would"
-					+ " like to keep the method.");
-		    }
-		}
-	    }
+		/**
+		 * If true, then the visitor subclass is only required to implement methods that represent direct subclasses of
+		 * the base class. If an object needs visiting, it simply uses the method for which it extends from. If this is
+		 * false, then all possible subclass values must be implemented, even if they simply call other visit methods.
+		 * The default is false.
+		 *
+		 * @return
+		 */
+		boolean directSubclassOnly() default false;
 	}
 
-	// Make sure that all subclasses are accounted for, taking into
-	// account the value of directSubclassOnly
-	Set<Class<?>> needsToHandle = new HashSet<>();
-	for(Class<?> c : ClassDiscovery.getDefaultInstance().loadClassesThatExtend(baseClass)) {
-	    if((c.getModifiers() & Modifier.ABSTRACT) != 0) {
-		// Abstract class, skip this, because an item can never be a concrete instance of this, and
-		// thus is not required to be implemented
-		continue;
-	    }
-	    if(info != null && info.directSubclassOnly()) {
-		if(c.getSuperclass() == baseClass || Arrays.asList(c.getInterfaces()).contains(c)) {
-		    needsToHandle.add(c);
+	/**
+	 * Calls the appropriate subclassed method based on the runtime type of the parameter passed in.
+	 *
+	 * @param object
+	 */
+	public final void visit(T object) {
+		VisitorInfo info = this.getClass().getDeclaredAnnotation(VisitorInfo.class);
+		Method candidate = null;
+		Class<?> searchFor = object.getClass();
+		for (Method m : this.getClass().getMethods()) {
+			if (VISIT.equals(m.getName())) {
+				Class<?> visitParam = m.getParameterTypes()[0];
+				if (info != null && info.directSubclassOnly()) {
+					if (visitParam.isAssignableFrom(searchFor)) {
+						candidate = m;
+						break;
+					}
+				} else {
+					if (visitParam == searchFor) {
+						candidate = m;
+						break;
+					}
+				}
+			}
 		}
-	    } else {
-		needsToHandle.add(c);
-	    }
+		if (candidate == null) {
+			throw new NoSuchMethodError("Missing implementation of method with signature (or superclass of): "
+					+ " public void visit(" + searchFor.getName().replace("$", ".") + ") in class "
+					+ this.getClass().getName());
+		}
+		try {
+			candidate.invoke(this, object);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+			throw new RuntimeException(ex);
+		}
 	}
-	if(!needsToHandle.equals(handledClasses)) {
-	    String s = clazz.getName() + " is missing needed implementations of the visit method. It is required"
-		    + " that it handle the following: " + needsToHandle + ", however, it only handles the following:"
-		    + " " + handledClasses + ". Please add the following implementations:\n";
-	    needsToHandle.removeAll(handledClasses);
-	    for(Class<?> n : needsToHandle) {
-		s += "public void visit(" + n.getName().replace("$", ".") + " obj) { /* Implement me */ }\n";
-	    }
-	    uhohs.add(s);
+
+	public static void verify(ClassMirror<? extends ExhaustiveVisitor> classMirror) throws ClassNotFoundException {
+		Class<? extends ExhaustiveVisitor> clazz = classMirror.loadClass();
+		System.out.println("Verifying " + clazz);
+		VisitorInfo info = clazz.getAnnotation(VisitorInfo.class);
+		Class<?> baseClass = classMirror.getGenerics()
+				.get(new ClassMirror<>(ExhaustiveVisitor.class).getClassReference()).get(0).loadClass();
+		List<String> uhohs = new ArrayList<>();
+		// Make sure all public visit methods have only one parameter (which extends T) and return void
+		Set<Class<?>> handledClasses = new HashSet<>();
+		for (Method m : clazz.getMethods()) {
+			if (m.getDeclaringClass() == ExhaustiveVisitor.class) {
+				// This is the method defined in this class, which doesn't need to be checked. Skip it.
+				continue;
+			}
+			if (VISIT.equals(m.getName()) && (m.getModifiers() & Modifier.PUBLIC) != 0) {
+				if (m.getReturnType() != void.class) {
+					uhohs.add("Return type of public visit() methods must be void, but "
+							+ clazz.getName() + " " + m + " does not conform");
+				}
+				if (m.getParameterTypes().length != 1) {
+					uhohs.add("Public visit() methods must accept exactly one parameter, but"
+							+ clazz.getName() + " " + m + " does not conform");
+				} else {
+					Class<?> param = m.getParameterTypes()[0];
+					if (baseClass.isAssignableFrom(param)) {
+						handledClasses.add(param);
+					} else {
+						uhohs.add("Public visit() methods parameters must extend the given base class's type, but the"
+								+ " parameter of method " + m + " in " + clazz.getName()
+								+ " has a disjoint type than "
+								+ baseClass.getName() + ". Make the method non-public, or rename it, if you would"
+								+ " like to keep the method.");
+					}
+				}
+			}
+		}
+
+		// Make sure that all subclasses are accounted for, taking into
+		// account the value of directSubclassOnly
+		Set<Class<?>> needsToHandle = new HashSet<>();
+		for (Class<?> c : ClassDiscovery.getDefaultInstance().loadClassesThatExtend(baseClass)) {
+			if ((c.getModifiers() & Modifier.ABSTRACT) != 0) {
+				// Abstract class, skip this, because an item can never be a concrete instance of this, and
+				// thus is not required to be implemented
+				continue;
+			}
+			if (info != null && info.directSubclassOnly()) {
+				if (c.getSuperclass() == baseClass || Arrays.asList(c.getInterfaces()).contains(c)) {
+					needsToHandle.add(c);
+				}
+			} else {
+				needsToHandle.add(c);
+			}
+		}
+		if (!needsToHandle.equals(handledClasses)) {
+			String s = clazz.getName() + " is missing needed implementations of the visit method. It is required"
+					+ " that it handle the following: " + needsToHandle + ", however, it only handles the following:"
+					+ " " + handledClasses + ". Please add the following implementations:\n";
+			needsToHandle.removeAll(handledClasses);
+			for (Class<?> n : needsToHandle) {
+				s += "public void visit(" + n.getName().replace("$", ".") + " obj) { /* Implement me */ }\n";
+			}
+			uhohs.add(s);
+		}
+		if (!uhohs.isEmpty()) {
+			throw new RuntimeException(StringUtils.Join(uhohs, "\n"));
+		}
 	}
-	if(!uhohs.isEmpty()) {
-	    throw new RuntimeException(StringUtils.Join(uhohs, "\n"));
-	}
-    }
 
 }

@@ -10,11 +10,11 @@ public class ConfigCompileGroupException extends Exception {
 
 	private final Set<ConfigCompileException> list;
 
-	public ConfigCompileGroupException(Set<ConfigCompileException> group){
+	public ConfigCompileGroupException(Set<ConfigCompileException> group) {
 		this.list = new HashSet<>(group);
 	}
 
-	public Set<ConfigCompileException> getList(){
+	public Set<ConfigCompileException> getList() {
 		return new HashSet<>(list);
 	}
 }

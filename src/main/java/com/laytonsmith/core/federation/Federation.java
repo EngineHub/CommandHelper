@@ -15,8 +15,7 @@ public class Federation {
 	private static Federation defaultFederation;
 
 	/**
-	 * Returns the default Federation object. If one isn't yet constructed, it
-	 * is constructed and returned.
+	 * Returns the default Federation object. If one isn't yet constructed, it is constructed and returned.
 	 *
 	 * @return
 	 */
@@ -29,8 +28,8 @@ public class Federation {
 	}
 
 	/**
-	 * Clears the default Federation object. If {@link #GetFederation()} is
-	 * called after this, a new one will be constructed.
+	 * Clears the default Federation object. If {@link #GetFederation()} is called after this, a new one will be
+	 * constructed.
 	 */
 	public static void ClearFederation() {
 		defaultFederation = null;
@@ -49,8 +48,8 @@ public class Federation {
 	 */
 	public static final int DYNAMIC_PORT_MAXIMUM = 56423;
 	/**
-	 * The timeout after which a server is considered "dead", that is, it's
-	 * heartbeat hasn't connected in this many seconds.
+	 * The timeout after which a server is considered "dead", that is, it's heartbeat hasn't connected in this many
+	 * seconds.
 	 */
 	public static final int DEAD_SERVER_TIMEOUT = 10;
 	/**
@@ -59,8 +58,7 @@ public class Federation {
 	public static final int HEARTBEAT_INTERVAL = 5;
 
 	/**
-	 * When this is 0, the shutdown hooks will de-register with the
-	 * DaemonManager.
+	 * When this is 0, the shutdown hooks will de-register with the DaemonManager.
 	 */
 	private int serverCount = 0;
 	private final Object serverCountLock = new Object();

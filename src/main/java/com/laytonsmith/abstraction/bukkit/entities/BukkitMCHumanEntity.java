@@ -18,8 +18,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHumanEntity {
-    
-    HumanEntity he;
+
+	HumanEntity he;
 
 	public BukkitMCHumanEntity(Entity humanEntity) {
 		super(humanEntity);
@@ -31,9 +31,9 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 	}
 
 	@Override
-    public String getName() {
-        return he.getName();
-    }
+	public String getName() {
+		return he.getName();
+	}
 
 	@Override
 	public void closeInventory() {
@@ -80,19 +80,19 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 	@Override
 	public void setItemInHand(MCItemStack item) {
 		// deprecated in 1.9
-		he.setItemInHand(((BukkitMCItemStack)item).asItemStack());
+		he.setItemInHand(((BukkitMCItemStack) item).asItemStack());
 	}
 
 	@Override
 	public void setItemOnCursor(MCItemStack item) {
-		he.setItemOnCursor(((BukkitMCItemStack)item).asItemStack());
+		he.setItemOnCursor(((BukkitMCItemStack) item).asItemStack());
 	}
 
 	@Override
 	public int getCooldown(MCMaterial material) {
 		try {
 			return he.getCooldown((Material) material.getHandle());
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably prior to 1.11.2
 			return 0;
 		}
@@ -102,14 +102,14 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 	public void setCooldown(MCMaterial material, int ticks) {
 		try {
 			he.setCooldown((Material) material.getHandle(), ticks);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably prior to 1.11.2
 		}
 	}
 
 	@Override
 	public MCInventoryView openInventory(MCInventory inventory) {
-		return new BukkitMCInventoryView(he.openInventory((Inventory)inventory.getHandle()));
+		return new BukkitMCInventoryView(he.openInventory((Inventory) inventory.getHandle()));
 	}
 
 	@Override
@@ -129,11 +129,11 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 
 	@Override
 	public MCInventoryView openWorkbench(MCLocation loc, boolean force) {
-		return new BukkitMCInventoryView(he.openWorkbench((Location)loc.getHandle(), force));
+		return new BukkitMCInventoryView(he.openWorkbench((Location) loc.getHandle(), force));
 	}
 
 	@Override
 	public MCInventoryView openEnchanting(MCLocation loc, boolean force) {
-		return new BukkitMCInventoryView(he.openEnchanting((Location)loc.getHandle(), force));
+		return new BukkitMCInventoryView(he.openEnchanting((Location) loc.getHandle(), force));
 	}
 }

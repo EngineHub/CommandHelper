@@ -49,10 +49,10 @@ public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 	}
 
 	@Override
-	public void setShooter(MCProjectileSource shooter){
-		if(shooter == null){
+	public void setShooter(MCProjectileSource shooter) {
+		if (shooter == null) {
 			proj.setShooter(null);
-		} else if(shooter instanceof MCBlockProjectileSource){
+		} else if (shooter instanceof MCBlockProjectileSource) {
 			proj.setShooter((BlockProjectileSource) shooter.getHandle());
 		} else {
 			proj.setShooter((ProjectileSource) shooter.getHandle());

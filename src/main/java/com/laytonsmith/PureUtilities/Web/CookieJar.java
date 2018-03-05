@@ -13,9 +13,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * This class manages a list of several cookies. There are several ways to add
- * a new cookie to this manager, and the getCookies method returns the pre-parsed
- * string that is suitable for direct use in an HTTP request header.
+ * This class manages a list of several cookies. There are several ways to add a new cookie to this manager, and the
+ * getCookies method returns the pre-parsed string that is suitable for direct use in an HTTP request header.
  */
 public final class CookieJar {
 
@@ -39,14 +38,15 @@ public final class CookieJar {
 			return val1.compareTo(val2) == 0;
 		}
 	});
-	
+
 	/**
-	 * Adds a new, pre-made cookie to this list. The constructors for Cookie
-	 * are capable of parsing the cookies found in a HTTP request.
-	 * @param cookie 
+	 * Adds a new, pre-made cookie to this list. The constructors for Cookie are capable of parsing the cookies found in
+	 * a HTTP request.
+	 *
+	 * @param cookie
 	 */
-	public void addCookie(Cookie cookie){
-		if(this.cookies.contains(cookie)){
+	public void addCookie(Cookie cookie) {
+		if (this.cookies.contains(cookie)) {
 			//This is an update, so remove it first
 			this.cookies.remove(cookie);
 		}
@@ -54,12 +54,11 @@ public final class CookieJar {
 	}
 
 	/**
-	 * Returns a string that is suitable to send as is with the Cookie
-	 * HTTP header. The URL is the search url, which will look through this
-	 * cookie jar, and only use the cookies that are applicable to this domain,
-	 * not expired, etc.
+	 * Returns a string that is suitable to send as is with the Cookie HTTP header. The URL is the search url, which
+	 * will look through this cookie jar, and only use the cookies that are applicable to this domain, not expired, etc.
+	 *
 	 * @param url
-	 * @return 
+	 * @return
 	 */
 	public String getCookies(URL url) {
 		List<Cookie> usable = new ArrayList<Cookie>();
@@ -87,7 +86,7 @@ public final class CookieJar {
 				continue;
 			}
 			//Or if we aren't in the right path
-			String path = (url.getPath().startsWith("/")?"":"/") + url.getPath();
+			String path = (url.getPath().startsWith("/") ? "" : "/") + url.getPath();
 			if (!path.startsWith(cookie.getPath())) {
 				continue;
 			}
@@ -110,33 +109,33 @@ public final class CookieJar {
 		}
 		return b.toString();
 	}
-	
+
 	/**
-	 * Clears out all session cookies from this cookie jar. That is, all
-	 * cookies with an expiration of 0 set.
+	 * Clears out all session cookies from this cookie jar. That is, all cookies with an expiration of 0 set.
 	 */
-	public void clearSessionCookies(){
+	public void clearSessionCookies() {
 		Iterator<Cookie> it = cookies.iterator();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			Cookie c = it.next();
-			if(c.getExpiration() == 0){
+			if (c.getExpiration() == 0) {
 				it.remove();
 			}
 		}
 	}
-	
+
 	/**
 	 * Clears all cookies from this cookie jar.
 	 */
-	public void clearAllCookies(){
+	public void clearAllCookies() {
 		cookies.clear();
 	}
-	
+
 	/**
 	 * Returns a copy of all the cookies in this cookie jar.
-	 * @return 
+	 *
+	 * @return
 	 */
-	public Set<Cookie> getAllCookies(){
+	public Set<Cookie> getAllCookies() {
 		return new TreeSet<Cookie>(cookies);
 	}
 

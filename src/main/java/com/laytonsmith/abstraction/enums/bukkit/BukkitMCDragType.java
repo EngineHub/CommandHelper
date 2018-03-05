@@ -16,7 +16,7 @@ public class BukkitMCDragType extends EnumConvertor<MCDragType, DragType> {
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCDragType instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCDragType getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCDragType();
 		}
 		return instance;

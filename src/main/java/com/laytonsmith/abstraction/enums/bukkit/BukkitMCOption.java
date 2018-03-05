@@ -11,16 +11,16 @@ import com.laytonsmith.annotations.abstractionenum;
 import com.laytonsmith.core.Static;
 
 @abstractionenum(
-		implementation= Implementation.Type.BUKKIT,
-		forAbstractEnum=MCOption.class,
-		forConcreteEnum=Team.Option.class
+		implementation = Implementation.Type.BUKKIT,
+		forAbstractEnum = MCOption.class,
+		forConcreteEnum = Team.Option.class
 )
-public class BukkitMCOption extends EnumConvertor<MCOption, Option>{
+public class BukkitMCOption extends EnumConvertor<MCOption, Option> {
 
 	private static BukkitMCOption instance;
 
 	public static BukkitMCOption getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new BukkitMCOption();
 		}
 		return instance;
@@ -28,7 +28,7 @@ public class BukkitMCOption extends EnumConvertor<MCOption, Option>{
 
 	@Override
 	protected Option getConcreteEnumCustom(MCOption abstracted) {
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9)) {
+		if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9)) {
 			return null;
 		}
 		return super.getConcreteEnumCustom(abstracted);

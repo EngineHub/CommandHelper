@@ -12,35 +12,35 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("InvalidWorldException")
 public class CREInvalidWorldException extends CREException {
 
-    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final CClassType TYPE = CClassType.get("InvalidWorldException");
+	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
+	public static final CClassType TYPE = CClassType.get("InvalidWorldException");
 
-    public CREInvalidWorldException(String msg, Target t) {
-	super(msg, t);
-    }
+	public CREInvalidWorldException(String msg, Target t) {
+		super(msg, t);
+	}
 
-    public CREInvalidWorldException(String msg, Target t, Throwable cause) {
-	super(msg, t, cause);
-    }
+	public CREInvalidWorldException(String msg, Target t, Throwable cause) {
+		super(msg, t, cause);
+	}
 
-    @Override
-    public String docs() {
-	return "If a function requests a world, and the world given doesn't exist,"
-		+ " this is thrown";
-    }
+	@Override
+	public String docs() {
+		return "If a function requests a world, and the world given doesn't exist,"
+				+ " this is thrown";
+	}
 
-    @Override
-    public Version since() {
-	return CHVersion.V3_3_1;
-    }
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	return super.getSuperclasses();
-    }
+	@Override
+	public CClassType[] getSuperclasses() {
+		return super.getSuperclasses();
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	return super.getInterfaces();
-    }
+	@Override
+	public CClassType[] getInterfaces() {
+		return super.getInterfaces();
+	}
 }

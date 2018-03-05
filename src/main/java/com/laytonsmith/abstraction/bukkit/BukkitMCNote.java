@@ -6,7 +6,9 @@ import com.laytonsmith.abstraction.enums.MCTone;
 import org.bukkit.Note;
 
 public class BukkitMCNote implements AbstractionObject, MCNote {
+
 	Note n;
+
 	public BukkitMCNote(int octave, MCTone tone, boolean sharp) throws IllegalArgumentException {
 		n = new Note(octave, Note.Tone.valueOf(tone.name()), sharp);
 	}

@@ -1,11 +1,10 @@
-
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCLightningStrike;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LightningStrike;
 
-public class BukkitMCLightningStrike extends BukkitMCEntity implements MCLightningStrike{
+public class BukkitMCLightningStrike extends BukkitMCEntity implements MCLightningStrike {
 
 	LightningStrike ls;
 
@@ -15,7 +14,7 @@ public class BukkitMCLightningStrike extends BukkitMCEntity implements MCLightni
 	}
 
 	@Override
-	public boolean isEffect(){
+	public boolean isEffect() {
 		return ls.isEffect();
 	}
 }

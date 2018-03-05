@@ -24,11 +24,11 @@ import java.util.List;
  * @author cgallarno
  */
 public class Recipes {
-	
-	public static String docs(){
-        return "This class of functions allows recipes to be managed.";
-    }
-	
+
+	public static String docs() {
+		return "This class of functions allows recipes to be managed.";
+	}
+
 	public static abstract class recipeFunction extends AbstractFunction {
 
 		@Override
@@ -40,9 +40,9 @@ public class Recipes {
 		public Boolean runAsync() {
 			return false;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class add_recipe extends recipeFunction {
 
@@ -55,7 +55,7 @@ public class Recipes {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				return CBoolean.get(Static.getServer().addRecipe(ObjectGenerator.GetGenerator().recipe(args[0], t)));
-			} catch(IllegalStateException ex) {
+			} catch (IllegalStateException ex) {
 				// recipe with the given key probably already exists
 				return CBoolean.FALSE;
 			}
@@ -68,7 +68,7 @@ public class Recipes {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[] {1};
+			return new Integer[]{1};
 		}
 
 		@Override
@@ -112,13 +112,13 @@ public class Recipes {
 					+ "}"
 					+ "</pre>";
 		}
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api
 	public static class get_recipes_for extends recipeFunction {
 
@@ -132,10 +132,10 @@ public class Recipes {
 			CArray ret = new CArray(t);
 			MCItemStack item = ObjectGenerator.GetGenerator().item(args[0], t);
 			List<MCRecipe> recipes = Static.getServer().getRecipesFor(item);
-			for(MCRecipe recipe : recipes) {
+			for (MCRecipe recipe : recipes) {
 				ret.push(ObjectGenerator.GetGenerator().recipe(recipe, t), t);
 			}
-			
+
 			return ret;
 		}
 
@@ -146,22 +146,22 @@ public class Recipes {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[] {1};
+			return new Integer[]{1};
 		}
 
 		@Override
 		public String docs() {
-			return "array {itemArray} Gets all recipes that have a result of the given item. " + 
-					"NOTE: Gets all recipes for result item regardless of meta and enchants, although the array has correct data.";
+			return "array {itemArray} Gets all recipes that have a result of the given item. "
+					+ "NOTE: Gets all recipes for result item regardless of meta and enchants, although the array has correct data.";
 		}
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class get_all_recipes extends recipeFunction {
 
@@ -174,10 +174,10 @@ public class Recipes {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			List<MCRecipe> recipes = Static.getServer().allRecipes();
-			for(MCRecipe recipe : recipes) {
+			for (MCRecipe recipe : recipes) {
 				ret.push(ObjectGenerator.GetGenerator().recipe(recipe, t), t);
 			}
-			
+
 			return ret;
 		}
 
@@ -188,21 +188,21 @@ public class Recipes {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[] {0};
+			return new Integer[]{0};
 		}
 
 		@Override
 		public String docs() {
 			return "array {} Gets all recipes on the server.";
 		}
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class clear_recipes extends recipeFunction {
 
@@ -214,7 +214,7 @@ public class Recipes {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getServer().clearRecipes();
-			
+
 			return CVoid.VOID;
 		}
 
@@ -225,21 +225,21 @@ public class Recipes {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[] {0};
+			return new Integer[]{0};
 		}
 
 		@Override
 		public String docs() {
 			return "void {} Clears all recipes.";
 		}
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class reset_recipes extends recipeFunction {
 
@@ -251,7 +251,7 @@ public class Recipes {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getServer().resetRecipes();
-			
+
 			return CVoid.VOID;
 		}
 
@@ -262,18 +262,18 @@ public class Recipes {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[] {0};
+			return new Integer[]{0};
 		}
 
 		@Override
 		public String docs() {
 			return "void {} Resets all recipes to the default recipes.";
 		}
-		
+
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
 }

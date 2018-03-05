@@ -4,9 +4,10 @@ import com.laytonsmith.core.LogLevel;
 
 /**
  *
- * 
+ *
  */
 public class ProfilePoint implements Comparable<ProfilePoint> {
+
 	private String name;
 	private String message;
 	boolean GCRun;
@@ -32,19 +33,19 @@ public class ProfilePoint implements Comparable<ProfilePoint> {
 	boolean wasGCd() {
 		return GCRun;
 	}
-	
-	public void stop(){
+
+	public void stop() {
 		parent.stop(this);
 	}
 
 	public String getMessage() {
 		return message;
 	}
-	
+
 	public void setMessage(String newMessage) {
 		message = newMessage;
 	}
-	
+
 	/**
 	 * This is an arbitrary comparison, for the sake of fast tree searches.
 	 *
@@ -58,18 +59,20 @@ public class ProfilePoint implements Comparable<ProfilePoint> {
 
 	/**
 	 * Package private.
-	 * @param granularity 
+	 *
+	 * @param granularity
 	 */
 	void setGranularity(LogLevel granularity) {
 		this.granularity = granularity;
 	}
-	
+
 	/**
 	 * Returns the log level at which this profile point was registered.
-	 * @return 
+	 *
+	 * @return
 	 */
-	public LogLevel getGranularity(){
+	public LogLevel getGranularity() {
 		return this.granularity;
 	}
-    
+
 }

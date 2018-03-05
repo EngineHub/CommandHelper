@@ -22,7 +22,7 @@ public class BukkitMCItemFrame extends BukkitMCHanging implements MCItemFrame {
 
 	@Override
 	public ItemFrame getHandle() {
-		return (ItemFrame)super.getHandle();
+		return (ItemFrame) super.getHandle();
 	}
 
 	@Override

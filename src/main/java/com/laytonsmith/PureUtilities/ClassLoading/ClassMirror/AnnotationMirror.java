@@ -1,4 +1,3 @@
-
 package com.laytonsmith.PureUtilities.ClassLoading.ClassMirror;
 
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
@@ -14,24 +13,26 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Represents an Annotation. Most features available to annotations are available here,
- * though finding the default value of an annotation does require loading the annotation.
+ * Represents an Annotation. Most features available to annotations are available here, though finding the default value
+ * of an annotation does require loading the annotation.
  */
 public class AnnotationMirror implements Serializable {
+
 	private static final long serialVersionUID = 1L;
 	private final ClassReferenceMirror type;
 	private final boolean visible;
 	private final List<AnnotationValue> values;
-	
+
 	/**
 	 * Creates a new AnnotationMirror based an a loaded {@link Annotation}.
-	 * @param annotation 
+	 *
+	 * @param annotation
 	 */
-	public AnnotationMirror(Annotation annotation){
+	public AnnotationMirror(Annotation annotation) {
 		this.type = ClassReferenceMirror.fromClass(annotation.annotationType());
 		this.visible = true;
 		values = new ArrayList<>();
-		for(Method m : annotation.annotationType().getDeclaredMethods()){
+		for (Method m : annotation.annotationType().getDeclaredMethods()) {
 			try {
 				values.add(new AnnotationValue(m.getName(), m.invoke(annotation)));
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
@@ -39,62 +40,62 @@ public class AnnotationMirror implements Serializable {
 			}
 		}
 	}
-	
-	/* package */ AnnotationMirror(ClassReferenceMirror type, boolean visible){
+
+	/* package */ AnnotationMirror(ClassReferenceMirror type, boolean visible) {
 		this.type = type;
 		this.visible = visible;
 		this.values = new ArrayList<>();
 	}
-	
-	/* package */ void addAnnotationValue(String name, Object value){
+
+	/* package */ void addAnnotationValue(String name, Object value) {
 		values.add(new AnnotationValue(name, value));
 	}
-	
+
 	/**
-	 * Returns the value for this annotation. Note that this won't resolve
-	 * default annotations, as that requires actually loading the annotation class
-	 * into memory. See {@link #getValueWithDefault} if you are ok with loading
+	 * Returns the value for this annotation. Note that this won't resolve default annotations, as that requires
+	 * actually loading the annotation class into memory. See {@link #getValueWithDefault} if you are ok with loading
 	 * the annotation class into memory. Null is returned if this value doesn't exist.
+	 *
 	 * @param forName
-	 * @return 
+	 * @return
 	 */
-	public Object getValue(String forName){
-		for(AnnotationValue value : values){
-			if(value.name.equals(forName)){
+	public Object getValue(String forName) {
+		for (AnnotationValue value : values) {
+			if (value.name.equals(forName)) {
 				return value.value;
 			}
 		}
 		return null;
 	}
-	
+
 	/**
-	 * Returns the list of defined values in this annotation. Note that this
-	 * won't resolve default annotations, as that requires actually loading the
-	 * annotation class into memory. See {@link #getDefinedValuesWithDefault} if you
-	 * are ok with loading the annotation class into memory.
-	 * @return 
+	 * Returns the list of defined values in this annotation. Note that this won't resolve default annotations, as that
+	 * requires actually loading the annotation class into memory. See {@link #getDefinedValuesWithDefault} if you are
+	 * ok with loading the annotation class into memory.
+	 *
+	 * @return
 	 */
-	public List<String> getDefinedValues(){
+	public List<String> getDefinedValues() {
 		List<String> list = new ArrayList<>();
-		for(AnnotationValue value : values){
+		for (AnnotationValue value : values) {
 			list.add(value.name);
 		}
 		return list;
 	}
-	
+
 	/**
-	 * Gets the value of this annotation. If the value wasn't defined
-	 * in this annotation, the default is returned by loading the annotation
-	 * Class into memory, and finding the default, and returning that. Calling
-	 * this method doesn't guarantee that the class will be loaded, however.
-	 * If the value doesn't exist, at all, this will return null.
+	 * Gets the value of this annotation. If the value wasn't defined in this annotation, the default is returned by
+	 * loading the annotation Class into memory, and finding the default, and returning that. Calling this method
+	 * doesn't guarantee that the class will be loaded, however. If the value doesn't exist, at all, this will return
+	 * null.
+	 *
 	 * @param forName
-	 * @return 
-	 * @throws java.lang.ClassNotFoundException 
+	 * @return
+	 * @throws java.lang.ClassNotFoundException
 	 */
-	public Object getValueWithDefault(String forName) throws ClassNotFoundException{
+	public Object getValueWithDefault(String forName) throws ClassNotFoundException {
 		Object value = getValue(forName);
-		if(value != null){
+		if (value != null) {
 			return value;
 		}
 		//Nope, have to load it.
@@ -108,64 +109,64 @@ public class AnnotationMirror implements Serializable {
 			throw new RuntimeException(ex);
 		}
 	}
-	
+
 	/**
-	 * Loads the class into memory, and returns all the annotation value names.
-	 * This includes default values that weren't specified by the actual instance
-	 * of the annotation. The values returned from here must be used with
+	 * Loads the class into memory, and returns all the annotation value names. This includes default values that
+	 * weren't specified by the actual instance of the annotation. The values returned from here must be used with
 	 * {@link #getValueWithDefault} to ensure they will return a value properly.
+	 *
 	 * @return
-	 * @throws ClassNotFoundException 
+	 * @throws ClassNotFoundException
 	 */
-	public List<String> getDefinedValuesWithDefault() throws ClassNotFoundException{
+	public List<String> getDefinedValuesWithDefault() throws ClassNotFoundException {
 		List<String> ret = new ArrayList<>();
 		Class c = type.loadClass();
-		for(Method m : c.getDeclaredMethods()){
+		for (Method m : c.getDeclaredMethods()) {
 			ret.add(m.getName());
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * Returns the type of this annotation.
-	 * @return 
+	 *
+	 * @return
 	 */
-	public ClassReferenceMirror getType(){
+	public ClassReferenceMirror getType() {
 		return type;
 	}
-	
+
 	/**
 	 * Returns true if this annotation is visible.
-	 * @return 
+	 *
+	 * @return
 	 */
-	public boolean isVisible(){
+	public boolean isVisible() {
 		return visible;
 	}
-	
+
 	/**
-	 * Gets a proxy annotation. When retrieving the annotation value,
-	 * getValueWithDefault is called, and the annotation's Class will for sure have
-	 * already been loaded.
-	 * 
-	 * This allows for annotation values to be read from an element without having
-	 * to actually load that element (just the annotation Class is loaded), and
-	 * allowing the type safe checks of compile time.
+	 * Gets a proxy annotation. When retrieving the annotation value, getValueWithDefault is called, and the
+	 * annotation's Class will for sure have already been loaded.
+	 *
+	 * This allows for annotation values to be read from an element without having to actually load that element (just
+	 * the annotation Class is loaded), and allowing the type safe checks of compile time.
+	 *
 	 * @param <T>
 	 * @param type
-	 * @return 
-	 * @throws IllegalArgumentException If AnnotationMirror doesn't represent the type
-	 * requested.
+	 * @return
+	 * @throws IllegalArgumentException If AnnotationMirror doesn't represent the type requested.
 	 */
 	public <T extends Annotation> T getProxy(Class<T> type) throws IllegalArgumentException {
-		if(!this.type.getJVMName().equals(ClassUtils.getJVMName(type))){
+		if (!this.type.getJVMName().equals(ClassUtils.getJVMName(type))) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		return (T) Proxy.newProxyInstance(AnnotationMirror.class.getClassLoader(), new Class[]{type}, new InvocationHandler() {
 
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-				if(("equals".equals(method.getName()) && matches(args, Object.class))
+				if (("equals".equals(method.getName()) && matches(args, Object.class))
 						|| ("hashCode".equals(method.getName()) && matches(args))
 						|| ("toString".equals(method.getName()) && matches(args))
 						|| ("wait".equals(method.getName()) && matches(args))
@@ -175,8 +176,7 @@ public class AnnotationMirror implements Serializable {
 						|| ("notify".equals(method.getName()) && matches(args))
 						|| ("notifyAll".equals(method.getName()) && matches(args))
 						|| ("finalize".equals(method.getName()) && matches(args))
-						|| ("clone".equals(method.getName()) && matches(args))
-					){
+						|| ("clone".equals(method.getName()) && matches(args))) {
 					// Currently, we just throw an exception, because they are
 					// actual methods defined in Object, not annotation values.
 					// I don't know how to make this work correctly yet.
@@ -186,14 +186,14 @@ public class AnnotationMirror implements Serializable {
 			}
 		});
 	}
-	
-	private static boolean matches(Object[] args, Class ... types){
-		if(args.length != types.length){
+
+	private static boolean matches(Object[] args, Class... types) {
+		if (args.length != types.length) {
 			return false;
 		}
-		for(int i = 0; i < args.length; i++){
+		for (int i = 0; i < args.length; i++) {
 			//Can't just use == here, since the class might be a subclass
-			if(!types[i].isAssignableFrom(args[i].getClass())){
+			if (!types[i].isAssignableFrom(args[i].getClass())) {
 				return false;
 			}
 		}
@@ -226,21 +226,21 @@ public class AnnotationMirror implements Serializable {
 		}
 		return true;
 	}
-	
-	
+
 	private static class AnnotationValue implements Serializable {
+
 		private static final long serialVersionUID = 1L;
 		private String name;
 		private Object value;
-		
-		public AnnotationValue(String name, Object value){
+
+		public AnnotationValue(String name, Object value) {
 			this.name = name;
 			this.value = value;
 		}
 
 		@Override
 		public String toString() {
-			if(value instanceof String){
+			if (value instanceof String) {
 				return name + " = " + StringUtils.toCodeString(value.toString());
 			} else {
 				return name + " = " + value.toString();
@@ -272,8 +272,6 @@ public class AnnotationMirror implements Serializable {
 			}
 			return true;
 		}
-		
-		
-		
+
 	}
 }

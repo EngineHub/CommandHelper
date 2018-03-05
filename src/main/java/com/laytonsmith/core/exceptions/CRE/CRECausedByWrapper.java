@@ -10,45 +10,45 @@ import com.laytonsmith.core.constructs.Target;
  */
 public class CRECausedByWrapper extends CREThrowable {
 
-    private final CArray exception;
+	private final CArray exception;
 
-    public CRECausedByWrapper(String msg, Target t) {
-	super(msg, t);
-	throw new UnsupportedOperationException();
-    }
+	public CRECausedByWrapper(String msg, Target t) {
+		super(msg, t);
+		throw new UnsupportedOperationException();
+	}
 
-    public CRECausedByWrapper(String msg, Target t, Throwable ex) {
-	super(msg, t, ex);
-	throw new UnsupportedOperationException();
-    }
+	public CRECausedByWrapper(String msg, Target t, Throwable ex) {
+		super(msg, t, ex);
+		throw new UnsupportedOperationException();
+	}
 
-    public CRECausedByWrapper(CArray exception) {
-	super(null, Target.UNKNOWN);
-	this.exception = exception.clone();
-    }
+	public CRECausedByWrapper(CArray exception) {
+		super(null, Target.UNKNOWN);
+		this.exception = exception.clone();
+	}
 
-    public CArray getException() {
-	return exception;
-    }
+	public CArray getException() {
+		return exception;
+	}
 
-    @Override
-    public Version since() {
-	return super.since();
-    }
+	@Override
+	public Version since() {
+		return super.since();
+	}
 
-    @Override
-    public String docs() {
-	return super.docs();
-    }
+	@Override
+	public String docs() {
+		return super.docs();
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	throw new UnsupportedOperationException();
-    }
+	@Override
+	public CClassType[] getInterfaces() {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	throw new UnsupportedOperationException();
-    }
+	@Override
+	public CClassType[] getSuperclasses() {
+		throw new UnsupportedOperationException();
+	}
 
 }

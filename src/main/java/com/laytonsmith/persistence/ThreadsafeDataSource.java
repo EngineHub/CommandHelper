@@ -1,4 +1,3 @@
-
 package com.laytonsmith.persistence;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
@@ -12,32 +11,31 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
- * Wraps a data source, and ensures that it is threadsafe. The static
- * accessor method ensures that all methods that access a data source
- * all operate on the one, threadsafe data source. This does not absolutely
- * ensure that the data source itself is threadsafe, as incompatible code
- * will be able to bypass restrictions, but all code that uses this class
- * can ensure that amongst those classes, the accesses will be threadsafe.
+ * Wraps a data source, and ensures that it is threadsafe. The static accessor method ensures that all methods that
+ * access a data source all operate on the one, threadsafe data source. This does not absolutely ensure that the data
+ * source itself is threadsafe, as incompatible code will be able to bypass restrictions, but all code that uses this
+ * class can ensure that amongst those classes, the accesses will be threadsafe.
  */
 public class ThreadsafeDataSource implements DataSource {
-	
-	private static final WeakHashMap<Pair<URI, ConnectionMixinFactory.ConnectionMixinOptions>, ThreadsafeDataSource> sources =
-			new WeakHashMap<>();
-	
+
+	private static final WeakHashMap<Pair<URI, ConnectionMixinFactory.ConnectionMixinOptions>, ThreadsafeDataSource> sources
+			= new WeakHashMap<>();
+
 	/**
-	 * Returns the threadsafe data source for the given uri and options. If an existing
-	 * reference to a DataSource is currently cached, it is returned, otherwise a new one
-	 * is constructed.
+	 * Returns the threadsafe data source for the given uri and options. If an existing reference to a DataSource is
+	 * currently cached, it is returned, otherwise a new one is constructed.
+	 *
 	 * @param uri The URI to be passed to the DataSourceFactory.
 	 * @param options The options to be passed to the DataSourceFactory.
 	 * @return
-	 * @throws DataSourceException If the underlying call to {@link DataSourceFactory#GetDataSource(java.net.URI, com.laytonsmith.persistence.io.ConnectionMixinFactory.ConnectionMixinOptions)}
+	 * @throws DataSourceException If the underlying call to
+	 * {@link DataSourceFactory#GetDataSource(java.net.URI, com.laytonsmith.persistence.io.ConnectionMixinFactory.ConnectionMixinOptions)}
 	 * throws a DataSourceException, it is re-thrown.
 	 */
-	public static synchronized ThreadsafeDataSource GetDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
+	public static synchronized ThreadsafeDataSource GetDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		Pair<URI, ConnectionMixinFactory.ConnectionMixinOptions> pair = new Pair<>(uri, options);
 		ThreadsafeDataSource source = sources.get(pair);
-		if(source != null){
+		if (source != null) {
 			return source;
 		} else {
 			ThreadsafeDataSource ds = new ThreadsafeDataSource(DataSourceFactory.GetDataSource(uri, options));
@@ -45,9 +43,10 @@ public class ThreadsafeDataSource implements DataSource {
 			return ds;
 		}
 	}
-	
+
 	private final DataSource source;
-	private ThreadsafeDataSource(DataSource source){
+
+	private ThreadsafeDataSource(DataSource source) {
 		this.source = source;
 	}
 
@@ -166,5 +165,5 @@ public class ThreadsafeDataSource implements DataSource {
 	public synchronized String toString() {
 		return source.toString();
 	}
-	
+
 }

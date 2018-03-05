@@ -10,17 +10,19 @@ import java.io.File;
  * @author Jason Unger <entityreborn@gmail.com>
  */
 public interface Extension {
+
 	/**
-	 * Return the extension tracker used to manage this extension.
-	 * EXPERIMENTAL! Could have bad side-effects! The use of this function is
-	 * for really advanced users. There is no guarantee of the fitness of this
-	 * function for ANY use. You have been warned.
+	 * Return the extension tracker used to manage this extension. EXPERIMENTAL! Could have bad side-effects! The use of
+	 * this function is for really advanced users. There is no guarantee of the fitness of this function for ANY use.
+	 * You have been warned.
+	 *
 	 * @return
 	 */
 	ExtensionTracker getExtensionTracker();
-	
+
 	/**
 	 * Create and return a valid data directory for this extension's use.
+	 *
 	 * @return
 	 */
 	File getConfigDir();
@@ -28,13 +30,15 @@ public interface Extension {
 	// Identity functions
 	/**
 	 * Return the identity of this extension.
+	 *
 	 * @return
 	 */
 	String getName();
-	
+
 	/**
 	 * Return the version for this extension.
-	 * @return 
+	 *
+	 * @return
 	 */
 	Version getVersion();
 
@@ -43,16 +47,15 @@ public interface Extension {
 	 * Called when server is loading, or during a /reloadaliases call.
 	 */
 	void onStartup();
-	
-    /**
-	 * Called after the logic in /reloadaliases is called. Won't be called
-	 * if /reloadaliases's help function is called.
+
+	/**
+	 * Called after the logic in /reloadaliases is called. Won't be called if /reloadaliases's help function is called.
 	 */
 	void onPostReloadAliases();
 
 	/**
-	 * Called just before the logic in /reloadaliases is called. Won't be called
-	 * if /reloadaliases's help function is called.
+	 * Called just before the logic in /reloadaliases is called. Won't be called if /reloadaliases's help function is
+	 * called.
 	 *
 	 * @param options
 	 */

@@ -20,19 +20,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * This class provides a temporary data source that is in memory only, and is
- * never written out to disk. All methods in this class are thread safe.
+ * This class provides a temporary data source that is in memory only, and is never written out to disk. All methods in
+ * this class are thread safe.
  */
 @datasource("mem")
 public final class MemoryDataSource extends AbstractDataSource {
-	
+
 	private static final Map<String, Map<String, String>> databasePool = new TreeMap<String, Map<String, String>>();
-	
+
 	/**
 	 * Clears all data from all databases. Should be called when a natural reload type operation is called.
 	 */
-	public synchronized static void ClearDatabases(){
-		for(String s : databasePool.keySet()){
+	public synchronized static void ClearDatabases() {
+		for (String s : databasePool.keySet()) {
 			databasePool.get(s).clear();
 		}
 		databasePool.clear();
@@ -42,54 +42,54 @@ public final class MemoryDataSource extends AbstractDataSource {
 	public void disconnect() {
 		ClearDatabases();
 	}
-	
+
 	/**
-	 * Retrieves the underlying database for a given database name.
-	 * The actual database instance is returned, not a copy, and if
-	 * the database doesn't exist, a new one is returned, therefore
-	 * this will never return null.
+	 * Retrieves the underlying database for a given database name. The actual database instance is returned, not a
+	 * copy, and if the database doesn't exist, a new one is returned, therefore this will never return null.
+	 *
 	 * @param name
-	 * @return 
+	 * @return
 	 */
-	public synchronized static Map<String, String> getDatabase(String name){
-		if(!databasePool.containsKey(name)){
+	public synchronized static Map<String, String> getDatabase(String name) {
+		if (!databasePool.containsKey(name)) {
 			databasePool.put(name, Collections.synchronizedMap(new TreeMap<String, String>()));
 		}
 		return databasePool.get(name);
 	}
-	
+
 	private String dbName;
 	private List<Transaction> transactionList = new ArrayList<Transaction>();
-	
+
 	private static enum Action {
 		CLEAR, SET
 	}
-	
+
 	private static class Transaction {
+
 		public Action action;
 		public String key;
 		public String value;
 	}
-	
-	private synchronized void addTransaction(Transaction transaction){
+
+	private synchronized void addTransaction(Transaction transaction) {
 		//If the transaction list contains this key already, we can clear it
 		//and add this one
 		Iterator<Transaction> it = transactionList.iterator();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			Transaction t = it.next();
-			if(t.key.equals(transaction.key)){
+			if (t.key.equals(transaction.key)) {
 				it.remove();
 			}
 		}
 		transactionList.add(transaction);
 	}
-	
-	private synchronized void replayTransactions(){
-		for(Transaction t : transactionList){
+
+	private synchronized void replayTransactions() {
+		for (Transaction t : transactionList) {
 			try {
-				if(t.action == Action.CLEAR){
+				if (t.action == Action.CLEAR) {
 					clearKey0(null, t.key.split("\\."));
-				} else if(t.action == Action.SET){
+				} else if (t.action == Action.SET) {
 					set0(null, t.key.split("\\."), t.value);
 				}
 			} catch (Exception ex) {
@@ -98,12 +98,12 @@ public final class MemoryDataSource extends AbstractDataSource {
 		}
 		transactionList.clear();
 	}
-	
-	private MemoryDataSource(){
-		
+
+	private MemoryDataSource() {
+
 	}
-	
-	public MemoryDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
+
+	public MemoryDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		super(uri, options);
 		dbName = uri.getSchemeSpecificPart();
 	}
@@ -115,7 +115,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 
 	@Override
 	protected synchronized void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
-		if(rollback){
+		if (rollback) {
 			transactionList.clear();
 		} else {
 			replayTransactions();
@@ -125,7 +125,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 	@Override
 	protected boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		String fKey = StringUtils.Join(key, ".");
-		if(inTransaction()){
+		if (inTransaction()) {
 			Transaction t = new Transaction();
 			t.action = Action.SET;
 			t.key = fKey;
@@ -134,16 +134,16 @@ public final class MemoryDataSource extends AbstractDataSource {
 		} else {
 			getDatabase(dbName).put(fKey, value);
 		}
-		
+
 		return true;
 	}
 
 	@Override
 	protected synchronized String get0(String[] key) throws DataSourceException {
 		String fKey = StringUtils.Join(key, ".");
-		if(inTransaction()){
-			for(Transaction t : transactionList){
-				if(t.action == Action.SET && t.key.equals(fKey)){
+		if (inTransaction()) {
+			for (Transaction t : transactionList) {
+				if (t.action == Action.SET && t.key.equals(fKey)) {
 					return t.value;
 				}
 			}
@@ -161,7 +161,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 	@Override
 	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
 		String fKey = StringUtils.Join(key, ".");
-		if(inTransaction()){
+		if (inTransaction()) {
 			Transaction t = new Transaction();
 			t.action = Action.CLEAR;
 			t.key = fKey;
@@ -170,12 +170,11 @@ public final class MemoryDataSource extends AbstractDataSource {
 			getDatabase(dbName).remove(StringUtils.Join(key, "."));
 		}
 	}
-	
 
 	@Override
 	public Set<String> stringKeySet(String[] keyBase) throws DataSourceException {
 		Set<String> keys = new TreeSet<String>();
-		for(String[] key : keySet(keyBase)){
+		for (String[] key : keySet(keyBase)) {
 			keys.add(StringUtils.Join(key, "."));
 		}
 		return keys;
@@ -184,24 +183,24 @@ public final class MemoryDataSource extends AbstractDataSource {
 	@Override
 	public synchronized Set<String[]> keySet(String[] keyBase) throws DataSourceException {
 		Set<String> set = new HashSet<String>();
-		for(String key : getDatabase(dbName).keySet()){
+		for (String key : getDatabase(dbName).keySet()) {
 			set.add(key);
 		}
 		//Now go through the transactions and add things that are set, and
 		//remove things that are cleared
-		if(inTransaction()){
-			for(Transaction t : transactionList){
-				if(t.action == Action.CLEAR){
+		if (inTransaction()) {
+			for (Transaction t : transactionList) {
+				if (t.action == Action.CLEAR) {
 					set.remove(t.key);
-				} else if(t.action == Action.SET){
+				} else if (t.action == Action.SET) {
 					set.add(t.key);
 				}
 			}
 		}
 		Set<String[]> ret = new HashSet<String[]>();
 		String kb = StringUtils.Join(keyBase, ".");
-		for(String key : set){
-			if(key.startsWith(kb)){
+		for (String key : set) {
+			if (key.startsWith(kb)) {
 				ret.add(key.split("\\."));
 			}
 		}
@@ -239,5 +238,5 @@ public final class MemoryDataSource extends AbstractDataSource {
 	public CHVersion since() {
 		return CHVersion.V3_3_1;
 	}
-	
+
 }

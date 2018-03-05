@@ -13,22 +13,22 @@ public class SizableRunner extends AbstractMixedInterfaceRunner {
 
     @Override
     public String docs() {
-	return "Any object that can report a size should implement this.";
+        return "Any object that can report a size should implement this.";
     }
 
     @Override
     public Version since() {
-	return CHVersion.V3_3_1;
+        return CHVersion.V3_3_1;
     }
 
     @Override
     public CClassType[] getSuperclasses() {
-	return new CClassType[]{Mixed.TYPE};
+        return new CClassType[]{Mixed.TYPE};
     }
 
     @Override
     public CClassType[] getInterfaces() {
-	return new CClassType[]{};
+        return new CClassType[]{};
     }
 
 }

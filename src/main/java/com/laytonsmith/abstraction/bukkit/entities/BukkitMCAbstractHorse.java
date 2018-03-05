@@ -55,7 +55,7 @@ public class BukkitMCAbstractHorse extends BukkitMCTameable implements MCAbstrac
 
 	@Override
 	public void setSaddle(MCItemStack stack) {
-		((InventoryHolder) ah).getInventory().setItem(0, ((BukkitMCItemStack)stack).asItemStack());
+		((InventoryHolder) ah).getInventory().setItem(0, ((BukkitMCItemStack) stack).asItemStack());
 	}
 
 	@Override

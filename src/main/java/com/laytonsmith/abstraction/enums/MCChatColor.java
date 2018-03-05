@@ -74,33 +74,27 @@ public enum MCChatColor {
 	 * Represents white
 	 */
 	WHITE(0xF),
-
 	//Styles
 	/**
 	 * Represents the random style
 	 */
 	RANDOM('k'),
-
 	/**
 	 * Represents the bold style
 	 */
 	BOLD('l'),
-
 	/**
 	 * Represents the strikethrough style
 	 */
 	STRIKETHROUGH('m'),
-
 	/**
 	 * Represents the underline style
 	 */
 	UNDERLINE('n'),
-
 	/**
 	 * Represents the italic style
 	 */
 	ITALIC('o'),
-
 	/**
 	 * Represents the plain white style
 	 */
@@ -109,14 +103,15 @@ public enum MCChatColor {
 	private final char code;
 	private final static Map<Character, MCChatColor> charColors = new HashMap<>();
 
-	MCChatColor(char code){
+	MCChatColor(char code) {
 		this.code = code;
 	}
+
 	MCChatColor(int code) {
 		this.code = Integer.toHexString(code).toLowerCase().charAt(0);
 	}
 
-	public char getChar(){
+	public char getChar() {
 		return code;
 	}
 
@@ -125,7 +120,7 @@ public enum MCChatColor {
 		return String.format("\u00A7%s", code);
 	}
 
-	public static MCChatColor getByChar(char code){
+	public static MCChatColor getByChar(char code) {
 		return charColors.get(code);
 	}
 
@@ -136,7 +131,7 @@ public enum MCChatColor {
 	 * @return A copy of the input string, without any coloring
 	 */
 	public static String stripColor(final String input) {
-		if(input == null) {
+		if (input == null) {
 			return null;
 		}
 
@@ -144,7 +139,7 @@ public enum MCChatColor {
 	}
 
 	static {
-		for(MCChatColor color : MCChatColor.values()) {
+		for (MCChatColor color : MCChatColor.values()) {
 			charColors.put(color.getChar(), color);
 		}
 	}

@@ -24,15 +24,15 @@ public class BukkitMCSound extends MCSound<Sound> {
 	@Override
 	public String concreteName() {
 		Sound concrete = getConcrete();
-		if(concrete == null) {
+		if (concrete == null) {
 			return "null";
 		}
 		return concrete.name();
 	}
 
 	public static BukkitMCSound valueOfConcrete(Sound test) {
-		for(MCSound t : mappings.values()) {
-			if(((BukkitMCSound) t).getConcrete().equals(test)) {
+		for (MCSound t : mappings.values()) {
+			if (((BukkitMCSound) t).getConcrete().equals(test)) {
 				return (BukkitMCSound) t;
 			}
 		}
@@ -52,10 +52,10 @@ public class BukkitMCSound extends MCSound<Sound> {
 		mappings = new HashMap<>();
 		NULL = new BukkitMCSound(MCVanillaSound.UNKNOWN, null);
 		ArrayList<Sound> counted = new ArrayList<>();
-		for(MCVanillaSound v : MCVanillaSound.values()) {
-			if(v.existsInCurrent()) {
+		for (MCVanillaSound v : MCVanillaSound.values()) {
+			if (v.existsInCurrent()) {
 				Sound sound = getBukkitType(v);
-				if(sound == null) {
+				if (sound == null) {
 					CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not find a matching sound for " + v.name()
 							+ ". This is an error, please report this to the bug tracker.", Target.UNKNOWN);
 					continue;
@@ -65,16 +65,16 @@ public class BukkitMCSound extends MCSound<Sound> {
 				counted.add(sound);
 			}
 		}
-		for(Sound s : Sound.values()) {
-			if(!counted.contains(s)) {
+		for (Sound s : Sound.values()) {
+			if (!counted.contains(s)) {
 				mappings.put(s.name(), new BukkitMCSound(MCVanillaSound.UNKNOWN, s));
 			}
 		}
 	}
 
 	private static Sound getBukkitType(MCVanillaSound v) {
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)){
-			switch(v){
+		if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
+			switch (v) {
 				case AMBIENCE_CAVE:
 					return Sound.AMBIENT_CAVE;
 				case AMBIENCE_RAIN:

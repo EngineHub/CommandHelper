@@ -6,10 +6,11 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import org.bukkit.block.CreatureSpawner;
 
-public class BukkitMCCreatureSpawner extends BukkitMCBlockState implements MCCreatureSpawner{
+public class BukkitMCCreatureSpawner extends BukkitMCBlockState implements MCCreatureSpawner {
 
 	CreatureSpawner cs;
-	public BukkitMCCreatureSpawner(CreatureSpawner cs){
+
+	public BukkitMCCreatureSpawner(CreatureSpawner cs) {
 		super(cs);
 		this.cs = cs;
 	}

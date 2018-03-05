@@ -67,10 +67,11 @@ public class Reflection {
 				+ " if you are not familiar with the language.";
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class reflect_pull extends AbstractFunction {
 
 		private static Set<Construct> protocols;
+
 		@Override
 		public String getName() {
 			return "reflect_pull";
@@ -154,31 +155,31 @@ public class Reflection {
 				}
 			} else if ("col".equalsIgnoreCase(param)) {
 				return new CInt(t.col(), t);
-			} else if("datasources".equalsIgnoreCase(param)){
-				if(protocols == null){
+			} else if ("datasources".equalsIgnoreCase(param)) {
+				if (protocols == null) {
 					protocols = new HashSet<Construct>();
-					for(String s : DataSourceFactory.GetSupportedProtocols()){
+					for (String s : DataSourceFactory.GetSupportedProtocols()) {
 						protocols.add(new CString(s, Target.UNKNOWN));
 					}
 				}
 				return new CArray(t, protocols);
-			} else if("enum".equalsIgnoreCase(param)){
+			} else if ("enum".equalsIgnoreCase(param)) {
 				CArray a = new CArray(t);
 				Set<ClassMirror<? extends Enum>> enums = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(MEnum.class, Enum.class);
 				Set<ClassMirror<? extends DynamicEnum>> dEnums = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class);
-				if(args.length == 1){
+				if (args.length == 1) {
 					//No name provided
-					for(ClassMirror<? extends Enum> e : enums){
+					for (ClassMirror<? extends Enum> e : enums) {
 						a.push(new CString((String) e.getAnnotation(MEnum.class).getValue("value"), t), t);
 					}
 					for (ClassMirror<? extends DynamicEnum> d : dEnums) {
 						a.push(new CString((String) d.getAnnotation(MDynamicEnum.class).getValue("value"), t), t);
 					}
-				} else if(args.length == 2){
+				} else if (args.length == 2) {
 					String enumName = args[1].val();
-					for(ClassMirror<? extends Enum> e : enums){
-						if(e.getAnnotation(MEnum.class).getValue("value").equals(enumName)){
-							for(Enum ee : e.loadClass().getEnumConstants()){
+					for (ClassMirror<? extends Enum> e : enums) {
+						if (e.getAnnotation(MEnum.class).getValue("value").equals(enumName)) {
+							for (Enum ee : e.loadClass().getEnumConstants()) {
 								a.push(new CString(ee.name(), t), t);
 							}
 							break;
@@ -289,7 +290,7 @@ public class Reflection {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.isEmpty()){
+			if (children.isEmpty()) {
 				//They are requesting this function's documentation. We can just return a string,
 				//and then it will never actually get called, so we handle it entirely in here.
 				return new ParseTree(new CString(docs(), t), null);
@@ -316,8 +317,8 @@ public class Reflection {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.OPTIMIZE_DYNAMIC
+					OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.OPTIMIZE_DYNAMIC
 			);
 		}
 
@@ -374,7 +375,7 @@ public class Reflection {
 			return false;
 		}
 
-		private static Map<String,List<String>> funcs = new HashMap<String,List<String>>();
+		private static Map<String, List<String>> funcs = new HashMap<String, List<String>>();
 
 		private void initf() {
 			for (FunctionBase f : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
@@ -626,15 +627,15 @@ public class Reflection {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Simple example", "msg(get_procedures());\n"
-						+ "proc _testProc() {}\n"
-						+ "msg(get_procedures());"),
+				+ "proc _testProc() {}\n"
+				+ "msg(get_procedures());"),
 				new ExampleScript("Example with procedures within procedures", "msg(get_procedures());\n"
-						+ "proc _testProc() {\n"
-						+ "\tproc _innerProc() {}\n"
-						+ "\tmsg(get_procedures());\n"
-						+ "}\n"
-						+ "_testProc();\n"
-						+ "msg(get_procedures());")
+				+ "proc _testProc() {\n"
+				+ "\tproc _innerProc() {}\n"
+				+ "\tmsg(get_procedures());\n"
+				+ "}\n"
+				+ "_testProc();\n"
+				+ "msg(get_procedures());")
 			};
 		}
 	}

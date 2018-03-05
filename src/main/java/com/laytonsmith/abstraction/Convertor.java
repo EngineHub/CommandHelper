@@ -16,22 +16,22 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
- * This should be implemented once for each server type. It mostly wraps
- * static methods, but also provides methods for getting other server specific
- * things. You can get an instance of the current Convertor by looking for the
- * <code>@convert</code> tag. StaticLayer wraps all the functionality for you
- * however.
+ * This should be implemented once for each server type. It mostly wraps static methods, but also provides methods for
+ * getting other server specific things. You can get an instance of the current Convertor by looking for the
+ * <code>@convert</code> tag. StaticLayer wraps all the functionality for you however.
  */
 public interface Convertor {
 
 	MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch);
+
 	Class GetServerEventMixin();
 
 	MCEnchantment[] GetEnchantmentValues();
 
 	/**
-	 * Returns the enchantment, given an enchantment name (or a string'd number).
-	 * Returns null if no such enchantment exists.
+	 * Returns the enchantment, given an enchantment name (or a string'd number). Returns null if no such enchantment
+	 * exists.
+	 *
 	 * @param name
 	 * @return
 	 */
@@ -66,9 +66,9 @@ public interface Convertor {
 	MCMetadataValue GetMetadataValue(Object value, MCPlugin plugin);
 
 	/**
-	 * A future runnable is run on a server accessible thread at roughly the time specified in the future.
-	 * This is no guarantee however, as the particular server implementation may make this hard to do. The
-	 * value returned is
+	 * A future runnable is run on a server accessible thread at roughly the time specified in the future. This is no
+	 * guarantee however, as the particular server implementation may make this hard to do. The value returned is
+	 *
 	 * @param dm
 	 * @param ms
 	 * @param r
@@ -83,12 +83,14 @@ public interface Convertor {
 
 	/**
 	 * Clears a future runnable task by id.
+	 *
 	 * @param id
 	 */
 	void ClearFutureRunnable(int id);
 
 	/**
 	 * Adds a future repeater
+	 *
 	 * @param dm
 	 * @param ms
 	 * @param initialDelay
@@ -102,49 +104,50 @@ public interface Convertor {
 	MCItemMeta GetCorrectMeta(MCItemMeta im);
 
 	/**
-	 * Returns the entities at the specified location, or null
-	 * if no entities are in this location.
+	 * Returns the entities at the specified location, or null if no entities are in this location.
+	 *
 	 * @param loc
 	 * @return
 	 */
 	List<MCEntity> GetEntitiesAt(MCLocation loc, double radius);
 
 	/**
-	 * Gets the inventory of the specified entity, or null if the entity id
-	 * is invalid
+	 * Gets the inventory of the specified entity, or null if the entity id is invalid
+	 *
 	 * @param entity
 	 * @return
 	 */
 	MCInventory GetEntityInventory(MCEntity entity);
 
 	/**
-	 * Returns the inventory of the block at the specified location, if it is
-	 * an inventory type block, or null if otherwise invalid.
+	 * Returns the inventory of the block at the specified location, if it is an inventory type block, or null if
+	 * otherwise invalid.
+	 *
 	 * @param location
 	 * @return
 	 */
 	MCInventory GetLocationInventory(MCLocation location);
 
 	/**
-	 * Run whenever the server is shutting down (or restarting). There is no
-	 * guarantee provided as to what thread the runnables actually run on, so you should
-	 * ensure that the runnable executes it's actions on the appropriate thread
+	 * Run whenever the server is shutting down (or restarting). There is no guarantee provided as to what thread the
+	 * runnables actually run on, so you should ensure that the runnable executes it's actions on the appropriate thread
 	 * yourself.
+	 *
 	 * @param r
 	 */
 	void addShutdownHook(Runnable r);
 
 	/**
-	 * Runs all the registered shutdown hooks. This should only be called by the shutdown mechanism.
-	 * After running, each Runnable will be removed from the queue.
+	 * Runs all the registered shutdown hooks. This should only be called by the shutdown mechanism. After running, each
+	 * Runnable will be removed from the queue.
 	 */
 	void runShutdownHooks();
 
 	/**
-	 * Runs some task on the "main" thread, possibly now, possibly in the future, and
-	 * possibly even on this thread. However, if the platform needs some critical action
-	 * to happen on one thread, (for instance, UI updates on the UI thread) those actions
-	 * will occur here.
+	 * Runs some task on the "main" thread, possibly now, possibly in the future, and possibly even on this thread.
+	 * However, if the platform needs some critical action to happen on one thread, (for instance, UI updates on the UI
+	 * thread) those actions will occur here.
+	 *
 	 * @param dm
 	 * @param r
 	 */
@@ -152,6 +155,7 @@ public interface Convertor {
 
 	/**
 	 * Works like runOnMainThreadLater, but waits for the task to finish.
+	 *
 	 * @param <T>
 	 * @param callable
 	 * @return
@@ -161,6 +165,7 @@ public interface Convertor {
 
 	/**
 	 * Returns a MCWorldCreator object for the given world name.
+	 *
 	 * @param worldName
 	 * @return
 	 */
@@ -168,6 +173,7 @@ public interface Convertor {
 
 	/**
 	 * Gets a note object, which can be used to play a sound
+	 *
 	 * @param octave May be 0-2
 	 * @param tone
 	 * @param sharp If the note should be a sharp (only applies to some tones)
@@ -177,6 +183,7 @@ public interface Convertor {
 
 	/**
 	 * Returns a color object for this server.
+	 *
 	 * @param red
 	 * @param green
 	 * @param blue
@@ -185,9 +192,9 @@ public interface Convertor {
 	MCColor GetColor(int red, int green, int blue);
 
 	/**
-	 * Returns a color object given the color name. The color
-	 * name must come from the standard color types, or a
+	 * Returns a color object given the color name. The color name must come from the standard color types, or a
 	 * FormatException is thrown.
+	 *
 	 * @param colorName
 	 * @param t
 	 * @return
@@ -196,6 +203,7 @@ public interface Convertor {
 
 	/**
 	 * Returns a pattern object
+	 *
 	 * @param color
 	 * @param shape
 	 */
@@ -203,6 +211,7 @@ public interface Convertor {
 
 	/**
 	 * Returns an MCFirework which can be built.
+	 *
 	 * @return
 	 */
 	MCFireworkBuilder GetFireworkBuilder();
@@ -242,18 +251,21 @@ public interface Convertor {
 
 	/**
 	 * Returns the name of CommandHelper by parsing the plugin.yml file.
+	 *
 	 * @return
 	 */
 	String GetPluginName();
 
 	/**
 	 * Returns a MCPlugin instance of CommandHelper.
+	 *
 	 * @return
 	 */
 	MCPlugin GetPlugin();
 
 	/**
 	 * Returns the name of the current user, or null if this doesn't make sense in the given platform.
+	 *
 	 * @param env The runtime environment, in case the convertor needs it
 	 * @return The username
 	 */

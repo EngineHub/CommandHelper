@@ -40,7 +40,7 @@ public class FileOptions {
 	}
 
 	private Boolean parseBoolean(String bool) {
-		if(bool == null) {
+		if (bool == null) {
 			return null;
 		}
 		return !(bool.equalsIgnoreCase("false") || bool.equalsIgnoreCase("off"));
@@ -60,10 +60,11 @@ public class FileOptions {
 	 * Returns whether or not this file is in strict mode. Unlike most options, this one depends on both the file
 	 * options and the config value. In the config, if strict mode is turned on or off, this value only serves as the
 	 * default. File options will override the global setting.
-	 * @return 
+	 *
+	 * @return
 	 */
 	public boolean isStrict() {
-		if(strict != null) {
+		if (strict != null) {
 			return strict;
 		} else {
 			return Prefs.StrictMode();

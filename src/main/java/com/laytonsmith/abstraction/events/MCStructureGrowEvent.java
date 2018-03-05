@@ -7,9 +7,14 @@ import com.laytonsmith.abstraction.enums.MCTreeType;
 import java.util.List;
 
 public interface MCStructureGrowEvent extends MCWorldEvent {
+
 	List<MCBlockState> getBlocks();
+
 	MCLocation getLocation();
+
 	MCPlayer getPlayer();
+
 	MCTreeType getSpecies();
+
 	boolean isFromBonemeal();
 }

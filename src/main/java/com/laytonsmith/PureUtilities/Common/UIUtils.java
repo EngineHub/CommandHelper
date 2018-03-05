@@ -19,21 +19,22 @@ import java.net.URL;
 public class UIUtils {
 
 	/**
-	 * Centers the window on the current "active" monitor. The active monitor is
-	 * defined as the monitor that the mouse is currently in.
+	 * Centers the window on the current "active" monitor. The active monitor is defined as the monitor that the mouse
+	 * is currently in.
+	 *
 	 * @param w
 	 */
-	public static void centerWindow(Window w){
+	public static void centerWindow(Window w) {
 		// For multimonitor support, we need to iterate the monitors
 		GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		GraphicsDevice[] devices = g.getScreenDevices();
 		Point mousePoint = MouseInfo.getPointerInfo().getLocation();
 		Rectangle primary = null;
-		for(GraphicsDevice gg : devices){
+		for (GraphicsDevice gg : devices) {
 			Rectangle r = gg.getDefaultConfiguration().getBounds();
 			primary = r; // Set this as the primary, so that primary will never be null.
-			if(mousePoint.x > r.x && mousePoint.x < (r.x + r.width)
-					&& mousePoint.y > r.y && mousePoint.y < (r.y + r.height)){
+			if (mousePoint.x > r.x && mousePoint.x < (r.x + r.width)
+					&& mousePoint.y > r.y && mousePoint.y < (r.y + r.height)) {
 				// This is the "primary" monitor
 				primary = r;
 				break;
@@ -51,38 +52,42 @@ public class UIUtils {
 
 	/**
 	 * Centers a window on another window.
+	 *
 	 * @param windowToCenter The window that will be moved
 	 * @param windowUponWhichToCenterOn The window that will be centered on
 	 */
-	public static void centerWindowOnWindow(Window windowToCenter, Window windowUponWhichToCenterOn){
+	public static void centerWindowOnWindow(Window windowToCenter, Window windowUponWhichToCenterOn) {
 		windowToCenter.setLocationRelativeTo(windowUponWhichToCenterOn);
 	}
 
 	/**
 	 * Provides an easy way to setEnabled on multiple components at once.
+	 *
 	 * @param enabled
 	 * @param components
 	 */
-	public static void setEnabled(boolean enabled, Component ... components){
-		for(Component component : components){
+	public static void setEnabled(boolean enabled, Component... components) {
+		for (Component component : components) {
 			component.setEnabled(enabled);
 		}
 	}
 
 	/**
 	 * Opens the system's default browser to the specified URI.
+	 *
 	 * @param uri
 	 * @throws java.io.IOException
 	 */
 	public static void openWebpage(URI uri) throws IOException {
 		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-		if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE)){
+		if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
 			desktop.browse(uri);
 		}
 	}
 
 	/**
 	 * Opens the system's default browser to the specified URL.
+	 *
 	 * @param url
 	 * @throws java.io.IOException
 	 * @throws java.net.URISyntaxException

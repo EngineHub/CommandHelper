@@ -1,4 +1,3 @@
-
 package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.constructs.Target;
@@ -13,9 +12,10 @@ import java.util.TreeSet;
 
 /**
  *
- * 
+ *
  */
 class LexerObject {
+
 	StringBuilder buffer;
 	//We have 5 states we need to monitor, multiline, line/block comment, single/double quote.
 	//Additionally, we want to have counters for the line number for the applicable ones that
@@ -80,8 +80,7 @@ class LexerObject {
 	}
 
 	/**
-	 * Adds simple tokens to the auto-identifier list. Order does not
-	 * matter, it is sorted appropriately for you.
+	 * Adds simple tokens to the auto-identifier list. Order does not matter, it is sorted appropriately for you.
 	 */
 	private static void setupTokens() {
 		//Even though we handle multiline specially, to force the lookahead to check
@@ -122,6 +121,7 @@ class LexerObject {
 		tokenMap.add(new TokenMap("(", Token.TType.FUNC_START));
 		tokenMap.add(new TokenMap(")", Token.TType.FUNC_END));
 	}
+
 	static {
 		setupTokens();
 	}
@@ -517,10 +517,10 @@ class LexerObject {
 	}
 
 	/**
-	 * If a symbol token is the next thing in the stream, it will be
-	 * identified, pushed onto the token_list, and the number of characters
-	 * to advance the stream is returned. If this method returns 0, no token
-	 * was identified, and no changes will have been made.
+	 * If a symbol token is the next thing in the stream, it will be identified, pushed onto the token_list, and the
+	 * number of characters to advance the stream is returned. If this method returns 0, no token was identified, and no
+	 * changes will have been made.
+	 *
 	 * @param startAt
 	 * @return
 	 */
@@ -560,5 +560,5 @@ class LexerObject {
 	private void error(String message) throws ConfigCompileException {
 		throw new ConfigCompileException(message, target);
 	}
-    
+
 }

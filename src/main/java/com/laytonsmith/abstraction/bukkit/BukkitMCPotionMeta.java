@@ -16,6 +16,7 @@ import java.util.List;
 public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta {
 
 	PotionMeta pm;
+
 	public BukkitMCPotionMeta(PotionMeta pomet) {
 		super(pomet);
 		pm = pomet;
@@ -27,14 +28,14 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 	}
 
 	@Override
-	public void setBasePotionData(MCPotionData bpd){
+	public void setBasePotionData(MCPotionData bpd) {
 		pm.setBasePotionData((PotionData) bpd.getHandle());
 	}
-	
+
 	@Override
 	public boolean addCustomEffect(int potionID, int strength, int ticks, boolean ambient, boolean overwrite, Target t) {
 		int maxID = PotionEffectType.values().length;
-		if(potionID < 1 || potionID > maxID) {
+		if (potionID < 1 || potionID > maxID) {
 			throw new CRERangeException("Invalid effect ID, must be from 1-" + maxID, t);
 		}
 		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), ticks, strength, ambient);
@@ -49,7 +50,7 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 	@Override
 	public List<MCEffect> getCustomEffects() {
 		List<MCEffect> list = new ArrayList<>();
-		for(PotionEffect pe : pm.getCustomEffects()) {
+		for (PotionEffect pe : pm.getCustomEffects()) {
 			list.add(new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient()));
 		}
 		return list;

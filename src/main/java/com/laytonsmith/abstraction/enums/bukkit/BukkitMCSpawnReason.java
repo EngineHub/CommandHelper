@@ -7,16 +7,16 @@ import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 @abstractionenum(
-		implementation=Implementation.Type.BUKKIT,
-		forAbstractEnum=MCSpawnReason.class,
-		forConcreteEnum=SpawnReason.class
+		implementation = Implementation.Type.BUKKIT,
+		forAbstractEnum = MCSpawnReason.class,
+		forConcreteEnum = SpawnReason.class
 )
 public class BukkitMCSpawnReason extends EnumConvertor<MCSpawnReason, SpawnReason> {
 
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason();
 		}
 		return instance;

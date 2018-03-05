@@ -5,10 +5,10 @@ import com.laytonsmith.core.SimpleDocumentation;
 
 /**
  * A Burst is a single transmission from client to server, or server to client.
- * 
+ *
  */
 public class Burst {
-	
+
 	BurstType type;
 	String id;
 	String value;
@@ -17,7 +17,7 @@ public class Burst {
 	String rider;
 	//TODO: Is this type right?
 	String riderChecksum;
-	
+
 	public static enum BurstType implements SimpleDocumentation {
 		@RemoteCapability()
 		META("Provides meta information to the client/server. The payload will be a json with further information", CHVersion.V3_3_1),
@@ -40,12 +40,12 @@ public class Burst {
 		@RemoteCapability()
 		ERROR("While handling the request, the remote failed unexpectedly. The payload will simply contain error information"
 				+ " in an unspecified format, which is intended to be helpful, but should not typically be shown to the"
-				+ " end user.", CHVersion.V3_3_1)
-		;
-		
+				+ " end user.", CHVersion.V3_3_1);
+
 		String doc;
 		CHVersion version;
-		private BurstType(String doc, CHVersion version){
+
+		private BurstType(String doc, CHVersion version) {
 			this.doc = doc;
 			this.version = version;
 		}
@@ -64,6 +64,6 @@ public class Burst {
 		public CHVersion since() {
 			return version;
 		}
-		
+
 	}
 }

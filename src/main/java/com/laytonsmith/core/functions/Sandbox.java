@@ -57,294 +57,298 @@ import java.util.Random;
  */
 public class Sandbox {
 
-    public static String docs() {
-        return "This class is for functions that are experimental. They don't actually get added"
-                + " to the documentation, and are subject to removal at any point in time, nor are they"
-                + " likely to have good documentation.";
-    }
+	public static String docs() {
+		return "This class is for functions that are experimental. They don't actually get added"
+				+ " to the documentation, and are subject to removal at any point in time, nor are they"
+				+ " likely to have good documentation.";
+	}
 
-    @api(environments={CommandHelperEnvironment.class})
-    public static class super_cancel extends AbstractFunction {
-
-		@Override
-        public String getName() {
-            return "super_cancel";
-        }
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class super_cancel extends AbstractFunction {
 
 		@Override
-        public Integer[] numArgs() {
-            return new Integer[]{0};
-        }
+		public String getName() {
+			return "super_cancel";
+		}
 
 		@Override
-        public String docs() {
-            return "void {} \"Super Cancels\" an event. This only will work if play-dirty is set to true. If an event is"
-                    + " super cancelled, not only is the cancelled flag set to true, the event stops propagating down, so"
-                    + " no other plugins (as in other server plugins, not just CH scripts) will receive the event at all "
-                    + " (other than monitor level plugins). This is useful for overridding"
-                    + " event handlers for plugins that don't respect the cancelled flag. This function hooks into the play-dirty"
-                    + " framework that injects custom event handlers into bukkit.";
-        }
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
 
 		@Override
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[]{CREBindException.class};
-        }
+		public String docs() {
+			return "void {} \"Super Cancels\" an event. This only will work if play-dirty is set to true. If an event is"
+					+ " super cancelled, not only is the cancelled flag set to true, the event stops propagating down, so"
+					+ " no other plugins (as in other server plugins, not just CH scripts) will receive the event at all "
+					+ " (other than monitor level plugins). This is useful for overridding"
+					+ " event handlers for plugins that don't respect the cancelled flag. This function hooks into the play-dirty"
+					+ " framework that injects custom event handlers into bukkit.";
+		}
 
 		@Override
-        public boolean isRestricted() {
-            return true;
-        }
-		@Override
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBindException.class};
+		}
 
 		@Override
-        public Boolean runAsync() {
-            return null;
-        }
+		public boolean isRestricted() {
+			return true;
+		}
 
 		@Override
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
-            if (original == null) {
-                throw new CREBindException("is_cancelled cannot be called outside an event handler", t);
-            }
-            if (original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable
-                    && original.getUnderlyingEvent() instanceof org.bukkit.event.Event) {
-                ( (Cancellable) original.getUnderlyingEvent() ).setCancelled(true);
-                BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event) original.getUnderlyingEvent());
-            }
-            environment.getEnv(GlobalEnv.class).GetEvent().setCancelled(true);
-            return CVoid.VOID;
-        }
-    }
-
-    @api(environments={CommandHelperEnvironment.class})
-    public static class enchant_inv_unsafe extends AbstractFunction {
+		public CHVersion since() {
+			return CHVersion.V3_3_0;
+		}
 
 		@Override
-        public String getName() {
-            return "enchant_inv_unsafe";
-        }
+		public Boolean runAsync() {
+			return null;
+		}
 
 		@Override
-        public Integer[] numArgs() {
-            return new Integer[]{3, 4};
-        }
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
+			if (original == null) {
+				throw new CREBindException("is_cancelled cannot be called outside an event handler", t);
+			}
+			if (original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable
+					&& original.getUnderlyingEvent() instanceof org.bukkit.event.Event) {
+				((Cancellable) original.getUnderlyingEvent()).setCancelled(true);
+				BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event) original.getUnderlyingEvent());
+			}
+			environment.getEnv(GlobalEnv.class).GetEvent().setCancelled(true);
+			return CVoid.VOID;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class enchant_inv_unsafe extends AbstractFunction {
 
 		@Override
-        public String docs() {
-            return "void {[player], slot, type, level} Works the same as enchant_inv, except anything goes. "
-                    + " You can enchant a fish with a level 5000 enchantment if you wish. Side effects"
-                    + " may include nausia, dry mouth, insomnia, or server crashes. (Seriously, this might"
-                    + " crash your server, be careful with it.)";
-        }
+		public String getName() {
+			return "enchant_inv_unsafe";
+		}
 
 		@Override
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[]{CRECastException.class, CREEnchantmentException.class,
+		public Integer[] numArgs() {
+			return new Integer[]{3, 4};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], slot, type, level} Works the same as enchant_inv, except anything goes. "
+					+ " You can enchant a fish with a level 5000 enchantment if you wish. Side effects"
+					+ " may include nausia, dry mouth, insomnia, or server crashes. (Seriously, this might"
+					+ " crash your server, be careful with it.)";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREEnchantmentException.class,
 				CREPlayerOfflineException.class, CRENotFoundException.class};
-        }
+		}
 
 		@Override
-        public boolean isRestricted() {
-            return true;
-        }
-		@Override
-        public CHVersion since() {
-            return CHVersion.V0_0_0;
-        }
+		public boolean isRestricted() {
+			return true;
+		}
 
 		@Override
-        public Boolean runAsync() {
-            return false;
-        }
+		public CHVersion since() {
+			return CHVersion.V0_0_0;
+		}
 
 		@Override
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-            int offset = 1;
-            if (args.length == 4) {
-                m = Static.GetPlayer(args[0].val(), t);
-                offset = 0;
-            }
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			int offset = 1;
+			if (args.length == 4) {
+				m = Static.GetPlayer(args[0].val(), t);
+				offset = 0;
+			}
 			Static.AssertPlayerNonNull(m, t);
-            MCItemStack is;
-            if (args[1 - offset] instanceof CNull) {
-                is = m.getItemInHand();
-            } else {
-                int slot = Static.getInt32(args[1 - offset], t);
+			MCItemStack is;
+			if (args[1 - offset] instanceof CNull) {
+				is = m.getItemInHand();
+			} else {
+				int slot = Static.getInt32(args[1 - offset], t);
 				MCPlayerInventory pinv = m.getInventory();
 				if (pinv == null) {
 					throw new CRENotFoundException(
-						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
+							"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 				}
-                is = pinv.getItem(slot);
-            }
-            CArray enchantArray = new CArray(t);
-            if (!( args[2 - offset] instanceof CArray )) {
-                enchantArray.push(args[2 - offset], t);
-            } else {
-                enchantArray = (CArray) args[2 - offset];
-            }
-
-            CArray levelArray = new CArray(t);
-            if (!( args[3 - offset] instanceof CArray )) {
-                levelArray.push(args[3 - offset], t);
-            } else {
-                levelArray = (CArray) args[3 - offset];
-            }
-            for (String key : enchantArray.stringKeySet()) {
-                MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
-                if (e == null) {
-                    throw new CREEnchantmentException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", t);
-                }
-                int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
-
-                is.addUnsafeEnchantment(e, level);
-            }
-            return CVoid.VOID;
-        }
-    }
-
-    @api(environments={CommandHelperEnvironment.class})
-    public static class raw_set_pvanish extends AbstractFunction {
-
-		@Override
-        public String getName() {
-            return "raw_set_pvanish";
-        }
-
-		@Override
-        public Integer[] numArgs() {
-            return new Integer[]{2, 3};
-        }
-
-		@Override
-        public String docs() {
-            return "void {[player], isVanished, otherPlayer} Sets the visibility"
-                    + " of the current player (or the one specified) to visible or invisible"
-                    + " (based on the value of isVanished) from the view of the otherPlayer."
-                    + " This is the raw access function, you probably shouldn't use this, as"
-                    + " the CommandHelper vanish api functions will probably be easier to use.";
-        }
-
-		@Override
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[]{CREPlayerOfflineException.class};
-        }
-
-		@Override
-        public boolean isRestricted() {
-            return true; //lol, very
-        }
-		@Override
-        public Boolean runAsync() {
-            return false;
-        }
-
-		@Override
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer me;
-            boolean isVanished;
-            MCPlayer other;
-            if (args.length == 2) {
-                me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-                isVanished = Static.getBoolean(args[0]);
-                other = Static.GetPlayer(args[1], t);
-            } else {
-                me = Static.GetPlayer(args[0], t);
-                isVanished = Static.getBoolean(args[1]);
-                other = Static.GetPlayer(args[2], t);
-            }
-
-            other.setVanished(isVanished, me);
-
-            return CVoid.VOID;
-        }
-
-		@Override
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
-    }
-
-    @api(environments={CommandHelperEnvironment.class})
-    public static class raw_pcan_see extends AbstractFunction {
-
-		@Override
-        public String getName() {
-            return "raw_pcan_see";
-        }
-
-		@Override
-        public Integer[] numArgs() {
-            return new Integer[]{1, 2};
-        }
-
-		@Override
-        public String docs() {
-            return "boolean {[player], other} Returns a boolean stating if the other player can"
-                    + " see this player or not. This is the raw access function, you probably shouldn't use this, as"
-                    + " the CommandHelper vanish api functions will probably be easier to use.";
-        }
-
-		@Override
-        public Class<? extends CREThrowable>[] thrown() {
-            return new Class[]{CREPlayerOfflineException.class};
-        }
-
-		@Override
-        public boolean isRestricted() {
-            return true;
-        }
-		@Override
-        public Boolean runAsync() {
-            return false;
-        }
-
-		@Override
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer me;
-            MCPlayer other;
-            if (args.length == 1) {
-                me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-                other = Static.GetPlayer(args[0], t);
-            } else {
-                me = Static.GetPlayer(args[0], t);
-                other = Static.GetPlayer(args[1], t);
-            }
-            return CBoolean.get(me.canSee(other));
-        }
-
-		@Override
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
-    }
-
-	private static String GenerateMooSaying(String text){
-			String [] saying = text.split("\r\n|\n|\n\r");
-			int longest = 0;
-			for(String s : saying){
-				longest = java.lang.Math.max(longest, s.length());
+				is = pinv.getItem(slot);
 			}
-			String divider = "";
-			for(int i = 0; i < longest + 4; i++){
-				divider += "-";
+			CArray enchantArray = new CArray(t);
+			if (!(args[2 - offset] instanceof CArray)) {
+				enchantArray.push(args[2 - offset], t);
+			} else {
+				enchantArray = (CArray) args[2 - offset];
 			}
-			String[] lines = new String[saying.length];
-			for(int i = 0; i < saying.length; i++){
-				int spaces = longest - saying[i].length();
-				String sSpaces = "";
-				for(int j = 0; j < spaces; j++){
-					sSpaces += " ";
+
+			CArray levelArray = new CArray(t);
+			if (!(args[3 - offset] instanceof CArray)) {
+				levelArray.push(args[3 - offset], t);
+			} else {
+				levelArray = (CArray) args[3 - offset];
+			}
+			for (String key : enchantArray.stringKeySet()) {
+				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
+				if (e == null) {
+					throw new CREEnchantmentException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", t);
 				}
-				lines[i] = "| " + saying[i] + sSpaces + " |";
+				int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
+
+				is.addUnsafeEnchantment(e, level);
 			}
-			return divider + "\n"
+			return CVoid.VOID;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class raw_set_pvanish extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "raw_set_pvanish";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], isVanished, otherPlayer} Sets the visibility"
+					+ " of the current player (or the one specified) to visible or invisible"
+					+ " (based on the value of isVanished) from the view of the otherPlayer."
+					+ " This is the raw access function, you probably shouldn't use this, as"
+					+ " the CommandHelper vanish api functions will probably be easier to use.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true; //lol, very
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer me;
+			boolean isVanished;
+			MCPlayer other;
+			if (args.length == 2) {
+				me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				isVanished = Static.getBoolean(args[0]);
+				other = Static.GetPlayer(args[1], t);
+			} else {
+				me = Static.GetPlayer(args[0], t);
+				isVanished = Static.getBoolean(args[1]);
+				other = Static.GetPlayer(args[2], t);
+			}
+
+			other.setVanished(isVanished, me);
+
+			return CVoid.VOID;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_0;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class raw_pcan_see extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "raw_pcan_see";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {[player], other} Returns a boolean stating if the other player can"
+					+ " see this player or not. This is the raw access function, you probably shouldn't use this, as"
+					+ " the CommandHelper vanish api functions will probably be easier to use.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer me;
+			MCPlayer other;
+			if (args.length == 1) {
+				me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				other = Static.GetPlayer(args[0], t);
+			} else {
+				me = Static.GetPlayer(args[0], t);
+				other = Static.GetPlayer(args[1], t);
+			}
+			return CBoolean.get(me.canSee(other));
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_0;
+		}
+	}
+
+	private static String GenerateMooSaying(String text) {
+		String[] saying = text.split("\r\n|\n|\n\r");
+		int longest = 0;
+		for (String s : saying) {
+			longest = java.lang.Math.max(longest, s.length());
+		}
+		String divider = "";
+		for (int i = 0; i < longest + 4; i++) {
+			divider += "-";
+		}
+		String[] lines = new String[saying.length];
+		for (int i = 0; i < saying.length; i++) {
+			int spaces = longest - saying[i].length();
+			String sSpaces = "";
+			for (int j = 0; j < spaces; j++) {
+				sSpaces += " ";
+			}
+			lines[i] = "| " + saying[i] + sSpaces + " |";
+		}
+		return divider + "\n"
 				+ StringUtils.Join(lines, "\n") + "\n"
 				+ divider + "\n";
 	}
@@ -358,15 +362,14 @@ public class Sandbox {
 			return new Integer[]{1};
 		}
 
-
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CString(GenerateMooSaying(args[0].val())
-				+ " \\   ^__^\n"
-				+ "  \\  (oo)\\_______\n"
-				+ "     (__)\\       )\\/\\\n"
-				+ "         ||----w |\n"
-				+ "         ||     ||\n", t);
+					+ " \\   ^__^\n"
+					+ "  \\  (oo)\\_______\n"
+					+ "     (__)\\       )\\/\\\n"
+					+ "         ||----w |\n"
+					+ "         ||     ||\n", t);
 		}
 
 	}
@@ -384,11 +387,11 @@ public class Sandbox {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CString(
 					GenerateMooSaying(args[0].val())
-				+ "              ^__^   /\n"
-				+ "      _______/(oo)  /\n"
-				+ " /\\/(        /(__)\n"
-				+ "      | w----||\n"
-				+ "      ||     ||\n", t);
+					+ "              ^__^   /\n"
+					+ "      _______/(oo)  /\n"
+					+ " /\\/(        /(__)\n"
+					+ "      | w----||\n"
+					+ "      ||     ||\n", t);
 		}
 
 	}
@@ -404,12 +407,12 @@ public class Sandbox {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CString( "  .-*)) `*-.\n" +
-								" /*  ((*   *'.\n" +
-								"|   *))  *   *\\\n" +
-								"| *  ((*   *  /\n" +
-								" \\  *))  *  .'\n" +
-								"  '-.((*_.-'", t);
+			return new CString("  .-*)) `*-.\n"
+					+ " /*  ((*   *'.\n"
+					+ "|   *))  *   *\\\n"
+					+ "| *  ((*   *  /\n"
+					+ " \\  *))  *  .'\n"
+					+ "  '-.((*_.-'", t);
 		}
 
 	}
@@ -434,15 +437,15 @@ public class Sandbox {
 			String twelve = multiply(c, 12 * multiplier);
 			String thirteen = multiply(c, 13 * multiplier);
 			String twentytwo = multiply(c, 22 * multiplier);
-			for(int i = 0; i < 6; ++i){
+			for (int i = 0; i < 6; ++i) {
 				System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
 			}
 			System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
-			for(int i = 0; i < 2; ++i){
+			for (int i = 0; i < 2; ++i) {
 				System.out.println(Static.MCToANSIColors(blue + twentytwo) + TermColors.RESET);
 			}
 			System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
-			for(int i = 0; i < 6; ++i){
+			for (int i = 0; i < 6; ++i) {
 				System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
 			}
 
@@ -454,18 +457,19 @@ public class Sandbox {
 			return new Integer[]{0, 3};
 		}
 
-		public static String multiply(char c, int times){
+		public static String multiply(char c, int times) {
 			StringBuilder b = new StringBuilder();
-			for(int i = 0; i < times; ++i){
+			for (int i = 0; i < times; ++i) {
 				b.append(c);
 			}
 			return b.toString();
 		}
 
 	}
-	
+
 	@api
 	public static class srand extends AbstractFunction {
+
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class};
@@ -485,8 +489,8 @@ public class Sandbox {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Random r;
 			try {
-				r = (Random)ArgumentValidation.getObject(args[0], t, CResource.class).getResource();
-			} catch(ClassCastException ex){
+				r = (Random) ArgumentValidation.getObject(args[0], t, CResource.class).getResource();
+			} catch (ClassCastException ex) {
 				throw new CRECastException("Expected a resource of type " + ResourceManager.ResourceTypes.RANDOM, t, ex);
 			}
 			double d = r.nextDouble();
@@ -513,9 +517,9 @@ public class Sandbox {
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class test_composite_function extends CompositeFunction {
 
@@ -561,11 +565,12 @@ public class Sandbox {
 		public Version since() {
 			return CHVersion.V3_3_2;
 		}
-		
+
 	}
 
 	@api
 	public static class x_recompile_includes extends AbstractFunction {
+
 		@Override
 		public String getName() {
 			return "x_recompile_includes";
@@ -610,7 +615,7 @@ public class Sandbox {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			File file = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			int num = 0;
-			if(Security.CheckSecurity(file)) {
+			if (Security.CheckSecurity(file)) {
 				if (file.isDirectory()) {
 					HashMap<File, ParseTree> files = compileDirectory(file, t);
 					IncludeCache.addAll(files);
@@ -629,9 +634,9 @@ public class Sandbox {
 		private HashMap<File, ParseTree> compileDirectory(File file, Target t) {
 			HashMap<File, ParseTree> newFiles = new HashMap<>();
 			File[] files = file.listFiles();
-			if(files != null) {
+			if (files != null) {
 				for (File f : files) {
-					if(f.isDirectory()) {
+					if (f.isDirectory()) {
 						newFiles.putAll(compileDirectory(f, t));
 					} else if (IncludeCache.has(f)) {
 						newFiles.put(f, compileFile(f, t));
@@ -648,10 +653,10 @@ public class Sandbox {
 			} catch (ConfigCompileException ex) {
 				throw new CREIncludeException("There was a compile error when trying to recompile the script at "
 						+ file + "\n" + ex.getMessage() + " :: " + file.getName() + ":" + ex.getLineNum(), t);
-			} catch(ConfigCompileGroupException ex){
+			} catch (ConfigCompileGroupException ex) {
 				StringBuilder b = new StringBuilder();
 				b.append("There were compile errors when trying to recompile the script at ").append(file).append("\n");
-				for(ConfigCompileException e : ex.getList()){
+				for (ConfigCompileException e : ex.getList()) {
 					b.append(e.getMessage()).append(" :: ").append(e.getFile().getName()).append(":").append(e.getLineNum());
 				}
 				throw new CREIncludeException(b.toString(), t);

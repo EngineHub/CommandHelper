@@ -63,7 +63,7 @@ public class Exceptions {
 		return "This class contains functions related to Exception handling in MethodScript";
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	@seealso({_throw.class, com.laytonsmith.tools.docgen.templates.Exceptions.class})
 	public static class _try extends AbstractFunction {
 
@@ -261,10 +261,9 @@ public class Exceptions {
 //		public boolean isTerminal() {
 //			return true;
 //		}
-
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if(args.length == 1){
+			if (args.length == 1) {
 				try {
 					// Exception type
 					// We need to reverse the excpetion into an object
@@ -273,35 +272,35 @@ public class Exceptions {
 					throw new CRECastException(ex.getMessage(), t);
 				}
 			} else {
-					if (args[0] instanceof CNull) {
-						CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR, "Uncatchable exceptions are no longer supported.", t);
-						throw new CRECastException("An exception type must be specified", t);
-					}
-					Class<? extends Mixed> c;
-					try {
-						c = NativeTypeList.getNativeClass(args[0].val());
-					} catch (ClassNotFoundException ex) {
-						throw new CREFormatException("Expected a valid exception type, but found \"" + args[0].val() + "\"", t);
-					}
-					List<Class> classes = new ArrayList<>();
-					List<Object> arguments = new ArrayList<>();
-					classes.add(String.class);
-					classes.add(Target.class);
-					arguments.add(args[1].val());
-					arguments.add(t);
-					if(args.length == 3){
-						classes.add(Throwable.class);
-						arguments.add(new CRECausedByWrapper(Static.getArray(args[2], t)));
-					}
-					CREThrowable throwable = (CREThrowable)ReflectionUtils.newInstance(c, classes.toArray(new Class[classes.size()]), arguments.toArray());
-					throw throwable;
+				if (args[0] instanceof CNull) {
+					CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR, "Uncatchable exceptions are no longer supported.", t);
+					throw new CRECastException("An exception type must be specified", t);
+				}
+				Class<? extends Mixed> c;
+				try {
+					c = NativeTypeList.getNativeClass(args[0].val());
+				} catch (ClassNotFoundException ex) {
+					throw new CREFormatException("Expected a valid exception type, but found \"" + args[0].val() + "\"", t);
+				}
+				List<Class> classes = new ArrayList<>();
+				List<Object> arguments = new ArrayList<>();
+				classes.add(String.class);
+				classes.add(Target.class);
+				arguments.add(args[1].val());
+				arguments.add(t);
+				if (args.length == 3) {
+					classes.add(Throwable.class);
+					arguments.add(new CRECausedByWrapper(Static.getArray(args[2], t)));
+				}
+				CREThrowable throwable = (CREThrowable) ReflectionUtils.newInstance(c, classes.toArray(new Class[classes.size()]), arguments.toArray());
+				throw throwable;
 			}
 		}
 	}
 
 	@api
 	@seealso({_throw.class, _try.class, com.laytonsmith.tools.docgen.templates.Exceptions.class})
-	public static class set_uncaught_exception_handler extends AbstractFunction{
+	public static class set_uncaught_exception_handler extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -320,10 +319,10 @@ public class Exceptions {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CClosure){
+			if (args[0] instanceof CClosure) {
 				CClosure old = environment.getEnv(GlobalEnv.class).GetExceptionHandler();
-				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure)args[0]);
-				if(old == null){
+				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure) args[0]);
+				if (old == null) {
 					return CNull.NULL;
 				} else {
 					return old;
@@ -368,17 +367,16 @@ public class Exceptions {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "set_uncaught_exception_handler(closure(@ex){\n"
-						+ "\tmsg('Exception caught!');\n"
-						+ "\tmsg(@ex);\n"
-						+ "\treturn(true);\n"
-						+ "});\n\n"
-						+ "@zero = 0;\n"
-						+ "@exception = 1 / @zero; // This should throw an exception\n",
-						// Can't automatically run this, since the examples don't have
-						// the exception handling fully working.
-						"Exception caught!\n"
-						+ "{RangeException, Division by 0!, /path/to/script.ms, 8}"),
-			};
+				+ "\tmsg('Exception caught!');\n"
+				+ "\tmsg(@ex);\n"
+				+ "\treturn(true);\n"
+				+ "});\n\n"
+				+ "@zero = 0;\n"
+				+ "@exception = 1 / @zero; // This should throw an exception\n",
+				// Can't automatically run this, since the examples don't have
+				// the exception handling fully working.
+				"Exception caught!\n"
+				+ "{RangeException, Division by 0!, /path/to/script.ms, 8}"),};
 		}
 
 	}
@@ -388,7 +386,9 @@ public class Exceptions {
 			+ " automatically generated by the try keyword.")
 	public static class complex_try extends AbstractFunction implements Optimizable {
 
-		/** Please do not change this name or make it final, it is used reflectively for testing */
+		/**
+		 * Please do not change this name or make it final, it is used reflectively for testing
+		 */
 		@SuppressWarnings("FieldMayBeFinal")
 		private static boolean doScreamError = false;
 
@@ -418,31 +418,31 @@ public class Exceptions {
 			ConfigRuntimeException caughtException = null;
 			try {
 				parent.eval(nodes[0], env);
-			} catch (ConfigRuntimeException ex){
-				if(!(ex instanceof AbstractCREException)){
+			} catch (ConfigRuntimeException ex) {
+				if (!(ex instanceof AbstractCREException)) {
 					// This should never actually happen, but we want to protect
 					// against errors, and continue to throw this one up the chain
 					throw ex;
 				}
 				AbstractCREException e = AbstractCREException.getAbstractCREException(ex);
 				CClassType exceptionType = e.getExceptionType();
-				for(int i = 1; i < nodes.length - 1; i+=2){
+				for (int i = 1; i < nodes.length - 1; i += 2) {
 					ParseTree assign = nodes[i];
-					CClassType clauseType = ((CClassType)assign.getChildAt(0).getData());
-					if(exceptionType.unsafeDoesExtend(clauseType)){
+					CClassType clauseType = ((CClassType) assign.getChildAt(0).getData());
+					if (exceptionType.unsafeDoesExtend(clauseType)) {
 						try {
 							// We need to define the exception in the variable table
 							IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
-							IVariable var = (IVariable)assign.getChildAt(1).getData();
+							IVariable var = (IVariable) assign.getChildAt(1).getData();
 							// This should eventually be changed to be of the appropriate type. Unfortunately, that will
 							// require reworking basically everything. We need all functions to accept Mixed, instead of Construct.
 							// This will have to do in the meantime.
 							varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(), t));
 							parent.eval(nodes[i + 1], env);
 							varList.remove(var.getVariableName());
-						} catch (ConfigRuntimeException | FunctionReturnException newEx){
-							if(newEx instanceof ConfigRuntimeException){
-								caughtException = (ConfigRuntimeException)newEx;
+						} catch (ConfigRuntimeException | FunctionReturnException newEx) {
+							if (newEx instanceof ConfigRuntimeException) {
+								caughtException = (ConfigRuntimeException) newEx;
 							}
 							exceptionCaught = true;
 							throw newEx;
@@ -455,12 +455,12 @@ public class Exceptions {
 				exceptionCaught = true;
 				throw ex;
 			} finally {
-				if(nodes.length % 2 == 0){
+				if (nodes.length % 2 == 0) {
 					// There is a finally clause. Run that here.
 					try {
 						parent.eval(nodes[nodes.length - 1], env);
-					} catch(ConfigRuntimeException | FunctionReturnException ex){
-						if(exceptionCaught && (doScreamError || Prefs.ScreamErrors() || Prefs.DebugMode())){
+					} catch (ConfigRuntimeException | FunctionReturnException ex) {
+						if (exceptionCaught && (doScreamError || Prefs.ScreamErrors() || Prefs.DebugMode())) {
 							CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Exception was thrown and"
 									+ " unhandled in any catch clause,"
 									+ " but is being hidden by a new exception being thrown in the finally clause.", t);
@@ -497,23 +497,23 @@ public class Exceptions {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			List<CClassType> types = new ArrayList<>();
-			for(int i = 1; i < children.size() - 1; i+=2){
+			for (int i = 1; i < children.size() - 1; i += 2) {
 				// TODO: Eh.. should probably move this check into the keyword, since techincally
 				// catch(Exception @e = null) { } would work.
 				ParseTree assign = children.get(i);
-				if(assign.getChildAt(0).getData() instanceof CString){
+				if (assign.getChildAt(0).getData() instanceof CString) {
 					// This is an unknown exception type, because otherwise it would have been cast to a CClassType
 					throw new ConfigCompileException("Unknown class type: " + assign.getChildAt(0).getData().val(), t);
 				}
-				types.add((CClassType)assign.getChildAt(0).getData());
-				if(CFunction.IsFunction(assign, DataHandling.assign.class)) {
+				types.add((CClassType) assign.getChildAt(0).getData());
+				if (CFunction.IsFunction(assign, DataHandling.assign.class)) {
 					// assign() will validate params 0 and 1
-					CClassType type = ((CClassType)assign.getChildAt(0).getData());
-					if(!type.unsafeDoesExtend(CREThrowable.TYPE)){
+					CClassType type = ((CClassType) assign.getChildAt(0).getData());
+					if (!type.unsafeDoesExtend(CREThrowable.TYPE)) {
 						throw new ConfigCompileException("The type defined in a catch clause must extend the"
 								+ " Throwable class.", t);
 					}
-					if(!(assign.getChildAt(2).getData() instanceof CNull)){
+					if (!(assign.getChildAt(2).getData() instanceof CNull)) {
 						throw new ConfigCompileException("Assignments are not allowed in catch clauses", t);
 					}
 					continue;
@@ -521,11 +521,11 @@ public class Exceptions {
 				throw new ConfigCompileException("Expecting a variable declaration, but instead "
 						+ assign.getData().val() + " was found", t);
 			}
-			for(int i = 0; i < types.size(); i++){
+			for (int i = 0; i < types.size(); i++) {
 				CClassType t1 = types.get(i);
-				for(int j = i + 1; j < types.size(); j++){
+				for (int j = i + 1; j < types.size(); j++) {
 					CClassType t2 = types.get(j);
-					if(t1.equals(t2)){
+					if (t1.equals(t2)) {
 						throw new ConfigCompileException("Duplicate catch clauses found. Only one clause may"
 								+ " catch exceptions of a particular type, but we found that " + t1.val() + " has"
 								+ " a duplicate signature", t);
@@ -576,7 +576,7 @@ public class Exceptions {
 			StackTraceManager stManager = environment.getEnv(GlobalEnv.class).GetStackTraceManager();
 			List<ConfigRuntimeException.StackTraceElement> elements = stManager.getCurrentStackTrace();
 			CArray ret = new CArray(t);
-			for(ConfigRuntimeException.StackTraceElement e : elements){
+			for (ConfigRuntimeException.StackTraceElement e : elements) {
 				ret.push(e.getObjectFor(), Target.UNKNOWN);
 			}
 			return ret;
@@ -607,14 +607,14 @@ public class Exceptions {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "proc _a(){\n"
-						+ "\t_b();\n"
-						+ "}\n"
-						+ "\n"
-						+ "proc _b(){\n"
-						+ "\tmsg(get_stack_trace());\n"
-						+ "}\n"
-						+ "\n"
-						+ "_a();")
+				+ "\t_b();\n"
+				+ "}\n"
+				+ "\n"
+				+ "proc _b(){\n"
+				+ "\tmsg(get_stack_trace());\n"
+				+ "}\n"
+				+ "\n"
+				+ "_a();")
 			};
 		}
 

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 public interface MCItemMeta extends AbstractionObject {
+
 	/**
 	 * Checks for existence of a display name
 	 *
@@ -74,12 +75,14 @@ public interface MCItemMeta extends AbstractionObject {
 
 	/**
 	 * Set itemflags which should be ignored when rendering a MCItemStack in the Client.
+	 *
 	 * @param flags The flags to ignore.
 	 */
 	void addItemFlags(MCItemFlag... flags);
 
 	/**
 	 * Get current set itemFlags.
+	 *
 	 * @return A set of all itemFlags set
 	 */
 	Set<MCItemFlag> getItemFlags();
@@ -93,9 +96,12 @@ public interface MCItemMeta extends AbstractionObject {
 	boolean removeEnchant(MCEnchantment ench);
 
 	boolean hasRepairCost();
+
 	int getRepairCost();
+
 	void setRepairCost(int cost);
 
 	boolean isUnbreakable();
+
 	void setUnbreakable(boolean unbreakable);
 }

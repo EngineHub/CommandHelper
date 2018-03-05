@@ -5,7 +5,7 @@ import com.laytonsmith.core.CHVersion;
 
 /**
  *
- * 
+ *
  */
 public enum CorePermissions implements PackagePermission {
 	FILE_READ("CORE.FILE.READ", ThreatLevel.CAUTIOUS, "This permission grants read access to the filesystem, via the VFS only,"
@@ -17,9 +17,8 @@ public enum CorePermissions implements PackagePermission {
 	NETWORK("CORE.NETWORK", ThreatLevel.CAUTIOUS, "This permission grants raw network access. If filesystem access is not allowed,"
 			+ " this is a relatively safe permission to allow, but can be misused by malicious code to transmit sensitive data.", CHVersion.V3_3_1),
 	GLOBAL_PERSISTENCE("CORE.GLOBAL_PERSISTENCE", ThreatLevel.TRIVIAL, "This permission grants access to the global persistence storage."
-			+ " This generally cannot be abused, other than to delete other package's data.", CHVersion.V3_3_1),
-	;
-	
+			+ " This generally cannot be abused, other than to delete other package's data.", CHVersion.V3_3_1),;
+
 	/**
 	 * This is the namespace for the permission
 	 */
@@ -31,28 +30,26 @@ public enum CorePermissions implements PackagePermission {
 	private final String docs;
 	private final CHVersion since;
 	/**
-	 * If a permission is implied, then it will automatically be granted
-	 * as well, if the two permissions are in the same requirement category.
-	 * For instance, giving CORE.FILE.RAW implies CORE.FILE.READ and CORE.FILE.WRITE,
-	 * so those two won't be separately requested.
-	 * TODO: Provide access to this data
+	 * If a permission is implied, then it will automatically be granted as well, if the two permissions are in the same
+	 * requirement category. For instance, giving CORE.FILE.RAW implies CORE.FILE.READ and CORE.FILE.WRITE, so those two
+	 * won't be separately requested. TODO: Provide access to this data
 	 */
 	private final PackagePermission[] implied;
-	
+
 	private CorePermissions(String permission, ThreatLevel threatLevel, String docs, CHVersion since) {
-		this(permission, threatLevel, docs, since, (PackagePermission[])null);
+		this(permission, threatLevel, docs, since, (PackagePermission[]) null);
 	}
-	
-	private CorePermissions(String permission, ThreatLevel threatLevel, String docs, CHVersion since, PackagePermission implied){
+
+	private CorePermissions(String permission, ThreatLevel threatLevel, String docs, CHVersion since, PackagePermission implied) {
 		this(permission, threatLevel, docs, since, new PackagePermission[]{implied});
 	}
-	
-	private CorePermissions(String permission, ThreatLevel threatLevel, String docs, CHVersion since, PackagePermission [] implied){
+
+	private CorePermissions(String permission, ThreatLevel threatLevel, String docs, CHVersion since, PackagePermission[] implied) {
 		this.namespace = permission.split("\\.");
 		this.threatLevel = threatLevel;
 		this.docs = docs;
 		this.since = since;
-		if(implied == null){
+		if (implied == null) {
 			this.implied = new PackagePermission[]{};
 		} else {
 			this.implied = implied;
@@ -85,5 +82,5 @@ public enum CorePermissions implements PackagePermission {
 	public CHVersion since() {
 		return since;
 	}
-	
+
 }

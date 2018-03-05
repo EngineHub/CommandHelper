@@ -7,16 +7,16 @@ import com.laytonsmith.annotations.abstractionenum;
 import org.bukkit.event.hanging.HangingBreakEvent.RemoveCause;
 
 @abstractionenum(
-		implementation=Implementation.Type.BUKKIT,
-		forAbstractEnum=MCRemoveCause.class,
-		forConcreteEnum=RemoveCause.class
+		implementation = Implementation.Type.BUKKIT,
+		forAbstractEnum = MCRemoveCause.class,
+		forConcreteEnum = RemoveCause.class
 )
 public class BukkitMCRemoveCause extends EnumConvertor<MCRemoveCause, RemoveCause> {
 
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCRemoveCause instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCRemoveCause getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCRemoveCause();
 		}
 		return instance;

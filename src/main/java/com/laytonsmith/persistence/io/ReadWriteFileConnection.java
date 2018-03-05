@@ -28,8 +28,8 @@ public class ReadWriteFileConnection implements ConnectionMixin {
 	//Do not change the name of this. It is read reflectively during testing
 	protected final File file;
 	/**
-	 * The encoding that was determined to be the encoding for this file, if
-	 * set, or UTF-8 by default, if the file doesn't exist.
+	 * The encoding that was determined to be the encoding for this file, if set, or UTF-8 by default, if the file
+	 * doesn't exist.
 	 */
 	protected String encoding = "UTF-8";
 	protected final ZipReader reader;
@@ -37,13 +37,11 @@ public class ReadWriteFileConnection implements ConnectionMixin {
 	protected final ExecutorService service;
 
 	/**
-	 * The executor service allows for reads and writes to be synchronized.
-	 * Writes needn't be synchronous, just merely synchronized with reads and
-	 * other writes. Reads of course need to be synchronous, at least as far as
-	 * the thread that runs the getData function is concerned, but we still need
-	 * to actually run the task on the executor service thread, so it will be
-	 * synced with the writes. All file based persistence systems should use
-	 * this executor to do the reads and writes.
+	 * The executor service allows for reads and writes to be synchronized. Writes needn't be synchronous, just merely
+	 * synchronized with reads and other writes. Reads of course need to be synchronous, at least as far as the thread
+	 * that runs the getData function is concerned, but we still need to actually run the task on the executor service
+	 * thread, so it will be synced with the writes. All file based persistence systems should use this executor to do
+	 * the reads and writes.
 	 */
 	public ReadWriteFileConnection(URI uri, File workingDirectory, String blankDataModel) throws IOException {
 		{
@@ -82,14 +80,14 @@ public class ReadWriteFileConnection implements ConnectionMixin {
 				60L, TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<Runnable>(),
 				new ThreadFactory() {
-					@Override
-					public Thread newThread(Runnable r) {
-						Thread t = new Thread(r, "ReadWriteFileConnection-" + file);
-						t.setPriority(Thread.MIN_PRIORITY);
-						t.setDaemon(true);
-						return t;
-					}
-				});
+			@Override
+			public Thread newThread(Runnable r) {
+				Thread t = new Thread(r, "ReadWriteFileConnection-" + file);
+				t.setPriority(Thread.MIN_PRIORITY);
+				t.setDaemon(true);
+				return t;
+			}
+		});
 
 	}
 

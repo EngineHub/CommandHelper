@@ -1,4 +1,3 @@
-
 package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
@@ -25,16 +24,18 @@ import org.json.simple.JSONValue;
  *
  */
 public class DocGenExportTool {
+
 	private final ClassDiscovery classDiscovery;
 	private final OutputStream out;
 
 	/**
 	 * Creates a new instance of the DocGenExportTool
+	 *
 	 * @param classDiscovery
 	 * @param extensionDir
 	 * @param out
 	 */
-	public DocGenExportTool(ClassDiscovery classDiscovery, OutputStream out){
+	public DocGenExportTool(ClassDiscovery classDiscovery, OutputStream out) {
 		this.classDiscovery = classDiscovery;
 		this.out = out;
 	}
@@ -42,7 +43,7 @@ public class DocGenExportTool {
 	/**
 	 * Triggers the export tool
 	 */
-	public void export(){
+	public void export() {
 		Set<Class<? extends Function>> functions = classDiscovery
 				.loadClassesWithAnnotationThatExtend(api.class, Function.class, this.getClass().getClassLoader(), false);
 		Set<Class<? extends Event>> events = classDiscovery
@@ -52,12 +53,12 @@ public class DocGenExportTool {
 		topLevel.put("functions", functionList);
 		List<Map<String, Object>> eventList = new ArrayList<Map<String, Object>>();
 		topLevel.put("events", eventList);
-		for(Class<? extends Function> functionC : functions){
+		for (Class<? extends Function> functionC : functions) {
 			Map<String, Object> function = new HashMap<String, Object>();
 			Function f;
 			try {
 				f = ReflectionUtils.newInstance(functionC);
-			} catch(NoClassDefFoundError ex){
+			} catch (NoClassDefFoundError ex) {
 				StreamUtils.GetSystemErr().println("While attempting to load: " + functionC.getName() + ": " + ex.getMessage());
 				continue;
 			}
@@ -71,11 +72,11 @@ public class DocGenExportTool {
 
 		Pattern eventPattern = Pattern.compile("\\{(.*?)\\} *?(.*?) *?\\{(.*?)\\} *?\\{(.*?)\\}");
 		DocGen.MarkupType type = DocGen.MarkupType.TEXT;
-		for(Class<? extends Event> eventC : events){
+		for (Class<? extends Event> eventC : events) {
 			Map<String, Object> event = new HashMap<String, Object>();
 			Event e = ReflectionUtils.newInstance(eventC);
 			Matcher m = eventPattern.matcher(e.docs());
-			if(m.find()){
+			if (m.find()) {
 				String name = e.getName();
 				String description = m.group(2).trim();
 				String prefilter = DocGen.PrefilterData.Get(m.group(1).split("\\|"), type);

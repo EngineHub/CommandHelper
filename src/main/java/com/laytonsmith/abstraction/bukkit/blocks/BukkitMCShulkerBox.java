@@ -8,6 +8,7 @@ import org.bukkit.block.ShulkerBox;
 public class BukkitMCShulkerBox extends BukkitMCBlockState implements MCShulkerBox {
 
 	ShulkerBox sb;
+
 	public BukkitMCShulkerBox(ShulkerBox block) {
 		super(block);
 		sb = block;
@@ -15,8 +16,8 @@ public class BukkitMCShulkerBox extends BukkitMCBlockState implements MCShulkerB
 
 	@Override
 	public ShulkerBox getHandle() {
-        return sb;
-    }
+		return sb;
+	}
 
 	@Override
 	public MCInventory getInventory() {

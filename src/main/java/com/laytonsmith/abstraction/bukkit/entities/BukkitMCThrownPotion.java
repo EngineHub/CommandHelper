@@ -20,7 +20,7 @@ public class BukkitMCThrownPotion extends BukkitMCProjectile implements MCThrown
 
 	@Override
 	public ThrownPotion getHandle() {
-		return (ThrownPotion)super.getHandle();
+		return (ThrownPotion) super.getHandle();
 	}
 
 	@Override

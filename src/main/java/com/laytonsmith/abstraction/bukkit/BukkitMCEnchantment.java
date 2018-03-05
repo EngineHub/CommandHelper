@@ -5,26 +5,27 @@ import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemStack;
 import org.bukkit.enchantments.Enchantment;
 
-public class BukkitMCEnchantment implements MCEnchantment{
+public class BukkitMCEnchantment implements MCEnchantment {
+
 	Enchantment e;
 
-	public BukkitMCEnchantment(Enchantment e){
-		if(e == null){
+	public BukkitMCEnchantment(Enchantment e) {
+		if (e == null) {
 			throw new NullPointerException();
 		}
 		this.e = e;
 	}
 
-	public BukkitMCEnchantment(AbstractionObject a){
-		if(a instanceof MCEnchantment){
-			this.e = ((Enchantment)a.getHandle());
+	public BukkitMCEnchantment(AbstractionObject a) {
+		if (a instanceof MCEnchantment) {
+			this.e = ((Enchantment) a.getHandle());
 		} else {
 			throw new ClassCastException();
 		}
 	}
 
 	@Override
-	public Object getHandle(){
+	public Object getHandle() {
 		return e;
 	}
 
@@ -38,7 +39,7 @@ public class BukkitMCEnchantment implements MCEnchantment{
 
 	@Override
 	public boolean canEnchantItem(MCItemStack is) {
-		return e.canEnchantItem(((BukkitMCItemStack)is).is);
+		return e.canEnchantItem(((BukkitMCItemStack) is).is);
 	}
 
 	@Override

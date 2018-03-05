@@ -13,14 +13,14 @@ import com.laytonsmith.core.constructs.Target;
 @Keyword.keyword("true")
 public class TrueKeyword extends LiteralKeyword {
 
-    @Override
-    protected Construct getValue(Target t) {
-	return CBoolean.GenerateCBoolean(true, t);
-    }
+	@Override
+	protected Construct getValue(Target t) {
+		return CBoolean.GenerateCBoolean(true, t);
+	}
 
-    @Override
-    public Version since() {
-	return CHVersion.V3_0_1;
-    }
+	@Override
+	public Version since() {
+		return CHVersion.V3_0_1;
+	}
 
 }

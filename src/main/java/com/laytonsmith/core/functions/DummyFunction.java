@@ -1,14 +1,12 @@
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 
 /**
- * Only should be used for test functions, or other typically unreleased or
- * temporary functions.
+ * Only should be used for test functions, or other typically unreleased or temporary functions.
  */
-public abstract class DummyFunction extends AbstractFunction{
+public abstract class DummyFunction extends AbstractFunction {
 
 	@Override
 	public Class<? extends CREThrowable>[] thrown() {
@@ -43,6 +41,6 @@ public abstract class DummyFunction extends AbstractFunction{
 	@Override
 	public String getName() {
 		return this.getClass().getSimpleName();
-	}		
-	
+	}
+
 }

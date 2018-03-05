@@ -1,4 +1,3 @@
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.StaticLayer;
@@ -24,18 +23,19 @@ import java.util.logging.Logger;
  *
  */
 public class ExecutionQueue {
-	public static String docs(){
+
+	public static String docs() {
 		return "An execution queue is a queue of closures, which are"
-			+ " queued up to be run in sequence by the engine."
-			+ " Unlike set_timeout and set_interval, there is no"
-			+ " time component, it's simply a queue of operations"
-			+ " to execute sequentially. See the"
-			+ " [[CommandHelper/Execution_Queue|article on the learning trail]]"
-			+ " for more information.";
+				+ " queued up to be run in sequence by the engine."
+				+ " Unlike set_timeout and set_interval, there is no"
+				+ " time component, it's simply a queue of operations"
+				+ " to execute sequentially. See the"
+				+ " [[CommandHelper/Execution_Queue|article on the learning trail]]"
+				+ " for more information.";
 	}
 
-	@api(environments={GlobalEnv.class})
-	public static class queue_push extends AbstractFunction{
+	@api(environments = {GlobalEnv.class})
+	public static class queue_push extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -56,11 +56,11 @@ public class ExecutionQueue {
 		public Construct exec(Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
-			if(!(args[0] instanceof CClosure)){
+			if (!(args[0] instanceof CClosure)) {
 				throw new CRECastException("Parameter 1 to " + getName() + " must be a closure.", t);
 			}
-			c = ((CClosure)args[0]);
-			if(args.length == 2){
+			c = ((CClosure) args[0]);
+			if (args.length == 2) {
 				queue = args[1].nval();
 			}
 
@@ -75,9 +75,9 @@ public class ExecutionQueue {
 							public Object call() throws Exception {
 								try {
 									c.execute();
-								} catch(ConfigRuntimeException ex){
+								} catch (ConfigRuntimeException ex) {
 									ConfigRuntimeException.HandleUncaughtException(ex, environment);
-								} catch(ProgramFlowManipulationException ex){
+								} catch (ProgramFlowManipulationException ex) {
 									// Ignored
 								}
 								return null;
@@ -114,8 +114,8 @@ public class ExecutionQueue {
 
 	}
 
-	@api(environments={GlobalEnv.class})
-	public static class queue_push_front extends AbstractFunction{
+	@api(environments = {GlobalEnv.class})
+	public static class queue_push_front extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -136,11 +136,11 @@ public class ExecutionQueue {
 		public Construct exec(Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
-			if(!(args[0] instanceof CClosure)){
+			if (!(args[0] instanceof CClosure)) {
 				throw new CRECastException("Parameter 1 to " + getName() + " must be a closure.", t);
 			}
-			c = ((CClosure)args[0]);
-			if(args.length == 2){
+			c = ((CClosure) args[0]);
+			if (args.length == 2) {
 				queue = args[1].nval();
 			}
 
@@ -155,9 +155,9 @@ public class ExecutionQueue {
 							public Object call() throws Exception {
 								try {
 									c.execute();
-								} catch(ConfigRuntimeException ex){
+								} catch (ConfigRuntimeException ex) {
 									ConfigRuntimeException.HandleUncaughtException(ex, environment);
-								} catch(ProgramFlowManipulationException ex){
+								} catch (ProgramFlowManipulationException ex) {
 									// Ignored
 								}
 								return null;
@@ -194,8 +194,8 @@ public class ExecutionQueue {
 
 	}
 
-	@api(environments={GlobalEnv.class})
-	public static class queue_remove extends AbstractFunction{
+	@api(environments = {GlobalEnv.class})
+	public static class queue_remove extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -215,7 +215,7 @@ public class ExecutionQueue {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
-			if(args.length == 1){
+			if (args.length == 1) {
 				queue = args[0].nval();
 			}
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().remove(queue);
@@ -244,8 +244,8 @@ public class ExecutionQueue {
 
 	}
 
-	@api(environments={GlobalEnv.class})
-	public static class queue_remove_front extends AbstractFunction{
+	@api(environments = {GlobalEnv.class})
+	public static class queue_remove_front extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -265,7 +265,7 @@ public class ExecutionQueue {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
-			if(args.length == 1){
+			if (args.length == 1) {
 				queue = args[0].nval();
 			}
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().removeFront(queue);
@@ -285,7 +285,7 @@ public class ExecutionQueue {
 		@Override
 		public String docs() {
 			return "void {[queue]} Removes a task from the front of the queue. That is, the next task"
-				+ " that would have been run is removed.";
+					+ " that would have been run is removed.";
 		}
 
 		@Override
@@ -295,8 +295,8 @@ public class ExecutionQueue {
 
 	}
 
-	@api(environments={GlobalEnv.class})
-	public static class queue_clear extends AbstractFunction{
+	@api(environments = {GlobalEnv.class})
+	public static class queue_clear extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -316,7 +316,7 @@ public class ExecutionQueue {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
-			if(args.length == 1){
+			if (args.length == 1) {
 				queue = args[0].nval();
 			}
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().clear(queue);
@@ -336,7 +336,7 @@ public class ExecutionQueue {
 		@Override
 		public String docs() {
 			return "void {[queue]} Clears out all tasks that are on the queue. If no tasks were"
-				+ " on the queue, nothing happens.";
+					+ " on the queue, nothing happens.";
 		}
 
 		@Override
@@ -346,8 +346,8 @@ public class ExecutionQueue {
 
 	}
 
-	@api(environments={GlobalEnv.class})
-	public static class queue_running extends AbstractFunction{
+	@api(environments = {GlobalEnv.class})
+	public static class queue_running extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -367,7 +367,7 @@ public class ExecutionQueue {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
-			if(args.length == 1){
+			if (args.length == 1) {
 				queue = args[0].nval();
 			}
 			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetExecutionQueue().isRunning(queue));
@@ -395,8 +395,8 @@ public class ExecutionQueue {
 
 	}
 
-	@api(environments={GlobalEnv.class})
-	public static class queue_delay extends AbstractFunction{
+	@api(environments = {GlobalEnv.class})
+	public static class queue_delay extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -416,7 +416,7 @@ public class ExecutionQueue {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
-			if(args.length == 2){
+			if (args.length == 2) {
 				queue = args[1].nval();
 			}
 			final long delay = Static.getInt(args[0], t);
@@ -447,7 +447,7 @@ public class ExecutionQueue {
 		@Override
 		public String docs() {
 			return "void {x, [queue]} Queues up a non-disruptive sleep at the end of the queue. This task"
-				+ " will stall the execution thread for x milliseconds.";
+					+ " will stall the execution thread for x milliseconds.";
 		}
 
 		@Override
@@ -457,8 +457,8 @@ public class ExecutionQueue {
 
 	}
 
-	@api(environments={GlobalEnv.class})
-	public static class queue_delay_front extends AbstractFunction{
+	@api(environments = {GlobalEnv.class})
+	public static class queue_delay_front extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -478,7 +478,7 @@ public class ExecutionQueue {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
-			if(args.length == 2){
+			if (args.length == 2) {
 				queue = args[1].nval();
 			}
 			final long delay = Static.getInt(args[0], t);

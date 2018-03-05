@@ -7,8 +7,12 @@ import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCCreatureSpawnEvent extends BindableEvent {
+
 	MCLivingEntity getEntity();
+
 	MCLocation getLocation();
+
 	MCSpawnReason getSpawnReason();
+
 	void setType(MCEntityType type);
 }

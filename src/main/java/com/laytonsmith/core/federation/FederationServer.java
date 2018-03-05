@@ -14,11 +14,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A FederationServer represents a server that is listening for remote connections.
- * Once a connection is established, a "sub socket" will be created, and that represents
- * a single connection to the client.
+ * A FederationServer represents a server that is listening for remote connections. Once a connection is established, a
+ * "sub socket" will be created, and that represents a single connection to the client.
  */
 public class FederationServer {
+
 	private final String serverName;
 	private final String password;
 	private final File authorizedKeys;
@@ -38,7 +38,8 @@ public class FederationServer {
 
 	/**
 	 * Sets the ServerSocket that this server is listening on.
-	 * @param serverSocket 
+	 *
+	 * @param serverSocket
 	 */
 	public void setServerSocket(ServerSocket serverSocket) {
 		this.serverSocket = serverSocket;
@@ -46,7 +47,8 @@ public class FederationServer {
 
 	/**
 	 * Gets the ServerSocket that this server is listening on.
-	 * @return 
+	 *
+	 * @return
 	 */
 	public ServerSocket getServerSocket() {
 		return this.serverSocket;
@@ -54,7 +56,8 @@ public class FederationServer {
 
 	/**
 	 * Returns the name of this server.
-	 * @return 
+	 *
+	 * @return
 	 */
 	public String getServerName() {
 		return serverName;
@@ -62,43 +65,44 @@ public class FederationServer {
 
 	/**
 	 * Returns the server password. If null, the server has no password.
-	 * @return 
+	 *
+	 * @return
 	 */
 	public String getPassword() {
 		return password;
 	}
 
 	/**
-	 * Returns a link to the authorized keys file. This is a list of client
-	 * keys that are allowed to connect to this server.
-	 * @return 
+	 * Returns a link to the authorized keys file. This is a list of client keys that are allowed to connect to this
+	 * server.
+	 *
+	 * @return
 	 */
 	public File getAuthorizedKeys() {
 		return authorizedKeys;
 	}
 
 	/**
-	 * Returns the allow from string. This is a comma separated list of the IP
-	 * or hostnames that are allowed.
-	 * @return 
+	 * Returns the allow from string. This is a comma separated list of the IP or hostnames that are allowed.
+	 *
+	 * @return
 	 */
 	public String getAllowFrom() {
 		return allowFrom;
 	}
 
 	/**
-	 * Returns the master port. This is NOT the same port as the one the server
-	 * is currently listening on however, this is simply the master port for this
-	 * server's federation.
-	 * @return 
+	 * Returns the master port. This is NOT the same port as the one the server is currently listening on however, this
+	 * is simply the master port for this server's federation.
+	 *
+	 * @return
 	 */
 	public int getMasterPort() {
 		return masterPort;
 	}
 
 	/**
-	 * A sub socket is a list of sockets that are currently connected to this
-	 * Server Socket.
+	 * A sub socket is a list of sockets that are currently connected to this Server Socket.
 	 *
 	 * @param s
 	 */
@@ -114,14 +118,15 @@ public class FederationServer {
 	public void removeSubSocket(Socket s) {
 		subSockets.remove(s);
 	}
-	
+
 	/**
-	 * Listens for connections. Each connection spawns a new thread. This method
-	 * blocks until the server socket is closed.
+	 * Listens for connections. Each connection spawns a new thread. This method blocks until the server socket is
+	 * closed.
+	 *
 	 * @throws java.io.IOException
 	 */
-	public void listenForConnections() throws IOException{
-		while(!serverSocket.isClosed()){
+	public void listenForConnections() throws IOException {
+		while (!serverSocket.isClosed()) {
 			final Socket s = serverSocket.accept();
 			addSubSocket(s);
 			new Thread(new Runnable() {
@@ -148,7 +153,7 @@ public class FederationServer {
 									// period, which means the connection is taking
 									// too long. Forcibly terminate it.
 									try {
-										if(s.isConnected()){
+										if (s.isConnected()) {
 											s.close();
 										}
 									} catch (IOException ex) {
@@ -162,7 +167,7 @@ public class FederationServer {
 						}, "FederationServerConnectionWatcher-" + s.hashCode());
 						connectionWatcher.start();
 						String hello = communicator.readUnencryptedLine();
-						if(!"HELLO".equals(hello)){
+						if (!"HELLO".equals(hello)) {
 							// Bad message. Close the socket immediately, and return.
 							s.close();
 							connectionWatcher.interrupt();
@@ -175,12 +180,12 @@ public class FederationServer {
 						try {
 							version = FederationVersion.fromVersion(sVersion);
 							communicator.writeUnencryptedLine("VERSION OK");
-						} catch(IllegalArgumentException ex){
+						} catch (IllegalArgumentException ex) {
 							// The version is unsupported. The client is newer than this server knows how
 							// to deal with. So, write out the version error data, then close the socket and
 							// continue.
 							communicator.writeUnencryptedLine("VERSION BAD");
-							byte [] errorMsg = ("The server does not support the version of this client (" + sVersion + ")!").getBytes("UTF-8");
+							byte[] errorMsg = ("The server does not support the version of this client (" + sVersion + ")!").getBytes("UTF-8");
 							communicator.writeUnencryptedLine(Integer.toString(errorMsg.length));
 							communicator.writeUnencrypted(errorMsg);
 							s.close();
@@ -188,21 +193,21 @@ public class FederationServer {
 							return;
 						}
 						// The rest of the code may vary based on the version.
-						if(version == FederationVersion.V1_0_0){
+						if (version == FederationVersion.V1_0_0) {
 							// Are we encrypted?
 							// TODO: This is currently unused
 							boolean isEncrypted = "1".equals(communicator.readUnencryptedLine());
 							// The rest of the data is sent possibly encrypted, so we use
 							// the normal form of the rest of these.
 							String clientPassword = communicator.readLine();
-							if(password != null){
+							if (password != null) {
 								// If the password is required by the server, we need to
 								// verify they got it correct. If it's not required, they
 								// were going to send a line anyways.
-								if(!password.equals(clientPassword)){
+								if (!password.equals(clientPassword)) {
 									// Oops, wrong guess, try again...
 									communicator.writeLine("ERROR");
-									byte [] errorMsg = ("Wrong password").getBytes("UTF-8");
+									byte[] errorMsg = ("Wrong password").getBytes("UTF-8");
 									communicator.writeLine(Integer.toString(errorMsg.length));
 									communicator.writeBytes(errorMsg);
 									s.close();
@@ -214,10 +219,9 @@ public class FederationServer {
 							communicator.writeLine("OK");
 							// We now allow the connection to idle.
 							connectionWatcher.interrupt();
-							
+
 						}
-						
-						
+
 					} catch (IOException ex) {
 						Logger.getLogger(FederationServer.class.getName()).log(Level.SEVERE, null, ex);
 					}
@@ -256,20 +260,19 @@ public class FederationServer {
 			subSockets.put(s, System.currentTimeMillis());
 		}
 	}
-	
+
 	/**
-	 * Closes all the sockets this server is currently using. This includes the
-	 * sub sockets that have been spawned off, as well as the server socket. Once
-	 * this is called, the reference to the FederationServer object should be
-	 * lost, as the object becomes useless at that point.
+	 * Closes all the sockets this server is currently using. This includes the sub sockets that have been spawned off,
+	 * as well as the server socket. Once this is called, the reference to the FederationServer object should be lost,
+	 * as the object becomes useless at that point.
 	 */
-	public void closeAllSockets(){
+	public void closeAllSockets() {
 		try {
 			serverSocket.close();
 		} catch (IOException ex) {
 			Logger.getLogger(FederationServer.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		for(Socket sub : subSockets.keySet()){
+		for (Socket sub : subSockets.keySet()) {
 			try {
 				sub.close();
 			} catch (IOException ex) {
@@ -283,7 +286,7 @@ public class FederationServer {
 	@SuppressWarnings("FinalizeDeclaration")
 	protected void finalize() throws Throwable {
 		super.finalize();
-		if(!closed){
+		if (!closed) {
 			StreamUtils.GetSystemErr().println("FederationServer was not closed properly, and cleanup is having to be done in the finalize method!");
 			closeAllSockets();
 		}

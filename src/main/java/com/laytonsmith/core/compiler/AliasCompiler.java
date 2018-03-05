@@ -14,16 +14,17 @@ import java.util.regex.Pattern;
  */
 public class AliasCompiler {
 
-	public static void main(String [] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 		List<AliasToken> list = new AliasLexer("/c /* = */ = /** hi */ code", null).parse();
 		StreamUtils.GetSystemOut().println(list);
 	}
 
-	public static List<AliasToken> lex(String script, File file) throws ConfigCompileException{
+	public static List<AliasToken> lex(String script, File file) throws ConfigCompileException {
 		return new AliasLexer(script, file).parse();
 	}
 
 	private static class AliasLexer {
+
 		private final String script;
 		private final File file;
 		private List<AliasToken> tokens;
@@ -47,8 +48,8 @@ public class AliasCompiler {
 		private boolean inMultilineComment;
 		private boolean inDocBlockComment;
 
-		public AliasLexer(String script, File file){
-			if((int)script.charAt(0) == 65279){
+		public AliasLexer(String script, File file) {
+			if ((int) script.charAt(0) == 65279) {
 				// Remove the UTF-8 Byte Order Mark, if present.
 				script = script.substring(1);
 			}
@@ -58,8 +59,8 @@ public class AliasCompiler {
 			this.file = file;
 		}
 
-		public List<AliasToken> parse() throws ConfigCompileException{
-			if(tokens == null){
+		public List<AliasToken> parse() throws ConfigCompileException {
+			if (tokens == null) {
 				doParse();
 			}
 			return tokens;
@@ -73,7 +74,7 @@ public class AliasCompiler {
 			Target doubleQuoteStart = Target.UNKNOWN;
 			Target multilineCommentStart = Target.UNKNOWN;
 			Target optionalVariableStart = Target.UNKNOWN;
-			for(int i = 0; i < script.length(); i++){
+			for (int i = 0; i < script.length(); i++) {
 				// Need up to a 3 lookahead
 				col++;
 				Character c = script.charAt(i);
@@ -91,46 +92,46 @@ public class AliasCompiler {
 				}
 				t = new Target(line, file, col);
 
-				if(!pastDefinitionStart && !inComment && !inAliasCode){
-					if(c == '\n' || Character.isWhitespace(c)){
+				if (!pastDefinitionStart && !inComment && !inAliasCode) {
+					if (c == '\n' || Character.isWhitespace(c)) {
 						continue;
 					}
 					pastLabel = c == '/' || c == '\'' || c == '"';
 					pastDefinitionStart = true;
 				}
-				
+
 				/* Strings and comments override basically everything */
-				if(inLineComment){
-					if(c == '\n'){
+				if (inLineComment) {
+					if (c == '\n') {
 						inLineComment = false;
 						inComment = false;
 					}
-					if(!inAliasCode){
+					if (!inAliasCode) {
 						continue;
 					}
 				}
-				if(inMultilineComment){
-					if(c == '*' && c2 == '/'){
+				if (inMultilineComment) {
+					if (c == '*' && c2 == '/') {
 						boolean wasDocBlock = inDocBlockComment;
 						inMultilineComment = inDocBlockComment = inComment = false;
-						if(!inAliasCode){
-							if(wasDocBlock){
+						if (!inAliasCode) {
+							if (wasDocBlock) {
 								buffer(AliasTokenType.DOCBLOCK, t);
 							}
 							i++;
 							continue;
 						}
 					}
-					if(inDocBlockComment || inAliasCode){
+					if (inDocBlockComment || inAliasCode) {
 						buf.append(c);
 						continue;
 					} else {
 						continue;
 					}
 				}
-				if(inQuote){
-					if(c == '\\'){
-						if(c2 == '\'' || c2 == '"'){
+				if (inQuote) {
+					if (c == '\\') {
+						if (c2 == '\'' || c2 == '"') {
 							buf.append(c2);
 							i++;
 							continue;
@@ -138,12 +139,12 @@ public class AliasCompiler {
 					}
 				}
 				boolean skipProcessing = false;
-				if(!inComment){
-					if(c == '\'' && inSingleString){
+				if (!inComment) {
+					if (c == '\'' && inSingleString) {
 						inQuote = false;
 						inSingleString = false;
-						if(!inAliasCode){
-							if(!inOptionalVariable){
+						if (!inAliasCode) {
+							if (!inOptionalVariable) {
 								validateLit(buf.toString());
 							}
 							buffer(AliasTokenType.LIT, t);
@@ -151,11 +152,11 @@ public class AliasCompiler {
 						}
 						skipProcessing = true;
 					}
-					if(c == '"' && inDoubleString){
+					if (c == '"' && inDoubleString) {
 						inQuote = false;
 						inDoubleString = false;
-						if(!inAliasCode){
-							if(!inOptionalVariable){
+						if (!inAliasCode) {
+							if (!inOptionalVariable) {
 								validateLit(buf.toString());
 							}
 							buffer(AliasTokenType.LIT, t);
@@ -163,51 +164,51 @@ public class AliasCompiler {
 						}
 						skipProcessing = true;
 					}
-					if(!skipProcessing){
-						if(c == '\'' && !inQuote){
+					if (!skipProcessing) {
+						if (c == '\'' && !inQuote) {
 							// Start single string
 							inQuote = true;
 							inSingleString = true;
 							singleQuoteStart = t;
-							if(!inAliasCode){
+							if (!inAliasCode) {
 								continue;
 							}
 						}
-						if(c == '"' && !inQuote){
+						if (c == '"' && !inQuote) {
 							inQuote = true;
 							inDoubleString = true;
 							doubleQuoteStart = t;
-							if(!inAliasCode){
+							if (!inAliasCode) {
 								continue;
 							}
 						}
 					}
-					if(inQuote && !inAliasCode){
+					if (inQuote && !inAliasCode) {
 						buf.append(c);
 						continue;
 					}
 				}
-				if(c == '#' || (c == '/' && c2 == '/') && !inQuote){
+				if (c == '#' || (c == '/' && c2 == '/') && !inQuote) {
 					inComment = true;
 					inLineComment = true;
-					if(!inAliasCode){
+					if (!inAliasCode) {
 						endToken();
-						if(c == '/'){
+						if (c == '/') {
 							i++;
 						}
 						continue;
 					}
 				}
-				if(c == '/' && c2 == '*' && !inQuote){
+				if (c == '/' && c2 == '*' && !inQuote) {
 					int skip = 1;
 					inComment = true;
 					inMultilineComment = true;
 					multilineCommentStart = t;
-					if(c3 == '*'){
+					if (c3 == '*') {
 						skip++;
 						inDocBlockComment = true;
 					}
-					if(!inAliasCode){
+					if (!inAliasCode) {
 						endToken();
 						i += skip;
 						continue;
@@ -215,10 +216,8 @@ public class AliasCompiler {
 				}
 				/* End string/comment handling */
 
-
-
-				if(c == ':'){
-					if(pastLabel){
+				if (c == ':') {
+					if (pastLabel) {
 						throw new ConfigCompileException("Unexpected symbol \":\", this may only be used as the command label.", t);
 					}
 					pastLabel = true;
@@ -226,34 +225,33 @@ public class AliasCompiler {
 					continue;
 				}
 
-				if(!pastLabel){
-					if(Character.isWhitespace(c)){
+				if (!pastLabel) {
+					if (Character.isWhitespace(c)) {
 						continue;
 					}
 					buf.append(c);
 					continue;
 				}
 
-
-				if(inAliasCode){
+				if (inAliasCode) {
 					// Once in the alias code, we can be in either two states, looking for the multiline start, or any
 					// other code. Whitespace is not taken care of here, so we need to handle it. (i.e. ignore it)
-					if(!pastMultiline && Character.isWhitespace(c) && c != '\n'){
+					if (!pastMultiline && Character.isWhitespace(c) && c != '\n') {
 						continue;
 					}
-					if(pastMultiline){
-						if(!inMultiline){
-							if(c == '\n'){
+					if (pastMultiline) {
+						if (!inMultiline) {
+							if (c == '\n') {
 								// This is the end of the alias code. We need to append the code then reset all the variables.
 								buffer(AliasTokenType.CODE, t);
 								buffer(AliasTokenType.ALIAS_END, t);
 								resetStates();
 								continue;
 							}
-						} else if(!inQuote && !inComment){
+						} else if (!inQuote && !inComment) {
 							// We're done with the multiline possibly.
-							if(c == '<' && c2 == '<' && c3 == '<'){
-								if(isNewStyleMultiline){
+							if (c == '<' && c2 == '<' && c3 == '<') {
+								if (isNewStyleMultiline) {
 									throw new ConfigCompileException("Unexpected multiline end symbol type, expected \"?>\" but found \"<<<\"", t);
 								}
 								i += 2;
@@ -262,8 +260,8 @@ public class AliasCompiler {
 								resetStates();
 								continue;
 							}
-							if(c == '?' && c2 == '>'){
-								if(!isNewStyleMultiline){
+							if (c == '?' && c2 == '>') {
+								if (!isNewStyleMultiline) {
 									throw new ConfigCompileException("Unexpected multiline end symbol type, expected \"<<<\" but found \"?>\"", t);
 								}
 								i++;
@@ -276,22 +274,22 @@ public class AliasCompiler {
 						buf.append(c);
 						continue;
 					}
-					if(!pastMultiline){
-						if(c == '>' && c2 == '>' && c3 == '>'){
+					if (!pastMultiline) {
+						if (c == '>' && c2 == '>' && c3 == '>') {
 							isNewStyleMultiline = false;
 							inMultiline = true;
 							i += 2;
 							pastMultiline = true;
 							continue;
-						} else if(c == '<' && c2 == '?' && c3 == 'm' && c4 == 's'){
+						} else if (c == '<' && c2 == '?' && c3 == 'm' && c4 == 's') {
 							isNewStyleMultiline = true;
 							inMultiline = true;
 							i += 3;
 							pastMultiline = true;
 							continue;
 						}
-						if((c == '<' && c2 == '<' && c3 == '<')
-								|| (c == '?' && c2 == '>')){
+						if ((c == '<' && c2 == '<' && c3 == '<')
+								|| (c == '?' && c2 == '>')) {
 							throw new ConfigCompileException("Unexpected multiline end symbol", t);
 						}
 						buf.append(c);
@@ -300,18 +298,18 @@ public class AliasCompiler {
 					}
 				}
 
-				if(Character.isWhitespace(c) && !inQuote && c != '\n'){
+				if (Character.isWhitespace(c) && !inQuote && c != '\n') {
 					// Ignore this, but end the previous token
 					endToken();
 					continue;
 				}
 
-				if(c == '$' && buf.length() == 0){
+				if (c == '$' && buf.length() == 0) {
 					inVariable = true;
 				}
 
-				if(c == '['){
-					if(inOptionalVariable){
+				if (c == '[') {
+					if (inOptionalVariable) {
 						throw new ConfigCompileException("Unexpected left bracket", t);
 					}
 					endToken();
@@ -321,8 +319,8 @@ public class AliasCompiler {
 					buffer(AliasTokenType.OPTIONAL_START, t);
 					continue;
 				}
-				if(c == ']'){
-					if(!inOptionalVariable){
+				if (c == ']') {
+					if (!inOptionalVariable) {
 						throw new ConfigCompileException("Unexpected right bracket", t);
 					}
 					endToken();
@@ -331,10 +329,10 @@ public class AliasCompiler {
 					buffer(AliasTokenType.OPTIONAL_END, t);
 					continue;
 				}
-				if(c == '='){
+				if (c == '=') {
 					endToken();
 					buf.append('=');
-					if(inOptionalVariable){
+					if (inOptionalVariable) {
 						buffer(AliasTokenType.ASSIGN, t);
 					} else {
 						buffer(AliasTokenType.DEFINITION_END, t);
@@ -344,7 +342,7 @@ public class AliasCompiler {
 					continue;
 				}
 
-				if(!inQuote && c == '\n'){
+				if (!inQuote && c == '\n') {
 					endToken();
 					buffer(AliasTokenType.ALIAS_END, t);
 					continue;
@@ -352,32 +350,32 @@ public class AliasCompiler {
 
 				buf.append(c);
 			}
-			if(inSingleString){
+			if (inSingleString) {
 				throw new ConfigCompileException("Unended string", singleQuoteStart);
 			}
-			if(inDoubleString){
+			if (inDoubleString) {
 				throw new ConfigCompileException("Unended string", doubleQuoteStart);
 			}
-			if(inMultilineComment){
+			if (inMultilineComment) {
 				throw new ConfigCompileException("Unended block comment", multilineCommentStart);
 			}
-			if(inOptionalVariable){
+			if (inOptionalVariable) {
 				throw new ConfigCompileException("Unended optional variable", optionalVariableStart);
 			}
 
 			endToken();
 		}
 
-		private void resetStates(){
-			inAliasCode = inDoubleString = inMultiline =
-					inOptionalVariable = inSingleString = inVariable =
-					isNewStyleMultiline = pastDefinitionStart = pastLabel =
-					pastMultiline = inQuote = inComment = inLineComment =
-					inMultilineComment = inDocBlockComment = false;
+		private void resetStates() {
+			inAliasCode = inDoubleString = inMultiline
+					= inOptionalVariable = inSingleString = inVariable
+					= isNewStyleMultiline = pastDefinitionStart = pastLabel
+					= pastMultiline = inQuote = inComment = inLineComment
+					= inMultilineComment = inDocBlockComment = false;
 		}
 
-		private void validateLit(String lit) throws ConfigCompileException{
-			if(lit.contains(" ") || lit.contains("\t") || lit.contains("\n")){
+		private void validateLit(String lit) throws ConfigCompileException {
+			if (lit.contains(" ") || lit.contains("\t") || lit.contains("\n")) {
 				throw new ConfigCompileException("Alias literals cannot contain whitespace", t);
 			}
 		}
@@ -385,12 +383,12 @@ public class AliasCompiler {
 		private final Pattern LIT_PATTERN = Pattern.compile("([\\[\\]=:\\$])");
 
 		private void endToken() throws ConfigCompileException {
-			if(buf.length() == 0){
+			if (buf.length() == 0) {
 				return;
 			}
-			if(inVariable){
+			if (inVariable) {
 				String var = buf.toString();
-				if(!var.matches("^\\$[a-zA-Z0-9_]*$")){
+				if (!var.matches("^\\$[a-zA-Z0-9_]*$")) {
 					throw new ConfigCompileException("Invalid variable name", t);
 				}
 				buffer(AliasTokenType.VARIABLE, t);
@@ -399,13 +397,13 @@ public class AliasCompiler {
 			}
 			//Otherwise it's a lit
 			Matcher m = LIT_PATTERN.matcher(buf.toString());
-			if(m.find()){
+			if (m.find()) {
 				throw new ConfigCompileException("Unexpected symbol \"" + m.group(1) + "\" in alias definition (you may quote strings in the definition)", t);
 			}
 			buffer(AliasTokenType.LIT, t);
 		}
 
-		private void buffer(AliasTokenType type, Target t){
+		private void buffer(AliasTokenType type, Target t) {
 			// Re-work the column so that it starts at the beginning of the token, not the end
 			Target myTarget = new Target(t.line(), t.file(), t.col() - buf.toString().length());
 			tokens.add(new AliasToken(buf.toString(), type, myTarget));
@@ -418,11 +416,12 @@ public class AliasCompiler {
 	}
 
 	public static class AliasToken {
+
 		private String token;
 		private AliasTokenType type;
 		private Target t;
 
-		public AliasToken(String token, AliasTokenType type, Target t){
+		public AliasToken(String token, AliasTokenType type, Target t) {
 			this.token = token;
 			this.type = type;
 			this.t = t;

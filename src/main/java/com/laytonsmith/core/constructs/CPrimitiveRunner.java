@@ -13,23 +13,23 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 @InterfaceRunnerFor(CPrimitive.class)
 public class CPrimitiveRunner extends AbstractMixedInterfaceRunner {
 
-    @Override
-    public String docs() {
-	return "A primitive is any non-object and non-array data type. All primitives are pass by value.";
-    }
+	@Override
+	public String docs() {
+		return "A primitive is any non-object and non-array data type. All primitives are pass by value.";
+	}
 
-    @Override
-    public Version since() {
-	return CHVersion.V3_0_1;
-    }
+	@Override
+	public Version since() {
+		return CHVersion.V3_0_1;
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	return new CClassType[]{Mixed.TYPE};
-    }
+	@Override
+	public CClassType[] getSuperclasses() {
+		return new CClassType[]{Mixed.TYPE};
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	return new CClassType[]{};
-    }
+	@Override
+	public CClassType[] getInterfaces() {
+		return new CClassType[]{};
+	}
 }

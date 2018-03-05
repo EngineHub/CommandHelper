@@ -65,7 +65,7 @@ public class World {
 		return "Provides functions for manipulating a world";
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class get_spawn extends AbstractFunction {
 
 		@Override
@@ -106,23 +106,23 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String world;
-			if(args.length == 1) {
+			if (args.length == 1) {
 				world = args[0].val();
 			} else {
-				if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() == null){
+				if (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() == null) {
 					throw new CREInvalidWorldException("A world must be specified in a context with no player.", t);
 				}
 				world = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld().getName();
 			}
 			MCWorld w = Static.getServer().getWorld(world);
-			if(w == null) {
+			if (w == null) {
 				throw new CREInvalidWorldException("The specified world \"" + world + "\" is not a valid world.", t);
 			}
 			return ObjectGenerator.GetGenerator().location(w.getSpawnLocation(), false);
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class set_spawn extends AbstractFunction {
 
 		@Override
@@ -144,29 +144,29 @@ public class World {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld w = null;
-			if(p != null) {
+			if (p != null) {
 				w = p.getWorld();
 			}
 			int x = 0;
 			int y = 0;
 			int z = 0;
-			if(args.length == 1) {
+			if (args.length == 1) {
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				w = l.getWorld();
 				x = l.getBlockX();
 				y = l.getBlockY();
 				z = l.getBlockZ();
-			} else if(args.length == 3) {
+			} else if (args.length == 3) {
 				x = Static.getInt32(args[0], t);
 				y = Static.getInt32(args[1], t);
 				z = Static.getInt32(args[2], t);
-			} else if(args.length == 4) {
+			} else if (args.length == 4) {
 				w = Static.getServer().getWorld(args[0].val());
 				x = Static.getInt32(args[1], t);
 				y = Static.getInt32(args[2], t);
 				z = Static.getInt32(args[3], t);
 			}
-			if(w == null) {
+			if (w == null) {
 				throw new CREInvalidWorldException("Invalid world given.", t);
 			}
 			w.setSpawnLocation(x, y, z);
@@ -196,7 +196,7 @@ public class World {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	@hide("Deprecated.")
 	public static class refresh_chunk extends AbstractFunction {
 
@@ -242,21 +242,21 @@ public class World {
 			MCWorld world;
 			int x;
 			int z;
-			if(args.length == 1) {
+			if (args.length == 1) {
 				//Location array provided
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
 				world = l.getWorld();
 				x = l.getBlockX();
 				z = l.getBlockZ();
-			} else if(args.length == 2) {
+			} else if (args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 2
-				if(args[1] instanceof CArray) {
+				if (args[1] instanceof CArray) {
 					world = Static.getServer().getWorld(args[0].val());
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, t);
 					x = l.getBlockX();
 					z = l.getBlockZ();
 				} else {
-					if(m == null) {
+					if (m == null) {
 						throw new CREInvalidWorldException("No world specified", t);
 					}
 					world = m.getWorld();
@@ -266,7 +266,7 @@ public class World {
 			} else {
 				//world, x and z provided
 				world = Static.getServer().getWorld(args[0].val());
-				if(world == null) {
+				if (world == null) {
 					throw new CREInvalidWorldException("World " + args[0].val() + " does not exist.", t);
 				}
 				x = Static.getInt32(args[1], t);
@@ -301,24 +301,24 @@ public class World {
 			MCWorld world;
 			int x;
 			int z;
-			if(args.length == 1) {
+			if (args.length == 1) {
 				//Location array provided
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
 				world = l.getWorld();
 				x = l.getBlockX();
 				z = l.getBlockZ();
-			} else if(args.length == 2) {
+			} else if (args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 2
-				if(args[1] instanceof CArray) {
+				if (args[1] instanceof CArray) {
 					world = Static.getServer().getWorld(args[0].val());
-					if(world == null) {
+					if (world == null) {
 						throw new CREInvalidWorldException("The given world (" + args[0].val() + ") does not exist.", t);
 					}
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, t);
 					x = l.getBlockX();
 					z = l.getBlockZ();
 				} else {
-					if(m == null) {
+					if (m == null) {
 						throw new CREInvalidWorldException("No world specified", t);
 					}
 					world = m.getWorld();
@@ -328,7 +328,7 @@ public class World {
 			} else {
 				//world, x and z provided
 				world = Static.getServer().getWorld(args[0].val());
-				if(world == null) {
+				if (world == null) {
 					throw new CREInvalidWorldException("The given world (" + args[0].val() + ") does not exist.", t);
 				}
 				x = Static.getInt32(args[1], t);
@@ -360,7 +360,7 @@ public class World {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class unload_chunk extends AbstractFunction {
 
 		@Override
@@ -384,21 +384,21 @@ public class World {
 			MCWorld world;
 			int x;
 			int z;
-			if(args.length == 1) {
+			if (args.length == 1) {
 				//Location array provided
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
 				world = l.getWorld();
 				x = l.getBlockX();
 				z = l.getBlockZ();
-			} else if(args.length == 2) {
+			} else if (args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 2
-				if(args[1] instanceof CArray) {
+				if (args[1] instanceof CArray) {
 					world = Static.getServer().getWorld(args[0].val());
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, t);
 					x = l.getBlockX();
 					z = l.getBlockZ();
 				} else {
-					if(m == null) {
+					if (m == null) {
 						throw new CREInvalidWorldException("No world specified", t);
 					}
 					world = m.getWorld();
@@ -411,7 +411,7 @@ public class World {
 				x = Static.getInt32(args[1], t);
 				z = Static.getInt32(args[2], t);
 			}
-			if(world == null) { // Happends when m is a fake console or null command sender.
+			if (world == null) { // Happends when m is a fake console or null command sender.
 				throw new CREInvalidWorldException("No world specified", t);
 			}
 			world.unloadChunk(x, z);
@@ -463,25 +463,25 @@ public class World {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld world;
-			if(args.length == 1) {
+			if (args.length == 1) {
 				// World Provided
 				world = Static.getServer().getWorld(args[0].val());
 			} else {
-				if(m == null) {
+				if (m == null) {
 					throw new CREInvalidWorldException("No world specified", t);
 				}
 				world = m.getWorld();
 			}
-			if(world == null) { // Happens when m is a fake console or null command sender.
+			if (world == null) { // Happens when m is a fake console or null command sender.
 				throw new CREInvalidWorldException("No world specified", t);
 			}
 			MCChunk[] chunks = world.getLoadedChunks();
-			if(chunks == null) { // Happens when m is a fake player.
+			if (chunks == null) { // Happens when m is a fake player.
 				throw new CRENotFoundException(
-					"Could not find the chunk objects of the world (are you running in cmdline mode?)", t);
+						"Could not find the chunk objects of the world (are you running in cmdline mode?)", t);
 			}
 			CArray ret = new CArray(t);
-			for(int i = 0; i < chunks.length; i++) {
+			for (int i = 0; i < chunks.length; i++) {
 				CArray chunk = new CArray(t);
 				chunk.set("x", new CInt(chunks[i].getX(), t), t);
 				chunk.set("z", new CInt(chunks[i].getZ(), t), t);
@@ -499,7 +499,7 @@ public class World {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[] {0, 1};
+			return new Integer[]{0, 1};
 		}
 
 		@Override
@@ -515,7 +515,7 @@ public class World {
 
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class regen_chunk extends AbstractFunction {
 
 		@Override
@@ -562,18 +562,18 @@ public class World {
 			int x;
 			int z;
 
-			if(args.length == 1) {
+			if (args.length == 1) {
 				//Location array provided
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
 
 				world = l.getWorld();
 				x = l.getChunk().getX();
 				z = l.getChunk().getZ();
-			} else if(args.length == 2) {
+			} else if (args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 1
-				if(args[0] instanceof CArray) {
+				if (args[0] instanceof CArray) {
 					world = Static.getServer().getWorld(args[1].val());
-					if(world == null) {
+					if (world == null) {
 						throw new CREInvalidWorldException("World " + args[1].val() + " does not exist.", t);
 					}
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
@@ -581,7 +581,7 @@ public class World {
 					x = l.getChunk().getX();
 					z = l.getChunk().getZ();
 				} else {
-					if(m == null) {
+					if (m == null) {
 						throw new CREInvalidWorldException("No world specified", t);
 					}
 
@@ -594,7 +594,7 @@ public class World {
 				x = Static.getInt32(args[0], t);
 				z = Static.getInt32(args[1], t);
 				world = Static.getServer().getWorld(args[2].val());
-				if(world == null) {
+				if (world == null) {
 					throw new CREInvalidWorldException("World " + args[2].val() + " does not exist.", t);
 				}
 			}
@@ -603,7 +603,7 @@ public class World {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class is_slime_chunk extends AbstractFunction {
 
 		@Override
@@ -650,24 +650,24 @@ public class World {
 			MCWorld world;
 			int x;
 			int z;
-			if(args.length == 1) {
+			if (args.length == 1) {
 				//Location array provided
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
 				world = l.getWorld();
 				x = l.getChunk().getX();
 				z = l.getChunk().getZ();
-			} else if(args.length == 2) {
+			} else if (args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 1
-				if(args[0] instanceof CArray) {
+				if (args[0] instanceof CArray) {
 					world = Static.getServer().getWorld(args[1].val());
-					if(world == null) {
+					if (world == null) {
 						throw new CREInvalidWorldException("The given world (" + args[1].val() + ") does not exist.", t);
 					}
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
 					x = l.getChunk().getX();
 					z = l.getChunk().getZ();
 				} else {
-					if(m == null) {
+					if (m == null) {
 						throw new CREInvalidWorldException("No world specified", t);
 					}
 					world = m.getWorld();
@@ -679,16 +679,16 @@ public class World {
 				x = Static.getInt32(args[0], t);
 				z = Static.getInt32(args[1], t);
 				world = Static.getServer().getWorld(args[2].val());
-				if(world == null) {
+				if (world == null) {
 					throw new CREInvalidWorldException("The given world (" + args[2].val() + ") does not exist.", t);
 				}
 			}
 			rnd.setSeed(world.getSeed()
-				+ x * x * 0x4c1906
-				+ x * 0x5ac0db
-				+ z * z * 0x4307a7L
-				+ z * 0x5f24f
-				^ 0x3ad8025f);
+					+ x * x * 0x4c1906
+					+ x * 0x5ac0db
+					+ z * z * 0x4307a7L
+					+ z * 0x5f24f
+					^ 0x3ad8025f);
 			return CBoolean.get(rnd.nextInt(10) == 0);
 		}
 	}
@@ -701,7 +701,7 @@ public class World {
 			try {
 				p.load(Minecraft.class.getResourceAsStream("/time_names.txt"));
 				Enumeration e = p.propertyNames();
-				while(e.hasMoreElements()) {
+				while (e.hasMoreElements()) {
 					String name = e.nextElement().toString();
 					TimeLookup.put(name, new CString(p.getProperty(name), Target.UNKNOWN));
 				}
@@ -711,7 +711,7 @@ public class World {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class set_world_time extends AbstractFunction {
 
 		@Override
@@ -732,7 +732,7 @@ public class World {
 						+ " 24000, if not, it is modulo scaled. ---- Alternatively, common time notation (9:30pm, 4:00 am)"
 						+ " is acceptable, and convenient english mappings also exist:");
 				doc.append("<ul>");
-				for(String key : TimeLookup.keySet()) {
+				for (String key : TimeLookup.keySet()) {
 					doc.append("<li>").append(key).append(" = ").append(TimeLookup.get(key)).append("</li>");
 				}
 				doc.append("</ul>");
@@ -763,39 +763,39 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+			if (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 			}
-			if(args.length == 2) {
+			if (args.length == 2) {
 				w = Static.getServer().getWorld(args[0].val());
 			}
-			if(w == null) {
+			if (w == null) {
 				throw new CREInvalidWorldException("No world specified", t);
 			}
 			String stime = (args.length == 1 ? args[0] : args[1]).val().toLowerCase();
-			if(TimeLookup.containsKey(stime.replaceAll("[^a-z]", ""))) {
+			if (TimeLookup.containsKey(stime.replaceAll("[^a-z]", ""))) {
 				stime = TimeLookup.get(stime.replaceAll("[^a-z]", "")).val();
 			}
-			if(stime.matches("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$")) {
+			if (stime.matches("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$")) {
 				Pattern p = Pattern.compile("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$");
 				Matcher m = p.matcher(stime);
 				m.find();
 				int hour = Integer.parseInt(m.group(1));
 				int minute = Integer.parseInt(m.group(2));
 				String offset = "a";
-				if(m.group(3) != null) {
+				if (m.group(3) != null) {
 					offset = m.group(3);
 				}
-				if(offset.equals("p")) {
+				if (offset.equals("p")) {
 					hour += 12;
 				}
-				if(hour == 24) {
+				if (hour == 24) {
 					hour = 0;
 				}
-				if(hour > 24) {
+				if (hour > 24) {
 					throw new CREFormatException("Invalid time provided", t);
 				}
-				if(minute > 59) {
+				if (minute > 59) {
 					throw new CREFormatException("Invalid time provided", t);
 				}
 				hour -= 6;
@@ -813,7 +813,7 @@ public class World {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api(environments = CommandHelperEnvironment.class)
 	public static class get_world_time extends AbstractFunction {
 
 		@Override
@@ -855,21 +855,21 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+			if (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 			}
-			if(args.length == 1) {
+			if (args.length == 1) {
 				w = Static.getServer().getWorld(args[0].val());
 			}
-			if(w == null) {
+			if (w == null) {
 				throw new CREInvalidWorldException("No world specified", t);
 			}
 			return new CInt(w.getTime(), t);
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
-	public static class create_world extends AbstractFunction{
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class create_world extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -889,7 +889,7 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCWorldCreator creator = StaticLayer.GetConvertor().getWorldCreator(args[0].val());
-			if(args.length >= 3) {
+			if (args.length >= 3) {
 				MCWorldType type;
 				try {
 					type = MCWorldType.valueOf(args[1].val().toUpperCase());
@@ -906,14 +906,14 @@ public class World {
 				}
 				creator.type(type).environment(environment);
 			}
-			if((args.length >= 4) && !(args[3] instanceof CNull)) {
-				if(args[3] instanceof CInt) {
+			if ((args.length >= 4) && !(args[3] instanceof CNull)) {
+				if (args[3] instanceof CInt) {
 					creator.seed(Static.getInt(args[3], t));
 				} else {
 					creator.seed(args[3].val().hashCode());
 				}
 			}
-			if(args.length == 5) {
+			if (args.length == 5) {
 				creator.generator(args[4].val());
 			}
 			creator.createWorld();
@@ -947,8 +947,8 @@ public class World {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
-	public static class get_worlds extends AbstractFunction{
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_worlds extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -968,7 +968,7 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray worlds = new CArray(t);
-			for(MCWorld w : Static.getServer().getWorlds()){
+			for (MCWorld w : Static.getServer().getWorlds()) {
 				worlds.push(new CString(w.getName(), t), t);
 			}
 			return worlds;
@@ -995,7 +995,7 @@ public class World {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_chunk_loc extends AbstractFunction {
 
 		@Override
@@ -1015,34 +1015,34 @@ public class World {
 			MCWorld w = null;
 			MCLocation l = null;
 
-			if(cs instanceof MCPlayer) {
-				p = (MCPlayer)cs;
+			if (cs instanceof MCPlayer) {
+				p = (MCPlayer) cs;
 				Static.AssertPlayerNonNull(p, t);
 				l = p.getLocation();
-				if(l == null) {
+				if (l == null) {
 					throw new CRENotFoundException(
 							"Could not find the location of the given player (are you running in cmdline mode?)", t);
 				}
 				w = l.getWorld();
 			}
 
-			if(args.length == 1) {
-				if(args[0] instanceof CArray) {
+			if (args.length == 1) {
+				if (args[0] instanceof CArray) {
 					l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				} else {
 					throw new CREFormatException("Expecting argument 1 of get_chunk_loc to be a location array", t);
 				}
 			} else {
-				if(p == null) {
+				if (p == null) {
 					throw new CREInsufficientArgumentsException(
 							"Expecting a player context for get_chunk_loc when used without arguments", t);
 				}
 			}
 
-			CArray chunk =  new CArray(t,
-				new CInt(l.getChunk().getX(), t),
-				new CInt(l.getChunk().getZ(), t),
-				new CString(l.getChunk().getWorld().getName(), t));
+			CArray chunk = new CArray(t,
+					new CInt(l.getChunk().getX(), t),
+					new CInt(l.getChunk().getZ(), t),
+					new CString(l.getChunk().getWorld().getName(), t));
 			chunk.set("x", new CInt(l.getChunk().getX(), t), t);
 			chunk.set("z", new CInt(l.getChunk().getZ(), t), t);
 			chunk.set("world", l.getChunk().getWorld().getName(), t);
@@ -1078,8 +1078,8 @@ public class World {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
-	public static class spawn_falling_block extends AbstractFunction{
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class spawn_falling_block extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1099,17 +1099,17 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null , t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
 			MCItemStack item = Static.ParseItemNotation(this.getName(), args[1].val(), 1, t);
 			Vector3D v = null;
 
-			if(args.length == 3) {
+			if (args.length == 3) {
 				v = ObjectGenerator.GetGenerator().vector(args[2], t);
 			}
 
-			MCFallingBlock block = loc.getWorld().spawnFallingBlock(loc, item.getType().getType(), (byte)item.getData().getData());
+			MCFallingBlock block = loc.getWorld().spawnFallingBlock(loc, item.getType().getType(), (byte) item.getData().getData());
 
-			if(v != null) {
+			if (v != null) {
 				block.setVelocity(v);
 			}
 
@@ -1162,7 +1162,7 @@ public class World {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCWorld w = Static.getServer().getWorld(args[0].val());
-			if(w == null) {
+			if (w == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
 			}
 			CArray ret = CArray.GetAssociativeArray(t);
@@ -1219,11 +1219,11 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean save = true;
-			if(args.length == 2) {
+			if (args.length == 2) {
 				save = Static.getBoolean(args[1]);
 			}
 			MCWorld world = Static.getServer().getWorld(args[0].val());
-			if(world == null) {
+			if (world == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 			}
 			return CBoolean.get(Static.getServer().unloadWorld(world, save));
@@ -1293,7 +1293,7 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
-			if(world == null) {
+			if (world == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 			}
 			return new CString(world.getDifficulty().toString(), t);
@@ -1342,18 +1342,18 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCDifficulty difficulty;
-			if(args.length == 1) {
+			if (args.length == 1) {
 				try {
 					difficulty = MCDifficulty.valueOf(args[0].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The difficulty \"" + args[0].val() + "\" does not exist.", t);
 				}
-				for(MCWorld world : Static.getServer().getWorlds()) {
+				for (MCWorld world : Static.getServer().getWorlds()) {
 					world.setDifficulty(difficulty);
 				}
 			} else {
 				MCWorld world = Static.getServer().getWorld(args[0].val());
-				if(world == null) {
+				if (world == null) {
 					throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 				}
 				try {
@@ -1408,7 +1408,7 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
-			if(world == null) {
+			if (world == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 			}
 			return CBoolean.get(world.getPVP());
@@ -1455,14 +1455,14 @@ public class World {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args.length == 1) {
+			if (args.length == 1) {
 				boolean pvp = Static.getBoolean(args[0]);
-				for(MCWorld world : Static.getServer().getWorlds()) {
+				for (MCWorld world : Static.getServer().getWorlds()) {
 					world.setPVP(pvp);
 				}
 			} else {
 				MCWorld world = Static.getServer().getWorld(args[0].val());
-				if(world == null) {
+				if (world == null) {
 					throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 				}
 				world.setPVP(Static.getBoolean(args[1]));
@@ -1514,12 +1514,12 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
-			if(world == null) {
+			if (world == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 			}
-			if(args.length == 1) {
+			if (args.length == 1) {
 				CArray gameRules = CArray.GetAssociativeArray(t);
-				for(String gameRule : world.getGameRules()) {
+				for (String gameRule : world.getGameRules()) {
 					gameRules.set(new CString(gameRule, t),
 							Static.resolveConstruct(world.getGameRuleValue(gameRule), t), t);
 				}
@@ -1528,7 +1528,7 @@ public class World {
 				try {
 					MCGameRule gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
 					String value = world.getGameRuleValue(gameRule.getGameRule());
-					if(value.equals("")) {
+					if (value.equals("")) {
 						throw new CREFormatException("The gamerule \"" + args[1].val()
 								+ "\" does not exist in this version.", t);
 					}
@@ -1584,17 +1584,17 @@ public class World {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCGameRule gameRule;
 			boolean success = false;
-			if(args.length == 2) {
+			if (args.length == 2) {
 				try {
 					gameRule = MCGameRule.valueOf(args[0].val().toUpperCase());
 				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The gamerule \"" + args[0].val() + "\" does not exist.", t);
 				}
-				if(!args[1].getCType().equals(gameRule.getRuleType())) {
+				if (!args[1].getCType().equals(gameRule.getRuleType())) {
 					throw new CREFormatException("Wrong value type for \"" + args[0].val() + "\".", t);
 				}
 				String value = args[1].val();
-				for(MCWorld world : Static.getServer().getWorlds()) {
+				for (MCWorld world : Static.getServer().getWorlds()) {
 					success = world.setGameRuleValue(gameRule, value);
 				}
 			} else {
@@ -1604,10 +1604,10 @@ public class World {
 					throw new CREFormatException("The gamerule \"" + args[1].val() + "\" does not exist.", t);
 				}
 				MCWorld world = Static.getServer().getWorld(args[0].val());
-				if(world == null) {
+				if (world == null) {
 					throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 				}
-				if(!args[2].getCType().equals(gameRule.getRuleType())) {
+				if (!args[2].getCType().equals(gameRule.getRuleType())) {
 					throw new CREFormatException("Wrong value type for \"" + args[1].val() + "\".", t);
 				}
 				success = world.setGameRuleValue(gameRule, args[2].val());
@@ -1663,11 +1663,11 @@ public class World {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
 			double distance = 1;
-			if(args.length == 3) {
+			if (args.length == 3) {
 				distance = Static.getNumber(args[2], t);
 			}
 			Vector3D vector;
-			if(args[1] instanceof CArray) {
+			if (args[1] instanceof CArray) {
 				MCLocation to = ObjectGenerator.GetGenerator().location(args[1], loc.getWorld(), t);
 				vector = to.toVector().subtract(loc.toVector()).normalize();
 			} else {
@@ -1690,8 +1690,7 @@ public class World {
 				"{0: 0.0, 1: 64.0, 2: 1.0, 3: world, 4: 0.0, 5: 90.0, x: 0.0, y: 64.0, z: 1.0, world: world, yaw: 0.0, pitch: 90.0}"),
 				new ExampleScript("Using a direction to get the block 2 meters above the player's targeted block.",
 				"location_shift(pcursor(), 'UP', 2)",
-				"{0: 0.0, 1: 66.0, 2: 0.0, 3: world, 4: 0.0, 5: 0.0, x: 0.0, y: 66.0, z: 0.0, world: world, yaw: 0.0, pitch: 0.0}"),
-			};
+				"{0: 0.0, 1: 66.0, 2: 0.0, 3: world, 4: 0.0, 5: 0.0, x: 0.0, y: 66.0, z: 0.0, world: world, yaw: 0.0, pitch: 0.0}"),};
 		}
 	}
 
@@ -1746,16 +1745,16 @@ public class World {
 			MCLocation subtract;
 			try {
 				subtract = to.subtract(from);
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CREFormatException("Locations are in differing worlds.", t);
 			}
 			double dX = subtract.getX();
 			double dZ = subtract.getZ();
 
-			double yaw = java.lang.Math.atan(dX/dZ) * 180 / java.lang.Math.PI; // In degrees [-90:90].
-			if(dZ < 0) { // Bottom circle quadrant.
+			double yaw = java.lang.Math.atan(dX / dZ) * 180 / java.lang.Math.PI; // In degrees [-90:90].
+			if (dZ < 0) { // Bottom circle quadrant.
 				yaw += 180;
-			} else if(dX < 0) { // Top left half quadrant.
+			} else if (dX < 0) { // Top left half quadrant.
 				yaw += 360;
 			}
 
@@ -1816,13 +1815,13 @@ public class World {
 
 			double distanceXZ = java.lang.Math.sqrt(dX * dX + dZ * dZ);
 
-			double pitch = java.lang.Math.atan(dY/distanceXZ) * -180 / java.lang.Math.PI;
+			double pitch = java.lang.Math.atan(dY / distanceXZ) * -180 / java.lang.Math.PI;
 
 			return new CDouble(pitch, t);
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_vector extends AbstractFunction {
 
 		@Override
@@ -1865,7 +1864,7 @@ public class World {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Vector3D v = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t).getDirection();
-			if(args.length == 2) {
+			if (args.length == 2) {
 				v = v.multiply(Static.getDouble(args[1], t));
 			}
 			return ObjectGenerator.GetGenerator().vector(v);
@@ -1888,7 +1887,7 @@ public class World {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRERangeException.class, CREFormatException.class, CREInvalidWorldException.class,
-					CREIllegalArgumentException.class};
+				CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -1992,7 +1991,7 @@ public class World {
 		public Construct exec(Target target, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCWorld world = null;
-			if(player != null) {
+			if (player != null) {
 				world = player.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], world, target);
@@ -2041,10 +2040,10 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = Static.getServer().getWorld(args[0].val());
-			if(w == null){
+			if (w == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
 			}
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)){
+			if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
 				return CNull.NULL;
 			}
 			MCWorldBorder wb = w.getWorldBorder();
@@ -2086,7 +2085,7 @@ public class World {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class,
-					CRERangeException.class};
+				CRERangeException.class};
 		}
 
 		@Override
@@ -2102,39 +2101,39 @@ public class World {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = Static.getServer().getWorld(args[0].val());
-			if(w == null){
+			if (w == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
 			}
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)){
+			if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
 				return CVoid.VOID;
 			}
 			MCWorldBorder wb = w.getWorldBorder();
 			Construct c = args[1];
-			if(!(c instanceof CArray)){
+			if (!(c instanceof CArray)) {
 				throw new CREFormatException("Expected array but given \"" + args[1].val() + "\"", t);
 			}
-			CArray params = (CArray)c;
-			if(params.containsKey("width")){
-				if(params.containsKey("seconds")){
+			CArray params = (CArray) c;
+			if (params.containsKey("width")) {
+				if (params.containsKey("seconds")) {
 					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t),
 							ArgumentValidation.getInt32(params.get("seconds", t), t));
 				} else {
 					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t));
 				}
 			}
-			if(params.containsKey("center")){
+			if (params.containsKey("center")) {
 				wb.setCenter(ObjectGenerator.GetGenerator().location(params.get("center", t), w, t));
 			}
-			if(params.containsKey("damagebuffer")){
+			if (params.containsKey("damagebuffer")) {
 				wb.setDamageBuffer(ArgumentValidation.getDouble(params.get("damagebuffer", t), t));
 			}
-			if(params.containsKey("damageamount")){
+			if (params.containsKey("damageamount")) {
 				wb.setDamageAmount(ArgumentValidation.getDouble(params.get("damageamount", t), t));
 			}
-			if(params.containsKey("warningtime")){
+			if (params.containsKey("warningtime")) {
 				wb.setWarningTime(ArgumentValidation.getInt32(params.get("warningtime", t), t));
 			}
-			if(params.containsKey("warningdistance")){
+			if (params.containsKey("warningdistance")) {
 				wb.setWarningDistance(ArgumentValidation.getInt32(params.get("warningdistance", t), t));
 			}
 			return CVoid.VOID;

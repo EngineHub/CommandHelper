@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction;
 
 public interface MCLeatherArmorMeta extends MCItemMeta {
+
 	/**
 	 * Gets the color of the armor.
 	 *

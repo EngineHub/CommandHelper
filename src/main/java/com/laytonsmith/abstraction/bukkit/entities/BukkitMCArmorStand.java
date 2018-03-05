@@ -29,8 +29,8 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	}
 
 	/**
-	 * LivingEntity#getEquipment returns null for ArmorStands, so we need to supply our own.
-	 * Needed for get|set_mob_equipment.
+	 * LivingEntity#getEquipment returns null for ArmorStands, so we need to supply our own. Needed for
+	 * get|set_mob_equipment.
 	 *
 	 * @return Custom implementation of org.bukkit.inventory.EntityEquipment
 	 */
@@ -42,7 +42,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	@Override
 	public Map<MCBodyPart, Vector3D> getAllPoses() {
 		Map<MCBodyPart, Vector3D> slots = new EnumMap<MCBodyPart, Vector3D>(MCBodyPart.class);
-		for(MCBodyPart key : MCBodyPart.values()) {
+		for (MCBodyPart key : MCBodyPart.values()) {
 			switch (key) {
 				case Head:
 					slots.put(key, getHeadPose());
@@ -70,9 +70,9 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	@Override
 	public void setAllPoses(Map<MCBodyPart, Vector3D> posemap) {
 		Vector3D pose;
-		for(Map.Entry<MCBodyPart, Vector3D> part : posemap.entrySet()) {
+		for (Map.Entry<MCBodyPart, Vector3D> part : posemap.entrySet()) {
 			pose = part.getValue();
-			switch(part.getKey()) {
+			switch (part.getKey()) {
 				case Head:
 					setHeadPose(pose);
 					break;
@@ -112,7 +112,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setBoots(MCItemStack item) {
-		if(item == null) {
+		if (item == null) {
 			as.setBoots(null);
 		} else {
 			as.setBoots(((BukkitMCItemStack) item).asItemStack());
@@ -136,7 +136,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setChestplate(MCItemStack item) {
-		if(item == null) {
+		if (item == null) {
 			as.setChestplate(null);
 		} else {
 			as.setChestplate(((BukkitMCItemStack) item).asItemStack());
@@ -150,7 +150,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setHelmet(MCItemStack item) {
-		if(item == null) {
+		if (item == null) {
 			as.setHelmet(null);
 		} else {
 			as.setHelmet(((BukkitMCItemStack) item).asItemStack());
@@ -277,7 +277,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	public Boolean isMarker() {
 		try {
 			return as.isMarker();
-		} catch(NoSuchMethodError ex){
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.8.7
 			return null;
 		}
@@ -287,18 +287,18 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	public void setMarker(boolean marker) {
 		try {
 			as.setMarker(marker);
-		} catch(NoSuchMethodError ex){
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.8.7
 		}
 	}
 
 	/**
 	 * @author jb_aero
-	 *         <p/>
-	 *         Custom implementation of EntityEquipment
-	 *         This remaps calls to EntityEquipment's methods to those of the associated ArmorStand
-	 *         <p/>
-	 *         Methods related to droprates are unmodified as they do nothing, but are not needed anyway.
+	 * <p/>
+	 * Custom implementation of EntityEquipment This remaps calls to EntityEquipment's methods to those of the
+	 * associated ArmorStand
+	 * <p/>
+	 * Methods related to droprates are unmodified as they do nothing, but are not needed anyway.
 	 */
 	private class ArmorStandEquipmentProxy implements EntityEquipment {
 
@@ -324,12 +324,12 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		}
 
 		@Override
-		public ItemStack getItemInMainHand(){
+		public ItemStack getItemInMainHand() {
 			return holder.getItemInHand();
 		}
 
 		@Override
-		public void setItemInMainHand(ItemStack itemStack){
+		public void setItemInMainHand(ItemStack itemStack) {
 			holder.setItemInHand(itemStack);
 		}
 
@@ -339,7 +339,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		}
 
 		@Override
-		public void setItemInOffHand(ItemStack itemStack){
+		public void setItemInOffHand(ItemStack itemStack) {
 			holder.getEquipment().setItemInOffHand(itemStack);
 		}
 

@@ -7,10 +7,16 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCSignChangeEvent extends BindableEvent {
+
 	MCPlayer getPlayer();
+
 	MCBlock getBlock();
+
 	CString getLine(int index);
+
 	void setLine(int index, String text);
+
 	void setLines(String[] lines);
+
 	CArray getLines();
 }

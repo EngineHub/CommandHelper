@@ -7,27 +7,29 @@ import java.util.Objects;
  * A package mirror provides information about the package a class is in.
  */
 public class PackageMirror implements Serializable {
+
 	private static final long serialVersionUID = 1L;
 	private final String name;
-	
-	public PackageMirror(String name){
+
+	public PackageMirror(String name) {
 		this.name = name;
 	}
-	
+
 	/**
 	 * Returns the name of the package
-	 * @return 
+	 *
+	 * @return
 	 */
-	public String getName(){
+	public String getName() {
 		return name;
 	}
-	
+
 	/**
-	 * Attempts to load the underlying {@link java.lang.Package} object.
-	 * If the package doesn't exist, null is returned.
-	 * @return 
+	 * Attempts to load the underlying {@link java.lang.Package} object. If the package doesn't exist, null is returned.
+	 *
+	 * @return
 	 */
-	public Package loadPackage(){
+	public Package loadPackage() {
 		return Package.getPackage(name);
 	}
 
@@ -52,6 +54,5 @@ public class PackageMirror implements Serializable {
 		}
 		return true;
 	}
-	
-	
+
 }

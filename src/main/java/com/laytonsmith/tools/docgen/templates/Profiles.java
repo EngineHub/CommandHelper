@@ -1,7 +1,7 @@
 package com.laytonsmith.tools.docgen.templates;
 
 /**
- * 
+ *
  */
 public class Profiles extends Template {
 

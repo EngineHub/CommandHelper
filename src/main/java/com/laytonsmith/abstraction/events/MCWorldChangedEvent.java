@@ -5,7 +5,10 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCWorldChangedEvent extends BindableEvent {
+
 	MCPlayer getPlayer();
+
 	MCWorld getFrom();
+
 	MCWorld getTo();
 }

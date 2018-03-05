@@ -1,4 +1,3 @@
-
 package com.laytonsmith.core.extensions;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
@@ -28,32 +27,34 @@ import java.util.TreeSet;
 
 /**
  * Extension tracking and control class.
+ *
  * @author Jason Unger <entityreborn@gmail.com>
  */
 public class ExtensionTracker {
+
 	/* package */ String identifier;
 	/* package */ Version version;
 	/* package */ List<Extension> allExtensions;
 	private final DynamicClassLoader dcl;
 	private final ClassDiscovery cd;
 	/* package */ final Map<api.Platforms, Map<String, FunctionBase>> functions;
-    /* package */ final Map<String, Set<api.Platforms>> supportedPlatforms;
+	/* package */ final Map<String, Set<api.Platforms>> supportedPlatforms;
 	/* package */ final Map<Driver, Set<Event>> events;
 	/* package */ final URL container;
 	/* package */ boolean isShutdown;
 
 	public ExtensionTracker(URL container, ClassDiscovery cd, DynamicClassLoader dcl) {
-		functions  = new EnumMap<>(api.Platforms.class);
+		functions = new EnumMap<>(api.Platforms.class);
 		supportedPlatforms = new HashMap<>();
-		
-		for(api.Platforms p : api.Platforms.values()){
-            functions.put(p, new HashMap<String, FunctionBase>());
-        }
-		
+
+		for (api.Platforms p : api.Platforms.values()) {
+			functions.put(p, new HashMap<String, FunctionBase>());
+		}
+
 		this.events = new EnumMap<>(Driver.class);
 		this.allExtensions = new ArrayList<>();
 		this.version = CHVersion.V0_0_0;
-		
+
 		this.container = container;
 		this.cd = cd;
 		this.dcl = dcl;
@@ -64,11 +65,11 @@ public class ExtensionTracker {
 		if (isShutdown) {
 			return;
 		}
-		
+
 		cd.removeDiscoveryLocation(container);
 		cd.removePreCache(container);
 		dcl.removeJar(container);
-		
+
 		isShutdown = true;
 	}
 
@@ -84,96 +85,98 @@ public class ExtensionTracker {
 	 */
 	public Set<FunctionBase> getFunctions() {
 		Set<FunctionBase> retn = new HashSet<>();
-		
-		for (Map<String, FunctionBase> function: functions.values()) {
+
+		for (Map<String, FunctionBase> function : functions.values()) {
 			retn.addAll(function.values());
 		}
-		
+
 		return retn;
 	}
-	
+
 	public void registerFunction(FunctionBase f) {
-		api api = f.getClass().getAnnotation(api.class);                    
-		api.Platforms [] platforms = api.platform();
-		
-		if(!api.enabled()){
+		api api = f.getClass().getAnnotation(api.class);
+		api.Platforms[] platforms = api.platform();
+
+		if (!api.enabled()) {
 			return;
 		}
 
-		if(supportedPlatforms.get(f.getName()) == null){
+		if (supportedPlatforms.get(f.getName()) == null) {
 			supportedPlatforms.put(f.getName(), EnumSet.noneOf(api.Platforms.class));
 		}
-		
+
 		supportedPlatforms.get(f.getName()).addAll(Arrays.asList(platforms));
-		
+
 		for (api.Platforms platform : platforms) {
 			try {
 				functions.get(platform).put(f.getName(), f);
-			} catch(UnsupportedOperationException e){
+			} catch (UnsupportedOperationException e) {
 				//This function isn't done yet, and during production this is a serious problem,
 				//but it will be caught when we test all the functions, so for now just ignore it,
 				//since this function is called during initial initialization
-			}	
+			}
 		}
-    }
+	}
 
 	/**
 	 * @return the events
 	 */
 	public Set<Event> getEvents() {
 		Set<Event> retn = new HashSet<>();
-		for (Set<Event> set: events.values()) {
+		for (Set<Event> set : events.values()) {
 			retn.addAll(set);
 		}
 		return retn;
 	}
-	
+
 	public Set<Event> getEvents(Driver type) {
 		Set<Event> retn = events.get(type);
-		
+
 		if (retn == null) {
 			return Collections.emptySet();
 		}
-		
+
 		return retn;
 	}
-	
+
 	public void registerEvent(Event e) {
-		if(e instanceof AbstractEvent){
-            AbstractEvent ae = (AbstractEvent) e;
-            //Get the mixin for this server, and add it to e
-            Class mixinClass = StaticLayer.GetServerEventMixin();
-            try{
-                Constructor mixinConstructor = mixinClass.getConstructor(AbstractEvent.class);
-                EventMixinInterface mixin = (EventMixinInterface) mixinConstructor.newInstance(e);
-                ae.setAbstractEventMixin(mixin);
-            } catch(Exception ex){
-                //This is a serious problem, and it should kill the plugin, for fast failure detection.
-                throw new Error("Could not properly instantiate the mixin class. "
-                        + "The constructor with the signature \"public " + mixinClass.getSimpleName() + "(AbstractEvent e)\" is missing"
-                        + " from " + mixinClass.getName());
-            }
-        }
-        
-        //Finally, add it to the list, and hook it.
-        if(!events.containsKey(e.driver())){
-            events.put(e.driver(), new TreeSet<Event>());
-        }
-		
-        events.get(e.driver()).add(e);
+		if (e instanceof AbstractEvent) {
+			AbstractEvent ae = (AbstractEvent) e;
+			//Get the mixin for this server, and add it to e
+			Class mixinClass = StaticLayer.GetServerEventMixin();
+			try {
+				Constructor mixinConstructor = mixinClass.getConstructor(AbstractEvent.class);
+				EventMixinInterface mixin = (EventMixinInterface) mixinConstructor.newInstance(e);
+				ae.setAbstractEventMixin(mixin);
+			} catch (Exception ex) {
+				//This is a serious problem, and it should kill the plugin, for fast failure detection.
+				throw new Error("Could not properly instantiate the mixin class. "
+						+ "The constructor with the signature \"public " + mixinClass.getSimpleName() + "(AbstractEvent e)\" is missing"
+						+ " from " + mixinClass.getName());
+			}
+		}
+
+		//Finally, add it to the list, and hook it.
+		if (!events.containsKey(e.driver())) {
+			events.put(e.driver(), new TreeSet<Event>());
+		}
+
+		events.get(e.driver()).add(e);
 	}
 
 	/**
 	 * Get the internal identifier for this tracker.
-	 * @return 
+	 *
+	 * @return
 	 */
 	public String getIdentifier() {
 		return identifier;
 	}
-	
+
 	/**
 	 * Get the internal version for this tracker.
-	 * @return 
+	 *
+	 * @return
 	 */
 	public Version getVersion() {
 		return version;

@@ -10,13 +10,14 @@ import org.bukkit.entity.Ocelot;
 public class BukkitMCOcelot extends BukkitMCTameable implements MCOcelot {
 
 	Ocelot o;
+
 	public BukkitMCOcelot(Entity be) {
 		super(be);
 		this.o = (Ocelot) be;
 	}
 
-	public BukkitMCOcelot(AbstractionObject ao){
-		super((LivingEntity)ao.getHandle());
+	public BukkitMCOcelot(AbstractionObject ao) {
+		super((LivingEntity) ao.getHandle());
 		this.o = (Ocelot) ao.getHandle();
 	}
 

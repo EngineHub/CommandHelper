@@ -17,7 +17,7 @@ public class BukkitMCPigZombie extends BukkitMCZombie implements MCPigZombie {
 
 	@Override
 	public PigZombie getHandle() {
-		return (PigZombie)super.getHandle();
+		return (PigZombie) super.getHandle();
 	}
 
 	@Override

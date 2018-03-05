@@ -12,35 +12,35 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("UnageableMobException")
 public class CREUnageableMobException extends CREException {
 
-    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final CClassType TYPE = CClassType.get("UnageableMobException");
+	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
+	public static final CClassType TYPE = CClassType.get("UnageableMobException");
 
-    public CREUnageableMobException(String msg, Target t) {
-	super(msg, t);
-    }
+	public CREUnageableMobException(String msg, Target t) {
+		super(msg, t);
+	}
 
-    public CREUnageableMobException(String msg, Target t, Throwable cause) {
-	super(msg, t, cause);
-    }
+	public CREUnageableMobException(String msg, Target t, Throwable cause) {
+		super(msg, t, cause);
+	}
 
-    @Override
-    public String docs() {
-	return "If an age function is called on an unageable mob, this "
-		+ "exception is thrown.";
-    }
+	@Override
+	public String docs() {
+		return "If an age function is called on an unageable mob, this "
+				+ "exception is thrown.";
+	}
 
-    @Override
-    public Version since() {
-	return CHVersion.V3_3_1;
-    }
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	return super.getSuperclasses();
-    }
+	@Override
+	public CClassType[] getSuperclasses() {
+		return super.getSuperclasses();
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	return super.getInterfaces();
-    }
+	@Override
+	public CClassType[] getInterfaces() {
+		return super.getInterfaces();
+	}
 }

@@ -32,33 +32,29 @@ public class SQLiteDataSource extends SQLDataSource {
 	private String path;
 	private ConnectionMixin mixin;
 	/**
-	 * If true, the connection will not be recycled, and will be disconnected
-	 * after each call, and re-established before each call. If false, the
-	 * connection is recycled using the AbstractDataSource connect logic.
+	 * If true, the connection will not be recycled, and will be disconnected after each call, and re-established before
+	 * each call. If false, the connection is recycled using the AbstractDataSource connect logic.
 	 *
-	 * It appears as though this needs to remain true for connections to work correctly
-	 * if multiple connections are established. Further research may need to be done
-	 * to establish if this is a Windows only problem, or if there is some other
-	 * complicating factor that causes connections to have to continually retry.
-	 * Additionally, it may be that the issue could be solved using a more complex
-	 * transaction system. Regardless, it seems to work in all cases without transactions,
-	 * so long as this remains true.
+	 * It appears as though this needs to remain true for connections to work correctly if multiple connections are
+	 * established. Further research may need to be done to establish if this is a Windows only problem, or if there is
+	 * some other complicating factor that causes connections to have to continually retry. Additionally, it may be that
+	 * the issue could be solved using a more complex transaction system. Regardless, it seems to work in all cases
+	 * without transactions, so long as this remains true.
 	 */
 	private final static boolean DO_DISCONNECTS = true;
 	/**
-	 * If the connection takes this long to connect, it will give up, throw an exception,
-	 * and continue on. This timeout should be large enough to never cause false positives,
-	 * but small enough that the host itself won't decide the connection has completely stalled
-	 * out.
+	 * If the connection takes this long to connect, it will give up, throw an exception, and continue on. This timeout
+	 * should be large enough to never cause false positives, but small enough that the host itself won't decide the
+	 * connection has completely stalled out.
 	 */
 	private final static int TIMEOUT = 30000;
 
-	private SQLiteDataSource(){
+	private SQLiteDataSource() {
 
 	}
 
 	@SuppressWarnings("SleepWhileInLoop")
-	public SQLiteDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
+	public SQLiteDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		super(uri, options);
 		mixin = getConnectionMixin();
 		try {
@@ -66,8 +62,8 @@ public class SQLiteDataSource extends SQLDataSource {
 			path = mixin.getPath();
 			connect();
 			long startTime = System.currentTimeMillis();
-			while(true){
-				if(System.currentTimeMillis() - TIMEOUT > startTime){
+			while (true) {
+				if (System.currentTimeMillis() - TIMEOUT > startTime) {
 					throw new DataSourceException("Data source at " + uri + " could not connect for "
 							+ (TIMEOUT / 1000) + " seconds, so we're giving up on retrying.");
 				}
@@ -77,8 +73,8 @@ public class SQLiteDataSource extends SQLDataSource {
 					}
 					updateLastConnected();
 					break;
-				} catch(SQLException ex){
-					if(ex.getMessage().startsWith("[SQLITE_BUSY]") || ex.getMessage().equals("database is locked")){
+				} catch (SQLException ex) {
+					if (ex.getMessage().startsWith("[SQLITE_BUSY]") || ex.getMessage().equals("database is locked")) {
 						try {
 							Thread.sleep(getRandomSleepTime());
 						} catch (InterruptedException ex1) {
@@ -92,7 +88,7 @@ public class SQLiteDataSource extends SQLDataSource {
 		} catch (ClassNotFoundException | UnsupportedOperationException | IOException | SQLException ex) {
 			throw new DataSourceException("An error occured while setting up a connection to the SQLite database", ex);
 		} finally {
-			if(DO_DISCONNECTS){
+			if (DO_DISCONNECTS) {
 				disconnect();
 			}
 		}
@@ -100,9 +96,9 @@ public class SQLiteDataSource extends SQLDataSource {
 
 	@Override
 	protected void connect() throws IOException, SQLException {
-		if(DO_DISCONNECTS){
+		if (DO_DISCONNECTS) {
 			//Speculative fix. Just kill the connection each time, then renew it.
-			if(connection != null){
+			if (connection != null) {
 				connection.close();
 			}
 			connection = DriverManager.getConnection(getConnectionString());
@@ -111,13 +107,12 @@ public class SQLiteDataSource extends SQLDataSource {
 		}
 	}
 
-
-
 	/**
 	 * {@inheritDoc}
 	 *
-	 * SQLite connections support INSERT OR REPLACE, which prevents duplicate keys from mattering, so this method needs to be overridden for
-	 * SQLite.
+	 * SQLite connections support INSERT OR REPLACE, which prevents duplicate keys from mattering, so this method needs
+	 * to be overridden for SQLite.
+	 *
 	 * @param dm
 	 * @param key
 	 * @param value
@@ -131,7 +126,7 @@ public class SQLiteDataSource extends SQLDataSource {
 	public boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		try {
 			connect();
-			if(value == null){
+			if (value == null) {
 				clearKey0(dm, key);
 			} else {
 				long startTime = System.currentTimeMillis();
@@ -148,10 +143,10 @@ public class SQLiteDataSource extends SQLDataSource {
 							statement.executeUpdate();
 						}
 						break;
-					} catch(SQLException ex){
-						if(ex.getMessage().startsWith("[SQLITE_BUSY]")
+					} catch (SQLException ex) {
+						if (ex.getMessage().startsWith("[SQLITE_BUSY]")
 								// This one only happens with SETs
-								|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")){
+								|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")) {
 							try {
 								Thread.sleep(getRandomSleepTime());
 							} catch (InterruptedException ex1) {
@@ -168,7 +163,7 @@ public class SQLiteDataSource extends SQLDataSource {
 		} catch (SQLException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
-			if(DO_DISCONNECTS){
+			if (DO_DISCONNECTS) {
 				disconnect();
 			}
 		}
@@ -188,19 +183,19 @@ public class SQLiteDataSource extends SQLDataSource {
 							+ (TIMEOUT / 1000) + " seconds, so we're giving up on retrying.");
 				}
 				try {
-					try(PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getKeyColumn() + "` FROM `" + getEscapedTable()
-							+ "` WHERE `" + getKeyColumn() + "` LIKE ?")){
+					try (PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getKeyColumn() + "` FROM `" + getEscapedTable()
+							+ "` WHERE `" + getKeyColumn() + "` LIKE ?")) {
 						statement.setString(1, searchPrefix + "%");
-						try(ResultSet result = statement.executeQuery()){
-							while(result.next()){
+						try (ResultSet result = statement.executeQuery()) {
+							while (result.next()) {
 								set.add(result.getString(getKeyColumn()).split("\\."));
 							}
 						}
 					}
 					updateLastConnected();
 					break;
-				} catch(SQLException ex){
-					if(ex.getMessage().startsWith("[SQLITE_BUSY]")){
+				} catch (SQLException ex) {
+					if (ex.getMessage().startsWith("[SQLITE_BUSY]")) {
 						try {
 							Thread.sleep(getRandomSleepTime());
 						} catch (InterruptedException ex1) {
@@ -212,10 +207,10 @@ public class SQLiteDataSource extends SQLDataSource {
 				}
 			}
 			return set;
-		} catch(SQLException | IOException ex){
+		} catch (SQLException | IOException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
-			if(DO_DISCONNECTS){
+			if (DO_DISCONNECTS) {
 				disconnect();
 			}
 		}
@@ -238,14 +233,14 @@ public class SQLiteDataSource extends SQLDataSource {
 							+ "` WHERE `" + getKeyColumn() + "`=? LIMIT 1")) {
 						statement.setString(1, StringUtils.Join(key, "."));
 						try (ResultSet result = statement.executeQuery()) {
-							if(result.next()){
+							if (result.next()) {
 								ret = result.getString(getValueColumn());
 							}
 						}
 					}
 					break;
-				} catch(SQLException ex){
-					if(ex.getMessage().startsWith("[SQLITE_BUSY]")){
+				} catch (SQLException ex) {
+					if (ex.getMessage().startsWith("[SQLITE_BUSY]")) {
 						try {
 							Thread.sleep(getRandomSleepTime());
 						} catch (InterruptedException ex1) {
@@ -258,10 +253,10 @@ public class SQLiteDataSource extends SQLDataSource {
 			}
 			updateLastConnected();
 			return ret;
-		} catch(SQLException | IOException ex){
+		} catch (SQLException | IOException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
-			if(DO_DISCONNECTS){
+			if (DO_DISCONNECTS) {
 				disconnect();
 			}
 		}
@@ -281,17 +276,17 @@ public class SQLiteDataSource extends SQLDataSource {
 				}
 				try {
 					try (PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getKeyColumn() + "`, `" + getValueColumn() + "` FROM `"
-							+ getEscapedTable() + "`" + " WHERE `" + getKeyColumn() + "` LIKE ?")){
+							+ getEscapedTable() + "`" + " WHERE `" + getKeyColumn() + "` LIKE ?")) {
 						statement.setString(1, StringUtils.Join(leadKey, ".") + "%");
-						try (ResultSet results = statement.executeQuery()){
-							while(results.next()){
+						try (ResultSet results = statement.executeQuery()) {
+							while (results.next()) {
 								map.put(results.getString(getKeyColumn()).split("\\."), results.getString(getValueColumn()));
 							}
 						}
 					}
 					break;
-				} catch(SQLException ex){
-					if(ex.getMessage().startsWith("[SQLITE_BUSY]")){
+				} catch (SQLException ex) {
+					if (ex.getMessage().startsWith("[SQLITE_BUSY]")) {
 						try {
 							Thread.sleep(getRandomSleepTime());
 						} catch (InterruptedException ex1) {
@@ -304,10 +299,10 @@ public class SQLiteDataSource extends SQLDataSource {
 			}
 			updateLastConnected();
 			return map;
-		} catch(SQLException | IOException ex){
+		} catch (SQLException | IOException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
-			if(DO_DISCONNECTS){
+			if (DO_DISCONNECTS) {
 				disconnect();
 			}
 		}
@@ -316,8 +311,8 @@ public class SQLiteDataSource extends SQLDataSource {
 	@Override
 	@SuppressWarnings("SleepWhileInLoop")
 	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
-		try{
-		    dm.activateThread(Thread.currentThread());
+		try {
+			dm.activateThread(Thread.currentThread());
 			connect();
 			long startTime = System.currentTimeMillis();
 			while (true) {
@@ -333,10 +328,10 @@ public class SQLiteDataSource extends SQLDataSource {
 						updateLastConnected();
 					}
 					break;
-				} catch(SQLException ex){
-					if(ex.getMessage().startsWith("[SQLITE_BUSY]")
+				} catch (SQLException ex) {
+					if (ex.getMessage().startsWith("[SQLITE_BUSY]")
 							// This one only happens with SETs
-							|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")){
+							|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")) {
 						try {
 							Thread.sleep(getRandomSleepTime());
 						} catch (InterruptedException ex1) {
@@ -347,10 +342,10 @@ public class SQLiteDataSource extends SQLDataSource {
 					}
 				}
 			}
-		} catch(IOException | SQLException e){
+		} catch (IOException | SQLException e) {
 			throw new DataSourceException(e.getMessage(), e);
 		} finally {
-			if(DO_DISCONNECTS){
+			if (DO_DISCONNECTS) {
 				disconnect();
 			}
 			dm.deactivateThread(Thread.currentThread());
@@ -360,19 +355,20 @@ public class SQLiteDataSource extends SQLDataSource {
 	@Override
 	public String docs() {
 		return "SQLite {sqlite://path/to/db/file.db} This type store data in a SQLite database."
-			+ " All the pros and cons of MySQL apply here. The database will contain a lone table,"
+				+ " All the pros and cons of MySQL apply here. The database will contain a lone table,"
 				+ " and the table should be created with the query: <%SYNTAX|sql|"
 				+ getTableCreationQuery() + "%>";
 	}
 
 	/**
-	 * Returns the table creation query that should be used to create the table specified.
-	 * This is public for documentation, but is used internally.
+	 * Returns the table creation query that should be used to create the table specified. This is public for
+	 * documentation, but is used internally.
+	 *
 	 * @return
 	 */
-	public final String getTableCreationQuery(){
+	public final String getTableCreationQuery() {
 		return "CREATE TABLE IF NOT EXISTS `" + TABLE_NAME + "` (`" + getKeyColumn() + "` TEXT PRIMARY KEY,"
-					+ " `" + getValueColumn() + "` TEXT)";
+				+ " `" + getValueColumn() + "` TEXT)";
 	}
 
 	@Override
@@ -396,11 +392,11 @@ public class SQLiteDataSource extends SQLDataSource {
 	protected void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
 		try {
 			if (rollback) {
-				try(PreparedStatement statement = getConnection().prepareStatement("ROLLBACK TRANSACTION")){
+				try (PreparedStatement statement = getConnection().prepareStatement("ROLLBACK TRANSACTION")) {
 					statement.execute();
 				}
 			} else {
-				try(PreparedStatement statement = getConnection().prepareStatement("END TRANSACTION")){
+				try (PreparedStatement statement = getConnection().prepareStatement("END TRANSACTION")) {
 					statement.execute();
 				}
 			}
@@ -420,7 +416,7 @@ public class SQLiteDataSource extends SQLDataSource {
 		return "jdbc:sqlite:" + path;
 	}
 
-	private int getRandomSleepTime(){
-		return ((int)(Math.random() * 10) % 10);
+	private int getRandomSleepTime() {
+		return ((int) (Math.random() * 10) % 10);
 	}
 }

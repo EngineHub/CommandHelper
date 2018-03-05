@@ -21,6 +21,7 @@ import java.util.Map;
  * @author Jason Unger <entityreborn@gmail.com>
  */
 public class PluginEvents {
+
 	public static String docs() {
 		return "Contains events related to generic plugin messaging.";
 	}
@@ -51,7 +52,7 @@ public class PluginEvents {
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if (e instanceof MCPluginIncomingMessageEvent) {
-				MCPluginIncomingMessageEvent event = (MCPluginIncomingMessageEvent)e;
+				MCPluginIncomingMessageEvent event = (MCPluginIncomingMessageEvent) e;
 
 				Prefilters.match(prefilter, "channel", event.getChannel(), Prefilters.PrefilterType.STRING_MATCH);
 

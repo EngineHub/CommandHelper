@@ -1,4 +1,3 @@
-
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Version;
@@ -31,10 +30,10 @@ import java.util.Map;
  */
 @core
 public class CmdlineEvents {
-	public static String docs(){
+
+	public static String docs() {
 		return "Contains events related to cmdline events.";
 	}
-
 
 	@api
 	@hide("Test event, not meant for normal use")
@@ -44,13 +43,13 @@ public class CmdlineEvents {
 
 		@Override
 		public void bind(BoundEvent event) {
-			if(testThread == null){
+			if (testThread == null) {
 				testThread = new Thread(new Runnable() {
 
 					@Override
 					public void run() {
-						while(true){
-							if(Thread.currentThread().isInterrupted()){
+						while (true) {
+							if (Thread.currentThread().isInterrupted()) {
 								break;
 							}
 							EventUtils.TriggerListener(Driver.EXTENSION, "cmdline_test_event", new BindableEvent() {
@@ -78,8 +77,6 @@ public class CmdlineEvents {
 				});
 			}
 		}
-
-
 
 		@Override
 		public String getName() {
@@ -158,13 +155,13 @@ public class CmdlineEvents {
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
 			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t).val(),
-				Static.getBoolean(manualObject.get("shellMode", t)));
+					Static.getBoolean(manualObject.get("shellMode", t)));
 			return cpi;
 		}
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			CmdlinePromptInput cpi = (CmdlinePromptInput)e;
+			CmdlinePromptInput cpi = (CmdlinePromptInput) e;
 			Map<String, Construct> map = new HashMap<>();
 			map.put("command", new CString(cpi.getCommand(), Target.UNKNOWN));
 			map.put("shellMode", CBoolean.get(cpi.isShellMode()));
@@ -196,7 +193,8 @@ public class CmdlineEvents {
 			private boolean isCancelled = false;
 			private final String command;
 			private final boolean shellMode;
-			public CmdlinePromptInput(String command, boolean shellMode){
+
+			public CmdlinePromptInput(String command, boolean shellMode) {
 				this.command = command;
 				this.shellMode = shellMode;
 			}
@@ -206,7 +204,7 @@ public class CmdlineEvents {
 				throw new UnsupportedOperationException("TODO: Not supported yet.");
 			}
 
-			public String getCommand(){
+			public String getCommand() {
 				return command;
 			}
 
@@ -215,12 +213,12 @@ public class CmdlineEvents {
 				isCancelled = state;
 			}
 
-			public boolean isCancelled(){
+			public boolean isCancelled() {
 				return isCancelled;
 			}
 
 			public boolean isShellMode() {
-			    return this.shellMode;
+				return this.shellMode;
 			}
 
 		}

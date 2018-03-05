@@ -49,7 +49,7 @@ public class MySQLProfile extends SQLProfile {
 		} else {
 			port = 3306;
 		}
-		if(elements.containsKey("useSSL")) {
+		if (elements.containsKey("useSSL")) {
 			useSSL = Boolean.parseBoolean(elements.get("useSSL"));
 		} else {
 			useSSL = null;

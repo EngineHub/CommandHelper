@@ -19,7 +19,7 @@ public class BukkitMCVillager extends BukkitMCAgeable implements MCVillager {
 
 	@Override
 	public Villager getHandle() {
-		return (Villager)super.getHandle();
+		return (Villager) super.getHandle();
 	}
 
 	@Override

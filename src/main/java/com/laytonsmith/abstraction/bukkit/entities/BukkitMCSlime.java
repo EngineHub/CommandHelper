@@ -17,11 +17,11 @@ public class BukkitMCSlime extends BukkitMCLivingEntity implements MCSlime {
 
 	@Override
 	public int getSize() {
-		return ((Slime)getHandle()).getSize();
+		return ((Slime) getHandle()).getSize();
 	}
 
 	@Override
 	public void setSize(int size) {
-		((Slime)getHandle()).setSize(size);
+		((Slime) getHandle()).setSize(size);
 	}
 }

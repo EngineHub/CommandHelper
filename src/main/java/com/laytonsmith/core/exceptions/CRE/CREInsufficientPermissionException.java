@@ -12,35 +12,35 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("InsufficientPermissionException")
 public class CREInsufficientPermissionException extends CREException {
 
-    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    public static final CClassType TYPE = CClassType.get("InsufficientPermissionException");
+	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
+	public static final CClassType TYPE = CClassType.get("InsufficientPermissionException");
 
-    public CREInsufficientPermissionException(String msg, Target t) {
-	super(msg, t);
-    }
+	public CREInsufficientPermissionException(String msg, Target t) {
+		super(msg, t);
+	}
 
-    public CREInsufficientPermissionException(String msg, Target t, Throwable cause) {
-	super(msg, t, cause);
-    }
+	public CREInsufficientPermissionException(String msg, Target t, Throwable cause) {
+		super(msg, t, cause);
+	}
 
-    @Override
-    public String docs() {
-	return "This exception is thrown if the user running the command does not"
-		+ " have permission to run the function";
-    }
+	@Override
+	public String docs() {
+		return "This exception is thrown if the user running the command does not"
+				+ " have permission to run the function";
+	}
 
-    @Override
-    public Version since() {
-	return CHVersion.V3_3_1;
-    }
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_1;
+	}
 
-    @Override
-    public CClassType[] getSuperclasses() {
-	return super.getSuperclasses();
-    }
+	@Override
+	public CClassType[] getSuperclasses() {
+		return super.getSuperclasses();
+	}
 
-    @Override
-    public CClassType[] getInterfaces() {
-	return super.getInterfaces();
-    }
+	@Override
+	public CClassType[] getInterfaces() {
+		return super.getInterfaces();
+	}
 }

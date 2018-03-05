@@ -25,24 +25,22 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * This file allows for simple data storage across many different data sources.
- * In general, the most common methods used are getValue and setValue. Note that
- * getValue, setValue, save, and load are synchronized.
+ * This file allows for simple data storage across many different data sources. In general, the most common methods used
+ * are getValue and setValue. Note that getValue, setValue, save, and load are synchronized.
  *
  *
  */
 @datasource("ser")
 public class SerializedPersistence extends AbstractDataSource {
 
-	private SerializedPersistence(){
+	private SerializedPersistence() {
 
 	}
 
 	/**
-	 * This is the data structure that the registry is stored in. It is a
-	 * HashMap, not a Map, since we are depending on the implementation to
-	 * remain constant, since it is serialized. Do not change this ever, or it
-	 * will break all current serialized databases.
+	 * This is the data structure that the registry is stored in. It is a HashMap, not a Map, since we are depending on
+	 * the implementation to remain constant, since it is serialized. Do not change this ever, or it will break all
+	 * current serialized databases.
 	 */
 	private HashMap<String, String> data = new HashMap<String, String>();
 	private HashMap<String, String> transactionData = new HashMap<String, String>();
@@ -81,51 +79,50 @@ public class SerializedPersistence extends AbstractDataSource {
 	}
 
 	/**
-	 * Loads the database from disk. This is automatically called when setValue
-	 * or getValue is called.
+	 * Loads the database from disk. This is automatically called when setValue or getValue is called.
 	 *
 	 * @throws Exception
 	 */
 	private void load() throws Exception {
-			if (!isLoaded) {
-				queue.invokeAndWait(new Callable<Object>(){
+		if (!isLoaded) {
+			queue.invokeAndWait(new Callable<Object>() {
 
 				@Override
-					public Object call() throws Exception {
+				public Object call() throws Exception {
+					try {
+						FileInputStream fis = null;
+						ObjectInputStream in = null;
 						try {
-							FileInputStream fis = null;
-							ObjectInputStream in = null;
-							try{
-								if(!storageLocation.exists()){
-									storageLocation.createNewFile();
-								}
-								if(storageLocation.length() == 0){
-									data = new HashMap<String, String>();
-								} else {
-									fis = new FileInputStream(storageLocation);
-									in = new ObjectInputStream(fis);
-									data = (HashMap<String, String>) in.readObject();
-								}
-								isLoaded = true;
-							} catch(Throwable t){
-								t.printStackTrace();
-							} finally {
-								if(fis != null){
-									fis.close();
-								}
-								if(in != null){
-									in.close();
-								}
+							if (!storageLocation.exists()) {
+								storageLocation.createNewFile();
 							}
-						} catch (FileNotFoundException ex) {
-							//ignore this one
-						} catch (Exception ex) {
-							throw ex;
+							if (storageLocation.length() == 0) {
+								data = new HashMap<String, String>();
+							} else {
+								fis = new FileInputStream(storageLocation);
+								in = new ObjectInputStream(fis);
+								data = (HashMap<String, String>) in.readObject();
+							}
+							isLoaded = true;
+						} catch (Throwable t) {
+							t.printStackTrace();
+						} finally {
+							if (fis != null) {
+								fis.close();
+							}
+							if (in != null) {
+								in.close();
+							}
 						}
-						return null;
+					} catch (FileNotFoundException ex) {
+						//ignore this one
+					} catch (Exception ex) {
+						throw ex;
 					}
-				});
-			}
+					return null;
+				}
+			});
+		}
 	}
 
 	private byte[] byteData = ArrayUtils.EMPTY_BYTE_ARRAY;
@@ -137,14 +134,15 @@ public class SerializedPersistence extends AbstractDataSource {
 			return byteData;
 		}
 	};
+
 	/**
 	 * Causes the database to be saved to disk
 	 *
 	 * @throws IOException
 	 */
-	private void save(final DaemonManager dm) throws IOException{
-		if(!inTransaction()){
-			if(writer == null){
+	private void save(final DaemonManager dm) throws IOException {
+		if (!inTransaction()) {
+			if (writer == null) {
 				writer = MemoryMapFileUtil.getInstance(storageLocation, grabber);
 			}
 			queue.invokeLater(dm, new Runnable() {
@@ -159,7 +157,7 @@ public class SerializedPersistence extends AbstractDataSource {
 						if (!storageLocation.exists()) {
 							storageLocation.createNewFile();
 						}
-	//					fos = new FileOutputStream(storageLocation);
+						//					fos = new FileOutputStream(storageLocation);
 						baos = new ByteArrayOutputStream();
 						out = new ObjectOutputStream(baos);
 						out.writeObject(new HashMap(data));
@@ -189,8 +187,7 @@ public class SerializedPersistence extends AbstractDataSource {
 	}
 
 	/**
-	 * You should not usually use this method. Please see
-	 * <code>setValue(String[] key, Serializable value)</code>
+	 * You should not usually use this method. Please see <code>setValue(String[] key, Serializable value)</code>
 	 */
 	private String setValue(DaemonManager dm, String key, String value) {
 		//defer loading until we actually try and use the data structure
@@ -231,26 +228,22 @@ public class SerializedPersistence extends AbstractDataSource {
 	}
 
 	/**
-	 * Adds or modifies the value of the key. Typically, this convention should
-	 * be followed:
+	 * Adds or modifies the value of the key. Typically, this convention should be followed:
 	 * <pre>
 	 * key1.key2.key3...
-	 * </pre> To make this usage easier, the function automatically namespaces
-	 * the values for you. A sample usage might be:
+	 * </pre> To make this usage easier, the function automatically namespaces the values for you. A sample usage might
+	 * be:
 	 * <pre>
 	 * setValue(new String[]{"playerName", "value"}, value);
 	 * </pre>
 	 *
-	 * When using namespaces in this way, the isNamespaceSet function becomes
-	 * available to you. Since plugin values are global, you can use this to
-	 * interact with other plugins. Caution should be used when interacting with
-	 * other plugin's values though.
+	 * When using namespaces in this way, the isNamespaceSet function becomes available to you. Since plugin values are
+	 * global, you can use this to interact with other plugins. Caution should be used when interacting with other
+	 * plugin's values though.
 	 *
 	 * @param key The key for this particular value
-	 * @param value The value to store. If value is null, the key is simply
-	 * removed.
-	 * @return The object that was in this key, or null if the value did not
-	 * exist.
+	 * @param value The value to store. If value is null, the key is simply removed.
+	 * @return The object that was in this key, or null if the value did not exist.
 	 */
 	private String setValue(DaemonManager dm, String[] key, String value) {
 		return setValue(dm, getNamespace0(key), (String) value);
@@ -279,7 +272,7 @@ public class SerializedPersistence extends AbstractDataSource {
 		Set<String[]> list = new HashSet<String[]>();
 		String kb = StringUtils.Join(keyBase, ".");
 		for (String key : data.keySet()) {
-			if(key.startsWith(kb)){
+			if (key.startsWith(kb)) {
 				list.add(key.split("\\."));
 			}
 		}
@@ -342,7 +335,7 @@ public class SerializedPersistence extends AbstractDataSource {
 
 	@Override
 	protected void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
-		if(!rollback){
+		if (!rollback) {
 			save(dm);
 		} else {
 			data = transactionData;

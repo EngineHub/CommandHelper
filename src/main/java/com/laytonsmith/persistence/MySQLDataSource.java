@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 public class MySQLDataSource extends SQLDataSource {
 
 	/* These values may not be changed without creating an upgrade routine */
-
 	private static final String KEY_HASH_COLUMN = "key_hash";
 	private String host;
 	private int port;
@@ -32,11 +31,11 @@ public class MySQLDataSource extends SQLDataSource {
 	private String database;
 	private String table;
 
-	private MySQLDataSource(){
+	private MySQLDataSource() {
 		super();
 	}
 
-	public MySQLDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
+	public MySQLDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		super(uri, options);
 		try {
 			Class.forName(com.mysql.jdbc.Driver.class.getName());
@@ -44,25 +43,25 @@ public class MySQLDataSource extends SQLDataSource {
 			throw new DataSourceException("Could not instantiate a MySQL data source, no driver appears to exist.", ex);
 		}
 		host = uri.getHost();
-		if(host == null){
+		if (host == null) {
 			throw new DataSourceException("Invalid URI specified for data source \"" + uri.toString() + "\"");
 		}
 		port = uri.getPort();
-		if(port < 0){
+		if (port < 0) {
 			port = 3306;
 		}
-		if(uri.getUserInfo() != null){
+		if (uri.getUserInfo() != null) {
 			String[] split = uri.getUserInfo().split(":");
 			username = split[0];
-			if(split.length > 1){
+			if (split.length > 1) {
 				password = split[1];
 			}
 		}
-		if(uri.getPath().split("/").length != 3 || !uri.getPath().startsWith("/")){
+		if (uri.getPath().split("/").length != 3 || !uri.getPath().startsWith("/")) {
 			throw new DataSourceException("Invalid path information for mysql connection \"" + uri.toString() + "\"."
 					+ " Path requires a database name and a table name, for instance \"/testDatabase/tableName");
 		} else {
-			String [] split = uri.getPath().split("/");
+			String[] split = uri.getPath().split("/");
 			//First one should be empty
 			database = split[1];
 			table = split[2];
@@ -83,8 +82,9 @@ public class MySQLDataSource extends SQLDataSource {
 	}
 
 	/**
-	 * Returns the table creation query that should be used to create the table specified.
-	 * This is public for documentation, but is used internally.
+	 * Returns the table creation query that should be used to create the table specified. This is public for
+	 * documentation, but is used internally.
+	 *
 	 * @param table
 	 * @return
 	 */
@@ -134,14 +134,14 @@ public class MySQLDataSource extends SQLDataSource {
 				statement.setString(1, joinedKey);
 				ret = null;
 				try (ResultSet result = statement.executeQuery()) {
-					if(result.next()){
+					if (result.next()) {
 						ret = result.getString(getValueColumn());
 					}
 				}
 			}
 			updateLastConnected();
 			return ret;
-		} catch(SQLException | IOException ex){
+		} catch (SQLException | IOException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
@@ -150,7 +150,7 @@ public class MySQLDataSource extends SQLDataSource {
 	public boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		try {
 			connect();
-			if(value == null){
+			if (value == null) {
 				clearKey0(dm, key);
 			} else {
 				try (PreparedStatement statement = getConnection().prepareStatement("REPLACE INTO"
@@ -173,8 +173,8 @@ public class MySQLDataSource extends SQLDataSource {
 
 	@Override
 	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
-		if(hasKey(key)){
-			try{
+		if (hasKey(key)) {
+			try {
 				connect();
 				try (PreparedStatement statement = getConnection().prepareStatement("DELETE FROM `" + getEscapedTable() + "`"
 						+ " WHERE `" + KEY_HASH_COLUMN + "`=UNHEX(MD5(?))")) {
@@ -183,7 +183,7 @@ public class MySQLDataSource extends SQLDataSource {
 					statement.executeUpdate();
 				}
 				updateLastConnected();
-			} catch(Exception e){
+			} catch (Exception e) {
 				throw new DataSourceException(e.getMessage(), e);
 			}
 		}
@@ -192,16 +192,16 @@ public class MySQLDataSource extends SQLDataSource {
 	@Override
 	public String docs() {
 		return "MySQL {mysql://[user[:password]@]host[:port]/database/table}"
-			+ " This type stores data in a MySQL database. Unlike the"
-			+ " file based systems, this is extremely efficient, but"
-			+ " requires a database connection already set up to work."
-			+ " This also always allows for simultaneous connections"
-			+ " from multiple data sink/sources at once, which is not"
-			+ " possible without the potential for corruption in file"
-			+ " based data sources, without risking either data corruption,"
-			+ " or extremely low efficiency. The layout of the table"
-			+ " in the database is required to be of a specific format: <%SYNTAX|sql|"
-			+ getTableCreationQuery("testTable") + "%>";
+				+ " This type stores data in a MySQL database. Unlike the"
+				+ " file based systems, this is extremely efficient, but"
+				+ " requires a database connection already set up to work."
+				+ " This also always allows for simultaneous connections"
+				+ " from multiple data sink/sources at once, which is not"
+				+ " possible without the potential for corruption in file"
+				+ " based data sources, without risking either data corruption,"
+				+ " or extremely low efficiency. The layout of the table"
+				+ " in the database is required to be of a specific format: <%SYNTAX|sql|"
+				+ getTableCreationQuery("testTable") + "%>";
 	}
 
 	@Override
@@ -212,7 +212,7 @@ public class MySQLDataSource extends SQLDataSource {
 	@Override
 	protected void startTransaction0(DaemonManager dm) {
 		try {
-			try(Statement statement = getConnection().createStatement()){
+			try (Statement statement = getConnection().createStatement()) {
 				statement.execute("START TRANSACTION");
 			}
 		} catch (SQLException ex) {
@@ -224,11 +224,11 @@ public class MySQLDataSource extends SQLDataSource {
 	protected void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
 		try {
 			if (rollback) {
-				try(PreparedStatement statement = getConnection().prepareStatement("ROLLBACK")){
+				try (PreparedStatement statement = getConnection().prepareStatement("ROLLBACK")) {
 					statement.execute();
 				}
 			} else {
-				try(PreparedStatement statement = getConnection().prepareStatement("COMMIT")){
+				try (PreparedStatement statement = getConnection().prepareStatement("COMMIT")) {
 					statement.execute();
 				}
 			}

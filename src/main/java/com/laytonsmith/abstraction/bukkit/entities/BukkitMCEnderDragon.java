@@ -34,7 +34,7 @@ public class BukkitMCEnderDragon extends BukkitMCComplexLivingEntity implements 
 	public void setPhase(MCEnderDragonPhase phase) {
 		try {
 			ed.setPhase(BukkitMCEnderDragonPhase.getConvertor().getConcreteEnum(phase));
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// probably prior to 1.9.2
 		}
 	}

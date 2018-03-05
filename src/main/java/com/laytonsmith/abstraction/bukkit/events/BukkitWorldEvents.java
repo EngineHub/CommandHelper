@@ -63,7 +63,7 @@ public final class BukkitWorldEvents {
 		public List<MCBlockState> getBlocks() {
 			List<BlockState> blocks = _event.getBlocks();
 			ArrayList<MCBlockState> r = new ArrayList<>(blocks.size());
-			for(BlockState block : blocks) {
+			for (BlockState block : blocks) {
 				r.add(new BukkitMCBlockState(block));
 			}
 			return r;

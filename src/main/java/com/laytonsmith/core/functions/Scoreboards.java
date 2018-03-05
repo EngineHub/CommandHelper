@@ -43,7 +43,7 @@ import java.util.Set;
 public class Scoreboards {
 
 	public static String docs() {
-	return "A class of functions for manipulating the server scoreboard.";
+		return "A class of functions for manipulating the server scoreboard.";
 	}
 
 	/**
@@ -54,7 +54,7 @@ public class Scoreboards {
 	private static Map<String, MCScoreboard> boards = new HashMap<String, MCScoreboard>();
 
 	static {
-		if(!isBoard(MAIN)) {
+		if (!isBoard(MAIN)) {
 			try {
 				addBoard(MAIN, Static.getServer().getMainScoreboard(), Target.UNKNOWN);
 			} catch (NotInitializedYetException e) {
@@ -88,8 +88,8 @@ public class Scoreboards {
 	 * @return if the given scoreboard is already being tracked
 	 */
 	public static boolean isBoard(MCScoreboard board) {
-		for(MCScoreboard s : boards.values()) {
-			if(s.equals(board)) {
+		for (MCScoreboard s : boards.values()) {
+			if (s.equals(board)) {
 				return true;
 			}
 		}
@@ -106,10 +106,10 @@ public class Scoreboards {
 	 * @throws CREScoreboardException if the cache already contains the board or the id
 	 */
 	public static void addBoard(String id, MCScoreboard board, Target t) throws CREScoreboardException {
-		if(isBoard(id)) {
+		if (isBoard(id)) {
 			throw new CREScoreboardException("That id is already in use.", t);
 		}
-		if(isBoard(board)) {
+		if (isBoard(board)) {
 			throw new CREScoreboardException("That Scoreboard is already added.", t);
 		}
 		boards.put(id, board);
@@ -124,11 +124,11 @@ public class Scoreboards {
 	 * @throws CREScoreboardException if the cache does not contain id or if the MCScoreboard object is null
 	 */
 	public static MCScoreboard getBoard(String id, Target t) throws CREScoreboardException {
-		if(!isBoard(id)) {
+		if (!isBoard(id)) {
 			throw new CREScoreboardException("The specified scoreboard does not exist.", t);
 		}
 		MCScoreboard ret = boards.get(id);
-		if(ret == null) {
+		if (ret == null) {
 			throw new CREScoreboardException("The specified scoreboard is null. Are you running from cmdline mode?", t);
 		}
 		return ret;
@@ -143,8 +143,8 @@ public class Scoreboards {
 	 * @throws CREScoreboardException if the cache does not contain the given scoreboard
 	 */
 	public static String getBoardID(MCScoreboard board, Target t) throws CREScoreboardException {
-		for(Map.Entry<String, MCScoreboard> e : boards.entrySet()) {
-			if(board.equals(e.getValue())) {
+		for (Map.Entry<String, MCScoreboard> e : boards.entrySet()) {
+			if (board.equals(e.getValue())) {
 				return e.getKey();
 			}
 		}
@@ -159,10 +159,10 @@ public class Scoreboards {
 	 * @throws CREScoreboardException if used on MAIN or if the cache does not contain id
 	 */
 	public static void removeBoard(String id, Target t) throws CREScoreboardException {
-		if(id.equalsIgnoreCase(MAIN)) {
+		if (id.equalsIgnoreCase(MAIN)) {
 			throw new CREScoreboardException("Cannot remove the main server scoreboard.", t);
 		}
-		if(!isBoard(id)) {
+		if (!isBoard(id)) {
 			throw new CREScoreboardException("The specified scoreboard does not exist.", t);
 		}
 		boards.remove(id);
@@ -178,7 +178,7 @@ public class Scoreboards {
 	 * @throws CREScoreboardException if the specified scoreboard does not exist
 	 */
 	static MCScoreboard assignBoard(int indexOfName, Target t, Construct... args) throws CREScoreboardException {
-		if(args.length == indexOfName + 1) {
+		if (args.length == indexOfName + 1) {
 			return getBoard(args[indexOfName].val(), t);
 		}
 		return getBoard(MAIN, t);
@@ -194,16 +194,16 @@ public class Scoreboards {
 		CArray ops = CArray.GetAssociativeArray(t);
 		ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t);
 		ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t);
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
+		if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
 			ops.set("nametagvisibility", new CString(team.getNameTagVisibility().name(), t), t);
 		}
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
+		if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
 			ops.set("collisionrule", new CString(team.getOption(MCOption.COLLISION_RULE).name(), t), t);
 			ops.set("deathmessagevisibility", new CString(team.getOption(MCOption.DEATH_MESSAGE_VISIBILITY).name(), t), t);
 		}
 		to.set("options", ops, t);
 		CArray pl = new CArray(t);
-		for(String entry : team.getEntries()) {
+		for (String entry : team.getEntries()) {
 			pl.push(new CString(entry, t), t);
 		}
 		to.set("players", pl, t);
@@ -294,7 +294,7 @@ public class Scoreboards {
 
 		@Override
 		public Construct exec(Target t, Environment environment,
-			Construct... args) throws ConfigRuntimeException {
+				Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
 			p.setScoreboard(assignBoard(1, t, args));
 			return CVoid.VOID;
@@ -332,9 +332,9 @@ public class Scoreboards {
 
 		@Override
 		public Construct exec(Target t, Environment environment,
-			Construct... args) throws ConfigRuntimeException {
+				Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
-			for(String id : boards.keySet()) {
+			for (String id : boards.keySet()) {
 				ret.push(new CString(id, t), t);
 			}
 			return ret;
@@ -369,13 +369,13 @@ public class Scoreboards {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s;
-			if(args.length == 0) {
+			if (args.length == 0) {
 				s = getBoard(MAIN, t);
 			} else {
 				s = getBoard(args[0].val(), t);
 			}
 			Set<MCObjective> os;
-			if(args.length == 2) {
+			if (args.length == 2) {
 				MCCriteria crit;
 				try {
 					crit = MCCriteria.valueOf(args[1].val());
@@ -387,12 +387,12 @@ public class Scoreboards {
 				os = s.getObjectives();
 			}
 			CArray ret = new CArray(t);
-			for(MCObjective o : os) {
+			for (MCObjective o : os) {
 				CArray obj = CArray.GetAssociativeArray(t);
 				obj.set("name", new CString(o.getName(), t), t);
 				obj.set("displayname", new CString(o.getDisplayName(), t), t);
 				Construct slot = CNull.NULL;
-				if(o.getDisplaySlot() != null) {
+				if (o.getDisplaySlot() != null) {
 					slot = new CString(o.getDisplaySlot().name(), t);
 				}
 				obj.set("slot", slot, t);
@@ -433,13 +433,13 @@ public class Scoreboards {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s;
-			if(args.length == 0) {
+			if (args.length == 0) {
 				s = getBoard(MAIN, t);
 			} else {
 				s = getBoard(args[0].val(), t);
 			}
 			CArray ret = new CArray(t);
-			for(MCTeam team : s.getTeams()) {
+			for (MCTeam team : s.getTeams()) {
 				ret.push(getTeam(team, t), t);
 			}
 			return ret;
@@ -479,7 +479,7 @@ public class Scoreboards {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard newBoard = Static.getServer().getNewScoreboard();
-			if(newBoard == null) {
+			if (newBoard == null) {
 				throw new CRENullPointerException(
 						"Could not create scoreboard, the server returned a null scoreboard"
 						+ " (Are you running in cmdline mode?)", t);
@@ -522,11 +522,11 @@ public class Scoreboards {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			String name = args[0].val();
-			if(name.length() > 16) {
+			if (name.length() > 16) {
 				throw new CRELengthException("Objective names should be no more than 16 characters", t);
 			}
 			MCCriteria criteria = MCCriteria.DUMMY;
-			if(args.length > 1) {
+			if (args.length > 1) {
 				try {
 					criteria = MCCriteria.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException iae) {
@@ -579,7 +579,7 @@ public class Scoreboards {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(1, t, args);
 			String name = args[0].val();
-			if(name.length() > 16) {
+			if (name.length() > 16) {
 				throw new CRELengthException("Team names should be no more than 16 characters.", t);
 			}
 			try {
@@ -625,18 +625,18 @@ public class Scoreboards {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			MCObjective o = s.getObjective(args[0].val());
-			if(o == null) {
+			if (o == null) {
 				throw new CREScoreboardException("No objective by that name exists.", t);
 			}
 			CArray dis = CArray.GetAssociativeArray(t);
-			if(args[1] instanceof CArray) {
+			if (args[1] instanceof CArray) {
 				dis = (CArray) args[1];
 			} else {
 				dis.set("displayname", args[1], t);
 			}
-			if(dis.containsKey("slot")) {
+			if (dis.containsKey("slot")) {
 				MCDisplaySlot slot;
-				if(dis.get("slot", t) instanceof CNull) {
+				if (dis.get("slot", t) instanceof CNull) {
 					slot = null;
 				} else {
 					try {
@@ -647,14 +647,14 @@ public class Scoreboards {
 				}
 				o.setDisplaySlot(slot);
 			}
-			if(dis.containsKey("displayname")) {
+			if (dis.containsKey("displayname")) {
 				String dname;
-				if(dis.get("displayname", t) instanceof CNull) {
+				if (dis.get("displayname", t) instanceof CNull) {
 					dname = o.getName();
 				} else {
 					dname = dis.get("displayname", t).val();
 				}
-				if(dname.length() > 32) {
+				if (dname.length() > 32) {
 					throw new CRELengthException("Displayname can only be 32 characters but was "
 							+ dname.length(), t);
 				}
@@ -702,49 +702,49 @@ public class Scoreboards {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			MCTeam o = s.getTeam(args[0].val());
-			if(o == null) {
+			if (o == null) {
 				throw new CREScoreboardException("No team by that name exists.", t);
 			}
 			CArray dis = CArray.GetAssociativeArray(t);
-			if(args[1] instanceof CArray) {
+			if (args[1] instanceof CArray) {
 				dis = (CArray) args[1];
 			} else {
 				dis.set("displayname", args[1], t);
 			}
-			if(dis.containsKey("displayname")) {
+			if (dis.containsKey("displayname")) {
 				String dname;
-				if(dis.get("displayname", t) instanceof CNull) {
+				if (dis.get("displayname", t) instanceof CNull) {
 					dname = o.getName();
 				} else {
 					dname = dis.get("displayname", t).val();
 				}
-				if(dname.length() > 32) {
+				if (dname.length() > 32) {
 					throw new CRELengthException("Displayname can only be 32 characters but was "
 							+ dname.length(), t);
 				}
 				o.setDisplayName(dname);
 			}
-			if(dis.containsKey("prefix")) {
+			if (dis.containsKey("prefix")) {
 				String prefix;
-				if(dis.get("prefix", t) instanceof CNull) {
+				if (dis.get("prefix", t) instanceof CNull) {
 					prefix = "";
 				} else {
 					prefix = dis.get("prefix", t).val();
 				}
-				if(prefix.length() > 16) {
+				if (prefix.length() > 16) {
 					throw new CRELengthException("Prefix can only be 16 characters but was "
 							+ prefix.length(), t);
 				}
 				o.setPrefix(prefix);
 			}
-			if(dis.containsKey("suffix")) {
+			if (dis.containsKey("suffix")) {
 				String suffix;
-				if(dis.get("suffix", t) instanceof CNull) {
+				if (dis.get("suffix", t) instanceof CNull) {
 					suffix = "";
 				} else {
 					suffix = dis.get("suffix", t).val();
 				}
-				if(suffix.length() > 16) {
+				if (suffix.length() > 16) {
 					throw new CRELengthException("Suffix can only be 16 characters but was "
 							+ suffix.length(), t);
 				}
@@ -793,11 +793,11 @@ public class Scoreboards {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			MCTeam team = s.getTeam(args[0].val());
-			if(team == null) {
+			if (team == null) {
 				throw new CREScoreboardException("No team by that name exists.", t);
 			}
-			if(args[1].val().length() > 40 ||
-						(args[1].val().length() > 16 && Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8_7))) {
+			if (args[1].val().length() > 40
+					|| (args[1].val().length() > 16 && Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8_7))) {
 				throw new CRELengthException("Player name is too long.", t);
 			}
 			team.addEntry(args[1].val());
@@ -834,7 +834,7 @@ public class Scoreboards {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			MCTeam team = s.getTeam(args[0].val());
-			if(team == null) {
+			if (team == null) {
 				throw new CREScoreboardException("No team by that name exists.", t);
 			}
 			return CBoolean.get(team.removeEntry(args[1].val()));
@@ -869,7 +869,7 @@ public class Scoreboards {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(1, t, args);
 			MCTeam team = s.getPlayerTeam(args[0].val());
-			if(team == null) {
+			if (team == null) {
 				return CNull.NULL;
 			}
 			return getTeam(team, t);
@@ -902,26 +902,26 @@ public class Scoreboards {
 
 		@Override
 		public Construct exec(Target t, Environment environment,
-			Construct... args) throws ConfigRuntimeException {
+				Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			boolean nullify = true;
-			if(args.length == 2) {
+			if (args.length == 2) {
 				nullify = Static.getBoolean(args[1]);
 			}
-			if(nullify) {
+			if (nullify) {
 				MCScoreboard s = getBoard(id, t);
-				for(String e : s.getEntries()) {
+				for (String e : s.getEntries()) {
 					s.resetScores(e);
 				}
-				for(MCPlayer p : Static.getServer().getOnlinePlayers()) {
-					if(s.equals(p.getScoreboard())) {
+				for (MCPlayer p : Static.getServer().getOnlinePlayers()) {
+					if (s.equals(p.getScoreboard())) {
 						p.setScoreboard(getBoard(MAIN, t));
 					}
 				}
-				for(MCTeam g : s.getTeams()) {
+				for (MCTeam g : s.getTeams()) {
 					g.unregister();
 				}
-				for(MCObjective o : s.getObjectives()) {
+				for (MCObjective o : s.getObjectives()) {
 					o.unregister();
 				}
 			}
@@ -1037,7 +1037,7 @@ public class Scoreboards {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			MCObjective o = s.getObjective(args[0].val());
-			if(o == null) {
+			if (o == null) {
 				throw new CREScoreboardException("The given objective does not exist.", t);
 			}
 			return new CInt(o.getScore(args[1].val()).getScore(), t);
@@ -1076,10 +1076,10 @@ public class Scoreboards {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, t, args);
 			MCObjective o = s.getObjective(args[0].val());
-			if(o == null) {
+			if (o == null) {
 				throw new CREScoreboardException("The given objective does not exist.", t);
 			}
-			if(args[1].val().length() > 40) {
+			if (args[1].val().length() > 40) {
 				throw new CRELengthException("Player names can only be 40 characters.", t);
 			}
 			o.getScore(args[1].val()).setScore(Static.getInt32(args[2], t));
@@ -1151,18 +1151,18 @@ public class Scoreboards {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			MCTeam team = s.getTeam(args[0].val());
-			if(team == null) {
+			if (team == null) {
 				throw new CREScoreboardException("No team by that name exists.", t);
 			}
-			if(args[1] instanceof CArray) {
+			if (args[1] instanceof CArray) {
 				CArray options = (CArray) args[1];
-				if(options.containsKey("friendlyfire")) {
+				if (options.containsKey("friendlyfire")) {
 					team.setAllowFriendlyFire(Static.getBoolean(options.get("friendlyfire", t)));
 				}
-				if(options.containsKey("friendlyinvisibles")) {
+				if (options.containsKey("friendlyinvisibles")) {
 					team.setCanSeeFriendlyInvisibles(Static.getBoolean(options.get("friendlyinvisibles", t)));
 				}
-				if(options.containsKey("nametagvisibility") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
+				if (options.containsKey("nametagvisibility") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
 					MCNameTagVisibility visibility;
 					try {
 						visibility = MCNameTagVisibility.valueOf(options.get("nametagvisibility", t).val().toUpperCase());
@@ -1172,8 +1172,8 @@ public class Scoreboards {
 					}
 					team.setNameTagVisibility(visibility);
 				}
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-					if(options.containsKey("collisionrule")) {
+				if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
+					if (options.containsKey("collisionrule")) {
 						MCOptionStatus collision;
 						try {
 							collision = MCOptionStatus.valueOf(options.get("collisionrule", t).val().toUpperCase());
@@ -1183,13 +1183,13 @@ public class Scoreboards {
 						}
 						team.setOption(MCOption.COLLISION_RULE, collision);
 					}
-					if(options.containsKey("deathmessagevisibility")) {
+					if (options.containsKey("deathmessagevisibility")) {
 						MCOptionStatus visibility;
 						try {
 							visibility = MCOptionStatus.valueOf(options.get("deathmessagevisibility", t).val().toUpperCase());
 						} catch (IllegalArgumentException iae) {
 							throw new CREFormatException("Unknown deathmessagevisibility: "
-										+ options.get("deathmessagevisibility", t).val(), t);
+									+ options.get("deathmessagevisibility", t).val(), t);
 						}
 						team.setOption(MCOption.DEATH_MESSAGE_VISIBILITY, visibility);
 					}

@@ -14,7 +14,7 @@ import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class AbstractConvertor implements Convertor{
+public abstract class AbstractConvertor implements Convertor {
 
 	private final List<Runnable> shutdownHooks = new ArrayList<>();
 
@@ -34,17 +34,17 @@ public abstract class AbstractConvertor implements Convertor{
 			}
 		});
 		Iterator<Runnable> iter = shutdownHooks.iterator();
-		while(iter.hasNext()){
+		while (iter.hasNext()) {
 			iter.next().run();
 			iter.remove();
 		}
 	}
 
 	/**
-	 * Runs the task either now or later. In the case of a default Convertor,
-	 * it just runs the task now.
+	 * Runs the task either now or later. In the case of a default Convertor, it just runs the task now.
+	 *
 	 * @param dm
-	 * @param r 
+	 * @param r
 	 */
 	@Override
 	public void runOnMainThreadLater(DaemonManager dm, Runnable r) {
@@ -52,7 +52,7 @@ public abstract class AbstractConvertor implements Convertor{
 	}
 
 	@Override
-	public <T> T runOnMainThreadAndWait(Callable<T> callable) throws Exception{
+	public <T> T runOnMainThreadAndWait(Callable<T> callable) throws Exception {
 		return (T) callable.call();
 	}
 
@@ -60,12 +60,12 @@ public abstract class AbstractConvertor implements Convertor{
 	public MCWorldCreator getWorldCreator(String worldName) {
 		throw new UnsupportedOperationException("Not supported.");
 	}
-	
+
 	@Override
 	public MCCommand getNewCommand(String name) {
 		throw new UnsupportedOperationException("Not supported in this implementation.");
 	}
-	
+
 	@Override
 	public MCCommandSender GetCorrectSender(MCCommandSender unspecific) {
 		throw new UnsupportedOperationException("Not supported in this implementation.");
@@ -76,8 +76,8 @@ public abstract class AbstractConvertor implements Convertor{
 
 	@Override
 	public void ClearAllRunnables() {
-		synchronized(tasks){
-			for(Task task : tasks.values()){
+		synchronized (tasks) {
+			for (Task task : tasks.values()) {
 				task.unregister();
 			}
 			tasks.clear();
@@ -86,8 +86,8 @@ public abstract class AbstractConvertor implements Convertor{
 
 	@Override
 	public void ClearFutureRunnable(int id) {
-		synchronized(tasks){
-			if(tasks.containsKey(id)){
+		synchronized (tasks) {
+			if (tasks.containsKey(id)) {
 				tasks.get(id).unregister();
 				tasks.remove(id);
 			}
@@ -104,7 +104,7 @@ public abstract class AbstractConvertor implements Convertor{
 				triggerRunnable(r);
 			}
 		});
-		synchronized(tasks){
+		synchronized (tasks) {
 			tasks.put(id, t);
 			t.register();
 		}
@@ -121,7 +121,7 @@ public abstract class AbstractConvertor implements Convertor{
 				triggerRunnable(r);
 			}
 		});
-		synchronized(tasks){
+		synchronized (tasks) {
 			tasks.put(id, t);
 			t.register();
 		}
@@ -129,18 +129,19 @@ public abstract class AbstractConvertor implements Convertor{
 	}
 
 	/**
-	 * A subclass may need to do special handling for the actual trigger of a scheduled
-	 * task, though not need to do anything special for the scheduling itself. In this
-	 * case, subclasses may override this method, and whenever a scheduled task is
-	 * intended to be run, it will be passed to this method instead. By default, the
-	 * runnable is simply run.
+	 * A subclass may need to do special handling for the actual trigger of a scheduled task, though not need to do
+	 * anything special for the scheduling itself. In this case, subclasses may override this method, and whenever a
+	 * scheduled task is intended to be run, it will be passed to this method instead. By default, the runnable is
+	 * simply run.
+	 *
 	 * @param r
 	 */
-	protected synchronized void triggerRunnable(Runnable r){
+	protected synchronized void triggerRunnable(Runnable r) {
 		r.run();
 	}
 
 	private class Task {
+
 		/**
 		 * The task id
 		 */
@@ -168,12 +169,12 @@ public abstract class AbstractConvertor implements Convertor{
 
 		private Timer timer;
 
-		public Task(int id, DaemonManager dm, boolean repeater, long initialDelay, long interval, Runnable task){
+		public Task(int id, DaemonManager dm, boolean repeater, long initialDelay, long interval, Runnable task) {
 			this.id = id;
 			this.dm = dm;
 			this.repeater = repeater;
 			this.initialDelay = initialDelay;
-			if(repeater){
+			if (repeater) {
 				this.interval = interval;
 			} else {
 				this.interval = Long.MAX_VALUE;
@@ -181,34 +182,34 @@ public abstract class AbstractConvertor implements Convertor{
 			this.task = task;
 		}
 
-		public void register(){
+		public void register() {
 			timer = new Timer();
 			timer.schedule(new TimerTask() {
 
 				@Override
 				public void run() {
 					task.run();
-					if(!repeater){
+					if (!repeater) {
 						unregister();
-						synchronized(tasks){
+						synchronized (tasks) {
 							tasks.remove(id);
 						}
 					}
 				}
 			}, initialDelay, interval);
-			if(dm != null){
+			if (dm != null) {
 				dm.activateThread(null);
 			}
 		}
 
-		public void unregister(){
+		public void unregister() {
 			timer.cancel();
-			if(dm != null){
+			if (dm != null) {
 				dm.deactivateThread(null);
 			}
 		}
 
-		public int getId(){
+		public int getId() {
 			return id;
 		}
 	}

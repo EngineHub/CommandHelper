@@ -28,17 +28,18 @@ public class FileUtil {
 
 	private static final Map<String, Object> fileLocks = new HashMap<>();
 	private static final Map<String, Integer> fileLockCounter = new HashMap<>();
+
 	/**
-	 * A more complicated mechanism is required to ensure global access across the JVM
-	 * is synchronized, so file system accesses do not throw OverlappingFileLockExceptions.
-	 * Though process safe, file locks are not thread safe -.-
+	 * A more complicated mechanism is required to ensure global access across the JVM is synchronized, so file system
+	 * accesses do not throw OverlappingFileLockExceptions. Though process safe, file locks are not thread safe -.-
+	 *
 	 * @param file
 	 * @return
 	 * @throws IOException
 	 */
-	private static synchronized Object getLock(File file) throws IOException{
+	private static synchronized Object getLock(File file) throws IOException {
 		String canonical = file.getAbsoluteFile().getCanonicalPath();
-		if(!fileLocks.containsKey(canonical)){
+		if (!fileLocks.containsKey(canonical)) {
 			fileLocks.put(canonical, new Object());
 			fileLockCounter.put(canonical, 0);
 		}
@@ -46,10 +47,10 @@ public class FileUtil {
 		return fileLocks.get(canonical);
 	}
 
-	private static synchronized void freeLock(File file) throws IOException{
+	private static synchronized void freeLock(File file) throws IOException {
 		String canonical = file.getAbsoluteFile().getCanonicalPath();
 		fileLockCounter.put(canonical, fileLockCounter.get(canonical) - 1);
-		if(fileLockCounter.get(canonical) == 0){
+		if (fileLockCounter.get(canonical) == 0) {
 			fileLockCounter.remove(canonical);
 			fileLocks.remove(canonical);
 		}
@@ -64,8 +65,8 @@ public class FileUtil {
 //		}
 	}
 
-	public static String read(File file, String charset) throws IOException{
-			return StreamUtils.GetString(readAsStream(file), charset);
+	public static String read(File file, String charset) throws IOException {
+		return StreamUtils.GetString(readAsStream(file), charset);
 	}
 
 	/**
@@ -79,14 +80,14 @@ public class FileUtil {
 		try {
 			byte[] bytes = org.apache.commons.io.FileUtils.readFileToByteArray(file);
 			return new ByteArrayInputStream(bytes);
-		} catch(IOException ex){
+		} catch (IOException ex) {
 			//Apache IO has an interesting feature/bug where the error message "Unexpected readed size" is thrown.
 			//If this is the case, we're going to try using a normal java file connection. Other IOExceptions
 			//are just going be rethrown.
-			if(ex.getMessage().startsWith("Unexpected readed size.")){
+			if (ex.getMessage().startsWith("Unexpected readed size.")) {
 				FileInputStream fis = new FileInputStream(file);
-				try{
-					byte [] bytes = StreamUtils.GetBytes(fis);
+				try {
+					byte[] bytes = StreamUtils.GetBytes(fis);
 					return new ByteArrayInputStream(bytes);
 				} finally {
 					//JVM bug with files
@@ -129,22 +130,23 @@ public class FileUtil {
 
 	/**
 	 * Works the same as write(String, File, int, false).
+	 *
 	 * @param data
 	 * @param file
 	 * @param mode
 	 * @throws IOException
 	 */
-	public static void write(String data, File file, int mode) throws IOException{
+	public static void write(String data, File file, int mode) throws IOException {
 		write(data, file, mode, false);
 	}
 
-	public static void write(String data, File file, int mode, boolean create) throws IOException{
+	public static void write(String data, File file, int mode, boolean create) throws IOException {
 		write(data.getBytes("UTF-8"), file, mode, create);
 	}
+
 	/**
-	 * Writes out a String to the given file, either appending or
-	 * overwriting, depending on the selected mode. If create is true,
-	 * will attempt to create the file and parent directories if need be.
+	 * Writes out a String to the given file, either appending or overwriting, depending on the selected mode. If create
+	 * is true, will attempt to create the file and parent directories if need be.
 	 *
 	 * @param data The string to write to the file
 	 * @param file The File to write to
@@ -158,8 +160,8 @@ public class FileUtil {
 		} else {
 			append = true;
 		}
-		if(create && !file.exists()){
-			if(file.getAbsoluteFile().getParentFile() != null){
+		if (create && !file.exists()) {
+			if (file.getAbsoluteFile().getParentFile() != null) {
 				file.getAbsoluteFile().getParentFile().mkdirs();
 			}
 			file.getAbsoluteFile().createNewFile();
@@ -225,8 +227,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * This function writes out a String to a file, overwriting it if it
-	 * already exists
+	 * This function writes out a String to a file, overwriting it if it already exists
 	 *
 	 * @param s The string to write to the file
 	 * @param f The File to write to
@@ -239,16 +240,14 @@ public class FileUtil {
 	/**
 	 * Shorthand for write(s, f, OVERWRITE, create)
 	 */
-	public static void write(String s, File f, boolean create) throws IOException{
+	public static void write(String s, File f, boolean create) throws IOException {
 		write(s, f, OVERWRITE, create);
 	}
 
 	/**
-	 * Copies a file from one location to another. If overwrite is null,
-	 * prompts the user on the console if the file already exists. If
-	 * overwrite is false, the operation throws an exception if the file
-	 * already exists. If overwrite is true, the file is overwritten without
-	 * prompting if it already exists.
+	 * Copies a file from one location to another. If overwrite is null, prompts the user on the console if the file
+	 * already exists. If overwrite is false, the operation throws an exception if the file already exists. If overwrite
+	 * is true, the file is overwritten without prompting if it already exists.
 	 *
 	 * @param fromFile
 	 * @param toFile
@@ -256,19 +255,19 @@ public class FileUtil {
 	 * @throws IOException
 	 */
 	public static void copy(File fromFile, File toFile, Boolean overwrite)
-		throws IOException {
+			throws IOException {
 
 		if (!fromFile.exists()) {
 			throw new IOException("FileCopy: " + "no such source file: "
-				+ fromFile.getName());
+					+ fromFile.getName());
 		}
 		if (!fromFile.isFile()) {
 			throw new IOException("FileCopy: " + "can't copy directory: "
-				+ fromFile.getName());
+					+ fromFile.getName());
 		}
 		if (!fromFile.canRead()) {
 			throw new IOException("FileCopy: " + "source file is unreadable: "
-				+ fromFile.getName());
+					+ fromFile.getName());
 		}
 
 		if (toFile.isDirectory()) {
@@ -278,21 +277,21 @@ public class FileUtil {
 		if (toFile.exists()) {
 			if (!toFile.canWrite()) {
 				throw new IOException("FileCopy: "
-					+ "destination file is unwriteable: " + toFile.getName());
+						+ "destination file is unwriteable: " + toFile.getName());
 			}
 
 			String response = null;
 			if (overwrite == null) {
 				StreamUtils.GetSystemOut().print("Overwrite existing file " + toFile.getName()
-					+ "? (Y/N): ");
+						+ "? (Y/N): ");
 				StreamUtils.GetSystemOut().flush();
 				BufferedReader in = new BufferedReader(new InputStreamReader(
-					System.in));
+						System.in));
 				response = in.readLine();
 			}
 			if ((overwrite != null && overwrite == false) || (!response.equals("Y") && !response.equals("y"))) {
 				throw new IOException("FileCopy: "
-					+ "existing file was not overwritten.");
+						+ "existing file was not overwritten.");
 			}
 			//overwrite being true falls through
 		} else {
@@ -303,15 +302,15 @@ public class FileUtil {
 			File dir = new File(parent);
 			if (!dir.exists()) {
 				throw new IOException("FileCopy: "
-					+ "destination directory doesn't exist: " + parent);
+						+ "destination directory doesn't exist: " + parent);
 			}
 			if (dir.isFile()) {
 				throw new IOException("FileCopy: "
-					+ "destination is not a directory: " + parent);
+						+ "destination is not a directory: " + parent);
 			}
 			if (!dir.canWrite()) {
 				throw new IOException("FileCopy: "
-					+ "destination directory is unwriteable: " + parent);
+						+ "destination directory is unwriteable: " + parent);
 			}
 		}
 
@@ -346,8 +345,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * Moves a file from one location to another. Assuming no exception is
-	 * thrown, always returns true.
+	 * Moves a file from one location to another. Assuming no exception is thrown, always returns true.
 	 *
 	 * @param from
 	 * @param to
@@ -365,9 +363,8 @@ public class FileUtil {
 	}
 
 	/**
-	 * Recursively deletes a file/folder structure. True is returned if ALL
-	 * files were deleted. If it returns false, some or none of the files
-	 * may have been deleted.
+	 * Recursively deletes a file/folder structure. True is returned if ALL files were deleted. If it returns false,
+	 * some or none of the files may have been deleted.
 	 *
 	 * @param file
 	 * @return
@@ -396,8 +393,8 @@ public class FileUtil {
 	}
 
 	/**
-	 * Returns the most likely character encoding for this file. The default is
-	 * "ASCII" and is probably the most common.
+	 * Returns the most likely character encoding for this file. The default is "ASCII" and is probably the most common.
+	 *
 	 * @param file
 	 * @return
 	 * @throws IOException
@@ -415,25 +412,25 @@ public class FileUtil {
 		});
 
 		BufferedInputStream imp = null;
-		try{
+		try {
 			imp = new BufferedInputStream(new FileInputStream(file));
 			byte[] buf = new byte[1024];
 			int len;
 			boolean done = false;
 			boolean isAscii = true;
 
-			while((len=imp.read(buf, 0, buf.length)) != -1){
-				if(isAscii){
+			while ((len = imp.read(buf, 0, buf.length)) != -1) {
+				if (isAscii) {
 					isAscii = det.isAscii(buf, len);
 				}
-				if(!isAscii && !done){
+				if (!isAscii && !done) {
 					done = det.DoIt(buf, len, false);
 				}
 			}
 			det.DataEnd();
-			return (String)result.getObject();
+			return (String) result.getObject();
 		} finally {
-			if(imp != null){
+			if (imp != null) {
 				imp.close();
 			}
 		}

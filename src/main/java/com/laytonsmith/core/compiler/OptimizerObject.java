@@ -14,15 +14,16 @@ import java.util.List;
  *
  */
 class OptimizerObject {
+
 	private ParseTree root;
 	private CompilerEnvironment env;
 
-	public OptimizerObject(ParseTree root, Environment compilerEnvironment){
+	public OptimizerObject(ParseTree root, Environment compilerEnvironment) {
 		this.root = root;
 		env = compilerEnvironment.getEnv(CompilerEnvironment.class);
 	}
 
-	public ParseTree optimize() throws ConfigCompileException{
+	public ParseTree optimize() throws ConfigCompileException {
 		optimize01(root, env);
 		optimize02(root, env);
 		optimize03(root, env);
@@ -33,8 +34,7 @@ class OptimizerObject {
 	}
 
 	/**
-	 * This optimization level removes all the __autoconcat__s (and
-	 * inadvertently several other constructs as well)
+	 * This optimization level removes all the __autoconcat__s (and inadvertently several other constructs as well)
 	 *
 	 * @param tree
 	 * @param compilerEnvironment
@@ -56,16 +56,17 @@ class OptimizerObject {
 
 	/**
 	 * This pass optimizes all turing functions. That is, branch functions like if, and for.
+	 *
 	 * @param tree
 	 * @param compilerEnvironment
 	 */
-	private void optimize02(ParseTree tree, CompilerEnvironment compilerEnvironment){
+	private void optimize02(ParseTree tree, CompilerEnvironment compilerEnvironment) {
 
 	}
 
 	/**
-	 * This pass makes sure no weird constructs are left, for instance, a
-	 * CEntry, or any bare strings, if strict mode is on.
+	 * This pass makes sure no weird constructs are left, for instance, a CEntry, or any bare strings, if strict mode is
+	 * on.
 	 *
 	 * @param tree
 	 * @param compilerEnvironment
@@ -75,8 +76,8 @@ class OptimizerObject {
 	}
 
 	/**
-	 * This pass makes sure that all variables are initialized before usage, if
-	 * strict mode is on. For the first call, send a new List for assignments.
+	 * This pass makes sure that all variables are initialized before usage, if strict mode is on. For the first call,
+	 * send a new List for assignments.
 	 */
 	private void optimize04(ParseTree tree, CompilerEnvironment compilerEnvironment, List<String> assignments) throws ConfigCompileException {
 		//TODO: I don't think all this is necessary
@@ -100,10 +101,10 @@ class OptimizerObject {
 //			optimize04(node, compilerEnvironment, assignments);
 //		}
 	}
+
 	/**
-	 * This optimization level adds all known instances of procs to the
-	 * environment. After this pass, all procs, if not obtainable, are a compile
-	 * error.
+	 * This optimization level adds all known instances of procs to the environment. After this pass, all procs, if not
+	 * obtainable, are a compile error.
 	 *
 	 * @param tree
 	 * @param compilerEnvironment

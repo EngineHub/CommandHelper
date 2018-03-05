@@ -9,16 +9,16 @@ import com.laytonsmith.core.Static;
 import org.bukkit.entity.Parrot;
 
 @abstractionenum(
-		implementation=Implementation.Type.BUKKIT,
-		forAbstractEnum=MCParrotType.class,
-		forConcreteEnum=Parrot.Variant.class
+		implementation = Implementation.Type.BUKKIT,
+		forAbstractEnum = MCParrotType.class,
+		forConcreteEnum = Parrot.Variant.class
 )
 public class BukkitMCParrotType extends EnumConvertor<MCParrotType, Parrot.Variant> {
 
 	private static BukkitMCParrotType instance;
 
 	public static BukkitMCParrotType getConvertor() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new BukkitMCParrotType();
 		}
 		return instance;
@@ -26,7 +26,7 @@ public class BukkitMCParrotType extends EnumConvertor<MCParrotType, Parrot.Varia
 
 	@Override
 	protected Parrot.Variant getConcreteEnumCustom(MCParrotType abstracted) {
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_12)) {
+		if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_12)) {
 			return null;
 		}
 		return super.getConcreteEnumCustom(abstracted);

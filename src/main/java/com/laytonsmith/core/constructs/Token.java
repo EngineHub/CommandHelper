@@ -298,7 +298,8 @@ public class Token {
 
 		/**
 		 * Returns true if this is a file option related token, i.e. file option start, end or string
-		 * @return 
+		 *
+		 * @return
 		 */
 		public boolean isFileOption() {
 			return this.variants.contains(TokenVariant.FILE_OPTION);

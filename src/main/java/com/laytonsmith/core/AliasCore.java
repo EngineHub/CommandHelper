@@ -56,9 +56,8 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 /**
- * This class contains all the handling code. It only deals with built-in Java
- * Objects, so that if the Minecraft API Hook changes, porting the code will
- * only require changing the API specific portions, not this core file.
+ * This class contains all the handling code. It only deals with built-in Java Objects, so that if the Minecraft API
+ * Hook changes, porting the code will only require changing the API specific portions, not this core file.
  *
  *
  */
@@ -76,8 +75,8 @@ public class AliasCore {
 	public static CommandHelperPlugin parent;
 
 	/**
-	 * This constructor accepts the configuration settings for the plugin, and
-	 * ensures that the manager uses these settings.
+	 * This constructor accepts the configuration settings for the plugin, and ensures that the manager uses these
+	 * settings.
 	 *
 	 * @param aliasConfig
 	 * @param auxAliases
@@ -98,11 +97,10 @@ public class AliasCore {
 	}
 
 	/**
-	 * This is the workhorse function. It takes a given command, then converts
-	 * it into the actual command(s). If the command maps to a defined alias, it
-	 * will run the specified alias. It will search through the global list of
-	 * aliases, as well as the aliases defined for that specific player. This
-	 * function doesn't handle the /alias command however.
+	 * This is the workhorse function. It takes a given command, then converts it into the actual command(s). If the
+	 * command maps to a defined alias, it will run the specified alias. It will search through the global list of
+	 * aliases, as well as the aliases defined for that specific player. This function doesn't handle the /alias command
+	 * however.
 	 *
 	 * @param command
 	 * @return
@@ -211,9 +209,8 @@ public class AliasCore {
 	}
 
 	/**
-	 * Loads the global alias file in from the file system. If a player is
-	 * running the command, send a reference to them, and they will see compile
-	 * errors, otherwise, null.
+	 * Loads the global alias file in from the file system. If a player is running the command, send a reference to
+	 * them, and they will see compile errors, otherwise, null.
 	 *
 	 * @param player
 	 * @param settings The argument list for the settings.
@@ -223,7 +220,7 @@ public class AliasCore {
 		ReloadOptions options;
 		try {
 			options = new ReloadOptions(settings);
-		} catch(Exception ex){
+		} catch (Exception ex) {
 			if (player != null) {
 				player.sendMessage(ex.getMessage());
 			} else {
@@ -271,7 +268,6 @@ public class AliasCore {
 			DataSourceFactory.DisconnectAll();
 
 			// PacketJumper.startup(); we're not using this yet
-
 			if (options.reloadExtensions()) {
 				ProfilePoint extensionManagerStartup = parent.profiler.start("Extension manager startup", LogLevel.VERBOSE);
 				try {
@@ -289,7 +285,7 @@ public class AliasCore {
 					mixinOptions.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
 					parent.persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 							new URI("sqlite:/" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile()
-							.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace('\\', '/')), mixinOptions);
+									.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace('\\', '/')), mixinOptions);
 				} finally {
 					persistenceConfigReload.stop();
 				}
@@ -432,6 +428,7 @@ public class AliasCore {
 	 * Holder for recompile command options
 	 */
 	public class ReloadOptions {
+
 		boolean globals;
 		boolean timeouts;
 		boolean executionQueue;
@@ -442,8 +439,8 @@ public class AliasCore {
 
 		private final ArgumentParser options = ArgumentParser.GetParser()
 				.addFlag("whitelist", "Sets the list of arguments to be a whitelist, that is,"
-				+ " only the specified modules get reloaded, the rest will be skipped. Without this option,"
-				+ " the specified modules don't get reloaded.")
+						+ " only the specified modules get reloaded, the rest will be skipped. Without this option,"
+						+ " the specified modules don't get reloaded.")
 				.addFlag('g', "globals", "Specifies that globals memory (values stored with export/import) should be preserved.")
 				.addFlag('t', "tasks", "Specifies that tasks registered with set_interval/set_timeout should be preserved.")
 				.addFlag('e', "execution-queue", "Specifies that tasks registered in execution queues should be preserved.")
@@ -532,8 +529,7 @@ public class AliasCore {
 	}
 
 	/**
-	 * Returns the contents of a file as a string. Accepts the file location as
-	 * a string.
+	 * Returns the contents of a file as a string. Accepts the file location as a string.
 	 *
 	 * @param file_location
 	 * @return the contents of the file as a string
@@ -555,12 +551,11 @@ public class AliasCore {
 	 *
 	 * @param file_location the location of the file on the disk
 	 * @param contents the string to be written to the file
-	 * @param mode the mode in which to write the file: <br /> <ul> <li>"o" -
-	 * overwrite the file if it exists, without asking</li> <li>"a" - append to
-	 * the file if it exists, without asking</li> <li>"c" - cancel the operation
-	 * if the file exists, without asking</li> </ul>
-	 * @return true if the file was written, false if it wasn't. Throws an
-	 * exception if the file could not be created, or if the mode is not valid.
+	 * @param mode the mode in which to write the file: <br /> <ul> <li>"o" - overwrite the file if it exists, without
+	 * asking</li> <li>"a" - append to the file if it exists, without asking</li> <li>"c" - cancel the operation if the
+	 * file exists, without asking</li> </ul>
+	 * @return true if the file was written, false if it wasn't. Throws an exception if the file could not be created,
+	 * or if the mode is not valid.
 	 * @throws Exception if the file could not be created
 	 */
 	public static boolean file_put_contents(File file_location, String contents, String mode)
@@ -692,8 +687,8 @@ public class AliasCore {
 								scripts.add(s);
 							} catch (ConfigCompileException e) {
 								ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", player);
-							} catch(ConfigCompileGroupException ex){
-								for(ConfigCompileException e : ex.getList()){
+							} catch (ConfigCompileGroupException ex) {
+								for (ConfigCompileException e : ex.getList()) {
 									ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", player);
 								}
 							}
@@ -732,7 +727,7 @@ public class AliasCore {
 				boolean exception = false;
 				try {
 					MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file, true)), env, null, null);
-				} catch (ConfigCompileGroupException e){
+				} catch (ConfigCompileGroupException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath() + " could not be compiled, due to compile errors.", player);
 				} catch (ConfigCompileException e) {

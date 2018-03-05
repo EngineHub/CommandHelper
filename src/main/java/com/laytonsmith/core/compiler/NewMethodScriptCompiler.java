@@ -20,13 +20,13 @@ import java.util.List;
 
 /**
  *
- * 
+ *
  */
 public class NewMethodScriptCompiler {
 
 	/**
-	 * Takes a raw string input, and parses it into a TokenStream, which can be
-	 * passed to either the preprocessor, or the compiler.
+	 * Takes a raw string input, and parses it into a TokenStream, which can be passed to either the preprocessor, or
+	 * the compiler.
 	 *
 	 * @param script
 	 * @param file
@@ -162,10 +162,11 @@ public class NewMethodScriptCompiler {
 
 	/**
 	 * TODO: Need a platform resolver here?
+	 *
 	 * @param tokenStream
 	 * @param compilerEnvironment
 	 * @return
-	 * @throws ConfigCompileException 
+	 * @throws ConfigCompileException
 	 */
 	public static ParseTree compile(TokenStream tokenStream, Environment compilerEnvironment) throws ConfigCompileException {
 		ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), tokenStream.getFileOptions());
@@ -188,8 +189,6 @@ public class NewMethodScriptCompiler {
 		optimizer.optimize();
 		//root is now optimized
 	}
-
-	
 
 	private static Construct tokenToConstruct(Token t) {
 		if (t.type == Token.TType.STRING) {

@@ -1,4 +1,3 @@
-
 package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.ParseTree;
@@ -25,9 +24,10 @@ import java.util.Stack;
 
 /**
  *
- * 
+ *
  */
 class CompilerObject {
+
 	TokenStream stream;
 	Stack<ParseTree> nodes = new Stack<ParseTree>();
 	int autoConcatCounter = 0;
@@ -92,7 +92,7 @@ class CompilerObject {
 				throw new ConfigCompileException("Expected the constant ${" + constName.toString() + "} to be provided in the compilation options, but it wasn't.", t.getTarget());
 			}
 			t = new Token(TType.STRING, constant.val(), constant.getTarget());
-		}							
+		}
 		if (t.type == TType.BARE_STRING && peek().type == TType.FUNC_START) {
 			consume();
 			CFunction f = new CFunction(t.val(), t.getTarget());
@@ -194,11 +194,11 @@ class CompilerObject {
 		switch (t.type) {
 			case STRING:
 				return new CString(t.val(), t.getTarget());
-				//				case SMART_STRING:
-				//
-				//				case VARIABLE:
-				//
-				//				case FINAL_VAR:
+			//				case SMART_STRING:
+			//
+			//				case VARIABLE:
+			//
+			//				case FINAL_VAR:
 			case IVARIABLE:
 				return new NewIVariable(t.val(), t.getTarget());
 			case BARE_STRING:
@@ -225,5 +225,5 @@ class CompilerObject {
 				throw new ConfigCompileException("Unexpected identifier? Found '" + t.val() + "' but was not any expected value.", t.getTarget());
 		}
 	}
-    
+
 }

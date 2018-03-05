@@ -12,19 +12,19 @@ import com.laytonsmith.core.compiler.Keyword;
 @Keyword.keyword("synchronized")
 public class SynchronizedKeyword extends SimpleBlockKeywordFunction {
 
-    @Override
-    protected Integer[] getFunctionArgumentCount() {
-	return new Integer[]{1};
-    }
+	@Override
+	protected Integer[] getFunctionArgumentCount() {
+		return new Integer[]{1};
+	}
 
-    @Override
-    public String docs() {
-	return "Defines a synchronization block";
-    }
+	@Override
+	public String docs() {
+		return "Defines a synchronization block";
+	}
 
-    @Override
-    public Version since() {
-	return CHVersion.V3_3_2;
-    }
+	@Override
+	public Version since() {
+		return CHVersion.V3_3_2;
+	}
 
 }

@@ -1,4 +1,3 @@
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
@@ -42,7 +41,8 @@ import java.util.concurrent.Callable;
  */
 @core
 public class Threading {
-	public static String docs(){
+
+	public static String docs() {
 		return "This experimental and private API is subject to removal, or incompatible changes, and should not"
 				+ " be yet heavily relied on in normal development.";
 	}
@@ -70,7 +70,7 @@ public class Threading {
 		@Override
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
-			if(!(args[1] instanceof CClosure)){
+			if (!(args[1] instanceof CClosure)) {
 				throw new CRECastException("Expected closure for arg 2", t);
 			}
 			final CClosure closure = (CClosure) args[1];
@@ -82,15 +82,15 @@ public class Threading {
 					dm.activateThread(Thread.currentThread());
 					try {
 						closure.execute();
-					} catch(FunctionReturnException ex){
+					} catch (FunctionReturnException ex) {
 						// Do nothing
-					} catch(LoopManipulationException ex){
+					} catch (LoopManipulationException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Unexpected loop manipulation"
 								+ " operation was triggered inside the closure.", t), environment);
-					} catch(ConfigRuntimeException ex){
+					} catch (ConfigRuntimeException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ex, environment);
-					} catch(CancelCommandException ex){
-						if(ex.getMessage() != null){
+					} catch (CancelCommandException ex) {
+						if (ex.getMessage() != null) {
 							new Echoes.console().exec(t, environment, new CString(ex.getMessage(), t), CBoolean.FALSE);
 						}
 					} finally {
@@ -131,14 +131,14 @@ public class Threading {
 			String new_thread = this.getName();
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "msg(" + get_current_thread + "());\n"
-						+ new_thread + "('myThread', closure(){\n"
-						+ "\tsleep(5); // Sleep here, to allow the main thread to get well past us, for demonstration purposes\n"
-						+ "\tmsg(" + get_current_thread + "());\n"
-						+ "});\n"
-						+ "msg('End of main thread');",
-						"MainThread\n"
-						+ "End of main thread\n"
-						+ "myThread")
+				+ new_thread + "('myThread', closure(){\n"
+				+ "\tsleep(5); // Sleep here, to allow the main thread to get well past us, for demonstration purposes\n"
+				+ "\tmsg(" + get_current_thread + "());\n"
+				+ "});\n"
+				+ "msg('End of main thread');",
+				"MainThread\n"
+				+ "End of main thread\n"
+				+ "myThread")
 			};
 		}
 
@@ -225,9 +225,9 @@ public class Threading {
 				public void run() {
 					try {
 						closure.execute();
-					} catch(ConfigRuntimeException e){
+					} catch (ConfigRuntimeException e) {
 						ConfigRuntimeException.HandleUncaughtException(e, environment);
-					} catch(ProgramFlowManipulationException e){
+					} catch (ProgramFlowManipulationException e) {
 						// Ignored
 					}
 				}
@@ -290,21 +290,20 @@ public class Threading {
 					public Object call() throws Exception {
 						try {
 							closure.execute();
-						} catch(FunctionReturnException e){
+						} catch (FunctionReturnException e) {
 							return e.getReturn();
-						} catch(ConfigRuntimeException | ProgramFlowManipulationException e){
+						} catch (ConfigRuntimeException | ProgramFlowManipulationException e) {
 							return e;
 						}
 						return CNull.NULL;
 					}
 				});
 
-
 			} catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
-			if(ret instanceof RuntimeException){
-				throw (RuntimeException)ret;
+			if (ret instanceof RuntimeException) {
+				throw (RuntimeException) ret;
 			} else {
 				return (Construct) ret;
 			}
@@ -340,6 +339,7 @@ public class Threading {
 	@noboilerplate
 	@seealso({x_new_thread.class})
 	public static class _synchronized extends AbstractFunction {
+
 		private static final Map<Object, Integer> syncObjectMap = new HashMap<Object, Integer>();
 
 		@Override
@@ -376,23 +376,24 @@ public class Threading {
 
 			// Get the sync object (CArray or String value of the Construct).
 			Construct cSyncObject = parent.seval(syncObjectTree, env);
-			if(cSyncObject instanceof CNull) {
+			if (cSyncObject instanceof CNull) {
 				throw new CRENullPointerException("Synchronization object may not be null in " + getName() + "().", t);
 			}
 			Object syncObject;
-			if(cSyncObject instanceof CArray) {
+			if (cSyncObject instanceof CArray) {
 				syncObject = cSyncObject;
 			} else {
 				syncObject = cSyncObject.val();
 			}
 
 			// Add String sync objects to the map to be able to synchronize by value.
-			if(syncObject instanceof String) {
-				synchronized(syncObjectMap) {
-					searchLabel: {
-						for(Entry<Object, Integer> entry : syncObjectMap.entrySet()) {
+			if (syncObject instanceof String) {
+				synchronized (syncObjectMap) {
+					searchLabel:
+					{
+						for (Entry<Object, Integer> entry : syncObjectMap.entrySet()) {
 							Object key = entry.getKey();
-							if(key instanceof String && key.equals(syncObject)) {
+							if (key instanceof String && key.equals(syncObject)) {
 								syncObject = key; // Get reference, value of this assign is the same.
 								entry.setValue(entry.getValue() + 1);
 								break searchLabel;
@@ -405,22 +406,22 @@ public class Threading {
 
 			// Evaluate the code, synchronized by the passed sync object.
 			try {
-				synchronized(syncObject) {
+				synchronized (syncObject) {
 					parent.seval(code, env);
 				}
-			} catch(RuntimeException e) {
+			} catch (RuntimeException e) {
 				throw e;
 			} finally {
 
 				// Remove 1 from the call count or remove the sync object from the map if it was a sync-by-value.
-				if(syncObject instanceof String) {
-					synchronized(syncObjectMap) {
+				if (syncObject instanceof String) {
+					synchronized (syncObjectMap) {
 						int count = syncObjectMap.get(syncObject); // This should never return null.
-						if(count <= 1) {
+						if (count <= 1) {
 							syncObjectMap.remove(syncObject);
 						} else {
-							for(Entry<Object, Integer> entry : syncObjectMap.entrySet()) {
-								if(entry.getKey() == syncObject) { // Equals by reference.
+							for (Entry<Object, Integer> entry : syncObjectMap.entrySet()) {
+								if (entry.getKey() == syncObject) { // Equals by reference.
 									entry.setValue(count - 1);
 									break;
 								}
@@ -468,44 +469,44 @@ public class Threading {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates two threads possibly overwriting eachother", ""
-						+ "export('log', '');\n"
-						+ "x_new_thread('Thread1', closure() {\n"
-						+ "\t@log = import('log');\n"
-						+ "\t@log = @log.'Some new log message from Thread1.\n'\n"
-						+ "\texport('log', @log);\n"
-						+ "});\n"
-						+ "x_new_thread('Thread2', closure() {\n"
-						+ "\t@log = import('log');\n"
-						+ "\t@log = @log.'Some new log message from Thread2.\n'\n"
-						+ "\texport('log', @log);\n"
-						+ "});\n"
-						+ "sleep(0.1);\n"
-						+ "msg(import('log'));",
-						"Some new log message from Thread1.\n"
-								+ "\nOR\nSome new log message from Thread2.\n"
-								+ "\nOR\nSome new log message from Thread1.\nSome new log message from Thread2.\n"
-								+ "\nOR\nSome new log message from Thread2.\nSome new log message from Thread1.\n"),
+				+ "export('log', '');\n"
+				+ "x_new_thread('Thread1', closure() {\n"
+				+ "\t@log = import('log');\n"
+				+ "\t@log = @log.'Some new log message from Thread1.\n'\n"
+				+ "\texport('log', @log);\n"
+				+ "});\n"
+				+ "x_new_thread('Thread2', closure() {\n"
+				+ "\t@log = import('log');\n"
+				+ "\t@log = @log.'Some new log message from Thread2.\n'\n"
+				+ "\texport('log', @log);\n"
+				+ "});\n"
+				+ "sleep(0.1);\n"
+				+ "msg(import('log'));",
+				"Some new log message from Thread1.\n"
+				+ "\nOR\nSome new log message from Thread2.\n"
+				+ "\nOR\nSome new log message from Thread1.\nSome new log message from Thread2.\n"
+				+ "\nOR\nSome new log message from Thread2.\nSome new log message from Thread1.\n"),
 				new ExampleScript("Demonstrates two threads modifying the same variable without the possibility of"
-						+ " overwriting eachother because they are synchronized.", ""
-								+ "export('log', '');\n"
-								+ "x_new_thread('Thread1', closure() {\n"
-								+ "\tsynchronized('syncLog') {\n"
-								+ "\t\t@log = import('log');\n"
-								+ "\t\t@log = @log.'Some new log message from Thread1.\n'\n"
-								+ "\t\texport('log', @log);\n"
-								+ "\t}\n"
-								+ "});\n"
-								+ "x_new_thread('Thread2', closure() {\n"
-								+ "\tsynchronized('syncLog') {\n"
-								+ "\t\t@log = import('log');\n"
-								+ "\t\t@log = @log.'Some new log message from Thread2.\n'\n"
-								+ "\t\texport('log', @log);\n"
-								+ "\t}\n"
-								+ "});\n"
-								+ "sleep(0.1);\n"
-								+ "msg(import('log'));",
-						"Some new log message from Thread1.\nSome new log message from Thread2.\n"
-								+ "\nOR\nSome new log message from Thread2.\nSome new log message from Thread1.\n")
+				+ " overwriting eachother because they are synchronized.", ""
+				+ "export('log', '');\n"
+				+ "x_new_thread('Thread1', closure() {\n"
+				+ "\tsynchronized('syncLog') {\n"
+				+ "\t\t@log = import('log');\n"
+				+ "\t\t@log = @log.'Some new log message from Thread1.\n'\n"
+				+ "\t\texport('log', @log);\n"
+				+ "\t}\n"
+				+ "});\n"
+				+ "x_new_thread('Thread2', closure() {\n"
+				+ "\tsynchronized('syncLog') {\n"
+				+ "\t\t@log = import('log');\n"
+				+ "\t\t@log = @log.'Some new log message from Thread2.\n'\n"
+				+ "\t\texport('log', @log);\n"
+				+ "\t}\n"
+				+ "});\n"
+				+ "sleep(0.1);\n"
+				+ "msg(import('log'));",
+				"Some new log message from Thread1.\nSome new log message from Thread2.\n"
+				+ "\nOR\nSome new log message from Thread2.\nSome new log message from Thread1.\n")
 			};
 		}
 

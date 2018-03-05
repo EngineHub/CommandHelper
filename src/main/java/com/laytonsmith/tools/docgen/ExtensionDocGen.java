@@ -57,7 +57,7 @@ public class ExtensionDocGen {
 		Collections.sort(functionEntryList, new Comparator<Entry<Class<?>, ArrayList<Class<? extends Function>>>>() {
 			@Override
 			public int compare(Entry<Class<?>, ArrayList<Class<? extends Function>>> o1,
-				    Entry<Class<?>, ArrayList<Class<? extends Function>>> o2) {
+					Entry<Class<?>, ArrayList<Class<? extends Function>>> o2) {
 				return o1.getKey().getName().compareTo(o2.getKey().getName());
 			}
 		});
@@ -69,7 +69,7 @@ public class ExtensionDocGen {
 				}
 			});
 		}
-		if(!functionEntryList.isEmpty()){
+		if (!functionEntryList.isEmpty()) {
 			fdocs.append("# Functions").append(nl);
 		}
 		for (Entry<Class<?>, ArrayList<Class<? extends Function>>> entry : functionEntryList) {
@@ -92,8 +92,8 @@ public class ExtensionDocGen {
 				if (f.appearInDocumentation()) {
 					DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
 					String d = "### " + markdownEscape(di.ret) + " " + markdownEscape(f.getName()) + "(" + markdownEscape(di.originalArgs) + "):" + nl
-							+ convertWiki(di.topDesc != null?di.topDesc:di.desc) + nl
-							+ convertWiki(di.extendedDesc != null?nl + di.extendedDesc + nl:"");
+							+ convertWiki(di.topDesc != null ? di.topDesc : di.desc) + nl
+							+ convertWiki(di.extendedDesc != null ? nl + di.extendedDesc + nl : "");
 					fdocs.append(d).append(nl);
 				}
 			}
@@ -113,7 +113,7 @@ public class ExtensionDocGen {
 		Collections.sort(eventEntryList, new Comparator<Entry<Class<?>, ArrayList<Class<? extends Event>>>>() {
 			@Override
 			public int compare(Entry<Class<?>, ArrayList<Class<? extends Event>>> o1,
-				Entry<Class<?>, ArrayList<Class<? extends Event>>> o2) {
+					Entry<Class<?>, ArrayList<Class<? extends Event>>> o2) {
 				return o1.getKey().getName().compareTo(o2.getKey().getName());
 			}
 		});
@@ -125,7 +125,7 @@ public class ExtensionDocGen {
 				}
 			});
 		}
-		if(!eventEntryList.isEmpty()){
+		if (!eventEntryList.isEmpty()) {
 			fdocs.append("# Events").append(nl);
 		}
 		for (Entry<Class<?>, ArrayList<Class<? extends Event>>> entry : eventEntryList) {
@@ -168,19 +168,20 @@ public class ExtensionDocGen {
 
 	/**
 	 * Converts selected wiki markup into markdown.
+	 *
 	 * @param input
 	 * @return
 	 */
-	private static String convertWiki(String input){
+	private static String convertWiki(String input) {
 		String output = input;
 		Matcher m = WIKI_LINK.matcher(input);
-		if(m.find()){
+		if (m.find()) {
 			output = m.replaceAll("[$2]($1)");
 		}
 		return output;
 	}
 
-	private static String markdownEscape(String input){
+	private static String markdownEscape(String input) {
 		return input.replace("*", "\\*")
 				.replace("_", "\\_");
 	}

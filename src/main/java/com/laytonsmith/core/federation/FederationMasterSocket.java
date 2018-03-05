@@ -13,13 +13,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * This class manages the master socket connection. If there are multiple server
- * names within the same process, there only needs to be one master socket, and
- * then, there only needs to be a master socket if no other process on the
- * machine has the master socket for a given port. This class manages having a
- * master socket running for each listening port, but only if needed.
+ * This class manages the master socket connection. If there are multiple server names within the same process, there
+ * only needs to be one master socket, and then, there only needs to be a master socket if no other process on the
+ * machine has the master socket for a given port. This class manages having a master socket running for each listening
+ * port, but only if needed.
  */
 public class FederationMasterSocket {
+
 	private static FederationMasterSocket defaultInstance;
 
 	/**
@@ -35,8 +35,8 @@ public class FederationMasterSocket {
 	}
 
 	/**
-	 * Clears the default instance of the master socket, and shuts down the old
-	 * one if it was already created, and running.
+	 * Clears the default instance of the master socket, and shuts down the old one if it was already created, and
+	 * running.
 	 */
 	public static void clearFederationMasterSocket() {
 		if (defaultInstance != null) {
@@ -67,9 +67,8 @@ public class FederationMasterSocket {
 	}
 
 	/**
-	 * Closes the master socket for the given port, but only that one. If there
-	 * is no master socket on that port, nothing happens, and false is returned.
-	 * If it was closed successfully, true is returned.
+	 * Closes the master socket for the given port, but only that one. If there is no master socket on that port,
+	 * nothing happens, and false is returned. If it was closed successfully, true is returned.
 	 *
 	 * @param port
 	 * @return
@@ -86,8 +85,7 @@ public class FederationMasterSocket {
 	}
 
 	/**
-	 * Ensures the master socket is open for the given port. If it is already up
-	 * and running, nothing happens.
+	 * Ensures the master socket is open for the given port. If it is already up and running, nothing happens.
 	 *
 	 * @param pn The persistence network, for finding the registration of a particular server.
 	 * @param port The port the master socket should be listening on.
@@ -164,9 +162,9 @@ public class FederationMasterSocket {
 									if ("GET PORT".equals(command)) {
 										String serverName = communicator.readUnencryptedLine();
 										String value = pn.get(new String[]{"federation", serverName});
-										if(value != null){
+										if (value != null) {
 											FederationRegistration reg = FederationRegistration.fromJSON(value);
-											if(reg.updatedSince(Federation.DEAD_SERVER_TIMEOUT)){
+											if (reg.updatedSince(Federation.DEAD_SERVER_TIMEOUT)) {
 												int port = reg.getPort();
 												communicator.writeLine("OK");
 												communicator.writeLine(Integer.toString(port));

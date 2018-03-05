@@ -112,18 +112,18 @@ public class CommandHelperPlugin extends JavaPlugin {
 	/**
 	 * Listener for the plugin system.
 	 */
-	final CommandHelperListener playerListener =
-			new CommandHelperListener(this);
+	final CommandHelperListener playerListener
+			= new CommandHelperListener(this);
 	/**
 	 * Interpreter listener
 	 */
-	public final CommandHelperInterpreterListener interpreterListener =
-			new CommandHelperInterpreterListener(this);
+	public final CommandHelperInterpreterListener interpreterListener
+			= new CommandHelperInterpreterListener(this);
 	/**
 	 * Server Command Listener, for console commands
 	 */
-	final CommandHelperServerListener serverListener =
-			new CommandHelperServerListener();
+	final CommandHelperServerListener serverListener
+			= new CommandHelperServerListener();
 
 	@Override
 	public void onLoad() {
@@ -137,6 +137,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		upgradeLog.addUpgradeTask(new UpgradeLog.UpgradeTask() {
 
 			String version = null;
+
 			@Override
 			public boolean doRun() {
 				try {
@@ -157,6 +158,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 			File oldPreferences = new File(CommandHelperFileLocations.getDefault().getConfigDirectory(),
 					"preferences.txt");
+
 			@Override
 			public boolean doRun() {
 				return oldPreferences.exists()
@@ -181,6 +183,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 			File cd = CommandHelperFileLocations.getDefault().getConfigDirectory();
 			private final String breadcrumb = "move-preference-files-v1.0";
+
 			@Override
 			public boolean doRun() {
 				return !hasBreadcrumb(breadcrumb)
@@ -256,7 +259,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
-		try{
+		try {
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
@@ -265,7 +268,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		Prefs.SetColors();
 		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
-		if(new SimpleVersion(System.getProperty("java.version")).lt(new SimpleVersion("1.8"))){
+		if (new SimpleVersion(System.getProperty("java.version")).lt(new SimpleVersion("1.8"))) {
 			CHLog.GetLogger().w(CHLog.Tags.GENERAL, "You appear to be running a version of Java older than Java 8. You should have plans"
 					+ " to upgrade at some point, as " + Implementation.GetServerType().getBranding() + " may require it at some point.", Target.UNKNOWN);
 		}
@@ -306,7 +309,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	 */
 	@Override
 	public void onEnable() {
-		if(loadingThread.isAlive()){
+		if (loadingThread.isAlive()) {
 			StreamUtils.GetSystemOut().println("[CommandHelper] Waiting for extension loading to complete...");
 
 			try {
@@ -344,7 +347,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		if(Prefs.UseSudoFallback()){
+		if (Prefs.UseSudoFallback()) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.WARNING, "In your preferences, use-sudo-fallback is turned on. Consider turning this off if you can.");
 		}
 		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
@@ -478,19 +481,19 @@ public class CommandHelperPlugin extends JavaPlugin {
 						handler = (HandlerList) ReflectionUtils.invokeMethod(eventSuperClass, null, "getHandlerList");
 					} catch (ReflectionUtils.ReflectionException refInner) {
 						CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
-										+ " because the handler for class " + identifier.className()
-										+ " could not be found. An attempt has already been made to find the"
-										+ " correct handler, but" + eventSuperClass.getName()
-										+ " did not have it either. Please report this on the bug tracker.",
+								+ " because the handler for class " + identifier.className()
+								+ " could not be found. An attempt has already been made to find the"
+								+ " correct handler, but" + eventSuperClass.getName()
+								+ " did not have it either. Please report this on the bug tracker.",
 								Target.UNKNOWN);
 						continue;
 					}
 				} else {
 					CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
-									+ " because the handler for class " + identifier.className()
-									+ " could not be found. An attempt has already been made to find the"
-									+ " correct handler, but no superclass could be found."
-									+ " Please report this on the bug tracker.",
+							+ " because the handler for class " + identifier.className()
+							+ " could not be found. An attempt has already been made to find the"
+							+ " correct handler, but no superclass could be found."
+							+ " Please report this on the bug tracker.",
 							Target.UNKNOWN);
 					continue;
 				}
@@ -528,6 +531,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 	/**
 	 * Called when a command registered by this plugin is received.
+	 *
 	 * @param sender
 	 * @param cmd
 	 * @param commandLabel
@@ -550,7 +554,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			return args.length >= 1 && args[0].equalsIgnoreCase("null");
 		} else if (cmdName.equals("runalias")) {
 			//Hardcoded alias rebroadcast
-			if(args.length == 0){
+			if (args.length == 0) {
 				return false;
 			}
 			String command = StringUtils.Join(args, " ");
@@ -568,13 +572,13 @@ public class CommandHelperPlugin extends JavaPlugin {
 				serverListener.onServerCommand(sce);
 			}
 			return true;
-		} else if(cmdName.equalsIgnoreCase("interpreter-on")){
-			if(sender instanceof ConsoleCommandSender){
+		} else if (cmdName.equalsIgnoreCase("interpreter-on")) {
+			if (sender instanceof ConsoleCommandSender) {
 				int interpreterTimeout = Prefs.InterpreterTimeout();
-				if(interpreterTimeout != 0){
+				if (interpreterTimeout != 0) {
 					interpreterUnlockedUntil = (interpreterTimeout * 60 * 1000) + System.currentTimeMillis();
 					sender.sendMessage("Interpreter mode unlocked for " + interpreterTimeout + " minute"
-							+ (interpreterTimeout==1?"":"s"));
+							+ (interpreterTimeout == 1 ? "" : "s"));
 				}
 			} else {
 				sender.sendMessage("This command can only be run from console.");

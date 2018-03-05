@@ -6,8 +6,7 @@ import java.io.ObjectStreamClass;
 import java.io.OutputStream;
 
 /**
- * This class extends ObjectOutputStream, but automatically flushes
- * after each write operation.
+ * This class extends ObjectOutputStream, but automatically flushes after each write operation.
  */
 public class AutoFlushObjectOutputStream extends ObjectOutputStream {
 
@@ -15,7 +14,7 @@ public class AutoFlushObjectOutputStream extends ObjectOutputStream {
 		super();
 	}
 
-	public AutoFlushObjectOutputStream(OutputStream outputStream) throws IOException{
+	public AutoFlushObjectOutputStream(OutputStream outputStream) throws IOException {
 		super(outputStream);
 	}
 

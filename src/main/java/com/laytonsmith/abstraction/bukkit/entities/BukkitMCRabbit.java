@@ -10,13 +10,14 @@ import org.bukkit.entity.Rabbit;
 public class BukkitMCRabbit extends BukkitMCAgeable implements MCRabbit {
 
 	Rabbit r;
+
 	public BukkitMCRabbit(Entity be) {
 		super(be);
 		this.r = (Rabbit) be;
 	}
 
-	public BukkitMCRabbit(AbstractionObject ao){
-		super((LivingEntity)ao.getHandle());
+	public BukkitMCRabbit(AbstractionObject ao) {
+		super((LivingEntity) ao.getHandle());
 		this.r = (Rabbit) ao.getHandle();
 	}
 

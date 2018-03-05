@@ -6,13 +6,14 @@ import java.util.Arrays;
 
 /**
  * This class provides a method for working around the not so pretty line breaks
- * that SMP does. The original class was written by Nossr50, with portions contributed
- * by Reil.
- * 
+ * that SMP does. The original class was written by Nossr50, with portions
+ * contributed by Reil.
+ *
  */
 public final class rParser {
-    
-    private rParser(){}
+
+    private rParser() {
+    }
 
     private static final int lineLength = 312;
 
@@ -93,8 +94,8 @@ public final class rParser {
             }
             String[] stringArray = words.toArray(new String[words.size()]);
             //if(stringArray.length != 0){
-                out.add(lastColor
-                        + combineSplit(0, stringArray, " ") + " ");
+            out.add(lastColor
+                    + combineSplit(0, stringArray, " ") + " ");
             //}
         }
 

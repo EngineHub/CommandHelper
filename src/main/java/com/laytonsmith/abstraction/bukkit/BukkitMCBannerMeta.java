@@ -13,6 +13,7 @@ import java.util.List;
 public class BukkitMCBannerMeta extends BukkitMCItemMeta implements MCBannerMeta {
 
 	BannerMeta bm;
+
 	public BukkitMCBannerMeta(BannerMeta meta) {
 		super(meta);
 		bm = meta;
@@ -42,7 +43,7 @@ public class BukkitMCBannerMeta extends BukkitMCItemMeta implements MCBannerMeta
 	public List<MCPattern> getPatterns() {
 		List<Pattern> bukkitPatterns = bm.getPatterns();
 		List<MCPattern> patterns = new ArrayList<>(bukkitPatterns.size());
-		for(Pattern p : bukkitPatterns) {
+		for (Pattern p : bukkitPatterns) {
 			patterns.add(new BukkitMCPattern(p));
 		}
 		return patterns;
@@ -71,7 +72,7 @@ public class BukkitMCBannerMeta extends BukkitMCItemMeta implements MCBannerMeta
 	@Override
 	public void setPatterns(List<MCPattern> patterns) {
 		List<Pattern> bukkitPatterns = new ArrayList<>(patterns.size());
-		for(MCPattern pattern : patterns) {
+		for (MCPattern pattern : patterns) {
 			bukkitPatterns.add((Pattern) pattern.getHandle());
 		}
 		bm.setPatterns(bukkitPatterns);

@@ -78,11 +78,11 @@ public class BukkitMCInventoryView implements MCInventoryView {
 
 	@Override
 	public void setCursor(MCItemStack item) {
-		iv.setCursor(((BukkitMCItemStack)item).__ItemStack());
+		iv.setCursor(((BukkitMCItemStack) item).__ItemStack());
 	}
 
 	@Override
 	public void setItem(int slot, MCItemStack item) {
-		iv.setItem(slot, (((BukkitMCItemStack)item).__ItemStack()));
+		iv.setItem(slot, (((BukkitMCItemStack) item).__ItemStack()));
 	}
 }

@@ -5,9 +5,12 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCRotation;
 
 public interface MCItemFrame extends MCHanging {
+
 	MCItemStack getItem();
+
 	void setItem(MCItemStack item);
 
 	MCRotation getRotation();
+
 	void setRotation(MCRotation rotation);
 }

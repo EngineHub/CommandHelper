@@ -8,9 +8,10 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFireworkType;
 import org.bukkit.FireworkEffect;
 
 public class BukkitMCFireworkBuilder implements MCFireworkBuilder {
+
 	private FireworkEffect.Builder builder;
 
-	public BukkitMCFireworkBuilder(){
+	public BukkitMCFireworkBuilder() {
 		builder = FireworkEffect.builder();
 	}
 
@@ -39,13 +40,13 @@ public class BukkitMCFireworkBuilder implements MCFireworkBuilder {
 	}
 
 	@Override
-	public MCFireworkBuilder setType(MCFireworkType type){
+	public MCFireworkBuilder setType(MCFireworkType type) {
 		builder.with(BukkitMCFireworkType.getConvertor().getConcreteEnum(type));
 		return this;
 	}
 
 	@Override
-	public MCFireworkEffect build(){
+	public MCFireworkEffect build() {
 		return new BukkitMCFireworkEffect(builder.build());
 	}
 

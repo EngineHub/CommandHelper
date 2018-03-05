@@ -14,7 +14,7 @@ import org.bukkit.util.Vector;
 
 /**
  * Workaround class to accommodate for the likelihood of non-living entities that can shoot stuff.
- * 
+ *
  * @author jb_aero
  */
 public class BukkitMCEntityProjectileSource extends BukkitMCEntity implements MCProjectileSource {
@@ -28,14 +28,14 @@ public class BukkitMCEntityProjectileSource extends BukkitMCEntity implements MC
 		}
 		eps = (ProjectileSource) source;
 	}
-	
+
 	@Override
 	public MCProjectile launchProjectile(MCProjectileType projectile) {
 		EntityType et = EntityType.valueOf(projectile.name());
 		Class<? extends Entity> c = et.getEntityClass();
 		Projectile proj = eps.launchProjectile(c.asSubclass(Projectile.class));
 		MCEntity mcproj = BukkitConvertor.BukkitGetCorrectEntity(proj);
-		if(mcproj instanceof MCProjectile) {
+		if (mcproj instanceof MCProjectile) {
 			return (MCProjectile) mcproj;
 		} else {
 			return null;
@@ -49,7 +49,7 @@ public class BukkitMCEntityProjectileSource extends BukkitMCEntity implements MC
 		Vector vector = new Vector(init.X(), init.Y(), init.Z());
 		Projectile proj = eps.launchProjectile(c.asSubclass(Projectile.class), vector);
 		MCEntity mcproj = BukkitConvertor.BukkitGetCorrectEntity(proj);
-		if(mcproj instanceof MCProjectile) {
+		if (mcproj instanceof MCProjectile) {
 			return (MCProjectile) mcproj;
 		} else {
 			return null;
