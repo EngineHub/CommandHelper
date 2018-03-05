@@ -70,7 +70,7 @@ public class BukkitPlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerInteract(PlayerInteractEvent e) {
 		BukkitMCPlayerInteractEvent pie = new BukkitMCPlayerInteractEvent(e);
-		if (e.getAction().equals(Action.PHYSICAL)) {
+		if(e.getAction().equals(Action.PHYSICAL)) {
 			EventUtils.TriggerListener(Driver.PLAYER_INTERACT, "pressure_plate_activated", pie);
 		} else {
 			EventUtils.TriggerListener(Driver.PLAYER_INTERACT, "player_interact", pie);
@@ -85,22 +85,22 @@ public class BukkitPlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onPlayerChat(final AsyncPlayerChatEvent event) {
-		if (CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(event.getPlayer().getName())) {
+		if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(event.getPlayer().getName())) {
 			//They are in interpreter mode, so we want it to handle this, not everything else.
 			return;
 		}
 
-		if (event.isAsynchronous()) {
+		if(event.isAsynchronous()) {
 			//The async event gets priority, and if cancelled, doesn't trigger a normal player_chat event.
 			BukkitMCPlayerChatEvent pce = new BukkitMCPlayerChatEvent(event);
 			EventUtils.TriggerListener(Driver.PLAYER_CHAT, "async_player_chat", pce);
-			if (event.isCancelled()) {
+			if(event.isCancelled()) {
 				return;
 			}
 		}
 
-		if (EventUtils.GetEvents(Driver.PLAYER_CHAT) != null && !EventUtils.GetEvents(Driver.PLAYER_CHAT).isEmpty()) {
-			if (event.isAsynchronous()) {
+		if(EventUtils.GetEvents(Driver.PLAYER_CHAT) != null && !EventUtils.GetEvents(Driver.PLAYER_CHAT).isEmpty()) {
+			if(event.isAsynchronous()) {
 				//We have to do the full processing on the main server thread, and
 				//block on it as well, so if we cancel it or something, the change
 				//will actually take effect. The easiest way to do this is to cancel the
@@ -146,7 +146,7 @@ public class BukkitPlayerListener implements Listener {
 				//Until there is a more reliable way to detect isConst() on a parse tree, (that supports procs)
 				//this must always be synchronous.
 				boolean canBeAsync = false;
-				if (canBeAsync) {
+				if(canBeAsync) {
 					//Fire away!
 					fireChat(event);
 				} else {
@@ -160,13 +160,13 @@ public class BukkitPlayerListener implements Listener {
 							return null;
 						}
 					});
-					while (true) {
+					while(true) {
 						try {
 							f.get();
 							break;
-						} catch (InterruptedException ex) {
+						} catch(InterruptedException ex) {
 							//I don't know why this happens, but screw it, we're gonna try again, and it's gonna like it.
-						} catch (ExecutionException ex) {
+						} catch(ExecutionException ex) {
 							Logger.getLogger(BukkitPlayerListener.class.getName()).log(Level.SEVERE, null, ex);
 							break;
 						}
@@ -195,7 +195,7 @@ public class BukkitPlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
-		if (event.getFrom().equals(event.getPlayer().getWorld())) {
+		if(event.getFrom().equals(event.getPlayer().getWorld())) {
 			return;
 		}
 
@@ -205,7 +205,7 @@ public class BukkitPlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
-		if (event.getFrom().equals(event.getTo())) {
+		if(event.getFrom().equals(event.getTo())) {
 			return;
 		}
 
@@ -277,28 +277,28 @@ public class BukkitPlayerListener implements Listener {
 	public void onPlayerMove(PlayerMoveEvent event) {
 		Location from = event.getFrom();
 		Location to = event.getTo();
-		if (from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) {
+		if(from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) {
 			return;
 		}
 		String p = event.getPlayer().getName();
-		for (Integer threshold : PlayerEvents.GetThresholdList()) {
+		for(Integer threshold : PlayerEvents.GetThresholdList()) {
 			Map<String, MCLocation> lastLocations = PlayerEvents.GetLastLocations(threshold);
 			MCLocation last;
-			if (!lastLocations.containsKey(p)) {
+			if(!lastLocations.containsKey(p)) {
 				last = new BukkitMCLocation(from);
 				lastLocations.put(p, last);
 			} else {
 				last = lastLocations.get(p);
 			}
 			MCLocation movedTo = new BukkitMCLocation(to);
-			if (!movedTo.getWorld().getName().equals(last.getWorld().getName())) {
+			if(!movedTo.getWorld().getName().equals(last.getWorld().getName())) {
 				lastLocations.put(p, movedTo);
 				continue;
 			}
-			if (last.distance(movedTo) > threshold) {
+			if(last.distance(movedTo) > threshold) {
 				BukkitMCPlayerMoveEvent pme = new BukkitMCPlayerMoveEvent(event, threshold, last);
 				EventUtils.TriggerListener(Driver.PLAYER_MOVE, "player_move", pme);
-				if (!pme.isCancelled()) {
+				if(!pme.isCancelled()) {
 					lastLocations.put(p, movedTo);
 				}
 			}
@@ -308,18 +308,18 @@ public class BukkitPlayerListener implements Listener {
 	// Reset player_move lastLocations when player respawns or teleports
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onNewRespawnLocation(PlayerRespawnEvent event) {
-		for (Integer i : PlayerEvents.GetThresholdList()) {
+		for(Integer i : PlayerEvents.GetThresholdList()) {
 			PlayerEvents.GetLastLocations(i).put(event.getPlayer().getName(), new BukkitMCLocation(event.getRespawnLocation()));
 		}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onNewTeleportLocation(PlayerTeleportEvent event) {
-		if (event.getFrom().equals(event.getTo())) {
+		if(event.getFrom().equals(event.getTo())) {
 			return;
 		}
-		if (!event.isCancelled()) {
-			for (Integer i : PlayerEvents.GetThresholdList()) {
+		if(!event.isCancelled()) {
+			for(Integer i : PlayerEvents.GetThresholdList()) {
 				PlayerEvents.GetLastLocations(i).put(event.getPlayer().getName(), new BukkitMCLocation(event.getTo()));
 			}
 		}

@@ -73,7 +73,7 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	@Override
 	public Map<MCEnchantment, Integer> getEnchants() {
 		Map<MCEnchantment, Integer> map = new HashMap<>();
-		for (Entry<Enchantment, Integer> entry : im.getEnchants().entrySet()) {
+		for(Entry<Enchantment, Integer> entry : im.getEnchants().entrySet()) {
 			map.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
 		}
 		return map;
@@ -130,7 +130,7 @@ public class BukkitMCItemMeta implements MCItemMeta {
 
 	@Override
 	public void addItemFlags(MCItemFlag... flags) {
-		for (MCItemFlag flag : flags) {
+		for(MCItemFlag flag : flags) {
 			im.addItemFlags(ItemFlag.valueOf(flag.name()));
 		}
 	}
@@ -139,7 +139,7 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	public Set<MCItemFlag> getItemFlags() {
 		Set<ItemFlag> flags = im.getItemFlags();
 		Set<MCItemFlag> ret = new HashSet<>(flags.size());
-		for (ItemFlag flag : flags) {
+		for(ItemFlag flag : flags) {
 			ret.add(MCItemFlag.valueOf(flag.name()));
 		}
 		return ret;

@@ -19,7 +19,7 @@ public class BukkitMCLocation implements MCLocation {
 	}
 
 	public BukkitMCLocation(AbstractionObject a) {
-		if (a instanceof MCLocation) {
+		if(a instanceof MCLocation) {
 			this.l = ((Location) a.getHandle());
 		} else {
 			throw new ClassCastException();
@@ -58,7 +58,7 @@ public class BukkitMCLocation implements MCLocation {
 
 	@Override
 	public MCWorld getWorld() {
-		if (l.getWorld() == null) {
+		if(l.getWorld() == null) {
 			return null;
 		}
 		return new BukkitMCWorld(l.getWorld());

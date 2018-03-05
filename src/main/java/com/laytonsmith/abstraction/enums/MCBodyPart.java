@@ -46,8 +46,8 @@ public enum MCBodyPart {
 
 	public static List<MCBodyPart> humanoidParts() {
 		List<MCBodyPart> bodyPartArrayList = new ArrayList<MCBodyPart>();
-		for (MCBodyPart part : values()) {
-			if (part.isHumanoidPart()) {
+		for(MCBodyPart part : values()) {
+			if(part.isHumanoidPart()) {
 				bodyPartArrayList.add(part);
 			}
 		}

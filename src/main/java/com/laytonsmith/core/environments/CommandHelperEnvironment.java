@@ -35,7 +35,7 @@ public class CommandHelperEnvironment implements Environment.EnvironmentImpl, Cl
 	 * @return
 	 */
 	public MCPlayer GetPlayer() {
-		if (commandSender instanceof MCPlayer) {
+		if(commandSender instanceof MCPlayer) {
 			return (MCPlayer) commandSender;
 		} else {
 			return null;

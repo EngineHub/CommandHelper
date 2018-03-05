@@ -38,7 +38,7 @@ public class BukkitVehicleListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockCollide(VehicleBlockCollisionEvent event) {
-		if (event.getVehicle() instanceof Animals && event.getVehicle().getPassenger() == null) {
+		if(event.getVehicle() instanceof Animals && event.getVehicle().getPassenger() == null) {
 			return;
 		}
 		BukkitMCVehicleBlockCollideEvent vbc = new BukkitMCVehicleBlockCollideEvent(event);
@@ -47,7 +47,7 @@ public class BukkitVehicleListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onEntityCollide(VehicleEntityCollisionEvent event) {
-		if (event.getVehicle().getPassenger() != event.getEntity()) {
+		if(event.getVehicle().getPassenger() != event.getEntity()) {
 			BukkitMCVehicleEntityCollideEvent vec = new BukkitMCVehicleEntityCollideEvent(event);
 			EventUtils.TriggerListener(Driver.VEHICLE_COLLIDE, "vehicle_collide", vec);
 		}
@@ -58,22 +58,22 @@ public class BukkitVehicleListener implements Listener {
 		Location from = event.getFrom();
 		Location to = event.getTo();
 		UUID id = event.getVehicle().getUniqueId();
-		for (Integer threshold : VehicleEvents.GetThresholdList()) {
+		for(Integer threshold : VehicleEvents.GetThresholdList()) {
 			Map<UUID, MCLocation> lastLocations = VehicleEvents.GetLastLocations(threshold);
-			if (!lastLocations.containsKey(id)) {
+			if(!lastLocations.containsKey(id)) {
 				lastLocations.put(id, new BukkitMCLocation(from));
 				continue;
 			}
 			MCLocation last = lastLocations.get(id);
-			if (!to.getWorld().getName().equals(last.getWorld().getName())) {
+			if(!to.getWorld().getName().equals(last.getWorld().getName())) {
 				lastLocations.put(id, new BukkitMCLocation(to));
 				continue;
 			}
 			BukkitMCLocation movedTo = new BukkitMCLocation(to);
-			if (last.distance(movedTo) > threshold) {
+			if(last.distance(movedTo) > threshold) {
 				BukkitMCVehicleMoveEvent vme = new BukkitMCVehicleMoveEvent(event, threshold, last);
 				EventUtils.TriggerListener(Driver.VEHICLE_MOVE, "vehicle_move", vme);
-				if (!vme.isCancelled()) {
+				if(!vme.isCancelled()) {
 					lastLocations.put(id, movedTo);
 				} else {
 					event.getVehicle().setVelocity(new Vector(0, 0, 0));

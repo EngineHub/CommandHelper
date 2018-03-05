@@ -16,7 +16,7 @@ public class BukkitMCWorldEnvironment extends EnumConvertor<MCWorldEnvironment, 
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldEnvironment instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldEnvironment getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldEnvironment();
 		}
 		return instance;

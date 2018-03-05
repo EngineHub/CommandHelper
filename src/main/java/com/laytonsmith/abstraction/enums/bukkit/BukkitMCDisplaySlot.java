@@ -16,7 +16,7 @@ public class BukkitMCDisplaySlot extends EnumConvertor<MCDisplaySlot, DisplaySlo
 	private static BukkitMCDisplaySlot instance;
 
 	public static BukkitMCDisplaySlot getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new BukkitMCDisplaySlot();
 		}
 		return instance;

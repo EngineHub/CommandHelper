@@ -81,10 +81,10 @@ public class Range {
 	public List<Integer> getRange() {
 		//Calculate the size once
 		double _size = Math.abs(leftBound - rightBound);
-		if (!leftInclusive) {
+		if(!leftInclusive) {
 			_size--;
 		}
-		if (rightInclusive) {
+		if(rightInclusive) {
 			_size++;
 		}
 		final int size = (int) _size;
@@ -92,7 +92,7 @@ public class Range {
 
 			@Override
 			public Integer get(int index) {
-				if (isAscending()) {
+				if(isAscending()) {
 					return leftBound + index + (leftInclusive ? 0 : 1);
 				} else {
 					return leftBound - index - (leftInclusive ? 0 : 1);
@@ -112,14 +112,14 @@ public class Range {
 	 * @return
 	 */
 	public int getMin() {
-		if (isAscending()) {
-			if (leftInclusive) {
+		if(isAscending()) {
+			if(leftInclusive) {
 				return leftBound;
 			} else {
 				return leftBound + 1;
 			}
-		} else if (isDecending()) {
-			if (rightInclusive) {
+		} else if(isDecending()) {
+			if(rightInclusive) {
 				return rightBound;
 			} else {
 				return rightBound + 1;
@@ -135,14 +135,14 @@ public class Range {
 	 * @return
 	 */
 	public int getMax() {
-		if (isDecending()) {
-			if (leftInclusive) {
+		if(isDecending()) {
+			if(leftInclusive) {
 				return leftBound;
 			} else {
 				return leftBound - 1;
 			}
-		} else if (isAscending()) {
-			if (rightInclusive) {
+		} else if(isAscending()) {
+			if(rightInclusive) {
 				return rightBound;
 			} else {
 				return rightBound - 1;

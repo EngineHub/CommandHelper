@@ -35,7 +35,7 @@ public class BukkitMCCommandMap implements MCCommandMap {
 	@Override
 	public MCCommand getCommand(String name) {
 		Command cmd = scm.getCommand(name);
-		if (cmd == null) {
+		if(cmd == null) {
 			return null;
 		}
 		return new BukkitMCCommand(cmd);
@@ -44,7 +44,7 @@ public class BukkitMCCommandMap implements MCCommandMap {
 	@Override
 	public List<MCCommand> getCommands() {
 		List<MCCommand> cmds = new ArrayList<>();
-		for (Command c : scm.getCommands()) {
+		for(Command c : scm.getCommands()) {
 			cmds.add(new BukkitMCCommand(c));
 		}
 		return cmds;
@@ -63,7 +63,7 @@ public class BukkitMCCommandMap implements MCCommandMap {
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean unregister(MCCommand cmd) {
-		if (cmd.isRegistered()) {
+		if(cmd.isRegistered()) {
 			((Map<String, Command>) ReflectionUtils.get(scm.getClass(), scm, "knownCommands")).remove(cmd.getName());
 			return cmd.unregister(this);
 		} else {

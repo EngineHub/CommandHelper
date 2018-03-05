@@ -98,8 +98,8 @@ public final class Prefilters {
 	 */
 	public static void match(Map<String, Construct> map, String key,
 			Construct actualValue, PrefilterType type) throws PrefilterNonMatchException {
-		if (map.containsKey(key)) {
-			switch (type) {
+		if(map.containsKey(key)) {
+			switch(type) {
 				case ITEM_MATCH:
 					ItemMatch(map.get(key), actualValue);
 					break;
@@ -111,7 +111,7 @@ public final class Prefilters {
 					break;
 				case EXPRESSION:
 					Construct exp = map.get(key);
-					if (!exp.val().isEmpty()
+					if(!exp.val().isEmpty()
 							&& exp.val().charAt(0) == '(' && exp.val().charAt(exp.val().length() - 1) == ')') {
 						ExpressionMatch(exp, key, actualValue);
 					} else {
@@ -122,7 +122,7 @@ public final class Prefilters {
 					break;
 				case REGEX:
 					String regex = map.get(key).val();
-					if (!regex.isEmpty()
+					if(!regex.isEmpty()
 							&& regex.charAt(0) == '/' && regex.charAt(regex.length() - 1) == '/') {
 						RegexMatch(regex, actualValue);
 					} else {
@@ -146,13 +146,13 @@ public final class Prefilters {
 	private static void ItemMatch(Construct item1, Construct item2) throws PrefilterNonMatchException {
 		String i1 = item1.val().split(":")[0];
 		String i2 = item2.val().split(":")[0];
-		if (!i1.trim().equals(i2)) {
+		if(!i1.trim().equals(i2)) {
 			throw new PrefilterNonMatchException();
 		}
 	}
 
 	private static void BooleanMatch(Construct bool1, Construct bool2) throws PrefilterNonMatchException {
-		if (Static.getBoolean(bool1) != Static.getBoolean(bool2)) {
+		if(Static.getBoolean(bool1) != Static.getBoolean(bool2)) {
 			throw new PrefilterNonMatchException();
 		}
 	}
@@ -160,13 +160,13 @@ public final class Prefilters {
 	private static void LocationMatch(Construct location1, Construct location2) throws PrefilterNonMatchException {
 		MCLocation l1 = ObjectGenerator.GetGenerator().location(location1, null, location1.getTarget());
 		MCLocation l2 = ObjectGenerator.GetGenerator().location(location2, null, Target.UNKNOWN);
-		if ((!l1.getWorld().equals(l2.getWorld())) || (l1.getBlockX() != l2.getBlockX()) || (l1.getBlockY() != l2.getBlockY()) || (l1.getBlockZ() != l2.getBlockZ())) {
+		if((!l1.getWorld().equals(l2.getWorld())) || (l1.getBlockX() != l2.getBlockX()) || (l1.getBlockY() != l2.getBlockY()) || (l1.getBlockZ() != l2.getBlockZ())) {
 			throw new PrefilterNonMatchException();
 		}
 	}
 
 	private static void StringMatch(String string1, String string2) throws PrefilterNonMatchException {
-		if (!string1.equals(string2)) {
+		if(!string1.equals(string2)) {
 			throw new PrefilterNonMatchException();
 		}
 	}
@@ -175,10 +175,10 @@ public final class Prefilters {
 		try {
 			double dOne = Static.getNumber(one, Target.UNKNOWN);
 			double dTwo = Static.getNumber(two, Target.UNKNOWN);
-			if (dOne != dTwo) {
+			if(dOne != dTwo) {
 				throw new PrefilterNonMatchException();
 			}
-		} catch (ConfigRuntimeException e) {
+		} catch(ConfigRuntimeException e) {
 			throw new PrefilterNonMatchException();
 		}
 	}
@@ -186,7 +186,7 @@ public final class Prefilters {
 	private static void ExpressionMatch(Construct expression, String key, Construct dvalue) throws PrefilterNonMatchException {
 		String exp = expression.val().substring(1, expression.val().length() - 1);
 		boolean inequalityMode = false;
-		if (exp.contains("<") || exp.contains(">") || exp.contains("==")) {
+		if(exp.contains("<") || exp.contains(">") || exp.contains("==")) {
 			inequalityMode = true;
 		}
 		String eClass = "com.sk89q.worldedit.internal.expression.Expression";
@@ -195,7 +195,7 @@ public final class Prefilters {
 		try {
 			eClazz = Class.forName(eClass);
 			errClazz = Class.forName(errClass);
-		} catch (ClassNotFoundException cnf) {
+		} catch(ClassNotFoundException cnf) {
 			throw new CREPluginInternalException("You are missing a required dependency: " + eClass, expression.getTarget(), cnf);
 		}
 		try {
@@ -204,17 +204,17 @@ public final class Prefilters {
 			double val = (double) ReflectionUtils.invokeMethod(eClazz, e, "evaluate",
 					new Class[]{double[].class},
 					new Object[]{new double[]{Static.getDouble(dvalue, Target.UNKNOWN)}});
-			if (inequalityMode) {
-				if (val == 0) {
+			if(inequalityMode) {
+				if(val == 0) {
 					throw new PrefilterNonMatchException();
 				}
 			} else {
-				if (val != Static.getDouble(dvalue, Target.UNKNOWN)) {
+				if(val != Static.getDouble(dvalue, Target.UNKNOWN)) {
 					throw new PrefilterNonMatchException();
 				}
 			}
-		} catch (ReflectionUtils.ReflectionException rex) {
-			if (rex.getCause().getClass().isAssignableFrom(errClazz)) {
+		} catch(ReflectionUtils.ReflectionException rex) {
+			if(rex.getCause().getClass().isAssignableFrom(errClazz)) {
 				throw new CREPluginInternalException("Your expression was invalidly formatted", expression.getTarget(), rex.getCause());
 			} else {
 				throw new CREPluginInternalException(rex.getMessage(),
@@ -225,17 +225,17 @@ public final class Prefilters {
 
 	private static void RegexMatch(String regex, Construct value) throws PrefilterNonMatchException {
 		regex = regex.substring(1, regex.length() - 1);
-		if (!value.val().matches(regex)) {
+		if(!value.val().matches(regex)) {
 			throw new PrefilterNonMatchException();
 		}
 	}
 
 	private static void MacroMatch(String key, Construct expression, Construct value) throws PrefilterNonMatchException {
-		if (expression.val().isEmpty()) {
+		if(expression.val().isEmpty()) {
 			throw new PrefilterNonMatchException();
-		} else if (expression.val().charAt(0) == '(' && expression.val().charAt(expression.val().length() - 1) == ')') {
+		} else if(expression.val().charAt(0) == '(' && expression.val().charAt(expression.val().length() - 1) == ')') {
 			ExpressionMatch(expression, key, value);
-		} else if (expression.val().charAt(0) == '/' && expression.val().charAt(expression.val().length() - 1) == '/') {
+		} else if(expression.val().charAt(0) == '/' && expression.val().charAt(expression.val().length() - 1) == '/') {
 			RegexMatch(expression.val(), value);
 		} else {
 			StringMatch(expression.val(), value.val());

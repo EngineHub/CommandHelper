@@ -47,18 +47,18 @@ public class TokenStream extends LinkedList<Token> {
 		boolean inKey = true;
 		StringBuilder buffer = new StringBuilder();
 		String keyName = "";
-		for (int i = 0; i < options.length(); i++) {
+		for(int i = 0; i < options.length(); i++) {
 			Character c = options.charAt(i);
 			Character c2 = null;
-			if (i < options.length() - 1) {
+			if(i < options.length() - 1) {
 				c2 = options.charAt(i + 1);
 			}
-			if (inKey) {
-				if (c == ':') {
+			if(inKey) {
+				if(c == ':') {
 					keyName = buffer.toString();
 					buffer = new StringBuilder();
 					inKey = false;
-				} else if (c == ';') {
+				} else if(c == ';') {
 					//Self closed
 					map.put(buffer.toString().trim().toLowerCase(), "true");
 					buffer = new StringBuilder();
@@ -68,10 +68,10 @@ public class TokenStream extends LinkedList<Token> {
 					buffer.append(c);
 				}
 			} else {
-				if (c == '\\' && c2 == ';') {
+				if(c == '\\' && c2 == ';') {
 					buffer.append(';');
 					i++;
-				} else if (c == ';') {
+				} else if(c == ';') {
 					//We're done
 					inKey = true;
 					map.put(keyName.trim().toLowerCase(), buffer.toString());
@@ -81,11 +81,11 @@ public class TokenStream extends LinkedList<Token> {
 				}
 			}
 		}
-		if (buffer.length() > 0) {
-			if (!inKey) {
+		if(buffer.length() > 0) {
+			if(!inKey) {
 				map.put(keyName.trim().toLowerCase(), buffer.toString());
 			} else {
-				if (!buffer.toString().trim().isEmpty()) {
+				if(!buffer.toString().trim().isEmpty()) {
 					map.put(buffer.toString().trim().toLowerCase(), "true");
 				}
 			}

@@ -43,7 +43,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	@Override
 	public Class<? extends Documentation>[] seeAlso() {
 		seealso see = this.getClass().getAnnotation(seealso.class);
-		if (see == null) {
+		if(see == null) {
 			return EMPTY_CLASS;
 		} else {
 			return see.value();
@@ -58,7 +58,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	@Override
 	public String getName() {
 		typeof to = this.getClass().getAnnotation(typeof.class);
-		if (to == null) {
+		if(to == null) {
 			throw new Error("ConfigRuntimeException subtypes must annotate themselves with @typeof, if they are instantiateable.");
 		} else {
 			return to.value();
@@ -82,7 +82,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * @return
 	 */
 	public static String getExceptionName(ConfigRuntimeException ex) {
-		if (ex instanceof AbstractCREException) {
+		if(ex instanceof AbstractCREException) {
 			return ((AbstractCREException) ex).getName();
 		} else {
 			return ex.getClass().getName();
@@ -102,7 +102,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		ret.set("message", this.getMessage());
 		CArray stackTrace = new CArray(Target.UNKNOWN);
 		ret.set("stackTrace", stackTrace, Target.UNKNOWN);
-		for (StackTraceElement e : this.getCREStackTrace()) {
+		for(StackTraceElement e : this.getCREStackTrace()) {
 			CArray element = e.getObjectFor();
 			stackTrace.push(element, Target.UNKNOWN);
 		}
@@ -115,13 +115,13 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		String classType = exception.get("classType", t).val();
 		Class<? extends Mixed> clzz = NativeTypeList.getNativeClass(classType);
 		Throwable cause = null;
-		if (exception.get("causedBy", t) instanceof CArray) {
+		if(exception.get("causedBy", t) instanceof CArray) {
 			// It has a cause
 			cause = new CRECausedByWrapper((CArray) exception.get("causedBy", t));
 		}
 		String message = exception.get("message", t).val();
 		List<StackTraceElement> st = new ArrayList<>();
-		for (Construct consStElement : Static.getArray(exception.get("stackTrace", t), t).asList()) {
+		for(Construct consStElement : Static.getArray(exception.get("stackTrace", t), t).asList()) {
 			CArray stElement = Static.getArray(consStElement, t);
 			int line = Static.getInt32(stElement.get("line", t), t);
 			File f = new File(stElement.get("file", t).val());
@@ -137,7 +137,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	private static Construct getCausedBy(Throwable causedBy) {
-		if (causedBy == null || !(causedBy instanceof CRECausedByWrapper)) {
+		if(causedBy == null || !(causedBy instanceof CRECausedByWrapper)) {
 			return CNull.NULL;
 		}
 		CRECausedByWrapper cre = (CRECausedByWrapper) causedBy;
@@ -152,7 +152,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * @return
 	 */
 	public static AbstractCREException getAbstractCREException(ConfigRuntimeException ex) {
-		if (ex instanceof AbstractCREException) {
+		if(ex instanceof AbstractCREException) {
 			return (AbstractCREException) ex;
 		}
 		throw new Error("Unexpected CRE exception that isn't convertable to AbstractCREException");
@@ -220,13 +220,13 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	public void freezeStackTraceElements(StackTraceManager manager) {
-		if (this.stackTrace == null) {
+		if(this.stackTrace == null) {
 			this.stackTrace = manager.getCurrentStackTrace();
 		}
 	}
 
 	public List<StackTraceElement> getCREStackTrace() {
-		if (this.stackTrace == null) {
+		if(this.stackTrace == null) {
 			return new ArrayList<>();
 		}
 		return new ArrayList<>(this.stackTrace);

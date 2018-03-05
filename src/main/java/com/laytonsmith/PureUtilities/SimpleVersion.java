@@ -24,7 +24,7 @@ public class SimpleVersion implements Version {
 
 	public SimpleVersion(String version) {
 		Matcher m = p.matcher(version);
-		if (m.find()) {
+		if(m.find()) {
 			major = Integer.parseInt(m.group(1) == null ? "0" : m.group(1));
 			minor = Integer.parseInt(m.group(2) == null ? "0" : m.group(2));
 			supplemental = Integer.parseInt(m.group(3) == null ? "0" : m.group(3));
@@ -108,13 +108,13 @@ public class SimpleVersion implements Version {
 	public int compareTo(Version o) {
 		int[] thisParts = new int[]{major, minor, supplemental};
 		int[] otherParts = new int[]{o.getMajor(), o.getMinor(), o.getSupplemental()};
-		for (int i = 0; i < thisParts.length; i++) {
+		for(int i = 0; i < thisParts.length; i++) {
 			int n1 = thisParts[i];
 			int n2 = otherParts[i];
-			if (n1 < n2) {
+			if(n1 < n2) {
 				return -1;
 			}
-			if (n1 > n2) {
+			if(n1 > n2) {
 				return 1;
 			}
 		}
@@ -123,9 +123,9 @@ public class SimpleVersion implements Version {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof Version) {
+		if(obj instanceof Version) {
 			Version v = (Version) obj;
-			if (major == v.getMajor() && minor == v.getMinor() && supplemental == v.getSupplemental()) {
+			if(major == v.getMajor() && minor == v.getMinor() && supplemental == v.getSupplemental()) {
 				return true;
 			} else {
 				return false;
@@ -165,60 +165,60 @@ public class SimpleVersion implements Version {
 	}
 
 	public static boolean checkLT(Version lhs, Version rhs) {
-		if (lhs == null || rhs == null) {
+		if(lhs == null || rhs == null) {
 			throw new NullPointerException();
 		}
-		if (lhs.getMajor() == rhs.getMajor()) {
-			if (lhs.getMinor() == rhs.getMinor()) {
-				if (lhs.getSupplemental() == rhs.getSupplemental()) {
+		if(lhs.getMajor() == rhs.getMajor()) {
+			if(lhs.getMinor() == rhs.getMinor()) {
+				if(lhs.getSupplemental() == rhs.getSupplemental()) {
 					return false;
-				} else if (lhs.getSupplemental() < rhs.getSupplemental()) {
+				} else if(lhs.getSupplemental() < rhs.getSupplemental()) {
 					return true;
 				}
-			} else if (lhs.getMinor() < rhs.getMinor()) {
+			} else if(lhs.getMinor() < rhs.getMinor()) {
 				return true;
 			}
-		} else if (lhs.getMajor() < rhs.getMajor()) {
+		} else if(lhs.getMajor() < rhs.getMajor()) {
 			return true;
 		}
 		return false;
 	}
 
 	public static boolean checkLTE(Version lhs, Version rhs) {
-		if (lhs == null || rhs == null) {
+		if(lhs == null || rhs == null) {
 			throw new NullPointerException();
 		}
-		if (lhs.equals(rhs)) {
+		if(lhs.equals(rhs)) {
 			return true;
 		}
 		return checkLT(lhs, rhs);
 	}
 
 	public static boolean checkGT(Version lhs, Version rhs) {
-		if (lhs == null || rhs == null) {
+		if(lhs == null || rhs == null) {
 			throw new NullPointerException();
 		}
-		if (lhs.getMajor() == rhs.getMajor()) {
-			if (lhs.getMinor() == rhs.getMinor()) {
-				if (lhs.getSupplemental() == rhs.getSupplemental()) {
+		if(lhs.getMajor() == rhs.getMajor()) {
+			if(lhs.getMinor() == rhs.getMinor()) {
+				if(lhs.getSupplemental() == rhs.getSupplemental()) {
 					return false;
-				} else if (lhs.getSupplemental() > rhs.getSupplemental()) {
+				} else if(lhs.getSupplemental() > rhs.getSupplemental()) {
 					return true;
 				}
-			} else if (lhs.getMinor() > rhs.getMinor()) {
+			} else if(lhs.getMinor() > rhs.getMinor()) {
 				return true;
 			}
-		} else if (lhs.getMajor() > rhs.getMajor()) {
+		} else if(lhs.getMajor() > rhs.getMajor()) {
 			return true;
 		}
 		return false;
 	}
 
 	public static boolean checkGTE(Version lhs, Version rhs) {
-		if (lhs == null || rhs == null) {
+		if(lhs == null || rhs == null) {
 			throw new NullPointerException();
 		}
-		if (lhs.equals(rhs)) {
+		if(lhs.equals(rhs)) {
 			return true;
 		}
 		return checkGT(lhs, rhs);

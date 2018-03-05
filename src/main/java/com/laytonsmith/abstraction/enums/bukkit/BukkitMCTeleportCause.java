@@ -16,7 +16,7 @@ public class BukkitMCTeleportCause extends EnumConvertor<MCTeleportCause, Telepo
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause();
 		}
 		return instance;

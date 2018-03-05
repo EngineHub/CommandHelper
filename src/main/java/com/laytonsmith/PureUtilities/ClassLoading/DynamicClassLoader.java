@@ -31,7 +31,7 @@ public class DynamicClassLoader extends ClassLoader {
 	 */
 	public synchronized void addJar(URL url) {
 		checkDestroy();
-		if (urls.contains(url)) {
+		if(urls.contains(url)) {
 			return;
 		}
 		urls.add(url);
@@ -46,7 +46,7 @@ public class DynamicClassLoader extends ClassLoader {
 	public synchronized void removeJar(URL url) {
 		checkDestroy();
 
-		if (!urls.contains(url)) {
+		if(!urls.contains(url)) {
 			return;
 		}
 
@@ -55,16 +55,16 @@ public class DynamicClassLoader extends ClassLoader {
 
 		try {
 			l.close();
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			// Whatever.
 		}
 	}
 
 	@Override
 	protected synchronized Package getPackage(String name) {
-		for (ClassLoader c : classLoaders.values()) {
+		for(ClassLoader c : classLoaders.values()) {
 			Package p = (Package) ReflectionUtils.invokeMethod(c.getClass(), c, "getPackage", new Class[]{String.class}, new Object[]{name});
-			if (p != null) {
+			if(p != null) {
 				return p;
 			}
 		}
@@ -74,7 +74,7 @@ public class DynamicClassLoader extends ClassLoader {
 	@Override
 	protected synchronized Package[] getPackages() {
 		List<Package> packages = new ArrayList<Package>();
-		for (ClassLoader c : classLoaders.values()) {
+		for(ClassLoader c : classLoaders.values()) {
 			packages.addAll(Arrays.asList((Package[]) ReflectionUtils.invokeMethod(c.getClass(), c, "getPackages")));
 		}
 		return packages.toArray(new Package[packages.size()]);
@@ -87,16 +87,16 @@ public class DynamicClassLoader extends ClassLoader {
 			//If the parent class knows about it, we're done.
 			Class c = Class.forName(name, resolve, DynamicClassLoader.class.getClassLoader());
 			return c;
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			//Otherwise we need to find the class ourselves.
-			for (URLClassLoader url : classLoaders.values()) {
+			for(URLClassLoader url : classLoaders.values()) {
 				try {
 					Class c = url.loadClass(name);
-					if (resolve) {
+					if(resolve) {
 						resolveClass(c);
 					}
 					return c;
-				} catch (ClassNotFoundException ex1) {
+				} catch(ClassNotFoundException ex1) {
 					//Don't care, move on to the next class loader
 				}
 			}
@@ -117,7 +117,7 @@ public class DynamicClassLoader extends ClassLoader {
 	}
 
 	private void checkDestroy() {
-		if (destroyed) {
+		if(destroyed) {
 			throw new RuntimeException("Cannot access this instance of " + DynamicClassLoader.class.getSimpleName() + ", as it has already been destroyed.");
 		}
 	}

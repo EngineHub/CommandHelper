@@ -16,7 +16,7 @@ public class BukkitMCRotation extends EnumConvertor<MCRotation, Rotation> {
 	private static BukkitMCRotation instance;
 
 	public static BukkitMCRotation getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCRotation();
 		}
 		return instance;

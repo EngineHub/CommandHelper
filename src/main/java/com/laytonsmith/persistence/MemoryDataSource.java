@@ -32,7 +32,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 	 * Clears all data from all databases. Should be called when a natural reload type operation is called.
 	 */
 	public synchronized static void ClearDatabases() {
-		for (String s : databasePool.keySet()) {
+		for(String s : databasePool.keySet()) {
 			databasePool.get(s).clear();
 		}
 		databasePool.clear();
@@ -51,7 +51,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 	 * @return
 	 */
 	public synchronized static Map<String, String> getDatabase(String name) {
-		if (!databasePool.containsKey(name)) {
+		if(!databasePool.containsKey(name)) {
 			databasePool.put(name, Collections.synchronizedMap(new TreeMap<String, String>()));
 		}
 		return databasePool.get(name);
@@ -75,9 +75,9 @@ public final class MemoryDataSource extends AbstractDataSource {
 		//If the transaction list contains this key already, we can clear it
 		//and add this one
 		Iterator<Transaction> it = transactionList.iterator();
-		while (it.hasNext()) {
+		while(it.hasNext()) {
 			Transaction t = it.next();
-			if (t.key.equals(transaction.key)) {
+			if(t.key.equals(transaction.key)) {
 				it.remove();
 			}
 		}
@@ -85,14 +85,14 @@ public final class MemoryDataSource extends AbstractDataSource {
 	}
 
 	private synchronized void replayTransactions() {
-		for (Transaction t : transactionList) {
+		for(Transaction t : transactionList) {
 			try {
-				if (t.action == Action.CLEAR) {
+				if(t.action == Action.CLEAR) {
 					clearKey0(null, t.key.split("\\."));
-				} else if (t.action == Action.SET) {
+				} else if(t.action == Action.SET) {
 					set0(null, t.key.split("\\."), t.value);
 				}
-			} catch (Exception ex) {
+			} catch(Exception ex) {
 				Logger.getLogger(MemoryDataSource.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -115,7 +115,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 
 	@Override
 	protected synchronized void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
-		if (rollback) {
+		if(rollback) {
 			transactionList.clear();
 		} else {
 			replayTransactions();
@@ -125,7 +125,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 	@Override
 	protected boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		String fKey = StringUtils.Join(key, ".");
-		if (inTransaction()) {
+		if(inTransaction()) {
 			Transaction t = new Transaction();
 			t.action = Action.SET;
 			t.key = fKey;
@@ -141,9 +141,9 @@ public final class MemoryDataSource extends AbstractDataSource {
 	@Override
 	protected synchronized String get0(String[] key) throws DataSourceException {
 		String fKey = StringUtils.Join(key, ".");
-		if (inTransaction()) {
-			for (Transaction t : transactionList) {
-				if (t.action == Action.SET && t.key.equals(fKey)) {
+		if(inTransaction()) {
+			for(Transaction t : transactionList) {
+				if(t.action == Action.SET && t.key.equals(fKey)) {
 					return t.value;
 				}
 			}
@@ -161,7 +161,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 	@Override
 	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
 		String fKey = StringUtils.Join(key, ".");
-		if (inTransaction()) {
+		if(inTransaction()) {
 			Transaction t = new Transaction();
 			t.action = Action.CLEAR;
 			t.key = fKey;
@@ -174,7 +174,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 	@Override
 	public Set<String> stringKeySet(String[] keyBase) throws DataSourceException {
 		Set<String> keys = new TreeSet<String>();
-		for (String[] key : keySet(keyBase)) {
+		for(String[] key : keySet(keyBase)) {
 			keys.add(StringUtils.Join(key, "."));
 		}
 		return keys;
@@ -183,24 +183,24 @@ public final class MemoryDataSource extends AbstractDataSource {
 	@Override
 	public synchronized Set<String[]> keySet(String[] keyBase) throws DataSourceException {
 		Set<String> set = new HashSet<String>();
-		for (String key : getDatabase(dbName).keySet()) {
+		for(String key : getDatabase(dbName).keySet()) {
 			set.add(key);
 		}
 		//Now go through the transactions and add things that are set, and
 		//remove things that are cleared
-		if (inTransaction()) {
-			for (Transaction t : transactionList) {
-				if (t.action == Action.CLEAR) {
+		if(inTransaction()) {
+			for(Transaction t : transactionList) {
+				if(t.action == Action.CLEAR) {
 					set.remove(t.key);
-				} else if (t.action == Action.SET) {
+				} else if(t.action == Action.SET) {
 					set.add(t.key);
 				}
 			}
 		}
 		Set<String[]> ret = new HashSet<String[]>();
 		String kb = StringUtils.Join(keyBase, ".");
-		for (String key : set) {
-			if (key.startsWith(kb)) {
+		for(String key : set) {
+			if(key.startsWith(kb)) {
 				ret.add(key.split("\\."));
 			}
 		}

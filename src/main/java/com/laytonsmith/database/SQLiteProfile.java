@@ -16,7 +16,7 @@ public class SQLiteProfile extends SQLProfile {
 
 	public SQLiteProfile(String id, Map<String, String> elements) throws Profiles.InvalidProfileException {
 		super(id, elements);
-		if (!elements.containsKey("file")) {
+		if(!elements.containsKey("file")) {
 			throw new Profiles.InvalidProfileException("\"file\" parameter is required for profile \"" + id + "\"");
 		}
 		file = elements.get("file");
@@ -24,7 +24,7 @@ public class SQLiteProfile extends SQLProfile {
 
 	public File getFile() {
 		File f = new File(file);
-		if (!f.isAbsolute()) {
+		if(!f.isAbsolute()) {
 			f = new File(MethodScriptFileLocations.getDefault().getProfilesFile(), f.getPath());
 		}
 		return f;
@@ -34,7 +34,7 @@ public class SQLiteProfile extends SQLProfile {
 	public String getConnectionString() throws SQLException {
 		try {
 			Class.forName(org.sqlite.JDBC.class.getName());
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			throw new SQLException("Cannot load SQLite. Check your installation and try again");
 		}
 		return "jdbc:sqlite:" + getFile();

@@ -41,17 +41,17 @@ public class Pair<A, B> implements Map.Entry<A, B> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if(obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if(getClass() != obj.getClass()) {
 			return false;
 		}
 		final Pair<?, ?> other = (Pair<?, ?>) obj;
-		if (!Objects.equals(this.fst, other.fst)) {
+		if(!Objects.equals(this.fst, other.fst)) {
 			return false;
 		}
-		if (!Objects.equals(this.snd, other.snd)) {
+		if(!Objects.equals(this.snd, other.snd)) {
 			return false;
 		}
 		return true;

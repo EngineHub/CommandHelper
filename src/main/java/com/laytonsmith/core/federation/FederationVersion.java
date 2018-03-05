@@ -14,8 +14,8 @@ public enum FederationVersion implements Version {
 	 * @throws IllegalArgumentException If the version is unrecognized.
 	 */
 	public static FederationVersion fromVersion(String version) {
-		for (FederationVersion f : values()) {
-			if (version.equals(f.getVersionString())) {
+		for(FederationVersion f : values()) {
+			if(version.equals(f.getVersionString())) {
 				return f;
 			}
 		}

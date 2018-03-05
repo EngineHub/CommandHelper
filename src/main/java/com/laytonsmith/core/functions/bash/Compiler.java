@@ -34,7 +34,7 @@ public class Compiler {
 
 		@Override
 		public String compile(Target t, String... args) {
-			if (args.length == 0) {
+			if(args.length == 0) {
 				return "0";
 			}
 			return args[0];

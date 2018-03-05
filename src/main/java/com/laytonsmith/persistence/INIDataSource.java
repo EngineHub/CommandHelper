@@ -31,12 +31,12 @@ public class INIDataSource extends StringSerializableDataSource {
 		Properties props = new Properties();
 		try {
 			props.load(new StringReader(data));
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			//Won't ever happen, but sure.
 			throw new DataSourceException(null, ex);
 		}
 		List<Pair<String, String>> list = new ArrayList<Pair<String, String>>();
-		for (String key : props.stringPropertyNames()) {
+		for(String key : props.stringPropertyNames()) {
 			list.add(new Pair<String, String>(key, props.getProperty(key)));
 		}
 		model = new DataSourceModel(list);
@@ -45,7 +45,7 @@ public class INIDataSource extends StringSerializableDataSource {
 	@Override
 	protected String serializeModel() {
 		StringBuilder b = new StringBuilder();
-		for (String[] key : model.keySet()) {
+		for(String[] key : model.keySet()) {
 			b.append(StringUtils.Join(key, ".")).append("=").append(model.get(key)).append("\n");
 		}
 		return b.toString();

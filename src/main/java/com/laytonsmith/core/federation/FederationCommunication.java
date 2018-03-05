@@ -44,7 +44,7 @@ public class FederationCommunication {
 			socketWriter.write(encode(line.getBytes("UTF-8")));
 			socketWriter.write("\n".getBytes("UTF-8"));
 			socketWriter.flush();
-		} catch (UnsupportedEncodingException ex) {
+		} catch(UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -58,9 +58,9 @@ public class FederationCommunication {
 	public String readLine() throws IOException {
 		try {
 			List<Byte> bytes = new ArrayList<>();
-			while (true) {
+			while(true) {
 				int b = socketReader.read();
-				if (b == '\n') {
+				if(b == '\n') {
 					//The newline is never encoded.
 					break;
 				} else {
@@ -68,12 +68,12 @@ public class FederationCommunication {
 				}
 			}
 			byte[] ba = new byte[bytes.size()];
-			for (int i = 0; i < bytes.size(); i++) {
+			for(int i = 0; i < bytes.size(); i++) {
 				ba[i] = bytes.get(i);
 			}
 			ba = decode(ba);
 			return new String(ba, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
+		} catch(UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -139,9 +139,9 @@ public class FederationCommunication {
 			// InputStream as well. We're just using the BufferedReader as a shortcut
 			// to reading this part of the stream.
 			List<Byte> bytes = new ArrayList<>();
-			while (true) {
+			while(true) {
 				int b = socketReader.read();
-				if (b == '\n') {
+				if(b == '\n') {
 					//The newline is never encoded.
 					break;
 				} else {
@@ -149,11 +149,11 @@ public class FederationCommunication {
 				}
 			}
 			byte[] ba = new byte[bytes.size()];
-			for (int i = 0; i < bytes.size(); i++) {
+			for(int i = 0; i < bytes.size(); i++) {
 				ba[i] = bytes.get(i);
 			}
 			return new String(ba, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
+		} catch(UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}

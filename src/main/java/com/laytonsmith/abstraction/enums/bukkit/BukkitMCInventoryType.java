@@ -15,7 +15,7 @@ public class BukkitMCInventoryType extends EnumConvertor<MCInventoryType, Invent
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCInventoryType instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCInventoryType getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCInventoryType();
 		}
 		return instance;

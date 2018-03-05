@@ -84,7 +84,7 @@ public final class StringUtils {
 	public static String Join(Map map, String entryGlue, String elementGlue, String lastElementGlue, String elementGlueForTwoItems, String empty) {
 		//Just create a list of glued together entries, then send it to the other Join method
 		List<String> list = new ArrayList<String>();
-		for (Object key : map.keySet()) {
+		for(Object key : map.keySet()) {
 			StringBuilder b = new StringBuilder();
 			b.append(key).append(entryGlue).append(map.get(key));
 			list.add(b.toString());
@@ -398,12 +398,12 @@ public final class StringUtils {
 	 * @return
 	 */
 	private static <T> String doJoin(ItemGetter<T> items, String glue, String lastGlue, String glueForTwoItems, String empty, Renderer<T> renderer) {
-		if (renderer == null) {
+		if(renderer == null) {
 			renderer = new Renderer<T>() {
 
 				@Override
 				public String toString(T item) {
-					if (item == null) {
+					if(item == null) {
 						return "null";
 					} else {
 						return item.toString();
@@ -411,25 +411,25 @@ public final class StringUtils {
 				}
 			};
 		}
-		if (lastGlue == null) {
+		if(lastGlue == null) {
 			lastGlue = glue;
 		}
-		if (glueForTwoItems == null) {
+		if(glueForTwoItems == null) {
 			glueForTwoItems = lastGlue;
 		}
-		if (items.isEmpty()) {
+		if(items.isEmpty()) {
 			return empty == null ? "" : empty;
-		} else if (items.size() == 2) {
+		} else if(items.size() == 2) {
 			StringBuilder b = new StringBuilder();
 			return b.append(renderer.toString(items.get(0)))
 					.append(glueForTwoItems)
 					.append(renderer.toString(items.get(1))).toString();
 		} else {
 			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < items.size(); i++) {
+			for(int i = 0; i < items.size(); i++) {
 				T o = items.get(i);
-				if (i != 0) {
-					if (i == items.size() - 1) {
+				if(i != 0) {
+					if(i == items.size() - 1) {
 						b.append(lastGlue);
 					} else {
 						b.append(glue);
@@ -481,15 +481,15 @@ public final class StringUtils {
 			CharSequence str2) {
 		int[][] distance = new int[str1.length() + 1][str2.length() + 1];
 
-		for (int i = 0; i <= str1.length(); i++) {
+		for(int i = 0; i <= str1.length(); i++) {
 			distance[i][0] = i;
 		}
-		for (int j = 0; j <= str2.length(); j++) {
+		for(int j = 0; j <= str2.length(); j++) {
 			distance[0][j] = j;
 		}
 
-		for (int i = 1; i <= str1.length(); i++) {
-			for (int j = 1; j <= str2.length(); j++) {
+		for(int i = 1; i <= str1.length(); i++) {
+			for(int j = 1; j <= str2.length(); j++) {
 				distance[i][j] = minimum(
 						distance[i - 1][j] + 1,
 						distance[i][j - 1] + 1,
@@ -519,11 +519,11 @@ public final class StringUtils {
 		char escape = 0;
 		char quote = 0;
 		boolean was_quote = false;
-		for (int i = 0; i < args.length(); i++) {
+		for(int i = 0; i < args.length(); i++) {
 			char ch = args.charAt(i);
-			if (quote != 0) {  // we're in a quote
-				if (escape != 0) {  // we're in an escape too
-					if (ch == quote) {  // escaping the same quote gives just that quote
+			if(quote != 0) {  // we're in a quote
+				if(escape != 0) {  // we're in an escape too
+					if(ch == quote) {  // escaping the same quote gives just that quote
 						buf.append(ch);
 					} else {  // escaping anything else gives the escape and char as written
 						buf.append(escape);
@@ -532,21 +532,21 @@ public final class StringUtils {
 					// in either case, this terminates the escape.
 					escape = 0;
 					continue;
-				} else if (ch == quote) {  // Specifying the same quote again terminates the quote.
+				} else if(ch == quote) {  // Specifying the same quote again terminates the quote.
 					quote = 0;
 					was_quote = true;
 					continue;
 				}
-			} else if (escape != 0) {
+			} else if(escape != 0) {
 				// all escapes outside quotes which are supported simply output the
 				// second character, as we aren't handling special ones like \t or \n
 				buf.append(ch);
 				escape = 0;
 				continue;
 			} else { // outside of quotes and escapes
-				switch (ch) {
+				switch(ch) {
 					case ' ':  // we can tokenize
-						if (was_quote || buf.length() != 0) {
+						if(was_quote || buf.length() != 0) {
 							arguments.add(buf.toString());
 							buf = new StringBuilder();
 							was_quote = false;
@@ -559,7 +559,7 @@ public final class StringUtils {
 				}
 			}
 			// escape handling and default handling can fall through from either branch to here
-			switch (ch) {
+			switch(ch) {
 				case '\\':
 					escape = ch;
 					break;
@@ -567,10 +567,10 @@ public final class StringUtils {
 					buf.append(ch);
 			}
 		}
-		if (escape != 0) {  // makes trailing escapes be appended (erroneous string, though, IMO)
+		if(escape != 0) {  // makes trailing escapes be appended (erroneous string, though, IMO)
 			buf.append(escape);
 		}
-		if (was_quote || buf.length() != 0) {  // add the final string
+		if(was_quote || buf.length() != 0) {  // add the final string
 			arguments.add(buf.toString());
 		}
 		return arguments;
@@ -578,7 +578,7 @@ public final class StringUtils {
 
 	public static String trimLeft(String str) {
 		//If the argument is null then return empty string
-		if (str == null) {
+		if(str == null) {
 			return "";
 		}
 
@@ -587,7 +587,7 @@ public final class StringUtils {
 		 * If it is, use substring to make a new String that starts after the space.
 		 */
 		int len = 0;
-		while (str.charAt(len) == ' ') {
+		while(str.charAt(len) == ' ') {
 			len++;
 		}
 		return str.substring(len);
@@ -595,7 +595,7 @@ public final class StringUtils {
 
 	public static String trimRight(String str) {
 		//If the argument is null then return empty string
-		if (str == null) {
+		if(str == null) {
 			return "";
 		}
 
@@ -603,7 +603,7 @@ public final class StringUtils {
 		 * In the code, take the length of the string and use it to determine if the last character is a space.
 		 */
 		int len = str.length();
-		while (len > 0 && str.charAt(len - 1) == ' ') {
+		while(len > 0 && str.charAt(len - 1) == ' ') {
 			len--;
 		}
 		str = str.substring(0, len);
@@ -619,7 +619,7 @@ public final class StringUtils {
 	 */
 	public static String[] trimSplit(String string, String regex) {
 		String[] split = string.split(regex);
-		for (int i = 0; i < split.length; i++) {
+		for(int i = 0; i < split.length; i++) {
 			split[i] = split[i].trim();
 		}
 		return split;
@@ -634,24 +634,24 @@ public final class StringUtils {
 	 * @return
 	 */
 	public static String replaceLast(String string, String regex, String replacement) {
-		if (regex == null) {
+		if(regex == null) {
 			return string;
 		}
-		if (string == null) {
+		if(string == null) {
 			return null;
 		}
-		if (regex.length() > string.length()) {
+		if(regex.length() > string.length()) {
 			//It can't be contained in here
 			return string;
 		}
 		Matcher m = Pattern.compile(regex).matcher(string);
 		int start = -1;
 		int end = -1;
-		while (m.find()) {
+		while(m.find()) {
 			start = m.start();
 			end = m.end();
 		}
-		if (start == -1 || end == -1) {
+		if(start == -1 || end == -1) {
 			//Didn't find it, return the whole string
 			return string;
 		} else {
@@ -678,7 +678,7 @@ public final class StringUtils {
 	 */
 	public static String HumanReadableByteCount(long bytes, boolean si) {
 		int unit = si ? 1000 : 1024;
-		if (bytes < unit) {
+		if(bytes < unit) {
 			return bytes + " B";
 		}
 		int exp = (int) (Math.log(bytes) / Math.log(unit));
@@ -753,7 +753,7 @@ public final class StringUtils {
 	 * @return
 	 */
 	public static String PluralTemplateHelper(int count, String singularTemplate, String pluralTemplate) {
-		if (count == 1) {
+		if(count == 1) {
 			return String.format(singularTemplate, count);
 		} else {
 			return String.format(pluralTemplate, count);
@@ -786,18 +786,18 @@ public final class StringUtils {
 	 * @throws IllegalArgumentException If count is less than 0.
 	 */
 	public static String stringMultiply(int count, CharSequence s) {
-		if (count < 0) {
+		if(count < 0) {
 			throw new IllegalArgumentException("Count must be greater than or equal to 0");
 		}
-		if (count == 0) {
+		if(count == 0) {
 			return "";
 		}
-		if (count == 1) {
+		if(count == 1) {
 			return s.toString();
 		}
 		//Ok, actually have to do the multiply now.
 		StringBuilder b = new StringBuilder(s.length() * count);
-		for (int i = 0; i < count; i++) {
+		for(int i = 0; i < count; i++) {
 			b.append(s);
 		}
 		return b.toString();
@@ -837,13 +837,13 @@ public final class StringUtils {
 	 */
 	public static List<String> lineSplit(String text, int len) {
 		// return empty array for null text
-		if (text == null) {
+		if(text == null) {
 			return new ArrayList<>();
 		}
 
 		// return text if len is zero or less
 		// or text is less than length
-		if (len <= 0 || text.length() <= len) {
+		if(len <= 0 || text.length() <= len) {
 			return new ArrayList<>(Arrays.asList(new String[]{text}));
 		}
 
@@ -852,11 +852,11 @@ public final class StringUtils {
 		StringBuilder line = new StringBuilder();
 		StringBuilder word = new StringBuilder();
 
-		for (int i = 0; i < chars.length; i++) {
+		for(int i = 0; i < chars.length; i++) {
 			word.append(chars[i]);
 
-			if (chars[i] == ' ') {
-				if ((line.length() + word.length()) > len) {
+			if(chars[i] == ' ') {
+				if((line.length() + word.length()) > len) {
 					lines.add(line.toString());
 					line.delete(0, line.length());
 				}
@@ -867,8 +867,8 @@ public final class StringUtils {
 		}
 
 		// handle any extra chars in current word
-		if (word.length() > 0) {
-			if ((line.length() + word.length()) > len) {
+		if(word.length() > 0) {
+			if((line.length() + word.length()) > len) {
 				lines.add(line.toString());
 				line.delete(0, line.length());
 			}
@@ -876,7 +876,7 @@ public final class StringUtils {
 		}
 
 		// handle extra line
-		if (line.length() > 0) {
+		if(line.length() > 0) {
 			lines.add(line.toString());
 		}
 
@@ -915,27 +915,27 @@ public final class StringUtils {
 	 * @return a line with newlines inserted, <code>null</code> if null input
 	 */
 	public static String lineWrap(String str, int wrapLength, String newLineStr, boolean wrapLongWords) {
-		if (str == null) {
+		if(str == null) {
 			return null;
 		}
-		if (newLineStr == null) {
+		if(newLineStr == null) {
 			newLineStr = OSUtils.GetLineEnding();
 		}
-		if (wrapLength < 1) {
+		if(wrapLength < 1) {
 			wrapLength = 1;
 		}
 		int inputLineLength = str.length();
 		int offset = 0;
 		StringBuilder wrappedLine = new StringBuilder(inputLineLength + 32);
 
-		while ((inputLineLength - offset) > wrapLength) {
-			if (str.charAt(offset) == ' ') {
+		while((inputLineLength - offset) > wrapLength) {
+			if(str.charAt(offset) == ' ') {
 				offset++;
 				continue;
 			}
 			int spaceToWrapAt = str.lastIndexOf(' ', wrapLength + offset);
 
-			if (spaceToWrapAt >= offset) {
+			if(spaceToWrapAt >= offset) {
 				// normal case
 				wrappedLine.append(str.substring(offset, spaceToWrapAt));
 				wrappedLine.append(newLineStr);
@@ -943,7 +943,7 @@ public final class StringUtils {
 
 			} else {
 				// really long word or URL
-				if (wrapLongWords) {
+				if(wrapLongWords) {
 					// wrap really long word one line at a time
 					wrappedLine.append(str.substring(offset, wrapLength + offset));
 					wrappedLine.append(newLineStr);
@@ -951,7 +951,7 @@ public final class StringUtils {
 				} else {
 					// do not wrap really long word, just extend beyond limit
 					spaceToWrapAt = str.indexOf(' ', wrapLength + offset);
-					if (spaceToWrapAt >= 0) {
+					if(spaceToWrapAt >= 0) {
 						wrappedLine.append(str.substring(offset, spaceToWrapAt));
 						wrappedLine.append(newLineStr);
 						offset = spaceToWrapAt + 1;

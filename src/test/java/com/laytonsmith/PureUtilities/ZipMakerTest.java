@@ -9,29 +9,30 @@ import org.junit.Before;
 
 /**
  *
- * 
+ *
  */
 public class ZipMakerTest {
-    File resourceDir;
-    
-    public ZipMakerTest() {
-    }
-    
-    @Before
-    public void setUp() throws URISyntaxException{
-        URL url = ZipMakerTest.class.getResource("/test.txt");
-        resourceDir = new File(new URI(url.toString())).getParentFile();        
-    }
-    
-    @After
-    public void tearDown(){
-        File test = new File(resourceDir, "zippables.zip");
-        if(test.exists()){
-            test.deleteOnExit();
-        }
-    }
-    
-    //TODO: Why doesn't this work? Am I missing a resource or something?
+
+	File resourceDir;
+
+	public ZipMakerTest() {
+	}
+
+	@Before
+	public void setUp() throws URISyntaxException {
+		URL url = ZipMakerTest.class.getResource("/test.txt");
+		resourceDir = new File(new URI(url.toString())).getParentFile();
+	}
+
+	@After
+	public void tearDown() {
+		File test = new File(resourceDir, "zippables.zip");
+		if(test.exists()) {
+			test.deleteOnExit();
+		}
+	}
+
+	//TODO: Why doesn't this work? Am I missing a resource or something?
 //    @Test public void testMakingZip() throws IOException, URISyntaxException{
 //        ZipMaker.MakeZip(new File(resourceDir, "zippables"), "zippables.zip");
 //        File zippable = new File(resourceDir, "zippables.zip");

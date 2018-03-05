@@ -21,7 +21,7 @@ public class BukkitMCShapelessRecipe extends BukkitMCRecipe implements MCShapele
 	public String getKey() {
 		try {
 			return r.getKey().getKey();
-		} catch (NoSuchMethodError ex) {
+		} catch(NoSuchMethodError ex) {
 			// Probably prior to 1.12
 			return null;
 		}
@@ -45,7 +45,7 @@ public class BukkitMCShapelessRecipe extends BukkitMCRecipe implements MCShapele
 	@Override
 	public List<MCItemStack> getIngredients() {
 		List<MCItemStack> ret = new ArrayList<>();
-		for (ItemStack is : r.getIngredientList()) {
+		for(ItemStack is : r.getIngredientList()) {
 			ret.add(new BukkitMCItemStack(is));
 		}
 		return ret;

@@ -84,7 +84,7 @@ public class BukkitMCBossBar implements MCBossBar {
 	@Override
 	public List<MCPlayer> getPlayers() {
 		List<MCPlayer> players = new ArrayList<>();
-		for (Player player : bb.getPlayers()) {
+		for(Player player : bb.getPlayers()) {
 			players.add(new BukkitMCPlayer(player));
 		}
 		return players;

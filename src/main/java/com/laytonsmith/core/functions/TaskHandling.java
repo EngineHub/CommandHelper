@@ -53,14 +53,14 @@ public class TaskHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			TaskManager tm = environment.getEnv(GlobalEnv.class).GetTaskManager();
 			CArray ret = new CArray(t);
-			for (TaskHandler task : tm.getTasks()) {
+			for(TaskHandler task : tm.getTasks()) {
 				CArray tt = new CArray(t);
 				tt.set("id", new CInt(task.getID(), t), t);
 				tt.set("type", task.getType().name());
 				tt.set("state", task.getState().name());
 				tt.set("target", task.getDefinedAt().toString());
 				CArray properties = CArray.GetAssociativeArray(t);
-				for (String prop : task.getProperties()) {
+				for(String prop : task.getProperties()) {
 					properties.set(prop, task.getPropertyData().get(prop).toString());
 				}
 				tt.set("properties", properties, t);

@@ -23,7 +23,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	public BukkitMCItemStack(AbstractionObject a) {
 		this((ItemStack) null);
-		if (a instanceof MCItemStack) {
+		if(a instanceof MCItemStack) {
 			this.is = ((ItemStack) a.getHandle());
 		} else {
 			throw new ClassCastException();
@@ -37,11 +37,11 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public MCMaterialData getData() {
-		if (is == null) {
+		if(is == null) {
 			return null;
 		}
 		MaterialData md = is.getData();
-		if (md == null) {
+		if(md == null) {
 			return null;
 		}
 		return new BukkitMCMaterialData(md);
@@ -49,7 +49,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public short getDurability() {
-		if (is == null) {
+		if(is == null) {
 			return 0;
 		}
 		return is.getDurability();
@@ -57,7 +57,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public int getTypeId() {
-		if (is == null) {
+		if(is == null) {
 			return 0;
 		}
 		return is.getTypeId();
@@ -65,7 +65,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public void setDurability(short data) {
-		if (is == null) {
+		if(is == null) {
 			return;
 		}
 		is.setDurability(data);
@@ -73,7 +73,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public void addEnchantment(MCEnchantment e, int level) {
-		if (is == null) {
+		if(is == null) {
 			return;
 		}
 		is.addEnchantment(((BukkitMCEnchantment) e).__Enchantment(), level);
@@ -81,7 +81,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public void addUnsafeEnchantment(MCEnchantment e, int level) {
-		if (is == null) {
+		if(is == null) {
 			return;
 		}
 		is.addUnsafeEnchantment(((BukkitMCEnchantment) e).__Enchantment(), level);
@@ -91,10 +91,10 @@ public class BukkitMCItemStack implements MCItemStack {
 	public Map<MCEnchantment, Integer> getEnchantments() {
 		Map<MCEnchantment, Integer> map = new HashMap<>();
 		try {
-			for (Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()) {
+			for(Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()) {
 				map.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
 			}
-		} catch (NullPointerException npe) {
+		} catch(NullPointerException npe) {
 			// Probably invalid enchantment, always return map
 		}
 		return map;
@@ -102,7 +102,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public void removeEnchantment(MCEnchantment e) {
-		if (is == null) {
+		if(is == null) {
 			return;
 		}
 		is.removeEnchantment(((BukkitMCEnchantment) e).__Enchantment());
@@ -110,7 +110,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public MCMaterial getType() {
-		if (is == null) {
+		if(is == null) {
 			return null;
 		}
 		return new BukkitMCMaterial(is.getType());
@@ -118,7 +118,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public void setTypeId(int type) {
-		if (is == null) {
+		if(is == null) {
 			return;
 		}
 		is.setTypeId(type);
@@ -126,7 +126,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public int getAmount() {
-		if (is == null) {
+		if(is == null) {
 			return 0;
 		}
 		return is.getAmount();
@@ -134,7 +134,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public void setAmount(int amt) {
-		if (is == null) {
+		if(is == null) {
 			return;
 		}
 		is.setAmount(amt);
@@ -146,7 +146,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public void setData(int data) {
-		if (is == null) {
+		if(is == null) {
 			return;
 		}
 		is.setData(new MaterialData(is.getTypeId(), (byte) data));
@@ -154,7 +154,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public int maxStackSize() {
-		if (is == null) {
+		if(is == null) {
 			return 0;
 		}
 		return is.getMaxStackSize();
@@ -191,10 +191,10 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public void setItemMeta(MCItemMeta im) {
-		if (is == null) {
+		if(is == null) {
 			return;
 		}
-		if (im == null) {
+		if(im == null) {
 			is.setItemMeta(null);
 			return;
 		}

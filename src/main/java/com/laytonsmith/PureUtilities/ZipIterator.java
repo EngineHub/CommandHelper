@@ -39,16 +39,16 @@ public class ZipIterator {
 		final ZipInputStream zis = new ZipInputStream(new FileInputStream(zip));
 		final double size = zip.length();
 		ZipEntry entry;
-		while ((entry = zis.getNextEntry()) != null) {
-			if (!entry.isDirectory()) {
+		while((entry = zis.getNextEntry()) != null) {
+			if(!entry.isDirectory()) {
 				callback.handle(entry.getName(), new InputStream() {
 					private double soFar = 0;
 
 					@Override
 					public int read() throws IOException {
-						if (progressIterator != null) {
+						if(progressIterator != null) {
 							++soFar;
-							if (soFar % 128 == 0) {
+							if(soFar % 128 == 0) {
 								progressIterator.progressChanged(soFar, size);
 							}
 						}

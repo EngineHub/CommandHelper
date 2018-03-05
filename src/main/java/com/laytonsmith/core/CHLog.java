@@ -74,10 +74,10 @@ public class CHLog {
 	private static CHLog instance = null;
 
 	public static CHLog GetLogger() {
-		if (root == null) {
+		if(root == null) {
 			throw new RuntimeException("Logger is not initialized! Call CHLog.initialize before using the logger.");
 		}
-		if (instance == null) {
+		if(instance == null) {
 			instance = new CHLog();
 		}
 		return instance;
@@ -92,13 +92,13 @@ public class CHLog {
 	public static void initialize(File root) {
 		CHLog.root = root;
 		List<Preference> myPrefs = new ArrayList<Preference>();
-		for (Tags t : Tags.values()) {
+		for(Tags t : Tags.values()) {
 			myPrefs.add(new Preference(t.name, t.level.name(), Preferences.Type.STRING, t.description));
 		}
 		CHLog.prefs = new Preferences("CommandHelper", Static.getLogger(), myPrefs, header);
 		try {
 			CHLog.prefs.init(MethodScriptFileLocations.getDefault().getLoggerPreferencesFile());
-		} catch (IOException e) {
+		} catch(IOException e) {
 			Static.getLogger().log(java.util.logging.Level.SEVERE, "Could not create logger preferences", e);
 		}
 	}
@@ -110,13 +110,13 @@ public class CHLog {
 	 * @return
 	 */
 	private static LogLevel GetLevel(Tags tag) {
-		if (lookup.containsKey(tag)) {
+		if(lookup.containsKey(tag)) {
 			return lookup.get(tag);
 		}
 		LogLevel level;
 		try {
 			level = LogLevel.valueOf((String) prefs.getPreference(tag.name));
-		} catch (IllegalArgumentException e) {
+		} catch(IllegalArgumentException e) {
 			level = LogLevel.ERROR;
 		}
 		lookup.put(tag, level);
@@ -132,7 +132,7 @@ public class CHLog {
 	 */
 	public boolean WillLog(Tags tag, LogLevel l) {
 		LogLevel level = GetLevel(tag);
-		if (level == LogLevel.OFF) {
+		if(level == LogLevel.OFF) {
 			return false;
 		} else {
 			return l.getLevel() <= level.getLevel();
@@ -152,14 +152,14 @@ public class CHLog {
 	 * @param messages
 	 */
 	public void LogOne(Tags tag, Target t, MsgBundle... messages) {
-		if (GetLevel(tag) == LogLevel.OFF) {
+		if(GetLevel(tag) == LogLevel.OFF) {
 			return; //Bail!
 		}
 		LogLevel tagLevel = GetLevel(tag);
 		LogLevel[] levels = new LogLevel[]{LogLevel.VERBOSE, LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARNING, LogLevel.ERROR};
-		for (LogLevel l : levels) {
-			for (MsgBundle b : messages) {
-				if (b.level == l && b.level == tagLevel) {
+		for(LogLevel l : levels) {
+			for(MsgBundle b : messages) {
+				if(b.level == l && b.level == tagLevel) {
 					//Found it.
 					Log(tag, l, header, t);
 					return;
@@ -177,10 +177,10 @@ public class CHLog {
 	 * @param messages
 	 */
 	public void LogAll(Tags tag, Target t, MsgBundle... messages) {
-		if (GetLevel(tag) == LogLevel.OFF) {
+		if(GetLevel(tag) == LogLevel.OFF) {
 			return; //For efficiency sake, go ahead and bail.
 		}
-		for (MsgBundle b : messages) {
+		for(MsgBundle b : messages) {
 			Log(tag, b.level, b.message, t);
 		}
 	}
@@ -285,17 +285,17 @@ public class CHLog {
 	 */
 	public void Log(Tags modules, LogLevel level, String message, Target t, boolean printScreen) {
 		LogLevel moduleLevel = GetLevel(modules);
-		if (moduleLevel == LogLevel.OFF && !Prefs.ScreamErrors()) {
+		if(moduleLevel == LogLevel.OFF && !Prefs.ScreamErrors()) {
 			return; //Bail as quick as we can!
 		}
-		if (moduleLevel.level >= level.level || (moduleLevel == LogLevel.ERROR && Prefs.ScreamErrors())) {
+		if(moduleLevel.level >= level.level || (moduleLevel == LogLevel.ERROR && Prefs.ScreamErrors())) {
 			//We want to do the log
 			try {
 				Static.LogDebug(root, "[" + Implementation.GetServerType().getBranding() + "][" + level.name() + "][" + modules.name() + "] " + message + (t != Target.UNKNOWN ? " " + t.toString() : ""),
 						level, printScreen);
-			} catch (IOException e) {
+			} catch(IOException e) {
 				//Well, shoot.
-				if (level.level <= 1) {
+				if(level.level <= 1) {
 					StreamUtils.GetSystemErr().println("Was going to print information to the log, but instead, there was"
 							+ " an IOException: ");
 					e.printStackTrace(StreamUtils.GetSystemErr());

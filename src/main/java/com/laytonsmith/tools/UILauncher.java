@@ -53,7 +53,7 @@ public class UILauncher extends javax.swing.JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (selectedUI == null) {
+				if(selectedUI == null) {
 					JOptionPane.showMessageDialog(UILauncher.this, "Please select a tool from the list on the left.", "Error", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
@@ -98,7 +98,7 @@ public class UILauncher extends javax.swing.JFrame {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (e.getClickCount() == 2) {
+				if(e.getClickCount() == 2) {
 					launchButton.doClick();
 				}
 			}
@@ -182,19 +182,19 @@ public class UILauncher extends javax.swing.JFrame {
 		 * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
 		 */
 		try {
-			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-				if ("Nimbus".equals(info.getName())) {
+			for(javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+				if("Nimbus".equals(info.getName())) {
 					javax.swing.UIManager.setLookAndFeel(info.getClassName());
 					break;
 				}
 			}
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			java.util.logging.Logger.getLogger(UILauncher.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (InstantiationException ex) {
+		} catch(InstantiationException ex) {
 			java.util.logging.Logger.getLogger(UILauncher.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (IllegalAccessException ex) {
+		} catch(IllegalAccessException ex) {
 			java.util.logging.Logger.getLogger(UILauncher.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
+		} catch(javax.swing.UnsupportedLookAndFeelException ex) {
 			java.util.logging.Logger.getLogger(UILauncher.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
 		//</editor-fold>

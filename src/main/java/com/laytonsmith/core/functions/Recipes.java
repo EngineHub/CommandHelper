@@ -55,7 +55,7 @@ public class Recipes {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				return CBoolean.get(Static.getServer().addRecipe(ObjectGenerator.GetGenerator().recipe(args[0], t)));
-			} catch (IllegalStateException ex) {
+			} catch(IllegalStateException ex) {
 				// recipe with the given key probably already exists
 				return CBoolean.FALSE;
 			}
@@ -132,7 +132,7 @@ public class Recipes {
 			CArray ret = new CArray(t);
 			MCItemStack item = ObjectGenerator.GetGenerator().item(args[0], t);
 			List<MCRecipe> recipes = Static.getServer().getRecipesFor(item);
-			for (MCRecipe recipe : recipes) {
+			for(MCRecipe recipe : recipes) {
 				ret.push(ObjectGenerator.GetGenerator().recipe(recipe, t), t);
 			}
 
@@ -174,7 +174,7 @@ public class Recipes {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			List<MCRecipe> recipes = Static.getServer().allRecipes();
-			for (MCRecipe recipe : recipes) {
+			for(MCRecipe recipe : recipes) {
 				ret.push(ObjectGenerator.GetGenerator().recipe(recipe, t), t);
 			}
 

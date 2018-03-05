@@ -24,7 +24,7 @@ public class BukkitMCComplexLivingEntity extends BukkitMCLivingEntity implements
 	@Override
 	public Set<MCComplexEntityPart> getParts() {
 		Set<MCComplexEntityPart> parts = new HashSet<>();
-		for (ComplexEntityPart part : getHandle().getParts()) {
+		for(ComplexEntityPart part : getHandle().getParts()) {
 			parts.add((MCComplexEntityPart) BukkitConvertor.BukkitGetCorrectEntity(part));
 		}
 		return parts;

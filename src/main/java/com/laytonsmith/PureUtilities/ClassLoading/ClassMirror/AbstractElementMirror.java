@@ -50,7 +50,7 @@ abstract class AbstractElementMirror implements Serializable {
 		this.modifiers = new ModifierMirror(field.getModifiers());
 		this.name = field.getName();
 		List<AnnotationMirror> list = new ArrayList<>();
-		for (Annotation a : field.getDeclaredAnnotations()) {
+		for(Annotation a : field.getDeclaredAnnotations()) {
 			list.add(new AnnotationMirror(a));
 		}
 		this.annotations = list;
@@ -60,7 +60,7 @@ abstract class AbstractElementMirror implements Serializable {
 
 	protected AbstractElementMirror(Member method) {
 		Objects.requireNonNull(method);
-		if (method instanceof Method) {
+		if(method instanceof Method) {
 			this.type = ClassReferenceMirror.fromClass(((Method) method).getReturnType());
 		} else {
 			//It's a constructor. I hope.
@@ -73,12 +73,12 @@ abstract class AbstractElementMirror implements Serializable {
 //		for(Annotation a : method.getDeclaredAnnotations()){
 //			list.add(new AnnotationMirror(a));
 //		}
-		if (method instanceof Method) {
-			for (Annotation a : ((Method) method).getDeclaredAnnotations()) {
+		if(method instanceof Method) {
+			for(Annotation a : ((Method) method).getDeclaredAnnotations()) {
 				list.add(new AnnotationMirror(a));
 			}
-		} else if (method instanceof Constructor) {
-			for (Annotation a : ((Constructor) method).getDeclaredAnnotations()) {
+		} else if(method instanceof Constructor) {
+			for(Annotation a : ((Constructor) method).getDeclaredAnnotations()) {
 				list.add(new AnnotationMirror(a));
 			}
 		} else {
@@ -91,7 +91,7 @@ abstract class AbstractElementMirror implements Serializable {
 
 	protected AbstractElementMirror(ClassReferenceMirror parent, List<AnnotationMirror> annotations, ModifierMirror modifiers, ClassReferenceMirror type, String name) {
 		this.annotations = annotations;
-		if (this.annotations == null) {
+		if(this.annotations == null) {
 			this.annotations = new ArrayList<>();
 		}
 		this.modifiers = modifiers;
@@ -148,8 +148,8 @@ abstract class AbstractElementMirror implements Serializable {
 	 */
 	public AnnotationMirror getAnnotation(Class<? extends Annotation> annotation) {
 		String jvmName = ClassUtils.getJVMName(annotation);
-		for (AnnotationMirror a : getAnnotations()) {
-			if (a.getType().getJVMName().equals(jvmName)) {
+		for(AnnotationMirror a : getAnnotations()) {
+			if(a.getType().getJVMName().equals(jvmName)) {
 				return a;
 			}
 		}
@@ -177,7 +177,7 @@ abstract class AbstractElementMirror implements Serializable {
 	 */
 	public <T extends Annotation> T loadAnnotation(Class<T> type) {
 		AnnotationMirror mirror = getAnnotation(type);
-		if (mirror == null) {
+		if(mirror == null) {
 			return null;
 		}
 		return mirror.getProxy(type);
@@ -206,17 +206,17 @@ abstract class AbstractElementMirror implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if(obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if(getClass() != obj.getClass()) {
 			return false;
 		}
 		final AbstractElementMirror other = (AbstractElementMirror) obj;
-		if (!Objects.equals(this.name, other.name)) {
+		if(!Objects.equals(this.name, other.name)) {
 			return false;
 		}
-		if (!Objects.equals(this.parent, other.parent)) {
+		if(!Objects.equals(this.parent, other.parent)) {
 			return false;
 		}
 		return true;

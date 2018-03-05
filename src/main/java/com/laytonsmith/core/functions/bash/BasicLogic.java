@@ -68,7 +68,7 @@ public class BasicLogic {
 			String s = "if [ " + args[0] + " ]; then\n"
 					+ args[1] + "\n";
 
-			if (args.length == 3) {
+			if(args.length == 3) {
 				s += "else\n";
 				s += args[2] + "\n";
 			}

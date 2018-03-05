@@ -29,7 +29,7 @@ public class ConstructorMirror<T> extends AbstractMethodMirror {
 
 	public ConstructorMirror(MethodMirror copy) {
 		super(copy.getDeclaringClass(), copy.modifiers, copy.type, copy.name, copy.getParams(), copy.isVararg(), copy.isSynthetic());
-		if (!INIT.equals(copy.name)) {
+		if(!INIT.equals(copy.name)) {
 			throw new IllegalArgumentException("Only constructors may be mirrored by " + this.getClass().getSimpleName());
 		}
 	}
@@ -60,17 +60,17 @@ public class ConstructorMirror<T> extends AbstractMethodMirror {
 	 * @throws ClassNotFoundException
 	 */
 	public Constructor<T> loadConstructor(ClassLoader loader, boolean initialize) throws ClassNotFoundException {
-		if (getExecutable() != null) {
+		if(getExecutable() != null) {
 			return (Constructor<T>) getExecutable();
 		}
 		Class parent = loadParentClass(loader, initialize);
 		List<Class> cParams = new ArrayList<>();
-		for (ClassReferenceMirror c : getParams()) {
+		for(ClassReferenceMirror c : getParams()) {
 			cParams.add(c.loadClass(loader, initialize));
 		}
 		try {
 			return parent.getConstructor(cParams.toArray(new Class[cParams.size()]));
-		} catch (NoSuchMethodException | SecurityException ex) {
+		} catch(NoSuchMethodException | SecurityException ex) {
 			//There's really no way for any exception to happen here, so just rethrow
 			throw new RuntimeException(ex);
 		}

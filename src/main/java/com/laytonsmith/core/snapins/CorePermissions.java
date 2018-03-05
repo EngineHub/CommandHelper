@@ -49,7 +49,7 @@ public enum CorePermissions implements PackagePermission {
 		this.threatLevel = threatLevel;
 		this.docs = docs;
 		this.since = since;
-		if (implied == null) {
+		if(implied == null) {
 			this.implied = new PackagePermission[]{};
 		} else {
 			this.implied = implied;

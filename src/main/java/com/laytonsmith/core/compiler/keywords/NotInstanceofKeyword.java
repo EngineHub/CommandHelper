@@ -21,10 +21,10 @@ public class NotInstanceofKeyword extends Keyword {
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
-		if (keywordPosition == 0) {
+		if(keywordPosition == 0) {
 			throw new ConfigCompileException("Expected value to proceed \"notinstanceof\" keyword, but no identifiers were found.", list.get(keywordPosition).getTarget());
 		}
-		if (list.size() <= keywordPosition + 1) {
+		if(list.size() <= keywordPosition + 1) {
 			throw new ConfigCompileException("Expected type to follow \"notinstanceof\" keyword, but no type was found.", list.get(keywordPosition).getTarget());
 		}
 		ParseTree node = new ParseTree(new CFunction(INSTANCEOF, list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());

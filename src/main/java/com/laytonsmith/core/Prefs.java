@@ -19,7 +19,7 @@ public final class Prefs {
 	 * @return
 	 */
 	public static Object pref(PNames name) {
-		if (prefs == null) {
+		if(prefs == null) {
 			//Uh oh.
 			throw new RuntimeException("Preferences have not been initialized!");
 		}
@@ -180,7 +180,7 @@ public final class Prefs {
 	 * Convenience function to set the term colors based on the UseColors preference.
 	 */
 	public static void SetColors() {
-		if (UseColors()) {
+		if(UseColors()) {
 			TermColors.EnableColors();
 		} else {
 			TermColors.DisableColors();
@@ -277,7 +277,7 @@ public final class Prefs {
 
 	public static Integer InterpreterTimeout() {
 		Integer i = (Integer) pref(PNames.INTERPRETER_TIMEOUT);
-		if (i < 0) {
+		if(i < 0) {
 			i = 0;
 		}
 		return i;

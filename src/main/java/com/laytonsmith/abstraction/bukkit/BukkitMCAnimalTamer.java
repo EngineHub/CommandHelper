@@ -19,7 +19,7 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer {
 
 	public BukkitMCAnimalTamer(AbstractionObject a) {
 		this((AnimalTamer) null);
-		if (a instanceof MCAnimalTamer) {
+		if(a instanceof MCAnimalTamer) {
 			this.at = ((AnimalTamer) a.getHandle());
 		} else {
 			throw new ClassCastException();
@@ -36,7 +36,7 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer {
 	}
 
 	public MCOfflinePlayer getOfflinePlayer() {
-		if (at instanceof OfflinePlayer) {
+		if(at instanceof OfflinePlayer) {
 			return new BukkitMCOfflinePlayer((OfflinePlayer) at);
 		}
 		return null;
@@ -51,7 +51,7 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer {
 	}
 
 	public MCHumanEntity getHumanEntity() {
-		if (at instanceof HumanEntity) {
+		if(at instanceof HumanEntity) {
 			return new BukkitMCHumanEntity((HumanEntity) at);
 		}
 		return null;

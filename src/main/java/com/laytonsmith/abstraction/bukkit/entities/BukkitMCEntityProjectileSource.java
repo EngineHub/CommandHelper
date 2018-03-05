@@ -23,7 +23,7 @@ public class BukkitMCEntityProjectileSource extends BukkitMCEntity implements MC
 
 	public BukkitMCEntityProjectileSource(Entity source) {
 		super(source);
-		if (!(source instanceof ProjectileSource)) {
+		if(!(source instanceof ProjectileSource)) {
 			throw new IllegalArgumentException("Tried to construct BukkitMCEntityProjectileSource from invalid source.");
 		}
 		eps = (ProjectileSource) source;
@@ -35,7 +35,7 @@ public class BukkitMCEntityProjectileSource extends BukkitMCEntity implements MC
 		Class<? extends Entity> c = et.getEntityClass();
 		Projectile proj = eps.launchProjectile(c.asSubclass(Projectile.class));
 		MCEntity mcproj = BukkitConvertor.BukkitGetCorrectEntity(proj);
-		if (mcproj instanceof MCProjectile) {
+		if(mcproj instanceof MCProjectile) {
 			return (MCProjectile) mcproj;
 		} else {
 			return null;
@@ -49,7 +49,7 @@ public class BukkitMCEntityProjectileSource extends BukkitMCEntity implements MC
 		Vector vector = new Vector(init.X(), init.Y(), init.Z());
 		Projectile proj = eps.launchProjectile(c.asSubclass(Projectile.class), vector);
 		MCEntity mcproj = BukkitConvertor.BukkitGetCorrectEntity(proj);
-		if (mcproj instanceof MCProjectile) {
+		if(mcproj instanceof MCProjectile) {
 			return (MCProjectile) mcproj;
 		} else {
 			return null;

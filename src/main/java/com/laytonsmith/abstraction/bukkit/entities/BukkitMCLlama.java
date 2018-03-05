@@ -50,7 +50,7 @@ public class BukkitMCLlama extends BukkitMCChestedHorse implements MCLlama {
 		private static BukkitMCLlamaColor instance;
 
 		public static BukkitMCLlamaColor getConvertor() {
-			if (instance == null) {
+			if(instance == null) {
 				instance = new BukkitMCLlamaColor();
 			}
 			return instance;
@@ -58,7 +58,7 @@ public class BukkitMCLlama extends BukkitMCChestedHorse implements MCLlama {
 
 		@Override
 		protected Llama.Color getConcreteEnumCustom(MCLlamaColor abstracted) {
-			if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_11)) {
+			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_11)) {
 				return null;
 			}
 			return super.getConcreteEnumCustom(abstracted);

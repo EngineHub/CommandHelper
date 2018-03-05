@@ -21,19 +21,19 @@ public class RealFileSystemLayer extends FileSystemLayer {
 
 	public RealFileSystemLayer(VirtualFile path, VirtualFileSystem fileSystem, String symlink) throws IOException {
 		super(path, fileSystem);
-		if (symlink == null) {
+		if(symlink == null) {
 			real = new File(fileSystem.root, path.getPath());
-			if (!real.getCanonicalPath().startsWith(fileSystem.root.getCanonicalPath())) {
+			if(!real.getCanonicalPath().startsWith(fileSystem.root.getCanonicalPath())) {
 				throw new PermissionException(path.getPath() + " extends above the root directory of this file system, and does not point to a valid file.");
 			}
 		} else {
 			File symlinkRoot = new File(fileSystem.symlinkFile, symlink);
 			real = new File(symlinkRoot, path.getPath());
 			//If the path extends above the symlink, disallow it
-			if (!real.getCanonicalPath().startsWith(symlinkRoot.getCanonicalPath())) {
+			if(!real.getCanonicalPath().startsWith(symlinkRoot.getCanonicalPath())) {
 				//Unless of course, the path is still within the full real path, then
 				//eh, we'll allow it.
-				if (!real.getCanonicalPath().startsWith(fileSystem.root.getCanonicalPath())) {
+				if(!real.getCanonicalPath().startsWith(fileSystem.root.getCanonicalPath())) {
 					throw new PermissionException(path.getPath() + " extends above the root directory of this file system, and does not point to a valid file.");
 				}
 			}
@@ -53,7 +53,7 @@ public class RealFileSystemLayer extends FileSystemLayer {
 	@Override
 	public VirtualFile[] listFiles() throws IOException {
 		List<VirtualFile> virtuals = new ArrayList<VirtualFile>();
-		for (File sub : real.listFiles()) {
+		for(File sub : real.listFiles()) {
 			virtuals.add(normalize(sub));
 		}
 		return virtuals.toArray(new VirtualFile[virtuals.size()]);
@@ -62,7 +62,7 @@ public class RealFileSystemLayer extends FileSystemLayer {
 	private VirtualFile normalize(File real) throws IOException {
 		String path = real.getCanonicalPath().replaceFirst(Pattern.quote(fileSystem.root.getCanonicalPath()), "");
 		path = path.replace('\\', '/');
-		if (!path.startsWith("/")) {
+		if(!path.startsWith("/")) {
 			path = "/" + path;
 		}
 		return new VirtualFile(path);
@@ -70,7 +70,7 @@ public class RealFileSystemLayer extends FileSystemLayer {
 
 	@Override
 	public void delete() throws IOException {
-		if (!real.delete()) {
+		if(!real.delete()) {
 			throw new IOException("Could not delete the file");
 		}
 	}
@@ -107,14 +107,14 @@ public class RealFileSystemLayer extends FileSystemLayer {
 
 	@Override
 	public void mkdirs() throws IOException {
-		if (!real.mkdirs()) {
+		if(!real.mkdirs()) {
 			throw new IOException("Directory structure could not be created");
 		}
 	}
 
 	@Override
 	public void createNewFile() throws IOException {
-		if (!real.createNewFile()) {
+		if(!real.createNewFile()) {
 			throw new IOException("File already exists!");
 		}
 	}

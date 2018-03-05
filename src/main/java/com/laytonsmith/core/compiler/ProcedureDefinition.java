@@ -31,13 +31,13 @@ public class ProcedureDefinition extends Construct {
 	@Override
 	public boolean isDynamic() {
 		boolean ret = true;
-		for (ParseTree defs : varDefaults) {
-			if (defs.isDynamic()) {
+		for(ParseTree defs : varDefaults) {
+			if(defs.isDynamic()) {
 				ret = false;
 				break;
 			}
 		}
-		if (code.isDynamic()) {
+		if(code.isDynamic()) {
 			ret = false;
 		}
 		return ret;

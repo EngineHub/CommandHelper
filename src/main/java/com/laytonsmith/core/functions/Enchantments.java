@@ -44,47 +44,47 @@ public class Enchantments {
 	 */
 	public static String ConvertName(String wikiVersion) {
 		String lc = wikiVersion.toUpperCase().trim();
-		if (lc.equals("PROTECTION")) {
+		if(lc.equals("PROTECTION")) {
 			return "PROTECTION_ENVIRONMENTAL";
-		} else if (lc.equals("FIRE PROTECTION")) {
+		} else if(lc.equals("FIRE PROTECTION")) {
 			return "PROTECTION_FIRE";
-		} else if (lc.equals("FEATHER FALLING")) {
+		} else if(lc.equals("FEATHER FALLING")) {
 			return "PROTECTION_FALL";
-		} else if (lc.equals("BLAST PROTECTION")) {
+		} else if(lc.equals("BLAST PROTECTION")) {
 			return "PROTECTION_EXPLOSIONS";
-		} else if (lc.equals("PROJECTILE PROTECTION")) {
+		} else if(lc.equals("PROJECTILE PROTECTION")) {
 			return "PROTECTION_PROJECTILE";
-		} else if (lc.equals("RESPIRATION")) {
+		} else if(lc.equals("RESPIRATION")) {
 			return "OXYGEN";
-		} else if (lc.equals("AQUA AFFINITY")) {
+		} else if(lc.equals("AQUA AFFINITY")) {
 			return "WATER_WORKER";
-		} else if (lc.equals("SHARPNESS")) {
+		} else if(lc.equals("SHARPNESS")) {
 			return "DAMAGE_ALL";
-		} else if (lc.equals("SMITE")) {
+		} else if(lc.equals("SMITE")) {
 			return "DAMAGE_UNDEAD";
-		} else if (lc.equals("BANE OF ARTHROPODS")) {
+		} else if(lc.equals("BANE OF ARTHROPODS")) {
 			return "DAMAGE_ARTHROPODS";
-		} else if (lc.equals("KNOCKBACK")) {
+		} else if(lc.equals("KNOCKBACK")) {
 			return "KNOCKBACK";
-		} else if (lc.equals("FIRE ASPECT")) {
+		} else if(lc.equals("FIRE ASPECT")) {
 			return "FIRE_ASPECT";
-		} else if (lc.equals("LOOTING")) {
+		} else if(lc.equals("LOOTING")) {
 			return "LOOT_BONUS_MOBS";
-		} else if (lc.equals("EFFICIENCY")) {
+		} else if(lc.equals("EFFICIENCY")) {
 			return "DIG_SPEED";
-		} else if (lc.equals("SILK TOUCH")) {
+		} else if(lc.equals("SILK TOUCH")) {
 			return "SILK_TOUCH";
-		} else if (lc.equals("UNBREAKING")) {
+		} else if(lc.equals("UNBREAKING")) {
 			return "DURABILITY";
-		} else if (lc.equals("FORTUNE")) {
+		} else if(lc.equals("FORTUNE")) {
 			return "LOOT_BONUS_BLOCKS";
-		} else if (lc.equals("POWER")) {
+		} else if(lc.equals("POWER")) {
 			return "ARROW_DAMAGE";
-		} else if (lc.equals("PUNCH")) {
+		} else if(lc.equals("PUNCH")) {
 			return "ARROW_KNOCKBACK";
-		} else if (lc.equals("FLAME")) {
+		} else if(lc.equals("FLAME")) {
 			return "ARROW_FIRE";
-		} else if (lc.equals("INFINITY")) {
+		} else if(lc.equals("INFINITY")) {
 			return "ARROW_INFINITE";
 		} else {
 			return wikiVersion;
@@ -103,7 +103,7 @@ public class Enchantments {
 		try {
 			Integer.parseInt(lc);
 			return lc;
-		} catch (NumberFormatException e) {
+		} catch(NumberFormatException e) {
 			//Maybe roman numeral?
 		}
 		int i = romanToWestern(lc);
@@ -131,11 +131,11 @@ public class Enchantments {
 
 		int i = 0;
 
-		while (i < roman.length()) {
+		while(i < roman.length()) {
 			currentChar = roman.charAt(i);
-			if (i < roman.length() - 1) {
+			if(i < roman.length() - 1) {
 				nextChar = roman.charAt(i + 1);
-				if (getValue(currentChar) < getValue(nextChar)) {
+				if(getValue(currentChar) < getValue(nextChar)) {
 					western += (getValue(nextChar) - getValue(currentChar));
 					i += 2;
 				} else {
@@ -153,25 +153,25 @@ public class Enchantments {
 
 	private static int getValue(char l) { //Converts the numeral to a number
 		String letter = String.valueOf(l);
-		if (letter.equalsIgnoreCase("I")) {
+		if(letter.equalsIgnoreCase("I")) {
 			return 1;
 		}
-		if (letter.equalsIgnoreCase("V")) {
+		if(letter.equalsIgnoreCase("V")) {
 			return 5;
 		}
-		if (letter.equalsIgnoreCase("X")) {
+		if(letter.equalsIgnoreCase("X")) {
 			return 10;
 		}
-		if (letter.equalsIgnoreCase("L")) {
+		if(letter.equalsIgnoreCase("L")) {
 			return 50;
 		}
-		if (letter.equalsIgnoreCase("C")) {
+		if(letter.equalsIgnoreCase("C")) {
 			return 100;
 		}
-		if (letter.equalsIgnoreCase("D")) {
+		if(letter.equalsIgnoreCase("D")) {
 			return 500;
 		}
-		if (letter.equalsIgnoreCase("M")) {
+		if(letter.equalsIgnoreCase("M")) {
 			return 1000;
 		}
 		return 0;
@@ -224,14 +224,14 @@ public class Enchantments {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 1;
-			if (args.length == 4) {
+			if(args.length == 4) {
 				m = Static.GetPlayer(args[0].val(), t);
 				offset = 0;
-			} else if (m == null) {
+			} else if(m == null) {
 				throw new CREPlayerOfflineException("Invalid sender!", t);
 			}
 			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull ? null : Static.getInt32(args[1 - offset], t));
-			if (is == null) {
+			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
 //            if (args[1 - offset] instanceof CNull) {
@@ -241,26 +241,26 @@ public class Enchantments {
 //                is = m.getInventory().getItem(slot);
 //            }
 			CArray enchantArray = new CArray(t);
-			if (!(args[2 - offset] instanceof CArray)) {
+			if(!(args[2 - offset] instanceof CArray)) {
 				enchantArray.push(args[2 - offset], t);
 			} else {
 				enchantArray = (CArray) args[2 - offset];
 			}
 
 			CArray levelArray = new CArray(t);
-			if (!(args[3 - offset] instanceof CArray)) {
+			if(!(args[3 - offset] instanceof CArray)) {
 				levelArray.push(args[3 - offset], t);
 			} else {
 				levelArray = (CArray) args[3 - offset];
 			}
-			for (String key : enchantArray.stringKeySet()) {
+			for(String key : enchantArray.stringKeySet()) {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
-				if (e == null) {
+				if(e == null) {
 					throw new CREEnchantmentException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", t);
 				}
-				if (e.canEnchantItem(is)) {
+				if(e.canEnchantItem(is)) {
 					int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
-					if (e.getMaxLevel() >= level && level > 0) {
+					if(e.getMaxLevel() >= level && level > 0) {
 						is.addEnchantment(e, level);
 					} else {
 						throw new CRERangeException("Level must be greater than 0, and less than " + e.getMaxLevel() + " but was " + level, t);
@@ -317,13 +317,13 @@ public class Enchantments {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 1;
-			if (args.length == 3) {
+			if(args.length == 3) {
 				m = Static.GetPlayer(args[0].val(), t);
 				offset = 0;
 			}
 			Static.AssertPlayerNonNull(m, t);
 			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull ? null : Static.getInt32(args[1 - offset], t));
-			if (is == null) {
+			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
 //            if (args[1 - offset] instanceof CNull) {
@@ -334,18 +334,18 @@ public class Enchantments {
 //            }
 
 			CArray enchantArray = new CArray(t);
-			if (!(args[2 - offset] instanceof CArray) && !(args[2 - offset] instanceof CNull)) {
+			if(!(args[2 - offset] instanceof CArray) && !(args[2 - offset] instanceof CNull)) {
 				enchantArray.push(args[2 - offset], t);
-			} else if (args[2 - offset] instanceof CNull) {
-				for (MCEnchantment e : is.getEnchantments().keySet()) {
+			} else if(args[2 - offset] instanceof CNull) {
+				for(MCEnchantment e : is.getEnchantments().keySet()) {
 					is.removeEnchantment(e);
 				}
 			} else {
 				enchantArray = (CArray) args[2 - offset];
 			}
-			for (String key : enchantArray.stringKeySet()) {
+			for(String key : enchantArray.stringKeySet()) {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
-				if (e == null) {
+				if(e == null) {
 					throw new CREEnchantmentException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid"
 							+ " enchantment type", t);
 				}
@@ -398,17 +398,17 @@ public class Enchantments {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Construct slot;
-			if (args.length == 2) {
+			if(args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
 				slot = args[1];
 			} else {
 				slot = args[0];
-				if (m == null) {
+				if(m == null) {
 					throw new CREPlayerOfflineException("Invalid sender!", t);
 				}
 			}
 			MCItemStack is = m.getItemAt(slot instanceof CNull ? null : Static.getInt32(slot, t));
-			if (is == null) {
+			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}
 //            if(slot instanceof CNull){
@@ -419,7 +419,7 @@ public class Enchantments {
 //            }
 			CArray enchants = new CArray(t);
 			CArray levels = new CArray(t);
-			for (Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {
+			for(Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {
 				MCEnchantment e = entry.getKey();
 				Integer l = entry.getValue();
 				enchants.push(new CString(e.getName(), t), t);
@@ -477,13 +477,13 @@ public class Enchantments {
 				String name = Enchantments.ConvertName(args[0].val());
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
 				MCItemStack is;
-				if (args[1] instanceof CArray) {
+				if(args[1] instanceof CArray) {
 					is = ObjectGenerator.GetGenerator().item(args[1], t);
 				} else {
 					is = Static.ParseItemNotation(null, args[1].val(), 1, t);
 				}
 				return CBoolean.get(e.canEnchantItem(is));
-			} catch (NullPointerException e) {
+			} catch(NullPointerException e) {
 				throw new CREEnchantmentException(args[0].val().toUpperCase() + " is not a known enchantment type.", t);
 			}
 		}
@@ -534,7 +534,7 @@ public class Enchantments {
 				String name = Enchantments.ConvertName(args[0].val());
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
 				return new CInt(e.getMaxLevel(), t);
-			} catch (NullPointerException e) {
+			} catch(NullPointerException e) {
 				throw new CREEnchantmentException(args[0].val().toUpperCase() + " is not a known enchantment type.", t);
 			}
 		}
@@ -585,7 +585,7 @@ public class Enchantments {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCItemStack is;
-			if (args[0] instanceof CArray) {
+			if(args[0] instanceof CArray) {
 				is = ObjectGenerator.GetGenerator().item(args[0], t);
 			} else {
 				is = Static.ParseItemNotation(null, args[0].val(), 1, t);
@@ -595,12 +595,12 @@ public class Enchantments {
 			 * Because enchantment types won't change from run to run, we can
 			 * cache here, and save time on duplicate lookups.
 			 */
-			if (cache.containsKey(name)) {
+			if(cache.containsKey(name)) {
 				return cache.get(name).clone();
 			}
 			CArray ca = new CArray(t);
-			for (MCEnchantment e : StaticLayer.GetEnchantmentValues()) {
-				if (e.canEnchantItem(is)) {
+			for(MCEnchantment e : StaticLayer.GetEnchantmentValues()) {
+				if(e.canEnchantItem(is)) {
 					ca.push(new CString(e.getName(), t), t);
 				}
 			}
@@ -653,7 +653,7 @@ public class Enchantments {
 			try {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(args[0].val());
 				return CBoolean.TRUE;
-			} catch (NullPointerException e) {
+			} catch(NullPointerException e) {
 				return CBoolean.FALSE;
 			}
 		}
@@ -681,7 +681,7 @@ public class Enchantments {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEnchantment[] enchantments = StaticLayer.GetEnchantmentValues();
 			CArray ret = new CArray(t);
-			for (MCEnchantment e : enchantments) {
+			for(MCEnchantment e : enchantments) {
 				ret.push(new CString(e.getName(), t), t);
 			}
 			return ret;

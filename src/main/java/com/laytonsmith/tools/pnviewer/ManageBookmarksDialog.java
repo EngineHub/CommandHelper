@@ -96,7 +96,7 @@ public final class ManageBookmarksDialog extends javax.swing.JDialog {
 
 		private String[] getNameList() {
 			String[] ret = new String[bookmarks.size()];
-			for (int i = 0; i < bookmarks.size(); i++) {
+			for(int i = 0; i < bookmarks.size(); i++) {
 				ret[i] = bookmarks.get(i).name;
 			}
 			Arrays.sort(ret);
@@ -104,8 +104,8 @@ public final class ManageBookmarksDialog extends javax.swing.JDialog {
 		}
 
 		private Bookmark getBookmark(String name) {
-			for (Bookmark b : bookmarks) {
-				if (name.equals(b.name)) {
+			for(Bookmark b : bookmarks) {
+				if(name.equals(b.name)) {
 					return b;
 				}
 			}
@@ -277,19 +277,19 @@ public final class ManageBookmarksDialog extends javax.swing.JDialog {
 		 * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
 		 */
 		try {
-			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-				if ("Nimbus".equals(info.getName())) {
+			for(javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+				if("Nimbus".equals(info.getName())) {
 					javax.swing.UIManager.setLookAndFeel(info.getClassName());
 					break;
 				}
 			}
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			java.util.logging.Logger.getLogger(ManageBookmarksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (InstantiationException ex) {
+		} catch(InstantiationException ex) {
 			java.util.logging.Logger.getLogger(ManageBookmarksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (IllegalAccessException ex) {
+		} catch(IllegalAccessException ex) {
 			java.util.logging.Logger.getLogger(ManageBookmarksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
+		} catch(javax.swing.UnsupportedLookAndFeelException ex) {
 			java.util.logging.Logger.getLogger(ManageBookmarksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
 		//</editor-fold>

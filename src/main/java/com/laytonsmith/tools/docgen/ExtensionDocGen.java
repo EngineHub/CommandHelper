@@ -44,9 +44,9 @@ public class ExtensionDocGen {
 		classloader.addJar(url);
 		//functions
 		HashMap<Class<?>, ArrayList<Class<? extends Function>>> functionMap = new HashMap<>();
-		for (Class<? extends Function> cf : customDiscovery.loadClassesWithAnnotationThatExtend(api.class, Function.class, classloader, true)) {
+		for(Class<? extends Function> cf : customDiscovery.loadClassesWithAnnotationThatExtend(api.class, Function.class, classloader, true)) {
 			Class enclosing = cf.getEnclosingClass();
-			if (functionMap.containsKey(enclosing)) {
+			if(functionMap.containsKey(enclosing)) {
 				functionMap.get(enclosing).add(cf);
 			} else {
 				functionMap.put(enclosing, new ArrayList<Class<? extends Function>>());
@@ -61,7 +61,7 @@ public class ExtensionDocGen {
 				return o1.getKey().getName().compareTo(o2.getKey().getName());
 			}
 		});
-		for (Entry<Class<?>, ArrayList<Class<? extends Function>>> e : functionEntryList) {
+		for(Entry<Class<?>, ArrayList<Class<? extends Function>>> e : functionEntryList) {
 			Collections.sort(e.getValue(), new Comparator<Class<? extends Function>>() {
 				@Override
 				public int compare(Class<? extends Function> o1, Class<? extends Function> o2) {
@@ -69,10 +69,10 @@ public class ExtensionDocGen {
 				}
 			});
 		}
-		if (!functionEntryList.isEmpty()) {
+		if(!functionEntryList.isEmpty()) {
 			fdocs.append("# Functions").append(nl);
 		}
-		for (Entry<Class<?>, ArrayList<Class<? extends Function>>> entry : functionEntryList) {
+		for(Entry<Class<?>, ArrayList<Class<? extends Function>>> entry : functionEntryList) {
 			Class enclosingClass = entry.getKey();
 			String[] split = enclosingClass.getName().split("\\.");
 			fdocs.append("## ").append(split[split.length - 1]).append(nl);
@@ -80,16 +80,16 @@ public class ExtensionDocGen {
 				Method docsMethod = enclosingClass.getMethod("docs", (Class[]) null);
 				Object o = enclosingClass.newInstance();
 				fdocs.append((String) docsMethod.invoke(o, (Object[]) null)).append(nl).append(nl);
-			} catch (NoSuchMethodException
+			} catch(NoSuchMethodException
 					| SecurityException
 					| InstantiationException
 					| IllegalAccessException
 					| IllegalArgumentException
 					| InvocationTargetException exception) {
 			}
-			for (Class<? extends Function> cf : entry.getValue()) {
+			for(Class<? extends Function> cf : entry.getValue()) {
 				Function f = cf.newInstance();
-				if (f.appearInDocumentation()) {
+				if(f.appearInDocumentation()) {
 					DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
 					String d = "### " + markdownEscape(di.ret) + " " + markdownEscape(f.getName()) + "(" + markdownEscape(di.originalArgs) + "):" + nl
 							+ convertWiki(di.topDesc != null ? di.topDesc : di.desc) + nl
@@ -100,9 +100,9 @@ public class ExtensionDocGen {
 		}
 		//events
 		HashMap<Class<?>, ArrayList<Class<? extends Event>>> eventMap = new HashMap<>();
-		for (Class<? extends Event> ce : customDiscovery.loadClassesWithAnnotationThatExtend(api.class, Event.class, classloader, true)) {
+		for(Class<? extends Event> ce : customDiscovery.loadClassesWithAnnotationThatExtend(api.class, Event.class, classloader, true)) {
 			Class<?> enclosing = ce.getEnclosingClass();
-			if (eventMap.containsKey(enclosing)) {
+			if(eventMap.containsKey(enclosing)) {
 				eventMap.get(enclosing).add(ce);
 			} else {
 				eventMap.put(enclosing, new ArrayList<Class<? extends Event>>());
@@ -117,7 +117,7 @@ public class ExtensionDocGen {
 				return o1.getKey().getName().compareTo(o2.getKey().getName());
 			}
 		});
-		for (Entry<Class<?>, ArrayList<Class<? extends Event>>> e : eventEntryList) {
+		for(Entry<Class<?>, ArrayList<Class<? extends Event>>> e : eventEntryList) {
 			Collections.sort(e.getValue(), new Comparator<Class<? extends Event>>() {
 				@Override
 				public int compare(Class<? extends Event> o1, Class<? extends Event> o2) {
@@ -125,10 +125,10 @@ public class ExtensionDocGen {
 				}
 			});
 		}
-		if (!eventEntryList.isEmpty()) {
+		if(!eventEntryList.isEmpty()) {
 			fdocs.append("# Events").append(nl);
 		}
-		for (Entry<Class<?>, ArrayList<Class<? extends Event>>> entry : eventEntryList) {
+		for(Entry<Class<?>, ArrayList<Class<? extends Event>>> entry : eventEntryList) {
 			Class enclosingClass = entry.getKey();
 			String[] split = enclosingClass.getName().split("\\.");
 			fdocs.append("## ").append(split[split.length - 1]).append(nl);
@@ -136,18 +136,18 @@ public class ExtensionDocGen {
 				Method docsMethod = enclosingClass.getMethod("docs", (Class[]) null);
 				Object o = enclosingClass.newInstance();
 				fdocs.append((String) docsMethod.invoke(o, (Object[]) null)).append(nl).append(nl);
-			} catch (NoSuchMethodException
+			} catch(NoSuchMethodException
 					| SecurityException
 					| InstantiationException
 					| IllegalAccessException
 					| IllegalArgumentException
 					| InvocationTargetException exception) {
 			}
-			for (Class<? extends Event> ce : entry.getValue()) {
+			for(Class<? extends Event> ce : entry.getValue()) {
 				Event e = ce.newInstance();
 				Pattern p = Pattern.compile("\\{(.*?)\\} *?(.*?) *?\\{(.*?)\\} *?\\{(.*?)\\}");
 				Matcher m = p.matcher(e.docs());
-				if (m.find()) {
+				if(m.find()) {
 					String name = e.getName();
 					String description = m.group(2).trim();
 					String prefilter = DocGen.PrefilterData.Get(m.group(1).split("\\|"), DocGen.MarkupType.MARKDOWN);
@@ -175,7 +175,7 @@ public class ExtensionDocGen {
 	private static String convertWiki(String input) {
 		String output = input;
 		Matcher m = WIKI_LINK.matcher(input);
-		if (m.find()) {
+		if(m.find()) {
 			output = m.replaceAll("[$2]($1)");
 		}
 		return output;

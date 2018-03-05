@@ -39,25 +39,25 @@ public class MySQLDataSource extends SQLDataSource {
 		super(uri, options);
 		try {
 			Class.forName(com.mysql.jdbc.Driver.class.getName());
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			throw new DataSourceException("Could not instantiate a MySQL data source, no driver appears to exist.", ex);
 		}
 		host = uri.getHost();
-		if (host == null) {
+		if(host == null) {
 			throw new DataSourceException("Invalid URI specified for data source \"" + uri.toString() + "\"");
 		}
 		port = uri.getPort();
-		if (port < 0) {
+		if(port < 0) {
 			port = 3306;
 		}
-		if (uri.getUserInfo() != null) {
+		if(uri.getUserInfo() != null) {
 			String[] split = uri.getUserInfo().split(":");
 			username = split[0];
-			if (split.length > 1) {
+			if(split.length > 1) {
 				password = split[1];
 			}
 		}
-		if (uri.getPath().split("/").length != 3 || !uri.getPath().startsWith("/")) {
+		if(uri.getPath().split("/").length != 3 || !uri.getPath().startsWith("/")) {
 			throw new DataSourceException("Invalid path information for mysql connection \"" + uri.toString() + "\"."
 					+ " Path requires a database name and a table name, for instance \"/testDatabase/tableName");
 		} else {
@@ -72,10 +72,10 @@ public class MySQLDataSource extends SQLDataSource {
 			connect();
 			//Create the table if it doesn't exist
 			//The columns in the table
-			try (Statement statement = getConnection().createStatement()) {
+			try(Statement statement = getConnection().createStatement()) {
 				statement.executeUpdate(getTableCreationQuery(table));
 			}
-		} catch (IOException | SQLException ex) {
+		} catch(IOException | SQLException ex) {
 			throw new DataSourceException("Could not connect to MySQL data source \"" + uri.toString() + "\": " + ex.getMessage(), ex);
 		}
 
@@ -117,7 +117,7 @@ public class MySQLDataSource extends SQLDataSource {
 					+ "&jdbcCompliantTruncation=false"
 					+ (username == null ? "" : "&user=" + URLEncoder.encode(username, "UTF-8"))
 					+ (password == null ? "" : "&password=" + URLEncoder.encode(password, "UTF-8"));
-		} catch (UnsupportedEncodingException ex) {
+		} catch(UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -127,21 +127,21 @@ public class MySQLDataSource extends SQLDataSource {
 		try {
 			connect();
 			String ret;
-			try (PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getValueColumn() + "` FROM `"
+			try(PreparedStatement statement = getConnection().prepareStatement("SELECT `" + getValueColumn() + "` FROM `"
 					+ getEscapedTable() + "` WHERE `" + KEY_HASH_COLUMN + "`=UNHEX(MD5(?))"
 					+ " LIMIT 1")) {
 				String joinedKey = StringUtils.Join(key, ".");
 				statement.setString(1, joinedKey);
 				ret = null;
-				try (ResultSet result = statement.executeQuery()) {
-					if (result.next()) {
+				try(ResultSet result = statement.executeQuery()) {
+					if(result.next()) {
 						ret = result.getString(getValueColumn());
 					}
 				}
 			}
 			updateLastConnected();
 			return ret;
-		} catch (SQLException | IOException ex) {
+		} catch(SQLException | IOException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
@@ -150,10 +150,10 @@ public class MySQLDataSource extends SQLDataSource {
 	public boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		try {
 			connect();
-			if (value == null) {
+			if(value == null) {
 				clearKey0(dm, key);
 			} else {
-				try (PreparedStatement statement = getConnection().prepareStatement("REPLACE INTO"
+				try(PreparedStatement statement = getConnection().prepareStatement("REPLACE INTO"
 						+ " `" + getEscapedTable() + "`"
 						+ " (`" + KEY_HASH_COLUMN + "`, `" + getKeyColumn() + "`, `" + getValueColumn() + "`)"
 						+ " VALUES (UNHEX(MD5(?)), ?, ?)")) {
@@ -166,24 +166,24 @@ public class MySQLDataSource extends SQLDataSource {
 			}
 			updateLastConnected();
 			return true;
-		} catch (SQLException ex) {
+		} catch(SQLException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
 
 	@Override
 	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
-		if (hasKey(key)) {
+		if(hasKey(key)) {
 			try {
 				connect();
-				try (PreparedStatement statement = getConnection().prepareStatement("DELETE FROM `" + getEscapedTable() + "`"
+				try(PreparedStatement statement = getConnection().prepareStatement("DELETE FROM `" + getEscapedTable() + "`"
 						+ " WHERE `" + KEY_HASH_COLUMN + "`=UNHEX(MD5(?))")) {
 					String joinedKey = StringUtils.Join(key, ".");
 					statement.setString(1, joinedKey);
 					statement.executeUpdate();
 				}
 				updateLastConnected();
-			} catch (Exception e) {
+			} catch(Exception e) {
 				throw new DataSourceException(e.getMessage(), e);
 			}
 		}
@@ -212,10 +212,10 @@ public class MySQLDataSource extends SQLDataSource {
 	@Override
 	protected void startTransaction0(DaemonManager dm) {
 		try {
-			try (Statement statement = getConnection().createStatement()) {
+			try(Statement statement = getConnection().createStatement()) {
 				statement.execute("START TRANSACTION");
 			}
-		} catch (SQLException ex) {
+		} catch(SQLException ex) {
 			Logger.getLogger(MySQLDataSource.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -223,17 +223,17 @@ public class MySQLDataSource extends SQLDataSource {
 	@Override
 	protected void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
 		try {
-			if (rollback) {
-				try (PreparedStatement statement = getConnection().prepareStatement("ROLLBACK")) {
+			if(rollback) {
+				try(PreparedStatement statement = getConnection().prepareStatement("ROLLBACK")) {
 					statement.execute();
 				}
 			} else {
-				try (PreparedStatement statement = getConnection().prepareStatement("COMMIT")) {
+				try(PreparedStatement statement = getConnection().prepareStatement("COMMIT")) {
 					statement.execute();
 				}
 			}
 			updateLastConnected();
-		} catch (SQLException ex) {
+		} catch(SQLException ex) {
 			Logger.getLogger(MySQLDataSource.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}

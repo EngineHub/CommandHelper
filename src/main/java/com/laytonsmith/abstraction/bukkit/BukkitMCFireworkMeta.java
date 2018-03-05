@@ -35,7 +35,7 @@ public class BukkitMCFireworkMeta extends BukkitMCItemMeta implements MCFirework
 	@Override
 	public List<MCFireworkEffect> getEffects() {
 		List<MCFireworkEffect> effects = new ArrayList<>();
-		for (FireworkEffect effect : fm.getEffects()) {
+		for(FireworkEffect effect : fm.getEffects()) {
 			effects.add(new BukkitMCFireworkEffect(effect));
 		}
 		return effects;

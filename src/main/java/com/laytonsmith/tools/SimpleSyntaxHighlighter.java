@@ -26,7 +26,7 @@ public class SimpleSyntaxHighlighter {
 	public static void main(String[] args) throws Exception {
 		String script = "<!\nstrict: on;\n>";
 		List<Token> ts = MethodScriptCompiler.lex(script, null, true, true);
-		for (Token t : ts) {
+		for(Token t : ts) {
 			System.out.println(t.type);
 			System.out.println(t.value);
 			System.out.println(t.target);
@@ -77,11 +77,11 @@ public class SimpleSyntaxHighlighter {
 	}
 
 	private String getColor(ElementTypes type) {
-		if (classes == null) {
+		if(classes == null) {
 			return null;
 		}
 		Color c = classes.get(type);
-		if (c == null) {
+		if(c == null) {
 			c = CLASSES.get(type);
 		}
 		return "color: #" + getRGB(c) + ";";
@@ -94,34 +94,34 @@ public class SimpleSyntaxHighlighter {
 	private String escapeLit(String c) {
 		StringBuilder b = new StringBuilder();
 		c = c.replaceAll("\t", "   ");
-		if (c.length() == 1) {
+		if(c.length() == 1) {
 			b.append(DocGenTemplates.escapeWiki(c));
 		} else {
 			boolean inMultispace = false;
-			for (int i = 0; i < c.length() - 1; i++) {
+			for(int i = 0; i < c.length() - 1; i++) {
 				char c1 = c.charAt(i);
-				if (!Character.isWhitespace(c1)) {
+				if(!Character.isWhitespace(c1)) {
 					inMultispace = false;
 					b.append(DocGenTemplates.escapeWiki(Character.toString(c1)));
-					if (i == c.length() - 2) {
+					if(i == c.length() - 2) {
 						// last run, also need to append the last character
 						b.append(DocGenTemplates.escapeWiki(Character.toString(c.charAt(i + 1))));
 					}
 					continue;
-				} else if (inMultispace) {
-					if (Character.isWhitespace(c1)) {
+				} else if(inMultispace) {
+					if(Character.isWhitespace(c1)) {
 						b.append("&nbsp;");
 						continue;
 					}
 				}
 				char c2 = c.charAt(i + 1);
-				if (Character.isWhitespace(c1) && Character.isWhitespace(c2)) {
+				if(Character.isWhitespace(c1) && Character.isWhitespace(c2)) {
 					inMultispace = true;
 					b.append("&nbsp;&nbsp;");
 					i++;
 				} else {
 					b.append(c1);
-					if (i == c.length() - 2) {
+					if(i == c.length() - 2) {
 						// last run, also need to append the last character
 						b.append(DocGenTemplates.escapeWiki(Character.toString(c2)));
 					}
@@ -158,7 +158,7 @@ public class SimpleSyntaxHighlighter {
 		// take out the last token, which is always a newline
 		tokens.remove(tokens.size() - 1);
 		// if the first token is a newline, also take that out.
-		if (tokens.get(0).type == TType.NEWLINE) {
+		if(tokens.get(0).type == TType.NEWLINE) {
 			tokens.remove(0);
 		}
 		String newlineString = "<div><span style=\"font-style: italic; " + getColor(ElementTypes.LINE_NUMBER) + "\">"
@@ -166,12 +166,12 @@ public class SimpleSyntaxHighlighter {
 		StringBuilder out = new StringBuilder();
 		AtomicInteger lineNum = new AtomicInteger(1);
 		out.append(String.format(newlineString, lineNum.get()));
-		for (Token t : tokens) {
-			if (null != t.type) {
-				switch (t.type) {
+		for(Token t : tokens) {
+			if(null != t.type) {
+				switch(t.type) {
 					case SMART_COMMENT:
 					case COMMENT:
-						for (String line : t.val().split("\n")) {
+						for(String line : t.val().split("\n")) {
 							out.append(getOpenSpan(t.type == TType.SMART_COMMENT
 									? ElementTypes.SMART_COMMENT : ElementTypes.COMMENT))
 									.append(escapeLit(line))
@@ -179,7 +179,7 @@ public class SimpleSyntaxHighlighter {
 							// If this is the last token, don't do this
 							// Note that this is a rare instance where reference comparison using == is valid,
 							// this is not a bug.
-							if (t != tokens.get(tokens.size() - 1)) {
+							if(t != tokens.get(tokens.size() - 1)) {
 								out.append("</div>").append(String.format(newlineString, lineNum.addAndGet(1)));
 							}
 						}
@@ -195,7 +195,7 @@ public class SimpleSyntaxHighlighter {
 						out.append(getCloseSpan());
 						break;
 					case FUNC_NAME:
-						if (t.val().equals("__autoconcat__")) {
+						if(t.val().equals("__autoconcat__")) {
 							// This (currently) only happens when there are loose parenthesis. In this
 							// case, we just want to get rid of this token, so we skip it.
 							break;
@@ -220,7 +220,7 @@ public class SimpleSyntaxHighlighter {
 						out.append(getCloseSpan());
 						break;
 					case LIT:
-						if (NativeTypeList.getNativeTypeList().contains(t.val())) {
+						if(NativeTypeList.getNativeTypeList().contains(t.val())) {
 							out.append(getOpenSpan(ElementTypes.OBJECT_TYPE));
 							out.append("{{object|").append(t.val()).append("}}");
 							out.append(getCloseSpan());
@@ -273,21 +273,21 @@ public class SimpleSyntaxHighlighter {
 		boolean inKey = true;
 		StringBuilder builder = new StringBuilder();
 		builder.append(getOpenSpan(ElementTypes.FILE_OPTIONS_KEY));
-		for (int i = 0; i < value.length(); i++) {
+		for(int i = 0; i < value.length(); i++) {
 			char c = value.charAt(i);
 			char c2 = '\0';
-			if (i + 1 < value.length()) {
+			if(i + 1 < value.length()) {
 				c2 = value.charAt(i + 1);
 			}
-			if (c == '\n') {
+			if(c == '\n') {
 				builder.append(getCloseSpan())
 						.append("</div>")
 						.append(String.format(newLineString, lineNum.addAndGet(1)))
 						.append(getOpenSpan(inKey ? ElementTypes.FILE_OPTIONS_KEY : ElementTypes.FILE_OPTIONS_VALUE));
 				continue;
 			}
-			if (inKey) {
-				if (c == ':') {
+			if(inKey) {
+				if(c == ':') {
 					inKey = false;
 					builder.append(getCloseSpan())
 							.append(getOpenSpan(ElementTypes.FILE_OPTIONS_BLOCK))
@@ -296,7 +296,7 @@ public class SimpleSyntaxHighlighter {
 							.append(getOpenSpan(ElementTypes.FILE_OPTIONS_VALUE));
 					continue;
 				}
-				if (c == ';') {
+				if(c == ';') {
 					builder.append(getCloseSpan())
 							.append(getOpenSpan(ElementTypes.FILE_OPTIONS_BLOCK))
 							.append(';')
@@ -306,12 +306,12 @@ public class SimpleSyntaxHighlighter {
 				}
 				builder.append(c);
 			} else {
-				if (c == '\\' && c2 == ';') {
+				if(c == '\\' && c2 == ';') {
 					builder.append("\\;");
 					i++;
 					continue;
 				}
-				if (c == ';') {
+				if(c == ';') {
 					builder.append(getCloseSpan())
 							.append(getOpenSpan(ElementTypes.FILE_OPTIONS_BLOCK))
 							.append(';')
@@ -339,44 +339,44 @@ public class SimpleSyntaxHighlighter {
 		StringBuilder brace = new StringBuilder();
 		boolean inSimpleVar = false;
 		boolean inBrace = false;
-		for (int i = 0; i < value.length(); i++) {
+		for(int i = 0; i < value.length(); i++) {
 			char c = value.charAt(i);
 			char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
-			if (c == '\\' && c2 == '@') {
+			if(c == '\\' && c2 == '@') {
 				b.append("\\@");
 				i++;
 				continue;
 			}
-			if (c == '@') {
-				if (Character.isLetterOrDigit(c2) || c2 == '_') {
+			if(c == '@') {
+				if(Character.isLetterOrDigit(c2) || c2 == '_') {
 					inSimpleVar = true;
 					b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">@");
 					continue;
-				} else if (c2 == '{') {
+				} else if(c2 == '{') {
 					inBrace = true;
 					b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">@{</span>");
 					i++;
 					continue;
 				}
 			}
-			if (inSimpleVar && !(Character.isLetterOrDigit(c) || c == '_')) {
+			if(inSimpleVar && !(Character.isLetterOrDigit(c) || c == '_')) {
 				inSimpleVar = false;
 				b.append("</span>");
 			}
-			if (inBrace && c == '}') {
+			if(inBrace && c == '}') {
 				inBrace = false;
 				b.append(processBraceString(brace.toString()));
 				brace = new StringBuilder();
 				b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">}</span>");
 				continue;
 			}
-			if (!inBrace) {
+			if(!inBrace) {
 				b.append(escapeLit(c));
 			} else {
 				brace.append(escapeLit(c));
 			}
 		}
-		if (inSimpleVar || inBrace) {
+		if(inSimpleVar || inBrace) {
 			b.append("</span>");
 		}
 		return b.toString();
@@ -393,31 +393,31 @@ public class SimpleSyntaxHighlighter {
 		boolean inVarName = true;
 		boolean inString = false;
 		b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">");
-		for (int i = 0; i < value.length(); i++) {
+		for(int i = 0; i < value.length(); i++) {
 			char c = value.charAt(i);
 			char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
-			if (c == '[' && inVarName) {
+			if(c == '[' && inVarName) {
 				inVarName = false;
 				b.append("</span>");
 			}
-			if (c == '[' && !inString) {
+			if(c == '[' && !inString) {
 				b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">[</span>");
 				continue;
 			}
-			if (c == ']' && !inString) {
+			if(c == ']' && !inString) {
 				b.append("<span style=\"").append(getColor(ElementTypes.VAR)).append("\">]</span>");
 				continue;
 			}
-			if (c == '\\' && c2 == '\'' && inString) {
+			if(c == '\\' && c2 == '\'' && inString) {
 				b.append("\\'");
 				continue;
 			}
-			if (c == '\'') {
+			if(c == '\'') {
 				inString = !inString;
 			}
 			b.append(escapeLit(c));
 		}
-		if (inVarName) {
+		if(inVarName) {
 			b.append("</span>");
 		}
 		return b.toString();

@@ -39,7 +39,7 @@ public class CResource<T> extends Construct {
 				String original = id.getResource().getClass().getName() + "@"
 						+ Integer.toHexString(id.getResource().hashCode());
 				String addendum = "";
-				if (!original.equals(id.getResource().toString())) {
+				if(!original.equals(id.getResource().toString())) {
 					addendum = original + ":";
 				}
 				return "resource@" + id.getId() + ":"
@@ -60,7 +60,7 @@ public class CResource<T> extends Construct {
 	public CResource(T resource, ResourceToString toString, Target t) {
 		super("", ConstructType.RESOURCE, t);
 		this.resource = resource;
-		if (toString == null) {
+		if(toString == null) {
 			throw new NullPointerException();
 		}
 		this.toString = toString;

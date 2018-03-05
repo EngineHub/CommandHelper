@@ -52,7 +52,7 @@ public class WeatherEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if (event instanceof MCLightningStrikeEvent) {
+			if(event instanceof MCLightningStrikeEvent) {
 				MCLightningStrikeEvent e = (MCLightningStrikeEvent) event;
 				Prefilters.match(prefilter, "world", e.getWorld().getName(), Prefilters.PrefilterType.MACRO);
 				Prefilters.match(prefilter, "location", e.getLightning().getLocation(), Prefilters.PrefilterType.LOCATION_MATCH);
@@ -69,7 +69,7 @@ public class WeatherEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if (event instanceof MCLightningStrikeEvent) {
+			if(event instanceof MCLightningStrikeEvent) {
 				MCLightningStrikeEvent e = (MCLightningStrikeEvent) event;
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(e);
@@ -100,7 +100,7 @@ public class WeatherEvents {
 
 		@Override
 		public void preExecution(Environment env, BoundEvent.ActiveEvent activeEvent) {
-			if (activeEvent.getUnderlyingEvent() instanceof MCLightningStrikeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCLightningStrikeEvent) {
 				// Static lookups of the entity don't work here, so we need to inject them
 				MCEntity entity = ((MCLightningStrikeEvent) activeEvent.getUnderlyingEvent()).getLightning();
 				Static.InjectEntity(entity);
@@ -109,7 +109,7 @@ public class WeatherEvents {
 
 		@Override
 		public void postExecution(Environment env, BoundEvent.ActiveEvent activeEvent) {
-			if (activeEvent.getUnderlyingEvent() instanceof MCLightningStrikeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCLightningStrikeEvent) {
 				MCEntity entity = ((MCLightningStrikeEvent) activeEvent.getUnderlyingEvent()).getLightning();
 				Static.UninjectEntity(entity);
 			}
@@ -137,7 +137,7 @@ public class WeatherEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if (event instanceof MCThunderChangeEvent) {
+			if(event instanceof MCThunderChangeEvent) {
 				MCThunderChangeEvent e = (MCThunderChangeEvent) event;
 				Prefilters.match(prefilter, "world", e.getWorld().getName(), Prefilters.PrefilterType.MACRO);
 				Prefilters.match(prefilter, "has_thunder", e.toThunderState(), Prefilters.PrefilterType.BOOLEAN_MATCH);
@@ -153,7 +153,7 @@ public class WeatherEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if (event instanceof MCThunderChangeEvent) {
+			if(event instanceof MCThunderChangeEvent) {
 				MCThunderChangeEvent e = (MCThunderChangeEvent) event;
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(e);
@@ -201,7 +201,7 @@ public class WeatherEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if (event instanceof MCWeatherChangeEvent) {
+			if(event instanceof MCWeatherChangeEvent) {
 				MCWeatherChangeEvent e = (MCWeatherChangeEvent) event;
 				Prefilters.match(prefilter, "world", e.getWorld().getName(), Prefilters.PrefilterType.MACRO);
 				Prefilters.match(prefilter, "is_effect", e.toWeatherState(), Prefilters.PrefilterType.BOOLEAN_MATCH);
@@ -217,7 +217,7 @@ public class WeatherEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if (event instanceof MCWeatherChangeEvent) {
+			if(event instanceof MCWeatherChangeEvent) {
 				MCWeatherChangeEvent e = (MCWeatherChangeEvent) event;
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(e);

@@ -18,7 +18,7 @@ public class BukkitMCSoundCategory extends EnumConvertor<MCSoundCategory, SoundC
 	private static BukkitMCSoundCategory instance;
 
 	public static BukkitMCSoundCategory getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new BukkitMCSoundCategory();
 		}
 		return instance;
@@ -26,7 +26,7 @@ public class BukkitMCSoundCategory extends EnumConvertor<MCSoundCategory, SoundC
 
 	@Override
 	protected SoundCategory getConcreteEnumCustom(MCSoundCategory abstracted) {
-		if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_11)) {
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_11)) {
 			return null;
 		}
 		return super.getConcreteEnumCustom(abstracted);

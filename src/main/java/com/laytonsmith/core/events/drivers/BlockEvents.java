@@ -123,7 +123,7 @@ public class BlockEvents {
 			Map<String, Construct> map = evaluate_stub(e);
 
 			CArray affected = new CArray(t);
-			for (MCBlock block : event.getPushedBlocks()) {
+			for(MCBlock block : event.getPushedBlocks()) {
 				MCMaterial mat = block.getType();
 				CArray blk = CArray.GetAssociativeArray(t);
 				blk.set("name", mat.getName(), t);
@@ -221,25 +221,25 @@ public class BlockEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (!(e instanceof MCBlockBreakEvent)) {
+			if(!(e instanceof MCBlockBreakEvent)) {
 				return false;
 			}
 			MCBlockBreakEvent event = (MCBlockBreakEvent) e;
 
-			if (prefilter.containsKey("player")) {
-				if (!event.getPlayer().getName().equals(prefilter.get("player").val())) {
+			if(prefilter.containsKey("player")) {
+				if(!event.getPlayer().getName().equals(prefilter.get("player").val())) {
 					return false;
 				}
 			}
 
-			if (prefilter.containsKey("name")) {
-				if (!prefilter.get("name").val().equals(event.getBlock().getType().getName())) {
+			if(prefilter.containsKey("name")) {
+				if(!prefilter.get("name").val().equals(event.getBlock().getType().getName())) {
 					return false;
 				}
-			} else if (prefilter.containsKey("type")) {
+			} else if(prefilter.containsKey("type")) {
 				Construct v = prefilter.get("type");
-				if (v instanceof CInt) {
-					if (event.getBlock().getTypeId() != ((CInt) v).getInt()) {
+				if(v instanceof CInt) {
+					if(event.getBlock().getTypeId() != ((CInt) v).getInt()) {
 						return false;
 					}
 				} else {
@@ -247,11 +247,11 @@ public class BlockEvents {
 				}
 			}
 
-			if (prefilter.containsKey("data")) {
+			if(prefilter.containsKey("data")) {
 				Construct v = prefilter.get("data");
 
-				if (v instanceof CInt) {
-					if ((int) event.getBlock().getData() != ((CInt) v).getInt()) {
+				if(v instanceof CInt) {
+					if((int) event.getBlock().getData() != ((CInt) v).getInt()) {
 						return false;
 					}
 				} else {
@@ -289,10 +289,10 @@ public class BlockEvents {
 
 			CArray drops = new CArray(t);
 			Collection<MCItemStack> items = event.getDrops();
-			if (items == null) {
+			if(items == null) {
 				items = event.getBlock().getDrops(event.getPlayer().getItemInHand());
 			}
-			for (MCItemStack stack : items) {
+			for(MCItemStack stack : items) {
 				CArray item = (CArray) ObjectGenerator.GetGenerator().item(stack, t);
 				drops.push(item, t);
 			}
@@ -308,11 +308,11 @@ public class BlockEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
 			MCBlockBreakEvent event = (MCBlockBreakEvent) e;
 
-			if (key.equals("drops")) {
+			if(key.equals("drops")) {
 				List<MCItemStack> drops = new ArrayList<>();
-				if (value instanceof CArray) {
+				if(value instanceof CArray) {
 					CArray arr = (CArray) value;
-					for (int i = 0; i < arr.size(); i++) {
+					for(int i = 0; i < arr.size(); i++) {
 						CArray item = (CArray) arr.get(i, value.getTarget());
 						drops.add(ObjectGenerator.GetGenerator().item(item, value.getTarget()));
 					}
@@ -321,8 +321,8 @@ public class BlockEvents {
 				return true;
 			}
 
-			if (key.equals("xp")) {
-				if (value instanceof CInt) {
+			if(key.equals("xp")) {
+				if(value instanceof CInt) {
 					int xp = Integer.parseInt(value.val());
 					event.setExpToDrop(xp);
 					return true;
@@ -368,26 +368,26 @@ public class BlockEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (!(e instanceof MCBlockPlaceEvent)) {
+			if(!(e instanceof MCBlockPlaceEvent)) {
 				return false;
 			}
 			MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
 
-			if (prefilter.containsKey("player")) {
-				if (!event.getPlayer().getName().equals(prefilter.get("player").val())) {
+			if(prefilter.containsKey("player")) {
+				if(!event.getPlayer().getName().equals(prefilter.get("player").val())) {
 					return false;
 				}
 			}
 
-			if (prefilter.containsKey("name")) {
-				if (!prefilter.get("name").val().equals(event.getBlock().getType().getName())) {
+			if(prefilter.containsKey("name")) {
+				if(!prefilter.get("name").val().equals(event.getBlock().getType().getName())) {
 					return false;
 				}
-			} else if (prefilter.containsKey("type")) {
+			} else if(prefilter.containsKey("type")) {
 				Construct v = prefilter.get("type");
 
-				if (v instanceof CInt) {
-					if (event.getBlock().getTypeId() != ((CInt) v).getInt()) {
+				if(v instanceof CInt) {
+					if(event.getBlock().getTypeId() != ((CInt) v).getInt()) {
 						return false;
 					}
 				} else {
@@ -395,11 +395,11 @@ public class BlockEvents {
 				}
 			}
 
-			if (prefilter.containsKey("data")) {
+			if(prefilter.containsKey("data")) {
 				Construct v = prefilter.get("data");
 
-				if (v instanceof CInt) {
-					if ((int) event.getBlock().getData() != ((CInt) v).getInt()) {
+				if(v instanceof CInt) {
+					if((int) event.getBlock().getData() != ((CInt) v).getInt()) {
 						return false;
 					}
 				} else {
@@ -461,26 +461,26 @@ public class BlockEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
 			MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
 
-			if (key.equals("name")) {
+			if(key.equals("name")) {
 				MCMaterial mat = StaticLayer.GetMaterial(value.val());
-				if (mat == null) {
+				if(mat == null) {
 					throw new CREFormatException("Material name \"" + value.val() + "\" not found.", value.getTarget());
 				}
 				event.getBlock().setType(mat);
 				return true;
-			} else if (key.equals("type")) {
-				if (value instanceof CInt) {
+			} else if(key.equals("type")) {
+				if(value instanceof CInt) {
 					int i = Integer.parseInt(value.val());
 					event.getBlock().setTypeId(i);
 					return true;
 				}
-			} else if (key.equals("data")) {
-				if (value instanceof CInt) {
+			} else if(key.equals("data")) {
+				if(value instanceof CInt) {
 					byte b;
 					try {
 						b = Byte.parseByte(value.val());
-					} catch (NumberFormatException exc) {
-						if (Integer.parseInt(value.val()) < 0) {
+					} catch(NumberFormatException exc) {
+						if(Integer.parseInt(value.val()) < 0) {
 							b = 0;
 						} else {
 							b = Byte.MAX_VALUE;
@@ -525,19 +525,19 @@ public class BlockEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (!(e instanceof MCBlockBurnEvent)) {
+			if(!(e instanceof MCBlockBurnEvent)) {
 				return false;
 			}
 			MCBlockBurnEvent event = (MCBlockBurnEvent) e;
 
-			if (prefilter.containsKey("name")) {
-				if (!prefilter.get("name").val().equals(event.getBlock().getType().getName())) {
+			if(prefilter.containsKey("name")) {
+				if(!prefilter.get("name").val().equals(event.getBlock().getType().getName())) {
 					return false;
 				}
-			} else if (prefilter.containsKey("type")) {
+			} else if(prefilter.containsKey("type")) {
 				Construct v = prefilter.get("type");
-				if (v instanceof CInt) {
-					if (event.getBlock().getTypeId() != ((CInt) v).getInt()) {
+				if(v instanceof CInt) {
+					if(event.getBlock().getTypeId() != ((CInt) v).getInt()) {
 						return false;
 					}
 				} else {
@@ -545,10 +545,10 @@ public class BlockEvents {
 				}
 			}
 
-			if (prefilter.containsKey("data")) {
+			if(prefilter.containsKey("data")) {
 				Construct v = prefilter.get("data");
-				if (v instanceof CInt) {
-					if ((int) event.getBlock().getData() != ((CInt) v).getInt()) {
+				if(v instanceof CInt) {
+					if((int) event.getBlock().getData() != ((CInt) v).getInt()) {
 						return false;
 					}
 				} else {
@@ -627,12 +627,12 @@ public class BlockEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (!(e instanceof MCBlockIgniteEvent)) {
+			if(!(e instanceof MCBlockIgniteEvent)) {
 				return false;
 			}
 			MCBlockIgniteEvent event = (MCBlockIgniteEvent) e;
 
-			if (event.getPlayer() != null) {
+			if(event.getPlayer() != null) {
 				Prefilters.match(prefilter, "player", event.getPlayer().getName(), Prefilters.PrefilterType.MACRO);
 			}
 
@@ -648,22 +648,22 @@ public class BlockEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if (!(e instanceof MCBlockIgniteEvent)) {
+			if(!(e instanceof MCBlockIgniteEvent)) {
 				throw new EventException("Cannot convert e to MCBlockIgniteEvent");
 			}
 			MCBlockIgniteEvent event = (MCBlockIgniteEvent) e;
 			Target t = Target.UNKNOWN;
 			Map<String, Construct> map = evaluate_helper(e);
 
-			if (event.getPlayer() != null) {
+			if(event.getPlayer() != null) {
 				map.put("player", new CString(event.getPlayer().getName(), t));
 			}
 
-			if (event.getIgnitingEntity() != null) {
+			if(event.getIgnitingEntity() != null) {
 				map.put("ignitingentity", new CString(event.getIgnitingEntity().getUniqueId().toString(), t));
 			}
 
-			if (event.getIgnitingBlock() != null) {
+			if(event.getIgnitingBlock() != null) {
 				MCMaterial ignitingmat = event.getIgnitingBlock().getType();
 				map.put("ignitingblock", new CInt(ignitingmat.getType(), t));
 				map.put("ignitingblockname", new CString(ignitingmat.getName(), t));
@@ -712,19 +712,19 @@ public class BlockEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (!(e instanceof MCBlockFromToEvent)) {
+			if(!(e instanceof MCBlockFromToEvent)) {
 				return false;
 			}
 			MCBlockFromToEvent event = (MCBlockFromToEvent) e;
 			Prefilters.match(prefilter, "world", event.getBlock().getWorld().getName(), PrefilterType.STRING_MATCH);
-			if (prefilter.containsKey("name")) {
-				if (!prefilter.get("name").val().equals(event.getBlock().getType().getName())) {
+			if(prefilter.containsKey("name")) {
+				if(!prefilter.get("name").val().equals(event.getBlock().getType().getName())) {
 					return false;
 				}
-			} else if (prefilter.containsKey("type")) {
+			} else if(prefilter.containsKey("type")) {
 				Construct v = prefilter.get("type");
-				if (v instanceof CInt) {
-					if (event.getBlock().getTypeId() != ((CInt) v).getInt()) {
+				if(v instanceof CInt) {
+					if(event.getBlock().getTypeId() != ((CInt) v).getInt()) {
 						return false;
 					}
 				} else {
@@ -732,14 +732,14 @@ public class BlockEvents {
 				}
 			}
 			Prefilters.match(prefilter, "data", (int) event.getBlock().getData(), PrefilterType.STRING_MATCH);
-			if (prefilter.containsKey("toname")) {
-				if (!prefilter.get("toname").val().equals(event.getToBlock().getType().getName())) {
+			if(prefilter.containsKey("toname")) {
+				if(!prefilter.get("toname").val().equals(event.getToBlock().getType().getName())) {
 					return false;
 				}
-			} else if (prefilter.containsKey("totype")) {
+			} else if(prefilter.containsKey("totype")) {
 				Construct v = prefilter.get("totype");
-				if (v instanceof CInt) {
-					if (event.getToBlock().getTypeId() != ((CInt) v).getInt()) {
+				if(v instanceof CInt) {
+					if(event.getToBlock().getTypeId() != ((CInt) v).getInt()) {
 						return false;
 					}
 				} else {
@@ -759,7 +759,7 @@ public class BlockEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if (!(e instanceof MCBlockFromToEvent)) {
+			if(!(e instanceof MCBlockFromToEvent)) {
 				throw new EventException("Cannot convert e to MCBlockFromToEvent");
 			}
 			MCBlockFromToEvent event = (MCBlockFromToEvent) e;
@@ -796,57 +796,57 @@ public class BlockEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if (!(event instanceof MCBlockFromToEvent)) {
+			if(!(event instanceof MCBlockFromToEvent)) {
 				return false;
 			}
 			MCBlockFromToEvent e = (MCBlockFromToEvent) event;
-			if (key.equals("block") && value instanceof CArray) {
+			if(key.equals("block") && value instanceof CArray) {
 				CArray blockArray = (CArray) value;
 				MCBlock block = e.getBlock();
 				Construct name = blockArray.get("name", value.getTarget());
-				if (name != null) {
+				if(name != null) {
 					MCMaterial mat = StaticLayer.GetMaterial(name.val());
-					if (mat == null) {
+					if(mat == null) {
 						throw new CREFormatException("Material name \"" + name.val() + "\" not found.", value.getTarget());
 					}
 					block.setType(mat);
 				} else {
 					try {
 						block.setTypeId(Integer.parseInt(blockArray.get("type", value.getTarget()).val()));
-					} catch (Exception ex) {
+					} catch(Exception ex) {
 						throw new CREFormatException("blockArray is invalid", value.getTarget());
 					}
 				}
-				if (blockArray.containsKey("data")) {
+				if(blockArray.containsKey("data")) {
 					try {
 						block.setData((byte) Integer.parseInt(blockArray.get("data", value.getTarget()).val()));
-					} catch (Exception ex) {
+					} catch(Exception ex) {
 						throw new CREFormatException("blockArray is invalid", value.getTarget());
 					}
 				}
 				return true;
 			}
-			if (key.equals("toblock") && value instanceof CArray) {
+			if(key.equals("toblock") && value instanceof CArray) {
 				CArray blockArray = (CArray) value;
 				MCBlock block = e.getToBlock();
 				Construct name = blockArray.get("name", value.getTarget());
-				if (name != null) {
+				if(name != null) {
 					MCMaterial mat = StaticLayer.GetMaterial(name.val());
-					if (mat == null) {
+					if(mat == null) {
 						throw new CREFormatException("Material name \"" + name.val() + "\" not found.", value.getTarget());
 					}
 					block.setType(mat);
 				} else {
 					try {
 						block.setTypeId(Integer.parseInt(blockArray.get("type", value.getTarget()).val()));
-					} catch (Exception ex) {
+					} catch(Exception ex) {
 						throw new CREFormatException("blockArray is invalid", value.getTarget());
 					}
 				}
-				if (blockArray.containsKey("data")) {
+				if(blockArray.containsKey("data")) {
 					try {
 						block.setData((byte) Integer.parseInt(blockArray.get("data", value.getTarget()).val()));
-					} catch (Exception ex) {
+					} catch(Exception ex) {
 						throw new CREFormatException("blockArray is invalid", value.getTarget());
 					}
 				}
@@ -886,13 +886,13 @@ public class BlockEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (!(e instanceof MCSignChangeEvent)) {
+			if(!(e instanceof MCSignChangeEvent)) {
 				return false;
 			}
 			MCSignChangeEvent sce = (MCSignChangeEvent) e;
 
-			if (prefilter.containsKey("player")) {
-				if (!sce.getPlayer().getName().equals(prefilter.get("player").val())) {
+			if(prefilter.containsKey("player")) {
+				if(!sce.getPlayer().getName().equals(prefilter.get("player").val())) {
 					return false;
 				}
 			}
@@ -907,7 +907,7 @@ public class BlockEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if (!(e instanceof MCSignChangeEvent)) {
+			if(!(e instanceof MCSignChangeEvent)) {
 				throw new EventException("Cannot convert e to MCSignChangeEvent");
 			}
 			MCSignChangeEvent event = (MCSignChangeEvent) e;
@@ -922,25 +922,25 @@ public class BlockEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if (!(event instanceof MCSignChangeEvent)) {
+			if(!(event instanceof MCSignChangeEvent)) {
 				return false;
 			}
 			MCSignChangeEvent sce = (MCSignChangeEvent) event;
 
 			// Allow changing everything at once.
-			if (key.equals("text")) {
-				if (!(value instanceof CArray)) {
+			if(key.equals("text")) {
+				if(!(value instanceof CArray)) {
 					return false;
 				}
 
 				CArray val = (CArray) value;
-				if (val.size() != 4) {
+				if(val.size() != 4) {
 					return false;
 				}
 
 				String[] lines = {"", "", "", ""};
 
-				for (int i = 0; i < 4; i++) {
+				for(int i = 0; i < 4; i++) {
 					lines[i] = val.get(i, value.getTarget()).toString();
 				}
 
@@ -951,19 +951,19 @@ public class BlockEvents {
 
 			int index;
 			// Allow changing just one line at a time.
-			if (key.equals("1")) {
+			if(key.equals("1")) {
 				index = 0;
-			} else if (key.equals("2")) {
+			} else if(key.equals("2")) {
 				index = 1;
-			} else if (key.equals("3")) {
+			} else if(key.equals("3")) {
 				index = 2;
-			} else if (key.equals("4")) {
+			} else if(key.equals("4")) {
 				index = 3;
 			} else {
 				return false;
 			}
 
-			if (value instanceof CNull) {
+			if(value instanceof CNull) {
 				sce.setLine(index, "");
 				return "".equals(sce.getLine(index).toString());
 			} else {
@@ -1014,7 +1014,7 @@ public class BlockEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (e instanceof MCBlockDispenseEvent) {
+			if(e instanceof MCBlockDispenseEvent) {
 				MCBlockDispenseEvent event = (MCBlockDispenseEvent) e;
 				Prefilters.match(prefilter, "type", event.getBlock().getType().getName(), PrefilterType.STRING_MATCH);
 				Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItem()), PrefilterType.ITEM_MATCH);
@@ -1049,12 +1049,12 @@ public class BlockEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if (event instanceof MCBlockDispenseEvent) {
-				if ("item".equals(key)) {
+			if(event instanceof MCBlockDispenseEvent) {
+				if("item".equals(key)) {
 					((MCBlockDispenseEvent) event).setItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
-				if ("velocity".equals(key)) {
+				if("velocity".equals(key)) {
 					((MCBlockDispenseEvent) event).setVelocity(ObjectGenerator.GetGenerator().vector(value, value.getTarget()));
 					return true;
 				}
@@ -1100,19 +1100,19 @@ public class BlockEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
-			if (!(event instanceof MCBlockGrowEvent)) {
+			if(!(event instanceof MCBlockGrowEvent)) {
 				return false;
 			}
 			MCBlockGrowEvent blockGrowEvent = (MCBlockGrowEvent) event;
 			MCBlock oldBlock = blockGrowEvent.getBlock();
-			if (prefilter.containsKey("oldname")) {
-				if (!prefilter.get("oldname").val().equals(oldBlock.getType().getName())) {
+			if(prefilter.containsKey("oldname")) {
+				if(!prefilter.get("oldname").val().equals(oldBlock.getType().getName())) {
 					return false;
 				}
-			} else if (prefilter.containsKey("oldtype")) {
+			} else if(prefilter.containsKey("oldtype")) {
 				Construct v = prefilter.get("oldtype");
-				if (v instanceof CInt) {
-					if (oldBlock.getTypeId() != ((CInt) v).getInt()) {
+				if(v instanceof CInt) {
+					if(oldBlock.getTypeId() != ((CInt) v).getInt()) {
 						return false;
 					}
 				} else {
@@ -1121,14 +1121,14 @@ public class BlockEvents {
 			}
 			Prefilters.match(prefilter, "olddata", oldBlock.getData(), PrefilterType.STRING_MATCH);
 			MCBlockState newBlock = blockGrowEvent.getNewState();
-			if (prefilter.containsKey("newname")) {
-				if (!prefilter.get("newname").val().equals(newBlock.getType().getName())) {
+			if(prefilter.containsKey("newname")) {
+				if(!prefilter.get("newname").val().equals(newBlock.getType().getName())) {
 					return false;
 				}
-			} else if (prefilter.containsKey("newtype")) {
+			} else if(prefilter.containsKey("newtype")) {
 				Construct v = prefilter.get("newtype");
-				if (v instanceof CInt) {
-					if (newBlock.getType().getType() != ((CInt) v).getInt()) {
+				if(v instanceof CInt) {
+					if(newBlock.getType().getType() != ((CInt) v).getInt()) {
 						return false;
 					}
 				} else {
@@ -1147,7 +1147,7 @@ public class BlockEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if (!(event instanceof MCBlockGrowEvent)) {
+			if(!(event instanceof MCBlockGrowEvent)) {
 				throw new EventException("Cannot convert event to BlockGrowEvent");
 			}
 			MCBlockGrowEvent blockGrowEvent = (MCBlockGrowEvent) event;
@@ -1222,7 +1222,7 @@ public class BlockEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if (!(event instanceof MCNotePlayEvent)) {
+			if(!(event instanceof MCNotePlayEvent)) {
 				throw new EventException("Cannot convert event to NotePlayEvent");
 			}
 			MCNotePlayEvent e = (MCNotePlayEvent) event;
@@ -1239,15 +1239,15 @@ public class BlockEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
-			if (e instanceof MCNotePlayEvent) {
+			if(e instanceof MCNotePlayEvent) {
 				MCNotePlayEvent event = (MCNotePlayEvent) e;
 				try {
-					if ("instrument".equals(key)) {
+					if("instrument".equals(key)) {
 						event.setInstrument(MCInstrument.valueOf(value.val()));
 						return true;
 					}
-					if ("tone".equals(key)) {
-						if (value.val().length() == 0) {
+					if("tone".equals(key)) {
+						if(value.val().length() == 0) {
 							return false;
 						}
 						int octave = event.getNote().getOctave();
@@ -1256,14 +1256,14 @@ public class BlockEvents {
 						event.setNote(StaticLayer.GetConvertor().GetNote(octave, tone, sharp));
 						return true;
 					}
-					if ("octave".equals(key)) {
+					if("octave".equals(key)) {
 						int octave = Static.getInt32(value, value.getTarget());
 						MCTone tone = event.getNote().getTone();
 						boolean sharp = event.getNote().isSharped();
 						event.setNote(StaticLayer.GetConvertor().GetNote(octave, tone, sharp));
 						return true;
 					}
-				} catch (IllegalArgumentException ex) {
+				} catch(IllegalArgumentException ex) {
 					throw new CREIllegalArgumentException("No " + key + " with the value " + value + " exists", value.getTarget(), ex);
 				}
 			}
@@ -1304,19 +1304,19 @@ public class BlockEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (!(e instanceof MCBlockFadeEvent)) {
+			if(!(e instanceof MCBlockFadeEvent)) {
 				return false;
 			}
 			MCBlockFadeEvent event = (MCBlockFadeEvent) e;
 			MCBlock oldBlock = event.getBlock();
-			if (prefilter.containsKey("oldname")) {
-				if (!prefilter.get("oldname").val().equals(oldBlock.getType().getName())) {
+			if(prefilter.containsKey("oldname")) {
+				if(!prefilter.get("oldname").val().equals(oldBlock.getType().getName())) {
 					return false;
 				}
-			} else if (prefilter.containsKey("oldtype")) {
+			} else if(prefilter.containsKey("oldtype")) {
 				Construct v = prefilter.get("oldtype");
-				if (v instanceof CInt) {
-					if (oldBlock.getTypeId() != ((CInt) v).getInt()) {
+				if(v instanceof CInt) {
+					if(oldBlock.getTypeId() != ((CInt) v).getInt()) {
 						return false;
 					}
 				} else {
@@ -1324,7 +1324,7 @@ public class BlockEvents {
 				}
 			}
 			Construct world = prefilter.get("world");
-			if (world != null && !world.val().equals(oldBlock.getWorld().getName())) {
+			if(world != null && !world.val().equals(oldBlock.getWorld().getName())) {
 				return false;
 			}
 			return true;
@@ -1337,7 +1337,7 @@ public class BlockEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if (!(e instanceof MCBlockFadeEvent)) {
+			if(!(e instanceof MCBlockFadeEvent)) {
 				throw new EventException("Cannot convert event to BlockFadeEvent");
 			}
 			MCBlockFadeEvent event = (MCBlockFadeEvent) e;

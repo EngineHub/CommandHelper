@@ -91,7 +91,7 @@ public class PNViewer extends javax.swing.JFrame {
 		sourceLabel.setText("");
 		try {
 			setIconImage(ImageIO.read(PNViewer.class.getResourceAsStream("GearIcon.png")));
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			Logger.getLogger(PNViewer.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		setStatus("Waiting for configuration to be loaded...", false);
@@ -100,9 +100,9 @@ public class PNViewer extends javax.swing.JFrame {
 
 			@Override
 			public void windowClosing(WindowEvent e) {
-				if (remoteSocketThread != null && remoteSocketThread.isAlive()) {
+				if(remoteSocketThread != null && remoteSocketThread.isAlive()) {
 					int sel = JOptionPane.showConfirmDialog(PNViewer.this, "A connection to the remote server is still active, are you sure you wish to disconnect?", "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-					if (sel == JOptionPane.YES_OPTION) {
+					if(sel == JOptionPane.YES_OPTION) {
 						System.exit(0);
 					}
 				} else {
@@ -118,7 +118,7 @@ public class PNViewer extends javax.swing.JFrame {
 			@Override
 			public void data(boolean isLocal, String localPath, String host, int port, String password, String remoteFile) {
 				isLocalConfig = isLocal;
-				if (isLocal) {
+				if(isLocal) {
 					loadFromLocal(localPath);
 				} else {
 					loadFromRemote(host, port, password, remoteFile);
@@ -137,18 +137,18 @@ public class PNViewer extends javax.swing.JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (remoteSocketThread == null) {
+				if(remoteSocketThread == null) {
 					showError("No remote connection is established.");
 				} else {
 					setStatus("Closing remote connection...", false);
 					try {
 						remoteOutput.writeUTF("DISCONNECT");
-					} catch (IOException ex) {
+					} catch(IOException ex) {
 						log(ex);
 						//Fallback in case a clean close doesn't work.
 						try {
 							remoteSocket.close();
-						} catch (IOException ex1) {
+						} catch(IOException ex1) {
 							//
 						}
 					}
@@ -162,11 +162,11 @@ public class PNViewer extends javax.swing.JFrame {
 			public void valueChanged(TreeSelectionEvent e) {
 				try {
 					String[] key = new String[e.getNewLeadSelectionPath().getPathCount() - 1];
-					for (int i = 1; i < e.getNewLeadSelectionPath().getPathCount(); i++) {
+					for(int i = 1; i < e.getNewLeadSelectionPath().getPathCount(); i++) {
 						key[i - 1] = (String) ((DefaultMutableTreeNode) e.getNewLeadSelectionPath().getPathComponent(i)).getUserObject();
 					}
 					showData(join(key), data.get(join(key)));
-				} catch (NullPointerException ex) {
+				} catch(NullPointerException ex) {
 					// Ignore
 				}
 			}
@@ -178,8 +178,8 @@ public class PNViewer extends javax.swing.JFrame {
 			public void mousePressed(MouseEvent e) {
 				int selRow = keyTree.getRowForLocation(e.getX(), e.getY());
 				TreePath selPath = keyTree.getPathForLocation(e.getX(), e.getY());
-				if (selRow != -1) {
-					if (SwingUtilities.isRightMouseButton(e)) {
+				if(selRow != -1) {
+					if(SwingUtilities.isRightMouseButton(e)) {
 						StreamUtils.GetSystemOut().println("Right click on " + selPath);
 					}
 				}
@@ -201,17 +201,17 @@ public class PNViewer extends javax.swing.JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (isLocalConfig == null) {
+				if(isLocalConfig == null) {
 					showError("No configuration is loaded.");
-				} else if (isLocalConfig == true) {
+				} else if(isLocalConfig == true) {
 					loadFromLocal(localPath);
 				} else {
-					if (remoteSocketThread == null) {
+					if(remoteSocketThread == null) {
 						showError("Remote connection isn't established, cannot reload data");
 					} else {
 						try {
 							remoteOutput.writeUTF("LOAD-DATA");
-						} catch (IOException ex) {
+						} catch(IOException ex) {
 							Logger.getLogger(PNViewer.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
@@ -237,7 +237,7 @@ public class PNViewer extends javax.swing.JFrame {
 					public String generate(String... args) {
 						try {
 							return Implementation.GetServerType().getBranding();
-						} catch (Exception ex) {
+						} catch(Exception ex) {
 							return "MethodScript";
 						}
 					}
@@ -302,8 +302,8 @@ public class PNViewer extends javax.swing.JFrame {
 		String[] split = key.split("\\.");
 		String[] namespace = new String[split.length - 1];
 		String keyPart = null;
-		for (int i = 0; i < split.length; i++) {
-			if (i == split.length - 1) {
+		for(int i = 0; i < split.length; i++) {
+			if(i == split.length - 1) {
 				keyPart = split[i];
 			} else {
 				namespace[i] = split[i];
@@ -311,7 +311,7 @@ public class PNViewer extends javax.swing.JFrame {
 		}
 		namespaceLabel.setText(join(namespace));
 		keyLabel.setText(keyPart);
-		if (value == null) {
+		if(value == null) {
 			sourceLabel.setText("");
 			valueTypeLabel.setText("(empty key)");
 			valueTextArea.setText("");
@@ -334,7 +334,7 @@ public class PNViewer extends javax.swing.JFrame {
 			Construct c = CNull.NULL;
 			try {
 				c = Construct.json_decode(value, Target.UNKNOWN);
-			} catch (MarshalException ex) {
+			} catch(MarshalException ex) {
 				Logger.getLogger(PNViewer.class.getName()).log(Level.SEVERE, null, ex);
 			}
 			valueTypeLabel.setText(new DataHandling.typeof().exec(Target.UNKNOWN, null, c).val());
@@ -365,7 +365,7 @@ public class PNViewer extends javax.swing.JFrame {
 						}
 					};
 					displayData(vpn);
-				} catch (URISyntaxException | IOException | DataSourceException ex) {
+				} catch(URISyntaxException | IOException | DataSourceException ex) {
 					Logger.getLogger(PNViewer.class.getName()).log(Level.SEVERE, null, ex);
 					showError(ex.getMessage());
 				}
@@ -384,7 +384,7 @@ public class PNViewer extends javax.swing.JFrame {
 			@Override
 			public void run() {
 				try {
-					try (Socket s = new Socket()) {
+					try(Socket s = new Socket()) {
 						s.connect(new InetSocketAddress(host, port), 30000);
 						remoteSocket = s;
 						setStatus("Connected to remote server", true);
@@ -398,7 +398,7 @@ public class PNViewer extends javax.swing.JFrame {
 							// Set up our initial data
 							log("Writing client version: " + PROTOCOL_VERSION);
 							os.writeInt(PROTOCOL_VERSION);
-							switch (is.readUTF()) {
+							switch(is.readUTF()) {
 								case "VERSION-OK":
 									break;
 								default:
@@ -406,7 +406,7 @@ public class PNViewer extends javax.swing.JFrame {
 									return;
 							}
 							os.writeUTF(password);
-							switch (is.readUTF()) {
+							switch(is.readUTF()) {
 								case "PASSWORD-OK":
 									log("Password accepted by server.");
 									break;
@@ -420,9 +420,9 @@ public class PNViewer extends javax.swing.JFrame {
 							final MutableObject<URI> sourceURI = new MutableObject<>();
 							VirtualPersistenceNetwork vpn = null;
 							connection:
-							while (!Thread.currentThread().isInterrupted() && s.isConnected()) {
+							while(!Thread.currentThread().isInterrupted() && s.isConnected()) {
 								String serverCommand = is.readUTF();
-								switch (serverCommand) {
+								switch(serverCommand) {
 									case "DISCONNECT":
 										break connection;
 									case "FILE-OK":
@@ -437,7 +437,7 @@ public class PNViewer extends javax.swing.JFrame {
 										setStatus("Downloading data from server...", true);
 										setProgress(0);
 										byte[] bdata = new byte[size];
-										for (int i = 0; i < size; i++) {
+										for(int i = 0; i < size; i++) {
 											bdata[i] = is.readByte();
 											setProgress((int) ((((double) i) / ((double) size)) * 100));
 										}
@@ -459,23 +459,23 @@ public class PNViewer extends javax.swing.JFrame {
 												@Override
 												public URI getKeySource(String[] key) {
 													String kk = join(key);
-													if (!sources.containsKey(kk)) {
+													if(!sources.containsKey(kk)) {
 														try {
 															sourceURI.setObject(null);
 															os.writeUTF("KEY-SOURCE");
 															os.writeUTF(kk);
-															synchronized (sourceURI) {
-																if (sourceURI.getObject() == null) {
+															synchronized(sourceURI) {
+																if(sourceURI.getObject() == null) {
 																	try {
 																		sourceURI.wait();
-																	} catch (InterruptedException ex) {
+																	} catch(InterruptedException ex) {
 																		//
 																	}
 																}
 															}
 															URI uri = sourceURI.getObject();
 															sources.put(kk, uri);
-														} catch (IOException ex) {
+														} catch(IOException ex) {
 															showError(ex.getMessage());
 															log(ex);
 														}
@@ -486,11 +486,11 @@ public class PNViewer extends javax.swing.JFrame {
 											try {
 												displayData(vpn);
 												setStatus("Done.", false);
-											} catch (DataSourceException ex) {
+											} catch(DataSourceException ex) {
 												log(ex);
 												showError(ex.getMessage());
 											}
-										} catch (ClassNotFoundException ex) {
+										} catch(ClassNotFoundException ex) {
 											log(ex);
 											showError(ex.getMessage());
 										}
@@ -500,10 +500,10 @@ public class PNViewer extends javax.swing.JFrame {
 										try {
 											URI uri = (URI) is.readObject();
 											sourceURI.setObject(uri);
-											synchronized (sourceURI) {
+											synchronized(sourceURI) {
 												sourceURI.notifyAll();
 											}
-										} catch (ClassNotFoundException ex) {
+										} catch(ClassNotFoundException ex) {
 											log(ex);
 										}
 										break;
@@ -520,11 +520,11 @@ public class PNViewer extends javax.swing.JFrame {
 								}
 							}
 							log("Closing connection.");
-						} catch (EOFException ex) {
+						} catch(EOFException ex) {
 							log(ex);
 							showError("The server closed the connection unexpectedly.");
 						}
-					} catch (SocketTimeoutException ex) {
+					} catch(SocketTimeoutException ex) {
 						showError("Connection timed out, check your settings and try again.");
 					} finally {
 						setStatus("Connection to remote server closed.", false);
@@ -532,7 +532,7 @@ public class PNViewer extends javax.swing.JFrame {
 						remoteInput = null;
 						reloadButton.setEnabled(true);
 					}
-				} catch (IOException ex) {
+				} catch(IOException ex) {
 					showError(ex.getMessage());
 					Logger.getLogger(PNViewer.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -548,7 +548,7 @@ public class PNViewer extends javax.swing.JFrame {
 		log("Process info: " + ManagementFactory.getRuntimeMXBean().getName());
 		log("Server version: " + PROTOCOL_VERSION);
 		connection:
-		while (true) {
+		while(true) {
 			log("Persistence Network Viewers may now connect to this server.");
 			final Socket s = socket.accept();
 			log("A client has connected from " + s.getInetAddress().toString());
@@ -566,23 +566,23 @@ public class PNViewer extends javax.swing.JFrame {
 							@Override
 							public void run() {
 								try {
-									while (true) {
-										synchronized (dataReceieved) {
+									while(true) {
+										synchronized(dataReceieved) {
 											dataReceieved.wait(longTimeout.get() ? 10 * 60 * 1000 : 10 * 1000);
 										}
-										if (dataReceieved.get() == false) {
+										if(dataReceieved.get() == false) {
 											log("No response from client in too long, forcibly closing connection.");
 											try {
 
 												s.close();
-											} catch (IOException ex) {
+											} catch(IOException ex) {
 												//
 											}
 											break;
 										}
 										dataReceieved.set(false);
 									}
-								} catch (InterruptedException ex) {
+								} catch(InterruptedException ex) {
 									//
 								}
 							}
@@ -591,7 +591,7 @@ public class PNViewer extends javax.swing.JFrame {
 						ObjectInputStream is = new ObjectInputStream(s.getInputStream());
 						ObjectOutputStream os = new AutoFlushObjectOutputStream(s.getOutputStream());
 						int protocolVersion = is.readInt();
-						if (protocolVersion != PROTOCOL_VERSION) {
+						if(protocolVersion != PROTOCOL_VERSION) {
 							log("Client version unsupported: " + protocolVersion);
 							os.writeUTF("VERSION-MISMATCH");
 							return;
@@ -600,13 +600,13 @@ public class PNViewer extends javax.swing.JFrame {
 							os.writeUTF("VERSION-OK");
 						}
 						String clientPassword = is.readUTF();
-						if (!password.equals(clientPassword)) {
+						if(!password.equals(clientPassword)) {
 							log("Client supplied the wrong password, disconnecting.");
 							os.writeUTF("PASSWORD-BAD");
 							os.writeUTF("DISCONNECT");
 							return;
 						} else {
-							if (!"".equals(password)) {
+							if(!"".equals(password)) {
 								log("Client supplied the correct password");
 							}
 							os.writeUTF("PASSWORD-OK");
@@ -620,14 +620,14 @@ public class PNViewer extends javax.swing.JFrame {
 						PersistenceNetwork pn = null;
 
 						connected:
-						while (s.isConnected()) {
+						while(s.isConnected()) {
 							String command = is.readUTF();
 							log("Command received from client: " + command);
 							dataReceieved.set(true);
-							synchronized (dataReceieved) {
+							synchronized(dataReceieved) {
 								dataReceieved.notifyAll();
 							}
-							switch (command) {
+							switch(command) {
 								case "DISCONNECT":
 									// Write the disconnect out to the client as well, so
 									// the client will gracefully disconnect.
@@ -636,7 +636,7 @@ public class PNViewer extends javax.swing.JFrame {
 								case "SET-REMOTE-FILE":
 									remoteFile = is.readUTF();
 									log("File set to " + remoteFile);
-									if (new File(remoteFile).exists()) {
+									if(new File(remoteFile).exists()) {
 										log("File accepted.");
 										os.writeUTF("FILE-OK");
 									} else {
@@ -658,7 +658,7 @@ public class PNViewer extends javax.swing.JFrame {
 										byte[] output = baos.toByteArray();
 										os.writeInt(output.length);
 										os.write(output);
-									} catch (URISyntaxException | DataSourceException ex) {
+									} catch(URISyntaxException | DataSourceException ex) {
 										os.writeUTF("LOAD-ERROR");
 										os.writeUTF(ex.getMessage());
 										log("Load error!");
@@ -668,7 +668,7 @@ public class PNViewer extends javax.swing.JFrame {
 								case "KEY-SOURCE":
 									os.writeUTF("KEY-SOURCE");
 									String key = is.readUTF();
-									if (pn == null) {
+									if(pn == null) {
 										log("pn is null, can't get key source");
 										os.writeUTF("DISCONNECT");
 									} else {
@@ -684,16 +684,16 @@ public class PNViewer extends javax.swing.JFrame {
 									break connected;
 							}
 						}
-					} catch (IOException ex) {
+					} catch(IOException ex) {
 						// Disconnected
 					} finally {
 						try {
 							s.close();
-						} catch (IOException ex) {
+						} catch(IOException ex) {
 							//
 						}
 						log("Client has disconnected.");
-						if (waitThread != null) {
+						if(waitThread != null) {
 							waitThread.interrupt();
 						}
 					}
@@ -728,14 +728,14 @@ public class PNViewer extends javax.swing.JFrame {
 				DefaultTreeModel model = (DefaultTreeModel) keyTree.getModel();
 				DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
 				root.removeAllChildren();
-				for (String[] key : data.keySet()) {
+				for(String[] key : data.keySet()) {
 					PNViewer.this.data.put(join(key), data.get(key));
 					DefaultMutableTreeNode node = root;
 					outer:
-					for (String n : key) {
-						for (int i = 0; i < node.getChildCount(); i++) {
+					for(String n : key) {
+						for(int i = 0; i < node.getChildCount(); i++) {
 							DefaultMutableTreeNode at = (DefaultMutableTreeNode) node.getChildAt(i);
-							if (n.equals(at.getUserObject())) {
+							if(n.equals(at.getUserObject())) {
 								// This is our node, so recurse down this
 								node = at;
 								continue outer;
@@ -772,12 +772,12 @@ public class PNViewer extends javax.swing.JFrame {
 				statusProgressBar.setVisible(thinking);
 			}
 		};
-		if (SwingUtilities.isEventDispatchThread()) {
+		if(SwingUtilities.isEventDispatchThread()) {
 			r.run();
 		} else {
 			try {
 				SwingUtilities.invokeAndWait(r);
-			} catch (InterruptedException | InvocationTargetException ex) {
+			} catch(InterruptedException | InvocationTargetException ex) {
 				log(ex);
 			}
 		}
@@ -797,12 +797,12 @@ public class PNViewer extends javax.swing.JFrame {
 				statusProgressBar.setIndeterminate(i == null);
 			}
 		};
-		if (SwingUtilities.isEventDispatchThread()) {
+		if(SwingUtilities.isEventDispatchThread()) {
 			r.run();
 		} else {
 			try {
 				SwingUtilities.invokeAndWait(r);
-			} catch (InterruptedException | InvocationTargetException ex) {
+			} catch(InterruptedException | InvocationTargetException ex) {
 				log(ex);
 			}
 		}
@@ -1050,13 +1050,13 @@ public class PNViewer extends javax.swing.JFrame {
 		 * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
 		 */
 		try {
-			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-				if ("Nimbus".equals(info.getName())) {
+			for(javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+				if("Nimbus".equals(info.getName())) {
 					javax.swing.UIManager.setLookAndFeel(info.getClassName());
 					break;
 				}
 			}
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+		} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
 			java.util.logging.Logger.getLogger(PNViewer.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
 		//</editor-fold>

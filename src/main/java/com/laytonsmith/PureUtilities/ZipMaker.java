@@ -42,14 +42,14 @@ public final class ZipMaker {
 	 */
 	public static void MakeZip(File startingDir, String filename, boolean createTopLevelFolder) throws IOException {
 		String topLevel = "";
-		if (createTopLevelFolder) {
-			if (filename.lastIndexOf(".") == -1) {
+		if(createTopLevelFolder) {
+			if(filename.lastIndexOf(".") == -1) {
 				topLevel = filename + "/";
 			} else {
 				topLevel = filename.substring(0, filename.lastIndexOf(".")) + "/";
 			}
 		}
-		if (startingDir.isDirectory()) {
+		if(startingDir.isDirectory()) {
 			Set<File> files = new LinkedHashSet<File>();
 			GetFiles(files, startingDir.getCanonicalFile(), startingDir.getCanonicalFile());
 			MakeZip(files, new File(startingDir.getParentFile(), filename), startingDir, topLevel);
@@ -59,8 +59,8 @@ public final class ZipMaker {
 	}
 
 	private static void GetFiles(Set<File> ongoing, File directory, File base) throws IOException {
-		if (directory.isDirectory()) {
-			for (File f : directory.listFiles()) {
+		if(directory.isDirectory()) {
+			for(File f : directory.listFiles()) {
 				GetFiles(ongoing, f, base);
 			}
 		} else {
@@ -78,7 +78,7 @@ public final class ZipMaker {
 		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(output));
 
 		// Compress the files
-		for (File f : files) {
+		for(File f : files) {
 			FileInputStream in = new FileInputStream(new File(base, f.getPath()));
 
 			// Add ZIP entry to output stream.                
@@ -86,7 +86,7 @@ public final class ZipMaker {
 
 			// Transfer bytes from the file to the ZIP file
 			int len;
-			while ((len = in.read(buf)) > 0) {
+			while((len = in.read(buf)) > 0) {
 				out.write(buf, 0, len);
 			}
 

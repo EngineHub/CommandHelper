@@ -13,7 +13,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * 
+ *
  */
 public class UpgradeLogTest {
 
@@ -35,12 +35,12 @@ public class UpgradeLogTest {
 	@After
 	public void tearDown() {
 	}
-	
+
 	@Test
 	public void testOldTasksArentRun() throws Exception {
 		File log = new File("upgradeLogTestOldTasksArentRun");
 		FileUtil.write("[{\"upgradeTime\":\"1234\",\"breadcrumb\":\"task\"}]", log);
-		try{
+		try {
 			UpgradeLog l = new UpgradeLog(log);
 			final AtomicInteger i = new AtomicInteger(0);
 			l.addUpgradeTask(new UpgradeLog.UpgradeTask() {
@@ -88,7 +88,7 @@ public class UpgradeLogTest {
 
 				@Override
 				public void run() {
-					if(i.get() != 1){
+					if(i.get() != 1) {
 						fail("This task isn't sequential");
 					}
 					i.incrementAndGet();

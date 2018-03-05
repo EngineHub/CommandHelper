@@ -111,46 +111,46 @@ public class Meta {
 
 		@Override
 		public Construct exec(Target t, final Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args[1].nval() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
+			if(args[1].nval() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
 				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
 			String cmd = args[1].val().substring(1);
-			if (args[0] instanceof CArray) {
+			if(args[0] instanceof CArray) {
 				CArray u = (CArray) args[0];
-				for (int i = 0; i < u.size(); i++) {
+				for(int i = 0; i < u.size(); i++) {
 					exec(t, env, new Construct[]{new CString(u.get(i, t).val(), t), args[1]});
 				}
 				return CVoid.VOID;
 			}
-			if (args[0].val().equals("~op")) {
+			if(args[0].val().equals("~op")) {
 				//TODO: Remove this after next release (3.3.1)
 				CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "Using runas(~op, " + args[1].asString().getQuote()
 						+ ") is deprecated. Use sudo(" + args[1].asString().getQuote() + ") instead.", t);
 				new sudo().exec(t, env, args[1]);
-			} else if (args[0].val().equals(Static.getConsoleName())) {
+			} else if(args[0].val().equals(Static.getConsoleName())) {
 				CHLog.GetLogger().Log(CHLog.Tags.META, LogLevel.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as console): " + args[1].val().trim(), t);
-				if (Prefs.DebugMode()) {
+				if(Prefs.DebugMode()) {
 					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as : " + args[1].val().trim());
 				}
-				if (cmd.equalsIgnoreCase("interpreter-on")) {
+				if(cmd.equalsIgnoreCase("interpreter-on")) {
 					//This isn't allowed for security reasons.
 					throw new CREFormatException("/interpreter-on cannot be run from runas for security reasons.", t);
 				}
 				Static.getServer().runasConsole(cmd);
 			} else {
 				MCPlayer m = Static.GetPlayer(args[0], t);
-				if (m != null && m.isOnline()) {
+				if(m != null && m.isOnline()) {
 					MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 					String name;
 
-					if (p != null) {
+					if(p != null) {
 						name = p.getName();
 					} else {
 						name = "Unknown player";
 					}
 
 					CHLog.GetLogger().Log(CHLog.Tags.META, LogLevel.INFO, "Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim(), t);
-					if (Prefs.DebugMode()) {
+					if(Prefs.DebugMode()) {
 						Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim());
 					}
 					//m.chat(cmd);
@@ -211,26 +211,26 @@ public class Meta {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
+			if(args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
 				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
 			String cmd = args[0].val().substring(1);
 			//If the command sender is null, then just try to run() this. It's unclear to me what
 			//would cause this for sure, but just in case. Regardless, this allows us to consolidate the error checking
 			//into the run function
-			if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() == null) {
+			if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() == null) {
 				return new run().exec(t, env, args);
 			}
 			//Store their current op status
 			Boolean isOp = env.getEnv(CommandHelperEnvironment.class).GetCommandSender().isOp();
 
 			CHLog.GetLogger().Log(CHLog.Tags.META, LogLevel.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[0].val().trim(), t);
-			if (Prefs.DebugMode()) {
+			if(Prefs.DebugMode()) {
 				Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[0].val().trim());
 			}
 
 			//If they aren't op, op them now
-			if (!isOp) {
+			if(!isOp) {
 				this.setOp(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), true);
 			}
 
@@ -240,7 +240,7 @@ public class Meta {
 				//If they just opped themselves, or deopped themselves in the command
 				//don't undo what they just did. Otherwise, set their op status back
 				//to their original status
-				if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null
+				if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null
 						&& !cmd.equalsIgnoreCase("op " + env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName())
 						&& !cmd.equalsIgnoreCase("deop " + env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName())) {
 					this.setOp(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), isOp);
@@ -284,14 +284,14 @@ public class Meta {
 		 * @param value
 		 */
 		protected void setOp(MCCommandSender player, Boolean value) {
-			if (!(player instanceof MCPlayer) || player.isOp() == value) {
+			if(!(player instanceof MCPlayer) || player.isOp() == value) {
 				return;
 			}
 			MCPlayer p = (MCPlayer) player;
 			try {
 				p.setTempOp(value);
-			} catch (Exception e) {
-				if (Prefs.UseSudoFallback()) {
+			} catch(Exception e) {
+				if(Prefs.UseSudoFallback()) {
 					p.setOp(value);
 				} else {
 					Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName() + "."
@@ -303,7 +303,7 @@ public class Meta {
 		}
 
 		protected MCCommandSender getOPCommandSender(final MCCommandSender sender) {
-			if (sender.isOp()) {
+			if(sender.isOp()) {
 				return sender;
 			}
 
@@ -313,7 +313,7 @@ public class Meta {
 				@Override
 				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 					String methodName = method.getName();
-					if ("isOp".equals(methodName) || "hasPermission".equals(methodName) || "isPermissionSet".equals(methodName)) {
+					if("isOp".equals(methodName) || "hasPermission".equals(methodName) || "isPermissionSet".equals(methodName)) {
 						return true;
 					} else {
 						return method.invoke(sender, args);
@@ -338,23 +338,23 @@ public class Meta {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
+			if(args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
 				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
 			String cmd = args[0].val().substring(1);
-			if (Prefs.DebugMode()) {
-				if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+			if(Prefs.DebugMode()) {
+				if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
 					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() + ": " + args[0].val().trim());
 				} else {
 					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[0].val().trim());
 				}
 			}
-			if (cmd.equalsIgnoreCase("interpreter-on")) {
+			if(cmd.equalsIgnoreCase("interpreter-on")) {
 				throw new CREFormatException("/interpreter-on cannot be run as apart of an alias for security reasons.", t);
 			}
 			try {
 				Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
-			} catch (Exception ex) {
+			} catch(Exception ex) {
 				throw new CREPluginInternalException("While running the command: \"" + cmd + "\""
 						+ " the plugin threw an unexpected exception (turn on debug mode to see the full"
 						+ " stacktrace): " + ex.getMessage() + "\n\nThis is not a bug in " + Implementation.GetServerType().getBranding()
@@ -413,8 +413,8 @@ public class Meta {
 				throws ConfigRuntimeException {
 			AliasCore ac = Static.getAliasCore();
 
-			for (Script s : ac.getScripts()) {
-				if (s.match(args[0].val())) {
+			for(Script s : ac.getScripts()) {
+				if(s.match(args[0].val())) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -489,14 +489,14 @@ public class Meta {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			boolean doRemoval = true;
-			if (!Static.getAliasCore().hasPlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender())) {
+			if(!Static.getAliasCore().hasPlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender())) {
 				doRemoval = false;
 			}
-			if (doRemoval) {
+			if(doRemoval) {
 				Static.getAliasCore().removePlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
 			}
 			boolean ret = Static.getAliasCore().alias(args[0].val(), env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
-			if (doRemoval) {
+			if(doRemoval) {
 				Static.getAliasCore().addPlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender());
 			}
 			return CBoolean.get(ret);
@@ -560,7 +560,7 @@ public class Meta {
 			MCCommandSender originalPlayer = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			int offset = 0;
 			String originalLabel = environment.getEnv(GlobalEnv.class).GetLabel();
-			if (nodes.length == 3) {
+			if(nodes.length == 3) {
 				offset++;
 				String label = parent.seval(nodes[1], environment).val();
 				environment.getEnv(GlobalEnv.class).SetLabel(label);
@@ -619,7 +619,7 @@ public class Meta {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(CommandHelperEnvironment.class).GetCommand() == null) {
+			if(environment.getEnv(CommandHelperEnvironment.class).GetCommand() == null) {
 				return CNull.NULL;
 			} else {
 				return new CString(environment.getEnv(CommandHelperEnvironment.class).GetCommand(), t);
@@ -655,7 +655,7 @@ public class Meta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String player = args[0].val();
 			String cmd = args[1].val();
-			if (!cmd.startsWith("/")) {
+			if(!cmd.startsWith("/")) {
 				throw new CREFormatException("Command must begin with a /", t);
 			}
 			cmd = cmd.substring(1);
@@ -665,7 +665,7 @@ public class Meta {
 			String ret;
 			try {
 				ret = Static.getServer().dispatchAndCaptureCommand(operator, cmd);
-			} catch (Exception ex) {
+			} catch(Exception ex) {
 				throw new CREPluginInternalException(ex.getMessage(), t, ex);
 			}
 
@@ -721,10 +721,10 @@ public class Meta {
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCLocation loc;
 			CArray ret;
-			if (sender instanceof MCBlockCommandSender) {
+			if(sender instanceof MCBlockCommandSender) {
 				loc = ((MCBlockCommandSender) sender).getBlock().getLocation();
 				ret = ObjectGenerator.GetGenerator().location(loc, false); // Do not include pitch/yaw.
-			} else if (sender instanceof MCCommandMinecart) {
+			} else if(sender instanceof MCCommandMinecart) {
 				loc = ((MCCommandMinecart) sender).getLocation();
 				ret = ObjectGenerator.GetGenerator().location(loc, true); // Include pitch/yaw.
 			} else {
@@ -779,7 +779,7 @@ public class Meta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			boolean state;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
 				state = Static.getBoolean(args[0]);
@@ -837,12 +837,12 @@ public class Meta {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CString s;
-			if (args[0] instanceof CString) {
+			if(args[0] instanceof CString) {
 				s = (CString) args[0];
 			} else {
 				s = new CString(args[0].val(), t);
 			}
-			if (is_alias.exec(t, environment, s).getBoolean()) {
+			if(is_alias.exec(t, environment, s).getBoolean()) {
 				call_alias.exec(t, environment, s);
 			} else {
 				run.exec(t, environment, s);
@@ -941,8 +941,8 @@ public class Meta {
 		@Override
 		public CArray exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray c = new CArray(t);
-			for (Locale l : Locale.getAvailableLocales()) {
-				if (!l.getCountry().equals("")) {
+			for(Locale l : Locale.getAvailableLocales()) {
+				if(!l.getCountry().equals("")) {
 					c.push(new CString(l.toString(), t), t);
 				}
 			}
@@ -1007,7 +1007,7 @@ public class Meta {
 				String jar = ClassDiscovery.GetClassContainer(Meta.class).toString();
 				jar = jar.replaceFirst("file:", "");
 				jf = new JarFile(jar);
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				return CNull.NULL;
 			}
 			ZipEntry manifest = jf.getEntry("META-INF/MANIFEST.MF");

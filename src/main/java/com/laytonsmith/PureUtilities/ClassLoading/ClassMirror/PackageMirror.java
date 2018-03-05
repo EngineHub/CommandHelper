@@ -42,14 +42,14 @@ public class PackageMirror implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if(obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if(getClass() != obj.getClass()) {
 			return false;
 		}
 		final PackageMirror other = (PackageMirror) obj;
-		if (!Objects.equals(this.name, other.name)) {
+		if(!Objects.equals(this.name, other.name)) {
 			return false;
 		}
 		return true;

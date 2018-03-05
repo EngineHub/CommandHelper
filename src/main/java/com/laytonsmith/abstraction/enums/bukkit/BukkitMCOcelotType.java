@@ -16,7 +16,7 @@ public class BukkitMCOcelotType extends EnumConvertor<MCOcelotType, Ocelot.Type>
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCOcelotType instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCOcelotType getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCOcelotType();
 		}
 		return instance;

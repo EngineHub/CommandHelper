@@ -35,14 +35,14 @@ public class ConnectionMixinFactory {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (obj == null) {
+			if(obj == null) {
 				return false;
 			}
-			if (getClass() != obj.getClass()) {
+			if(getClass() != obj.getClass()) {
 				return false;
 			}
 			final ConnectionMixinOptions other = (ConnectionMixinOptions) obj;
-			if (!Objects.equals(this.workingDirectory, other.workingDirectory)) {
+			if(!Objects.equals(this.workingDirectory, other.workingDirectory)) {
 				return false;
 			}
 			return true;
@@ -69,26 +69,26 @@ public class ConnectionMixinFactory {
 	 * @return
 	 */
 	public static ConnectionMixin GetConnectionMixin(URI uri, Set<DataSource.DataSourceModifier> modifiers, ConnectionMixinOptions options, String blankDataModel) throws DataSourceException {
-		if (modifiers.contains(DataSource.DataSourceModifier.HTTP) || modifiers.contains(DataSource.DataSourceModifier.HTTPS)) {
+		if(modifiers.contains(DataSource.DataSourceModifier.HTTP) || modifiers.contains(DataSource.DataSourceModifier.HTTPS)) {
 			try {
 				//This is a WebConnection
 				return new WebConnection(uri, modifiers.contains(DataSource.DataSourceModifier.HTTP) ? false : true);
-			} catch (MalformedURLException ex) {
+			} catch(MalformedURLException ex) {
 				throw new DataSourceException("Malformed URL.", ex);
 			}
-		} else if (modifiers.contains(DataSource.DataSourceModifier.SSH)) {
+		} else if(modifiers.contains(DataSource.DataSourceModifier.SSH)) {
 			//This is an SSHConnection
 			return new SSHConnection(uri);
 		} else {
 			//Else it's a file connection, or null, but we will go ahead
 			//and assume it's file.
 			try {
-				if (modifiers.contains(DataSource.DataSourceModifier.READONLY)) {
+				if(modifiers.contains(DataSource.DataSourceModifier.READONLY)) {
 					return new ReadOnlyFileConnection(uri, options.workingDirectory, blankDataModel);
 				} else {
 					return new ReadWriteFileConnection(uri, options.workingDirectory, blankDataModel);
 				}
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				throw new DataSourceException("IOException: " + ex.getMessage(), ex);
 			}
 		}

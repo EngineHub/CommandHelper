@@ -1,6 +1,5 @@
 package com.laytonsmith.core.events;
 
-
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.testing.StaticTest;
@@ -13,30 +12,33 @@ import org.junit.BeforeClass;
 
 /**
  *
- * 
+ *
  */
 //@RunWith(PowerMockRunner.class)
 //@PrepareForTest(Static.class)
 public class GeneralTest {
-    MCPlayer fakePlayer;
-    public GeneralTest() {
-    }
 
-    @BeforeClass
-    public static void setUpClass(){
+	MCPlayer fakePlayer;
 
-    }
-    @Before
-    public void setUp() throws Exception {        
-        fakePlayer = StaticTest.GetOnlinePlayer();
-        StaticTest.InstallFakeConvertor(fakePlayer);
-        Static.InjectPlayer(fakePlayer);
-    }
-    @After
-    public void tearDown(){
-        EventUtils.UnregisterAll();
-    }
-    
+	public GeneralTest() {
+	}
+
+	@BeforeClass
+	public static void setUpClass() {
+
+	}
+
+	@Before
+	public void setUp() throws Exception {
+		fakePlayer = StaticTest.GetOnlinePlayer();
+		StaticTest.InstallFakeConvertor(fakePlayer);
+		Static.InjectPlayer(fakePlayer);
+	}
+
+	@After
+	public void tearDown() {
+		EventUtils.UnregisterAll();
+	}
 
 //    @Test
 //    //This is moreso a test of the event testing framework
@@ -55,9 +57,8 @@ public class GeneralTest {
 //        //Verify that it ran correctly
 //        verify(fakePlayer).sendMessage("success");
 //    }
-    
-    //This is an invalid test. It's working as expected, because the proc is not in scope
-    //When the event is run.
+	//This is an invalid test. It's working as expected, because the proc is not in scope
+	//When the event is run.
 //    @Test 
 //    public void testCallProcInEventHandler() throws ConfigCompileException{
 //        
@@ -79,5 +80,4 @@ public class GeneralTest {
 //        inOrder.verify(fakePlayer).sendMessage(name);
 //        inOrder.verify(fakePlayer).sendMessage("{join_message: player joined, player: " + name + "}");
 //    }
-    
 }

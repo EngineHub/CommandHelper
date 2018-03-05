@@ -14,11 +14,11 @@ public abstract class MCPluginMeta {
 			@Override
 			public void run() {
 				List<String> copyOutgoing = new ArrayList<>(openOutgoingChannels);
-				for (String s : copyOutgoing) {
+				for(String s : copyOutgoing) {
 					closeOutgoingChannel(s);
 				}
 				List<String> copyIncoming = new ArrayList<>(openIncomingChannels);
-				for (String s : copyIncoming) {
+				for(String s : copyIncoming) {
 					closeIncomingChannel(s);
 				}
 			}
@@ -26,14 +26,14 @@ public abstract class MCPluginMeta {
 	}
 
 	public void closeOutgoingChannel(String channel) {
-		if (openOutgoingChannels.contains(channel)) {
+		if(openOutgoingChannels.contains(channel)) {
 			closeOutgoingChannel0(channel);
 			openOutgoingChannels.remove(channel);
 		}
 	}
 
 	public void openOutgoingChannel(String channel) {
-		if (!openOutgoingChannels.contains(channel)) {
+		if(!openOutgoingChannels.contains(channel)) {
 			openOutgoingChannel0(channel);
 			openOutgoingChannels.add(channel);
 		}
@@ -52,14 +52,14 @@ public abstract class MCPluginMeta {
 	public abstract void openOutgoingChannel0(String channel);
 
 	public void closeIncomingChannel(String channel) {
-		if (openIncomingChannels.contains(channel)) {
+		if(openIncomingChannels.contains(channel)) {
 			closeIncomingChannel0(channel);
 			openIncomingChannels.remove(channel);
 		}
 	}
 
 	public void openIncomingChannel(String channel) {
-		if (!openIncomingChannels.contains(channel)) {
+		if(!openIncomingChannels.contains(channel)) {
 			openIncomingChannel0(channel);
 			openIncomingChannels.add(channel);
 		}

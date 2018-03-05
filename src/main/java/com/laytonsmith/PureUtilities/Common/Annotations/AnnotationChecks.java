@@ -27,23 +27,23 @@ public class AnnotationChecks {
 	public static void checkForTypeInTypeofClasses() throws Exception {
 		Set<ClassMirror<?>> classes = ClassDiscovery.getDefaultInstance().getClassesWithAnnotation(typeof.class);
 		Set<String> errors = new HashSet<>();
-		for (ClassMirror<?> clazz : classes) {
+		for(ClassMirror<?> clazz : classes) {
 			try {
 				// Make sure that TYPE has the same type as the typeof annotation
 				CClassType TYPE = (CClassType) ReflectionUtils.get(clazz.loadClass(), "TYPE");
-				if (TYPE == null) {
+				if(TYPE == null) {
 					errors.add("TYPE is null? " + clazz.getClassName());
 					continue;
 				}
-				if (!TYPE.val().equals(clazz.getAnnotation(typeof.class).getValue("value"))) {
+				if(!TYPE.val().equals(clazz.getAnnotation(typeof.class).getValue("value"))) {
 					errors.add(clazz.getClassName() + "'s TYPE value is different than the typeof annotation on it");
 				}
-			} catch (ReflectionUtils.ReflectionException ex) {
+			} catch(ReflectionUtils.ReflectionException ex) {
 				errors.add(clazz.getClassName() + " needs to add the following:\n\t@SuppressWarnings(\"FieldNameHidesFieldInSuperclass\")\n"
 						+ "\tpublic static final CClassType TYPE = CClassType.get(\"" + clazz.getAnnotation(typeof.class).getValue("value") + "\");");
 			}
 		}
-		if (!errors.isEmpty()) {
+		if(!errors.isEmpty()) {
 			throw new Exception("\n" + StringUtils.Join(errors, "\n"));
 		}
 	}
@@ -52,18 +52,18 @@ public class AnnotationChecks {
 	public static void checkForceImplementation() throws Exception {
 		Set<String> uhohs = new HashSet<>();
 		Set<Constructor<?>> set = ClassDiscovery.getDefaultInstance().loadConstructorsWithAnnotation(ForceImplementation.class);
-		for (Constructor<?> cons : set) {
+		for(Constructor<?> cons : set) {
 			Class superClass = cons.getDeclaringClass();
 			Set<Class> s = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(superClass);
 			checkImplements:
-			for (Class c : s) {
+			for(Class c : s) {
 				// c is the class we want to check to make sure it implements cons
-				for (Constructor cCons : c.getDeclaredConstructors()) {
-					if (Arrays.equals(cons.getParameterTypes(), cCons.getParameterTypes())) {
+				for(Constructor cCons : c.getDeclaredConstructors()) {
+					if(Arrays.equals(cons.getParameterTypes(), cCons.getParameterTypes())) {
 						continue checkImplements;
 					}
 				}
-				if (c.isMemberClass() && (c.getModifiers() & Modifier.STATIC) == 0) {
+				if(c.isMemberClass() && (c.getModifiers() & Modifier.STATIC) == 0) {
 					// Ok, so, an inner, non static class actually passes the super class's reference to the constructor as
 					// the first parameter, at a byte code level. So this is a different type of error, or at least, a different
 					// error message will be helpful.
@@ -75,17 +75,17 @@ public class AnnotationChecks {
 		}
 
 		Set<Method> set2 = ClassDiscovery.getDefaultInstance().loadMethodsWithAnnotation(ForceImplementation.class);
-		for (Method cons : set2) {
+		for(Method cons : set2) {
 			Class superClass = cons.getDeclaringClass();
 			@SuppressWarnings("unchecked")
 			Set<Class<?>> s = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(superClass);
 			checkImplements:
-			for (Class<?> c : s) {
+			for(Class<?> c : s) {
 				// First, check if maybe it has a InterfaceRunner for it
 				findRunner:
-				for (Class<?> ir : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(InterfaceRunnerFor.class)) {
+				for(Class<?> ir : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(InterfaceRunnerFor.class)) {
 					InterfaceRunnerFor ira = ir.getAnnotation(InterfaceRunnerFor.class);
-					if (ira.value() == c) {
+					if(ira.value() == c) {
 						// Aha! It does. Set c to ir, then break this for loop.
 						// The runner for this class will act in the stead of this
 						// class.
@@ -94,8 +94,8 @@ public class AnnotationChecks {
 					}
 				}
 				// c is the class we want to check to make sure it implements cons
-				for (Method cCons : c.getDeclaredMethods()) {
-					if (cCons.getName().equals(cons.getName()) && Arrays.equals(cons.getParameterTypes(), cCons.getParameterTypes())) {
+				for(Method cCons : c.getDeclaredMethods()) {
+					if(cCons.getName().equals(cons.getName()) && Arrays.equals(cons.getParameterTypes(), cCons.getParameterTypes())) {
 						continue checkImplements;
 					}
 				}
@@ -103,7 +103,7 @@ public class AnnotationChecks {
 			}
 		}
 
-		if (!uhohs.isEmpty()) {
+		if(!uhohs.isEmpty()) {
 			List<String> uhohsList = new ArrayList<>(uhohs);
 			Collections.sort(uhohsList);
 			throw new Exception("There " + StringUtils.PluralHelper(uhohs.size(), "error") + ". The following classes need to implement various methods:\n" + StringUtils.Join(uhohs, "\n"));
@@ -115,12 +115,12 @@ public class AnnotationChecks {
 //		for(Class cc : executable.getParameterTypes()){
 //			l.add(cc.getName());
 //		}
-		if (executable instanceof Method) {
-			for (Class cc : ((Method) executable).getParameterTypes()) {
+		if(executable instanceof Method) {
+			for(Class cc : ((Method) executable).getParameterTypes()) {
 				l.add(cc.getName());
 			}
-		} else if (executable instanceof Constructor) {
-			for (Class cc : ((Constructor) executable).getParameterTypes()) {
+		} else if(executable instanceof Constructor) {
+			for(Class cc : ((Constructor) executable).getParameterTypes()) {
 				l.add(cc.getName());
 			}
 		} else {
@@ -133,7 +133,7 @@ public class AnnotationChecks {
 		Set<ClassMirror<ExhaustiveVisitor>> toVerify;
 		toVerify = ClassDiscovery.getDefaultInstance()
 				.getClassesThatExtend(ExhaustiveVisitor.class);
-		for (ClassMirror<ExhaustiveVisitor> c : toVerify) {
+		for(ClassMirror<ExhaustiveVisitor> c : toVerify) {
 			ExhaustiveVisitor.verify(c);
 		}
 	}

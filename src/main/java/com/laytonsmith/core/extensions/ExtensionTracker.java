@@ -47,7 +47,7 @@ public class ExtensionTracker {
 		functions = new EnumMap<>(api.Platforms.class);
 		supportedPlatforms = new HashMap<>();
 
-		for (api.Platforms p : api.Platforms.values()) {
+		for(api.Platforms p : api.Platforms.values()) {
 			functions.put(p, new HashMap<String, FunctionBase>());
 		}
 
@@ -62,7 +62,7 @@ public class ExtensionTracker {
 
 	public void shutdownTracker() {
 		// Remove as much as possible from memory.
-		if (isShutdown) {
+		if(isShutdown) {
 			return;
 		}
 
@@ -86,7 +86,7 @@ public class ExtensionTracker {
 	public Set<FunctionBase> getFunctions() {
 		Set<FunctionBase> retn = new HashSet<>();
 
-		for (Map<String, FunctionBase> function : functions.values()) {
+		for(Map<String, FunctionBase> function : functions.values()) {
 			retn.addAll(function.values());
 		}
 
@@ -97,20 +97,20 @@ public class ExtensionTracker {
 		api api = f.getClass().getAnnotation(api.class);
 		api.Platforms[] platforms = api.platform();
 
-		if (!api.enabled()) {
+		if(!api.enabled()) {
 			return;
 		}
 
-		if (supportedPlatforms.get(f.getName()) == null) {
+		if(supportedPlatforms.get(f.getName()) == null) {
 			supportedPlatforms.put(f.getName(), EnumSet.noneOf(api.Platforms.class));
 		}
 
 		supportedPlatforms.get(f.getName()).addAll(Arrays.asList(platforms));
 
-		for (api.Platforms platform : platforms) {
+		for(api.Platforms platform : platforms) {
 			try {
 				functions.get(platform).put(f.getName(), f);
-			} catch (UnsupportedOperationException e) {
+			} catch(UnsupportedOperationException e) {
 				//This function isn't done yet, and during production this is a serious problem,
 				//but it will be caught when we test all the functions, so for now just ignore it,
 				//since this function is called during initial initialization
@@ -123,7 +123,7 @@ public class ExtensionTracker {
 	 */
 	public Set<Event> getEvents() {
 		Set<Event> retn = new HashSet<>();
-		for (Set<Event> set : events.values()) {
+		for(Set<Event> set : events.values()) {
 			retn.addAll(set);
 		}
 		return retn;
@@ -132,7 +132,7 @@ public class ExtensionTracker {
 	public Set<Event> getEvents(Driver type) {
 		Set<Event> retn = events.get(type);
 
-		if (retn == null) {
+		if(retn == null) {
 			return Collections.emptySet();
 		}
 
@@ -140,7 +140,7 @@ public class ExtensionTracker {
 	}
 
 	public void registerEvent(Event e) {
-		if (e instanceof AbstractEvent) {
+		if(e instanceof AbstractEvent) {
 			AbstractEvent ae = (AbstractEvent) e;
 			//Get the mixin for this server, and add it to e
 			Class mixinClass = StaticLayer.GetServerEventMixin();
@@ -148,7 +148,7 @@ public class ExtensionTracker {
 				Constructor mixinConstructor = mixinClass.getConstructor(AbstractEvent.class);
 				EventMixinInterface mixin = (EventMixinInterface) mixinConstructor.newInstance(e);
 				ae.setAbstractEventMixin(mixin);
-			} catch (Exception ex) {
+			} catch(Exception ex) {
 				//This is a serious problem, and it should kill the plugin, for fast failure detection.
 				throw new Error("Could not properly instantiate the mixin class. "
 						+ "The constructor with the signature \"public " + mixinClass.getSimpleName() + "(AbstractEvent e)\" is missing"
@@ -157,7 +157,7 @@ public class ExtensionTracker {
 		}
 
 		//Finally, add it to the list, and hook it.
-		if (!events.containsKey(e.driver())) {
+		if(!events.containsKey(e.driver())) {
 			events.put(e.driver(), new TreeSet<Event>());
 		}
 

@@ -17,40 +17,40 @@ import org.junit.Test;
 
 /**
  *
- * 
+ *
  */
-
 public class MinecraftTest {
-    MCServer fakeServer;
-    MCPlayer fakePlayer;
-    com.laytonsmith.core.environments.Environment env;
 
-    public MinecraftTest() {
-    }
+	MCServer fakeServer;
+	MCPlayer fakePlayer;
+	com.laytonsmith.core.environments.Environment env;
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
+	public MinecraftTest() {
+	}
 
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
+	@BeforeClass
+	public static void setUpClass() throws Exception {
+	}
 
-    @Before
-    public void setUp() throws Exception {        
-        fakePlayer = StaticTest.GetOnlinePlayer();
-        fakeServer = StaticTest.GetFakeServer();
+	@AfterClass
+	public static void tearDownClass() throws Exception {
+	}
+
+	@Before
+	public void setUp() throws Exception {
+		fakePlayer = StaticTest.GetOnlinePlayer();
+		fakeServer = StaticTest.GetFakeServer();
 		env = Static.GenerateStandaloneEnvironment();
-        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
-    }
+		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
+	}
 
-    @After
-    public void tearDown() {
-    }
-    
-    @Test
-    public void testIsTameable() throws ConfigCompileException{
-        //Y U NO COOPERATE, TEST FRAMEWORK?
+	@After
+	public void tearDown() {
+	}
+
+	@Test
+	public void testIsTameable() throws ConfigCompileException {
+		//Y U NO COOPERATE, TEST FRAMEWORK?
 //        MCWorld fakeWorld = mock(MCWorld.class);
 //        MCLocation fakeLocation = mock(MCLocation.class);
 //        when(fakePlayer.getWorld()).thenReturn(fakeWorld);
@@ -68,16 +68,16 @@ public class MinecraftTest {
 //        
 //        SRun("is_tameable(spawn_mob('ocelot')[0])", fakePlayer);
 //        verify(fakePlayer).sendMessage("true");
-        
-    }
 
-    @Test
-    public void testGetMCVersion() {
-        assertEquals(MCVersion.match(new String[]{"1", "8"}), MCVersion.MC1_8);
-        assertEquals(MCVersion.match(new String[]{"1", "8", "0"}), MCVersion.MC1_8);
-        assertEquals(MCVersion.match(new String[]{"1", "8", "6"}), MCVersion.MC1_8_6);
-        assertEquals(MCVersion.match(new String[]{"1", "8", "8"}), MCVersion.MC1_8_X);
-        assertEquals(MCVersion.match(new String[]{"2", "10", "20"}), MCVersion.MC2_X);
-        assertEquals(MCVersion.match(new String[]{"3", "1", "4"}), MCVersion.MCX_X);
-    }
+	}
+
+	@Test
+	public void testGetMCVersion() {
+		assertEquals(MCVersion.match(new String[]{"1", "8"}), MCVersion.MC1_8);
+		assertEquals(MCVersion.match(new String[]{"1", "8", "0"}), MCVersion.MC1_8);
+		assertEquals(MCVersion.match(new String[]{"1", "8", "6"}), MCVersion.MC1_8_6);
+		assertEquals(MCVersion.match(new String[]{"1", "8", "8"}), MCVersion.MC1_8_X);
+		assertEquals(MCVersion.match(new String[]{"2", "10", "20"}), MCVersion.MC2_X);
+		assertEquals(MCVersion.match(new String[]{"3", "1", "4"}), MCVersion.MCX_X);
+	}
 }

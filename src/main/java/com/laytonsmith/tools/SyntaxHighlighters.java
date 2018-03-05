@@ -31,41 +31,41 @@ public class SyntaxHighlighters {
 
 	public static String generate(String type, String theme) {
 		Implementation.forceServerType(Implementation.Type.BUKKIT);
-		if ("npp".equals(type) || "notepad++".equals(type)) {
-			if ("default".equals(theme)) {
+		if("npp".equals(type) || "notepad++".equals(type)) {
+			if("default".equals(theme)) {
 				return template("/syntax-templates/notepad++/default.xml");
 			}
-			if ("obsidian".equals(theme)) {
+			if("obsidian".equals(theme)) {
 				return template("/syntax-templates/notepad++/obsidian.xml");
 			}
-			if ("solarized-dark".equals(theme)) {
+			if("solarized-dark".equals(theme)) {
 				return template("/syntax-templates/notepad++/solarized_dark.xml");
 			}
-			if ("solarized-light".equals(theme)) {
+			if("solarized-light".equals(theme)) {
 				return template("/syntax-templates/notepad++/solarized_light.xml");
 			}
 
 			return "Available themes for Notepad++: default, obsidian, solarized-dark, solarized-light";
 		}
-		if ("textwrangler".equals(type)) {
+		if("textwrangler".equals(type)) {
 			return template("/syntax-templates/text-wrangler/default.plist");
 		}
-		if ("geshi".equals(type)) {
+		if("geshi".equals(type)) {
 			return template("/syntax-templates/geshi/default.php");
 		}
-		if ("vim".equals(type)) {
+		if("vim".equals(type)) {
 			return template("/syntax-templates/vim/default.vim");
 		}
-		if ("nano".equals(type)) {
+		if("nano".equals(type)) {
 			return template("/syntax-templates/nano/default.txt");
 		}
-		if ("atom".equals(type)) {
+		if("atom".equals(type)) {
 			return template("/syntax-templates/atom/default.cson");
 		}
-		if ("sublime".equals(type)) {
+		if("sublime".equals(type)) {
 			return template("/syntax-templates/sublime/default.xml");
 		}
-		if ("sublime3".equals(type)) {
+		if("sublime3".equals(type)) {
 			return template("/syntax-templates/sublime3/default.sublime-syntax");
 		}
 
@@ -110,7 +110,7 @@ public class SyntaxHighlighters {
 		template = template.replace("///!", "");
 		Pattern p = Pattern.compile("%%(.*?)%%");
 		Matcher m = p.matcher(template);
-		while (m.find()) {
+		while(m.find()) {
 			template = template.replaceAll("%%" + m.group(1) + "%%", macro(m.group(1)));
 		}
 		return template;
@@ -121,100 +121,100 @@ public class SyntaxHighlighters {
 		String type = split[0];
 		String datalist = split[1];
 		List<String> params = new ArrayList<>();
-		for (int i = 2; i < split.length; i++) {
+		for(int i = 2; i < split.length; i++) {
 			params.add(split[i].toLowerCase());
 		}
 		List<String> base = new ArrayList<>();
-		if (datalist.equalsIgnoreCase("colors")) {
-			for (MCChatColor c : MCChatColor.values()) {
+		if(datalist.equalsIgnoreCase("colors")) {
+			for(MCChatColor c : MCChatColor.values()) {
 				base.add(c.name());
 			}
-		} else if (datalist.equalsIgnoreCase("keywords")) {
-			for (String keyword : SimpleSyntaxHighlighter.KEYWORDS) {
+		} else if(datalist.equalsIgnoreCase("keywords")) {
+			for(String keyword : SimpleSyntaxHighlighter.KEYWORDS) {
 				base.add(keyword);
 			}
-		} else if (datalist.equalsIgnoreCase("functions")) {
-			for (Function f : GetFunctions()) {
-				if (SimpleSyntaxHighlighter.KEYWORDS.contains(f.getName())) {
+		} else if(datalist.equalsIgnoreCase("functions")) {
+			for(Function f : GetFunctions()) {
+				if(SimpleSyntaxHighlighter.KEYWORDS.contains(f.getName())) {
 					// Keywords override functions
 					continue;
 				}
-				if (!f.appearInDocumentation()) {
+				if(!f.appearInDocumentation()) {
 					continue;
 				}
-				if (params.contains("restricted") || params.contains("unrestricted")) {
-					if (params.contains("restricted") && f.isRestricted()) {
+				if(params.contains("restricted") || params.contains("unrestricted")) {
+					if(params.contains("restricted") && f.isRestricted()) {
 						base.add(f.getName());
-					} else if (params.contains("unrestricted") && !f.isRestricted()) {
+					} else if(params.contains("unrestricted") && !f.isRestricted()) {
 						base.add(f.getName());
 					}
 				} else {
 					base.add(f.getName());
 				}
 			}
-		} else if (datalist.equalsIgnoreCase("events")) {
-			for (Documentation d : GetEvents()) {
+		} else if(datalist.equalsIgnoreCase("events")) {
+			for(Documentation d : GetEvents()) {
 				base.add(d.getName());
 			}
-		} else if (datalist.equalsIgnoreCase("exceptions")) {
-			for (Class<? extends CREThrowable> c : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class)) {
+		} else if(datalist.equalsIgnoreCase("exceptions")) {
+			for(Class<? extends CREThrowable> c : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class)) {
 				base.add(c.getAnnotation(typeof.class).value());
 			}
-		} else if (datalist.equalsIgnoreCase("types")) {
+		} else if(datalist.equalsIgnoreCase("types")) {
 			base.addAll(NativeTypeList.getNativeTypeList());
 			base.remove("null"); // Null is technically in the list, but it shouldn't be added.
-		} else if (datalist.equalsIgnoreCase("enums")) {
+		} else if(datalist.equalsIgnoreCase("enums")) {
 			Set<String> set = new HashSet<>();
 			Set<Class<? extends Enum>> enums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(MEnum.class, Enum.class);
-			for (Class<? extends Enum> e : enums) {
+			for(Class<? extends Enum> e : enums) {
 				Enum[] es = e.getEnumConstants();
-				for (Enum ee : es) {
+				for(Enum ee : es) {
 					set.add(ee.name());
 				}
 			}
 			base.addAll(set);
-		} else if (datalist.equalsIgnoreCase("fileOptions")) {
-			for (Field f : FileOptions.class.getDeclaredFields()) {
+		} else if(datalist.equalsIgnoreCase("fileOptions")) {
+			for(Field f : FileOptions.class.getDeclaredFields()) {
 				base.add(f.getName());
 			}
 		}
 		String header = "";
 		String spliter = "IMPROPER FORMATTING";
 		String footer = "";
-		if (type.equalsIgnoreCase("space")) {
-			if (params.contains("quoted")) {
+		if(type.equalsIgnoreCase("space")) {
+			if(params.contains("quoted")) {
 				header = "'";
 				spliter = "' '";
 				footer = "'";
 			} else {
 				spliter = " ";
 			}
-		} else if (type.equalsIgnoreCase("comma")) {
-			if (params.contains("quoted")) {
+		} else if(type.equalsIgnoreCase("comma")) {
+			if(params.contains("quoted")) {
 				header = "'";
 				spliter = "', '";
 				footer = "'";
 			} else {
 				spliter = ", ";
 			}
-		} else if (type.equalsIgnoreCase("pipe")) {
-			if (params.contains("quoted")) {
+		} else if(type.equalsIgnoreCase("pipe")) {
+			if(params.contains("quoted")) {
 				header = "'";
 				spliter = "|";
 				footer = "'";
 			} else {
 				spliter = "|";
 			}
-		} else if (type.equalsIgnoreCase("xml")) {
+		} else if(type.equalsIgnoreCase("xml")) {
 			String tag = "PLEASE INCLUDE THE TAG NAME USING tag=tagname AS A PARAMETER";
-			for (String param : params) {
+			for(String param : params) {
 				//Find the tag name
-				if (param.matches("tag=.*")) {
+				if(param.matches("tag=.*")) {
 					tag = param.substring(4);
 					break;
 				}
 			}
-			if (params.contains("quoted")) {
+			if(params.contains("quoted")) {
 				header = "<" + tag + ">'";
 				spliter = "'</" + tag + "><" + tag + ">'";
 				footer = "'</" + tag + ">";
@@ -230,13 +230,13 @@ public class SyntaxHighlighters {
 	private static List<Documentation> GetEvents() {
 		List<Documentation> l = new ArrayList<>();
 		Set<Class<?>> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
-		for (Class<?> c : classes) {
-			if (Event.class.isAssignableFrom(c) && Documentation.class.isAssignableFrom(c)) {
+		for(Class<?> c : classes) {
+			if(Event.class.isAssignableFrom(c) && Documentation.class.isAssignableFrom(c)) {
 				try {
 					Constructor<?> m = c.getConstructor();
 					Documentation e = (Documentation) m.newInstance();
 					l.add(e);
-				} catch (NoSuchMethodException | SecurityException | InstantiationException
+				} catch(NoSuchMethodException | SecurityException | InstantiationException
 						| IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 					StreamUtils.GetSystemErr().println(ex.getMessage());
 				}
@@ -248,13 +248,13 @@ public class SyntaxHighlighters {
 	private static List<Function> GetFunctions() {
 		List<Function> fl = new ArrayList<>();
 		Set<Class<?>> functions = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class);
-		for (Class<?> c : functions) {
-			if (Function.class.isAssignableFrom(c)) {
+		for(Class<?> c : functions) {
+			if(Function.class.isAssignableFrom(c)) {
 				try {
 					fl.add((Function) c.newInstance());
-				} catch (InstantiationException | IllegalAccessException ex) {
+				} catch(InstantiationException | IllegalAccessException ex) {
 					Logger.getLogger(SyntaxHighlighters.class.getName()).log(Level.SEVERE, null, ex);
-				} catch (NoClassDefFoundError e) {
+				} catch(NoClassDefFoundError e) {
 					//Hmm. No real good way to handle this... echo out to stderr, I guess.
 					StreamUtils.GetSystemErr().println(e.getMessage());
 				}
@@ -265,8 +265,8 @@ public class SyntaxHighlighters {
 
 	private static String Join(List<?> l, String joiner) {
 		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < l.size(); i++) {
-			if (i == 0) {
+		for(int i = 0; i < l.size(); i++) {
+			if(i == 0) {
 				b.append(l.get(i).toString());
 			} else {
 				b.append(joiner).append(l.get(i).toString());

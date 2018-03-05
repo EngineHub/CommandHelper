@@ -34,7 +34,7 @@ public abstract class AbstractDataSource implements DataSource {
 	protected AbstractDataSource() {
 		try {
 			uri = new URI("");
-		} catch (URISyntaxException ex) {
+		} catch(URISyntaxException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -44,8 +44,8 @@ public abstract class AbstractDataSource implements DataSource {
 		this.mixinOptions = mixinOptions;
 		setInvalidModifiers();
 		DataSourceModifier[] implicit = this.implicitModifiers();
-		if (implicit != null) {
-			for (DataSourceModifier dsm : this.implicitModifiers()) {
+		if(implicit != null) {
+			for(DataSourceModifier dsm : this.implicitModifiers()) {
 				addModifier(dsm);
 			}
 		}
@@ -58,7 +58,7 @@ public abstract class AbstractDataSource implements DataSource {
 	 * @throws DataSourceException
 	 */
 	protected ConnectionMixin getConnectionMixin() throws DataSourceException {
-		if (connectionMixin == null) {
+		if(connectionMixin == null) {
 			connectionMixin = ConnectionMixinFactory.GetConnectionMixin(uri, modifiers, mixinOptions, getBlankDataModel());
 		}
 		return connectionMixin;
@@ -86,7 +86,7 @@ public abstract class AbstractDataSource implements DataSource {
 	 */
 	protected Map<String[], String> getValues0(String[] leadKey) throws DataSourceException {
 		Map<String[], String> map = new HashMap<>();
-		for (String[] key : getNamespace(leadKey)) {
+		for(String[] key : getNamespace(leadKey)) {
 			map.put(key, get(key));
 		}
 		return map;
@@ -154,7 +154,7 @@ public abstract class AbstractDataSource implements DataSource {
 	@Override
 	public Set<String> stringKeySet(String[] keyBase) throws DataSourceException {
 		Set<String> keys = new TreeSet<String>();
-		for (String[] key : keySet(keyBase)) {
+		for(String[] key : keySet(keyBase)) {
 			keys.add(StringUtils.Join(key, "."));
 		}
 		return keys;
@@ -164,8 +164,8 @@ public abstract class AbstractDataSource implements DataSource {
 	public Set<String[]> getNamespace(String[] namespace) throws DataSourceException {
 		Set<String[]> list = new HashSet<String[]>();
 		String ns = StringUtils.Join(namespace, ".");
-		for (String key : stringKeySet(namespace)) {
-			if ("".equals(ns) //Blank string; this means they want it to always match.
+		for(String key : stringKeySet(namespace)) {
+			if("".equals(ns) //Blank string; this means they want it to always match.
 					|| key.matches(Pattern.quote(ns) + "(?:$|\\..*)")) {
 				String[] split = key.split("\\.");
 				list.add(split);
@@ -176,7 +176,7 @@ public abstract class AbstractDataSource implements DataSource {
 
 	private void setInvalidModifiers() {
 		DataSourceModifier[] invalid = this.invalidModifiers();
-		if (invalid == null) {
+		if(invalid == null) {
 			return;
 		}
 		this.invalidModifiers = EnumSet.copyOf(Arrays.asList(invalid));
@@ -189,14 +189,14 @@ public abstract class AbstractDataSource implements DataSource {
 
 	@Override
 	public final void addModifier(DataSourceModifier modifier) {
-		if (invalidModifiers != null && invalidModifiers.contains(modifier)) {
+		if(invalidModifiers != null && invalidModifiers.contains(modifier)) {
 			return;
 		}
-		if (modifier == DataSourceModifier.HTTP || modifier == DataSourceModifier.HTTPS) {
+		if(modifier == DataSourceModifier.HTTP || modifier == DataSourceModifier.HTTPS) {
 			modifiers.add(DataSourceModifier.READONLY);
 			modifiers.add(DataSourceModifier.ASYNC);
 		}
-		if (modifier == DataSourceModifier.SSH) {
+		if(modifier == DataSourceModifier.SSH) {
 			modifiers.add(DataSourceModifier.ASYNC);
 		}
 		modifiers.add(modifier);
@@ -247,25 +247,25 @@ public abstract class AbstractDataSource implements DataSource {
 	 */
 	public final void checkModifiers() throws DataSourceException {
 		List<String> errors = new ArrayList();
-		if (invalidModifiers != null) {
-			for (DataSourceModifier dsm : invalidModifiers) {
-				if (modifiers.contains(dsm)) {
+		if(invalidModifiers != null) {
+			for(DataSourceModifier dsm : invalidModifiers) {
+				if(modifiers.contains(dsm)) {
 					errors.add(uri.toString() + " contains the modifier " + dsm.getName() + ", which is not applicable. This will be ignored.");
 				}
 			}
 		}
-		if (modifiers.contains(DataSourceModifier.PRETTYPRINT) && modifiers.contains(DataSourceModifier.READONLY)) {
+		if(modifiers.contains(DataSourceModifier.PRETTYPRINT) && modifiers.contains(DataSourceModifier.READONLY)) {
 			errors.add(uri.toString() + " contains both prettyprint and readonly modifiers, which doesn't make sense, because we cannot write out the file; prettyprint will be ignored.");
 			modifiers.remove(DataSourceModifier.PRETTYPRINT);
 		}
-		if ((modifiers.contains(DataSourceModifier.HTTP) || modifiers.contains(DataSourceModifier.HTTPS)) && modifiers.contains(DataSourceModifier.SSH)) {
+		if((modifiers.contains(DataSourceModifier.HTTP) || modifiers.contains(DataSourceModifier.HTTPS)) && modifiers.contains(DataSourceModifier.SSH)) {
 			errors.add(uri.toString() + " contains both http(s) and ssh modifiers.");
 		}
-		if (modifiers.contains(DataSourceModifier.HTTP) && modifiers.contains(DataSourceModifier.HTTPS)) {
+		if(modifiers.contains(DataSourceModifier.HTTP) && modifiers.contains(DataSourceModifier.HTTPS)) {
 			errors.add(uri.toString() + " contains both http and https modifiers. Because these are mutually exclusive, this doesn't make sense, and https will be assumed.");
 			modifiers.remove(DataSourceModifier.HTTP);
 		}
-		if (!errors.isEmpty()) {
+		if(!errors.isEmpty()) {
 			throw new DataSourceException(StringUtils.Join(errors, "\n"));
 		}
 	}
@@ -279,13 +279,13 @@ public abstract class AbstractDataSource implements DataSource {
 	 * This method checks to see if a set operation should simply throw a ReadOnlyException based on the modifiers.
 	 */
 	private void checkSet(String[] key) throws ReadOnlyException {
-		for (String namespace : key) {
-			if ("_".equals(namespace)) {
+		for(String namespace : key) {
+			if("_".equals(namespace)) {
 				throw new IllegalArgumentException("In the key \"" + StringUtils.Join(key, ".") + ", the namespace \"_\" is not allowed."
 						+ " (Namespaces may contain an underscore, but may not be just an underscore.)");
 			}
 		}
-		if (modifiers.contains(DataSourceModifier.READONLY)) {
+		if(modifiers.contains(DataSourceModifier.READONLY)) {
 			throw new ReadOnlyException();
 		}
 	}
@@ -295,16 +295,16 @@ public abstract class AbstractDataSource implements DataSource {
 	 * will do so.
 	 */
 	private void checkGet(String[] key) throws DataSourceException {
-		for (String namespace : key) {
-			if ("_".equals(namespace)) {
+		for(String namespace : key) {
+			if("_".equals(namespace)) {
 				throw new IllegalArgumentException("In the key \"" + StringUtils.Join(key, ".") + ", the namespace \"_\" is not allowed."
 						+ " (Namespaces may contain an underscore, but may not be just an underscore.)");
 			}
 		}
-		if (this.getModifiers().contains(DataSource.DataSourceModifier.TRANSIENT)) {
+		if(this.getModifiers().contains(DataSource.DataSourceModifier.TRANSIENT)) {
 			this.populate();
 		}
-		if (hasModifier(DataSourceModifier.TRANSIENT)) {
+		if(hasModifier(DataSourceModifier.TRANSIENT)) {
 			populate();
 		}
 	}
@@ -327,7 +327,7 @@ public abstract class AbstractDataSource implements DataSource {
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		for (DataSourceModifier m : modifiers) {
+		for(DataSourceModifier m : modifiers) {
 			b.append(m.getName().toLowerCase()).append(":");
 		}
 		b.append(uri.toString());

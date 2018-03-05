@@ -16,7 +16,7 @@ public class BukkitMCDamageCause extends EnumConvertor<MCDamageCause, DamageCaus
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause();
 		}
 		return instance;

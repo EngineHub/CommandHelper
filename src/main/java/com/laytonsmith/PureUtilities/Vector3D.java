@@ -106,7 +106,7 @@ public class Vector3D extends Point3D {
 	 */
 	public Vector3D normalize() {
 		double length = length();
-		if (length == 0.0) {
+		if(length == 0.0) {
 			return Vector3D.ZERO;
 		}
 		return new Vector3D(x / length, y / length, z / length);

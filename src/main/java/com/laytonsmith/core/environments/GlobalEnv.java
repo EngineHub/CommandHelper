@@ -81,7 +81,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		this.profiler = profiler;
 		this.persistenceNetwork = network;
 		this.root = new MutableObject(root);
-		if (this.executionQueue instanceof MethodScriptExecutionQueue) {
+		if(this.executionQueue instanceof MethodScriptExecutionQueue) {
 			((MethodScriptExecutionQueue) executionQueue).setEnvironment(this);
 		}
 		this.profiles = profiles;
@@ -121,7 +121,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @return
 	 */
 	public Boolean GetFlag(String name) {
-		if (!flags.containsKey(name)) {
+		if(!flags.containsKey(name)) {
 			return null;
 		} else {
 			return flags.get(name);
@@ -153,7 +153,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @param var
 	 */
 	public void SetCustom(String name, Object var) {
-		if (!custom.containsKey("custom")) {
+		if(!custom.containsKey("custom")) {
 			custom.put("custom", new HashMap<String, Object>());
 		}
 		((Map<String, Object>) custom.get("custom")).put(name, var);
@@ -167,7 +167,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @return
 	 */
 	public Object GetCustom(String name) {
-		if (!custom.containsKey("custom")) {
+		if(!custom.containsKey("custom")) {
 			custom.put("custom", new HashMap<String, Object>());
 		}
 		return ((Map<String, Object>) custom.get("custom")).get(name);
@@ -176,14 +176,14 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	@Override
 	public EnvironmentImpl clone() throws CloneNotSupportedException {
 		GlobalEnv clone = (GlobalEnv) super.clone();
-		if (procs != null) {
+		if(procs != null) {
 			clone.procs = new HashMap<>(procs);
 		} else {
 			clone.procs = new HashMap<>();
 		}
-		if (cloneVars && iVariableList != null) {
+		if(cloneVars && iVariableList != null) {
 			clone.iVariableList = (IVariableList) iVariableList.clone();
-		} else if (!cloneVars) {
+		} else if(!cloneVars) {
 			clone.iVariableList = new IVariableList();
 		}
 		return clone;
@@ -223,7 +223,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 */
 	public void SetRootFolder(File file) {
 		Static.AssertNonNull(file, "Root file cannot be null");
-		if (file.isFile()) {
+		if(file.isFile()) {
 			throw new IllegalArgumentException("File provided to SetRootFolder must be a folder, not a file. (" + file.toString() + " was found.)");
 		}
 		this.root.setObject(file);
@@ -244,7 +244,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @return
 	 */
 	public Map<String, Procedure> GetProcs() {
-		if (procs == null) {
+		if(procs == null) {
 			procs = new HashMap<>();
 		}
 		return procs;
@@ -261,7 +261,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @return
 	 */
 	public IVariableList GetVarList() {
-		if (iVariableList == null) {
+		if(iVariableList == null) {
 			iVariableList = new IVariableList();
 		}
 		return iVariableList;
@@ -356,9 +356,9 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 */
 	public List<ArrayAccess.ArrayAccessIterator> GetArrayAccessIteratorsFor(ArrayAccess array) {
 		List<ArrayAccess.ArrayAccessIterator> list = new ArrayList<>();
-		synchronized (arrayAccessList) {
-			for (ArrayAccess.ArrayAccessIterator value : arrayAccessList) {
-				if (value.underlyingArray() == array) {
+		synchronized(arrayAccessList) {
+			for(ArrayAccess.ArrayAccessIterator value : arrayAccessList) {
+				if(value.underlyingArray() == array) {
 					list.add(value);
 				}
 			}
@@ -373,8 +373,8 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 */
 	public StackTraceManager GetStackTraceManager() {
 		Thread currentThread = Thread.currentThread();
-		synchronized (stackTraceManagers) {
-			if (!stackTraceManagers.containsKey(currentThread)) {
+		synchronized(stackTraceManagers) {
+			if(!stackTraceManagers.containsKey(currentThread)) {
 				StackTraceManager manager = new StackTraceManager();
 				stackTraceManagers.put(currentThread, manager);
 				return manager;

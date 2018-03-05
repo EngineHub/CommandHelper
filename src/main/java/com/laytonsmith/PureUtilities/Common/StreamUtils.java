@@ -27,7 +27,7 @@ public class StreamUtils {
 	public static void Copy(InputStream in, OutputStream out) throws IOException {
 		byte[] buffer = new byte[1024];
 		int len = in.read(buffer);
-		while (len != -1) {
+		while(len != -1) {
 			out.write(buffer, 0, len);
 			len = in.read(buffer);
 		}
@@ -44,7 +44,7 @@ public class StreamUtils {
 	public static String GetString(InputStream in) {
 		try {
 			return GetString(in, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
+		} catch(UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -59,10 +59,10 @@ public class StreamUtils {
 	 * @throws UnsupportedEncodingException
 	 */
 	public static String GetString(InputStream in, String encoding) throws UnsupportedEncodingException {
-		if (encoding == null) {
+		if(encoding == null) {
 			encoding = "UTF-8";
 		}
-		if (in == null) {
+		if(in == null) {
 			throw new NullPointerException();
 		}
 		InputStreamReader input;
@@ -71,12 +71,12 @@ public class StreamUtils {
 		final char[] buffer = new char[CHARS_PER_PAGE];
 		StringBuilder output = new StringBuilder(CHARS_PER_PAGE);
 		try {
-			for (int read = input.read(buffer, 0, buffer.length);
+			for(int read = input.read(buffer, 0, buffer.length);
 					read != -1;
 					read = input.read(buffer, 0, buffer.length)) {
 				output.append(buffer, 0, read);
 			}
-		} catch (IOException ignore) {
+		} catch(IOException ignore) {
 		}
 
 		return output.toString();
@@ -94,7 +94,7 @@ public class StreamUtils {
 		BufferedInputStream bis = new BufferedInputStream(in);
 		List<Byte> bytes = new ArrayList<Byte>();
 		int i;
-		while ((i = bis.read()) != -1) {
+		while((i = bis.read()) != -1) {
 			bytes.add(((byte) i));
 		}
 		return ArrayUtils.unbox(bytes.toArray(new Byte[bytes.size()]));
@@ -109,7 +109,7 @@ public class StreamUtils {
 	public static InputStream GetInputStream(String contents) {
 		try {
 			return GetInputStream(contents, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
+		} catch(UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -135,7 +135,7 @@ public class StreamUtils {
 	public static PrintStream GetSystemOut() {
 		try {
 			return new PrintStream(System.out, true, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
+		} catch(UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -149,7 +149,7 @@ public class StreamUtils {
 	public static PrintStream GetSystemErr() {
 		try {
 			return new PrintStream(System.err, true, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
+		} catch(UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}

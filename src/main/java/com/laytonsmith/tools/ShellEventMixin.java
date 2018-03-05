@@ -22,7 +22,7 @@ public class ShellEventMixin implements EventMixinInterface {
 
 	@Override
 	public void cancel(BindableEvent e, boolean state) {
-		if (e instanceof CancellableEvent) {
+		if(e instanceof CancellableEvent) {
 			((CancellableEvent) e).cancel(state);
 		}
 	}

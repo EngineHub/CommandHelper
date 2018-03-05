@@ -104,10 +104,10 @@ public class PublicSuffix {
 	 * Returns the PublicSuffix instance based on the default data source
 	 */
 	public static PublicSuffix get() {
-		if (defaultInstance == null) {
+		if(defaultInstance == null) {
 			try {
 				defaultInstance = new PublicSuffix();
-			} catch (Exception ex) {
+			} catch(Exception ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -134,19 +134,19 @@ public class PublicSuffix {
 	public int getEffectiveTLDLength(final String hostname) {
 		final String normalizedHostname = normalizeHostname(hostname);
 		int lastDot = normalizedHostname.length();
-		for (SubdomainNode node = this.root; lastDot > 0;) {
+		for(SubdomainNode node = this.root; lastDot > 0;) {
 			int nextDotLoc = normalizedHostname.lastIndexOf('.', lastDot - 1);
 			node = findNode(node,
 					normalizedHostname.substring(nextDotLoc + 1, lastDot), false);
-			if (node == null) {
+			if(node == null) {
 				break;
 			}
 			lastDot = nextDotLoc;
-			if (node.isException()) {
+			if(node.isException()) {
 				// Exception rules use one fewer levels than were matched.
 				break;
 			}
-			if (node.isStopOK()) {
+			if(node.isStopOK()) {
 				break;
 			}
 		}
@@ -163,17 +163,17 @@ public class PublicSuffix {
 	private String normalizeHostname(final String hostname) {
 		boolean isLowercase = true;
 		boolean isAscii = true;
-		for (int i = 0; i < hostname.length(); i++) {
+		for(int i = 0; i < hostname.length(); i++) {
 			char c = hostname.charAt(i);
-			if (c >= 128) {
+			if(c >= 128) {
 				isAscii = false;
 				break;
 			}
-			if (!Character.isLowerCase(c)) {
+			if(!Character.isLowerCase(c)) {
 				isLowercase = false;
 			}
 		}
-		if (!isAscii) {
+		if(!isAscii) {
 			// TODO: If java 6, then there is java.net.IDN#toAscii(hostname).
 			throw new UnsupportedOperationException("No support yet for IDN: TODO");
 		}
@@ -189,13 +189,13 @@ public class PublicSuffix {
 	private void load()
 			throws UnsupportedEncodingException, IOException {
 		URL u = this.getClass().getResource("/" + DATA_FILENAME);
-		if (u == null) {
+		if(u == null) {
 			throw new FileNotFoundException(DATA_FILENAME + " not on CLASSPATH");
 		}
 		BufferedReader br
 				= new BufferedReader(new InputStreamReader(u.openStream(), "UTF-8"));
-		for (String line = null; (line = br.readLine()) != null;) {
-			if (line.length() <= 0 || line.startsWith("//")) {
+		for(String line = null; (line = br.readLine()) != null;) {
+			if(line.length() <= 0 || line.startsWith("//")) {
 				continue;
 			}
 			addEffectiveTLDEntry(this.root, line);
@@ -220,10 +220,10 @@ public class PublicSuffix {
 		boolean exception = subdomain != null && subdomain.startsWith(EXCEPTION);
 		String key = exception ? subdomain.substring(1) : subdomain;
 		SubdomainNode newNode = node.getChildren().get(key);
-		if (newNode != null) {
+		if(newNode != null) {
 			return newNode;
 		}
-		if (create) {
+		if(create) {
 			// Create it and add to parent.
 			SubdomainNode subNode = new SubdomainNode(exception, false);
 			node.getChildren().put(key, subNode);
@@ -241,7 +241,7 @@ public class PublicSuffix {
 	private void addEffectiveTLDEntry(SubdomainNode node,
 			final String line) {
 		String hostname = WHITESPACE.split(line, 2)[0];
-		for (int dotLoc = hostname.length(); dotLoc >= 0;) {
+		for(int dotLoc = hostname.length(); dotLoc >= 0;) {
 			int nextDocLoc = hostname.lastIndexOf(DOT, dotLoc - 1);
 			String subdomain = hostname.substring(nextDocLoc + 1, dotLoc);
 			dotLoc = nextDocLoc;
@@ -257,11 +257,11 @@ public class PublicSuffix {
 	}
 
 	private void dump(final Map<String, SubdomainNode> node, final int offset) {
-		if (node == null || node.size() == 0) {
+		if(node == null || node.size() == 0) {
 			return;
 		}
-		for (Map.Entry<String, SubdomainNode> e : node.entrySet()) {
-			for (int i = 0; i < offset; i++) {
+		for(Map.Entry<String, SubdomainNode> e : node.entrySet()) {
+			for(int i = 0; i < offset; i++) {
 				System.out.print(" ");
 			}
 			System.out.println(e.getKey() + ": " + e.getValue());

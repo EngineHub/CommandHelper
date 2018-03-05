@@ -21,7 +21,7 @@ public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedReci
 	public String getKey() {
 		try {
 			return r.getKey().getKey();
-		} catch (NoSuchMethodError ex) {
+		} catch(NoSuchMethodError ex) {
 			// Probably prior to 1.12
 			return null;
 		}
@@ -40,7 +40,7 @@ public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedReci
 	@Override
 	public Map<Character, MCItemStack> getIngredientMap() {
 		Map<Character, MCItemStack> ret = new HashMap<>();
-		for (Map.Entry<Character, ItemStack> e : r.getIngredientMap().entrySet()) {
+		for(Map.Entry<Character, ItemStack> e : r.getIngredientMap().entrySet()) {
 			ret.put(e.getKey(), new BukkitMCItemStack(e.getValue()));
 		}
 		return ret;

@@ -28,7 +28,7 @@ public class BukkitMCItemFrame extends BukkitMCHanging implements MCItemFrame {
 	@Override
 	public MCItemStack getItem() {
 		ItemStack item = getHandle().getItem();
-		if (item != null) {
+		if(item != null) {
 			return new BukkitMCItemStack(getHandle().getItem());
 		} else {
 			return null;
@@ -37,7 +37,7 @@ public class BukkitMCItemFrame extends BukkitMCHanging implements MCItemFrame {
 
 	@Override
 	public void setItem(MCItemStack item) {
-		if (item != null) {
+		if(item != null) {
 			getHandle().setItem((ItemStack) item.getHandle());
 		} else {
 			getHandle().setItem(null);

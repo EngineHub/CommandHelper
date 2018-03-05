@@ -157,24 +157,24 @@ public class DataHandling {
 			//we aren't getting a slice in a label, which is used in switch
 			//statements, but doesn't make sense here.
 			//Also check for dynamic labels
-			for (ParseTree child : children) {
-				if (child.getData() instanceof CFunction && new Compiler.centry().getName().equals(child.getData().val())) {
-					if (((CLabel) child.getChildAt(0).getData()).cVal() instanceof CSlice) {
+			for(ParseTree child : children) {
+				if(child.getData() instanceof CFunction && new Compiler.centry().getName().equals(child.getData().val())) {
+					if(((CLabel) child.getChildAt(0).getData()).cVal() instanceof CSlice) {
 						throw new ConfigCompileException("Slices cannot be used as array indices", child.getChildAt(0).getTarget());
 					}
-					if (((CLabel) child.getChildAt(0).getData()).cVal() instanceof IVariable) {
+					if(((CLabel) child.getChildAt(0).getData()).cVal() instanceof IVariable) {
 						String array = "@a";
 						String valueName = ((IVariable) ((CLabel) child.getChildAt(0).getData()).cVal()).getVariableName();
 						Construct value = child.getChildAt(1).getData();
 						String v;
-						if (value instanceof IVariable) {
+						if(value instanceof IVariable) {
 							v = ((IVariable) value).getVariableName();
-						} else if (value instanceof CString) {
+						} else if(value instanceof CString) {
 							v = ((CString) value).getQuote();
 						} else {
 							v = "@value";
 						}
-						if ("@a".equals(valueName)) {
+						if("@a".equals(valueName)) {
 							array = "@myArray";
 						}
 						throw new ConfigCompileException("Dynamic values cannot be used as indices in array construction."
@@ -266,14 +266,14 @@ public class DataHandling {
 			int offset;
 			CClassType type;
 			String name;
-			if (args.length == 3) {
+			if(args.length == 3) {
 				offset = 1;
-				if (!(args[offset] instanceof IVariable)) {
+				if(!(args[offset] instanceof IVariable)) {
 					throw new CRECastException(getName() + " with 3 arguments only accepts an ivariable as the second argument.", t);
 				}
 				name = ((IVariable) args[offset]).getVariableName();
-				if (list.has(name) && env.getEnv(GlobalEnv.class).GetFlag("no-check-duplicate-assign") == null) {
-					if (env.getEnv(GlobalEnv.class).GetFlag("closure-warn-overwrite") != null) {
+				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag("no-check-duplicate-assign") == null) {
+					if(env.getEnv(GlobalEnv.class).GetFlag("closure-warn-overwrite") != null) {
 						CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR,
 								"The variable " + name + " is hiding another value of the"
 								+ " same name in the main scope.", t);
@@ -285,14 +285,14 @@ public class DataHandling {
 				type = ArgumentValidation.getClassType(args[0], t);
 			} else {
 				offset = 0;
-				if (!(args[offset] instanceof IVariable)) {
+				if(!(args[offset] instanceof IVariable)) {
 					throw new CRECastException(getName() + " with 2 arguments only accepts an ivariable as the second argument.", t);
 				}
 				name = ((IVariable) args[offset]).getVariableName();
 				type = list.get(name, t, true).getDefinedType();
 			}
 			Construct c = args[offset + 1];
-			while (c instanceof IVariable) {
+			while(c instanceof IVariable) {
 				IVariable cur = (IVariable) c;
 				c = list.get(cur.getVariableName(), cur.getTarget()).ival();
 			}
@@ -347,13 +347,13 @@ public class DataHandling {
 			//We can't really optimize, but we can check that we are
 			//getting an ivariable.
 			int offset = 0;
-			if (args.length == 3) {
+			if(args.length == 3) {
 				offset = 1;
-				if (!(args[0] instanceof CClassType)) {
+				if(!(args[0] instanceof CClassType)) {
 					throw new ConfigCompileException("Expecting a ClassType for parameter 1 to assign", t);
 				}
 			}
-			if (args.length > 0 && !(args[offset] instanceof IVariable)) {
+			if(args.length > 0 && !(args[offset] instanceof IVariable)) {
 				throw new ConfigCompileException("Expecting an ivar for argument 1 to assign", t);
 			}
 			return null;
@@ -362,20 +362,20 @@ public class DataHandling {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			//Check for too few arguments
-			if (children.size() < 2) {
+			if(children.size() < 2) {
 				return null;
 			}
-			if (children.get(0).getData() instanceof IVariable
+			if(children.get(0).getData() instanceof IVariable
 					&& children.get(1).getData() instanceof IVariable) {
-				if (((IVariable) children.get(0).getData()).getVariableName().equals(
+				if(((IVariable) children.get(0).getData()).getVariableName().equals(
 						((IVariable) children.get(1).getData()).getVariableName())) {
 					CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Assigning a variable to itself", t);
 				}
 			}
-			if (children.get(0).getData() instanceof CFunction && array_get.equals(children.get(0).getData().val())) {
-				if (children.get(0).getChildAt(1).getData() instanceof CSlice) {
+			if(children.get(0).getData() instanceof CFunction && array_get.equals(children.get(0).getData().val())) {
+				if(children.get(0).getChildAt(1).getData() instanceof CSlice) {
 					CSlice cs = (CSlice) children.get(0).getChildAt(1).getData();
-					if (cs.getStart() == 0 && cs.getFinish() == -1) {
+					if(cs.getStart() == 0 && cs.getFinish() == -1) {
 						//Turn this into an array_push
 						ParseTree tree = new ParseTree(new CFunction(array_push, t), children.get(0).getFileOptions());
 						tree.addChild(children.get(0).getChildAt(0));
@@ -500,7 +500,7 @@ public class DataHandling {
 			//let's reverse it.
 			boolean isInc;
 			try {
-				if (children.get(2).getData() instanceof CFunction
+				if(children.get(2).getData() instanceof CFunction
 						&& ((isInc = children.get(2).getData().val().equals("postinc"))
 						|| children.get(2).getData().val().equals("postdec"))
 						&& children.get(2).getChildAt(0).getData() instanceof IVariable) {
@@ -508,7 +508,7 @@ public class DataHandling {
 					pre.addChild(children.get(2).getChildAt(0));
 					children.set(2, pre);
 				}
-			} catch (IndexOutOfBoundsException e) {
+			} catch(IndexOutOfBoundsException e) {
 				//Just ignore it. It's a compile error, but we'll let the rest of the
 				//existing system sort that out.
 			}
@@ -569,44 +569,44 @@ public class DataHandling {
 			ParseTree expression = nodes[2];
 			ParseTree runnable = nodes[3];
 			ParseTree elseCode = null;
-			if (!runAsFor) {
+			if(!runAsFor) {
 				elseCode = nodes[4];
 			}
 			boolean hasRunOnce = false;
 
 			Construct counter = parent.eval(assign, env);
-			if (!(counter instanceof IVariable)) {
+			if(!(counter instanceof IVariable)) {
 				throw new CRECastException("First parameter of for must be an ivariable", t);
 			}
 			int _continue = 0;
-			while (true) {
+			while(true) {
 				boolean cond = Static.getBoolean(parent.seval(condition, env));
-				if (cond == false) {
+				if(cond == false) {
 					break;
 				}
 				hasRunOnce = true;
-				if (_continue >= 1) {
+				if(_continue >= 1) {
 					--_continue;
 					parent.eval(expression, env);
 					continue;
 				}
 				try {
 					parent.eval(runnable, env);
-				} catch (LoopBreakException e) {
+				} catch(LoopBreakException e) {
 					int num = e.getTimes();
-					if (num > 1) {
+					if(num > 1) {
 						e.setTimes(--num);
 						throw e;
 					}
 					return CVoid.VOID;
-				} catch (LoopContinueException e) {
+				} catch(LoopContinueException e) {
 					_continue = e.getTimes() - 1;
 					parent.eval(expression, env);
 					continue;
 				}
 				parent.eval(expression, env);
 			}
-			if (!hasRunOnce && !runAsFor && elseCode != null) {
+			if(!hasRunOnce && !runAsFor && elseCode != null) {
 				parent.eval(elseCode, env);
 			}
 			return CVoid.VOID;
@@ -659,13 +659,13 @@ public class DataHandling {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			if (nodes.length < 3) {
+			if(nodes.length < 3) {
 				throw new CREInsufficientArgumentsException("Insufficient arguments passed to " + getName(), t);
 			}
 			ParseTree array = nodes[0];
 			ParseTree key = null;
 			int offset = 0;
-			if (nodes.length == 4) {
+			if(nodes.length == 4) {
 				//Key and value provided
 				key = nodes[1];
 				offset = 1;
@@ -674,32 +674,32 @@ public class DataHandling {
 			ParseTree code = nodes[2 + offset];
 			Construct arr = parent.seval(array, env);
 			Construct ik = null;
-			if (key != null) {
+			if(key != null) {
 				ik = parent.eval(key, env);
-				if (!(ik instanceof IVariable)) {
+				if(!(ik instanceof IVariable)) {
 					throw new CRECastException("Parameter 2 of " + getName() + " must be an ivariable", t);
 				}
 			}
 			Construct iv = parent.eval(value, env);
-			if (arr instanceof CSlice) {
+			if(arr instanceof CSlice) {
 				long start = ((CSlice) arr).getStart();
 				long finish = ((CSlice) arr).getFinish();
-				if (finish < start) {
+				if(finish < start) {
 					arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish - 1, t), new CInt(-1, t));
 				} else {
 					arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
 				}
 			}
-			if (!(arr instanceof ArrayAccess)) {
+			if(!(arr instanceof ArrayAccess)) {
 				throw new CRECastException("Parameter 1 of " + getName() + " must be an array or array like data structure", t);
 			}
-			if (!(iv instanceof IVariable)) {
+			if(!(iv instanceof IVariable)) {
 				throw new CRECastException("Parameter " + (2 + offset) + " of " + getName() + " must be an ivariable", t);
 			}
 			ArrayAccess one = (ArrayAccess) arr;
 			IVariable kkey = (IVariable) ik;
 			IVariable two = (IVariable) iv;
-			if (one.isAssociative()) {
+			if(one.isAssociative()) {
 				//Iteration of an associative array is much easier, and we have
 				//special logic here to decrease the complexity.
 
@@ -710,15 +710,15 @@ public class DataHandling {
 				//we have to track this differently. Basically, we skip the
 				//next element in the array key set.
 				int continues = 0;
-				for (Construct c : keySet) {
-					if (continues > 0) {
+				for(Construct c : keySet) {
+					if(continues > 0) {
 						//If continues is greater than 0, continue in the loop,
 						//however many times necessary to make it 0.
 						continues--;
 						continue;
 					}
 					//If the key isn't null, set that in the variable table.
-					if (kkey != null) {
+					if(kkey != null) {
 						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getVariableName(), c, t));
 					}
 					//Set the value in the variable table
@@ -727,14 +727,14 @@ public class DataHandling {
 						//Execute the code
 						parent.eval(code, env);
 						//And handle any break/continues.
-					} catch (LoopBreakException e) {
+					} catch(LoopBreakException e) {
 						int num = e.getTimes();
-						if (num > 1) {
+						if(num > 1) {
 							e.setTimes(--num);
 							throw e;
 						}
 						return CVoid.VOID;
-					} catch (LoopContinueException e) {
+					} catch(LoopContinueException e) {
 						// In associative arrays, (unlike with normal arrays) we need to decrement it by one, because the nature of
 						// the normal array is such that the counter is handled manually by our code. Because we are letting java
 						// handle our code though, this run actually counts as one run.
@@ -754,40 +754,40 @@ public class DataHandling {
 				try {
 					arrayAccessList.add(iterator);
 					int continues = 0;
-					while (true) {
+					while(true) {
 						int current = iterator.getCurrent();
-						if (continues > 0) {
+						if(continues > 0) {
 							//We have some continues to handle. Blacklisted
 							//values don't count for the continuing count, so
 							//we have to consider that when counting.
 							iterator.incrementCurrent();
-							if (iterator.isBlacklisted(current)) {
+							if(iterator.isBlacklisted(current)) {
 								continue;
 							} else {
 								--continues;
 								continue;
 							}
 						}
-						if (current >= one.size()) {
+						if(current >= one.size()) {
 							//Done with the iterations.
 							break;
 						}
 						//If the item is blacklisted, we skip it.
-						if (!iterator.isBlacklisted(current)) {
-							if (kkey != null) {
+						if(!iterator.isBlacklisted(current)) {
+							if(kkey != null) {
 								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getVariableName(), new CInt(current, t), t));
 							}
 							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getVariableName(), one.get(current, t), t));
 							try {
 								parent.eval(code, env);
-							} catch (LoopBreakException e) {
+							} catch(LoopBreakException e) {
 								int num = e.getTimes();
-								if (num > 1) {
+								if(num > 1) {
 									e.setTimes(--num);
 									throw e;
 								}
 								return CVoid.VOID;
-							} catch (LoopContinueException e) {
+							} catch(LoopContinueException e) {
 								continues += e.getTimes();
 								continue;
 							}
@@ -909,28 +909,28 @@ public class DataHandling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() < 2) {
+			if(children.size() < 2) {
 				throw new ConfigCompileException("Invalid number of arguments passed to " + getName(), t);
 			}
-			if (isFunction(children.get(0), CENTRY)) {
+			if(isFunction(children.get(0), CENTRY)) {
 				// This is what "@key: @value in @array" looks like initially. We'll refactor this so the next segment can take over properly.
 				ParseTree sconcat = new ParseTree(new CFunction(new StringHandling.sconcat().getName(), t), fileOptions);
 				sconcat.addChild(children.get(0).getChildAt(0));
-				for (int i = 0; i < children.get(0).getChildAt(1).numberOfChildren(); i++) {
+				for(int i = 0; i < children.get(0).getChildAt(1).numberOfChildren(); i++) {
 					sconcat.addChild(children.get(0).getChildAt(1).getChildAt(i));
 				}
 				children.set(0, sconcat);
 			}
-			if (children.get(0).getData() instanceof CFunction && children.get(0).getData().val().equals(new StringHandling.sconcat().getName())) {
+			if(children.get(0).getData() instanceof CFunction && children.get(0).getData().val().equals(new StringHandling.sconcat().getName())) {
 				// We may be looking at a "@value in @array" or "@array as @value" type
 				// structure, so we need to re-arrange this into the standard format.
 				ParseTree array = null;
 				ParseTree key = null;
 				ParseTree value = null;
 				List<ParseTree> c = children.get(0).getChildren();
-				if (c.size() == 3) {
+				if(c.size() == 3) {
 					// No key specified
-					switch (c.get(1).getData().val()) {
+					switch(c.get(1).getData().val()) {
 						case "in":
 							// @value in @array
 							value = c.get(0);
@@ -942,21 +942,21 @@ public class DataHandling {
 							array = c.get(0);
 							break;
 					}
-				} else if (c.size() == 4) {
-					if ("in".equals(c.get(2).getData().val())) {
+				} else if(c.size() == 4) {
+					if("in".equals(c.get(2).getData().val())) {
 						// @key: @value in @array
 						key = c.get(0);
 						value = c.get(1);
 						array = c.get(3);
-					} else if ("as".equals(c.get(1).getData().val())) {
+					} else if("as".equals(c.get(1).getData().val())) {
 						// @array as @key: @value
 						array = c.get(0);
 						key = c.get(2);
 						value = c.get(3);
 					}
 				}
-				if (key != null && key.getData() instanceof CLabel) {
-					if (!(((CLabel) key.getData()).cVal() instanceof IVariable)
+				if(key != null && key.getData() instanceof CLabel) {
+					if(!(((CLabel) key.getData()).cVal() instanceof IVariable)
 							&& !(((CLabel) key.getData()).cVal() instanceof CFunction
 							&& ((CLabel) key.getData()).cVal().val().equals(ASSIGN))) {
 						throw new ConfigCompileException("Expected a variable for key, but \"" + key.getData().val() + "\" was found", t);
@@ -967,17 +967,17 @@ public class DataHandling {
 				// need to accept all the arguments after the first, and put those in.
 				List<ParseTree> newChildren = new ArrayList<>();
 				newChildren.add(array);
-				if (key != null) {
+				if(key != null) {
 					newChildren.add(key);
 				}
 				newChildren.add(value);
-				for (int i = 1; i < children.size(); i++) {
+				for(int i = 1; i < children.size(); i++) {
 					newChildren.add(children.get(i));
 				}
 				children.clear();
 				children.addAll(newChildren);
 				// Change foreach(){ ... } else { ... } to a foreachelse.
-				if (children.get(children.size() - 1).getData() instanceof CFunction
+				if(children.get(children.size() - 1).getData() instanceof CFunction
 						&& children.get(children.size() - 1).getData().val().equals("else")) {
 					ParseTree foreachelse = new ParseTree(new CFunction(new foreachelse().getName(), t), fileOptions);
 					children.set(children.size() - 1, children.get(children.size() - 1).getChildAt(0));
@@ -1004,11 +1004,11 @@ public class DataHandling {
 
 			Construct data = parent.seval(array, env);
 
-			if (!(data instanceof CArray) && !(data instanceof CSlice)) {
+			if(!(data instanceof CArray) && !(data instanceof CSlice)) {
 				throw new CRECastException(getName() + " expects an array for parameter 1", t);
 			}
 
-			if (((CArray) data).isEmpty()) {
+			if(((CArray) data).isEmpty()) {
 				parent.eval(elseCode, env);
 			} else {
 				ParseTree pass[] = new ParseTree[nodes.length - 1];
@@ -1109,19 +1109,19 @@ public class DataHandling {
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			try {
-				while (Static.getBoolean(parent.seval(nodes[0], env))) {
+				while(Static.getBoolean(parent.seval(nodes[0], env))) {
 					//We allow while(thing()); to be done. This makes certain
 					//types of coding styles possible.
-					if (nodes.length > 1) {
+					if(nodes.length > 1) {
 						try {
 							parent.seval(nodes[1], env);
-						} catch (LoopContinueException e) {
+						} catch(LoopContinueException e) {
 							//ok.
 						}
 					}
 				}
-			} catch (LoopBreakException e) {
-				if (e.getTimes() > 1) {
+			} catch(LoopBreakException e) {
+				if(e.getTimes() > 1) {
 					throw new LoopBreakException(e.getTimes() - 1, t);
 				}
 			}
@@ -1226,12 +1226,12 @@ public class DataHandling {
 				do {
 					try {
 						parent.seval(nodes[0], env);
-					} catch (LoopContinueException e) {
+					} catch(LoopContinueException e) {
 						//ok. No matter how many times it tells us to continue, we're only going to continue once.
 					}
-				} while (Static.getBoolean(parent.seval(nodes[1], env)));
-			} catch (LoopBreakException e) {
-				if (e.getTimes() > 1) {
+				} while(Static.getBoolean(parent.seval(nodes[1], env)));
+			} catch(LoopBreakException e) {
+				if(e.getTimes() > 1) {
 					throw new LoopBreakException(e.getTimes() - 1, t);
 				}
 			}
@@ -1308,7 +1308,7 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				num = Static.getInt32(args[0], t);
 			}
 			throw new LoopBreakException(num, t);
@@ -1332,15 +1332,15 @@ public class DataHandling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() == 1) {
-				if (children.get(0).isDynamic()) {
+			if(children.size() == 1) {
+				if(children.get(0).isDynamic()) {
 					//This is absolutely a bad design, if there is a variable here
 					//in the break. Due to optimization, this is a compile error.
 					throw new ConfigCompileException("The parameter sent to break() should"
 							+ " be hard coded, and should not be dynamically determinable, since this is always a sign"
 							+ " of loose code flow, which should be avoided.", t);
 				}
-				if (!(children.get(0).getData() instanceof CInt)) {
+				if(!(children.get(0).getData() instanceof CInt)) {
 					throw new ConfigCompileException("break() only accepts integer values.", t);
 				}
 			}
@@ -1400,7 +1400,7 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				num = Static.getInt32(args[0], t);
 			}
 			throw new LoopContinueException(num, t);
@@ -2003,7 +2003,7 @@ public class DataHandling {
 			boolean b = true;
 			try {
 				Static.getNumber(args[0], t);
-			} catch (ConfigRuntimeException e) {
+			} catch(ConfigRuntimeException e) {
 				b = false;
 			}
 			return CBoolean.get(b);
@@ -2077,7 +2077,7 @@ public class DataHandling {
 			double d;
 			try {
 				d = Static.getDouble(args[0], t);
-			} catch (ConfigRuntimeException e) {
+			} catch(ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
 			return CBoolean.get((long) d == d);
@@ -2168,25 +2168,25 @@ public class DataHandling {
 			List<String> varNames = new ArrayList<>();
 			boolean usesAssign = false;
 			CClassType returnType = Auto.TYPE;
-			if (nodes[0].getData() instanceof CClassType) {
+			if(nodes[0].getData() instanceof CClassType) {
 				returnType = (CClassType) nodes[0].getData();
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
-				for (int i = 1; i < nodes.length; i++) {
+				for(int i = 1; i < nodes.length; i++) {
 					newNodes[i - 1] = nodes[i];
 				}
 				nodes = newNodes;
 			}
 			// We have to restore the variable list once we're done
 			IVariableList originalList = env.getEnv(GlobalEnv.class).GetVarList().clone();
-			for (int i = 0; i < nodes.length; i++) {
-				if (i == nodes.length - 1) {
+			for(int i = 0; i < nodes.length; i++) {
+				if(i == nodes.length - 1) {
 					tree = nodes[i];
 				} else {
 					boolean thisNodeIsAssign = false;
-					if (nodes[i].getData() instanceof CFunction) {
-						if (((CFunction) nodes[i].getData()).getValue().equals("assign")) {
+					if(nodes[i].getData() instanceof CFunction) {
+						if(((CFunction) nodes[i].getData()).getValue().equals("assign")) {
 							thisNodeIsAssign = true;
-							if ((nodes[i].getChildren().size() == 3 && nodes[i].getChildAt(0).getData().isDynamic())
+							if((nodes[i].getChildren().size() == 3 && nodes[i].getChildAt(0).getData().isDynamic())
 									|| nodes[i].getChildAt(1).getData().isDynamic()) {
 								usesAssign = true;
 							}
@@ -2195,34 +2195,34 @@ public class DataHandling {
 					env.getEnv(GlobalEnv.class).SetFlag("no-check-duplicate-assign", true);
 					Construct cons = parent.eval(nodes[i], env);
 					env.getEnv(GlobalEnv.class).ClearFlag("no-check-duplicate-assign");
-					if (i == 0 && cons instanceof IVariable) {
+					if(i == 0 && cons instanceof IVariable) {
 						throw new CREInvalidProcedureException("Anonymous Procedures are not allowed", t);
-					} else if (i == 0 && !(cons instanceof IVariable)) {
+					} else if(i == 0 && !(cons instanceof IVariable)) {
 						name = cons.val();
-					} else if (!(cons instanceof IVariable)) {
+					} else if(!(cons instanceof IVariable)) {
 						throw new CREInvalidProcedureException("You must use IVariables as the arguments", t);
 					} else {
 						IVariable ivar = null;
 						try {
 							Construct c = cons;
-							if (c instanceof IVariable) {
+							if(c instanceof IVariable) {
 								String varName = ((IVariable) c).getVariableName();
-								if (varNames.contains(varName)) {
+								if(varNames.contains(varName)) {
 									throw new CREInvalidProcedureException("Same variable name defined twice in " + name, t);
 								}
 								varNames.add(varName);
 							}
-							while (c instanceof IVariable) {
+							while(c instanceof IVariable) {
 								c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getVariableName(), t, true).ival();
 							}
-							if (!thisNodeIsAssign) {
+							if(!thisNodeIsAssign) {
 								//This is required because otherwise a default value that's already in the environment
 								//would end up getting set to the existing value, thereby leaking in the global env
 								//into this proc, if the call to the proc didn't have a value in this slot.
 								c = new CString("", t);
 							}
 							ivar = new IVariable(((IVariable) cons).getDefinedType(), ((IVariable) cons).getVariableName(), c.clone(), t);
-						} catch (CloneNotSupportedException ex) {
+						} catch(CloneNotSupportedException ex) {
 							//
 						}
 						vars.add(ivar);
@@ -2231,7 +2231,7 @@ public class DataHandling {
 			}
 			env.getEnv(GlobalEnv.class).SetVarList(originalList);
 			Procedure myProc = new Procedure(name, returnType, vars, tree, t);
-			if (usesAssign) {
+			if(usesAssign) {
 				myProc.definitelyNotConstant();
 			}
 			return myProc;
@@ -2258,11 +2258,11 @@ public class DataHandling {
 		 * @throws ConfigRuntimeException
 		 */
 		public static Construct optimizeProcedure(Target t, Procedure myProc, List<ParseTree> children) throws ConfigRuntimeException {
-			if (myProc.isPossiblyConstant()) {
+			if(myProc.isPossiblyConstant()) {
 				//Oooh, it's possibly constant. So, let's run it with our children.
 				try {
 					FileOptions options = new FileOptions(new HashMap<String, String>());
-					if (!children.isEmpty()) {
+					if(!children.isEmpty()) {
 						options = children.get(0).getFileOptions();
 					}
 					ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), options);
@@ -2272,8 +2272,8 @@ public class DataHandling {
 					Construct c = myProc.cexecute(children, env, t);
 					//Yup! It worked. It's a const proc.
 					return c;
-				} catch (ConfigRuntimeException e) {
-					if (e instanceof CREInvalidProcedureException) {
+				} catch(ConfigRuntimeException e) {
+					if(e instanceof CREInvalidProcedureException) {
 						//This is the only valid exception that doesn't strictly mean it's a bad
 						//call.
 						return null;
@@ -2281,7 +2281,7 @@ public class DataHandling {
 					throw e; //Rethrow it. Since the functions are all static, and we actually are
 					//running it with a mostly legit environment, this is a real runtime error,
 					//and we can safely convert it to a compile error upstream
-				} catch (Exception e) {
+				} catch(Exception e) {
 					//Nope. Something is preventing us from running it statically.
 					//We don't really care. We just know it can't be optimized.
 					return null;
@@ -2411,7 +2411,7 @@ public class DataHandling {
 			String location = arg.val();
 			File file = Static.GetFileFromArgument(location, env, t, null);
 			ParseTree include = IncludeCache.get(file, t);
-			if (include != null) {
+			if(include != null) {
 				// It could be an empty file
 				parent.eval(include.getChildAt(0), env);
 			}
@@ -2485,17 +2485,17 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args.length < 1) {
+			if(args.length < 1) {
 				throw new CREInsufficientArgumentsException("Expecting at least one argument to " + getName(), t);
 			}
 			Procedure proc = env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val());
-			if (proc != null) {
+			if(proc != null) {
 				List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
 				vars.remove(0);
 				Environment newEnv = null;
 				try {
 					newEnv = env.clone();
-				} catch (CloneNotSupportedException ex) {
+				} catch(CloneNotSupportedException ex) {
 					throw new RuntimeException(ex);
 				}
 				return proc.execute(vars, newEnv, t);
@@ -2510,10 +2510,10 @@ public class DataHandling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() < 1) {
+			if(children.size() < 1) {
 				throw new CREInsufficientArgumentsException("Expecting at least one argument to " + getName(), t);
 			}
-			if (children.get(0).isConst()) {
+			if(children.get(0).isConst()) {
 				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Hardcoding procedure name in " + getName() + ", which is inefficient."
 						+ " Consider calling the procedure directly if the procedure name is known at compile time.", t);
 			}
@@ -2528,12 +2528,12 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ca = Static.getArray(args[1], t);
-			if (ca.inAssociativeMode()) {
+			if(ca.inAssociativeMode()) {
 				throw new CRECastException("Expected the array passed to " + getName() + " to be non-associative.", t);
 			}
 			Construct[] args2 = new Construct[(int) ca.size() + 1];
 			args2[0] = args[0];
-			for (int i = 1; i < args2.length; i++) {
+			for(int i = 1; i < args2.length; i++) {
 				args2[i] = ca.get(i - 1, t);
 			}
 			return super.exec(t, environment, args2);
@@ -2659,7 +2659,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
+			if(args[0] instanceof CArray) {
 				return CBoolean.get(((CArray) args[0]).inAssociativeMode());
 			} else {
 				throw new CRECastException(this.getName() + " expects argument 1 to be an array", t);
@@ -2780,10 +2780,10 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String key;
-			if (args[0] instanceof CString) {
+			if(args[0] instanceof CString) {
 				key = args[0].val();
-			} else if (args[0] instanceof CArray) {
-				if (((CArray) args[0]).isAssociative()) {
+			} else if(args[0] instanceof CArray) {
+				if(((CArray) args[0]).isAssociative()) {
 					throw new CREIllegalArgumentException("Associative arrays may not be used as keys in " + getName(), t);
 				}
 				key = GetNamespace((CArray) args[0], t);
@@ -2791,7 +2791,7 @@ public class DataHandling {
 				throw new CREIllegalArgumentException("Argument 1 in " + this.getName() + " must be a string or array.", t);
 			}
 			Construct c = Globals.GetGlobalConstruct(key);
-			if (args.length == 2 && c instanceof CNull) {
+			if(args.length == 2 && c instanceof CNull) {
 				c = args[1];
 			}
 			return c;
@@ -2851,10 +2851,10 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String key;
-			if (args[0] instanceof CString) {
+			if(args[0] instanceof CString) {
 				key = args[0].val();
-			} else if (args[0] instanceof CArray) {
-				if (((CArray) args[0]).isAssociative()) {
+			} else if(args[0] instanceof CArray) {
+				if(((CArray) args[0]).isAssociative()) {
 					throw new CREIllegalArgumentException("Associative arrays may not be used as keys in " + getName(), t);
 				}
 				key = GetNamespace((CArray) args[0], t);
@@ -2947,16 +2947,16 @@ public class DataHandling {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			if (nodes.length == 0) {
+			if(nodes.length == 0) {
 				//Empty closure, do nothing.
 				return new CClosure(null, env, Auto.TYPE, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
 			}
 			// Handle the closure type first thing
 			CClassType returnType = Auto.TYPE;
-			if (nodes[0].getData() instanceof CClassType) {
+			if(nodes[0].getData() instanceof CClassType) {
 				returnType = (CClassType) nodes[0].getData();
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
-				for (int i = 1; i < nodes.length; i++) {
+				for(int i = 1; i < nodes.length; i++) {
 					newNodes[i - 1] = nodes[i];
 				}
 				nodes = newNodes;
@@ -2969,10 +2969,10 @@ public class DataHandling {
 			Environment myEnv;
 			try {
 				myEnv = env.clone();
-			} catch (CloneNotSupportedException ex) {
+			} catch(CloneNotSupportedException ex) {
 				myEnv = env;
 			}
-			for (int i = 0; i < nodes.length - 1; i++) {
+			for(int i = 0; i < nodes.length - 1; i++) {
 				ParseTree node = nodes[i];
 				ParseTree newNode = new ParseTree(new CFunction("g", t), node.getFileOptions());
 				List<ParseTree> children = new ArrayList<>();
@@ -2982,14 +2982,14 @@ public class DataHandling {
 				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
 				Construct ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
-				if (!(ret instanceof IVariable)) {
+				if(!(ret instanceof IVariable)) {
 					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
 				}
 				names[i] = ((IVariable) ret).getVariableName();
 				try {
 					defaults[i] = ((IVariable) ret).ival().clone();
 					types[i] = ((IVariable) ret).getDefinedType();
-				} catch (CloneNotSupportedException ex) {
+				} catch(CloneNotSupportedException ex) {
 					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
@@ -3051,16 +3051,16 @@ public class DataHandling {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			if (nodes.length == 0) {
+			if(nodes.length == 0) {
 				//Empty closure, do nothing.
 				return new CClosure(null, env, Auto.TYPE, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
 			}
 			// Handle the closure type first thing
 			CClassType returnType = Auto.TYPE;
-			if (nodes[0].getData() instanceof CClassType) {
+			if(nodes[0].getData() instanceof CClassType) {
 				returnType = (CClassType) nodes[0].getData();
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
-				for (int i = 1; i < nodes.length; i++) {
+				for(int i = 1; i < nodes.length; i++) {
 					newNodes[i - 1] = nodes[i];
 				}
 				nodes = newNodes;
@@ -3073,10 +3073,10 @@ public class DataHandling {
 			Environment myEnv;
 			try {
 				myEnv = env.clone();
-			} catch (CloneNotSupportedException ex) {
+			} catch(CloneNotSupportedException ex) {
 				myEnv = env;
 			}
-			for (int i = 0; i < nodes.length - 1; i++) {
+			for(int i = 0; i < nodes.length - 1; i++) {
 				ParseTree node = nodes[i];
 				ParseTree newNode = new ParseTree(new CFunction("g", t), node.getFileOptions());
 				List<ParseTree> children = new ArrayList<>();
@@ -3086,14 +3086,14 @@ public class DataHandling {
 				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
 				Construct ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
-				if (!(ret instanceof IVariable)) {
+				if(!(ret instanceof IVariable)) {
 					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
 				}
 				names[i] = ((IVariable) ret).getVariableName();
 				try {
 					defaults[i] = ((IVariable) ret).ival().clone();
 					types[i] = ((IVariable) ret).getDefinedType();
-				} catch (CloneNotSupportedException ex) {
+				} catch(CloneNotSupportedException ex) {
 					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
@@ -3196,13 +3196,13 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args[args.length - 1] instanceof CClosure) {
+			if(args[args.length - 1] instanceof CClosure) {
 				Construct[] vals = new Construct[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
 				CClosure closure = (CClosure) args[args.length - 1];
 				try {
 					closure.execute(vals);
-				} catch (FunctionReturnException e) {
+				} catch(FunctionReturnException e) {
 					return e.getReturn();
 				}
 			} else {
@@ -3448,7 +3448,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CString) {
+			if(args[0] instanceof CString) {
 				return args[0];
 			}
 			return new CString(args[0].val(), t);
@@ -3501,7 +3501,7 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int radix = Static.getInt32(args[1], t);
-			if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
+			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}
 			return new CString(Long.toString(Static.getInt(args[0], t), radix), t);
@@ -3574,13 +3574,13 @@ public class DataHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String value = args[0].val();
 			int radix = Static.getInt32(args[1], t);
-			if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
+			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}
 			long ret;
 			try {
 				ret = Long.parseLong(value, radix);
-			} catch (NumberFormatException ex) {
+			} catch(NumberFormatException ex) {
 				throw new CREFormatException("The input string: \"" + value + "\" is improperly formatted. (Perhaps you're using a character greater than"
 						+ " the radix specified?)", t);
 			}
@@ -3627,8 +3627,8 @@ public class DataHandling {
 	private static String GetNamespace(CArray array, Target t) {
 		boolean first = true;
 		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < array.size(); i++) {
-			if (!first) {
+		for(int i = 0; i < array.size(); i++) {
+			if(!first) {
 				b.append(".");
 			}
 			first = false;
@@ -3659,7 +3659,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				return args[0].typeof();
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				throw new Error("Class " + args[0].getClass().getName() + " is not annotated with @typeof. Please report this"
 						+ " error to the developers.");
 			}
@@ -3743,16 +3743,16 @@ public class DataHandling {
 			try {
 				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(true);
 				Construct script = parent.seval(node, env);
-				if (script instanceof CClosure) {
+				if(script instanceof CClosure) {
 					throw new CRECastException("Closures cannot be eval'd directly. Use execute() instead.", t);
 				}
 				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true));
 				StringBuilder b = new StringBuilder();
 				int count = 0;
-				for (ParseTree child : root.getChildren()) {
+				for(ParseTree child : root.getChildren()) {
 					Construct s = parent.seval(child, env);
-					if (!s.val().trim().isEmpty()) {
-						if (count > 0) {
+					if(!s.val().trim().isEmpty()) {
+						if(count > 0) {
 							b.append(" ");
 						}
 						b.append(s.val());
@@ -3760,12 +3760,12 @@ public class DataHandling {
 					count++;
 				}
 				return new CString(b.toString(), t);
-			} catch (ConfigCompileException e) {
+			} catch(ConfigCompileException e) {
 				throw new CREFormatException("Could not compile eval'd code: " + e.getMessage(), t);
-			} catch (ConfigCompileGroupException ex) {
+			} catch(ConfigCompileGroupException ex) {
 				StringBuilder b = new StringBuilder();
 				b.append("Could not compile eval'd code: ");
-				for (ConfigCompileException e : ex.getList()) {
+				for(ConfigCompileException e : ex.getList()) {
 					b.append(e.getMessage()).append("\n");
 				}
 				throw new CREFormatException(b.toString(), t);
@@ -3797,10 +3797,10 @@ public class DataHandling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() != 1) {
+			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " expects only one argument", t);
 			}
-			if (children.get(0).isConst()) {
+			if(children.get(0).isConst()) {
 				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Eval'd code is hardcoded, consider simply using the code directly, as wrapping"
 						+ " hardcoded code in " + getName() + " is much less efficient.", t);
 			}
@@ -3826,7 +3826,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			for (int i = 0; i < args.length; i++) {
+			for(int i = 0; i < args.length; i++) {
 				args[i].val();
 			}
 			return CVoid.VOID;
@@ -3891,7 +3891,7 @@ public class DataHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Construct val = CNull.NULL;
-			if (args.length > 0) {
+			if(args.length > 0) {
 				val = args[0];
 			}
 			return new CMutablePrimitive(val, t);
@@ -3985,7 +3985,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CNull) {
+			if(args[0] instanceof CNull) {
 				return CBoolean.FALSE;
 			}
 			boolean b = InstanceofUtil.isInstanceof(args[0], args[1].val());
@@ -4025,23 +4025,23 @@ public class DataHandling {
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			// There are two specific cases here where we will give more precise error messages.
 			// If it's a string, yell at them
-			if (children.get(1).getData() instanceof CString) {
+			if(children.get(1).getData() instanceof CString) {
 				throw new ConfigCompileException("Unexpected string type passed to \"instanceof\"", t);
 			}
 			// If it's a variable, also yell at them
-			if (children.get(1).getData() instanceof IVariable) {
+			if(children.get(1).getData() instanceof IVariable) {
 				throw new ConfigCompileException("Variable types are not allowed in \"instanceof\"", t);
 			}
 			// Unknown error, but this is still never valid.
-			if (!(children.get(1).getData() instanceof CClassType)) {
+			if(!(children.get(1).getData() instanceof CClassType)) {
 				throw new ConfigCompileException("Unexpected type for \"instanceof\": " + children.get(1).getData(), t);
 			}
 			// null is technically a type, but instanceof shouldn't work with that
-			if (children.get(1).getData().val().equals("null")) {
+			if(children.get(1).getData().val().equals("null")) {
 				throw new ConfigCompileException("\"null\" cannot be compared against with instanceof. Use <value> === null.", t);
 			}
 			// It's hardcoded, allow it, but optimize it out.
-			if (children.get(0).isConst()) {
+			if(children.get(0).isConst()) {
 				return new ParseTree(exec(t, null, children.get(0).getData(), children.get(1).getData()), fileOptions);
 			}
 			return null;

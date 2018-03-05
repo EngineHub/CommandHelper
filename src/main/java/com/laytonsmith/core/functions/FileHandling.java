@@ -82,10 +82,10 @@ public class FileHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
-			if (!Static.InCmdLine(env)) {
+			if(!Static.InCmdLine(env)) {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
-				if (!Security.CheckSecurity(location)) {
+				if(!Security.CheckSecurity(location)) {
 					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
 			}
@@ -93,7 +93,7 @@ public class FileHandling {
 				String s = file_get_contents(location.getAbsolutePath());
 				s = s.replaceAll("\n|\r\n", "\n");
 				return new CString(s, t);
-			} catch (Exception ex) {
+			} catch(Exception ex) {
 				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.INFO, "Could not read in file while attempting to find "
 						+ location.getAbsolutePath()
 						+ "\nFile " + (location.exists() ? "exists" : "does not exist"), t);
@@ -190,13 +190,13 @@ public class FileHandling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.get(0).isDynamic()) {
+			if(children.get(0).isDynamic()) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded paths.", t);
 			}
 			Environment env;
 			try {
 				env = Static.GenerateStandaloneEnvironment();
-			} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+			} catch(IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
 				throw new ConfigCompileException(ex.getMessage(), t, ex);
 			}
 			String ret = new read().exec(t, env, children.get(0).getData()).val();
@@ -214,7 +214,7 @@ public class FileHandling {
 		boolean started = false;
 
 		private void startup() {
-			if (!started) {
+			if(!started) {
 				queue.invokeLater(null, new Runnable() {
 
 					@Override
@@ -254,13 +254,13 @@ public class FileHandling {
 			startup();
 			final String file = args[0].val();
 			final CClosure callback;
-			if (!(args[1] instanceof CClosure)) {
+			if(!(args[1] instanceof CClosure)) {
 				throw new CRECastException("Expected paramter 2 of " + getName() + " to be a closure!", t);
 			} else {
 				callback = ((CClosure) args[1]);
 			}
-			if (!Static.InCmdLine(environment)) {
-				if (!Security.CheckSecurity(file)) {
+			if(!Static.InCmdLine(environment)) {
+				if(!Security.CheckSecurity(file)) {
 					throw new CRESecurityException("You do not have permission to access the file '" + file + "'", t);
 				}
 			}
@@ -270,12 +270,12 @@ public class FileHandling {
 				public void run() {
 					String returnString = null;
 					ConfigRuntimeException exception = null;
-					if (file.contains("@")) {
+					if(file.contains("@")) {
 						try {
 							//It's an SCP transfer
 							returnString = SSHWrapper.SCPReadString(file);
 							SSHWrapper.closeSessions();
-						} catch (IOException ex) {
+						} catch(IOException ex) {
 							exception = new CREIOException(ex.getMessage(), t, ex);
 						}
 					} else {
@@ -283,18 +283,18 @@ public class FileHandling {
 							//It's a local file read
 							File _file = Static.GetFileFromArgument(file, environment, t, null);
 							returnString = FileUtil.read(_file);
-						} catch (IOException ex) {
+						} catch(IOException ex) {
 							exception = new CREIOException(ex.getMessage(), t, ex);
 						}
 					}
 					final Construct cret;
-					if (returnString == null) {
+					if(returnString == null) {
 						cret = CNull.NULL;
 					} else {
 						cret = new CString(returnString, t);
 					}
 					final Construct cex;
-					if (exception == null) {
+					if(exception == null) {
 						cex = CNull.NULL;
 					} else {
 						cex = ObjectGenerator.GetGenerator().exception(exception, environment, t);
@@ -365,7 +365,7 @@ public class FileHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
-			if (!Security.CheckSecurity(location) && !Static.InCmdLine(environment)) {
+			if(!Security.CheckSecurity(location) && !Static.InCmdLine(environment)) {
 				throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 			}
 			return new CInt(location.length(), t);
@@ -414,17 +414,17 @@ public class FileHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
-			if (!Static.InCmdLine(env)) {
+			if(!Static.InCmdLine(env)) {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
-				if (!Security.CheckSecurity(location)) {
+				if(!Security.CheckSecurity(location)) {
 					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
 			}
 			try {
 				InputStream stream = new GZIPInputStream(new FileInputStream(location));
 				return CByteArray.wrap(StreamUtils.GetBytes(stream), t);
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
 						+ "\nFile " + (location.exists() ? "exists" : "does not exist"));
 				throw new CREIOException("File could not be read in.", t);
@@ -476,17 +476,17 @@ public class FileHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
-			if (!Static.InCmdLine(env)) {
+			if(!Static.InCmdLine(env)) {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
-				if (!Security.CheckSecurity(location)) {
+				if(!Security.CheckSecurity(location)) {
 					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
 			}
 			try {
 				InputStream stream = new BufferedInputStream(new FileInputStream(location));
 				return CByteArray.wrap(StreamUtils.GetBytes(stream), t);
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
 						+ "\nFile " + (location.exists() ? "exists" : "does not exist"));
 				throw new CREIOException("File could not be read in.", t);
@@ -543,12 +543,12 @@ public class FileHandling {
 			String path = args[0].val().trim().replace('\\', '/');
 			//Remove duplicate /
 			path = path.replaceAll("(/)(?=.*?/)", path);
-			if ("/".equals(path) || path.matches("[a-zA-Z]:/")) {
+			if("/".equals(path) || path.matches("[a-zA-Z]:/")) {
 				//This is the root path, return null.
 				return CNull.NULL;
 			}
 			//If the path ends with /, take it off
-			while (path.endsWith("/")) {
+			while(path.endsWith("/")) {
 				path = path.substring(0, path.length() - 2);
 			}
 			return new CString(path.substring(0, path.length() - path.lastIndexOf("/")), t);
@@ -604,7 +604,7 @@ public class FileHandling {
 			File f = Static.GetFileFromArgument(args[0].val(), environment, t, null);
 			try {
 				return new CString(f.getCanonicalPath(), t);
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
 			}
 		}

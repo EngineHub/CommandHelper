@@ -19,12 +19,12 @@ public class StackTraceUtils {
 		boolean first = true;
 		Throwable tt = t;
 		do {
-			if (!first) {
+			if(!first) {
 				printWriter.append("Caused by: ");
 			}
 			first = false;
 			tt.printStackTrace(printWriter);
-		} while ((tt = tt.getCause()) != null);
+		} while((tt = tt.getCause()) != null);
 		return result.toString();
 	}
 
@@ -35,15 +35,15 @@ public class StackTraceUtils {
 			// method within this class.
 			StackTraceElement[] st = Thread.currentThread().getStackTrace();
 			String doNotReturn = st[2].getClassName();
-			for (int i = 3; i < st.length; i++) {
-				if (!st[i].getClassName().equals(doNotReturn)) {
+			for(int i = 3; i < st.length; i++) {
+				if(!st[i].getClassName().equals(doNotReturn)) {
 					return Class.forName(st[i].getClassName());
 				}
 			}
 			// The only way this can get here is if this were the bootstrap class.
 			// I doubt the JVM is calling us first thing, so just throw an Error.
 			throw new Error();
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			throw new RuntimeException(ex);
 		}
 	}

@@ -89,12 +89,12 @@ public class RequestSettings {
 	 * @return
 	 */
 	public RequestSettings setParameters(Map<String, String> parameters) {
-		if (parameters == null) {
+		if(parameters == null) {
 			this.parameters = null;
 			return this;
 		} else {
 			Map<String, List<String>> p = new HashMap<String, List<String>>();
-			for (String key : parameters.keySet()) {
+			for(String key : parameters.keySet()) {
 				p.put(key, Arrays.asList(new String[]{parameters.get(key)}));
 			}
 			return setComplexParameters(p);

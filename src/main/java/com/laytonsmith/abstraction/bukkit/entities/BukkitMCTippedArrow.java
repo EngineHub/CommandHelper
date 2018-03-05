@@ -30,7 +30,7 @@ public class BukkitMCTippedArrow extends BukkitMCArrow implements MCTippedArrow 
 	@Override
 	public List<MCLivingEntity.MCEffect> getCustomEffects() {
 		List<MCLivingEntity.MCEffect> list = new ArrayList<>();
-		for (PotionEffect pe : ta.getCustomEffects()) {
+		for(PotionEffect pe : ta.getCustomEffects()) {
 			list.add(new MCLivingEntity.MCEffect(pe.getType().getId(), pe.getAmplifier(),
 					pe.getDuration(), pe.isAmbient(), pe.hasParticles()));
 		}

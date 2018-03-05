@@ -157,16 +157,16 @@ public final class Interpreter {
 		Interpreter interpreter = new Interpreter(args, fromFile.getParentFile().getPath(), true);
 		try {
 			interpreter.execute(FileUtil.read(fromFile), args, fromFile);
-		} catch (ConfigCompileException ex) {
+		} catch(ConfigCompileException ex) {
 			ConfigRuntimeException.HandleUncaughtException(ex, null, null);
 			StreamUtils.GetSystemOut().println(TermColors.reset());
-			if (systemExitOnFailure) {
+			if(systemExitOnFailure) {
 				System.exit(1);
 			}
-		} catch (ConfigCompileGroupException ex) {
+		} catch(ConfigCompileGroupException ex) {
 			ConfigRuntimeException.HandleUncaughtException(ex, null);
 			StreamUtils.GetSystemOut().println(TermColors.reset());
-			if (systemExitOnFailure) {
+			if(systemExitOnFailure) {
 				System.exit(1);
 			}
 		}
@@ -184,7 +184,7 @@ public final class Interpreter {
 				+ "with $$. Use - on a line by itself to exit this mode as well.";
 		try {
 			msg += "\nYour current working directory is: " + env.getEnv(GlobalEnv.class).GetRootFolder().getCanonicalPath();
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			//
 		}
 		return msg;
@@ -207,32 +207,32 @@ public final class Interpreter {
 	private Interpreter(List<String> args, String cwd, boolean inTTYMode) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		doStartup();
 		env.getEnv(GlobalEnv.class).SetRootFolder(new File(cwd));
-		if (inTTYMode) {
+		if(inTTYMode) {
 			//Ok, done. They'll have to execute from here.
 			return;
 		}
 		//We have two modes here, piped input, or interactive console.
-		if (System.console() == null) {
+		if(System.console() == null) {
 			Scanner scanner = new Scanner(System.in);
 			//We need to read in everything, it's basically in multiline mode
 			StringBuilder script = new StringBuilder();
 			String line;
 			try {
-				while ((line = scanner.nextLine()) != null) {
+				while((line = scanner.nextLine()) != null) {
 					script.append(line).append("\n");
 				}
-			} catch (NoSuchElementException e) {
+			} catch(NoSuchElementException e) {
 				//Done
 			}
 			try {
 				execute(script.toString(), args);
 				StreamUtils.GetSystemOut().print(TermColors.reset());
 				System.exit(0);
-			} catch (ConfigCompileException ex) {
+			} catch(ConfigCompileException ex) {
 				ConfigRuntimeException.HandleUncaughtException(ex, null, null);
 				StreamUtils.GetSystemOut().print(TermColors.reset());
 				System.exit(1);
-			} catch (ConfigCompileGroupException ex) {
+			} catch(ConfigCompileGroupException ex) {
 				ConfigRuntimeException.HandleUncaughtException(ex, null);
 				StreamUtils.GetSystemOut().println(TermColors.reset());
 				System.exit(1);
@@ -244,8 +244,8 @@ public final class Interpreter {
 			//Get a list of all the function names. This will be provided to the auto completer.
 			Set<FunctionBase> functions = FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA);
 			List<String> names = new ArrayList<>();
-			for (FunctionBase f : functions) {
-				if (f.appearInDocumentation()) {
+			for(FunctionBase f : functions) {
+				if(f.appearInDocumentation()) {
 					names.add(f.getName());
 				}
 			}
@@ -263,7 +263,7 @@ public final class Interpreter {
 					//The autocomplete can be improved a bit, instead of putting a space after it,
 					//let's put a parenthesis.
 					int ret = super.complete(buffer, cursor, candidates);
-					if (candidates.size() == 1) {
+					if(candidates.size() == 1) {
 						String functionName = candidates.get(0).toString().trim();
 						candidates.set(0, functionName + "()");
 					}
@@ -271,15 +271,15 @@ public final class Interpreter {
 				}
 
 			}));
-			while (true) {
+			while(true) {
 				String prompt;
-				if (multilineMode) {
+				if(multilineMode) {
 					prompt = TermColors.WHITE + ">" + reset();
 				} else {
 					prompt = getPrompt();
 				}
 				String line = reader.readLine(prompt);
-				if (!textLine(line)) {
+				if(!textLine(line)) {
 					break;
 				}
 			}
@@ -445,13 +445,13 @@ public final class Interpreter {
 
 	private String getPrompt() {
 		CClosure c = (CClosure) env.getEnv(GlobalEnv.class).GetCustom("cmdline_prompt");
-		if (c != null) {
+		if(c != null) {
 			try {
 				c.execute(CBoolean.get(inShellMode));
-			} catch (FunctionReturnException ex) {
+			} catch(FunctionReturnException ex) {
 				String val = ex.getReturn().val();
 				return Static.MCToANSIColors(val) + TermColors.RESET;
-			} catch (ConfigRuntimeException ex) {
+			} catch(ConfigRuntimeException ex) {
 				ConfigRuntimeException.HandleUncaughtException(ex, env);
 			}
 		}
@@ -465,7 +465,7 @@ public final class Interpreter {
 
 		env = Static.GenerateStandaloneEnvironment(false);
 		env.getEnv(GlobalEnv.class).SetCustom("cmdline", true);
-		if (Prefs.UseColors()) {
+		if(Prefs.UseColors()) {
 			TermColors.EnableColors();
 		} else {
 			TermColors.DisableColors();
@@ -474,9 +474,9 @@ public final class Interpreter {
 		String auto_include = FileUtil.read(MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile());
 		try {
 			MethodScriptCompiler.execute(auto_include, MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile(), true, env, null, null, null);
-		} catch (ConfigCompileException ex) {
+		} catch(ConfigCompileException ex) {
 			ConfigRuntimeException.HandleUncaughtException(ex, "Interpreter will continue to run, however.", null);
-		} catch (ConfigCompileGroupException ex) {
+		} catch(ConfigCompileGroupException ex) {
 			ConfigRuntimeException.HandleUncaughtException(ex, null);
 		}
 		//Install our signal handlers.
@@ -484,17 +484,17 @@ public final class Interpreter {
 
 			@Override
 			public boolean handle(SignalType type) {
-				if (isExecuting) {
+				if(isExecuting) {
 					env.getEnv(GlobalEnv.class).SetInterrupt(true);
-					if (scriptThread != null) {
+					if(scriptThread != null) {
 						scriptThread.interrupt();
 					}
-					for (Thread t : env.getEnv(GlobalEnv.class).GetDaemonManager().getActiveThreads()) {
+					for(Thread t : env.getEnv(GlobalEnv.class).GetDaemonManager().getActiveThreads()) {
 						t.interrupt();
 					}
 				} else {
 					ctrlCcount++;
-					if (ctrlCcount > MAX_CTRL_C_MASHES) {
+					if(ctrlCcount > MAX_CTRL_C_MASHES) {
 						//Ok, ok, we get the hint.
 						StreamUtils.GetSystemOut().println();
 						StreamUtils.GetSystemOut().flush();
@@ -508,12 +508,12 @@ public final class Interpreter {
 		};
 		try {
 			SignalHandler.addHandler(Signals.SIGTERM, signalHandler);
-		} catch (IllegalArgumentException ex) {
+		} catch(IllegalArgumentException ex) {
 			// Oh well.
 		}
 		try {
 			SignalHandler.addHandler(Signals.SIGINT, signalHandler);
-		} catch (IllegalArgumentException ex) {
+		} catch(IllegalArgumentException ex) {
 			// Oh well again.
 		}
 	}
@@ -526,12 +526,12 @@ public final class Interpreter {
 	 * @throws IOException
 	 */
 	private boolean textLine(String line) throws IOException {
-		switch (line) {
+		switch(line) {
 			case "-":
 				//Exit interpreter mode
-				if (multilineMode) {
+				if(multilineMode) {
 					script = "";
-				} else if (inShellMode) {
+				} else if(inShellMode) {
 					inShellMode = false;
 				} else {
 					return false;
@@ -539,7 +539,7 @@ public final class Interpreter {
 				break;
 			case ">>>":
 				//Start multiline mode
-				if (multilineMode) {
+				if(multilineMode) {
 					pl(RED + "You are already in multiline mode!");
 				} else {
 					multilineMode = true;
@@ -552,9 +552,9 @@ public final class Interpreter {
 				try {
 					execute(script, null);
 					script = "";
-				} catch (ConfigCompileException e) {
+				} catch(ConfigCompileException e) {
 					ConfigRuntimeException.HandleUncaughtException(e, null, null);
-				} catch (ConfigCompileGroupException e) {
+				} catch(ConfigCompileGroupException e) {
 					ConfigRuntimeException.HandleUncaughtException(e, null);
 				}
 				break;
@@ -562,16 +562,16 @@ public final class Interpreter {
 				inShellMode = true;
 				break;
 			default:
-				if (multilineMode) {
+				if(multilineMode) {
 					//Queue multiline
 					script = script + line + "\n";
 				} else {
 					try {
 						//Execute single line
 						execute(line, null);
-					} catch (ConfigCompileException ex) {
+					} catch(ConfigCompileException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ex, null, null);
-					} catch (ConfigCompileGroupException ex) {
+					} catch(ConfigCompileGroupException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ex, null);
 					}
 				}
@@ -605,39 +605,39 @@ public final class Interpreter {
 	public void execute(String script, List<String> args, File fromFile) throws ConfigCompileException, IOException, ConfigCompileGroupException {
 		CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput input = new CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput(script, inShellMode);
 		EventUtils.TriggerListener(Driver.CMDLINE_PROMPT_INPUT, "cmdline_prompt_input", input);
-		if (input.isCancelled()) {
+		if(input.isCancelled()) {
 			return;
 		}
 		ctrlCcount = 0;
-		if ("exit".equals(script)) {
-			if (inShellMode) {
+		if("exit".equals(script)) {
+			if(inShellMode) {
 				inShellMode = false;
 				return;
 			}
 			pl(YELLOW + "Use exit() if you wish to exit.");
 			return;
 		}
-		if ("help".equals(script)) {
+		if("help".equals(script)) {
 			pl(getHelpMsg());
 			return;
 		}
-		if (fromFile == null) {
+		if(fromFile == null) {
 			fromFile = new File("Interpreter");
 		}
 		boolean localShellMode = false;
-		if (!inShellMode && script.startsWith("$$")) {
+		if(!inShellMode && script.startsWith("$$")) {
 			localShellMode = true;
 			script = script.substring(2);
 		}
 
-		if (inShellMode || localShellMode) {
+		if(inShellMode || localShellMode) {
 			// Wrap this in shell_adv
-			if (doBuiltin(script)) {
+			if(doBuiltin(script)) {
 				return;
 			}
 			List<String> shellArgs = StringUtils.ArgParser(script);
 			List<String> escapedArgs = new ArrayList<>();
-			for (String arg : shellArgs) {
+			for(String arg : shellArgs) {
 				escapedArgs.add(new CString(arg, Target.UNKNOWN).getQuote());
 			}
 			script = "shell_adv("
@@ -660,7 +660,7 @@ public final class Interpreter {
 		}
 		//Environment env = Environment.createEnvironment(this.env.getEnv(GlobalEnv.class));
 		final List<Variable> vars = new ArrayList<>();
-		if (args != null) {
+		if(args != null) {
 			//Build the @arguments variable, the $ vars, and $ itself. Note that
 			//we have special handling for $0, that is the script name, like bash.
 			//However, it doesn't get added to either $ or @arguments, due to the
@@ -674,9 +674,9 @@ public final class Interpreter {
 				v.setDefault(fromFile.toString());
 				vars.add(v);
 			}
-			for (int i = 0; i < args.size(); i++) {
+			for(int i = 0; i < args.size(); i++) {
 				String arg = args.get(i);
-				if (i > 0) {
+				if(i > 0) {
 					finalArgument.append(" ");
 				}
 				Variable v = new Variable("$" + Integer.toString(i + 1), "", Target.UNKNOWN);
@@ -704,38 +704,38 @@ public final class Interpreter {
 							MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
 								@Override
 								public void done(String output) {
-									if (System.console() != null && !"".equals(output.trim())) {
+									if(System.console() != null && !"".equals(output.trim())) {
 										StreamUtils.GetSystemOut().println(output);
 									}
 								}
 							}, null, vars);
-						} catch (CancelCommandException e) {
+						} catch(CancelCommandException e) {
 							//Nothing, though we could have been Ctrl+C cancelled, so we need to reset
 							//the interrupt flag. But we do that unconditionally below, in the finally,
 							//in the other thread.
-						} catch (ConfigRuntimeException e) {
+						} catch(ConfigRuntimeException e) {
 							ConfigRuntimeException.HandleUncaughtException(e, env);
 							//No need for the full stack trace
-							if (System.console() == null) {
+							if(System.console() == null) {
 								System.exit(1);
 							}
-						} catch (NoClassDefFoundError e) {
+						} catch(NoClassDefFoundError e) {
 							StreamUtils.GetSystemErr().println(RED + Main.getNoClassDefFoundErrorMessage(e) + reset());
 							StreamUtils.GetSystemErr().println("Since you're running from standalone interpreter mode, this is not a fatal error, but one of the functions you just used required"
 									+ " an actual backing engine that isn't currently loaded. (It still might fail even if you load the engine though.) You simply won't be"
 									+ " able to use that function here.");
-							if (System.console() == null) {
+							if(System.console() == null) {
 								System.exit(1);
 							}
-						} catch (InvalidEnvironmentException ex) {
+						} catch(InvalidEnvironmentException ex) {
 							StreamUtils.GetSystemErr().println(RED + ex.getMessage() + " " + ex.getData() + "() cannot be used in this context.");
-							if (System.console() == null) {
+							if(System.console() == null) {
 								System.exit(1);
 							}
-						} catch (RuntimeException e) {
+						} catch(RuntimeException e) {
 							pl(RED + e.toString());
 							e.printStackTrace(StreamUtils.GetSystemErr());
-							if (System.console() == null) {
+							if(System.console() == null) {
 								System.exit(1);
 							}
 						}
@@ -744,7 +744,7 @@ public final class Interpreter {
 				scriptThread.start();
 				try {
 					scriptThread.join();
-				} catch (InterruptedException ex) {
+				} catch(InterruptedException ex) {
 					//
 				}
 
@@ -759,11 +759,11 @@ public final class Interpreter {
 
 	public boolean doBuiltin(String script) {
 		List<String> args = StringUtils.ArgParser(script);
-		if (args.size() > 0) {
+		if(args.size() > 0) {
 			String command = args.get(0);
 			args.remove(0);
 			command = command.toLowerCase(Locale.ENGLISH);
-			switch (command) {
+			switch(command) {
 				case "help":
 					pl(getHelpMsg());
 					pl("Shell builtins:");
@@ -777,20 +777,20 @@ public final class Interpreter {
 					return true;
 				case "cd":
 				case "s":
-					if ("s".equals(command)) {
+					if("s".equals(command)) {
 						args.add("..");
 					}
-					if (args.size() > 1) {
+					if(args.size() > 1) {
 						pl(RED + "Too many arguments passed to cd");
 						return true;
 					}
 					Construct[] a = new Construct[0];
-					if (args.size() == 1) {
+					if(args.size() == 1) {
 						a = new Construct[]{new CString(args.get(0), Target.UNKNOWN)};
 					}
 					try {
 						new Cmdline.cd().exec(Target.UNKNOWN, env, a);
-					} catch (CREIOException ex) {
+					} catch(CREIOException ex) {
 						pl(RED + ex.getMessage());
 					}
 					return true;
@@ -808,12 +808,12 @@ public final class Interpreter {
 					// is actually useful as is, because this is not supposed to be a scripting environment.. that's
 					// what the normal shell is for.
 					boolean colorize = false;
-					if (args.size() > 0 && "-e".equals(args.get(0))) {
+					if(args.size() > 0 && "-e".equals(args.get(0))) {
 						colorize = true;
 						args.remove(0);
 					}
 					String output = StringUtils.Join(args, " ");
-					if (colorize) {
+					if(colorize) {
 						output = new Echoes.colorize().exec(Target.UNKNOWN, env, new CString(output, Target.UNKNOWN)).val();
 					}
 					pl(output);
@@ -837,35 +837,35 @@ public final class Interpreter {
 	}
 
 	public static void install() {
-		if (TermColors.SYSTEM == TermColors.SYS.UNIX) {
+		if(TermColors.SYSTEM == TermColors.SYS.UNIX) {
 			try {
 				URL jar = Interpreter.class.getProtectionDomain().getCodeSource().getLocation();
 				File exe = new File(INTERPRETER_INSTALLATION_LOCATION);
 				String bashScript = Static.GetStringResource("/interpreter-helpers/bash.sh");
 				try {
 					bashScript = bashScript.replaceAll("%%LOCATION%%", jar.toURI().getPath());
-				} catch (URISyntaxException ex) {
+				} catch(URISyntaxException ex) {
 					ex.printStackTrace();
 				}
 				exe.createNewFile();
-				if (!exe.canWrite()) {
+				if(!exe.canWrite()) {
 					throw new IOException();
 				}
 				FileUtil.write(bashScript, exe);
 				exe.setExecutable(true, false);
 				File manDir = new File("/usr/local/man/man1");
-				if (manDir.exists()) {
+				if(manDir.exists()) {
 					//Don't do this installation if the man pages aren't already there.
 					String manPage = Static.GetStringResource("/interpreter-helpers/manpage");
 					try {
 						manPage = DocGenTemplates.DoTemplateReplacement(manPage, DocGenTemplates.GetGenerators());
 						File manPageFile = new File(manDir, "mscript.1");
 						FileUtil.write(manPage, manPageFile);
-					} catch (DocGenTemplates.Generator.GenerateException ex) {
+					} catch(DocGenTemplates.Generator.GenerateException ex) {
 						Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
-			} catch (IOException e) {
+			} catch(IOException e) {
 				StreamUtils.GetSystemErr().println("Cannot install. You must run the command with sudo for it to succeed, however, did you do that?");
 				return;
 			}
@@ -881,13 +881,13 @@ public final class Interpreter {
 	}
 
 	public static void uninstall() {
-		if (TermColors.SYSTEM == TermColors.SYS.UNIX) {
+		if(TermColors.SYSTEM == TermColors.SYS.UNIX) {
 			try {
 				File exe = new File(INTERPRETER_INSTALLATION_LOCATION);
-				if (!exe.delete()) {
+				if(!exe.delete()) {
 					throw new IOException();
 				}
-			} catch (IOException e) {
+			} catch(IOException e) {
 				StreamUtils.GetSystemErr().println("Cannot uninstall. You must run the command with sudo for it to succeed, however, did you do that?");
 				return;
 			}

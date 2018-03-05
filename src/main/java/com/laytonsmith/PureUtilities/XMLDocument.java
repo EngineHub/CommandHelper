@@ -56,7 +56,7 @@ public class XMLDocument {
 			XPathFactory xpf = XPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI,
 					"com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl", XMLDocument.class.getClassLoader());
 			xpath = xpf.newXPath();
-		} catch (ParserConfigurationException | XPathFactoryConfigurationException ex) {
+		} catch(ParserConfigurationException | XPathFactoryConfigurationException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -71,7 +71,7 @@ public class XMLDocument {
 		this();
 		try {
 			doc = docBuilder.parse(new ByteArrayInputStream(document.getBytes(encoding)));
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -86,7 +86,7 @@ public class XMLDocument {
 		this();
 		try {
 			doc = docBuilder.parse(new ByteArrayInputStream(document.getBytes("UTF-8")));
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -124,24 +124,24 @@ public class XMLDocument {
 	 */
 	public void setNode(String xpath, Object value) throws XPathExpressionException {
 		String sval = "";
-		if (value != null) {
+		if(value != null) {
 			sval = value.toString();
 		}
 		getXPath(xpath); //Verifies this is a generally valid xpath, so we can roll with that assumption
-		while (xpath.startsWith("/")) {
+		while(xpath.startsWith("/")) {
 			xpath = xpath.substring(1);
 		}
 		String[] xpathParts = xpath.split("/");
 		int count = xpathParts.length;
-		while (count > 0) {
+		while(count > 0) {
 			String newXPath = "/" + StringUtils.Join(ArrayUtils.slice(xpathParts, 0, count - 1), "/");
-			if (!nodeExists(newXPath)) {
+			if(!nodeExists(newXPath)) {
 				count--;
 			} else {
 				break;
 			}
 		}
-		if (count == xpathParts.length) {
+		if(count == xpathParts.length) {
 			//We're at the node already, so just set it and bail
 			getElement(xpath).setTextContent(sval);
 			setDirty();
@@ -154,22 +154,22 @@ public class XMLDocument {
 		do {
 			String part = xpathParts[count];
 			String nodeName = getNodeName(part);
-			if (count > 0) {
+			if(count > 0) {
 				parent = getElement("/" + StringUtils.Join(ArrayUtils.slice(xpathParts, 0, count - 1), "/"));
 			}
-			if (nodeName == null) {
+			if(nodeName == null) {
 				//This is an attribute, edit the node above us
 				parent.setAttribute(getAttributeName(part), sval);
 				setDirty();
 				return; //Go ahead and bail
 			} else {
 				int position = getNodeIndex(part);
-				if (count == 0 && position != -1) {
+				if(count == 0 && position != -1) {
 					throw new XPathExpressionException("The root node cannot have multiple instances.");
 				}
 				newNode = doc.createElement(nodeName);
-				if (position == -1) {
-					if (count == 0) {
+				if(position == -1) {
+					if(count == 0) {
 						//Special case, we need to create a new element and put it in the root
 						doc.appendChild(newNode);
 					} else {
@@ -177,7 +177,7 @@ public class XMLDocument {
 					}
 				} else {
 					//It's an array
-					if (!(countChildren(parent) + 1 >= position)) {
+					if(!(countChildren(parent) + 1 >= position)) {
 						//If /root/node[1] exists, but they try to create /root/node[3], this exception is thrown
 						throw new XPathExpressionException("Will not tolerate a jump in node numbers, will only create the next node in sequence.");
 					}
@@ -185,18 +185,18 @@ public class XMLDocument {
 				}
 			}
 			count++;
-		} while (count < xpathParts.length);
+		} while(count < xpathParts.length);
 		newNode.setTextContent(sval);
 		setDirty();
 	}
 
 	private int countChildren(Element e) {
 		Node child = e.getFirstChild();
-		if (child == null) {
+		if(child == null) {
 			return 0;
 		}
 		int counter = 1;
-		while ((child = child.getNextSibling()) != null) {
+		while((child = child.getNextSibling()) != null) {
 			counter++;
 		}
 		return counter;
@@ -209,11 +209,11 @@ public class XMLDocument {
 	 * @return
 	 */
 	private static String getNodeName(String node) {
-		if (node.startsWith("@")) {
+		if(node.startsWith("@")) {
 			return null;
 		}
 		int firstBracket = node.indexOf("[");
-		if (firstBracket != -1) {
+		if(firstBracket != -1) {
 			return node.substring(0, firstBracket).trim();
 		} else {
 			return node.trim();
@@ -230,7 +230,7 @@ public class XMLDocument {
 	private static int getNodeIndex(String node) {
 		int indexFirst = node.indexOf("[");
 		int indexLast = node.indexOf("]");
-		if (indexFirst == -1) {
+		if(indexFirst == -1) {
 			return -1;
 		} else {
 			return Integer.parseInt(node.substring(indexFirst + 1, indexLast).trim());
@@ -244,7 +244,7 @@ public class XMLDocument {
 	 * @return
 	 */
 	private static String getAttributeName(String node) {
-		if (node.trim().startsWith("@")) {
+		if(node.trim().startsWith("@")) {
 			return node.trim().substring(1);
 		} else {
 			return null;
@@ -370,7 +370,7 @@ public class XMLDocument {
 	public List<String> getChildren(String xpath) throws XPathExpressionException {
 		List<String> list = new ArrayList<String>();
 		NodeList o = (NodeList) getXPath(xpath + "/child::*").evaluate(doc, XPathConstants.NODESET);
-		for (int i = 0; i < o.getLength(); i++) {
+		for(int i = 0; i < o.getLength(); i++) {
 			Node n = o.item(i);
 			list.add(n.getNodeName());
 		}
@@ -402,29 +402,29 @@ public class XMLDocument {
 	 * @return
 	 */
 	public String getXML(boolean pretty) {
-		if (uglyDirty || prettyDirty) {
+		if(uglyDirty || prettyDirty) {
 			try {
 				Transformer transformer = TransformerFactory.newInstance().newTransformer();
 				DOMSource source = new DOMSource(doc);
 				StringWriter writer = new StringWriter();
 				StreamResult result = new StreamResult(writer);
-				if (pretty) {
+				if(pretty) {
 					transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 					transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 				}
 				transformer.transform(source, result);
-				if (pretty) {
+				if(pretty) {
 					prettyRender = writer.toString();
 					prettyDirty = false;
 				} else {
 					uglyRender = writer.toString();
 					uglyDirty = false;
 				}
-			} catch (Exception ex) {
+			} catch(Exception ex) {
 				throw new RuntimeException(ex);
 			}
 		}
-		if (pretty) {
+		if(pretty) {
 			return prettyRender;
 		} else {
 			return uglyRender;

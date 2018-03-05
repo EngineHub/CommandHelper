@@ -115,7 +115,7 @@ public interface ArrayAccess extends Mixed, Sizeable {
 		 * @param array
 		 */
 		public ArrayAccessIterator(ArrayAccess array) {
-			if (array.isAssociative()) {
+			if(array.isAssociative()) {
 				throw new RuntimeException();
 			}
 			this.array = array;
@@ -153,8 +153,8 @@ public interface ArrayAccess extends Mixed, Sizeable {
 		 * @param from The value to search from. Any values after this are incremented, and values before it are not.
 		 */
 		public void incrementBlacklistAfter(int from) {
-			for (int i = 0; i < blacklist.length; i++) {
-				if (blacklist[i] > from) {
+			for(int i = 0; i < blacklist.length; i++) {
+				if(blacklist[i] > from) {
 					blacklist[i]++;
 				}
 			}
@@ -167,7 +167,7 @@ public interface ArrayAccess extends Mixed, Sizeable {
 		 * @param index The index to add to the blacklist.
 		 */
 		public void addToBlacklist(int index) {
-			if (blacklistSize == blacklist.length) {
+			if(blacklistSize == blacklist.length) {
 				int[] bl = new int[blacklist.length * 2];
 				Arrays.fill(bl, -1);
 				System.arraycopy(blacklist, 0, bl, 0, blacklist.length);
@@ -185,8 +185,8 @@ public interface ArrayAccess extends Mixed, Sizeable {
 		 * @return True if this value should be skipped.
 		 */
 		public boolean isBlacklisted(int index) {
-			for (int v : blacklist) {
-				if (v == index) {
+			for(int v : blacklist) {
+				if(v == index) {
 					return true;
 				}
 			}

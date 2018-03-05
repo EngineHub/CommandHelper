@@ -23,7 +23,7 @@ public class FieldMirror extends AbstractElementMirror {
 		Object _value = null;
 		try {
 			_value = field.get(null);
-		} catch (IllegalArgumentException | IllegalAccessException ex) {
+		} catch(IllegalArgumentException | IllegalAccessException ex) {
 			//
 		}
 		this.value = _value;

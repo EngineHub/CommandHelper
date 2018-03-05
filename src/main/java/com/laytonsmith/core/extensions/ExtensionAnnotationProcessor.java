@@ -53,11 +53,11 @@ public class ExtensionAnnotationProcessor extends AbstractProcessor {
 		boolean isExtensionWithLifecycleClass = false;
 
 		// Find all annotations in this environment with the MSExtension annotation.
-		for (Element possible : roundEnv.getElementsAnnotatedWith(MSExtension.class)) {
+		for(Element possible : roundEnv.getElementsAnnotatedWith(MSExtension.class)) {
 			StreamUtils.GetSystemOut().println("Processing " + possible);
 
 			// Make sure this compile unit exposes only one lifecycle class
-			if (found > 0) {
+			if(found > 0) {
 				error("A given compile unit (IE, Jar file) may contain only"
 						+ " ONE lifecycle class!", possible);
 				continue;
@@ -68,7 +68,7 @@ public class ExtensionAnnotationProcessor extends AbstractProcessor {
 			// Manually load the class, as the class provided by the element isn't sufficient.
 			try {
 				clazz = getClassFromName(possible.toString());
-			} catch (ClassNotFoundException ex) {
+			} catch(ClassNotFoundException ex) {
 				Logger.getLogger(ExtensionAnnotationProcessor.class.getName()).log(Level.SEVERE, null, ex);
 				continue;
 			}
@@ -76,26 +76,26 @@ public class ExtensionAnnotationProcessor extends AbstractProcessor {
 			Set<Modifier> modifiers = possible.getModifiers();
 
 			// The class must not be abstract.
-			if (modifiers.contains(Modifier.ABSTRACT)) {
+			if(modifiers.contains(Modifier.ABSTRACT)) {
 				error("Lifecycle classes must not be declared abstract!", possible);
 				continue;
 			}
 
 			// The class must be static.
-			if (!modifiers.contains(Modifier.PUBLIC)) {
+			if(!modifiers.contains(Modifier.PUBLIC)) {
 				error("Lifecycle classes must be declared public!", possible);
 				continue;
 			}
 
 			// If the class is an embedded class, it must be declared static as well as public.
-			if (clazz.isMemberClass() && !modifiers.contains(Modifier.STATIC)) {
+			if(clazz.isMemberClass() && !modifiers.contains(Modifier.STATIC)) {
 				error("Lifecycle class must be declared static when wrapped "
 						+ "by an outer class!", possible);
 				continue;
 			}
 
 			// The class must extend Extension.class
-			if (!Extension.class.isAssignableFrom(clazz)) {
+			if(!Extension.class.isAssignableFrom(clazz)) {
 				error("Lifecycle class must extend AbstractExtension!", possible);
 				continue;
 			}
@@ -104,15 +104,15 @@ public class ExtensionAnnotationProcessor extends AbstractProcessor {
 
 			// Let's get the annotation instance pertaining to this class, so we
 			// can get the name.
-			for (Annotation a : clazz.getAnnotations()) {
-				if (a instanceof MSExtension) {
+			for(Annotation a : clazz.getAnnotations()) {
+				if(a instanceof MSExtension) {
 					annotation = (MSExtension) a;
 				}
 			}
 
 			// We really shouldn't ever get here, because of the call used in the
 			// for loop above, but handle it anyway.
-			if (annotation == null) {
+			if(annotation == null) {
 				error("Lifecycle class must be annotated with MSExtension!", possible);
 				continue;
 			}

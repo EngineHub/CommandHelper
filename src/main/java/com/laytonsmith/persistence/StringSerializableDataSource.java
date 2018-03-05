@@ -74,14 +74,14 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 	@Override
 	protected final void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
 		doPopulate = true;
-		if (hasChanges) {
+		if(hasChanges) {
 			hasChanges = false;
-			if (rollback) {
+			if(rollback) {
 				populate();
 			} else {
 				try {
 					writeData(dm, serializeModel());
-				} catch (ReadOnlyException ex) {
+				} catch(ReadOnlyException ex) {
 					//This shouldn't happen, because we won't have been allowed to set any 
 					Logger.getLogger(StringSerializableDataSource.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -91,8 +91,8 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 
 	@Override
 	public void populate() throws DataSourceException {
-		if (inTransaction()) {
-			if (doPopulate) {
+		if(inTransaction()) {
+			if(doPopulate) {
 				doPopulate = false;
 			} else {
 				return;
@@ -101,7 +101,7 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 		String data;
 		try {
 			data = getConnectionMixin().getData();
-		} catch (DataSourceException | IOException e) {
+		} catch(DataSourceException | IOException e) {
 			throw new DataSourceException("Could not populate the data source (" + uri + ") with data: " + e.getMessage(), e);
 		}
 		populateModel(data);
@@ -111,8 +111,8 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 	public Set<String[]> keySet(String[] keyBase) {
 		Set<String[]> keys = new HashSet<>();
 		String kb = StringUtils.Join(keyBase, ".");
-		for (String[] key : model.keySet()) {
-			if (StringUtils.Join(key, ".").startsWith(kb)) {
+		for(String[] key : model.keySet()) {
+			if(StringUtils.Join(key, ".").startsWith(kb)) {
 				keys.add(key);
 			}
 		}
@@ -126,15 +126,15 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 
 	@Override
 	protected final boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, IOException, DataSourceException {
-		if (modifiers.contains(DataSourceModifier.READONLY)) {
+		if(modifiers.contains(DataSourceModifier.READONLY)) {
 			throw new ReadOnlyException();
 		}
 		String old = get(key);
-		if ((old == null && value == null) || (old != null && old.equals(value))) {
+		if((old == null && value == null) || (old != null && old.equals(value))) {
 			return false;
 		}
 		model.set(key, value);
-		if (!inTransaction()) {
+		if(!inTransaction()) {
 			//We need to output the model now
 			writeData(dm, serializeModel());
 		} else {

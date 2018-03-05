@@ -65,11 +65,11 @@ public class Commands {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			MCCommandMap map = s.getCommandMap();
-			if (map == null) {
+			if(map == null) {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
 			}
 			MCCommand cmd = map.getCommand(args[0].val());
-			if (cmd == null) {
+			if(cmd == null) {
 				throw new CRENotFoundException("Command not found, did you forget to register it?", t);
 			}
 			customExec(t, environment, cmd, args[1]);
@@ -85,7 +85,7 @@ public class Commands {
 		 * @param arg
 		 */
 		public static void customExec(Target t, Environment environment, MCCommand cmd, Construct arg) {
-			if (arg instanceof CClosure) {
+			if(arg instanceof CClosure) {
 				onTabComplete.remove(cmd.getName());
 				onTabComplete.put(cmd.getName(), (CClosure) arg);
 			} else {
@@ -139,11 +139,11 @@ public class Commands {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
-			if (map == null) {
+			if(map == null) {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
 			}
 			MCCommand cmd = map.getCommand(args[0].val());
-			if (cmd == null) {
+			if(cmd == null) {
 				throw new CRENotFoundException("Command not found, did you forget to register it?", t);
 			}
 			return CBoolean.get(map.unregister(cmd));
@@ -192,47 +192,47 @@ public class Commands {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
-			if (map == null) {
+			if(map == null) {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
 			}
 			MCCommand cmd = map.getCommand(args[0].val().toLowerCase());
 			boolean isnew = false;
-			if (cmd == null) {
+			if(cmd == null) {
 				isnew = true;
 				cmd = StaticLayer.GetConvertor().getNewCommand(args[0].val().toLowerCase());
 			}
-			if (args[1] instanceof CArray) {
+			if(args[1] instanceof CArray) {
 				CArray ops = (CArray) args[1];
-				if (ops.containsKey("permission")) {
+				if(ops.containsKey("permission")) {
 					cmd.setPermission(ops.get("permission", t).val());
 				}
-				if (ops.containsKey("description")) {
+				if(ops.containsKey("description")) {
 					cmd.setDescription(ops.get("description", t).val());
 				}
-				if (ops.containsKey("usage")) {
+				if(ops.containsKey("usage")) {
 					cmd.setUsage(ops.get("usage", t).val());
 				}
-				if (ops.containsKey("noPermMsg")) {
+				if(ops.containsKey("noPermMsg")) {
 					cmd.setPermissionMessage(ops.get("noPermMsg", t).val());
 				}
-				if (ops.containsKey("aliases")) {
-					if (ops.get("aliases", t) instanceof CArray) {
+				if(ops.containsKey("aliases")) {
+					if(ops.get("aliases", t) instanceof CArray) {
 						List<Construct> ca = ((CArray) ops.get("aliases", t)).asList();
 						List<String> aliases = new ArrayList<String>();
-						for (Construct c : ca) {
+						for(Construct c : ca) {
 							aliases.add(c.val().toLowerCase());
 						}
 						cmd.setAliases(aliases);
 					}
 				}
-				if (ops.containsKey("executor")) {
+				if(ops.containsKey("executor")) {
 					set_executor.customExec(t, environment, cmd, ops.get("executor", t));
 				}
-				if (ops.containsKey("tabcompleter")) {
+				if(ops.containsKey("tabcompleter")) {
 					set_tabcompleter.customExec(t, environment, cmd, ops.get("tabcompleter", t));
 				}
 				boolean success = true;
-				if (isnew) {
+				if(isnew) {
 					success = map.register(Implementation.GetServerType().getBranding(), cmd);
 				}
 				return CBoolean.get(success);
@@ -330,11 +330,11 @@ public class Commands {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
-			if (map == null) {
+			if(map == null) {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
 			}
 			MCCommand cmd = map.getCommand(args[0].val());
-			if (cmd == null) {
+			if(cmd == null) {
 				throw new CRENotFoundException("Command not found did you forget to register it?", t);
 			}
 			customExec(t, environment, cmd, args[1]);
@@ -350,7 +350,7 @@ public class Commands {
 		 * @param arg
 		 */
 		public static void customExec(Target t, Environment environment, MCCommand cmd, Construct arg) {
-			if (arg instanceof CClosure) {
+			if(arg instanceof CClosure) {
 				onCommand.remove(cmd.getName());
 				onCommand.put(cmd.getName(), (CClosure) arg);
 			} else {
@@ -403,17 +403,17 @@ public class Commands {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
-			if (map == null) {
+			if(map == null) {
 				return CNull.NULL;
 			}
 			Collection<MCCommand> commands = map.getCommands();
 			CArray ret = CArray.GetAssociativeArray(t);
-			for (MCCommand command : commands) {
+			for(MCCommand command : commands) {
 				CArray ca = CArray.GetAssociativeArray(t);
 				ca.set("name", new CString(command.getName(), t), t);
 				ca.set("description", new CString(command.getDescription(), t), t);
 				Construct permission;
-				if (command.getPermission() == null) {
+				if(command.getPermission() == null) {
 					permission = CNull.NULL;
 				} else {
 					permission = new CString(command.getPermission(), t);
@@ -422,7 +422,7 @@ public class Commands {
 				ca.set("nopermmsg", new CString(command.getPermissionMessage(), t), t);
 				ca.set("usage", new CString(command.getUsage(), t), t);
 				CArray aliases = new CArray(t);
-				for (String a : command.getAliases()) {
+				for(String a : command.getAliases()) {
 					aliases.push(new CString(a, t), t);
 				}
 				ca.set("aliases", aliases, t);
@@ -474,7 +474,7 @@ public class Commands {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
-			if (map != null) {
+			if(map != null) {
 				map.clearCommands();
 			}
 			return CVoid.VOID;

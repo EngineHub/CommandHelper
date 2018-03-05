@@ -26,16 +26,16 @@ public class MSLPMaker {
 
 	public static void start(String path) throws IOException {
 		File start = new File(path);
-		if (!start.exists()) {
+		if(!start.exists()) {
 			StreamUtils.GetSystemErr().println("The specified file does not exist!");
 			return;
 		}
 
 		File output = new File(start.getParentFile(), start.getName() + ".mslp");
-		if (output.exists()) {
+		if(output.exists()) {
 			pl("The file " + output.getName() + " already exists, would you like to overwrite? (Y/N)");
 			String overwrite = prompt();
-			if (!overwrite.equalsIgnoreCase("y")) {
+			if(!overwrite.equalsIgnoreCase("y")) {
 				return;
 			}
 		}
@@ -43,42 +43,42 @@ public class MSLPMaker {
 		AliasCore.LocalPackage localPackage = new AliasCore.LocalPackage();
 		AliasCore.GetAuxAliases(start, localPackage);
 		boolean error = false;
-		for (AliasCore.LocalPackage.FileInfo fi : localPackage.getMSFiles()) {
+		for(AliasCore.LocalPackage.FileInfo fi : localPackage.getMSFiles()) {
 			try {
 				MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents(), fi.file(), true));
-			} catch (ConfigCompileException e) {
+			} catch(ConfigCompileException e) {
 				error = true;
 				ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", null);
-			} catch (ConfigCompileGroupException ex) {
+			} catch(ConfigCompileGroupException ex) {
 				error = true;
 				ConfigRuntimeException.HandleUncaughtException(ex, null);
 			}
 		}
 		List<Script> allScripts = new ArrayList<Script>();
-		for (AliasCore.LocalPackage.FileInfo fi : localPackage.getMSAFiles()) {
+		for(AliasCore.LocalPackage.FileInfo fi : localPackage.getMSAFiles()) {
 			List<Script> tempScripts;
 			try {
 				tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents(), fi.file(), false));
-				for (Script s : tempScripts) {
+				for(Script s : tempScripts) {
 					try {
 						s.compile();
 						s.checkAmbiguous(allScripts);
 						allScripts.add(s);
-					} catch (ConfigCompileException e) {
+					} catch(ConfigCompileException e) {
 						error = true;
 						ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", null);
-					} catch (ConfigCompileGroupException e) {
+					} catch(ConfigCompileGroupException e) {
 						error = true;
 						ConfigRuntimeException.HandleUncaughtException(e, "Compile errors in script. Compilation will attempt to continue, however.", null);
 					}
 				}
-			} catch (ConfigCompileException e) {
+			} catch(ConfigCompileException e) {
 				error = true;
 				ConfigRuntimeException.HandleUncaughtException(e, "Could not compile file " + fi.file() + " compilation will halt.", null);
 			}
 		}
 
-		if (!error) {
+		if(!error) {
 			ZipMaker.MakeZip(start, output.getName());
 
 			pl(GREEN + "The MSLP file has been created at " + output.getAbsolutePath() + reset());

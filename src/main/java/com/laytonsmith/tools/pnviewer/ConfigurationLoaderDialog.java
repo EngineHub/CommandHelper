@@ -32,7 +32,7 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				boolean isLocal = false;
-				if (localOrRemoteGroup.getSelection() == localRadioButton.getModel()) {
+				if(localOrRemoteGroup.getSelection() == localRadioButton.getModel()) {
 					isLocal = true;
 				}
 				setLocalEnabled(isLocal);
@@ -46,10 +46,10 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (validateFields()) {
+				if(validateFields()) {
 					ConfigurationLoaderDialog.this.setVisible(false);
-					if (finishAction != null) {
-						if (localOrRemoteGroup.isSelected(localRadioButton.getModel())) {
+					if(finishAction != null) {
+						if(localOrRemoteGroup.isSelected(localRadioButton.getModel())) {
 							finishAction.data(true, localFileField.getText(), "", 1, "", "");
 						} else {
 							finishAction.data(false, "", hostField.getText(),
@@ -88,7 +88,7 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fc = new JFileChooser();
 				int returnVal = fc.showOpenDialog(ConfigurationLoaderDialog.this);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
+				if(returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = fc.getSelectedFile();
 					toPopulate.setText(file.getAbsolutePath());
 				}
@@ -103,7 +103,7 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 	 * @param fields
 	 */
 	private void registerEnterHandler(final JButton button, JTextField... fields) {
-		for (JTextField field : fields) {
+		for(JTextField field : fields) {
 			field.addActionListener(new ActionListener() {
 
 				@Override
@@ -120,9 +120,9 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	private String getValidationError() {
-		if (localOrRemoteGroup.isSelected(localRadioButton.getModel())) {
+		if(localOrRemoteGroup.isSelected(localRadioButton.getModel())) {
 			String localFile = localFileField.getText();
-			if (!new File(localFile).exists()) {
+			if(!new File(localFile).exists()) {
 				return "File specified doesn't exist.";
 			}
 		} else {
@@ -131,19 +131,19 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 			String remote = remoteFileField.getText().trim();
 			try {
 				new URI(host);
-			} catch (URISyntaxException ex) {
+			} catch(URISyntaxException ex) {
 				return ex.getMessage();
 			}
 			int port;
 			try {
 				port = Integer.parseInt(sport);
-			} catch (NumberFormatException ex) {
+			} catch(NumberFormatException ex) {
 				return "Port must be a number.";
 			}
-			if (port < 1 || port > 65535) {
+			if(port < 1 || port > 65535) {
 				return "Port must be between 1 and 65535";
 			}
-			if ("".equals(remote)) {
+			if("".equals(remote)) {
 				return "No remote file specified.";
 			}
 		}
@@ -315,19 +315,19 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 		 * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
 		 */
 		try {
-			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-				if ("Nimbus".equals(info.getName())) {
+			for(javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+				if("Nimbus".equals(info.getName())) {
 					javax.swing.UIManager.setLookAndFeel(info.getClassName());
 					break;
 				}
 			}
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			java.util.logging.Logger.getLogger(ConfigurationLoaderDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (InstantiationException ex) {
+		} catch(InstantiationException ex) {
 			java.util.logging.Logger.getLogger(ConfigurationLoaderDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (IllegalAccessException ex) {
+		} catch(IllegalAccessException ex) {
 			java.util.logging.Logger.getLogger(ConfigurationLoaderDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
+		} catch(javax.swing.UnsupportedLookAndFeelException ex) {
 			java.util.logging.Logger.getLogger(ConfigurationLoaderDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
 		//</editor-fold>

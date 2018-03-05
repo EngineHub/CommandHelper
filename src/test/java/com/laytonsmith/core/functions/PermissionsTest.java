@@ -23,43 +23,43 @@ import static org.mockito.Mockito.mock;
 //This should be re-implemented once permissions aren't static anymore.
 /**
  *
- * 
+ *
  */
-
 //@RunWith(PowerMockRunner.class)
 //@PrepareForTest({Static.class, CommandHelperPlugin.class})
 public class PermissionsTest {
-    MCServer fakeServer;
-    MCPlayer fakePlayer;
-    com.laytonsmith.core.environments.Environment env;
 
-    public PermissionsTest() {
-    }
+	MCServer fakeServer;
+	MCPlayer fakePlayer;
+	com.laytonsmith.core.environments.Environment env;
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        Prefs.init(new File("plugins/CommandHelper/preferences.ini"));
-    }
+	public PermissionsTest() {
+	}
 
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
+	@BeforeClass
+	public static void setUpClass() throws Exception {
+		Prefs.init(new File("plugins/CommandHelper/preferences.ini"));
+	}
 
-    @Before
-    public void setUp() throws Exception {        
-        fakePlayer = StaticTest.GetOnlinePlayer();
-        MCWorld fakeWorld = mock(MCWorld.class);
+	@AfterClass
+	public static void tearDownClass() throws Exception {
+	}
+
+	@Before
+	public void setUp() throws Exception {
+		fakePlayer = StaticTest.GetOnlinePlayer();
+		MCWorld fakeWorld = mock(MCWorld.class);
 //        when(fakeWorld.getName()).thenReturn("world");
 //        when(fakePlayer.getWorld()).thenReturn(fakeWorld);
-        fakeServer = StaticTest.GetFakeServer();
+		fakeServer = StaticTest.GetFakeServer();
 		env = Static.GenerateStandaloneEnvironment();
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
-    }
+	}
 
-    @After
-    public void tearDown() {
-    }
-    
+	@After
+	public void tearDown() {
+	}
+
 //    @Test
 //    public void testHasPermission() throws ConfigCompileException{
 //        when(fakePerms.hasPermission(fakePlayer.getName(), "this.is.a.test")).thenReturn(true);
@@ -81,9 +81,8 @@ public class PermissionsTest {
 //        StaticTest.RunCommand("simple:/cmd = tmsg(player(), 'hi')", fakePlayer, "/cmd", env);
 //        verify(fakePerms, atLeastOnce()).hasPermission(name, "commandhelper.alias.simple", world);
 //    }
-    
-    //TODO: Get this working again. The behavior is correct, but somewhere along the line, the perms that actually
-    //gets used ends up not being the same as fakePerms
+	//TODO: Get this working again. The behavior is correct, but somewhere along the line, the perms that actually
+	//gets used ends up not being the same as fakePerms
 //    @Test
 //    public void testLongPermissions() throws ConfigCompileException{
 //        when(fakePlayer.isOp()).thenReturn(false);
@@ -95,7 +94,6 @@ public class PermissionsTest {
 //        StaticTest.RunCommand("arbitrary.permission:/cmd = tmsg(player(), 'hi')", fakePlayer, "/cmd");
 //        verify(fakePerms, atLeastOnce()).hasPermission(world, name, "arbitrary.permission");
 //    }
-    
 //    @Test
 //    public void testGroupPermissions() throws ConfigCompileException{
 //        when(fakePlayer.isOp()).thenReturn(false);

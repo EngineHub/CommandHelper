@@ -68,7 +68,7 @@ public enum MCBlockFace {
 	}
 
 	public MCBlockFace getOppositeFace() {
-		switch (this) {
+		switch(this) {
 			case NORTH:
 				return MCBlockFace.SOUTH;
 

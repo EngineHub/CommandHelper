@@ -69,22 +69,22 @@ public class BasicLogic {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			for (ParseTree node : nodes) {
-				if (node.getData() instanceof CIdentifier) {
+			for(ParseTree node : nodes) {
+				if(node.getData() instanceof CIdentifier) {
 					return new ifelse().execs(t, env, parent, nodes);
 				}
 			}
 			ParseTree condition = nodes[0];
 			ParseTree __if = nodes[1];
 			ParseTree __else = null;
-			if (nodes.length == 3) {
+			if(nodes.length == 3) {
 				__else = nodes[2];
 			}
 
-			if (Static.getBoolean(parent.seval(condition, env))) {
+			if(Static.getBoolean(parent.seval(condition, env))) {
 				return parent.seval(__if, env);
 			} else {
-				if (__else == null) {
+				if(__else == null) {
 					return CVoid.VOID;
 				}
 				return parent.seval(__else, env);
@@ -145,20 +145,20 @@ public class BasicLogic {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> args, FileOptions fileOptions) throws ConfigCompileException {
 			//Check for too many/few arguments
-			if (args.size() < 2) {
+			if(args.size() < 2) {
 				throw new ConfigCompileException("Too few arguments passed to if()", t);
 			}
-			if (args.size() > 3) {
+			if(args.size() > 3) {
 				throw new ConfigCompileException("if() can only have 3 parameters", t);
 			}
-			if (args.get(0).isConst()) {
+			if(args.get(0).isConst()) {
 				// We can optimize this one way or the other, since the condition is const
-				if (Static.getBoolean(args.get(0).getData())) {
+				if(Static.getBoolean(args.get(0).getData())) {
 					// It's true, return the true condition
 					return args.get(1);
 				} else // If there are three args, return the else condition, otherwise,
 				// have it entirely remove us from the parse tree.
-				if (args.size() == 3) {
+				if(args.size() == 3) {
 					return args.get(2);
 				} else {
 					return Optimizable.REMOVE_ME;
@@ -174,16 +174,16 @@ public class BasicLogic {
 			// The caveat is that if the inner if statement has an else statement (or is ifelse)
 			// or there are other nodes inside the statement, or we have an else clause
 			// we cannot do this optimization, as it then has side effects.
-			if (args.get(1).getData() instanceof CFunction && args.get(1).getData().val().equals("if") && args.size() == 2) {
+			if(args.get(1).getData() instanceof CFunction && args.get(1).getData().val().equals("if") && args.size() == 2) {
 				ParseTree _if = args.get(1);
-				if (_if.getChildren().size() == 2) {
+				if(_if.getChildren().size() == 2) {
 					// All the conditions are met, move this up
 					ParseTree myCondition = args.get(0);
 					ParseTree theirCondition = _if.getChildAt(0);
 					ParseTree theirCode = _if.getChildAt(1);
 					ParseTree andClause = new ParseTree(new CFunction(and, t), fileOptions);
 					// If it's already an and(), just tack the other condition on
-					if (myCondition.getData() instanceof CFunction && myCondition.getData().val().equals(and)) {
+					if(myCondition.getData() instanceof CFunction && myCondition.getData().val().equals(and)) {
 						andClause = myCondition;
 						andClause.addChild(theirCondition);
 					} else {
@@ -259,24 +259,24 @@ public class BasicLogic {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			if (nodes.length < 2) {
+			if(nodes.length < 2) {
 				throw new CREInsufficientArgumentsException("ifelse expects at least 2 arguments", t);
 			}
-			for (int i = 0; i <= nodes.length - 2; i += 2) {
+			for(int i = 0; i <= nodes.length - 2; i += 2) {
 				ParseTree statement = nodes[i];
 				ParseTree code = nodes[i + 1];
 				Construct evalStatement = parent.seval(statement, env);
-				if (evalStatement instanceof CIdentifier) {
+				if(evalStatement instanceof CIdentifier) {
 					evalStatement = parent.seval(((CIdentifier) evalStatement).contained(), env);
 				}
-				if (Static.getBoolean(evalStatement)) {
+				if(Static.getBoolean(evalStatement)) {
 					Construct ret = env.getEnv(GlobalEnv.class).GetScript().eval(code, env);
 					return ret;
 				}
 			}
-			if (nodes.length % 2 == 1) {
+			if(nodes.length % 2 == 1) {
 				Construct ret = env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
-				if (ret instanceof CIdentifier) {
+				if(ret instanceof CIdentifier) {
 					return parent.seval(((CIdentifier) ret).contained(), env);
 				} else {
 					return ret;
@@ -378,50 +378,50 @@ public class BasicLogic {
 			Construct value = parent.seval(nodes[0], env);
 			equals equals = new equals();
 			try {
-				for (int i = 1; i <= nodes.length - 2; i += 2) {
+				for(int i = 1; i <= nodes.length - 2; i += 2) {
 					ParseTree statement = nodes[i];
 					ParseTree code = nodes[i + 1];
 					Construct evalStatement = parent.seval(statement, env);
-					if (evalStatement instanceof CSlice) { //More specific subclass of array, we can do more optimal handling here
+					if(evalStatement instanceof CSlice) { //More specific subclass of array, we can do more optimal handling here
 						long rangeLeft = ((CSlice) evalStatement).getStart();
 						long rangeRight = ((CSlice) evalStatement).getFinish();
-						if (value instanceof CInt) {
+						if(value instanceof CInt) {
 							long v = Static.getInt(value, t);
-							if ((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
+							if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 									|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
 									|| (rangeLeft == rangeRight && v == rangeLeft)) {
 								return parent.seval(code, env);
 							}
 						}
-					} else if (evalStatement instanceof CArray) {
-						for (String index : ((CArray) evalStatement).stringKeySet()) {
+					} else if(evalStatement instanceof CArray) {
+						for(String index : ((CArray) evalStatement).stringKeySet()) {
 							Construct inner = ((CArray) evalStatement).get(index, t);
-							if (inner instanceof CSlice) {
+							if(inner instanceof CSlice) {
 								long rangeLeft = ((CSlice) inner).getStart();
 								long rangeRight = ((CSlice) inner).getFinish();
-								if (value instanceof CInt) {
+								if(value instanceof CInt) {
 									long v = Static.getInt(value, t);
-									if ((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
+									if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 											|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
 											|| (rangeLeft == rangeRight && v == rangeLeft)) {
 										return parent.seval(code, env);
 									}
 								}
-							} else if (equals.exec(t, env, value, inner).getBoolean()) {
+							} else if(equals.exec(t, env, value, inner).getBoolean()) {
 								return parent.seval(code, env);
 							}
 						}
-					} else if (equals.exec(t, env, value, evalStatement).getBoolean()) {
+					} else if(equals.exec(t, env, value, evalStatement).getBoolean()) {
 						return parent.seval(code, env);
 					}
 				}
-				if (nodes.length % 2 == 0) {
+				if(nodes.length % 2 == 0) {
 					return parent.seval(nodes[nodes.length - 1], env);
 				}
-			} catch (LoopBreakException ex) {
+			} catch(LoopBreakException ex) {
 				//Ignored, unless the value passed in is greater than 1, in which case
 				//we rethrow.
-				if (ex.getTimes() > 1) {
+				if(ex.getTimes() > 1) {
 					ex.setTimes(ex.getTimes() - 1);
 					throw ex;
 				}
@@ -504,7 +504,7 @@ public class BasicLogic {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() > 1 && children.get(1).getData() instanceof CFunction
+			if(children.size() > 1 && children.get(1).getData() instanceof CFunction
 					&& new StringHandling.sconcat().getName().equals(children.get(1).getData().val())) {
 				//This is the brace/case/default usage of switch, probably. We need
 				//to refactor the data into the old switch format.
@@ -515,30 +515,30 @@ public class BasicLogic {
 				CArray conditions = new CArray(t);
 				boolean inCase = false;
 				boolean inDefault = false;
-				for (int i = 0; i < c.size(); i++) {
+				for(int i = 0; i < c.size(); i++) {
 					//Need up to a 2 lookahead
 					ParseTree c1 = c.get(i);
 					ParseTree c2 = null;
-					if (i + 1 < c.size()) {
+					if(i + 1 < c.size()) {
 						c2 = c.get(i + 1);
 					}
-					if (CKeyword.isKeyword(c1, "case")) {
+					if(CKeyword.isKeyword(c1, "case")) {
 						//If this is a case AND the next one is
 						//a label, this is a case.
-						if (c2 != null && c2.getData() instanceof CLabel) {
-							if (inDefault) {
+						if(c2 != null && c2.getData() instanceof CLabel) {
+							if(inDefault) {
 								//Default must come last
 								throw new ConfigCompileException("Unexpected case; the default case must come last.", t);
 							}
-							if (lastCodeBlock.size() > 0) {
+							if(lastCodeBlock.size() > 0) {
 								//Ok, need to push some stuff on to the new children
 								newChildren.add(new ParseTree(conditions, c2.getFileOptions()));
 								conditions = new CArray(t);
 								ParseTree codeBlock = new ParseTree(new CFunction(new StringHandling.sconcat().getName(), t), c2.getFileOptions());
-								for (ParseTree line : lastCodeBlock) {
+								for(ParseTree line : lastCodeBlock) {
 									codeBlock.addChild(line);
 								}
-								if (codeBlock.getChildren().size() == 1) {
+								if(codeBlock.getChildren().size() == 1) {
 									codeBlock = codeBlock.getChildAt(0);
 								}
 								newChildren.add(codeBlock);
@@ -557,22 +557,22 @@ public class BasicLogic {
 							continue;
 						}
 					}
-					if (c1.getData() instanceof CLabel && CKeyword.isKeyword(((CLabel) c1.getData()).cVal(), "default")) {
+					if(c1.getData() instanceof CLabel && CKeyword.isKeyword(((CLabel) c1.getData()).cVal(), "default")) {
 						//Default case
-						if (lastCodeBlock.size() > 0) {
+						if(lastCodeBlock.size() > 0) {
 							//Ok, need to push some stuff on to the new children
 							newChildren.add(new ParseTree(conditions, c1.getFileOptions()));
 							conditions = new CArray(t);
 							ParseTree codeBlock = new ParseTree(new CFunction(new StringHandling.sconcat().getName(), t), c1.getFileOptions());
-							for (ParseTree line : lastCodeBlock) {
+							for(ParseTree line : lastCodeBlock) {
 								codeBlock.addChild(line);
 							}
-							if (codeBlock.getChildren().size() == 1) {
+							if(codeBlock.getChildren().size() == 1) {
 								codeBlock = codeBlock.getChildAt(0);
 							}
 							newChildren.add(codeBlock);
 							lastCodeBlock = new ArrayList<>();
-						} else if (conditions.size() > 0) {
+						} else if(conditions.size() > 0) {
 							//Special case where they have
 							//case 0:
 							//default:
@@ -590,19 +590,19 @@ public class BasicLogic {
 					}
 
 					//Loop forward until we get to the next case
-					if (inCase || inDefault) {
+					if(inCase || inDefault) {
 						lastCodeBlock.add(c1);
 					}
 				}
-				if (conditions.size() > 0) {
+				if(conditions.size() > 0) {
 					newChildren.add(new ParseTree(conditions, children.get(0).getFileOptions()));
 				}
-				if (lastCodeBlock.size() > 0) {
+				if(lastCodeBlock.size() > 0) {
 					ParseTree codeBlock = new ParseTree(new CFunction(new StringHandling.sconcat().getName(), t), lastCodeBlock.get(0).getFileOptions());
-					for (ParseTree line : lastCodeBlock) {
+					for(ParseTree line : lastCodeBlock) {
 						codeBlock.addChild(line);
 					}
-					if (codeBlock.getChildren().size() == 1) {
+					if(codeBlock.getChildren().size() == 1) {
 						codeBlock = codeBlock.getChildAt(0);
 					}
 					newChildren.add(codeBlock);
@@ -620,7 +620,7 @@ public class BasicLogic {
 
 				@Override
 				public int compare(Construct t, Construct t1) {
-					if (EQUALS.exec(Target.UNKNOWN, null, t, t1).getBoolean()) {
+					if(EQUALS.exec(Target.UNKNOWN, null, t, t1).getBoolean()) {
 						return 0;
 					} else {
 						return t.val().compareTo(t1.val());
@@ -628,17 +628,17 @@ public class BasicLogic {
 				}
 			});
 			final boolean hasDefaultCase = (children.size() & 0b00000001) == 0; // size % 2 == 0 -> Even number means there is a default.
-			for (int i = 1; i < children.size(); i += 2) {
-				if (hasDefaultCase && i == children.size() - 1) {
+			for(int i = 1; i < children.size(); i += 2) {
+				if(hasDefaultCase && i == children.size() - 1) {
 					// This is the default case code. Stop checking here.
 					break;
 				}
 				//To standardize the rest of the code (and to optimize), go ahead and resolve array()
-				if (children.get(i).getData() instanceof CFunction
+				if(children.get(i).getData() instanceof CFunction
 						&& new DataHandling.array().getName().equals(children.get(i).getData().val())) {
 					CArray data = new CArray(t);
-					for (ParseTree child : children.get(i).getChildren()) {
-						if (child.getData().isDynamic()) {
+					for(ParseTree child : children.get(i).getChildren()) {
+						if(child.getData().isDynamic()) {
 							throw new ConfigCompileException(notConstant, child.getTarget());
 						}
 						data.push(child.getData(), t);
@@ -646,21 +646,21 @@ public class BasicLogic {
 					children.set(i, new ParseTree(data, children.get(i).getFileOptions()));
 				}
 				//Now we validate that the values are constant and non-repeating.
-				if (children.get(i).getData() instanceof CArray) {
+				if(children.get(i).getData() instanceof CArray) {
 					List<Construct> list = ((CArray) children.get(i).getData()).asList();
-					for (Construct c : list) {
-						if (c instanceof CSlice) {
-							for (Construct cc : ((CSlice) c).asList()) {
-								if (values.contains(cc)) {
+					for(Construct c : list) {
+						if(c instanceof CSlice) {
+							for(Construct cc : ((CSlice) c).asList()) {
+								if(values.contains(cc)) {
 									throw new ConfigCompileException(alreadyContains, cc.getTarget());
 								}
 								values.add(cc);
 							}
 						} else {
-							if (c.isDynamic()) {
+							if(c.isDynamic()) {
 								throw new ConfigCompileException(notConstant, c.getTarget());
 							}
-							if (values.contains(c)) {
+							if(values.contains(c)) {
 								throw new ConfigCompileException(alreadyContains, c.getTarget());
 							}
 							values.add(c);
@@ -668,17 +668,17 @@ public class BasicLogic {
 					}
 				} else {
 					Construct c = children.get(i).getData();
-					if (c.isDynamic()) {
+					if(c.isDynamic()) {
 						throw new ConfigCompileException(notConstant, c.getTarget());
 					}
-					if (values.contains(c)) {
+					if(values.contains(c)) {
 						throw new ConfigCompileException(alreadyContains, c.getTarget());
 					}
 					values.add(c);
 				}
 			}
 
-			if ((children.size() > 3 || (children.size() > 1 && children.get(1).getData() instanceof CArray))
+			if((children.size() > 3 || (children.size() > 1 && children.get(1).getData() instanceof CArray))
 					//No point in doing this optimization if there are only 3 args and the case is flat.
 					//Also, doing this check prevents an inifinite loop during optimization.
 					&& (children.size() > 0 && !children.get(0).getData().isDynamic())) {
@@ -686,28 +686,28 @@ public class BasicLogic {
 				//The item passed in is constant (or has otherwise been made constant)
 				//so we can go ahead and condense this down to the single code path
 				//in the switch.
-				for (int i = 1; i < children.size(); i += 2) {
+				for(int i = 1; i < children.size(); i += 2) {
 					Construct data = children.get(i).getData();
 
-					if (!(data instanceof CArray) || data instanceof CSlice) {
+					if(!(data instanceof CArray) || data instanceof CSlice) {
 						//Put it in an array to make the rest of this parsing easier.
 						data = new CArray(t);
 						((CArray) data).push(children.get(i).getData(), t);
 					}
-					for (Construct value : ((CArray) data).asList()) {
-						if (value instanceof CSlice) {
+					for(Construct value : ((CArray) data).asList()) {
+						if(value instanceof CSlice) {
 							long rangeLeft = ((CSlice) value).getStart();
 							long rangeRight = ((CSlice) value).getFinish();
-							if (children.get(0).getData() instanceof CInt) {
+							if(children.get(0).getData() instanceof CInt) {
 								long v = Static.getInt(children.get(0).getData(), t);
-								if ((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
+								if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 										|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
 										|| (rangeLeft == rangeRight && v == rangeLeft)) {
 									toReturn = children.get(i + 1);
 									break;
 								}
 							}
-						} else if (EQUALS.exec(t, null, children.get(0).getData(), value).getBoolean()) {
+						} else if(EQUALS.exec(t, null, children.get(0).getData(), value).getBoolean()) {
 							toReturn = children.get(i + 1);
 							break;
 						}
@@ -715,8 +715,8 @@ public class BasicLogic {
 				}
 				//None of the values match. Return the default case, if it exists, or remove the switch entirely
 				//if it doesn't.
-				if (toReturn == null) {
-					if (children.size() % 2 == 0) {
+				if(toReturn == null) {
+					if(children.size() % 2 == 0) {
 						toReturn = children.get(children.size() - 1);
 					} else {
 						return Optimizable.REMOVE_ME;
@@ -771,34 +771,34 @@ public class BasicLogic {
 
 		@Override
 		public CBoolean exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args.length <= 1) {
+			if(args.length <= 1) {
 				throw new CREInsufficientArgumentsException("At least two arguments must be passed to equals", t);
 			}
 			boolean referenceMatch = true;
-			for (int i = 0; i < args.length - 1; i++) {
-				if (args[i] != args[i + 1]) {
+			for(int i = 0; i < args.length - 1; i++) {
+				if(args[i] != args[i + 1]) {
 					referenceMatch = false;
 					break;
 				}
 			}
-			if (referenceMatch) {
+			if(referenceMatch) {
 				return CBoolean.TRUE;
 			}
-			if (Static.anyNulls(args)) {
+			if(Static.anyNulls(args)) {
 				boolean equals = true;
-				for (Construct c : args) {
-					if (!(c instanceof CNull)) {
+				for(Construct c : args) {
+					if(!(c instanceof CNull)) {
 						equals = false;
 					}
 				}
 				return CBoolean.get(equals);
 			}
-			if (Static.anyBooleans(args)) {
+			if(Static.anyBooleans(args)) {
 				boolean equals = true;
-				for (int i = 1; i < args.length; i++) {
+				for(int i = 1; i < args.length; i++) {
 					boolean arg1 = Static.getBoolean(args[i - 1]);
 					boolean arg2 = Static.getBoolean(args[i]);
-					if (arg1 != arg2) {
+					if(arg1 != arg2) {
 						equals = false;
 						break;
 					}
@@ -808,34 +808,34 @@ public class BasicLogic {
 
 			{
 				boolean equals = true;
-				for (int i = 1; i < args.length; i++) {
-					if (!args[i - 1].val().equals(args[i].val())) {
+				for(int i = 1; i < args.length; i++) {
+					if(!args[i - 1].val().equals(args[i].val())) {
 						equals = false;
 						break;
 					}
 				}
-				if (equals) {
+				if(equals) {
 					return CBoolean.TRUE;
 				}
 			}
 			try {
 				// Validate that these are numbers, so that getNumber doesn't throw an exception.
-				if (!ArgumentValidation.isNumber(args[0])) {
+				if(!ArgumentValidation.isNumber(args[0])) {
 					return CBoolean.FALSE;
 				}
 				boolean equals = true;
-				for (int i = 1; i < args.length; i++) {
-					if (!ArgumentValidation.isNumber(args[i])) {
+				for(int i = 1; i < args.length; i++) {
+					if(!ArgumentValidation.isNumber(args[i])) {
 						return CBoolean.FALSE;
 					}
 					double arg1 = Static.getNumber(args[i - 1], t);
 					double arg2 = Static.getNumber(args[i], t);
-					if (arg1 != arg2) {
+					if(arg1 != arg2) {
 						return CBoolean.FALSE;
 					}
 				}
 				return CBoolean.TRUE;
-			} catch (ConfigRuntimeException e) {
+			} catch(ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
 		}
@@ -931,11 +931,11 @@ public class BasicLogic {
 
 		@Override
 		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length != 2) {
+			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			if (args[1].typeof().equals(args[0].typeof())) {
-				if (args[0] instanceof CString && args[1] instanceof CString) {
+			if(args[1].typeof().equals(args[0].typeof())) {
+				if(args[0] instanceof CString && args[1] instanceof CString) {
 					// Check for actual string equality, so we don't do type massaging
 					// for numeric strings. Thus '2' !== '2.0'
 					return CBoolean.get(args[0].val().equals(args[1].val()));
@@ -1131,15 +1131,15 @@ public class BasicLogic {
 
 		@Override
 		public CBoolean exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args.length <= 1) {
+			if(args.length <= 1) {
 				throw new CREInsufficientArgumentsException("At least two arguments must be passed to equals_ic", t);
 			}
-			if (Static.anyBooleans(args)) {
+			if(Static.anyBooleans(args)) {
 				boolean equals = true;
-				for (int i = 1; i < args.length; i++) {
+				for(int i = 1; i < args.length; i++) {
 					boolean arg1 = Static.getBoolean(args[i - 1]);
 					boolean arg2 = Static.getBoolean(args[i]);
-					if (arg1 != arg2) {
+					if(arg1 != arg2) {
 						equals = false;
 						break;
 					}
@@ -1149,34 +1149,34 @@ public class BasicLogic {
 
 			{
 				boolean equals = true;
-				for (int i = 1; i < args.length; i++) {
-					if (!args[i - 1].val().equalsIgnoreCase(args[i].val())) {
+				for(int i = 1; i < args.length; i++) {
+					if(!args[i - 1].val().equalsIgnoreCase(args[i].val())) {
 						equals = false;
 						break;
 					}
 				}
-				if (equals) {
+				if(equals) {
 					return CBoolean.TRUE;
 				}
 			}
 			try {
 				// Validate that these are numbers, so that getNumber doesn't throw an exception.
-				if (!ArgumentValidation.isNumber(args[0])) {
+				if(!ArgumentValidation.isNumber(args[0])) {
 					return CBoolean.FALSE;
 				}
 				boolean equals = true;
-				for (int i = 1; i < args.length; i++) {
-					if (!ArgumentValidation.isNumber(args[i])) {
+				for(int i = 1; i < args.length; i++) {
+					if(!ArgumentValidation.isNumber(args[i])) {
 						return CBoolean.FALSE;
 					}
 					double arg1 = Static.getNumber(args[i - 1], t);
 					double arg2 = Static.getNumber(args[i], t);
-					if (arg1 != arg2) {
+					if(arg1 != arg2) {
 						return CBoolean.FALSE;
 					}
 				}
 				return CBoolean.TRUE;
-			} catch (ConfigRuntimeException e) {
+			} catch(ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
 		}
@@ -1219,7 +1219,7 @@ public class BasicLogic {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Construct v1 = args[0];
 			Construct v2 = args[1];
-			if (!v2.getClass().equals(v1.getClass())) {
+			if(!v2.getClass().equals(v1.getClass())) {
 				return CBoolean.FALSE;
 			}
 			return new equals_ic().exec(t, environment, v1, v2);
@@ -1347,7 +1347,7 @@ public class BasicLogic {
 
 		@Override
 		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray && args[1] instanceof CArray) {
+			if(args[0] instanceof CArray && args[1] instanceof CArray) {
 				return CBoolean.get(args[0] == args[1]);
 			} else {
 				return new equals().exec(t, environment, args);
@@ -1410,7 +1410,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args.length != 2) {
+			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
 			double arg1 = Static.getNumber(args[0], t);
@@ -1477,7 +1477,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args.length != 2) {
+			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
 			double arg1 = Static.getNumber(args[0], t);
@@ -1544,7 +1544,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args.length != 2) {
+			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
 			double arg1 = Static.getNumber(args[0], t);
@@ -1612,7 +1612,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args.length != 2) {
+			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
 			double arg1 = Static.getNumber(args[0], t);
@@ -1681,8 +1681,8 @@ public class BasicLogic {
 		public CBoolean exec(Target t, Environment env, Construct... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
-			for (Construct c : args) {
-				if (!Static.getBoolean(c)) {
+			for(Construct c : args) {
+				if(!Static.getBoolean(c)) {
 					return CBoolean.FALSE;
 				}
 			}
@@ -1691,10 +1691,10 @@ public class BasicLogic {
 
 		@Override
 		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			for (ParseTree tree : nodes) {
+			for(ParseTree tree : nodes) {
 				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
 				boolean b = Static.getBoolean(c);
-				if (b == false) {
+				if(b == false) {
 					return CBoolean.FALSE;
 				}
 			}
@@ -1738,19 +1738,19 @@ public class BasicLogic {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
 			Iterator<ParseTree> it = children.iterator();
 			boolean foundFalse = false;
-			while (it.hasNext()) {
+			while(it.hasNext()) {
 				//Remove hard coded true values, they won't affect the calculation at all
 				//Also walk through the children, and if we find a hardcoded false, discard all the following values.
 				//If we do find a hardcoded false, though we can know ahead of time that this statement as a whole
 				//will be false, we can't remove everything, as the parameters beforehand may have side effects, so
 				//we musn't remove them.
 				ParseTree child = it.next();
-				if (foundFalse) {
+				if(foundFalse) {
 					it.remove();
 					continue;
 				}
-				if (child.isConst()) {
-					if (Static.getBoolean(child.getData()) == true) {
+				if(child.isConst()) {
+					if(Static.getBoolean(child.getData()) == true) {
 						it.remove();
 					} else {
 						foundFalse = true;
@@ -1774,10 +1774,10 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final false. However,
 			// if false is the only remaining condition (which could be) then we can simply return false here.
-			if (children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData()) == false) {
+			if(children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData()) == false) {
 				return new ParseTree(CBoolean.FALSE, fileOptions);
 			}
-			if (children.isEmpty()) {
+			if(children.isEmpty()) {
 				//We've removed all the children, so return true, because they were all true.
 				return new ParseTree(CBoolean.TRUE, fileOptions);
 			}
@@ -1829,9 +1829,9 @@ public class BasicLogic {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			for (ParseTree tree : nodes) {
+			for(ParseTree tree : nodes) {
 				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if (!Static.getBoolean(c)) {
+				if(!Static.getBoolean(c)) {
 					return c;
 				}
 			}
@@ -1843,19 +1843,19 @@ public class BasicLogic {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
 			Iterator<ParseTree> it = children.iterator();
 			boolean foundFalse = false;
-			while (it.hasNext()) {
+			while(it.hasNext()) {
 				//Remove hard coded true values, they won't affect the calculation at all
 				//Also walk through the children, and if we find a hardcoded false, discard all the following values.
 				//If we do find a hardcoded false, though we can know ahead of time that this statement as a whole
 				//will be false, we can't remove everything, as the parameters beforehand may have side effects, so
 				//we musn't remove them.
 				ParseTree child = it.next();
-				if (foundFalse) {
+				if(foundFalse) {
 					it.remove();
 					continue;
 				}
-				if (child.isConst()) {
-					if (Static.getBoolean(child.getData()) == true) {
+				if(child.isConst()) {
+					if(Static.getBoolean(child.getData()) == true) {
 						it.remove();
 					} else {
 						foundFalse = true;
@@ -1879,10 +1879,10 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final false. However,
 			// if false is the only remaining condition (which could be) then we can simply return false here.
-			if (children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData()) == false) {
+			if(children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData()) == false) {
 				return new ParseTree(children.get(0).getData(), fileOptions);
 			}
-			if (children.isEmpty()) {
+			if(children.isEmpty()) {
 				//We've removed all the children, so return true, because they were all true.
 				return new ParseTree(CBoolean.TRUE, fileOptions);
 			}
@@ -1937,8 +1937,8 @@ public class BasicLogic {
 		public CBoolean exec(Target t, Environment env, Construct... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
-			for (Construct c : args) {
-				if (Static.getBoolean(c)) {
+			for(Construct c : args) {
+				if(Static.getBoolean(c)) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -1947,9 +1947,9 @@ public class BasicLogic {
 
 		@Override
 		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			for (ParseTree tree : nodes) {
+			for(ParseTree tree : nodes) {
 				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if (Static.getBoolean(c)) {
+				if(Static.getBoolean(c)) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -1993,19 +1993,19 @@ public class BasicLogic {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
 			Iterator<ParseTree> it = children.iterator();
 			boolean foundTrue = false;
-			while (it.hasNext()) {
+			while(it.hasNext()) {
 				//Remove hard coded false values, they won't affect the calculation at all
 				//Also walk through the children, and if we find a hardcoded true, discard all the following values.
 				//If we do find a hardcoded true, though we can know ahead of time that this statement as a whole
 				//will be true, we can't remove everything, as the parameters beforehand may have side effects, so
 				//we musn't remove them.
 				ParseTree child = it.next();
-				if (foundTrue) {
+				if(foundTrue) {
 					it.remove();
 					continue;
 				}
-				if (child.isConst()) {
-					if (Static.getBoolean(child.getData()) == false) {
+				if(child.isConst()) {
+					if(Static.getBoolean(child.getData()) == false) {
 						it.remove();
 					} else {
 						foundTrue = true;
@@ -2029,10 +2029,10 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final true. However,
 			// if true is the only remaining condition (which could be) then we can simply return true here.
-			if (children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData()) == true) {
+			if(children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData()) == true) {
 				return new ParseTree(CBoolean.TRUE, fileOptions);
 			}
-			if (children.isEmpty()) {
+			if(children.isEmpty()) {
 				//We've removed all the children, so return false, because they were all false.
 				return new ParseTree(CBoolean.FALSE, fileOptions);
 			}
@@ -2084,9 +2084,9 @@ public class BasicLogic {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			for (ParseTree tree : nodes) {
+			for(ParseTree tree : nodes) {
 				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if (Static.getBoolean(c)) {
+				if(Static.getBoolean(c)) {
 					return c;
 				}
 			}
@@ -2098,19 +2098,19 @@ public class BasicLogic {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
 			Iterator<ParseTree> it = children.iterator();
 			boolean foundTrue = false;
-			while (it.hasNext()) {
+			while(it.hasNext()) {
 				//Remove hard coded false values, they won't affect the calculation at all
 				//Also walk through the children, and if we find a hardcoded true, discard all the following values.
 				//If we do find a hardcoded true, though we can know ahead of time that this statement as a whole
 				//will be true, we can't remove everything, as the parameters beforehand may have side effects, so
 				//we musn't remove them.
 				ParseTree child = it.next();
-				if (foundTrue) {
+				if(foundTrue) {
 					it.remove();
 					continue;
 				}
-				if (child.isConst()) {
-					if (Static.getBoolean(child.getData()) == false) {
+				if(child.isConst()) {
+					if(Static.getBoolean(child.getData()) == false) {
 						it.remove();
 					} else {
 						foundTrue = true;
@@ -2134,10 +2134,10 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final true. However,
 			// if true is the only remaining condition (which could be) then we can simply return true here.
-			if (children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData()) == true) {
+			if(children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData()) == true) {
 				return new ParseTree(children.get(0).getData(), fileOptions);
 			}
-			if (children.isEmpty()) {
+			if(children.isEmpty()) {
 				//We've removed all the children, so return false, because they were all false.
 				return new ParseTree(CBoolean.FALSE, fileOptions);
 			}
@@ -2197,7 +2197,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args.length != 1) {
+			if(args.length != 1) {
 				throw new CREFormatException(this.getName() + " expects 1 argument.", t);
 			}
 			return CBoolean.get(!Static.getBoolean(args[0]));
@@ -2286,7 +2286,7 @@ public class BasicLogic {
 
 		@Override
 		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length != 2) {
+			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
 			boolean val1 = Static.getBoolean(args[0]);
@@ -2476,7 +2476,7 @@ public class BasicLogic {
 
 		@Override
 		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length != 2) {
+			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
 			return new xor().exec(t, environment, args).not();
@@ -2541,11 +2541,11 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length < 2) {
+			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
 			long val = Static.getInt(args[0], t);
-			for (int i = 1; i < args.length; i++) {
+			for(int i = 1; i < args.length; i++) {
 				val = val & Static.getInt(args[i], t);
 			}
 			return new CInt(val, t);
@@ -2570,7 +2570,7 @@ public class BasicLogic {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() < 2) {
+			if(children.size() < 2) {
 				throw new ConfigCompileException("bit_and() requires at least 2 arguments.", t);
 			}
 			return null;
@@ -2617,11 +2617,11 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length < 2) {
+			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
 			long val = Static.getInt(args[0], t);
-			for (int i = 1; i < args.length; i++) {
+			for(int i = 1; i < args.length; i++) {
 				val = val | Static.getInt(args[i], t);
 			}
 			return new CInt(val, t);
@@ -2648,7 +2648,7 @@ public class BasicLogic {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() < 2) {
+			if(children.size() < 2) {
 				throw new ConfigCompileException("bit_or() requires at least 2 arguments.", t);
 			}
 			return null;
@@ -2695,11 +2695,11 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length < 2) {
+			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
 			long val = Static.getInt(args[0], t);
-			for (int i = 1; i < args.length; i++) {
+			for(int i = 1; i < args.length; i++) {
 				val = val ^ Static.getInt(args[i], t);
 			}
 			return new CInt(val, t);
@@ -2722,7 +2722,7 @@ public class BasicLogic {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() < 2) {
+			if(children.size() < 2) {
 				throw new ConfigCompileException("bit_xor() requires at least 2 arguments.", t);
 			}
 			return null;
@@ -2769,7 +2769,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length != 1) {
+			if(args.length != 1) {
 				throw new CREFormatException(this.getName() + " expects 1 argument.", t);
 			}
 			return new CInt(~Static.getInt(args[0], t), t);
@@ -2830,7 +2830,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length != 2) {
+			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
 			long value = Static.getInt(args[0], t);
@@ -2893,7 +2893,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length != 2) {
+			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
 			long value = Static.getInt(args[0], t);
@@ -2958,7 +2958,7 @@ public class BasicLogic {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length != 2) {
+			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
 			long value = Static.getInt(args[0], t);
@@ -3034,10 +3034,10 @@ public class BasicLogic {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.isEmpty()) {
+			if(children.isEmpty()) {
 				throw new CREFormatException(this.getName() + " expects at least 1 argument.", t);
 			}
-			if (!children.get(0).isConst()) {
+			if(!children.get(0).isConst()) {
 				throw new ConfigCompileException(getName() + "'s argument must be a hardcoded string.", t);
 			}
 			return null;
@@ -3045,7 +3045,7 @@ public class BasicLogic {
 
 		@Override
 		public void link(Target t, List<ParseTree> children) throws ConfigCompileException {
-			if (children.isEmpty()) {
+			if(children.isEmpty()) {
 				throw new CREFormatException(this.getName() + " expects at least 1 argument.", t);
 			}
 			throw new ConfigCompileException(children.get(0).getData().val(), t);

@@ -61,17 +61,17 @@ public class GNUErrorMessageFormat {
 	 * @return This object, for easier chaining
 	 */
 	public GNUErrorMessageFormat parse() throws IllegalArgumentException {
-		if (parsed) {
+		if(parsed) {
 			return this;
 		}
 		parsed = true;
 		String[] errorParts = messageLine.split(" ", 2);
 		message = errorParts[1].trim();
 		errorParts = errorParts[0].split(":", -1);
-		if ("".equals(errorParts[errorParts.length - 1])) {
+		if("".equals(errorParts[errorParts.length - 1])) {
 			errorParts = ArrayUtils.slice(errorParts, 0, errorParts.length - 2);
 		}
-		if (errorParts.length > 3) {
+		if(errorParts.length > 3) {
 			throw new IllegalArgumentException("Not a supported error message format");
 		}
 		// These are all the formats we need to support
@@ -81,17 +81,17 @@ public class GNUErrorMessageFormat {
 		// sourcefile:line1.column1-line2.column2: message
 		// sourcefile:line1.column1-column2: message
 		// sourcefile:line1-line2: message
-		switch (errorParts.length) {
+		switch(errorParts.length) {
 			case 2:
 				file = errorParts[0];
 				String middle = errorParts[1];
-				if (middle.matches("\\d+")) {
+				if(middle.matches("\\d+")) {
 					fromLine = Integer.parseInt(middle);
-				} else if (middle.matches("\\d+\\.\\d+")) {
+				} else if(middle.matches("\\d+\\.\\d+")) {
 					String[] s = middle.split("\\.");
 					fromLine = Integer.parseInt(s[0]);
 					fromColumn = toColumn = Integer.parseInt(s[1]);
-				} else if (middle.matches("\\d+\\.\\d+-\\d+\\.\\d+")) {
+				} else if(middle.matches("\\d+\\.\\d+-\\d+\\.\\d+")) {
 					String[] s = middle.split("-");
 					String s0[] = s[0].split("\\.");
 					String s1[] = s[1].split("\\.");
@@ -99,13 +99,13 @@ public class GNUErrorMessageFormat {
 					fromColumn = Integer.parseInt(s0[1]);
 					toLine = Integer.parseInt(s1[0]);
 					toColumn = Integer.parseInt(s1[1]);
-				} else if (middle.matches("\\d+\\.\\d+-\\d+")) {
+				} else if(middle.matches("\\d+\\.\\d+-\\d+")) {
 					String[] s = middle.split("\\.");
 					String[] c = s[1].split("-");
 					fromLine = toLine = Integer.parseInt(s[0]);
 					fromColumn = Integer.parseInt(c[0]);
 					toColumn = Integer.parseInt(c[1]);
-				} else if (middle.matches("\\d+-\\d+")) {
+				} else if(middle.matches("\\d+-\\d+")) {
 					String[] s = middle.split("-");
 					fromLine = Integer.parseInt(s[0]);
 					toLine = Integer.parseInt(s[1]);
@@ -121,17 +121,17 @@ public class GNUErrorMessageFormat {
 				break;
 		}
 		// If it contains more than one, then the most severe takes priority anyways
-		if (StringUtils.containsIgnoreCase(message, "error")) {
+		if(StringUtils.containsIgnoreCase(message, "error")) {
 			probableMessageType = MessageType.ERROR;
-		} else if (StringUtils.containsIgnoreCase(message, "warning")) {
+		} else if(StringUtils.containsIgnoreCase(message, "warning")) {
 			probableMessageType = MessageType.WARNING;
-		} else if (StringUtils.containsIgnoreCase(message, "info")) {
+		} else if(StringUtils.containsIgnoreCase(message, "info")) {
 			probableMessageType = MessageType.INFO;
 		}
-		if (toLine == -1) {
+		if(toLine == -1) {
 			toLine = fromLine;
 		}
-		if (toColumn == -1) {
+		if(toColumn == -1) {
 			toColumn = fromColumn;
 		}
 		return this;
@@ -219,7 +219,7 @@ public class GNUErrorMessageFormat {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof GNUErrorMessageFormat) {
+		if(obj instanceof GNUErrorMessageFormat) {
 			return this.messageLine.equals(((GNUErrorMessageFormat) obj).messageLine);
 		}
 		return false;

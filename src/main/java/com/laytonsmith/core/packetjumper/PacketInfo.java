@@ -21,7 +21,7 @@ public class PacketInfo implements Comparable<PacketInfo> {
 		this.packetClass = packetClass;
 		constructors = (Constructor<?>[]) packetClass.getConstructors();
 		arguments = new Class[constructors.length][];
-		for (int i = 0; i < constructors.length; i++) {
+		for(int i = 0; i < constructors.length; i++) {
 			Constructor<?> constructor = constructors[i];
 			arguments[i] = constructor.getParameterTypes();
 		}
@@ -60,7 +60,7 @@ public class PacketInfo implements Comparable<PacketInfo> {
 	@Override
 	public String toString() {
 		List<String> l = new ArrayList<>();
-		for (Class[] args : arguments) {
+		for(Class[] args : arguments) {
 			l.add(StringUtils.Join(args, ", "));
 		}
 		return packetClass.getName() + "(" + StringUtils.Join(l, " | ") + ")";
@@ -68,7 +68,7 @@ public class PacketInfo implements Comparable<PacketInfo> {
 
 	@Override
 	public int compareTo(PacketInfo o) {
-		if (this.packetID == o.packetID) {
+		if(this.packetID == o.packetID) {
 			return 0;
 		}
 		return this.packetID < o.packetID ? -1 : 1;

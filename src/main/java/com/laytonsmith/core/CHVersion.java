@@ -30,8 +30,8 @@ public enum CHVersion implements Version {
 	static {
 		//Dynamically determine the latest value.
 		CHVersion latest = null;
-		for (CHVersion v : CHVersion.values()) {
-			if (latest == null || v.gt(latest)) {
+		for(CHVersion v : CHVersion.values()) {
+			if(latest == null || v.gt(latest)) {
 				latest = v;
 			}
 		}

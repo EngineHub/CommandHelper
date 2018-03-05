@@ -129,29 +129,29 @@ public class Color implements java.io.Serializable {
 	 * @param r the Red component
 	 * @param g the Green component
 	 * @param b the Blue component
-     *
+	 *
 	 */
 	private static void testColorValueRange(int r, int g, int b, int a) {
 		boolean rangeError = false;
 		String badComponentString = "";
 
-		if (a < 0 || a > 255) {
+		if(a < 0 || a > 255) {
 			rangeError = true;
 			badComponentString = badComponentString + " Alpha";
 		}
-		if (r < 0 || r > 255) {
+		if(r < 0 || r > 255) {
 			rangeError = true;
 			badComponentString = badComponentString + " Red";
 		}
-		if (g < 0 || g > 255) {
+		if(g < 0 || g > 255) {
 			rangeError = true;
 			badComponentString = badComponentString + " Green";
 		}
-		if (b < 0 || b > 255) {
+		if(b < 0 || b > 255) {
 			rangeError = true;
 			badComponentString = badComponentString + " Blue";
 		}
-		if (rangeError == true) {
+		if(rangeError == true) {
 			throw new IllegalArgumentException("Color parameter outside of expected range:"
 					+ badComponentString);
 		}
@@ -164,28 +164,28 @@ public class Color implements java.io.Serializable {
 	 * @param r the Red component
 	 * @param g the Green component
 	 * @param b the Blue component
-     *
+	 *
 	 */
 	private static void testColorValueRange(float r, float g, float b, float a) {
 		boolean rangeError = false;
 		String badComponentString = "";
-		if (a < 0.0 || a > 1.0) {
+		if(a < 0.0 || a > 1.0) {
 			rangeError = true;
 			badComponentString = badComponentString + " Alpha";
 		}
-		if (r < 0.0 || r > 1.0) {
+		if(r < 0.0 || r > 1.0) {
 			rangeError = true;
 			badComponentString = badComponentString + " Red";
 		}
-		if (g < 0.0 || g > 1.0) {
+		if(g < 0.0 || g > 1.0) {
 			rangeError = true;
 			badComponentString = badComponentString + " Green";
 		}
-		if (b < 0.0 || b > 1.0) {
+		if(b < 0.0 || b > 1.0) {
 			rangeError = true;
 			badComponentString = badComponentString + " Blue";
 		}
-		if (rangeError == true) {
+		if(rangeError == true) {
 			throw new IllegalArgumentException("Color parameter outside of expected range:"
 					+ badComponentString);
 		}
@@ -266,7 +266,7 @@ public class Color implements java.io.Serializable {
 	 * @see #getRGB
 	 */
 	public Color(int rgba, boolean hasalpha) {
-		if (hasalpha) {
+		if(hasalpha) {
 			value = rgba;
 		} else {
 			value = 0xff000000 | rgba;
@@ -408,16 +408,16 @@ public class Color implements java.io.Serializable {
          * 3. non pure color (non zero rgb) will eventually return white
 		 */
 		int i = (int) (1.0 / (1.0 - FACTOR));
-		if (r == 0 && g == 0 && b == 0) {
+		if(r == 0 && g == 0 && b == 0) {
 			return new Color(i, i, i, alpha);
 		}
-		if (r > 0 && r < i) {
+		if(r > 0 && r < i) {
 			r = i;
 		}
-		if (g > 0 && g < i) {
+		if(g > 0 && g < i) {
 			g = i;
 		}
-		if (b > 0 && b < i) {
+		if(b > 0 && b < i) {
 			b = i;
 		}
 
@@ -540,7 +540,7 @@ public class Color implements java.io.Serializable {
 	 */
 	public static Color getColor(String nm, Color v) {
 		Integer intval = Integer.getInteger(nm);
-		if (intval == null) {
+		if(intval == null) {
 			return v;
 		}
 		int i = intval;
@@ -595,7 +595,7 @@ public class Color implements java.io.Serializable {
 	 */
 	public static int HSBtoRGB(float hue, float saturation, float brightness) {
 		int r = 0, g = 0, b = 0;
-		if (saturation == 0) {
+		if(saturation == 0) {
 			r = g = b = (int) (brightness * 255.0f + 0.5f);
 		} else {
 			float h = (hue - (float) Math.floor(hue)) * 6.0f;
@@ -603,7 +603,7 @@ public class Color implements java.io.Serializable {
 			float p = brightness * (1.0f - saturation);
 			float q = brightness * (1.0f - saturation * f);
 			float t = brightness * (1.0f - (saturation * (1.0f - f)));
-			switch ((int) h) {
+			switch((int) h) {
 				case 0:
 					r = (int) (brightness * 255.0f + 0.5f);
 					g = (int) (t * 255.0f + 0.5f);
@@ -659,39 +659,39 @@ public class Color implements java.io.Serializable {
 	 */
 	public static float[] RGBtoHSB(int r, int g, int b, float[] hsbvals) {
 		float hue, saturation, brightness;
-		if (hsbvals == null) {
+		if(hsbvals == null) {
 			hsbvals = new float[3];
 		}
 		int cmax = (r > g) ? r : g;
-		if (b > cmax) {
+		if(b > cmax) {
 			cmax = b;
 		}
 		int cmin = (r < g) ? r : g;
-		if (b < cmin) {
+		if(b < cmin) {
 			cmin = b;
 		}
 
 		brightness = cmax / 255.0f;
-		if (cmax != 0) {
+		if(cmax != 0) {
 			saturation = (cmax - cmin) / ((float) cmax);
 		} else {
 			saturation = 0;
 		}
-		if (saturation == 0) {
+		if(saturation == 0) {
 			hue = 0;
 		} else {
 			float redc = (cmax - r) / ((float) (cmax - cmin));
 			float greenc = (cmax - g) / ((float) (cmax - cmin));
 			float bluec = (cmax - b) / ((float) (cmax - cmin));
-			if (r == cmax) {
+			if(r == cmax) {
 				hue = bluec - greenc;
-			} else if (g == cmax) {
+			} else if(g == cmax) {
 				hue = 2.0f + redc - bluec;
 			} else {
 				hue = 4.0f + greenc - redc;
 			}
 			hue = hue / 6.0f;
-			if (hue < 0) {
+			if(hue < 0) {
 				hue = hue + 1.0f;
 			}
 		}
@@ -730,12 +730,12 @@ public class Color implements java.io.Serializable {
 	 */
 	public float[] getRGBComponents(float[] compArray) {
 		float[] f;
-		if (compArray == null) {
+		if(compArray == null) {
 			f = new float[4];
 		} else {
 			f = compArray;
 		}
-		if (frgbvalue == null) {
+		if(frgbvalue == null) {
 			f[0] = getRed() / 255f;
 			f[1] = getGreen() / 255f;
 			f[2] = getBlue() / 255f;
@@ -760,12 +760,12 @@ public class Color implements java.io.Serializable {
 	 */
 	public float[] getRGBColorComponents(float[] compArray) {
 		float[] f;
-		if (compArray == null) {
+		if(compArray == null) {
 			f = new float[3];
 		} else {
 			f = compArray;
 		}
-		if (frgbvalue == null) {
+		if(frgbvalue == null) {
 			f[0] = getRed() / 255f;
 			f[1] = getGreen() / 255f;
 			f[2] = getBlue() / 255f;
@@ -789,12 +789,12 @@ public class Color implements java.io.Serializable {
 	 * @return the color and alpha components in a <code>float</code> array.
 	 */
 	public float[] getComponents(float[] compArray) {
-		if (fvalue == null) {
+		if(fvalue == null) {
 			return getRGBComponents(compArray);
 		}
 		float[] f;
 		int n = fvalue.length;
-		if (compArray == null) {
+		if(compArray == null) {
 			f = new float[n + 1];
 		} else {
 			f = compArray;
@@ -816,12 +816,12 @@ public class Color implements java.io.Serializable {
 	 * @return the color components in a <code>float</code> array.
 	 */
 	public float[] getColorComponents(float[] compArray) {
-		if (fvalue == null) {
+		if(fvalue == null) {
 			return getRGBColorComponents(compArray);
 		}
 		float[] f;
 		int n = fvalue.length;
-		if (compArray == null) {
+		if(compArray == null) {
 			f = new float[n];
 		} else {
 			f = compArray;

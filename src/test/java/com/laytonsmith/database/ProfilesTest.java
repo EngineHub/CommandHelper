@@ -10,32 +10,32 @@ import org.junit.Test;
 
 /**
  *
- * 
+ *
  */
 public class ProfilesTest {
-	
+
 	public ProfilesTest() {
 	}
-	
+
 	@BeforeClass
 	public static void setUpClass() {
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Profiles.class));
 	}
-	
+
 	@AfterClass
 	public static void tearDownClass() {
 	}
-	
+
 	@Before
 	public void setUp() {
 	}
-	
+
 	@After
 	public void tearDown() {
 	}
-	
+
 	@Test
-	public void testProfileSuccess() throws Exception{
+	public void testProfileSuccess() throws Exception {
 		String good = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
 				+ "<profiles>"
 				+ "	<profile id=\"profile1\">"
@@ -52,8 +52,7 @@ public class ProfilesTest {
 				+ "	</profile>"
 				+ "</profiles>";
 		Profiles profiles = new Profiles(good);
-		
+
 	}
-	
-	
+
 }

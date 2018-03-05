@@ -25,7 +25,7 @@ public class DataSourceException extends Exception {
 
 	public Throwable getRootCause() {
 		Throwable t = this.getCause();
-		while (t != null) {
+		while(t != null) {
 			t = t.getCause();
 		}
 		return t;

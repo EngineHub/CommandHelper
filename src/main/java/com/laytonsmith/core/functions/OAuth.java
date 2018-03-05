@@ -93,29 +93,29 @@ public class OAuth {
 			String scope = options.get("scope", t).val();
 			String successText = options.get("successText", t).nval();
 			CArray extraHeaders1 = null;
-			if (options.containsKey("extraHeaders")) {
+			if(options.containsKey("extraHeaders")) {
 				extraHeaders1 = Static.getArray(options.get("extraHeaders", t), t);
 			}
 			Map<String, String> extraHeaders = new HashMap<>();
-			if (extraHeaders1 != null) {
-				for (String key : extraHeaders1.stringKeySet()) {
+			if(extraHeaders1 != null) {
+				for(String key : extraHeaders1.stringKeySet()) {
 					extraHeaders.put(key, extraHeaders1.get(key, t).val());
 				}
 			}
 			try { // Persistence errors
 				String accessToken = getAccessToken(env, clientId);
-				if (accessToken == null) {
+				if(accessToken == null) {
 					try {
-						if (options.containsKey("refreshToken")) {
+						if(options.containsKey("refreshToken")) {
 							String refreshToken = options.get("refreshToken", t).val();
 							storeRefreshToken(env, clientId, refreshToken);
 						}
 						String refreshToken;
-						if (!hasRefreshToken(env, clientId)) {
+						if(!hasRefreshToken(env, clientId)) {
 							MutableObject<String> lock = startServer(successText);
 							String redirectUrl;
-							synchronized (lock) {
-								if (lock.getObject() == null) {
+							synchronized(lock) {
+								if(lock.getObject() == null) {
 									lock.wait();
 								}
 								redirectUrl = lock.getObject();
@@ -124,8 +124,8 @@ public class OAuth {
 							String requestURI = generateRequestURI(authorizationUrl, clientId, scope, redirectUrl,
 									extraHeaders);
 							new XGUI.x_launch_browser().exec(t, env, new CString(requestURI, t));
-							synchronized (lock) {
-								if (lock.getObject() == null) {
+							synchronized(lock) {
+								if(lock.getObject() == null) {
 									lock.wait();
 								}
 							}
@@ -147,7 +147,7 @@ public class OAuth {
 							accessToken = tokenJson.get("access_token", t).val();
 							storeAccessToken(env, clientId, new AccessToken(accessToken, Static.getInt32(tokenJson.get("expires_in", t), t) * 1000));
 						}
-						if (accessToken == null) {
+						if(accessToken == null) {
 							refreshToken = getRefreshToken(env, clientId);
 							RequestSettings settings = new RequestSettings();
 							settings.setFollowRedirects(true);
@@ -164,21 +164,21 @@ public class OAuth {
 							accessToken = tokenJson.get("access_token", t).val();
 							storeAccessToken(env, clientId, new AccessToken(accessToken, Static.getInt32(tokenJson.get("expires_in", t), t) * 1000));
 						}
-					} catch (InterruptedException ex) {
+					} catch(InterruptedException ex) {
 						return CNull.NULL;
-					} catch (OAuthSystemException ex) {
+					} catch(OAuthSystemException ex) {
 						// TODO
 						throw new CREOAuthException(ex.getMessage(), t, ex);
-					} catch (MalformedURLException ex) {
+					} catch(MalformedURLException ex) {
 						throw new CREFormatException(ex.getMessage(), t, ex);
-					} catch (IOException ex) {
+					} catch(IOException ex) {
 						throw new CREIOException(ex.getMessage(), t, ex);
 					}
 				}
 				return new CString(accessToken, t);
-			} catch (DataSourceException ex) {
+			} catch(DataSourceException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
-			} catch (ReadOnlyException ex) {
+			} catch(ReadOnlyException ex) {
 				throw new CREReadOnlyException(ex.getMessage(), t, ex);
 			}
 		}
@@ -241,15 +241,15 @@ public class OAuth {
 			PersistenceNetwork pn = env.getEnv(GlobalEnv.class).GetPersistenceNetwork();
 			AccessToken aT = null;
 			String aTS = pn.get(new String[]{"oauth", getFormattedClientId(clientId), "accessToken"});
-			if (aTS != null) {
+			if(aTS != null) {
 				String[] aTSA = unformatValue(aTS).split(",", 2);
 				aT = new AccessToken(aTSA[1], new Date(Long.parseLong(aTSA[0])));
 			}
-			if (aT == null) {
+			if(aT == null) {
 				// No key exists in the first place
 				return null;
 			}
-			if (aT.getExpiry().after(new Date())) {
+			if(aT.getExpiry().after(new Date())) {
 				// The key is not expired, so return it now
 				return aT.getAccessToken();
 			} else {
@@ -261,7 +261,7 @@ public class OAuth {
 		private static String getRefreshToken(Environment env, String clientId) throws DataSourceException {
 			PersistenceNetwork pn = env.getEnv(GlobalEnv.class).GetPersistenceNetwork();
 			String v = pn.get(new String[]{"oauth", getFormattedClientId(clientId), "refreshToken"});
-			if (v == null) {
+			if(v == null) {
 				return v;
 			} else {
 				return unformatValue(v);
@@ -275,7 +275,7 @@ public class OAuth {
 		private static String formatValue(String value) {
 			try {
 				return Construct.json_encode(new CString(value, Target.UNKNOWN), Target.UNKNOWN);
-			} catch (MarshalException ex) {
+			} catch(MarshalException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -283,14 +283,14 @@ public class OAuth {
 		private static String unformatValue(String pnVersion) {
 			try {
 				return Construct.json_decode(pnVersion, Target.UNKNOWN).val();
-			} catch (MarshalException ex) {
+			} catch(MarshalException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
 
 		private static MutableObject<String> startServer(String successText1) {
 			final String successText;
-			if (successText1 == null) {
+			if(successText1 == null) {
 				successText = "OAuth request successful. You may now close your browser window.";
 			} else {
 				successText = successText1;
@@ -302,23 +302,23 @@ public class OAuth {
 					try {
 						ServerSocket s = new ServerSocket(0);
 						ret.setObject("http://localhost:" + s.getLocalPort());
-						synchronized (ret) {
+						synchronized(ret) {
 							ret.notifyAll();
 						}
 						Socket ss = s.accept();
 						InputStream is = new BufferedInputStream(ss.getInputStream());
 						BufferedReader input = new BufferedReader(new InputStreamReader(is));
 						List<String> headers = new ArrayList<>();
-						while (input.ready()) {
+						while(input.ready()) {
 							String line = input.readLine();
-							if ("".equals(line)) {
+							if("".equals(line)) {
 								break;
 							}
 							headers.add(line);
 						}
 						int contentLength = 0;
-						for (String header : headers) {
-							if (header.matches("(?i)content-length.*")) {
+						for(String header : headers) {
+							if(header.matches("(?i)content-length.*")) {
 								contentLength = Integer.parseInt(header.split(":")[1].trim());
 							}
 						}
@@ -349,10 +349,10 @@ public class OAuth {
 						s.close();
 
 						ret.setObject(query.get("code"));
-						synchronized (ret) {
+						synchronized(ret) {
 							ret.notifyAll();
 						}
-					} catch (IOException ex) {
+					} catch(IOException ex) {
 						ex.printStackTrace();
 					}
 				}
@@ -368,7 +368,7 @@ public class OAuth {
 					.setClientId(clientId)
 					.setScope(scope)
 					.setRedirectURI(redirectUrl);
-			for (String key : extraHeaders.keySet()) {
+			for(String key : extraHeaders.keySet()) {
 				requestBuilder.setParameter(key, extraHeaders.get(key));
 			}
 			requestBuilder.setParameter("response_type", "code");
@@ -420,20 +420,20 @@ public class OAuth {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			PersistenceNetwork pn = environment.getEnv(GlobalEnv.class).GetPersistenceNetwork();
 			String namespace = "oauth";
-			if (args.length >= 1) {
+			if(args.length >= 1) {
 				namespace += x_get_oauth_token.getFormattedClientId(args[0].val());
 			}
 			DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
 			try {
 				Map<String[], String> list = pn.getNamespace(namespace.split("\\."));
-				for (String[] key : list.keySet()) {
+				for(String[] key : list.keySet()) {
 					pn.clearKey(dm, key);
 				}
-			} catch (DataSourceException | IOException ex) {
+			} catch(DataSourceException | IOException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				throw new CREFormatException(ex.getMessage(), t, ex);
-			} catch (ReadOnlyException ex) {
+			} catch(ReadOnlyException ex) {
 				throw new CREReadOnlyException(ex.getMessage(), t, ex);
 			}
 			return CVoid.VOID;

@@ -25,22 +25,22 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 	}
 
 	public static MCSound valueOf(String test) throws IllegalArgumentException {
-		if (mappings == null) {
+		if(mappings == null) {
 			return null;
 		}
 		MCSound ret = mappings.get(test);
-		if (ret == null) {
+		if(ret == null) {
 			throw new IllegalArgumentException("Unknown sound: " + test);
 		}
 		return ret;
 	}
 
 	public static Set<String> types() {
-		if (NULL == null) { // docs mode
+		if(NULL == null) { // docs mode
 			Set<String> dummy = new HashSet<>();
-			for (final MCVanillaSound s : MCVanillaSound.values()) {
+			for(final MCVanillaSound s : MCVanillaSound.values()) {
 				// Ignore UNKNOWN and pre-1.9 sound names for docs
-				if (s.since.equals(MCVersion.MC1_0) || s.equals(MCVanillaSound.UNKNOWN)) {
+				if(s.since.equals(MCVersion.MC1_0) || s.equals(MCVanillaSound.UNKNOWN)) {
 					continue;
 				}
 				dummy.add(s.name());
@@ -51,11 +51,11 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 	}
 
 	public static Collection<MCSound> values() {
-		if (NULL == null) { // docs mode
+		if(NULL == null) { // docs mode
 			ArrayList<MCSound> dummy = new ArrayList<>();
-			for (final MCVanillaSound s : MCVanillaSound.values()) {
+			for(final MCVanillaSound s : MCVanillaSound.values()) {
 				// Ignore UNKNOWN and pre-1.9 sound names for docs
-				if (s.since.equals(MCVersion.MC1_0) || s.equals(MCVanillaSound.UNKNOWN)) {
+				if(s.since.equals(MCVersion.MC1_0) || s.equals(MCVanillaSound.UNKNOWN)) {
 					continue;
 				}
 				dummy.add(new MCSound<Object>(s, null) {

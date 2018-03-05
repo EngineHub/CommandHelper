@@ -70,16 +70,12 @@ public class PropertiesManager extends LinkedHashMap<String, String> {
 	 * <p>
 	 * <
 	 * pre>
-	 * Truth = Beauty
-	 *  Truth:Beauty
-	 * Truth                    :Beauty
+	 * Truth = Beauty Truth:Beauty Truth :Beauty
 	 * </pre> As another example, the following three lines specify a single property:
 	 * <p>
 	 * <
 	 * pre>
-	 * fruits                           apple, banana, pear, \
-	 *                                  cantaloupe, watermelon, \
-	 *                                  kiwi, mango
+	 * fruits apple, banana, pear, \ cantaloupe, watermelon, \ kiwi, mango
 	 * </pre> The key is <code>"fruits"</code> and the associated element is:
 	 * <p>
 	 * <
@@ -126,7 +122,7 @@ public class PropertiesManager extends LinkedHashMap<String, String> {
 		try {
 			InputStream is = new ByteArrayInputStream(properties.getBytes("UTF-8"));
 			load(new LineReader(is));
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			//Either encoding exception or IO error. Neither should actually happen here.
 			throw new Error(ex);
 		}
@@ -145,7 +141,7 @@ public class PropertiesManager extends LinkedHashMap<String, String> {
 		boolean hasSep;
 		boolean precedingBackslash;
 
-		while ((limit = lr.readLine()) >= 0) {
+		while((limit = lr.readLine()) >= 0) {
 			c = 0;
 			keyLen = 0;
 			valueStart = limit;
@@ -153,28 +149,28 @@ public class PropertiesManager extends LinkedHashMap<String, String> {
 
 			//System.out.println("line=<" + new String(lineBuf, 0, limit) + ">");
 			precedingBackslash = false;
-			while (keyLen < limit) {
+			while(keyLen < limit) {
 				c = lr.lineBuf[keyLen];
 				//need check if escaped.
-				if ((c == '=' || c == ':') && !precedingBackslash) {
+				if((c == '=' || c == ':') && !precedingBackslash) {
 					valueStart = keyLen + 1;
 					hasSep = true;
 					break;
-				} else if ((c == ' ' || c == '\t' || c == '\f') && !precedingBackslash) {
+				} else if((c == ' ' || c == '\t' || c == '\f') && !precedingBackslash) {
 					valueStart = keyLen + 1;
 					break;
 				}
-				if (c == '\\') {
+				if(c == '\\') {
 					precedingBackslash = !precedingBackslash;
 				} else {
 					precedingBackslash = false;
 				}
 				keyLen++;
 			}
-			while (valueStart < limit) {
+			while(valueStart < limit) {
 				c = lr.lineBuf[valueStart];
-				if (c != ' ' && c != '\t' && c != '\f') {
-					if (!hasSep && (c == '=' || c == ':')) {
+				if(c != ' ' && c != '\t' && c != '\f') {
+					if(!hasSep && (c == '=' || c == ':')) {
 						hasSep = true;
 					} else {
 						break;
@@ -225,54 +221,54 @@ public class PropertiesManager extends LinkedHashMap<String, String> {
 			boolean precedingBackslash = false;
 			boolean skipLF = false;
 
-			while (true) {
-				if (inOff >= inLimit) {
+			while(true) {
+				if(inOff >= inLimit) {
 					inLimit = (inStream == null) ? reader.read(inCharBuf)
 							: inStream.read(inByteBuf);
 					inOff = 0;
-					if (inLimit <= 0) {
-						if (len == 0 || isCommentLine) {
+					if(inLimit <= 0) {
+						if(len == 0 || isCommentLine) {
 							return -1;
 						}
 						return len;
 					}
 				}
-				if (inStream != null) {
+				if(inStream != null) {
 					//The line below is equivalent to calling a
 					//ISO8859-1 decoder.
 					c = (char) (0xff & inByteBuf[inOff++]);
 				} else {
 					c = inCharBuf[inOff++];
 				}
-				if (skipLF) {
+				if(skipLF) {
 					skipLF = false;
-					if (c == '\n') {
+					if(c == '\n') {
 						continue;
 					}
 				}
-				if (skipWhiteSpace) {
-					if (c == ' ' || c == '\t' || c == '\f') {
+				if(skipWhiteSpace) {
+					if(c == ' ' || c == '\t' || c == '\f') {
 						continue;
 					}
-					if (!appendedLineBegin && (c == '\r' || c == '\n')) {
+					if(!appendedLineBegin && (c == '\r' || c == '\n')) {
 						continue;
 					}
 					skipWhiteSpace = false;
 					appendedLineBegin = false;
 				}
-				if (isNewLine) {
+				if(isNewLine) {
 					isNewLine = false;
-					if (c == '#' || c == '!') {
+					if(c == '#' || c == '!') {
 						isCommentLine = true;
 						continue;
 					}
 				}
 
-				if (c != '\n' && c != '\r') {
+				if(c != '\n' && c != '\r') {
 					lineBuf[len++] = c;
-					if (len == lineBuf.length) {
+					if(len == lineBuf.length) {
 						int newLength = lineBuf.length * 2;
-						if (newLength < 0) {
+						if(newLength < 0) {
 							newLength = Integer.MAX_VALUE;
 						}
 						char[] buf = new char[newLength];
@@ -280,36 +276,36 @@ public class PropertiesManager extends LinkedHashMap<String, String> {
 						lineBuf = buf;
 					}
 					//flip the preceding backslash flag
-					if (c == '\\') {
+					if(c == '\\') {
 						precedingBackslash = !precedingBackslash;
 					} else {
 						precedingBackslash = false;
 					}
 				} else {
 					// reached EOL
-					if (isCommentLine || len == 0) {
+					if(isCommentLine || len == 0) {
 						isCommentLine = false;
 						isNewLine = true;
 						skipWhiteSpace = true;
 						len = 0;
 						continue;
 					}
-					if (inOff >= inLimit) {
+					if(inOff >= inLimit) {
 						inLimit = (inStream == null)
 								? reader.read(inCharBuf)
 								: inStream.read(inByteBuf);
 						inOff = 0;
-						if (inLimit <= 0) {
+						if(inLimit <= 0) {
 							return len;
 						}
 					}
-					if (precedingBackslash) {
+					if(precedingBackslash) {
 						len -= 1;
 						//skip the leading whitespace characters in following line
 						skipWhiteSpace = true;
 						appendedLineBegin = true;
 						precedingBackslash = false;
-						if (c == '\r') {
+						if(c == '\r') {
 							skipLF = true;
 						}
 					} else {
@@ -325,9 +321,9 @@ public class PropertiesManager extends LinkedHashMap<String, String> {
      * and changes special saved chars to their original forms
 	 */
 	private String loadConvert(char[] in, int off, int len, char[] convtBuf) {
-		if (convtBuf.length < len) {
+		if(convtBuf.length < len) {
 			int newLen = len * 2;
-			if (newLen < 0) {
+			if(newLen < 0) {
 				newLen = Integer.MAX_VALUE;
 			}
 			convtBuf = new char[newLen];
@@ -337,16 +333,16 @@ public class PropertiesManager extends LinkedHashMap<String, String> {
 		int outLen = 0;
 		int end = off + len;
 
-		while (off < end) {
+		while(off < end) {
 			aChar = in[off++];
-			if (aChar == '\\') {
+			if(aChar == '\\') {
 				aChar = in[off++];
-				if (aChar == 'u') {
+				if(aChar == 'u') {
 					// Read the xxxx
 					int value = 0;
-					for (int i = 0; i < 4; i++) {
+					for(int i = 0; i < 4; i++) {
 						aChar = in[off++];
-						switch (aChar) {
+						switch(aChar) {
 							case '0':
 							case '1':
 							case '2':
@@ -382,13 +378,13 @@ public class PropertiesManager extends LinkedHashMap<String, String> {
 					}
 					out[outLen++] = (char) value;
 				} else {
-					if (aChar == 't') {
+					if(aChar == 't') {
 						aChar = '\t';
-					} else if (aChar == 'r') {
+					} else if(aChar == 'r') {
 						aChar = '\r';
-					} else if (aChar == 'n') {
+					} else if(aChar == 'n') {
 						aChar = '\n';
-					} else if (aChar == 'f') {
+					} else if(aChar == 'f') {
 						aChar = '\f';
 					}
 					out[outLen++] = aChar;

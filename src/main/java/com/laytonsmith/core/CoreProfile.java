@@ -12,7 +12,7 @@ public class CoreProfile {
 	public static void main(String[] args) {
 		long start = System.currentTimeMillis();
 		List<Long> array = new ArrayList<Long>();
-		for (long i = 0; i < 100000; i++) {
+		for(long i = 0; i < 100000; i++) {
 			array.add(i);
 			StreamUtils.GetSystemOut().println(i);
 		}

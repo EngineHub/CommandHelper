@@ -39,7 +39,7 @@ public class FileUtil {
 	 */
 	private static synchronized Object getLock(File file) throws IOException {
 		String canonical = file.getAbsoluteFile().getCanonicalPath();
-		if (!fileLocks.containsKey(canonical)) {
+		if(!fileLocks.containsKey(canonical)) {
 			fileLocks.put(canonical, new Object());
 			fileLockCounter.put(canonical, 0);
 		}
@@ -50,7 +50,7 @@ public class FileUtil {
 	private static synchronized void freeLock(File file) throws IOException {
 		String canonical = file.getAbsoluteFile().getCanonicalPath();
 		fileLockCounter.put(canonical, fileLockCounter.get(canonical) - 1);
-		if (fileLockCounter.get(canonical) == 0) {
+		if(fileLockCounter.get(canonical) == 0) {
 			fileLockCounter.remove(canonical);
 			fileLocks.remove(canonical);
 		}
@@ -80,11 +80,11 @@ public class FileUtil {
 		try {
 			byte[] bytes = org.apache.commons.io.FileUtils.readFileToByteArray(file);
 			return new ByteArrayInputStream(bytes);
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			//Apache IO has an interesting feature/bug where the error message "Unexpected readed size" is thrown.
 			//If this is the case, we're going to try using a normal java file connection. Other IOExceptions
 			//are just going be rethrown.
-			if (ex.getMessage().startsWith("Unexpected readed size.")) {
+			if(ex.getMessage().startsWith("Unexpected readed size.")) {
 				FileInputStream fis = new FileInputStream(file);
 				try {
 					byte[] bytes = StreamUtils.GetBytes(fis);
@@ -155,13 +155,13 @@ public class FileUtil {
 	 */
 	public static void write(byte[] data, File file, int mode, boolean create) throws IOException {
 		boolean append;
-		if (mode == OVERWRITE) {
+		if(mode == OVERWRITE) {
 			append = false;
 		} else {
 			append = true;
 		}
-		if (create && !file.exists()) {
-			if (file.getAbsoluteFile().getParentFile() != null) {
+		if(create && !file.exists()) {
+			if(file.getAbsoluteFile().getParentFile() != null) {
 				file.getAbsoluteFile().getParentFile().mkdirs();
 			}
 			file.getAbsoluteFile().createNewFile();
@@ -257,31 +257,31 @@ public class FileUtil {
 	public static void copy(File fromFile, File toFile, Boolean overwrite)
 			throws IOException {
 
-		if (!fromFile.exists()) {
+		if(!fromFile.exists()) {
 			throw new IOException("FileCopy: " + "no such source file: "
 					+ fromFile.getName());
 		}
-		if (!fromFile.isFile()) {
+		if(!fromFile.isFile()) {
 			throw new IOException("FileCopy: " + "can't copy directory: "
 					+ fromFile.getName());
 		}
-		if (!fromFile.canRead()) {
+		if(!fromFile.canRead()) {
 			throw new IOException("FileCopy: " + "source file is unreadable: "
 					+ fromFile.getName());
 		}
 
-		if (toFile.isDirectory()) {
+		if(toFile.isDirectory()) {
 			toFile = new File(toFile, fromFile.getName());
 		}
 
-		if (toFile.exists()) {
-			if (!toFile.canWrite()) {
+		if(toFile.exists()) {
+			if(!toFile.canWrite()) {
 				throw new IOException("FileCopy: "
 						+ "destination file is unwriteable: " + toFile.getName());
 			}
 
 			String response = null;
-			if (overwrite == null) {
+			if(overwrite == null) {
 				StreamUtils.GetSystemOut().print("Overwrite existing file " + toFile.getName()
 						+ "? (Y/N): ");
 				StreamUtils.GetSystemOut().flush();
@@ -289,26 +289,26 @@ public class FileUtil {
 						System.in));
 				response = in.readLine();
 			}
-			if ((overwrite != null && overwrite == false) || (!response.equals("Y") && !response.equals("y"))) {
+			if((overwrite != null && overwrite == false) || (!response.equals("Y") && !response.equals("y"))) {
 				throw new IOException("FileCopy: "
 						+ "existing file was not overwritten.");
 			}
 			//overwrite being true falls through
 		} else {
 			String parent = toFile.getParent();
-			if (parent == null) {
+			if(parent == null) {
 				parent = System.getProperty("user.dir");
 			}
 			File dir = new File(parent);
-			if (!dir.exists()) {
+			if(!dir.exists()) {
 				throw new IOException("FileCopy: "
 						+ "destination directory doesn't exist: " + parent);
 			}
-			if (dir.isFile()) {
+			if(dir.isFile()) {
 				throw new IOException("FileCopy: "
 						+ "destination is not a directory: " + parent);
 			}
-			if (!dir.canWrite()) {
+			if(!dir.canWrite()) {
 				throw new IOException("FileCopy: "
 						+ "destination directory is unwriteable: " + parent);
 			}
@@ -376,14 +376,14 @@ public class FileUtil {
 		//have file locks on the file, even if the Streams
 		//were properly closed.
 		System.gc();
-		if (file.isDirectory()) {
+		if(file.isDirectory()) {
 			boolean ret = true;
-			for (File f : file.listFiles()) {
-				if (!recursiveDelete(f)) {
+			for(File f : file.listFiles()) {
+				if(!recursiveDelete(f)) {
 					ret = false;
 				}
 			}
-			if (!file.delete()) {
+			if(!file.delete()) {
 				ret = false;
 			}
 			return ret;
@@ -419,18 +419,18 @@ public class FileUtil {
 			boolean done = false;
 			boolean isAscii = true;
 
-			while ((len = imp.read(buf, 0, buf.length)) != -1) {
-				if (isAscii) {
+			while((len = imp.read(buf, 0, buf.length)) != -1) {
+				if(isAscii) {
 					isAscii = det.isAscii(buf, len);
 				}
-				if (!isAscii && !done) {
+				if(!isAscii && !done) {
 					done = det.DoIt(buf, len, false);
 				}
 			}
 			det.DataEnd();
 			return (String) result.getObject();
 		} finally {
-			if (imp != null) {
+			if(imp != null) {
 				imp.close();
 			}
 		}

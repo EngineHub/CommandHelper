@@ -31,7 +31,7 @@ public class CacheAnnotations {
 	public static void main(String[] args) throws Exception {
 		File outputDir = new File(args[0]);
 		File scanDir = new File(args[1]);
-		if (outputDir.toString().startsWith("-classpath") || outputDir.toString().startsWith("-Xdebug")) {
+		if(outputDir.toString().startsWith("-classpath") || outputDir.toString().startsWith("-Xdebug")) {
 			//This happens when running locally. I dunno what that is, but we
 			//can skip this step.
 			StreamUtils.GetSystemOut().println("Skipping annotation caching, running locally.");
@@ -57,16 +57,16 @@ public class CacheAnnotations {
 		Set<Class> apiClasses = new HashSet<>();
 		apiClasses.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class));
 		apiClasses.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(typeof.class));
-		if (apiClasses.isEmpty()) {
+		if(apiClasses.isEmpty()) {
 			// Sanity check
 			throw new Exception("API classes should not be empty");
 		}
-		for (Class c : apiClasses) {
+		for(Class c : apiClasses) {
 			boolean isGetNameExempt = false;
-			if (c.isInterface()) {
-				for (Class r : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(InterfaceRunnerFor.class)) {
+			if(c.isInterface()) {
+				for(Class r : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(InterfaceRunnerFor.class)) {
 					InterfaceRunnerFor f = (InterfaceRunnerFor) r.getAnnotation(InterfaceRunnerFor.class);
-					if (f.value() == c) {
+					if(f.value() == c) {
 						isGetNameExempt = c.getAnnotation(typeof.class) != null;
 						c = r;
 						break;
@@ -75,31 +75,31 @@ public class CacheAnnotations {
 			}
 			// Verify that all classes that are @api classes have the valid functions required for proper documentation
 			// generation, as well as ultimately extend at minimum SimpleDocumentation.
-			if (DummyFunction.class.isAssignableFrom(c)) {
+			if(DummyFunction.class.isAssignableFrom(c)) {
 				// Skip this one. These are excused from the normal reporting requirements.
 				continue;
 			}
-			if (!SimpleDocumentation.class.isAssignableFrom(c) && !MixedInterfaceRunner.class.isAssignableFrom(c)) {
+			if(!SimpleDocumentation.class.isAssignableFrom(c) && !MixedInterfaceRunner.class.isAssignableFrom(c)) {
 				uhohs.add(c.getName() + " must implement SimpleDocumentation");
 				continue;
 			}
-			for (Method m : SimpleDocumentation.class.getDeclaredMethods()) {
+			for(Method m : SimpleDocumentation.class.getDeclaredMethods()) {
 				try {
 					c.getDeclaredMethod(m.getName(), m.getParameterTypes());
-				} catch (NoSuchMethodException ex) {
+				} catch(NoSuchMethodException ex) {
 					// typeof is exempt from having getName in each individual class, because the
 					// typeof value is that information.
-					if (!m.getName().equals("getName")) {
-						if (c.getAnnotation(typeof.class) != null && !isGetNameExempt) {
+					if(!m.getName().equals("getName")) {
+						if(c.getAnnotation(typeof.class) != null && !isGetNameExempt) {
 							uhohs.add(c.getName() + " must implement " + m.getName() + "().");
 						}
 					}
-				} catch (SecurityException ex) {
+				} catch(SecurityException ex) {
 					throw new Error(ex);
 				}
 			}
 		}
-		if (!uhohs.isEmpty()) {
+		if(!uhohs.isEmpty()) {
 			Collections.sort(uhohs);
 			throw new Exception("There " + StringUtils.PluralHelper(uhohs.size(), "compile error") + ":\n" + StringUtils.Join(uhohs, "\n"));
 		}

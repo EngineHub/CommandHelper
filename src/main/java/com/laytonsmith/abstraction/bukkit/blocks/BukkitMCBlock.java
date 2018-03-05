@@ -60,7 +60,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
 	@Override
 	public int getTypeId() {
-		if (b == null) {
+		if(b == null) {
 			return 0;
 		}
 		return b.getTypeId();
@@ -94,7 +94,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	@Override
 	public MCBlockState getState() {
 		BlockState bs = b.getState();
-		if (bs instanceof CreatureSpawner) {
+		if(bs instanceof CreatureSpawner) {
 			return new BukkitMCCreatureSpawner((CreatureSpawner) bs);
 		}
 		return new BukkitMCBlockState(bs);
@@ -154,7 +154,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	@Override
 	public Collection<MCItemStack> getDrops() {
 		Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
-		for (ItemStack is : b.getDrops()) {
+		for(ItemStack is : b.getDrops()) {
 			collection.add(new BukkitMCItemStack(is));
 		}
 		return collection;
@@ -163,7 +163,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	@Override
 	public Collection<MCItemStack> getDrops(MCItemStack tool) {
 		Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
-		for (ItemStack is : b.getDrops(((BukkitMCItemStack) tool).asItemStack())) {
+		for(ItemStack is : b.getDrops(((BukkitMCItemStack) tool).asItemStack())) {
 			collection.add(new BukkitMCItemStack(is));
 		}
 		return collection;

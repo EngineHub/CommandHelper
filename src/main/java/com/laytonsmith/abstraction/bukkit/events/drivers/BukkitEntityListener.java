@@ -47,13 +47,13 @@ public class BukkitEntityListener implements Listener {
 	@EventIdentifier(event = Driver.ENTITY_DEATH, className = "org.bukkit.event.entity.EntityDeathEvent")
 	public void onEntityDeath(Event event) {
 		BukkitMCEntityDeathEvent ede;
-		if (event instanceof PlayerDeathEvent) {
+		if(event instanceof PlayerDeathEvent) {
 			ede = new BukkitPlayerEvents.BukkitMCPlayerDeathEvent(event);
 		} else {
 			ede = new BukkitMCEntityDeathEvent(event);
 		}
 		EventUtils.TriggerListener(Driver.ENTITY_DEATH, "entity_death", ede);
-		if (event instanceof PlayerDeathEvent) {
+		if(event instanceof PlayerDeathEvent) {
 			EventUtils.TriggerListener(Driver.PLAYER_DEATH, "player_death", ede);
 		}
 	}
@@ -62,7 +62,7 @@ public class BukkitEntityListener implements Listener {
 	public void onTargetLiving(Event event) {
 		BukkitMCTargetEvent ete = new BukkitMCTargetEvent(event);
 		MCEntity target = ete.getTarget();
-		if (target == null || !(target instanceof MCPlayer)) {
+		if(target == null || !(target instanceof MCPlayer)) {
 			return;
 		}
 		EventUtils.TriggerListener(Driver.TARGET_ENTITY, "target_player", ete);
@@ -71,10 +71,10 @@ public class BukkitEntityListener implements Listener {
 	@EventIdentifier(event = Driver.ENTITY_DAMAGE, className = "org.bukkit.event.entity.EntityDamageEvent")
 	public void onEntityDamage(Event event) {
 		BukkitMCEntityDamageEvent ede;
-		if (event instanceof EntityDamageByEntityEvent) {
+		if(event instanceof EntityDamageByEntityEvent) {
 			ede = new BukkitMCEntityDamageByEntityEvent(event);
 			EventUtils.TriggerListener(Driver.ENTITY_DAMAGE, "entity_damage", ede);
-			if (ede.getEntity() instanceof MCPlayer) {
+			if(ede.getEntity() instanceof MCPlayer) {
 				EventUtils.TriggerListener(Driver.ENTITY_DAMAGE_PLAYER, "entity_damage_player", ede);
 			}
 		} else {

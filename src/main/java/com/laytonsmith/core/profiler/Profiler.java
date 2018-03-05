@@ -79,7 +79,7 @@ public final class Profiler {
 
 	private Profiler() {
 		//Private constructor for FakeProfiler
-		if (outputQueue == null) {
+		if(outputQueue == null) {
 			outputQueue = new MethodScriptExecutionQueue("CommandHelper-Profiler", "default");
 		}
 	}
@@ -92,7 +92,7 @@ public final class Profiler {
 		this.initFile = initFile;
 
 		configGranularity = LogLevel.getEnum((Integer) prefs.getPreference("profiler-granularity"));
-		if (configGranularity == null) {
+		if(configGranularity == null) {
 			configGranularity = LogLevel.ERROR;
 		}
 		profilerOn = (Boolean) prefs.getPreference("profiler-on");
@@ -117,7 +117,7 @@ public final class Profiler {
 	 * @return
 	 */
 	public ProfilePoint start(String name, LogLevel granularity) {
-		if (!isLoggable(granularity)) {
+		if(!isLoggable(granularity)) {
 			return NULL_OP;
 		}
 		ProfilePoint p = new ProfilePoint(name, this);
@@ -135,7 +135,7 @@ public final class Profiler {
 	 * @param granularity The granularity at which to log.
 	 */
 	private void start0(ProfilePoint operationName, LogLevel granularity) {
-		if (operations.containsKey(operationName)) {
+		if(operations.containsKey(operationName)) {
 			//Nope. Can't queue up multiple versions of the same
 			//id
 			throw new RuntimeException("Cannot queue the same profile point multiple times!");
@@ -151,15 +151,15 @@ public final class Profiler {
 
 	static {
 		//Let's just warm it up some
-		for (int i = 0; i < 10; i++) {
+		for(int i = 0; i < 10; i++) {
 			getIndent(i);
 		}
 	}
 
 	private static String getIndent(long count) {
-		if (!indents.containsKey(count)) {
+		if(!indents.containsKey(count)) {
 			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < count; i++) {
+			for(int i = 0; i < count; i++) {
 				b.append(" ");
 			}
 			indents.put(count, b.toString());
@@ -171,25 +171,25 @@ public final class Profiler {
 	public void stop(ProfilePoint operationName) {
 		//This line should ALWAYS be first in the function
 		long stop = System.nanoTime();
-		if (operationName == NULL_OP) {
+		if(operationName == NULL_OP) {
 			return;
 		}
-		if (!operations.containsKey(operationName)) {
+		if(!operations.containsKey(operationName)) {
 			return;
 		}
 		long total = stop - operations.get(operationName);
 		//1 million nano seconds in 1 ms. We want x.xxx ms shown, so divide by 1000, round (well, integer truncate, since it's faster), then divide by 1000 again.
 		//voila, significant figure to the 3rd degree.
 		double time = (total / 1000) / 1000.0;
-		if (time >= logThreshold) {
+		if(time >= logThreshold) {
 			String stringTime = Double.toString(time);
-			if (stringTime.length() < 6 && stringTime.contains(".")) {
-				while (stringTime.length() < 6) {
+			if(stringTime.length() < 6 && stringTime.contains(".")) {
+				while(stringTime.length() < 6) {
 					stringTime += "0";
 				}
 			}
 			stringTime += "ms";
-			if (time > 1000) {
+			if(time > 1000) {
 				//Let's change this to seconds, actually.
 				stringTime = Double.toString(((long) time) / 1000.0) + "sec";
 			}
@@ -201,7 +201,7 @@ public final class Profiler {
 	}
 
 	public boolean isLoggable(LogLevel granularity) {
-		if (!profilerOn || granularity == null) {
+		if(!profilerOn || granularity == null) {
 			return false;
 		}
 		return granularity.getLevel() <= configGranularity.getLevel();
@@ -217,17 +217,17 @@ public final class Profiler {
 		outputQueue.push(null, null, new Runnable() {
 			@Override
 			public void run() {
-				if (writeToScreen) {
+				if(writeToScreen) {
 					StreamUtils.GetSystemOut().println(message);
 				}
-				if (writeToFile) {
+				if(writeToFile) {
 					File file = new File(initFile.getParentFile(), DateUtils.ParseCalendarNotation(logFile));
 					try {
 						FileUtil.write(DateUtils.ParseCalendarNotation("%Y-%M-%D %h:%m.%s") + ": " + message + Static.LF(), //Message to log
 								file, //File to output to
 								FileUtil.APPEND, //We want to append
 								true); //Create it for us if it doesn't exist
-					} catch (IOException ex) {
+					} catch(IOException ex) {
 						StreamUtils.GetSystemErr().println("While trying to write to the profiler log file (" + file.getAbsolutePath() + "), recieved an IOException: " + ex.getMessage());
 					}
 				}

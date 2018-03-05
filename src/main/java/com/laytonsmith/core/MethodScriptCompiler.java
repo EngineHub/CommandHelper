@@ -110,10 +110,10 @@ public final class MethodScriptCompiler {
 	 * @throws ConfigCompileException If compilation fails due to bad syntax
 	 */
 	public static TokenStream lex(String script, File file, boolean inPureMScript, boolean saveAllTokens) throws ConfigCompileException {
-		if (script.isEmpty()) {
+		if(script.isEmpty()) {
 			return new TokenStream(new LinkedList<>(), "");
 		}
-		if ((int) script.charAt(0) == 65279) {
+		if((int) script.charAt(0) == 65279) {
 			// Remove the UTF-8 Byte Order Mark, if present.
 			script = script.substring(1);
 		}
@@ -145,41 +145,41 @@ public final class MethodScriptCompiler {
 		Target target = Target.UNKNOWN;
 
 		// Lex the script character by character.
-		for (int i = 0; i < script.length(); i++) {
+		for(int i = 0; i < script.length(); i++) {
 			Character c = script.charAt(i);
 			Character c2 = null;
-			if (i < script.length() - 1) {
+			if(i < script.length() - 1) {
 				c2 = script.charAt(i + 1);
 			}
 
 			column += i - lastColumn;
 			lastColumn = i;
-			if (c == '\n') {
+			if(c == '\n') {
 				line_num++;
 				column = 1;
-				if (!inMultiline && !inPureMScript) {
+				if(!inMultiline && !inPureMScript) {
 					inCommand = true;
 				}
 			}
-			if (buf.length() == 0) {
+			if(buf.length() == 0) {
 				target = new Target(line_num, file, column);
 			}
 
 			// If we are in file options, add the character to the buffer if it's not a file options end character.
-			if (in_file_options) {
+			if(in_file_options) {
 				// For a '>' character outside of a comment, '\>' would have to be used in file options.
 				// Other characters than '>'cannot be escaped.
 				// If support for more escaped characters would be desired in the future, it could be added here.
-				switch (c) {
+				switch(c) {
 					case '\\': {
-						if (c2 == '>') { // "\>".
+						if(c2 == '>') { // "\>".
 							fileOptions.append('>');
 							i++;
 							continue;
 						}
 					}
 					case '>': {
-						if (saveAllTokens) {
+						if(saveAllTokens) {
 							token_list.add(new Token(TType.FILE_OPTIONS_STRING,
 									fileOptions.toString(), target));
 							token_list.add(new Token(TType.FILE_OPTIONS_END, ">", target));
@@ -193,17 +193,17 @@ public final class MethodScriptCompiler {
 			}
 
 			// Comment handling. This is bypassed if we are in a string.
-			if (!state_in_quote && !in_smart_quote) {
-				switch (c) {
+			if(!state_in_quote && !in_smart_quote) {
+				switch(c) {
 
 					// Block comments start (/* and /**) and Double slash line comment start (//).
 					case '/': {
-						if (!in_comment) {
-							if (c2 == '*') { // "/*" or "/**".
+						if(!in_comment) {
+							if(c2 == '*') { // "/*" or "/**".
 								buf.append("/*");
 								in_comment = true;
 								comment_is_block = true;
-								if (i < script.length() - 2 && script.charAt(i + 2) == '*') { // "/**".
+								if(i < script.length() - 2 && script.charAt(i + 2) == '*') { // "/**".
 									in_smart_comment = true;
 									buf.append("*");
 									i++;
@@ -211,7 +211,7 @@ public final class MethodScriptCompiler {
 								commentLineNumberStart = line_num;
 								i++;
 								continue;
-							} else if (c2 == '/') { // "//".
+							} else if(c2 == '/') { // "//".
 								buf.append("//");
 								in_comment = true;
 								i++;
@@ -223,7 +223,7 @@ public final class MethodScriptCompiler {
 
 					// Line comment start (#).
 					case '#': {
-						if (!in_comment) { // "#".
+						if(!in_comment) { // "#".
 							buf.append("#");
 							in_comment = true;
 							continue;
@@ -233,8 +233,8 @@ public final class MethodScriptCompiler {
 
 					// Block comment end (*/).
 					case '*': {
-						if (in_comment && comment_is_block && c2 == '/') { // "*/".
-							if (saveAllTokens || in_smart_comment) {
+						if(in_comment && comment_is_block && c2 == '/') { // "*/".
+							if(saveAllTokens || in_smart_comment) {
 								buf.append("*/");
 								token_list.add(new Token(in_smart_comment ? TType.SMART_COMMENT : TType.COMMENT,
 										buf.toString(), target));
@@ -252,9 +252,9 @@ public final class MethodScriptCompiler {
 
 					// Line comment end (\n).
 					case '\n': {
-						if (in_comment && !comment_is_block) { // "\n".
+						if(in_comment && !comment_is_block) { // "\n".
 							in_comment = false;
-							if (saveAllTokens) {
+							if(saveAllTokens) {
 								token_list.add(new Token(TType.COMMENT, buf.toString(), target));
 								token_list.add(new Token(TType.NEWLINE, "\n", new Target(line_num + 1, file, 0)));
 							}
@@ -268,25 +268,25 @@ public final class MethodScriptCompiler {
 			}
 
 			// If we are in a comment, add the character to the buffer.
-			if (in_comment) {
+			if(in_comment) {
 				buf.append(c);
 				continue;
 			}
 
 			// Handle non-comment non-quoted characters.
-			if (!state_in_quote) {
+			if(!state_in_quote) {
 				// We're not in a comment or quoted string, handle: +=, -=, *=, /=, .=, ->, ++, --, %, **, *, +, -, /,
 				// >=, <=, <<<, >>>, <, >, ===, !==, ==, !=, &&&, |||, &&, ||, !, {, }, .., ., ::, [, =, ], :, comma,
 				// (, ), ;, and whitespace.
 				matched:
 				{
 					Token token;
-					switch (c) {
+					switch(c) {
 						case '+': {
-							if (c2 == '=') { // "+=".
+							if(c2 == '=') { // "+=".
 								token = new Token(TType.PLUS_ASSIGNMENT, "+=", target);
 								i++;
-							} else if (c2 == '+') { // "++".
+							} else if(c2 == '+') { // "++".
 								token = new Token(TType.INCREMENT, "++", target);
 								i++;
 							} else { // "+".
@@ -295,13 +295,13 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '-': {
-							if (c2 == '=') { // "-=".
+							if(c2 == '=') { // "-=".
 								token = new Token(TType.MINUS_ASSIGNMENT, "-=", target);
 								i++;
-							} else if (c2 == '-') { // "--".
+							} else if(c2 == '-') { // "--".
 								token = new Token(TType.DECREMENT, "--", target);
 								i++;
-							} else if (c2 == '>') { // "->".
+							} else if(c2 == '>') { // "->".
 								token = new Token(TType.DEREFERENCE, "->", target);
 								i++;
 							} else { // "-".
@@ -310,10 +310,10 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '*': {
-							if (c2 == '=') { // "*=".
+							if(c2 == '=') { // "*=".
 								token = new Token(TType.MULTIPLICATION_ASSIGNMENT, "*=", target);
 								i++;
-							} else if (c2 == '*') { // "**".
+							} else if(c2 == '*') { // "**".
 								token = new Token(TType.EXPONENTIAL, "**", target);
 								i++;
 							} else { // "*".
@@ -322,12 +322,12 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '/': {
-							if (c2 == '=') { // "/=".
+							if(c2 == '=') { // "/=".
 								token = new Token(TType.DIVISION_ASSIGNMENT, "/=", target);
 								i++;
 							} else { // "/".
 								// Protect against matching commands.
-								if (Character.isLetter(c2)) {
+								if(Character.isLetter(c2)) {
 									break matched; // Pretend that division didn't match.
 								}
 								token = new Token(TType.DIVISION, "/", target);
@@ -335,10 +335,10 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '.': {
-							if (c2 == '=') { // ".=".
+							if(c2 == '=') { // ".=".
 								token = new Token(TType.CONCAT_ASSIGNMENT, ".=", target);
 								i++;
-							} else if (c2 == '.') { // "..".
+							} else if(c2 == '.') { // "..".
 								token = new Token(TType.SLICE, "..", target);
 								i++;
 							} else { // ".".
@@ -351,10 +351,10 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '>': {
-							if (c2 == '=') { // ">=".
+							if(c2 == '=') { // ">=".
 								token = new Token(TType.GTE, ">=", target);
 								i++;
-							} else if (c2 == '>' && i < script.length() - 2 && script.charAt(i + 2) == '>') { // ">>>".
+							} else if(c2 == '>' && i < script.length() - 2 && script.charAt(i + 2) == '>') { // ">>>".
 								token = new Token(TType.MULTILINE_START, ">>>", target);
 								inMultiline = true;
 								i += 2;
@@ -364,24 +364,24 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '<': {
-							if (c2 == '!') { // "<!".								
-								if (buf.length() > 0) {
+							if(c2 == '!') { // "<!".								
+								if(buf.length() > 0) {
 									token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 									buf = new StringBuilder();
 									target = new Target(line_num, file, column);
 								}
 
-								if (saveAllTokens) {
+								if(saveAllTokens) {
 									token_list.add(new Token(TType.FILE_OPTIONS_START, "<!", target));
 								}
 								in_file_options = true;
 								fileOptionsLineNumberStart = line_num;
 								i++;
 								continue;
-							} else if (c2 == '=') { // "<=".
+							} else if(c2 == '=') { // "<=".
 								token = new Token(TType.LTE, "<=", target);
 								i++;
-							} else if (c2 == '<' && i < script.length() - 2 && script.charAt(i + 2) == '<') { // "<<<".
+							} else if(c2 == '<' && i < script.length() - 2 && script.charAt(i + 2) == '<') { // "<<<".
 								token = new Token(TType.MULTILINE_END, "<<<", target);
 								inMultiline = false;
 								i += 2;
@@ -391,8 +391,8 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '=': {
-							if (c2 == '=') {
-								if (i < script.length() - 2 && script.charAt(i + 2) == '=') { // "===".
+							if(c2 == '=') {
+								if(i < script.length() - 2 && script.charAt(i + 2) == '=') { // "===".
 									token = new Token(TType.STRICT_EQUALS, "===", target);
 									i += 2;
 								} else { // "==".
@@ -400,8 +400,8 @@ public final class MethodScriptCompiler {
 									i++;
 								}
 							} else { // "=".
-								if (inCommand) {
-									if (in_opt_var) {
+								if(inCommand) {
+									if(in_opt_var) {
 										token = new Token(TType.OPT_VAR_ASSIGN, "=", target);
 									} else {
 										token = new Token(TType.ALIAS_END, "=", target);
@@ -414,8 +414,8 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '!': {
-							if (c2 == '=') {
-								if (i < script.length() - 2 && script.charAt(i + 2) == '=') { // "!==".
+							if(c2 == '=') {
+								if(i < script.length() - 2 && script.charAt(i + 2) == '=') { // "!==".
 									token = new Token(TType.STRICT_NOT_EQUALS, "!==", target);
 									i += 2;
 								} else { // "!=".
@@ -428,8 +428,8 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '&': {
-							if (c2 == '&') {
-								if (i < script.length() - 2 && script.charAt(i + 2) == '&') { // "&&&".
+							if(c2 == '&') {
+								if(i < script.length() - 2 && script.charAt(i + 2) == '&') { // "&&&".
 									token = new Token(TType.DEFAULT_AND, "&&&", target);
 									i += 2;
 								} else { // "&&".
@@ -444,8 +444,8 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '|': {
-							if (c2 == '|') {
-								if (i < script.length() - 2 && script.charAt(i + 2) == '|') { // "|||".
+							if(c2 == '|') {
+								if(i < script.length() - 2 && script.charAt(i + 2) == '|') { // "|||".
 									token = new Token(TType.DEFAULT_OR, "|||", target);
 									i += 2;
 								} else { // "||".
@@ -465,7 +465,7 @@ public final class MethodScriptCompiler {
 //							break;
 //						}
 						case ':': {
-							if (c2 == ':') { // "::".
+							if(c2 == ':') { // "::".
 								token = new Token(TType.DEREFERENCE, "::", target);
 								i++;
 							} else { // ":".
@@ -503,13 +503,13 @@ public final class MethodScriptCompiler {
 							token = new Token(TType.FUNC_START, "(", target);
 
 							// Handle the buffer or previous token, with the knowledge that a FUNC_START follows.
-							if (buf.length() > 0) {
-								if (saveAllTokens) {
+							if(buf.length() > 0) {
+								if(saveAllTokens) {
 									// In this case, we need to check for keywords first, because we want to go ahead
 									// and convert into that stage. In the future, we might want to do this
 									// unconditionally, but for now, just go ahead and only do it if saveAllTokens is
 									// true, because we know that won't be used by the compiler.
-									if (KeywordList.getKeywordByName(buf.toString()) != null) {
+									if(KeywordList.getKeywordByName(buf.toString()) != null) {
 										// It's a keyword.
 										token_list.add(new Token(TType.KEYWORD, buf.toString(), target));
 									} else {
@@ -529,20 +529,20 @@ public final class MethodScriptCompiler {
 									int count = 0;
 									Iterator<Token> it = token_list.descendingIterator();
 									Token t;
-									while ((t = it.next()).type == TType.WHITESPACE) {
+									while((t = it.next()).type == TType.WHITESPACE) {
 										count++;
 									}
-									if (t.type == TType.UNKNOWN) {
+									if(t.type == TType.UNKNOWN) {
 										t.type = TType.FUNC_NAME;
 										// Go ahead and remove the whitespace here too, they break things.
 										count--;
-										for (int a = 0; a < count; a++) {
+										for(int a = 0; a < count; a++) {
 											token_list.removeLast();
 										}
 									} else {
 										token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
 									}
-								} catch (NoSuchElementException e) {
+								} catch(NoSuchElementException e) {
 									// This is the first element on the list, so, it's another autoconcat.
 									token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
 								}
@@ -568,7 +568,7 @@ public final class MethodScriptCompiler {
 					}
 
 					// Add previous characters as UNKNOWN token.
-					if (buf.length() > 0) {
+					if(buf.length() > 0) {
 						token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 						buf = new StringBuilder();
 						target = new Target(line_num, file, column);
@@ -583,19 +583,19 @@ public final class MethodScriptCompiler {
 			}
 
 			// Handle non-comment characters that might start or stop a quoted string.
-			switch (c) {
+			switch(c) {
 				case '\'': {
-					if (state_in_quote && !in_smart_quote) {
+					if(state_in_quote && !in_smart_quote) {
 						token_list.add(new Token(TType.STRING, buf.toString(), target));
 						buf = new StringBuilder();
 						target = new Target(line_num, file, column);
 						state_in_quote = false;
 						continue;
-					} else if (!state_in_quote) {
+					} else if(!state_in_quote) {
 						state_in_quote = true;
 						quoteLineNumberStart = line_num;
 						in_smart_quote = false;
-						if (buf.length() > 0) {
+						if(buf.length() > 0) {
 							token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 							buf = new StringBuilder();
 							target = new Target(line_num, file, column);
@@ -608,18 +608,18 @@ public final class MethodScriptCompiler {
 					break;
 				}
 				case '"': {
-					if (state_in_quote && in_smart_quote) {
+					if(state_in_quote && in_smart_quote) {
 						token_list.add(new Token(TType.SMART_STRING, buf.toString(), target));
 						buf = new StringBuilder();
 						target = new Target(line_num, file, column);
 						state_in_quote = false;
 						in_smart_quote = false;
 						continue;
-					} else if (!state_in_quote) {
+					} else if(!state_in_quote) {
 						state_in_quote = true;
 						in_smart_quote = true;
 						smartQuoteLineNumberStart = line_num;
-						if (buf.length() > 0) {
+						if(buf.length() > 0) {
 							token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 							buf = new StringBuilder();
 							target = new Target(line_num, file, column);
@@ -634,11 +634,11 @@ public final class MethodScriptCompiler {
 				case '\n': {
 
 					// Append a newline to the buffer if it's quoted.
-					if (state_in_quote) {
+					if(state_in_quote) {
 						buf.append(c);
 					} else {
 						// Newline is not quoted. Move the buffer to an UNKNOWN token and add a NEWLINE token.
-						if (buf.length() > 0) {
+						if(buf.length() > 0) {
 							token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 							buf = new StringBuilder();
 							target = new Target(line_num, file, column);
@@ -651,13 +651,13 @@ public final class MethodScriptCompiler {
 					// Handle escaped characters in quotes or a single "\" seperator token otherwise.
 
 					// Handle backslash character outside of quotes.
-					if (!state_in_quote) {
+					if(!state_in_quote) {
 						token_list.add(new Token(TType.SEPERATOR, "\\", target));
 						break;
 					}
 
 					// Handle an escape sign in a quote.
-					switch (c2) {
+					switch(c2) {
 						case '\\':
 						case '\'':
 						case '"':
@@ -689,14 +689,14 @@ public final class MethodScriptCompiler {
 							break; // Backspace.
 						case 'u': { // Unicode (4 characters).
 							// Grab the next 4 characters, and check to see if they are numbers.
-							if (i + 5 >= script.length()) {
+							if(i + 5 >= script.length()) {
 								throw new ConfigCompileException("Unrecognized unicode escape sequence", target);
 							}
 							String unicode = script.substring(i + 2, i + 6);
 							int unicodeNum;
 							try {
 								unicodeNum = Integer.parseInt(unicode, 16);
-							} catch (NumberFormatException e) {
+							} catch(NumberFormatException e) {
 								throw new ConfigCompileException(
 										"Unrecognized unicode escape sequence: \\u" + unicode, target);
 							}
@@ -706,14 +706,14 @@ public final class MethodScriptCompiler {
 						}
 						case 'U': { // Unicode (8 characters).
 							// Grab the next 8 characters and check to see if they are numbers.
-							if (i + 9 >= script.length()) {
+							if(i + 9 >= script.length()) {
 								throw new ConfigCompileException("Unrecognized unicode escape sequence", target);
 							}
 							String unicode = script.substring(i + 2, i + 10);
 							int unicodeNum;
 							try {
 								unicodeNum = Integer.parseInt(unicode, 16);
-							} catch (NumberFormatException e) {
+							} catch(NumberFormatException e) {
 								throw new ConfigCompileException(
 										"Unrecognized unicode escape sequence: \\u" + unicode, target);
 							}
@@ -722,7 +722,7 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '@': {
-							if (!in_smart_quote) {
+							if(!in_smart_quote) {
 								throw new ConfigCompileException("The escape sequence \\@ is not"
 										+ " a recognized escape sequence in a non-smart string", target);
 							}
@@ -743,7 +743,7 @@ public final class MethodScriptCompiler {
 					// At this point, only non-comment and non-escaped characters that are not part of a
 					// quote start/end are left.
 					// Disallow Non-Breaking Space Characters.
-					if (!state_in_quote && c == '\u00A0'/*nbsp*/) {
+					if(!state_in_quote && c == '\u00A0'/*nbsp*/) {
 						throw new ConfigCompileException("NBSP character in script", target);
 					}
 
@@ -755,14 +755,14 @@ public final class MethodScriptCompiler {
 		} // End of lexing.
 
 		// Handle unended file options.
-		if (in_file_options) {
+		if(in_file_options) {
 			throw new ConfigCompileException("Unended file options. You started the the file options on line "
 					+ fileOptionsLineNumberStart, target);
 		}
 
 		// Handle unended string literals.
-		if (state_in_quote) {
-			if (in_smart_quote) {
+		if(state_in_quote) {
+			if(in_smart_quote) {
 				throw new ConfigCompileException("Unended string literal. You started the last double quote on line "
 						+ smartQuoteLineNumberStart, target);
 			} else {
@@ -772,7 +772,7 @@ public final class MethodScriptCompiler {
 		}
 
 		// Handle unended comment blocks. Since a newline is added to the end of the script, line comments are ended.
-		if (in_comment || comment_is_block) {
+		if(in_comment || comment_is_block) {
 			throw new ConfigCompileException("Unended block comment. You started the comment on line "
 					+ commentLineNumberStart, target);
 		}
@@ -780,13 +780,13 @@ public final class MethodScriptCompiler {
 		// Look at the tokens and get meaning from them. Also, look for improper symbol locations
 		// and go ahead and absorb unary +- into the token.
 		ListIterator<Token> it = token_list.listIterator(0);
-		while (it.hasNext()) {
+		while(it.hasNext()) {
 			Token t = it.next();
 
 			// Combine whitespace tokens into one.
-			if (t.type == TType.WHITESPACE && it.hasNext()) {
+			if(t.type == TType.WHITESPACE && it.hasNext()) {
 				Token next;
-				if ((next = it.next()).type == TType.WHITESPACE) {
+				if((next = it.next()).type == TType.WHITESPACE) {
 					t.value += next.val();
 					it.remove(); // Remove 'next'.
 				} else {
@@ -798,11 +798,11 @@ public final class MethodScriptCompiler {
 
 			// Convert "-" + number to -number if allowed.
 			it.previous(); // Select 't' <--.
-			if (it.hasPrevious()) {
+			if(it.hasPrevious()) {
 				Token prev1 = it.previous(); // Select 'prev1' <--.
-				if (it.hasPrevious()) {
+				if(it.hasPrevious()) {
 					Token prev2 = it.previous(); // Select 'prev2' <--.
-					if (t.type == TType.UNKNOWN && prev1.type.isPlusMinus() // Convert "± UNKNOWN".
+					if(t.type == TType.UNKNOWN && prev1.type.isPlusMinus() // Convert "± UNKNOWN".
 							&& !prev2.type.isIdentifier() // Don't convert "number/string/var ± ...".
 							&& prev2.type != TType.FUNC_END // Don't convert "func() ± ...".
 							&& !IVAR_PATTERN.matcher(t.val()).matches() // Don't convert "± @var".
@@ -823,20 +823,20 @@ public final class MethodScriptCompiler {
 			it.next(); // Select 't' -->.
 
 			// Assign a type to all UNKNOWN tokens.
-			if (t.type == TType.UNKNOWN) {
-				if (t.val().charAt(0) == '/' && t.val().length() > 1) {
+			if(t.type == TType.UNKNOWN) {
+				if(t.val().charAt(0) == '/' && t.val().length() > 1) {
 					t.type = TType.COMMAND;
-				} else if (t.val().equals("$")) {
+				} else if(t.val().equals("$")) {
 					t.type = TType.FINAL_VAR;
-				} else if (VAR_PATTERN.matcher(t.val()).matches()) {
+				} else if(VAR_PATTERN.matcher(t.val()).matches()) {
 					t.type = TType.VARIABLE;
-				} else if (IVAR_PATTERN.matcher(t.val()).matches()) {
+				} else if(IVAR_PATTERN.matcher(t.val()).matches()) {
 					t.type = TType.IVARIABLE;
-				} else if (t.val().charAt(0) == '@') {
+				} else if(t.val().charAt(0) == '@') {
 					throw new ConfigCompileException("IVariables must match the regex: " + IVAR_PATTERN, target);
-				} else if (keywords.contains(t.val())) {
+				} else if(keywords.contains(t.val())) {
 					t.type = TType.KEYWORD;
-				} else if (t.val().matches("[\t ]*")) {
+				} else if(t.val().matches("[\t ]*")) {
 					t.type = TType.WHITESPACE;
 				} else {
 					t.type = TType.LIT;
@@ -844,15 +844,15 @@ public final class MethodScriptCompiler {
 			}
 
 			// Skip this check if we're not in pure mscript.
-			if (inPureMScript) {
-				if (it.hasNext()) {
+			if(inPureMScript) {
+				if(it.hasNext()) {
 					Token next = it.next(); // Select 'next' -->.
 					it.previous(); // Select 'next' <--.
 					it.previous(); // Select 't' <--.
-					if (t.type.isSymbol() && !t.type.isUnary() && !next.type.isUnary()) {
-						if (it.hasPrevious()) {
+					if(t.type.isSymbol() && !t.type.isUnary() && !next.type.isUnary()) {
+						if(it.hasPrevious()) {
 							Token prev1 = it.previous(); // Select 'prev1' <--.
-							if (prev1.type.equals(TType.FUNC_START) || prev1.type.equals(TType.COMMA)
+							if(prev1.type.equals(TType.FUNC_START) || prev1.type.equals(TType.COMMA)
 									|| next.type.equals(TType.FUNC_END) || next.type.equals(TType.COMMA)
 									|| prev1.type.isSymbol() || next.type.isSymbol()) {
 								throw new ConfigCompileException("Unexpected symbol (" + t.val() + ")", t.getTarget());
@@ -870,15 +870,15 @@ public final class MethodScriptCompiler {
 		// Make sure that the file options are the first non-comment code in the file
 		{
 			boolean foundCode = false;
-			for (Token t : token_list) {
-				if (t.type.isFileOption()) {
-					if (foundCode) {
+			for(Token t : token_list) {
+				if(t.type.isFileOption()) {
+					if(foundCode) {
 						throw new ConfigCompileException("File options must be the first non-comment section in the"
 								+ " code", t.target);
 					}
 					break;
 				}
-				if (!t.type.isComment() && !t.type.isWhitespace()) {
+				if(!t.type.isComment() && !t.type.isWhitespace()) {
 					foundCode = true;
 				}
 			}
@@ -895,17 +895,17 @@ public final class MethodScriptCompiler {
 	 * @throws ConfigCompileException
 	 */
 	public static List<Script> preprocess(TokenStream tokenStream) throws ConfigCompileException {
-		if (tokenStream == null || tokenStream.isEmpty()) {
+		if(tokenStream == null || tokenStream.isEmpty()) {
 			return new ArrayList<>();
 		}
 
 		// Remove leading newlines.
-		while (!tokenStream.isEmpty() && tokenStream.getFirst().type == TType.NEWLINE) {
+		while(!tokenStream.isEmpty() && tokenStream.getFirst().type == TType.NEWLINE) {
 			tokenStream.removeFirst(); // Remove leading newlines.
 		}
 
 		// Return an empty list if there were only newlines.
-		if (tokenStream.isEmpty()) {
+		if(tokenStream.isEmpty()) {
 			return new ArrayList<>();
 		}
 
@@ -914,21 +914,21 @@ public final class MethodScriptCompiler {
 			ListIterator<Token> it = tokenStream.listIterator(0);
 			Token token = it.next();
 			outerLoop:
-			while (true) {
-				switch (token.type) {
+			while(true) {
+				switch(token.type) {
 					case WHITESPACE: {
 						it.remove(); // Remove whitespaces.
-						if (!it.hasNext()) {
+						if(!it.hasNext()) {
 							break outerLoop;
 						}
 						token = it.next();
 						continue outerLoop;
 					}
 					case NEWLINE: {
-						while (true) {
-							if (!it.hasNext()) {
+						while(true) {
+							if(!it.hasNext()) {
 								break outerLoop;
-							} else if ((token = it.next()).type == TType.NEWLINE) {
+							} else if((token = it.next()).type == TType.NEWLINE) {
 								it.remove(); // Remove duplicate newlines.
 							} else {
 								continue outerLoop;
@@ -936,7 +936,7 @@ public final class MethodScriptCompiler {
 						}
 					}
 					default: {
-						if (!it.hasNext()) {
+						if(!it.hasNext()) {
 							break outerLoop;
 						}
 						token = it.next();
@@ -952,13 +952,13 @@ public final class MethodScriptCompiler {
 		boolean inside_multiline = false;
 		ListIterator<Token> it = tokenStream.listIterator(0);
 		Token token = null;
-		while (it.hasNext()) {
+		while(it.hasNext()) {
 			token = it.next();
 
-			switch (token.type) {
+			switch(token.type) {
 				case ALIAS_END: { // "=".
-					if (it.hasNext()) {
-						if (it.next().type == TType.MULTILINE_START) { // "= >>>".
+					if(it.hasNext()) {
+						if(it.next().type == TType.MULTILINE_START) { // "= >>>".
 							inside_multiline = true;
 							it.remove(); // Remove multiline start (>>>).
 							it.previous(); // Select 'token' <---.
@@ -972,7 +972,7 @@ public final class MethodScriptCompiler {
 				case MULTILINE_END: { // "<<<".
 
 					// Handle multiline end token (<<<) without start.
-					if (!inside_multiline) {
+					if(!inside_multiline) {
 						throw new ConfigCompileException(
 								"Found multiline end symbol, and no multiline start found", token.target);
 					}
@@ -984,14 +984,14 @@ public final class MethodScriptCompiler {
 				case MULTILINE_START: { // ">>>".
 
 					// Handle multiline start token (>>>) while already in multiline.
-					if (inside_multiline) {
+					if(inside_multiline) {
 						throw new ConfigCompileException("Did not expect a multiline start symbol here,"
 								+ " are you missing a multiline end symbol above this line?", token.target);
 					}
 
 					// Handle multiline start token (>>>) without alias end (=) in front.
 					it.previous(); // Select 'token' <--.
-					if (!it.hasPrevious() || it.previous().type != TType.ALIAS_END) {
+					if(!it.hasPrevious() || it.previous().type != TType.ALIAS_END) {
 						throw new ConfigCompileException(
 								"Multiline symbol must follow the alias_end (=) symbol", token.target);
 					}
@@ -1002,7 +1002,7 @@ public final class MethodScriptCompiler {
 				case NEWLINE: { // "\n".
 
 					// Skip newlines that are inside a multiline construct.
-					if (inside_multiline) {
+					if(inside_multiline) {
 						it.remove(); // Remove newline.
 					}
 					continue;
@@ -1017,8 +1017,8 @@ public final class MethodScriptCompiler {
 				default: {
 
 					// Remove newlines that are behind a '\'.
-					if (token.type != TType.STRING && token.val().equals("\\") && it.hasNext()) {
-						if (it.next().type == TType.NEWLINE) {
+					if(token.type != TType.STRING && token.val().equals("\\") && it.hasNext()) {
+						if(it.next().type == TType.NEWLINE) {
 							it.remove(); // Remove newline.
 							it.previous(); // Select 'token' <--.
 							it.next(); // Select 'token' -->.
@@ -1033,7 +1033,7 @@ public final class MethodScriptCompiler {
 		assert token != null;
 
 		// Handle missing multiline end token.
-		if (inside_multiline) {
+		if(inside_multiline) {
 			throw new ConfigCompileException("Expecting a multiline end symbol, but your last multiline alias appears to be missing one.", token.target);
 		}
 
@@ -1043,12 +1043,12 @@ public final class MethodScriptCompiler {
 		List<Token> right = new ArrayList<>();
 		List<Script> scripts = new ArrayList<>();
 		tokenLoop:
-		for (it = tokenStream.listIterator(0); it.hasNext();) {
+		for(it = tokenStream.listIterator(0); it.hasNext();) {
 			Token t = it.next();
 
 			// Add all tokens until ALIAS_END (=) or end of stream.
-			while (t.type != TType.ALIAS_END) {
-				if (!it.hasNext()) {
+			while(t.type != TType.ALIAS_END) {
+				if(!it.hasNext()) {
 					break tokenLoop; // End of stream.
 				}
 				left.add(t);
@@ -1056,19 +1056,19 @@ public final class MethodScriptCompiler {
 			}
 
 			// Add all tokens until NEWLINE (\n).
-			while (t.type != TType.NEWLINE) {
+			while(t.type != TType.NEWLINE) {
 				assert it.hasNext(); // All files end with a newline, so end of stream should be impossible here.
 				right.add(t);
 				t = it.next();
 			}
 
 			// Create a new script for the obtained left and right if end of stream has not been reached.
-			if (t.type == TType.NEWLINE) {
+			if(t.type == TType.NEWLINE) {
 
 				// Check for spurious symbols, which indicate an issue with the script, but ignore any whitespace.
-				for (int j = left.size() - 1; j >= 0; j--) {
-					if (left.get(j).type == TType.NEWLINE) {
-						if (j > 0 && left.get(j - 1).type != TType.WHITESPACE) {
+				for(int j = left.size() - 1; j >= 0; j--) {
+					if(left.get(j).type == TType.NEWLINE) {
+						if(j > 0 && left.get(j - 1).type != TType.WHITESPACE) {
 							throw new ConfigCompileException(
 									"Unexpected token: " + left.get(j - 1).val(), left.get(j - 1).getTarget());
 						}
@@ -1101,21 +1101,21 @@ public final class MethodScriptCompiler {
 	 */
 	public static ParseTree compile(TokenStream stream) throws ConfigCompileException, ConfigCompileGroupException {
 		Set<ConfigCompileException> compilerErrors = new HashSet<>();
-		if (stream == null || stream.isEmpty()) {
+		if(stream == null || stream.isEmpty()) {
 			return null;
 		}
 		Target unknown;
 		try {
 			//Instead of using Target.UNKNOWN, we can at least set the file.
 			unknown = new Target(0, stream.get(0).target.file(), 0);
-		} catch (Exception e) {
+		} catch(Exception e) {
 			unknown = Target.UNKNOWN;
 		}
 
 		// Remove all newlines and whitespaces.
 		ListIterator<Token> it = stream.listIterator(0);
-		while (it.hasNext()) {
-			if (it.next().type.isWhitespace()) {
+		while(it.hasNext()) {
+			if(it.next().type.isWhitespace()) {
 				it.remove();
 			}
 		}
@@ -1155,7 +1155,7 @@ public final class MethodScriptCompiler {
 
 		// Create a Token array to iterate over, rather than using the LinkedList's O(n) get() method.
 		Token[] tokenArray = stream.toArray(new Token[stream.size()]);
-		for (int i = 0; i < tokenArray.length; i++) {
+		for(int i = 0; i < tokenArray.length; i++) {
 			t = tokenArray[i];
 			Token prev1 = i - 1 >= 0 ? tokenArray[i - 1] : new Token(TType.UNKNOWN, "", t.target);
 			Token next1 = i + 1 < stream.size() ? tokenArray[i + 1] : new Token(TType.UNKNOWN, "", t.target);
@@ -1163,7 +1163,7 @@ public final class MethodScriptCompiler {
 			Token next3 = i + 3 < stream.size() ? tokenArray[i + 3] : new Token(TType.UNKNOWN, "", t.target);
 
 			// Brace handling
-			if (t.type == TType.LCURLY_BRACKET) {
+			if(t.type == TType.LCURLY_BRACKET) {
 				ParseTree b = new ParseTree(new CFunction("__cbrace__", t.getTarget()), fileOptions);
 				tree.addChild(b);
 				tree = b;
@@ -1173,21 +1173,21 @@ public final class MethodScriptCompiler {
 				continue;
 			}
 
-			if (t.type == TType.RCURLY_BRACKET) {
+			if(t.type == TType.RCURLY_BRACKET) {
 				bracketCount--;
-				if (constructCount.peek().get() > 1) {
+				if(constructCount.peek().get() > 1) {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
 					ParseTree c = new ParseTree(new CFunction("__autoconcat__", tree.getTarget()), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<>();
-					for (int b = replaceAt; b < tree.numberOfChildren(); b++) {
+					for(int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
 					}
 					c.setChildren(subChildren);
-					if (replaceAt > 0) {
+					if(replaceAt > 0) {
 						List<ParseTree> firstChildren = new ArrayList<>();
-						for (int d = 0; d < replaceAt; d++) {
+						for(int d = 0; d < replaceAt; d++) {
 							firstChildren.add(tree.getChildAt(d));
 						}
 						tree.setChildren(firstChildren);
@@ -1201,18 +1201,18 @@ public final class MethodScriptCompiler {
 				constructCount.pop();
 				try {
 					constructCount.peek().incrementAndGet();
-				} catch (EmptyStackException e) {
+				} catch(EmptyStackException e) {
 					throw new ConfigCompileException("Unexpected end curly brace", t.target);
 				}
 				continue;
 			}
 
 			//Associative array/label handling
-			if (t.type == TType.LABEL && tree.getChildren().size() > 0) {
+			if(t.type == TType.LABEL && tree.getChildren().size() > 0) {
 				//If it's not an atomic identifier it's an error.
-				if (!prev1.type.isAtomicLit() && prev1.type != TType.IVARIABLE && prev1.type != TType.KEYWORD) {
+				if(!prev1.type.isAtomicLit() && prev1.type != TType.IVARIABLE && prev1.type != TType.KEYWORD) {
 					ConfigCompileException error = new ConfigCompileException("Invalid label specified", t.getTarget());
-					if (prev1.type == TType.FUNC_END) {
+					if(prev1.type == TType.FUNC_END) {
 						// This is a fairly common mistake, so we have special handling for this,
 						// because otherwise we would get a "Mismatched parenthesis" warning (which doesn't make sense),
 						// and potentially lots of other invalid errors down the line, so we go ahead
@@ -1229,30 +1229,30 @@ public final class MethodScriptCompiler {
 			}
 
 			//Array notation handling
-			if (t.type.equals(TType.LSQUARE_BRACKET)) {
+			if(t.type.equals(TType.LSQUARE_BRACKET)) {
 				arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
 				continue;
-			} else if (t.type.equals(TType.RSQUARE_BRACKET)) {
+			} else if(t.type.equals(TType.RSQUARE_BRACKET)) {
 				boolean emptyArray = false;
-				if (prev1.type.equals(TType.LSQUARE_BRACKET)) {
+				if(prev1.type.equals(TType.LSQUARE_BRACKET)) {
 					emptyArray = true;
 				}
-				if (arrayStack.size() == 1) {
+				if(arrayStack.size() == 1) {
 					throw new ConfigCompileException("Mismatched square bracket", t.target);
 				}
 				//array is the location of the array
 				int array = arrayStack.pop().get();
 				//index is the location of the first node with the index
 				int index = array + 1;
-				if (!tree.hasChildren() || array == -1) {
+				if(!tree.hasChildren() || array == -1) {
 					throw new ConfigCompileException("Brackets are illegal here", t.target);
 				}
 				ParseTree myArray = tree.getChildAt(array);
 				ParseTree myIndex;
-				if (!emptyArray) {
+				if(!emptyArray) {
 					myIndex = new ParseTree(new CFunction("__autoconcat__", myArray.getTarget()), fileOptions);
 
-					for (int j = index; j < tree.numberOfChildren(); j++) {
+					for(int j = index; j < tree.numberOfChildren(); j++) {
 						myIndex.addChild(tree.getChildAt(j));
 					}
 				} else {
@@ -1264,8 +1264,8 @@ public final class MethodScriptCompiler {
 				arrayGet.addChild(myIndex);
 
 				// Check if the @var[...] had a negating "-" in front. If so, add a neg().
-				if (minusArrayStack.size() != 0 && arrayStack.size() + 1 == minusArrayStack.peek().get()) {
-					if (!next1.type.equals(TType.LSQUARE_BRACKET)) { // Wait if there are more array_get's comming.
+				if(minusArrayStack.size() != 0 && arrayStack.size() + 1 == minusArrayStack.peek().get()) {
+					if(!next1.type.equals(TType.LSQUARE_BRACKET)) { // Wait if there are more array_get's comming.
 						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
 						negTree.addChild(arrayGet);
 						tree.addChild(negTree);
@@ -1282,8 +1282,8 @@ public final class MethodScriptCompiler {
 			}
 
 			//Smart strings
-			if (t.type == TType.SMART_STRING) {
-				if (t.val().contains("@")) {
+			if(t.type == TType.SMART_STRING) {
+				if(t.val().contains("@")) {
 					ParseTree function = new ParseTree(fileOptions);
 					function.setData(new CFunction(new Compiler.smart_string().getName(), t.target));
 					ParseTree string = new ParseTree(fileOptions);
@@ -1297,43 +1297,43 @@ public final class MethodScriptCompiler {
 				continue;
 			}
 
-			if (t.type == TType.DEREFERENCE) {
+			if(t.type == TType.DEREFERENCE) {
 				//Currently unimplemented, but going ahead and making it strict
 				compilerErrors.add(new ConfigCompileException("The '" + t.val() + "' symbol is not currently allowed in raw strings. You must quote all"
 						+ " symbols.", t.target));
 			}
 
-			if (t.type.equals(TType.FUNC_NAME)) {
+			if(t.type.equals(TType.FUNC_NAME)) {
 				CFunction func = new CFunction(t.val(), t.target);
 				ParseTree f = new ParseTree(func, fileOptions);
 				tree.addChild(f);
 				constructCount.push(new AtomicInteger(0));
 				tree = f;
 				parents.push(f);
-			} else if (t.type.equals(TType.FUNC_START)) {
-				if (!prev1.type.equals(TType.FUNC_NAME)) {
+			} else if(t.type.equals(TType.FUNC_START)) {
+				if(!prev1.type.equals(TType.FUNC_NAME)) {
 					throw new ConfigCompileException("Unexpected parenthesis", t.target);
 				}
 				parens++;
-			} else if (t.type.equals(TType.FUNC_END)) {
-				if (parens <= 0) {
+			} else if(t.type.equals(TType.FUNC_END)) {
+				if(parens <= 0) {
 					throw new ConfigCompileException("Unexpected parenthesis", t.target);
 				}
 				parens--;
 				parents.pop(); // Pop function.
-				if (constructCount.peek().get() > 1) {
+				if(constructCount.peek().get() > 1) {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
 					ParseTree c = new ParseTree(new CFunction("__autoconcat__", tree.getTarget()), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<>();
-					for (int b = replaceAt; b < tree.numberOfChildren(); b++) {
+					for(int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
 					}
 					c.setChildren(subChildren);
-					if (replaceAt > 0) {
+					if(replaceAt > 0) {
 						List<ParseTree> firstChildren = new ArrayList<>();
-						for (int d = 0; d < replaceAt; d++) {
+						for(int d = 0; d < replaceAt; d++) {
 							firstChildren.add(tree.getChildAt(d));
 						}
 						tree.setChildren(firstChildren);
@@ -1345,18 +1345,18 @@ public final class MethodScriptCompiler {
 				constructCount.pop();
 				try {
 					constructCount.peek().incrementAndGet();
-				} catch (EmptyStackException e) {
+				} catch(EmptyStackException e) {
 					throw new ConfigCompileException("Unexpected end parenthesis", t.target);
 				}
 				try {
 					tree = parents.peek();
-				} catch (EmptyStackException e) {
+				} catch(EmptyStackException e) {
 					throw new ConfigCompileException("Unexpected end parenthesis", t.target);
 				}
 
 				// Handle "-func(args)" and "-func(args)[index]".
-				if (minusFuncStack.size() != 0 && minusFuncStack.peek().get() == parens + 1) {
-					if (next1.type.equals(TType.LSQUARE_BRACKET)) {
+				if(minusFuncStack.size() != 0 && minusFuncStack.peek().get() == parens + 1) {
+					if(next1.type.equals(TType.LSQUARE_BRACKET)) {
 						// Move the negation to the array_get which contains this function.
 						minusArrayStack.push(new AtomicInteger(arrayStack.size() + 1)); // +1 because the bracket isn't counted yet.
 					} else {
@@ -1369,19 +1369,19 @@ public final class MethodScriptCompiler {
 					minusFuncStack.pop();
 				}
 
-			} else if (t.type.equals(TType.COMMA)) {
-				if (constructCount.peek().get() > 1) {
+			} else if(t.type.equals(TType.COMMA)) {
+				if(constructCount.peek().get() > 1) {
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
 					ParseTree c = new ParseTree(new CFunction("__autoconcat__", unknown), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<>();
-					for (int b = replaceAt; b < tree.numberOfChildren(); b++) {
+					for(int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
 					}
 					c.setChildren(subChildren);
-					if (replaceAt > 0) {
+					if(replaceAt > 0) {
 						List<ParseTree> firstChildren = new ArrayList<>();
-						for (int d = 0; d < replaceAt; d++) {
+						for(int d = 0; d < replaceAt; d++) {
 							firstChildren.add(tree.getChildAt(d));
 						}
 						tree.setChildren(firstChildren);
@@ -1393,14 +1393,14 @@ public final class MethodScriptCompiler {
 				constructCount.peek().set(0);
 				continue;
 			}
-			if (t.type == TType.SLICE) {
+			if(t.type == TType.SLICE) {
 				//We got here because the previous token isn't being ignored, because it's
 				//actually a control character, instead of whitespace, but this is a
 				//"empty first" slice notation. Compare this to the code below.
 				try {
 					CSlice slice;
 					String value = next1.val();
-					if (next1.type == TType.MINUS || next1.type == TType.PLUS) {
+					if(next1.type == TType.MINUS || next1.type == TType.PLUS) {
 						value = next1.val() + next2.val();
 						i++;
 					}
@@ -1409,33 +1409,33 @@ public final class MethodScriptCompiler {
 					tree.addChild(new ParseTree(slice, fileOptions));
 					constructCount.peek().incrementAndGet();
 					continue;
-				} catch (ConfigRuntimeException ex) {
+				} catch(ConfigRuntimeException ex) {
 					//CSlice can throw CREs, but at this stage, we have to
 					//turn them into a CCE.
 					throw new ConfigCompileException(ex);
 				}
 			}
-			if (next1.type.equals(TType.SLICE)) {
+			if(next1.type.equals(TType.SLICE)) {
 				//Slice notation handling
 				try {
 					CSlice slice;
-					if (t.type.isSeparator() || (t.type.isWhitespace() && prev1.type.isSeparator()) || t.type.isKeyword()) {
+					if(t.type.isSeparator() || (t.type.isWhitespace() && prev1.type.isSeparator()) || t.type.isKeyword()) {
 						//empty first
 						String value = next2.val();
 						i++;
-						if (next2.type == TType.MINUS || next2.type == TType.PLUS) {
+						if(next2.type == TType.MINUS || next2.type == TType.PLUS) {
 							value = next2.val() + next3.val();
 							i++;
 						}
 						slice = new CSlice(".." + value, next1.getTarget());
-						if (t.type.isKeyword()) {
+						if(t.type.isKeyword()) {
 							tree.addChild(new ParseTree(new CKeyword(t.val(), t.getTarget()), fileOptions));
 							constructCount.peek().incrementAndGet();
 						}
-					} else if (next2.type.isSeparator() || next2.type.isKeyword()) {
+					} else if(next2.type.isSeparator() || next2.type.isKeyword()) {
 						//empty last
 						String modifier = "";
-						if (prev1.type == TType.MINUS || prev1.type == TType.PLUS) {
+						if(prev1.type == TType.MINUS || prev1.type == TType.PLUS) {
 							//The negative would have already been inserted into the tree
 							modifier = prev1.val();
 							tree.removeChildAt(tree.getChildren().size() - 1);
@@ -1444,20 +1444,20 @@ public final class MethodScriptCompiler {
 					} else {
 						//both are provided
 						String modifier1 = "";
-						if (prev1.type == TType.MINUS || prev1.type == TType.PLUS) {
+						if(prev1.type == TType.MINUS || prev1.type == TType.PLUS) {
 							//It's a negative, incorporate that here, and remove the
 							//minus from the tree
 							modifier1 = prev1.val();
 							tree.removeChildAt(tree.getChildren().size() - 1);
 						}
 						Token first = t;
-						if (first.type.isWhitespace()) {
+						if(first.type.isWhitespace()) {
 							first = prev1;
 						}
 						Token second = next2;
 						i++;
 						String modifier2 = "";
-						if (next2.type == TType.MINUS || next2.type == TType.PLUS) {
+						if(next2.type == TType.MINUS || next2.type == TType.PLUS) {
 							modifier2 = next2.val();
 							second = next3;
 							i++;
@@ -1468,23 +1468,23 @@ public final class MethodScriptCompiler {
 					tree.addChild(new ParseTree(slice, fileOptions));
 					constructCount.peek().incrementAndGet();
 					continue;
-				} catch (ConfigRuntimeException ex) {
+				} catch(ConfigRuntimeException ex) {
 					//CSlice can throw CREs, but at this stage, we have to
 					//turn them into a CCE.
 					throw new ConfigCompileException(ex);
 				}
-			} else if (t.type == TType.LIT) {
+			} else if(t.type == TType.LIT) {
 				Construct c = Static.resolveConstruct(t.val(), t.target);
-				if (c instanceof CString && fileOptions.isStrict()) {
+				if(c instanceof CString && fileOptions.isStrict()) {
 					compilerErrors.add(new ConfigCompileException("Bare strings are not allowed in strict mode", t.target));
-				} else if ((c instanceof CInt || c instanceof CDecimal) && next1.type == TType.DOT && next2.type == TType.LIT) {
+				} else if((c instanceof CInt || c instanceof CDecimal) && next1.type == TType.DOT && next2.type == TType.LIT) {
 					// make CDouble/CDecimal here because otherwise Long.parseLong() will remove
 					// minus zero before decimals and leading zeroes after decimals
 					try {
-						if (t.value.startsWith("0m")) {
+						if(t.value.startsWith("0m")) {
 							// CDecimal
 							String neg = "";
-							if (prev1.value.equals("-")) {
+							if(prev1.value.equals("-")) {
 								neg = "-";
 							}
 							c = new CDecimal(neg + t.value.substring(2) + '.' + next2.value, t.target);
@@ -1493,40 +1493,40 @@ public final class MethodScriptCompiler {
 							c = new CDouble(Double.parseDouble(t.val() + '.' + next2.val()), t.target);
 						}
 						i += 2;
-					} catch (NumberFormatException e) {
+					} catch(NumberFormatException e) {
 						// Not a double
 					}
 				}
 				tree.addChild(new ParseTree(c, fileOptions));
 				constructCount.peek().incrementAndGet();
-			} else if (t.type.equals(TType.STRING) || t.type.equals(TType.COMMAND)) {
+			} else if(t.type.equals(TType.STRING) || t.type.equals(TType.COMMAND)) {
 				tree.addChild(new ParseTree(new CString(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
-			} else if (t.type.equals(TType.IDENTIFIER)) {
+			} else if(t.type.equals(TType.IDENTIFIER)) {
 				tree.addChild(new ParseTree(new CPreIdentifier(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
-			} else if (t.type.isKeyword()) {
+			} else if(t.type.isKeyword()) {
 				tree.addChild(new ParseTree(new CKeyword(t.val(), t.getTarget()), fileOptions));
 				constructCount.peek().incrementAndGet();
-			} else if (t.type.equals(TType.IVARIABLE)) {
+			} else if(t.type.equals(TType.IVARIABLE)) {
 				tree.addChild(new ParseTree(new IVariable(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
-			} else if (t.type.equals(TType.UNKNOWN)) {
+			} else if(t.type.equals(TType.UNKNOWN)) {
 				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
-			} else if (t.type.isSymbol()) { //Logic and math symbols
+			} else if(t.type.isSymbol()) { //Logic and math symbols
 
 				// Attempt to find "-@var" and change it to "neg(@var)" if it's not @a - @b. Else just add the symbol.
 				// Also handles "-function()" and "-@var[index]".
-				if (t.type.equals(TType.MINUS) && !prev1.type.isAtomicLit() && !prev1.type.equals(TType.IVARIABLE)
+				if(t.type.equals(TType.MINUS) && !prev1.type.isAtomicLit() && !prev1.type.equals(TType.IVARIABLE)
 						&& !prev1.type.equals(TType.VARIABLE) && !prev1.type.equals(TType.RCURLY_BRACKET)
 						&& !prev1.type.equals(TType.RSQUARE_BRACKET) && !prev1.type.equals(TType.FUNC_END)
 						&& (next1.type.equals(TType.IVARIABLE) || next1.type.equals(TType.VARIABLE) || next1.type.equals(TType.FUNC_NAME))) {
 
 					// Check if we are negating a value from an array, function or variable.
-					if (next2.type.equals(TType.LSQUARE_BRACKET)) {
+					if(next2.type.equals(TType.LSQUARE_BRACKET)) {
 						minusArrayStack.push(new AtomicInteger(arrayStack.size() + 1)); // +1 because the bracket isn't counted yet.
-					} else if (next1.type.equals(TType.FUNC_NAME)) {
+					} else if(next1.type.equals(TType.FUNC_NAME)) {
 						minusFuncStack.push(new AtomicInteger(parens + 1)); // +1 because the function isn't counted yet.
 					} else {
 						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
@@ -1540,23 +1540,23 @@ public final class MethodScriptCompiler {
 					constructCount.peek().incrementAndGet();
 				}
 
-			} else if (t.type == TType.DOT) {
+			} else if(t.type == TType.DOT) {
 				// Check for doubles that start with a decimal, otherwise concat
 				Construct c = null;
-				if (next1.type == TType.LIT && prev1.type != TType.STRING && prev1.type != TType.SMART_STRING) {
+				if(next1.type == TType.LIT && prev1.type != TType.STRING && prev1.type != TType.SMART_STRING) {
 					try {
 						c = new CDouble(Double.parseDouble('.' + next1.val()), t.target);
 						i++;
-					} catch (NumberFormatException e) {
+					} catch(NumberFormatException e) {
 						// Not a double
 					}
 				}
-				if (c == null) {
+				if(c == null) {
 					c = new CSymbol(".", TType.CONCAT, t.target);
 				}
 				tree.addChild(new ParseTree(c, fileOptions));
 				constructCount.peek().incrementAndGet();
-			} else if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
+			} else if(t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
 				tree.addChild(new ParseTree(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 				//right_vars.add(new Variable(t.val(), null, t.line_num));
@@ -1566,13 +1566,13 @@ public final class MethodScriptCompiler {
 
 		assert t != null;
 
-		if (arrayStack.size() != 1) {
+		if(arrayStack.size() != 1) {
 			throw new ConfigCompileException("Mismatched square brackets", t.target);
 		}
-		if (parens != 0) {
+		if(parens != 0) {
 			throw new ConfigCompileException("Mismatched parenthesis", t.target);
 		}
-		if (bracketCount != 0) {
+		if(bracketCount != 0) {
 			throw new ConfigCompileException("Mismatched curly braces", t.target);
 		}
 
@@ -1584,10 +1584,10 @@ public final class MethodScriptCompiler {
 		link(tree, compilerErrors);
 		checkLabels(tree, compilerErrors);
 		checkBreaks(tree, compilerErrors);
-		if (!compilerErrors.isEmpty()) {
-			if (compilerErrors.size() == 1) {
+		if(!compilerErrors.isEmpty()) {
+			if(compilerErrors.size() == 1) {
 				// Just throw the one CCE
-				for (ConfigCompileException e : compilerErrors) {
+				for(ConfigCompileException e : compilerErrors) {
 					throw e;
 				}
 			} else {
@@ -1610,13 +1610,13 @@ public final class MethodScriptCompiler {
 	}
 
 	private static void checkBreaks0(ParseTree tree, long currentLoops, String lastUnbreakable, Set<ConfigCompileException> compilerErrors) {
-		if (!(tree.getData() instanceof CFunction)) {
+		if(!(tree.getData() instanceof CFunction)) {
 			//Don't care about these
 			return;
 		}
-		if (tree.getData().val().startsWith("_")) {
+		if(tree.getData().val().startsWith("_")) {
 			//It's a proc. We need to recurse, but not check this "function"
-			for (ParseTree child : tree.getChildren()) {
+			for(ParseTree child : tree.getChildren()) {
 				checkBreaks0(child, currentLoops, lastUnbreakable, compilerErrors);
 			}
 			return;
@@ -1624,29 +1624,29 @@ public final class MethodScriptCompiler {
 		Function func;
 		try {
 			func = ((CFunction) tree.getData()).getFunction();
-		} catch (ConfigCompileException ex) {
+		} catch(ConfigCompileException ex) {
 			compilerErrors.add(ex);
 			return;
 		}
-		if (func.getClass().getAnnotation(nolinking.class) != null) {
+		if(func.getClass().getAnnotation(nolinking.class) != null) {
 			// Don't link here
 			return;
 		}
 		// We have special handling for procs and closures, and of course break and the loops.
 		// If any of these are here, we kick into special handling mode. Otherwise, we recurse.
-		if (func instanceof DataHandling._break) {
+		if(func instanceof DataHandling._break) {
 			// First grab the counter in the break function. If the break function doesn't
 			// have any children, then 1 is implied. break() requires the argument to be
 			// a CInt, so if it weren't, there would already have been a compile error, so
 			// we can assume it will be a CInt.
 			long breakCounter = 1;
-			if (tree.getChildren().size() == 1) {
+			if(tree.getChildren().size() == 1) {
 				breakCounter = ((CInt) tree.getChildAt(0).getData()).getInt();
 			}
-			if (breakCounter > currentLoops) {
+			if(breakCounter > currentLoops) {
 				// Throw an exception, as this would break above a loop. Different error messages
 				// are applied to different cases
-				if (currentLoops == 0) {
+				if(currentLoops == 0) {
 					compilerErrors.add(new ConfigCompileException("The break() function can only break out of loops" + (lastUnbreakable == null ? "."
 							: ", but an attempt to break out of a " + lastUnbreakable + " was detected."), tree.getTarget()));
 				} else {
@@ -1656,18 +1656,18 @@ public final class MethodScriptCompiler {
 			}
 			return;
 		}
-		if (func.getClass().getAnnotation(unbreakable.class) != null) {
+		if(func.getClass().getAnnotation(unbreakable.class) != null) {
 			// Parse the children like normal, but reset the counter to 0.
-			for (ParseTree child : tree.getChildren()) {
+			for(ParseTree child : tree.getChildren()) {
 				checkBreaks0(child, 0, func.getName(), compilerErrors);
 			}
 			return;
 		}
-		if (func.getClass().getAnnotation(breakable.class) != null) {
+		if(func.getClass().getAnnotation(breakable.class) != null) {
 			// Don't break yet, still recurse, but up our current loops counter.
 			currentLoops++;
 		}
-		for (ParseTree child : tree.getChildren()) {
+		for(ParseTree child : tree.getChildren()) {
 			checkBreaks0(child, currentLoops, lastUnbreakable, compilerErrors);
 		}
 	}
@@ -1681,17 +1681,17 @@ public final class MethodScriptCompiler {
 	 * @param compilerExceptions
 	 */
 	private static void optimizeAutoconcats(ParseTree root, Set<ConfigCompileException> compilerExceptions) {
-		for (ParseTree child : root.getChildren()) {
-			if (child.hasChildren()) {
+		for(ParseTree child : root.getChildren()) {
+			if(child.hasChildren()) {
 				optimizeAutoconcats(child, compilerExceptions);
 			}
 		}
-		if (root.getData() instanceof CFunction && root.getData().val().equals(__autoconcat__)) {
+		if(root.getData() instanceof CFunction && root.getData().val().equals(__autoconcat__)) {
 			try {
 				ParseTree ret = ((Compiler.__autoconcat__) ((CFunction) root.getData()).getFunction()).optimizeDynamic(root.getTarget(), root.getChildren(), root.getFileOptions());
 				root.setData(ret.getData());
 				root.setChildren(ret.getChildren());
-			} catch (ConfigCompileException ex) {
+			} catch(ConfigCompileException ex) {
 				compilerExceptions.add(ex);
 			}
 		}
@@ -1729,41 +1729,41 @@ public final class MethodScriptCompiler {
 		FunctionBase treeFunction = null;
 		try {
 			treeFunction = FunctionList.getFunction(tree.getData());
-			if (treeFunction.getClass().getAnnotation(nolinking.class) != null) {
+			if(treeFunction.getClass().getAnnotation(nolinking.class) != null) {
 				//Don't link children of a nolinking function.
 				return;
 			}
-		} catch (ConfigCompileException ex) {
+		} catch(ConfigCompileException ex) {
 			//This can happen if the treeFunction isn't a function, is a proc, etc,
 			//but we don't care, we just want to continue.
 		}
 		// Check the argument count, and do any custom linking the function may have
-		if (treeFunction != null) {
+		if(treeFunction != null) {
 			Integer[] numArgs = treeFunction.numArgs();
-			if (!Arrays.asList(numArgs).contains(Integer.MAX_VALUE)
+			if(!Arrays.asList(numArgs).contains(Integer.MAX_VALUE)
 					&& !Arrays.asList(numArgs).contains(tree.getChildren().size())) {
 				compilerErrors.add(new ConfigCompileException("Incorrect number of arguments passed to "
 						+ tree.getData().val(), tree.getData().getTarget()));
 			}
-			if (treeFunction instanceof Optimizable) {
+			if(treeFunction instanceof Optimizable) {
 				Optimizable op = (Optimizable) treeFunction;
-				if (op.optimizationOptions().contains(OptimizationOption.CUSTOM_LINK)) {
+				if(op.optimizationOptions().contains(OptimizationOption.CUSTOM_LINK)) {
 					try {
 						op.link(tree.getData().getTarget(), tree.getChildren());
-					} catch (ConfigCompileException ex) {
+					} catch(ConfigCompileException ex) {
 						compilerErrors.add(ex);
 					}
 				}
 			}
 		}
 		// Walk the children
-		for (ParseTree child : tree.getChildren()) {
-			if (child.getData() instanceof CFunction) {
-				if (child.getData().val().charAt(0) != '_' || child.getData().val().charAt(1) == '_') {
+		for(ParseTree child : tree.getChildren()) {
+			if(child.getData() instanceof CFunction) {
+				if(child.getData().val().charAt(0) != '_' || child.getData().val().charAt(1) == '_') {
 					// This will throw an exception if the function doesn't exist.
 					try {
 						FunctionList.getFunction(child.getData());
-					} catch (ConfigCompileException ex) {
+					} catch(ConfigCompileException ex) {
 						compilerErrors.add(ex);
 					}
 				}
@@ -1782,35 +1782,35 @@ public final class MethodScriptCompiler {
 	 * @return
 	 */
 	private static void optimize(ParseTree tree, Stack<List<Procedure>> procs, Set<ConfigCompileException> compilerErrors) {
-		if (tree.isOptimized()) {
+		if(tree.isOptimized()) {
 			return; //Don't need to re-run this
 		}
 //		if (tree.getData() instanceof CIdentifier) {
 //			optimize(((CIdentifier) tree.getData()).contained(), procs);
 //			return;
 //		}
-		if (!(tree.getData() instanceof CFunction)) {
+		if(!(tree.getData() instanceof CFunction)) {
 			//There's no way to optimize something that's not a function
 			return;
 		}
 		//If it is a proc definition, we need to go ahead and see if we can add it to the const proc stack
-		if (tree.getData().val().equals("proc")) {
+		if(tree.getData().val().equals("proc")) {
 			procs.push(new ArrayList<Procedure>());
 		}
 		CFunction cFunction = (CFunction) tree.getData();
 		Function func;
 		try {
 			func = (Function) FunctionList.getFunction(cFunction);
-		} catch (ConfigCompileException e) {
+		} catch(ConfigCompileException e) {
 			func = null;
 		}
-		if (func != null) {
-			if (func.getClass().getAnnotation(nolinking.class) != null) {
+		if(func != null) {
+			if(func.getClass().getAnnotation(nolinking.class) != null) {
 				//It's an unlinking function, so we need to stop at this point
 				return;
 			}
 		}
-		if (cFunction instanceof CIdentifier) {
+		if(cFunction instanceof CIdentifier) {
 			//Add the child to the identifier
 			ParseTree c = ((CIdentifier) cFunction).contained();
 			tree.addChild(c);
@@ -1818,18 +1818,18 @@ public final class MethodScriptCompiler {
 		}
 
 		List<ParseTree> children = tree.getChildren();
-		if (func instanceof Optimizable && ((Optimizable) func).optimizationOptions().contains(OptimizationOption.PRIORITY_OPTIMIZATION)) {
+		if(func instanceof Optimizable && ((Optimizable) func).optimizationOptions().contains(OptimizationOption.PRIORITY_OPTIMIZATION)) {
 			// This is a priority optimization function, meaning it needs to be optimized before its children are.
 			// This is required when optimization of the children could cause different internal behavior, for instance
 			// if this function is expecting the precense of soem code element, but the child gets optimized out, this
 			// would cause an error, even though the user did in fact provide code in that section.
 			try {
 				((Optimizable) func).optimizeDynamic(tree.getTarget(), children, tree.getFileOptions());
-			} catch (ConfigCompileException ex) {
+			} catch(ConfigCompileException ex) {
 				// If an error occurs, we will skip the rest of this element
 				compilerErrors.add(ex);
 				return;
-			} catch (ConfigRuntimeException ex) {
+			} catch(ConfigRuntimeException ex) {
 				compilerErrors.add(new ConfigCompileException(ex));
 				return;
 			}
@@ -1871,29 +1871,29 @@ public final class MethodScriptCompiler {
 		//is a branch (branches always use execs, though using execs doesn't strictly
 		//mean you are a branch type function).
 
-		for (int i = 0; i < children.size(); i++) {
+		for(int i = 0; i < children.size(); i++) {
 			ParseTree t = children.get(i);
-			if (t.getData() instanceof CFunction) {
-				if (t.getData().val().startsWith("_") || (func != null && func.useSpecialExec())) {
+			if(t.getData() instanceof CFunction) {
+				if(t.getData().val().startsWith("_") || (func != null && func.useSpecialExec())) {
 					continue;
 				}
 				Function f;
 				try {
 					f = (Function) FunctionList.getFunction(t.getData());
-				} catch (ConfigCompileException ex) {
+				} catch(ConfigCompileException ex) {
 					compilerErrors.add(ex);
 					return;
 				}
 				Set<OptimizationOption> options = NO_OPTIMIZATIONS;
-				if (f instanceof Optimizable) {
+				if(f instanceof Optimizable) {
 					options = ((Optimizable) f).optimizationOptions();
 				}
-				if (options.contains(OptimizationOption.TERMINAL)) {
-					if (children.size() > i + 1) {
+				if(options.contains(OptimizationOption.TERMINAL)) {
+					if(children.size() > i + 1) {
 						//First, a compiler warning
 						CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider removing this code.", children.get(i + 1).getTarget());
 						//Now, truncate the children
-						for (int j = children.size() - 1; j > i; j--) {
+						for(int j = children.size() - 1; j > i; j--) {
 							children.remove(j);
 						}
 						break;
@@ -1903,15 +1903,15 @@ public final class MethodScriptCompiler {
 		}
 		boolean fullyStatic = true;
 		boolean hasIVars = false;
-		for (ParseTree node : children) {
-			if (node.getData() instanceof CFunction) {
+		for(ParseTree node : children) {
+			if(node.getData() instanceof CFunction) {
 				optimize(node, procs, compilerErrors);
 			}
 
-			if (node.getData().isDynamic() && !(node.getData() instanceof IVariable)) {
+			if(node.getData().isDynamic() && !(node.getData() instanceof IVariable)) {
 				fullyStatic = false;
 			}
-			if (node.getData() instanceof IVariable) {
+			if(node.getData() instanceof IVariable) {
 				hasIVars = true;
 			}
 		}
@@ -1920,27 +1920,27 @@ public final class MethodScriptCompiler {
 		//optimize, so set our optimized variable at this point.
 		tree.setOptimized(true);
 
-		if (func == null) {
+		if(func == null) {
 			//It's a proc call. Let's see if we can optimize it
 			Procedure p = null;
 			loop:
-			for (List<Procedure> proc : procs) {
-				for (Procedure pp : proc) {
-					if (pp.getName().equals(cFunction.val())) {
+			for(List<Procedure> proc : procs) {
+				for(Procedure pp : proc) {
+					if(pp.getName().equals(cFunction.val())) {
 						p = pp;
 						break loop;
 					}
 				}
 			}
-			if (p != null) {
+			if(p != null) {
 				try {
 					Construct c = DataHandling.proc.optimizeProcedure(p.getTarget(), p, children);
-					if (c != null) {
+					if(c != null) {
 						tree.setData(c);
 						tree.removeChildren();
 						return;
 					}//else Nope, couldn't optimize.
-				} catch (ConfigRuntimeException ex) {
+				} catch(ConfigRuntimeException ex) {
 					//Cool. Caught a runtime error at compile time :D
 					compilerErrors.add(new ConfigCompileException(ex));
 				}
@@ -1949,9 +1949,9 @@ public final class MethodScriptCompiler {
 			//so we can't for sure say, but we do know we can't optimize this
 			return;
 		}
-		if (tree.getData().val().equals("proc")) {
+		if(tree.getData().val().equals("proc")) {
 			//Check for too few arguments
-			if (children.size() < 2) {
+			if(children.size() < 2) {
 				compilerErrors.add(new ConfigCompileException("Incorrect number of arguments passed to proc",
 						tree.getData().getTarget()));
 				return;
@@ -1966,7 +1966,7 @@ public final class MethodScriptCompiler {
 				Script fakeScript = Script.GenerateScript(root, "*");
 				Environment env = null;
 				try {
-					if (Implementation.GetServerType().equals(Implementation.Type.BUKKIT)) {
+					if(Implementation.GetServerType().equals(Implementation.Type.BUKKIT)) {
 						CommandHelperPlugin plugin = CommandHelperPlugin.self;
 						GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistenceNetwork,
 								MethodScriptFileLocations.getDefault().getConfigDirectory(), plugin.profiles, new TaskManager());
@@ -1974,15 +1974,15 @@ public final class MethodScriptCompiler {
 					} else {
 						env = Static.GenerateStandaloneEnvironment(false);
 					}
-				} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e) {
+				} catch(IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e) {
 					//
 				}
 				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(new ParseTree[children.size()]));
 				procs.peek().add(myProc); //Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
-			} catch (ConfigRuntimeException e) {
+			} catch(ConfigRuntimeException e) {
 				//Well, they have an error in there somewhere
 				compilerErrors.add(new ConfigCompileException(e));
-			} catch (NullPointerException e) {
+			} catch(NullPointerException e) {
 				//Nope, can't optimize.
 				return;
 			}
@@ -1992,29 +1992,29 @@ public final class MethodScriptCompiler {
 		//static, so do this first.
 		String oldFunctionName = func.getName();
 		Set<OptimizationOption> options = NO_OPTIMIZATIONS;
-		if (func instanceof Optimizable) {
+		if(func instanceof Optimizable) {
 			options = ((Optimizable) func).optimizationOptions();
 		}
-		if (options.contains(OptimizationOption.OPTIMIZE_DYNAMIC)) {
+		if(options.contains(OptimizationOption.OPTIMIZE_DYNAMIC)) {
 			try {
 				ParseTree tempNode;
 				try {
 					tempNode = ((Optimizable) func).optimizeDynamic(tree.getData().getTarget(), tree.getChildren(), tree.getFileOptions());
-				} catch (ConfigRuntimeException e) {
+				} catch(ConfigRuntimeException e) {
 					//Turn it into a compile exception, then rethrow
 					throw new ConfigCompileException(e);
 				}
-				if (tempNode == Optimizable.PULL_ME_UP) {
-					if (tree.hasChildren()) {
+				if(tempNode == Optimizable.PULL_ME_UP) {
+					if(tree.hasChildren()) {
 						tempNode = tree.getChildAt(0);
 					} else {
 						tempNode = null;
 					}
 				}
-				if (tempNode == Optimizable.REMOVE_ME) {
+				if(tempNode == Optimizable.REMOVE_ME) {
 					tree.setData(new CFunction("p", Target.UNKNOWN));
 					tree.removeChildren();
-				} else if (tempNode != null) {
+				} else if(tempNode != null) {
 					tree.setData(tempNode.getData());
 					tree.setOptimized(tempNode.isOptimized());
 					tree.setChildren(tempNode.getChildren());
@@ -2023,38 +2023,38 @@ public final class MethodScriptCompiler {
 					tree.setOptimized(true);
 					//Some functions can actually make static the arguments, for instance, by pulling up a hardcoded
 					//array, so if they have reversed this, make note of that now
-					if (tempNode.hasBeenMadeStatic()) {
+					if(tempNode.hasBeenMadeStatic()) {
 						fullyStatic = true;
 					}
 				} //else it wasn't an optimization, but a compile check
-			} catch (ConfigCompileException ex) {
+			} catch(ConfigCompileException ex) {
 				compilerErrors.add(ex);
 			}
 		}
-		if (!fullyStatic) {
+		if(!fullyStatic) {
 			return;
 		}
 		//Otherwise, everything is static, or an IVariable and we can proceed.
 		//Note since we could still have IVariables, we have to handle those
 		//specially from here forward
-		if (func.preResolveVariables() && hasIVars) {
+		if(func.preResolveVariables() && hasIVars) {
 			//Well, this function isn't equipped to deal with IVariables.
 			return;
 		}
 		//It could have optimized by changing the name, in that case, we
 		//don't want to run this now
-		if (tree.getData().getValue().equals(oldFunctionName)
+		if(tree.getData().getValue().equals(oldFunctionName)
 				&& (options.contains(OptimizationOption.OPTIMIZE_CONSTANT) || options.contains(OptimizationOption.CONSTANT_OFFLINE))) {
 			Construct[] constructs = new Construct[tree.getChildren().size()];
-			for (int i = 0; i < tree.getChildren().size(); i++) {
+			for(int i = 0; i < tree.getChildren().size(); i++) {
 				constructs[i] = tree.getChildAt(i).getData();
 			}
 			try {
 				try {
 					Construct result;
-					if (options.contains(OptimizationOption.CONSTANT_OFFLINE)) {
+					if(options.contains(OptimizationOption.CONSTANT_OFFLINE)) {
 						List<Integer> numArgsList = Arrays.asList(func.numArgs());
-						if (!numArgsList.contains(Integer.MAX_VALUE)
+						if(!numArgsList.contains(Integer.MAX_VALUE)
 								&& !numArgsList.contains(tree.getChildren().size())) {
 							compilerErrors.add(new ConfigCompileException("Incorrect number of arguments passed to "
 									+ tree.getData().val(), tree.getData().getTarget()));
@@ -2067,16 +2067,16 @@ public final class MethodScriptCompiler {
 					}
 
 					//If the result is null, it was just a check, it can't optimize further.
-					if (result != null) {
+					if(result != null) {
 						result.setWasIdentifier(tree.getData().wasIdentifier());
 						tree.setData(result);
 						tree.removeChildren();
 					}
-				} catch (ConfigRuntimeException e) {
+				} catch(ConfigRuntimeException e) {
 					//Turn this into a ConfigCompileException, then rethrow
 					throw new ConfigCompileException(e);
 				}
-			} catch (ConfigCompileException ex) {
+			} catch(ConfigCompileException ex) {
 				compilerErrors.add(ex);
 			}
 		}
@@ -2092,18 +2092,18 @@ public final class MethodScriptCompiler {
 	private static void processKeywords(ParseTree tree) throws ConfigCompileException {
 		// Keyword processing
 		List<ParseTree> children = tree.getChildren();
-		for (int i = 0; i < children.size(); i++) {
+		for(int i = 0; i < children.size(); i++) {
 			ParseTree node = children.get(i);
 			// Keywords can be standalone, or a function can double as a keyword. So we have to check for both
 			// conditions.
 			processKeywords(node);
-			if (node.getData() instanceof CKeyword
+			if(node.getData() instanceof CKeyword
 					|| (node.getData() instanceof CLabel && ((CLabel) node.getData()).cVal() instanceof CKeyword)
 					|| (node.getData() instanceof CFunction && KeywordList.getKeywordByName(node.getData().val()) != null)) {
 				// This looks a bit confusing, but is fairly straightforward. We want to process the child elements of all
 				// remaining nodes, so that subchildren that need processing will be finished, and our current tree level will
 				// be able to independently process it. We don't want to process THIS level though, just the children of this level.
-				for (int j = i + 1; j < children.size(); j++) {
+				for(int j = i + 1; j < children.size(); j++) {
 					processKeywords(children.get(j));
 				}
 				// Now that all the children of the rest of the chain are processed, we can do the processing of this level.
@@ -2159,21 +2159,21 @@ public final class MethodScriptCompiler {
 	 * @return
 	 */
 	public static Construct execute(ParseTree root, Environment env, MethodScriptComplete done, Script script, List<Variable> vars) {
-		if (root == null) {
+		if(root == null) {
 			return CVoid.VOID;
 		}
-		if (script == null) {
+		if(script == null) {
 			script = new Script(null, null, env.getEnv(GlobalEnv.class).GetLabel(), new FileOptions(new HashMap<>()));
 		}
-		if (vars != null) {
+		if(vars != null) {
 			Map<String, Variable> varMap = new HashMap<>();
-			for (Variable v : vars) {
+			for(Variable v : vars) {
 				varMap.put(v.getVariableName(), v);
 			}
-			for (Construct tempNode : root.getAllData()) {
-				if (tempNode instanceof Variable) {
+			for(Construct tempNode : root.getAllData()) {
+				if(tempNode instanceof Variable) {
 					Variable vv = varMap.get(((Variable) tempNode).getVariableName());
-					if (vv != null) {
+					if(vv != null) {
 						((Variable) tempNode).setVal(vv.getDefault());
 					} else {
 						//The variable is unset. I'm not quite sure what cases would cause this
@@ -2184,32 +2184,32 @@ public final class MethodScriptCompiler {
 		}
 		StringBuilder b = new StringBuilder();
 		Construct returnable = null;
-		for (ParseTree gg : root.getChildren()) {
+		for(ParseTree gg : root.getChildren()) {
 			Construct retc = script.eval(gg, env);
-			if (root.numberOfChildren() == 1) {
+			if(root.numberOfChildren() == 1) {
 				returnable = retc;
 			}
 			String ret = retc instanceof CNull ? "null" : retc.val();
-			if (ret != null && !ret.trim().isEmpty()) {
+			if(ret != null && !ret.trim().isEmpty()) {
 				b.append(ret).append(" ");
 			}
 		}
-		if (done != null) {
+		if(done != null) {
 			done.done(b.toString().trim());
 		}
-		if (returnable != null) {
+		if(returnable != null) {
 			return returnable;
 		}
 		return Static.resolveConstruct(b.toString().trim(), Target.UNKNOWN);
 	}
 
 	public static void registerAutoIncludes(Environment env, Script s) {
-		for (File f : Static.getAliasCore().autoIncludes) {
+		for(File f : Static.getAliasCore().autoIncludes) {
 			try {
 				MethodScriptCompiler.execute(IncludeCache.get(f, new Target(0, f, 0)), env, null, s);
-			} catch (ProgramFlowManipulationException e) {
+			} catch(ProgramFlowManipulationException e) {
 				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in auto include files.", e.getTarget()), env);
-			} catch (ConfigRuntimeException e) {
+			} catch(ConfigRuntimeException e) {
 				e.setEnv(env);
 				ConfigRuntimeException.HandleUncaughtException(e, env);
 			}

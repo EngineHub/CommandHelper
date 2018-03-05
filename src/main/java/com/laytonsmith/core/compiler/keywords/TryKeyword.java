@@ -40,7 +40,7 @@ public class TryKeyword extends Keyword {
 		 */
 
 		// If it's the old version, and a function
-		if (list.get(keywordPosition).getData() instanceof CFunction && list.get(keywordPosition).getData().val().equals("try")) {
+		if(list.get(keywordPosition).getData() instanceof CFunction && list.get(keywordPosition).getData().val().equals("try")) {
 			return keywordPosition;
 		}
 		// Otherwise it's not, and we can continue on, assuming keyword usage.
@@ -55,26 +55,26 @@ public class TryKeyword extends Keyword {
 		// For now, we won't allow try {}, so this must be followed by a catch keyword. This restriction is somewhat artificial, and
 		// if we want to remove it in the future, we can do so by removing this code block.
 		{
-			if (!(list.size() > keywordPosition && (nodeIsCatchKeyword(list.get(keywordPosition)) || nodeIsFinallyKeyword(list.get(keywordPosition))))) {
+			if(!(list.size() > keywordPosition && (nodeIsCatchKeyword(list.get(keywordPosition)) || nodeIsFinallyKeyword(list.get(keywordPosition))))) {
 				throw new ConfigCompileException("Expecting \"catch\" or \"finally\" keyword to follow try, but none found", complex_try.getTarget());
 			}
 		}
 
 		// We can have any number of catch statements after the try, so we loop through until we run out.
-		for (int i = keywordPosition; i < list.size(); i++) {
-			if (!nodeIsCatchKeyword(list.get(i)) && !nodeIsFinallyKeyword(list.get(i))) {
+		for(int i = keywordPosition; i < list.size(); i++) {
+			if(!nodeIsCatchKeyword(list.get(i)) && !nodeIsFinallyKeyword(list.get(i))) {
 				// End of the chain, stop processing.
 				break;
 			}
-			if (list.size() > i + 1) {
+			if(list.size() > i + 1) {
 				this.validateCodeBlock(list.get(i + 1), "Expecting code block after catch, but none found");
 			} else {
 				throw new ConfigCompileException("catch must be followed by a code block, but none was found", list.get(i).getTarget());
 			}
-			if (list.get(i).getData() instanceof CFunction) {
+			if(list.get(i).getData() instanceof CFunction) {
 				// We have something like catch(Exception @e) { }
 				ParseTree n = list.get(i);
-				if (n.getChildren().size() != 1) {
+				if(n.getChildren().size() != 1) {
 					throw new ConfigCompileException("Unexpected parameters passed to the \"catch\" clause."
 							+ " Exactly one argument must be passed.", n.getTarget());
 				}
@@ -83,8 +83,8 @@ public class TryKeyword extends Keyword {
 			} else {
 				// We have something like finally { }. In this case, this must be the final
 				// clause statement, and we need to verify that there isn't a catch following it.
-				if (list.size() > i + 2) {
-					if (nodeIsCatchKeyword(list.get(i + 2))) {
+				if(list.size() > i + 2) {
+					if(nodeIsCatchKeyword(list.get(i + 2))) {
 						throw new ConfigCompileException("A finally block must be the final"
 								+ " clause in the try/[catch]/finally statement", list.get(i + 2).getTarget());
 					}

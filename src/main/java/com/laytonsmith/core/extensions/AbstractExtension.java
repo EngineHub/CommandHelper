@@ -24,8 +24,8 @@ public abstract class AbstractExtension implements Extension {
 	 */
 	@Override
 	public final String getName() {
-		for (Annotation a : getClass().getAnnotations()) {
-			if (a instanceof MSExtension) {
+		for(Annotation a : getClass().getAnnotations()) {
+			if(a instanceof MSExtension) {
 				MSExtension e = (MSExtension) a;
 				return e.value();
 			}
@@ -55,7 +55,7 @@ public abstract class AbstractExtension implements Extension {
 	public File getConfigDir() {
 		File f = new File(CommandHelperFileLocations.getDefault().getExtensionsDirectory(), getName());
 
-		if (!f.exists()) {
+		if(!f.exists()) {
 			f.mkdirs();
 		}
 

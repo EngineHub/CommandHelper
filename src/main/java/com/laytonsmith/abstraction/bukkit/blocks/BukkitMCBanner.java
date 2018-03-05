@@ -39,7 +39,7 @@ public class BukkitMCBanner extends BukkitMCBlockState implements MCBanner {
 	public List<MCPattern> getPatterns() {
 		List<Pattern> bukkitPatterns = b.getPatterns();
 		List<MCPattern> patterns = new ArrayList<>(bukkitPatterns.size());
-		for (Pattern p : bukkitPatterns) {
+		for(Pattern p : bukkitPatterns) {
 			patterns.add(new BukkitMCPattern(p));
 		}
 		return patterns;

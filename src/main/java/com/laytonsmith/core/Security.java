@@ -20,14 +20,14 @@ public final class Security {
 	 * @return
 	 */
 	public static boolean CheckSecurity(String location) {
-		if (on) {
+		if(on) {
 			String pref = Prefs.BaseDir();
-			if (pref.trim().isEmpty()) {
+			if(pref.trim().isEmpty()) {
 				pref = ".";
 			}
 			File base_dir = new File(pref);
 			String base_final = base_dir.getAbsolutePath();
-			if (base_final.endsWith(".")) {
+			if(base_final.endsWith(".")) {
 				base_final = base_final.substring(0, base_final.length() - 1);
 			}
 			File loc = new File(location);

@@ -47,25 +47,25 @@ public class SmartComment {
 	 * particular embedded annotation has no handler, the embedded text is simply used as is.
 	 */
 	public SmartComment(String comment, Map<String, Replacement> replacements) {
-		if (replacements == null) {
+		if(replacements == null) {
 			replacements = new HashMap<String, Replacement>();
 		}
 
 		//Remove the @ at the beginning, if present.
-		for (String key : replacements.keySet()) {
+		for(String key : replacements.keySet()) {
 			rplcmnt.put(key.replaceFirst("@", ""), replacements.get(key));
 		}
 
 		comment = comment.trim();
-		if (comment.startsWith("/**")) {
+		if(comment.startsWith("/**")) {
 			comment = comment.substring(3);
 		}
-		if (comment.endsWith("*/")) {
+		if(comment.endsWith("*/")) {
 			comment = comment.substring(0, comment.length() - 2);
 		}
 		String[] lines = comment.split("\n|\r\n|\n\r");
 		StringBuilder b = new StringBuilder();
-		for (String line : lines) {
+		for(String line : lines) {
 			line = line.replaceFirst(LINE_START, "");
 			b.append("\n").append(line);
 		}
@@ -76,9 +76,9 @@ public class SmartComment {
 		StringBuilder buffer = new StringBuilder();
 		String lastAnnotation = null;
 		int annotationIndex = -1;
-		for (String word : words) {
-			if (ANNOTATION.matcher(word).matches()) {
-				if (annotationIndex == -1) {
+		for(String word : words) {
+			if(ANNOTATION.matcher(word).matches()) {
+				if(annotationIndex == -1) {
 					Matcher m = ANNOTATION.matcher(raw);
 					m.find();
 					annotationIndex = m.start();
@@ -91,7 +91,7 @@ public class SmartComment {
 			}
 		}
 		processBuffer(lastAnnotation, buffer.toString());
-		if (annotationIndex == -1) {
+		if(annotationIndex == -1) {
 			body = raw;
 		} else {
 			body = raw.substring(0, annotationIndex).trim();
@@ -101,10 +101,10 @@ public class SmartComment {
 	private String replaceEmbedded(String string) {
 		//Replace embedded annotations
 		Matcher embedded = EMBEDDED_ANNOTATION.matcher(string);
-		while (embedded.find()) {
+		while(embedded.find()) {
 			String key = embedded.group(1);
 			String data = embedded.group(2);
-			if (rplcmnt.containsKey(key)) {
+			if(rplcmnt.containsKey(key)) {
 				string = string.replaceAll(Pattern.quote(embedded.group(0)), rplcmnt.get(key).replace(data));
 			} else {
 				string = string.replaceAll(Pattern.quote(embedded.group(0)), data);
@@ -114,13 +114,13 @@ public class SmartComment {
 	}
 
 	private void processBuffer(String lastAnnotation, String buffer) {
-		if (lastAnnotation != null) {
+		if(lastAnnotation != null) {
 			addAnnotation(lastAnnotation, buffer.trim());
 		}
 	}
 
 	private void addAnnotation(String name, String value) {
-		if (!annotations.containsKey(name)) {
+		if(!annotations.containsKey(name)) {
 			annotations.put(name, new ArrayList<String>());
 		}
 		annotations.get(name).add(value);
@@ -142,7 +142,7 @@ public class SmartComment {
 	 * @return
 	 */
 	public List<String> getAnnotations(String annotation) {
-		if (!annotation.startsWith("@")) {
+		if(!annotation.startsWith("@")) {
 			annotation = "@" + annotation;
 		}
 		return new ArrayList<String>(annotations.get(annotation));

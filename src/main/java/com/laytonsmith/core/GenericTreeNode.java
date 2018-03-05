@@ -22,20 +22,20 @@ public class GenericTreeNode<T> implements Cloneable {
 	public GenericTreeNode<T> clone() throws CloneNotSupportedException {
 		GenericTreeNode<T> clone = (GenericTreeNode<T>) super.clone();
 		Class c = data.getClass();
-		if (Arrays.asList(c.getInterfaces()).contains(Cloneable.class)) {
+		if(Arrays.asList(c.getInterfaces()).contains(Cloneable.class)) {
 			try {
 				Method m = c.getMethod("clone", new Class[]{});
 				Object obj = m.invoke(data, new Object[]{});
 				clone.data = (T) obj;
 				clone.children = new ArrayList<GenericTreeNode<T>>(children);
 				clone.optimized = optimized;
-			} catch (IllegalAccessException ex) {
+			} catch(IllegalAccessException ex) {
 				throw new CloneNotSupportedException();
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				throw new CloneNotSupportedException();
-			} catch (InvocationTargetException ex) {
+			} catch(InvocationTargetException ex) {
 				throw new CloneNotSupportedException();
-			} catch (NoSuchMethodException e) {
+			} catch(NoSuchMethodException e) {
 				throw new CloneNotSupportedException();
 			}
 		}
@@ -103,21 +103,21 @@ public class GenericTreeNode<T> implements Cloneable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
+		if(this == obj) {
 			return true;
 		}
-		if (obj == null) {
+		if(obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if(getClass() != obj.getClass()) {
 			return false;
 		}
 		GenericTreeNode<?> other = (GenericTreeNode<?>) obj;
-		if (data == null) {
-			if (other.data != null) {
+		if(data == null) {
+			if(other.data != null) {
 				return false;
 			}
-		} else if (!data.equals(other.data)) {
+		} else if(!data.equals(other.data)) {
 			return false;
 		}
 		return true;
@@ -137,7 +137,7 @@ public class GenericTreeNode<T> implements Cloneable {
 	public String toStringVerbose() {
 		String stringRepresentation = getData().toString() + ":[";
 
-		for (GenericTreeNode<T> node : getChildren()) {
+		for(GenericTreeNode<T> node : getChildren()) {
 			stringRepresentation += node.getData().toString() + ", ";
 		}
 

@@ -19,32 +19,32 @@ public class EmailProfile extends Profiles.Profile {
 
 	public EmailProfile(String id, Map<String, String> elements) throws Profiles.InvalidProfileException {
 		super(id);
-		if (elements.containsKey("host")) {
+		if(elements.containsKey("host")) {
 			host = elements.get("host");
 		}
-		if (elements.containsKey("user")) {
+		if(elements.containsKey("user")) {
 			user = elements.get("user");
 		}
-		if (elements.containsKey("password")) {
+		if(elements.containsKey("password")) {
 			password = elements.get("password");
 		}
-		if (elements.containsKey("port")) {
+		if(elements.containsKey("port")) {
 			try {
 				port = Integer.parseInt(elements.get("port"));
-			} catch (NumberFormatException ex) {
+			} catch(NumberFormatException ex) {
 				throw new Profiles.InvalidProfileException(ex.getMessage());
 			}
 		}
-		if (elements.containsKey("use_ssl")) {
+		if(elements.containsKey("use_ssl")) {
 			use_ssl = Boolean.parseBoolean(elements.get("use_ssl"));
 		}
-		if (elements.containsKey("use_start_tls")) {
+		if(elements.containsKey("use_start_tls")) {
 			use_start_tls = Boolean.parseBoolean(elements.get("use_start_tls"));
 		}
-		if (elements.containsKey("timeout")) {
+		if(elements.containsKey("timeout")) {
 			try {
 				timeout = Integer.parseInt(elements.get("timeout"));
-			} catch (NumberFormatException ex) {
+			} catch(NumberFormatException ex) {
 				throw new Profiles.InvalidProfileException(ex.getMessage());
 			}
 		}

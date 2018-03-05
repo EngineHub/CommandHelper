@@ -35,44 +35,44 @@ public class CIClosure extends CClosure {
 
 	@Override
 	public void execute(Construct... values) throws ConfigRuntimeException, ProgramFlowManipulationException, FunctionReturnException, CancelCommandException {
-		if (node == null) {
+		if(node == null) {
 			return;
 		}
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<iclosure>>", getTarget()));
 		try {
 			Environment environment;
-			synchronized (this) {
+			synchronized(this) {
 				boolean prev = env.getEnv(GlobalEnv.class).getCloneVars();
 				env.getEnv(GlobalEnv.class).setCloneVars(false);
 				environment = env.clone();
 				env.getEnv(GlobalEnv.class).setCloneVars(prev);
 			}
 			environment.getEnv(GlobalEnv.class).setCloneVars(true);
-			if (values != null) {
-				for (int i = 0; i < names.length; i++) {
+			if(values != null) {
+				for(int i = 0; i < names.length; i++) {
 					String name = names[i];
 					Construct value;
 					try {
 						value = values[i];
-					} catch (Exception e) {
+					} catch(Exception e) {
 						value = defaults[i].clone();
 					}
 					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value, getTarget()));
 				}
 			}
 			boolean hasArgumentsParam = false;
-			for (String pName : this.names) {
-				if (pName.equals("@arguments")) {
+			for(String pName : this.names) {
+				if(pName.equals("@arguments")) {
 					hasArgumentsParam = true;
 					break;
 				}
 			}
 
-			if (!hasArgumentsParam) {
+			if(!hasArgumentsParam) {
 				CArray arguments = new CArray(node.getData().getTarget());
-				if (values != null) {
-					for (Construct value : values) {
+				if(values != null) {
+					for(Construct value : values) {
 						arguments.push(value, node.getData().getTarget());
 					}
 				}
@@ -85,7 +85,7 @@ public class CIClosure extends CClosure {
 			newNode.setChildren(children);
 			try {
 				MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class).GetScript());
-			} catch (LoopManipulationException e) {
+			} catch(LoopManipulationException e) {
 				// Not normal, but pop anyways
 				stManager.popStackTraceElement();
 				//This shouldn't ever happen.
@@ -93,35 +93,35 @@ public class CIClosure extends CClosure {
 				Target t = lme.getTarget();
 				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A " + lme.getName() + "() bubbled up to the top of"
 						+ " a closure, which is unexpected behavior.", t), environment);
-			} catch (FunctionReturnException ex) {
+			} catch(FunctionReturnException ex) {
 				// Normal. Pop element
 				stManager.popStackTraceElement();
 				// Check the return type of the closure to see if it matches the defined type
 				Construct ret = ex.getReturn();
-				if (!InstanceofUtil.isInstanceof(ret, returnType)) {
+				if(!InstanceofUtil.isInstanceof(ret, returnType)) {
 					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
 							+ " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 				}
 				// Now rethrow it
 				throw ex;
-			} catch (CancelCommandException e) {
+			} catch(CancelCommandException e) {
 				stManager.popStackTraceElement();
 				// die()
-			} catch (ConfigRuntimeException ex) {
-				if (ex instanceof AbstractCREException) {
+			} catch(ConfigRuntimeException ex) {
+				if(ex instanceof AbstractCREException) {
 					((AbstractCREException) ex).freezeStackTraceElements(stManager);
 				}
 				throw ex;
-			} catch (Throwable t) {
+			} catch(Throwable t) {
 				stManager.popStackTraceElement();
 				throw t;
 			}
 			// If we got here, then there was no return type. This is fine, but only for returnType void or auto.
-			if (!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
+			if(!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
 				throw new CRECastException("Expecting closure to return a value of type " + returnType.val() + ","
 						+ " but no value was returned.", node.getTarget());
 			}
-		} catch (CloneNotSupportedException ex) {
+		} catch(CloneNotSupportedException ex) {
 			Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}

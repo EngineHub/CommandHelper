@@ -18,7 +18,7 @@ public class BukkitMCPluginManager implements MCPluginManager {
 
 	public BukkitMCPluginManager(AbstractionObject a) {
 		this((PluginManager) null);
-		if (a instanceof MCPluginManager) {
+		if(a instanceof MCPluginManager) {
 			this.p = ((PluginManager) a.getHandle());
 		} else {
 			throw new ClassCastException();
@@ -32,7 +32,7 @@ public class BukkitMCPluginManager implements MCPluginManager {
 
 	@Override
 	public MCPlugin getPlugin(String name) {
-		if (p.getPlugin(name) == null) {
+		if(p.getPlugin(name) == null) {
 			return null;
 		}
 		return new BukkitMCPlugin(p.getPlugin(name));
@@ -61,7 +61,7 @@ public class BukkitMCPluginManager implements MCPluginManager {
 	public List<MCPlugin> getPlugins() {
 		List<MCPlugin> retn = new ArrayList<>();
 		Plugin[] plugs = p.getPlugins();
-		for (Plugin plug : plugs) {
+		for(Plugin plug : plugs) {
 			retn.add(new BukkitMCPlugin(plug));
 		}
 		return retn;

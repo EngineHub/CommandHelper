@@ -58,7 +58,7 @@ public class DataSourceFilter {
 	public DataSourceFilter(File file, URI defaultURI) throws IOException, DataSourceException {
 		try {
 			process(FileUtil.read(file), defaultURI);
-		} catch (DataSourceException e) {
+		} catch(DataSourceException e) {
 			throw new DataSourceException("Could not process filter file located at " + file.getAbsolutePath() + ": " + e.getMessage());
 		}
 	}
@@ -76,7 +76,7 @@ public class DataSourceFilter {
 	}
 
 	private void process(String filters, URI defaultURI) throws DataSourceException {
-		if (defaultURI == null) {
+		if(defaultURI == null) {
 			throw new NullPointerException("defaultURI cannot be null");
 		}
 
@@ -87,28 +87,28 @@ public class DataSourceFilter {
 		//we get to them.
 		Map<String, String> aliases = new HashMap<String, String>();
 		boolean hasDefault = false;
-		for (String key : p.keySet()) {
+		for(String key : p.keySet()) {
 			key = key.trim();
-			if (key.matches("\\$[^a-zA-Z_]+")) {
+			if(key.matches("\\$[^a-zA-Z_]+")) {
 				//Bad alias, bail                
 				throw new DataSourceException("Aliases in your filters may not start with a digit.");
 			}
-			if (key.matches("\\$[a-zA-Z_][a-zA-Z0-9_]*")) {
+			if(key.matches("\\$[a-zA-Z_][a-zA-Z0-9_]*")) {
 				//It's an alias
-				if (aliases.containsKey(key)) {
+				if(aliases.containsKey(key)) {
 					throw new DataSourceException("Duplicate aliases defined: " + key);
 				}
 				aliases.put(key, p.get(key));
 			}
-			if (key.equals("**")) {
+			if(key.equals("**")) {
 				hasDefault = true;
 			}
 		}
 
 		//Ok, now let's load up the actual connections.
-		for (String key : p.keySet()) {
-			if (!key.matches("\\$.*")) {
-				if (key.matches("[^a-zA-Z0-9_\\*]")) {
+		for(String key : p.keySet()) {
+			if(!key.matches("\\$.*")) {
+				if(key.matches("[^a-zA-Z0-9_\\*]")) {
 					//Bad character in the filter. Bail.
 					throw new DataSourceException("Invalid character in filter. Only"
 							+ " the following characters are allowed: a-zA-Z0-9_()*"
@@ -124,8 +124,8 @@ public class DataSourceFilter {
 				String originalValue = value;
 				//Used for more meaningful error messages below
 				boolean isAlias = false;
-				if (value.matches("\\$.*")) {
-					if (!aliases.containsKey(value)) {
+				if(value.matches("\\$.*")) {
+					if(!aliases.containsKey(value)) {
 						throw new DataSourceException("Invalid alias: " + value + " is trying to be"
 								+ " used, but has not been defined.");
 					} else {
@@ -135,7 +135,7 @@ public class DataSourceFilter {
 				}
 
 				//Is this pattern already in the mapping? If so, we need to throw an error.
-				if (mappings.containsKey(pattern)) {
+				if(mappings.containsKey(pattern)) {
 					throw new DataSourceException("Multiple definitions exist for the key: " + key);
 				}
 
@@ -145,7 +145,7 @@ public class DataSourceFilter {
 				URI uriValue;
 				try {
 					uriValue = new URI(value);
-				} catch (URISyntaxException e) {
+				} catch(URISyntaxException e) {
 					throw new DataSourceException("Invalid URI for " + value
 							+ (isAlias ? "(Defined for alias " + originalValue + ")" : "") + ".");
 				}
@@ -156,7 +156,7 @@ public class DataSourceFilter {
 			}
 			//else it's an alias, and we've already dealt with it
 		}
-		if (!hasDefault) {
+		if(!hasDefault) {
 			Pattern m = Pattern.compile(".*?");
 			mappings.put(m, defaultURI.toString());
 			original.put(m, "**");
@@ -175,17 +175,17 @@ public class DataSourceFilter {
 		//Parenthesis are kept as is.
 		String newKey = key.replaceAll("\\.", "\\\\.");
 		StringBuilder b = new StringBuilder("^");
-		for (int i = 0; i < newKey.length(); i++) {
+		for(int i = 0; i < newKey.length(); i++) {
 			Character c1 = newKey.charAt(i);
 			Character c2 = null;
-			if (i + 1 < newKey.length()) {
+			if(i + 1 < newKey.length()) {
 				c2 = newKey.charAt(i + 1);
 			}
-			if (c1 == '*' && c2 != null && c2 == '*') {
+			if(c1 == '*' && c2 != null && c2 == '*') {
 				//Double star
 				b.append(".*?");
 				i++;
-			} else if (c1 == '*') {
+			} else if(c1 == '*') {
 				//Single star
 				b.append("[^\\.]*?");
 			} else {
@@ -213,10 +213,10 @@ public class DataSourceFilter {
 	 */
 	public Set<URI> getAllConnections() {
 		Set<URI> set = new HashSet<>();
-		for (String uri : namespaced.values()) {
+		for(String uri : namespaced.values()) {
 			try {
 				set.add(new URI(uri));
-			} catch (URISyntaxException ex) {
+			} catch(URISyntaxException ex) {
 				//Won't happen
 				throw new Error(ex);
 			}
@@ -242,40 +242,40 @@ public class DataSourceFilter {
 	 * @return
 	 */
 	public Set<URI> getAllConnections(String key) {
-		if (namespaceCache.containsKey(key)) {
+		if(namespaceCache.containsKey(key)) {
 			return new HashSet<>(namespaceCache.get(key));
 		}
 		Map<String[], String> matches = new HashMap<String[], String>();
 		String[] split = key.split("\\.");
 		outer:
-		for (String[] comparison : namespaced.keySet()) {
+		for(String[] comparison : namespaced.keySet()) {
 			inner:
-			for (int comparing = 0; comparing < split.length; comparing++) {
+			for(int comparing = 0; comparing < split.length; comparing++) {
 				//If the length of the key is greater than this comparison, it's not a match, unless
 				//the key had a ** in it at some point before this index
-				if (arrayContains(comparison, "**", 0, comparing)) {
+				if(arrayContains(comparison, "**", 0, comparing)) {
 					//Yes, it matches, regardless.
 					matches.put(comparison, namespaced.get(comparison));
 					break inner;
-				} else if (comparison.length > comparing) {
+				} else if(comparison.length > comparing) {
 					//Ok, so we know that it has the correct number of parts.					
 					String requestedPart = split[comparing];
 					String myPart = comparison[comparing];
-					if (myPart.contains("*")) {
+					if(myPart.contains("*")) {
 						//It's got a wildcard, so we need to convert it to a regex and compare from there
 						String regexPart = toRegex(myPart);
-						if (!requestedPart.matches(regexPart)) {
+						if(!requestedPart.matches(regexPart)) {
 							continue outer;
 						}
 					} else {
 						//Else it's a simple a string match
-						if (!requestedPart.equals(myPart)) {
+						if(!requestedPart.equals(myPart)) {
 							continue outer;
 						}
 					}
 					//It matched this part, so let's continue with the investigation.
 					//If this was the last part we need to compare, it's good, we can add it to the list now.
-					if (comparing == split.length - 1) {
+					if(comparing == split.length - 1) {
 						matches.put(comparison, namespaced.get(comparison));
 						break inner;
 					}
@@ -284,11 +284,11 @@ public class DataSourceFilter {
 		}
 
 		Set<URI> list = new HashSet<>();
-		for (String[] match : matches.keySet()) {
+		for(String[] match : matches.keySet()) {
 			String uri = matches.get(match);
 			try {
 				list.add(new URI(uri));
-			} catch (URISyntaxException ex) {
+			} catch(URISyntaxException ex) {
 				//Won't happen
 				throw new Error(ex);
 			}
@@ -298,9 +298,9 @@ public class DataSourceFilter {
 	}
 
 	private boolean arrayContains(String[] array, String contains, int from, int to) {
-		for (int i = from; i < (to + 1 <= array.length ? to + 1 : array.length); i++) {
+		for(int i = from; i < (to + 1 <= array.length ? to + 1 : array.length); i++) {
 			String part = array[i];
-			if (part.contains(contains)) {
+			if(part.contains(contains)) {
 				return true;
 			}
 		}
@@ -317,34 +317,34 @@ public class DataSourceFilter {
 		//Since looking through these patterns, doing the matches, calculating string distance are all
 		//fairly expensive operations, let's improve the runtime complexity by using a cache
 		URI cached = cache.get(key);
-		if (cached != null) {
+		if(cached != null) {
 			return cached;
 		}
 		List<Pattern> matches = new ArrayList<Pattern>();
-		for (Pattern p : mappings.keySet()) {
-			if (p.matcher(key).matches()) {
+		for(Pattern p : mappings.keySet()) {
+			if(p.matcher(key).matches()) {
 				matches.add(p);
 			}
 		}
 		//Ok, we have a list of the actual matches, we have to narrow it down to the closest
 		//match.
 		Pattern closest = null;
-		if (matches.isEmpty()) {
+		if(matches.isEmpty()) {
 			//Trivial case
 			return null;
-		} else if (matches.size() == 1) {
+		} else if(matches.size() == 1) {
 			//Yay! Also a trivial case!            
 			closest = matches.get(0);
 		} else {
 			int lowest = Integer.MAX_VALUE;
-			for (Pattern p : matches) {
+			for(Pattern p : matches) {
 				//The closest match is defined as a filter that, minus wild cards, matches more characters.
 				//So, for instance, if the key is a.b.c.d, then this matches a.*.c.d better than a.*.*.d
 				//The easiest way to detect this is to simply remove * characters, and do a Levenshtein distance on the strings, and
 				//whichever one is lowest, is the closest.
 				String originalKey = original.get(p);
 				int dist = StringUtils.LevenshteinDistance(key, originalKey.replaceAll("\\*", "").replaceAll("[\\(\\)]", ""));
-				if (dist < lowest) {
+				if(dist < lowest) {
 					closest = p;
 					lowest = dist;
 				}
@@ -352,7 +352,7 @@ public class DataSourceFilter {
 		}
 
 		try {
-			if (closest == null) {
+			if(closest == null) {
 				return null;
 			}
 			String uri = mappings.get(closest);
@@ -360,7 +360,7 @@ public class DataSourceFilter {
 			//Store it in our cache
 			cache.put(key, u);
 			return u;
-		} catch (URISyntaxException ex) {
+		} catch(URISyntaxException ex) {
 			//We already verified that this won't happen, so yeah.
 			return null;
 		}

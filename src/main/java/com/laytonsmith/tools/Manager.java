@@ -94,7 +94,7 @@ public class Manager {
 		try {
 			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null, true)), env, null, null);
-		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch(ConfigCompileException | ConfigCompileGroupException ex) {
 		}
 		pl(GREEN + "Welcome to the CommandHelper " + CYAN + "Data Manager!");
 		pl(BLINKON + RED + "Warning!" + BLINKOFF + YELLOW + " Be sure your server is not running before using this tool to make changes to your database!");
@@ -104,30 +104,30 @@ public class Manager {
 			pl(YELLOW + "What function would you like to run? Type \"help\" for a full list of options.");
 			String input = prompt();
 			pl();
-			if (input.toLowerCase().startsWith("help")) {
+			if(input.toLowerCase().startsWith("help")) {
 				help(input.replaceFirst("help ?", "").toLowerCase().split(" "));
-			} else if (input.equalsIgnoreCase("refactor")) {
+			} else if(input.equalsIgnoreCase("refactor")) {
 				refactor();
-			} else if (input.toLowerCase().startsWith("print")) {
+			} else if(input.toLowerCase().startsWith("print")) {
 				print(input.replaceFirst("print ?", "").toLowerCase().split(" "));
-			} else if (input.equalsIgnoreCase("cleardb")) {
+			} else if(input.equalsIgnoreCase("cleardb")) {
 				cleardb();
-			} else if (input.equalsIgnoreCase("edit")) {
+			} else if(input.equalsIgnoreCase("edit")) {
 				edit();
-			} else if (input.equalsIgnoreCase("merge")) {
+			} else if(input.equalsIgnoreCase("merge")) {
 				merge();
-			} else if (input.equalsIgnoreCase("interpreter")) {
+			} else if(input.equalsIgnoreCase("interpreter")) {
 				new Interpreter(null, System.getProperty("user.dir"));
-			} else if (input.equalsIgnoreCase("hidden-keys")) {
+			} else if(input.equalsIgnoreCase("hidden-keys")) {
 				hiddenKeys();
-			} else if (input.equalsIgnoreCase("exit")) {
+			} else if(input.equalsIgnoreCase("exit")) {
 				pl("Thanks for using the " + CYAN + BOLD + "Data Manager!" + reset());
 				finished = true;
 			} else {
 				pl("I'm sorry, that's not a valid command. Here's the help:");
 				help(new String[]{});
 			}
-		} while (finished == false);
+		} while(finished == false);
 		StreamUtils.GetSystemOut().println(TermColors.reset());
 	}
 
@@ -153,12 +153,12 @@ public class Manager {
 				try {
 					source = DataSourceFactory.GetDataSource(ssource, mixinOptions);
 					break;
-				} catch (DataSourceException ex) {
+				} catch(DataSourceException ex) {
 					pl(RED + ex.getMessage());
-				} catch (URISyntaxException ex) {
+				} catch(URISyntaxException ex) {
 					pl(RED + ex.getMessage());
 				}
-			} while (true);
+			} while(true);
 
 			do {
 				//Get the destination connection set up
@@ -167,12 +167,12 @@ public class Manager {
 				try {
 					destination = DataSourceFactory.GetDataSource(sdestination, mixinOptions);
 					break;
-				} catch (DataSourceException ex) {
+				} catch(DataSourceException ex) {
 					pl(RED + ex.getMessage());
-				} catch (URISyntaxException ex) {
+				} catch(URISyntaxException ex) {
 					pl(RED + ex.getMessage());
 				}
-			} while (true);
+			} while(true);
 			try {
 				//Run through all the source's keys, and check to see that either the
 				//destination's key doesn't exist, or the value at that key is the
@@ -180,19 +180,19 @@ public class Manager {
 				boolean acceptAllDestination = false;
 				boolean acceptAllSource = false;
 				DaemonManager dm = new DaemonManager();
-				for (String[] key : source.keySet(ArrayUtils.EMPTY_STRING_ARRAY)) {
-					if (destination.hasKey(key)) {
-						if (!source.get(key).equals(destination.get(key))) {
+				for(String[] key : source.keySet(ArrayUtils.EMPTY_STRING_ARRAY)) {
+					if(destination.hasKey(key)) {
+						if(!source.get(key).equals(destination.get(key))) {
 							String data;
 							//If the key is null, it's empty, so we can just stick it in, no
 							//problem. If there is data there, it's a conflict, and we need to
 							//ask.
-							if (destination.get(key) != null) {
+							if(destination.get(key) != null) {
 								boolean useSource = false;
 								boolean useDestination = false;
-								if (acceptAllDestination || acceptAllSource) {
+								if(acceptAllDestination || acceptAllSource) {
 									p(RED + "Conflict found for " + StringUtils.Join(key, ".") + ", using ");
-									if (useSource) {
+									if(useSource) {
 										useSource = true;
 										p("source");
 									} else {
@@ -221,25 +221,25 @@ public class Manager {
 												+ BLUE + "AD"
 												+ WHITE + "]");
 										String response = prompt();
-										if ("AS".equalsIgnoreCase(response)) {
+										if("AS".equalsIgnoreCase(response)) {
 											acceptAllSource = true;
 											useSource = true;
-										} else if ("AD".equalsIgnoreCase(response)) {
+										} else if("AD".equalsIgnoreCase(response)) {
 											acceptAllDestination = true;
 											useDestination = true;
-										} else if ("S".equalsIgnoreCase(response)) {
+										} else if("S".equalsIgnoreCase(response)) {
 											useSource = true;
-										} else if ("D".equalsIgnoreCase(response)) {
+										} else if("D".equalsIgnoreCase(response)) {
 											useDestination = true;
 										} else {
 											continue;
 										}
 										break;
-									} while (true);
+									} while(true);
 								}
-								if (useSource) {
+								if(useSource) {
 									data = source.get(key);
-								} else if (useDestination) {
+								} else if(useDestination) {
 									data = destination.get(key);
 								} else {
 									throw new RuntimeException("Invalid state, both useSource and useDestination are false");
@@ -258,18 +258,18 @@ public class Manager {
 				}
 				try {
 					dm.waitForThreads();
-				} catch (InterruptedException ex) {
+				} catch(InterruptedException ex) {
 					//
 				}
 				break;
-			} catch (DataSourceException ex) {
+			} catch(DataSourceException ex) {
 				pl(RED + ex.getMessage());
-			} catch (ReadOnlyException ex) {
+			} catch(ReadOnlyException ex) {
 				pl(RED + ex.getMessage());
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				pl(RED + ex.getMessage());
 			}
-		} while (true);
+		} while(true);
 		pl(GREEN + "Done merging!");
 	}
 
@@ -279,38 +279,38 @@ public class Manager {
 			pl(WHITE + "This will completely wipe your persistence information out. (No other data will be changed)");
 			pl("[YES/No]");
 			String choice = prompt();
-			if (choice.equals("YES")) {
+			if(choice.equals("YES")) {
 				pl("Positive? [YES/No]");
-				if (prompt().equals("YES")) {
+				if(prompt().equals("YES")) {
 					p("Ok, here we go... ");
 					Set<String[]> keySet = persistenceNetwork.getNamespace(new String[]{}).keySet();
 					DaemonManager dm = new DaemonManager();
-					for (String[] key : keySet) {
+					for(String[] key : keySet) {
 						try {
 							persistenceNetwork.clearKey(dm, key);
-						} catch (ReadOnlyException ex) {
+						} catch(ReadOnlyException ex) {
 							pl(RED + "Read only data source found: " + ex.getMessage());
 						}
 					}
 					try {
 						dm.waitForThreads();
-					} catch (InterruptedException e) {
+					} catch(InterruptedException e) {
 						//
 					}
 					pl("Done!");
 				}
-			} else if (choice.equalsIgnoreCase("yes")) {
+			} else if(choice.equalsIgnoreCase("yes")) {
 				pl("No, you have to type YES exactly.");
 			}
-		} catch (DataSourceException ex) {
+		} catch(DataSourceException ex) {
 			pl(RED + ex.getMessage());
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			pl(RED + ex.getMessage());
 		}
 	}
 
 	public static void help(String[] args) {
-		if (args.length < 1 || args[0].isEmpty()) {
+		if(args.length < 1 || args[0].isEmpty()) {
 			pl("Currently, your options are:\n"
 					+ "\t" + GREEN + "refactor" + WHITE + " - Allows you to shuffle data around in the persistence network more granularly than the merge tool.\n"
 					+ "\t" + GREEN + "print" + WHITE + " - Prints out the information from your persisted data\n"
@@ -324,8 +324,8 @@ public class Manager {
 
 			pl("Type " + MAGENTA + "help <command>" + WHITE + " for more details about a specific command");
 		} else {
-			if (null != args[0]) {
-				switch (args[0]) {
+			if(null != args[0]) {
+				switch(args[0]) {
 					case "refactor":
 						pl("This tool allows you to granularly move individual keys from one datasource to another."
 								+ " Unlike the merge tool, this works with individual keys, not necessarily keys that are"
@@ -400,35 +400,35 @@ public class Manager {
 
 	public static void edit() {
 		cls();
-		while (true) {
+		while(true) {
 			pl("Would you like to " + GREEN + "(a)dd/edit" + WHITE
 					+ " a value, " + RED + "(r)emove" + WHITE + " a value, " + CYAN
 					+ "(v)iew" + WHITE + " a single value, or "
 					+ MAGENTA + "(s)top" + WHITE + " editting? [" + GREEN + "A" + WHITE + "/"
 					+ RED + "R" + WHITE + "/" + CYAN + "V" + WHITE + "/" + MAGENTA + "S" + WHITE + "]");
 			String choice = prompt();
-			if (choice.equalsIgnoreCase("s") || choice.equalsIgnoreCase("exit")) {
+			if(choice.equalsIgnoreCase("s") || choice.equalsIgnoreCase("exit")) {
 				break;
-			} else if (choice.equalsIgnoreCase("a")) {
+			} else if(choice.equalsIgnoreCase("a")) {
 				pl("Type the name of the key " + YELLOW + "EXACTLY" + WHITE + " as shown in the"
 						+ " persistence format,\nnot the format you use when using store_value().");
 				String key = prompt();
 				pl("Provide a value for " + CYAN + key + WHITE + ". This value you provide will"
 						+ " be interpreted as pure MethodScript. (So things like array() will work)");
 				String value = prompt();
-				if (doAddEdit(key, value)) {
+				if(doAddEdit(key, value)) {
 					pl("Value changed!");
 				}
-			} else if (choice.equalsIgnoreCase("r")) {
+			} else if(choice.equalsIgnoreCase("r")) {
 				pl("Type the name of the key " + YELLOW + "EXACTLY" + WHITE + " as shown in the"
 						+ " persistence format,\nnot the format you use when using store_value().");
 				String key = prompt();
-				if (doRemove(key)) {
+				if(doRemove(key)) {
 					pl("Value removed!");
 				} else {
 					pl("That value wasn't in the database to start with");
 				}
-			} else if (choice.equalsIgnoreCase("v")) {
+			} else if(choice.equalsIgnoreCase("v")) {
 				pl("Type the name of the key " + YELLOW + "EXACTLY" + WHITE + " as shown in the"
 						+ " persistence format,\nnot the format you use when using store_value().");
 				String key = prompt();
@@ -443,13 +443,13 @@ public class Manager {
 	public static boolean doView(String key) {
 		try {
 			String[] k = key.split("\\.");
-			if (!persistenceNetwork.hasKey(k)) {
+			if(!persistenceNetwork.hasKey(k)) {
 				pl(RED + "That value is not set!");
 				return true;
 			}
 			pl(CYAN + key + ":" + WHITE + persistenceNetwork.get(k));
 			return true;
-		} catch (DataSourceException ex) {
+		} catch(DataSourceException ex) {
 			pl(RED + ex.getMessage());
 			return false;
 		}
@@ -466,11 +466,11 @@ public class Manager {
 			persistenceNetwork.set(dm, k, value);
 			try {
 				dm.waitForThreads();
-			} catch (InterruptedException e) {
+			} catch(InterruptedException e) {
 				//
 			}
 			return true;
-		} catch (Exception ex) {
+		} catch(Exception ex) {
 			pl(RED + ex.getMessage());
 			return false;
 		}
@@ -479,19 +479,19 @@ public class Manager {
 	public static boolean doRemove(String key) {
 		try {
 			String[] k = key.split("\\.");
-			if (persistenceNetwork.hasKey(k)) {
+			if(persistenceNetwork.hasKey(k)) {
 				DaemonManager dm = new DaemonManager();
 				persistenceNetwork.clearKey(dm, k);
 				try {
 					dm.waitForThreads();
-				} catch (InterruptedException e) {
+				} catch(InterruptedException e) {
 					//
 				}
 				return true;
 			} else {
 				return false;
 			}
-		} catch (Exception ex) {
+		} catch(Exception ex) {
 			pl(RED + ex.getMessage());
 			return false;
 		}
@@ -500,12 +500,12 @@ public class Manager {
 	public static void print(String[] args) {
 		try {
 			int count = 0;
-			for (String[] key : persistenceNetwork.getNamespace(new String[]{}).keySet()) {
+			for(String[] key : persistenceNetwork.getNamespace(new String[]{}).keySet()) {
 				count++;
 				pl(CYAN + StringUtils.Join(key, ".") + ": " + WHITE + persistenceNetwork.get(key));
 			}
 			pl(BLUE + count + " items found");
-		} catch (Exception e) {
+		} catch(Exception e) {
 			pl(RED + e.getMessage());
 		}
 	}
@@ -521,12 +521,12 @@ public class Manager {
 		pl("Would you like to continue? [" + GREEN + "Y" + WHITE + "/"
 				+ RED + "N" + WHITE + "]");
 		String choice = prompt();
-		if ("Y".equals(choice)) {
+		if("Y".equals(choice)) {
 			String filter;
 			File input;
 			File output;
-			while (true) {
-				while (true) {
+			while(true) {
+				while(true) {
 					pl("What keys are you interested in transferring? The filter should be in the same format as the persistence.ini file, i.e."
 							+ " \"storage.test\" or \"storage.test.**\". If a wildcard is used, multiple keys may be moved, otherwise, only one will"
 							+ " be.");
@@ -534,39 +534,39 @@ public class Manager {
 					break;
 				}
 				File def = MethodScriptFileLocations.getDefault().getPersistenceConfig();
-				while (true) {
+				while(true) {
 					pl("What is the input configuration (where keys will be read in from, then deleted)? Leave blank for the default, which is " + def.toString()
 							+ ". The path should be relative to " + jarLocation.toString());
 					String sinput = prompt();
-					if ("".equals(sinput.trim())) {
+					if("".equals(sinput.trim())) {
 						input = def;
 					} else {
 						File temp = new File(sinput);
-						if (!temp.isAbsolute()) {
+						if(!temp.isAbsolute()) {
 							temp = new File(jarLocation, sinput);
 						}
 						input = temp;
 					}
-					if (!input.exists() || !input.isFile()) {
+					if(!input.exists() || !input.isFile()) {
 						pl(RED + input.toString() + " isn't a file. Please enter an existing file.");
 					} else {
 						break;
 					}
 				}
-				while (true) {
+				while(true) {
 					pl("What is the output configuration (where keys will be written to)? The path should be relative to " + jarLocation.toString());
 					String soutput = prompt();
-					if ("".equals(soutput.trim())) {
+					if("".equals(soutput.trim())) {
 						pl(RED + "The output cannot be empty");
 						continue;
 					} else {
 						File temp = new File(soutput);
-						if (!temp.isAbsolute()) {
+						if(!temp.isAbsolute()) {
 							temp = new File(jarLocation, soutput);
 						}
 						output = temp;
 					}
-					if (!output.exists() || !output.isFile()) {
+					if(!output.exists() || !output.isFile()) {
 						pl(RED + output.toString() + " isn't a file. Please enter an existing file.");
 					} else {
 						break;
@@ -578,7 +578,7 @@ public class Manager {
 				pl("The output configuration is \"" + MAGENTA + output.toString() + WHITE + "\".");
 				pl("Is this correct? [" + GREEN + "Y" + WHITE + "/"
 						+ RED + "N" + WHITE + "]");
-				if ("Y".equals(prompt())) {
+				if("Y".equals(prompt())) {
 					break;
 				}
 			}
@@ -586,7 +586,7 @@ public class Manager {
 			URI defaultURI;
 			try {
 				defaultURI = new URI("file://persistence.db");
-			} catch (URISyntaxException ex) {
+			} catch(URISyntaxException ex) {
 				throw new Error(ex);
 			}
 			ConnectionMixinFactory.ConnectionMixinOptions mixinOptions = new ConnectionMixinFactory.ConnectionMixinOptions();
@@ -600,13 +600,13 @@ public class Manager {
 				boolean errors = false;
 				int transferred = 0;
 				int skipped = 0;
-				for (String[] k : inputData.keySet()) {
+				for(String[] k : inputData.keySet()) {
 					String key = StringUtils.Join(k, ".");
-					if (p.matcher(key).matches()) {
+					if(p.matcher(key).matches()) {
 						pl(GREEN + "transferring " + YELLOW + key);
 						//This key matches, so we need to add it to the output network, and then remove it
 						//from the input network
-						if (pnoutput.getKeySource(k).equals(pninput.getKeySource(k))) {
+						if(pnoutput.getKeySource(k).equals(pninput.getKeySource(k))) {
 							continue; //Don't transfer it if it's the same source, otherwise we would
 							//end up just deleting it.
 						}
@@ -615,12 +615,12 @@ public class Manager {
 							transferred++;
 							try {
 								pninput.clearKey(dm, k);
-							} catch (ReadOnlyException ex) {
+							} catch(ReadOnlyException ex) {
 								pl(RED + "Could not clear out original key for the value for \"" + MAGENTA + StringUtils.Join(k, ".") + RED + "\", as the input"
 										+ " file is set to read only.");
 								errors = true;
 							}
-						} catch (ReadOnlyException ex) {
+						} catch(ReadOnlyException ex) {
 							pl(RED + "Could not write out the value for \"" + MAGENTA + StringUtils.Join(k, ".") + RED + "\", as the output"
 									+ " file is set to read only.");
 							errors = true;
@@ -631,16 +631,16 @@ public class Manager {
 				}
 				pl(YELLOW + StringUtils.PluralTemplateHelper(transferred, "%d key was", "%d keys were") + " transferred.");
 				pl(YELLOW + StringUtils.PluralTemplateHelper(skipped, "%d key was", "%d keys were") + " skipped.");
-				if (errors) {
+				if(errors) {
 					pl(YELLOW + "Other than the errors listed above, all keys were transferred successfully.");
 				} else {
 					pl(GREEN + "Done!");
 				}
 				pl(GREEN + "If this is being done as part of an entire transfer process, don't forget to set " + output.toString()
 						+ " as your main Persistence Network configuration file.");
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
-			} catch (DataSourceException ex) {
+			} catch(DataSourceException ex) {
 				Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -648,28 +648,28 @@ public class Manager {
 
 	public static void hiddenKeys() {
 		String action;
-		while (true) {
+		while(true) {
 			pl(WHITE + "Would you like to \"" + GREEN + "view" + WHITE + "\" or \"" + RED + "delete" + WHITE + "\" the hidden keys (default: view)? [view/delete]");
 			action = prompt();
-			if ("".equals(action)) {
+			if("".equals(action)) {
 				action = "view";
 			}
-			if ("view".equals(action) || "delete".equals(action)) {
+			if("view".equals(action) || "delete".equals(action)) {
 				break;
 			} else {
 				pl(RED + "Invalid selection.");
 			}
 		}
 		File configuration = MethodScriptFileLocations.getDefault().getPersistenceConfig();
-		while (true) {
+		while(true) {
 			pl("Currently, " + configuration.getAbsolutePath() + " is being used as the persistence config file, but you may"
 					+ " specify another (blank to use the default).");
 			String file = prompt();
-			if ("".equals(file)) {
+			if("".equals(file)) {
 				break;
 			} else {
 				File f = new File(file);
-				if (f.exists()) {
+				if(f.exists()) {
 					configuration = f;
 					break;
 				} else {
@@ -679,15 +679,15 @@ public class Manager {
 		}
 		pl(YELLOW + "Using " + configuration.getAbsolutePath() + " as our Persistence Network config.");
 		File workingDirectory = MethodScriptFileLocations.getDefault().getConfigDirectory();
-		while (true) {
+		while(true) {
 			pl("Currently, " + workingDirectory.getAbsolutePath() + " is being used as the default \"working directory\" for the"
 					+ " persistence config file, but you may specify another (blank to use the default).");
 			String file = prompt();
-			if ("".equals(file)) {
+			if("".equals(file)) {
 				break;
 			} else {
 				File f = new File(file);
-				if (f.exists()) {
+				if(f.exists()) {
 					workingDirectory = f;
 					break;
 				} else {
@@ -703,57 +703,57 @@ public class Manager {
 			Set<URI> uris = filter.getAllConnections();
 			boolean noneFound = true;
 			int runningTotal = 0;
-			for (URI uri : uris) {
+			for(URI uri : uris) {
 
 				DataSource ds = DataSourceFactory.GetDataSource(uri, options);
 				Map<String[], String> db = ds.getValues(ArrayUtils.EMPTY_STRING_ARRAY);
 				Map<String[], String> map = new HashMap<>();
 				DaemonManager dm = new DaemonManager();
 				try {
-					for (String[] key : db.keySet()) {
-						if (!filter.getConnection(key).equals(uri)) {
+					for(String[] key : db.keySet()) {
+						if(!filter.getConnection(key).equals(uri)) {
 							map.put(key, db.get(key));
-							if ("delete".equals(action)) {
+							if("delete".equals(action)) {
 								ds.clearKey(dm, key);
 							}
 						}
 					}
 					runningTotal += map.size();
-				} catch (ReadOnlyException ex) {
+				} catch(ReadOnlyException ex) {
 					pl(RED + "Cannot delete any keys from " + uri + " as it is marked as read only, so it is being skipped.");
 				}
-				if ("delete".equals(action)) {
+				if("delete".equals(action)) {
 					try {
 						dm.waitForThreads();
-					} catch (InterruptedException ex) {
+					} catch(InterruptedException ex) {
 						// Ignored
 					}
 				}
-				if (!map.isEmpty()) {
+				if(!map.isEmpty()) {
 					noneFound = false;
-					if ("view".equals(action)) {
+					if("view".equals(action)) {
 						pl("Found " + StringUtils.PluralTemplateHelper(map.size(), "one hidden key", "%d hidden keys") + " in data source "
 								+ MAGENTA + uri.toString());
-						for (String[] key : map.keySet()) {
+						for(String[] key : map.keySet()) {
 							pl("\t" + GREEN + StringUtils.Join(key, ".") + WHITE + ":" + CYAN + map.get(key));
 						}
-						if (ds.hasModifier(DataSource.DataSourceModifier.READONLY)) {
+						if(ds.hasModifier(DataSource.DataSourceModifier.READONLY)) {
 							pl(YELLOW + "This data source is marked as read only, and the keys cannot be deleted from it by this utility.");
 						}
 						pl();
 					}
 				}
 			}
-			if (noneFound) {
+			if(noneFound) {
 				pl(GREEN + "Done searching, no hidden keys were found.");
 			} else {
-				if ("delete".equals(action)) {
+				if("delete".equals(action)) {
 					pl(GREEN + "Done, " + StringUtils.PluralTemplateHelper(runningTotal, "one hidden key was", "%d hidden keys were") + " deleted.");
 				} else {
 					pl(GREEN + "Found " + StringUtils.PluralTemplateHelper(runningTotal, "one hidden key", "%d hidden keys") + " in total.");
 				}
 			}
-		} catch (URISyntaxException | IOException | DataSourceException ex) {
+		} catch(URISyntaxException | IOException | DataSourceException ex) {
 			pl(RED + ex.getMessage());
 			ex.printStackTrace(StreamUtils.GetSystemErr());
 		}

@@ -55,56 +55,56 @@ public class ModifierMirror implements Serializable {
 	public ModifierMirror(Type type, int access) {
 		this.access = access;
 		//public, private, protected, final are all valid on all three types
-		if (type == Type.CLASS || type == Type.METHOD || type == Type.FIELD) {
-			if (hasFlag(Opcodes.ACC_PRIVATE)) {
+		if(type == Type.CLASS || type == Type.METHOD || type == Type.FIELD) {
+			if(hasFlag(Opcodes.ACC_PRIVATE)) {
 				modifiers |= Modifier.PRIVATE;
 			}
-			if (hasFlag(Opcodes.ACC_PROTECTED)) {
+			if(hasFlag(Opcodes.ACC_PROTECTED)) {
 				modifiers |= Modifier.PROTECTED;
 			}
-			if (hasFlag(Opcodes.ACC_PUBLIC)) {
+			if(hasFlag(Opcodes.ACC_PUBLIC)) {
 				modifiers |= Modifier.PUBLIC;
 			}
-			if (hasFlag(Opcodes.ACC_FINAL)) {
+			if(hasFlag(Opcodes.ACC_FINAL)) {
 				modifiers |= Modifier.FINAL;
 			}
 		}
 		//static is only valid on fields and methods
-		if (type == Type.FIELD || type == Type.METHOD) {
-			if (hasFlag(Opcodes.ACC_STATIC)) {
+		if(type == Type.FIELD || type == Type.METHOD) {
+			if(hasFlag(Opcodes.ACC_STATIC)) {
 				modifiers |= Modifier.STATIC;
 			}
 		}
 		//interface is only valid on a class
-		if (type == Type.CLASS) {
-			if (hasFlag(Opcodes.ACC_INTERFACE)) {
+		if(type == Type.CLASS) {
+			if(hasFlag(Opcodes.ACC_INTERFACE)) {
 				modifiers |= Modifier.INTERFACE;
 			}
 		}
 		//abstract is only valid on classes or methods
-		if (type == Type.CLASS || type == Type.METHOD) {
-			if (hasFlag(Opcodes.ACC_ABSTRACT)) {
+		if(type == Type.CLASS || type == Type.METHOD) {
+			if(hasFlag(Opcodes.ACC_ABSTRACT)) {
 				modifiers |= Modifier.ABSTRACT;
 			}
 		}
 		//native, strict, and synchronized are only valid on methods
-		if (type == Type.METHOD) {
-			if (hasFlag(Opcodes.ACC_NATIVE)) {
+		if(type == Type.METHOD) {
+			if(hasFlag(Opcodes.ACC_NATIVE)) {
 				modifiers |= Modifier.NATIVE;
 			}
-			if (hasFlag(Opcodes.ACC_STRICT)) {
+			if(hasFlag(Opcodes.ACC_STRICT)) {
 				modifiers |= Modifier.STRICT;
 			}
-			if (hasFlag(Opcodes.ACC_SYNCHRONIZED)) {
+			if(hasFlag(Opcodes.ACC_SYNCHRONIZED)) {
 				modifiers |= Modifier.SYNCHRONIZED;
 			}
 		}
 		//transient and volatile are only valid on fields
-		if (type == Type.FIELD) {
-			if (hasFlag(Opcodes.ACC_TRANSIENT)) {
+		if(type == Type.FIELD) {
+			if(hasFlag(Opcodes.ACC_TRANSIENT)) {
 				modifiers |= Modifier.TRANSIENT;
 			}
-			if (hasFlag(Opcodes.ACC_VOLATILE)) {
+			if(hasFlag(Opcodes.ACC_VOLATILE)) {
 				modifiers |= Modifier.VOLATILE;
 			}
 		}
@@ -246,10 +246,10 @@ public class ModifierMirror implements Serializable {
 	@Override
 	public String toString() {
 		List<String> build = new ArrayList<String>();
-		for (int i = 0; i < order.length; i++) {
+		for(int i = 0; i < order.length; i++) {
 			int type = (Integer) order[i];
 			String name = (String) order[++i];
-			if ((modifiers & type) > 0) {
+			if((modifiers & type) > 0) {
 				build.add(name);
 			}
 		}

@@ -15,7 +15,7 @@ public class CSymbol extends Construct {
 	public CSymbol(String symbol, Token.TType type, Target target) {
 		super(symbol, ConstructType.SYMBOL, target);
 		symbolType = type;
-		switch (symbolType) {
+		switch(symbolType) {
 			case CONCAT:
 				conversion = "concat";
 				break;
@@ -168,7 +168,7 @@ public class CSymbol extends Construct {
 	}
 
 	public String convertAssignment() {
-		switch (symbolType) {
+		switch(symbolType) {
 			case PLUS_ASSIGNMENT:
 				return "add";
 			case MINUS_ASSIGNMENT:

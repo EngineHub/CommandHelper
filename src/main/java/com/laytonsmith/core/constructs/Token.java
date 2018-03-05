@@ -330,7 +330,7 @@ public class Token {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof Token) {
+		if(o instanceof Token) {
 			Token t = (Token) o;
 			return (this.type.equals(t.type) && this.value.equals(t.value));
 		}
@@ -339,17 +339,17 @@ public class Token {
 
 	@Override
 	public String toString() {
-		if (type.equals(TType.NEWLINE)) {
+		if(type.equals(TType.NEWLINE)) {
 			return "newline";
 		}
-		if (type.equals(TType.STRING)) {
+		if(type.equals(TType.STRING)) {
 			return "'" + value + "'";
 		}
 		return type + ":" + value;
 	}
 
 	public String toSimpleString() {
-		if (type.equals(TType.STRING)) {
+		if(type.equals(TType.STRING)) {
 			return "'" + value + "'";
 		}
 		return value;
@@ -362,9 +362,9 @@ public class Token {
 	 * @return
 	 */
 	public String toOutputString() {
-		if (type.equals(TType.STRING)) {
+		if(type.equals(TType.STRING)) {
 			return value.replace("\\", "\\\\").replace("'", "\\'");
-		} else if (type.equals(TType.SMART_STRING)) {
+		} else if(type.equals(TType.SMART_STRING)) {
 			return value.replace("\\", "\\\\").replace("\"", "\\\"");
 		}
 		return value;

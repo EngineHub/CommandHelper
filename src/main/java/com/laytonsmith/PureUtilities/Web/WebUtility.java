@@ -113,23 +113,23 @@ public final class WebUtility {
 		RawHTTPResponse response = getWebStream(url, settings);
 		StringBuilder b = null;
 		BufferedReader in = new BufferedReader(new InputStreamReader(response.getStream()));
-		if (settings.getDownloadTo() == null) {
-			if (settings.getLogger() != null) {
+		if(settings.getDownloadTo() == null) {
+			if(settings.getLogger() != null) {
 				settings.getLogger().log(Level.INFO, "Reading in response body");
 			}
 			b = new StringBuilder();
 			String line;
-			while ((line = in.readLine()) != null) {
+			while((line = in.readLine()) != null) {
 				b.append(line).append("\n");
 			}
 			in.close();
 		} else {
-			if (settings.getLogger() != null) {
+			if(settings.getLogger() != null) {
 				settings.getLogger().log(Level.INFO, "Saving file to {0}", settings.getDownloadTo());
 			}
 			int r;
 			OutputStream out = new BufferedOutputStream(new FileOutputStream(settings.getDownloadTo()));
-			while ((r = in.read()) != -1) {
+			while((r = in.read()) != -1) {
 				out.write(r);
 			}
 			try {
@@ -141,14 +141,14 @@ public final class WebUtility {
 		//Assume 1.0 if something breaks
 		String httpVersion = "1.0";
 		Matcher m = Pattern.compile("HTTP/(\\d\\+.\\d+).*").matcher(response.getConnection().getHeaderField(0));
-		if (m.find()) {
+		if(m.find()) {
 			httpVersion = m.group(1);
 		}
 		HTTPResponse resp = new HTTPResponse(response.getConnection().getResponseMessage(),
 				response.getConnection().getResponseCode(), response.getConnection().getHeaderFields(), b == null ? null : b.toString(), httpVersion);
-		if (cookieStash != null && resp.getHeaderNames().contains("Set-Cookie")) {
+		if(cookieStash != null && resp.getHeaderNames().contains("Set-Cookie")) {
 			//We need to add the cookie to the stash
-			for (String h : resp.getHeaders("Set-Cookie")) {
+			for(String h : resp.getHeaders("Set-Cookie")) {
 				cookieStash.addCookie(new Cookie(h, url));
 			}
 		}
@@ -166,7 +166,7 @@ public final class WebUtility {
 	 * @throws IOException
 	 */
 	public static RawHTTPResponse getWebStream(URL url, RequestSettings _settings) throws SocketTimeoutException, IOException {
-		if (_settings == null) {
+		if(_settings == null) {
 			_settings = new RequestSettings();
 		}
 		final RequestSettings settings = _settings;
@@ -179,7 +179,7 @@ public final class WebUtility {
 		final int timeout = settings.getTimeout();
 		String username = settings.getUsername();
 		String password = settings.getPassword();
-		if (logger != null) {
+		if(logger != null) {
 			logger.log(Level.INFO, "Using the following settings:\n"
 					+ "HTTP method: {0}\n"
 					+ "Headers: {1}\n"
@@ -196,40 +196,40 @@ public final class WebUtility {
 		}
 		//First, let's check to see that the url is properly formatted. If there are parameters,
 		//and this is a GET request, we want to tack them on to the end.
-		if (parameters != null && !parameters.isEmpty() && method == HTTPMethod.GET) {
+		if(parameters != null && !parameters.isEmpty() && method == HTTPMethod.GET) {
 			StringBuilder b = new StringBuilder(url.getQuery() == null ? "" : url.getQuery());
-			if (b.length() != 0) {
+			if(b.length() != 0) {
 				b.append("&");
 			}
 			b.append(encodeParameters(parameters));
 			String query = b.toString();
 			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "?" + query);
 		}
-		if (logger != null) {
+		if(logger != null) {
 			logger.log(Level.INFO, "Using url: {0}", url);
 		}
 
 		Proxy proxy;
-		if (settings.getProxy() == null) {
+		if(settings.getProxy() == null) {
 			proxy = Proxy.NO_PROXY;
 		} else {
 			proxy = settings.getProxy();
 		}
-		if (logger != null) {
+		if(logger != null) {
 			logger.log(Level.INFO, "Using proxy: {0}", proxy);
 		}
 		InetSocketAddress addr = (InetSocketAddress) proxy.address();
-		if (addr != null) {
-			if (addr.isUnresolved()) {
+		if(addr != null) {
+			if(addr.isUnresolved()) {
 				throw new IOException("Could not resolve the proxy address: " + addr.toString());
 			}
 		}
 		//FIXME: When given a bad proxy, this causes it to stall forever
-		if (logger != null) {
+		if(logger != null) {
 			logger.log(Level.INFO, "Opening connection...");
 		}
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection(/*proxy*/);
-		if (conn instanceof HttpsURLConnection
+		if(conn instanceof HttpsURLConnection
 				&& (settings.getDisableCertChecking() || settings.getUseDefaultTrustStore() == false
 				|| !settings.getTrustStore().isEmpty())) {
 			HttpsURLConnection conns = (HttpsURLConnection) conn;
@@ -238,25 +238,25 @@ public final class WebUtility {
 			final SSLContext sslc;
 			try {
 				sslc = SSLContext.getInstance("SSL");
-			} catch (NoSuchAlgorithmException ex) {
+			} catch(NoSuchAlgorithmException ex) {
 				throw new IOException(ex);
 			}
 			TrustManager _defaultTrustManager = null;
 			{
-				if (settings.getUseDefaultTrustStore()) {
+				if(settings.getUseDefaultTrustStore()) {
 					TrustManagerFactory tmf;
 					try {
 						tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-					} catch (NoSuchAlgorithmException ex) {
+					} catch(NoSuchAlgorithmException ex) {
 						throw new RuntimeException(ex);
 					}
 					try {
 						tmf.init((KeyStore) null);
-					} catch (KeyStoreException ex) {
+					} catch(KeyStoreException ex) {
 						throw new IOException(ex);
 					}
-					for (TrustManager tm : tmf.getTrustManagers()) {
-						if (tm instanceof X509TrustManager) {
+					for(TrustManager tm : tmf.getTrustManagers()) {
+						if(tm instanceof X509TrustManager) {
 							_defaultTrustManager = tm;
 							break;
 						}
@@ -276,36 +276,36 @@ public final class WebUtility {
 
 					@Override
 					public void checkServerTrusted(X509Certificate[] xcs, String string) throws CertificateException {
-						if (settings.getDisableCertChecking()) {
+						if(settings.getDisableCertChecking()) {
 							// No cert checking, all pass
 							return;
 						}
 						boolean trusted = true;
-						if (defaultTrustManager != null) {
+						if(defaultTrustManager != null) {
 							try {
 								defaultTrustManager.checkClientTrusted(xcs, string);
-							} catch (CertificateException ex) {
+							} catch(CertificateException ex) {
 								trusted = false;
 							}
 						}
-						if (trusted) {
+						if(trusted) {
 							return;
 						}
 						// If any of the certificates are trusted, then the whole chain is trusted
-						for (X509Certificate c : xcs) {
+						for(X509Certificate c : xcs) {
 							// Unfortunately, we do not know what schemes to use, so we must walk through each
 							// trust store item one at a time. We have a documented guarantee that we will walk
 							// this list from top to bottom, so we have a linked hash map.
 							LinkedHashMap<String, String> ts = settings.getTrustStore();
-							for (String fingerprint : ts.keySet()) {
+							for(String fingerprint : ts.keySet()) {
 								fingerprint = fingerprint.toLowerCase().replace(" ", "");
 								try {
 									String scheme = ts.get(fingerprint);
 									String fp = getThumbPrint(c, scheme).toLowerCase().replace(" ", "");
-									if (fp.equals(fingerprint)) {
+									if(fp.equals(fingerprint)) {
 										return;
 									}
-								} catch (NoSuchAlgorithmException | CertificateEncodingException ex) {
+								} catch(NoSuchAlgorithmException | CertificateEncodingException ex) {
 									throw new RuntimeException(ex);
 								}
 							}
@@ -316,10 +316,10 @@ public final class WebUtility {
 
 					@Override
 					public X509Certificate[] getAcceptedIssuers() {
-						if (settings.getDisableCertChecking()) {
+						if(settings.getDisableCertChecking()) {
 							return new X509Certificate[0];
 						}
-						if (defaultTrustManager != null) {
+						if(defaultTrustManager != null) {
 							return defaultTrustManager.getAcceptedIssuers();
 						}
 						return new X509Certificate[0];
@@ -328,7 +328,7 @@ public final class WebUtility {
 			};
 			try {
 				sslc.init(null, overrideTrustManager, new java.security.SecureRandom());
-			} catch (KeyManagementException ex) {
+			} catch(KeyManagementException ex) {
 				throw new IOException(ex);
 			}
 			final SSLSocketFactory ssf;
@@ -373,41 +373,41 @@ public final class WebUtility {
 		}
 		conn.setConnectTimeout(timeout);
 		conn.setInstanceFollowRedirects(followRedirects);
-		if (cookieStash != null) {
+		if(cookieStash != null) {
 			String cookies = cookieStash.getCookies(url);
-			if (cookies != null) {
+			if(cookies != null) {
 				conn.setRequestProperty("Cookie", cookies);
 			}
 		}
-		if (username != null && password != null) {
-			if (logger != null) {
+		if(username != null && password != null) {
+			if(logger != null) {
 				logger.log(Level.INFO, "Using Username/Password authentication, adding Authorization header");
 			}
 			conn.setRequestProperty("Authorization", "Basic " + new String(Base64.encodeBase64((username + ":" + password).getBytes("UTF-8")), "UTF-8"));
 		}
-		if (headers != null) {
-			for (String key : headers.keySet()) {
+		if(headers != null) {
+			for(String key : headers.keySet()) {
 				conn.setRequestProperty(key, StringUtils.Join(headers.get(key), ","));
 			}
 		}
 		conn.setRequestMethod(method.name());
-		if ((parameters != null && !parameters.isEmpty()) || settings.getRawParameter() != null) {
+		if((parameters != null && !parameters.isEmpty()) || settings.getRawParameter() != null) {
 			conn.setDoOutput(true);
 			byte[] params = ArrayUtils.EMPTY_BYTE_ARRAY;
-			if (parameters != null && !parameters.isEmpty()) {
-				if (logger != null) {
+			if(parameters != null && !parameters.isEmpty()) {
+				if(logger != null) {
 					logger.log(Level.INFO, "Parameters are added, and content type set to application/x-www-form-urlencoded");
 				}
 				params = encodeParameters(parameters).getBytes("UTF-8");
 				conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-			} else if (settings.getRawParameter() != null) {
-				if (logger != null) {
+			} else if(settings.getRawParameter() != null) {
+				if(logger != null) {
 					logger.log(Level.INFO, "Raw parameter is added");
 				}
 				params = settings.getRawParameter();
 			}
 			conn.setRequestProperty("Content-Length", Integer.toString(params.length));
-			if (logger != null) {
+			if(logger != null) {
 				logger.log(Level.INFO, "Content length is {0}", params.length);
 				logger.log(Level.INFO, "Writing out request now");
 			}
@@ -415,37 +415,37 @@ public final class WebUtility {
 			os.write(params);
 			os.close();
 		}
-		if (logger != null) {
+		if(logger != null) {
 			logger.log(Level.INFO, "Output sent");
 		}
 		InputStream is;
 		try {
 			is = conn.getInputStream();
-		} catch (UnknownHostException e) {
+		} catch(UnknownHostException e) {
 			throw e;
-		} catch (Exception e) {
-			if (logger != null) {
+		} catch(Exception e) {
+			if(logger != null) {
 				logger.log(Level.SEVERE, "Exception occurred, {0} response from server", conn.getResponseCode());
 			}
 			is = conn.getErrorStream();
 		}
-		if ("x-gzip".equals(conn.getContentEncoding()) || "gzip".equals(conn.getContentEncoding())) {
-			if (logger != null) {
+		if("x-gzip".equals(conn.getContentEncoding()) || "gzip".equals(conn.getContentEncoding())) {
+			if(logger != null) {
 				logger.log(Level.INFO, "Response is gzipped, using a GZIPInputStream");
 			}
 			is = new GZIPInputStream(is);
-		} else if ("deflate".equals(conn.getContentEncoding())) {
-			if (logger != null) {
+		} else if("deflate".equals(conn.getContentEncoding())) {
+			if(logger != null) {
 				logger.log(Level.INFO, "Response is zipped, using a InflaterInputStream");
 			}
 			is = new InflaterInputStream(is);
-		} else if ("identity".equals(conn.getContentEncoding())) {
+		} else if("identity".equals(conn.getContentEncoding())) {
 			//This is the default, meaning no transformation is needed.
-			if (logger != null) {
+			if(logger != null) {
 				logger.log(Level.INFO, "Response is not compressed");
 			}
 		}
-		if (is == null) {
+		if(is == null) {
 			throw new IOException("Could not connnect to " + url);
 		}
 		return new RawHTTPResponse(conn, is);
@@ -458,33 +458,33 @@ public final class WebUtility {
 	 * @return
 	 */
 	public static String encodeParameters(Map<String, List<String>> parameters) {
-		if (parameters == null) {
+		if(parameters == null) {
 			return "";
 		}
 		StringBuilder b = new StringBuilder();
 		boolean first = true;
-		if (!first) {
+		if(!first) {
 			b.append("&");
 		}
 		first = false;
-		for (String key : parameters.keySet()) {
+		for(String key : parameters.keySet()) {
 
 			List<String> values = parameters.get(key);
 			try {
-				if (values.size() == 1) {
+				if(values.size() == 1) {
 					String value = values.get(0);
 					b.append(URLEncoder.encode(key, "UTF-8")).append("=").append(URLEncoder.encode(value, "UTF-8"));
 				} else {
 					boolean innerFirst = true;
-					for (String value : values) {
-						if (!innerFirst) {
+					for(String value : values) {
+						if(!innerFirst) {
 							b.append("&");
 						}
 						innerFirst = false;
 						b.append(URLEncoder.encode(key + "[]", "UTF-8")).append("=").append(URLEncoder.encode(value, "UTF-8"));
 					}
 				}
-			} catch (UnsupportedEncodingException ex) {
+			} catch(UnsupportedEncodingException ex) {
 				throw new Error(ex);
 			}
 		}
@@ -492,7 +492,7 @@ public final class WebUtility {
 	}
 
 	private static void WriteStringToOutputStream(String data, BufferedWriter bw) throws IOException {
-		for (Character c : data.toCharArray()) {
+		for(Character c : data.toCharArray()) {
 			bw.write((int) c.charValue());
 		}
 	}
@@ -549,12 +549,12 @@ public final class WebUtility {
 			public void run() {
 				try {
 					HTTPResponse response = GetPage(url, settings);
-					if (callback == null) {
+					if(callback == null) {
 						return;
 					}
 					callback.response(response);
-				} catch (IOException ex) {
-					if (callback == null) {
+				} catch(IOException ex) {
+					if(callback == null) {
 						return;
 					}
 					callback.error(ex);
@@ -571,11 +571,11 @@ public final class WebUtility {
 	 */
 	public static Map<String, String> getQueryMap(String query) {
 		Map<String, String> map = new HashMap<String, String>();
-		if (query == null) {
+		if(query == null) {
 			return map;
 		}
 		String[] params = query.split("&");
-		for (String param : params) {
+		for(String param : params) {
 			String name = param.split("=")[0];
 			String value = param.split("=")[1];
 			map.put(name, value);

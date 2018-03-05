@@ -79,7 +79,7 @@ public class BossBar {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			CArray ca = new CArray(t);
-			for (String id : bars.keySet()) {
+			for(String id : bars.keySet()) {
 				ca.push(new CString(id, t), t);
 			}
 			return ca;
@@ -119,7 +119,7 @@ public class BossBar {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
-			if (bars.containsKey(id)) {
+			if(bars.containsKey(id)) {
 				throw new CREIllegalArgumentException("That boss bar id is already in use.", t);
 			}
 			String title = "";
@@ -127,41 +127,41 @@ public class BossBar {
 			MCBarStyle style = MCBarStyle.SOLID;
 			boolean visible = true;
 			double percent = 1.0;
-			if (args.length == 2) {
-				if (!(args[1] instanceof CArray)) {
+			if(args.length == 2) {
+				if(!(args[1] instanceof CArray)) {
 					throw new CRECastException("Expected array for parameter 2 of create_bar()", t);
 				}
 				CArray ca = (CArray) args[1];
-				if (ca.containsKey("title")) {
+				if(ca.containsKey("title")) {
 					title = ca.get("title", t).val();
 				}
-				if (ca.containsKey("color")) {
+				if(ca.containsKey("color")) {
 					try {
 						color = MCBarColor.valueOf(ca.get("color", t).val());
-					} catch (IllegalArgumentException ex) {
+					} catch(IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar color.", t);
 					}
 				}
-				if (ca.containsKey("style")) {
+				if(ca.containsKey("style")) {
 					try {
 						style = MCBarStyle.valueOf(ca.get("style", t).val());
-					} catch (IllegalArgumentException ex) {
+					} catch(IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar style.", t);
 					}
 				}
-				if (ca.containsKey("visible")) {
+				if(ca.containsKey("visible")) {
 					visible = Static.getBoolean(ca.get("visible", t));
 				}
-				if (ca.containsKey("percent")) {
+				if(ca.containsKey("percent")) {
 					try {
 						percent = Static.getDouble(ca.get("percent", t), t);
-					} catch (IllegalArgumentException ex) {
+					} catch(IllegalArgumentException ex) {
 						throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 					}
 				}
 			}
 			MCBossBar bar = StaticLayer.GetServer().createBossBar(title, color, style);
-			if (bar != null) {
+			if(bar != null) {
 				bar.setVisible(visible);
 				bar.setProgress(percent);
 				bars.put(id, bar);
@@ -204,43 +204,43 @@ public class BossBar {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			MCBossBar bar = bars.get(id);
-			if (bar == null) {
+			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
-			if (args[1] instanceof CString) {
+			if(args[1] instanceof CString) {
 				bar.setTitle(args[1].val());
-			} else if (args[1] instanceof CDouble) {
+			} else if(args[1] instanceof CDouble) {
 				try {
 					bar.setProgress(Static.getDouble(args[1], t));
-				} catch (IllegalArgumentException ex) {
+				} catch(IllegalArgumentException ex) {
 					throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 				}
-			} else if (args[1] instanceof CArray) {
+			} else if(args[1] instanceof CArray) {
 				CArray ca = (CArray) args[1];
-				if (ca.containsKey("title")) {
+				if(ca.containsKey("title")) {
 					bar.setTitle(ca.get("title", t).val());
 				}
-				if (ca.containsKey("color")) {
+				if(ca.containsKey("color")) {
 					try {
 						bar.setColor(MCBarColor.valueOf(ca.get("color", t).val()));
-					} catch (IllegalArgumentException ex) {
+					} catch(IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar color.", t);
 					}
 				}
-				if (ca.containsKey("style")) {
+				if(ca.containsKey("style")) {
 					try {
 						bar.setStyle(MCBarStyle.valueOf(ca.get("style", t).val()));
-					} catch (IllegalArgumentException ex) {
+					} catch(IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar style.", t);
 					}
 				}
-				if (ca.containsKey("visible")) {
+				if(ca.containsKey("visible")) {
 					bar.setVisible(Static.getBoolean(ca.get("visible", t)));
 				}
-				if (ca.containsKey("percent")) {
+				if(ca.containsKey("percent")) {
 					try {
 						bar.setProgress(Static.getDouble(ca.get("percent", t), t));
-					} catch (IllegalArgumentException ex) {
+					} catch(IllegalArgumentException ex) {
 						throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 					}
 				}
@@ -280,7 +280,7 @@ public class BossBar {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			MCBossBar bar = bars.get(id);
-			if (bar == null) {
+			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
 			CArray ret = CArray.GetAssociativeArray(t);
@@ -321,7 +321,7 @@ public class BossBar {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			MCBossBar bar = bars.get(id);
-			if (bar == null) {
+			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
 			bar.removeAllPlayers();
@@ -357,7 +357,7 @@ public class BossBar {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCBossBar bar = bars.get(args[0].val());
-			if (bar == null) {
+			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
 			bar.addPlayer(Static.GetPlayer(args[1].val(), t));
@@ -391,7 +391,7 @@ public class BossBar {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCBossBar bar = bars.get(args[0].val());
-			if (bar == null) {
+			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
 			bar.removePlayer(Static.GetPlayer(args[1].val(), t));
@@ -425,11 +425,11 @@ public class BossBar {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCBossBar bar = bars.get(args[0].val());
-			if (bar == null) {
+			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
 			CArray players = new CArray(t);
-			for (MCPlayer player : bar.getPlayers()) {
+			for(MCPlayer player : bar.getPlayers()) {
 				players.push(new CString(player.getName(), t), t);
 			}
 			return players;

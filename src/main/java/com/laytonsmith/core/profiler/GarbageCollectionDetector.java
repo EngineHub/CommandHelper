@@ -14,8 +14,8 @@ final class GarbageCollectionDetector {
 
 	@Override
 	protected void finalize() throws Throwable {
-		if (profiler.queuedProfilePoints > 0) {
-			for (ProfilePoint p : profiler.operations.keySet()) {
+		if(profiler.queuedProfilePoints > 0) {
+			for(ProfilePoint p : profiler.operations.keySet()) {
 				p.garbageCollectorRun();
 			}
 		}

@@ -10,14 +10,14 @@ public class BukkitMCEnchantment implements MCEnchantment {
 	Enchantment e;
 
 	public BukkitMCEnchantment(Enchantment e) {
-		if (e == null) {
+		if(e == null) {
 			throw new NullPointerException();
 		}
 		this.e = e;
 	}
 
 	public BukkitMCEnchantment(AbstractionObject a) {
-		if (a instanceof MCEnchantment) {
+		if(a instanceof MCEnchantment) {
 			this.e = ((Enchantment) a.getHandle());
 		} else {
 			throw new ClassCastException();

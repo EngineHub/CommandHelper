@@ -34,7 +34,7 @@ public class BukkitAbstractEventMixin implements EventMixinInterface {
 
 	@Override
 	public void cancel(BindableEvent e, boolean state) {
-		if (e._GetObject() instanceof Cancellable) {
+		if(e._GetObject() instanceof Cancellable) {
 			((Cancellable) e._GetObject()).setCancelled(state);
 		}
 	}
@@ -45,28 +45,28 @@ public class BukkitAbstractEventMixin implements EventMixinInterface {
 		map.put("event_type", new CString(mySuper.getName(), Target.UNKNOWN));
 		String macro;
 		Object e = event._GetObject();
-		if (e instanceof BlockEvent) {
+		if(e instanceof BlockEvent) {
 			macro = "block";
-		} else if (e instanceof EntityEvent) {
+		} else if(e instanceof EntityEvent) {
 			macro = "entity";
-			if (((EntityEvent) e).getEntity() instanceof Player) {
+			if(((EntityEvent) e).getEntity() instanceof Player) {
 				Entity entity = ((EntityEvent) e).getEntity();
 				map.put("player", new CString(entity.getName(), Target.UNKNOWN));
 			}
-		} else if (e instanceof HangingEvent) {
+		} else if(e instanceof HangingEvent) {
 			macro = "entity";
-		} else if (e instanceof InventoryEvent) {
+		} else if(e instanceof InventoryEvent) {
 			macro = "inventory";
-		} else if (e instanceof PlayerEvent) {
+		} else if(e instanceof PlayerEvent) {
 			map.put("player", new CString(((PlayerEvent) e).getPlayer().getName(), Target.UNKNOWN));
 			macro = "player";
-		} else if (e instanceof ServerEvent) {
+		} else if(e instanceof ServerEvent) {
 			macro = "server";
-		} else if (e instanceof VehicleEvent) {
+		} else if(e instanceof VehicleEvent) {
 			macro = "vehicle";
-		} else if (e instanceof WeatherEvent) {
+		} else if(e instanceof WeatherEvent) {
 			macro = "weather";
-		} else if (e instanceof WorldEvent) {
+		} else if(e instanceof WorldEvent) {
 			macro = "world";
 		} else {
 			macro = "custom";
@@ -77,7 +77,7 @@ public class BukkitAbstractEventMixin implements EventMixinInterface {
 
 	@Override
 	public void manualTrigger(BindableEvent e) {
-		if (e._GetObject() instanceof org.bukkit.event.Event) {
+		if(e._GetObject() instanceof org.bukkit.event.Event) {
 			((BukkitMCServer) Static.getServer()).__Server().getPluginManager().callEvent((org.bukkit.event.Event) e._GetObject());
 		}
 	}
@@ -89,7 +89,7 @@ public class BukkitAbstractEventMixin implements EventMixinInterface {
 
 	@Override
 	public boolean isCancelled(BindableEvent o) {
-		if (o._GetObject() instanceof Cancellable) {
+		if(o._GetObject() instanceof Cancellable) {
 			return ((Cancellable) o._GetObject()).isCancelled();
 		} else {
 			return false;

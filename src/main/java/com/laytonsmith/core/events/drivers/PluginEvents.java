@@ -51,7 +51,7 @@ public class PluginEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (e instanceof MCPluginIncomingMessageEvent) {
+			if(e instanceof MCPluginIncomingMessageEvent) {
 				MCPluginIncomingMessageEvent event = (MCPluginIncomingMessageEvent) e;
 
 				Prefilters.match(prefilter, "channel", event.getChannel(), Prefilters.PrefilterType.STRING_MATCH);
@@ -68,7 +68,7 @@ public class PluginEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if (e instanceof MCPluginIncomingMessageEvent) {
+			if(e instanceof MCPluginIncomingMessageEvent) {
 				MCPluginIncomingMessageEvent event = (MCPluginIncomingMessageEvent) e;
 				Map<String, Construct> ret = evaluate_helper(e);
 

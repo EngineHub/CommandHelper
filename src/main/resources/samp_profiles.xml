@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <profiles>
-    <!-- Profiles go here. A sample MySQL profile configuration is provided. See the documentation
-		on profiles for more detailed information about this file. -->
+	<!-- Profiles go here. A sample MySQL profile configuration is provided. See the documentation
+	on profiles for more detailed information about this file. -->
 	<!--
 	<profile id="profileName">
 		<type>mysql</type>

@@ -63,21 +63,21 @@ public class UpgradeLog {
 	 * @throws java.io.IOException If the output log can't be written to.
 	 */
 	public void runTasks() throws IOException {
-		if (logFile.exists()) {
+		if(logFile.exists()) {
 			List<Map<String, String>> jsonUpgrades = (List<Map<String, String>>) JSONValue.parse(FileUtil.read(logFile));
-			for (Map<String, String> m : jsonUpgrades) {
+			for(Map<String, String> m : jsonUpgrades) {
 				upgrades.add(Upgrade.fromMap(m));
 			}
 		}
 
-		for (UpgradeTask task : tasks) {
-			if (task.doRun()) {
+		for(UpgradeTask task : tasks) {
+			if(task.doRun()) {
 				task.run();
 			}
 		}
 
 		List<Map<String, String>> jsonUpgrades = new ArrayList<Map<String, String>>();
-		for (Upgrade u : upgrades) {
+		for(Upgrade u : upgrades) {
 			jsonUpgrades.add(u.toMap());
 		}
 		String newJSON = JSONValue.toJSONString(jsonUpgrades);
@@ -96,8 +96,8 @@ public class UpgradeLog {
 		 * @return
 		 */
 		protected boolean hasBreadcrumb(String breadcrumb) {
-			for (Upgrade u : that.upgrades) {
-				if (u.breadcrumb.equals(breadcrumb)) {
+			for(Upgrade u : that.upgrades) {
+				if(u.breadcrumb.equals(breadcrumb)) {
 					return true;
 				}
 			}

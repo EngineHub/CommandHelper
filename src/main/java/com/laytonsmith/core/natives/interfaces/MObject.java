@@ -46,9 +46,9 @@ public class MObject {
 		T instance;
 		try {
 			instance = type.newInstance();
-		} catch (InstantiationException ex) {
+		} catch(InstantiationException ex) {
 			throw new RuntimeException(type.getName() + " does not have a default constructor.");
-		} catch (IllegalAccessException ex) {
+		} catch(IllegalAccessException ex) {
 			throw new RuntimeException(type.getName() + "'s default constructor is not public.");
 		}
 		return null; //TODO
@@ -89,62 +89,62 @@ public class MObject {
 	 */
 	public final void set(String field, Construct value, Target t) {
 		String alias = alias(field);
-		if (alias != null) {
+		if(alias != null) {
 			field = alias;
 		}
-		for (Field f : this.getClass().getFields()) {
-			if (f.isAnnotationPresent(nofield.class)) {
+		for(Field f : this.getClass().getFields()) {
+			if(f.isAnnotationPresent(nofield.class)) {
 				//Skip this one
 				continue;
 			}
-			if (f.getName().equals(field)) {
+			if(f.getName().equals(field)) {
 				//This is it, so let's set it, (converting if necessary) then break
 				Object val;
 				Class fType = f.getType();
-				if (value instanceof CNull) { //TODO
+				if(value instanceof CNull) { //TODO
 					//Easy case
 					val = null;
 				} else {
-					if (fType == byte.class) {
+					if(fType == byte.class) {
 						val = Static.getInt8(value, t);
-					} else if (fType == short.class) {
+					} else if(fType == short.class) {
 						val = Static.getInt16(value, t);
-					} else if (fType == int.class) {
+					} else if(fType == int.class) {
 						val = Static.getInt32(value, t);
-					} else if (fType == long.class) {
+					} else if(fType == long.class) {
 						val = Static.getInt(value, t);
-					} else if (fType == char.class) {
-						if (value.val().length() == 0) {
+					} else if(fType == char.class) {
+						if(value.val().length() == 0) {
 							val = null;
 						} else {
 							val = value.val().charAt(0);
 						}
-					} else if (fType == boolean.class) {
+					} else if(fType == boolean.class) {
 						val = Static.getBoolean(value);
-					} else if (fType == float.class) {
+					} else if(fType == float.class) {
 						val = Static.getDouble32(value, t);
-					} else if (fType == double.class) {
+					} else if(fType == double.class) {
 						val = Static.getDouble(value, t);
-					} else if (fType == MMap.class) {
+					} else if(fType == MMap.class) {
 						CArray ca = Static.getArray(value, t);
 						MMap m = new MMap();
-						for (String key : ca.stringKeySet()) {
+						for(String key : ca.stringKeySet()) {
 							m.put(key, ca.get(key, t));
 						}
 						val = m;
-					} else if (fType == MList.class) {
+					} else if(fType == MList.class) {
 						CArray ca = Static.getArray(value, t);
 						MList m = new MList();
-						if (ca.inAssociativeMode()) {
+						if(ca.inAssociativeMode()) {
 							throw new CRECastException("Expected non-associative array, but an associative array was found instead.", t);
 						}
-						for (int i = 0; i < ca.size(); i++) {
+						for(int i = 0; i < ca.size(); i++) {
 							m.add(ca.get(i, t));
 						}
 						val = m;
-					} else if (Construct.class.isAssignableFrom(fType)) {
+					} else if(Construct.class.isAssignableFrom(fType)) {
 						val = value;
-					} else if (MObject.class.isAssignableFrom(fType)) {
+					} else if(MObject.class.isAssignableFrom(fType)) {
 						CArray ca = Static.getArray(value, t);
 						val = MObject.Construct(fType, ca);
 					} else {
@@ -157,9 +157,9 @@ public class MObject {
 					//val is now set correctly, guaranteed.
 					f.set(this, val);
 					//These exceptions cannot happen.
-				} catch (IllegalArgumentException ex) {
+				} catch(IllegalArgumentException ex) {
 					throw new Error(ex);
-				} catch (IllegalAccessException ex) {
+				} catch(IllegalAccessException ex) {
 					throw new Error(ex);
 				}
 			}

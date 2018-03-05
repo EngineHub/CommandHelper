@@ -36,7 +36,7 @@ public class MethodMirror extends AbstractMethodMirror {
 	 * @throws java.lang.ClassNotFoundException
 	 */
 	public Method loadMethod() throws ClassNotFoundException {
-		if (getExecutable() != null) {
+		if(getExecutable() != null) {
 			return (Method) getExecutable();
 		}
 		return loadMethod(MethodMirror.class.getClassLoader(), true);
@@ -54,18 +54,18 @@ public class MethodMirror extends AbstractMethodMirror {
 	 * @throws ClassNotFoundException
 	 */
 	public Method loadMethod(ClassLoader loader, boolean initialize) throws ClassNotFoundException {
-		if (getExecutable() != null) {
+		if(getExecutable() != null) {
 			return (Method) getExecutable();
 		}
 
 		Class parent = loadParentClass(loader, initialize);
 		List<Class> cParams = new ArrayList<>();
-		for (ClassReferenceMirror c : getParams()) {
+		for(ClassReferenceMirror c : getParams()) {
 			cParams.add(c.loadClass(loader, initialize));
 		}
 		try {
 			return parent.getMethod(name, cParams.toArray(new Class[cParams.size()]));
-		} catch (NoSuchMethodException | SecurityException ex) {
+		} catch(NoSuchMethodException | SecurityException ex) {
 			//There's really no way for any exception to happen here, so just rethrow
 			throw new RuntimeException(ex);
 		}
@@ -73,7 +73,7 @@ public class MethodMirror extends AbstractMethodMirror {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof MethodMirror)) {
+		if(!(obj instanceof MethodMirror)) {
 			return false;
 		}
 		return super.equals(obj);

@@ -19,20 +19,20 @@ public class ClosureKeyword extends Keyword {
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
 		try {
-			if (list.get(keywordPosition).getData() instanceof CFunction) {
+			if(list.get(keywordPosition).getData() instanceof CFunction) {
 				// It's a function, so do the old processing
 				SimpleBlockKeywordFunction.doProcess(this.getKeywordName(), null, true, list, keywordPosition);
 				// However, if we are proceeded by a ClassType, this is the return type of the closure, and it is
 				// easiest if we do the conversion here.
 				try {
-					if (list.get(keywordPosition - 1).getData() instanceof CClassType) {
+					if(list.get(keywordPosition - 1).getData() instanceof CClassType) {
 						ParseTree type = list.remove(keywordPosition - 1);
 						List<ParseTree> children = list.get(keywordPosition - 1).getChildren();
 						children.add(0, type);
 						list.get(keywordPosition - 1).setChildren(children);
 						return keywordPosition - 1;
 					}
-				} catch (IndexOutOfBoundsException ex) {
+				} catch(IndexOutOfBoundsException ex) {
 					// Ignore, it's not a typed closure
 				}
 				return keywordPosition;
@@ -41,7 +41,7 @@ public class ClosureKeyword extends Keyword {
 				list.set(keywordPosition, new ParseTree(CClosure.TYPE, list.get(keywordPosition).getFileOptions()));
 				return keywordPosition;
 			}
-		} catch (IndexOutOfBoundsException ex) {
+		} catch(IndexOutOfBoundsException ex) {
 			throw new ConfigCompileException("Unexpected \"closure\" reference", list.get(keywordPosition).getTarget());
 		}
 	}

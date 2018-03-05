@@ -35,13 +35,13 @@ public class IncludeCache {
 
 	public static ParseTree get(File file, Target t) {
 		CHLog.GetLogger().Log(TAG, LogLevel.DEBUG, "Loading " + file, t);
-		if (cache.containsKey(file)) {
+		if(cache.containsKey(file)) {
 			CHLog.GetLogger().Log(TAG, LogLevel.INFO, "Returning " + file + " from cache", t);
 			return cache.get(file);
 		}
 		CHLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Cache does not already contain file. Compiling and caching.", t);
 		//We have to pull the file from the FS, and compile it.
-		if (!Security.CheckSecurity(file)) {
+		if(!Security.CheckSecurity(file)) {
 			throw new CRESecurityException("The script cannot access " + file
 					+ " due to restrictions imposed by the base-dir setting.", t);
 		}
@@ -52,17 +52,17 @@ public class IncludeCache {
 			CHLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Compilation succeeded, adding to cache.", t);
 			IncludeCache.add(file, tree);
 			return tree;
-		} catch (ConfigCompileException ex) {
+		} catch(ConfigCompileException ex) {
 			throw new CREIncludeException("There was a compile error when trying to include the script at " + file
 					+ "\n" + ex.getMessage() + " :: " + file.getName() + ":" + ex.getLineNum(), t);
-		} catch (ConfigCompileGroupException ex) {
+		} catch(ConfigCompileGroupException ex) {
 			StringBuilder b = new StringBuilder();
 			b.append("There were compile errors when trying to include the script at ").append(file).append("\n");
-			for (ConfigCompileException e : ex.getList()) {
+			for(ConfigCompileException e : ex.getList()) {
 				b.append(e.getMessage()).append(" :: ").append(e.getFile().getName()).append(":").append(e.getLineNum());
 			}
 			throw new CREIncludeException(b.toString(), t);
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			throw new CREIOException("The script at " + file + " could not be found or read in.", t);
 		}
 	}

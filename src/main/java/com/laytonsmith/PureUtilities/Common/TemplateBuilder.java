@@ -82,8 +82,8 @@ public class TemplateBuilder {
 		StringBuilder templateBuilder = new StringBuilder();
 		int lastMatch = 0;
 		boolean appended = false;
-		while (m.find()) {
-			if (!appended) {
+		while(m.find()) {
+			if(!appended) {
 				templateBuilder.append(template.substring(lastMatch, m.start()));
 				appended = true;
 			}
@@ -97,16 +97,16 @@ public class TemplateBuilder {
 //				}
 //			}
 			String[] tmplArgs = ArrayUtils.EMPTY_STRING_ARRAY;
-			if (m.group(2) != null && !m.group(2).equals("")) {
+			if(m.group(2) != null && !m.group(2).equals("")) {
 				//We have arguments
 				//remove the initial |, then split
 				tmplArgs = m.group(2).substring(1).split("\\|");
 			}
-			if (templates.containsKey(name)) {
+			if(templates.containsKey(name)) {
 				String templateValue = templates.get(name).generate(tmplArgs);
 				templateBuilder.append(templateValue);
 			} else {
-				if (!silentFail) {
+				if(!silentFail) {
 					throw new IllegalArgumentException("Template with name \"" + name + "\" was found in the input"
 							+ " text, but no such template exists.");
 				}
@@ -114,7 +114,7 @@ public class TemplateBuilder {
 			lastMatch = m.end();
 			appended = false;
 		}
-		if (!appended) {
+		if(!appended) {
 			templateBuilder.append(template.substring(lastMatch));
 		}
 		return templateBuilder.toString();

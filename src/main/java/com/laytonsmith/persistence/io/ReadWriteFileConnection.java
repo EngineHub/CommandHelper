@@ -52,27 +52,27 @@ public class ReadWriteFileConnection implements ConnectionMixin {
 			//then the rest of the path is the actual file path. If it is absolute, the File constructor will handle
 			//that for us.
 			String path = uri.getSchemeSpecificPart();
-			if (!path.startsWith("//")) {
+			if(!path.startsWith("//")) {
 				throw new IOException("Could not read the URI: " + uri.toString() + ". Did you forget the \"//\"?");
 			}
 			path = path.substring(2);
 			File temp = new File(path);
-			if (temp.isAbsolute()) {
+			if(temp.isAbsolute()) {
 				file = temp;
 			} else {
 				file = new File(workingDirectory, path);
 			}
 		}
-		if (file.exists()) {
+		if(file.exists()) {
 			encoding = FileUtil.getFileCharset(file);
 		}
 		reader = new ZipReader(file);
-		if (!reader.isZipped()) {
-			if (reader.getTopLevelFile().getParentFile() != null) {
+		if(!reader.isZipped()) {
+			if(reader.getTopLevelFile().getParentFile() != null) {
 				reader.getTopLevelFile().getParentFile().mkdirs();
 			}
 		}
-		if (!reader.exists()) {
+		if(!reader.exists()) {
 			reader.getTopLevelFile().createNewFile();
 		}
 		this.blankDataModel = blankDataModel;
@@ -94,7 +94,7 @@ public class ReadWriteFileConnection implements ConnectionMixin {
 	@Override
 	@SuppressWarnings("ThrowableResultIgnored")
 	public String getData() throws IOException {
-		if (reader.isZipped()) {
+		if(reader.isZipped()) {
 			//We have an entirely different method here: it is assumed that
 			//a zip file is an archive; that is, there will be no write operations.
 			//Making this assumption, it is then OK to simply read from it
@@ -102,7 +102,7 @@ public class ReadWriteFileConnection implements ConnectionMixin {
 			return reader.getFileContents();
 		}
 		final Future<byte[]> future;
-		synchronized (service) {
+		synchronized(service) {
 			future = service.submit(new Callable<byte[]>() {
 
 				@Override
@@ -113,10 +113,10 @@ public class ReadWriteFileConnection implements ConnectionMixin {
 		}
 		try {
 			return new String(future.get(), encoding);
-		} catch (InterruptedException ex) {
+		} catch(InterruptedException ex) {
 			throw new RuntimeException(ex);
-		} catch (ExecutionException ex) {
-			if (ex.getCause() instanceof IOException) {
+		} catch(ExecutionException ex) {
+			if(ex.getCause() instanceof IOException) {
 				throw (IOException) ex.getCause();
 			} else {
 				throw new RuntimeException(ex.getCause());
@@ -126,16 +126,16 @@ public class ReadWriteFileConnection implements ConnectionMixin {
 
 	@Override
 	public void writeData(final DaemonManager dm, final String data) throws ReadOnlyException, IOException, UnsupportedOperationException {
-		if (reader.isZipped()) {
+		if(reader.isZipped()) {
 			throw new ReadOnlyException("Cannot write to a zipped file.");
 		}
-		if (file.getParentFile() != null) {
+		if(file.getParentFile() != null) {
 			file.getParentFile().mkdirs();
 		}
-		if (!file.exists()) {
+		if(!file.exists()) {
 			throw new FileNotFoundException(file.getAbsolutePath() + " does not exist!");
 		}
-		synchronized (service) {
+		synchronized(service) {
 			dm.activateThread(null);
 			service.submit(new Runnable() {
 
@@ -143,7 +143,7 @@ public class ReadWriteFileConnection implements ConnectionMixin {
 				public void run() {
 					try {
 						FileUtil.write(data, file);
-					} catch (IOException ex) {
+					} catch(IOException ex) {
 						Logger.getLogger(ReadWriteFileConnection.class.getName()).log(Level.SEVERE, null, ex);
 					}
 					dm.deactivateThread(null);

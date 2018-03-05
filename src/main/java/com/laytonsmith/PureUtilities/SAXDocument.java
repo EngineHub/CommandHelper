@@ -61,7 +61,7 @@ public class SAXDocument {
 		SAXParser saxParser;
 		try {
 			saxParser = factory.newSAXParser();
-		} catch (ParserConfigurationException | SAXException ex) {
+		} catch(ParserConfigurationException | SAXException ex) {
 			throw new RuntimeException(ex);
 		}
 		saxParser.parse(stream, new DefaultHandler() {
@@ -80,17 +80,17 @@ public class SAXDocument {
 			public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 				nodeNames.push(qName);
 				Map<String, AtomicInteger> c = nodeCount.peek();
-				if (!c.containsKey(qName)) {
+				if(!c.containsKey(qName)) {
 					c.put(qName, new AtomicInteger(1));
 				} else {
 					c.get(qName).incrementAndGet();
 				}
 				Map<String, AtomicInteger> counts = new HashMap<>();
 				nodeCount.push(counts);
-				if (!contents.isEmpty()) {
+				if(!contents.isEmpty()) {
 					StringBuilder b = new StringBuilder();
 					b.append("<").append(qName).append("");
-					for (int i = 0; i < attributes.getLength(); i++) {
+					for(int i = 0; i < attributes.getLength(); i++) {
 						b.append(" ").append(attributes.getQName(i))
 								.append("=\"").append(attributes.getValue(i).replace("\"", "&quot;")).append("\"");
 					}
@@ -98,7 +98,7 @@ public class SAXDocument {
 					appendAll(b.toString());
 				}
 				String path = pathFromMarkers(nodeNames, nodeCount);
-				if (hasListener(path)) {
+				if(hasListener(path)) {
 					contents.put(getListenerPath(path), new StringBuilder());
 					attributeStack.push(attributes);
 				}
@@ -106,7 +106,7 @@ public class SAXDocument {
 
 			@Override
 			public void characters(char[] ch, int start, int length) throws SAXException {
-				if (!contents.isEmpty()) {
+				if(!contents.isEmpty()) {
 					String s = fromChars(ch, start, length);
 					appendAll(s);
 				}
@@ -115,17 +115,17 @@ public class SAXDocument {
 			@Override
 			public void endElement(String uri, String localName, String qName) throws SAXException {
 				String path = pathFromMarkers(nodeNames, nodeCount);
-				if (hasListener(path)) {
+				if(hasListener(path)) {
 					String key = getListenerPath(path);
 					StringBuilder b = contents.remove(key);
 					Attributes attr = attributeStack.pop();
 					Map<String, String> attributes = new LinkedHashMap<>();
-					for (int i = 0; i < attr.getLength(); i++) {
+					for(int i = 0; i < attr.getLength(); i++) {
 						attributes.put(attr.getQName(i), attr.getValue(i));
 					}
 					notifyListeners(path, qName, attributes, b.toString());
 				}
-				if (!contents.isEmpty()) {
+				if(!contents.isEmpty()) {
 					appendAll("</" + qName + ">");
 				}
 
@@ -134,7 +134,7 @@ public class SAXDocument {
 			}
 
 			private void appendAll(String s) {
-				for (StringBuilder b : contents.values()) {
+				for(StringBuilder b : contents.values()) {
 					b.append(s);
 				}
 			}
@@ -146,7 +146,7 @@ public class SAXDocument {
 		List<String> elementList = new ArrayList<>(elementStack);
 		List<Map<String, AtomicInteger>> nodeList = new ArrayList<>(nodeCounts);
 		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < elementList.size(); i++) {
+		for(int i = 0; i < elementList.size(); i++) {
 			b.append("/")
 					.append(elementList.get(i))
 					.append("[")
@@ -158,16 +158,16 @@ public class SAXDocument {
 
 	private String fromChars(char[] ch, int start, int length) {
 		StringBuilder b = new StringBuilder();
-		for (int i = start; i < start + length; i++) {
+		for(int i = start; i < start + length; i++) {
 			b.append(ch[i]);
 		}
 		return b.toString();
 	}
 
 	private void notifyListeners(String xpath, String tag, Map<String, String> attr, String contents) {
-		for (String key : callbacks.keySet()) {
-			if (xpath.matches(key)) {
-				for (ElementCallback c : callbacks.get(key)) {
+		for(String key : callbacks.keySet()) {
+			if(xpath.matches(key)) {
+				for(ElementCallback c : callbacks.get(key)) {
 					c.handleElement(xpath, tag, attr, contents);
 				}
 			}
@@ -175,8 +175,8 @@ public class SAXDocument {
 	}
 
 	private boolean hasListener(String xpath) {
-		for (String key : callbacks.keySet()) {
-			if (xpath.matches(key)) {
+		for(String key : callbacks.keySet()) {
+			if(xpath.matches(key)) {
 				return true;
 			}
 		}
@@ -184,8 +184,8 @@ public class SAXDocument {
 	}
 
 	private String getListenerPath(String xpath) {
-		for (String key : callbacks.keySet()) {
-			if (xpath.matches(key)) {
+		for(String key : callbacks.keySet()) {
+			if(xpath.matches(key)) {
 				return key;
 			}
 		}
@@ -204,24 +204,24 @@ public class SAXDocument {
 	 * @param callback The callback to run when an element is matched
 	 */
 	public void addListener(String xpath, ElementCallback callback) {
-		if (xpath.contains(" ")) {
+		if(xpath.contains(" ")) {
 			throw new IllegalArgumentException("The xpath may not contain spaces");
 		}
-		if (xpath.startsWith("//") || !xpath.startsWith("/")) {
+		if(xpath.startsWith("//") || !xpath.startsWith("/")) {
 			throw new IllegalArgumentException("The xpath must be absolute, meaning it must start with exactly 1 forward slash");
 		}
 		//Standardize our xpath
 		String[] parts = xpath.substring(1).split("/");
 		StringBuilder b = new StringBuilder();
-		for (String part : parts) {
-			if (!part.matches(".*\\[(?:\\d+|\\*)\\]$")) {
+		for(String part : parts) {
+			if(!part.matches(".*\\[(?:\\d+|\\*)\\]$")) {
 				//Add the identifier. Implied *
 				part += "[*]";
 			}
 			b.append("/").append(part);
 		}
 		xpath = "^" + b.toString().replace("[*]", "[\\d+]").replace("[", "\\[").replace("]", "\\]") + "$";
-		if (!callbacks.containsKey(xpath)) {
+		if(!callbacks.containsKey(xpath)) {
 			callbacks.put(xpath, new ArrayList<ElementCallback>());
 		}
 		callbacks.get(xpath).add(callback);

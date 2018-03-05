@@ -37,7 +37,7 @@ public class VirtualFileSystemSettings {
 
 	static {
 		List<String> list = new ArrayList<String>();
-		for (VirtualFileSystemSetting setting : VirtualFileSystemSetting.values()) {
+		for(VirtualFileSystemSetting setting : VirtualFileSystemSetting.values()) {
 			String s = "Setting name: " + setting.getName() + "\n"
 					+ "# Default value: " + setting.getDef().toString() + "\n"
 					+ "# Description: " + setting.getDescription() + "\n";
@@ -90,8 +90,8 @@ public class VirtualFileSystemSettings {
 		}
 
 		static VirtualFileSystemSetting getSettingByName(String name) {
-			for (VirtualFileSystemSetting s : VirtualFileSystemSetting.values()) {
-				if (s.getName().equals(name)) {
+			for(VirtualFileSystemSetting s : VirtualFileSystemSetting.values()) {
+				if(s.getName().equals(name)) {
 					return s;
 				}
 			}
@@ -105,9 +105,9 @@ public class VirtualFileSystemSettings {
 		options.setPrettyFlow(true);
 		Yaml yaml = new Yaml(options);
 		Map<String, Map<String, Object>> serializable = new HashMap<String, Map<String, Object>>();
-		for (VirtualGlob glob : settings.keySet()) {
+		for(VirtualGlob glob : settings.keySet()) {
 			Map<String, Object> inner = new HashMap<String, Object>();
-			for (VirtualFileSystemSetting setting : settings.get(glob).settingGroup.keySet()) {
+			for(VirtualFileSystemSetting setting : settings.get(glob).settingGroup.keySet()) {
 				inner.put(setting.getName(), settings.get(glob).get(setting));
 			}
 			serializable.put(glob.toString(), inner);
@@ -119,12 +119,12 @@ public class VirtualFileSystemSettings {
 		Yaml yaml = new Yaml();
 		Map<String, Map<String, Object>> unserialized = (Map) yaml.load(settings);
 		Map<VirtualGlob, SettingGroup> parsedSettings = new HashMap<VirtualGlob, SettingGroup>();
-		if (unserialized != null) {
-			for (String glob : unserialized.keySet()) {
+		if(unserialized != null) {
+			for(String glob : unserialized.keySet()) {
 				VirtualGlob vglob = new VirtualGlob(glob);
 				Map<String, Object> settingGroup = (Map) unserialized.get(glob);
 				SettingGroup group = new SettingGroup();
-				for (String settingName : settingGroup.keySet()) {
+				for(String settingName : settingGroup.keySet()) {
 					VirtualFileSystemSetting s = VirtualFileSystemSetting.getSettingByName(settingName);
 					Object value = settingGroup.get(settingName);
 					group.set(s, value);
@@ -152,7 +152,7 @@ public class VirtualFileSystemSettings {
 		}
 
 		public Object get(VirtualFileSystemSetting setting) {
-			if (settingGroup.containsKey(setting)) {
+			if(settingGroup.containsKey(setting)) {
 				return settingGroup.get(setting);
 			} else {
 				return setting.getDef();
@@ -162,7 +162,7 @@ public class VirtualFileSystemSettings {
 		@Override
 		public String toString() {
 			StringBuilder b = new StringBuilder();
-			for (VirtualFileSystemSetting s : settingGroup.keySet()) {
+			for(VirtualFileSystemSetting s : settingGroup.keySet()) {
 				b.append(s.getName()).append(": ").append(settingGroup.get(s)).append("; ");
 			}
 			return b.toString().trim();
@@ -194,11 +194,11 @@ public class VirtualFileSystemSettings {
 	public VirtualFileSystemSettings(Map<VirtualGlob, SettingGroup> settings) {
 		this.settings = new HashMap<VirtualGlob, VirtualFileSystemSettings.SettingGroup>(settings);
 		this.settings.put(new VirtualGlob(VirtualFileSystem.META_DIRECTORY), new SettingGroup(META_DIRECTORY_SETTINGS));
-		for (VirtualGlob g : settings.keySet()) {
+		for(VirtualGlob g : settings.keySet()) {
 			SettingGroup s = settings.get(g);
-			if (s.settingGroup.keySet().contains(VirtualFileSystemSetting.QUOTA)) {
-				if ((Integer) s.settingGroup.get(VirtualFileSystemSetting.QUOTA) >= 0) {
-					if (g.matches(new VirtualFile("/"))) {
+			if(s.settingGroup.keySet().contains(VirtualFileSystemSetting.QUOTA)) {
+				if((Integer) s.settingGroup.get(VirtualFileSystemSetting.QUOTA) >= 0) {
+					if(g.matches(new VirtualFile("/"))) {
 						hasQuota = true;
 					} else {
 						Logger.getLogger(VirtualFileSystemSettings.class.getName()).log(Level.WARNING, "The \"quota\" setting can only be applied to the root of the "
@@ -207,9 +207,9 @@ public class VirtualFileSystemSettings {
 				}
 			}
 
-			if (s.settingGroup.keySet().contains(VirtualFileSystemSetting.CORDONED_OFF)) {
-				if ((Boolean) s.settingGroup.get(VirtualFileSystemSetting.CORDONED_OFF) == true) {
-					if (g.matches(new VirtualFile("/"))) {
+			if(s.settingGroup.keySet().contains(VirtualFileSystemSetting.CORDONED_OFF)) {
+				if((Boolean) s.settingGroup.get(VirtualFileSystemSetting.CORDONED_OFF) == true) {
+					if(g.matches(new VirtualFile("/"))) {
 						cordonedOff = true;
 					} else {
 						Logger.getLogger(VirtualFileSystemSettings.class.getName()).log(Level.WARNING, "The \"cordoned-off\" setting can only be applied to the root"
@@ -230,15 +230,15 @@ public class VirtualFileSystemSettings {
 	 */
 	public Object getSetting(VirtualFile file, VirtualFileSystemSetting setting) {
 		SortedSet<VirtualGlob> matchedGlobs = new TreeSet<VirtualGlob>();
-		for (VirtualGlob glob : settings.keySet()) {
-			if (glob.matches(file)) {
+		for(VirtualGlob glob : settings.keySet()) {
+			if(glob.matches(file)) {
 				matchedGlobs.add(glob);
 			}
 		}
-		if (matchedGlobs.isEmpty()) {
+		if(matchedGlobs.isEmpty()) {
 			//trivial state
 			return setting.getDef();
-		} else if (matchedGlobs.size() == 1) {
+		} else if(matchedGlobs.size() == 1) {
 			//trivial state
 			return settings.get(matchedGlobs.first()).get(setting);
 		} else {

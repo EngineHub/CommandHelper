@@ -57,7 +57,7 @@ public class ConfigCompileException extends Exception {
 
 	@Override
 	public String toString() {
-		if (line_num != 0) {
+		if(line_num != 0) {
 			return "Configuration Compile Exception: " + message + " near line " + line_num + ". Please "
 					+ "check your code and try again. " + (file != null ? "(" + file.getAbsolutePath() + ")" : "");
 		} else {
@@ -71,7 +71,7 @@ public class ConfigCompileException extends Exception {
 	}
 
 	public String getSimpleFile() {
-		if (this.file != null) {
+		if(this.file != null) {
 			return this.file.getName();
 		} else {
 			return null;
@@ -91,26 +91,26 @@ public class ConfigCompileException extends Exception {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if(obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if(getClass() != obj.getClass()) {
 			return false;
 		}
 		final ConfigCompileException other = (ConfigCompileException) obj;
-		if (!Objects.equals(this.message, other.message)) {
+		if(!Objects.equals(this.message, other.message)) {
 			return false;
 		}
-		if (this.line_num != other.line_num) {
+		if(this.line_num != other.line_num) {
 			return false;
 		}
-		if (!Objects.equals(this.file, other.file)) {
+		if(!Objects.equals(this.file, other.file)) {
 			return false;
 		}
-		if (this.col != other.col) {
+		if(this.col != other.col) {
 			return false;
 		}
-		if (!Objects.equals(this.t, other.t)) {
+		if(!Objects.equals(this.t, other.t)) {
 			return false;
 		}
 		return true;

@@ -34,7 +34,7 @@ public class Target {
 	 * @param col
 	 */
 	public Target(int line, File file, int col) {
-		if (line == 0 && col == 0 && file == null) {
+		if(line == 0 && col == 0 && file == null) {
 			throw new RuntimeException("For efficiency sake, use Target.UNKNOWN instead of constructing"
 					+ " a new Target.");
 		}

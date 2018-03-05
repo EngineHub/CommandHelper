@@ -76,7 +76,7 @@ public class WorldEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (e instanceof MCWorldLoadEvent) {
+			if(e instanceof MCWorldLoadEvent) {
 				Prefilters.match(prefilter, "world", ((MCWorldEvent) e).getWorld().getName(), Prefilters.PrefilterType.MACRO);
 				return true;
 			} else {
@@ -124,7 +124,7 @@ public class WorldEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (e instanceof MCWorldUnloadEvent) {
+			if(e instanceof MCWorldUnloadEvent) {
 				Prefilters.match(prefilter, "world", ((MCWorldEvent) e).getWorld().getName(), Prefilters.PrefilterType.MACRO);
 				return true;
 			} else {
@@ -172,7 +172,7 @@ public class WorldEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (e instanceof MCWorldSaveEvent) {
+			if(e instanceof MCWorldSaveEvent) {
 				Prefilters.match(prefilter, "world", ((MCWorldEvent) e).getWorld().getName(), Prefilters.PrefilterType.MACRO);
 				return true;
 			} else {
@@ -221,16 +221,16 @@ public class WorldEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (e instanceof MCStructureGrowEvent) {
+			if(e instanceof MCStructureGrowEvent) {
 				MCStructureGrowEvent event = (MCStructureGrowEvent) e;
 				Prefilters.match(prefilter, "world", event.getWorld().getName(), Prefilters.PrefilterType.MACRO);
-				if (prefilter.containsKey("player")) {
+				if(prefilter.containsKey("player")) {
 					MCPlayer player = event.getPlayer();
-					if (player == null) {
-						if (!(prefilter.get("player") instanceof CNull)) {
+					if(player == null) {
+						if(!(prefilter.get("player") instanceof CNull)) {
 							return false;
 						}
-					} else if (!player.getName().equals(prefilter.get("player").val())) {
+					} else if(!player.getName().equals(prefilter.get("player").val())) {
 						return false;
 					}
 				}
@@ -248,7 +248,7 @@ public class WorldEvents {
 			MCStructureGrowEvent event = (MCStructureGrowEvent) e;
 			List<MCBlockState> blocks = event.getBlocks();
 			CArray a = new CArray(Target.UNKNOWN, blocks.size());
-			for (MCBlockState block : blocks) {
+			for(MCBlockState block : blocks) {
 				a.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), Target.UNKNOWN);
 			}
 			r.put("blocks", a);

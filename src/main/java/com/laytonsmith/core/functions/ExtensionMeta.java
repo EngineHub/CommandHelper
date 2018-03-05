@@ -60,7 +60,7 @@ public class ExtensionMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				FunctionList.getFunction(args[0].val().toLowerCase(), t);
-			} catch (ConfigCompileException ex) {
+			} catch(ConfigCompileException ex) {
 				return CBoolean.FALSE;
 			}
 
@@ -105,11 +105,11 @@ public class ExtensionMeta {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() != 1) {
+			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " can only accept one argument", t);
 			}
 
-			if (!(children.get(0).getData() instanceof CString)) {
+			if(!(children.get(0).getData() instanceof CString)) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			}
 
@@ -182,11 +182,11 @@ public class ExtensionMeta {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() != 1) {
+			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " can only accept one argument", t);
 			}
 
-			if (!(children.get(0).getData() instanceof CString)) {
+			if(!(children.get(0).getData() instanceof CString)) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			}
 
@@ -216,9 +216,9 @@ public class ExtensionMeta {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
-			for (ExtensionTracker tracker : trackers.values()) {
+			for(ExtensionTracker tracker : trackers.values()) {
 				String identifier = tracker.getIdentifier();
-				if ((identifier != null) && identifier.equalsIgnoreCase(args[0].val())) {
+				if((identifier != null) && identifier.equalsIgnoreCase(args[0].val())) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -254,9 +254,9 @@ public class ExtensionMeta {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() != 1) {
+			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " can only accept one argument", t);
-			} else if (!(children.get(0).getData() instanceof CString)) {
+			} else if(!(children.get(0).getData() instanceof CString)) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			} else {
 				return new ParseTree(this.exec(t, null, children.get(0).getData()), children.get(0).getFileOptions());
@@ -288,12 +288,12 @@ public class ExtensionMeta {
 
 			CArray retn = CArray.GetAssociativeArray(t);
 
-			if (args.length == 0) {
-				for (URL url : trackers.keySet()) {
+			if(args.length == 0) {
+				for(URL url : trackers.keySet()) {
 					ExtensionTracker trk = trackers.get(url);
 					CArray trkdata;
 
-					if (!retn.containsKey(trk.getIdentifier())) {
+					if(!retn.containsKey(trk.getIdentifier())) {
 						trkdata = CArray.GetAssociativeArray(t);
 					} else {
 						trkdata = (CArray) retn.get(trk.getIdentifier(), t);
@@ -304,13 +304,13 @@ public class ExtensionMeta {
 					// but lets handle it nicely. This will ALWAYS happen for old
 					// style extensions, as they don't have an identifier.
 					CArray funcs;
-					if (!trkdata.containsKey("functions")) {
+					if(!trkdata.containsKey("functions")) {
 						funcs = new CArray(t);
 					} else {
 						funcs = (CArray) trkdata.get("functions", t);
 					}
-					for (FunctionBase func : trk.getFunctions()) {
-						if (!funcs.contains(func.getName())) {
+					for(FunctionBase func : trk.getFunctions()) {
+						if(!funcs.contains(func.getName())) {
 							funcs.push(new CString(func.getName(), t), t);
 						}
 					}
@@ -318,12 +318,12 @@ public class ExtensionMeta {
 					trkdata.set("functions", funcs, t);
 
 					CArray events;
-					if (!trkdata.containsKey("events")) {
+					if(!trkdata.containsKey("events")) {
 						events = new CArray(t);
 					} else {
 						events = (CArray) trkdata.get("events", t);
 					}
-					for (Event event : trk.getEvents()) {
+					for(Event event : trk.getEvents()) {
 						events.push(new CString(event.getName(), t), t);
 					}
 					events.sort(CArray.SortType.STRING_IC);
@@ -331,30 +331,30 @@ public class ExtensionMeta {
 
 					trkdata.set("version", trk.getVersion().toString());
 
-					if (trk.getIdentifier() != null) {
+					if(trk.getIdentifier() != null) {
 						retn.set(trk.getIdentifier(), trkdata, t);
 					} else {
 						retn.set("__unidentified__", trkdata, t);
 					}
 				}
 			} else {
-				for (ExtensionTracker tracker : trackers.values()) {
+				for(ExtensionTracker tracker : trackers.values()) {
 					String identifier = tracker.getIdentifier();
-					if (identifier == null) {
+					if(identifier == null) {
 						identifier = "__unidentified__";
 					}
-					if (identifier.equals(args[0].val())) {
+					if(identifier.equals(args[0].val())) {
 						CArray functions = (retn.containsKey("functions")) ? (CArray) retn.get("functions", t) : new CArray(t);
-						for (FunctionBase function : tracker.getFunctions()) {
-							if (!functions.contains(function.getName())) {
+						for(FunctionBase function : tracker.getFunctions()) {
+							if(!functions.contains(function.getName())) {
 								functions.push(new CString(function.getName(), t), t);
 							}
 						}
 						functions.sort(CArray.SortType.STRING_IC);
 						retn.set("functions", functions, t);
 						CArray events = (retn.containsKey("events")) ? (CArray) retn.get("events", t) : new CArray(t);
-						for (Event event : tracker.getEvents()) {
-							if (!events.contains(event.getName())) {
+						for(Event event : tracker.getEvents()) {
+							if(!events.contains(event.getName())) {
 								events.push(new CString(event.getName(), t), t);
 							}
 						}

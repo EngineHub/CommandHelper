@@ -46,7 +46,7 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
 
 	@Override
 	public MCPlayer getPlayer() {
-		if (op instanceof Player) {
+		if(op instanceof Player) {
 			return new BukkitMCPlayer(((Player) op));
 		}
 		return null;
@@ -70,7 +70,7 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
 	@Override
 	public MCLocation getBedSpawnLocation() {
 		Location loc = op.getBedSpawnLocation();
-		if (loc == null) {
+		if(loc == null) {
 			return null;
 		}
 		return new BukkitMCLocation(loc);

@@ -77,19 +77,19 @@ public class ItemMeta {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCItemStack is;
 			Construct slot;
-			if (args.length == 2) {
+			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				slot = args[1];
 			} else {
 				slot = args[0];
 			}
 			Static.AssertPlayerNonNull(p, t);
-			if (slot instanceof CNull) {
+			if(slot instanceof CNull) {
 				is = p.getItemInHand();
 			} else {
 				is = p.getItemAt(Static.getInt32(slot, t));
 			}
-			if (is == null) {
+			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}
 			return ObjectGenerator.GetGenerator().itemMeta(is, t);
@@ -173,7 +173,7 @@ public class ItemMeta {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Construct slot, meta;
 			MCItemStack is;
-			if (args.length == 3) {
+			if(args.length == 3) {
 				p = Static.GetPlayer(args[0], t);
 				slot = args[1];
 				meta = args[2];
@@ -182,12 +182,12 @@ public class ItemMeta {
 				meta = args[1];
 			}
 			Static.AssertPlayerNonNull(p, t);
-			if (slot instanceof CNull) {
+			if(slot instanceof CNull) {
 				is = p.getItemInHand();
 			} else {
 				is = p.getItemAt(Static.getInt32(slot, t));
 			}
-			if (is == null) {
+			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}
 			is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(meta, is.getType(), t));
@@ -278,7 +278,7 @@ public class ItemMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
-			if (args.length == 2) {
+			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				slot = Static.getInt32(args[1], t);
 			} else {
@@ -286,11 +286,11 @@ public class ItemMeta {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCItemStack is = p.getItemAt(slot);
-			if (is == null) {
+			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}
 			MCItemMeta im = is.getItemMeta();
-			if (im instanceof MCLeatherArmorMeta) {
+			if(im instanceof MCLeatherArmorMeta) {
 				return ObjectGenerator.GetGenerator().color(((MCLeatherArmorMeta) im).getColor(), t);
 			} else {
 				throw new CRECastException("The item at slot " + slot + " is not leather armor.", t);
@@ -344,17 +344,17 @@ public class ItemMeta {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
 			CArray color;
-			if (args.length == 3) {
+			if(args.length == 3) {
 				p = Static.GetPlayer(args[0], t);
 				slot = Static.getInt32(args[1], t);
-				if (args[2] instanceof CArray) {
+				if(args[2] instanceof CArray) {
 					color = (CArray) args[2];
 				} else {
 					throw new CREFormatException("Expected an array but recieved " + args[2] + " instead.", t);
 				}
 			} else {
 				slot = Static.getInt32(args[0], t);
-				if (args[1] instanceof CArray) {
+				if(args[1] instanceof CArray) {
 					color = (CArray) args[1];
 				} else {
 					throw new CREFormatException("Expected an array but recieved " + args[1] + " instead.", t);
@@ -362,11 +362,11 @@ public class ItemMeta {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCItemStack is = p.getItemAt(slot);
-			if (is == null) {
+			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}
 			MCItemMeta im = is.getItemMeta();
-			if (im instanceof MCLeatherArmorMeta) {
+			if(im instanceof MCLeatherArmorMeta) {
 				((MCLeatherArmorMeta) im).setColor(ObjectGenerator.GetGenerator().color(color, t));
 				is.setItemMeta(im);
 			} else {
@@ -422,7 +422,7 @@ public class ItemMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
-			if (args.length == 2) {
+			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				slot = Static.getInt32(args[1], t);
 			} else {

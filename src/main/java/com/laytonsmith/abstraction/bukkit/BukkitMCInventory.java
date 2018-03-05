@@ -44,8 +44,8 @@ public class BukkitMCInventory implements MCInventory {
 	public MCItemStack getItem(int slot) {
 		try {
 			return new BukkitMCItemStack(i.getItem(slot));
-		} catch (ArrayIndexOutOfBoundsException aioobe) {
-			if (slot > 0 && slot < getSize()) {
+		} catch(ArrayIndexOutOfBoundsException aioobe) {
+			if(slot > 0 && slot < getSize()) {
 				CHLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
 						+ " accessible, however the server implementation does not give access."
 						+ " This is the fault of the server and can't be helped by "
@@ -61,8 +61,8 @@ public class BukkitMCInventory implements MCInventory {
 	public void setItem(int slot, MCItemStack stack) {
 		try {
 			this.i.setItem(slot, stack == null ? null : ((BukkitMCItemStack) stack).is);
-		} catch (ArrayIndexOutOfBoundsException aioobe) {
-			if (slot > 0 && slot < getSize()) {
+		} catch(ArrayIndexOutOfBoundsException aioobe) {
+			if(slot > 0 && slot < getSize()) {
 				CHLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
 						+ " accessible, however the server implementation does not give access."
 						+ " This is the fault of the server and can't be helped by "
@@ -107,7 +107,7 @@ public class BukkitMCInventory implements MCInventory {
 	public Map<Integer, MCItemStack> addItem(MCItemStack stack) {
 		Map<Integer, ItemStack> h = i.addItem(stack == null ? null : ((BukkitMCItemStack) stack).is);
 		Map<Integer, MCItemStack> m = new HashMap<>();
-		for (Map.Entry<Integer, ItemStack> entry : h.entrySet()) {
+		for(Map.Entry<Integer, ItemStack> entry : h.entrySet()) {
 			Integer key = entry.getKey();
 			ItemStack value = entry.getValue();
 			m.put(key, new BukkitMCItemStack(value));
@@ -118,7 +118,7 @@ public class BukkitMCInventory implements MCInventory {
 	@Override
 	public List<MCHumanEntity> getViewers() {
 		List<MCHumanEntity> retn = new ArrayList<>();
-		for (HumanEntity human : i.getViewers()) {
+		for(HumanEntity human : i.getViewers()) {
 			retn.add(new BukkitMCHumanEntity((human)));
 		}
 		return retn;
@@ -126,8 +126,8 @@ public class BukkitMCInventory implements MCInventory {
 
 	@Override
 	public void updateViewers() {
-		for (HumanEntity human : i.getViewers()) {
-			if (human instanceof Player) {
+		for(HumanEntity human : i.getViewers()) {
+			if(human instanceof Player) {
 				((Player) human).updateInventory();
 			}
 		}

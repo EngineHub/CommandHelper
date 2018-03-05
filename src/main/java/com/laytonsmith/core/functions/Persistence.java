@@ -94,28 +94,28 @@ public class Persistence {
 			String value = null;
 			try {
 				value = Construct.json_encode(args[args.length - 1], t);
-			} catch (MarshalException e) {
+			} catch(MarshalException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}
 			char pc = '.';
-			for (int i = 0; i < key.length(); i++) {
+			for(int i = 0; i < key.length(); i++) {
 				Character c = key.charAt(i);
-				if (i != 0) {
+				if(i != 0) {
 					pc = key.charAt(i - 1);
 				}
-				if ((i == 0 || i == key.length() - 1 || pc == '.') && c == '.') {
+				if((i == 0 || i == key.length() - 1 || pc == '.') && c == '.') {
 					throw new CREFormatException("Periods may only be used as seperators between namespaces.", t);
 				}
-				if (c != '_' && c != '.' && !Character.isLetterOrDigit(c)) {
+				if(c != '_' && c != '.' && !Character.isLetterOrDigit(c)) {
 					throw new CREFormatException("Param 1 in store_value must only contain letters, digits, underscores, or dots, (which denote namespaces).", t);
 				}
 			}
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Storing: " + key + " -> " + value, t);
 			try {
 				env.getEnv(GlobalEnv.class).GetPersistenceNetwork().set(env.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + key).split("\\."), value);
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t);
-			} catch (Exception ex) {
+			} catch(Exception ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
 			}
 			return CVoid.VOID;
@@ -179,21 +179,21 @@ public class Persistence {
 				Object obj;
 				try {
 					obj = env.getEnv(GlobalEnv.class).GetPersistenceNetwork().get(("storage." + namespace).split("\\."));
-				} catch (DataSourceException ex) {
+				} catch(DataSourceException ex) {
 					throw new CREIOException(ex.getMessage(), t, ex);
-				} catch (IllegalArgumentException e) {
+				} catch(IllegalArgumentException e) {
 					throw new CREFormatException(e.getMessage(), t, e);
 				}
-				if (obj == null) {
+				if(obj == null) {
 					return CNull.NULL;
 				}
 				o = Construct.json_decode(obj.toString(), t);
-			} catch (MarshalException ex) {
+			} catch(MarshalException ex) {
 				throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
 			}
 			try {
 				return (Construct) o;
-			} catch (ClassCastException e) {
+			} catch(ClassCastException e) {
 				return CNull.NULL;
 			}
 		}
@@ -268,19 +268,19 @@ public class Persistence {
 			Map<String[], String> list;
 			try {
 				list = p.getNamespace(keyChain.toArray(new String[keyChain.size()]));
-			} catch (DataSourceException ex) {
+			} catch(DataSourceException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t, e);
 			}
 			CArray ca = CArray.GetAssociativeArray(t);
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, list.size() + " value(s) are being returned", t);
-			for (String[] e : list.keySet()) {
+			for(String[] e : list.keySet()) {
 				try {
 					String key = StringUtils.Join(e, ".").replaceFirst("storage\\.", ""); //Get that junk out of here
 					ca.set(new CString(key, t),
 							Construct.json_decode(list.get(e), t), t);
-				} catch (MarshalException ex) {
+				} catch(MarshalException ex) {
 					Logger.getLogger(Persistence.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
@@ -342,9 +342,9 @@ public class Persistence {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			try {
 				return CBoolean.get(env.getEnv(GlobalEnv.class).GetPersistenceNetwork().hasKey(("storage." + GetNamespace(args, null, getName(), t)).split("\\.")));
-			} catch (DataSourceException ex) {
+			} catch(DataSourceException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t, e);
 			}
 		}
@@ -401,13 +401,13 @@ public class Persistence {
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Clearing value: " + namespace, t);
 			try {
 				environment.getEnv(GlobalEnv.class).GetPersistenceNetwork().clearKey(environment.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + namespace).split("\\."));
-			} catch (DataSourceException ex) {
+			} catch(DataSourceException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
-			} catch (ReadOnlyException ex) {
+			} catch(ReadOnlyException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t, e);
 			}
 			return CVoid.VOID;
@@ -428,16 +428,16 @@ public class Persistence {
 	 * @return
 	 */
 	private static String GetNamespace(Construct[] args, Integer exclude, String name, Target t) {
-		if (exclude != null && args.length < 2 || exclude == null && args.length < 1) {
+		if(exclude != null && args.length < 2 || exclude == null && args.length < 1) {
 			throw new CREInsufficientArgumentsException(name + " was not provided with enough arguments. Check the documentation, and try again.", t);
 		}
 		boolean first = true;
 		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < args.length; i++) {
-			if (exclude != null && exclude == i) {
+		for(int i = 0; i < args.length; i++) {
+			if(exclude != null && exclude == i) {
 				continue;
 			}
-			if (!first) {
+			if(!first) {
 				b.append(".");
 			}
 			first = false;

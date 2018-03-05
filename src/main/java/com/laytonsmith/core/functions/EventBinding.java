@@ -105,7 +105,7 @@ public class EventBinding {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			if (nodes.length < 5) {
+			if(nodes.length < 5) {
 				throw new CREInsufficientArgumentsException("bind accepts 5 or more parameters", t);
 			}
 			Construct name = parent.seval(nodes[0], env);
@@ -113,9 +113,9 @@ public class EventBinding {
 			Construct prefilter = parent.seval(nodes[2], env);
 			Construct event_obj = parent.eval(nodes[3], env);
 			IVariableList custom_params = new IVariableList();
-			for (int a = 0; a < nodes.length - 5; a++) {
+			for(int a = 0; a < nodes.length - 5; a++) {
 				Construct var = parent.eval(nodes[4 + a], env);
-				if (!(var instanceof IVariable)) {
+				if(!(var instanceof IVariable)) {
 					throw new CRECastException("The custom parameters must be ivariables", t);
 				}
 				IVariable cur = (IVariable) var;
@@ -124,26 +124,26 @@ public class EventBinding {
 			Environment newEnv = env;
 			try {
 				newEnv = env.clone();
-			} catch (Exception e) {
+			} catch(Exception e) {
 			}
 			newEnv.getEnv(GlobalEnv.class).SetVarList(custom_params);
 			ParseTree tree = nodes[nodes.length - 1];
 
 			//Check to see if our arguments are correct
-			if (!(options instanceof CNull || options instanceof CArray)) {
+			if(!(options instanceof CNull || options instanceof CArray)) {
 				throw new CRECastException("The options must be an array or null", t);
 			}
-			if (!(prefilter instanceof CNull || prefilter instanceof CArray)) {
+			if(!(prefilter instanceof CNull || prefilter instanceof CArray)) {
 				throw new CRECastException("The prefilters must be an array or null", t);
 			}
-			if (!(event_obj instanceof IVariable)) {
+			if(!(event_obj instanceof IVariable)) {
 				throw new CRECastException("The event object must be an IVariable", t);
 			}
 			CString id;
-			if (options instanceof CNull) {
+			if(options instanceof CNull) {
 				options = null;
 			}
-			if (prefilter instanceof CNull) {
+			if(prefilter instanceof CNull) {
 				prefilter = null;
 			}
 			Event event;
@@ -153,20 +153,20 @@ public class EventBinding {
 				EventUtils.RegisterEvent(be);
 				id = new CString(be.getId(), t);
 				event = EventList.getEvent(be.getEventName());
-			} catch (EventException ex) {
+			} catch(EventException ex) {
 				throw new CREBindException(ex.getMessage(), t);
 			}
 
 			//Set up our bind counter, but only if the event is supposed to be added to the counter
-			if (event.addCounter()) {
-				synchronized (bindCounter) {
-					if (bindCounter.get() == 0) {
+			if(event.addCounter()) {
+				synchronized(bindCounter) {
+					if(bindCounter.get() == 0) {
 						env.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
 						StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
 							@Override
 							public void run() {
-								synchronized (bindCounter) {
+								synchronized(bindCounter) {
 									bindCounter.set(0);
 								}
 							}
@@ -190,10 +190,10 @@ public class EventBinding {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() < 5) {
+			if(children.size() < 5) {
 				throw new CREInsufficientArgumentsException("bind accepts 5 or more parameters", t);
 			}
-			if (!children.get(0).isConst()) {
+			if(!children.get(0).isConst()) {
 				// Const event name allows for better compilation checks of event type, once objects are added.
 				// This will throw an exception when linking, so let's give a more specific message here
 				throw new ConfigCompileException("Event names must be constant in bind().", t);
@@ -206,7 +206,7 @@ public class EventBinding {
 			String name = children.get(0).getData().val();
 			try {
 				EventUtils.verifyEventName(name);
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				throw new ConfigCompileException(ex.getMessage(), t);
 			}
 		}
@@ -300,27 +300,27 @@ public class EventBinding {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String id = null;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				//We are cancelling an arbitrary event
 				id = args[0].val();
 			} else {
 				//We are cancelling this event. If we are not in an event, throw an exception
-				if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
+				if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 					throw new CREBindException("No event ID specified, and not running inside an event", t);
 				}
 				id = environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent().getId();
 			}
 			BoundEvent be = EventUtils.GetEventById(id);
 			Event event = null;
-			if (be != null) {
+			if(be != null) {
 				event = be.getEventDriver();
 			}
 			EventUtils.UnregisterEvent(id);
 			//Only remove the counter if it had been added in the first place.
-			if (event != null && event.addCounter()) {
-				synchronized (bindCounter) {
+			if(event != null && event.addCounter()) {
+				synchronized(bindCounter) {
 					bindCounter.decrementAndGet();
-					if (bindCounter.get() == 0) {
+					if(bindCounter.get() == 0) {
 						environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
 					}
 				}
@@ -373,15 +373,15 @@ public class EventBinding {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean cancelled = true;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				cancelled = Static.getBoolean(args[0]);
 			}
 
 			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
-			if (original == null) {
+			if(original == null) {
 				throw new CREBindException("cancel cannot be called outside an event handler", t);
 			}
-			if (original.getUnderlyingEvent() != null && original.isCancellable()) {
+			if(original.getUnderlyingEvent() != null && original.isCancellable()) {
 				original.setCancelled(cancelled);
 			}
 			return CVoid.VOID;
@@ -430,11 +430,11 @@ public class EventBinding {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
-			if (original == null) {
+			if(original == null) {
 				throw new CREBindException("is_cancelled cannot be called outside an event handler", t);
 			}
 			boolean result = false;
-			if (original.getUnderlyingEvent() != null && original.isCancellable()) {
+			if(original.getUnderlyingEvent() != null && original.isCancellable()) {
 				result = original.isCancelled();
 			}
 			return CBoolean.get(result);
@@ -487,15 +487,15 @@ public class EventBinding {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray obj = null;
-			if (args[1] instanceof CNull) {
+			if(args[1] instanceof CNull) {
 				obj = new CArray(t);
-			} else if (args[1] instanceof CArray) {
+			} else if(args[1] instanceof CArray) {
 				obj = (CArray) args[1];
 			} else {
 				throw new CRECastException("The eventObject must be null, or an array", t);
 			}
 			boolean serverWide = false;
-			if (args.length == 3) {
+			if(args.length == 3) {
 				serverWide = Static.getBoolean(args[2]);
 			}
 			EventUtils.ManualTrigger(args[0].val(), obj, t, serverWide);
@@ -556,29 +556,29 @@ public class EventBinding {
 			String parameter = args[0].val();
 			Construct value = args[1];
 			boolean throwOnFailure = false;
-			if (args.length == 3) {
+			if(args.length == 3) {
 				throwOnFailure = Static.getBoolean(args[3]);
 			}
-			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
+			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException(this.getName() + " must be called from within an event handler", t);
 			}
 			Event e = environment.getEnv(GlobalEnv.class).GetEvent().getEventDriver();
-			if (environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent().getPriority().equals(Priority.MONITOR)) {
+			if(environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent().getPriority().equals(Priority.MONITOR)) {
 				throw new CREBindException("Monitor level handlers may not modify an event!", t);
 			}
 			ActiveEvent active = environment.getEnv(GlobalEnv.class).GetEvent();
 			boolean success = false;
-			if (!active.isLocked(parameter)) {
+			if(!active.isLocked(parameter)) {
 				try {
 					success = e.modifyEvent(parameter, value, environment.getEnv(GlobalEnv.class).GetEvent().getUnderlyingEvent());
-				} catch (ConfigRuntimeException ex) {
+				} catch(ConfigRuntimeException ex) {
 					ex.setTarget(t);
 					throw ex;
 				}
 			} else {
 				success = false;
 			}
-			if (throwOnFailure && !success) {
+			if(throwOnFailure && !success) {
 				throw new CREBindException("Event parameter is already locked!", t);
 			}
 			return CBoolean.get(success);
@@ -621,28 +621,28 @@ public class EventBinding {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
+			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("lock must be called from within an event handler", t);
 			}
 
 			BoundEvent.ActiveEvent e = environment.getEnv(GlobalEnv.class).GetEvent();
 			Priority p = e.getBoundEvent().getPriority();
 			List<String> params = new ArrayList<String>();
-			if (args.length == 0) {
+			if(args.length == 0) {
 				e.lock(null);
 			} else {
-				if (args[0] instanceof CArray) {
+				if(args[0] instanceof CArray) {
 					CArray ca = (CArray) args[1];
-					for (int i = 0; i < ca.size(); i++) {
+					for(int i = 0; i < ca.size(); i++) {
 						params.add(ca.get(i, t).val());
 					}
 				} else {
-					for (int i = 0; i < args.length; i++) {
+					for(int i = 0; i < args.length; i++) {
 						params.add(args[i].val());
 					}
 				}
 			}
-			for (String param : params) {
+			for(String param : params) {
 				e.lock(param);
 			}
 			return CVoid.VOID;
@@ -692,7 +692,7 @@ public class EventBinding {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
+			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("is_locked may only be called from inside an event handler", t);
 			}
 			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetEvent().isLocked(args[0].val()));
@@ -741,7 +741,7 @@ public class EventBinding {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
+			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("consume may only be called from an event handler!", t);
 			}
 			environment.getEnv(GlobalEnv.class).GetEvent().consume();
@@ -792,7 +792,7 @@ public class EventBinding {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
+			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("is_consumed must be called from within an event handler", t);
 			}
 			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetEvent().isConsumed());
@@ -846,11 +846,11 @@ public class EventBinding {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (environment.getEnv(GlobalEnv.class).GetEvent() == null) {
+			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("event_meta must be called from within an event handler!", t);
 			}
 			CArray history = new CArray(t);
-			for (String entry : environment.getEnv(GlobalEnv.class).GetEvent().getHistory()) {
+			for(String entry : environment.getEnv(GlobalEnv.class).GetEvent().getHistory()) {
 				history.push(new CString(entry, t), t);
 			}
 			return history;

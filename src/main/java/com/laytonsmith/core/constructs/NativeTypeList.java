@@ -23,11 +23,11 @@ public class NativeTypeList {
 	 * @return
 	 */
 	public static Set<String> getNativeTypeList() {
-		if (nativeTypes != null) {
+		if(nativeTypes != null) {
 			return nativeTypes;
 		}
 		nativeTypes = new HashSet<>();
-		for (ClassMirror<? extends Mixed> c : ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(typeof.class, Mixed.class)) {
+		for(ClassMirror<? extends Mixed> c : ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(typeof.class, Mixed.class)) {
 			nativeTypes.add(c.loadAnnotation(typeof.class).value());
 		}
 		// Also add this one in
@@ -44,8 +44,8 @@ public class NativeTypeList {
 	 * @throws ClassNotFoundException If the class can't be found
 	 */
 	public static Class<? extends Mixed> getNativeClass(String methodscriptType) throws ClassNotFoundException {
-		for (ClassMirror<? extends Mixed> c : ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(typeof.class, Mixed.class)) {
-			if (c.getAnnotation(typeof.class).getProxy(typeof.class).value().equals(methodscriptType)) {
+		for(ClassMirror<? extends Mixed> c : ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(typeof.class, Mixed.class)) {
+			if(c.getAnnotation(typeof.class).getProxy(typeof.class).value().equals(methodscriptType)) {
 				return c.loadClass();
 			}
 		}
@@ -66,7 +66,7 @@ public class NativeTypeList {
 	public static Class<? extends Mixed> getNativeClassOrInterfaceRunner(String methodscriptType) throws ClassNotFoundException {
 		try {
 			return getInterfaceRunnerFor(methodscriptType);
-		} catch (ClassNotFoundException | IllegalArgumentException ex) {
+		} catch(ClassNotFoundException | IllegalArgumentException ex) {
 			return getNativeClass(methodscriptType);
 		}
 	}
@@ -82,16 +82,16 @@ public class NativeTypeList {
 	public static Class<? extends MixedInterfaceRunner> getInterfaceRunnerFor(String methodscriptType) throws
 			ClassNotFoundException, IllegalArgumentException {
 		Class<? extends Mixed> c = getNativeClass(methodscriptType);
-		if (!c.isInterface() && (c.getModifiers() & Modifier.ABSTRACT) == 0) {
+		if(!c.isInterface() && (c.getModifiers() & Modifier.ABSTRACT) == 0) {
 			throw new IllegalArgumentException(methodscriptType + " does not represent a java interface or abstract class");
 		}
 		Set<Class<? extends MixedInterfaceRunner>> set = ClassDiscovery.getDefaultInstance()
 				.loadClassesWithAnnotationThatExtend(InterfaceRunnerFor.class, MixedInterfaceRunner.class);
-		for (Class<? extends MixedInterfaceRunner> cl : set) {
-			if (cl == MixedInterfaceRunner.class) {
+		for(Class<? extends MixedInterfaceRunner> cl : set) {
+			if(cl == MixedInterfaceRunner.class) {
 				continue;
 			}
-			if (cl.getAnnotation(InterfaceRunnerFor.class).value() == c) {
+			if(cl.getAnnotation(InterfaceRunnerFor.class).value() == c) {
 				return cl;
 			}
 		}

@@ -68,11 +68,11 @@ public class Minecraft {
 		try {
 			p1.load(Minecraft.class.getResourceAsStream("/data_values.txt"));
 			Enumeration e = p1.propertyNames();
-			while (e.hasMoreElements()) {
+			while(e.hasMoreElements()) {
 				String name = e.nextElement().toString();
 				DataValueLookup.put(name, new CString(p1.getProperty(name).toString(), Target.UNKNOWN));
 			}
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
@@ -80,11 +80,11 @@ public class Minecraft {
 		try {
 			p2.load(Minecraft.class.getResourceAsStream("/data_names.txt"));
 			Enumeration e = p2.propertyNames();
-			while (e.hasMoreElements()) {
+			while(e.hasMoreElements()) {
 				String name = e.nextElement().toString();
 				DataNameLookup.put(name, new CString(p2.getProperty(name).toString(), Target.UNKNOWN));
 			}
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -104,28 +104,28 @@ public class Minecraft {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args[0] instanceof CInt) {
+			if(args[0] instanceof CInt) {
 				return new CInt(Static.getInt(args[0], t), t);
 			}
 			String c = args[0].val();
 			int number = StaticLayer.LookupItemId(c);
-			if (number != -1) {
+			if(number != -1) {
 				return new CInt(number, t);
 			}
 			String changed = c;
-			if (changed.contains(":")) {
+			if(changed.contains(":")) {
 				//Split on that, and reverse. Change wool:red to redwool
 				String split[] = changed.split(":");
-				if (split.length == 2) {
+				if(split.length == 2) {
 					changed = split[1] + split[0];
 				}
 			}
 			//Remove anything that isn't a letter or a number
 			changed = changed.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
 			//Do a lookup in the DataLookup table
-			if (DataValueLookup.containsKey(changed)) {
+			if(DataValueLookup.containsKey(changed)) {
 				String split[] = DataValueLookup.get(changed).toString().split(":");
-				if (split[1].equals("0")) {
+				if(split[1].equals("0")) {
 					return new CInt(split[0], t);
 				}
 				return new CString(split[0] + ":" + split[1], t);
@@ -205,37 +205,37 @@ public class Minecraft {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int i = -1;
 			int i2 = -1;
-			if (args[0] instanceof CString) {
+			if(args[0] instanceof CString) {
 				//We also accept item notation
-				if (args[0].val().contains(":")) {
+				if(args[0].val().contains(":")) {
 					String[] split = args[0].val().split(":");
 					try {
 						i = Integer.parseInt(split[0]);
 						i2 = Integer.parseInt(split[1]);
-					} catch (NumberFormatException e) {
-					} catch (ArrayIndexOutOfBoundsException e) {
+					} catch(NumberFormatException e) {
+					} catch(ArrayIndexOutOfBoundsException e) {
 						throw new CREFormatException("Incorrect format for the item notation: " + args[0].val(), t);
 					}
 				}
-			} else if (args[0] instanceof CArray) {
+			} else if(args[0] instanceof CArray) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t);
 				i = is.getTypeId();
 				i2 = is.getData().getData();
 			}
-			if (i == -1) {
+			if(i == -1) {
 				i = Static.getInt32(args[0], t);
 			}
-			if (i2 == -1) {
+			if(i2 == -1) {
 				i2 = 0;
 			}
-			if (DataNameLookup.containsKey(i + "_" + i2)) {
+			if(DataNameLookup.containsKey(i + "_" + i2)) {
 				return DataNameLookup.get(i + "_" + i2);
-			} else if (DataNameLookup.containsKey(i + "_0")) {
+			} else if(DataNameLookup.containsKey(i + "_0")) {
 				return DataNameLookup.get(i + "_0");
 			}
 			try {
 				return new CString(StaticLayer.LookupMaterialName(i), t);
-			} catch (NullPointerException e) {
+			} catch(NullPointerException e) {
 				return CNull.NULL;
 			}
 		}
@@ -283,21 +283,21 @@ public class Minecraft {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Construct id = args[0];
-			if (id instanceof CArray) {
+			if(id instanceof CArray) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t);
 				return new CInt(is.getType().getMaxStackSize(), t);
-			} else if (id instanceof CString) {
+			} else if(id instanceof CString) {
 				int seperatorIndex = id.val().indexOf(':');
-				if (seperatorIndex != -1) {
+				if(seperatorIndex != -1) {
 					id = new CString(id.val().substring(0, seperatorIndex), t);
 				}
 			}
 			int seperatorIndex = id.val().indexOf(':');
-			if (seperatorIndex != -1) {
+			if(seperatorIndex != -1) {
 				id = new CString(id.val().substring(0, seperatorIndex), t);
 			}
 			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(id, t));
-			if (mat == null) {
+			if(mat == null) {
 				throw new CRENotFoundException("A material type could not be found based on the given id.", t);
 			}
 			return new CInt(mat.getMaxStackSize(), t);
@@ -360,26 +360,26 @@ public class Minecraft {
 			int data = 0;
 			int radius = 64;
 			int index = preEff.indexOf(':');
-			if (index != -1) {
+			if(index != -1) {
 				try {
 					data = Integer.parseInt(preEff.substring(index + 1));
-				} catch (NumberFormatException ex) {
+				} catch(NumberFormatException ex) {
 					throw new CRECastException("Effect data expected an integer", t);
 				}
 				preEff = preEff.substring(0, index);
 			}
 			try {
 				e = MCEffect.valueOf(preEff.toUpperCase());
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				throw new CREFormatException("The effect type " + args[1].val() + " is not valid", t);
 			}
-			if (e.equals(MCEffect.STEP_SOUND)) {
+			if(e.equals(MCEffect.STEP_SOUND)) {
 				MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
-				if (mat == null || !mat.isBlock()) {
+				if(mat == null || !mat.isBlock()) {
 					throw new CREFormatException("This effect requires a valid BlockID", t);
 				}
 			}
-			if (args.length == 3) {
+			if(args.length == 3) {
 				radius = Static.getInt32(args[2], t);
 			}
 			l.getWorld().playEffect(l, e, data, radius);
@@ -450,57 +450,57 @@ public class Minecraft {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = StaticLayer.GetServer();
 			int index = -1;
-			if (args.length == 0) {
+			if(args.length == 0) {
 				index = -1;
-			} else if (args.length == 1) {
+			} else if(args.length == 1) {
 				index = Static.getInt32(args[0], t);
 			}
 
-			if (index < -1 || index > 16) {
+			if(index < -1 || index > 16) {
 				throw new CRERangeException(this.getName() + " expects the index to be between -1 and 16 (inclusive)", t);
 			}
 
 			ArrayList<Construct> retVals = new ArrayList<Construct>();
 
-			if (index == 0 || index == -1) {
+			if(index == 0 || index == -1) {
 				//Server name
 				retVals.add(new CString(server.getServerName(), t));
 			}
 
-			if (index == 1 || index == -1) {
+			if(index == 1 || index == -1) {
 				// API Version
 				retVals.add(new CString(server.getAPIVersion(), t));
 			}
-			if (index == 2 || index == -1) {
+			if(index == 2 || index == -1) {
 				// Server Version
 				retVals.add(new CString(server.getServerVersion(), t));
 			}
-			if (index == 3 || index == -1) {
+			if(index == 3 || index == -1) {
 				//Allow flight
 				retVals.add(CBoolean.get(server.getAllowFlight()));
 			}
-			if (index == 4 || index == -1) {
+			if(index == 4 || index == -1) {
 				//Allow nether
 				retVals.add(CBoolean.get(server.getAllowNether()));
 			}
-			if (index == 5 || index == -1) {
+			if(index == 5 || index == -1) {
 				//Allow end
 				retVals.add(CBoolean.get(server.getAllowEnd()));
 			}
-			if (index == 6 || index == -1) {
+			if(index == 6 || index == -1) {
 				//World container
 				retVals.add(new CString(server.getWorldContainer(), t));
 			}
-			if (index == 7 || index == -1) {
+			if(index == 7 || index == -1) {
 				//Max player limit
 				retVals.add(new CInt(server.getMaxPlayers(), t));
 			}
-			if (index == 8 || index == -1) {
+			if(index == 8 || index == -1) {
 				//Array of op's
 				CArray co = new CArray(t);
 				List<MCOfflinePlayer> so = server.getOperators();
-				for (MCOfflinePlayer o : so) {
-					if (o == null) {
+				for(MCOfflinePlayer o : so) {
+					if(o == null) {
 						continue;
 					}
 					CString os = new CString(o.getName(), t);
@@ -508,17 +508,17 @@ public class Minecraft {
 				}
 				retVals.add(co);
 			}
-			if (index == 9 || index == -1) {
+			if(index == 9 || index == -1) {
 				//Array of plugins
 				CArray co = new CArray(t);
 				MCPluginManager plugManager = server.getPluginManager();
-				if (plugManager == null) {
+				if(plugManager == null) {
 					throw new CRENotFoundException(this.getName()
 							+ " could not receive the server plugins. Are you running in cmdline mode?", t);
 				}
 				List<MCPlugin> plugs = plugManager.getPlugins();
-				for (MCPlugin p : plugs) {
-					if (p == null) {
+				for(MCPlugin p : plugs) {
+					if(p == null) {
 						continue;
 					}
 					CString name = new CString(p.getName(), t);
@@ -527,46 +527,46 @@ public class Minecraft {
 
 				retVals.add(co);
 			}
-			if (index == 10 || index == -1) {
+			if(index == 10 || index == -1) {
 				//Online Mode
 				retVals.add(CBoolean.get(server.getOnlineMode()));
 			}
-			if (index == 11 || index == -1) {
+			if(index == 11 || index == -1) {
 				//Server port
 				retVals.add(new CInt(server.getPort(), t));
 			}
-			if (index == 12 || index == -1) {
+			if(index == 12 || index == -1) {
 				//Server Ip
 				retVals.add(new CString(server.getIp(), t));
 			}
-			if (index == 13 || index == -1) {
+			if(index == 13 || index == -1) {
 				//Uptime
 				long uptime = System.currentTimeMillis() - ManagementFactory.getRuntimeMXBean().getStartTime();
 				retVals.add(new CInt(uptime, t));
 			}
-			if (index == 14 || index == -1) {
+			if(index == 14 || index == -1) {
 				//gcmax
 				retVals.add(new CInt((Runtime.getRuntime().maxMemory()), t));
 			}
-			if (index == 15 || index == -1) {
+			if(index == 15 || index == -1) {
 				//gctotal
 				retVals.add(new CInt((Runtime.getRuntime().totalMemory()), t));
 			}
-			if (index == 16 || index == -1) {
+			if(index == 16 || index == -1) {
 				//gcfree
 				retVals.add(new CInt((Runtime.getRuntime().freeMemory()), t));
 			}
-			if (index == 17 || index == -1) {
+			if(index == 17 || index == -1) {
 				//motd
 				retVals.add(new CString(server.getMotd(), t));
 			}
 
-			if (retVals.size() == 1) {
+			if(retVals.size() == 1) {
 				return retVals.get(0);
 			}
 
 			CArray ca = new CArray(t);
-			for (Construct c : retVals) {
+			for(Construct c : retVals) {
 				ca.push(c, t);
 			}
 			return ca;
@@ -616,8 +616,8 @@ public class Minecraft {
 			MCServer server = StaticLayer.GetServer();
 			CArray co = new CArray(t);
 			List<MCOfflinePlayer> so = server.getBannedPlayers();
-			for (MCOfflinePlayer o : so) {
-				if (o == null) {
+			for(MCOfflinePlayer o : so) {
+				if(o == null) {
 					continue;
 				}
 				CString os = new CString(o.getName(), t);
@@ -670,8 +670,8 @@ public class Minecraft {
 			MCServer server = StaticLayer.GetServer();
 			CArray co = new CArray(t);
 			List<MCOfflinePlayer> so = server.getWhitelistedPlayers();
-			for (MCOfflinePlayer o : so) {
-				if (o == null) {
+			for(MCOfflinePlayer o : so) {
+				if(o == null) {
 					continue;
 				}
 				CString os = new CString(o.getName(), t);
@@ -703,11 +703,11 @@ public class Minecraft {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (p != null) {
+			if(p != null) {
 				w = p.getWorld();
 			}
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			if (location.getBlock().getState() instanceof MCCreatureSpawner) {
+			if(location.getBlock().getState() instanceof MCCreatureSpawner) {
 				String type = ((MCCreatureSpawner) location.getBlock().getState()).getSpawnedType().name();
 				return new CString(type, t);
 			} else {
@@ -760,17 +760,17 @@ public class Minecraft {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (p != null) {
+			if(p != null) {
 				w = p.getWorld();
 			}
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
 			MCEntityType type;
 			try {
 				type = MCEntityType.valueOf(args[1].val().toUpperCase());
-			} catch (IllegalArgumentException iae) {
+			} catch(IllegalArgumentException iae) {
 				throw new CREBadEntityException("Not a registered entity type: " + args[1].val(), t);
 			}
-			if (location.getBlock().getState() instanceof MCCreatureSpawner) {
+			if(location.getBlock().getState() instanceof MCCreatureSpawner) {
 				((MCCreatureSpawner) location.getBlock().getState()).setSpawnedType(type);
 				return CVoid.VOID;
 			} else {
@@ -874,7 +874,7 @@ public class Minecraft {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			CArray ret = new CArray(t);
-			for (String ip : s.getIPBans()) {
+			for(String ip : s.getIPBans()) {
 				ret.push(new CString(ip, t), t);
 			}
 			return ret;
@@ -923,7 +923,7 @@ public class Minecraft {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			String ip = args[0].val();
-			if (Static.getBoolean(args[1])) {
+			if(Static.getBoolean(args[1])) {
 				s.banIP(ip);
 			} else {
 				s.unbanIP(ip);
@@ -964,8 +964,8 @@ public class Minecraft {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMaterial i = StaticLayer.GetConvertor().getMaterial(Static.getInt32(args[0], t));
-			if (args.length == 2) {
-				switch (args[1].val()) {
+			if(args.length == 2) {
+				switch(args[1].val()) {
 					case "maxStacksize":
 						return new CInt(i.getMaxStackSize(), t);
 					case "maxDurability":
@@ -1114,16 +1114,16 @@ public class Minecraft {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld world = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (p != null) {
+			if(p != null) {
 				world = p.getWorld();
 			}
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], world, t);
 			boolean add = true;
-			if (args.length > 1) {
+			if(args.length > 1) {
 				add = Static.getBoolean(args[1]);
 			}
 			Map<MCLocation, Boolean> redstoneMonitors = ServerEvents.getRedstoneMonitors();
-			if (add) {
+			if(add) {
 				redstoneMonitors.put(location, location.getBlock().isBlockPowered());
 			} else {
 				redstoneMonitors.remove(location);

@@ -162,7 +162,7 @@ public class SiteDeploy {
 				+ " will be uploaded."));
 
 		Preferences prefs = new Preferences("Site-Deploy", Logger.getLogger(SiteDeploy.class.getName()), defaults);
-		if (generate_prefs) {
+		if(generate_prefs) {
 			prefs.init(sitedeploy);
 			System.out.println("Preferences file is now located at " + sitedeploy.getAbsolutePath() + ". Please fill in the"
 					+ " values, then re-run this command without the --generate-prefs option.");
@@ -185,41 +185,41 @@ public class SiteDeploy {
 		{
 			// Check for config errors
 			List<String> configErrors = new ArrayList<>();
-			if ("".equals(directory)) {
+			if("".equals(directory)) {
 				configErrors.add("Directory cannot be empty.");
 			}
-			if ("".equals(docsBase)) {
+			if("".equals(docsBase)) {
 				configErrors.add("DocsBase cannot be empty.");
 			}
-			if ("".equals(hostname)) {
+			if("".equals(hostname)) {
 				configErrors.add("Hostname cannot be empty.");
 			}
-			if (!docsBase.startsWith("https://") && !docsBase.startsWith("http://")) {
+			if(!docsBase.startsWith("https://") && !docsBase.startsWith("http://")) {
 				configErrors.add("DocsBase must begin with either http:// or https://");
 			}
-			if (!siteBase.startsWith("https://") && !siteBase.startsWith("http://")) {
+			if(!siteBase.startsWith("https://") && !siteBase.startsWith("http://")) {
 				configErrors.add("SiteBase must begin with either http:// or https://");
 			}
-			if (!"localhost".equals(hostname)) {
-				if (port < 0 || port > 65535) {
+			if(!"localhost".equals(hostname)) {
+				if(port < 0 || port > 65535) {
 					configErrors.add("Port must be a number between 0 and 65535.");
 				}
-				if ("".equals(username)) {
+				if("".equals(username)) {
 					configErrors.add("Username cannot be empty.");
 				}
 			}
-			if (doValidation && "".equals(validatorUrl)) {
+			if(doValidation && "".equals(validatorUrl)) {
 				configErrors.add("Validation cannot occur while an empty validation url is specified in the config."
 						+ " Either set a validator url, or re-run without the --do-validation flag.");
 			}
-			if (finalizerScript != null) {
-				if (!finalizerScript.exists()) {
+			if(finalizerScript != null) {
+				if(!finalizerScript.exists()) {
 					configErrors.add("post-script file specified does not exist (" + finalizerScript.getCanonicalPath() + ")");
-				} else if (!finalizerScript.getPath().endsWith(".ms") && !finalizerScript.canExecute()) {
+				} else if(!finalizerScript.getPath().endsWith(".ms") && !finalizerScript.canExecute()) {
 					configErrors.add("post-script does not end in .ms, and is not executable");
 				}
 			}
-			if (!configErrors.isEmpty()) {
+			if(!configErrors.isEmpty()) {
 				System.err.println("Invalid input. Check preferences in " + sitedeploy.getAbsolutePath() + " and re-run");
 				System.err.println(StringUtils.PluralTemplateHelper(configErrors.size(),
 						"Here is the %d error:", "Here are the %d errors:"));
@@ -228,10 +228,10 @@ public class SiteDeploy {
 			}
 		}
 
-		if (!directory.endsWith("/")) {
+		if(!directory.endsWith("/")) {
 			directory += "/";
 		}
-		if (!docsBase.endsWith("/")) {
+		if(!docsBase.endsWith("/")) {
 			docsBase += "/";
 		}
 		directory += CHVersion.LATEST;
@@ -244,14 +244,14 @@ public class SiteDeploy {
 		System.out.println("docs-base: " + docsBase);
 		System.out.println("site-base: " + siteBase);
 		System.out.println("github-base-url: " + githubBaseUrl);
-		if (finalizerScript != null) {
+		if(finalizerScript != null) {
 			System.out.println("post-script: " + finalizerScript.getCanonicalPath());
 		}
-		if (doValidation) {
+		if(doValidation) {
 			System.out.println("validator-url: " + validatorUrl);
 		}
 
-		if (use_password && password != null) {
+		if(use_password && password != null) {
 			jline.console.ConsoleReader reader = null;
 			try {
 				Character cha = (char) 0;
@@ -259,13 +259,13 @@ public class SiteDeploy {
 				reader.setExpandEvents(false);
 				password = reader.readLine("Please enter your password: ", cha);
 			} finally {
-				if (reader != null) {
+				if(reader != null) {
 					reader.shutdown();
 				}
 			}
 		}
 		DeploymentMethod deploymentMethod;
-		if ("localhost".equals(hostname)) {
+		if("localhost".equals(hostname)) {
 			deploymentMethod = new LocalDeploymentMethod(directory + "/");
 		} else {
 			/**
@@ -347,19 +347,19 @@ public class SiteDeploy {
 		this.doValidation = doValidation;
 		this.showTemplateCredit = showTemplateCredit;
 		this.validatorUrl = validatorUrl;
-		if (githubBaseUrl.equals("")) {
+		if(githubBaseUrl.equals("")) {
 			githubBaseUrl = DEFAULT_GITHUB_BASE_URL;
 		}
 		this.githubBaseUrl = githubBaseUrl;
 		pn = getPersistenceNetwork();
-		if (pn != null) {
+		if(pn != null) {
 			try {
 				String localCache = pn.get(new String[]{"site_deploy", "local_cache"});
-				if (localCache == null) {
+				if(localCache == null) {
 					localCache = "{}";
 				}
 				lc = (Map<String, String>) JSONValue.parse(localCache);
-			} catch (DataSourceException | IllegalArgumentException ex) {
+			} catch(DataSourceException | IllegalArgumentException ex) {
 				Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Could not read in local cache", ex);
 				notificationAboutLocalCache = false;
 			}
@@ -378,7 +378,7 @@ public class SiteDeploy {
 					new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile()
 							.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace('\\', '/')),
 					new ConnectionMixinFactory.ConnectionMixinOptions());
-		} catch (DataSourceException | URISyntaxException | IOException ex) {
+		} catch(DataSourceException | URISyntaxException | IOException ex) {
 			p = null;
 		}
 		return p;
@@ -391,11 +391,11 @@ public class SiteDeploy {
 
 	private synchronized void writeStatus(String additionalInfo) {
 		int generatePercent = 0;
-		if (totalGenerateTasks.get() != 0) {
+		if(totalGenerateTasks.get() != 0) {
 			generatePercent = (int) (currentGenerateTask.get() / ((double) totalGenerateTasks.get()) * 100.0);
 		}
 		int uploadPercent = 0;
-		if (totalUploadTasks.get() != 0) {
+		if(totalUploadTasks.get() != 0) {
 			uploadPercent = (int) (currentUploadTask.get() / ((double) totalUploadTasks.get()) * 100.0);
 		}
 		String message = "Generate progress: " + currentGenerateTask.get() + "/" + totalGenerateTasks.get()
@@ -407,7 +407,7 @@ public class SiteDeploy {
 			resetLine();
 			reader.getOutput().write(message);
 			reader.flush();
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			System.out.println(message);
 		}
 	}
@@ -458,7 +458,7 @@ public class SiteDeploy {
 			public String generate(String... args) {
 				String resourceLoc = SiteDeploy.this.resourceBase + args[0];
 				String loc = args[0];
-				if (!loc.startsWith("/")) {
+				if(!loc.startsWith("/")) {
 					loc = "/siteDeploy/resources/" + loc;
 				} else {
 					resourceLoc = SiteDeploy.this.resourceBase + args[1];
@@ -466,11 +466,11 @@ public class SiteDeploy {
 				String hash = "0";
 				try {
 					InputStream in = SiteDeploy.class.getResourceAsStream(loc);
-					if (in == null) {
+					if(in == null) {
 						throw new RuntimeException("Could not find " + loc + " in resources folder for cacheBuster template");
 					}
 					hash = getLocalMD5(in);
-				} catch (IOException ex) {
+				} catch(IOException ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				return resourceLoc + "?v=" + hash;
@@ -484,23 +484,23 @@ public class SiteDeploy {
 				List<Map<String, List<Map<String, String>>>> ret = new ArrayList<>();
 				@SuppressWarnings("unchecked")
 				List<Map<String, List<Object>>> lt = (List<Map<String, List<Object>>>) JSONValue.parse(learning_trail);
-				for (Map<String, List<Object>> l : lt) {
-					for (Map.Entry<String, List<Object>> e : l.entrySet()) {
+				for(Map<String, List<Object>> l : lt) {
+					for(Map.Entry<String, List<Object>> e : l.entrySet()) {
 						String category = e.getKey();
 						List<Map<String, String>> catInfo = new ArrayList<>();
-						for (Object ll : e.getValue()) {
+						for(Object ll : e.getValue()) {
 							Map<String, String> pageInfo = new LinkedHashMap<>();
 							String page = null;
 							String name = null;
-							if (ll instanceof String) {
+							if(ll instanceof String) {
 								name = page = (String) ll;
-							} else if (ll instanceof Map) {
+							} else if(ll instanceof Map) {
 								@SuppressWarnings("unchecked")
 								Map<String, String> p = (Map<String, String>) ll;
-								if (p.entrySet().size() != 1) {
+								if(p.entrySet().size() != 1) {
 									throw new RuntimeException("Invalid JSON for learning trail");
 								}
-								for (Map.Entry<String, String> ee : p.entrySet()) {
+								for(Map.Entry<String, String> ee : p.entrySet()) {
 									page = ee.getKey();
 									name = ee.getValue();
 								}
@@ -509,7 +509,7 @@ public class SiteDeploy {
 							}
 							assert page != null && name != null;
 							boolean exists;
-							if (page.contains(".")) {
+							if(page.contains(".")) {
 								// We can't really check this, because it might be a synthetic page, like
 								// api.json. So we just have to set it to true.
 								exists = true;
@@ -573,7 +573,7 @@ public class SiteDeploy {
 			@Override
 			public void run() {
 				// Just us left, shut us down
-				if (generateQueue.getQueue().isEmpty()) {
+				if(generateQueue.getQueue().isEmpty()) {
 					generateQueue.shutdown();
 				} else {
 					// Oops, we're a bit premature. Schedule us to run again.
@@ -586,7 +586,7 @@ public class SiteDeploy {
 		Runnable uploadFinalizer = new Runnable() {
 			@Override
 			public void run() {
-				if (uploadQueue.getQueue().isEmpty()) {
+				if(uploadQueue.getQueue().isEmpty()) {
 					uploadQueue.shutdown();
 				} else {
 					uploadQueue.submit(this);
@@ -599,12 +599,12 @@ public class SiteDeploy {
 		deploymentMethod.finish();
 		// Next, we need to validate the pages
 		System.out.println();
-		if (doValidation) {
+		if(doValidation) {
 			System.out.println("Upload complete, running html5 validation");
 			int filesValidated = 0;
 			int specifiedErrors = 0;
 			try {
-				for (Map.Entry<String, String> e : uploadedPages.entrySet()) {
+				for(Map.Entry<String, String> e : uploadedPages.entrySet()) {
 					Map<String, List<String>> headers = new HashMap<>();
 					RequestSettings settings = new RequestSettings();
 					//settings.setLogger(Logger.getLogger(SiteDeploy.class.getName()));
@@ -616,7 +616,7 @@ public class SiteDeploy {
 
 					byte[] outStream = e.getValue().getBytes("UTF-8");
 					ByteArrayOutputStream out = new ByteArrayOutputStream(outStream.length);
-					try (GZIPOutputStream gz = new GZIPOutputStream(out)) {
+					try(GZIPOutputStream gz = new GZIPOutputStream(out)) {
 						gz.write(outStream);
 					}
 					byte[] param = out.toByteArray();
@@ -625,7 +625,7 @@ public class SiteDeploy {
 					settings.setMethod(HTTPMethod.POST);
 					HTTPResponse response = WebUtility.GetPage(new URL(validatorUrl + "?out=gnu"), settings);
 
-					if (response.getResponseCode() != 200) {
+					if(response.getResponseCode() != 200) {
 						System.out.println(Static.MCToANSIColors("Response for "
 								+ MCChatColor.AQUA + e.getKey() + MCChatColor.PLAIN_WHITE + ":"));
 						System.out.println(response.getContent());
@@ -634,20 +634,20 @@ public class SiteDeploy {
 
 					String[] errors = response.getContent().split("\n");
 					int errorsDisplayed = 0;
-					for (String error : errors) {
+					for(String error : errors) {
 						GNUErrorMessageFormat gnuError = new GNUErrorMessageFormat(error);
 						String supressWarning = "info warning: Section lacks heading. Consider using “h2”-“h6”"
 								+ " elements to add identifying headings to all sections.";
-						if (supressWarning.equals(gnuError.message())) {
+						if(supressWarning.equals(gnuError.message())) {
 							continue;
 						}
 						// == on String, yes this is what I want
-						if (error == errors[0]) {
+						if(error == errors[0]) {
 							System.out.println(Static.MCToANSIColors("Response for "
 									+ MCChatColor.AQUA + e.getKey() + MCChatColor.PLAIN_WHITE + ":"));
 						}
 						StringBuilder output = new StringBuilder();
-						switch (gnuError.messageType()) {
+						switch(gnuError.messageType()) {
 							case ERROR:
 								output.append(MCChatColor.RED);
 								break;
@@ -658,11 +658,11 @@ public class SiteDeploy {
 						output.append("line ").append(gnuError.fromLine()).append(" ")
 								.append(gnuError.message()).append(MCChatColor.PLAIN_WHITE);
 						String[] page = e.getValue().split("\n");
-						for (int i = gnuError.fromLine(); i < gnuError.toLine() + 1; i++) {
+						for(int i = gnuError.fromLine(); i < gnuError.toLine() + 1; i++) {
 							output.append("\n").append(page[i - 1]);
 						}
 						output.append("\n");
-						for (int i = 0; i < gnuError.fromColumn() - 1; i++) {
+						for(int i = 0; i < gnuError.fromColumn() - 1; i++) {
 							output.append(" ");
 						}
 						output.append(MCChatColor.RED).append("^").append(MCChatColor.PLAIN_WHITE);
@@ -672,19 +672,19 @@ public class SiteDeploy {
 					}
 					filesValidated++;
 				}
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				System.err.println("Validation could not occur due to the following exception: " + ex.getMessage());
 				ex.printStackTrace(System.err);
 			}
 			System.out.println("Files validated: " + filesValidated);
 			System.out.println("Errors found: " + specifiedErrors);
 		}
-		if (finalizerScript != null) {
+		if(finalizerScript != null) {
 			System.out.println("Running post-script");
-			if (finalizerScript.getPath().endsWith(".ms")) {
+			if(finalizerScript.getPath().endsWith(".ms")) {
 				try {
 					Interpreter.startWithTTY(finalizerScript, filesChanged, false);
-				} catch (DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+				} catch(DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
 					ex.printStackTrace(System.err);
 				}
 			} else {
@@ -731,39 +731,39 @@ public class SiteDeploy {
 					contents.close();
 					boolean skipUpload = false;
 					String hash = null;
-					if (pn != null) {
-						if (notificationAboutLocalCache) {
+					if(pn != null) {
+						if(notificationAboutLocalCache) {
 							hash = getLocalMD5(new ByteArrayInputStream(c));
 							try {
-								if (lc.containsKey(deploymentMethod.getID() + toLocation)) {
-									if (useLocalCache) {
+								if(lc.containsKey(deploymentMethod.getID() + toLocation)) {
+									if(useLocalCache) {
 										String cacheHash = lc.get(deploymentMethod.getID() + toLocation);
-										if (cacheHash.equals(hash)) {
+										if(cacheHash.equals(hash)) {
 											skipUpload = true;
 										}
 									}
 								}
-							} catch (IllegalArgumentException ex) {
+							} catch(IllegalArgumentException ex) {
 								Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Could not use local cache", ex);
 								notificationAboutLocalCache = false;
 							}
 						}
 					}
-					if (!skipUpload && deploymentMethod.deploy(new ByteArrayInputStream(c), toLocation)) {
+					if(!skipUpload && deploymentMethod.deploy(new ByteArrayInputStream(c), toLocation)) {
 						filesChanged.add(toLocation);
 					}
-					if (pn != null && notificationAboutLocalCache && hash != null) {
+					if(pn != null && notificationAboutLocalCache && hash != null) {
 						try {
 							lc.put(deploymentMethod.getID() + toLocation, hash);
 							pn.set(dm, new String[]{"site_deploy", "local_cache"}, JSONValue.toJSONString(lc));
-						} catch (DataSourceException | ReadOnlyException | IllegalArgumentException ex) {
+						} catch(DataSourceException | ReadOnlyException | IllegalArgumentException ex) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 							notificationAboutLocalCache = false;
 						}
 					}
 					currentUploadTask.addAndGet(1);
 					writeStatus("");
-				} catch (Throwable ex) {
+				} catch(Throwable ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed while uploading " + toLocation, ex);
 					generateQueue.shutdownNow();
 					uploadQueue.shutdownNow();
@@ -780,7 +780,7 @@ public class SiteDeploy {
 			digest.update(f);
 			String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 			return hash;
-		} catch (NoSuchAlgorithmException ex) {
+		} catch(NoSuchAlgorithmException ex) {
 			throw new RuntimeException(ex);
 		} finally {
 			localFile.close();
@@ -856,7 +856,7 @@ public class SiteDeploy {
 	 */
 	private void writePage(final String title, final String body, final String toLocation,
 			List<String> keywords, final String description) {
-		if (keywords == null) {
+		if(keywords == null) {
 			keywords = new ArrayList<>();
 		}
 		final List<String> kw = keywords;
@@ -864,7 +864,7 @@ public class SiteDeploy {
 			@Override
 			public void run() {
 				String bW = body;
-				if (!bW.contains(EDIT_THIS_PAGE_PREAMBLE)) {
+				if(!bW.contains(EDIT_THIS_PAGE_PREAMBLE)) {
 					bW += "<p id=\"edit_this_page\">"
 							+ EDIT_THIS_PAGE_PREAMBLE
 							+ String.format(githubBaseUrl, "java/" + SiteDeploy.class.getName().replace(".", "/")) + ".java"
@@ -879,8 +879,8 @@ public class SiteDeploy {
 						Map<String, Generator> standard = getStandardGenerators();
 						standard.putAll(DocGenTemplates.GetGenerators());
 						b = DocGenTemplates.DoTemplateReplacement(bW, standard);
-					} catch (Exception ex) {
-						if (ex instanceof GenerateException) {
+					} catch(Exception ex) {
+						if(ex instanceof GenerateException) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed to substitute template"
 									+ " while trying to upload resource to " + toLocation, ex);
 						} else {
@@ -941,7 +941,7 @@ public class SiteDeploy {
 					writeFromString(bb, toLocation);
 					currentGenerateTask.addAndGet(1);
 					writeStatus("");
-				} catch (Exception ex) {
+				} catch(Exception ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While writing " + toLocation + " the following error occured:", ex);
 				}
 			}
@@ -963,22 +963,22 @@ public class SiteDeploy {
 					ZipReader reader = new ZipReader(root);
 					Queue<File> q = new LinkedList<>();
 					q.addAll(Arrays.asList(reader.listFiles()));
-					while (q.peek() != null) {
+					while(q.peek() != null) {
 						ZipReader r = new ZipReader(q.poll());
-						if (r.isDirectory()) {
+						if(r.isDirectory()) {
 							q.addAll(Arrays.asList(r.listFiles()));
 						} else {
 							String fileName = r.getFile().getAbsolutePath().replaceFirst(Pattern.quote(reader.getFile().getAbsolutePath()), "");
 							writeFromStream(r.getInputStream(), "resources" + fileName);
 						}
 					}
-				} catch (IOException ex) {
+				} catch(IOException ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				String index_js = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/index.js"));
 				try {
 					writeFromString(DocGenTemplates.DoTemplateReplacement(index_js, getStandardGenerators()), "resources/js/index.js");
-				} catch (Generator.GenerateException ex) {
+				} catch(Generator.GenerateException ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "GenerateException in /siteDeploy/index.js", ex);
 				}
 				currentGenerateTask.addAndGet(1);
@@ -1057,12 +1057,12 @@ public class SiteDeploy {
 				try {
 					File root = new File(SiteDeploy.class.getResource("/docs").toExternalForm());
 					ZipReader zReader = new ZipReader(root);
-					for (File r : zReader.listFiles()) {
+					for(File r : zReader.listFiles()) {
 						String filename = r.getAbsolutePath().replaceFirst(Pattern.quote(zReader.getFile().getAbsolutePath()), "");
 						writePageFromResource(r.getName(), "/docs" + filename, r.getName() + ".html",
 								Arrays.asList(new String[]{r.getName().replace("_", " ")}), "Learning trail page for " + r.getName().replace("_", " "));
 					}
-				} catch (IOException ex) {
+				} catch(IOException ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				currentGenerateTask.addAndGet(1);
@@ -1095,8 +1095,8 @@ public class SiteDeploy {
 						}
 					});
 					List<String> hiddenFunctions = new ArrayList<>();
-					for (Class<? extends Function> functionClass : functionClasses) {
-						if (!data.containsKey(functionClass.getEnclosingClass())) {
+					for(Class<? extends Function> functionClass : functionClasses) {
+						if(!data.containsKey(functionClass.getEnclosingClass())) {
 							data.put(functionClass.getEnclosingClass(), new ArrayList<List<String>>());
 						}
 						List<List<String>> d = data.get(functionClass.getEnclosingClass());
@@ -1105,7 +1105,7 @@ public class SiteDeploy {
 						final Function f;
 						try {
 							f = ReflectionUtils.instantiateUnsafe(functionClass);
-						} catch (ReflectionUtils.ReflectionException ex) {
+						} catch(ReflectionUtils.ReflectionException ex) {
 							throw new RuntimeException("While trying to construct " + functionClass + ", got the following", ex);
 						}
 						final DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
@@ -1117,19 +1117,19 @@ public class SiteDeploy {
 								generateFunctionDocs(f, di);
 							}
 						});
-						if (f.since().equals(CHVersion.V0_0_0)) {
+						if(f.since().equals(CHVersion.V0_0_0)) {
 							// Don't add these
 							continue;
 						}
-						if (f.getClass().getAnnotation(hide.class) != null) {
+						if(f.getClass().getAnnotation(hide.class) != null) {
 							hiddenFunctions.add(f.getName());
 						}
 						c.add("[[API/functions/" + f.getName() + "|" + f.getName() + "]]()");
 						c.add(di.ret);
 						c.add(di.args);
 						List<String> exc = new ArrayList<>();
-						if (f.thrown() != null) {
-							for (Class<? extends CREThrowable> e : f.thrown()) {
+						if(f.thrown() != null) {
+							for(Class<? extends CREThrowable> e : f.thrown()) {
 								CREThrowable ct = ReflectionUtils.instantiateUnsafe(e);
 								exc.add("{{object|" + ct.getName() + "}}");
 							}
@@ -1137,14 +1137,14 @@ public class SiteDeploy {
 						c.add(StringUtils.Join(exc, "<br>"));
 						StringBuilder desc = new StringBuilder();
 						desc.append(HTMLUtils.escapeHTML(di.desc));
-						if (di.extendedDesc != null) {
+						if(di.extendedDesc != null) {
 							desc.append(" [[functions/").append(f.getName()).append("|See more...]]<br>\n");
 						}
 						try {
-							if (f.examples() != null && f.examples().length > 0) {
+							if(f.examples() != null && f.examples().length > 0) {
 								desc.append("<br>([[API/functions/").append(f.getName()).append("#Examples|Examples...]])\n");
 							}
-						} catch (ConfigCompileException | NoClassDefFoundError ex) {
+						} catch(ConfigCompileException | NoClassDefFoundError ex) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 						}
 						c.add(desc.toString());
@@ -1155,15 +1155,15 @@ public class SiteDeploy {
 					// data is now constructed.
 					StringBuilder b = new StringBuilder();
 					b.append("<ul id=\"TOC\">");
-					for (Class<?> clazz : data.keySet()) {
+					for(Class<?> clazz : data.keySet()) {
 						b.append("<li><a href=\"#").append(clazz.getSimpleName())
 								.append("\">").append(clazz.getSimpleName()).append("</a></li>");
 					}
 					b.append("</ul>\n");
-					for (Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
+					for(Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
 						Class<?> clazz = e.getKey();
 						List<List<String>> clazzData = e.getValue();
-						if (clazzData.isEmpty()) {
+						if(clazzData.isEmpty()) {
 							// If there are no functions in the class, don't display it. This is most likely to happen
 							// if all the class's functions are hidden with @hide.
 							continue;
@@ -1179,20 +1179,20 @@ public class SiteDeploy {
 									+ "! scope=\"col\" width=\"10%\" | Throws\n"
 									+ "! scope=\"col\" width=\"64%\" | Description\n"
 									+ "! scope=\"col\" width=\"5%\" | <span class=\"abbr\" title=\"Restricted\">Res</span>\n");
-							for (List<String> row : clazzData) {
+							for(List<String> row : clazzData) {
 								b.append("|-");
-								if (hiddenFunctions.contains(row.get(0))) {
+								if(hiddenFunctions.contains(row.get(0))) {
 									b.append(" class=\"hiddenFunction\"");
 								}
 								b.append("\n");
-								for (String cell : row) {
+								for(String cell : row) {
 									b.append("| ").append(cell).append("\n");
 								}
 
 							}
 							b.append("|}\n");
 							b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
-						} catch (Error ex) {
+						} catch(Error ex) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
 						}
 					}
@@ -1212,7 +1212,7 @@ public class SiteDeploy {
 							Arrays.asList(new String[]{"API", "functions"}),
 							"A list of all " + Implementation.GetServerType().getBranding() + " functions");
 					currentGenerateTask.addAndGet(1);
-				} catch (Error ex) {
+				} catch(Error ex) {
 					ex.printStackTrace(System.err);
 				}
 			}
@@ -1243,7 +1243,7 @@ public class SiteDeploy {
 				+ "! scope=\"row\" | Throws\n"
 				+ "| ");
 		List<String> exceptions = new ArrayList<>();
-		for (Class<? extends CREThrowable> c : f.thrown()) {
+		for(Class<? extends CREThrowable> c : f.thrown()) {
 			String t = c.getAnnotation(typeof.class).value();
 			exceptions.add("[[../objects/" + t + "|" + t + "]]");
 		}
@@ -1262,23 +1262,23 @@ public class SiteDeploy {
 				+ "! scope=\"row\" | Optimizations\n"
 				+ "| ");
 		String optimizationMessage = "None";
-		if (f instanceof Optimizable) {
+		if(f instanceof Optimizable) {
 			Set<Optimizable.OptimizationOption> options = ((Optimizable) f).optimizationOptions();
 			List<String> list = new ArrayList<>();
-			for (Optimizable.OptimizationOption option : options) {
+			for(Optimizable.OptimizationOption option : options) {
 				list.add("[[../../Optimizer#" + option.name() + "|" + option.name() + "]]");
 			}
 			optimizationMessage = StringUtils.Join(list, " <br /> ");
 		}
 		page.append(optimizationMessage);
 		page.append("\n|}");
-		if (docs.extendedDesc != null) {
+		if(docs.extendedDesc != null) {
 			page.append("<div>").append(docs.extendedDesc).append("</div>");
 		}
 
 		String[] usages = docs.originalArgs.split("\\|");
 		StringBuilder usageBuilder = new StringBuilder();
-		for (String usage : usages) {
+		for(String usage : usages) {
 			usageBuilder.append("<pre>\n").append(f.getName()).append("(").append(usage.trim()).append(")\n</pre>");
 		}
 		page.append("\n=== Usages ===\n");
@@ -1286,17 +1286,17 @@ public class SiteDeploy {
 
 		StringBuilder exampleBuilder = new StringBuilder();
 		try {
-			if (f.examples() != null && f.examples().length > 0) {
+			if(f.examples() != null && f.examples().length > 0) {
 				int count = 1;
 				//If the output was automatically generated, change the color of the pre
-				for (ExampleScript es : f.examples()) {
+				for(ExampleScript es : f.examples()) {
 					exampleBuilder.append("====Example ").append(count).append("====\n")
 							.append(HTMLUtils.escapeHTML(es.getDescription())).append("\n\n"
 							+ "Given the following code:\n");
 					exampleBuilder.append(SimpleSyntaxHighlighter.Highlight(es.getScript(), true)).append("\n");
 					String style = "";
 					exampleBuilder.append("\n\nThe output ");
-					if (es.isAutomatic()) {
+					if(es.isAutomatic()) {
 						style = " background-color: #BDC7E9;";
 						exampleBuilder.append("would");
 					} else {
@@ -1311,7 +1311,7 @@ public class SiteDeploy {
 			} else {
 				exampleBuilder.append("Sorry, there are no examples for this function! :(\n");
 			}
-		} catch (ConfigCompileException | IOException | DataSourceException | URISyntaxException ex) {
+		} catch(ConfigCompileException | IOException | DataSourceException | URISyntaxException ex) {
 			exampleBuilder.append("Error while compiling the examples for ").append(f.getName());
 		}
 
@@ -1320,18 +1320,18 @@ public class SiteDeploy {
 
 		Class<?>[] seeAlso = f.seeAlso();
 		String seeAlsoText = "";
-		if (seeAlso != null && seeAlso.length > 0) {
+		if(seeAlso != null && seeAlso.length > 0) {
 			seeAlsoText += "===See Also===\n";
 			boolean first = true;
-			for (Class<?> c : seeAlso) {
-				if (!first) {
+			for(Class<?> c : seeAlso) {
+				if(!first) {
 					seeAlsoText += ", ";
 				}
 				first = false;
-				if (Function.class.isAssignableFrom(c)) {
+				if(Function.class.isAssignableFrom(c)) {
 					Function f2 = (Function) ReflectionUtils.newInstance(c);
 					seeAlsoText += "<code>[[" + f2.getName() + "|" + f2.getName() + "]]</code>";
-				} else if (Template.class.isAssignableFrom(c)) {
+				} else if(Template.class.isAssignableFrom(c)) {
 					Template t = (Template) ReflectionUtils.newInstance(c);
 					seeAlsoText += "[[" + t.getName() + "|Learning Trail: " + t.getDisplayName() + "]]";
 				} else {
@@ -1342,7 +1342,7 @@ public class SiteDeploy {
 		page.append(seeAlsoText);
 
 		Class<?> container = f.getClass();
-		while (container.getEnclosingClass() != null) {
+		while(container.getEnclosingClass() != null) {
 			container = container.getEnclosingClass();
 		}
 		String bW = "<p id=\"edit_this_page\">"
@@ -1378,8 +1378,8 @@ public class SiteDeploy {
 							return o1.getCanonicalName().compareTo(o2.getCanonicalName());
 						}
 					});
-					for (Class<? extends Event> eventClass : eventClasses) {
-						if (!data.containsKey(eventClass.getEnclosingClass())) {
+					for(Class<? extends Event> eventClass : eventClasses) {
+						if(!data.containsKey(eventClass.getEnclosingClass())) {
 							data.put(eventClass.getEnclosingClass(), new ArrayList<>());
 						}
 						List<List<String>> d = data.get(eventClass.getEnclosingClass());
@@ -1388,34 +1388,34 @@ public class SiteDeploy {
 						final Event e;
 						try {
 							e = ReflectionUtils.instantiateUnsafe(eventClass);
-						} catch (ReflectionUtils.ReflectionException ex) {
+						} catch(ReflectionUtils.ReflectionException ex) {
 							throw new RuntimeException("While trying to construct " + eventClass + ", got the following", ex);
 						}
 						final DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
-						if (e.since().equals(CHVersion.V0_0_0)) {
+						if(e.since().equals(CHVersion.V0_0_0)) {
 							// Don't add these
 							continue;
 						}
 						c.add(e.getName());
 						c.add(edi.description);
 						List<String> pre = new ArrayList<>();
-						if (!edi.prefilter.isEmpty()) {
-							for (DocGen.EventDocInfo.PrefilterData pdata : edi.prefilter) {
+						if(!edi.prefilter.isEmpty()) {
+							for(DocGen.EventDocInfo.PrefilterData pdata : edi.prefilter) {
 								pre.add("<p><strong>" + pdata.name + "</strong>: " + pdata.formatDescription(DocGen.MarkupType.HTML) + "</p>");
 							}
 						}
 						c.add(StringUtils.Join(pre, ""));
 						List<String> ed = new ArrayList<>();
-						if (!edi.eventData.isEmpty()) {
-							for (DocGen.EventDocInfo.EventData edata : edi.eventData) {
+						if(!edi.eventData.isEmpty()) {
+							for(DocGen.EventDocInfo.EventData edata : edi.eventData) {
 								ed.add("<p><strong>" + edata.name + "</strong>"
 										+ (!edata.description.isEmpty() ? ": " + edata.description : "") + "</p>");
 							}
 						}
 						c.add(StringUtils.Join(ed, ""));
 						List<String> mut = new ArrayList<>();
-						if (!edi.mutability.isEmpty()) {
-							for (DocGen.EventDocInfo.MutabilityData mdata : edi.mutability) {
+						if(!edi.mutability.isEmpty()) {
+							for(DocGen.EventDocInfo.MutabilityData mdata : edi.mutability) {
 								mut.add("<p><strong>" + mdata.name + "</strong>"
 										+ (!mdata.description.isEmpty() ? ": " + mdata.description : "") + "</p>");
 							}
@@ -1426,15 +1426,15 @@ public class SiteDeploy {
 					// data is now constructed.
 					StringBuilder b = new StringBuilder();
 					b.append("<ul id=\"TOC\">");
-					for (Class<?> clazz : data.keySet()) {
+					for(Class<?> clazz : data.keySet()) {
 						b.append("<li><a href=\"#").append(clazz.getSimpleName())
 								.append("\">").append(clazz.getSimpleName()).append("</a></li>");
 					}
 					b.append("</ul>\n");
-					for (Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
+					for(Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
 						Class<?> clazz = e.getKey();
 						List<List<String>> clazzData = e.getValue();
-						if (clazzData.isEmpty()) {
+						if(clazzData.isEmpty()) {
 							// If there are no events in the class, don't display it.
 							continue;
 						}
@@ -1448,16 +1448,16 @@ public class SiteDeploy {
 									+ "! scope=\"col\" width=\"20%\" | Prefilters\n"
 									+ "! scope=\"col\" width=\"25%\" | Event Data\n"
 									+ "! scope=\"col\" width=\"18%\" | Mutable Fields\n");
-							for (List<String> row : clazzData) {
+							for(List<String> row : clazzData) {
 								b.append("|-");
 								b.append("\n");
-								for (String cell : row) {
+								for(String cell : row) {
 									b.append("| ").append(cell).append("\n");
 								}
 							}
 							b.append("|}\n");
 							b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
-						} catch (Error ex) {
+						} catch(Error ex) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
 						}
 					}
@@ -1465,7 +1465,7 @@ public class SiteDeploy {
 							Arrays.asList(new String[]{"API", "events"}),
 							"A list of all " + Implementation.GetServerType().getBranding() + " events");
 					currentGenerateTask.addAndGet(1);
-				} catch (Error ex) {
+				} catch(Error ex) {
 					ex.printStackTrace(System.err);
 				}
 			}

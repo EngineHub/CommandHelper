@@ -53,12 +53,12 @@ public class DocGenExportTool {
 		topLevel.put("functions", functionList);
 		List<Map<String, Object>> eventList = new ArrayList<Map<String, Object>>();
 		topLevel.put("events", eventList);
-		for (Class<? extends Function> functionC : functions) {
+		for(Class<? extends Function> functionC : functions) {
 			Map<String, Object> function = new HashMap<String, Object>();
 			Function f;
 			try {
 				f = ReflectionUtils.newInstance(functionC);
-			} catch (NoClassDefFoundError ex) {
+			} catch(NoClassDefFoundError ex) {
 				StreamUtils.GetSystemErr().println("While attempting to load: " + functionC.getName() + ": " + ex.getMessage());
 				continue;
 			}
@@ -72,11 +72,11 @@ public class DocGenExportTool {
 
 		Pattern eventPattern = Pattern.compile("\\{(.*?)\\} *?(.*?) *?\\{(.*?)\\} *?\\{(.*?)\\}");
 		DocGen.MarkupType type = DocGen.MarkupType.TEXT;
-		for (Class<? extends Event> eventC : events) {
+		for(Class<? extends Event> eventC : events) {
 			Map<String, Object> event = new HashMap<String, Object>();
 			Event e = ReflectionUtils.newInstance(eventC);
 			Matcher m = eventPattern.matcher(e.docs());
-			if (m.find()) {
+			if(m.find()) {
 				String name = e.getName();
 				String description = m.group(2).trim();
 				String prefilter = DocGen.PrefilterData.Get(m.group(1).split("\\|"), type);
@@ -95,7 +95,7 @@ public class DocGenExportTool {
 		try {
 			out.write(output.getBytes("UTF-8"));
 			out.flush();
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			Logger.getLogger(DocGenExportTool.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}

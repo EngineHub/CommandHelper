@@ -36,7 +36,7 @@ public class Profiles {
 	public Profiles(String xml) throws InvalidProfileException {
 		try {
 			document = new XMLDocument(xml);
-		} catch (SAXException ex) {
+		} catch(SAXException ex) {
 			throw new InvalidProfileException(ex);
 		}
 		parse();
@@ -61,7 +61,7 @@ public class Profiles {
 	public Profiles(InputStream profileData) throws IOException, InvalidProfileException {
 		try {
 			document = new XMLDocument(profileData);
-		} catch (SAXException ex) {
+		} catch(SAXException ex) {
 			throw new InvalidProfileException(ex);
 		}
 		parse();
@@ -71,35 +71,35 @@ public class Profiles {
 		int profileCount;
 		try {
 			profileCount = document.countNodes("/profiles/profile");
-		} catch (XPathExpressionException ex) {
+		} catch(XPathExpressionException ex) {
 			throw new InvalidProfileException("Missing root /profiles element");
 		}
 
-		for (int i = 1; i < profileCount + 1; i++) {
+		for(int i = 1; i < profileCount + 1; i++) {
 			String id;
 			String type;
 			try {
 				id = document.getNode("/profiles/profile[" + i + "]/@id");
-			} catch (XPathExpressionException ex) {
+			} catch(XPathExpressionException ex) {
 				throw new InvalidProfileException("All <profile> elements must have an id attribute.");
 			}
 			try {
 				type = document.getNode("/profiles/profile[" + i + "]/type");
-			} catch (XPathExpressionException ex) {
+			} catch(XPathExpressionException ex) {
 				throw new InvalidProfileException("All <profile> elements must have a type attribute.");
 			}
 			List<String> children;
 			try {
 				children = document.getChildren("/profiles/profile[" + i + "]");
-			} catch (XPathExpressionException ex) {
+			} catch(XPathExpressionException ex) {
 				//Shouldn't happen, this is our fault.
 				throw new RuntimeException(ex);
 			}
 			Map<String, String> elements = new HashMap<>();
-			for (String child : children) {
+			for(String child : children) {
 				try {
 					elements.put(child, document.getNode("/profiles/profile[" + i + "]/" + child));
-				} catch (XPathExpressionException ex) {
+				} catch(XPathExpressionException ex) {
 					//Shouldn't happen
 					throw new RuntimeException(ex);
 				}
@@ -107,7 +107,7 @@ public class Profiles {
 			//Type is only used internally, so we remove it at this point.
 			elements.remove("type");
 			//If the profile already exists in the set, throw an exception. (Profiles are sorted by ID, so that needs to be unique.)
-			if (profiles.containsKey(id)) {
+			if(profiles.containsKey(id)) {
 				throw new InvalidProfileException("Duplicate profile id found: \"" + id + "\"");
 			}
 			profiles.put(id, getProfile0(id, type, elements));
@@ -123,7 +123,7 @@ public class Profiles {
 	 * @throws InvalidProfileException If the profile doesn't exist.
 	 */
 	public Profile getProfileById(String id) throws InvalidProfileException {
-		if (!profiles.containsKey(id)) {
+		if(!profiles.containsKey(id)) {
 			throw new InvalidProfileException("No profile by the name \"" + id + "\" was found.");
 		}
 		return profiles.get(id);
@@ -144,17 +144,17 @@ public class Profiles {
 	 * @throws InvalidProfileException
 	 */
 	private static Profile getProfile0(String id, String type, Map<String, String> data) throws InvalidProfileException {
-		if (profileTypes == null) {
+		if(profileTypes == null) {
 			profileTypes = new HashMap<>();
-			for (Class<? extends Profile> p : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(ProfileType.class, Profile.class)) {
-				if (p == Profile.class) {
+			for(Class<? extends Profile> p : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(ProfileType.class, Profile.class)) {
+				if(p == Profile.class) {
 					continue;
 				}
 				String t = p.getAnnotation(ProfileType.class).type();
 				profileTypes.put(t, p);
 			}
 		}
-		if (!profileTypes.containsKey(type)) {
+		if(!profileTypes.containsKey(type)) {
 			throw new InvalidProfileException("Unknown type \"" + type + "\"");
 		}
 		Profile profile = ReflectionUtils.newInstance(profileTypes.get(type), new Class[]{String.class, Map.class},
@@ -171,7 +171,7 @@ public class Profiles {
 	 * @throws InvalidProfileException
 	 */
 	public static Profile getProfile(Map<String, String> data) throws InvalidProfileException {
-		if (!data.containsKey("type")) {
+		if(!data.containsKey("type")) {
 			throw new InvalidProfileException("Missing \"type\"");
 		}
 		String type = data.get("type");

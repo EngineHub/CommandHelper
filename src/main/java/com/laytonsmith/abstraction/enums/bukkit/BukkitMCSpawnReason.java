@@ -16,7 +16,7 @@ public class BukkitMCSpawnReason extends EnumConvertor<MCSpawnReason, SpawnReaso
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason();
 		}
 		return instance;

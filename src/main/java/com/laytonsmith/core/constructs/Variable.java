@@ -59,7 +59,7 @@ public class Variable extends Construct {
 	}
 
 	public void setDefault(String def) {
-		if (def == null) {
+		if(def == null) {
 			def = "";
 		}
 		this.def = def;
@@ -81,7 +81,7 @@ public class Variable extends Construct {
 	@Override
 	public Variable clone() throws CloneNotSupportedException {
 		Variable clone = (Variable) super.clone();
-		if (this.var_value != null) {
+		if(this.var_value != null) {
 			clone.var_value = var_value;
 		}
 		return clone;

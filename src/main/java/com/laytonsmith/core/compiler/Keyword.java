@@ -66,10 +66,10 @@ public abstract class Keyword implements Documentation {
 	protected void validateCodeBlock(ParseTree node, String message) throws ConfigCompileException {
 		// Note: If any of these checks are changed, the isValidCodeBlock(ParseTree node) method has to be updated too
 		// to keep it in sync.
-		if (node.getChildren().size() > 1) {
+		if(node.getChildren().size() > 1) {
 			throw new ConfigCompileException("Unexpected number of arguments in code block", node.getTarget());
 		}
-		if (!isCodeBlock(node)) {
+		if(!isCodeBlock(node)) {
 			throw new ConfigCompileException(message, node.getTarget());
 		}
 	}
@@ -103,7 +103,7 @@ public abstract class Keyword implements Documentation {
 	 * @return
 	 */
 	protected static ParseTree getArgumentOrNull(ParseTree node) {
-		if (node.getChildren().isEmpty()) {
+		if(node.getChildren().isEmpty()) {
 			return new ParseTree(CNull.NULL, node.getFileOptions());
 		} else {
 			return node.getChildAt(0);

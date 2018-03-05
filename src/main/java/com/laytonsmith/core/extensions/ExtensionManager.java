@@ -58,7 +58,7 @@ public class ExtensionManager {
 	 * @param tracker
 	 */
 	public static void RegisterTracker(URL url, ExtensionTracker tracker) {
-		if (extensions.containsKey(url) || extensions.containsValue(tracker)) {
+		if(extensions.containsKey(url) || extensions.containsValue(tracker)) {
 			return;
 		}
 
@@ -74,7 +74,7 @@ public class ExtensionManager {
 	 * @return
 	 */
 	public static ExtensionTracker UnregisterTracker(URL url) {
-		if (!url.equals(ClassDiscovery.GetClassContainer(ExtensionManager.class))) {
+		if(!url.equals(ClassDiscovery.GetClassContainer(ExtensionManager.class))) {
 			ExtensionTracker trk = extensions.remove(url);
 			trk.shutdownTracker();
 
@@ -104,23 +104,23 @@ public class ExtensionManager {
 	private static List<File> getFiles(File location) {
 		List<File> toProcess = new ArrayList<>();
 
-		if (location.isDirectory()) {
-			for (File f : location.listFiles()) {
-				if (f.getName().endsWith(".jar")) {
+		if(location.isDirectory()) {
+			for(File f : location.listFiles()) {
+				if(f.getName().endsWith(".jar")) {
 					try {
 						// Add the trimmed absolute path.
 						toProcess.add(f.getCanonicalFile());
-					} catch (IOException ex) {
+					} catch(IOException ex) {
 						Static.getLogger().log(Level.SEVERE, "Could not get exact"
 								+ " path for " + f.getAbsolutePath(), ex);
 					}
 				}
 			}
-		} else if (location.getName().endsWith(".jar")) {
+		} else if(location.getName().endsWith(".jar")) {
 			try {
 				// Add the trimmed absolute path.
 				toProcess.add(location.getCanonicalFile());
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not get exact path"
 						+ " for " + location.getAbsolutePath(), ex);
 			}
@@ -139,7 +139,7 @@ public class ExtensionManager {
 		// it harder for server owners on Windows to update the jars.
 		boolean onWindows = (OSUtils.GetOS() == OSUtils.OS.WINDOWS);
 
-		if (!onWindows) {
+		if(!onWindows) {
 			return;
 		}
 
@@ -149,10 +149,10 @@ public class ExtensionManager {
 		// Try to delete any loose files in the cache dir, so that we
 		// don't load stuff we aren't supposed to. This is in case the shutdown
 		// cleanup wasn't successful on the last run.
-		for (File f : extCache.listFiles()) {
+		for(File f : extCache.listFiles()) {
 			try {
 				Files.delete(f.toPath());
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				Static.getLogger().log(Level.WARNING,
 						"[CommandHelper] Could not delete loose file "
 						+ f.getAbsolutePath() + ": " + ex.getMessage());
@@ -170,27 +170,27 @@ public class ExtensionManager {
 
 		cd.setClassDiscoveryCache(cache);
 		cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(ExtensionManager.class));
-		for (Class klazz : extraClasses) {
+		for(Class klazz : extraClasses) {
 			cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(klazz));
 		}
 
 		//Look in the given locations for jars, add them to our class discovery.
 		List<File> toProcess = new ArrayList<>();
 
-		for (File location : locations) {
+		for(File location : locations) {
 			toProcess.addAll(getFiles(location));
 		}
 
 		// Load the files into the discovery mechanism.
-		for (File file : toProcess) {
-			if (!file.canRead()) {
+		for(File file : toProcess) {
+			if(!file.canRead()) {
 				continue;
 			}
 
 			URL jar;
 			try {
 				jar = file.toURI().toURL();
-			} catch (MalformedURLException ex) {
+			} catch(MalformedURLException ex) {
 				Static.getLogger().log(Level.SEVERE, null, ex);
 				continue;
 			}
@@ -209,10 +209,10 @@ public class ExtensionManager {
 
 		// First, cache new lifecycle style extensions. They will be renamed to
 		// use their internal name.
-		for (ClassMirror<? extends AbstractExtension> extmirror
+		for(ClassMirror<? extends AbstractExtension> extmirror
 				: cd.getClassesWithAnnotationThatExtend(
 						MSExtension.class, AbstractExtension.class)) {
-			if (extmirror.equals(new ClassMirror<>(AbstractExtension.class))) {
+			if(extmirror.equals(new ClassMirror<>(AbstractExtension.class))) {
 				continue;
 			}
 			AnnotationMirror plug = extmirror.getAnnotation(MSExtension.class);
@@ -220,23 +220,23 @@ public class ExtensionManager {
 			URL plugURL = extmirror.getContainer();
 
 			// Get the internal name that this extension exposes.
-			if (plugURL != null && plugURL.getPath().endsWith(".jar")) {
+			if(plugURL != null && plugURL.getPath().endsWith(".jar")) {
 				File f;
 				try {
 					f = new File(URLDecoder.decode(plugURL.getFile(), "UTF8"));
-				} catch (UnsupportedEncodingException ex) {
+				} catch(UnsupportedEncodingException ex) {
 					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
 					continue;
 				}
 
 				// Skip extensions that originate from commandhelpercore.
-				if (plugURL.equals(ClassDiscovery.GetClassContainer(ExtensionManager.class))) {
+				if(plugURL.equals(ClassDiscovery.GetClassContainer(ExtensionManager.class))) {
 					done.add(f);
 					continue;
 				}
 
 				// Skip files already processed.
-				if (done.contains(f)) {
+				if(done.contains(f)) {
 					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.WARNING,
 							f.getAbsolutePath() + " contains more than one extension"
 							+ " descriptor. Bug someone about it!", Target.UNKNOWN);
@@ -250,7 +250,7 @@ public class ExtensionManager {
 
 				// Just in case we have two plugins with the same internal name,
 				// lets track and rename them using a number scheme.
-				if (namecount.containsKey(name.toLowerCase())) {
+				if(namecount.containsKey(name.toLowerCase())) {
 					int i = namecount.get(name.toLowerCase());
 					name += "-" + i;
 					namecount.put(name.toLowerCase(), i++);
@@ -269,7 +269,7 @@ public class ExtensionManager {
 
 				try {
 					Files.copy(f.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-				} catch (IOException ex) {
+				} catch(IOException ex) {
 					Static.getLogger().log(Level.SEVERE, "Could not copy '"
 							+ f.getName() + "' to cache: " + ex.getMessage());
 				}
@@ -279,26 +279,26 @@ public class ExtensionManager {
 		Set<ClassMirror<?>> classes = cd.getClassesWithAnnotation(api.class);
 
 		// Now process @api annotated extensions, ignoring ones already processed.
-		for (ClassMirror klass : classes) {
+		for(ClassMirror klass : classes) {
 			URL plugURL = klass.getContainer();
 
-			if (plugURL != null && plugURL.getPath().endsWith(".jar")) {
+			if(plugURL != null && plugURL.getPath().endsWith(".jar")) {
 				File f;
 				try {
 					f = new File(URLDecoder.decode(plugURL.getFile(), "UTF8"));
-				} catch (UnsupportedEncodingException ex) {
+				} catch(UnsupportedEncodingException ex) {
 					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
 					continue;
 				}
 
 				// Skip files already processed.
-				if (done.contains(f)) {
+				if(done.contains(f)) {
 					continue;
 				}
 
 				// Copy the file if it's a valid extension.
 				// No special processing needed.
-				if (cd.doesClassExtend(klass, Event.class)
+				if(cd.doesClassExtend(klass, Event.class)
 						|| cd.doesClassExtend(klass, Function.class)) {
 					// We're processing it here instead of above, complain about it.
 					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.WARNING,
@@ -313,7 +313,7 @@ public class ExtensionManager {
 
 					try {
 						Files.copy(f.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-					} catch (IOException ex) {
+					} catch(IOException ex) {
 						Static.getLogger().log(Level.SEVERE, "Could not copy '"
 								+ f.getName() + "' to cache: " + ex.getMessage());
 					}
@@ -347,10 +347,10 @@ public class ExtensionManager {
 		// directly from the stored locations.
 		boolean onWindows = (OSUtils.GetOS() == OSUtils.OS.WINDOWS);
 
-		if (onWindows) {
+		if(onWindows) {
 			toProcess.addAll(getFiles(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory()));
 		} else {
-			for (File location : locations) {
+			for(File location : locations) {
 				toProcess.addAll(getFiles(location));
 			}
 		}
@@ -358,8 +358,8 @@ public class ExtensionManager {
 		DynamicClassLoader dcl = new DynamicClassLoader();
 		cd.setDefaultClassLoader(dcl);
 
-		for (File f : toProcess) {
-			if (f.getName().endsWith(".jar")) {
+		for(File f : toProcess) {
+			if(f.getName().endsWith(".jar")) {
 				try {
 					//First, load it with our custom class loader
 					URL jar = f.toURI().toURL();
@@ -368,7 +368,7 @@ public class ExtensionManager {
 					cd.addDiscoveryLocation(jar);
 
 					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.DEBUG, "Loaded " + f.getAbsolutePath(), Target.UNKNOWN);
-				} catch (MalformedURLException ex) {
+				} catch(MalformedURLException ex) {
 					Static.getLogger().log(Level.SEVERE, null, ex);
 				}
 			}
@@ -377,15 +377,15 @@ public class ExtensionManager {
 		// Grab all known lifecycle classes, and use them. If more than one
 		// lifecycle is found per URL, it's stored and used, but the first
 		// one found defines the internal name.
-		for (ClassMirror<? extends AbstractExtension> extmirror : cd.getClassesWithAnnotationThatExtend(MSExtension.class, AbstractExtension.class)) {
-			if (extmirror.equals(new ClassMirror<>(AbstractExtension.class))) {
+		for(ClassMirror<? extends AbstractExtension> extmirror : cd.getClassesWithAnnotationThatExtend(MSExtension.class, AbstractExtension.class)) {
+			if(extmirror.equals(new ClassMirror<>(AbstractExtension.class))) {
 				continue;
 			}
 			Extension ext;
 			URL url = extmirror.getContainer();
 			Class<? extends AbstractExtension> extcls;
 
-			if (extmirror.getModifiers().isAbstract()) {
+			if(extmirror.getModifiers().isAbstract()) {
 				Static.getLogger().log(Level.SEVERE, "Probably won't be able to"
 						+ " instantiate " + extmirror.getClassName() + ": The"
 						+ " class is marked as abstract! Will try anyway.");
@@ -393,7 +393,7 @@ public class ExtensionManager {
 
 			try {
 				extcls = extmirror.loadClass(dcl, true);
-			} catch (Throwable ex) {
+			} catch(Throwable ex) {
 				// May throw anything, and kill the loading process.
 				// Lets prevent that!
 				Static.getLogger().log(Level.SEVERE, "Could not load class '"
@@ -404,7 +404,7 @@ public class ExtensionManager {
 
 			try {
 				ext = extcls.newInstance();
-			} catch (InstantiationException | IllegalAccessException ex) {
+			} catch(InstantiationException | IllegalAccessException ex) {
 				//Error, but skip this one, don't throw an exception ourselves, just log it.
 				Static.getLogger().log(Level.SEVERE, "Could not instantiate "
 						+ extcls.getName() + ": " + ex.getMessage());
@@ -413,7 +413,7 @@ public class ExtensionManager {
 
 			ExtensionTracker trk = extensions.get(url);
 
-			if (trk == null) {
+			if(trk == null) {
 				trk = new ExtensionTracker(url, cd, dcl);
 
 				extensions.put(url, trk);
@@ -421,11 +421,11 @@ public class ExtensionManager {
 
 			// Grab the identifier for the first lifecycle we come across and
 			// use it.
-			if (trk.identifier == null) {
+			if(trk.identifier == null) {
 				trk.identifier = ext.getName();
 				try {
 					trk.version = ext.getVersion();
-				} catch (AbstractMethodError ex) {
+				} catch(AbstractMethodError ex) {
 					// getVersion() was added later. This is a temporary fix
 					// to allow extension authors some time to update.
 					// TODO: Remove this soon.
@@ -446,17 +446,17 @@ public class ExtensionManager {
 
 		// Loop over the classes, instantiate and register functions and events,
 		// and store the instances in their trackers.
-		for (ClassMirror klass : classes) {
+		for(ClassMirror klass : classes) {
 			URL url = klass.getContainer();
 
-			if (cd.doesClassExtend(klass, Event.class)
+			if(cd.doesClassExtend(klass, Event.class)
 					|| cd.doesClassExtend(klass, Function.class)) {
 
 				Class c;
 
 				try {
 					c = klass.loadClass(dcl, true);
-				} catch (Throwable ex) {
+				} catch(Throwable ex) {
 					// May throw anything, and kill the loading process.
 					// Lets prevent that!
 					Static.getLogger().log(Level.SEVERE, "Could not load class '"
@@ -467,7 +467,7 @@ public class ExtensionManager {
 
 				ExtensionTracker trk = extensions.get(url);
 
-				if (trk == null) {
+				if(trk == null) {
 					trk = new ExtensionTracker(url, cd, dcl);
 
 					extensions.put(url, trk);
@@ -475,10 +475,10 @@ public class ExtensionManager {
 
 				// Instantiate, register and store.
 				try {
-					if (Event.class.isAssignableFrom(c)) {
+					if(Event.class.isAssignableFrom(c)) {
 						Class<Event> cls = (Class<Event>) c;
 
-						if (klass.getModifiers().isAbstract()) {
+						if(klass.getModifiers().isAbstract()) {
 							// Abstract? Looks like they accidently @api'd
 							// a cheater class. We can't be sure that it is fully
 							// defined, so complain to the console.
@@ -493,10 +493,10 @@ public class ExtensionManager {
 						events.add(e.getName());
 
 						trk.registerEvent(e);
-					} else if (Function.class.isAssignableFrom(c)) {
+					} else if(Function.class.isAssignableFrom(c)) {
 						Class<Function> cls = (Class<Function>) c;
 
-						if (klass.getModifiers().isAbstract()) {
+						if(klass.getModifiers().isAbstract()) {
 							// Abstract? Looks like they accidently @api'd
 							// a cheater class. We can't be sure that it is fully
 							// defined, so complain to the console.
@@ -512,9 +512,9 @@ public class ExtensionManager {
 
 						trk.registerFunction(f);
 					}
-				} catch (InstantiationException ex) {
+				} catch(InstantiationException ex) {
 					Static.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-				} catch (IllegalAccessException ex) {
+				} catch(IllegalAccessException ex) {
 					Static.getLogger().log(Level.SEVERE, null, ex);
 				}
 			}
@@ -522,7 +522,7 @@ public class ExtensionManager {
 
 		// Lets print out the details to the console, if we are in debug mode.
 		try {
-			if (Prefs.DebugMode()) {
+			if(Prefs.DebugMode()) {
 				Collections.sort(events);
 				String eventString = StringUtils.Join(events, ", ", ", and ", " and ");
 				Collections.sort(functions);
@@ -537,7 +537,7 @@ public class ExtensionManager {
 				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
 						+ ": Loaded " + events.size() + " event" + (events.size() == 1 ? "." : "s."));
 			}
-		} catch (Throwable e) {
+		} catch(Throwable e) {
 			// Prefs weren't loaded, probably caused by running tests.
 		}
 	}
@@ -548,7 +548,7 @@ public class ExtensionManager {
 	public static void Cleanup() {
 		// Shutdown and release all the extensions
 		Shutdown();
-		for (ExtensionTracker trk : extensions.values()) {
+		for(ExtensionTracker trk : extensions.values()) {
 			trk.shutdownTracker();
 		}
 
@@ -558,7 +558,7 @@ public class ExtensionManager {
 		ClassDiscovery.getDefaultInstance().invalidateCaches();
 		ClassLoader loader = ClassDiscovery.getDefaultInstance().getDefaultClassLoader();
 
-		if (loader instanceof DynamicClassLoader) {
+		if(loader instanceof DynamicClassLoader) {
 			DynamicClassLoader dcl = (DynamicClassLoader) loader;
 			dcl.destroy();
 		}
@@ -569,15 +569,15 @@ public class ExtensionManager {
 
 		File cacheDir = CommandHelperFileLocations.getDefault().getExtensionCacheDirectory();
 
-		if (!cacheDir.exists() || !cacheDir.isDirectory()) {
+		if(!cacheDir.exists() || !cacheDir.isDirectory()) {
 			return;
 		}
 
 		// Try to delete any loose files in the cache dir.
-		for (File f : cacheDir.listFiles()) {
+		for(File f : cacheDir.listFiles()) {
 			try {
 				Files.delete(f.toPath());
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				StreamUtils.GetSystemOut().println("[CommandHelper] Could not delete loose file "
 						+ f.getAbsolutePath() + ": " + ex.getMessage());
 			}
@@ -588,11 +588,11 @@ public class ExtensionManager {
 	 * This should be run each time the "startup" of the runtime occurs or extensions are reloaded.
 	 */
 	public static void Startup() {
-		for (ExtensionTracker trk : extensions.values()) {
-			for (Extension ext : trk.getExtensions()) {
+		for(ExtensionTracker trk : extensions.values()) {
+			for(Extension ext : trk.getExtensions()) {
 				try {
 					ext.onStartup();
-				} catch (Throwable e) {
+				} catch(Throwable e) {
 					Logger log = Static.getLogger();
 					log.log(Level.SEVERE, ext.getClass().getName()
 							+ "'s onStartup caused an exception:");
@@ -606,11 +606,11 @@ public class ExtensionManager {
 	 * This should be run each time the "shutdown" of the runtime occurs or extensions are reloaded.
 	 */
 	public static void Shutdown() {
-		for (ExtensionTracker trk : extensions.values()) {
-			for (Extension ext : trk.getExtensions()) {
+		for(ExtensionTracker trk : extensions.values()) {
+			for(Extension ext : trk.getExtensions()) {
 				try {
 					ext.onShutdown();
-				} catch (Throwable e) {
+				} catch(Throwable e) {
 					Logger log = Static.getLogger();
 					log.log(Level.SEVERE, ext.getClass().getName()
 							+ "'s onShutdown caused an exception:");
@@ -621,11 +621,11 @@ public class ExtensionManager {
 	}
 
 	public static void PreReloadAliases(AliasCore.ReloadOptions options) {
-		for (ExtensionTracker trk : extensions.values()) {
-			for (Extension ext : trk.getExtensions()) {
+		for(ExtensionTracker trk : extensions.values()) {
+			for(Extension ext : trk.getExtensions()) {
 				try {
 					ext.onPreReloadAliases(options);
-				} catch (Throwable e) {
+				} catch(Throwable e) {
 					Logger log = Static.getLogger();
 					log.log(Level.SEVERE, ext.getClass().getName()
 							+ "'s onPreReloadAliases caused an exception:");
@@ -636,11 +636,11 @@ public class ExtensionManager {
 	}
 
 	public static void PostReloadAliases() {
-		for (ExtensionTracker trk : extensions.values()) {
-			for (Extension ext : trk.getExtensions()) {
+		for(ExtensionTracker trk : extensions.values()) {
+			for(Extension ext : trk.getExtensions()) {
 				try {
 					ext.onPostReloadAliases();
-				} catch (Throwable e) {
+				} catch(Throwable e) {
 					Logger log = Static.getLogger();
 					log.log(Level.SEVERE, ext.getClass().getName()
 							+ "'s onPreReloadAliases caused an exception:");
@@ -653,7 +653,7 @@ public class ExtensionManager {
 	public static void AddDiscoveryLocation(File file) {
 		try {
 			locations.add(file.getCanonicalFile());
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			Static.getLogger().log(Level.SEVERE, null, ex);
 		}
 	}
@@ -661,7 +661,7 @@ public class ExtensionManager {
 	public static Set<Event> GetEvents() {
 		Set<Event> retn = new HashSet<>();
 
-		for (ExtensionTracker trk : extensions.values()) {
+		for(ExtensionTracker trk : extensions.values()) {
 			retn.addAll(trk.getEvents());
 		}
 
@@ -671,7 +671,7 @@ public class ExtensionManager {
 	public static Set<Event> GetEvents(Driver type) {
 		Set<Event> retn = new HashSet<>();
 
-		for (ExtensionTracker trk : extensions.values()) {
+		for(ExtensionTracker trk : extensions.values()) {
 			retn.addAll(trk.getEvents(type));
 		}
 
@@ -679,11 +679,11 @@ public class ExtensionManager {
 	}
 
 	public static Event GetEvent(Driver type, String name) {
-		for (ExtensionTracker trk : extensions.values()) {
+		for(ExtensionTracker trk : extensions.values()) {
 			Set<Event> events = trk.getEvents(type);
 
-			for (Event event : events) {
-				if (event.getName().equalsIgnoreCase(name)) {
+			for(Event event : events) {
+				if(event.getName().equalsIgnoreCase(name)) {
 					return event;
 				}
 			}
@@ -693,11 +693,11 @@ public class ExtensionManager {
 	}
 
 	public static Event GetEvent(String name) {
-		for (ExtensionTracker trk : extensions.values()) {
+		for(ExtensionTracker trk : extensions.values()) {
 			Set<Event> events = trk.getEvents();
 
-			for (Event event : events) {
-				if (event.getName().equalsIgnoreCase(name)) {
+			for(Event event : events) {
+				if(event.getName().equalsIgnoreCase(name)) {
 					return event;
 				}
 			}
@@ -710,23 +710,23 @@ public class ExtensionManager {
 	 * This runs the hooks on all events. This should be called each time the server "starts up".
 	 */
 	public static void RunHooks() {
-		for (Event event : GetEvents()) {
+		for(Event event : GetEvents()) {
 			try {
 				event.hook();
-			} catch (UnsupportedOperationException ex) {
+			} catch(UnsupportedOperationException ex) {
 			}
 		}
 	}
 
 	public static FunctionBase GetFunction(Construct c, api.Platforms platform) throws ConfigCompileException {
-		if (platform == null) {
+		if(platform == null) {
 			//Default to the Java interpreter
 			platform = api.Platforms.INTERPRETER_JAVA;
 		}
 
-		if (c instanceof CFunction) {
-			for (ExtensionTracker trk : extensions.values()) {
-				if (trk.functions.get(platform).containsKey(c.val())
+		if(c instanceof CFunction) {
+			for(ExtensionTracker trk : extensions.values()) {
+				if(trk.functions.get(platform).containsKey(c.val())
 						&& trk.supportedPlatforms.get(c.val()).contains(platform)) {
 					return trk.functions.get(platform).get(c.val());
 				}
@@ -741,10 +741,10 @@ public class ExtensionManager {
 	}
 
 	public static Set<FunctionBase> GetFunctions(api.Platforms platform) {
-		if (platform == null) {
+		if(platform == null) {
 			Set<FunctionBase> retn = new HashSet<>();
 
-			for (api.Platforms p : api.Platforms.values()) {
+			for(api.Platforms p : api.Platforms.values()) {
 				retn.addAll(GetFunctions(p));
 			}
 
@@ -753,8 +753,8 @@ public class ExtensionManager {
 
 		Set<FunctionBase> retn = new HashSet<>();
 
-		for (ExtensionTracker trk : extensions.values()) {
-			for (FunctionBase func : trk.functions.get(platform).values()) {
+		for(ExtensionTracker trk : extensions.values()) {
+			for(FunctionBase func : trk.functions.get(platform).values()) {
 				retn.add(func);
 			}
 		}

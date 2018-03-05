@@ -41,12 +41,12 @@ public class DataType {
 		}
 
 		private void setup(EnumSet<DataTypes> parents, EnumSet<DataTypes> children) {
-			if (parents == null) {
+			if(parents == null) {
 				this.parents = EnumSet.noneOf(DataTypes.class);
 			} else {
 				this.parents = parents;
 			}
-			if (children == null) {
+			if(children == null) {
 				this.children = EnumSet.noneOf(DataTypes.class);
 			} else {
 				this.children = children;
@@ -57,7 +57,7 @@ public class DataType {
 	private DataTypes subType;
 
 	private DataType(DataTypes myType, DataTypes subType) {
-		if (myType != DataTypes.ARRAY && subType != null) {
+		if(myType != DataTypes.ARRAY && subType != null) {
 			throw new Error("subType cannot be set except for arrays");
 		}
 		this.type = myType;
@@ -71,26 +71,26 @@ public class DataType {
 	}
 
 	private boolean castableTo(DataTypes type, Boolean upward) {
-		if (cachedCastableTo.containsKey(type)) {
+		if(cachedCastableTo.containsKey(type)) {
 			return cachedCastableTo.get(type);
 		} else {
 			boolean answer = false;
 			//We need to see if type is either a parent, or a child (or a child of our children, etc)
-			if (upward == null || upward == true) {
-				for (DataTypes parent : this.type.parents) {
-					if (parent == type) {
+			if(upward == null || upward == true) {
+				for(DataTypes parent : this.type.parents) {
+					if(parent == type) {
 						answer = true;
 						break;
 					} else {
-						if (castableTo(parent, true)) {
+						if(castableTo(parent, true)) {
 							answer = true;
 						}
 					}
 				}
 			}
-			if (upward == null || upward == false) {
-				for (DataTypes child : this.type.children) {
-					if (child == type) {
+			if(upward == null || upward == false) {
+				for(DataTypes child : this.type.children) {
+					if(child == type) {
 						answer = true;
 						break;
 					} else {

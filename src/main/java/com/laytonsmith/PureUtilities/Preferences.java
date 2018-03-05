@@ -113,10 +113,10 @@ public class Preferences {
 	public Preferences(String appName, Logger logger, List<Preference> defaults, String header) {
 		this.appName = appName;
 		this.logger = logger;
-		for (Preference p : defaults) {
+		for(Preference p : defaults) {
 			prefs.put(p.name, p);
 		}
-		if (!header.trim().isEmpty()) {
+		if(!header.trim().isEmpty()) {
 			this.header = "#  " + header.replaceAll("\n", "\n#  ");
 		}
 	}
@@ -139,18 +139,18 @@ public class Preferences {
 	 */
 	public void init(File prefFile) throws IOException {
 		this.prefFile = prefFile;
-		if (prefFile != null && prefFile.exists()) {
+		if(prefFile != null && prefFile.exists()) {
 			Properties userProperties = new Properties();
 			FileInputStream in = new FileInputStream(prefFile);
 			userProperties.load(in);
 			in.close();
-			for (String key : userProperties.stringPropertyNames()) {
+			for(String key : userProperties.stringPropertyNames()) {
 				String val = userProperties.getProperty(key);
 				String value = Objects.toString(getObject(val, prefs.get(key)), null);
 				Object ovalue = getObject(val, prefs.get(key));
 				Preference p1 = prefs.get(key);
 				Preference p2;
-				if (p1 != null) {
+				if(p1 != null) {
 					p2 = new Preference(p1.name, value, p1.allowed, p1.description);
 				} else {
 					p2 = new Preference(key, val, Type.STRING, "");
@@ -164,51 +164,51 @@ public class Preferences {
 
 	@SuppressWarnings("LoggerStringConcat")
 	private Object getObject(String value, Preference p) {
-		if (p == null) {
+		if(p == null) {
 			return value;
 		}
-		if ("null".equalsIgnoreCase(value)) {
+		if("null".equalsIgnoreCase(value)) {
 			return getObject(p.value, p);
 		}
-		switch (p.allowed) {
+		switch(p.allowed) {
 			case INT:
 				try {
 					return Integer.parseInt(value);
-				} catch (NumberFormatException e) {
+				} catch(NumberFormatException e) {
 					logger.log(Level.WARNING, "[" + appName + "] expects the value of " + p.name + " to be an integer. Using the default of " + p.value);
 					return Integer.parseInt(p.value);
 				}
 			case DOUBLE:
 				try {
 					return Double.parseDouble(value);
-				} catch (NumberFormatException e) {
+				} catch(NumberFormatException e) {
 					logger.log(Level.WARNING, "[" + appName + "] expects the value of " + p.name + " to be an double. Using the default of " + p.value);
 					return Double.parseDouble(p.value);
 				}
 			case BOOLEAN:
 				try {
 					return getBoolean(value);
-				} catch (NumberFormatException e) {
+				} catch(NumberFormatException e) {
 					logger.log(Level.WARNING, "[" + appName + "] expects the value of " + p.name + " to be an boolean. Using the default of " + p.value);
 					return getBoolean(p.value);
 				}
 			case NUMBER:
 				try {
 					return Integer.parseInt(value);
-				} catch (NumberFormatException e) {
+				} catch(NumberFormatException e) {
 					try {
 						return Double.parseDouble(value);
-					} catch (NumberFormatException f) {
+					} catch(NumberFormatException f) {
 						logger.log(Level.WARNING, "[" + appName + "] expects the value of " + p.name + " to be a number. Using the default of " + p.value);
 						try {
 							return Integer.parseInt(p.value);
-						} catch (NumberFormatException g) {
+						} catch(NumberFormatException g) {
 							return Double.parseDouble(p.value);
 						}
 					}
 				}
 			case FILE:
-				if (value == null || "".equals(value.trim())) {
+				if(value == null || "".equals(value.trim())) {
 					return null;
 				}
 				return new File(value);
@@ -220,17 +220,17 @@ public class Preferences {
 	}
 
 	private Boolean getBoolean(String value) {
-		if (value.equalsIgnoreCase("true")) {
+		if(value.equalsIgnoreCase("true")) {
 			return true;
-		} else if (value.equalsIgnoreCase("false")) {
+		} else if(value.equalsIgnoreCase("false")) {
 			return false;
-		} else if (value.equalsIgnoreCase("yes")) {
+		} else if(value.equalsIgnoreCase("yes")) {
 			return true;
-		} else if (value.equalsIgnoreCase("no")) {
+		} else if(value.equalsIgnoreCase("no")) {
 			return false;
-		} else if (value.equalsIgnoreCase("on")) {
+		} else if(value.equalsIgnoreCase("on")) {
 			return true;
-		} else if (value.equalsIgnoreCase("off")) {
+		} else if(value.equalsIgnoreCase("off")) {
 			return false;
 		} else {
 			double d = Double.parseDouble(value);
@@ -247,14 +247,14 @@ public class Preferences {
 	 * @return
 	 */
 	public Object getPreference(String name) {
-		if (prefs.get(name).objectValue == null) {
+		if(prefs.get(name).objectValue == null) {
 			prefs.get(name).objectValue = getObject(prefs.get(name).value, prefs.get(name));
 		}
 		return prefs.get(name).objectValue;
 	}
 
 	private Object getSafePreference(String name, Type type) {
-		if (prefs.get(name).allowed != type) {
+		if(prefs.get(name).allowed != type) {
 			throw new IllegalArgumentException("Expecting " + prefs.get(name).allowed + " but " + type + " was requested");
 		}
 		return getPreference(name);
@@ -335,22 +335,22 @@ public class Preferences {
 					.append(nl)
 					.append("# will persist, but changes to comments will not.")
 					.append(nl).append(nl);
-			if (!header.trim().isEmpty()) {
+			if(!header.trim().isEmpty()) {
 				b.append(header).append(nl).append(nl);
 			}
 			SortedSet<String> keys = new TreeSet<String>(prefs.keySet()) {
 			};
-			for (String key : keys) {
+			for(String key : keys) {
 				Preference p = prefs.get(key);
 				String description = "This value is not used in " + appName;
-				if (!p.description.trim().isEmpty()) {
+				if(!p.description.trim().isEmpty()) {
 					description = p.description;
 				}
 				StringBuilder c = new StringBuilder();
 				boolean first = true;
-				for (String line : description.split("\n|\r\n|\n\r")) {
-					for (String line2 : StringUtils.lineSplit(line, lineLength)) {
-						if (first) {
+				for(String line : description.split("\n|\r\n|\n\r")) {
+					for(String line2 : StringUtils.lineSplit(line, lineLength)) {
+						if(first) {
 							c.append("# ").append(line2);
 							first = false;
 						} else {
@@ -360,14 +360,14 @@ public class Preferences {
 				}
 				b.append(c).append(nl).append(p.name).append("=").append(p.value).append(nl).append(nl);
 			}
-			if (prefFile != null && !prefFile.exists()) {
+			if(prefFile != null && !prefFile.exists()) {
 				prefFile.getAbsoluteFile().getParentFile().mkdirs();
 				prefFile.createNewFile();
 			}
-			if (prefFile != null) {
+			if(prefFile != null) {
 				FileUtil.write(b.toString(), prefFile);
 			}
-		} catch (Exception ex) {
+		} catch(Exception ex) {
 			logger.log(Level.WARNING, "[" + appName + "] Could not write out preferences file: " + (prefFile != null ? prefFile.getAbsolutePath() : "null"), ex);
 		}
 	}
@@ -379,7 +379,7 @@ public class Preferences {
 	 * @throws IllegalArgumentException If {@code lineLength} is less than 1.
 	 */
 	public void setLineLength(int lineLength) {
-		if (lineLength < 1) {
+		if(lineLength < 1) {
 			throw new IllegalArgumentException();
 		}
 		this.lineLength = lineLength;

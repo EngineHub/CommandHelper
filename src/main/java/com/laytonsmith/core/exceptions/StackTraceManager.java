@@ -71,7 +71,7 @@ public class StackTraceManager {
 	 * @param target
 	 */
 	public void setCurrentTarget(Target target) {
-		if (!isStackEmpty()) {
+		if(!isStackEmpty()) {
 			elements.peek().setDefinedAt(target);
 		}
 	}

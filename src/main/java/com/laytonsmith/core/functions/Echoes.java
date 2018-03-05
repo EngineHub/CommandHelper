@@ -52,19 +52,19 @@ public class Echoes {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException {
-			if (args.length == 0) {
+			if(args.length == 0) {
 				throw new CancelCommandException("", t);
 			}
 			StringBuilder b = new StringBuilder();
-			for (Construct arg : args) {
+			for(Construct arg : args) {
 				b.append(arg.val());
 			}
 			try {
-				if (env.hasEnv(CommandHelperEnvironment.class)) {
+				if(env.hasEnv(CommandHelperEnvironment.class)) {
 					Static.SendMessage(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), b.toString(), t);
 				} else {
 					String mes = Static.MCToANSIColors(b.toString());
-					if (mes.contains("\033")) {
+					if(mes.contains("\033")) {
 						//We have terminal colors, we need to reset them at the end
 						mes += TermColors.reset();
 					}
@@ -133,15 +133,15 @@ public class Echoes {
 		@Override
 		public Construct exec(final Target t, Environment env, final Construct... args) throws ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
-			for (Construct arg : args) {
+			for(Construct arg : args) {
 				b.append(arg.val());
 			}
-			if (env.hasEnv(CommandHelperEnvironment.class)) {
+			if(env.hasEnv(CommandHelperEnvironment.class)) {
 				final MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				Static.SendMessage(p, b.toString(), t);
 			} else {
 				String mes = Static.MCToANSIColors(b.toString());
-				if (mes.contains("\033")) {
+				if(mes.contains("\033")) {
 					//We have terminal colors, we need to reset them at the end
 					mes += TermColors.reset();
 				}
@@ -193,17 +193,17 @@ public class Echoes {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args.length < 2) {
+			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException("You must send at least 2 arguments to tmsg", t);
 			}
 			MCCommandSender p;
-			if (Static.getConsoleName().equals(args[0].val())) {
+			if(Static.getConsoleName().equals(args[0].val())) {
 				p = Static.getServer().getConsole();
 			} else {
 				p = Static.GetPlayer(args[0], t);
 			}
 			StringBuilder b = new StringBuilder();
-			for (int i = 1; i < args.length; i++) {
+			for(int i = 1; i < args.length; i++) {
 				b.append(args[i].val());
 			}
 			Static.SendMessage(p, b.toString(), t);
@@ -287,7 +287,7 @@ public class Echoes {
 			int fadeout = 20;
 			int offset = 0;
 
-			if (args.length == 3 || args.length == 6) {
+			if(args.length == 3 || args.length == 6) {
 				player = Static.GetPlayer(args[0].val(), t);
 				offset = 1;
 			} else {
@@ -295,7 +295,7 @@ public class Echoes {
 				Static.AssertPlayerNonNull(player, t);
 			}
 
-			if (args.length > 3) {
+			if(args.length > 3) {
 				fadein = Static.getInt32(args[2 + offset], t);
 				stay = Static.getInt32(args[3 + offset], t);
 				fadeout = Static.getInt32(args[4 + offset], t);
@@ -315,7 +315,7 @@ public class Echoes {
 
 		static {
 			Set<Character> temp = new TreeSet<>();
-			for (Character c : symbols.toCharArray()) {
+			for(Character c : symbols.toCharArray()) {
 				temp.add(c);
 			}
 			COLOR_SYMBOLS = Collections.unmodifiableSet(temp);
@@ -335,18 +335,18 @@ public class Echoes {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String color = null;
 			String val = args[0].nval();
-			if (val == null) {
+			if(val == null) {
 				return new CString(MCChatColor.WHITE.toString(), t);
 			}
-			if (colors.containsKey(val)) {
+			if(colors.containsKey(val)) {
 				return colors.get(val);
 			}
 			try {
 				color = MCChatColor.valueOf(val.toUpperCase()).toString();
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 			}
 			String a = val.toLowerCase();
-			switch (a) {
+			switch(a) {
 				case "10":
 					a = "a";
 					break;
@@ -394,23 +394,23 @@ public class Echoes {
 			// IMPORTANT                                                //
 			// Be sure to update COLOR_SYMBOLS if this list is updated! //
 			//////////////////////////////////////////////////////////////
-			if ("".equals(a.trim())) {
+			if("".equals(a.trim())) {
 				//If the value is empty string, set the color to white.
 				color = MCChatColor.WHITE.toString();
 			}
-			if (color == null) {
+			if(color == null) {
 				try {
 					Character p = String.valueOf(a).charAt(0);
 					MCChatColor cc = MCChatColor.getByChar(p);
-					if (cc == null) {
+					if(cc == null) {
 						cc = MCChatColor.WHITE;
 					}
 					color = cc.toString();
-				} catch (NumberFormatException e) {
+				} catch(NumberFormatException e) {
 				}
 			}
 
-			if (color == null) {
+			if(color == null) {
 				color = MCChatColor.WHITE.toString();
 			}
 			//Until we get a compilation environment going, this must be removed so we can optimize it out.
@@ -523,7 +523,7 @@ public class Echoes {
 		@Override
 		public Construct exec(final Target t, final Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (p != null) {
+			if(p != null) {
 				p.chat(args[0].val());
 			} else {
 				throw new CREPlayerOfflineException("Console cannot chat. Use something like broadcast() instead.", t);
@@ -647,14 +647,14 @@ public class Echoes {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			final MCServer server = Static.getServer();
 			String permission = null;
-			if (args.length == 2) {
-				if (args[1] instanceof CArray) {
+			if(args.length == 2) {
+				if(args[1] instanceof CArray) {
 					CArray array = (CArray) args[1];
-					if (!array.isAssociative()) {
-						for (Construct p : array.asList()) {
+					if(!array.isAssociative()) {
+						for(Construct p : array.asList()) {
 							try {
 								Static.GetPlayer(p, t).sendMessage(args[0].val());
-							} catch (CREPlayerOfflineException cre) {
+							} catch(CREPlayerOfflineException cre) {
 								// ignore offline players
 							}
 						}
@@ -664,7 +664,7 @@ public class Echoes {
 				}
 				permission = args[1].nval();
 			}
-			if (permission == null) {
+			if(permission == null) {
 				server.broadcastMessage(args[0].val());
 			} else {
 				server.broadcastMessage(args[0].val(), permission);
@@ -718,13 +718,13 @@ public class Echoes {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String mes = Static.MCToANSIColors(args[0].val());
 			boolean prefix = true;
-			if (args.length > 1) {
+			if(args.length > 1) {
 				prefix = Static.getBoolean(args[1]);
 			}
-			if (prefix) {
+			if(prefix) {
 				mes = "CommandHelper: " + mes;
 			}
-			if (mes.contains("\033")) {
+			if(mes.contains("\033")) {
 				//We have terminal colors, we need to reset them at the end
 				mes += TermColors.reset();
 			}
@@ -763,43 +763,43 @@ public class Echoes {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Construct text = args[0];
 			String symbol = "&";
-			if (args.length == 2) {
+			if(args.length == 2) {
 				symbol = args[1].val();
 			}
-			if (text instanceof CString) {
+			if(text instanceof CString) {
 				String stext = text.val();
 				StringBuilder b = new StringBuilder();
 				int sl = symbol.length();
-				for (int i = 0; i < stext.length(); i++) {
-					if (i + sl >= stext.length()) {
-						if (i < stext.length()) {
+				for(int i = 0; i < stext.length(); i++) {
+					if(i + sl >= stext.length()) {
+						if(i < stext.length()) {
 							b.append(stext.substring(i));
 							break;
 						}
 					} else {
 						String subsequence1 = stext.substring(i, i + sl);
-						if (!symbol.equals(subsequence1)) {
+						if(!symbol.equals(subsequence1)) {
 							b.append(stext.charAt(i));
 							continue;
 						}
 						try {
 							String subsequence2 = stext.substring(i + sl, i + (sl * 2));
-							if (subsequence2.equals(subsequence1)) {
+							if(subsequence2.equals(subsequence1)) {
 								b.append(subsequence1);
 								i += (sl * 2) - 1;
 								continue;
 							}
-						} catch (IndexOutOfBoundsException e) {
+						} catch(IndexOutOfBoundsException e) {
 							//Ignored, it just means there aren't enough characters to do a second subsequence
 						}
 						Character c;
 						try {
 							c = stext.charAt(i + sl);
-						} catch (IndexOutOfBoundsException e) {
+						} catch(IndexOutOfBoundsException e) {
 							b.append(stext.charAt(i + sl - 1));
 							break;
 						}
-						if (Echoes.color.COLOR_SYMBOLS.contains(c)) {
+						if(Echoes.color.COLOR_SYMBOLS.contains(c)) {
 							b.append(color.exec(t, environment, new CString(c, t)));
 							i += sl;
 						} else {

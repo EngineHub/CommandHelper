@@ -89,11 +89,11 @@ public abstract class SQLDataSource extends AbstractDataSource {
 	 */
 	protected void connect() throws IOException, SQLException {
 		boolean needToConnect = false;
-		if (connection == null) {
+		if(connection == null) {
 			needToConnect = true;
-		} else if (connection.isClosed()) {
+		} else if(connection.isClosed()) {
 			needToConnect = true;
-		} else if (lastConnected < System.currentTimeMillis() - 10000) {
+		} else if(lastConnected < System.currentTimeMillis() - 10000) {
 			// If we connected more than 10 seconds ago, we should re-test
 			// the connection explicitely, because isClosed may return false,
 			// even if the connection will fail. The only real way to test
@@ -101,19 +101,19 @@ public abstract class SQLDataSource extends AbstractDataSource {
 			// doing that too often will cause unneccessary delay, so we
 			// wait an arbitrary amount, in this case, 10 seconds.
 			try {
-				if (!connection.isValid(3)) {
+				if(!connection.isValid(3)) {
 					needToConnect = true;
 				}
-			} catch (AbstractMethodError ex) {
+			} catch(AbstractMethodError ex) {
 				// isValid was added later, some connection types may not have that method.
 				try {
 					connection.createStatement().execute(getTestQuery());
-				} catch (SQLException e) {
+				} catch(SQLException e) {
 					needToConnect = true;
 				}
 			}
 		}
-		if (needToConnect) {
+		if(needToConnect) {
 			connection = DriverManager.getConnection(getConnectionString());
 		}
 	}
@@ -131,11 +131,11 @@ public abstract class SQLDataSource extends AbstractDataSource {
 	@Override
 	public void disconnect() throws DataSourceException {
 		try {
-			if (connection != null) {
+			if(connection != null) {
 				connection.close();
 				connection = null;
 			}
-		} catch (SQLException ex) {
+		} catch(SQLException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
@@ -146,18 +146,18 @@ public abstract class SQLDataSource extends AbstractDataSource {
 		try {
 			connect();
 			Set<String[]> set;
-			try (PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "` FROM `" + getEscapedTable() + "` WHERE `" + KEY_COLUMN + "` LIKE ?")) {
+			try(PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "` FROM `" + getEscapedTable() + "` WHERE `" + KEY_COLUMN + "` LIKE ?")) {
 				statement.setString(1, searchPrefix + "%");
 				set = new HashSet<>();
-				try (ResultSet result = statement.executeQuery()) {
-					while (result.next()) {
+				try(ResultSet result = statement.executeQuery()) {
+					while(result.next()) {
 						set.add(result.getString(KEY_COLUMN).split("\\."));
 					}
 				}
 				lastConnected = System.currentTimeMillis();
 			}
 			return set;
-		} catch (SQLException | IOException ex) {
+		} catch(SQLException | IOException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
@@ -167,34 +167,34 @@ public abstract class SQLDataSource extends AbstractDataSource {
 		try {
 			connect();
 			Map<String[], String> map;
-			try (PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "` FROM `" + getEscapedTable() + "`"
+			try(PreparedStatement statement = connection.prepareStatement("SELECT `" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "` FROM `" + getEscapedTable() + "`"
 					+ " WHERE `" + KEY_COLUMN + "` LIKE ?")) {
 				statement.setString(1, StringUtils.Join(leadKey, ".") + "%");
 				map = new HashMap<>();
-				try (ResultSet results = statement.executeQuery()) {
-					while (results.next()) {
+				try(ResultSet results = statement.executeQuery()) {
+					while(results.next()) {
 						map.put(results.getString(KEY_COLUMN).split("\\."), results.getString(VALUE_COLUMN));
 					}
 				}
 				lastConnected = System.currentTimeMillis();
 			}
 			return map;
-		} catch (SQLException | IOException ex) {
+		} catch(SQLException | IOException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
 
 	@Override
 	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
-		if (hasKey(key)) {
+		if(hasKey(key)) {
 			try {
 				connect();
-				try (PreparedStatement statement = connection.prepareStatement("DELETE FROM `" + getEscapedTable() + "` WHERE `" + KEY_COLUMN + "`=?")) {
+				try(PreparedStatement statement = connection.prepareStatement("DELETE FROM `" + getEscapedTable() + "` WHERE `" + KEY_COLUMN + "`=?")) {
 					statement.setString(1, StringUtils.Join(key, "."));
 					statement.executeUpdate();
 				}
 				lastConnected = System.currentTimeMillis();
-			} catch (Exception e) {
+			} catch(Exception e) {
 				throw new DataSourceException(e.getMessage(), e);
 			}
 		}

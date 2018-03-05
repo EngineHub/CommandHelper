@@ -131,7 +131,7 @@ public enum MCChatColor {
 	 * @return A copy of the input string, without any coloring
 	 */
 	public static String stripColor(final String input) {
-		if (input == null) {
+		if(input == null) {
 			return null;
 		}
 
@@ -139,7 +139,7 @@ public enum MCChatColor {
 	}
 
 	static {
-		for (MCChatColor color : MCChatColor.values()) {
+		for(MCChatColor color : MCChatColor.values()) {
 			charColors.put(color.getChar(), color);
 		}
 	}

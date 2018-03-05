@@ -18,7 +18,7 @@ public class BukkitMCParticle extends EnumConvertor<MCParticle, Particle> {
 	private static BukkitMCParticle instance;
 
 	public static BukkitMCParticle getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new BukkitMCParticle();
 		}
 		return instance;
@@ -26,7 +26,7 @@ public class BukkitMCParticle extends EnumConvertor<MCParticle, Particle> {
 
 	@Override
 	protected Particle getConcreteEnumCustom(MCParticle abstracted) {
-		if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9)) {
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9)) {
 			return null;
 		}
 		return super.getConcreteEnumCustom(abstracted);

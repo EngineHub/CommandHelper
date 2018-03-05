@@ -70,13 +70,13 @@ public class ServerEvents {
 		}
 
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (!(e instanceof MCServerCommandEvent)) {
+			if(!(e instanceof MCServerCommandEvent)) {
 				return false;
 			}
 			MCServerCommandEvent event = (MCServerCommandEvent) e;
-			if (prefilter.containsKey("prefix")) {
+			if(prefilter.containsKey("prefix")) {
 				String prefix = event.getCommand().split(" ", 2)[0];
-				if (!prefix.equals(prefilter.get("prefix").val())) {
+				if(!prefix.equals(prefilter.get("prefix").val())) {
 					return false;
 				}
 			}
@@ -89,7 +89,7 @@ public class ServerEvents {
 		}
 
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if (!(e instanceof MCServerCommandEvent)) {
+			if(!(e instanceof MCServerCommandEvent)) {
 				throw new EventException("Cannot convert e to MCServerCommandEvent");
 			}
 			MCServerCommandEvent event = (MCServerCommandEvent) e;
@@ -101,9 +101,9 @@ public class ServerEvents {
 		}
 
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if (event instanceof MCServerCommandEvent) {
+			if(event instanceof MCServerCommandEvent) {
 				MCServerCommandEvent e = (MCServerCommandEvent) event;
-				if (key.equals("command")) {
+				if(key.equals("command")) {
 					e.setCommand(value.val());
 					return true;
 				}
@@ -113,7 +113,7 @@ public class ServerEvents {
 
 		@Override
 		public void preExecution(Environment env, ActiveEvent activeEvent) {
-			if (activeEvent.getUnderlyingEvent() instanceof MCServerCommandEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCServerCommandEvent) {
 				MCServerCommandEvent event = (MCServerCommandEvent) activeEvent.getUnderlyingEvent();
 				env.getEnv(CommandHelperEnvironment.class).SetCommandSender(event.getCommandSender());
 			}
@@ -142,7 +142,7 @@ public class ServerEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (e instanceof MCServerPingEvent) {
+			if(e instanceof MCServerPingEvent) {
 				MCServerPingEvent event = (MCServerPingEvent) e;
 				Prefilters.match(prefilter, "players", event.getNumPlayers(), PrefilterType.MATH_MATCH);
 				Prefilters.match(prefilter, "maxplayers", event.getMaxPlayers(), PrefilterType.MATH_MATCH);
@@ -158,14 +158,14 @@ public class ServerEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if (e instanceof MCServerPingEvent) {
+			if(e instanceof MCServerPingEvent) {
 				MCServerPingEvent event = (MCServerPingEvent) e;
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(event);
 				String ip;
 				try {
 					ip = event.getAddress().getHostAddress();
-				} catch (NullPointerException npe) {
+				} catch(NullPointerException npe) {
 					ip = "";
 				}
 				ret.put("ip", new CString(ip, t));
@@ -173,7 +173,7 @@ public class ServerEvents {
 				ret.put("players", new CInt(event.getNumPlayers(), t));
 				ret.put("maxplayers", new CInt(event.getMaxPlayers(), t));
 				CArray players = new CArray(t);
-				for (MCPlayer player : event.getPlayers()) {
+				for(MCPlayer player : event.getPlayers()) {
 					players.push(new CString(player.getName(), t), t);
 				}
 				ret.put("list", players);
@@ -185,9 +185,9 @@ public class ServerEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if (event instanceof MCServerPingEvent) {
+			if(event instanceof MCServerPingEvent) {
 				MCServerPingEvent e = (MCServerPingEvent) event;
-				switch (key.toLowerCase()) {
+				switch(key.toLowerCase()) {
 					case "motd":
 						e.setMOTD(value.val());
 						return true;
@@ -199,16 +199,16 @@ public class ServerEvents {
 						// and the given list. Names and UUID's outside this intersection will simply be ignored.
 						Set<MCPlayer> modifiedPlayers = new HashSet<>();
 						List<Construct> passedList = ArgumentValidation.getArray(value, value.getTarget()).asList();
-						for (MCPlayer player : e.getPlayers()) {
-							for (Construct construct : passedList) {
+						for(MCPlayer player : e.getPlayers()) {
+							for(Construct construct : passedList) {
 								String playerStr = construct.val();
-								if (playerStr.length() > 0 && playerStr.length() <= 16) { // "player" is a name.
-									if (playerStr.equalsIgnoreCase(player.getName())) {
+								if(playerStr.length() > 0 && playerStr.length() <= 16) { // "player" is a name.
+									if(playerStr.equalsIgnoreCase(player.getName())) {
 										modifiedPlayers.add(player);
 										break;
 									}
 								} else { // "player" is the UUID of the player.
-									if (playerStr.equalsIgnoreCase(player.getUniqueID().toString())) {
+									if(playerStr.equalsIgnoreCase(player.getUniqueID().toString())) {
 										modifiedPlayers.add(player);
 										break;
 									}
@@ -266,21 +266,21 @@ public class ServerEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
-			if (event instanceof MCCommandTabCompleteEvent) {
+			if(event instanceof MCCommandTabCompleteEvent) {
 				MCCommandTabCompleteEvent e = (MCCommandTabCompleteEvent) event;
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(event);
 				ret.put("sender", new CString(e.getCommandSender().getName(), t));
 				CArray comp = new CArray(t);
-				if (e.getCompletions() != null) {
-					for (String c : e.getCompletions()) {
+				if(e.getCompletions() != null) {
+					for(String c : e.getCompletions()) {
 						comp.push(new CString(c, t), t);
 					}
 				}
 				ret.put("completions", comp);
 				ret.put("command", new CString(e.getCommand().getName(), t));
 				CArray args = new CArray(t);
-				for (String a : e.getArguments()) {
+				for(String a : e.getArguments()) {
 					args.push(new CString(a, t), t);
 				}
 				ret.put("args", args);
@@ -298,17 +298,17 @@ public class ServerEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if (event instanceof MCCommandTabCompleteEvent) {
+			if(event instanceof MCCommandTabCompleteEvent) {
 				MCCommandTabCompleteEvent e = (MCCommandTabCompleteEvent) event;
-				if ("completions".equals(key)) {
-					if (value instanceof CArray) {
+				if("completions".equals(key)) {
+					if(value instanceof CArray) {
 						List<String> comp = new ArrayList<>();
-						if (((CArray) value).inAssociativeMode()) {
-							for (Construct k : ((CArray) value).keySet()) {
+						if(((CArray) value).inAssociativeMode()) {
+							for(Construct k : ((CArray) value).keySet()) {
 								comp.add(((CArray) value).get(k, value.getTarget()).val());
 							}
 						} else {
-							for (Construct v : ((CArray) value).asList()) {
+							for(Construct v : ((CArray) value).asList()) {
 								comp.add(v.val());
 							}
 						}
@@ -362,7 +362,7 @@ public class ServerEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if (e instanceof MCRedstoneChangedEvent) {
+			if(e instanceof MCRedstoneChangedEvent) {
 				MCRedstoneChangedEvent event = (MCRedstoneChangedEvent) e;
 				Prefilters.match(prefilter, "location", event.getLocation(), PrefilterType.LOCATION_MATCH);
 				return true;

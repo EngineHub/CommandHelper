@@ -21,8 +21,8 @@ public class DaemonManager {
 	 * @param t The thread to activate
 	 */
 	public void activateThread(Thread t) {
-		synchronized (lock) {
-			if (t != null) {
+		synchronized(lock) {
+			if(t != null) {
 				threads.add(t);
 			} else {
 				threads.add(Thread.currentThread());
@@ -37,8 +37,8 @@ public class DaemonManager {
 	 * @param t The thread to deactivate
 	 */
 	public void deactivateThread(Thread t) {
-		synchronized (lock) {
-			if (t != null) {
+		synchronized(lock) {
+			if(t != null) {
 				threads.remove(t);
 			} else {
 				threads.remove(Thread.currentThread());
@@ -54,7 +54,7 @@ public class DaemonManager {
 	 * @return
 	 */
 	public Thread[] getActiveThreads() {
-		synchronized (lock) {
+		synchronized(lock) {
 			return threads.toArray(new Thread[threads.size()]);
 		}
 	}
@@ -65,8 +65,8 @@ public class DaemonManager {
 	 * @throws InterruptedException
 	 */
 	public void waitForThreads() throws InterruptedException {
-		synchronized (lock) {
-			while (count > 0) {
+		synchronized(lock) {
+			while(count > 0) {
 				lock.wait();
 			}
 		}

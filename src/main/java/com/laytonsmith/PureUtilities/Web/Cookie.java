@@ -31,9 +31,9 @@ public final class Cookie implements Comparable<Cookie> {
 	public Cookie(String unparsedValue, URL currentURL) {
 		//Split on ;
 		String[] parts = unparsedValue.split(";");
-		for (int i = 0; i < parts.length; i++) {
+		for(int i = 0; i < parts.length; i++) {
 			String part = parts[i];
-			if (i == 0) {
+			if(i == 0) {
 				//This is the actual cookie value
 				String[] nameVal = part.split("=", 2);
 				name = nameVal[0].trim();
@@ -44,35 +44,35 @@ public final class Cookie implements Comparable<Cookie> {
 			String[] keyval = part.split("=", 2);
 			String key = keyval[0].trim().toLowerCase();
 			String val = null;
-			if (keyval.length >= 2) {
+			if(keyval.length >= 2) {
 				val = keyval[1].trim();
 			}
-			if ("expires".equals(key)) {
+			if("expires".equals(key)) {
 				DateFormat formatter = new SimpleDateFormat("EEE, dd-MMM-yyyy kk:mm:ss zzz");
 				try {
 					expiration = formatter.parse(val).getTime();
-				} catch (ParseException ex) {
+				} catch(ParseException ex) {
 					Logger.getLogger(WebUtility.class.getName()).log(Level.SEVERE, null, ex);
 				}
-			} else if ("path".equals(key)) {
+			} else if("path".equals(key)) {
 				path = val;
-			} else if ("domain".equals(key)) {
+			} else if("domain".equals(key)) {
 				//Finish the PublicSuffix stuff to validate this domain.
-				if (PublicSuffix.get().getEffectiveTLDLength(val) != -1) {
+				if(PublicSuffix.get().getEffectiveTLDLength(val) != -1) {
 					domain = val;
 				} else {
 					Logger.getLogger(WebUtility.class.getName()).log(Level.SEVERE, "Possible attack cookie being set from " + currentURL + ". Attempted" + " to set " + val + " as the domain.");
 				}
-			} else if ("httponly".equals(key)) {
+			} else if("httponly".equals(key)) {
 				httpOnly = true;
-			} else if ("secureonly".equals(key)) {
+			} else if("secureonly".equals(key)) {
 				secureOnly = true;
 			}
 		}
-		if (domain == null) {
+		if(domain == null) {
 			domain = currentURL.getHost();
 		}
-		if (path == null) {
+		if(path == null) {
 			path = currentURL.getPath();
 		}
 	}

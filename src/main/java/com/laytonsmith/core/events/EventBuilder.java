@@ -27,13 +27,13 @@ public final class EventBuilder {
 
 	static {
 		//First, we need to pull all the event implementors
-		for (Class c : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(abstraction.class)) {
-			if (BindableEvent.class.isAssignableFrom(c)) {
+		for(Class c : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(abstraction.class)) {
+			if(BindableEvent.class.isAssignableFrom(c)) {
 				abstraction abs = (abstraction) c.getAnnotation(abstraction.class);
-				if (abs.type().equals(Implementation.GetServerType())) {
+				if(abs.type().equals(Implementation.GetServerType())) {
 					Class cinterface = null;
-					for (Class implementor : c.getInterfaces()) {
-						if (BindableEvent.class.isAssignableFrom(implementor)) {
+					for(Class implementor : c.getInterfaces()) {
+						if(BindableEvent.class.isAssignableFrom(implementor)) {
 							cinterface = implementor;
 							break;
 						}
@@ -52,16 +52,16 @@ public final class EventBuilder {
 	 * @param clazz
 	 */
 	private static void warmup(Class<? extends BindableEvent> clazz) {
-		if (!methods.containsKey((Class<BindableEvent>) clazz)) {
+		if(!methods.containsKey((Class<BindableEvent>) clazz)) {
 			Class implementor = eventImplementations.get((Class<BindableEvent>) clazz);
 			Method method = null;
-			for (Method m : implementor.getMethods()) {
-				if (m.getName().equals("_instantiate") && (m.getModifiers() & Modifier.STATIC) != 0) {
+			for(Method m : implementor.getMethods()) {
+				if(m.getName().equals("_instantiate") && (m.getModifiers() & Modifier.STATIC) != 0) {
 					method = m;
 					break;
 				}
 			}
-			if (method == null) {
+			if(method == null) {
 				StreamUtils.GetSystemErr().println("UNABLE TO CACHE A CONSTRUCTOR FOR " + clazz.getSimpleName()
 						+ ". Manual triggering will be impossible, and errors will occur"
 						+ " if an attempt is made. Did you forget to add"
@@ -73,26 +73,26 @@ public final class EventBuilder {
 
 	public static <T extends BindableEvent> T instantiate(Class<? extends BindableEvent> clazz, Object... params) {
 		try {
-			if (!methods.containsKey((Class<BindableEvent>) clazz)) {
+			if(!methods.containsKey((Class<BindableEvent>) clazz)) {
 				warmup(clazz);
 			}
 			Object o = methods.get((Class<BindableEvent>) clazz).invoke(null, params);
 			//Now, we have an instance of the underlying object, which the instance
 			//of the event BindableEvent should know how to handle in a constructor.
-			if (!constructors.containsKey((Class<BindableEvent>) clazz)) {
+			if(!constructors.containsKey((Class<BindableEvent>) clazz)) {
 				Class bindableEvent = eventImplementations.get((Class<BindableEvent>) clazz);
 				Constructor constructor = null;
-				for (Constructor c : bindableEvent.getConstructors()) {
-					if (c.getParameterTypes().length == 1) {
+				for(Constructor c : bindableEvent.getConstructors()) {
+					if(c.getParameterTypes().length == 1) {
 						//looks promising
-						if (c.getParameterTypes()[0].equals(o.getClass())) {
+						if(c.getParameterTypes()[0].equals(o.getClass())) {
 							//This is it
 							constructor = c;
 							break;
 						}
 					}
 				}
-				if (constructor == null) {
+				if(constructor == null) {
 					throw new CREPluginInternalException("Cannot find an acceptable constructor that follows the format:"
 							+ " public " + bindableEvent.getClass().getSimpleName() + "(" + o.getClass().getSimpleName() + " event)."
 							+ " Please notify the plugin author of this error.", Target.UNKNOWN);
@@ -104,7 +104,7 @@ public final class EventBuilder {
 			BindableEvent be = (BindableEvent) constructor.newInstance(o);
 			return (T) be;
 
-		} catch (Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
 		return null;

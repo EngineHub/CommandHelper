@@ -23,18 +23,18 @@ public class HeapDumper {
 		initHotspotMBean();
 		try {
 			hotspotMBean.dumpHeap(fileName, live);
-		} catch (RuntimeException re) {
+		} catch(RuntimeException re) {
 			throw re;
-		} catch (Exception exp) {
+		} catch(Exception exp) {
 			throw new RuntimeException(exp);
 		}
 	}
 
 	// initialize the hotspot diagnostic MBean field
 	private static void initHotspotMBean() {
-		if (hotspotMBean == null) {
-			synchronized (HeapDumper.class) {
-				if (hotspotMBean == null) {
+		if(hotspotMBean == null) {
+			synchronized(HeapDumper.class) {
+				if(hotspotMBean == null) {
 					hotspotMBean = getHotspotMBean();
 				}
 			}
@@ -50,9 +50,9 @@ public class HeapDumper {
 					= ManagementFactory.newPlatformMXBeanProxy(server,
 							HOTSPOT_BEAN_NAME, HotSpotDiagnosticMXBean.class);
 			return bean;
-		} catch (RuntimeException re) {
+		} catch(RuntimeException re) {
 			throw re;
-		} catch (Exception exp) {
+		} catch(Exception exp) {
 			throw new RuntimeException(exp);
 		}
 	}

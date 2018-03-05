@@ -97,9 +97,9 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		int spos = pos == null ? data.position() : pos;
 		maxValue = Math.max(maxValue, spos + need);
 		//Reallocate if needed
-		if (spos + need >= data.limit()) {
+		if(spos + need >= data.limit()) {
 			int newSize = data.limit() * scaleMultiplier;
-			if (newSize <= 0) {
+			if(newSize <= 0) {
 				//Protect from this happening
 				newSize = 1;
 			}
@@ -115,12 +115,12 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@Override
 	public String val() {
-		if (value == null) {
+		if(value == null) {
 			int position = data.position();
 			data.rewind();
 			try {
 				value = new String(data.array(), "UTF-8");
-			} catch (UnsupportedEncodingException ex) {
+			} catch(UnsupportedEncodingException ex) {
 				throw new Error(ex);
 			}
 			data.position(position);
@@ -143,7 +143,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 */
 	public void putByte(byte b, Integer pos) {
 		checkSize(Sizes.sizeof(byte.class), pos);
-		if (pos != null) {
+		if(pos != null) {
 			data.position(pos);
 		}
 		data.put(b);
@@ -157,7 +157,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 */
 	public void putChar(char c, Integer pos) {
 		checkSize(Sizes.sizeof(char.class), pos);
-		if (pos == null) {
+		if(pos == null) {
 			data.putChar(c);
 		} else {
 			data.putChar(pos, c);
@@ -172,7 +172,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 */
 	public void putDouble(double d, Integer pos) {
 		checkSize(Sizes.sizeof(double.class), pos);
-		if (pos == null) {
+		if(pos == null) {
 			data.putDouble(d);
 		} else {
 			data.putDouble(pos, d);
@@ -187,7 +187,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 */
 	public void putFloat(float f, Integer pos) {
 		checkSize(Sizes.sizeof(float.class), pos);
-		if (pos == null) {
+		if(pos == null) {
 			data.putFloat(f);
 		} else {
 			data.putFloat(pos, f);
@@ -202,7 +202,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 */
 	public void putInt(int i, Integer pos) {
 		checkSize(Sizes.sizeof(int.class), pos);
-		if (pos == null) {
+		if(pos == null) {
 			data.putInt(i);
 		} else {
 			data.putInt(pos, i);
@@ -217,7 +217,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 */
 	public void putLong(long l, Integer pos) {
 		checkSize(Sizes.sizeof(long.class), pos);
-		if (pos == null) {
+		if(pos == null) {
 			data.putLong(l);
 		} else {
 			data.putLong(pos, l);
@@ -232,7 +232,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 */
 	public void putShort(short s, Integer pos) {
 		checkSize(Sizes.sizeof(short.class), pos);
-		if (pos == null) {
+		if(pos == null) {
 			data.putShort(s);
 		} else {
 			data.putShort(pos, s);
@@ -246,7 +246,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @return
 	 */
 	public byte getByte(Integer pos) {
-		if (pos == null) {
+		if(pos == null) {
 			return data.get();
 		} else {
 			return data.get(pos);
@@ -260,7 +260,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @return
 	 */
 	public char getChar(Integer pos) {
-		if (pos == null) {
+		if(pos == null) {
 			return data.getChar();
 		} else {
 			return data.getChar(pos);
@@ -274,7 +274,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @return
 	 */
 	public double getDouble(Integer pos) {
-		if (pos == null) {
+		if(pos == null) {
 			return data.getDouble();
 		} else {
 			return data.getDouble(pos);
@@ -288,7 +288,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @return
 	 */
 	public float getFloat(Integer pos) {
-		if (pos == null) {
+		if(pos == null) {
 			return data.getFloat();
 		} else {
 			return data.getFloat(pos);
@@ -302,7 +302,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @return
 	 */
 	public int getInt(Integer pos) {
-		if (pos == null) {
+		if(pos == null) {
 			return data.getInt();
 		} else {
 			return data.getInt(pos);
@@ -316,7 +316,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @return
 	 */
 	public long getLong(Integer pos) {
-		if (pos == null) {
+		if(pos == null) {
 			return data.getLong();
 		} else {
 			return data.getLong(pos);
@@ -330,7 +330,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @return
 	 */
 	public short getShort(Integer pos) {
-		if (pos == null) {
+		if(pos == null) {
 			return data.getShort();
 		} else {
 			return data.getShort(pos);
@@ -355,7 +355,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 */
 	public void putBytes(byte[] d, Integer pos) {
 		checkSize((int) d.length, pos);
-		if (pos != null) {
+		if(pos != null) {
 			data.position(pos);
 		}
 		data.put(d);
@@ -371,7 +371,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	public CByteArray getBytes(int size, Integer pos) {
 		CByteArray ba = new CByteArray(this.getTarget(), 0);
 		byte[] d = new byte[size];
-		if (pos != null) {
+		if(pos != null) {
 			data.position(pos);
 		}
 		data.get(d);
@@ -412,15 +412,15 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 */
 	public void writeUTF8String(String string, Integer pos, String encoding) throws IndexOutOfBoundsException, UnsupportedEncodingException {
 		byte[] array;
-		if (encoding == null) {
+		if(encoding == null) {
 			encoding = "UTF-8";
 		}
 		array = string.getBytes(encoding);
 		checkSize(array.length + Sizes.sizeof(short.class), pos);
-		if (pos != null) {
+		if(pos != null) {
 			data.position(pos);
 		}
-		if (array.length > Short.MAX_VALUE) {
+		if(array.length > Short.MAX_VALUE) {
 			throw new IndexOutOfBoundsException("The length of the string cannot be greater than " + Short.MAX_VALUE + ". If you must encode a string"
 					+ " longer than this, you must write the string out yourself.");
 		}
@@ -437,10 +437,10 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @throws java.io.UnsupportedEncodingException
 	 */
 	public String readUTF8String(Integer pos, String encoding) throws UnsupportedEncodingException {
-		if (pos != null) {
+		if(pos != null) {
 			data.position(pos);
 		}
-		if (encoding == null) {
+		if(encoding == null) {
 			encoding = "UTF-8";
 		}
 		byte[] array = new byte[data.getShort()];
@@ -557,7 +557,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			int i = Static.getInt32(index, t);
 			try {
 				return new CInt(backing[i], t);
-			} catch (ArrayIndexOutOfBoundsException e) {
+			} catch(ArrayIndexOutOfBoundsException e) {
 				throw new CRERangeException("Index out of range. Found " + i + ", but array length is only " + backing.length, t);
 			}
 		}
@@ -569,10 +569,10 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 		@Override
 		public String val() {
-			if (value == null) {
+			if(value == null) {
 				try {
 					value = new String(backing, "UTF-8");
-				} catch (UnsupportedEncodingException ex) {
+				} catch(UnsupportedEncodingException ex) {
 					throw new Error(ex);
 				}
 			}

@@ -49,8 +49,8 @@ public class CClosure extends Construct {
 		this.defaults = defaults;
 		this.types = types;
 		this.returnType = returnType;
-		for (String pName : names) {
-			if (pName.equals("@arguments")) {
+		for(String pName : names) {
+			if(pName.equals("@arguments")) {
 				CHLog.GetLogger().w(CHLog.Tags.COMPILER, "This closure overrides the builtin @arguments parameter", t);
 				break;
 			}
@@ -65,23 +65,23 @@ public class CClosure extends Construct {
 	}
 
 	private void condense(ParseTree node, StringBuilder b) {
-		if (node == null) {
+		if(node == null) {
 			return;
 		}
-		if (node.getData() instanceof CFunction) {
+		if(node.getData() instanceof CFunction) {
 			b.append(((CFunction) node.getData()).val()).append("(");
-			for (int i = 0; i < node.numberOfChildren(); i++) {
+			for(int i = 0; i < node.numberOfChildren(); i++) {
 				condense(node.getChildAt(i), b);
-				if (i != node.numberOfChildren() - 1 && !((CFunction) node.getData()).val().equals("__autoconcat__")) {
+				if(i != node.numberOfChildren() - 1 && !((CFunction) node.getData()).val().equals("__autoconcat__")) {
 					b.append(",");
 				}
 			}
 			b.append(")");
-		} else if (node.getData() instanceof CString) {
+		} else if(node.getData() instanceof CString) {
 			CString data = (CString) node.getData();
 			// Convert: \ -> \\ and ' -> \'
 			b.append("'").append(data.val().replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n").replace("'", "\\'")).append("'");
-		} else if (node.getData() instanceof IVariable) {
+		} else if(node.getData() instanceof IVariable) {
 			b.append(((IVariable) node.getData()).getVariableName());
 		} else {
 			b.append(node.getData().val());
@@ -95,7 +95,7 @@ public class CClosure extends Construct {
 	@Override
 	public CClosure clone() throws CloneNotSupportedException {
 		CClosure clone = (CClosure) super.clone();
-		if (this.node != null) {
+		if(this.node != null) {
 			clone.node = this.node.clone();
 		}
 		return clone;
@@ -138,40 +138,40 @@ public class CClosure extends Construct {
 	 * @throws FunctionReturnException If the closure has a return() call in it.
 	 */
 	public void execute(Construct... values) throws ConfigRuntimeException, ProgramFlowManipulationException, FunctionReturnException, CancelCommandException {
-		if (node == null) {
+		if(node == null) {
 			return;
 		}
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<closure>>", getTarget()));
 		try {
 			Environment environment;
-			synchronized (this) {
+			synchronized(this) {
 				environment = env.clone();
 			}
-			if (values != null) {
-				for (int i = 0; i < names.length; i++) {
+			if(values != null) {
+				for(int i = 0; i < names.length; i++) {
 					String name = names[i];
 					Construct value;
 					try {
 						value = values[i];
-					} catch (Exception e) {
+					} catch(Exception e) {
 						value = defaults[i].clone();
 					}
 					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value, getTarget()));
 				}
 			}
 			boolean hasArgumentsParam = false;
-			for (String pName : this.names) {
-				if (pName.equals("@arguments")) {
+			for(String pName : this.names) {
+				if(pName.equals("@arguments")) {
 					hasArgumentsParam = true;
 					break;
 				}
 			}
 
-			if (!hasArgumentsParam) {
+			if(!hasArgumentsParam) {
 				CArray arguments = new CArray(node.getData().getTarget());
-				if (values != null) {
-					for (Construct value : values) {
+				if(values != null) {
+					for(Construct value : values) {
 						arguments.push(value, node.getData().getTarget());
 					}
 				}
@@ -184,41 +184,41 @@ public class CClosure extends Construct {
 			newNode.setChildren(children);
 			try {
 				MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class).GetScript());
-			} catch (LoopManipulationException e) {
+			} catch(LoopManipulationException e) {
 				//This shouldn't ever happen.
 				LoopManipulationException lme = ((LoopManipulationException) e);
 				Target t = lme.getTarget();
 				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A " + lme.getName() + "() bubbled up to the top of"
 						+ " a closure, which is unexpected behavior.", t), environment);
-			} catch (FunctionReturnException ex) {
+			} catch(FunctionReturnException ex) {
 				// Check the return type of the closure to see if it matches the defined type
 				// Normal execution.
 				Construct ret = ex.getReturn();
-				if (!InstanceofUtil.isInstanceof(ret, returnType)) {
+				if(!InstanceofUtil.isInstanceof(ret, returnType)) {
 					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
 							+ " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 				}
 				// Now rethrow it
 				throw ex;
-			} catch (CancelCommandException e) {
+			} catch(CancelCommandException e) {
 				// die()
-			} catch (ConfigRuntimeException ex) {
-				if (ex instanceof AbstractCREException) {
+			} catch(ConfigRuntimeException ex) {
+				if(ex instanceof AbstractCREException) {
 					((AbstractCREException) ex).freezeStackTraceElements(stManager);
 				}
 				throw ex;
-			} catch (Throwable t) {
+			} catch(Throwable t) {
 				// Not sure. Pop and re-throw.
 				throw t;
 			} finally {
 				stManager.popStackTraceElement();
 			}
 			// If we got here, then there was no return type. This is fine, but only for returnType void or auto.
-			if (!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
+			if(!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
 				throw new CRECastException("Expecting closure to return a value of type " + returnType.val() + ","
 						+ " but no value was returned.", node.getTarget());
 			}
-		} catch (CloneNotSupportedException ex) {
+		} catch(CloneNotSupportedException ex) {
 			Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}

@@ -49,7 +49,7 @@ public class XGUI {
 
 			@Override
 			public void run() {
-				for (Window w : windows.values()) {
+				for(Window w : windows.values()) {
 					w.dispose();
 				}
 				windows.clear();
@@ -84,13 +84,13 @@ public class XGUI {
 			String title = "";
 			int width = 300;
 			int height = 300;
-			if (args.length > 0) {
+			if(args.length > 0) {
 				title = args[0].val();
 			}
-			if (args.length > 1) {
+			if(args.length > 1) {
 				width = Static.getInt32(args[1], t);
 			}
-			if (args.length > 2) {
+			if(args.length > 2) {
 				height = Static.getInt32(args[2], t);
 			}
 			frame.setTitle(title);
@@ -151,7 +151,7 @@ public class XGUI {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
 			boolean show = true;
-			if (args.length > 1) {
+			if(args.length > 1) {
 				show = Static.getBoolean(args[1]);
 			}
 			Window w = windows.get(id);
@@ -210,13 +210,13 @@ public class XGUI {
 			int green = Static.getInt32(args[4], t);
 			int blue = Static.getInt32(args[5], t);
 			Window w = windows.get(windowID);
-			while (true) {
+			while(true) {
 				try {
 					JPanel panel = (JPanel) w.findComponentAt(x, y);
 					panel.getGraphics().setColor(new Color(red, green, blue));
 					panel.getGraphics().draw3DRect(x, y, 1, 1, true);
 					return CVoid.VOID;
-				} catch (ClassCastException ex) {
+				} catch(ClassCastException ex) {
 					//?
 					return CVoid.VOID;
 				}
@@ -270,16 +270,16 @@ public class XGUI {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String url = args[0].val();
 			try {
-				if (Desktop.isDesktopSupported()) {
+				if(Desktop.isDesktopSupported()) {
 					Desktop.getDesktop().browse(new URI(url));
 				}
-			} catch (URISyntaxException ex1) {
+			} catch(URISyntaxException ex1) {
 				throw new CREFormatException(ex1.getMessage(), t);
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				try {
 					// Last ditch effort
 					Runtime rt = Runtime.getRuntime();
-					switch (OSUtils.GetOS()) {
+					switch(OSUtils.GetOS()) {
 						case WINDOWS:
 							rt.exec("rundll32 url.dll,FileProtocolHandler " + url);
 							break;
@@ -293,14 +293,14 @@ public class XGUI {
 								"netscape", "opera", "links", "lynx"};
 
 							StringBuilder cmd = new StringBuilder();
-							for (int i = 0; i < browsers.length; i++) {
+							for(int i = 0; i < browsers.length; i++) {
 								cmd.append(i == 0 ? "" : " || ").append(browsers[i]).append(" \"").append(url).append("\" ");
 							}
 
 							rt.exec(new String[]{"sh", "-c", cmd.toString()});
 							break;
 					}
-				} catch (IOException ex1) {
+				} catch(IOException ex1) {
 					throw new CREIOException(ex1.getMessage(), t, ex1);
 				}
 			}

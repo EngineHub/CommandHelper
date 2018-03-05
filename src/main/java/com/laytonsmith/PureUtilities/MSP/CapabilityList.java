@@ -31,7 +31,7 @@ public class CapabilityList {
 	}
 
 	public void setCapability(Capability capability, CapabilityValue value) {
-		if (value.serverReturnable()) {
+		if(value.serverReturnable()) {
 			caps.put(capability, value);
 		} else {
 			throw new RuntimeException("An error occured during runtime, the server returned an invalid capability: " + value);
@@ -47,11 +47,11 @@ public class CapabilityList {
 	 */
 	public CapabilityValue hasCapability(Capability capability) {
 		CapabilityValue value = caps.get(capability);
-		if (value == null) {
+		if(value == null) {
 			//If the capability is unknown, we need to look it up.
 			setCapability(capability, connection.getCapability(capability));
 			return hasCapability(capability);
-		} else if (value == CapabilityValue.DYNAMIC) {
+		} else if(value == CapabilityValue.DYNAMIC) {
 			//Do a one time lookup
 			return connection.getCapability(capability);
 		}

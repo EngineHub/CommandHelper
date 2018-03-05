@@ -64,7 +64,7 @@ public class Weather {
 			MCWorld w = null;
 			boolean safe = false;
 			int safeIndex = 1;
-			if (args[0] instanceof CArray) {
+			if(args[0] instanceof CArray) {
 				CArray a = (CArray) args[0];
 				MCLocation l = ObjectGenerator.GetGenerator().location(a, (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld() : null), t);
 				x = (int) java.lang.Math.floor(l.getX());
@@ -77,11 +77,11 @@ public class Weather {
 				z = (int) java.lang.Math.floor(Static.getNumber(args[2], t));
 				safeIndex = 3;
 			}
-			if (args.length >= safeIndex + 1) {
+			if(args.length >= safeIndex + 1) {
 				safe = Static.getBoolean(args[safeIndex]);
 			}
-			if (w != null) {
-				if (!safe) {
+			if(w != null) {
+				if(!safe) {
 					ent = w.strikeLightning(StaticLayer.GetLocation(w, x, y + 1, z)).getUniqueId();
 				} else {
 					ent = w.strikeLightningEffect(StaticLayer.GetLocation(w, x, y + 1, z)).getUniqueId();
@@ -136,32 +136,32 @@ public class Weather {
 			boolean b = Static.getBoolean(args[0]);
 			MCWorld w = null;
 			int duration = -1;
-			if (args.length == 2) {
-				if (args[1] instanceof CString) {
+			if(args.length == 2) {
+				if(args[1] instanceof CString) {
 					w = Static.getServer().getWorld(args[1].val());
-				} else if (args[1] instanceof CInt) {
+				} else if(args[1] instanceof CInt) {
 					duration = Static.getInt32(args[1], t);
 				} else {
 					throw new CREFormatException("", t);
 				}
 			}
-			if (args.length == 3) {
+			if(args.length == 3) {
 				w = Static.getServer().getWorld(args[1].val());
 				duration = Static.getInt32(args[2], t);
 			}
-			if (w == null) {
+			if(w == null) {
 				MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-				if (sender instanceof MCPlayer) {
+				if(sender instanceof MCPlayer) {
 					w = ((MCPlayer) sender).getWorld();
-				} else if (sender instanceof MCBlockCommandSender) {
+				} else if(sender instanceof MCBlockCommandSender) {
 					w = ((MCBlockCommandSender) sender).getBlock().getWorld();
-				} else if (sender instanceof MCCommandMinecart) {
+				} else if(sender instanceof MCCommandMinecart) {
 					w = ((MCCommandMinecart) sender).getWorld();
 				}
 			}
-			if (w != null) {
+			if(w != null) {
 				w.setStorm(b);
-				if (duration > 0) {
+				if(duration > 0) {
 					w.setWeatherDuration(duration);
 				}
 			} else {
@@ -222,19 +222,19 @@ public class Weather {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			if (args.length == 1) {
-				if (environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+			if(args.length == 1) {
+				if(environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
 					w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 				}
 			} else {
 				w = Static.getServer().getWorld(args[1].val());
 			}
-			if (w != null) {
+			if(w != null) {
 				w.setThundering(Static.getBoolean(args[0]));
 			} else {
 				throw new CREInvalidWorldException("No existing world specified!", t);
 			}
-			if (args.length == 3) {
+			if(args.length == 3) {
 				w.setThunderDuration(Static.getInt32(args[2], t));
 			}
 			return CVoid.VOID;
@@ -285,14 +285,14 @@ public class Weather {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				w = Static.getServer().getWorld(args[0].val());
 			} else {
-				if (environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+				if(environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
 					w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 				}
 			}
-			if (w != null) {
+			if(w != null) {
 				return CBoolean.get(w.isStorming());
 			} else {
 				throw new CREInvalidWorldException("No existing world specified!", t);
@@ -343,14 +343,14 @@ public class Weather {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				w = Static.getServer().getWorld(args[0].val());
 			} else {
-				if (environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+				if(environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
 					w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 				}
 			}
-			if (w != null) {
+			if(w != null) {
 				return CBoolean.get(w.isThundering());
 			} else {
 				throw new CREInvalidWorldException("No existing world specified!", t);

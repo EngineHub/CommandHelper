@@ -39,7 +39,7 @@ public class SSHWrapper {
 	 * Sessions are cached, and should be closed after use.
 	 */
 	public static void closeSessions() {
-		for (Session s : sessionList.values()) {
+		for(Session s : sessionList.values()) {
 			s.disconnect();
 		}
 		sessionList.clear();
@@ -57,19 +57,19 @@ public class SSHWrapper {
 	 * true otherwise
 	 */
 	public static boolean SCP(String from, String to) throws IOException {
-		if ((from.contains("@") && to.contains("@")) || (!from.contains("@") && !to.contains("@"))) {
+		if((from.contains("@") && to.contains("@")) || (!from.contains("@") && !to.contains("@"))) {
 			throw new IOException("Paths cannot be both remote, or both local.");
 		}
 		//Now that we've handled the case where both paths are remote, we
 		//can determine which one is the remote path, and proceed from there.
 		String remote = to;
-		if (from.contains("@")) {
+		if(from.contains("@")) {
 			remote = from;
 		}
 		//Now, parse the remote connection for information
 		Matcher m = Pattern.compile("(.+?)@(.+?)(?:\\:(.+?)(?:\\:(.+?))?)?\\:(.+)").matcher(remote);
 		String syntaxErrorMsg = "Remote host connection must match the following syntax: user@host[:port[:password]]:path/to/file";
-		if (m.find()) {
+		if(m.find()) {
 			String user = m.group(1);
 			String host = m.group(2);
 			String sport = m.group(3);
@@ -78,47 +78,47 @@ public class SSHWrapper {
 			String file = m.group(5);
 
 			try {
-				if (sport != null) {
+				if(sport != null) {
 					port = Integer.parseInt(sport);
 				}
-				if (port == 0) {
+				if(port == 0) {
 					port = 22;
 				}
-			} catch (NumberFormatException e) {
+			} catch(NumberFormatException e) {
 				//They may have been trying this:
 				//user@host:password:/file/path
 				//If that's the case, password will
 				//be null, so let's give them a better error message.
-				if (password == null) {
+				if(password == null) {
 					throw new IOException(syntaxErrorMsg + " (It appears as though you may have been trying a password"
 							+ " in place of the port. You may specify the port to be 0 if you want it to use the default,"
 							+ " to bypass the port parameter.)");
 				}
 			}
-			if (port < 1 || port > 65535) {
+			if(port < 1 || port > 65535) {
 				throw new IOException("Port numbers must be between 1 and 65535");
 			}
 			try {
 				JSch jsch = new JSch();
 				Session sshSession = null;
 				File known_hosts = new File(System.getProperty("user.home") + "/.ssh/known_hosts");
-				if (!known_hosts.exists()) {
-					if (password == null) {
+				if(!known_hosts.exists()) {
+					if(password == null) {
 						throw new IOException("No known hosts file exists at " + known_hosts.getAbsolutePath() + ", and no password was provided");
 					}
 				} else {
 					jsch.setKnownHosts(known_hosts.getAbsolutePath());
 				}
-				if (password == null) {
+				if(password == null) {
 					//We need to try public key authentication
 					File privKey = new File(System.getProperty("user.home") + "/.ssh/id_rsa");
-					if (privKey.exists()) {
+					if(privKey.exists()) {
 						jsch.addIdentity(privKey.getAbsolutePath());
 					} else {
 						throw new IOException("No password provided, and no private key exists at " + privKey.getAbsolutePath());
 					}
 				}
-				if (!sessionList.containsKey(user + host + port)) {
+				if(!sessionList.containsKey(user + host + port)) {
 					sshSession = jsch.getSession(user, host, port);
 					sshSession.setUserInfo(new UserInfo() {
 						@Override
@@ -160,7 +160,7 @@ public class SSHWrapper {
 					sshSession = sessionList.get(user + host + port);
 				}
 				// http://www.jcraft.com/jsch/examples/
-				if (from.contains("@")) {
+				if(from.contains("@")) {
 					//We are pulling a remote file here, so we need to use SCPFrom
 					File localFile = new File(to);
 					SCPFrom(file, localFile, sshSession);
@@ -172,7 +172,7 @@ public class SSHWrapper {
 
 				return true;
 
-			} catch (JSchException | SftpException ex) {
+			} catch(JSchException | SftpException ex) {
 				throw new IOException(ex);
 			}
 		} else {
@@ -202,15 +202,15 @@ public class SSHWrapper {
 			try {
 				// Try to cd to the parent folder
 				channel.cd(frfile.getParent());
-			} catch (SftpException ex) {
+			} catch(SftpException ex) {
 				// But if that doesn't work, we need to create one or more of the folders, so we start at the beginning
 				channel.cd("/");
-				for (int i = 0; i < folders.length - 1; i++) {
+				for(int i = 0; i < folders.length - 1; i++) {
 					String folder = folders[i];
-					if (folder.length() > 0) {
+					if(folder.length() > 0) {
 						try {
 							channel.cd(folder);
-						} catch (SftpException e) {
+						} catch(SftpException e) {
 							channel.mkdir(folder);
 							channel.cd(folder);
 						}
@@ -219,14 +219,14 @@ public class SSHWrapper {
 			}
 			String remote = getRemoteMD5(rfile, session);
 			String local = getLocalMD5(lfile);
-			if (!remote.equals(local)) {
+			if(!remote.equals(local)) {
 				// only upload if it's different
 				channel.put(new FileInputStream(lfile), frfile.getName());
 				return true;
 			}
 			return false;
 		} finally {
-			if (channel != null) {
+			if(channel != null) {
 				channel.exit();
 				channel.disconnect();
 			}
@@ -247,7 +247,7 @@ public class SSHWrapper {
 			digest.update(f);
 			String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 			return hash;
-		} catch (NoSuchAlgorithmException ex) {
+		} catch(NoSuchAlgorithmException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -266,19 +266,19 @@ public class SSHWrapper {
 			channel.connect();
 
 			byte[] tmp = new byte[1024];
-			while (true) {
-				while (in.available() > 0) {
+			while(true) {
+				while(in.available() > 0) {
 					int i = in.read(tmp, 0, 1024);
-					if (i < 0) {
+					if(i < 0) {
 						break;
 					}
 					sb.append(new String(tmp, 0, i));
 				}
-				if (channel.isClosed()) {
-					if (in.available() > 0) {
+				if(channel.isClosed()) {
+					if(in.available() > 0) {
 						continue;
 					}
-					if (channel.getExitStatus() != 0) {
+					if(channel.getExitStatus() != 0) {
 						// Something went wrong, fail the comparison
 						return "invalidMD5sum";
 					}
@@ -286,15 +286,15 @@ public class SSHWrapper {
 				}
 				try {
 					Thread.sleep(1);
-				} catch (Exception ee) {
+				} catch(Exception ee) {
 				}
 			}
 		} finally {
-			if (channel != null) {
+			if(channel != null) {
 				channel.disconnect();
 			}
 		}
-		if ("".equals(sb.toString())) {
+		if("".equals(sb.toString())) {
 			// Something went wrong, and so we're going to be forced to re-upload anyways. Using a nonsense value
 			// ensures that the comparison will fail. This can happen if openssl is not installed on the remote,
 			// or if the file simply doesn't exist.
@@ -326,9 +326,9 @@ public class SSHWrapper {
 		out.write(buf, 0, 1);
 		out.flush();
 
-		while (true) {
+		while(true) {
 			int c = checkAckFrom(in);
-			if (c != 'C') {
+			if(c != 'C') {
 				break;
 			}
 
@@ -336,21 +336,21 @@ public class SSHWrapper {
 			in.read(buf, 0, 5);
 
 			long filesize = 0L;
-			while (true) {
-				if (in.read(buf, 0, 1) < 0) {
+			while(true) {
+				if(in.read(buf, 0, 1) < 0) {
 					// error
 					break;
 				}
-				if (buf[0] == ' ') {
+				if(buf[0] == ' ') {
 					break;
 				}
 				filesize = filesize * 10L + (long) (buf[0] - '0');
 			}
 
 			String file = null;
-			for (int i = 0;; i++) {
+			for(int i = 0;; i++) {
 				in.read(buf, i, 1);
-				if (buf[i] == (byte) 0x0a) {
+				if(buf[i] == (byte) 0x0a) {
 					file = new String(buf, 0, i);
 					break;
 				}
@@ -362,26 +362,26 @@ public class SSHWrapper {
 			out.flush();
 
 			String prefix = null;
-			if (local.isDirectory()) {
+			if(local.isDirectory()) {
 				prefix = local.getPath() + File.separator;
 			}
 			// read a content of lfile
 			FileOutputStream fos = new FileOutputStream(prefix == null ? local.getPath() : prefix + file);
 			int foo;
-			while (true) {
-				if (buf.length < filesize) {
+			while(true) {
+				if(buf.length < filesize) {
 					foo = buf.length;
 				} else {
 					foo = (int) filesize;
 				}
 				foo = in.read(buf, 0, foo);
-				if (foo < 0) {
+				if(foo < 0) {
 					// error
 					break;
 				}
 				fos.write(buf, 0, foo);
 				filesize -= foo;
-				if (filesize == 0L) {
+				if(filesize == 0L) {
 					break;
 				}
 			}
@@ -406,17 +406,17 @@ public class SSHWrapper {
 		// 2 for fatal error,
 		// -1
 
-		if (b == 1 || b == 2) {
+		if(b == 1 || b == 2) {
 			StringBuffer sb = new StringBuffer();
 			int c;
 			do {
 				c = in.read();
 				sb.append((char) c);
-			} while (c != '\n');
-			if (b == 1) { // error
+			} while(c != '\n');
+			if(b == 1) { // error
 				throw new IOException(sb.toString());
 			}
-			if (b == 2) { // fatal error
+			if(b == 2) { // fatal error
 				throw new IOException(sb.toString());
 			}
 		}
@@ -428,24 +428,24 @@ public class SSHWrapper {
 		// 1 for error,
 		// 2 for fatal error,
 		// -1
-		if (b == 0) {
+		if(b == 0) {
 			return b;
 		}
-		if (b == -1) {
+		if(b == -1) {
 			return b;
 		}
 
-		if (b == 1 || b == 2) {
+		if(b == 1 || b == 2) {
 			StringBuffer sb = new StringBuffer();
 			int c;
 			do {
 				c = in.read();
 				sb.append((char) c);
-			} while (c != '\n');
-			if (b == 1) { // error
+			} while(c != '\n');
+			if(b == 1) { // error
 				throw new IOException(sb.toString());
 			}
-			if (b == 2) { // fatal error
+			if(b == 2) { // fatal error
 				throw new IOException(sb.toString());
 			}
 		}

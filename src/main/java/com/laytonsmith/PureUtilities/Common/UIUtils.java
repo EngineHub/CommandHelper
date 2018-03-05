@@ -30,10 +30,10 @@ public class UIUtils {
 		GraphicsDevice[] devices = g.getScreenDevices();
 		Point mousePoint = MouseInfo.getPointerInfo().getLocation();
 		Rectangle primary = null;
-		for (GraphicsDevice gg : devices) {
+		for(GraphicsDevice gg : devices) {
 			Rectangle r = gg.getDefaultConfiguration().getBounds();
 			primary = r; // Set this as the primary, so that primary will never be null.
-			if (mousePoint.x > r.x && mousePoint.x < (r.x + r.width)
+			if(mousePoint.x > r.x && mousePoint.x < (r.x + r.width)
 					&& mousePoint.y > r.y && mousePoint.y < (r.y + r.height)) {
 				// This is the "primary" monitor
 				primary = r;
@@ -67,7 +67,7 @@ public class UIUtils {
 	 * @param components
 	 */
 	public static void setEnabled(boolean enabled, Component... components) {
-		for (Component component : components) {
+		for(Component component : components) {
 			component.setEnabled(enabled);
 		}
 	}
@@ -80,7 +80,7 @@ public class UIUtils {
 	 */
 	public static void openWebpage(URI uri) throws IOException {
 		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-		if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+		if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
 			desktop.browse(uri);
 		}
 	}

@@ -27,11 +27,11 @@ public class CommandHelperServerListener implements Listener {
 	public void onServerCommand(ServerCommandEvent event) {
 		// Select the proper CommandSender wrapper.
 		MCCommandSender sender;
-		if (event.getSender() instanceof ConsoleCommandSender) { // Console.
+		if(event.getSender() instanceof ConsoleCommandSender) { // Console.
 			sender = new BukkitMCConsoleCommandSender((ConsoleCommandSender) event.getSender());
-		} else if (event.getSender() instanceof BlockCommandSender) { // Commandblock blocks.
+		} else if(event.getSender() instanceof BlockCommandSender) { // Commandblock blocks.
 			sender = new BukkitMCBlockCommandSender((BlockCommandSender) event.getSender());
-		} else if (event.getSender() instanceof CommandMinecart) { // Commandblock minecarts.
+		} else if(event.getSender() instanceof CommandMinecart) { // Commandblock minecarts.
 			sender = new BukkitMCCommandMinecart((CommandMinecart) event.getSender());
 		} else { // other CommandSenders.
 			sender = new BukkitMCCommandSender(event.getSender());
@@ -40,21 +40,21 @@ public class CommandHelperServerListener implements Listener {
 		BukkitMiscEvents.BukkitMCServerCommandEvent cce = new BukkitMiscEvents.BukkitMCServerCommandEvent(event, sender);
 		EventUtils.TriggerListener(Driver.SERVER_COMMAND, "server_command", cce);
 		try {
-			if (event.isCancelled()) {
+			if(event.isCancelled()) {
 				return;
 			}
-		} catch (NoSuchMethodError ex) {
+		} catch(NoSuchMethodError ex) {
 			// not cancellable before 1.8.8
 		}
 
 		boolean match = false;
 		try {
 			match = Static.getAliasCore().alias("/" + event.getCommand(), sender);
-		} catch (InternalException e) {
+		} catch(InternalException e) {
 			Static.getLogger().log(Level.SEVERE, e.getMessage());
-		} catch (ConfigRuntimeException e) {
+		} catch(ConfigRuntimeException e) {
 			Static.getLogger().log(Level.WARNING, e.getMessage());
-		} catch (Throwable e) {
+		} catch(Throwable e) {
 			sender.sendMessage(MCChatColor.RED + "Command failed with following reason: " + e.getMessage());
 			//Obviously the command is registered, but it somehow failed. Cancel the event.
 			e.printStackTrace();
@@ -62,7 +62,7 @@ public class CommandHelperServerListener implements Listener {
 		}
 		//To prevent "unknown console command" error, set the command to the meta command
 		//commandhelper null, which just returns true.
-		if (match) {
+		if(match) {
 			event.setCommand("commandhelper null");
 		}
 	}

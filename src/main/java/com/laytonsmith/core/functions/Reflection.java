@@ -119,75 +119,75 @@ public class Reflection {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args.length < 1) {
+			if(args.length < 1) {
 				throw new CREInsufficientArgumentsException("Not enough parameters was sent to " + getName(), t);
 			}
 
 			String param = args[0].val();
-			if ("label".equalsIgnoreCase(param)) {
+			if("label".equalsIgnoreCase(param)) {
 				return new CString(env.getEnv(GlobalEnv.class).GetLabel(), t);
-			} else if ("command".equalsIgnoreCase(param)) {
+			} else if("command".equalsIgnoreCase(param)) {
 				return new CString(env.getEnv(CommandHelperEnvironment.class).GetCommand(), t);
-			} else if ("varlist".equalsIgnoreCase(param)) {
-				if (args.length == 1) {
+			} else if("varlist".equalsIgnoreCase(param)) {
+				if(args.length == 1) {
 					//No name provided
 					CArray ca = new CArray(t);
-					for (String name : env.getEnv(GlobalEnv.class).GetVarList().keySet()) {
+					for(String name : env.getEnv(GlobalEnv.class).GetVarList().keySet()) {
 						ca.push(new CString(name, t), t);
 					}
 					return ca;
-				} else if (args.length == 2) {
+				} else if(args.length == 2) {
 					//The name was provided
 					String name = args[1].val();
 					return env.getEnv(GlobalEnv.class).GetVarList().get(name, t).ival();
 				}
-			} else if ("line_num".equalsIgnoreCase(param)) {
+			} else if("line_num".equalsIgnoreCase(param)) {
 				return new CInt(t.line(), t);
-			} else if ("file".equalsIgnoreCase(param)) {
-				if (t.file() == null) {
+			} else if("file".equalsIgnoreCase(param)) {
+				if(t.file() == null) {
 					return new CString("Unknown (maybe the interpreter?)", t);
 				} else {
 					try {
 						return new CString(t.file().getCanonicalPath().replace('\\', '/'), t);
-					} catch (IOException ex) {
+					} catch(IOException ex) {
 						throw new CREIOException(ex.getMessage(), t);
 					}
 				}
-			} else if ("col".equalsIgnoreCase(param)) {
+			} else if("col".equalsIgnoreCase(param)) {
 				return new CInt(t.col(), t);
-			} else if ("datasources".equalsIgnoreCase(param)) {
-				if (protocols == null) {
+			} else if("datasources".equalsIgnoreCase(param)) {
+				if(protocols == null) {
 					protocols = new HashSet<Construct>();
-					for (String s : DataSourceFactory.GetSupportedProtocols()) {
+					for(String s : DataSourceFactory.GetSupportedProtocols()) {
 						protocols.add(new CString(s, Target.UNKNOWN));
 					}
 				}
 				return new CArray(t, protocols);
-			} else if ("enum".equalsIgnoreCase(param)) {
+			} else if("enum".equalsIgnoreCase(param)) {
 				CArray a = new CArray(t);
 				Set<ClassMirror<? extends Enum>> enums = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(MEnum.class, Enum.class);
 				Set<ClassMirror<? extends DynamicEnum>> dEnums = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class);
-				if (args.length == 1) {
+				if(args.length == 1) {
 					//No name provided
-					for (ClassMirror<? extends Enum> e : enums) {
+					for(ClassMirror<? extends Enum> e : enums) {
 						a.push(new CString((String) e.getAnnotation(MEnum.class).getValue("value"), t), t);
 					}
-					for (ClassMirror<? extends DynamicEnum> d : dEnums) {
+					for(ClassMirror<? extends DynamicEnum> d : dEnums) {
 						a.push(new CString((String) d.getAnnotation(MDynamicEnum.class).getValue("value"), t), t);
 					}
-				} else if (args.length == 2) {
+				} else if(args.length == 2) {
 					String enumName = args[1].val();
-					for (ClassMirror<? extends Enum> e : enums) {
-						if (e.getAnnotation(MEnum.class).getValue("value").equals(enumName)) {
-							for (Enum ee : e.loadClass().getEnumConstants()) {
+					for(ClassMirror<? extends Enum> e : enums) {
+						if(e.getAnnotation(MEnum.class).getValue("value").equals(enumName)) {
+							for(Enum ee : e.loadClass().getEnumConstants()) {
 								a.push(new CString(ee.name(), t), t);
 							}
 							break;
 						}
 					}
-					for (ClassMirror<? extends DynamicEnum> d : dEnums) {
-						if (d.getAnnotation(MDynamicEnum.class).getValue("value").equals(enumName)) {
-							for (DynamicEnum ee : (Collection<DynamicEnum>) ReflectionUtils.invokeMethod(d.loadClass(), null, "values")) {
+					for(ClassMirror<? extends DynamicEnum> d : dEnums) {
+						if(d.getAnnotation(MDynamicEnum.class).getValue("value").equals(enumName)) {
+							for(DynamicEnum ee : (Collection<DynamicEnum>) ReflectionUtils.invokeMethod(d.loadClass(), null, "values")) {
 								a.push(new CString(ee.name(), t), t);
 							}
 							break;
@@ -246,25 +246,25 @@ public class Reflection {
 			DocField docField;
 			try {
 				docField = DocField.getValue(args[1].val());
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CREFormatException("Invalid docField provided: " + args[1].val(), t);
 			}
 			//For now, we have special handling, since functions are actually the only thing that will work,
 			//but eventually this will be a generic interface.
-			if (element.startsWith("@")) {
+			if(element.startsWith("@")) {
 				IVariable var = environment.getEnv(GlobalEnv.class).GetVarList().get(element, t);
-				if (var == null) {
+				if(var == null) {
 					throw new CREFormatException("Invalid variable provided: " + element + " does not exist in the current scope", t);
 				}
-			} else if (element.startsWith("_")) {
-				if (!environment.getEnv(GlobalEnv.class).GetProcs().containsKey(element)) {
+			} else if(element.startsWith("_")) {
+				if(!environment.getEnv(GlobalEnv.class).GetProcs().containsKey(element)) {
 					throw new CREFormatException("Invalid procedure name provided: " + element + " does not exist in the current scope", t);
 				}
 			} else {
 				try {
 					Function f = (Function) FunctionList.getFunction(new CFunction(element, t));
 					return new CString(formatFunctionDoc(f.docs(), docField), t);
-				} catch (ConfigCompileException ex) {
+				} catch(ConfigCompileException ex) {
 					throw new CREFormatException("Unknown function: " + element, t);
 				}
 			}
@@ -274,15 +274,15 @@ public class Reflection {
 		public String formatFunctionDoc(String docs, DocField field) {
 			Pattern p = Pattern.compile("(?s)\\s*(.*?)\\s*\\{(.*?)\\}\\s*(.*)\\s*");
 			Matcher m = p.matcher(docs);
-			if (!m.find()) {
+			if(!m.find()) {
 				throw new Error("An error has occured in " + getName() + ". While trying to get the documentation"
 						+ ", it was unable to parse this: " + docs);
 			}
-			if (field == DocField.RETURN || field == DocField.TYPE) {
+			if(field == DocField.RETURN || field == DocField.TYPE) {
 				return m.group(1);
-			} else if (field == DocField.ARGS) {
+			} else if(field == DocField.ARGS) {
 				return m.group(2);
-			} else if (field == DocField.DESCRIPTION) {
+			} else if(field == DocField.DESCRIPTION) {
 				return m.group(3);
 			}
 			throw new Error("Unhandled case in formatFunctionDoc!");
@@ -290,24 +290,24 @@ public class Reflection {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.isEmpty()) {
+			if(children.isEmpty()) {
 				//They are requesting this function's documentation. We can just return a string,
 				//and then it will never actually get called, so we handle it entirely in here.
 				return new ParseTree(new CString(docs(), t), null);
 			}
-			if (children.get(0).isConst()) {
+			if(children.get(0).isConst()) {
 				//If it's a function, we can check to see if it actually exists,
 				//and make it a compile error if it doesn't, even if parameter 2 is dynamic
 				String value = children.get(0).getData().val();
-				if (!value.startsWith("_") && !value.startsWith("@")) {
+				if(!value.startsWith("_") && !value.startsWith("@")) {
 					//It's a function
 					FunctionList.getFunction(new CFunction(value, t));
 				}
 			}
-			if (children.get(1).isConst()) {
+			if(children.get(1).isConst()) {
 				try {
 					DocField.getValue(children.get(1).getData().val());
-				} catch (IllegalArgumentException e) {
+				} catch(IllegalArgumentException e) {
 					throw new ConfigCompileException("Invalid docField provided: " + children.get(1).getData().val(), t);
 				}
 			}
@@ -378,10 +378,10 @@ public class Reflection {
 		private static Map<String, List<String>> funcs = new HashMap<String, List<String>>();
 
 		private void initf() {
-			for (FunctionBase f : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
+			for(FunctionBase f : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
 				String[] pack = f.getClass().getEnclosingClass().getName().split("\\.");
 				String clazz = pack[pack.length - 1];
-				if (!funcs.containsKey(clazz)) {
+				if(!funcs.containsKey(clazz)) {
 					funcs.put(clazz, new ArrayList<String>());
 				}
 				funcs.get(clazz).add(f.getName());
@@ -391,12 +391,12 @@ public class Reflection {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ret = CArray.GetAssociativeArray(t);
-			if (funcs.keySet().size() < 10) {
+			if(funcs.keySet().size() < 10) {
 				initf();
 			}
-			for (String cname : funcs.keySet()) {
+			for(String cname : funcs.keySet()) {
 				CArray fnames = new CArray(t);
-				for (String fname : funcs.get(cname)) {
+				for(String fname : funcs.get(cname)) {
 					fnames.push(new CString(fname, t), t);
 				}
 				ret.set(new CString(cname, t), fnames, t);
@@ -449,7 +449,7 @@ public class Reflection {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
-			for (Event event : EventList.GetEvents()) {
+			for(Event event : EventList.GetEvents()) {
 				ret.push(new CString(event.getName(), t), t);
 			}
 			ret.sort(CArray.SortType.STRING_IC);
@@ -498,7 +498,7 @@ public class Reflection {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
-			for (Script s : Static.getAliasCore().getScripts()) {
+			for(Script s : Static.getAliasCore().getScripts()) {
 				ret.push(new CString(s.getSignature(), t), t);
 			}
 			ret.sort(CArray.SortType.STRING_IC);
@@ -596,7 +596,7 @@ public class Reflection {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
-			for (Map.Entry<String, Procedure> p : environment.getEnv(GlobalEnv.class).GetProcs().entrySet()) {
+			for(Map.Entry<String, Procedure> p : environment.getEnv(GlobalEnv.class).GetProcs().entrySet()) {
 				ret.push(new CString(p.getKey(), t), t);
 			}
 			ret.sort(CArray.SortType.STRING_IC);

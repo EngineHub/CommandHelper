@@ -109,10 +109,10 @@ public class Sandbox {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
-			if (original == null) {
+			if(original == null) {
 				throw new CREBindException("is_cancelled cannot be called outside an event handler", t);
 			}
-			if (original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable
+			if(original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable
 					&& original.getUnderlyingEvent() instanceof org.bukkit.event.Event) {
 				((Cancellable) original.getUnderlyingEvent()).setCancelled(true);
 				BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event) original.getUnderlyingEvent());
@@ -168,39 +168,39 @@ public class Sandbox {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 1;
-			if (args.length == 4) {
+			if(args.length == 4) {
 				m = Static.GetPlayer(args[0].val(), t);
 				offset = 0;
 			}
 			Static.AssertPlayerNonNull(m, t);
 			MCItemStack is;
-			if (args[1 - offset] instanceof CNull) {
+			if(args[1 - offset] instanceof CNull) {
 				is = m.getItemInHand();
 			} else {
 				int slot = Static.getInt32(args[1 - offset], t);
 				MCPlayerInventory pinv = m.getInventory();
-				if (pinv == null) {
+				if(pinv == null) {
 					throw new CRENotFoundException(
 							"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 				}
 				is = pinv.getItem(slot);
 			}
 			CArray enchantArray = new CArray(t);
-			if (!(args[2 - offset] instanceof CArray)) {
+			if(!(args[2 - offset] instanceof CArray)) {
 				enchantArray.push(args[2 - offset], t);
 			} else {
 				enchantArray = (CArray) args[2 - offset];
 			}
 
 			CArray levelArray = new CArray(t);
-			if (!(args[3 - offset] instanceof CArray)) {
+			if(!(args[3 - offset] instanceof CArray)) {
 				levelArray.push(args[3 - offset], t);
 			} else {
 				levelArray = (CArray) args[3 - offset];
 			}
-			for (String key : enchantArray.stringKeySet()) {
+			for(String key : enchantArray.stringKeySet()) {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
-				if (e == null) {
+				if(e == null) {
 					throw new CREEnchantmentException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", t);
 				}
 				int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
@@ -253,7 +253,7 @@ public class Sandbox {
 			MCPlayer me;
 			boolean isVanished;
 			MCPlayer other;
-			if (args.length == 2) {
+			if(args.length == 2) {
 				me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				isVanished = Static.getBoolean(args[0]);
 				other = Static.GetPlayer(args[1], t);
@@ -313,7 +313,7 @@ public class Sandbox {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer me;
 			MCPlayer other;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				other = Static.GetPlayer(args[0], t);
 			} else {
@@ -332,18 +332,18 @@ public class Sandbox {
 	private static String GenerateMooSaying(String text) {
 		String[] saying = text.split("\r\n|\n|\n\r");
 		int longest = 0;
-		for (String s : saying) {
+		for(String s : saying) {
 			longest = java.lang.Math.max(longest, s.length());
 		}
 		String divider = "";
-		for (int i = 0; i < longest + 4; i++) {
+		for(int i = 0; i < longest + 4; i++) {
 			divider += "-";
 		}
 		String[] lines = new String[saying.length];
-		for (int i = 0; i < saying.length; i++) {
+		for(int i = 0; i < saying.length; i++) {
 			int spaces = longest - saying[i].length();
 			String sSpaces = "";
-			for (int j = 0; j < spaces; j++) {
+			for(int j = 0; j < spaces; j++) {
 				sSpaces += " ";
 			}
 			lines[i] = "| " + saying[i] + sSpaces + " |";
@@ -437,15 +437,15 @@ public class Sandbox {
 			String twelve = multiply(c, 12 * multiplier);
 			String thirteen = multiply(c, 13 * multiplier);
 			String twentytwo = multiply(c, 22 * multiplier);
-			for (int i = 0; i < 6; ++i) {
+			for(int i = 0; i < 6; ++i) {
 				System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
 			}
 			System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
-			for (int i = 0; i < 2; ++i) {
+			for(int i = 0; i < 2; ++i) {
 				System.out.println(Static.MCToANSIColors(blue + twentytwo) + TermColors.RESET);
 			}
 			System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
-			for (int i = 0; i < 6; ++i) {
+			for(int i = 0; i < 6; ++i) {
 				System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
 			}
 
@@ -459,7 +459,7 @@ public class Sandbox {
 
 		public static String multiply(char c, int times) {
 			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < times; ++i) {
+			for(int i = 0; i < times; ++i) {
 				b.append(c);
 			}
 			return b.toString();
@@ -490,7 +490,7 @@ public class Sandbox {
 			Random r;
 			try {
 				r = (Random) ArgumentValidation.getObject(args[0], t, CResource.class).getResource();
-			} catch (ClassCastException ex) {
+			} catch(ClassCastException ex) {
 				throw new CRECastException("Expected a resource of type " + ResourceManager.ResourceTypes.RANDOM, t, ex);
 			}
 			double d = r.nextDouble();
@@ -615,12 +615,12 @@ public class Sandbox {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			File file = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			int num = 0;
-			if (Security.CheckSecurity(file)) {
-				if (file.isDirectory()) {
+			if(Security.CheckSecurity(file)) {
+				if(file.isDirectory()) {
 					HashMap<File, ParseTree> files = compileDirectory(file, t);
 					IncludeCache.addAll(files);
 					num = files.size();
-				} else if (IncludeCache.has(file)) {
+				} else if(IncludeCache.has(file)) {
 					IncludeCache.add(file, compileFile(file, t));
 					num = 1;
 				}
@@ -634,11 +634,11 @@ public class Sandbox {
 		private HashMap<File, ParseTree> compileDirectory(File file, Target t) {
 			HashMap<File, ParseTree> newFiles = new HashMap<>();
 			File[] files = file.listFiles();
-			if (files != null) {
-				for (File f : files) {
-					if (f.isDirectory()) {
+			if(files != null) {
+				for(File f : files) {
+					if(f.isDirectory()) {
 						newFiles.putAll(compileDirectory(f, t));
-					} else if (IncludeCache.has(f)) {
+					} else if(IncludeCache.has(f)) {
 						newFiles.put(f, compileFile(f, t));
 					}
 				}
@@ -650,17 +650,17 @@ public class Sandbox {
 			try {
 				String s = new ZipReader(file).getFileContents();
 				return MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true));
-			} catch (ConfigCompileException ex) {
+			} catch(ConfigCompileException ex) {
 				throw new CREIncludeException("There was a compile error when trying to recompile the script at "
 						+ file + "\n" + ex.getMessage() + " :: " + file.getName() + ":" + ex.getLineNum(), t);
-			} catch (ConfigCompileGroupException ex) {
+			} catch(ConfigCompileGroupException ex) {
 				StringBuilder b = new StringBuilder();
 				b.append("There were compile errors when trying to recompile the script at ").append(file).append("\n");
-				for (ConfigCompileException e : ex.getList()) {
+				for(ConfigCompileException e : ex.getList()) {
 					b.append(e.getMessage()).append(" :: ").append(e.getFile().getName()).append(":").append(e.getLineNum());
 				}
 				throw new CREIncludeException(b.toString(), t);
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				throw new CREIOException("The script at " + file + " could not be found or read in.", t);
 			}
 		}

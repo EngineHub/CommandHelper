@@ -72,15 +72,15 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (Static.anyDoubles(args)) {
+			if(Static.anyDoubles(args)) {
 				double tally = Static.getNumber(args[0], t);
-				for (int i = 1; i < args.length; i++) {
+				for(int i = 1; i < args.length; i++) {
 					tally += Static.getNumber(args[i], t);
 				}
 				return new CDouble(tally, t);
 			} else {
 				long tally = Static.getInt(args[0], t);
-				for (int i = 1; i < args.length; i++) {
+				for(int i = 1; i < args.length; i++) {
 					tally += Static.getInt(args[i], t);
 				}
 				return new CInt(tally, t);
@@ -154,15 +154,15 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (Static.anyDoubles(args)) {
+			if(Static.anyDoubles(args)) {
 				double tally = Static.getNumber(args[0], t);
-				for (int i = 1; i < args.length; i++) {
+				for(int i = 1; i < args.length; i++) {
 					tally -= Static.getNumber(args[i], t);
 				}
 				return new CDouble(tally, t);
 			} else {
 				long tally = Static.getInt(args[0], t);
-				for (int i = 1; i < args.length; i++) {
+				for(int i = 1; i < args.length; i++) {
 					tally -= Static.getInt(args[i], t);
 				}
 				return new CInt(tally, t);
@@ -227,15 +227,15 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (Static.anyDoubles(args)) {
+			if(Static.anyDoubles(args)) {
 				double tally = Static.getNumber(args[0], t);
-				for (int i = 1; i < args.length; i++) {
+				for(int i = 1; i < args.length; i++) {
 					tally *= Static.getNumber(args[i], t);
 				}
 				return new CDouble(tally, t);
 			} else {
 				long tally = Static.getInt(args[0], t);
-				for (int i = 1; i < args.length; i++) {
+				for(int i = 1; i < args.length; i++) {
 					tally *= Static.getInt(args[i], t);
 				}
 				return new CInt(tally, t);
@@ -308,14 +308,14 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double tally = Static.getNumber(args[0], t);
-			for (int i = 1; i < args.length; i++) {
+			for(int i = 1; i < args.length; i++) {
 				double next = Static.getNumber(args[i], t);
-				if (next == 0) {
+				if(next == 0) {
 					throw new CRERangeException("Division by 0!", t);
 				}
 				tally /= next;
 			}
-			if (tally == (int) tally) {
+			if(tally == (int) tally) {
 				return new CInt((long) tally, t);
 			} else {
 				return new CDouble(tally, t);
@@ -384,7 +384,7 @@ public class Math {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			long arg1 = Static.getInt(args[0], t);
 			long arg2 = Static.getInt(args[1], t);
-			if (arg2 == 0) {
+			if(arg2 == 0) {
 				throw new CRERangeException("Modulo by 0!", t);
 			}
 			return new CInt(arg1 % arg2, t);
@@ -501,15 +501,15 @@ public class Math {
 	protected static Construct doIncrementDecrement(ParseTree[] nodes,
 			Script parent, Environment env, Target t,
 			Function func, boolean pre, boolean inc) {
-		if (nodes[0].getData() instanceof CFunction) {
+		if(nodes[0].getData() instanceof CFunction) {
 			Function f;
 			try {
 				f = ((CFunction) nodes[0].getData()).getFunction();
-			} catch (ConfigCompileException ex) {
+			} catch(ConfigCompileException ex) {
 				// This can't really happen, as the compiler would have already caught this
 				throw new Error(ex);
 			}
-			if (f.getName().equals(new ArrayHandling.array_get().getName())) {
+			if(f.getName().equals(new ArrayHandling.array_get().getName())) {
 				//Ok, so, this is it, we're in charge here.
 				long temp;
 				long newVal;
@@ -519,17 +519,17 @@ public class Math {
 				Construct array = parent.seval(eval.getChildAt(0), env);
 				Construct index = parent.seval(eval.getChildAt(1), env);
 				Construct cdelta = new CInt(1, t);
-				if (nodes.length == 2) {
+				if(nodes.length == 2) {
 					cdelta = parent.seval(nodes[1], env);
 				}
 				long delta = Static.getInt(cdelta, t);
 				//First, error check, then get the old value, and store it in temp.
-				if (!(array instanceof CArray) && !(array instanceof ArrayAccess)) {
+				if(!(array instanceof CArray) && !(array instanceof ArrayAccess)) {
 					//Let's just evaluate this like normal with array_get, so it will
 					//throw the appropriate exception.
 					new ArrayHandling.array_get().exec(t, env, array, index);
 					throw ConfigRuntimeException.CreateUncatchableException("Shouldn't have gotten here. Please report this error, and how you got here.", t);
-				} else if (!(array instanceof CArray)) {
+				} else if(!(array instanceof CArray)) {
 					//It's an ArrayAccess type, but we can't use that here, so, throw our
 					//own exception.
 					throw new CRECastException("Cannot increment/decrement a non-array array"
@@ -538,11 +538,11 @@ public class Math {
 					//Ok, we're good. Data types should all be correct.
 					CArray myArray = ((CArray) array);
 					Construct value = myArray.get(index, t);
-					if (value instanceof CInt || value instanceof CDouble) {
+					if(value instanceof CInt || value instanceof CDouble) {
 						temp = Static.getInt(value, t);
 						//Alright, now let's actually perform the increment, and store that in the array.
 
-						if (inc) {
+						if(inc) {
 							newVal = temp + delta;
 						} else {
 							newVal = temp - delta;
@@ -553,7 +553,7 @@ public class Math {
 					}
 				}
 				long valueToReturn;
-				if (pre) {
+				if(pre) {
 					valueToReturn = newVal;
 				} else {
 					valueToReturn = temp;
@@ -562,7 +562,7 @@ public class Math {
 			}
 		}
 		Construct[] args = new Construct[nodes.length];
-		for (int i = 0; i < args.length; i++) {
+		for(int i = 0; i < args.length; i++) {
 			args[i] = parent.eval(nodes[i], env);
 		}
 		return func.exec(t, env, args);
@@ -595,29 +595,29 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
-			if (args.length == 2) {
-				if (args[1] instanceof IVariable) {
+			if(args.length == 2) {
+				if(args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
 					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget());
 				}
 				value = Static.getInt(args[1], t);
 			}
-			if (args[0] instanceof IVariable) {
+			if(args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
 				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget());
 				Construct newVal;
-				if (Static.anyDoubles(v.ival())) {
+				if(Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) + value, t);
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) + value, t);
 				}
-				if (v.ival() instanceof CMutablePrimitive) {
+				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
 				}
 				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
-			} else if (Static.anyDoubles(args[0])) {
+			} else if(Static.anyDoubles(args[0])) {
 				return new CDouble(Static.getNumber(args[0], t) + value, t);
 			} else {
 				return new CInt(Static.getInt(args[0], t) + value, t);
@@ -669,7 +669,7 @@ public class Math {
 
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			if (args[0] instanceof IVariable) {
+			if(args[0] instanceof IVariable) {
 				return null;
 			} else {
 				return exec(t, null, args);
@@ -711,35 +711,35 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
-			if (args.length == 2) {
-				if (args[1] instanceof IVariable) {
+			if(args.length == 2) {
+				if(args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
 					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget());
 				}
 				value = Static.getInt(args[1], t);
 			}
-			if (args[0] instanceof IVariable) {
+			if(args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
 				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget());
 				Construct newVal;
-				if (Static.anyDoubles(v.ival())) {
+				if(Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) + value, t);
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) + value, t);
 				}
-				if (v.ival() instanceof CMutablePrimitive) {
+				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
 				}
 				Construct oldVal = null;
 				try {
 					oldVal = v.ival().clone();
-				} catch (CloneNotSupportedException ex) {
+				} catch(CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
-			} else if (Static.anyDoubles(args[0])) {
+			} else if(Static.anyDoubles(args[0])) {
 				return new CDouble(Static.getNumber(args[0], t) + value, t);
 			} else {
 				return new CInt(Static.getInt(args[0], t) + value, t);
@@ -780,7 +780,7 @@ public class Math {
 
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			if (args[0] instanceof IVariable) {
+			if(args[0] instanceof IVariable) {
 				return null;
 			} else {
 				return exec(t, null, args);
@@ -837,29 +837,29 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
-			if (args.length == 2) {
-				if (args[1] instanceof IVariable) {
+			if(args.length == 2) {
+				if(args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
 					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget());
 				}
 				value = Static.getInt(args[1], t);
 			}
-			if (args[0] instanceof IVariable) {
+			if(args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
 				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget());
 				Construct newVal;
-				if (Static.anyDoubles(v.ival())) {
+				if(Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) - value, t);
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) - value, t);
 				}
-				if (v.ival() instanceof CMutablePrimitive) {
+				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
 				}
 				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
-			} else if (Static.anyDoubles(args[0])) {
+			} else if(Static.anyDoubles(args[0])) {
 				return new CDouble(Static.getNumber(args[0], t) - value, t);
 			} else {
 				return new CInt(Static.getInt(args[0], t) - value, t);
@@ -900,7 +900,7 @@ public class Math {
 
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			if (args[0] instanceof IVariable) {
+			if(args[0] instanceof IVariable) {
 				return null;
 			} else {
 				return exec(t, null, args);
@@ -953,35 +953,35 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
-			if (args.length == 2) {
-				if (args[1] instanceof IVariable) {
+			if(args.length == 2) {
+				if(args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
 					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget());
 				}
 				value = Static.getInt(args[1], t);
 			}
-			if (args[0] instanceof IVariable) {
+			if(args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
 				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget());
 				Construct newVal;
-				if (Static.anyDoubles(v.ival())) {
+				if(Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) - value, t);
 				} else {
 					newVal = new CInt(Static.getInt(v.ival(), t) - value, t);
 				}
-				if (v.ival() instanceof CMutablePrimitive) {
+				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
 				}
 				Construct oldVal = null;
 				try {
 					oldVal = v.ival().clone();
-				} catch (CloneNotSupportedException ex) {
+				} catch(CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
-			} else if (Static.anyDoubles(args[0])) {
+			} else if(Static.anyDoubles(args[0])) {
 				return new CDouble(Static.getNumber(args[0], t) - value, t);
 			} else {
 				return new CInt(Static.getInt(args[0], t) - value, t);
@@ -1022,7 +1022,7 @@ public class Math {
 
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			if (args[0] instanceof IVariable) {
+			if(args[0] instanceof IVariable) {
 				return null;
 			} else {
 				return exec(t, null, args);
@@ -1090,24 +1090,24 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args.length == 0) {
+			if(args.length == 0) {
 				return new CDouble(java.lang.Math.random(), t);
 			} else {
 				long min = 0;
 				long max = 0;
-				if (args.length == 1) {
+				if(args.length == 1) {
 					max = Static.getInt(args[0], t);
 				} else {
 					min = Static.getInt(args[0], t);
 					max = Static.getInt(args[1], t);
 				}
-				if (max > Integer.MAX_VALUE || min > Integer.MAX_VALUE) {
+				if(max > Integer.MAX_VALUE || min > Integer.MAX_VALUE) {
 					throw new CRERangeException("max and min must be below int max, defined as " + Integer.MAX_VALUE,
 							t);
 				}
 
 				long range = max - min;
-				if (range <= 0) {
+				if(range <= 0) {
 					throw new CRERangeException("max - min must be greater than 0", t);
 				}
 				long rand = java.lang.Math.abs(r.nextLong());
@@ -1173,7 +1173,7 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CInt) {
+			if(args[0] instanceof CInt) {
 				return new CInt(java.lang.Math.abs(Static.getInt(args[0], t)), t);
 			} else {
 				return new CDouble(java.lang.Math.abs(Static.getDouble(args[0], t)), t);
@@ -1343,11 +1343,11 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			double d = Static.getNumber(args[0], t);
-			if (d < 0) {
+			if(d < 0) {
 				throw new CRERangeException("sqrt expects a number >= 0", t);
 			}
 			double m = java.lang.Math.sqrt(d);
-			if (m == (int) m) {
+			if(m == (int) m) {
 				return new CInt((long) m, t);
 			} else {
 				return new CDouble(m, t);
@@ -1404,19 +1404,19 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args.length == 0) {
+			if(args.length == 0) {
 				throw new CREInsufficientArgumentsException("You must send at least one parameter to min", t);
 			}
 			double lowest = Double.POSITIVE_INFINITY;
 			List<Construct> list = new ArrayList<Construct>();
 			recList(list, args);
-			for (Construct c : list) {
+			for(Construct c : list) {
 				double d = Static.getNumber(c, t);
-				if (d < lowest) {
+				if(d < lowest) {
 					lowest = d;
 				}
 			}
-			if (lowest == (long) lowest) {
+			if(lowest == (long) lowest) {
 				return new CInt((long) lowest, t);
 			} else {
 				return new CDouble(lowest, t);
@@ -1424,9 +1424,9 @@ public class Math {
 		}
 
 		public List<Construct> recList(List<Construct> list, Construct... args) {
-			for (Construct c : args) {
-				if (c instanceof CArray) {
-					for (int i = 0; i < ((CArray) c).size(); i++) {
+			for(Construct c : args) {
+				if(c instanceof CArray) {
+					for(int i = 0; i < ((CArray) c).size(); i++) {
 						recList(list, ((CArray) c).get(i, Target.UNKNOWN));
 					}
 				} else {
@@ -1486,19 +1486,19 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args.length == 0) {
+			if(args.length == 0) {
 				throw new CREInsufficientArgumentsException("You must send at least one parameter to max", t);
 			}
 			double highest = Double.NEGATIVE_INFINITY;
 			List<Construct> list = new ArrayList<Construct>();
 			recList(list, args);
-			for (Construct c : list) {
+			for(Construct c : list) {
 				double d = Static.getNumber(c, t);
-				if (d > highest) {
+				if(d > highest) {
 					highest = d;
 				}
 			}
-			if (highest == (long) highest) {
+			if(highest == (long) highest) {
 				return new CInt((long) highest, t);
 			} else {
 				return new CDouble(highest, t);
@@ -1506,9 +1506,9 @@ public class Math {
 		}
 
 		public List<Construct> recList(List<Construct> list, Construct... args) {
-			for (Construct c : args) {
-				if (c instanceof CArray) {
-					for (int i = 0; i < ((CArray) c).size(); i++) {
+			for(Construct c : args) {
+				if(c instanceof CArray) {
+					for(int i = 0; i < ((CArray) c).size(); i++) {
 						recList(list, ((CArray) c).get(i, Target.UNKNOWN));
 					}
 				} else {
@@ -2198,10 +2198,10 @@ public class Math {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			double number = Static.getNumber(args[0], t);
 			int precision = 0;
-			if (args.length > 1) {
+			if(args.length > 1) {
 				precision = Static.getInt32(args[1], t);
 			}
-			if (precision < 0) {
+			if(precision < 0) {
 				throw new CRERangeException("precision cannot be less than 0, was " + precision, t);
 			}
 			number = number * java.lang.Math.pow(10, precision);
@@ -2347,25 +2347,25 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String expr = args[0].val().trim();
-			if ("".equals(expr)) {
+			if("".equals(expr)) {
 				throw new CREFormatException("Expression may not be empty", t);
 			}
 			CArray vars = null;
-			if (args.length == 2 && args[1] instanceof CArray) {
+			if(args.length == 2 && args[1] instanceof CArray) {
 				vars = (CArray) args[1];
-			} else if (args.length == 2 && !(args[1] instanceof CArray)) {
+			} else if(args.length == 2 && !(args[1] instanceof CArray)) {
 				throw new CRECastException("The second argument of expr() should be an array", t);
 			}
-			if (vars != null && !vars.inAssociativeMode()) {
+			if(vars != null && !vars.inAssociativeMode()) {
 				throw new CRECastException("The array provided to expr() must be an associative array", t);
 			}
 			double[] da;
 			String[] varNames;
-			if (vars != null) {
+			if(vars != null) {
 				int i = 0;
 				da = new double[(int) vars.size()];
 				varNames = new String[(int) vars.size()];
-				for (String key : vars.stringKeySet()) {
+				for(String key : vars.stringKeySet()) {
 					varNames[i] = key;
 					da[i] = Static.getDouble(vars.get(key, t), t);
 					i++;
@@ -2386,7 +2386,7 @@ public class Math {
 			try {
 				eClazz = Class.forName(eClass);
 				errClazz = Class.forName(errClass);
-			} catch (ClassNotFoundException cnf) {
+			} catch(ClassNotFoundException cnf) {
 				throw new CREPluginInternalException("You are missing a required dependency: " + eClass, t);
 			}
 			try {
@@ -2395,8 +2395,8 @@ public class Math {
 				Object d = ReflectionUtils.invokeMethod(eClazz, e, "evaluate",
 						new Class[]{double[].class}, new Object[]{da});
 				return new CDouble((double) d, t);
-			} catch (ReflectionUtils.ReflectionException rex) {
-				if (rex.getCause().getClass().isAssignableFrom(errClazz)) {
+			} catch(ReflectionUtils.ReflectionException rex) {
+				if(rex.getCause().getClass().isAssignableFrom(errClazz)) {
 					throw new CREPluginInternalException("Your expression was invalidly formatted", args[0].getTarget(), rex.getCause());
 				} else {
 					throw new CREPluginInternalException(rex.getMessage(),
@@ -2449,7 +2449,7 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CInt) {
+			if(args[0] instanceof CInt) {
 				return new CInt(-(Static.getInt(args[0], t)), t);
 			} else {
 				return new CDouble(-(Static.getDouble(args[0], t)), t);
@@ -2491,11 +2491,11 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			double val = Static.getDouble(args[0], t);
-			if (val <= 0) {
+			if(val <= 0) {
 				throw new CRERangeException("val was <= 0", t);
 			}
 			double r;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				r = java.lang.Math.log(val);
 			} else {// if(args.length == 2){
 				r = java.lang.Math.log(val) / java.lang.Math.log(Static.getDouble(args[1], t));
@@ -2608,12 +2608,12 @@ public class Math {
 			try {
 				MathConstants c = MathConstants.valueOf(args[0].val());
 				Number v = c.getValue();
-				if (v instanceof Double) {
+				if(v instanceof Double) {
 					return new CDouble((Double) c.getValue(), t);
 				} else {
 					return new CInt((Integer) c.getValue(), t);
 				}
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				throw new CRECastException("No constant with the value " + args[0].val() + " exists.", t);
 			}
 		}
@@ -2638,7 +2638,7 @@ public class Math {
 					+ "! Constant Name\n"
 					+ "! Description\n"
 					+ "! Value\n";
-			for (MathConstants value : MathConstants.values()) {
+			for(MathConstants value : MathConstants.values()) {
 				docs += "|-\n"
 						+ "| " + value.name() + "\n"
 						+ "| " + value.getDoc() + "\n"
@@ -2692,26 +2692,26 @@ public class Math {
 			double min = Static.getDouble(args[1], t);
 			double max = Static.getDouble(args[2], t);
 			double v;
-			if (min == max) {
+			if(min == max) {
 				v = min;
-			} else if (min < max) {
+			} else if(min < max) {
 				// Normal mode
-				if (value < min) {
+				if(value < min) {
 					v = min;
-				} else if (value > max) {
+				} else if(value > max) {
 					v = max;
 				} else {
 					v = value;
 				}
 			} else // Reverse mode
-			if (value < max) {
+			if(value < max) {
 				// Actually min
 				v = value;
-			} else if (value > min) {
+			} else if(value > min) {
 				// Actually max
 				v = value;
 			} else // Special handling, find the closer value
-			if (value - max <= min - value) {
+			if(value - max <= min - value) {
 				v = max;
 			} else {
 				v = min;

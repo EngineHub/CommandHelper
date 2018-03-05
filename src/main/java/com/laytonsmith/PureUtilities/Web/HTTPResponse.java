@@ -33,8 +33,8 @@ public final class HTTPResponse {
 			String response, String httpVersion) {
 		this.responseText = responseText;
 		this.responseCode = responseCode;
-		for (String key : headers.keySet()) {
-			for (String value : headers.get(key)) {
+		for(String key : headers.keySet()) {
+			for(String value : headers.get(key)) {
 				this.headers.add(new HTTPHeader(key, value));
 			}
 		}
@@ -67,8 +67,8 @@ public final class HTTPResponse {
 	 * @return
 	 */
 	public String getFirstHeader(String key) {
-		for (HTTPHeader header : headers) {
-			if (header.getHeader().equalsIgnoreCase(key)) {
+		for(HTTPHeader header : headers) {
+			if(header.getHeader().equalsIgnoreCase(key)) {
 				return header.getValue();
 			}
 		}
@@ -82,8 +82,8 @@ public final class HTTPResponse {
 	 */
 	public Set<String> getHeaderNames() {
 		Set<String> set = new HashSet<String>();
-		for (HTTPHeader h : headers) {
-			if (h.getHeader() != null) {
+		for(HTTPHeader h : headers) {
+			if(h.getHeader() != null) {
 				set.add(h.getHeader());
 			}
 		}
@@ -98,8 +98,8 @@ public final class HTTPResponse {
 	 */
 	public List<String> getHeaders(String key) {
 		List<String> list = new ArrayList<String>();
-		for (HTTPHeader header : headers) {
-			if ((header.getHeader() == null && key == null) || (header.getHeader() != null && header.getHeader().equalsIgnoreCase(key))) {
+		for(HTTPHeader header : headers) {
+			if((header.getHeader() == null && key == null) || (header.getHeader() != null && header.getHeader().equalsIgnoreCase(key))) {
 				list.add(header.getValue());
 			}
 		}
@@ -126,10 +126,10 @@ public final class HTTPResponse {
 
 	@Override
 	public String toString() {
-		if (rawResponse == null) {
+		if(rawResponse == null) {
 			rawResponse = "HTTP/" + httpVersion + " " + responseCode + " " + responseText + "\n";
-			for (HTTPHeader h : headers) {
-				if (h.getHeader() == null) {
+			for(HTTPHeader h : headers) {
+				if(h.getHeader() == null) {
 					continue;
 				}
 				rawResponse += h.getHeader() + ": " + h.getValue() + "\n";

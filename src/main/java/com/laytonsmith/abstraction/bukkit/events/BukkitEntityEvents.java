@@ -170,7 +170,7 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCEntity getEntity() {
-			if (e.getEntity() != null) {
+			if(e.getEntity() != null) {
 				return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity());
 			}
 			return null;
@@ -179,7 +179,7 @@ public class BukkitEntityEvents {
 		@Override
 		public List<MCBlock> getBlocks() {
 			List<MCBlock> ret = new ArrayList<>();
-			for (Block b : e.blockList()) {
+			for(Block b : e.blockList()) {
 				ret.add(new BukkitMCBlock(b));
 			}
 			return ret;
@@ -188,7 +188,7 @@ public class BukkitEntityEvents {
 		@Override
 		public void setBlocks(List<MCBlock> blocks) {
 			e.blockList().clear();
-			for (MCBlock b : blocks) {
+			for(MCBlock b : blocks) {
 				e.blockList().add(((BukkitMCBlock) b).__Block());
 			}
 		}
@@ -237,7 +237,7 @@ public class BukkitEntityEvents {
 		public MCEntity getHitEntity() {
 			try {
 				return BukkitConvertor.BukkitGetCorrectEntity(phe.getHitEntity());
-			} catch (NoSuchMethodError ex) {
+			} catch(NoSuchMethodError ex) {
 				// Probably prior to 1.11
 				return null;
 			}
@@ -247,11 +247,11 @@ public class BukkitEntityEvents {
 		public MCBlock getHitBlock() {
 			try {
 				Block blk = phe.getHitBlock();
-				if (blk == null) {
+				if(blk == null) {
 					return null;
 				}
 				return new BukkitMCBlock(blk);
-			} catch (NoSuchMethodError ex) {
+			} catch(NoSuchMethodError ex) {
 				// Probably prior to 1.11
 				return null;
 			}
@@ -308,7 +308,7 @@ public class BukkitEntityEvents {
 		@Override
 		public Set<MCLivingEntity> getAffectedEntities() {
 			Set<MCLivingEntity> ret = new HashSet<>();
-			for (LivingEntity le : pse.getAffectedEntities()) {
+			for(LivingEntity le : pse.getAffectedEntities()) {
 				ret.add((MCLivingEntity) BukkitConvertor.BukkitGetCorrectEntity(le));
 			}
 			return ret;
@@ -349,7 +349,7 @@ public class BukkitEntityEvents {
 			List<ItemStack> islist = e.getDrops();
 			List<MCItemStack> drops = new ArrayList<>();
 
-			for (ItemStack is : islist) {
+			for(ItemStack is : islist) {
 				drops.add(new BukkitMCItemStack(is));
 			}
 
@@ -450,11 +450,11 @@ public class BukkitEntityEvents {
 		@Override
 		public MCEquipmentSlot getHand() {
 			try {
-				if (e.getHand() == EquipmentSlot.HAND) {
+				if(e.getHand() == EquipmentSlot.HAND) {
 					return MCEquipmentSlot.WEAPON;
 				}
 				return MCEquipmentSlot.OFF_HAND;
-			} catch (NoSuchMethodError e) {
+			} catch(NoSuchMethodError e) {
 				// before Bukkit 1.9
 				return MCEquipmentSlot.WEAPON;
 			}
@@ -495,7 +495,7 @@ public class BukkitEntityEvents {
 		@Override
 		public void setItemStack(MCItemStack stack) {
 			BukkitMCItemStack s = (BukkitMCItemStack) stack;
-			if (s.getTypeId() == 0) {
+			if(s.getTypeId() == 0) {
 				e.getItemDrop().remove();
 			} else {
 				e.getItemDrop().setItemStack(s.__ItemStack());
@@ -547,7 +547,7 @@ public class BukkitEntityEvents {
 			BukkitMCItemStack s = (BukkitMCItemStack) stack;
 			e.setCancelled(true);
 			e.getItem().remove();
-			if (s.getTypeId() == 0) {
+			if(s.getTypeId() == 0) {
 				return;
 			} else {
 				e.getPlayer().getInventory().addItem(s.asItemStack());
@@ -660,7 +660,7 @@ public class BukkitEntityEvents {
 
 		@Override
 		public void setTarget(MCEntity target) {
-			if (target == null) {
+			if(target == null) {
 				pie.setTarget(null);
 			} else {
 				pie.setTarget(((BukkitMCEntity) target).getHandle());
@@ -812,7 +812,7 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCEntity getRemover() {
-			if (hbe instanceof HangingBreakByEntityEvent) {
+			if(hbe instanceof HangingBreakByEntityEvent) {
 				return BukkitConvertor.BukkitGetCorrectEntity(((HangingBreakByEntityEvent) hbe).getRemover());
 			} else {
 				return null;
@@ -937,7 +937,7 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCLocation getTo() {
-			if (epe.getTo() == null) {
+			if(epe.getTo() == null) {
 				return null;
 			}
 			return new BukkitMCLocation(epe.getTo());

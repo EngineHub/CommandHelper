@@ -16,7 +16,7 @@ public class BukkitMCDyeColor extends EnumConvertor<MCDyeColor, DyeColor> {
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor();
 		}
 		return instance;

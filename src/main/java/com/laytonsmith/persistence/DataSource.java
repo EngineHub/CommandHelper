@@ -224,8 +224,8 @@ public interface DataSource extends SimpleDocumentation {
 		}
 
 		public static boolean isModifier(String scheme) {
-			for (DataSourceModifier modifier : DataSourceModifier.values()) {
-				if (modifier.getName().equalsIgnoreCase(scheme)) {
+			for(DataSourceModifier modifier : DataSourceModifier.values()) {
+				if(modifier.getName().equalsIgnoreCase(scheme)) {
 					return true;
 				}
 			}

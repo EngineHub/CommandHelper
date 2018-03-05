@@ -80,7 +80,7 @@ public class ClassReferenceMirror<T> implements Serializable {
 	 * @return
 	 */
 	public ClassReferenceMirror getComponentType() {
-		if (!isArray()) {
+		if(!isArray()) {
 			return null;
 		}
 		return new ClassReferenceMirror(name.substring(1));
@@ -100,10 +100,10 @@ public class ClassReferenceMirror<T> implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if(obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if(getClass() != obj.getClass()) {
 			return false;
 		}
 		final ClassReferenceMirror other = (ClassReferenceMirror) obj;

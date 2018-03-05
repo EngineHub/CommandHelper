@@ -28,7 +28,7 @@ public class MemoryMapFileUtil {
 	public static synchronized MemoryMapFileUtil getInstance(File f, DataGrabber grabber) throws IOException {
 		String s = f.getCanonicalPath();
 		MemoryMapFileUtil mem;
-		if (!instances.containsKey(s)) {
+		if(!instances.containsKey(s)) {
 			mem = new MemoryMapFileUtil(f, grabber);
 			instances.put(s, mem);
 		} else {
@@ -58,36 +58,36 @@ public class MemoryMapFileUtil {
 
 	private void run() {
 		try {
-			synchronized (this) {
+			synchronized(this) {
 				running = true;
 			}
-			while (true) {
+			while(true) {
 				//We don't want to write out files too frequently, so we want to check when our last write action was,
 				//and delay some if it was too recent.
 				long lastWriteDelta = System.currentTimeMillis() - lastWrite;
-				if (lastWriteDelta < WRITE_DELAY) {
+				if(lastWriteDelta < WRITE_DELAY) {
 					try {
 						Thread.sleep(lastWriteDelta);
-					} catch (InterruptedException ex) {
+					} catch(InterruptedException ex) {
 					}
 				}
 //				File temp = null;
 				try {
-					synchronized (this) {
-						if (!modelDirty && !fileDirty) {
+					synchronized(this) {
+						if(!modelDirty && !fileDirty) {
 							return;
 						}
 					}
 //					temp = File.createTempFile("MemoryMapFile", ".tmp");
 					File permanent = new File(file);
 					byte[] data;
-					synchronized (this) {
+					synchronized(this) {
 						data = grabber.getData();
 						modelDirty = false;
 						fileDirty = true;
 					}
 
-					synchronized (this) {
+					synchronized(this) {
 						FileUtil.write(data, permanent, FileUtil.OVERWRITE, true);
 						lastWrite = System.currentTimeMillis();
 						fileDirty = false;
@@ -102,7 +102,7 @@ public class MemoryMapFileUtil {
 //							System.out.println("Could not move tmp file.");
 //						}
 //					}
-				} catch (IOException ex) {
+				} catch(IOException ex) {
 					Logger.getLogger(MemoryMapFileUtil.class.getName()).log(Level.SEVERE, null, ex);
 				} finally {
 //					if(temp != null){
@@ -112,7 +112,7 @@ public class MemoryMapFileUtil {
 				}
 			}
 		} finally {
-			synchronized (this) {
+			synchronized(this) {
 				running = false;
 			}
 		}
@@ -125,10 +125,10 @@ public class MemoryMapFileUtil {
 	 * @param dm The daemon manager. If null, ignored.
 	 */
 	public void mark(final DaemonManager dm) {
-		synchronized (this) {
+		synchronized(this) {
 			modelDirty = fileDirty = true;
-			if (!running) {
-				if (dm != null) {
+			if(!running) {
+				if(dm != null) {
 					dm.activateThread(null);
 				}
 				getService().submit(new Runnable() {
@@ -138,7 +138,7 @@ public class MemoryMapFileUtil {
 						try {
 							MemoryMapFileUtil.this.run();
 						} finally {
-							if (dm != null) {
+							if(dm != null) {
 								dm.deactivateThread(null);
 							}
 						}
@@ -149,7 +149,7 @@ public class MemoryMapFileUtil {
 	}
 
 	private synchronized ExecutorService getService() {
-		if (service == null) {
+		if(service == null) {
 			service = new ThreadPoolExecutor(1, 1,
 					60L, TimeUnit.MILLISECONDS,
 					new LinkedBlockingQueue<Runnable>(),

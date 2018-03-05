@@ -48,38 +48,38 @@ public class CheckOverrides extends AbstractProcessor {
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-		if (!enabled) {
+		if(!enabled) {
 			processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "CheckOverrides processor is turned off!");
 			return false;
 		}
 		setup();
-		if (!roundEnv.processingOver()) {
-			for (Element element : roundEnv.getElementsAnnotatedWith(MustUseOverride.class)) {
+		if(!roundEnv.processingOver()) {
+			for(Element element : roundEnv.getElementsAnnotatedWith(MustUseOverride.class)) {
 				String className = element.toString();
 				Class c = null;
 				try {
 					c = getClassFromName(className);
-				} catch (ClassNotFoundException ex) {
+				} catch(ClassNotFoundException ex) {
 					Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				if (c != null) {
-					if (!c.isInterface()) {
+				if(c != null) {
+					if(!c.isInterface()) {
 						processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
 								"Only interfaces may be annotated with " + MustUseOverride.class.getName());
 					}
 					interfacesWithMustUseOverride.add(c);
 				}
 			}
-			for (Element element : roundEnv.getElementsAnnotatedWith(Override.class)) {
+			for(Element element : roundEnv.getElementsAnnotatedWith(Override.class)) {
 				String className = element.getEnclosingElement().toString();
 				Class c = null;
 				try {
 					c = getClassFromName(className);
-				} catch (ClassNotFoundException ex) {
+				} catch(ClassNotFoundException ex) {
 					Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
 				}
 
-				if (c != null && !c.isInterface()) {
+				if(c != null && !c.isInterface()) {
 					//StreamUtils.GetSystemOut().println("Dealing with " + c.getName() + ".." + element.toString());
 					//We have to do a bit of massaging to turn "method(java.lang.String[], java.lang.String)
 					//into a Method object.
@@ -87,12 +87,12 @@ public class CheckOverrides extends AbstractProcessor {
 					String methodName = element.getSimpleName().toString();
 					Class[] argTypes;
 					boolean isTemplate = false;
-					if (!m.find()) {
+					if(!m.find()) {
 						argTypes = new Class[0];
 					} else {
 						String inner = m.group(1);
 						String[] args;
-						if ("".equals(inner.trim())) {
+						if("".equals(inner.trim())) {
 							args = ArrayUtils.EMPTY_STRING_ARRAY;
 						} else {
 							//Take out generics, since we can't really deal with them, and they make parsing
@@ -102,20 +102,20 @@ public class CheckOverrides extends AbstractProcessor {
 						}
 						//StreamUtils.GetSystemOut().println("Args length: " + args.length);
 						argTypes = new Class[args.length];
-						for (int i = 0; i < args.length; i++) {
+						for(int i = 0; i < args.length; i++) {
 							try {
 								argTypes[i] = getClassFromName(args[i]);
-							} catch (ClassNotFoundException e) {
+							} catch(ClassNotFoundException e) {
 								//It may be a template parameter, so check in the enclosing class name for that
 								//template type.
 								String codeClassName = element.getEnclosingElement().asType().toString();
 								Matcher mm = CLASS_TEMPLATES.matcher(codeClassName);
 								boolean found = false;
-								if (mm.find()) {
+								if(mm.find()) {
 									String[] templates = removeGenerics(mm.group(1)).split(",");
 									String baseClass = args[i].replaceAll("\\[\\]", "");
-									for (String template : templates) {
-										if (baseClass.equals(template)) {
+									for(String template : templates) {
+										if(baseClass.equals(template)) {
 											//Ok, it's found.
 											isTemplate = true;
 											found = true;
@@ -124,19 +124,19 @@ public class CheckOverrides extends AbstractProcessor {
 										}
 									}
 								}
-								if (!isTemplate || !found) {
+								if(!isTemplate || !found) {
 									//Oh, there aren't any. Well, I don't know why this would happen.
 									Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, e);
 								}
 								try {
 									argTypes[i] = Class.forName(args[i]);
-								} catch (ClassNotFoundException ex) {
+								} catch(ClassNotFoundException ex) {
 									//Won't happen
 								}
 							}
 						}
 					}
-					if (isTemplate) {
+					if(isTemplate) {
 						//Template parameters that extend something break this, because the annotation
 						//processor doesn't provide the information to us. So, for instance, if you have
 						//a template parameter MyClass<T extends List> and a method in that class
@@ -148,8 +148,8 @@ public class CheckOverrides extends AbstractProcessor {
 						//and remove all the methods with this name and type. We can, however,
 						//avoid removing methods with different number of arguments, since we
 						//can guarantee those aren't overridden.
-						for (Method method : c.getDeclaredMethods()) {
-							if (method.getName().equals(methodName)
+						for(Method method : c.getDeclaredMethods()) {
+							if(method.getName().equals(methodName)
 									&& method.getParameterTypes().length == argTypes.length) {
 								methods.get(c).remove(method);
 							}
@@ -161,18 +161,18 @@ public class CheckOverrides extends AbstractProcessor {
 							//Ok, remove it from the list of methods, cause we know it's overridden.
 							//.remove won't work, because we need to also remove co-return types present
 							Iterator<Method> it = methods.get(c).iterator();
-							while (it.hasNext()) {
+							while(it.hasNext()) {
 								Method next = it.next();
-								if (next.getName().equals(method.getName())
+								if(next.getName().equals(method.getName())
 										&& checkSignatureForCompatibility(next.getParameterTypes(), method.getParameterTypes())) {
 									it.remove();
 								}
 							}
-						} catch (NoSuchMethodException | SecurityException ex) {
+						} catch(NoSuchMethodException | SecurityException ex) {
 							Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
-					if (methods.get(c).isEmpty()) {
+					if(methods.get(c).isEmpty()) {
 						methods.remove(c);
 					}
 				}
@@ -181,9 +181,9 @@ public class CheckOverrides extends AbstractProcessor {
 			//classes. We now need to go through and find out which of the remaining methods *could*
 			//be overriden, as many may not be overrides anyways.
 			Set<Method> methodsInError = new HashSet<>();
-			for (Class c : methods.keySet()) {
+			for(Class c : methods.keySet()) {
 				Set<Method> mm = methods.get(c);
-				for (Method m : mm) {
+				for(Method m : mm) {
 					//Get the superclass/superinterfaces that this class extends/implements
 					//all the way up to Object
 					Set<Class> supers = new HashSet<>();
@@ -191,12 +191,12 @@ public class CheckOverrides extends AbstractProcessor {
 					//Ok, now look through all the superclasses' methods, and find any that
 					//match the signature. If they do, it's an error.
 					List<Method> compare = new ArrayList<>();
-					for (Class s : supers) {
+					for(Class s : supers) {
 						compare.addAll(getOverridableMethods(s));
 					}
-					for (Method superM : compare) {
-						if (m.getName().equals(superM.getName())) {
-							if (checkSignatureForCompatibility(superM.getParameterTypes(), m.getParameterTypes())) {
+					for(Method superM : compare) {
+						if(m.getName().equals(superM.getName())) {
+							if(checkSignatureForCompatibility(superM.getParameterTypes(), m.getParameterTypes())) {
 								//Oops, found a bad method.
 								methodsInError.add(m);
 							}
@@ -204,7 +204,7 @@ public class CheckOverrides extends AbstractProcessor {
 					}
 				}
 			}
-			if (!methodsInError.isEmpty()) {
+			if(!methodsInError.isEmpty()) {
 				//Some package names are pretty verbose, and will more than
 				//likely be included with an import, so let's trim the
 				//error message down some so it's easier to read
@@ -215,14 +215,14 @@ public class CheckOverrides extends AbstractProcessor {
 				});
 				//Build a sorted set, so these go in order.
 				SortedSet<String> stringMethodsInError = new TreeSet<>();
-				for (Method m : methodsInError) {
+				for(Method m : methodsInError) {
 					stringMethodsInError.add(m.getDeclaringClass().getName() + "."
 							+ m.getName() + "(" + StringUtils.Join(Arrays.asList(m.getParameterTypes()), ", ", ", ", ", ", "", new StringUtils.Renderer<Class<?>>() {
 						@Override
 						public String toString(Class<?> item) {
 							String name = ClassUtils.getCommonName(item);
-							for (String v : verbosePackages) {
-								if (name.matches(Pattern.quote(v) + "\\.([^\\.]*?)$")) {
+							for(String v : verbosePackages) {
+								if(name.matches(Pattern.quote(v) + "\\.([^\\.]*?)$")) {
 									return name.replaceFirst(Pattern.quote(v) + "\\.", "");
 								}
 							}
@@ -249,10 +249,10 @@ public class CheckOverrides extends AbstractProcessor {
 	}
 
 	private static void getAllSupers(Class c, Set<Class> building, boolean first) {
-		if (c == null || c == Object.class) {
+		if(c == null || c == Object.class) {
 			return;
 		}
-		if (!first) {
+		if(!first) {
 			building.add(c);
 		} else {
 			//everything extends Object, and we're gonna use
@@ -261,8 +261,8 @@ public class CheckOverrides extends AbstractProcessor {
 			building.add(Object.class);
 		}
 		getAllSupers(c.getSuperclass(), building, false);
-		for (Class cc : c.getInterfaces()) {
-			if (interfacesWithMustUseOverride.contains(cc)) {
+		for(Class cc : c.getInterfaces()) {
+			if(interfacesWithMustUseOverride.contains(cc)) {
 				building.add(cc);
 			}
 		}
@@ -276,11 +276,11 @@ public class CheckOverrides extends AbstractProcessor {
 	 * @return
 	 */
 	private static boolean checkSignatureForCompatibility(Class[] superArgs, Class[] subArgs) {
-		if (superArgs.length != subArgs.length) {
+		if(superArgs.length != subArgs.length) {
 			return false;
 		}
-		for (int i = 0; i < superArgs.length; i++) {
-			if (superArgs[i] != subArgs[i]) {
+		for(int i = 0; i < superArgs.length; i++) {
+			if(superArgs[i] != subArgs[i]) {
 				return false;
 			}
 		}
@@ -296,17 +296,17 @@ public class CheckOverrides extends AbstractProcessor {
 	private static String removeGenerics(String identifier) {
 		StringBuilder b = new StringBuilder();
 		int genericCount = 0;
-		for (int i = 0; i < identifier.length(); i++) {
+		for(int i = 0; i < identifier.length(); i++) {
 			char ch = identifier.charAt(i);
-			if (ch == '<') {
+			if(ch == '<') {
 				genericCount++;
 				continue;
 			}
-			if (ch == '>') {
+			if(ch == '>') {
 				genericCount--;
 				continue;
 			}
-			if (genericCount == 0) {
+			if(genericCount == 0) {
 				b.append(ch);
 			}
 		}
@@ -318,17 +318,17 @@ public class CheckOverrides extends AbstractProcessor {
 	}
 
 	private static void setup() {
-		if (methods == null) {
+		if(methods == null) {
 			methods = new HashMap<>();
 
 			List<ClassMirror<?>> classes = ClassDiscovery.getDefaultInstance().getKnownClasses(ClassDiscovery.GetClassContainer(CheckOverrides.class));
-			for (ClassMirror cm : classes) {
+			for(ClassMirror cm : classes) {
 				Class c = cm.loadClass(CheckOverrides.class.getClassLoader(), false);
-				if (c.isInterface()) {
+				if(c.isInterface()) {
 					continue;
 				}
 				Set<Method> mm = getPotentiallyOverridingMethods(c);
-				if (!mm.isEmpty()) {
+				if(!mm.isEmpty()) {
 					methods.put(c, mm);
 				}
 			}
@@ -343,9 +343,9 @@ public class CheckOverrides extends AbstractProcessor {
 	 */
 	private static Set<Method> getPotentiallyOverridingMethods(Class c) {
 		Set<Method> methodList = new HashSet<>();
-		for (Method m : c.getDeclaredMethods()) {
+		for(Method m : c.getDeclaredMethods()) {
 			//Ignore static or public methods, since those can't override anything
-			if ((m.getModifiers() & Modifier.PRIVATE) == 0 && (m.getModifiers() & Modifier.STATIC) == 0
+			if((m.getModifiers() & Modifier.PRIVATE) == 0 && (m.getModifiers() & Modifier.STATIC) == 0
 					&& !m.isSynthetic()) {
 				methodList.add(m);
 			}
@@ -361,8 +361,8 @@ public class CheckOverrides extends AbstractProcessor {
 	 */
 	private static List<Method> getOverridableMethods(Class c) {
 		List<Method> methodList = new ArrayList<>();
-		for (Method m : c.getDeclaredMethods()) {
-			if ((m.getModifiers() & Modifier.PRIVATE) == 0
+		for(Method m : c.getDeclaredMethods()) {
+			if((m.getModifiers() & Modifier.PRIVATE) == 0
 					&& (m.getModifiers() & Modifier.STATIC) == 0
 					&& (m.getModifiers() & Modifier.FINAL) == 0
 					&& !m.isSynthetic()) {

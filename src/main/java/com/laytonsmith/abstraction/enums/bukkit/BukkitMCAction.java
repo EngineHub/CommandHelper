@@ -16,7 +16,7 @@ public class BukkitMCAction extends EnumConvertor<MCAction, Action> {
 	private static BukkitMCAction instance;
 
 	public static BukkitMCAction getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new BukkitMCAction();
 		}
 		return instance;

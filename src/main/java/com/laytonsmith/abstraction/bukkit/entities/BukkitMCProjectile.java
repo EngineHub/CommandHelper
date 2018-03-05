@@ -29,13 +29,13 @@ public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 	public MCProjectileSource getShooter() {
 		ProjectileSource source = proj.getShooter();
 
-		if (source instanceof BlockProjectileSource) {
+		if(source instanceof BlockProjectileSource) {
 			return new BukkitMCBlockProjectileSource((BlockProjectileSource) source);
 		}
 
-		if (source instanceof Entity) {
+		if(source instanceof Entity) {
 			MCEntity e = BukkitConvertor.BukkitGetCorrectEntity((Entity) source);
-			if (e instanceof MCProjectileSource) {
+			if(e instanceof MCProjectileSource) {
 				return (MCProjectileSource) e;
 			}
 		}
@@ -50,9 +50,9 @@ public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 
 	@Override
 	public void setShooter(MCProjectileSource shooter) {
-		if (shooter == null) {
+		if(shooter == null) {
 			proj.setShooter(null);
-		} else if (shooter instanceof MCBlockProjectileSource) {
+		} else if(shooter instanceof MCBlockProjectileSource) {
 			proj.setShooter((BlockProjectileSource) shooter.getHandle());
 		} else {
 			proj.setShooter((ProjectileSource) shooter.getHandle());

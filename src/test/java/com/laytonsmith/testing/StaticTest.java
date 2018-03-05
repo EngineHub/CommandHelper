@@ -103,28 +103,28 @@ import static org.mockito.Mockito.when;
  */
 //@RunWith(PowerMockRunner.class)
 public class StaticTest {
+
 	static com.laytonsmith.core.environments.Environment env;
 
 	static {
 		try {
 			Implementation.setServerType(Implementation.Type.TEST);
 			env = Static.GenerateStandaloneEnvironment();
-		} catch (Exception ex) {
+		} catch(Exception ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 
 	/**
-	 * Tests the boilerplate functions in a Function. While all functions should
-	 * conform to at least this, it is useful to also use the more strict
-	 * TestBoilerplate function.
+	 * Tests the boilerplate functions in a Function. While all functions should conform to at least this, it is useful
+	 * to also use the more strict TestBoilerplate function.
 	 *
 	 * @param ff
 	 * @param name
 	 * @throws java.lang.Exception
 	 */
 	public static void TestBoilerplate(FunctionBase ff, String name) throws Exception {
-		if (!(ff instanceof Function)) {
+		if(!(ff instanceof Function)) {
 			return;
 		}
 		Function f = (Function) ff;
@@ -142,26 +142,26 @@ public class StaticTest {
 		f.thrown();
 
 		//name should match the given value
-		if (!f.getName().equals(name)) {
+		if(!f.getName().equals(name)) {
 			fail("Expected name of function to be " + name + ", but was given " + f.getName());
 		}
 
 		//docs needs to at least be more than a non-empty string, though in the future this should follow a more strict
 		//requirement set.
-		if (f.docs().length() <= 0) {
+		if(f.docs().length() <= 0) {
 			fail("docs must return a non-empty string");
 		}
 
 		TestDocs(f);
 
-		if (f.numArgs().length == 0) {
+		if(f.numArgs().length == 0) {
 			fail("numArgs must return an Integer array with more than zero values");
 		}
 
 		//If we want a "quality test coverage" number, we can't run this section, because it bombards the code
 		//with random data to see if it fails in expected ways (to simulate how a user could run the scripts)
 		//If we are interested in tests that are specific to the functions however, we shouldn't run this.
-		if (!runQualityTestsOnly && f.getClass().getAnnotation(noboilerplate.class) == null) {
+		if(!runQualityTestsOnly && f.getClass().getAnnotation(noboilerplate.class) == null) {
 			TestExec(f, fakePlayer, "fake player");
 			TestExec(f, null, "null command sender");
 			TestExec(f, StaticTest.GetFakeConsoleCommandSender(), "fake console command sender");
@@ -169,28 +169,28 @@ public class StaticTest {
 
 		//Let's make sure that if execs is defined in the class, useSpecialExec returns true.
 		//Same thing for optimize/canOptimize and optimizeDynamic/canOptimizeDynamic
-		if (f instanceof Optimizable) {
+		if(f instanceof Optimizable) {
 			Set<Optimizable.OptimizationOption> options = ((Optimizable) f).optimizationOptions();
-			if (options.contains(Optimizable.OptimizationOption.CONSTANT_OFFLINE) && options.contains(Optimizable.OptimizationOption.OPTIMIZE_CONSTANT)) {
+			if(options.contains(Optimizable.OptimizationOption.CONSTANT_OFFLINE) && options.contains(Optimizable.OptimizationOption.OPTIMIZE_CONSTANT)) {
 				fail(f.getName() + " declares both CONSTANT_OFFLINE and OPTIMIZE_CONSTANT, which are mutually exclusive.");
 			}
 		}
-		for (Method method : f.getClass().getDeclaredMethods()) {
-			if (method.getName().equals("execs")) {
-				if (!f.useSpecialExec()) {
+		for(Method method : f.getClass().getDeclaredMethods()) {
+			if(method.getName().equals("execs")) {
+				if(!f.useSpecialExec()) {
 					fail(f.getName() + " declares execs, but returns false for useSpecialExec.");
 				}
 			}
 
-			if (f instanceof Optimizable) {
+			if(f instanceof Optimizable) {
 				Set<Optimizable.OptimizationOption> options = ((Optimizable) f).optimizationOptions();
-				if (method.getName().equals("optimize")) {
-					if (!options.contains(Optimizable.OptimizationOption.OPTIMIZE_CONSTANT)) {
+				if(method.getName().equals("optimize")) {
+					if(!options.contains(Optimizable.OptimizationOption.OPTIMIZE_CONSTANT)) {
 						fail(f.getName() + " declares optimize, but does not declare that it can OPTIMIZE_CONSTANT");
 					}
 				}
-				if (method.getName().equals("optimizeDynamic")) {
-					if (!options.contains(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC)) {
+				if(method.getName().equals("optimizeDynamic")) {
+					if(!options.contains(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC)) {
 						fail(f.getName() + " declares optimizeDynamic, but does not declare that it can OPTIMIZE_DYNAMIC");
 					}
 				}
@@ -212,7 +212,7 @@ public class StaticTest {
 	private static ArrayList<String> tested = new ArrayList<String>();
 
 	public static void TestExec(Function f, MCCommandSender p, String commandType) throws Exception {
-		if (tested.contains(f.getName() + String.valueOf(p))) {
+		if(tested.contains(f.getName() + String.valueOf(p))) {
 			return;
 		}
 		tested.add(f.getName() + String.valueOf(p));
@@ -220,8 +220,8 @@ public class StaticTest {
 		//See if the function throws something other than a ConfigRuntimeException or CancelCommandException if we send it bad arguments,
 		//keeping in mind of course, that it isn't supposed to be able to accept the wrong number of arguments. Specifically, we want to try
 		//strings, numbers, arrays, and nulls
-		for (Integer i : f.numArgs()) {
-			if (i == Integer.MAX_VALUE) {
+		for(Integer i : f.numArgs()) {
+			if(i == Integer.MAX_VALUE) {
 				//er.. let's just try with 10...
 				i = 10;
 			}
@@ -230,9 +230,9 @@ public class StaticTest {
 			//ok is if it throws an unexpected type of exception. It should only ever
 			//throw a ConfigRuntimeException, or a CancelCommandException. Further,
 			//if it throws a ConfigRuntimeException, the documentation should state so.
-			for (int z = 0; z < 10; z++) {
-				for (int a = 0; a < i; a++) {
-					switch (z) {
+			for(int z = 0; z < 10; z++) {
+				for(int a = 0; a < i; a++) {
+					switch(z) {
 						case 0:
 							con[a] = C.onstruct("hi");
 							break;
@@ -267,9 +267,9 @@ public class StaticTest {
 				}
 				try {
 					f.exec(Target.UNKNOWN, env, con);
-				} catch (CancelCommandException e) {
-				} catch (ConfigRuntimeException e) {
-					if (f.getName().equals("throw")) {
+				} catch(CancelCommandException e) {
+				} catch(ConfigRuntimeException e) {
+					if(f.getName().equals("throw")) {
 						// throw() can throw anything.
 						return;
 					}
@@ -278,31 +278,31 @@ public class StaticTest {
 					// objects instead, but for now, it returns an enum. This will
 					// be a large change.
 					List<String> expectedNames = new ArrayList<>();
-					for (Class<? extends CREThrowable> tt : f.thrown()) {
+					for(Class<? extends CREThrowable> tt : f.thrown()) {
 						expectedNames.add(tt.getAnnotation(typeof.class).value());
 					}
-					if (f.thrown() == null || !expectedNames.contains(name)) {
+					if(f.thrown() == null || !expectedNames.contains(name)) {
 						fail("The documentation for " + f.getName() + " doesn't state that it can throw a "
 								+ name + ", but it did.");
 					}
-				} catch (Throwable e) {
-					if (e instanceof LoopBreakException && !f.getName().equals("break")) {
+				} catch(Throwable e) {
+					if(e instanceof LoopBreakException && !f.getName().equals("break")) {
 						fail("Only break() can throw LoopBreakExceptions");
 					}
-					if (e instanceof LoopContinueException && !f.getName().equals("continue")) {
+					if(e instanceof LoopContinueException && !f.getName().equals("continue")) {
 						fail("Only continue() can throw LoopContinueExceptions");
 					}
-					if (e instanceof FunctionReturnException && !f.getName().equals("return")) {
+					if(e instanceof FunctionReturnException && !f.getName().equals("return")) {
 						fail("Only return() can throw FunctionReturnExceptions");
 					}
-					if (e instanceof NullPointerException) {
+					if(e instanceof NullPointerException) {
 						String error = (f.getName() + " breaks if you send it the following while using a " + commandType + ": " + Arrays.deepToString(con) + "\n");
 						error += ("Here is the first few stack trace lines:\n");
 						error += ("\t" + e.getStackTrace()[0].toString() + "\n");
 						error += ("\t" + e.getStackTrace()[1].toString() + "\n");
 						error += ("\t" + e.getStackTrace()[2].toString() + "\n");
 						System.err.println(StackTraceUtils.GetStacktrace(e));
-						if (!brokenJunk.contains(error)) {
+						if(!brokenJunk.contains(error)) {
 							brokenJunk.add(error);
 						}
 					}
@@ -313,14 +313,13 @@ public class StaticTest {
 	static Set<String> brokenJunk = new TreeSet<String>();
 
 	public static void TestClassDocs(String docs, Class container) {
-		if (docs.length() <= 0) {
+		if(docs.length() <= 0) {
 			fail("The docs for the " + container.getSimpleName() + " class are missing");
 		}
 	}
 
 	/**
-	 * Gets the value out of s construct, ignoring information like line
-	 * numbers.
+	 * Gets the value out of s construct, ignoring information like line numbers.
 	 *
 	 * @param c
 	 * @return
@@ -330,9 +329,8 @@ public class StaticTest {
 	}
 
 	/**
-	 * Checks to see if two constructs are equal, using the same method that
-	 * MethodScript equals() uses. In fact, this method depends on equals()
-	 * working, as it actually uses the function.
+	 * Checks to see if two constructs are equal, using the same method that MethodScript equals() uses. In fact, this
+	 * method depends on equals() working, as it actually uses the function.
 	 *
 	 * @param expected
 	 * @param actual
@@ -340,7 +338,7 @@ public class StaticTest {
 	public static void assertCEquals(Construct expected, Construct actual) throws CancelCommandException {
 		equals e = new equals();
 		CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, expected, actual);
-		if (ret.getBoolean() == false) {
+		if(ret.getBoolean() == false) {
 			throw new AssertionError("Expected " + expected + " and " + actual + " to be equal to each other");
 		}
 	}
@@ -355,53 +353,52 @@ public class StaticTest {
 	public static void assertCNotEquals(Construct expected, Construct actual) throws CancelCommandException {
 		equals e = new equals();
 		CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, expected, actual);
-		if (ret.getBoolean() == true) {
+		if(ret.getBoolean() == true) {
 			throw new AssertionError("Did not expect " + expected + " and " + actual + " to be equal to each other");
 		}
 	}
 
 	/**
-	 * Verifies that the given construct <em>resolves</em> to true. The
-	 * resolution uses Static.getBoolean to do the resolution.
+	 * Verifies that the given construct <em>resolves</em> to true. The resolution uses Static.getBoolean to do the
+	 * resolution.
 	 *
 	 * @param actual
 	 */
 	public static void assertCTrue(Construct actual) {
-		if (!Static.getBoolean(actual)) {
+		if(!Static.getBoolean(actual)) {
 			fail("Expected '" + actual.val() + "' to resolve to true, but it did not");
 		}
 	}
 
 	/**
-	 * Verifies that the given construct <em>resolves</em> to false. The
-	 * resolution uses Static.getBoolean to do the resolution.
+	 * Verifies that the given construct <em>resolves</em> to false. The resolution uses Static.getBoolean to do the
+	 * resolution.
 	 *
 	 * @param actual
 	 */
 	public static void assertCFalse(Construct actual) {
-		if (Static.getBoolean(actual)) {
+		if(Static.getBoolean(actual)) {
 			fail("Expected '" + actual.val() + "' to resolve to false, but it did not");
 		}
 	}
 
 	/**
-	 * This function is used to assert that the type of a construct is one of
-	 * the specified types.
+	 * This function is used to assert that the type of a construct is one of the specified types.
 	 *
 	 * @param test
 	 * @param retTypes
 	 */
 	public static void assertReturn(Construct test, Class... retTypes) {
-		if (!Arrays.asList(retTypes).contains(test.getClass())) {
+		if(!Arrays.asList(retTypes).contains(test.getClass())) {
 			StringBuilder b = new StringBuilder();
-			if (retTypes.length == 1) {
+			if(retTypes.length == 1) {
 				b.append("Expected return type to be ").append(retTypes[0].getSimpleName()).append(", but found ").append(test.getClass().getSimpleName());
-			} else if (retTypes.length == 2) {
+			} else if(retTypes.length == 2) {
 				b.append("Expected return type to be either ").append(retTypes[0].getSimpleName()).append(" or ").append(retTypes[1].getSimpleName()).append(", but found ").append(test.getClass().getSimpleName());
 			} else {
 				b.append("Expected return type to be one of: ");
-				for (int i = 0; i < retTypes.length; i++) {
-					if (i < retTypes.length - 1) {
+				for(int i = 0; i < retTypes.length; i++) {
+					if(i < retTypes.length - 1) {
 						b.append(retTypes[i].getSimpleName()).append(", ");
 					} else {
 						b.append("or ").append(retTypes[i].getSimpleName());
@@ -444,16 +441,16 @@ public class StaticTest {
 		when(p.getName()).thenReturn(name);
 		when(p.getServer()).thenReturn(s);
 		when(p.isOp()).thenReturn(true);
-		if (s != null && s.getOnlinePlayers() != null) {
+		if(s != null && s.getOnlinePlayers() != null) {
 			Collection<MCPlayer> online = s.getOnlinePlayers();
 			boolean alreadyOnline = false;
-			for (MCPlayer o : online) {
-				if (o.getName().equals(name)) {
+			for(MCPlayer o : online) {
+				if(o.getName().equals(name)) {
 					alreadyOnline = true;
 					break;
 				}
 			}
-			if (!alreadyOnline) {
+			if(!alreadyOnline) {
 				online.add(p);
 				when(s.getOnlinePlayers()).thenReturn(new HashSet<MCPlayer>());
 			}
@@ -517,7 +514,7 @@ public class StaticTest {
 
 	public static void Run(String script, MCCommandSender player, MethodScriptComplete done, Environment env) throws Exception {
 		InstallFakeServerFrontend();
-		if (env == null) {
+		if(env == null) {
 			env = StaticTest.env;
 		}
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
@@ -530,14 +527,14 @@ public class StaticTest {
 
 	public static void RunCommand(String combinedScript, MCCommandSender player, String command, Environment env) throws Exception {
 		InstallFakeServerFrontend();
-		if (env == null) {
+		if(env == null) {
 			env = StaticTest.env;
 		}
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
 		List<Script> scripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(combinedScript, null, false));
-		for (Script s : scripts) {
+		for(Script s : scripts) {
 			s.compile();
-			if (s.match(command)) {
+			if(s.match(command)) {
 				s.run(s.getVariables(command), env, null);
 			}
 		}
@@ -596,7 +593,7 @@ public class StaticTest {
 		MCServer fakeServer = mock(MCServer.class);
 		String[] pnames = new String[]{"player1", "player2", "player3"};
 		ArrayList<MCPlayer> pps = new ArrayList<MCPlayer>();
-		for (String p : pnames) {
+		for(String p : pnames) {
 			MCPlayer pp = GetOnlinePlayer(p, fakeServer);
 			pps.add(pp);
 		}
@@ -610,11 +607,10 @@ public class StaticTest {
 	/**
 	 * This installs a fake server frontend. You must have already included
 	 *
-	 * @PrepareForTest(Static.class) in the calling test code, which will allow
-	 * the proper static methods to be mocked.
+	 * @PrepareForTest(Static.class) in the calling test code, which will allow the proper static methods to be mocked.
 	 */
 	public static void InstallFakeServerFrontend() {
-		if (frontendInstalled) {
+		if(frontendInstalled) {
 			return;
 		}
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Static.class));
@@ -627,16 +623,15 @@ public class StaticTest {
 		frontendInstalled = true;
 		try {
 			Prefs.init(new File("preferences.ini"));
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			Logger.getLogger(StaticTest.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		CHLog.initialize(new File("."));
 	}
 
 	/**
-	 * Installs the fake convertor into the server, so event based calls will
-	 * work. Additionally, adds the fakePlayer to the server, if player based
-	 * events are to be called, this is the player returned.
+	 * Installs the fake convertor into the server, so event based calls will work. Additionally, adds the fakePlayer to
+	 * the server, if player based events are to be called, this is the player returned.
 	 *
 	 * @param fakePlayer
 	 * @throws java.lang.Exception
@@ -647,7 +642,7 @@ public class StaticTest {
 			//We need to add the test directory to the ClassDiscovery path
 			//This should probably not be hard coded at some point.
 			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(new File("./target/test-classes").toURI().toURL());
-		} catch (MalformedURLException ex) {
+		} catch(MalformedURLException ex) {
 			throw new RuntimeException(ex);
 		}
 
@@ -909,7 +904,7 @@ public class StaticTest {
 		@Override
 		public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException {
 			Map<String, Construct> map = new HashMap<String, Construct>();
-			if (fakePlayer != null) {
+			if(fakePlayer != null) {
 				map.put("player", new CString(fakePlayer.getName(), Target.UNKNOWN));
 			}
 			return map;
@@ -928,14 +923,12 @@ public class StaticTest {
 	}
 
 	/**
-	 * Returns the value of a private (or any other variable for that matter)
-	 * data member contained in the object provided. If the value isn't there,
-	 * the test fails automatically.
+	 * Returns the value of a private (or any other variable for that matter) data member contained in the object
+	 * provided. If the value isn't there, the test fails automatically.
 	 *
 	 * @param in The object to look in, or the Class object for static varibles.
 	 * @param name The name of the variable to get.
-	 * @param expected The type of the value that you expect to be. This is the
-	 * type that will be returned.
+	 * @param expected The type of the value that you expect to be. This is the type that will be returned.
 	 * @return
 	 */
 	public static <T> T GetPrivate(Object in, String name, Class<T> expected) {
@@ -943,11 +936,9 @@ public class StaticTest {
 	}
 
 	/**
-	 * Sets the value of a private (or any other variable for that matter) data
-	 * member contained in the object provided.
+	 * Sets the value of a private (or any other variable for that matter) data member contained in the object provided.
 	 *
-	 * @param in Either the class of the object (for static variables) or an
-	 * instance of the object.
+	 * @param in Either the class of the object (for static variables) or an instance of the object.
 	 * @param name The name of the field
 	 * @param value The actual value to set
 	 * @param expected The type of the value that you expect to be in the code.
@@ -961,39 +952,39 @@ public class StaticTest {
 		try {
 			Field f = null;
 			Class search = in.getClass();
-			if (in instanceof Class) {
+			if(in instanceof Class) {
 				search = (Class) in;
 			}
-			while (search != null) {
+			while(search != null) {
 				try {
 					f = search.getDeclaredField(name);
 					break;
-				} catch (NoSuchFieldException e) {
+				} catch(NoSuchFieldException e) {
 					search = search.getSuperclass();
 				}
 			}
-			if (f == null) {
+			if(f == null) {
 				throw new NoSuchFieldException();
 			}
 			f.setAccessible(true);
-			if (expected != null && !expected.isAssignableFrom(f.getType())) {
+			if(expected != null && !expected.isAssignableFrom(f.getType())) {
 				fail("Expected the value to be a " + expected.getName() + ", but it was actually a " + f.getType().getName());
 			}
-			if (isSet) {
+			if(isSet) {
 				f.set(in, value);
 			} else {
 				ret = f.get(in);
 			}
-		} catch (IllegalArgumentException ex) {
+		} catch(IllegalArgumentException ex) {
 			//This shouldn't happen ever, since we are using the class provided by in, and sending
 			//get/set in as well.
 			fail(ex.getMessage());
-		} catch (IllegalAccessException ex) {
+		} catch(IllegalAccessException ex) {
 			//This shouldn't happen ever, since we set it to accessible
 			fail(ex.getMessage());
-		} catch (NoSuchFieldException ex) {
+		} catch(NoSuchFieldException ex) {
 			fail("No such field \"" + name + "\" exists in the class " + in.getClass().getName());
-		} catch (SecurityException ex) {
+		} catch(SecurityException ex) {
 			fail("A security policy is preventing the test from getting \"" + name + "\" in the object provided.");
 		}
 		return (T) ret;

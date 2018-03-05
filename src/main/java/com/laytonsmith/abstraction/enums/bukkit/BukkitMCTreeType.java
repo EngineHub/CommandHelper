@@ -16,7 +16,7 @@ public class BukkitMCTreeType extends EnumConvertor<MCTreeType, TreeType> {
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCTreeType instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCTreeType getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCTreeType();
 		}
 		return instance;

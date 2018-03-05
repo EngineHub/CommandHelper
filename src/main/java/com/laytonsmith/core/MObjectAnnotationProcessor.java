@@ -30,18 +30,18 @@ public class MObjectAnnotationProcessor extends AbstractProcessor {
 
 	@Override
 	public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnv) {
-		if (!roundEnv.processingOver()) {
+		if(!roundEnv.processingOver()) {
 			List<Class> classesWithMObjectAnnotation = new ArrayList<>();
-			for (Element element : roundEnv.getElementsAnnotatedWith(mobject.class)) {
+			for(Element element : roundEnv.getElementsAnnotatedWith(mobject.class)) {
 				String className = element.toString();
 				Class c = null;
 				try {
 					c = getClassFromName(className);
-				} catch (ClassNotFoundException ex) {
+				} catch(ClassNotFoundException ex) {
 					Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				if (c != null) {
-					if (c.isInterface() || (c.getModifiers() & Modifier.ABSTRACT) > 0) {
+				if(c != null) {
+					if(c.isInterface() || (c.getModifiers() & Modifier.ABSTRACT) > 0) {
 						processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
 								"Only concrete classes may be annotated with " + mobject.class.getName()
 								+ " but found " + c.getName() + " to have been annotated with it.");
@@ -49,11 +49,11 @@ public class MObjectAnnotationProcessor extends AbstractProcessor {
 					classesWithMObjectAnnotation.add(c);
 				}
 			}
-			for (ClassMirror<MObject> c : ClassDiscovery.getDefaultInstance().getClassesThatExtend(MObject.class)) {
-				if (c.isInterface() || c.isAbstract()) {
+			for(ClassMirror<MObject> c : ClassDiscovery.getDefaultInstance().getClassesThatExtend(MObject.class)) {
+				if(c.isInterface() || c.isAbstract()) {
 					continue;
 				}
-				if (!classesWithMObjectAnnotation.contains(c.loadClass())) {
+				if(!classesWithMObjectAnnotation.contains(c.loadClass())) {
 					processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Concrete objects that extend MObject must"
 							+ " have the @mobject annotation, but found " + c.toString() + " without it.");
 				}

@@ -8,26 +8,26 @@ import org.bukkit.entity.Painting;
 
 public class BukkitMCPainting extends BukkitMCHanging implements MCPainting {
 
-    Painting p;
+	Painting p;
 
-    public BukkitMCPainting(Entity painting) {
-        super(painting);
-        this.p = (Painting) painting;
-    }
+	public BukkitMCPainting(Entity painting) {
+		super(painting);
+		this.p = (Painting) painting;
+	}
 
-    @Override
-    public MCArt getArt() {
-        return BukkitMCArt.getConvertor().getAbstractedEnum(p.getArt());
-    }
+	@Override
+	public MCArt getArt() {
+		return BukkitMCArt.getConvertor().getAbstractedEnum(p.getArt());
+	}
 
-    @Override
-    public boolean setArt(MCArt art) {
-        return setArt(art, false);
-    }
+	@Override
+	public boolean setArt(MCArt art) {
+		return setArt(art, false);
+	}
 
-    @Override
-    public boolean setArt(MCArt art, boolean force) {
-        return p.setArt(BukkitMCArt.getConvertor().getConcreteEnum(art), force);
-    }
+	@Override
+	public boolean setArt(MCArt art, boolean force) {
+		return p.setArt(BukkitMCArt.getConvertor().getConcreteEnum(art), force);
+	}
 
 }

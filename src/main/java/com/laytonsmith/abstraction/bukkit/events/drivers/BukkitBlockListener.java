@@ -48,12 +48,12 @@ public class BukkitBlockListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockBreak(BlockBreakEvent e) {
-		if (ignorebreak) {
+		if(ignorebreak) {
 			return;
 		}
 		BukkitBlockEvents.BukkitMCBlockBreakEvent bbe = new BukkitBlockEvents.BukkitMCBlockBreakEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_BREAK, "block_break", bbe);
-		if (bbe.isModified() && !e.isCancelled()) {
+		if(bbe.isModified() && !e.isCancelled()) {
 			e.setCancelled(true);
 			// If we've modified the drops, create a new event for other plugins (eg. block loggers, region protection)
 			BlockBreakEvent chevent = new BlockBreakEvent(e.getBlock(), e.getPlayer());
@@ -65,16 +65,16 @@ public class BukkitBlockListener implements Listener {
 			} finally {
 				ignorebreak = false;
 			}
-			if (!chevent.isCancelled()) {
+			if(!chevent.isCancelled()) {
 				Block block = chevent.getBlock();
 				block.setType(Material.AIR);
 				Location loc = block.getLocation();
 				loc.add(0.5, 0.5, 0.5);
-				for (MCItemStack item : bbe.getDrops()) {
+				for(MCItemStack item : bbe.getDrops()) {
 					block.getWorld().dropItemNaturally(loc, (ItemStack) item.getHandle());
 				}
 				int amt = chevent.getExpToDrop();
-				if (amt > 0) {
+				if(amt > 0) {
 					ExperienceOrb exp = (ExperienceOrb) block.getWorld().spawnEntity(loc, EntityType.EXPERIENCE_ORB);
 					exp.setExperience(amt);
 				}

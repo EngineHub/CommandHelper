@@ -22,7 +22,7 @@ public class WebConnection implements ConnectionMixin {
 			newURI = new URI("http" + (useHTTPS ? "s" : "") + "://" + uri.getHost() + uri.getPath()
 					+ (uri.getQuery() == null ? "" : "?" + uri.getQuery())
 					+ (uri.getFragment() == null ? "" : "#" + uri.getFragment()));
-		} catch (URISyntaxException ex) {
+		} catch(URISyntaxException ex) {
 			//This shouldn't happen, because the URI we received should be correct. If this happens, it's my fault :x
 			throw new Error("Bad URI?");
 		}

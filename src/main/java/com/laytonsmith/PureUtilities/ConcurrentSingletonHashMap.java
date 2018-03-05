@@ -87,13 +87,13 @@ public class ConcurrentSingletonHashMap<T, V> implements Map<T, V> {
 		@SuppressWarnings("unchecked")
 		T k = (T) key;
 		// Usual case, it already exists. No synchronization.
-		if (map.containsKey(k)) {
+		if(map.containsKey(k)) {
 			return map.get(k);
 		}
 		// It does not exist. We must now synchronize.
-		synchronized (map) {
+		synchronized(map) {
 			// It may have since been created since we got the lock
-			if (map.containsKey(k)) {
+			if(map.containsKey(k)) {
 				return map.get(k);
 			}
 			// It truly does not exist, so now we must create it, put it in the map, then return it.

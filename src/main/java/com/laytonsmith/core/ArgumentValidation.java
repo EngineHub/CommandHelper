@@ -36,9 +36,9 @@ public class ArgumentValidation {
 	 * defaultItem is null.
 	 */
 	public static Construct getItemFromArray(CArray object, String key, Target t, Construct defaultItem) throws ConfigRuntimeException {
-		if (object.containsKey(key)) {
+		if(object.containsKey(key)) {
 			return object.get(key, t);
-		} else if (defaultItem == null) {
+		} else if(defaultItem == null) {
 			throw new CREFormatException("Expected the key \"" + key + "\" to be present, but it was not found.", t);
 		} else {
 			return defaultItem;
@@ -53,7 +53,7 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static CArray getArray(Construct construct, Target t) {
-		if (construct instanceof CArray) {
+		if(construct instanceof CArray) {
 			return ((CArray) construct);
 		} else {
 			throw new CRECastException("Expecting array, but received " + construct.val(), t);
@@ -76,7 +76,7 @@ public class ArgumentValidation {
 	 */
 	@Deprecated
 	public static <T extends Construct> T getObject(Construct construct, Target t, String expectedClassName, Class<T> clazz) {
-		if (clazz.isAssignableFrom(construct.getClass())) {
+		if(clazz.isAssignableFrom(construct.getClass())) {
 			return (T) construct;
 		} else {
 			throw new CRECastException("Expecting " + expectedClassName + " but receieved " + construct.val() + " instead.", t);
@@ -97,7 +97,7 @@ public class ArgumentValidation {
 	 * @return The properly cast object.
 	 */
 	public static <T extends Construct> T getObject(Construct construct, Target t, Class<T> clazz) {
-		if (clazz.isAssignableFrom(construct.getClass())) {
+		if(clazz.isAssignableFrom(construct.getClass())) {
 			return (T) construct;
 		} else {
 			String expectedClassName = clazz.getAnnotation(typeof.class).value();
@@ -117,30 +117,30 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static double getNumber(Construct c, Target t) {
-		if (c instanceof CMutablePrimitive) {
+		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
 		double d;
-		if (c == null || c instanceof CNull) {
+		if(c == null || c instanceof CNull) {
 			return 0.0;
 		}
-		if (c instanceof CInt) {
+		if(c instanceof CInt) {
 			d = ((CInt) c).getInt();
-		} else if (c instanceof CDouble) {
+		} else if(c instanceof CDouble) {
 			d = ((CDouble) c).getDouble();
-		} else if (c instanceof CString) {
+		} else if(c instanceof CString) {
 			try {
 				d = Double.parseDouble(c.val());
-			} catch (NumberFormatException e) {
+			} catch(NumberFormatException e) {
 				throw new CRECastException("Expecting a number, but received \"" + c.val() + "\" instead", t);
 			}
-		} else if (c instanceof CBoolean) {
-			if (((CBoolean) c).getBoolean()) {
+		} else if(c instanceof CBoolean) {
+			if(((CBoolean) c).getBoolean()) {
 				d = 1;
 			} else {
 				d = 0;
 			}
-		} else if (c instanceof CDecimal) {
+		} else if(c instanceof CDecimal) {
 			throw new CRECastException("Expecting a number, but received a decimal value instead. This cannot be"
 					+ " automatically cast, please use double(@decimal) to manually cast down to a double.", t);
 		} else {
@@ -188,12 +188,12 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static double getDouble(Construct c, Target t) {
-		if (c instanceof CMutablePrimitive) {
+		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
 		try {
 			return getNumber(c, t);
-		} catch (ConfigRuntimeException e) {
+		} catch(ConfigRuntimeException e) {
 			throw new CRECastException("Expecting a double, but received " + c.val() + " instead", t);
 		}
 	}
@@ -208,14 +208,14 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static float getDouble32(Construct c, Target t) {
-		if (c instanceof CMutablePrimitive) {
+		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
 		// Use 6 places at most else the imprecisions of float makes this function throw the exception.
 		double delta = 0.0000001;
 		double l = getDouble(c, t);
 		float f = (float) l;
-		if (Math.abs(f - l) > delta) {
+		if(Math.abs(f - l) > delta) {
 			throw new CRERangeException("Expecting a 32 bit float, but a larger value was found: " + l, t);
 		}
 		return f;
@@ -229,17 +229,17 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static long getInt(Construct c, Target t) {
-		if (c instanceof CMutablePrimitive) {
+		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
 		long i;
-		if (c == null || c instanceof CNull) {
+		if(c == null || c instanceof CNull) {
 			return 0;
 		}
-		if (c instanceof CInt) {
+		if(c instanceof CInt) {
 			i = ((CInt) c).getInt();
-		} else if (c instanceof CBoolean) {
-			if (((CBoolean) c).getBoolean()) {
+		} else if(c instanceof CBoolean) {
+			if(((CBoolean) c).getBoolean()) {
 				i = 1;
 			} else {
 				i = 0;
@@ -247,7 +247,7 @@ public class ArgumentValidation {
 		} else {
 			try {
 				i = Long.parseLong(c.val());
-			} catch (NumberFormatException e) {
+			} catch(NumberFormatException e) {
 				throw new CRECastException("Expecting an integer, but received \"" + c.val() + "\" instead", t);
 			}
 		}
@@ -264,12 +264,12 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static int getInt32(Construct c, Target t) {
-		if (c instanceof CMutablePrimitive) {
+		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
 		long l = getInt(c, t);
 		int i = (int) l;
-		if (i != l) {
+		if(i != l) {
 			throw new CRERangeException("Expecting a 32 bit integer, but a larger value was found: " + l, t);
 		}
 		return i;
@@ -285,12 +285,12 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static short getInt16(Construct c, Target t) {
-		if (c instanceof CMutablePrimitive) {
+		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
 		long l = getInt(c, t);
 		short s = (short) l;
-		if (s != l) {
+		if(s != l) {
 			throw new CRERangeException("Expecting a 16 bit integer, but a larger value was found: " + l, t);
 		}
 		return s;
@@ -306,12 +306,12 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static byte getInt8(Construct c, Target t) {
-		if (c instanceof CMutablePrimitive) {
+		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
 		long l = getInt(c, t);
 		byte b = (byte) l;
-		if (b != l) {
+		if(b != l) {
 			throw new CRERangeException("Expecting an 8 bit integer, but a larger value was found: " + l, t);
 		}
 		return b;
@@ -327,20 +327,20 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static boolean getBoolean(Construct c, Target t) {
-		if (c instanceof CMutablePrimitive) {
+		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
 		boolean b = false;
-		if (c == null) {
+		if(c == null) {
 			return false;
 		}
-		if (c instanceof CBoolean) {
+		if(c instanceof CBoolean) {
 			b = ((CBoolean) c).getBoolean();
-		} else if (c instanceof CString) {
+		} else if(c instanceof CString) {
 			b = (c.val().length() > 0);
-		} else if (c instanceof CInt || c instanceof CDouble) {
+		} else if(c instanceof CInt || c instanceof CDouble) {
 			b = !(getNumber(c, t) == 0);
-		} else if (c instanceof ArrayAccess) {
+		} else if(c instanceof ArrayAccess) {
 			b = !(((ArrayAccess) c).size() == 0);
 		}
 		return b;
@@ -354,9 +354,9 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static CByteArray getByteArray(Construct c, Target t) {
-		if (c instanceof CByteArray) {
+		if(c instanceof CByteArray) {
 			return (CByteArray) c;
-		} else if (c instanceof CNull) {
+		} else if(c instanceof CNull) {
 			return new CByteArray(t, 0);
 		} else {
 			throw new CRECastException("Expecting byte array, but found " + c.typeof() + " instead.", t);
@@ -364,7 +364,7 @@ public class ArgumentValidation {
 	}
 
 	public static CClassType getClassType(Construct c, Target t) {
-		if (c instanceof CClassType) {
+		if(c instanceof CClassType) {
 			return (CClassType) c;
 		} else {
 			throw new CRECastException("Expecting a ClassType, but found " + c.typeof() + " instead.", t);
@@ -390,8 +390,8 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static boolean anyDoubles(Construct... c) {
-		for (Construct c1 : c) {
-			if (c1 instanceof CDouble) {
+		for(Construct c1 : c) {
+			if(c1 instanceof CDouble) {
 				return true;
 			}
 		}
@@ -405,8 +405,8 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static boolean anyStrings(Construct... c) {
-		for (Construct c1 : c) {
-			if (c1 instanceof CString) {
+		for(Construct c1 : c) {
+			if(c1 instanceof CString) {
 				return true;
 			}
 		}
@@ -420,8 +420,8 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static boolean anyNulls(Construct... c) {
-		for (Construct c1 : c) {
-			if (c1 instanceof CNull) {
+		for(Construct c1 : c) {
+			if(c1 instanceof CNull) {
 				return true;
 			}
 		}
@@ -435,8 +435,8 @@ public class ArgumentValidation {
 	 * @return
 	 */
 	public static boolean anyBooleans(Construct... c) {
-		for (Construct c1 : c) {
-			if (c1 instanceof CBoolean) {
+		for(Construct c1 : c) {
+			if(c1 instanceof CBoolean) {
 				return true;
 			}
 		}

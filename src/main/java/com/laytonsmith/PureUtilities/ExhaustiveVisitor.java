@@ -218,30 +218,30 @@ public class ExhaustiveVisitor<T> {
 		VisitorInfo info = this.getClass().getDeclaredAnnotation(VisitorInfo.class);
 		Method candidate = null;
 		Class<?> searchFor = object.getClass();
-		for (Method m : this.getClass().getMethods()) {
-			if (VISIT.equals(m.getName())) {
+		for(Method m : this.getClass().getMethods()) {
+			if(VISIT.equals(m.getName())) {
 				Class<?> visitParam = m.getParameterTypes()[0];
-				if (info != null && info.directSubclassOnly()) {
-					if (visitParam.isAssignableFrom(searchFor)) {
+				if(info != null && info.directSubclassOnly()) {
+					if(visitParam.isAssignableFrom(searchFor)) {
 						candidate = m;
 						break;
 					}
 				} else {
-					if (visitParam == searchFor) {
+					if(visitParam == searchFor) {
 						candidate = m;
 						break;
 					}
 				}
 			}
 		}
-		if (candidate == null) {
+		if(candidate == null) {
 			throw new NoSuchMethodError("Missing implementation of method with signature (or superclass of): "
 					+ " public void visit(" + searchFor.getName().replace("$", ".") + ") in class "
 					+ this.getClass().getName());
 		}
 		try {
 			candidate.invoke(this, object);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+		} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -255,22 +255,22 @@ public class ExhaustiveVisitor<T> {
 		List<String> uhohs = new ArrayList<>();
 		// Make sure all public visit methods have only one parameter (which extends T) and return void
 		Set<Class<?>> handledClasses = new HashSet<>();
-		for (Method m : clazz.getMethods()) {
-			if (m.getDeclaringClass() == ExhaustiveVisitor.class) {
+		for(Method m : clazz.getMethods()) {
+			if(m.getDeclaringClass() == ExhaustiveVisitor.class) {
 				// This is the method defined in this class, which doesn't need to be checked. Skip it.
 				continue;
 			}
-			if (VISIT.equals(m.getName()) && (m.getModifiers() & Modifier.PUBLIC) != 0) {
-				if (m.getReturnType() != void.class) {
+			if(VISIT.equals(m.getName()) && (m.getModifiers() & Modifier.PUBLIC) != 0) {
+				if(m.getReturnType() != void.class) {
 					uhohs.add("Return type of public visit() methods must be void, but "
 							+ clazz.getName() + " " + m + " does not conform");
 				}
-				if (m.getParameterTypes().length != 1) {
+				if(m.getParameterTypes().length != 1) {
 					uhohs.add("Public visit() methods must accept exactly one parameter, but"
 							+ clazz.getName() + " " + m + " does not conform");
 				} else {
 					Class<?> param = m.getParameterTypes()[0];
-					if (baseClass.isAssignableFrom(param)) {
+					if(baseClass.isAssignableFrom(param)) {
 						handledClasses.add(param);
 					} else {
 						uhohs.add("Public visit() methods parameters must extend the given base class's type, but the"
@@ -286,31 +286,31 @@ public class ExhaustiveVisitor<T> {
 		// Make sure that all subclasses are accounted for, taking into
 		// account the value of directSubclassOnly
 		Set<Class<?>> needsToHandle = new HashSet<>();
-		for (Class<?> c : ClassDiscovery.getDefaultInstance().loadClassesThatExtend(baseClass)) {
-			if ((c.getModifiers() & Modifier.ABSTRACT) != 0) {
+		for(Class<?> c : ClassDiscovery.getDefaultInstance().loadClassesThatExtend(baseClass)) {
+			if((c.getModifiers() & Modifier.ABSTRACT) != 0) {
 				// Abstract class, skip this, because an item can never be a concrete instance of this, and
 				// thus is not required to be implemented
 				continue;
 			}
-			if (info != null && info.directSubclassOnly()) {
-				if (c.getSuperclass() == baseClass || Arrays.asList(c.getInterfaces()).contains(c)) {
+			if(info != null && info.directSubclassOnly()) {
+				if(c.getSuperclass() == baseClass || Arrays.asList(c.getInterfaces()).contains(c)) {
 					needsToHandle.add(c);
 				}
 			} else {
 				needsToHandle.add(c);
 			}
 		}
-		if (!needsToHandle.equals(handledClasses)) {
+		if(!needsToHandle.equals(handledClasses)) {
 			String s = clazz.getName() + " is missing needed implementations of the visit method. It is required"
 					+ " that it handle the following: " + needsToHandle + ", however, it only handles the following:"
 					+ " " + handledClasses + ". Please add the following implementations:\n";
 			needsToHandle.removeAll(handledClasses);
-			for (Class<?> n : needsToHandle) {
+			for(Class<?> n : needsToHandle) {
 				s += "public void visit(" + n.getName().replace("$", ".") + " obj) { /* Implement me */ }\n";
 			}
 			uhohs.add(s);
 		}
-		if (!uhohs.isEmpty()) {
+		if(!uhohs.isEmpty()) {
 			throw new RuntimeException(StringUtils.Join(uhohs, "\n"));
 		}
 	}

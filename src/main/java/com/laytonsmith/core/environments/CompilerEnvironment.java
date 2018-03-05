@@ -39,10 +39,10 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl, Cloneab
 	 */
 	public IVariable getIVariableFromStack(String name) {
 		ListIterator<Set<IVariable>> stackIterator = variableStack.listIterator(variableStack.size());
-		while (stackIterator.hasPrevious()) {
+		while(stackIterator.hasPrevious()) {
 			Set<IVariable> set = stackIterator.previous();
-			for (IVariable v : set) {
-				if (v.getVariableName().equals(name)) {
+			for(IVariable v : set) {
+				if(v.getVariableName().equals(name)) {
 					return v;
 				}
 			}

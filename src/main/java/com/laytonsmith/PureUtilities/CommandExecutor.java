@@ -54,7 +54,7 @@ public class CommandExecutor {
 		Byte[] Bytes = new Byte[output.size()];
 		byte[] bytes = new byte[output.size()];
 		Bytes = output.toArray(Bytes);
-		for (int i = 0; i < Bytes.length; i++) {
+		for(int i = 0; i < Bytes.length; i++) {
 			bytes[i] = Bytes[i];
 		}
 
@@ -103,21 +103,21 @@ public class CommandExecutor {
 				InputStream bout = new BufferedInputStream(process.getInputStream());
 				int ret;
 				try {
-					while ((ret = bout.read()) != -1) {
-						if (out != null) {
+					while((ret = bout.read()) != -1) {
+						if(out != null) {
 							out.write(ret);
 						}
 					}
-					if (out != null) {
+					if(out != null) {
 						out.flush();
 					}
-				} catch (IOException ex) {
+				} catch(IOException ex) {
 					Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 				} finally {
-					if (out != null) {
+					if(out != null) {
 						try {
 							out.close();
-						} catch (IOException ex) {
+						} catch(IOException ex) {
 							Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
@@ -132,21 +132,21 @@ public class CommandExecutor {
 				InputStream berr = new BufferedInputStream(process.getErrorStream());
 				int ret;
 				try {
-					while ((ret = berr.read()) != -1) {
-						if (err != null) {
+					while((ret = berr.read()) != -1) {
+						if(err != null) {
 							err.write(ret);
 						}
 					}
-					if (err != null) {
+					if(err != null) {
 						err.flush();
 					}
-				} catch (IOException ex) {
+				} catch(IOException ex) {
 					Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 				} finally {
-					if (err != null) {
+					if(err != null) {
 						try {
 							err.close();
-						} catch (IOException ex) {
+						} catch(IOException ex) {
 							Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
@@ -154,7 +154,7 @@ public class CommandExecutor {
 			}
 		}, Arrays.toString(args) + "-error");
 		errThread.start();
-		if (in != null) {
+		if(in != null) {
 			inThread = new Thread(new Runnable() {
 
 				@Override
@@ -162,16 +162,16 @@ public class CommandExecutor {
 					OutputStream bin = new BufferedOutputStream(process.getOutputStream());
 					int ret;
 					try {
-						while ((ret = in.read()) != -1) {
+						while((ret = in.read()) != -1) {
 							bin.write(ret);
 						}
-					} catch (IOException ex) {
+					} catch(IOException ex) {
 						Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 					} finally {
-						if (in != null) {
+						if(in != null) {
 							try {
 								in.close();
-							} catch (IOException ex) {
+							} catch(IOException ex) {
 								Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 							}
 						}
@@ -184,7 +184,7 @@ public class CommandExecutor {
 	}
 
 	public CommandExecutor setSystemIn(InputStream input) {
-		if (process != null) {
+		if(process != null) {
 			throw new RuntimeException("Process is already started! Cannot set a new InputStream!");
 		}
 		in = input;
@@ -192,7 +192,7 @@ public class CommandExecutor {
 	}
 
 	public CommandExecutor setSystemOut(OutputStream output) {
-		if (process != null) {
+		if(process != null) {
 			throw new RuntimeException("Process is already started! Cannot set a new InputStream!");
 		}
 		out = output;
@@ -200,7 +200,7 @@ public class CommandExecutor {
 	}
 
 	public CommandExecutor setSystemErr(OutputStream error) {
-		if (process != null) {
+		if(process != null) {
 			throw new RuntimeException("Process is already started! Cannot set a new OutputStream!");
 		}
 		err = error;
@@ -220,7 +220,7 @@ public class CommandExecutor {
 	}
 
 	public CommandExecutor setWorkingDir(File workingDir) {
-		if (process != null) {
+		if(process != null) {
 			throw new RuntimeException("Process is already started! Cannot set a new working directory!");
 		}
 		this.workingDir = workingDir;
@@ -236,17 +236,17 @@ public class CommandExecutor {
 	 */
 	public int waitFor() throws InterruptedException {
 		int ret = process.waitFor();
-		if (out != null) {
+		if(out != null) {
 			try {
 				out.flush();
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-		if (err != null) {
+		if(err != null) {
 			try {
 				err.flush();
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}

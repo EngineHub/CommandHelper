@@ -39,9 +39,9 @@ public final class CLock extends Construct {
 	 * immediately.
 	 */
 	public void obtainLock() throws InterruptedException {
-		synchronized (lock) {
+		synchronized(lock) {
 			count++;
-			while (count > 0) {
+			while(count > 0) {
 				lock.wait();
 			}
 		}
@@ -54,8 +54,8 @@ public final class CLock extends Construct {
 	 * @param signal
 	 */
 	public void releaseLock(Construct signal) {
-		synchronized (lock) {
-			if (count > 0) {
+		synchronized(lock) {
+			if(count > 0) {
 				count--;
 			}
 			lock.notifyAll();

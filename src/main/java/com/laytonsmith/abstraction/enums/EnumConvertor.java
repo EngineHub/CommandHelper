@@ -27,7 +27,7 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 
 	protected EnumConvertor() {
 		abstractionenum annotation = this.getClass().getAnnotation(abstractionenum.class);
-		if (annotation == null) {
+		if(annotation == null) {
 			throw new Error(this.getClass() + " is not annotated with @abstractionenum.");
 		}
 
@@ -46,12 +46,12 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 	 * @throws IllegalArgumentException If the enum lookup failed
 	 */
 	public final Abstracted getAbstractedEnum(Concrete concrete) {
-		if (concrete == null) {
+		if(concrete == null) {
 			return null;
 		}
 		try {
 			return getAbstractedEnumCustom(concrete);
-		} catch (IllegalArgumentException e) {
+		} catch(IllegalArgumentException e) {
 			doLog(concreteClass, abstractedClass, concrete);
 			return null;
 		}
@@ -79,12 +79,12 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 	 * @throws IllegalArgumentException If the enum lookup failed
 	 */
 	public final Concrete getConcreteEnum(Abstracted abstracted) {
-		if (abstracted == null) {
+		if(abstracted == null) {
 			return null;
 		}
 		try {
 			return getConcreteEnumCustom(abstracted);
-		} catch (IllegalArgumentException e) {
+		} catch(IllegalArgumentException e) {
 			doLog(abstractedClass, concreteClass, abstracted);
 			return null;
 		}
@@ -104,7 +104,7 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 	private void doLog(Class from, Class to, Enum value) {
 		String message = from.getSimpleName() + "." + value.name() + " missing a match in " + to.getName();
 		LogLevel level = LogLevel.WARNING;
-		if (useError) {
+		if(useError) {
 			level = LogLevel.ERROR;
 		}
 		CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, level, message, Target.UNKNOWN);

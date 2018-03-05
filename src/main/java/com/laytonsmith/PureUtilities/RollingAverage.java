@@ -38,7 +38,7 @@ public class RollingAverage {
 	public void addData(double d) {
 		data[insertionIndex] = d;
 		insertionIndex++;
-		if (insertionIndex == dataSize) {
+		if(insertionIndex == dataSize) {
 			insertionIndex = 0; //rollover
 		}
 	}
@@ -52,14 +52,14 @@ public class RollingAverage {
 		double sum = 0;
 		int count = 0;
 		boolean hasValue = false;
-		for (Double d : data) {
-			if (d != null) {
+		for(Double d : data) {
+			if(d != null) {
 				hasValue = true;
 				sum += d;
 				count++;
 			}
 		}
-		if (!hasValue) {
+		if(!hasValue) {
 			return initialValue;
 		}
 		return sum / count;

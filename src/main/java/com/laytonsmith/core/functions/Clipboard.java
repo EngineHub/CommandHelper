@@ -38,7 +38,7 @@ public class Clipboard {
 	static {
 		try {
 			clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-		} catch (HeadlessException ex) {
+		} catch(HeadlessException ex) {
 			clipboard = null;
 		}
 	}
@@ -66,14 +66,14 @@ public class Clipboard {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Cmdline.requireCmdlineMode(environment, this, t);
 			Transferable tr = clipboard.getContents(null);
-			if (tr.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+			if(tr.isDataFlavorSupported(DataFlavor.stringFlavor)) {
 				try {
 					String data = (String) tr.getTransferData(DataFlavor.stringFlavor);
 					return new CString(data, t);
-				} catch (UnsupportedFlavorException ex) {
+				} catch(UnsupportedFlavorException ex) {
 					// Can't happen
 					throw new RuntimeException(ex);
-				} catch (IOException ex) {
+				} catch(IOException ex) {
 					throw new CREIOException(ex.getMessage(), t, ex);
 				}
 			} else {

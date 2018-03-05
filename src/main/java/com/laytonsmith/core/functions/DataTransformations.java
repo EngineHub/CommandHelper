@@ -66,7 +66,7 @@ public class DataTransformations {
 			CArray ca = Static.getArray(args[0], t);
 			try {
 				return new CString(Construct.json_encode(ca, t), t);
-			} catch (MarshalException ex) {
+			} catch(MarshalException ex) {
 				throw new CRECastException(ex.getMessage(), t);
 			}
 		}
@@ -116,7 +116,7 @@ public class DataTransformations {
 			String s = args[0].val();
 			try {
 				return Construct.json_decode(s, t);
-			} catch (MarshalException ex) {
+			} catch(MarshalException ex) {
 				throw new CREFormatException("The input JSON string is improperly formatted. Check your formatting and try again.", t, ex);
 			}
 		}
@@ -166,18 +166,18 @@ public class DataTransformations {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ca = Static.getArray(args[0], t);
 			boolean prettyPrint = false;
-			if (args.length == 2) {
+			if(args.length == 2) {
 				prettyPrint = Static.getBoolean(args[1]);
 			}
 			DumperOptions options = new DumperOptions();
-			if (prettyPrint) {
+			if(prettyPrint) {
 				options.setPrettyFlow(true);
 				options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 			}
 			Yaml yaml = new Yaml(options);
 			try {
 				return new CString(yaml.dump(Construct.GetPOJO(ca)), t);
-			} catch (ClassCastException ex) {
+			} catch(ClassCastException ex) {
 				throw new CRECastException(ex.getMessage(), t);
 			}
 		}
@@ -230,10 +230,10 @@ public class DataTransformations {
 			Exception cause = null;
 			try {
 				ret = yaml.load(data);
-			} catch (ScannerException | ParserException ex) {
+			} catch(ScannerException | ParserException ex) {
 				cause = ex;
 			}
-			if (!(ret instanceof Map) && !(ret instanceof Collection)) {
+			if(!(ret instanceof Map) && !(ret instanceof Collection)) {
 				throw new CREFormatException("Improperly formatted YML", t, cause);
 			}
 			return Construct.GetConstruct(ret);
@@ -285,18 +285,18 @@ public class DataTransformations {
 			Properties props = new Properties();
 			CArray arr = Static.getArray(args[0], t);
 			String comment = null;
-			if (args.length == 2) {
+			if(args.length == 2) {
 				comment = args[1].val();
 			}
-			if (!arr.inAssociativeMode()) {
+			if(!arr.inAssociativeMode()) {
 				throw new CRECastException("Expecting an associative array", t);
 			}
-			for (String key : arr.stringKeySet()) {
+			for(String key : arr.stringKeySet()) {
 				Construct c = arr.get(key, t);
 				String val;
-				if (c instanceof CNull) {
+				if(c instanceof CNull) {
 					val = "";
-				} else if (c instanceof CArray) {
+				} else if(c instanceof CArray) {
 					throw new CRECastException("Arrays cannot be encoded with ini_encode.", t);
 				} else {
 					val = c.val();
@@ -306,7 +306,7 @@ public class DataTransformations {
 			StringWriter writer = new StringWriter();
 			try {
 				props.store(writer, comment);
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				// Won't happen
 			}
 			return new CString(writer.toString(), t);
@@ -365,11 +365,11 @@ public class DataTransformations {
 			Reader reader = new StringReader(args[0].val());
 			try {
 				props.load(reader);
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				throw new CREFormatException(ex.getMessage(), t);
 			}
 			CArray arr = CArray.GetAssociativeArray(t);
-			for (String key : props.stringPropertyNames()) {
+			for(String key : props.stringPropertyNames()) {
 				arr.set(key, props.getProperty(key));
 			}
 			return arr;
@@ -431,12 +431,12 @@ public class DataTransformations {
 			XMLDocument doc;
 			try {
 				doc = new XMLDocument(args[0].val());
-			} catch (SAXException ex) {
+			} catch(SAXException ex) {
 				throw new CREFormatException("Malformed XML.", t, ex);
 			}
 			try {
 				return Static.resolveConstruct(doc.getNode(args[1].val()), t);
-			} catch (XPathExpressionException ex) {
+			} catch(XPathExpressionException ex) {
 				throw new CREFormatException(ex.getMessage(), t, ex);
 			}
 		}

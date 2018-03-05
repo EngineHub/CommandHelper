@@ -76,7 +76,7 @@ public class Permissions {
 			MCCommandSender sender;
 			String permission;
 
-			if (args.length == 1) {
+			if(args.length == 1) {
 				sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				permission = args[0].val();
 			} else {
@@ -84,18 +84,18 @@ public class Permissions {
 				permission = args[1].val();
 
 				MCPlayer mcp = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				if (mcp != null && !mcp.getName().equals(args[0].val())) {
-					if (!Static.hasCHPermission(getName(), environment)) {
+				if(mcp != null && !mcp.getName().equals(args[0].val())) {
+					if(!Static.hasCHPermission(getName(), environment)) {
 						throw new CREInsufficientPermissionException("You do not have permission to use the " + getName() + " function.", t);
 					}
 				}
 			}
 
-			if (sender == null) {
+			if(sender == null) {
 				return CBoolean.FALSE; // Return false for null command senders.
 			}
 
-			if ((Static.getConsoleName().equals(sender.getName().toLowerCase())
+			if((Static.getConsoleName().equals(sender.getName().toLowerCase())
 					|| sender.getName().startsWith(Static.getBlockPrefix()))
 					&& !sender.isPermissionSet(permission)) {
 				// Console and CommandBlocks always have permission unless specifically set otherwise

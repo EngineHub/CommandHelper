@@ -30,18 +30,18 @@ public abstract class CompositeFunction extends AbstractFunction {
 	@Override
 	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 		ParseTree tree;
-		if (!cachedScripts.containsKey(this.getClass())) {
+		if(!cachedScripts.containsKey(this.getClass())) {
 			try {
 
 				String script = script();
 				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true))
 						// the root of the tree is null, so go ahead and pull it up
 						.getChildAt(0);
-			} catch (ConfigCompileException | ConfigCompileGroupException ex) {
+			} catch(ConfigCompileException | ConfigCompileGroupException ex) {
 				// This is really bad.
 				throw new Error(ex);
 			}
-			if (cacheCompile()) {
+			if(cacheCompile()) {
 				cachedScripts.put(this.getClass(), tree);
 			}
 		} else {
@@ -55,7 +55,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 		Construct ret = CVoid.VOID;
 		try {
 			env.GetScript().eval(tree, environment);
-		} catch (FunctionReturnException ex) {
+		} catch(FunctionReturnException ex) {
 			ret = ex.getReturn();
 		}
 		env.SetVarList(oldVariables);

@@ -88,9 +88,9 @@ public @interface api {
 		 * @return
 		 */
 		public static List<Class> Classes() {
-			if (classes == null) {
+			if(classes == null) {
 				Class[] cc = new Class[ValidClasses.values().length];
-				for (int i = 0; i < ValidClasses.values().length; i++) {
+				for(int i = 0; i < ValidClasses.values().length; i++) {
 					cc[i] = ValidClasses.values()[i].classType;
 				}
 				classes = Arrays.asList(cc);
@@ -105,8 +105,8 @@ public @interface api {
 		 * @return
 		 */
 		public static boolean IsValid(Class c) {
-			for (Class cc : Classes()) {
-				if (cc.isAssignableFrom(c)) {
+			for(Class cc : Classes()) {
+				if(cc.isAssignableFrom(c)) {
 					return true;
 				}
 			}

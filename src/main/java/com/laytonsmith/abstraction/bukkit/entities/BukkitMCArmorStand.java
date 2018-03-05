@@ -42,8 +42,8 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	@Override
 	public Map<MCBodyPart, Vector3D> getAllPoses() {
 		Map<MCBodyPart, Vector3D> slots = new EnumMap<MCBodyPart, Vector3D>(MCBodyPart.class);
-		for (MCBodyPart key : MCBodyPart.values()) {
-			switch (key) {
+		for(MCBodyPart key : MCBodyPart.values()) {
+			switch(key) {
 				case Head:
 					slots.put(key, getHeadPose());
 					break;
@@ -70,9 +70,9 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	@Override
 	public void setAllPoses(Map<MCBodyPart, Vector3D> posemap) {
 		Vector3D pose;
-		for (Map.Entry<MCBodyPart, Vector3D> part : posemap.entrySet()) {
+		for(Map.Entry<MCBodyPart, Vector3D> part : posemap.entrySet()) {
 			pose = part.getValue();
-			switch (part.getKey()) {
+			switch(part.getKey()) {
 				case Head:
 					setHeadPose(pose);
 					break;
@@ -112,7 +112,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setBoots(MCItemStack item) {
-		if (item == null) {
+		if(item == null) {
 			as.setBoots(null);
 		} else {
 			as.setBoots(((BukkitMCItemStack) item).asItemStack());
@@ -136,7 +136,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setChestplate(MCItemStack item) {
-		if (item == null) {
+		if(item == null) {
 			as.setChestplate(null);
 		} else {
 			as.setChestplate(((BukkitMCItemStack) item).asItemStack());
@@ -150,7 +150,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public void setHelmet(MCItemStack item) {
-		if (item == null) {
+		if(item == null) {
 			as.setHelmet(null);
 		} else {
 			as.setHelmet(((BukkitMCItemStack) item).asItemStack());
@@ -277,7 +277,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	public Boolean isMarker() {
 		try {
 			return as.isMarker();
-		} catch (NoSuchMethodError ex) {
+		} catch(NoSuchMethodError ex) {
 			// Probably before 1.8.7
 			return null;
 		}
@@ -287,7 +287,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	public void setMarker(boolean marker) {
 		try {
 			as.setMarker(marker);
-		} catch (NoSuchMethodError ex) {
+		} catch(NoSuchMethodError ex) {
 			// Probably before 1.8.7
 		}
 	}
@@ -390,7 +390,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 		@Override
 		public void setArmorContents(ItemStack[] itemStacks) {
-			switch (itemStacks.length) {
+			switch(itemStacks.length) {
 				case 4:
 					setHelmet(itemStacks[3]);
 				case 3:

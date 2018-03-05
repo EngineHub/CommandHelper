@@ -21,17 +21,17 @@ public class ProcKeyword extends Keyword {
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
-		if (list.get(keywordPosition).getData() instanceof CKeyword) {
+		if(list.get(keywordPosition).getData() instanceof CKeyword) {
 			// It's a lone keyword, so we expect some function to follow, which is the proc name + variables
-			if (list.get(keywordPosition + 1).getData() instanceof CFunction) {
+			if(list.get(keywordPosition + 1).getData() instanceof CFunction) {
 				ParseTree proc = new ParseTree(new CFunction(PROC, list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
 				proc.addChild(new ParseTree(new CString(list.get(keywordPosition + 1).getData().val(),
 						list.get(keywordPosition + 1).getTarget()), list.get(keywordPosition + 1).getFileOptions()));
 				// Grab the functions children, and put them on the stack
-				for (ParseTree child : list.get(keywordPosition + 1).getChildren()) {
+				for(ParseTree child : list.get(keywordPosition + 1).getChildren()) {
 					proc.addChild(child);
 				}
-				if (list.size() > keywordPosition + 2) {
+				if(list.size() > keywordPosition + 2) {
 					validateCodeBlock(list.get(keywordPosition + 2), "Expected braces to follow proc definition");
 					proc.addChild(getArgumentOrNull(list.get(keywordPosition + 2)));
 				} else {
@@ -45,10 +45,10 @@ public class ProcKeyword extends Keyword {
 				throw new ConfigCompileException("Unexpected use of \"proc\" keyword", list.get(keywordPosition).getTarget());
 			}
 
-		} else if (nodeIsProcFunction(list.get(keywordPosition))) {
+		} else if(nodeIsProcFunction(list.get(keywordPosition))) {
 			// It's the functional usage, possibly followed by a cbrace. If so, pull the cbrace in, and that's it
-			if (list.size() > keywordPosition + 1) {
-				if (isValidCodeBlock(list.get(keywordPosition + 1))) {
+			if(list.size() > keywordPosition + 1) {
+				if(isValidCodeBlock(list.get(keywordPosition + 1))) {
 					list.get(keywordPosition).addChild(getArgumentOrNull(list.get(keywordPosition + 1)));
 					list.remove(keywordPosition + 1);
 				}

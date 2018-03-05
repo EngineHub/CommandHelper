@@ -25,15 +25,15 @@ public class KeywordList {
 	public static void refreshKeywordList() {
 		Set<Class<? extends Keyword>> keywords = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(Keyword.keyword.class, Keyword.class);
 		keywordList = new HashMap<>();
-		for (Class<? extends Keyword> k : keywords) {
-			if (k == Keyword.class) {
+		for(Class<? extends Keyword> k : keywords) {
+			if(k == Keyword.class) {
 				// Skip this one
 				continue;
 			}
 			try {
 				Keyword kk = k.newInstance();
 				keywordList.put(kk.getKeywordName(), kk);
-			} catch (InstantiationException | IllegalAccessException ex) {
+			} catch(InstantiationException | IllegalAccessException ex) {
 				Logger.getLogger(KeywordList.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}

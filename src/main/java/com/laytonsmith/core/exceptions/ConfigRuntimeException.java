@@ -88,23 +88,23 @@ public class ConfigRuntimeException extends RuntimeException {
 	public static Reaction GetReaction(ConfigRuntimeException e, Environment env) {
 		//If there is an exception handler, call it to see what it says.
 		Reaction reaction = Reaction.REPORT;
-		if (env.getEnv(GlobalEnv.class).GetExceptionHandler() != null) {
+		if(env.getEnv(GlobalEnv.class).GetExceptionHandler() != null) {
 			CClosure c = env.getEnv(GlobalEnv.class).GetExceptionHandler();
 			CArray ex = ObjectGenerator.GetGenerator().exception(e, env, Target.UNKNOWN);
-			if (e.getEnv() != null) {
+			if(e.getEnv() != null) {
 				MCCommandSender sender = e.getEnv().getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				c.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
 			}
 			Construct ret = CNull.NULL;
 			try {
 				c.execute(new Construct[]{ex});
-			} catch (FunctionReturnException retException) {
+			} catch(FunctionReturnException retException) {
 				ret = retException.getReturn();
 			}
-			if (ret instanceof CNull || Prefs.ScreamErrors()) {
+			if(ret instanceof CNull || Prefs.ScreamErrors()) {
 				reaction = Reaction.REPORT;
 			} else {
-				if (Static.getBoolean(ret)) {
+				if(Static.getBoolean(ret)) {
 					reaction = Reaction.IGNORE;
 				} else {
 					reaction = Reaction.FATAL;
@@ -123,14 +123,14 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @param player
 	 */
 	public static void HandleUncaughtException(ConfigCompileException e, String optionalMessage, MCPlayer player) {
-		if (optionalMessage != null) {
+		if(optionalMessage != null) {
 			DoWarning(optionalMessage);
 		}
 		DoReport(e, player);
 	}
 
 	public static void HandleUncaughtException(ConfigCompileGroupException e, MCPlayer player) {
-		for (ConfigCompileException ce : e.getList()) {
+		for(ConfigCompileException ce : e.getList()) {
 			HandleUncaughtException(ce, null, player);
 		}
 	}
@@ -159,12 +159,12 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @param r
 	 */
 	private static void HandleUncaughtException(ConfigRuntimeException e, Environment env, Reaction r) {
-		if (r == Reaction.IGNORE) {
+		if(r == Reaction.IGNORE) {
 			//Welp, you heard the man.
 			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.DEBUG, "An exception bubbled to the top, but was instructed by an event handler to not cause output.", e.getTarget());
-		} else if (r == ConfigRuntimeException.Reaction.REPORT) {
+		} else if(r == ConfigRuntimeException.Reaction.REPORT) {
 			ConfigRuntimeException.DoReport(e, env);
-		} else if (r == ConfigRuntimeException.Reaction.FATAL) {
+		} else if(r == ConfigRuntimeException.Reaction.FATAL) {
 			ConfigRuntimeException.DoReport(e, env);
 			//Well, here goes nothing
 			throw e;
@@ -182,21 +182,21 @@ public class ConfigRuntimeException extends RuntimeException {
 	@SuppressWarnings("ThrowableResultIgnored")
 	private static void DoReport(String message, String exceptionType, ConfigRuntimeException ex, List<StackTraceElement> stacktrace, MCPlayer currentPlayer) {
 		String type = exceptionType;
-		if (exceptionType == null) {
+		if(exceptionType == null) {
 			type = "FATAL";
 		}
 		List<StackTraceElement> st = new ArrayList<>(stacktrace);
-		if (message == null) {
+		if(message == null) {
 			message = "";
 		}
-		if (!"".equals(message.trim())) {
+		if(!"".equals(message.trim())) {
 			message = ": " + message;
 		}
 
 		Target top = Target.UNKNOWN;
-		for (StackTraceElement e : st) {
+		for(StackTraceElement e : st) {
 			Target t = e.getDefinedAt();
-			if (top == Target.UNKNOWN) {
+			if(top == Target.UNKNOWN) {
 				top = t;
 			}
 		}
@@ -204,12 +204,12 @@ public class ConfigRuntimeException extends RuntimeException {
 		StringBuilder console = new StringBuilder();
 		StringBuilder player = new StringBuilder();
 		PrintMessage(log, console, player, type, message, ex, st);
-		if (ex != null) {
+		if(ex != null) {
 			// Otherwise, a CCE
-			if (ex.getCause() != null && ex.getCause() instanceof ConfigRuntimeException) {
+			if(ex.getCause() != null && ex.getCause() instanceof ConfigRuntimeException) {
 				ex = (ConfigRuntimeException) ex.getCause();
 			}
-			while (ex instanceof CRECausedByWrapper) {
+			while(ex instanceof CRECausedByWrapper) {
 				Target t = ex.getTarget();
 				log.append("Caused by:\n");
 				console.append(TermColors.CYAN).append("Caused by:\n");
@@ -217,7 +217,7 @@ public class ConfigRuntimeException extends RuntimeException {
 				CArray exception = ((CRECausedByWrapper) ex).getException();
 				CArray stackTrace = Static.getArray(exception.get("stackTrace", t), t);
 				List<StackTraceElement> newSt = new ArrayList<>();
-				for (Construct consElement : stackTrace.asList()) {
+				for(Construct consElement : stackTrace.asList()) {
 					CArray element = Static.getArray(consElement, t);
 					int line = Static.getInt32(element.get("line", t), t);
 					File file = new File(element.get("file", t).val());
@@ -228,7 +228,7 @@ public class ConfigRuntimeException extends RuntimeException {
 
 				String nType = exception.get("classType", t).val();
 				String nMessage = exception.get("message", t).val();
-				if (!"".equals(nMessage.trim())) {
+				if(!"".equals(nMessage.trim())) {
 					nMessage = ": " + nMessage;
 				}
 				PrintMessage(log, console, player, nType, nMessage, ex, newSt);
@@ -242,7 +242,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		//Console
 		StreamUtils.GetSystemOut().println(console.toString() + TermColors.reset());
 		//Player
-		if (currentPlayer != null) {
+		if(currentPlayer != null) {
 			currentPlayer.sendMessage(player.toString());
 		}
 	}
@@ -251,7 +251,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		log.append(type).append(message).append("\n");
 		console.append(TermColors.RED).append(type).append(TermColors.WHITE).append(message).append("\n");
 		player.append(MCChatColor.RED).append(type).append(MCChatColor.WHITE).append(message).append("\n");
-		for (StackTraceElement e : st) {
+		for(StackTraceElement e : st) {
 			Target t = e.getDefinedAt();
 			String proc = e.getProcedureName();
 			File file = t.file();
@@ -259,7 +259,7 @@ public class ConfigRuntimeException extends RuntimeException {
 			int column = t.col();
 			String filepath;
 			String simplepath;
-			if (file == null) {
+			if(file == null) {
 				filepath = simplepath = "Unknown Source";
 			} else {
 				filepath = file.getPath();
@@ -285,21 +285,21 @@ public class ConfigRuntimeException extends RuntimeException {
 
 	private static void DoReport(ConfigRuntimeException e, Environment env) {
 		MCPlayer p = null;
-		if (e.getEnv() != null && e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+		if(e.getEnv() != null && e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 			p = e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer();
 		}
 		List<StackTraceElement> st = new ArrayList<>();
-		if (e instanceof AbstractCREException) {
+		if(e instanceof AbstractCREException) {
 			st = ((AbstractCREException) e).getCREStackTrace();
 		}
 		DoReport(e.getMessage(), AbstractCREException.getExceptionName(e), e, st, p);
-		if (Prefs.DebugMode()) {
-			if (e.getCause() != null && !(e.getCause() instanceof CRECausedByWrapper)) {
+		if(Prefs.DebugMode()) {
+			if(e.getCause() != null && !(e.getCause() instanceof CRECausedByWrapper)) {
 				//This is more of a system level exception, so if debug mode is on, we also want to print this stack trace
 				StreamUtils.GetSystemErr().println("The previous MethodScript error had an attached cause:");
 				e.getCause().printStackTrace(StreamUtils.GetSystemErr());
 			}
-			if (e.getTarget().equals(Target.UNKNOWN)) {
+			if(e.getTarget().equals(Target.UNKNOWN)) {
 				//This should never happen, but there are still some hard to track
 				//down bugs that cause this. If it does happen, we want to print out
 				//a stacktrace from here, which *might* assist in fixing the error
@@ -345,13 +345,13 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @throws NullPointerException If both the exception and message are null (or empty)
 	 */
 	public static void DoWarning(Exception e, String optionalMessage, boolean checkPrefs) {
-		if (e == null && (optionalMessage == null || optionalMessage.isEmpty())) {
+		if(e == null && (optionalMessage == null || optionalMessage.isEmpty())) {
 			throw new NullPointerException("Both the exception and the message cannot be empty");
 		}
-		if (!checkPrefs || Prefs.ShowWarnings()) {
+		if(!checkPrefs || Prefs.ShowWarnings()) {
 			String exceptionMessage = "";
 			Target t = Target.UNKNOWN;
-			if (e instanceof ConfigRuntimeException) {
+			if(e instanceof ConfigRuntimeException) {
 				ConfigRuntimeException cre = (ConfigRuntimeException) e;
 				exceptionMessage = MCChatColor.YELLOW + cre.getMessage()
 						+ MCChatColor.WHITE + " :: " + MCChatColor.GREEN
@@ -359,7 +359,7 @@ public class ConfigRuntimeException extends RuntimeException {
 						+ MCChatColor.YELLOW + cre.target.file() + MCChatColor.WHITE + ":"
 						+ MCChatColor.AQUA + cre.target.line();
 				t = cre.getTarget();
-			} else if (e != null) {
+			} else if(e != null) {
 				exceptionMessage = MCChatColor.YELLOW + e.getMessage();
 			}
 			String message = exceptionMessage + MCChatColor.WHITE + optionalMessage;
@@ -464,7 +464,7 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @return
 	 */
 	public String getSimpleFile() {
-		if (this.target.file() != null) {
+		if(this.target.file() != null) {
 			return this.target.file().getName();
 		} else {
 			return null;
@@ -519,14 +519,14 @@ public class ConfigRuntimeException extends RuntimeException {
 			element.set("id", getProcedureName());
 			try {
 				String name = "Unknown file";
-				if (getDefinedAt().file() != null) {
+				if(getDefinedAt().file() != null) {
 					name = getDefinedAt().file().getCanonicalPath();
 				}
 				element.set("file", name);
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				// This shouldn't happen, but if it does, we want to fall back to something marginally useful
 				String name = "Unknown file";
-				if (getDefinedAt().file() != null) {
+				if(getDefinedAt().file() != null) {
 					name = getDefinedAt().file().getAbsolutePath();
 				}
 				element.set("file", getDefinedAt().file().getAbsolutePath());

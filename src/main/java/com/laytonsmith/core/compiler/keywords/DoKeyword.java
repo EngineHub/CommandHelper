@@ -28,10 +28,10 @@ public class DoKeyword extends Keyword {
 			ParseTree code = list.get(keywordPosition + 1);
 			ParseTree _while = list.get(keywordPosition + 2);
 			this.validateCodeBlock(code, "Missing brace following \"do\" keyword");
-			if (!(_while.getData() instanceof CFunction) || !_while.getData().val().equals(WHILE)) {
+			if(!(_while.getData() instanceof CFunction) || !_while.getData().val().equals(WHILE)) {
 				throw new ConfigCompileException("Missing while clause following \"do\" keyword", t);
 			}
-			if (_while.getChildren().isEmpty()) {
+			if(_while.getChildren().isEmpty()) {
 				throw new ConfigCompileException("Missing argument to while clause", _while.getTarget());
 			}
 			ParseTree dowhile = new ParseTree(new CFunction(DOWHILE, t), list.get(keywordPosition).getFileOptions());
@@ -40,7 +40,7 @@ public class DoKeyword extends Keyword {
 			list.set(keywordPosition, dowhile);
 			list.remove(keywordPosition + 2);
 			list.remove(keywordPosition + 1);
-		} catch (IndexOutOfBoundsException ex) {
+		} catch(IndexOutOfBoundsException ex) {
 			throw new ConfigCompileException("Unexpected keyword \"do\"", t);
 		}
 		return keywordPosition;

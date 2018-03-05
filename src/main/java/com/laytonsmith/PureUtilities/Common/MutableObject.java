@@ -46,7 +46,7 @@ public final class MutableObject<T> {
 	@Override
 	@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 	public boolean equals(Object obj) {
-		if (this.obj == null) {
+		if(this.obj == null) {
 			return obj == null;
 		} else {
 			return this.obj.equals(obj);
@@ -55,7 +55,7 @@ public final class MutableObject<T> {
 
 	@Override
 	public int hashCode() {
-		if (this.obj == null) {
+		if(this.obj == null) {
 			return 0;
 		} else {
 			return this.obj.hashCode();
@@ -64,7 +64,7 @@ public final class MutableObject<T> {
 
 	@Override
 	public String toString() {
-		if (this.obj == null) {
+		if(this.obj == null) {
 			return "null";
 		} else {
 			return this.obj.toString();

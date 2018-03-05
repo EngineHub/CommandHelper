@@ -18,7 +18,7 @@ public class BukkitMCPatternShape extends EnumConvertor<MCPatternShape, PatternT
 	private static BukkitMCPatternShape instance;
 
 	public static BukkitMCPatternShape getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new BukkitMCPatternShape();
 		}
 		return instance;
@@ -26,7 +26,7 @@ public class BukkitMCPatternShape extends EnumConvertor<MCPatternShape, PatternT
 
 	@Override
 	protected PatternType getConcreteEnumCustom(MCPatternShape abstracted) {
-		if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
 			return null;
 		}
 		return super.getConcreteEnumCustom(abstracted);

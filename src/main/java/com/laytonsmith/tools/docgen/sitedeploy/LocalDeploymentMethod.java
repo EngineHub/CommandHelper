@@ -31,16 +31,16 @@ class LocalDeploymentMethod implements DeploymentMethod {
 			String currentFile;
 			try {
 				currentFile = SiteDeploy.getLocalMD5(new FileInputStream(outLoc));
-			} catch (FileNotFoundException ex) {
+			} catch(FileNotFoundException ex) {
 				// Doesn't exist, so just set the currentFile to INVALID
 				currentFile = "INVALID";
 			}
 			String newFile = SiteDeploy.getLocalMD5(new ByteArrayInputStream(d));
-			if (currentFile.equals(newFile)) {
+			if(currentFile.equals(newFile)) {
 				return false;
 			}
 			FileUtil.write(d, outLoc, FileUtil.OVERWRITE, true);
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 			return false;
 		}

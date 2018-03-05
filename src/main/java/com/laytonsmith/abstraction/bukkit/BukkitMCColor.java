@@ -57,20 +57,20 @@ public class BukkitMCColor implements MCColor {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if(obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if(getClass() != obj.getClass()) {
 			return false;
 		}
 		final BukkitMCColor other = (BukkitMCColor) obj;
-		if (this.red != other.red) {
+		if(this.red != other.red) {
 			return false;
 		}
-		if (this.green != other.green) {
+		if(this.green != other.green) {
 			return false;
 		}
-		if (this.blue != other.blue) {
+		if(this.blue != other.blue) {
 			return false;
 		}
 		return true;

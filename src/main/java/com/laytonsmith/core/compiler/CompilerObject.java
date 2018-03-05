@@ -45,7 +45,7 @@ class CompilerObject {
 	}
 
 	Token peek() {
-		if (stream.isEmpty()) {
+		if(stream.isEmpty()) {
 			return new Token(TType.UNKNOWN, "", Target.UNKNOWN);
 		}
 		return stream.get(0);
@@ -60,70 +60,70 @@ class CompilerObject {
 		nodes.push(root);
 		pointer = root;
 		this.env = compilerEnv.getEnv(CompilerEnvironment.class);
-		while (!stream.isEmpty()) {
+		while(!stream.isEmpty()) {
 			compile0();
 		}
-		if (bracketCounter > 0) {
+		if(bracketCounter > 0) {
 			throw new ConfigCompileException("Unclosed brackets. (Did you forget a right bracket (])?)", bracketLines.peek());
 		}
-		if (braceCounter > 0) {
+		if(braceCounter > 0) {
 			throw new ConfigCompileException("Unclosed braces. (Did you forget a right brace (})?)", braceLines.peek());
 		}
-		if (!functionLines.isEmpty()) {
+		if(!functionLines.isEmpty()) {
 			throw new ConfigCompileException("Unclosed left parenthesis. (Did you forget to close a function?)", functionLines.peek());
 		}
 	}
 
 	void compile0() throws ConfigCompileException {
 		Token t = consume();
-		if (t.type == TType.NEWLINE) {
+		if(t.type == TType.NEWLINE) {
 			return;
 		}
-		if (t.type == TType.CONST_START) {
+		if(t.type == TType.CONST_START) {
 			StringBuilder constName = new StringBuilder();
-			while ((t = consume()).type != TType.RCURLY_BRACKET) {
-				if (t.type != TType.BARE_STRING && t.type != TType.CONCAT) {
+			while((t = consume()).type != TType.RCURLY_BRACKET) {
+				if(t.type != TType.BARE_STRING && t.type != TType.CONCAT) {
 					throw new ConfigCompileException("Constant names may only contain names and dots.", t.getTarget());
 				}
 				constName.append(t.val());
 			}
 			Construct constant = env.getConstant(constName.toString());
-			if (constant == null) {
+			if(constant == null) {
 				throw new ConfigCompileException("Expected the constant ${" + constName.toString() + "} to be provided in the compilation options, but it wasn't.", t.getTarget());
 			}
 			t = new Token(TType.STRING, constant.val(), constant.getTarget());
 		}
-		if (t.type == TType.BARE_STRING && peek().type == TType.FUNC_START) {
+		if(t.type == TType.BARE_STRING && peek().type == TType.FUNC_START) {
 			consume();
 			CFunction f = new CFunction(t.val(), t.getTarget());
 			functionLines.add(peek().getTarget());
 			pushNode(f);
 			return;
 		}
-		if (t.type == TType.FUNC_END || t.type == TType.COMMA) {
-			if (autoConcatCounter > 0) {
+		if(t.type == TType.FUNC_END || t.type == TType.COMMA) {
+			if(autoConcatCounter > 0) {
 				autoConcatCounter--;
 				popNode(t.getTarget());
 			}
 		}
-		if (t.type == TType.COMMA) {
+		if(t.type == TType.COMMA) {
 			return;
 		}
-		if (t.type == TType.FUNC_END) {
+		if(t.type == TType.FUNC_END) {
 			//We're done with this child, so push it up
 			popNode(t.getTarget());
 			functionLines.pop();
 			return;
 		}
-		if (t.type == TType.LSQUARE_BRACKET) {
+		if(t.type == TType.LSQUARE_BRACKET) {
 			CFunction f = new CFunction("__cbracket__", Target.UNKNOWN);
 			pushNode(f);
 			bracketCounter++;
 			bracketLines.push(t.getTarget());
 			return;
 		}
-		if (t.type == TType.RSQUARE_BRACKET) {
-			if (bracketCounter == 0) {
+		if(t.type == TType.RSQUARE_BRACKET) {
+			if(bracketCounter == 0) {
 				throw new ConfigCompileException("Unexpected right bracket. (Did you have too many right square brackets (]) in your code?)", t.getTarget());
 			}
 			bracketCounter--;
@@ -131,15 +131,15 @@ class CompilerObject {
 			popNode(t.getTarget());
 			return;
 		}
-		if (t.type == TType.LCURLY_BRACKET) {
+		if(t.type == TType.LCURLY_BRACKET) {
 			CFunction f = new CFunction("__cbrace__", Target.UNKNOWN);
 			pushNode(f);
 			braceCounter++;
 			braceLines.push(t.getTarget());
 			return;
 		}
-		if (t.type == TType.RCURLY_BRACKET) {
-			if (braceCounter == 0) {
+		if(t.type == TType.RCURLY_BRACKET) {
+			if(braceCounter == 0) {
 				throw new ConfigCompileException("Unexpected right brace. (Did you have too many right braces (}) in your code?)", t.getTarget());
 			}
 			braceCounter--;
@@ -148,25 +148,25 @@ class CompilerObject {
 			return;
 		}
 		//If the next token ISN'T a ) , } ] we need to autoconcat this
-		if (peek().type != TType.FUNC_END && peek().type != TType.COMMA && peek().type != TType.RCURLY_BRACKET && peek().type != TType.RSQUARE_BRACKET) {
+		if(peek().type != TType.FUNC_END && peek().type != TType.COMMA && peek().type != TType.RCURLY_BRACKET && peek().type != TType.RSQUARE_BRACKET) {
 			//... unless we're already in an autoconcat
-			if (!(pointer.getData() instanceof CFunction && ((CFunction) pointer.getData()).val().equals("__autoconcat__"))) {
+			if(!(pointer.getData() instanceof CFunction && ((CFunction) pointer.getData()).val().equals("__autoconcat__"))) {
 				CFunction f = new CFunction("__autoconcat__", Target.UNKNOWN);
 				pushNode(f);
 				autoConcatCounter++;
 			}
 		}
-		if (t.type == TType.BARE_STRING && peek().type == TType.LABEL) {
+		if(t.type == TType.BARE_STRING && peek().type == TType.LABEL) {
 			consume();
 			pointer.addChild(new ParseTree(new CLabel(new CString(t.val(), t.getTarget())), stream.getFileOptions()));
 			return;
 		}
-		if (t.type.isIdentifier()) {
+		if(t.type.isIdentifier()) {
 			//If it's an atomic, put it in a construct and parse tree, then add it
 			pointer.addChild(new ParseTree(resolveIdentifier(t), stream.getFileOptions()));
 			return;
 		}
-		if (t.type.isSymbol()) {
+		if(t.type.isSymbol()) {
 			pointer.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.getTarget()), stream.getFileOptions()));
 			return;
 		}
@@ -184,14 +184,14 @@ class CompilerObject {
 		try {
 			nodes.pop();
 			pointer = nodes.peek();
-		} catch (EmptyStackException e) {
+		} catch(EmptyStackException e) {
 			throw new ConfigCompileException("Unmatched closing parenthesis. (Did you put too many right parenthesis?)", t);
 		}
 	}
 	private static List<String> keywords = Arrays.asList(new String[]{"else", "bind", "proc"});
 
 	private Construct resolveIdentifier(Token t) throws ConfigCompileException {
-		switch (t.type) {
+		switch(t.type) {
 			case STRING:
 				return new CString(t.val(), t.getTarget());
 			//				case SMART_STRING:
@@ -202,16 +202,16 @@ class CompilerObject {
 			case IVARIABLE:
 				return new NewIVariable(t.val(), t.getTarget());
 			case BARE_STRING:
-				if (t.val().equals("true")) {
+				if(t.val().equals("true")) {
 					return CBoolean.GenerateCBoolean(true, t.getTarget());
-				} else if (t.val().equals("false")) {
+				} else if(t.val().equals("false")) {
 					return CBoolean.GenerateCBoolean(false, t.getTarget());
-				} else if (t.val().equals("null")) {
+				} else if(t.val().equals("null")) {
 					return CNull.GenerateCNull(t.getTarget());
-				} else if (keywords.contains(t.val())) {
+				} else if(keywords.contains(t.val())) {
 					return new CKeyword(t.val(), t.getTarget());
 				} else {
-					if (stream.getFileOptions().isStrict()) {
+					if(stream.getFileOptions().isStrict()) {
 						throw new ConfigCompileException("Bare strings not allowed in strict mode. (" + t.val() + ")", t.getTarget());
 					} else {
 						return new CString(t.val(), t.getTarget());

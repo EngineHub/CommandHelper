@@ -19,12 +19,12 @@ public class InstanceofUtil {
 	 */
 	public static boolean isInstanceof(Mixed value, String instanceofThis) {
 		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
-		if (instanceofThis.equals("auto")) {
+		if(instanceofThis.equals("auto")) {
 			return true;
 		}
-		for (Class c : ClassUtils.getAllCastableClasses(value.getClass())) {
+		for(Class c : ClassUtils.getAllCastableClasses(value.getClass())) {
 			String typeof = typeof(c);
-			if (typeof != null && typeof.equals(instanceofThis)) {
+			if(typeof != null && typeof.equals(instanceofThis)) {
 				return true;
 			}
 		}
@@ -44,7 +44,7 @@ public class InstanceofUtil {
 
 	private static String typeof(Class<?> c) {
 		typeof type = c.getAnnotation(typeof.class);
-		if (type == null) {
+		if(type == null) {
 			return null;
 		} else {
 			return type.value();

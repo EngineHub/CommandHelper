@@ -20,7 +20,7 @@ public class BukkitMCMetadatable implements MCMetadatable {
 	public List<MCMetadataValue> getMetadata(String metadataKey) {
 		List<MetadataValue> lst = _metadatable.getMetadata(metadataKey);
 		List<MCMetadataValue> retn = new ArrayList<>();
-		for (MetadataValue val : lst) {
+		for(MetadataValue val : lst) {
 			retn.add(new BukkitMCMetadataValue(val));
 		}
 		return retn;

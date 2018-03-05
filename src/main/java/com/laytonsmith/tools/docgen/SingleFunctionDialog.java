@@ -89,18 +89,18 @@ public class SingleFunctionDialog extends javax.swing.JDialog {
 		Function f;
 		try {
 			f = (Function) FunctionList.getFunction(functionNameField.getText(), Target.UNKNOWN);
-			if (!f.appearInDocumentation()) {
+			if(!f.appearInDocumentation()) {
 				statusLabel.setText("That function is not configured to have documentation.");
 				return;
 			}
 			try {
 				String docs = DocGen.examples(f.getName(), parent.handler.isStaged);
 				parent.handler.doUpload(docs, "/API/" + f.getName(), true);
-			} catch (Exception ex) {
+			} catch(Exception ex) {
 				statusLabel.setText(ex.getMessage());
 				ex.printStackTrace(StreamUtils.GetSystemErr());
 			}
-		} catch (ConfigCompileException ex) {
+		} catch(ConfigCompileException ex) {
 			statusLabel.setText("That function doesn't exist.");
 			return;
 		}

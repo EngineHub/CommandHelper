@@ -18,15 +18,15 @@ public class VirtualFile {
 	public VirtualFile(String path) {
 		String working = path;
 		working = working.replace('\\', '/');
-		for (String s : RESTRICTED_CHARS) {
-			if (working.contains(s)) {
+		for(String s : RESTRICTED_CHARS) {
+			if(working.contains(s)) {
 				throw new InvalidVirtualFile("VirtualFiles cannot contain the '" + s + "' character.");
 			}
 		}
 		//Now, remove duplicate slashes
 		working = working.replaceAll("[/]{2,}", "/");
 		//Remove unneccessary dots
-		if (working.startsWith("./")) {
+		if(working.startsWith("./")) {
 			working = working.substring(2);
 		}
 		working = working.replaceAll("/\\./", "/");

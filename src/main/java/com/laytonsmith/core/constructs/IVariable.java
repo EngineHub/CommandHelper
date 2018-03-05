@@ -20,7 +20,7 @@ public class IVariable extends Construct implements Cloneable {
 
 	public IVariable(String name, Target t) throws ConfigCompileException {
 		super(name, ConstructType.IVARIABLE, t);
-		if (!name.matches(VARIABLE_NAME_REGEX)) {
+		if(!name.matches(VARIABLE_NAME_REGEX)) {
 			throw new ConfigCompileException("IVariables must match the regex: " + VARIABLE_NAME_REGEX, t);
 		}
 		this.var_value = new CString("", t);
@@ -31,17 +31,17 @@ public class IVariable extends Construct implements Cloneable {
 
 	public IVariable(CClassType type, String name, Construct value, Target t) {
 		super(name, ConstructType.IVARIABLE, t);
-		if (!type.equals(Auto.TYPE) && !(value instanceof CNull)) {
-			if (!InstanceofUtil.isInstanceof(value, type.val())) {
+		if(!type.equals(Auto.TYPE) && !(value instanceof CNull)) {
+			if(!InstanceofUtil.isInstanceof(value, type.val())) {
 				throw new CRECastException(name + " is of type " + type.val() + ", but a value of type "
 						+ value.typeof() + " was assigned to it.", t);
 			}
 		}
-		if (type.equals(CVoid.TYPE)) {
+		if(type.equals(CVoid.TYPE)) {
 			throw new CRECastException("Variables may not be of type void", t);
 		}
 		this.type = type;
-		if (value == null) {
+		if(value == null) {
 			throw new NullPointerException();
 		}
 		this.var_value = value;
@@ -80,7 +80,7 @@ public class IVariable extends Construct implements Cloneable {
 	@Override
 	public IVariable clone() throws CloneNotSupportedException {
 		IVariable clone = (IVariable) super.clone();
-		if (this.var_value != null) {
+		if(this.var_value != null) {
 			clone.var_value = this.var_value.clone();
 		}
 		return (IVariable) clone;

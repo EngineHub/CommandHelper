@@ -29,7 +29,7 @@ public class BukkitMCBlockProjectileSource implements MCBlockProjectileSource {
 
 		MCEntity e = BukkitConvertor.BukkitGetCorrectEntity(proj);
 
-		if (e instanceof MCProjectile) {
+		if(e instanceof MCProjectile) {
 			return (MCProjectile) e;
 		} else {
 			return null;
@@ -43,7 +43,7 @@ public class BukkitMCBlockProjectileSource implements MCBlockProjectileSource {
 		Vector vector = new Vector(init.X(), init.Y(), init.Z());
 		Projectile proj = bps.launchProjectile(c.asSubclass(Projectile.class), vector);
 		MCEntity e = BukkitConvertor.BukkitGetCorrectEntity(proj);
-		if (e instanceof MCProjectile) {
+		if(e instanceof MCProjectile) {
 			return (MCProjectile) e;
 		} else {
 			return null;

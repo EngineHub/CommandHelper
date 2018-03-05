@@ -60,8 +60,8 @@ public class APIBuilder {
 		{
 			// functions
 			Map<String, Map<String, Object>> API = new TreeMap<>();
-			for (FunctionBase f : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
-				if (f instanceof Function) {
+			for(FunctionBase f : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
+				if(f instanceof Function) {
 					Function ff = (Function) f;
 					Map<String, Object> function = new TreeMap<>();
 					DocGen.DocInfo di = new DocGen.DocInfo(ff.docs());
@@ -70,12 +70,12 @@ public class APIBuilder {
 					function.put("args", di.originalArgs);
 					List<String> thrown = new ArrayList<>();
 					try {
-						if (ff.thrown() != null) {
-							for (Class<? extends CREThrowable> c : ff.thrown()) {
+						if(ff.thrown() != null) {
+							for(Class<? extends CREThrowable> c : ff.thrown()) {
 								thrown.add(c.getAnnotation(typeof.class).value());
 							}
 						}
-					} catch (Throwable t) {
+					} catch(Throwable t) {
 						Logger.getLogger("default").log(Level.SEVERE, null, t);
 					}
 					function.put("thrown", thrown);
@@ -86,8 +86,8 @@ public class APIBuilder {
 					function.put("restricted", ff.isRestricted());
 					function.put("coreFunction", ff.isCore());
 					List<String> optimizations = new ArrayList<>();
-					if (ff instanceof Optimizable) {
-						for (Optimizable.OptimizationOption o : ((Optimizable) ff).optimizationOptions()) {
+					if(ff instanceof Optimizable) {
+						for(Optimizable.OptimizationOption o : ((Optimizable) ff).optimizationOptions()) {
 							optimizations.add(o.name());
 						}
 					}
@@ -105,24 +105,24 @@ public class APIBuilder {
 		{
 			// events
 			Map<String, Map<String, Object>> events = new TreeMap<>();
-			for (Event e : EventList.GetEvents()) {
+			for(Event e : EventList.GetEvents()) {
 				try {
 					Map<String, Object> event = new TreeMap<>();
 					event.put("name", e.getName());
 					DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
 					event.put("desc", edi.description);
 					Map<String, String> ed = new TreeMap<>();
-					for (DocGen.EventDocInfo.EventData edd : edi.eventData) {
+					for(DocGen.EventDocInfo.EventData edd : edi.eventData) {
 						ed.put(edd.name, edd.description);
 					}
 					event.put("eventData", ed);
 					Map<String, String> md = new TreeMap<>();
-					for (DocGen.EventDocInfo.MutabilityData mdd : edi.mutability) {
+					for(DocGen.EventDocInfo.MutabilityData mdd : edi.mutability) {
 						md.put(mdd.name, mdd.description);
 					}
 					event.put("mutability", md);
 					Map<String, String> pd = new TreeMap<>();
-					for (DocGen.EventDocInfo.PrefilterData pdd : edi.prefilter) {
+					for(DocGen.EventDocInfo.PrefilterData pdd : edi.prefilter) {
 						pd.put(pdd.name, pdd.formatDescription(DocGen.MarkupType.TEXT));
 					}
 					event.put("prefilters", pd);
@@ -130,7 +130,7 @@ public class APIBuilder {
 					String extId = ExtensionManager.getTrackers().get(e.getSourceJar()).getIdentifier();
 					event.put("source", extId);
 					events.put(e.getName(), event);
-				} catch (Exception ex) {
+				} catch(Exception ex) {
 					Logger.getLogger("default").log(Level.SEVERE, e.getName(), ex);
 				}
 			}
@@ -139,7 +139,7 @@ public class APIBuilder {
 		{
 			Map<String, Map<String, String>> extensions = new TreeMap<>();
 			// extensions
-			for (ExtensionTracker t : ExtensionManager.getTrackers().values()) {
+			for(ExtensionTracker t : ExtensionManager.getTrackers().values()) {
 				Map<String, String> ext = new TreeMap<>();
 				ext.put("id", t.getIdentifier());
 				ext.put("version", t.getVersion().toString());
@@ -150,7 +150,7 @@ public class APIBuilder {
 		{
 			// keywords
 			Map<String, Map<String, String>> keywords = new TreeMap<>();
-			for (Keyword keyword : KeywordList.getKeywordList()) {
+			for(Keyword keyword : KeywordList.getKeywordList()) {
 				Map<String, String> keyw = new TreeMap<>();
 				keyw.put("name", keyword.getKeywordName());
 				keyw.put("docs", keyword.docs());
@@ -164,9 +164,9 @@ public class APIBuilder {
 		{
 			//objects
 			Map<String, Map<String, Object>> objects = new TreeMap<>();
-			for (String t : NativeTypeList.getNativeTypeList()) {
+			for(String t : NativeTypeList.getNativeTypeList()) {
 				try {
-					if ("void".equals(t) || "null".equals(t)) {
+					if("void".equals(t) || "null".equals(t)) {
 						// These are super special, and aren't really
 						// "real" datatypes, so shouldn't be included.
 						continue;
@@ -194,10 +194,10 @@ public class APIBuilder {
 					obj.put("source", extId);
 					List<String> i = new ArrayList<>();
 					List<String> s = new ArrayList<>();
-					for (CClassType c : interfaces) {
+					for(CClassType c : interfaces) {
 						i.add(c.val());
 					}
-					for (CClassType c : supers) {
+					for(CClassType c : supers) {
 						s.add(c.val());
 					}
 					obj.put("interfaces", i);
@@ -206,10 +206,10 @@ public class APIBuilder {
 					//obj.put("containingClass", m.getContainingClass().getName());
 					//obj.put("objectModifiers", m.getObjectModifiers());
 					objects.put(name, obj);
-				} catch (ClassNotFoundException ex) {
+				} catch(ClassNotFoundException ex) {
 					// Pretty sure this isn't possible?
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
-				} catch (Exception ex) {
+				} catch(Exception ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Could not instantiate " + t, ex);
 				}
 			}

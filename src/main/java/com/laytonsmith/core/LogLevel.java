@@ -56,8 +56,8 @@ public enum LogLevel {
 	 * @return
 	 */
 	public static LogLevel getEnum(int level) {
-		for (LogLevel l : LogLevel.values()) {
-			if (level == l.getLevel()) {
+		for(LogLevel l : LogLevel.values()) {
+			if(level == l.getLevel()) {
 				return l;
 			}
 		}

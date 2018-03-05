@@ -16,7 +16,7 @@ public class BukkitMCInventoryAction extends EnumConvertor<MCInventoryAction, In
 	private static BukkitMCInventoryAction instance;
 
 	public static BukkitMCInventoryAction getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new BukkitMCInventoryAction();
 		}
 		return instance;

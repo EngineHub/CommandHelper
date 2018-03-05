@@ -53,7 +53,7 @@ public class CommandHelperInterpreterListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerChat(final AsyncPlayerChatEvent event) {
-		if (interpreterMode.contains(event.getPlayer().getName())) {
+		if(interpreterMode.contains(event.getPlayer().getName())) {
 			final MCPlayer p = new BukkitMCPlayer(event.getPlayer());
 			event.setCancelled(true);
 			StaticLayer.SetFutureRunnable(null, 0, new Runnable() {
@@ -75,10 +75,10 @@ public class CommandHelperInterpreterListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-		if (event.isCancelled()) {
+		if(event.isCancelled()) {
 			return;
 		}
-		if (interpreterMode.contains(event.getPlayer().getName())) {
+		if(interpreterMode.contains(event.getPlayer().getName())) {
 			MCPlayer p = new BukkitMCPlayer(event.getPlayer());
 			textLine(p, event.getMessage());
 			event.setCancelled(true);
@@ -86,35 +86,35 @@ public class CommandHelperInterpreterListener implements Listener {
 	}
 
 	public void textLine(MCPlayer p, String line) {
-		if (line.equals("-")) {
+		if(line.equals("-")) {
 			//Exit interpreter mode
 			interpreterMode.remove(p.getName());
 			Static.SendMessage(p, MCChatColor.YELLOW + "Now exiting interpreter mode");
-		} else if (line.equals(">>>")) {
+		} else if(line.equals(">>>")) {
 			//Start multiline mode
-			if (multilineMode.containsKey(p.getName())) {
+			if(multilineMode.containsKey(p.getName())) {
 				Static.SendMessage(p, MCChatColor.RED + "You are already in multiline mode!");
 			} else {
 				multilineMode.put(p.getName(), "");
 				Static.SendMessage(p, MCChatColor.YELLOW + "You are now in multiline mode. Type <<< on a line by itself to execute.");
 				Static.SendMessage(p, ":" + MCChatColor.GRAY + ">>>");
 			}
-		} else if (line.equals("<<<")) {
+		} else if(line.equals("<<<")) {
 			//Execute multiline
 			Static.SendMessage(p, ":" + MCChatColor.GRAY + "<<<");
 			String script = multilineMode.get(p.getName());
 			multilineMode.remove(p.getName());
 			try {
 				execute(script, p);
-			} catch (ConfigCompileException e) {
+			} catch(ConfigCompileException e) {
 				Static.SendMessage(p, MCChatColor.RED + e.getMessage() + ":" + e.getLineNum());
-			} catch (ConfigCompileGroupException ex) {
-				for (ConfigCompileException e : ex.getList()) {
+			} catch(ConfigCompileGroupException ex) {
+				for(ConfigCompileException e : ex.getList()) {
 					Static.SendMessage(p, MCChatColor.RED + e.getMessage() + ":" + e.getLineNum());
 				}
 			}
 		} else {
-			if (multilineMode.containsKey(p.getName())) {
+			if(multilineMode.containsKey(p.getName())) {
 				//Queue multiline
 				multilineMode.put(p.getName(), multilineMode.get(p.getName()) + line + "\n");
 				Static.SendMessage(p, ":" + MCChatColor.GRAY + line);
@@ -122,10 +122,10 @@ public class CommandHelperInterpreterListener implements Listener {
 				try {
 					//Execute single line
 					execute(line, p);
-				} catch (ConfigCompileException ex) {
+				} catch(ConfigCompileException ex) {
 					Static.SendMessage(p, MCChatColor.RED + ex.getMessage());
-				} catch (ConfigCompileGroupException e) {
-					for (ConfigCompileException ex : e.getList()) {
+				} catch(ConfigCompileGroupException e) {
+					for(ConfigCompileException ex : e.getList()) {
 						Static.SendMessage(p, MCChatColor.RED + ex.getMessage());
 					}
 				}
@@ -154,10 +154,10 @@ public class CommandHelperInterpreterListener implements Listener {
 				@Override
 				public void done(String output) {
 					output = output.trim();
-					if (output.isEmpty()) {
+					if(output.isEmpty()) {
 						Static.SendMessage(p, ":");
 					} else {
-						if (output.startsWith("/")) {
+						if(output.startsWith("/")) {
 							//Run the command
 							Static.SendMessage(p, ":" + MCChatColor.YELLOW + output);
 							p.chat(output);
@@ -169,13 +169,13 @@ public class CommandHelperInterpreterListener implements Listener {
 					interpreterMode.add(p.getName());
 				}
 			}, null);
-		} catch (CancelCommandException e) {
+		} catch(CancelCommandException e) {
 			interpreterMode.add(p.getName());
-		} catch (ConfigRuntimeException e) {
+		} catch(ConfigRuntimeException e) {
 			ConfigRuntimeException.HandleUncaughtException(e, env);
 			Static.SendMessage(p, MCChatColor.RED + e.toString());
 			interpreterMode.add(p.getName());
-		} catch (Exception e) {
+		} catch(Exception e) {
 			Static.SendMessage(p, MCChatColor.RED + e.toString());
 			Logger.getLogger(CommandHelperInterpreterListener.class.getName()).log(Level.SEVERE, null, e);
 			interpreterMode.add(p.getName());

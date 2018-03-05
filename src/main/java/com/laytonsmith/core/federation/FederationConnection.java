@@ -122,7 +122,7 @@ public final class FederationConnection {
 	 * @throws SocketTimeoutException If the socket tried to connect, but the connection timed out.
 	 */
 	public synchronized void ensureConnected() throws IOException, SocketTimeoutException {
-		if (socket == null || !socket.isConnected()) {
+		if(socket == null || !socket.isConnected()) {
 			Socket masterSocket = new Socket();
 			masterSocket.connect(new InetSocketAddress(host, masterPort), timeout);
 			// Handshake with the server to get the correct port that we need to actually
@@ -130,13 +130,13 @@ public final class FederationConnection {
 			// deals with a connection to the final server, not whichever server the master socket
 			// is running on.
 			int port = -1;
-			try (
+			try(
 					BufferedReader reader = new BufferedReader(new InputStreamReader(masterSocket.getInputStream(), "UTF-8"));
 					PrintWriter out = new PrintWriter(masterSocket.getOutputStream(), true);) {
 				out.println("HELLO");
 				out.println(version);
 				String versionOK = reader.readLine();
-				if (!"VERSION OK".equals(versionOK)) {
+				if(!"VERSION OK".equals(versionOK)) {
 					// (If we get here, the message would have been VERSION BAD
 					// Ok, what was the error?
 					int errorMsgSize = Integer.parseInt(reader.readLine());
@@ -148,12 +148,12 @@ public final class FederationConnection {
 				out.println("GET PORT");
 				out.println(serverName);
 				String portOK = reader.readLine();
-				if (null != portOK) {
-					switch (portOK) {
+				if(null != portOK) {
+					switch(portOK) {
 						case "OK":
 							try {
 								port = Integer.parseInt(reader.readLine());
-							} catch (NumberFormatException ex) {
+							} catch(NumberFormatException ex) {
 								//
 							}
 							break;
@@ -179,7 +179,7 @@ public final class FederationConnection {
 			// Version is next, then whether or not we're encrypting things.
 			communicator.writeUnencryptedLine(version);
 			String versionOK = communicator.readLine();
-			if (!"VERSION OK".equals(versionOK)) {
+			if(!"VERSION OK".equals(versionOK)) {
 				// (If we get here, the message would have been VERSION BAD
 				// Ok, what was the error?
 				int errorMsgSize = Integer.parseInt(communicator.readLine());
@@ -194,8 +194,8 @@ public final class FederationConnection {
 			communicator.writeLine(password == null ? "" : password);
 
 			String response = communicator.readLine();
-			if (null != response) {
-				switch (response) {
+			if(null != response) {
+				switch(response) {
 					case "OK":
 						// The handshake succeeded, so we can return.
 						return;
@@ -214,7 +214,7 @@ public final class FederationConnection {
 	@SuppressWarnings("FinalizeDeclaration")
 	protected void finalize() throws Throwable {
 		super.finalize();
-		if (!closed) {
+		if(!closed) {
 			StreamUtils.GetSystemErr().println("FederationConnection was not closed properly, and cleanup is having to be done in the finalize method!");
 			closeSocket();
 		}
@@ -225,12 +225,12 @@ public final class FederationConnection {
 	 */
 	public void closeSocket() {
 		try {
-			if (communicator != null) {
+			if(communicator != null) {
 				communicator.close();
 			}
 
 			socket.close();
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			Logger.getLogger(FederationConnection.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
@@ -256,7 +256,7 @@ public final class FederationConnection {
 	 * @return
 	 */
 	public boolean closeIfInactive(long ms) {
-		if (lastUpdated < System.currentTimeMillis() - ms) {
+		if(lastUpdated < System.currentTimeMillis() - ms) {
 			return false;
 		}
 		closeSocket();

@@ -99,7 +99,7 @@ public class DocGenTemplates {
 	public static String Generate(String forPage, Map<String, String> customTemplates) {
 		try {
 			Prefs.init(null);
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenTemplates.class));
@@ -110,14 +110,14 @@ public class DocGenTemplates {
 		StringBuilder templateBuilder = new StringBuilder();
 		int lastMatch = 0;
 		boolean appended = false;
-		while (m.find()) {
-			if (!appended) {
+		while(m.find()) {
+			if(!appended) {
 				templateBuilder.append(template.substring(lastMatch, m.start()));
 				appended = true;
 			}
 			String name = m.group(1);
-			for (String templateName : customTemplates.keySet()) {
-				if (templateName.equals(name)) {
+			for(String templateName : customTemplates.keySet()) {
+				if(templateName.equals(name)) {
 					templateBuilder.append(customTemplates.get(name));
 					lastMatch = m.end();
 					appended = false;
@@ -127,9 +127,9 @@ public class DocGenTemplates {
 			try {
 				Field f = DocGenTemplates.class.getDeclaredField(name);
 				f.setAccessible(true);
-				if (Generator.class.isAssignableFrom(f.getType()) && Modifier.isStatic(f.getModifiers())) {
+				if(Generator.class.isAssignableFrom(f.getType()) && Modifier.isStatic(f.getModifiers())) {
 					String[] tmplArgs = ArrayUtils.EMPTY_STRING_ARRAY;
-					if (m.group(2) != null && !m.group(2).equals("")) {
+					if(m.group(2) != null && !m.group(2).equals("")) {
 						//We have arguments
 						//remove the initial |, then split (noting that empty arguments is still an argument)
 						tmplArgs = m.group(2).substring(1).split("\\|", -1);
@@ -144,12 +144,12 @@ public class DocGenTemplates {
 							+ " is not an instance of " + Generator.class.getSimpleName()
 							+ ", or is not static. Please correct this error to use it as a template.");
 				}
-			} catch (Exception e) {
+			} catch(Exception e) {
 				System.out.println(e);
 				//Oh well, skip it.
 			}
 		}
-		if (!appended) {
+		if(!appended) {
 			templateBuilder.append(template.substring(lastMatch));
 		}
 		return templateBuilder.toString();
@@ -162,11 +162,11 @@ public class DocGenTemplates {
 	 */
 	public static Map<String, Generator> GetGenerators() {
 		Map<String, Generator> generators = new HashMap<>();
-		for (Field f : DocGenTemplates.class.getDeclaredFields()) {
-			if (Generator.class.isAssignableFrom(f.getType())) {
+		for(Field f : DocGenTemplates.class.getDeclaredFields()) {
+			if(Generator.class.isAssignableFrom(f.getType())) {
 				try {
 					generators.put(f.getName(), (Generator) f.get(null));
-				} catch (IllegalArgumentException | IllegalAccessException ex) {
+				} catch(IllegalArgumentException | IllegalAccessException ex) {
 					Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
@@ -184,10 +184,10 @@ public class DocGenTemplates {
 	 */
 	public static String DoTemplateReplacement(String template, Map<String, Generator> generators) throws GenerateException {
 		try {
-			if (Implementation.GetServerType() != Implementation.Type.BUKKIT) {
+			if(Implementation.GetServerType() != Implementation.Type.BUKKIT) {
 				Prefs.init(null);
 			}
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenTemplates.class));
@@ -197,48 +197,48 @@ public class DocGenTemplates {
 		StringBuilder tBuilder = new StringBuilder();
 		StringBuilder tArgument = new StringBuilder();
 		boolean inTemplate = false;
-		for (int i = 0; i < template.length(); i++) {
+		for(int i = 0; i < template.length(); i++) {
 			Character c1 = template.charAt(i);
 			Character c2 = '\0';
-			if (i < template.length() - 1) {
+			if(i < template.length() - 1) {
 				c2 = template.charAt(i + 1);
 			}
-			if (c1 == '<' && c2 == '%') {
+			if(c1 == '<' && c2 == '%') {
 				// start template
 				inTemplate = true;
 				templateStack++;
-				if (templateStack == 1) {
+				if(templateStack == 1) {
 					i++;
 					continue;
 				}
 			}
 
-			if (c1 == '%' && c2 == '>') {
+			if(c1 == '%' && c2 == '>') {
 				// end template
 				templateStack--;
-				if (templateStack == 0) {
+				if(templateStack == 0) {
 					// Process the template now
 					String[] args = tArgument.toString().split("\\|");
 					String name = args[0];
-					if (args.length > 1) {
+					if(args.length > 1) {
 						args = ArrayUtils.slice(args, 1, args.length - 1);
 					}
 					// Loop over the arguments and resolve them first
-					for (int j = 0; j < args.length; j++) {
+					for(int j = 0; j < args.length; j++) {
 						args[j] = DoTemplateReplacement(args[j], generators);
 					}
-					if (generators.containsKey(name)) {
+					if(generators.containsKey(name)) {
 						String result = generators.get(name).generate(args);
 						tBuilder.append(result);
 					}
 					tArgument = new StringBuilder();
 				}
-				if (templateStack == 0) {
+				if(templateStack == 0) {
 					i++;
 					continue;
 				}
 			}
-			if (templateStack == 0) {
+			if(templateStack == 0) {
 				tBuilder.append(c1);
 			} else {
 				tArgument.append(c1);
@@ -250,21 +250,21 @@ public class DocGenTemplates {
 		StringBuilder templateBuilder = new StringBuilder();
 		int lastMatch = 0;
 		boolean appended = false;
-		while (m.find()) {
-			if (!appended) {
+		while(m.find()) {
+			if(!appended) {
 				templateBuilder.append(template.substring(lastMatch, m.start()));
 				appended = true;
 			}
 			String name = m.group(1);
 			try {
-				if (generators.containsKey(name)) {
+				if(generators.containsKey(name)) {
 					String[] tmplArgs = ArrayUtils.EMPTY_STRING_ARRAY;
-					if (m.group(2) != null && !m.group(2).equals("")) {
+					if(m.group(2) != null && !m.group(2).equals("")) {
 						//We have arguments
 						//remove the initial |, then split
 						tmplArgs = m.group(2).substring(1).split("\\|");
 					}
-					for (int i = 0; i < tmplArgs.length; i++) {
+					for(int i = 0; i < tmplArgs.length; i++) {
 						tmplArgs[i] = DoTemplateReplacement(tmplArgs[i], generators);
 					}
 					String templateValue = generators.get(name).generate(tmplArgs);
@@ -273,14 +273,14 @@ public class DocGenTemplates {
 				}
 				lastMatch = m.end();
 				appended = false;
-			} catch (GenerateException e) {
+			} catch(GenerateException e) {
 				throw e;
-			} catch (Exception e) {
+			} catch(Exception e) {
 				//Oh well, skip it.
 				e.printStackTrace();
 			}
 		}
-		if (!appended) {
+		if(!appended) {
 			templateBuilder.append(template.substring(lastMatch));
 		}
 		return templateBuilder.toString();
@@ -294,7 +294,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) {
 			StringBuilder b = new StringBuilder();
-			for (DataSource.DataSourceModifier mod : DataSource.DataSourceModifier.values()) {
+			for(DataSource.DataSourceModifier mod : DataSource.DataSourceModifier.values()) {
 				b.append("|-\n| ").append(mod.getName().toLowerCase()).append(" || ").append(HTMLUtils.escapeHTML(mod.docs())).append("\n");
 
 			}
@@ -312,14 +312,14 @@ public class DocGenTemplates {
 			Set<Class<?>> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(datasource.class);
 			Pattern p = Pattern.compile("(?s)\\s*(.*?)\\s*\\{\\s*(.*?)\\s*\\}\\s*(.*)\\s*$");
 			SortedSet<String> set = new TreeSet<String>();
-			for (Class c : classes) {
-				if (DataSource.class.isAssignableFrom(c)) {
+			for(Class c : classes) {
+				if(DataSource.class.isAssignableFrom(c)) {
 					try {
 						Constructor constructor;
 						try {
 							constructor = c.getDeclaredConstructor();
 							constructor.setAccessible(true);
-						} catch (NoSuchMethodException e) {
+						} catch(NoSuchMethodException e) {
 							throw new RuntimeException("No no-argument constructor was found for " + c.getName() + ". A no-arg constructor must be provided, even if it is"
 									+ " private, so that the documentation functions can be accessed.", e);
 						}
@@ -329,12 +329,12 @@ public class DocGenTemplates {
 						String name = null;
 						String example = null;
 						String description = null;
-						if (m.find()) {
+						if(m.find()) {
 							name = m.group(1);
 							example = m.group(2);
 							description = m.group(3);
 						}
-						if (name == null || example == null || description == null) {
+						if(name == null || example == null || description == null) {
 							throw new Error("Invalid documentation for " + c.getSimpleName()
 									+ (name == null ? " name was null;" : "")
 									+ (example == null ? " example was null;" : "")
@@ -344,7 +344,7 @@ public class DocGenTemplates {
 						b.append("|-\n| ").append(name).append("\n| ").append(description)
 								.append("\n| ").append(example).append("\n| ").append(ds.since().toString()).append("\n");
 						set.add(b.toString());
-					} catch (Exception e) {
+					} catch(Exception e) {
 						throw new Error(e);
 					}
 				} else {
@@ -364,7 +364,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) {
 			StringBuilder b = new StringBuilder();
-			for (Optimizable.OptimizationOption option : Optimizable.OptimizationOption.values()) {
+			for(Optimizable.OptimizationOption option : Optimizable.OptimizationOption.values()) {
 				b.append("=== ").append(option.getName()).append(" ===\n");
 				b.append(option.docs()).append("\n\n");
 				b.append("Since ").append(option.since()).append("\n\n");
@@ -406,7 +406,7 @@ public class DocGenTemplates {
 				}
 			});
 			set.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class));
-			for (Class<? extends CREThrowable> c : set) {
+			for(Class<? extends CREThrowable> c : set) {
 				// This is suuuuuuper evil, but we don't want to have to deal with the exception constructors, we're
 				// just after the documentation stuff.
 				SimpleDocumentation d = (SimpleDocumentation) ReflectionUtils.instantiateUnsafe(c);
@@ -469,11 +469,11 @@ public class DocGenTemplates {
 			try {
 				FunctionBase b = FunctionList.getFunction(args[0], Target.UNKNOWN);
 				Class c = b.getClass();
-				while (c.getEnclosingClass() != null) {
+				while(c.getEnclosingClass() != null) {
 					c = c.getEnclosingClass();
 				}
 				return "[" + githubBaseURL + "/" + c.getName().replace('.', '/') + ".java " + b.getName() + "]";
-			} catch (ConfigCompileException ex) {
+			} catch(ConfigCompileException ex) {
 				return "Unknown function: " + args[0];
 			}
 
@@ -488,11 +488,11 @@ public class DocGenTemplates {
 			boolean colorsDisabled = TermColors.ColorsDisabled();
 			TermColors.DisableColors();
 			b.append("<pre style=\"white-space: pre-wrap;\">\n").append(HTMLUtils.escapeHTML(Main.ARGUMENT_SUITE.getBuiltDescription())).append("\n</pre>\n");
-			if (!colorsDisabled) {
+			if(!colorsDisabled) {
 				TermColors.EnableColors();
 			}
-			for (Field f : Main.class.getDeclaredFields()) {
-				if (f.getType() == ArgumentParser.class) {
+			for(Field f : Main.class.getDeclaredFields()) {
+				if(f.getType() == ArgumentParser.class) {
 					b.append("==== ").append(StringUtils.replaceLast(f.getName(), "(?i)mode", "")).append(" ====\n<pre style=\"white-space: pre-wrap;\">");
 					ArgumentParser parser = (ArgumentParser) ReflectionUtils.get(Main.class, f.getName());
 					b.append(HTMLUtils.escapeHTML(parser.getBuiltDescription())).append("</pre>\n\n");
@@ -515,15 +515,15 @@ public class DocGenTemplates {
 				Manager.help(ArrayUtils.EMPTY_STRING_ARRAY);
 				String initial = HTMLUtils.escapeHTML(baos.toString("UTF-8")).replace("\n", "<br />").replace("\t", "&nbsp;&nbsp;&nbsp;");
 				baos.reset();
-				for (String option : Manager.options) {
+				for(String option : Manager.options) {
 					Manager.out.println("\n===" + option + "===");
 					Manager.help(new String[]{option});
 				}
-				if (!colorsDisabled) {
+				if(!colorsDisabled) {
 					TermColors.EnableColors();
 				}
 				return initial + HTMLUtils.escapeHTML(baos.toString("UTF-8"));
-			} catch (UnsupportedEncodingException ex) {
+			} catch(UnsupportedEncodingException ex) {
 				throw new Error(ex);
 			}
 		}
@@ -536,13 +536,13 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) throws GenerateException {
 			String code = StringUtils.Join(args, "|");
-			if (code.endsWith("\n")) {
+			if(code.endsWith("\n")) {
 				code = code.replaceAll("\n$", "");
 			}
 			String out;
 			try {
 				out = SimpleSyntaxHighlighter.Highlight(code, false);
-			} catch (ConfigCompileException ex) {
+			} catch(ConfigCompileException ex) {
 				throw new GenerateException(ex.getMessage() + "\nFor code: " + code, ex);
 			}
 			return out;
@@ -558,13 +558,13 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) throws GenerateException {
 			String code = StringUtils.Join(args, "|");
-			if (code.endsWith("\n")) {
+			if(code.endsWith("\n")) {
 				code = code.replaceAll("\n$", "");
 			}
 			String out;
 			try {
 				out = SimpleSyntaxHighlighter.Highlight(code, true);
-			} catch (ConfigCompileException ex) {
+			} catch(ConfigCompileException ex) {
 				throw new GenerateException(ex.getMessage() + "\nFor code: " + code, ex);
 			}
 			return out;
@@ -609,10 +609,10 @@ public class DocGenTemplates {
 		public String generate(String... args) {
 			String code = StringUtils.Join(args, "|");
 			String out = escapeWiki(code);
-			if (out.startsWith("\n")) {
+			if(out.startsWith("\n")) {
 				out = out.substring(1);
 			}
-			if (out.endsWith("\n")) {
+			if(out.endsWith("\n")) {
 				out = out.substring(0, out.length() - 1);
 			}
 			return "<pre class=\"pre\">" + out + "</pre>";
@@ -631,7 +631,7 @@ public class DocGenTemplates {
 			out = escapeWiki(out);
 			out = out.replaceAll("<", "&lt;");
 			out = out.replaceAll(">", "&gt;");
-			if (out.startsWith("\n")) {
+			if(out.startsWith("\n")) {
 				out = out.substring(1);
 			}
 			return "<pre><code class=\"" + args[0] + "\">" + out + "</code></pre>";
@@ -692,8 +692,8 @@ public class DocGenTemplates {
 			String value = args[0];
 			String[] v = value.split("\\.");
 			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < v.length - 1; i++) {
-				if (i != 0) {
+			for(int i = 0; i < v.length - 1; i++) {
+				if(i != 0) {
 					b.append(".");
 				}
 				b.append(v[i]);
@@ -703,18 +703,18 @@ public class DocGenTemplates {
 			Class c;
 			try {
 				c = Class.forName(clazz);
-			} catch (ClassNotFoundException ex) {
+			} catch(ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 			Field f;
 			try {
 				f = c.getField(constant);
-			} catch (NoSuchFieldException | SecurityException ex) {
+			} catch(NoSuchFieldException | SecurityException ex) {
 				throw new RuntimeException(ex);
 			}
 			try {
 				return f.get(null).toString();
-			} catch (IllegalArgumentException | IllegalAccessException ex) {
+			} catch(IllegalArgumentException | IllegalAccessException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -742,7 +742,7 @@ public class DocGenTemplates {
 		public String generate(String... args) {
 			String page = args[0];
 			String text = null;
-			if (args.length >= 2) {
+			if(args.length >= 2) {
 				text = args[1];
 			}
 			return "[[" + page + (text != null ? "|" + text : "") + "]]";

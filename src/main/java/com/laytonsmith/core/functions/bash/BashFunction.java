@@ -40,11 +40,11 @@ public abstract class BashFunction implements FunctionBase, CompiledFunction, Do
 	public final boolean isCore() {
 		Class c = this.getClass();
 		do {
-			if (c.getAnnotation(core.class) != null) {
+			if(c.getAnnotation(core.class) != null) {
 				return true;
 			}
 			c = c.getDeclaringClass();
-		} while (c != null);
+		} while(c != null);
 		return false;
 	}
 

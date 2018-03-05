@@ -75,14 +75,14 @@ public class ClassDiscoveryCache {
 	 * @return
 	 */
 	public ClassDiscoveryURLCache getURLCache(URL fromClassLocation) {
-		if (fromClassLocation.toString().endsWith(".jar")) {
+		if(fromClassLocation.toString().endsWith(".jar")) {
 			File cacheOutputName = null;
 
 			try {
 				File jarFile = new File(URLDecoder.decode(fromClassLocation.getFile(), "UTF8"));
 
 				byte[] data;
-				try (FileInputStream fis = new FileInputStream(jarFile)) {
+				try(FileInputStream fis = new FileInputStream(jarFile)) {
 					data = new byte[READ_SIZE];
 					fis.read(data);
 				}
@@ -92,7 +92,7 @@ public class ClassDiscoveryCache {
 
 				String fileName = StringUtils.toHex(digest.digest());
 				cacheOutputName = new File(cacheDir, fileName);
-				if (cacheOutputName.exists()) {
+				if(cacheOutputName.exists()) {
 					//Cool, already exists, so we'll just return this.
 					//Note that we write the data out as a zip, since it is
 					//huge otherwise, and compresses quite well, so we have 
@@ -102,7 +102,7 @@ public class ClassDiscoveryCache {
 				}
 				//Doesn't exist, but we set cacheOutputName, so it will save it there
 				//after it scans.
-			} catch (Exception ex) {
+			} catch(Exception ex) {
 				//Hmm. Ok, well, we'll just regenerate.
 			}
 
@@ -110,38 +110,38 @@ public class ClassDiscoveryCache {
 			try {
 				jfile = new JarFile(URLDecoder.decode(fromClassLocation.getFile(), "UTF8"));
 
-				for (Enumeration<JarEntry> ent = jfile.entries(); ent.hasMoreElements();) {
+				for(Enumeration<JarEntry> ent = jfile.entries(); ent.hasMoreElements();) {
 					JarEntry entry = ent.nextElement();
 
-					if (entry.getName().equals(ClassDiscoveryCache.OUTPUT_FILENAME)) {
+					if(entry.getName().equals(ClassDiscoveryCache.OUTPUT_FILENAME)) {
 						InputStream is = jfile.getInputStream(entry);
 
 						try {
 							return new ClassDiscoveryURLCache(fromClassLocation, is);
-						} catch (Exception ex) {
+						} catch(Exception ex) {
 							//Do nothing, we'll just re-load from disk.
 						}
 					}
 				}
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				Logger.getLogger(ClassDiscoveryCache.class.getName()).log(Level.SEVERE, null, ex);
 			}
 
-			if (logger != null) {
+			if(logger != null) {
 				logger.log(Level.INFO, "Performing one time scan of {0}, this may take a few moments.", fromClassLocation);
 			}
 
 			ClassDiscoveryURLCache cache = new ClassDiscoveryURLCache(fromClassLocation, progress);
 
-			if (cacheOutputName != null) {
+			if(cacheOutputName != null) {
 				try {
-					try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(cacheOutputName, false))) {
+					try(ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(cacheOutputName, false))) {
 						zos.putNextEntry(new ZipEntry("data"));
 						cache.writeDescriptor(zos);
 					}
-				} catch (IOException ex) {
+				} catch(IOException ex) {
 					//Well, we couldn't write it out, so report the error, but continue anyways.
-					if (logger != null) {
+					if(logger != null) {
 						logger.log(Level.SEVERE, null, ex);
 					} else {
 						//Report errors even if the logger passed in is null.

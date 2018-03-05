@@ -150,20 +150,20 @@ public final class Sizes {
 
 	//Class types
 	public static int sizeof(Class<?> c) {
-		if (c.isPrimitive()) {
-			if (c == byte.class) {
+		if(c.isPrimitive()) {
+			if(c == byte.class) {
 				return byteSize;
-			} else if (c == short.class) {
+			} else if(c == short.class) {
 				return shortSize;
-			} else if (c == int.class) {
+			} else if(c == int.class) {
 				return intSize;
-			} else if (c == long.class) {
+			} else if(c == long.class) {
 				return longSize;
-			} else if (c == float.class) {
+			} else if(c == float.class) {
 				return floatSize;
-			} else if (c == double.class) {
+			} else if(c == double.class) {
 				return doubleSize;
-			} else if (c == char.class) {
+			} else if(c == char.class) {
 				return charSize;
 			}
 		}
@@ -171,22 +171,22 @@ public final class Sizes {
 	}
 
 	public static int sizeofBits(Class<?> c) {
-		if (c.isPrimitive()) {
-			if (c == byte.class) {
+		if(c.isPrimitive()) {
+			if(c == byte.class) {
 				return byteSizeBits;
-			} else if (c == short.class) {
+			} else if(c == short.class) {
 				return shortSizeBits;
-			} else if (c == int.class) {
+			} else if(c == int.class) {
 				return intSizeBits;
-			} else if (c == long.class) {
+			} else if(c == long.class) {
 				return longSizeBits;
-			} else if (c == float.class) {
+			} else if(c == float.class) {
 				return floatSizeBits;
-			} else if (c == double.class) {
+			} else if(c == double.class) {
 				return doubleSizeBits;
-			} else if (c == char.class) {
+			} else if(c == char.class) {
 				return charSizeBits;
-			} else if (c == boolean.class) {
+			} else if(c == boolean.class) {
 				return booleanSizeBits;
 			}
 		}

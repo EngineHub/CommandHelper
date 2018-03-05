@@ -24,7 +24,7 @@ public abstract class TaskHandler {
 
 	protected TaskHandler(TaskType type, int id, Target target) {
 		this.annotation = this.getClass().getAnnotation(taskhandler.class);
-		if (this.annotation == null) {
+		if(this.annotation == null) {
 			throw new RuntimeException("All instances of TaskHandler must be tagged with the @taskhandler");
 		}
 		this.type = type;
@@ -53,7 +53,7 @@ public abstract class TaskHandler {
 	public synchronized void changeState(TaskState changeTo) {
 		TaskState old = this.getState();
 		this.state = changeTo;
-		for (TaskStateChangeListener listener : stateChangeListeners) {
+		for(TaskStateChangeListener listener : stateChangeListeners) {
 			listener.taskStateChanged(old, this);
 		}
 	}
@@ -83,7 +83,7 @@ public abstract class TaskHandler {
 	 */
 	public final Map<String, Object> getPropertyData() {
 		Map<String, Object> data = new HashMap<>();
-		for (String prop : getProperties()) {
+		for(String prop : getProperties()) {
 			data.put(prop, ReflectionUtils.get(this.getClass(), this, "get" + prop));
 		}
 		return data;

@@ -29,20 +29,20 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 	public static int doProcess(String keywordName, Integer[] functionArgumentCount, boolean isStandaloneFunction, List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
 
 		Target t = list.get(keywordPosition).getTarget();
-		if (list.size() > keywordPosition + 1) {
+		if(list.size() > keywordPosition + 1) {
 			ParseTree code = list.get(keywordPosition + 1);
-			if (isCodeBlock(code)) {
+			if(isCodeBlock(code)) {
 				// This is a valid format, but we need to make sure that there is only one argument passed
 				// to the while so far.
 				Integer[] validArgs = functionArgumentCount;
 				// If this is null, we don't care about argument count.
-				if (validArgs != null) {
+				if(validArgs != null) {
 					// If the valid argument count is only 1, we will use that value
 					// in the error message to make it more precise. Otherwise, use a more
 					// generic error message
 					int firstClauseArgumentCount = list.get(keywordPosition).getChildren().size();
-					if (validArgs.length == 1) {
-						if (firstClauseArgumentCount != validArgs[0]) {
+					if(validArgs.length == 1) {
+						if(firstClauseArgumentCount != validArgs[0]) {
 							throw new ConfigCompileException("\"" + keywordName + "\" blocks "
 									+ (firstClauseArgumentCount > validArgs[0] ? "may only" : "must") + " have " + validArgs[0]
 									+ " argument" + (validArgs[0] == 1 ? "" : "s") + " passed to the"
@@ -50,13 +50,13 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 						}
 					} else {
 						boolean error = true;
-						for (int i : validArgs) {
-							if (firstClauseArgumentCount == i) {
+						for(int i : validArgs) {
+							if(firstClauseArgumentCount == i) {
 								error = false;
 								break;
 							}
 						}
-						if (error) {
+						if(error) {
 							throw new ConfigCompileException("\"" + keywordName + "\" blocks may not have " + firstClauseArgumentCount
 									+ " argument" + (firstClauseArgumentCount == 1 ? "" : "s") + " passed to the "
 									+ keywordName + " condition", t);
@@ -67,7 +67,7 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 				list.remove(keywordPosition + 1);
 			}
 		} else {
-			if (!isStandaloneFunction) {
+			if(!isStandaloneFunction) {
 				throw new ConfigCompileException("Missing code block, following \"" + keywordName + "\"", t);
 			}
 		}

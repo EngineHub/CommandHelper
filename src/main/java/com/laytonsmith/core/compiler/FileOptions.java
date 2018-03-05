@@ -32,7 +32,7 @@ public class FileOptions {
 	}
 
 	private String getDefault(Map<String, String> map, String key, String defaultIfNone) {
-		if (map.containsKey(key)) {
+		if(map.containsKey(key)) {
 			return map.get(key);
 		} else {
 			return defaultIfNone;
@@ -40,7 +40,7 @@ public class FileOptions {
 	}
 
 	private Boolean parseBoolean(String bool) {
-		if (bool == null) {
+		if(bool == null) {
 			return null;
 		}
 		return !(bool.equalsIgnoreCase("false") || bool.equalsIgnoreCase("off"));
@@ -48,8 +48,8 @@ public class FileOptions {
 
 	private List<String> parseList(String list) {
 		List<String> l = new ArrayList<>();
-		for (String part : list.split(",")) {
-			if (!part.trim().isEmpty()) {
+		for(String part : list.split(",")) {
+			if(!part.trim().isEmpty()) {
 				l.add(part.trim().toLowerCase());
 			}
 		}
@@ -64,7 +64,7 @@ public class FileOptions {
 	 * @return
 	 */
 	public boolean isStrict() {
-		if (strict != null) {
+		if(strict != null) {
 			return strict;
 		} else {
 			return Prefs.StrictMode();

@@ -67,8 +67,8 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 	}
 
 	public boolean isVarKnown(String name) {
-		for (Set<String> scope : knownVars) {
-			if (scope.contains(name)) {
+		for(Set<String> scope : knownVars) {
+			if(scope.contains(name)) {
 				return true;
 			}
 		}

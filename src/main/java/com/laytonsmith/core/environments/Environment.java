@@ -32,7 +32,7 @@ public class Environment implements Cloneable {
 	 */
 	public static Environment createEnvironment(EnvironmentImpl... envs) {
 		Environment e = new Environment();
-		for (EnvironmentImpl ee : envs) {
+		for(EnvironmentImpl ee : envs) {
 			e.addEnv(ee);
 		}
 		return e;
@@ -51,7 +51,7 @@ public class Environment implements Cloneable {
 	 * @throws InvalidEnvironmentException If the environment doesn't exist
 	 */
 	public final <T extends EnvironmentImpl> T getEnv(Class<T> clazz) throws InvalidEnvironmentException {
-		if (environments.containsKey(clazz)) {
+		if(environments.containsKey(clazz)) {
 			return (T) environments.get(clazz);
 		} else {
 			throw new InvalidEnvironmentException(clazz.getSimpleName() + " is not included in this environment.");
@@ -82,11 +82,11 @@ public class Environment implements Cloneable {
 	public Environment cloneAndAdd(EnvironmentImpl... envs) {
 		try {
 			Environment clone = clone();
-			for (EnvironmentImpl ee : envs) {
+			for(EnvironmentImpl ee : envs) {
 				clone.addEnv(ee);
 			}
 			return clone;
-		} catch (CloneNotSupportedException ex) {
+		} catch(CloneNotSupportedException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -101,7 +101,7 @@ public class Environment implements Cloneable {
 	public Environment clone() throws CloneNotSupportedException {
 		Environment clone = (Environment) super.clone();
 		clone.environments = new HashMap<>();
-		for (Class c : environments.keySet()) {
+		for(Class c : environments.keySet()) {
 			clone.environments.put(c, environments.get(c).clone());
 		}
 		return clone;

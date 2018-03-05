@@ -38,7 +38,7 @@ public final class CNull extends Construct implements Cloneable {
 	 * @return
 	 */
 	public static CNull GenerateCNull(Target t) {
-		if (t == Target.UNKNOWN) {
+		if(t == Target.UNKNOWN) {
 			return NULL;
 		} else {
 			return new CNull(t);

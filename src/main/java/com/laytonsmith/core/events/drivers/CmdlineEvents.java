@@ -43,13 +43,13 @@ public class CmdlineEvents {
 
 		@Override
 		public void bind(BoundEvent event) {
-			if (testThread == null) {
+			if(testThread == null) {
 				testThread = new Thread(new Runnable() {
 
 					@Override
 					public void run() {
-						while (true) {
-							if (Thread.currentThread().isInterrupted()) {
+						while(true) {
+							if(Thread.currentThread().isInterrupted()) {
 								break;
 							}
 							EventUtils.TriggerListener(Driver.EXTENSION, "cmdline_test_event", new BindableEvent() {
@@ -61,7 +61,7 @@ public class CmdlineEvents {
 							});
 							try {
 								Thread.sleep(5000);
-							} catch (InterruptedException ex) {
+							} catch(InterruptedException ex) {
 								//
 							}
 						}

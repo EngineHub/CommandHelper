@@ -29,7 +29,7 @@ public class BukkitMCChunk implements MCChunk {
 	public MCEntity[] getEntities() {
 		Entity[] entities = c.getEntities();
 		MCEntity[] r = new MCEntity[entities.length];
-		for (int i = 0; i < r.length; i++) {
+		for(int i = 0; i < r.length; i++) {
 			r[i] = new BukkitMCEntity(entities[i]);
 		}
 		return r;

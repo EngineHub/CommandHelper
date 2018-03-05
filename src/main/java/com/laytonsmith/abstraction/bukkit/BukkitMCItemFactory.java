@@ -44,7 +44,7 @@ public class BukkitMCItemFactory implements MCItemFactory {
 
 	@Override
 	public MCItemMeta getItemMeta(MCMaterial material) {
-		if (material == null) {
+		if(material == null) {
 			return null;
 		}
 		ItemMeta im = f.getItemMeta((Material) material.getHandle());

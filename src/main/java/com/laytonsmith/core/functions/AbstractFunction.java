@@ -137,26 +137,26 @@ public abstract class AbstractFunction implements Function {
 	public String profileMessage(Construct... args) {
 		StringBuilder b = new StringBuilder();
 		boolean first = true;
-		for (Construct ccc : args) {
-			if (!first) {
+		for(Construct ccc : args) {
+			if(!first) {
 				b.append(", ");
 			}
 			first = false;
-			if (ccc instanceof CArray) {
+			if(ccc instanceof CArray) {
 				//Arrays take too long to toString, so we don't want to actually toString them here if
 				//we don't need to.
 				b.append("<arrayNotShown size:" + ((CArray) ccc).size() + ">");
-			} else if (ccc instanceof CClosure) {
+			} else if(ccc instanceof CClosure) {
 				//The toString of a closure is too long, so let's not output them either.
 				b.append("<closureNotShown>");
-			} else if (ccc instanceof CString) {
+			} else if(ccc instanceof CString) {
 				String val = ccc.val().replace("\\", "\\\\").replace("'", "\\'");
 				int max = 1000;
-				if (val.length() > max) {
+				if(val.length() > max) {
 					val = val.substring(0, max) + "... (" + (val.length() - max) + " more characters hidden)";
 				}
 				b.append("'").append(val).append("'");
-			} else if (ccc instanceof IVariable) {
+			} else if(ccc instanceof IVariable) {
 				b.append(((IVariable) ccc).getVariableName());
 			} else {
 				b.append(ccc.val());
@@ -175,7 +175,7 @@ public abstract class AbstractFunction implements Function {
 	protected String getBundledDocs() {
 		try {
 			return getBundledDocs(null);
-		} catch (GenerateException ex) {
+		} catch(GenerateException ex) {
 			// This condition is impossible, so we just ignore this case.
 			return "";
 		}
@@ -192,7 +192,7 @@ public abstract class AbstractFunction implements Function {
 	 */
 	protected String getBundledDocs(Map<String, DocGenTemplates.Generator> map) throws GenerateException {
 		String template = StreamUtils.GetString(AbstractFunction.class.getResourceAsStream("/functionDocs/" + getName()));
-		if (map == null) {
+		if(map == null) {
 			map = new HashMap<>();
 		}
 		return DocGenTemplates.DoTemplateReplacement(template, map);
@@ -225,7 +225,7 @@ public abstract class AbstractFunction implements Function {
 	@Override
 	public final Class<? extends Documentation>[] seeAlso() {
 		seealso see = this.getClass().getAnnotation(seealso.class);
-		if (see == null) {
+		if(see == null) {
 			return EMPTY_CLASS;
 		} else {
 			return see.value();
@@ -236,11 +236,11 @@ public abstract class AbstractFunction implements Function {
 	public final boolean isCore() {
 		Class c = this.getClass();
 		do {
-			if (c.getAnnotation(core.class) != null) {
+			if(c.getAnnotation(core.class) != null) {
 				return true;
 			}
 			c = c.getDeclaringClass();
-		} while (c != null);
+		} while(c != null);
 		return false;
 	}
 

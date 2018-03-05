@@ -36,7 +36,7 @@ public final class DateUtils {
 	 * @return
 	 */
 	public static String ParseCalendarNotation(String name, Calendar c) {
-		if (c == null) {
+		if(c == null) {
 			c = Calendar.getInstance();
 		}
 		String year = String.format("%04d", c.get(Calendar.YEAR));

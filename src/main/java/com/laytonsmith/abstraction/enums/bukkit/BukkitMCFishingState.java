@@ -16,7 +16,7 @@ public class BukkitMCFishingState extends EnumConvertor<MCFishingState, PlayerFi
 	private static BukkitMCFishingState instance;
 
 	public static BukkitMCFishingState getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new BukkitMCFishingState();
 		}
 		return instance;

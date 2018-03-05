@@ -37,7 +37,7 @@ public class ParseTree implements Cloneable {
 			= new WeakHashMap<ParseTree, Map<CacheTypes, Object>>();
 
 	private static boolean isCached(ParseTree tree, CacheTypes type) {
-		if (!cache.containsKey(tree)) {
+		if(!cache.containsKey(tree)) {
 			return false;
 		} else {
 			return cache.get(tree).containsKey(type);
@@ -53,14 +53,14 @@ public class ParseTree implements Cloneable {
 	 * @return
 	 */
 	private static Object getCache(ParseTree tree, CacheTypes type) {
-		if (!isCached(tree, type)) {
+		if(!isCached(tree, type)) {
 			throw new Error("It is an error to call getCache on an object that does not already have a cached value");
 		}
 		return cache.get(tree).get(type);
 	}
 
 	private static void setCache(ParseTree tree, CacheTypes type, Object value) {
-		if (!cache.containsKey(tree)) {
+		if(!cache.containsKey(tree)) {
 			cache.put(tree, new EnumMap<CacheTypes, Object>(CacheTypes.class));
 		}
 		cache.get(tree).put(type, value);
@@ -127,7 +127,7 @@ public class ParseTree implements Cloneable {
 	public List<Construct> getAllData() {
 		List<Construct> list = new ArrayList<Construct>();
 		list.add(getData());
-		for (ParseTree node : getChildren()) {
+		for(ParseTree node : getChildren()) {
 			list.addAll(node.getAllData());
 		}
 		return list;
@@ -293,21 +293,21 @@ public class ParseTree implements Cloneable {
 	 * @return
 	 */
 	public List<Function> getFunctions() {
-		if (isCached(this, CacheTypes.FUNCTIONS)) {
+		if(isCached(this, CacheTypes.FUNCTIONS)) {
 			return new ArrayList<Function>((List<Function>) getCache(this, CacheTypes.FUNCTIONS));
 		} else {
 			List<Function> functions = new ArrayList<Function>();
 			List<Construct> allChildren = getAllData();
 			loop:
-			for (Construct c : allChildren) {
-				if (c instanceof CFunction) {
+			for(Construct c : allChildren) {
+				if(c instanceof CFunction) {
 					try {
 						FunctionBase f = FunctionList.getFunction(c);
-						if (f instanceof Function) {
+						if(f instanceof Function) {
 							Function ff = (Function) f;
 							functions.add(ff);
 						}
-					} catch (ConfigCompileException ex) {
+					} catch(ConfigCompileException ex) {
 						throw new Error(ex);
 					}
 
@@ -333,22 +333,22 @@ public class ParseTree implements Cloneable {
 
 	public String toStringVerbose() {
 		StringBuilder stringRepresentation = new StringBuilder();
-		if (data instanceof CFunction) {
+		if(data instanceof CFunction) {
 			stringRepresentation.append(data.toString());
 			stringRepresentation.append("(");
 			boolean first = true;
-			for (ParseTree child : children) {
-				if (!first) {
+			for(ParseTree child : children) {
+				if(!first) {
 					stringRepresentation.append(", ");
 				}
 				first = false;
 				stringRepresentation.append(child.toStringVerbose());
 			}
 			stringRepresentation.append(")");
-		} else if (data instanceof CString) {
+		} else if(data instanceof CString) {
 			// Convert: \ -> \\ and ' -> \'
 			stringRepresentation.append("'").append(data.val().replaceAll("\t", "\\t").replaceAll("\n", "\\n").replace("\\", "\\\\").replace("'", "\\'")).append("'");
-		} else if (data instanceof IVariable) {
+		} else if(data instanceof IVariable) {
 			stringRepresentation.append(((IVariable) data).getVariableName());
 		} else {
 			stringRepresentation.append(data.val());
@@ -357,7 +357,7 @@ public class ParseTree implements Cloneable {
 	}
 
 	public Target getTarget() {
-		if (data == null) {
+		if(data == null) {
 			return Target.UNKNOWN;
 		} else {
 			return data.getTarget();

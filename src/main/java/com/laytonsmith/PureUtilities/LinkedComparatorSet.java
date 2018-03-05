@@ -42,33 +42,33 @@ public class LinkedComparatorSet<T> extends AbstractSet<T> implements Set<T> {
 	 */
 	public LinkedComparatorSet(Collection c, EqualsComparator comparator) {
 		this.comparator = comparator;
-		if (c != null && comparator != null) {
+		if(c != null && comparator != null) {
 			Set<Integer> skip = new HashSet<Integer>();
 			List<T> array = new ArrayList<T>(c);
-			for (int i = 0; i < c.size(); i++) {
-				if (skip.contains(i)) {
+			for(int i = 0; i < c.size(); i++) {
+				if(skip.contains(i)) {
 					continue;
 				}
 				boolean foundMatch = false;
 				T item1 = array.get(i);
-				for (int j = i + 1; j < array.size(); j++) {
-					if (skip.contains(j)) {
+				for(int j = i + 1; j < array.size(); j++) {
+					if(skip.contains(j)) {
 						continue;
 					}
 					T item2 = array.get(j);
-					if (comparator.checkIfEquals(item1, item2)) {
+					if(comparator.checkIfEquals(item1, item2)) {
 						skip.add(j);
-						if (!foundMatch) {
+						if(!foundMatch) {
 							list.add(item1);
 						}
 						foundMatch = true;
 					}
 				}
-				if (!foundMatch) {
+				if(!foundMatch) {
 					list.add(item1);
 				}
 			}
-		} else if (c != null) {
+		} else if(c != null) {
 			addAll(c);
 		}
 	}
@@ -85,7 +85,7 @@ public class LinkedComparatorSet<T> extends AbstractSet<T> implements Set<T> {
 
 	@Override
 	public boolean add(T e) {
-		if (!contains(e)) {
+		if(!contains(e)) {
 			list.add(e);
 			return true;
 		} else {
@@ -104,19 +104,19 @@ public class LinkedComparatorSet<T> extends AbstractSet<T> implements Set<T> {
 	 */
 	@Override
 	public boolean contains(Object o) {
-		if (comparator == null) {
+		if(comparator == null) {
 			return super.contains(o);
 		} else {
 			Iterator<T> e = iterator();
-			if (o == null) {
-				while (e.hasNext()) {
-					if (e.next() == null) {
+			if(o == null) {
+				while(e.hasNext()) {
+					if(e.next() == null) {
 						return true;
 					}
 				}
 			} else {
-				while (e.hasNext()) {
-					if (comparator.checkIfEquals(o, e.next())) {
+				while(e.hasNext()) {
+					if(comparator.checkIfEquals(o, e.next())) {
 						return true;
 					}
 				}
@@ -136,20 +136,20 @@ public class LinkedComparatorSet<T> extends AbstractSet<T> implements Set<T> {
 	 */
 	@Override
 	public boolean remove(Object o) {
-		if (comparator == null) {
+		if(comparator == null) {
 			return super.remove(o);
 		} else {
 			Iterator<T> e = iterator();
-			if (o == null) {
-				while (e.hasNext()) {
-					if (e.next() == null) {
+			if(o == null) {
+				while(e.hasNext()) {
+					if(e.next() == null) {
 						e.remove();
 						return true;
 					}
 				}
 			} else {
-				while (e.hasNext()) {
-					if (comparator.checkIfEquals(o, e.next())) {
+				while(e.hasNext()) {
+					if(comparator.checkIfEquals(o, e.next())) {
 						e.remove();
 						return true;
 					}

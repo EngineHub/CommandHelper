@@ -45,7 +45,7 @@ public class LimitedQueue<E> extends LinkedList<E> {
 	@Override
 	public boolean addAll(int index, Collection<? extends E> c) {
 		int i = 0;
-		for (E e : c) {
+		for(E e : c) {
 			super.add(index + i, e);
 			i++;
 		}
@@ -54,7 +54,7 @@ public class LimitedQueue<E> extends LinkedList<E> {
 	}
 
 	private void checkSize() {
-		while (size() > limit) {
+		while(size() > limit) {
 			super.remove();
 		}
 	}

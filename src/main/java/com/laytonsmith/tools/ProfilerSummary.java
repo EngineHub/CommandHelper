@@ -57,7 +57,7 @@ public class ProfilerSummary {
 	 * @param percentage
 	 */
 	public void setIgnorePercentage(double percentage) {
-		if (percentage < 0 || percentage > 1) {
+		if(percentage < 0 || percentage > 1) {
 			throw new IllegalArgumentException("The percentage must be between 0 and 1.");
 		}
 		this.ignorePercentage = percentage;
@@ -73,26 +73,26 @@ public class ProfilerSummary {
 		Matcher m = PATTERN.matcher(data);
 		double totalTime = 0;
 		boolean foundLevel5 = false;
-		while (m.find()) {
+		while(m.find()) {
 			String function = m.group(3);
-			if ("5".equals(m.group(2))) {
+			if("5".equals(m.group(2))) {
 				foundLevel5 = true;
 			}
 			Double time = Double.parseDouble(m.group(1));
 			totalTime += time;
-			if (functionData.containsKey(function)) {
+			if(functionData.containsKey(function)) {
 				functionData.put(function, functionData.get(function) + time);
 			} else {
 				functionData.put(function, time);
 			}
 		}
-		if (!foundLevel5) {
+		if(!foundLevel5) {
 			return "Analysis can only be done on a profile summary file, which was created with verbosity level 5.";
 		}
 		int originalSize = functionData.size();
 		//Now, figure out which results to ignore
-		for (String f : new ArrayList<>(functionData.keySet())) {
-			if (functionData.get(f) / totalTime <= ignorePercentage) {
+		for(String f : new ArrayList<>(functionData.keySet())) {
+			if(functionData.get(f) / totalTime <= ignorePercentage) {
 				//Remove it
 				functionData.remove(f);
 			}
@@ -101,7 +101,7 @@ public class ProfilerSummary {
 		StringBuilder b = new StringBuilder();
 		b.append("Profiler data summary:\n\n");
 		b.append(StringUtils.PluralTemplateHelper(functionData.size(), "One function was", "%d functions were")).append(" profiled in total");
-		if (originalSize == functionData.size()) {
+		if(originalSize == functionData.size()) {
 			b.append(".");
 		} else {
 			b.append(", and ");
@@ -113,7 +113,7 @@ public class ProfilerSummary {
 		Map<String, Double> sortedMap = sortByValue(functionData);
 		List<String> keySet = new ArrayList<>(sortedMap.keySet());
 		Collections.reverse(keySet);
-		for (String f : keySet) {
+		for(String f : keySet) {
 			b.append(TermColors.WHITE).append(f).append(TermColors.RESET).append(": ").append(String.format("%.3f", sortedMap.get(f))).append(" ms\n");
 		}
 		return b.toString();
@@ -129,7 +129,7 @@ public class ProfilerSummary {
 		});
 
 		Map<K, V> result = new LinkedHashMap<>();
-		for (Map.Entry<K, V> entry : list) {
+		for(Map.Entry<K, V> entry : list) {
 			result.put(entry.getKey(), entry.getValue());
 		}
 		return result;

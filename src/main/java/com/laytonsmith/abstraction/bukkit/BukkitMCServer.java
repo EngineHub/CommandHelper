@@ -83,7 +83,7 @@ public class BukkitMCServer implements MCServer {
 	public Collection<MCPlayer> getOnlinePlayers() {
 		Collection<? extends Player> players = s.getOnlinePlayers();
 		Set<MCPlayer> mcpa = new HashSet<>();
-		for (Player p : players) {
+		for(Player p : players) {
 			mcpa.add(new BukkitMCPlayer(p));
 		}
 		return mcpa;
@@ -96,7 +96,7 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public boolean dispatchCommand(MCCommandSender sender, String command) {
 		CommandSender cs;
-		if (sender instanceof MCPlayer) {
+		if(sender instanceof MCPlayer) {
 			cs = (Player) sender.getHandle();
 		} else {
 			cs = (CommandSender) sender.getHandle();
@@ -116,7 +116,7 @@ public class BukkitMCServer implements MCServer {
 
 		@Override
 		public Object invoke(Object o, Method method, Object[] args) throws Throwable {
-			if ("sendMessage".equals(method.getName())) {
+			if("sendMessage".equals(method.getName())) {
 				buffer.append(args[0].toString());
 				return Void.TYPE;
 			} else {
@@ -151,7 +151,7 @@ public class BukkitMCServer implements MCServer {
 		} finally {
 			// Clean up
 			Static.UninjectPlayer(aCommandSender);
-			if (oldSender != null) {
+			if(oldSender != null) {
 				Static.InjectPlayer(oldSender);
 			}
 		}
@@ -162,7 +162,7 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public MCPluginManager getPluginManager() {
-		if (s.getPluginManager() == null) {
+		if(s.getPluginManager() == null) {
 			return null;
 		}
 		return new BukkitMCPluginManager(s.getPluginManager());
@@ -171,7 +171,7 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCPlayer getPlayer(String name) {
 		Player p = s.getPlayer(name);
-		if (p == null) {
+		if(p == null) {
 			return null;
 		}
 		return new BukkitMCPlayer(p);
@@ -180,7 +180,7 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCPlayer getPlayer(UUID uuid) {
 		Player p = s.getPlayer(uuid);
-		if (p == null) {
+		if(p == null) {
 			return null;
 		}
 		return new BukkitMCPlayer(p);
@@ -189,7 +189,7 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCWorld getWorld(String name) {
 		World w = s.getWorld(name);
-		if (w == null) {
+		if(w == null) {
 			return null;
 		}
 		return new BukkitMCWorld(w);
@@ -198,7 +198,7 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public List<MCWorld> getWorlds() {
 		List<MCWorld> list = new ArrayList<>();
-		for (World w : s.getWorlds()) {
+		for(World w : s.getWorlds()) {
 			list.add(new BukkitMCWorld(w));
 		}
 		return list;
@@ -243,7 +243,7 @@ public class BukkitMCServer implements MCServer {
 	public MCOfflinePlayer[] getOfflinePlayers() {
 		OfflinePlayer[] offp = s.getOfflinePlayers();
 		MCOfflinePlayer[] mcoff = new MCOfflinePlayer[offp.length];
-		for (int i = 0; i < offp.length; i++) {
+		for(int i = 0; i < offp.length; i++) {
 			mcoff[i] = new BukkitMCOfflinePlayer(offp[i]);
 		}
 		return mcoff;
@@ -262,7 +262,7 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public MCVersion getMinecraftVersion() {
-		if (version == null) {
+		if(version == null) {
 			int temp = s.getBukkitVersion().indexOf('-');
 			version = MCVersion.match(s.getBukkitVersion().substring(0, temp).split("\\."));
 		}
@@ -327,7 +327,7 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public List<MCOfflinePlayer> getBannedPlayers() {
 		List<MCOfflinePlayer> list = new ArrayList<>();
-		for (OfflinePlayer p : s.getBannedPlayers()) {
+		for(OfflinePlayer p : s.getBannedPlayers()) {
 			list.add(getOfflinePlayer(p.getName()));
 		}
 		return list;
@@ -336,7 +336,7 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public List<MCOfflinePlayer> getWhitelistedPlayers() {
 		List<MCOfflinePlayer> list = new ArrayList<>();
-		for (OfflinePlayer p : s.getWhitelistedPlayers()) {
+		for(OfflinePlayer p : s.getWhitelistedPlayers()) {
 			list.add(getOfflinePlayer(p.getName()));
 		}
 		return list;
@@ -345,7 +345,7 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public List<MCOfflinePlayer> getOperators() {
 		List<MCOfflinePlayer> list = new ArrayList<>();
-		for (OfflinePlayer p : s.getOperators()) {
+		for(OfflinePlayer p : s.getOperators()) {
 			list.add(getOfflinePlayer(p.getName()));
 		}
 		return list;
@@ -376,11 +376,11 @@ public class BukkitMCServer implements MCServer {
 	public MCInventory createInventory(MCInventoryHolder holder, MCInventoryType type) {
 		InventoryHolder ih = null;
 
-		if (holder instanceof MCPlayer) {
+		if(holder instanceof MCPlayer) {
 			ih = ((BukkitMCPlayer) holder)._Player();
-		} else if (holder instanceof MCHumanEntity) {
+		} else if(holder instanceof MCHumanEntity) {
 			ih = ((BukkitMCHumanEntity) holder).asHumanEntity();
-		} else if (holder.getHandle() instanceof InventoryHolder) {
+		} else if(holder.getHandle() instanceof InventoryHolder) {
 			ih = (InventoryHolder) holder.getHandle();
 		}
 
@@ -391,11 +391,11 @@ public class BukkitMCServer implements MCServer {
 	public MCInventory createInventory(MCInventoryHolder holder, int size) {
 		InventoryHolder ih = null;
 
-		if (holder instanceof MCPlayer) {
+		if(holder instanceof MCPlayer) {
 			ih = ((BukkitMCPlayer) holder)._Player();
-		} else if (holder instanceof MCHumanEntity) {
+		} else if(holder instanceof MCHumanEntity) {
 			ih = ((BukkitMCHumanEntity) holder).asHumanEntity();
-		} else if (holder.getHandle() instanceof InventoryHolder) {
+		} else if(holder.getHandle() instanceof InventoryHolder) {
 			ih = (InventoryHolder) holder.getHandle();
 		}
 
@@ -406,11 +406,11 @@ public class BukkitMCServer implements MCServer {
 	public MCInventory createInventory(MCInventoryHolder holder, int size, String title) {
 		InventoryHolder ih = null;
 
-		if (holder instanceof MCPlayer) {
+		if(holder instanceof MCPlayer) {
 			ih = ((BukkitMCPlayer) holder)._Player();
-		} else if (holder instanceof MCHumanEntity) {
+		} else if(holder instanceof MCHumanEntity) {
 			ih = ((BukkitMCHumanEntity) holder).asHumanEntity();
-		} else if (holder.getHandle() instanceof InventoryHolder) {
+		} else if(holder.getHandle() instanceof InventoryHolder) {
 			ih = (InventoryHolder) holder.getHandle();
 		}
 
@@ -481,7 +481,7 @@ public class BukkitMCServer implements MCServer {
 	public List<MCRecipe> getRecipesFor(MCItemStack result) {
 		List<MCRecipe> ret = new ArrayList<>();
 		List<Recipe> recipes = s.getRecipesFor(((BukkitMCItemStack) result).__ItemStack());
-		for (Recipe recipe : recipes) {
+		for(Recipe recipe : recipes) {
 			ret.add(BukkitConvertor.BukkitGetRecipe(recipe));
 		}
 		return ret;
@@ -490,7 +490,7 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public List<MCRecipe> allRecipes() {
 		List<MCRecipe> ret = new ArrayList<>();
-		for (Iterator recipes = s.recipeIterator(); recipes.hasNext();) {
+		for(Iterator recipes = s.recipeIterator(); recipes.hasNext();) {
 			Recipe recipe = (Recipe) recipes.next();
 			ret.add(BukkitConvertor.BukkitGetRecipe(recipe));
 		}
@@ -511,7 +511,7 @@ public class BukkitMCServer implements MCServer {
 	public MCBossBar createBossBar(String title, MCBarColor color, MCBarStyle style) {
 		try {
 			return new BukkitMCBossBar(s.createBossBar(title, BarColor.valueOf(color.name()), BarStyle.valueOf(style.name())));
-		} catch (NoSuchMethodError ex) {
+		} catch(NoSuchMethodError ex) {
 			// Probably prior to 1.9
 			return null;
 		}

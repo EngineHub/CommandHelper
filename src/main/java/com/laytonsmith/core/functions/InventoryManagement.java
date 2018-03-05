@@ -104,15 +104,15 @@ public class InventoryManagement {
 			Integer index = -1;
 			boolean all;
 			MCPlayer m;
-			if (args.length == 0) {
+			if(args.length == 0) {
 				all = true;
 				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(m, t);
-			} else if (args.length == 1) {
+			} else if(args.length == 1) {
 				all = true;
 				m = Static.GetPlayer(args[0], t);
 			} else {
-				if (args[1] instanceof CNull) {
+				if(args[1] instanceof CNull) {
 					index = null;
 				} else {
 					index = Static.getInt32(args[1], t);
@@ -120,15 +120,15 @@ public class InventoryManagement {
 				all = false;
 				m = Static.GetPlayer(args[0], t);
 			}
-			if (all) {
+			if(all) {
 				CArray ret = CArray.GetAssociativeArray(t);
-				for (int i = 0; i < 36; i++) {
+				for(int i = 0; i < 36; i++) {
 					ret.set(i, getInvSlot(m, i, t), t);
 				}
-				for (int i = 100; i < 104; i++) {
+				for(int i = 100; i < 104; i++) {
 					ret.set(i, getInvSlot(m, i, t), t);
 				}
-				if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
 					ret.set(-106, getInvSlot(m, -106, t), t);
 				}
 				return ret;
@@ -138,39 +138,39 @@ public class InventoryManagement {
 		}
 
 		private Construct getInvSlot(MCPlayer m, Integer slot, Target t) {
-			if (slot == null) {
+			if(slot == null) {
 				return ObjectGenerator.GetGenerator().item(m.getItemInHand(), t);
 			}
 			MCPlayerInventory inv = m.getInventory();
-			if (inv == null) {
+			if(inv == null) {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
 
-			if (slot.equals(36)) {
+			if(slot.equals(36)) {
 				slot = 100;
 			}
-			if (slot.equals(37)) {
+			if(slot.equals(37)) {
 				slot = 101;
 			}
-			if (slot.equals(38)) {
+			if(slot.equals(38)) {
 				slot = 102;
 			}
-			if (slot.equals(39)) {
+			if(slot.equals(39)) {
 				slot = 103;
 			}
 			MCItemStack is;
-			if (slot >= 0 && slot <= 35) {
+			if(slot >= 0 && slot <= 35) {
 				is = inv.getItem(slot);
-			} else if (slot.equals(100)) {
+			} else if(slot.equals(100)) {
 				is = inv.getBoots();
-			} else if (slot.equals(101)) {
+			} else if(slot.equals(101)) {
 				is = inv.getLeggings();
-			} else if (slot.equals(102)) {
+			} else if(slot.equals(102)) {
 				is = inv.getChestplate();
-			} else if (slot.equals(103)) {
+			} else if(slot.equals(103)) {
 				is = inv.getHelmet();
-			} else if (slot.equals(-106)) {
+			} else if(slot.equals(-106)) {
 				is = inv.getItemInOffHand();
 			} else {
 				throw new CRERangeException("Slot index must be 0-35, or 100-103, or -106", t);
@@ -201,7 +201,7 @@ public class InventoryManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p;
 
-			if (args.length == 1) {
+			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			} else {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -258,11 +258,11 @@ public class InventoryManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p;
 
-			if (args.length == 1) {
+			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			} else {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				if (p == null) {
+				if(p == null) {
 					throw new CREInsufficientArgumentsException(
 							"You have to specify a player when running " + this.getName() + " from console.", t);
 				}
@@ -318,10 +318,10 @@ public class InventoryManagement {
 			MCPlayer player;
 			MCPlayer other;
 
-			if (args.length == 1) {
+			if(args.length == 1) {
 				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				other = Static.GetPlayer(args[0], t);
-			} else if (args.length == 2) {
+			} else if(args.length == 2) {
 				other = Static.GetPlayer(args[0], t);
 				player = Static.GetPlayer(args[1], t);
 			} else {
@@ -381,7 +381,7 @@ public class InventoryManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p;
 
-			if (args.length == 1) {
+			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			} else {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -471,18 +471,18 @@ public class InventoryManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m;
 			Construct arg;
-			if (args.length == 3) {
+			if(args.length == 3) {
 				// Single item
 				m = Static.GetPlayer(args[0], t);
 				MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t);
-				if (args[1] instanceof CNull) {
+				if(args[1] instanceof CNull) {
 					m.setItemInHand(is);
 				} else {
 					setInvSlot(m.getInventory(), Static.getInt32(args[1], t), is);
 				}
 				m.getInventory().updateViewers();
 				return CVoid.VOID;
-			} else if (args.length == 1) {
+			} else if(args.length == 1) {
 				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(m, t);
 				arg = args[0];
@@ -490,13 +490,13 @@ public class InventoryManagement {
 				m = Static.GetPlayer(args[0], t);
 				arg = args[1];
 			}
-			if (!(arg instanceof CArray)) {
+			if(!(arg instanceof CArray)) {
 				throw new CRECastException("Expecting an array as the last argument.", t);
 			}
 			CArray array = (CArray) arg;
 			MCPlayerInventory inv = m.getInventory();
-			for (String key : array.stringKeySet()) {
-				if (key.isEmpty() || key.equals("null")) {
+			for(String key : array.stringKeySet()) {
+				if(key.isEmpty() || key.equals("null")) {
 					//It was a null key
 					MCItemStack is = ObjectGenerator.GetGenerator().item(array.get("", t), t);
 					m.setItemInHand(is);
@@ -505,7 +505,7 @@ public class InventoryManagement {
 						int index = Integer.parseInt(key);
 						MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t), t);
 						setInvSlot(inv, index, is);
-					} catch (NumberFormatException e) {
+					} catch(NumberFormatException e) {
 						ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to"
 								+ " set_pinv(), but \"" + key + "\" was found. Ignoring.");
 					}
@@ -516,17 +516,17 @@ public class InventoryManagement {
 		}
 
 		private void setInvSlot(MCPlayerInventory inv, Integer index, MCItemStack is) {
-			if (index >= 0 && index <= 35) {
+			if(index >= 0 && index <= 35) {
 				inv.setItem(index, is);
-			} else if (index == 100) {
+			} else if(index == 100) {
 				inv.setBoots(is);
-			} else if (index == 101) {
+			} else if(index == 101) {
 				inv.setLeggings(is);
-			} else if (index == 102) {
+			} else if(index == 102) {
 				inv.setChestplate(is);
-			} else if (index == 103) {
+			} else if(index == 103) {
 				inv.setHelmet(is);
-			} else if (index == -106) {
+			} else if(index == -106) {
 				inv.setItemInOffHand(is);
 			} else {
 				ConfigRuntimeException.DoWarning("Ignoring out of range slot (" + index + ") passed to set_pinv().");
@@ -576,19 +576,19 @@ public class InventoryManagement {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p;
-			if (args.length == 0) {
+			if(args.length == 0) {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
 				p = Static.GetPlayer(args[0].val(), t);
 			}
 			MCPlayerInventory inv = p.getInventory();
-			if (inv == null) {
+			if(inv == null) {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
 			inv.clear();
-			if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9)) {
+			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9)) {
 				// 1.9 clears armor and offhand too, but before then we need clear armor manually.
 				MCItemStack empty = StaticLayer.GetItemStack("AIR", 0);
 				inv.setBoots(empty);
@@ -643,7 +643,7 @@ public class InventoryManagement {
 			MCItemStack is;
 			Construct c;
 			CArray ca = null;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				c = args[0];
@@ -652,7 +652,7 @@ public class InventoryManagement {
 				c = args[1];
 			}
 
-			if (c instanceof CArray) {
+			if(c instanceof CArray) {
 				ca = (CArray) c;
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
@@ -660,13 +660,13 @@ public class InventoryManagement {
 			}
 
 			MCPlayerInventory inv = p.getInventory();
-			if (inv == null) {
+			if(inv == null) {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
 
 			int total = 0;
-			for (int i = 0; i < 36; i++) {
+			for(int i = 0; i < 36; i++) {
 				MCItemStack iis = inv.getItem(i);
 				total += total(ca, is, iis, t);
 			}
@@ -674,14 +674,14 @@ public class InventoryManagement {
 			total += total(ca, is, inv.getLeggings(), t);
 			total += total(ca, is, inv.getChestplate(), t);
 			total += total(ca, is, inv.getHelmet(), t);
-			if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
 				total += total(ca, is, inv.getItemInOffHand(), t);
 			}
 			return new CInt(total, t);
 		}
 
 		private int total(CArray map, MCItemStack is, MCItemStack iis, Target t) {
-			if (IsMatch(map, is, iis, t)) {
+			if(IsMatch(map, is, iis, t)) {
 				return iis.getAmount();
 			}
 			return 0;
@@ -734,7 +734,7 @@ public class InventoryManagement {
 			MCPlayer p;
 			Construct item;
 			CArray ca = null;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				item = args[0];
@@ -743,7 +743,7 @@ public class InventoryManagement {
 				item = args[1];
 			}
 			MCItemStack is;
-			if (item instanceof CArray) {
+			if(item instanceof CArray) {
 				ca = (CArray) item;
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
@@ -751,29 +751,29 @@ public class InventoryManagement {
 			}
 
 			MCPlayerInventory inv = p.getInventory();
-			if (inv == null) {
+			if(inv == null) {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
 			CArray ret = new CArray(t);
-			for (int i = 0; i < 36; i++) {
-				if (IsMatch(ca, is, inv.getItem(i), t)) {
+			for(int i = 0; i < 36; i++) {
+				if(IsMatch(ca, is, inv.getItem(i), t)) {
 					ret.push(new CInt(i, t), t);
 				}
 			}
-			if (IsMatch(ca, is, inv.getBoots(), t)) {
+			if(IsMatch(ca, is, inv.getBoots(), t)) {
 				ret.push(new CInt(100, t), t);
 			}
-			if (IsMatch(ca, is, inv.getLeggings(), t)) {
+			if(IsMatch(ca, is, inv.getLeggings(), t)) {
 				ret.push(new CInt(101, t), t);
 			}
-			if (IsMatch(ca, is, inv.getChestplate(), t)) {
+			if(IsMatch(ca, is, inv.getChestplate(), t)) {
 				ret.push(new CInt(102, t), t);
 			}
-			if (IsMatch(ca, is, inv.getHelmet(), t)) {
+			if(IsMatch(ca, is, inv.getHelmet(), t)) {
 				ret.push(new CInt(103, t), t);
 			}
-			if (Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9) && IsMatch(ca, is, inv.getItemInOffHand(), t)) {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9) && IsMatch(ca, is, inv.getItemInOffHand(), t)) {
 				ret.push(new CInt(-106, t), t);
 			}
 			return ret;
@@ -832,44 +832,44 @@ public class InventoryManagement {
 			MCItemStack is;
 			int itemOffset = 0;
 
-			if (args.length == 2) {
-				if (args[1] instanceof CArray) {
+			if(args.length == 2) {
+				if(args[1] instanceof CArray) {
 					itemOffset = 1;
 				}
-			} else if (args.length == 3) {
-				if (args[0] instanceof CString) { // we assume player here, apparently
+			} else if(args.length == 3) {
+				if(args[0] instanceof CString) { // we assume player here, apparently
 					itemOffset = 1;
 				}
-			} else if (args.length == 4) {
+			} else if(args.length == 4) {
 				itemOffset = 1;
 			}
 
-			if (itemOffset == 0) {
+			if(itemOffset == 0) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
 				p = Static.GetPlayer(args[0], t);
 			}
 
-			if (args[itemOffset] instanceof CArray) {
+			if(args[itemOffset] instanceof CArray) {
 				is = ObjectGenerator.GetGenerator().item(args[itemOffset], t);
 			} else {
 				is = Static.ParseItemNotation(null, args[itemOffset].val(), Static.getInt32(args[itemOffset + 1], t), t);
-				if (args.length > itemOffset + 2) {
+				if(args.length > itemOffset + 2) {
 					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[itemOffset + 2], is.getType(), t));
 				}
 			}
 
 			MCInventory inv = p.getInventory();
-			if (inv != null) {
+			if(inv != null) {
 				Map<Integer, MCItemStack> h;
 				try {
 					h = p.getInventory().addItem(is);
-				} catch (IllegalArgumentException e) {
+				} catch(IllegalArgumentException e) {
 					throw new CREIllegalArgumentException("Item value is invalid", t);
 				}
 				p.updateInventory();
-				if (!h.isEmpty()) {
+				if(!h.isEmpty()) {
 					return new CInt(h.get(0).getAmount(), t);
 				}
 			}
@@ -925,22 +925,22 @@ public class InventoryManagement {
 			int itemOffset = 0;
 			CArray ca = null;
 
-			if (args.length == 2) {
-				if (args[1] instanceof CArray) {
+			if(args.length == 2) {
+				if(args[1] instanceof CArray) {
 					itemOffset = 1;
 				}
-			} else if (args.length == 3) {
+			} else if(args.length == 3) {
 				itemOffset = 1;
 			}
 
-			if (itemOffset == 0) {
+			if(itemOffset == 0) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
 				p = Static.GetPlayer(args[0], t);
 			}
 
-			if (args[itemOffset] instanceof CArray) {
+			if(args[itemOffset] instanceof CArray) {
 				ca = (CArray) args[itemOffset];
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
@@ -950,22 +950,22 @@ public class InventoryManagement {
 			int total = is.getAmount();
 			int remaining = is.getAmount();
 			MCPlayerInventory inv = p.getInventory();
-			if (inv == null) {
+			if(inv == null) {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
 
-			for (int i = 35; i >= 0; i--) {
+			for(int i = 35; i >= 0; i--) {
 				MCItemStack iis = inv.getItem(i);
-				if (remaining <= 0) {
+				if(remaining <= 0) {
 					break;
 				}
-				if (IsMatch(ca, is, iis, t)) {
+				if(IsMatch(ca, is, iis, t)) {
 					//Take the minimum of either: remaining, or iis.getAmount()
 					int toTake = java.lang.Math.min(remaining, iis.getAmount());
 					remaining -= toTake;
 					int replace = iis.getAmount() - toTake;
-					if (replace == 0) {
+					if(replace == 0) {
 						inv.clear(i);
 					} else {
 						iis.setAmount(replace);
@@ -1030,43 +1030,43 @@ public class InventoryManagement {
 			MCItemStack is;
 			int itemOffset = 0;
 
-			if (args.length == 2) {
-				if (args[1] instanceof CArray) {
+			if(args.length == 2) {
+				if(args[1] instanceof CArray) {
 					itemOffset = 1;
 				}
-			} else if (args.length == 3) {
-				if (args[0] instanceof CString) { // we assume player here, apparently
+			} else if(args.length == 3) {
+				if(args[0] instanceof CString) { // we assume player here, apparently
 					itemOffset = 1;
 				}
-			} else if (args.length == 4) {
+			} else if(args.length == 4) {
 				itemOffset = 1;
 			}
 
-			if (itemOffset == 0) {
+			if(itemOffset == 0) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
 				p = Static.GetPlayer(args[0], t);
 			}
 
-			if (args[itemOffset] instanceof CArray) {
+			if(args[itemOffset] instanceof CArray) {
 				is = ObjectGenerator.GetGenerator().item(args[itemOffset], t);
 			} else {
 				is = Static.ParseItemNotation(null, args[itemOffset].val(), Static.getInt32(args[itemOffset + 1], t), t);
-				if (args.length > itemOffset + 2) {
+				if(args.length > itemOffset + 2) {
 					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[itemOffset + 2], is.getType(), t));
 				}
 			}
 
 			MCInventory inv = p.getEnderChest();
-			if (inv != null) {
+			if(inv != null) {
 				Map<Integer, MCItemStack> h;
 				try {
 					h = p.getEnderChest().addItem(is);
-				} catch (IllegalArgumentException e) {
+				} catch(IllegalArgumentException e) {
 					throw new CREIllegalArgumentException("Item value is invalid", t);
 				}
-				if (!h.isEmpty()) {
+				if(!h.isEmpty()) {
 					return new CInt(h.get(0).getAmount(), t);
 				}
 			}
@@ -1121,22 +1121,22 @@ public class InventoryManagement {
 			int itemOffset = 0;
 			CArray ca = null;
 
-			if (args.length == 2) {
-				if (args[1] instanceof CArray) {
+			if(args.length == 2) {
+				if(args[1] instanceof CArray) {
 					itemOffset = 1;
 				}
-			} else if (args.length == 3) {
+			} else if(args.length == 3) {
 				itemOffset = 1;
 			}
 
-			if (itemOffset == 0) {
+			if(itemOffset == 0) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
 				p = Static.GetPlayer(args[0], t);
 			}
 
-			if (args[itemOffset] instanceof CArray) {
+			if(args[itemOffset] instanceof CArray) {
 				ca = (CArray) args[itemOffset];
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
@@ -1146,22 +1146,22 @@ public class InventoryManagement {
 			int total = is.getAmount();
 			int remaining = is.getAmount();
 			MCInventory inv = p.getEnderChest();
-			if (inv == null) {
+			if(inv == null) {
 				throw new CRENotFoundException(
 						"Could not find the enderchest inventory of the given player (are you running in cmdline mode?)", t);
 			}
 
-			for (int i = 26; i >= 0; i--) {
+			for(int i = 26; i >= 0; i--) {
 				MCItemStack iis = inv.getItem(i);
-				if (remaining <= 0) {
+				if(remaining <= 0) {
 					break;
 				}
-				if (IsMatch(ca, is, iis, t)) {
+				if(IsMatch(ca, is, iis, t)) {
 					//Take the minimum of either: remaining, or iis.getAmount()
 					int toTake = java.lang.Math.min(remaining, iis.getAmount());
 					remaining -= toTake;
 					int replace = iis.getAmount() - toTake;
-					if (replace == 0) {
+					if(replace == 0) {
 						inv.clear(i);
 					} else {
 						iis.setAmount(replace);
@@ -1235,20 +1235,20 @@ public class InventoryManagement {
 
 			MCPlayer m = null;
 
-			if (p instanceof MCPlayer) {
+			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
 
 			Construct arg;
 
-			if (args.length == 2) {
+			if(args.length == 2) {
 				m = Static.GetPlayer(args[0], t);
 				arg = args[1];
 			} else {
 				arg = args[0];
 			}
 
-			if (!(arg instanceof CArray)) {
+			if(!(arg instanceof CArray)) {
 				throw new CRECastException("Expecting an array as argument " + (args.length == 1 ? "1" : "2"), t);
 			}
 
@@ -1256,14 +1256,14 @@ public class InventoryManagement {
 
 			Static.AssertPlayerNonNull(m, t);
 
-			for (String key : array.stringKeySet()) {
+			for(String key : array.stringKeySet()) {
 				try {
 					int index = -2;
 
 					try {
 						index = Integer.parseInt(key);
-					} catch (NumberFormatException e) {
-						if (key.isEmpty()) {
+					} catch(NumberFormatException e) {
+						if(key.isEmpty()) {
 							throw new CRERangeException("Slot index must be 0-26", t);
 						} else {
 							throw e;
@@ -1272,12 +1272,12 @@ public class InventoryManagement {
 
 					MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t), t);
 
-					if (index >= 0 && index <= 26) {
+					if(index >= 0 && index <= 26) {
 						m.getEnderChest().setItem(index, is);
 					} else {
 						ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found in array passed to set_penderchest(), so ignoring.");
 					}
-				} catch (NumberFormatException e) {
+				} catch(NumberFormatException e) {
 					ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_penderchest(), but \"" + key + "\" was found. Ignoring.");
 				}
 			}
@@ -1343,18 +1343,18 @@ public class InventoryManagement {
 			boolean all = false;
 			MCPlayer m = null;
 
-			if (args.length == 0) {
+			if(args.length == 0) {
 				all = true;
 
-				if (p instanceof MCPlayer) {
+				if(p instanceof MCPlayer) {
 					m = (MCPlayer) p;
 				}
-			} else if (args.length == 1) {
+			} else if(args.length == 1) {
 				all = true;
 
 				m = Static.GetPlayer(args[0], t);
-			} else if (args.length == 2) {
-				if (args[1] instanceof CNull) {
+			} else if(args.length == 2) {
+				if(args[1] instanceof CNull) {
 					throw new CRERangeException("Slot index must be 0-26", t);
 				} else {
 					index = Static.getInt32(args[1], t);
@@ -1366,10 +1366,10 @@ public class InventoryManagement {
 
 			Static.AssertPlayerNonNull(m, t);
 
-			if (all) {
+			if(all) {
 				CArray ret = CArray.GetAssociativeArray(t);
 
-				for (int i = 0; i < 27; i++) {
+				for(int i = 0; i < 27; i++) {
 					ret.set(i, getInvSlot(m, i, t), t);
 				}
 
@@ -1381,11 +1381,11 @@ public class InventoryManagement {
 
 		private Construct getInvSlot(MCPlayer m, Integer slot, Target t) {
 			MCInventory inv = m.getEnderChest();
-			if (inv == null) {
+			if(inv == null) {
 				throw new CRENotFoundException(
 						"Could not find the enderchest inventory of the given player (are you running in cmdline mode?)", t);
 			}
-			if (slot < 0 || slot > 26) {
+			if(slot < 0 || slot > 26) {
 				throw new CRERangeException("Slot index must be 0-26", t);
 			}
 			MCItemStack is = inv.getItem(slot);
@@ -1416,7 +1416,7 @@ public class InventoryManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (p != null) {
+			if(p != null) {
 				w = p.getWorld();
 			}
 
@@ -1425,7 +1425,7 @@ public class InventoryManagement {
 			try {
 				MCItemStack is = inv.getItem(slot);
 				return ObjectGenerator.GetGenerator().item(is, t);
-			} catch (ArrayIndexOutOfBoundsException e) {
+			} catch(ArrayIndexOutOfBoundsException e) {
 				throw new CRERangeException("Index out of bounds for the inventory type.", t);
 			}
 		}
@@ -1479,7 +1479,7 @@ public class InventoryManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (p != null) {
+			if(p != null) {
 				w = p.getWorld();
 			}
 
@@ -1490,7 +1490,7 @@ public class InventoryManagement {
 				inv.setItem(slot, is);
 				inv.updateViewers();
 				return CVoid.VOID;
-			} catch (ArrayIndexOutOfBoundsException e) {
+			} catch(ArrayIndexOutOfBoundsException e) {
 				throw new CRERangeException("Index out of bounds for the inventory type.", t);
 			}
 		}
@@ -1541,7 +1541,7 @@ public class InventoryManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (p != null) {
+			if(p != null) {
 				w = p.getWorld();
 			}
 
@@ -1596,7 +1596,7 @@ public class InventoryManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
-			if (environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 			}
 			MCInventory inventory = InventoryManagement.GetInventory(args[0], w, t);
@@ -1649,7 +1649,7 @@ public class InventoryManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (p != null) {
+			if(p != null) {
 				w = p.getWorld();
 			}
 			MCInventory inventory = InventoryManagement.GetInventory(args[0], w, t);
@@ -1701,7 +1701,7 @@ public class InventoryManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p1 = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCPlayer p2;
-			if (args.length == 2) {
+			if(args.length == 2) {
 				p1 = Static.GetPlayer(args[0], t);
 				p2 = Static.GetPlayer(args[1], t);
 			} else {
@@ -1790,17 +1790,17 @@ public class InventoryManagement {
 			Integer size = inventory.getSize();
 			Integer index = -1;
 
-			if (args.length == 2) {
+			if(args.length == 2) {
 				index = Static.getInt32(args[1], t);
 
-				if (index < 0 || index >= size) {
+				if(index < 0 || index >= size) {
 					throw new CRERangeException("Slot index must be 0-" + (size - 1), t);
 				}
 			}
 
-			if (index == -1) {
+			if(index == -1) {
 				CArray ret = CArray.GetAssociativeArray(t);
-				for (int i = 0; i < size; i++) {
+				for(int i = 0; i < size; i++) {
 					ret.set(i, ObjectGenerator.GetGenerator().item(inventory.getItem(i), t), t);
 				}
 
@@ -1868,27 +1868,27 @@ public class InventoryManagement {
 			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
 			Integer size = inventory.getSize();
 
-			if (!(args[1] instanceof CArray)) {
+			if(!(args[1] instanceof CArray)) {
 				throw new CRECastException("Expecting an array as argument 2", t);
 			}
 
 			CArray array = (CArray) args[1];
 
-			for (String key : array.stringKeySet()) {
+			for(String key : array.stringKeySet()) {
 				try {
 					int index;
 					try {
 						index = Integer.parseInt(key);
-					} catch (NumberFormatException e) {
+					} catch(NumberFormatException e) {
 						throw e;
 					}
-					if (index < 0 || index >= size) {
+					if(index < 0 || index >= size) {
 						ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found in array passed to set_inventory(), so ignoring.");
 					} else {
 						MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t), t);
 						inventory.setItem(index, is);
 					}
-				} catch (NumberFormatException e) {
+				} catch(NumberFormatException e) {
 					ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_inventory(), but \"" + key + "\" was found. Ignoring.");
 				}
 			}
@@ -1941,11 +1941,11 @@ public class InventoryManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
 			MCItemStack is;
-			if (args.length == 2) {
+			if(args.length == 2) {
 				is = ObjectGenerator.GetGenerator().item(args[1], t);
 			} else {
 				is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
-				if (args.length == 4) {
+				if(args.length == 4) {
 					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[3], is.getType(), t));
 				}
 			}
@@ -1953,11 +1953,11 @@ public class InventoryManagement {
 			Map<Integer, MCItemStack> h;
 			try {
 				h = inventory.addItem(is);
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CREIllegalArgumentException("Item value is invalid", t);
 			}
 
-			if (h.isEmpty()) {
+			if(h.isEmpty()) {
 				return new CInt(0, t);
 			} else {
 				return new CInt(h.get(0).getAmount(), t);
@@ -2013,7 +2013,7 @@ public class InventoryManagement {
 			CArray ca = null;
 
 			MCItemStack is;
-			if (args.length == 2) {
+			if(args.length == 2) {
 				ca = (CArray) args[1];
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
@@ -2022,17 +2022,17 @@ public class InventoryManagement {
 
 			int total = is.getAmount();
 			int remaining = is.getAmount();
-			for (int i = size - 1; i >= 0; i--) {
+			for(int i = size - 1; i >= 0; i--) {
 				MCItemStack iis = inventory.getItem(i);
-				if (remaining <= 0) {
+				if(remaining <= 0) {
 					break;
 				}
-				if (IsMatch(ca, is, iis, t)) {
+				if(IsMatch(ca, is, iis, t)) {
 					//Take the minimum of either: remaining, or iis.getAmount()
 					int toTake = java.lang.Math.min(remaining, iis.getAmount());
 					remaining -= toTake;
 					int replace = iis.getAmount() - toTake;
-					if (replace == 0) {
+					if(replace == 0) {
 						inventory.clear(i);
 					} else {
 						iis.setAmount(replace);
@@ -2088,10 +2088,10 @@ public class InventoryManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer player;
-			switch (args.length) {
+			switch(args.length) {
 				case 1: {
 					MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-					if (sender instanceof MCPlayer) {
+					if(sender instanceof MCPlayer) {
 						player = (MCPlayer) sender;
 					} else {
 						throw new CREPlayerOfflineException("The command sender is not online (are you running this from console?).", t);
@@ -2110,15 +2110,15 @@ public class InventoryManagement {
 			int slot;
 			try {
 				slot = Integer.parseInt(args[args.length - 1].val());
-			} catch (NumberFormatException e) {
+			} catch(NumberFormatException e) {
 				throw new CREFormatException("Slot number must be an integer in range of [0-8].", t);
 			}
-			if (slot < 0 || slot > 8) {
+			if(slot < 0 || slot > 8) {
 				throw new CRERangeException("Slot number must be an integer in range of [0-8].", t);
 			}
 
 			MCPlayerInventory pinv = player.getInventory();
-			if (pinv == null) {
+			if(pinv == null) {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
@@ -2170,10 +2170,10 @@ public class InventoryManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer player;
-			switch (args.length) {
+			switch(args.length) {
 				case 0: {
 					MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-					if (sender instanceof MCPlayer) {
+					if(sender instanceof MCPlayer) {
 						player = (MCPlayer) sender;
 					} else {
 						throw new CREPlayerOfflineException("The command sender is not online (are you running this from console?).", t);
@@ -2190,7 +2190,7 @@ public class InventoryManagement {
 			}
 
 			MCPlayerInventory pinv = player.getInventory();
-			if (pinv == null) {
+			if(pinv == null) {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
@@ -2261,14 +2261,14 @@ public class InventoryManagement {
 //    }
 	private static MCInventory GetInventory(Construct specifier, MCWorld w, Target t) {
 		MCInventory inv;
-		if (specifier instanceof CArray) {
+		if(specifier instanceof CArray) {
 			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
 			inv = StaticLayer.GetConvertor().GetLocationInventory(l);
 		} else {
 			MCEntity entity = Static.getEntity(specifier, t);
 			inv = StaticLayer.GetConvertor().GetEntityInventory(entity);
 		}
-		if (inv == null) {
+		if(inv == null) {
 			throw new CREFormatException("The entity or location specified is not capable of having an inventory.", t);
 		} else {
 			return inv;
@@ -2290,38 +2290,38 @@ public class InventoryManagement {
 	 * @return Whether or not the items are a match
 	 */
 	private static boolean IsMatch(CArray map, MCItemStack is, MCItemStack iis, Target t) {
-		if (!is.getType().equals(iis.getType())) {
+		if(!is.getType().equals(iis.getType())) {
 			return false;
 		}
-		if ((map == null || map.containsKey("data")) && is.getDurability() != iis.getDurability()) {
+		if((map == null || map.containsKey("data")) && is.getDurability() != iis.getDurability()) {
 			return false;
 		}
-		if (map != null && map.containsKey("meta")) {
+		if(map != null && map.containsKey("meta")) {
 			Construct c = map.get("meta", t);
-			if (c instanceof CNull) {
-				if (iis.hasItemMeta()) {
+			if(c instanceof CNull) {
+				if(iis.hasItemMeta()) {
 					return false;
 				}
 			} else {
-				if (!iis.hasItemMeta()) {
+				if(!iis.hasItemMeta()) {
 					return false;
 				}
 				CArray metamap = (CArray) c;
 				MCItemMeta im = is.getItemMeta();
 				MCItemMeta iim = iis.getItemMeta();
-				if (metamap.containsKey("display")) {
-					if (im.hasDisplayName()) {
-						if (!iim.hasDisplayName() || !im.getDisplayName().equals(iim.getDisplayName())) {
+				if(metamap.containsKey("display")) {
+					if(im.hasDisplayName()) {
+						if(!iim.hasDisplayName() || !im.getDisplayName().equals(iim.getDisplayName())) {
 							return false;
 						}
-					} else if (iim.hasDisplayName()) {
+					} else if(iim.hasDisplayName()) {
 						return false;
 					}
 				}
-				if (metamap.containsKey("lore") && im.hasLore() && !im.getLore().equals(iim.getLore())) {
+				if(metamap.containsKey("lore") && im.hasLore() && !im.getLore().equals(iim.getLore())) {
 					return false;
 				}
-				if (metamap.containsKey("enchants") && !im.getEnchants().equals(iim.getEnchants())) {
+				if(metamap.containsKey("enchants") && !im.getEnchants().equals(iim.getEnchants())) {
 					return false;
 				}
 			}

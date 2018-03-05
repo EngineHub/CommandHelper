@@ -18,7 +18,7 @@ public class BukkitMCEnderDragonPhase extends EnumConvertor<MCEnderDragonPhase, 
 	private static BukkitMCEnderDragonPhase instance;
 
 	public static BukkitMCEnderDragonPhase getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new BukkitMCEnderDragonPhase();
 		}
 		return instance;
@@ -26,7 +26,7 @@ public class BukkitMCEnderDragonPhase extends EnumConvertor<MCEnderDragonPhase, 
 
 	@Override
 	protected EnderDragon.Phase getConcreteEnumCustom(MCEnderDragonPhase abstracted) {
-		if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9_X)) {
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9_X)) {
 			return null;
 		}
 		return super.getConcreteEnumCustom(abstracted);

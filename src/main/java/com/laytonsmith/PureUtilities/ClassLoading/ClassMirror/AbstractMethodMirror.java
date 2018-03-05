@@ -54,9 +54,9 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 	 * @return
 	 */
 	public List<ClassReferenceMirror> getParams() {
-		if (underlyingMethod != null) {
+		if(underlyingMethod != null) {
 			List<ClassReferenceMirror> list = new ArrayList<>();
-			for (Class p : ((Method) underlyingMethod).getParameterTypes()) {
+			for(Class p : ((Method) underlyingMethod).getParameterTypes()) {
 				list.add(ClassReferenceMirror.fromClass(p));
 			}
 			return list;
@@ -70,7 +70,7 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 	 * @return
 	 */
 	public boolean isVararg() {
-		if (underlyingMethod != null) {
+		if(underlyingMethod != null) {
 			return ((Method) underlyingMethod).isVarArgs();
 		}
 		return isVararg;
@@ -82,7 +82,7 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 	 * @return
 	 */
 	public boolean isSynthetic() {
-		if (underlyingMethod != null) {
+		if(underlyingMethod != null) {
 			return underlyingMethod.isSynthetic();
 		}
 		return isSynthetic;
@@ -90,12 +90,12 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 
 	@Override
 	public String toString() {
-		if (underlyingMethod != null) {
+		if(underlyingMethod != null) {
 			return underlyingMethod.toString();
 		}
 		List<String> sParams = new ArrayList<>();
-		for (int i = 0; i < params.size(); i++) {
-			if (i == params.size() - 1 && isVararg) {
+		for(int i = 0; i < params.size(); i++) {
+			if(i == params.size() - 1 && isVararg) {
 				sParams.add(params.get(i).getComponentType().toString() + "...");
 			} else {
 				sParams.add(params.get(i).toString());
@@ -107,10 +107,10 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof MethodMirror)) {
+		if(!(obj instanceof MethodMirror)) {
 			return false;
 		}
-		if (!super.equals(obj)) {
+		if(!super.equals(obj)) {
 			return false;
 		}
 		AbstractMethodMirror m = (AbstractMethodMirror) obj;

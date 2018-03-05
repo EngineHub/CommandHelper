@@ -34,7 +34,7 @@ public class Performance {
 		try {
 			Static.QuickAppend(Static.profilingLogFile(root), "start[" + stopWatch.getStartTime() + "] time[" + stopWatch.getElapsedTime() + "] "
 					+ "tag[" + stopWatch.getTag() + "]\n");
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			Logger.getLogger(Performance.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -83,7 +83,7 @@ public class Performance {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (!Prefs.AllowProfiling()) {
+			if(!Prefs.AllowProfiling()) {
 				throw new CRESecurityException("allow-profiling is currently off, you must set it to true in your preferences.", t);
 			}
 			PERFORMANCE_LOGGING = Static.getBoolean(args[0]);

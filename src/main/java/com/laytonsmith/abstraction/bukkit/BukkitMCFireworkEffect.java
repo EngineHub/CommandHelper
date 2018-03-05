@@ -32,7 +32,7 @@ public class BukkitMCFireworkEffect implements MCFireworkEffect {
 	public List<MCColor> getColors() {
 		List<Color> colors = fe.getColors();
 		List<MCColor> c = new ArrayList<>();
-		for (Color cc : colors) {
+		for(Color cc : colors) {
 			c.add(BukkitMCColor.GetMCColor(cc));
 		}
 		return c;
@@ -42,7 +42,7 @@ public class BukkitMCFireworkEffect implements MCFireworkEffect {
 	public List<MCColor> getFadeColors() {
 		List<Color> colors = fe.getFadeColors();
 		List<MCColor> c = new ArrayList<>();
-		for (Color cc : colors) {
+		for(Color cc : colors) {
 			c.add(BukkitMCColor.GetMCColor(cc));
 		}
 		return c;

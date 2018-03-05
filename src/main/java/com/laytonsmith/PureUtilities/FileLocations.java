@@ -27,7 +27,7 @@ public class FileLocations {
 			userHome = new File(System.getProperty("user.home"));
 			userDir = new File(System.getProperty("user.dir"));
 			javaHome = new File(System.getProperty("java.home"));
-		} catch (SecurityException e) {
+		} catch(SecurityException e) {
 			//This could happen in applets or some other wierd security configuration.
 			//Regardless, we don't want this to ever fail.
 		}
@@ -43,7 +43,7 @@ public class FileLocations {
 	 * @return
 	 */
 	public static FileLocations getDefault() {
-		if (defaultInstance == null) {
+		if(defaultInstance == null) {
 			defaultInstance = new FileLocations();
 		}
 		return defaultInstance;

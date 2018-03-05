@@ -14,44 +14,44 @@ import org.xml.sax.SAXException;
 
 /**
  *
- * 
+ *
  */
 public class XMLDocumentTest {
-	
+
 	XMLDocument doc;
 	static String testDoc = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
 			+ "<root>"
-				+ "<node1 attribute=\"value\">Text</node1>"
-					+ "<nodes>"
-						+ "<inode attribute=\"1\">value</inode>"
-						+ "<!-- This is 2 ^ 33 -->"
-						+ "<inode attribute=\"1.5\">8589934592</inode>"
-						+ "<inode>true</inode>"
-					+ "</nodes>"
+			+ "<node1 attribute=\"value\">Text</node1>"
+			+ "<nodes>"
+			+ "<inode attribute=\"1\">value</inode>"
+			+ "<!-- This is 2 ^ 33 -->"
+			+ "<inode attribute=\"1.5\">8589934592</inode>"
+			+ "<inode>true</inode>"
+			+ "</nodes>"
 			+ "</root>";
-	
+
 	public XMLDocumentTest() {
 	}
-	
+
 	@BeforeClass
 	public static void setUpClass() {
 	}
-	
+
 	@AfterClass
 	public static void tearDownClass() {
 	}
-	
+
 	@Before
 	public void setUp() throws SAXException {
 		doc = new XMLDocument(testDoc);
 	}
-	
+
 	@After
 	public void tearDown() {
 	}
-	
+
 	@Test
-	public void testNewDocument(){
+	public void testNewDocument() {
 		String output = new XMLDocument().getXML();
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>", output);
 	}
@@ -70,20 +70,20 @@ public class XMLDocumentTest {
 		doc.setNode("/root/other/node[2]/inner", "value2");
 		assertEquals("value1", doc.getNode("/root/other/node[1]/inner"));
 		assertEquals("value2", doc.getNode("/root/other/node[2]/inner"));
-		try{
+		try {
 			doc.setNode("/root/other/node[4]/node", "value");
 			fail("Did not expect this to pass");
-		} catch(XPathExpressionException e){
+		} catch(XPathExpressionException e) {
 			//Pass
 		}
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
 				+ "<root>"
-					+ "<newNode attribute=\"attribute\">test</newNode>"
-					+ "<other>"
-						+ "<node><inner>value1</inner></node>"
-						+ "<node><inner>value2</inner></node>"
-					+ "</other>"
-				+ "</root>", 
+				+ "<newNode attribute=\"attribute\">test</newNode>"
+				+ "<other>"
+				+ "<node><inner>value1</inner></node>"
+				+ "<node><inner>value2</inner></node>"
+				+ "</other>"
+				+ "</root>",
 				doc.getXML());
 	}
 
@@ -143,9 +143,9 @@ public class XMLDocumentTest {
 	public void testGetXML() {
 		assertEquals(testDoc, doc.getXML());
 	}
-	
+
 	@Test
-	public void testPrettyPrint() throws XPathExpressionException{
+	public void testPrettyPrint() throws XPathExpressionException {
 		doc = new XMLDocument();
 		doc.setNode("/root/node", "value");
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
@@ -153,9 +153,9 @@ public class XMLDocumentTest {
 				+ "    <node>value</node>\n"
 				+ "</root>\n", doc.getXML(true).replace("\r\n", "\n").replace("\n\r", "\n"));
 	}
-	
+
 	@Test
-	public void testWithNamespace() throws XPathExpressionException, SAXException{
+	public void testWithNamespace() throws XPathExpressionException, SAXException {
 		doc = new XMLDocument("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 				+ "<root>\n"
 				+ "    <ns:node>value</ns:node>\n"

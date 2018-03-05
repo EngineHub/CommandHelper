@@ -26,16 +26,16 @@ public class LogicUtils {
 		 * @return
 		 */
 		public boolean equalsAny(Object... o) {
-			if (obj == null) {
-				for (Object oo : o) {
-					if (oo == null) {
+			if(obj == null) {
+				for(Object oo : o) {
+					if(oo == null) {
 						return true;
 					}
 				}
 				return false;
 			}
-			for (Object oo : o) {
-				if (obj.equals(oo)) {
+			for(Object oo : o) {
+				if(obj.equals(oo)) {
 					return true;
 				}
 			}
@@ -47,16 +47,16 @@ public class LogicUtils {
 		 * is equivalent to a != b && a != c && a != d
 		 */
 		public boolean equalsNone(Object... o) {
-			if (obj == null) {
-				for (Object oo : o) {
-					if (oo == null) {
+			if(obj == null) {
+				for(Object oo : o) {
+					if(oo == null) {
 						return false;
 					}
 				}
 				return true;
 			}
-			for (Object oo : o) {
-				if (obj.equals(oo)) {
+			for(Object oo : o) {
+				if(obj.equals(oo)) {
 					return false;
 				}
 			}
@@ -71,10 +71,10 @@ public class LogicUtils {
 		 */
 		@Override
 		public boolean equals(Object o) {
-			if (!(o instanceof Compare)) {
+			if(!(o instanceof Compare)) {
 				return false;
 			}
-			if (obj == null) {
+			if(obj == null) {
 				return obj == o;
 			} else {
 				return obj.equals(o);
@@ -83,7 +83,7 @@ public class LogicUtils {
 
 		@Override
 		public int hashCode() {
-			if (obj == null) {
+			if(obj == null) {
 				return 0;
 			} else {
 				return obj.hashCode();

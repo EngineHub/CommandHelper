@@ -22,7 +22,7 @@ public class RunnableQueue {
 	}
 
 	public RunnableQueue(final String threadPrefix, final Thread.UncaughtExceptionHandler exceptionHandler) {
-		if (threadPrefix == null) {
+		if(threadPrefix == null) {
 			throw new NullPointerException();
 		}
 		threadFactory = new ThreadFactory() {
@@ -31,7 +31,7 @@ public class RunnableQueue {
 			public Thread newThread(Runnable r) {
 				Thread t = new Thread(r, threadPrefix + "-" + (++threadCount));
 				t.setDaemon(false);
-				if (exceptionHandler != null) {
+				if(exceptionHandler != null) {
 					t.setUncaughtExceptionHandler(exceptionHandler);
 				} else {
 					t.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
@@ -49,7 +49,7 @@ public class RunnableQueue {
 	}
 
 	private void activate() {
-		if (service == null) {
+		if(service == null) {
 			service = Executors.newSingleThreadExecutor(threadFactory);
 		}
 	}
@@ -60,7 +60,7 @@ public class RunnableQueue {
 	 * @param r
 	 */
 	public void invokeLater(final DaemonManager dm, final Runnable r) {
-		if (dm != null) {
+		if(dm != null) {
 			dm.activateThread(null);
 		}
 		activate();
@@ -71,7 +71,7 @@ public class RunnableQueue {
 				try {
 					r.run();
 				} finally {
-					if (dm != null) {
+					if(dm != null) {
 						dm.deactivateThread(null);
 					}
 				}

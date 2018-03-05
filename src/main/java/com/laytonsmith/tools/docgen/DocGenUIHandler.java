@@ -99,10 +99,10 @@ public class DocGenUIHandler {
 		this.doExamples = doExamples;
 		this.doEvents = doEvents;
 		this.doTemplates = doTemplates;
-		if (!this.prefix.endsWith("/")) {
+		if(!this.prefix.endsWith("/")) {
 			this.prefix += "/";
 		}
-		if (this.prefix.startsWith("/")) {
+		if(this.prefix.startsWith("/")) {
 			this.prefix = this.prefix.substring(1);
 		}
 	}
@@ -112,7 +112,7 @@ public class DocGenUIHandler {
 	}
 
 	public void checkStop() {
-		if (stop) {
+		if(stop) {
 			throw new QuickStop();
 		}
 	}
@@ -120,38 +120,38 @@ public class DocGenUIHandler {
 	public void go() throws Exception {
 		try {
 			endpoint = new URL(url.toString() + "/w/api.php");
-			if (getPage(endpoint).getResponseCode() != 200) {
+			if(getPage(endpoint).getResponseCode() != 200) {
 				throw new Exception("Unable to reach wiki API.");
 			}
-			if (doExamples) {
+			if(doExamples) {
 				testCompileExamples();
 			}
 			doLogin();
 			//Now, gather up the page count, so we can set our progress bar correctly
-			if (doFunctions) {
+			if(doFunctions) {
 				totalPages += getFunctionCount();
 			}
-			if (doExamples) {
+			if(doExamples) {
 				totalPages += getExampleCount();
 			}
-			if (doEvents) {
+			if(doEvents) {
 				totalPages += getEventCount();
 			}
-			if (doTemplates) {
+			if(doTemplates) {
 				totalPages += getTemplateCount();
 			}
 			totalPages += getMiscCount();
 			progress.setProgress(0);
-			if (doFunctions) {
+			if(doFunctions) {
 				doFunctions();
 			}
-			if (doExamples) {
+			if(doExamples) {
 				doExamples();
 			}
-			if (doEvents) {
+			if(doEvents) {
 				doEvents();
 			}
-			if (doTemplates) {
+			if(doTemplates) {
 				doTemplates();
 			}
 		} finally {
@@ -167,13 +167,13 @@ public class DocGenUIHandler {
 		//So they are alphabetical, so we always have a consistent upload order, to
 		//facilitate tracing problems.
 		SortedSet<String> names = new TreeSet<String>();
-		for (FunctionBase base : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
+		for(FunctionBase base : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
 			String name = base.getName();
-			if (base.appearInDocumentation()) {
+			if(base.appearInDocumentation()) {
 				names.add(name);
 			}
 		}
-		for (String name : names) {
+		for(String name : names) {
 			String docs = DocGen.examples(name, isStaged);
 			doUpload(docs, "/API/" + name, true);
 		}
@@ -189,16 +189,16 @@ public class DocGenUIHandler {
 			ZipReader reader = new ZipReader(root);
 			Queue<File> q = new LinkedList<File>();
 			q.addAll(Arrays.asList(reader.listFiles()));
-			while (q.peek() != null) {
+			while(q.peek() != null) {
 				ZipReader r = new ZipReader(q.poll());
-				if (r.isDirectory()) {
+				if(r.isDirectory()) {
 					q.addAll(Arrays.asList(r.listFiles()));
 				} else {
 					String articleName = "/" + r.getFile().getName();
 					doUpload(DocGen.Template(r.getFile().getName(), isStaged), articleName, true);
 				}
 			}
-		} catch (URISyntaxException ex) {
+		} catch(URISyntaxException ex) {
 			Logger.getLogger(DocGenUIHandler.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -214,7 +214,7 @@ public class DocGenUIHandler {
 	 */
 	void doUpload(String wikiMarkup, String page, Boolean protect) throws XPathExpressionException {
 		checkStop();
-		if (page.startsWith("/")) {
+		if(page.startsWith("/")) {
 			//The prefix already has this
 			page = page.substring(1);
 		}
@@ -233,7 +233,7 @@ public class DocGenUIHandler {
 		checkStop();
 		String sha1 = content.getNode("/api/query/pages/page/revisions/rev/@sha1");
 		String sha1local = getSha1(wikiMarkup);
-		if (!sha1.equals(sha1local)) {
+		if(!sha1.equals(sha1local)) {
 			XMLDocument query = getXML(endpoint, mapCreator(
 					"action", "query",
 					"titles", fullPath,
@@ -254,7 +254,7 @@ public class DocGenUIHandler {
 					"token", edittoken
 			), false);
 		}
-		if (protect != null) {
+		if(protect != null) {
 			XMLDocument query = getXML(endpoint, mapCreator(
 					"action", "query",
 					"titles", fullPath,
@@ -267,24 +267,24 @@ public class DocGenUIHandler {
 			String protectToken = query.getNode("/api/query/pages/page/@protecttoken");
 			boolean isProtectedEdit = false;
 			boolean isProtectedMove = false;
-			if (query.nodeExists("/api/query/pages/page/protection/pr")) {
-				for (int i = 1; i <= query.countChildren("/api/query/pages/page/protection"); i++) {
+			if(query.nodeExists("/api/query/pages/page/protection/pr")) {
+				for(int i = 1; i <= query.countChildren("/api/query/pages/page/protection"); i++) {
 					//If only sysops can edit and move
-					if (query.getNode("/api/query/pages/page/protection/pr[" + i + "]/@level").equals("sysop")
+					if(query.getNode("/api/query/pages/page/protection/pr[" + i + "]/@level").equals("sysop")
 							&& query.getNode("/api/query/pages/page/protection/pr[" + i + "]/@type").equals("edit")) {
 						isProtectedEdit = true;
 					}
-					if (query.getNode("/api/query/pages/page/protection/pr[" + i + "]/@level").equals("sysop")
+					if(query.getNode("/api/query/pages/page/protection/pr[" + i + "]/@level").equals("sysop")
 							&& query.getNode("/api/query/pages/page/protection/pr[" + i + "]/@type").equals("move")) {
 						isProtectedMove = true;
 					}
 				}
 			}
 			boolean isProtected = false;
-			if (isProtectedEdit && isProtectedMove) {
+			if(isProtectedEdit && isProtectedMove) {
 				isProtected = true;
 			}
-			if (protect && !isProtected) {
+			if(protect && !isProtected) {
 				//Protect it
 				getXML(endpoint, mapCreator(
 						"action", "protect",
@@ -294,7 +294,7 @@ public class DocGenUIHandler {
 						"expiry", "infinite",
 						"reason", "Autoprotecting page (This is a bot edit)"
 				));
-			} else if (!protect && isProtected) {
+			} else if(!protect && isProtected) {
 				//Unprotect it
 				getXML(endpoint, mapCreator(
 						"action", "protect",
@@ -312,7 +312,7 @@ public class DocGenUIHandler {
 
 	private void incProgress() {
 		atPage++;
-		if (totalPages == 0) {
+		if(totalPages == 0) {
 			progress.setProgress(null);
 		} else {
 			progress.setProgress((int) ((float) atPage / (float) totalPages * 100.0));
@@ -337,16 +337,16 @@ public class DocGenUIHandler {
 			ZipReader reader = new ZipReader(new File(DocGenUIHandler.class.getResource("/docs").toURI()));
 			Queue<File> q = new LinkedList<File>();
 			q.addAll(Arrays.asList(reader.listFiles()));
-			while (q.peek() != null) {
+			while(q.peek() != null) {
 				ZipReader r = new ZipReader(q.poll());
-				if (r.isDirectory()) {
+				if(r.isDirectory()) {
 					q.addAll(Arrays.asList(r.listFiles()));
 				} else {
 					count++;
 				}
 			}
 			return count;
-		} catch (URISyntaxException ex) {
+		} catch(URISyntaxException ex) {
 			throw new APIException(ex);
 		}
 	}
@@ -365,7 +365,7 @@ public class DocGenUIHandler {
 				"lgname", username,
 				"lgpassword", password
 		));
-		if ("NeedToken".equals(login.getNode("/api/login/@result"))) {
+		if("NeedToken".equals(login.getNode("/api/login/@result"))) {
 			XMLDocument login2 = getXML(endpoint, mapCreator(
 					"format", "xml",
 					"action", "login",
@@ -373,8 +373,8 @@ public class DocGenUIHandler {
 					"lgpassword", password,
 					"lgtoken", login.getNode("/api/login/@token")
 			));
-			if (!"Success".equals(login2.getNode("/api/login/@result"))) {
-				if ("WrongPass".equals(login2.getNode("/api/login/@result"))) {
+			if(!"Success".equals(login2.getNode("/api/login/@result"))) {
+				if("WrongPass".equals(login2.getNode("/api/login/@result"))) {
 					throw new APIException("Wrong password.");
 				}
 				throw new APIException("Could not log in successfully.");
@@ -402,17 +402,17 @@ public class DocGenUIHandler {
 			digest.update(content.getBytes());
 			String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 			return hash;
-		} catch (NoSuchAlgorithmException ex) {
+		} catch(NoSuchAlgorithmException ex) {
 			throw new RuntimeException("An error occured while trying to hash your data", ex);
 		}
 	}
 
 	private static Map<String, String> mapCreator(String... strings) {
-		if (strings.length % 2 != 0) {
+		if(strings.length % 2 != 0) {
 			throw new Error("Only an even number of parameters may be passed to mapCreator");
 		}
 		Map<String, String> map = new HashMap<String, String>();
-		for (int i = 0; i < strings.length; i += 2) {
+		for(int i = 0; i < strings.length; i += 2) {
 			map.put(strings[i], strings[i + 1]);
 		}
 		return map;
@@ -426,16 +426,16 @@ public class DocGenUIHandler {
 	private static XMLDocument getXML(URL url, Map<String, String> params, boolean useURL) throws APIException {
 		try {
 			XMLDocument doc = new XMLDocument(getPage(url, params, useURL).getContent());
-			if (doc.nodeExists("/api/error")) {
+			if(doc.nodeExists("/api/error")) {
 				//Doh.
 				throw new APIException(doc.getNode("/api/error/@info"));
 			}
 			return doc;
-		} catch (XPathExpressionException e) {
+		} catch(XPathExpressionException e) {
 			throw new APIException(e);
-		} catch (SAXException e) {
+		} catch(SAXException e) {
 			throw new APIException(e);
-		} catch (IOException e) {
+		} catch(IOException e) {
 			throw new APIException(e);
 		}
 	}
@@ -460,9 +460,9 @@ public class DocGenUIHandler {
 	 */
 	private static HTTPResponse getPage(URL url, Map<String, String> params, boolean useURL) throws IOException {
 		Map<String, List<String>> headers = new HashMap<String, List<String>>(baseHeaders);
-		if (params != null && !params.isEmpty() && useURL) {
+		if(params != null && !params.isEmpty() && useURL) {
 			StringBuilder b = new StringBuilder(url.getQuery() == null ? "" : url.getQuery());
-			if (b.length() != 0) {
+			if(b.length() != 0) {
 				b.append("&");
 			}
 			RequestSettings temp = new RequestSettings().setParameters(params);
@@ -477,12 +477,12 @@ public class DocGenUIHandler {
 	}
 
 	public static void testCompileExamples() {
-		for (FunctionBase fb : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
-			if (fb instanceof Function) {
+		for(FunctionBase fb : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
+			if(fb instanceof Function) {
 				Function f = (Function) fb;
 				try {
 					f.examples();
-				} catch (ConfigCompileException e) {
+				} catch(ConfigCompileException e) {
 					throw new RuntimeException("Compilation error while compiling examples for " + f.getName(), e);
 				}
 			}

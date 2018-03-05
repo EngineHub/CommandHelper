@@ -16,7 +16,7 @@ public class BukkitMCFireworkType extends EnumConvertor<MCFireworkType, Firework
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCFireworkType instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCFireworkType getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCFireworkType();
 		}
 		return instance;

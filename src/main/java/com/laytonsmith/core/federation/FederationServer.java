@@ -126,7 +126,7 @@ public class FederationServer {
 	 * @throws java.io.IOException
 	 */
 	public void listenForConnections() throws IOException {
-		while (!serverSocket.isClosed()) {
+		while(!serverSocket.isClosed()) {
 			final Socket s = serverSocket.accept();
 			addSubSocket(s);
 			new Thread(new Runnable() {
@@ -153,13 +153,13 @@ public class FederationServer {
 									// period, which means the connection is taking
 									// too long. Forcibly terminate it.
 									try {
-										if (s.isConnected()) {
+										if(s.isConnected()) {
 											s.close();
 										}
-									} catch (IOException ex) {
+									} catch(IOException ex) {
 										Logger.getLogger(FederationServer.class.getName()).log(Level.SEVERE, null, ex);
 									}
-								} catch (InterruptedException ex) {
+								} catch(InterruptedException ex) {
 									// Ok, it's good. The connection may now
 									// idle without risk of being killed.
 								}
@@ -167,7 +167,7 @@ public class FederationServer {
 						}, "FederationServerConnectionWatcher-" + s.hashCode());
 						connectionWatcher.start();
 						String hello = communicator.readUnencryptedLine();
-						if (!"HELLO".equals(hello)) {
+						if(!"HELLO".equals(hello)) {
 							// Bad message. Close the socket immediately, and return.
 							s.close();
 							connectionWatcher.interrupt();
@@ -180,7 +180,7 @@ public class FederationServer {
 						try {
 							version = FederationVersion.fromVersion(sVersion);
 							communicator.writeUnencryptedLine("VERSION OK");
-						} catch (IllegalArgumentException ex) {
+						} catch(IllegalArgumentException ex) {
 							// The version is unsupported. The client is newer than this server knows how
 							// to deal with. So, write out the version error data, then close the socket and
 							// continue.
@@ -193,18 +193,18 @@ public class FederationServer {
 							return;
 						}
 						// The rest of the code may vary based on the version.
-						if (version == FederationVersion.V1_0_0) {
+						if(version == FederationVersion.V1_0_0) {
 							// Are we encrypted?
 							// TODO: This is currently unused
 							boolean isEncrypted = "1".equals(communicator.readUnencryptedLine());
 							// The rest of the data is sent possibly encrypted, so we use
 							// the normal form of the rest of these.
 							String clientPassword = communicator.readLine();
-							if (password != null) {
+							if(password != null) {
 								// If the password is required by the server, we need to
 								// verify they got it correct. If it's not required, they
 								// were going to send a line anyways.
-								if (!password.equals(clientPassword)) {
+								if(!password.equals(clientPassword)) {
 									// Oops, wrong guess, try again...
 									communicator.writeLine("ERROR");
 									byte[] errorMsg = ("Wrong password").getBytes("UTF-8");
@@ -222,7 +222,7 @@ public class FederationServer {
 
 						}
 
-					} catch (IOException ex) {
+					} catch(IOException ex) {
 						Logger.getLogger(FederationServer.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
@@ -237,12 +237,12 @@ public class FederationServer {
 	 */
 	public void checkSocketTimeouts(long inactiveMS) {
 		Iterator<Socket> it = subSockets.keySet().iterator();
-		while (it.hasNext()) {
+		while(it.hasNext()) {
 			Socket s = it.next();
-			if (subSockets.get(s) < System.currentTimeMillis() - inactiveMS) {
+			if(subSockets.get(s) < System.currentTimeMillis() - inactiveMS) {
 				try {
 					s.close();
-				} catch (IOException ex) {
+				} catch(IOException ex) {
 					Logger.getLogger(com.laytonsmith.core.functions.Federation.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				it.remove();
@@ -256,7 +256,7 @@ public class FederationServer {
 	 * @param s
 	 */
 	public void updateSocketActivity(Socket s) {
-		if (subSockets.containsKey(s)) {
+		if(subSockets.containsKey(s)) {
 			subSockets.put(s, System.currentTimeMillis());
 		}
 	}
@@ -269,13 +269,13 @@ public class FederationServer {
 	public void closeAllSockets() {
 		try {
 			serverSocket.close();
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			Logger.getLogger(FederationServer.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		for (Socket sub : subSockets.keySet()) {
+		for(Socket sub : subSockets.keySet()) {
 			try {
 				sub.close();
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				Logger.getLogger(FederationServer.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -286,7 +286,7 @@ public class FederationServer {
 	@SuppressWarnings("FinalizeDeclaration")
 	protected void finalize() throws Throwable {
 		super.finalize();
-		if (!closed) {
+		if(!closed) {
 			StreamUtils.GetSystemErr().println("FederationServer was not closed properly, and cleanup is having to be done in the finalize method!");
 			closeAllSockets();
 		}

@@ -42,7 +42,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	 * @param t
 	 */
 	public void set(Construct value, Target t) {
-		if (value instanceof CArray) {
+		if(value instanceof CArray) {
 			throw new CREFormatException("mutable_primitives can only store primitive values.", t);
 		}
 		this.value = value;
@@ -88,7 +88,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 
 	@Override
 	public long size() {
-		if (value instanceof CString) {
+		if(value instanceof CString) {
 			return ((CString) value).size();
 		} else {
 			return 0;

@@ -66,7 +66,7 @@ public class ReflectionUtils {
 			Constructor<T> c = clazz.getDeclaredConstructor(argTypes);
 			c.setAccessible(true);
 			return c.newInstance(args);
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+		} catch(InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
@@ -99,11 +99,11 @@ public class ReflectionUtils {
 	 */
 	public static Object get(Class clazz, Object instance, String variableName) throws ReflectionException {
 		try {
-			if (variableName.contains(".")) {
+			if(variableName.contains(".")) {
 				String split[] = variableName.split("\\.");
 				Object myInstance = instance;
 				Class myClazz = clazz;
-				for (String var : split) {
+				for(String var : split) {
 					myInstance = get(myClazz, myInstance, var);
 					myClazz = myInstance.getClass();
 				}
@@ -113,7 +113,7 @@ public class ReflectionUtils {
 				f.setAccessible(true);
 				return f.get(instance);
 			}
-		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
+		} catch(IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
@@ -141,13 +141,13 @@ public class ReflectionUtils {
 	public static void set(Class clazz, Object instance, String variableName, Object value) throws ReflectionException {
 		try {
 
-			if (variableName.contains(".")) {
+			if(variableName.contains(".")) {
 				String split[] = variableName.split("\\.");
 				Object myInstance = instance;
 				Class myClazz = clazz;
 				int count = 0;
-				for (String var : split) {
-					if (count == split.length - 1) {
+				for(String var : split) {
+					if(count == split.length - 1) {
 						//Only the last one needs to be set
 						break;
 					}
@@ -169,7 +169,7 @@ public class ReflectionUtils {
 				f.set(instance, value);
 
 			}
-		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
+		} catch(IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
@@ -202,8 +202,8 @@ public class ReflectionUtils {
 		Class[] argTypes;
 		{
 			List<Class> cl = new ArrayList<>();
-			for (Object o : params) {
-				if (o != null) {
+			for(Object o : params) {
+				if(o != null) {
 					cl.add(o.getClass());
 				} else {
 					//If it's null, we'll just add null, and check it below
@@ -212,27 +212,27 @@ public class ReflectionUtils {
 			}
 			argTypes = cl.toArray(new Class[cl.size()]);
 		}
-		while (c != null) {
+		while(c != null) {
 			method:
-			for (Method m : c.getDeclaredMethods()) {
-				if (methodName.equals(m.getName())) {
+			for(Method m : c.getDeclaredMethods()) {
+				if(methodName.equals(m.getName())) {
 					try {
-						if (m.getParameterTypes().length == argTypes.length) {
+						if(m.getParameterTypes().length == argTypes.length) {
 							Class[] args = m.getParameterTypes();
 							//Check to see that these arguments are subclasses
 							//of the method's parameters. If so, this is our method,
 							//otherwise, not.
-							for (int i = 0; i < argTypes.length; i++) {
+							for(int i = 0; i < argTypes.length; i++) {
 								// Null types match everything, so if argTypes[i] is null, then we
 								// don't care what the actual method type is.
-								if (argTypes[i] != null && !args[i].isAssignableFrom(argTypes[i])) {
+								if(argTypes[i] != null && !args[i].isAssignableFrom(argTypes[i])) {
 									continue method;
 								}
 							}
 							m.setAccessible(true);
 							return m.invoke(instance, params);
 						}
-					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+					} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 						throw new ReflectionException(ex);
 					}
 				}
@@ -253,12 +253,12 @@ public class ReflectionUtils {
 	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
 	public static Object invokeMethod(Object instance, String methodName) throws ReflectionException {
 		Class c = instance.getClass();
-		while (c != null) {
-			for (Method m : c.getDeclaredMethods()) {
-				if (methodName.equals(m.getName())) {
+		while(c != null) {
+			for(Method m : c.getDeclaredMethods()) {
+				if(methodName.equals(m.getName())) {
 					try {
 						return m.invoke(instance);
-					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+					} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 						throw new ReflectionException(ex);
 					}
 				}
@@ -283,7 +283,7 @@ public class ReflectionUtils {
 			Method m = clazz.getDeclaredMethod(methodName, argTypes);
 			m.setAccessible(true);
 			return m.invoke(instance, args);
-		} catch (InvocationTargetException | NoSuchMethodException | IllegalArgumentException | IllegalAccessException | SecurityException ex) {
+		} catch(InvocationTargetException | NoSuchMethodException | IllegalArgumentException | IllegalAccessException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
@@ -309,33 +309,33 @@ public class ReflectionUtils {
 	 * @param output The print stream to output to, or System.out if null.
 	 */
 	public static void PrintObjectTrace(Object instance, boolean instanceOnly, PrintStream output) {
-		if (output == null) {
+		if(output == null) {
 			output = StreamUtils.GetSystemOut();
 		}
-		if (instance == null) {
+		if(instance == null) {
 			output.println("The object is null");
 			return;
 		}
 
 		Class iClass = instance.getClass();
 		do {
-			for (Field f : iClass.getDeclaredFields()) {
-				if ((f.getModifiers() & Modifier.STATIC) > 0) {
+			for(Field f : iClass.getDeclaredFields()) {
+				if((f.getModifiers() & Modifier.STATIC) > 0) {
 					continue;
 				}
 				String value = "null";
 				try {
 					f.setAccessible(true);
 					Object o = ReflectionUtils.get(iClass, instance, f.getName());
-					if (o != null) {
+					if(o != null) {
 						value = o.toString();
 					}
-				} catch (SecurityException e) {
+				} catch(SecurityException e) {
 					value = "Could not access value due to a SecurityException";
 				}
 				output.println("(" + f.getType() + ") " + f.getName() + ": " + value);
 			}
-		} while (!instanceOnly && (iClass = iClass.getSuperclass()) != null);
+		} while(!instanceOnly && (iClass = iClass.getSuperclass()) != null);
 	}
 
 	/**
@@ -348,15 +348,15 @@ public class ReflectionUtils {
 	public static Set<Class> getAllExtensions(Class c) {
 		Set<Class> cs = new HashSet<>();
 		Class cc = c.getSuperclass();
-		while (cc != null) {
+		while(cc != null) {
 			cs.add(cc);
-			for (Class ccc : cc.getInterfaces()) {
+			for(Class ccc : cc.getInterfaces()) {
 				cs.addAll(getAllExtensions(ccc));
 			}
 			cc = cc.getSuperclass();
 
 		}
-		for (Class i : c.getInterfaces()) {
+		for(Class i : c.getInterfaces()) {
 			cs.addAll(getAllExtensions(i));
 			cs.add(i);
 		}
@@ -379,12 +379,12 @@ public class ReflectionUtils {
 		Method m;
 		try {
 			m = c.getMethod(methodName, params);
-		} catch (NoSuchMethodException ex) {
+		} catch(NoSuchMethodException ex) {
 			return false;
-		} catch (SecurityException ex) {
+		} catch(SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
-		if (returnType != null) {
+		if(returnType != null) {
 			return returnType.isAssignableFrom(m.getReturnType());
 		}
 		return true;
@@ -400,7 +400,7 @@ public class ReflectionUtils {
 		Object unsafe;
 		try {
 			unsafe = ReflectionUtils.get(Class.forName("sun.misc.Unsafe"), "theUnsafe");
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			throw new RuntimeException(ex);
 		}
 		return unsafe;

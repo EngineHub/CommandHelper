@@ -22,7 +22,7 @@ public class BukkitMCFireworkEffectMeta extends BukkitMCItemMeta implements MCFi
 	@Override
 	public MCFireworkEffect getEffect() {
 		FireworkEffect effect = fem.getEffect();
-		if (effect == null) {
+		if(effect == null) {
 			return null;
 		}
 		return new BukkitMCFireworkEffect(fem.getEffect());

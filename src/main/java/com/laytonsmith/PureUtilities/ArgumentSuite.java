@@ -60,7 +60,7 @@ public class ArgumentSuite {
 	}
 
 	private void validateModeName(String modeName) {
-		if (modeName.contains(" ")) {
+		if(modeName.contains(" ")) {
 			throw new IllegalArgumentException("The mode name may not contain a space.");
 		}
 	}
@@ -85,7 +85,7 @@ public class ArgumentSuite {
 	 * @throws IllegalArgumentException if the mode is not registered
 	 */
 	public ArgumentParser getMode(String name) {
-		if (suite.containsKey(name)) {
+		if(suite.containsKey(name)) {
 			return suite.get(name);
 		} else {
 			throw new IllegalArgumentException("No mode by the name \"" + name + "\" has been registered.");
@@ -103,19 +103,19 @@ public class ArgumentSuite {
 	public ArgumentSuiteResults match(String[] args, String defaultMode) throws ResultUseException, ValidationException {
 		String[] nonModeArgs = ArrayUtils.EMPTY_STRING_ARRAY;
 		String mode;
-		if (args.length > 1) {
+		if(args.length > 1) {
 			mode = args[0];
 			nonModeArgs = ArrayUtils.cast(ArrayUtils.slice(args, 1, args.length - 1), String[].class);
-		} else if (args.length == 1) {
+		} else if(args.length == 1) {
 			mode = args[0];
 		} else {
 			//0 argsm, use the defaultMode.
 			mode = defaultMode;
 		}
-		if (aliases.containsKey(mode)) {
+		if(aliases.containsKey(mode)) {
 			mode = aliases.get(mode);
 		}
-		if (suite.containsKey(mode)) {
+		if(suite.containsKey(mode)) {
 			return new ArgumentSuiteResults(mode, suite.get(mode), suite.get(mode).match(nonModeArgs));
 		} else {
 			throw new ResultUseException("Mode " + mode + " was not found.");
@@ -144,21 +144,21 @@ public class ArgumentSuite {
 	 */
 	public String getBuiltDescription() {
 		StringBuilder b = new StringBuilder();
-		if (description != null) {
+		if(description != null) {
 			b.append(description).append("\n\n");
 		}
 		b.append("Modes: (a mode must be the first argument) \n");
-		for (String mode : suite.keySet()) {
+		for(String mode : suite.keySet()) {
 			b.append("\t").append(TermColors.BOLD).append(mode);
-			if (aliases.containsValue(mode)) {
+			if(aliases.containsValue(mode)) {
 				List<String> keys = new ArrayList<>();
-				for (String alias : aliases.keySet()) {
-					if (aliases.get(alias).equals(mode)) {
+				for(String alias : aliases.keySet()) {
+					if(aliases.get(alias).equals(mode)) {
 						keys.add(alias);
 					}
 				}
 				b.append(TermColors.RESET).append(" (Alias");
-				if (keys.size() != 1) {
+				if(keys.size() != 1) {
 					b.append("es");
 				}
 				b.append(": ").append(StringUtils.Join(keys, ", ")).append(")");
@@ -177,12 +177,12 @@ public class ArgumentSuite {
 	 * @return
 	 */
 	public String getModeFromAlias(String alias) {
-		if (alias == null) {
+		if(alias == null) {
 			return null;
 		}
-		if (suite.containsKey(alias)) {
+		if(suite.containsKey(alias)) {
 			return alias;
-		} else if (aliases.containsKey(alias)) {
+		} else if(aliases.containsKey(alias)) {
 			return aliases.get(alias);
 		} else {
 			return null;
@@ -199,10 +199,10 @@ public class ArgumentSuite {
 	 * @return
 	 */
 	public ArgumentParser getModeFromName(String mode) {
-		if (mode == null) {
+		if(mode == null) {
 			return null;
 		}
-		if (suite.containsKey(mode)) {
+		if(suite.containsKey(mode)) {
 			return suite.get(mode);
 		} else {
 			return null;
@@ -273,28 +273,28 @@ public class ArgumentSuite {
 			ArgumentSuiteResults results = suite.match("wat", "help");
 			ArgumentParser mode = results.getMode();
 			ArgumentParserResults modeResults = results.getResults();
-			if (mode == help) {
+			if(mode == help) {
 				String modeHelp = modeResults.getStringArgument();
 				ArgumentParser selectedMode = suite.getModeFromName(suite.getModeFromAlias(modeHelp));
-				if (selectedMode != null) {
+				if(selectedMode != null) {
 					StreamUtils.GetSystemOut().println(selectedMode.getBuiltDescription());
 					System.exit(0);
 				} else {
 					showHelp(suite);
 				}
-			} else if (mode == mode1 || mode == mode2) {
+			} else if(mode == mode1 || mode == mode2) {
 				String argument;
-				if ((argument = modeResults.getStringArgument("arg1")) != null) {
+				if((argument = modeResults.getStringArgument("arg1")) != null) {
 					StreamUtils.GetSystemOut().println("You selected " + argument + " for arg1");
 				}
-				if ((argument = modeResults.getStringArgument("arg2")) != null) {
+				if((argument = modeResults.getStringArgument("arg2")) != null) {
 					StreamUtils.GetSystemOut().println("You selected " + argument + " for arg2");
 				}
 				System.exit(0);
 			}
-		} catch (ResultUseException ex) {
+		} catch(ResultUseException ex) {
 			showHelp(suite);
-		} catch (ValidationException ex) {
+		} catch(ValidationException ex) {
 			showHelp(suite);
 		}
 	}

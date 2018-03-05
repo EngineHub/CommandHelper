@@ -158,29 +158,29 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	private static Object json_encode0(Construct c, Target t) throws MarshalException {
-		if (c instanceof CString || c instanceof Command) {
+		if(c instanceof CString || c instanceof Command) {
 			return c.val();
-		} else if (c instanceof CVoid) {
+		} else if(c instanceof CVoid) {
 			return "";
-		} else if (c instanceof CInt) {
+		} else if(c instanceof CInt) {
 			return ((CInt) c).getInt();
-		} else if (c instanceof CDouble) {
+		} else if(c instanceof CDouble) {
 			return ((CDouble) c).getDouble();
-		} else if (c instanceof CBoolean) {
+		} else if(c instanceof CBoolean) {
 			return ((CBoolean) c).getBoolean();
-		} else if (c instanceof CNull) {
+		} else if(c instanceof CNull) {
 			return null;
-		} else if (c instanceof CArray) {
+		} else if(c instanceof CArray) {
 			CArray ca = (CArray) c;
-			if (!ca.inAssociativeMode()) {
+			if(!ca.inAssociativeMode()) {
 				List<Object> list = new ArrayList<Object>();
-				for (int i = 0; i < ca.size(); i++) {
+				for(int i = 0; i < ca.size(); i++) {
 					list.add(json_encode0(ca.get(i, t), t));
 				}
 				return list;
 			} else {
 				Map<String, Object> map = new HashMap<String, Object>();
-				for (String key : ca.stringKeySet()) {
+				for(String key : ca.stringKeySet()) {
 					map.put(key, json_encode0(ca.get(key, t), t));
 				}
 				return map;
@@ -199,34 +199,34 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @throws com.laytonsmith.core.exceptions.MarshalException
 	 */
 	public static Construct json_decode(String s, Target t) throws MarshalException {
-		if (s == null) {
+		if(s == null) {
 			return CNull.NULL;
 		}
-		if ("".equals(s.trim())) {
+		if("".equals(s.trim())) {
 			throw new MarshalException();
 		}
-		if (s.startsWith("{")) {
+		if(s.startsWith("{")) {
 			//Object
 			JSONObject obj = (JSONObject) JSONValue.parse(s);
 			CArray ca = CArray.GetAssociativeArray(t);
-			if (obj == null) {
+			if(obj == null) {
 				//From what I can tell, this happens when the json object is improperly formatted,
 				//so go ahead and throw an exception
 				throw new MarshalException();
 			}
-			for (Object key : obj.keySet()) {
+			for(Object key : obj.keySet()) {
 				ca.set(convertJSON(key, t),
 						convertJSON(obj.get(key), t), t);
 			}
 			return ca;
-		} else if (s.startsWith("[")) {
+		} else if(s.startsWith("[")) {
 			//It's an array
 			JSONArray array = (JSONArray) JSONValue.parse(s);
-			if (array == null) {
+			if(array == null) {
 				throw new MarshalException();
 			}
 			CArray carray = new CArray(t);
-			for (int i = 0; i < array.size(); i++) {
+			for(int i = 0; i < array.size(); i++) {
 				carray.push(convertJSON(array.get(i), t), t);
 			}
 			return carray;
@@ -234,7 +234,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			//It's a single value, but we're gonna wrap it in an array, then deconstruct it
 			s = "[" + s + "]";
 			JSONArray array = (JSONArray) JSONValue.parse(s);
-			if (array == null) {
+			if(array == null) {
 				//It's a null value
 				return CNull.NULL;
 			}
@@ -244,31 +244,31 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	private static Construct convertJSON(Object o, Target t) throws MarshalException {
-		if (o instanceof String) {
+		if(o instanceof String) {
 			return new CString((String) o, Target.UNKNOWN);
-		} else if (o instanceof Number) {
+		} else if(o instanceof Number) {
 			Number n = (Number) o;
-			if (n.longValue() == n.doubleValue()) {
+			if(n.longValue() == n.doubleValue()) {
 				//It's an int
 				return new CInt(n.longValue(), Target.UNKNOWN);
 			} else {
 				//It's a double
 				return new CDouble(n.doubleValue(), Target.UNKNOWN);
 			}
-		} else if (o instanceof Boolean) {
+		} else if(o instanceof Boolean) {
 			return CBoolean.get((Boolean) o);
-		} else if (o instanceof java.util.List) {
+		} else if(o instanceof java.util.List) {
 			java.util.List l = (java.util.List) o;
 			CArray ca = new CArray(t);
-			for (Object l1 : l) {
+			for(Object l1 : l) {
 				ca.push(convertJSON(l1, t), t);
 			}
 			return ca;
-		} else if (o == null) {
+		} else if(o == null) {
 			return CNull.NULL;
-		} else if (o instanceof java.util.Map) {
+		} else if(o instanceof java.util.Map) {
 			CArray ca = CArray.GetAssociativeArray(t);
-			for (Object key : ((java.util.Map) o).keySet()) {
+			for(Object key : ((java.util.Map) o).keySet()) {
 				ca.set(convertJSON(key, t),
 						convertJSON(((java.util.Map) o).get(key), t), t);
 			}
@@ -280,7 +280,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
 	@Override
 	public int compareTo(Construct c) {
-		if (this.value.contains(" ") || this.value.contains("\t")
+		if(this.value.contains(" ") || this.value.contains("\t")
 				|| c.value.contains(" ") || c.value.contains("\t")) {
 			return this.value.compareTo(c.value);
 		}
@@ -288,7 +288,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			Double d1 = Double.valueOf(this.value);
 			Double d2 = Double.valueOf(c.value);
 			return d1.compareTo(d2);
-		} catch (NumberFormatException e) {
+		} catch(NumberFormatException e) {
 			return this.value.compareTo(c.value);
 		}
 	}
@@ -315,12 +315,12 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @throws ClassCastException
 	 */
 	public static Construct GetConstruct(Object o, boolean allowResources) throws ClassCastException {
-		if (o == null) {
+		if(o == null) {
 			return CNull.NULL;
-		} else if (o instanceof CharSequence) {
+		} else if(o instanceof CharSequence) {
 			return new CString((CharSequence) o, Target.UNKNOWN);
-		} else if (o instanceof Number) {
-			if (o instanceof Integer || o instanceof Long || o instanceof Byte || o instanceof BigInteger
+		} else if(o instanceof Number) {
+			if(o instanceof Integer || o instanceof Long || o instanceof Byte || o instanceof BigInteger
 					|| o instanceof AtomicInteger || o instanceof Short) {
 				//integral
 				return new CInt(((Number) o).longValue(), Target.UNKNOWN);
@@ -328,21 +328,21 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 				//floating point
 				return new CDouble(((Number) o).doubleValue(), Target.UNKNOWN);
 			}
-		} else if (o instanceof Boolean) {
+		} else if(o instanceof Boolean) {
 			return CBoolean.get((Boolean) o);
-		} else if (o instanceof Map) {
+		} else if(o instanceof Map) {
 			//associative array
 			CArray a = CArray.GetAssociativeArray(Target.UNKNOWN);
 			Map m = (Map) o;
-			for (Entry<?, ?> entry : (Set<Entry<?, ?>>) m.entrySet()) {
+			for(Entry<?, ?> entry : (Set<Entry<?, ?>>) m.entrySet()) {
 				a.set(entry.getKey().toString(), GetConstruct(entry.getValue(), allowResources), Target.UNKNOWN);
 			}
 			return a;
-		} else if (o instanceof Collection) {
+		} else if(o instanceof Collection) {
 			//normal array
 			CArray a = new CArray(Target.UNKNOWN);
 			Collection l = (Collection) o;
-			for (Object obj : l) {
+			for(Object obj : l) {
 				a.push(GetConstruct(obj, allowResources), Target.UNKNOWN);
 			}
 			return a;
@@ -370,34 +370,34 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @throws ClassCastException
 	 */
 	public static Object GetPOJO(Construct c) throws ClassCastException {
-		if (c instanceof CNull) {
+		if(c instanceof CNull) {
 			return null;
-		} else if (c instanceof CString) {
+		} else if(c instanceof CString) {
 			return c.val();
-		} else if (c instanceof CBoolean) {
+		} else if(c instanceof CBoolean) {
 			return Boolean.valueOf(((CBoolean) c).getBoolean());
-		} else if (c instanceof CInt) {
+		} else if(c instanceof CInt) {
 			return Long.valueOf(((CInt) c).getInt());
-		} else if (c instanceof CDouble) {
+		} else if(c instanceof CDouble) {
 			return Double.valueOf(((CDouble) c).getDouble());
-		} else if (c instanceof CArray) {
+		} else if(c instanceof CArray) {
 			CArray ca = (CArray) c;
-			if (ca.inAssociativeMode()) {
+			if(ca.inAssociativeMode()) {
 				//SortedMap
 				SortedMap<String, Object> map = new TreeMap<>();
-				for (Entry<String, Construct> entry : ca.getAssociativeArray().entrySet()) {
+				for(Entry<String, Construct> entry : ca.getAssociativeArray().entrySet()) {
 					map.put(entry.getKey(), GetPOJO(entry.getValue()));
 				}
 				return map;
 			} else {
 				//ArrayList
 				ArrayList<Object> list = new ArrayList<Object>((int) ca.size());
-				for (Construct construct : ca.getArray()) {
+				for(Construct construct : ca.getArray()) {
 					list.add(GetPOJO(construct));
 				}
 				return list;
 			}
-		} else if (c instanceof CResource) {
+		} else if(c instanceof CResource) {
 			return ((CResource) c).getResource();
 		} else {
 			throw new ClassCastException(c.getClass().getName() + " cannot be cast to a POJO");
@@ -442,7 +442,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
 	public static CClassType typeof(Mixed that) {
 		typeof ann = that.getClass().getAnnotation(typeof.class);
-		if (ann == null) {
+		if(ann == null) {
 			throw new IllegalArgumentException();
 		}
 		return CClassType.get(ann.value());

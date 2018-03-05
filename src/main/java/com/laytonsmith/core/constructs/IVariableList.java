@@ -28,7 +28,7 @@ public class IVariableList {
 	}
 
 	public IVariable get(String name, Target t, boolean bypassAssignedCheck) {
-		if (!varList.containsKey(name)) {
+		if(!varList.containsKey(name)) {
 			this.set(new IVariable(Auto.TYPE, name, CNull.UNDEFINED, t));
 		}
 		IVariable v = varList.get(name);
@@ -37,7 +37,7 @@ public class IVariableList {
 		// and moved into the compiler. In strict mode, it will be a compiler error, in
 		// non-strict mode it will be a compiler warning.
 		// ==, not .equals
-		if (v.ival() == CNull.UNDEFINED && !bypassAssignedCheck) {
+		if(v.ival() == CNull.UNDEFINED && !bypassAssignedCheck) {
 			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, "Using undefined variable: " + name, t);
 		}
 		v.setTarget(t);
@@ -63,9 +63,9 @@ public class IVariableList {
 		StringBuilder b = new StringBuilder();
 		b.append("[");
 		boolean first = true;
-		for (Map.Entry<String, IVariable> entry : varList.entrySet()) {
+		for(Map.Entry<String, IVariable> entry : varList.entrySet()) {
 			IVariable iv = entry.getValue();
-			if (first) {
+			if(first) {
 				first = false;
 			} else {
 				b.append(", ");

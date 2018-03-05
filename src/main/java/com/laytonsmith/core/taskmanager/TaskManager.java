@@ -37,8 +37,8 @@ public class TaskManager {
 	 * @return
 	 */
 	public synchronized TaskHandler getTask(TaskType type, int id) {
-		for (TaskHandler task : getTasks()) {
-			if (task.getType().equals(type) && task.getID() == id) {
+		for(TaskHandler task : getTasks()) {
+			if(task.getType().equals(type) && task.getID() == id) {
 				return task;
 			}
 		}
@@ -53,8 +53,8 @@ public class TaskManager {
 	 * @return
 	 */
 	public synchronized TaskHandler getTask(String type, int id) {
-		for (TaskHandler task : getTasks()) {
-			if (task.getType().name().equals(type) && task.getID() == id) {
+		for(TaskHandler task : getTasks()) {
+			if(task.getType().name().equals(type) && task.getID() == id) {
 				return task;
 			}
 		}
@@ -70,7 +70,7 @@ public class TaskManager {
 	 */
 	public void killTask(TaskType type, int id) {
 		TaskHandler task = getTask(type, id);
-		if (task != null) {
+		if(task != null) {
 			task.kill();
 		}
 	}
@@ -84,7 +84,7 @@ public class TaskManager {
 	 */
 	public void killTask(String type, int id) {
 		TaskHandler task = getTask(type, id);
-		if (task != null) {
+		if(task != null) {
 			task.kill();
 		}
 	}
@@ -99,7 +99,7 @@ public class TaskManager {
 
 			@Override
 			public void taskStateChanged(TaskState from, TaskHandler task) {
-				if (task.getState().isFinalized()) {
+				if(task.getState().isFinalized()) {
 					tasks.remove(task);
 				}
 			}

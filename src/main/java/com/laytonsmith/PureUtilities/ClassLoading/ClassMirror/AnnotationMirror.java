@@ -32,10 +32,10 @@ public class AnnotationMirror implements Serializable {
 		this.type = ClassReferenceMirror.fromClass(annotation.annotationType());
 		this.visible = true;
 		values = new ArrayList<>();
-		for (Method m : annotation.annotationType().getDeclaredMethods()) {
+		for(Method m : annotation.annotationType().getDeclaredMethods()) {
 			try {
 				values.add(new AnnotationValue(m.getName(), m.invoke(annotation)));
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+			} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -60,8 +60,8 @@ public class AnnotationMirror implements Serializable {
 	 * @return
 	 */
 	public Object getValue(String forName) {
-		for (AnnotationValue value : values) {
-			if (value.name.equals(forName)) {
+		for(AnnotationValue value : values) {
+			if(value.name.equals(forName)) {
 				return value.value;
 			}
 		}
@@ -77,7 +77,7 @@ public class AnnotationMirror implements Serializable {
 	 */
 	public List<String> getDefinedValues() {
 		List<String> list = new ArrayList<>();
-		for (AnnotationValue value : values) {
+		for(AnnotationValue value : values) {
 			list.add(value.name);
 		}
 		return list;
@@ -95,7 +95,7 @@ public class AnnotationMirror implements Serializable {
 	 */
 	public Object getValueWithDefault(String forName) throws ClassNotFoundException {
 		Object value = getValue(forName);
-		if (value != null) {
+		if(value != null) {
 			return value;
 		}
 		//Nope, have to load it.
@@ -103,9 +103,9 @@ public class AnnotationMirror implements Serializable {
 		try {
 			Method m = c.getMethod(forName);
 			return m.getDefaultValue();
-		} catch (NoSuchMethodException ex) {
+		} catch(NoSuchMethodException ex) {
 			return null;
-		} catch (SecurityException ex) {
+		} catch(SecurityException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -121,7 +121,7 @@ public class AnnotationMirror implements Serializable {
 	public List<String> getDefinedValuesWithDefault() throws ClassNotFoundException {
 		List<String> ret = new ArrayList<>();
 		Class c = type.loadClass();
-		for (Method m : c.getDeclaredMethods()) {
+		for(Method m : c.getDeclaredMethods()) {
 			ret.add(m.getName());
 		}
 		return ret;
@@ -158,7 +158,7 @@ public class AnnotationMirror implements Serializable {
 	 * @throws IllegalArgumentException If AnnotationMirror doesn't represent the type requested.
 	 */
 	public <T extends Annotation> T getProxy(Class<T> type) throws IllegalArgumentException {
-		if (!this.type.getJVMName().equals(ClassUtils.getJVMName(type))) {
+		if(!this.type.getJVMName().equals(ClassUtils.getJVMName(type))) {
 			throw new IllegalArgumentException();
 		}
 
@@ -166,7 +166,7 @@ public class AnnotationMirror implements Serializable {
 
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-				if (("equals".equals(method.getName()) && matches(args, Object.class))
+				if(("equals".equals(method.getName()) && matches(args, Object.class))
 						|| ("hashCode".equals(method.getName()) && matches(args))
 						|| ("toString".equals(method.getName()) && matches(args))
 						|| ("wait".equals(method.getName()) && matches(args))
@@ -188,12 +188,12 @@ public class AnnotationMirror implements Serializable {
 	}
 
 	private static boolean matches(Object[] args, Class... types) {
-		if (args.length != types.length) {
+		if(args.length != types.length) {
 			return false;
 		}
-		for (int i = 0; i < args.length; i++) {
+		for(int i = 0; i < args.length; i++) {
 			//Can't just use == here, since the class might be a subclass
-			if (!types[i].isAssignableFrom(args[i].getClass())) {
+			if(!types[i].isAssignableFrom(args[i].getClass())) {
 				return false;
 			}
 		}
@@ -214,14 +214,14 @@ public class AnnotationMirror implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if(obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if(getClass() != obj.getClass()) {
 			return false;
 		}
 		final AnnotationMirror other = (AnnotationMirror) obj;
-		if (!Objects.equals(this.type, other.type)) {
+		if(!Objects.equals(this.type, other.type)) {
 			return false;
 		}
 		return true;
@@ -240,7 +240,7 @@ public class AnnotationMirror implements Serializable {
 
 		@Override
 		public String toString() {
-			if (value instanceof String) {
+			if(value instanceof String) {
 				return name + " = " + StringUtils.toCodeString(value.toString());
 			} else {
 				return name + " = " + value.toString();
@@ -257,17 +257,17 @@ public class AnnotationMirror implements Serializable {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (obj == null) {
+			if(obj == null) {
 				return false;
 			}
-			if (getClass() != obj.getClass()) {
+			if(getClass() != obj.getClass()) {
 				return false;
 			}
 			final AnnotationValue other = (AnnotationValue) obj;
-			if (!Objects.equals(this.name, other.name)) {
+			if(!Objects.equals(this.name, other.name)) {
 				return false;
 			}
-			if (!Objects.equals(this.value, other.value)) {
+			if(!Objects.equals(this.value, other.value)) {
 				return false;
 			}
 			return true;

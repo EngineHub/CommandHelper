@@ -45,7 +45,7 @@ public final class LogUtils {
 	 * @throws IOException
 	 */
 	public static synchronized void LoggerMessage(String filename, String message, Logger logger) throws IOException {
-		if (logger != null) {
+		if(logger != null) {
 			logger.log(Level.INFO, message);
 		}
 		LoggerMessage(filename, message);
@@ -60,7 +60,7 @@ public final class LogUtils {
 	 * @throws IOException
 	 */
 	public static synchronized void LoggerMessage(String filename, String message, PrintStream out) throws IOException {
-		if (out != null) {
+		if(out != null) {
 			out.println(message);
 		}
 		LoggerMessage(filename, message);

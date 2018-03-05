@@ -323,7 +323,7 @@ public final class Static {
 	 */
 	public static MCServer getServer() throws NotInitializedYetException {
 		MCServer s = com.laytonsmith.commandhelper.CommandHelperPlugin.myServer;
-		if (s == null) {
+		if(s == null) {
 			throw new NotInitializedYetException("The server has not been initialized yet");
 		}
 		return s;
@@ -337,7 +337,7 @@ public final class Static {
 	 */
 	public static AliasCore getAliasCore() throws NotInitializedYetException {
 		AliasCore ac = com.laytonsmith.commandhelper.CommandHelperPlugin.getCore();
-		if (ac == null) {
+		if(ac == null) {
 			throw new NotInitializedYetException("The core has not been initialized yet");
 		}
 		return ac;
@@ -351,16 +351,16 @@ public final class Static {
 	 */
 	public static SimpleVersion getVersion() throws NotInitializedYetException {
 		SimpleVersion v = null;
-		if (Implementation.GetServerType() == Implementation.Type.BUKKIT) {
+		if(Implementation.GetServerType() == Implementation.Type.BUKKIT) {
 			v = com.laytonsmith.commandhelper.CommandHelperPlugin.version;
 		} else {
 			try {
 				v = Main.loadSelfVersion();
-			} catch (Exception ex) {
+			} catch(Exception ex) {
 				//Ignored
 			}
 		}
-		if (v == null) {
+		if(v == null) {
 			throw new NotInitializedYetException("The plugin has not been initialized yet");
 		}
 		return v;
@@ -377,14 +377,14 @@ public final class Static {
 	 */
 	public static FileWriter debugLogFile(File root) throws IOException {
 		String currentFileName = root.getPath() + "/" + DateUtils.ParseCalendarNotation(Prefs.DebugLogFile());
-		if (!currentFileName.equals(debugLogFileCurrent)) {
-			if (debugLogFileHandle != null) {
+		if(!currentFileName.equals(debugLogFileCurrent)) {
+			if(debugLogFileHandle != null) {
 				//We're done with the old one, close it.
 				debugLogFileHandle.close();
 			}
 			debugLogFileCurrent = currentFileName;
 			new File(debugLogFileCurrent).getParentFile().mkdirs();
-			if (!new File(debugLogFileCurrent).exists()) {
+			if(!new File(debugLogFileCurrent).exists()) {
 				new File(debugLogFileCurrent).createNewFile();
 			}
 			debugLogFileHandle = new FileWriter(currentFileName);
@@ -396,8 +396,8 @@ public final class Static {
 
 	public static FileWriter standardLogFile(File root) throws IOException {
 		String currentFileName = root.getPath() + DateUtils.ParseCalendarNotation(Prefs.StandardLogFile());
-		if (!currentFileName.equals(standardLogFileCurrent)) {
-			if (standardLogFileHandle != null) {
+		if(!currentFileName.equals(standardLogFileCurrent)) {
+			if(standardLogFileHandle != null) {
 				//We're done with the old one, close it.
 				standardLogFileHandle.close();
 			}
@@ -412,8 +412,8 @@ public final class Static {
 
 	public static FileWriter profilingLogFile(File root) throws IOException {
 		String currentFileName = root.getPath() + DateUtils.ParseCalendarNotation(Prefs.ProfilingFile());
-		if (!currentFileName.equals(profilingLogFileCurrent)) {
-			if (profilingLogFileHandle != null) {
+		if(!currentFileName.equals(profilingLogFileCurrent)) {
+			if(profilingLogFileHandle != null) {
 				//We're done with the old one, close it.
 				profilingLogFileHandle.close();
 			}
@@ -425,7 +425,7 @@ public final class Static {
 	}
 
 	public static void checkPlugin(String name, Target t) throws ConfigRuntimeException {
-		if (Static.getServer().getPluginManager().getPlugin(name) == null) {
+		if(Static.getServer().getPluginManager().getPlugin(name) == null) {
 			throw new CREInvalidPluginException("Needed plugin " + name + " not found!", t);
 		}
 	}
@@ -452,64 +452,64 @@ public final class Static {
 	 * @throws ConfigRuntimeException If the value is a hex or binary value, but has invalid characters in it.
 	 */
 	public static Construct resolveConstruct(String val, Target t) throws ConfigRuntimeException {
-		if (val == null) {
+		if(val == null) {
 			return new CString("", t);
 		}
-		if (val.equals("true")) {
+		if(val.equals("true")) {
 			return CBoolean.TRUE;
 		}
-		if (val.equals("false")) {
+		if(val.equals("false")) {
 			return CBoolean.FALSE;
 		}
-		if (val.equals("null")) {
+		if(val.equals("null")) {
 			return CNull.NULL;
 		}
-		if (val.equals("void")) {
+		if(val.equals("void")) {
 			return CVoid.VOID;
 		}
-		if (INVALID_HEX.matcher(val).matches()) {
+		if(INVALID_HEX.matcher(val).matches()) {
 			throw new CREFormatException("Hex numbers must only contain digits 0-9, and the letters A-F, but \"" + val + "\" was found.", t);
 		}
-		if (VALID_HEX.matcher(val).matches()) {
+		if(VALID_HEX.matcher(val).matches()) {
 			//Hex number
 			return new CInt(Long.parseLong(val.substring(2), 16), t);
 		}
-		if (INVALID_BINARY.matcher(val).matches()) {
+		if(INVALID_BINARY.matcher(val).matches()) {
 			throw new CREFormatException("Binary numbers must only contain digits 0 and 1, but \"" + val + "\" was found.", t);
 		}
-		if (VALID_BINARY.matcher(val).matches()) {
+		if(VALID_BINARY.matcher(val).matches()) {
 			//Binary number
 			return new CInt(Long.parseLong(val.substring(2), 2), t);
 		}
-		if (INVALID_OCTAL.matcher(val).matches()) {
+		if(INVALID_OCTAL.matcher(val).matches()) {
 			throw new CREFormatException("Octal numbers must only contain digits 0-7, but \"" + val + "\" was found.", t);
 		}
-		if (VALID_OCTAL.matcher(val).matches()) {
+		if(VALID_OCTAL.matcher(val).matches()) {
 			return new CInt(Long.parseLong(val.substring(2), 8), t);
 		}
-		if (INVALID_DECIMAL.matcher(val).matches()) {
+		if(INVALID_DECIMAL.matcher(val).matches()) {
 			throw new CREFormatException("Decimal numbers must only contain digits, but \"" + val + "\" was found.", t);
 		}
-		if (VALID_DECIMAL.matcher(val).matches()) {
+		if(VALID_DECIMAL.matcher(val).matches()) {
 			return new CDecimal(val.substring(2), t);
 		}
 		try {
 			return new CInt(Long.parseLong(val), t);
-		} catch (NumberFormatException e) {
+		} catch(NumberFormatException e) {
 			try {
-				if (!(val.contains(" ") || val.contains("\t"))) {
+				if(!(val.contains(" ") || val.contains("\t"))) {
 					//Interesting behavior in Double.parseDouble causes it to "trim" strings first, then
 					//try to parse them, which is not desireable in our case. So, if the value contains
 					//any characters other than [\-0-9\.], we want to make it a string instead
 					return new CDouble(Double.parseDouble(val), t);
 				}
-			} catch (NumberFormatException g) {
+			} catch(NumberFormatException g) {
 				// Not a double either
 			}
 		}
 		// TODO: Once compiler environments are added, we would need to check to see if the value here is a custom
 		// type. However, as it stands, since we only support the native types, we will just hardcode the check here.
-		if (NativeTypeList.getNativeTypeList().contains(val)) {
+		if(NativeTypeList.getNativeTypeList().contains(val)) {
 			return CClassType.get(val);
 		} else {
 			return new CString(val, t);
@@ -517,12 +517,12 @@ public final class Static {
 	}
 
 	public static Construct resolveDollarVar(Construct variable, List<Variable> vars) {
-		if (variable == null) {
+		if(variable == null) {
 			return CNull.NULL;
 		}
-		if (variable.getCType() == Construct.ConstructType.VARIABLE) {
-			for (Variable var : vars) {
-				if (var.getVariableName().equals(((Variable) variable).getVariableName())) {
+		if(variable.getCType() == Construct.ConstructType.VARIABLE) {
+			for(Variable var : vars) {
+				if(var.getVariableName().equals(((Variable) variable).getVariableName())) {
 					return new CString(var.val(), var.getTarget());
 				}
 			}
@@ -539,17 +539,17 @@ public final class Static {
 	 * @param msg
 	 */
 	public static void SendMessage(final MCCommandSender m, String msg, final Target t) {
-		if (m != null && !(m instanceof MCConsoleCommandSender)) {
-			if (m instanceof MCPlayer) {
+		if(m != null && !(m instanceof MCConsoleCommandSender)) {
+			if(m instanceof MCPlayer) {
 				MCPlayer p = (MCPlayer) m;
-				if (!p.isOnline()) {
+				if(!p.isOnline()) {
 					throw new CREPlayerOfflineException("The player " + p.getName() + " is not online", t);
 				}
 			}
 			m.sendMessage(msg);
 		} else {
 			msg = Static.MCToANSIColors(msg);
-			if (msg.contains("\033")) {
+			if(msg.contains("\033")) {
 				//We have terminal colors, we need to reset them at the end
 				msg += TermColors.reset();
 			}
@@ -568,7 +568,7 @@ public final class Static {
 	public static void SendMessage(final MCCommandSender m, String msg) {
 		try {
 			SendMessage(m, msg, Target.UNKNOWN);
-		} catch (ConfigRuntimeException e) {
+		} catch(ConfigRuntimeException e) {
 			//Ignored
 		}
 	}
@@ -608,13 +608,13 @@ public final class Static {
 		short data = 0;
 		try {
 			int separatorIndex = notation.indexOf(':');
-			if (separatorIndex != -1) {
+			if(separatorIndex != -1) {
 				type = Integer.parseInt(notation.substring(0, separatorIndex));
 				data = (short) Integer.parseInt(notation.substring(separatorIndex + 1));
 			} else {
 				type = Integer.parseInt(notation);
 			}
-		} catch (NumberFormatException e) {
+		} catch(NumberFormatException e) {
 			throw new CREFormatException("Invalid item notation: " + notation, t);
 		}
 		return StaticLayer.GetItemStack(type, data, qty);
@@ -627,15 +627,15 @@ public final class Static {
 	 * @return
 	 */
 	public static String ParseItemNotation(MCItemStack is) {
-		if (is == null) {
+		if(is == null) {
 			return "0";
 		}
 		String append = null;
-		if (is.getDurability() != 0) {
+		if(is.getDurability() != 0) {
 			append = Short.toString(is.getDurability());
 		} else {
 			MCMaterialData md = is.getData();
-			if (md != null) {
+			if(md != null) {
 				append = Integer.toString(md.getData());
 			}
 		}
@@ -643,7 +643,7 @@ public final class Static {
 	}
 
 	public static String ParseItemNotation(MCBlock b) {
-		if (b == null || b.isNull()) {
+		if(b == null || b.isNull()) {
 			return "0";
 		}
 		byte data = b.getData();
@@ -663,12 +663,12 @@ public final class Static {
 	 */
 	public static UUID GetUUID(String subject, Target t) {
 		try {
-			if (subject.length() == 36) {
+			if(subject.length() == 36) {
 				return UUID.fromString(subject);
 			}
-			if (subject.length() == 32) {
+			if(subject.length() == 32) {
 				Matcher matcher = DASHLESS_PATTERN.matcher(subject);
-				if (!matcher.matches()) {
+				if(!matcher.matches()) {
 					throw new IllegalArgumentException("Invalid UUID format.");
 				}
 				return UUID.fromString(matcher.replaceAll("$1-$2-$3-$4-$5"));
@@ -676,7 +676,7 @@ public final class Static {
 				throw new CRELengthException("A UUID is expected to be 32 or 36 characters,"
 						+ " but the given string was " + subject.length() + " characters.", t);
 			}
-		} catch (IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 			throw new CREIllegalArgumentException("A UUID length string was given, but was not a valid UUID.", t);
 		}
 	}
@@ -700,13 +700,13 @@ public final class Static {
 	 */
 	public static MCOfflinePlayer GetUser(String search, Target t) {
 		MCOfflinePlayer ofp;
-		if (search.length() > 0 && search.length() <= 16) {
+		if(search.length() > 0 && search.length() <= 16) {
 			ofp = getServer().getOfflinePlayer(search);
 		} else {
 			try {
 				ofp = getServer().getOfflinePlayer(GetUUID(search, t));
-			} catch (ConfigRuntimeException cre) {
-				if (cre instanceof CRELengthException) {
+			} catch(ConfigRuntimeException cre) {
+				if(cre instanceof CRELengthException) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
 				} else {
@@ -730,17 +730,17 @@ public final class Static {
 	public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {
 		MCCommandSender m;
 
-		if (player == null) {
+		if(player == null) {
 			throw new CREPlayerOfflineException("No player was specified!", t);
 		}
 
-		if (player.length() > 0 && player.length() <= 16) {
+		if(player.length() > 0 && player.length() <= 16) {
 			m = GetCommandSender(player, t);
 		} else {
 			try {
 				m = getServer().getPlayer(GetUUID(player, t));
-			} catch (ConfigRuntimeException cre) {
-				if (cre instanceof CRELengthException) {
+			} catch(ConfigRuntimeException cre) {
+				if(cre instanceof CRELengthException) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
 				} else {
@@ -748,14 +748,14 @@ public final class Static {
 				}
 			}
 		}
-		if (m == null) {
+		if(m == null) {
 			throw new CREPlayerOfflineException("The specified player (" + player + ") is not online", t);
 		}
-		if (!(m instanceof MCPlayer)) {
+		if(!(m instanceof MCPlayer)) {
 			throw new CREPlayerOfflineException("Expecting a player name, but \"" + player + "\" was found.", t);
 		}
 		MCPlayer p = (MCPlayer) m;
-		if (!p.isOnline()) {
+		if(!p.isOnline()) {
 			throw new CREPlayerOfflineException("The specified player (" + player + ") is not online", t);
 		}
 		return p;
@@ -772,20 +772,20 @@ public final class Static {
 	 */
 	public static MCCommandSender GetCommandSender(String player, Target t) throws ConfigRuntimeException {
 		MCCommandSender m = null;
-		if (injectedPlayers.containsKey(player)) {
+		if(injectedPlayers.containsKey(player)) {
 			m = injectedPlayers.get(player);
-		} else if (consoleName.equals(player)) {
+		} else if(consoleName.equals(player)) {
 			m = Static.getServer().getConsole();
 		} else {
 			try {
 				m = Static.getServer().getPlayer(player);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				//Apparently the server can occasionally throw exceptions here, so instead of rethrowing
 				//a NPE or whatever, we'll assume that the player just isn't online, and
 				//throw a CRE instead.
 			}
 		}
-		if (m == null || (m instanceof MCPlayer && (!((MCPlayer) m).isOnline() && !injectedPlayers.containsKey(player)))) {
+		if(m == null || (m instanceof MCPlayer && (!((MCPlayer) m).isOnline() && !injectedPlayers.containsKey(player)))) {
 			throw new CREPlayerOfflineException("The specified player (" + player + ") is not online", t);
 		}
 		return m;
@@ -804,7 +804,7 @@ public final class Static {
 	 */
 	public static MCPlayer getPlayer(Environment environment, Target t) {
 		MCPlayer player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-		if (player != null) {
+		if(player != null) {
 			return player;
 		} else {
 			throw new CREPlayerOfflineException("The passed arguments induce that the function must be run by a player.", t);
@@ -834,13 +834,13 @@ public final class Static {
 	 * @return
 	 */
 	public static MCEntity getEntityByUuid(UUID id, Target t) {
-		if (injectedEntity != null && injectedEntity.getUniqueId().compareTo(id) == 0) {
+		if(injectedEntity != null && injectedEntity.getUniqueId().compareTo(id) == 0) {
 			// This entity is not in the world yet, but it was injected by the event
 			return injectedEntity;
 		}
-		for (MCWorld w : getServer().getWorlds()) {
-			for (MCEntity e : w.getEntities()) {
-				if (e.getUniqueId().compareTo(id) == 0) {
+		for(MCWorld w : getServer().getWorlds()) {
+			for(MCEntity e : w.getEntities()) {
+				if(e.getUniqueId().compareTo(id) == 0) {
 					return StaticLayer.GetCorrectEntity(e);
 				}
 			}
@@ -856,19 +856,19 @@ public final class Static {
 	 * @return
 	 */
 	public static MCLivingEntity getLivingByUUID(UUID id, Target t) {
-		if (injectedEntity != null && injectedEntity.getUniqueId().compareTo(id) == 0) {
+		if(injectedEntity != null && injectedEntity.getUniqueId().compareTo(id) == 0) {
 			// This entity is not in the world yet, but it was injected by the event
-			if (injectedEntity instanceof MCLivingEntity) {
+			if(injectedEntity instanceof MCLivingEntity) {
 				return (MCLivingEntity) injectedEntity;
 			}
 			throw new CREBadEntityException("That entity (" + id + ") is not alive.", t);
 		}
-		for (MCWorld w : Static.getServer().getWorlds()) {
-			for (MCLivingEntity e : w.getLivingEntities()) {
-				if (e.getUniqueId().compareTo(id) == 0) {
+		for(MCWorld w : Static.getServer().getWorlds()) {
+			for(MCLivingEntity e : w.getLivingEntities()) {
+				if(e.getUniqueId().compareTo(id) == 0) {
 					try {
 						return (MCLivingEntity) StaticLayer.GetCorrectEntity(e);
-					} catch (ClassCastException cce) {
+					} catch(ClassCastException cce) {
 						throw new CREBadEntityException("The entity found was misinterpreted by the converter, this is"
 								+ " a developer mistake, please file a ticket.", t);
 					}
@@ -887,10 +887,10 @@ public final class Static {
 
 		List<MCVehicle> vehicles = new ArrayList<MCVehicle>();
 
-		for (MCWorld w : Static.getServer().getWorlds()) {
-			for (MCEntity e : w.getEntities()) {
+		for(MCWorld w : Static.getServer().getWorlds()) {
+			for(MCEntity e : w.getEntities()) {
 				MCEntity entity = StaticLayer.GetCorrectEntity(e);
-				if (entity instanceof MCVehicle) {
+				if(entity instanceof MCVehicle) {
 					vehicles.add((MCVehicle) entity);
 				}
 			}
@@ -907,7 +907,7 @@ public final class Static {
 	 */
 	public static MCWorld getWorld(String name, Target t) {
 		MCWorld world = getServer().getWorld(name);
-		if (world != null) {
+		if(world != null) {
 			return world;
 		} else {
 			throw new CREInvalidWorldException("Unknown world:" + name + ".", t);
@@ -934,7 +934,7 @@ public final class Static {
 	 */
 	public static MCPlugin getPlugin(String name, Target t) {
 		MCPlugin plugin = getServer().getPluginManager().getPlugin(name);
-		if (plugin != null) {
+		if(plugin != null) {
 			return plugin;
 		} else {
 			throw new CREInvalidPluginException("Unknown plugin:" + name + ".", t);
@@ -954,10 +954,10 @@ public final class Static {
 	 * @return
 	 */
 	public static MCMetadatable getMetadatable(Construct construct, Target t) {
-		if (construct instanceof CArray) {
+		if(construct instanceof CArray) {
 			return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
-		} else if (construct instanceof CString) {
-			switch (construct.val().length()) {
+		} else if(construct instanceof CString) {
+			switch(construct.val().length()) {
 				case 32:
 				case 36:
 					return Static.getEntity(construct, t);
@@ -973,8 +973,8 @@ public final class Static {
 	public static String strJoin(Collection c, String inner) {
 		StringBuilder b = new StringBuilder();
 		Object[] o = c.toArray();
-		for (int i = 0; i < o.length; i++) {
-			if (i != 0) {
+		for(int i = 0; i < o.length; i++) {
+			if(i != 0) {
 				b.append(inner);
 			}
 			b.append(o[i]);
@@ -984,8 +984,8 @@ public final class Static {
 
 	public static String strJoin(Object[] o, String inner) {
 		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < o.length; i++) {
-			if (i != 0) {
+		for(int i = 0; i < o.length; i++) {
+			if(i != 0) {
 				b.append(inner);
 			}
 			b.append(o[i]);
@@ -1025,11 +1025,11 @@ public final class Static {
 	 */
 	public static synchronized void LogDebug(File root, String message, LogLevel level, boolean printScreen) throws IOException {
 		//If debug mode is on in the prefs, we want to log this to the screen too
-		if (Prefs.DebugMode() || Prefs.ShowWarnings() || level == LogLevel.ERROR) {
+		if(Prefs.DebugMode() || Prefs.ShowWarnings() || level == LogLevel.ERROR) {
 			String color = "";
 			Level lev = Level.INFO;
 			boolean show = false;
-			switch (level) {
+			switch(level) {
 				case ERROR:
 					color = TermColors.RED;
 					lev = Level.SEVERE;
@@ -1038,33 +1038,33 @@ public final class Static {
 				case WARNING:
 					color = TermColors.YELLOW;
 					lev = Level.WARNING;
-					if (Prefs.DebugMode() || Prefs.ShowWarnings()) {
+					if(Prefs.DebugMode() || Prefs.ShowWarnings()) {
 						show = true;
 					}
 					break;
 				case INFO:
 					color = TermColors.GREEN;
 					lev = Level.INFO;
-					if (Prefs.DebugMode()) {
+					if(Prefs.DebugMode()) {
 						show = true;
 					}
 					break;
 				case DEBUG:
 					color = TermColors.BRIGHT_BLUE;
 					lev = Level.INFO;
-					if (Prefs.DebugMode()) {
+					if(Prefs.DebugMode()) {
 						show = true;
 					}
 					break;
 				case VERBOSE:
 					color = TermColors.WHITE;
 					lev = Level.INFO;
-					if (Prefs.DebugMode()) {
+					if(Prefs.DebugMode()) {
 						show = true;
 					}
 					break;
 			}
-			if (show && printScreen) {
+			if(show && printScreen) {
 				Static.getLogger().log(lev, "{0}{1}{2}", new Object[]{color, message, TermColors.reset()});
 			}
 		}
@@ -1079,7 +1079,7 @@ public final class Static {
 
 	public static boolean hasCHPermission(String functionName, Environment env) {
 		//The * label completely overrides everything
-		if (GLOBAL_PERMISSION.equals(env.getEnv(GlobalEnv.class).GetLabel())) {
+		if(GLOBAL_PERMISSION.equals(env.getEnv(GlobalEnv.class).GetLabel())) {
 			return true;
 		}
 		MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -1123,7 +1123,7 @@ public final class Static {
 	 */
 	public static String MCToANSIColors(String mes) {
 		//Pull out the MC colors
-		if (mes == null) {
+		if(mes == null) {
 			return null;
 		}
 		return mes
@@ -1154,7 +1154,7 @@ public final class Static {
 
 	public static void InjectPlayer(MCCommandSender player) {
 		String name = player.getName();
-		if ("CONSOLE".equals(name)) {
+		if("CONSOLE".equals(name)) {
 			name = "~console";
 		}
 		injectedPlayers.put(name, player);
@@ -1168,7 +1168,7 @@ public final class Static {
 	 */
 	public static MCCommandSender UninjectPlayer(MCCommandSender player) {
 		String name = player.getName();
-		if ("CONSOLE".equals(name)) {
+		if("CONSOLE".equals(name)) {
 			name = "~console";
 		}
 		return injectedPlayers.remove(name);
@@ -1200,7 +1200,7 @@ public final class Static {
 	}
 
 	public static void AssertPlayerNonNull(MCPlayer p, Target t) throws ConfigRuntimeException {
-		if (p == null) {
+		if(p == null) {
 			throw new CREPlayerOfflineException("No player was specified!", t);
 		}
 		assert p != null;
@@ -1215,7 +1215,7 @@ public final class Static {
 	}
 
 	public static void AssertNonNull(Object var, String message) throws NullPointerException {
-		if (var == null) {
+		if(var == null) {
 			throw new NullPointerException(message);
 		}
 	}
@@ -1231,7 +1231,7 @@ public final class Static {
 	 */
 	public static Environment GenerateStandaloneEnvironment(boolean install) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		File platformFolder = MethodScriptFileLocations.getDefault().getConfigDirectory();
-		if (install) {
+		if(install) {
 			Installer.Install(platformFolder);
 		}
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
@@ -1257,8 +1257,8 @@ public final class Static {
 	 * @throws ConfigRuntimeException
 	 */
 	public static void AssertNonCNull(Target t, Construct... args) throws ConfigRuntimeException {
-		for (Construct arg : args) {
-			if (arg instanceof CNull) {
+		for(Construct arg : args) {
+			if(arg instanceof CNull) {
 				throw new CRENullPointerException("Argument was null, and nulls are not allowed.", t);
 			}
 		}
@@ -1285,21 +1285,21 @@ public final class Static {
 	 * @return
 	 */
 	public static File GetFileFromArgument(String arg, Environment env, Target t, File def) throws ConfigRuntimeException {
-		if (arg == null) {
+		if(arg == null) {
 			return def;
 		}
-		if (arg.startsWith("~")) {
+		if(arg.startsWith("~")) {
 			arg = System.getProperty("user.home") + arg.substring(1);
 		}
 		File f = new File(arg);
-		if (f.isAbsolute()) {
+		if(f.isAbsolute()) {
 			return f;
 		}
 		//Ok, it's not absolute, so we need to see if we're in cmdline mode or not.
 		//If so, we use the root directory, not the target.
-		if (env != null && InCmdLine(env)) {
+		if(env != null && InCmdLine(env)) {
 			return new File(env.getEnv(GlobalEnv.class).GetRootFolder(), arg);
-		} else if (t.file() == null) {
+		} else if(t.file() == null) {
 			throw new CREIOException("Unable to receive a non-absolute file with an unknown target", t);
 		} else {
 			return new File(t.file().getParent(), arg);
@@ -1335,10 +1335,10 @@ public final class Static {
 	 */
 	public static <T extends Construct> T AssertType(Class<T> type, Construct[] args, int argNumber, Function func, Target t) {
 		Construct value = args[argNumber];
-		if (!type.isAssignableFrom(value.getClass())) {
+		if(!type.isAssignableFrom(value.getClass())) {
 			typeof todesired = type.getAnnotation(typeof.class);
 			CClassType toactual = value.typeof();
-			if (todesired != null) {
+			if(todesired != null) {
 				throw new CRECastException("Argument " + (argNumber + 1) + " of " + func.getName() + " was expected to be a "
 						+ todesired.value() + ", but " + toactual + " \"" + value.val() + "\" was found.", t);
 			} else {
@@ -1358,92 +1358,92 @@ public final class Static {
 	 * @return
 	 */
 	public static Construct getMSObject(Object object, Target t) {
-		if (object == null) {
+		if(object == null) {
 			return CNull.NULL;
-		} else if (object instanceof Boolean) {
+		} else if(object instanceof Boolean) {
 			return CBoolean.get((boolean) object);
-		} else if ((object instanceof Byte) || (object instanceof Short) || (object instanceof Integer) || (object instanceof Long)) {
+		} else if((object instanceof Byte) || (object instanceof Short) || (object instanceof Integer) || (object instanceof Long)) {
 			return new CInt((long) object, t);
-		} else if ((object instanceof Float) || (object instanceof Double)) {
+		} else if((object instanceof Float) || (object instanceof Double)) {
 			return new CDouble((double) object, t);
-		} else if (object instanceof Character) {
+		} else if(object instanceof Character) {
 			return new CString((char) object, t);
-		} else if (object instanceof String) {
+		} else if(object instanceof String) {
 			return new CString((String) object, t);
-		} else if (object instanceof StringBuffer) {
+		} else if(object instanceof StringBuffer) {
 			return new CResource<>((StringBuffer) object, new CResource.ResourceToString() {
 				@Override
 				public String getString(CResource res) {
 					return res.getResource().toString();
 				}
 			}, t);
-		} else if (object instanceof XMLDocument) {
+		} else if(object instanceof XMLDocument) {
 			return new CResource<>((XMLDocument) object, t);
-		} else if (object instanceof Construct) {
+		} else if(object instanceof Construct) {
 			return (Construct) object;
-		} else if (object instanceof boolean[]) {
+		} else if(object instanceof boolean[]) {
 			boolean[] array = (boolean[]) object;
 			CArray r = new CArray(t);
-			for (boolean b : array) {
+			for(boolean b : array) {
 				r.push(CBoolean.get(b), t);
 			}
 			return r;
-		} else if (object instanceof byte[]) {
+		} else if(object instanceof byte[]) {
 			return CByteArray.wrap((byte[]) object, t);
-		} else if (object instanceof char[]) {
+		} else if(object instanceof char[]) {
 			char[] array = (char[]) object;
 			CArray r = new CArray(t);
-			for (char c : array) {
+			for(char c : array) {
 				r.push(new CString(c, t), t);
 			}
 			return r;
-		} else if (object instanceof short[]) {
+		} else if(object instanceof short[]) {
 			short[] array = (short[]) object;
 			CArray r = new CArray(t);
-			for (short s : array) {
+			for(short s : array) {
 				r.push(new CInt(s, t), t);
 			}
 			return r;
-		} else if (object instanceof int[]) {
+		} else if(object instanceof int[]) {
 			int[] array = (int[]) object;
 			CArray r = new CArray(t);
-			for (int i : array) {
+			for(int i : array) {
 				r.push(new CInt(i, t), t);
 			}
 			return r;
-		} else if (object instanceof long[]) {
+		} else if(object instanceof long[]) {
 			long[] array = (long[]) object;
 			CArray r = new CArray(t);
-			for (long l : array) {
+			for(long l : array) {
 				r.push(new CInt(l, t), t);
 			}
 			return r;
-		} else if (object instanceof float[]) {
+		} else if(object instanceof float[]) {
 			float[] array = (float[]) object;
 			CArray r = new CArray(t);
-			for (float f : array) {
+			for(float f : array) {
 				r.push(new CDouble(f, t), t);
 			}
 			return r;
-		} else if (object instanceof double[]) {
+		} else if(object instanceof double[]) {
 			double[] array = (double[]) object;
 			CArray r = new CArray(t);
-			for (double d : array) {
+			for(double d : array) {
 				r.push(new CDouble(d, t), t);
 			}
 			return r;
-		} else if (object instanceof Object[]) {
+		} else if(object instanceof Object[]) {
 			CArray r = new CArray(t);
-			for (Object o : (Object[]) object) {
+			for(Object o : (Object[]) object) {
 				r.push((o == object) ? r : getMSObject(o, t), t);
 			}
 			return r;
-		} else if (object instanceof Collection) {
+		} else if(object instanceof Collection) {
 			return getMSObject(((Collection) object).toArray(), t);
-		} else if (object instanceof Map) {
+		} else if(object instanceof Map) {
 			Map map = ((Map) object);
 			CArray r = new CArray(t);
-			for (Object key : map.keySet()) {
+			for(Object key : map.keySet()) {
 				Object o = map.get(key);
 				r.set(key.toString(), (o == object) ? r : getMSObject(o, t), t);
 			}
@@ -1460,27 +1460,27 @@ public final class Static {
 	 * @return
 	 */
 	public static Object getJavaObject(Construct construct) {
-		if ((construct == null) || (construct instanceof CNull)) {
+		if((construct == null) || (construct instanceof CNull)) {
 			return null;
-		} else if (construct instanceof CVoid) {
+		} else if(construct instanceof CVoid) {
 			return "";
-		} else if (construct instanceof CBoolean) {
+		} else if(construct instanceof CBoolean) {
 			return ((CBoolean) construct).getBoolean();
-		} else if (construct instanceof CInt) {
+		} else if(construct instanceof CInt) {
 			return ((CInt) construct).getInt();
-		} else if (construct instanceof CDouble) {
+		} else if(construct instanceof CDouble) {
 			return ((CDouble) construct).getDouble();
-		} else if (construct instanceof CString) {
+		} else if(construct instanceof CString) {
 			return construct.val();
-		} else if (construct instanceof CByteArray) {
+		} else if(construct instanceof CByteArray) {
 			return ((CByteArray) construct).asByteArrayCopy();
-		} else if (construct instanceof CResource) {
+		} else if(construct instanceof CResource) {
 			return ((CResource) construct).getResource();
-		} else if (construct instanceof CArray) {
+		} else if(construct instanceof CArray) {
 			CArray array = (CArray) construct;
-			if (array.isAssociative()) {
+			if(array.isAssociative()) {
 				HashMap<String, Object> map = new HashMap<>();
-				for (Construct key : array.keySet()) {
+				for(Construct key : array.keySet()) {
 					Construct c = array.get(key.val(), Target.UNKNOWN);
 					map.put(key.val(), (c == array) ? map : getJavaObject(c));
 				}
@@ -1489,20 +1489,20 @@ public final class Static {
 				Object[] a = new Object[(int) array.size()];
 				boolean nullable = false;
 				Class<?> clazz = null;
-				for (int i = 0; i < array.size(); i++) {
+				for(int i = 0; i < array.size(); i++) {
 					Construct c = array.get(i, Target.UNKNOWN);
-					if (c == array) {
+					if(c == array) {
 						a[i] = a;
 					} else {
 						a[i] = getJavaObject(array.get(i, Target.UNKNOWN));
 					}
-					if (a[i] != null) {
-						if (clazz == null) {
+					if(a[i] != null) {
+						if(clazz == null) {
 							clazz = a[i].getClass();
-						} else if (!clazz.equals(Object.class)) {
+						} else if(!clazz.equals(Object.class)) {
 							//to test if it is possible to return something more specific than Object[]
 							Class<?> cl = a[i].getClass();
-							while (!clazz.isAssignableFrom(cl)) {
+							while(!clazz.isAssignableFrom(cl)) {
 								clazz = clazz.getSuperclass();
 							}
 						}
@@ -1510,23 +1510,23 @@ public final class Static {
 						nullable = true;
 					}
 				}
-				if ((clazz != null) && (!clazz.equals(Object.class))) {
-					if (clazz.equals(Boolean.class) && !nullable) {
+				if((clazz != null) && (!clazz.equals(Object.class))) {
+					if(clazz.equals(Boolean.class) && !nullable) {
 						boolean[] r = new boolean[a.length];
-						for (int i = 0; i < a.length; i++) {
+						for(int i = 0; i < a.length; i++) {
 							r[i] = (boolean) a[i];
 						}
 						return r;
 					}
-					if (clazz.equals(Long.class) && !nullable) {
+					if(clazz.equals(Long.class) && !nullable) {
 						long[] r = new long[a.length];
-						for (int i = 0; i < a.length; i++) {
+						for(int i = 0; i < a.length; i++) {
 							r[i] = (long) a[i];
 						}
 						return r;
-					} else if (clazz.equals(Double.class) && !nullable) {
+					} else if(clazz.equals(Double.class) && !nullable) {
 						double[] r = new double[a.length];
-						for (int i = 0; i < a.length; i++) {
+						for(int i = 0; i < a.length; i++) {
 							r[i] = (double) a[i];
 						}
 						return r;
@@ -1551,8 +1551,8 @@ public final class Static {
 	 * @return
 	 */
 	public static Locale GetLocale(String fromLocaleString) {
-		for (Locale loc : Locale.getAvailableLocales()) {
-			if (loc.toString().toLowerCase().equals(fromLocaleString.toLowerCase())) {
+		for(Locale loc : Locale.getAvailableLocales()) {
+			if(loc.toString().toLowerCase().equals(fromLocaleString.toLowerCase())) {
 				return loc;
 			}
 		}

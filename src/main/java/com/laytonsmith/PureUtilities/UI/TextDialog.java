@@ -55,7 +55,7 @@ public class TextDialog extends javax.swing.JDialog {
 		HTMLEditorKit editorKit = (HTMLEditorKit) inputDialog.getEditorKit();
 		try {
 			editorKit.insertHTML(doc, doc.getLength(), "<html>" + text + "</html>", 0, 0, null);
-		} catch (BadLocationException | IOException ex) {
+		} catch(BadLocationException | IOException ex) {
 			Logger.getLogger(TextDialog.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		inputDialog.setCaretPosition(0);
@@ -63,9 +63,9 @@ public class TextDialog extends javax.swing.JDialog {
 
 			@Override
 			public void hyperlinkUpdate(HyperlinkEvent e) {
-				if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+				if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
 					URL url = e.getURL();
-					if (url == null) {
+					if(url == null) {
 						// This is an internal link. The url will be null if the url
 						// is "invalid", which also includes anchor links. In order
 						// to work around this, we have to get messy and use some
@@ -75,14 +75,14 @@ public class TextDialog extends javax.swing.JDialog {
 						Enumeration enu = clicked.getAttributes().getAttributeNames();
 						Object[] attr = (Object[]) ReflectionUtils.get(enu.getClass(), enu, "attr");
 						String link = null;
-						for (Object item : attr) {
-							if (item instanceof SimpleAttributeSet) {
+						for(Object item : attr) {
+							if(item instanceof SimpleAttributeSet) {
 								SimpleAttributeSet tag = (SimpleAttributeSet) item;
 								@SuppressWarnings("UseOfObsoleteCollectionType")
 								Hashtable table = (Hashtable) ReflectionUtils.get(tag.getClass(), tag, "table");
-								for (Object key : table.keySet()) {
-									if (key instanceof HTML.Attribute) {
-										if ("href".equals(((HTML.Attribute) key).toString())) {
+								for(Object key : table.keySet()) {
+									if(key instanceof HTML.Attribute) {
+										if("href".equals(((HTML.Attribute) key).toString())) {
 											link = (String) table.get(key);
 											break;
 										}
@@ -91,10 +91,10 @@ public class TextDialog extends javax.swing.JDialog {
 								break;
 							}
 						}
-						if (link != null) {
+						if(link != null) {
 							String id = link.substring(1);
 							Element elem = doc.getElement(id);
-							if (elem != null) {
+							if(elem != null) {
 								inputDialog.setCaretPosition(elem.getStartOffset());
 								inputDialog.scrollToReference(id);
 							}
@@ -103,7 +103,7 @@ public class TextDialog extends javax.swing.JDialog {
 						try {
 							// It's an external link
 							UIUtils.openWebpage(url);
-						} catch (IOException | URISyntaxException ex) {
+						} catch(IOException | URISyntaxException ex) {
 							Logger.getLogger(TextDialog.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}

@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -21,56 +19,56 @@ import org.junit.Test;
  */
 public class RegexTest {
 
-    public RegexTest() {
-    }
+	public RegexTest() {
+	}
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
+	@BeforeClass
+	public static void setUpClass() throws Exception {
+	}
 
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
+	@AfterClass
+	public static void tearDownClass() throws Exception {
+	}
 
-    @Before
-    public void setUp() {
-    }
+	@Before
+	public void setUp() {
+	}
 
-    @After
-    public void tearDown() {
-    }
+	@After
+	public void tearDown() {
+	}
 
-    @Test(timeout = 10000)
-    public void testRegMatch() throws Exception {
-        assertEquals("{0: word}", SRun("reg_match('word', 'This is a word')", null));
-        assertEquals("{}", SRun("reg_match('word', 'This is an airplane')", null));
-        assertEquals("{0: word, 1: word}", SRun("reg_match('(word)', 'This is a word')", null));
-        assertEquals("{0: This is a word, 1: word}", SRun("reg_match('This is a (word)', 'This is a word')", null));
-        assertEquals("{0: WORD}", SRun("reg_match(array(word, i), 'THIS IS A WORD')", null));
-        try {
-            SRun("reg_match(array(word, l), hi)", null);
-            fail();
-        } catch (ConfigRuntimeException e) {
-            //Pass
-        }
-    }
+	@Test(timeout = 10000)
+	public void testRegMatch() throws Exception {
+		assertEquals("{0: word}", SRun("reg_match('word', 'This is a word')", null));
+		assertEquals("{}", SRun("reg_match('word', 'This is an airplane')", null));
+		assertEquals("{0: word, 1: word}", SRun("reg_match('(word)', 'This is a word')", null));
+		assertEquals("{0: This is a word, 1: word}", SRun("reg_match('This is a (word)', 'This is a word')", null));
+		assertEquals("{0: WORD}", SRun("reg_match(array(word, i), 'THIS IS A WORD')", null));
+		try {
+			SRun("reg_match(array(word, l), hi)", null);
+			fail();
+		} catch(ConfigRuntimeException e) {
+			//Pass
+		}
+	}
 
-    @Test(timeout = 10000)
-    public void testRegMatchAll() throws Exception {
-        assertEquals("{{0: This is a word, 1: word}, {0: This is a word, 1: word}}", SRun("reg_match_all('This is a (word)', 'word, This is a word, This is a word')", null));
-        assertEquals("{}", SRun("reg_match_all('word', 'yay')", null));
-    }
+	@Test(timeout = 10000)
+	public void testRegMatchAll() throws Exception {
+		assertEquals("{{0: This is a word, 1: word}, {0: This is a word, 1: word}}", SRun("reg_match_all('This is a (word)', 'word, This is a word, This is a word')", null));
+		assertEquals("{}", SRun("reg_match_all('word', 'yay')", null));
+	}
 
-    @Test(timeout = 10000)
-    public void testRegReplace() throws Exception {
-        assertEquals("word", SRun("reg_replace('This is a (word)', '$1', 'This is a word')", null));
-        assertEquals("It's a wordy day!", SRun("reg_replace('sunn', 'word', 'It\\'s a sunny day!')", null));
-    }
+	@Test(timeout = 10000)
+	public void testRegReplace() throws Exception {
+		assertEquals("word", SRun("reg_replace('This is a (word)', '$1', 'This is a word')", null));
+		assertEquals("It's a wordy day!", SRun("reg_replace('sunn', 'word', 'It\\'s a sunny day!')", null));
+	}
 
-    @Test(timeout = 10000)
-    public void testRegSplit() throws Exception {
-        assertEquals("{one, two, three}", SRun("reg_split('\\\\|', 'one|two|three')", null));
-    }
+	@Test(timeout = 10000)
+	public void testRegSplit() throws Exception {
+		assertEquals("{one, two, three}", SRun("reg_split('\\\\|', 'one|two|three')", null));
+	}
 
 	@Test
 	public void testRegSplitLimit0() throws Exception {
@@ -87,27 +85,27 @@ public class RegexTest {
 		assertEquals("{a, b, c3d}", SRun("reg_split('\\\\d', 'a1b2c3d', 2)", null));
 	}
 
-    @Test(timeout = 10000)
-    public void testRegCount() throws Exception {
-        assertEquals("3", SRun("reg_count('/', '///yay')", null));
-        assertEquals("0", SRun("reg_count('poppycock', 'tiddly winks')", null));
-    }
+	@Test(timeout = 10000)
+	public void testRegCount() throws Exception {
+		assertEquals("3", SRun("reg_count('/', '///yay')", null));
+		assertEquals("0", SRun("reg_count('poppycock', 'tiddly winks')", null));
+	}
 
-    //Here, it's a compile error, since we're using it statically
-    @Test(expected=ConfigCompileException.class)
-    public void testRegFailureStatic() throws Exception{
-        MethodScriptCompiler.compile(MethodScriptCompiler.lex("reg_match('(?i)asd(', 'irrelevant')", null, true));
-    }
+	//Here, it's a compile error, since we're using it statically
+	@Test(expected = ConfigCompileException.class)
+	public void testRegFailureStatic() throws Exception {
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex("reg_match('(?i)asd(', 'irrelevant')", null, true));
+	}
 
-    //Here, it's a runtime error, since we're using it dynamically
-    @Test(expected=ConfigRuntimeException.class)
-    public void testRegFailureDynamic() throws Exception{
-        SRun("assign(@a, '(?i)asd(') reg_match(@a, 'irrelevant')", null);
-    }
+	//Here, it's a runtime error, since we're using it dynamically
+	@Test(expected = ConfigRuntimeException.class)
+	public void testRegFailureDynamic() throws Exception {
+		SRun("assign(@a, '(?i)asd(') reg_match(@a, 'irrelevant')", null);
+	}
 
 	@Test
 	public void testNamedCaptures1() throws Exception {
-		if(!hasNamedCaptureCapability()){
+		if(!hasNamedCaptureCapability()) {
 			return;
 		}
 		assertEquals("123", SRun("reg_match('abc(?<foo>\\\\d+)(xyz)', 'abc123xyz')['foo']", null));
@@ -115,7 +113,7 @@ public class RegexTest {
 
 	@Test
 	public void testNamedCaptures2() throws Exception {
-		if(!hasNamedCaptureCapability()){
+		if(!hasNamedCaptureCapability()) {
 			return;
 		}
 		assertEquals("123", SRun("reg_match_all('abc(?<foo>\\\\d+)(xyz)', 'abc123xyzabc456xyz')[0]['foo']", null));
@@ -124,7 +122,7 @@ public class RegexTest {
 
 	@Test
 	public void testNamedCaptures3() throws Exception {
-		if(!hasNamedCaptureCapability()){
+		if(!hasNamedCaptureCapability()) {
 			return;
 		}
 		assertEquals("123", SRun("reg_match('abc(?<foo>\\\\d+)def\\\\k<foo>', 'abc123def123')['foo']", null));
@@ -132,7 +130,7 @@ public class RegexTest {
 
 	@Test
 	public void testNamedCaptures4() throws Exception {
-		if(!hasNamedCaptureCapability()){
+		if(!hasNamedCaptureCapability()) {
 			return;
 		}
 		assertEquals("123", SRun("reg_replace('abc(?<foo>\\\\d+)', '${foo}', 'abc123')", null));
@@ -144,13 +142,13 @@ public class RegexTest {
 		SRun("reg_match_all('(?<=@)[^@]*', '@@@@')", null);
 	}
 
-	public static boolean hasNamedCaptureCapability(){
+	public static boolean hasNamedCaptureCapability() {
 		try {
 			Matcher.class.getMethod("group", String.class);
 			return true;
-		} catch (NoSuchMethodException ex) {
+		} catch(NoSuchMethodException ex) {
 			return false;
-		} catch (SecurityException ex) {
+		} catch(SecurityException ex) {
 			throw new Error(ex);
 		}
 	}

@@ -74,7 +74,7 @@ public class BukkitInventoryEvents {
 		@Override
 		public List<MCHumanEntity> getViewers() {
 			List<MCHumanEntity> viewers = new ArrayList<>();
-			for (HumanEntity viewer : event.getViewers()) {
+			for(HumanEntity viewer : event.getViewers()) {
 				viewers.add(new BukkitMCHumanEntity(viewer));
 			}
 			return viewers;
@@ -227,7 +227,7 @@ public class BukkitInventoryEvents {
 
 		@Override
 		public void setCurrentItem(MCItemStack slot) {
-			if (slot != null) {
+			if(slot != null) {
 				ic.setCurrentItem(((BukkitMCItemStack) slot).asItemStack());
 			} else {
 				ic.setCurrentItem(null);
@@ -264,7 +264,7 @@ public class BukkitInventoryEvents {
 		public Map<Integer, MCItemStack> getNewItems() {
 			Map<Integer, MCItemStack> ret = new HashMap<>();
 
-			for (Map.Entry<Integer, ItemStack> ni : id.getNewItems().entrySet()) {
+			for(Map.Entry<Integer, ItemStack> ni : id.getNewItems().entrySet()) {
 				Integer key = ni.getKey();
 				ItemStack value = ni.getValue();
 				ret.put(key, new BukkitMCItemStack(value));
@@ -275,7 +275,7 @@ public class BukkitInventoryEvents {
 		@Override
 		public Set<Integer> getRawSlots() {
 			Set<Integer> ret = new HashSet<>();
-			for (Integer rs : id.getRawSlots()) {
+			for(Integer rs : id.getRawSlots()) {
 				ret.add(rs);
 			}
 			return ret;
@@ -284,7 +284,7 @@ public class BukkitInventoryEvents {
 		@Override
 		public Set<Integer> getInventorySlots() {
 			Set<Integer> ret = new HashSet<>();
-			for (Integer is : id.getInventorySlots()) {
+			for(Integer is : id.getInventorySlots()) {
 				ret.add(is);
 			}
 			return ret;
@@ -333,7 +333,7 @@ public class BukkitInventoryEvents {
 		@Override
 		public Map<MCEnchantment, Integer> getEnchantsToAdd() {
 			Map<MCEnchantment, Integer> ret = new HashMap<>();
-			for (Map.Entry<Enchantment, Integer> ea : ei.getEnchantsToAdd().entrySet()) {
+			for(Map.Entry<Enchantment, Integer> ea : ei.getEnchantsToAdd().entrySet()) {
 				Enchantment key = ea.getKey();
 				Integer value = ea.getValue();
 				ret.put(new BukkitMCEnchantment(key), value);
@@ -353,7 +353,7 @@ public class BukkitInventoryEvents {
 //			}
 			Map<Enchantment, Integer> enchantments = new HashMap<>();
 
-			for (Map.Entry<MCEnchantment, Integer> ea : enchants.entrySet()) {
+			for(Map.Entry<MCEnchantment, Integer> ea : enchants.entrySet()) {
 				MCEnchantment key = ea.getKey();
 				Integer value = ea.getValue();
 				enchantments.put(((BukkitMCEnchantment) key).asEnchantment(), value);

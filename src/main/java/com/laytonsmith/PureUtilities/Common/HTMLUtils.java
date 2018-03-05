@@ -8,8 +8,8 @@ public class HTMLUtils {
 	/**
 	 * Given a raw string, escapes html special characters. For instance, turning &lt; into &amp;lt;
 	 * <!-- for those reading the javadoc directly in code, that's: -->
-	 * <!-- < into &lt; -->
-	 * @
+	 * <!-- < into &lt; --> @
+	 *
 	 *
 	 * param raw
 	 * @return
@@ -28,6 +28,7 @@ public class HTMLUtils {
 	 * <!-- &lt; into < --> @param ht
 	 *
 	 * ml
+	 *
 	 * @return
 	 */
 	public static String unescapeHTML(String html) {

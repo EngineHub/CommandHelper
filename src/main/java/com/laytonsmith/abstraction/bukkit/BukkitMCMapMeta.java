@@ -15,7 +15,7 @@ public class BukkitMCMapMeta extends BukkitMCItemMeta implements MCMapMeta {
 
 	@Override
 	public MCColor getColor() {
-		if (mm.hasColor()) {
+		if(mm.hasColor()) {
 			return BukkitMCColor.GetMCColor(mm.getColor());
 		}
 		return null;

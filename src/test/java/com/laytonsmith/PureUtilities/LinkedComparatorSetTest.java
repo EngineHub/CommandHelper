@@ -11,30 +11,31 @@ import org.junit.Test;
 
 /**
  *
- * 
+ *
  */
 public class LinkedComparatorSetTest {
-	
+
 	public LinkedComparatorSetTest() {
 	}
-	
+
 	@BeforeClass
 	public static void setUpClass() {
 	}
-	
+
 	@AfterClass
 	public static void tearDownClass() {
 	}
-	
+
 	@Before
 	public void setUp() {
 	}
-	
+
 	@After
 	public void tearDown() {
 	}
 
-	@Test public void testCreation(){
+	@Test
+	public void testCreation() {
 		assertArrayEquals(new Object[]{"b", "a"}, new LinkedComparatorSet<Object>(Arrays.asList(new Object[]{"b", "B", "a"}), new LinkedComparatorSet.EqualsComparator() {
 
 			@Override
@@ -43,8 +44,9 @@ public class LinkedComparatorSetTest {
 			}
 		}).toArray());
 	}
-	
-	@Test public void testInsertion(){
+
+	@Test
+	public void testInsertion() {
 		Object[] expected = new Object[]{"A"};
 		Set<Object> set = new LinkedComparatorSet<Object>(new LinkedComparatorSet.EqualsComparator() {
 

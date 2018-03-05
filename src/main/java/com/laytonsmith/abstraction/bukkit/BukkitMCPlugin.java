@@ -14,7 +14,7 @@ public class BukkitMCPlugin implements MCPlugin {
 
 	public BukkitMCPlugin(AbstractionObject a) {
 		this((Plugin) null);
-		if (a instanceof MCPlugin) {
+		if(a instanceof MCPlugin) {
 			this.p = ((Plugin) a.getHandle());
 		} else {
 			throw new ClassCastException();
@@ -33,7 +33,7 @@ public class BukkitMCPlugin implements MCPlugin {
 
 	@Override
 	public boolean isInstanceOf(Class c) {
-		if (c.isInstance(p)) {
+		if(c.isInstance(p)) {
 			return true;
 		}
 		return false;

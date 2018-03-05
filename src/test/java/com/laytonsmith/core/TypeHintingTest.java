@@ -5,22 +5,22 @@ import org.junit.Before;
 
 /**
  *
- * 
+ *
  */
-public class TypeHintingTest {   
-    
-    public TypeHintingTest() {
-    }
-    
-    @Before
-    public void setUp() {
-    }
-    
-    @After
-    public void tearDown() {
-    }
-    
-    //Meh. I'll re-investigate this later maybe. It may not be very helpful.
+public class TypeHintingTest {
+
+	public TypeHintingTest() {
+	}
+
+	@Before
+	public void setUp() {
+	}
+
+	@After
+	public void tearDown() {
+	}
+
+	//Meh. I'll re-investigate this later maybe. It may not be very helpful.
 //    @Test public void testSimpleCase1(){
 //        assertTrue(TypeHinting.Generate(STRING).matches(STRING));
 //    }

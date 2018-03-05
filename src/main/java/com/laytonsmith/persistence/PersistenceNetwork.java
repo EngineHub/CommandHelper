@@ -37,8 +37,8 @@ public class PersistenceNetwork {
 	}
 
 	private static File ensureCreated(File f) throws IOException {
-		if (!f.exists()) {
-			if (f.getParentFile() != null) {
+		if(!f.exists()) {
+			if(f.getParentFile() != null) {
 				f.getParentFile().mkdirs();
 			}
 			f.createNewFile();
@@ -155,15 +155,15 @@ public class PersistenceNetwork {
 		Set<URI> uris = filter.getAllConnections(namespace);
 
 		Map<String[], String> map = new HashMap<String[], String>();
-		for (URI uri : uris) {
+		for(URI uri : uris) {
 			Map<String[], String> db = getDataSource(uri).getValues(namespace);
 			//We have to loop through and make sure that this key should actually
 			//come from this connection. It may not, if there are "hidden" keys.
 			//The easiest way to do so is to ask the filter if this key == this uri.
 			//The .get here isn't terribly inefficient, because in this case it won't actually
 			//poll the data source.
-			for (String[] key : db.keySet()) {
-				if (filter.getConnection(key).equals(uri)) {
+			for(String[] key : db.keySet()) {
+				if(filter.getConnection(key).equals(uri)) {
 					map.put(key, db.get(key));
 				}
 			}

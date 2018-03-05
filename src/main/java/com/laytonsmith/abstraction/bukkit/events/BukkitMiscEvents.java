@@ -138,10 +138,10 @@ public class BukkitMiscEvents {
 			Set<MCPlayer> players = new HashSet<>();
 			try {
 				Iterator<Player> iterator = slp.iterator();
-				while (iterator.hasNext()) {
+				while(iterator.hasNext()) {
 					players.add(new BukkitMCPlayer(iterator.next()));
 				}
-			} catch (UnsupportedOperationException ex) {
+			} catch(UnsupportedOperationException ex) {
 				// not implemented, ignore
 			}
 			return players;
@@ -150,17 +150,17 @@ public class BukkitMiscEvents {
 		@Override
 		public void setPlayers(Collection<MCPlayer> players) {
 			Set<Player> ps = new HashSet<>();
-			for (MCPlayer player : players) {
+			for(MCPlayer player : players) {
 				ps.add((Player) player.getHandle());
 			}
 			try {
 				Iterator<Player> iterator = slp.iterator();
-				while (iterator.hasNext()) {
-					if (!ps.contains(iterator.next())) {
+				while(iterator.hasNext()) {
+					if(!ps.contains(iterator.next())) {
 						iterator.remove();
 					}
 				}
-			} catch (UnsupportedOperationException ex) {
+			} catch(UnsupportedOperationException ex) {
 				// not implemented, ignore
 			}
 		}

@@ -20,7 +20,7 @@ public class Federation {
 	 * @return
 	 */
 	public static Federation GetFederation() {
-		if (defaultFederation == null) {
+		if(defaultFederation == null) {
 			defaultFederation = new Federation();
 
 		}
@@ -212,7 +212,7 @@ public class Federation {
 	 * @param port the port to check for availability
 	 */
 	public static boolean available(int port) {
-		if (port < 0 || port > 65535) {
+		if(port < 0 || port > 65535) {
 			throw new IllegalArgumentException("Invalid start port: " + port);
 		}
 
@@ -224,16 +224,16 @@ public class Federation {
 			ds = new DatagramSocket(port);
 			ds.setReuseAddress(true);
 			return true;
-		} catch (IOException e) {
+		} catch(IOException e) {
 		} finally {
-			if (ds != null) {
+			if(ds != null) {
 				ds.close();
 			}
 
-			if (ss != null) {
+			if(ss != null) {
 				try {
 					ss.close();
-				} catch (IOException e) {
+				} catch(IOException e) {
 					/* should not be thrown */
 				}
 			}

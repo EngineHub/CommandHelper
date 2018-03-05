@@ -56,7 +56,7 @@ public class PluginMeta {
 			MCPluginMeta meta = StaticLayer.GetConvertor().GetPluginMeta();
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
-			if (args.length == 3) {
+			if(args.length == 3) {
 				offset = 1;
 				p = Static.GetPlayer(args[0], t);
 			}
@@ -114,7 +114,7 @@ public class PluginMeta {
 
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
-			if (args.length == 3) {
+			if(args.length == 3) {
 				offset = 1;
 				p = Static.GetPlayer(args[0], t);
 			}
@@ -170,13 +170,13 @@ public class PluginMeta {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
-			if (messenger == null) {
+			if(messenger == null) {
 				throw new CRENotFoundException(
 						"Could not find the internal Messenger object (are you running in cmdline mode?)", t);
 			}
 			String channel = args[0].toString();
 
-			if (!messenger.isIncomingChannelRegistered(channel)) {
+			if(!messenger.isIncomingChannelRegistered(channel)) {
 				messenger.registerIncomingPluginChannel(channel);
 			} else {
 				throw new CREPluginChannelException("The channel '" + channel + "' is already registered.", t);
@@ -228,13 +228,13 @@ public class PluginMeta {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
-			if (messenger == null) {
+			if(messenger == null) {
 				throw new CRENotFoundException(
 						"Could not find the internal Messenger object (are you running in cmdline mode?)", t);
 			}
 			String channel = args[0].toString();
 
-			if (messenger.isIncomingChannelRegistered(channel)) {
+			if(messenger.isIncomingChannelRegistered(channel)) {
 				messenger.unregisterIncomingPluginChannel(channel);
 			} else {
 				throw new CREPluginChannelException("The channel '" + channel + "' is not registered.", t);
@@ -285,7 +285,7 @@ public class PluginMeta {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
-			if (messenger == null) {
+			if(messenger == null) {
 				throw new CRENotFoundException(
 						"Could not find the internal Messenger object (are you running in cmdline mode?)", t);
 			}
@@ -335,14 +335,14 @@ public class PluginMeta {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCMessenger messenger = Static.getServer().getMessenger();
-			if (messenger == null) {
+			if(messenger == null) {
 				throw new CRENotFoundException(
 						"Could not find the internal Messenger object (are you running in cmdline mode?)", t);
 			}
 			Set<String> chans = messenger.getIncomingChannels();
 			CArray arr = new CArray(t);
 
-			for (String chan : chans) {
+			for(String chan : chans) {
 				arr.push(new CString(chan, t), t);
 			}
 

@@ -26,22 +26,22 @@ public class SignalHandler {
 	 * is uncatchable, this is also thrown.
 	 */
 	public static SignalCallback addHandler(final SignalType type, SignalCallback handler) {
-		if (!type.isCatchable()) {
+		if(!type.isCatchable()) {
 			throw new IllegalArgumentException(type.getSignalName() + " cannot be caught, and therefore cannot be registered.");
 		}
 		SignalCallback last = null;
-		if (handlers.containsKey(type)) {
+		if(handlers.containsKey(type)) {
 			last = handlers.get(type);
 		}
 		handlers.put(type, handler);
-		if (!setup.contains(type)) {
+		if(!setup.contains(type)) {
 			sun.misc.Signal.handle(new sun.misc.Signal(type.getSignalName()), new sun.misc.SignalHandler() {
 
 				@Override
 				public void handle(Signal sig) {
 					boolean handled = handlers.get(type).handle(type);
-					if (!handled) {
-						if (type.getDefaultAction() == SignalType.DefaultAction.IGNORE) {
+					if(!handled) {
+						if(type.getDefaultAction() == SignalType.DefaultAction.IGNORE) {
 							sun.misc.SignalHandler.SIG_IGN.handle(sig);
 						} else {
 							sun.misc.SignalHandler.SIG_DFL.handle(sig);

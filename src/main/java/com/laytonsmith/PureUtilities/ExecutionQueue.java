@@ -43,7 +43,7 @@ public class ExecutionQueue {
 	 * @throws NullPointerException if either threadPrefix or defaultQueueName are null
 	 */
 	public ExecutionQueue(final String threadPrefix, String defaultQueueName, final Thread.UncaughtExceptionHandler exceptionHandler) {
-		if (threadPrefix == null || defaultQueueName == null) {
+		if(threadPrefix == null || defaultQueueName == null) {
 			throw new NullPointerException();
 		}
 		uncaughtExceptionHandler = exceptionHandler;
@@ -75,7 +75,7 @@ public class ExecutionQueue {
 	 */
 	public final void push(DaemonManager dm, String queue, Runnable r) {
 		queue = prepareLock(queue);
-		synchronized (locks.get(queue)) {
+		synchronized(locks.get(queue)) {
 			Deque<Runnable> q = prepareQueue(queue);
 			q.addLast(r);
 			startQueue(dm, queue);
@@ -90,7 +90,7 @@ public class ExecutionQueue {
 	 */
 	public final void pushFront(DaemonManager dm, String queue, Runnable r) {
 		queue = prepareLock(queue);
-		synchronized (locks.get(queue)) {
+		synchronized(locks.get(queue)) {
 			Deque<Runnable> q = prepareQueue(queue);
 			q.addFirst(r);
 			startQueue(dm, queue);
@@ -104,11 +104,11 @@ public class ExecutionQueue {
 	 */
 	public final void remove(String queue) {
 		queue = prepareLock(queue);
-		synchronized (locks.get(queue)) {
+		synchronized(locks.get(queue)) {
 			Deque<Runnable> q = prepareQueue(queue);
 			try {
 				q.removeLast();
-			} catch (NoSuchElementException e) {
+			} catch(NoSuchElementException e) {
 				//
 			}
 		}
@@ -122,7 +122,7 @@ public class ExecutionQueue {
 	public final void removeFront(String queue) {
 		try {
 			pop(queue);
-		} catch (NoSuchElementException e) {
+		} catch(NoSuchElementException e) {
 			//
 		}
 	}
@@ -134,7 +134,7 @@ public class ExecutionQueue {
 	 */
 	public final void clear(String queue) {
 		queue = prepareLock(queue);
-		synchronized (locks.get(queue)) {
+		synchronized(locks.get(queue)) {
 			prepareQueue(queue).clear();
 		}
 	}
@@ -147,7 +147,7 @@ public class ExecutionQueue {
 	 */
 	public final boolean isRunning(String queue) {
 		queue = prepareLock(queue);
-		synchronized (locks.get(queue)) {
+		synchronized(locks.get(queue)) {
 			return runningQueues.containsKey(queue) && runningQueues.get(queue).equals(true);
 		}
 	}
@@ -159,9 +159,9 @@ public class ExecutionQueue {
 	 */
 	public final List<String> activeQueues() {
 		List<String> q = new ArrayList<String>();
-		for (String queue : queues.keySet()) {
-			synchronized (locks.get(queue)) {
-				if (queues.containsKey(queue) && !queues.get(queue).isEmpty()) {
+		for(String queue : queues.keySet()) {
+			synchronized(locks.get(queue)) {
+				if(queues.containsKey(queue) && !queues.get(queue).isEmpty()) {
 					q.add(queue);
 				}
 			}
@@ -175,17 +175,17 @@ public class ExecutionQueue {
 	 * @param queueName
 	 */
 	private Deque<Runnable> prepareQueue(String queueName) {
-		if (!queues.containsKey(queueName)) {
+		if(!queues.containsKey(queueName)) {
 			queues.put(queueName, new ArrayDeque<Runnable>());
 		}
 		return queues.get(queueName);
 	}
 
 	private String prepareLock(String queueName) {
-		if (queueName == null) {
+		if(queueName == null) {
 			queueName = defaultQueueName;
 		}
-		if (!locks.containsKey(queueName)) {
+		if(!locks.containsKey(queueName)) {
 			locks.put(queueName, new Object());
 		}
 		return queueName;
@@ -197,7 +197,7 @@ public class ExecutionQueue {
 	 * @param queueName
 	 */
 	private void destroyQueue(String queueName) {
-		synchronized (locks.get(queueName)) {
+		synchronized(locks.get(queueName)) {
 			queues.remove(queueName);
 		}
 	}
@@ -208,15 +208,15 @@ public class ExecutionQueue {
 	 * @param queueName
 	 */
 	private void pumpQueue(String queueName) {
-		while (true) {
+		while(true) {
 			Runnable r;
-			synchronized (locks.get(queueName)) {
+			synchronized(locks.get(queueName)) {
 
 				r = pop(queueName);
 			}
 			r.run();
-			synchronized (locks.get(queueName)) {
-				if (queues.get(queueName).isEmpty()) {
+			synchronized(locks.get(queueName)) {
+				if(queues.get(queueName).isEmpty()) {
 					runningQueues.put(queueName, false);
 					destroyQueue(queueName);
 					break;
@@ -226,14 +226,14 @@ public class ExecutionQueue {
 	}
 
 	private synchronized void startQueue(final DaemonManager dm, final String queue) {
-		synchronized (locks.get(queue)) {
-			if (!isRunning(queue)) {
+		synchronized(locks.get(queue)) {
+			if(!isRunning(queue)) {
 				//We need to create a new thread
 				runningQueues.put(queue, true);
-				if (dm != null) {
+				if(dm != null) {
 					dm.activateThread(null);
 				}
-				if (service == null) {
+				if(service == null) {
 					service = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
 							50L, TimeUnit.MILLISECONDS,
 							new SynchronousQueue<Runnable>(),
@@ -245,15 +245,15 @@ public class ExecutionQueue {
 					public void run() {
 						try {
 							pumpQueue(queue);
-						} catch (RuntimeException t) {
-							if (uncaughtExceptionHandler != null) {
+						} catch(RuntimeException t) {
+							if(uncaughtExceptionHandler != null) {
 								uncaughtExceptionHandler.uncaughtException(Thread.currentThread(), t);
 							} else {
 								StreamUtils.GetSystemErr().println("The queue \"" + queue + "\" threw an exception, and it was not handled.");
 								t.printStackTrace(StreamUtils.GetSystemErr());
 							}
 						} finally {
-							if (dm != null) {
+							if(dm != null) {
 								dm.deactivateThread(null);
 							}
 						}
@@ -265,9 +265,9 @@ public class ExecutionQueue {
 
 	private Runnable pop(String queue) throws NoSuchElementException {
 		queue = prepareLock(queue);
-		synchronized (locks.get(queue)) {
+		synchronized(locks.get(queue)) {
 			Deque<Runnable> q = queues.get(queue);
-			if (q == null) {
+			if(q == null) {
 				throw new NoSuchElementException("The given queue does not exist.");
 			}
 			return q.removeFirst();
@@ -278,7 +278,7 @@ public class ExecutionQueue {
 	 * Stops all executing tasks on a best effort basis.
 	 */
 	public synchronized void stopAllNow() {
-		if (service != null) {
+		if(service != null) {
 			service.shutdownNow();
 			service = null;
 		}

@@ -87,39 +87,39 @@ public class CommandHelperListener implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-		if (CommandHelperPlugin.self.interpreterListener
+		if(CommandHelperPlugin.self.interpreterListener
 				.isInInterpreterMode(event.getPlayer().getName())) {
 			//They are in interpreter mode, so we want it to handle this, not everything else.
 			return;
 		}
 		MCPlayerCommandEvent mpce = new BukkitPlayerEvents.BukkitMCPlayerCommandEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_COMMAND, "player_command", mpce);
-		if (mpce.isCancelled()) {
+		if(mpce.isCancelled()) {
 			return;
 		}
 		String cmd = event.getMessage();
 		MCPlayer player = new BukkitMCPlayer(event.getPlayer());
 		BukkitDirtyRegisteredListener.PlayDirty();
 
-		if (!Prefs.PlayDirty()) {
-			if (event.isCancelled()) {
+		if(!Prefs.PlayDirty()) {
+			if(event.isCancelled()) {
 				return;
 			}
 		} //If we are playing dirty, ignore the cancelled flag
 
 		try {
-			if (runAlias(event.getMessage(), player)) {
+			if(runAlias(event.getMessage(), player)) {
 				event.setCancelled(true);
-				if (Prefs.PlayDirty()) {
+				if(Prefs.PlayDirty()) {
 					//Super cancel the event
 					BukkitDirtyRegisteredListener.setCancelled(event);
 				}
 			}
-		} catch (InternalException e) {
+		} catch(InternalException e) {
 			logger.log(Level.SEVERE, e.getMessage());
-		} catch (ConfigRuntimeException e) {
+		} catch(ConfigRuntimeException e) {
 			logger.log(Level.WARNING, e.getMessage());
-		} catch (Throwable e) {
+		} catch(Throwable e) {
 			player.sendMessage(MCChatColor.RED + "Command failed with following reason: " + e.getMessage());
 			//Obviously the command is registered, but it somehow failed. Cancel the event.
 			event.setCancelled(true);

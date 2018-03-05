@@ -25,7 +25,7 @@ public final class DataSourceModel {
 
 	public DataSourceModel(Map<String, Object> model) {
 		//We have to do a depth first traversal here to get all the keys
-		if (model != null) {
+		if(model != null) {
 			build(model, tree);
 		}
 	}
@@ -36,17 +36,17 @@ public final class DataSourceModel {
 	 * @param list
 	 */
 	public DataSourceModel(List<Pair<String, String>> list) {
-		for (Pair<String, String> pair : list) {
+		for(Pair<String, String> pair : list) {
 			String[] key = pair.getKey().split("\\.");
 			set(key, pair.getValue());
 		}
 	}
 
 	private void build(Object node, GenericTreeNode<Pair<String, String>> treeNode) {
-		if (node instanceof Map) {
+		if(node instanceof Map) {
 			//We need to iterate through all the keys, creating children as we go
-			for (String key : ((Map<String, Object>) node).keySet()) {
-				if (key.equals("_")) {
+			for(String key : ((Map<String, Object>) node).keySet()) {
+				if(key.equals("_")) {
 					//Special case, this is a reserved key
 					build(((Map<String, Object>) node).get(key), treeNode);
 				} else {
@@ -64,7 +64,7 @@ public final class DataSourceModel {
 
 	public Map<String, Object> toMap() {
 		Map<String, Object> map = new HashMap<>();
-		for (GenericTreeNode<Pair<String, String>> child : tree.getChildren()) {
+		for(GenericTreeNode<Pair<String, String>> child : tree.getChildren()) {
 			decompose(map, child);
 		}
 		return map;
@@ -77,15 +77,15 @@ public final class DataSourceModel {
 	}
 
 	private void decompose(Map<String, Object> node, GenericTreeNode<Pair<String, String>> treeNode) {
-		if (treeNode.hasChildren()) {
+		if(treeNode.hasChildren()) {
 			//If it's not a leaf node, we need to add a new child to the map. 
 			//However, if the data isn't null, we need to add the data now as a _ key
 			Map<String, Object> map = new HashMap<>();
-			if (treeNode.getData().getValue() != null) {
+			if(treeNode.getData().getValue() != null) {
 				map.put("_", treeNode.getData().getValue());
 			}
 			node.put(treeNode.getData().getKey(), map);
-			for (GenericTreeNode<Pair<String, String>> child : treeNode.getChildren()) {
+			for(GenericTreeNode<Pair<String, String>> child : treeNode.getChildren()) {
 				decompose(map, child);
 			}
 		} else {
@@ -108,11 +108,11 @@ public final class DataSourceModel {
 
 	private String getValue(List<String> keys, GenericTreeNode<Pair<String, String>> treeNode) {
 		String value = null;
-		if (!keys.isEmpty()) {
+		if(!keys.isEmpty()) {
 			String key = keys.get(0);
 			keys.remove(0);
-			for (GenericTreeNode<Pair<String, String>> child : treeNode.getChildren()) {
-				if (child.getData().getKey().equals(key)) {
+			for(GenericTreeNode<Pair<String, String>> child : treeNode.getChildren()) {
+				if(child.getData().getKey().equals(key)) {
 					return getValue(keys, child);
 				}
 			}
@@ -123,29 +123,29 @@ public final class DataSourceModel {
 	}
 
 	private void setValue(List<String> keys, GenericTreeNode<Pair<String, String>> treeNode, String value) {
-		if (keys.isEmpty()) {
+		if(keys.isEmpty()) {
 			treeNode.getData().setValue(value);
 		} else {
 			GenericTreeNode<Pair<String, String>> found = null;
 			String key = keys.get(0);
 			keys.remove(0);
-			for (GenericTreeNode<Pair<String, String>> child : treeNode.getChildren()) {
-				if (child.getData().getKey().equals(key)) {
+			for(GenericTreeNode<Pair<String, String>> child : treeNode.getChildren()) {
+				if(child.getData().getKey().equals(key)) {
 					found = child;
 					break;
 				}
 			}
-			if (found == null) {
+			if(found == null) {
 				found = new GenericTreeNode<>(new Pair<String, String>(key, null));
 				treeNode.addChild(found);
 			}
-			if (value == null) {
-				if (keys.isEmpty()) {
+			if(value == null) {
+				if(keys.isEmpty()) {
 					//We need to remove this node.
 					//TODO: This fails to remove the parent
-					for (int i = 0; i < treeNode.getNumberOfChildren(); i++) {
+					for(int i = 0; i < treeNode.getNumberOfChildren(); i++) {
 						GenericTreeNode<Pair<String, String>> node = treeNode.getChildAt(i);
-						if (node.getData().getKey().equals(key)) {
+						if(node.getData().getKey().equals(key)) {
 							treeNode.removeChildAt(i);
 							break;
 						}
@@ -159,20 +159,20 @@ public final class DataSourceModel {
 
 	public Set<String[]> keySet() {
 		Set<String[]> keys = new HashSet<>();
-		for (GenericTreeNode child : tree.getChildren()) {
+		for(GenericTreeNode child : tree.getChildren()) {
 			traverse(child, new ArrayList<String>(), keys);
 		}
 		return keys;
 	}
 
 	private void traverse(GenericTreeNode<Pair<String, String>> treeNode, List<String> ongoingKey, Set<String[]> keys) {
-		if (treeNode.hasChildren()) {
+		if(treeNode.hasChildren()) {
 			ongoingKey.add(treeNode.getData().getKey());
-			if (treeNode.getData().getValue() != null) {
+			if(treeNode.getData().getValue() != null) {
 				//Data and children
 				keys.add(ongoingKey.toArray(new String[ongoingKey.size()]));
 			}
-			for (GenericTreeNode<Pair<String, String>> child : treeNode.getChildren()) {
+			for(GenericTreeNode<Pair<String, String>> child : treeNode.getChildren()) {
 				//recurse down now
 				traverse(child, ongoingKey, keys);
 			}

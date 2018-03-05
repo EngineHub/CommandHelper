@@ -14,10 +14,11 @@ public class CustomMatchers {
 	public static <T> Matcher<String> regexMatch(String regex) {
 		return new RegexMatch(regex);
 	}
-	
+
 	private static class RegexMatch extends TypeSafeMatcher<String> {
 
 		String regex;
+
 		public RegexMatch(String regex) {
 			this.regex = regex;
 		}
@@ -31,7 +32,7 @@ public class CustomMatchers {
 		public void describeTo(Description description) {
 			description.appendText("value to match regex " + regex);
 		}
-		
+
 	}
-	
+
 }

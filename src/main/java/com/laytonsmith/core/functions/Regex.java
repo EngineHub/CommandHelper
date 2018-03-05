@@ -92,10 +92,10 @@ public class Regex {
 			String subject = args[1].val();
 			CArray ret = CArray.GetAssociativeArray(t);
 			Matcher m = pattern.matcher(subject);
-			if (m.find()) {
+			if(m.find()) {
 				ret.set(0, new CString(m.group(0), t), t);
-				for (int i = 1; i <= m.groupCount(); i++) {
-					if (m.group(i) == null) {
+				for(int i = 1; i <= m.groupCount(); i++) {
+					if(m.group(i) == null) {
 						ret.set(i, CNull.NULL, t);
 					} else {
 						ret.set(i, new CString(m.group(i), t), t);
@@ -105,10 +105,10 @@ public class Regex {
 				//dynamically enable this feature if they have it.
 				Set<String> namedGroups = getNamedGroups(pattern.pattern());
 				try {
-					for (String key : namedGroups) {
+					for(String key : namedGroups) {
 						ret.set(key, (String) ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
 					}
-				} catch (ReflectionUtils.ReflectionException ex) {
+				} catch(ReflectionUtils.ReflectionException ex) {
 					throw new CREFormatException("Named captures are only supported with Java 7.", t);
 				}
 			}
@@ -117,7 +117,7 @@ public class Regex {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (!children.get(0).getData().isDynamic()) {
+			if(!children.get(0).getData().isDynamic()) {
 				getPattern(children.get(0).getData(), t);
 			}
 			return null;
@@ -193,20 +193,20 @@ public class Regex {
 			CArray fret = new CArray(t);
 			Matcher m = pattern.matcher(subject);
 			Set<String> namedGroups = getNamedGroups(pattern.pattern());
-			while (m.find()) {
+			while(m.find()) {
 				CArray ret = CArray.GetAssociativeArray(t);
 				ret.set(0, new CString(m.group(0), t), t);
 
-				for (int i = 1; i <= m.groupCount(); i++) {
+				for(int i = 1; i <= m.groupCount(); i++) {
 					ret.set(i, new CString(m.group(i), t), t);
 				}
 				//Named groups are only supported in Java 7, but we can
 				//dynamically enable this feature if they have it.
 				try {
-					for (String key : namedGroups) {
+					for(String key : namedGroups) {
 						ret.set(key, (String) ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
 					}
-				} catch (ReflectionUtils.ReflectionException e) {
+				} catch(ReflectionUtils.ReflectionException e) {
 					throw new CREFormatException("Named captures are only supported with Java 7.", t);
 				}
 				fret.push(ret, t);
@@ -216,7 +216,7 @@ public class Regex {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (!children.get(0).getData().isDynamic()) {
+			if(!children.get(0).getData().isDynamic()) {
 				getPattern(children.get(0).getData(), t);
 			}
 			return null;
@@ -294,9 +294,9 @@ public class Regex {
 
 			try {
 				ret = pattern.matcher(subject).replaceAll(replacement);
-			} catch (IndexOutOfBoundsException e) {
+			} catch(IndexOutOfBoundsException e) {
 				throw new CREFormatException("Expecting a regex group at parameter 1 of reg_replace", t);
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}
 
@@ -306,9 +306,9 @@ public class Regex {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree data = children.get(0);
-			if (!data.getData().isDynamic()) {
+			if(!data.getData().isDynamic()) {
 				String pattern = data.getData().val();
-				if (isLiteralRegex(pattern)) {
+				if(isLiteralRegex(pattern)) {
 					//We want to replace this with replace()
 					//Note the alternative order of arguments
 					ParseTree replace = new ParseTree(new CFunction("replace", t), data.getFileOptions());
@@ -405,12 +405,12 @@ public class Regex {
 			 * split().
 			 */
 			int limit = Integer.MAX_VALUE - 1;
-			if (args.length >= 3) {
+			if(args.length >= 3) {
 				limit = Static.getInt32(args[2], t);
 			}
 			String[] rsplit = pattern.split(subject, limit + 1);
 			CArray ret = new CArray(t);
-			for (String split : rsplit) {
+			for(String split : rsplit) {
 				ret.push(new CString(split, t), t);
 			}
 			return ret;
@@ -419,9 +419,9 @@ public class Regex {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree data = children.get(0);
-			if (!data.getData().isDynamic()) {
+			if(!data.getData().isDynamic()) {
 				String pattern = data.getData().val();
-				if (isLiteralRegex(pattern)) {
+				if(isLiteralRegex(pattern)) {
 					//We want to replace this with split()
 					ParseTree splitNode = new ParseTree(new CFunction(split, t), data.getFileOptions());
 					splitNode.addChildAt(0, new ParseTree(new CString(getLiteralRegex(pattern), t), splitNode.getFileOptions()));
@@ -496,7 +496,7 @@ public class Regex {
 			String subject = args[1].val();
 			long ret = 0;
 			Matcher m = pattern.matcher(subject);
-			while (m.find()) {
+			while(m.find()) {
 				ret++;
 			}
 			return new CInt(ret, t);
@@ -504,7 +504,7 @@ public class Regex {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (!children.get(0).getData().isDynamic()) {
+			if(!children.get(0).getData().isDynamic()) {
 				getPattern(children.get(0).getData(), t);
 			}
 			return null;
@@ -595,16 +595,16 @@ public class Regex {
 		String regex = "";
 		int flags = 0;
 		String sflags = "";
-		if (c instanceof CArray) {
+		if(c instanceof CArray) {
 			CArray ca = (CArray) c;
 			regex = ca.get(0, t).val();
 			sflags = ca.get(1, t).val();
-			for (int i = 0; i < sflags.length(); i++) {
-				if (sflags.toLowerCase().charAt(i) == 'i') {
+			for(int i = 0; i < sflags.length(); i++) {
+				if(sflags.toLowerCase().charAt(i) == 'i') {
 					flags |= java.util.regex.Pattern.CASE_INSENSITIVE;
-				} else if (sflags.toLowerCase().charAt(i) == 'm') {
+				} else if(sflags.toLowerCase().charAt(i) == 'm') {
 					flags |= java.util.regex.Pattern.MULTILINE;
-				} else if (sflags.toLowerCase().charAt(i) == 's') {
+				} else if(sflags.toLowerCase().charAt(i) == 's') {
 					flags |= java.util.regex.Pattern.DOTALL;
 				} else {
 					throw new CREFormatException("Unrecognized flag: " + sflags.toLowerCase().charAt(i), t);
@@ -615,7 +615,7 @@ public class Regex {
 		}
 		try {
 			return Pattern.compile(regex, flags);
-		} catch (PatternSyntaxException e) {
+		} catch(PatternSyntaxException e) {
 			throw new CREFormatException(e.getMessage(), t);
 		}
 	}
@@ -630,14 +630,14 @@ public class Regex {
 		//optimizable case, but we will have to transform the regex to get the actual split index, but that's up
 		//to the function to call getLiteralRegex. If the internal of the regex further contains more \Q or \E identifiers,
 		//they are doing something more complex, so we're just gonna forgo optimizing that.
-		if (regex.startsWith("\\Q") && regex.endsWith("\\E")
+		if(regex.startsWith("\\Q") && regex.endsWith("\\E")
 				&& !regex.substring(2, regex.length() - 2).contains("\\Q")
 				&& !regex.substring(2, regex.length() - 2).contains("\\E")) {
 			return true;
 		}
 		String chars = "[\\^$.|?*+()";
-		for (int i = 0; i < chars.length(); i++) {
-			if (regex.contains(Character.toString(chars.charAt(i)))) {
+		for(int i = 0; i < chars.length(); i++) {
+			if(regex.contains(Character.toString(chars.charAt(i)))) {
 				return false;
 			}
 		}
@@ -645,7 +645,7 @@ public class Regex {
 	}
 
 	private static String getLiteralRegex(String regex) {
-		if (regex.startsWith("\\Q") && regex.endsWith("\\E")
+		if(regex.startsWith("\\Q") && regex.endsWith("\\E")
 				&& !regex.substring(2, regex.length() - 2).contains("\\Q")
 				&& !regex.substring(2, regex.length() - 2).contains("\\E")) {
 			return regex.substring(2, regex.length() - 2);
@@ -659,7 +659,7 @@ public class Regex {
 	private static Set<String> getNamedGroups(String regex) {
 		Matcher m = NAMED_GROUP.matcher(regex);
 		Set<String> ret = new HashSet<String>();
-		while (m.find()) {
+		while(m.find()) {
 			ret.add(m.group(1));
 		}
 		return ret;

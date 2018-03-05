@@ -14,29 +14,29 @@ import org.junit.Test;
 
 /**
  *
- * 
+ *
  */
 public class StringUtilsTest {
-	
+
 	public StringUtilsTest() {
 	}
 	Set<String> set3;
 	List<String> list3;
-	String [] array3;
+	String[] array3;
 	Map<String, String> map3;
 	Set<String> set2;
 	List<String> list2;
-	String [] array2;
+	String[] array2;
 	Map<String, String> map2;
 	Set<String> set1;
 	List<String> list1;
-	String [] array1;
+	String[] array1;
 	Map<String, String> map1;
 	Set<String> set0;
 	List<String> list0;
-	String [] array0;
+	String[] array0;
 	Map<String, String> map0;
-	
+
 	@Before
 	public void setUp() {
 		set3 = new LinkedHashSet<String>();
@@ -52,7 +52,7 @@ public class StringUtilsTest {
 		map3.put("one", "1");
 		map3.put("two", "2");
 		map3.put("three", "3");
-		
+
 		set2 = new LinkedHashSet<String>();
 		set2.add("1");
 		set2.add("2");
@@ -63,7 +63,7 @@ public class StringUtilsTest {
 		map2 = new LinkedHashMap<String, String>();
 		map2.put("one", "1");
 		map2.put("two", "2");
-		
+
 		set1 = new LinkedHashSet<String>();
 		set1.add("1");
 		list1 = new ArrayList<String>();
@@ -71,12 +71,12 @@ public class StringUtilsTest {
 		array1 = new String[]{"1"};
 		map1 = new LinkedHashMap<String, String>();
 		map1.put("one", "1");
-		
+
 		set0 = new LinkedHashSet<String>();
 		list0 = new ArrayList<String>();
 		array0 = new String[]{};
 		map0 = new LinkedHashMap<String, String>();
-		
+
 	}
 
 	/**
@@ -117,9 +117,9 @@ public class StringUtilsTest {
 		assertEquals("", StringUtils.Join(list0, ", ", ", and ", " and ", ""));
 		assertEquals("test", StringUtils.Join(list0, ", ", ", and ", " and ", "test"));
 	}
-	
+
 	@Test
-	public void testJoin_Map(){
+	public void testJoin_Map() {
 		assertEquals("one=1, two=2, three=3", StringUtils.Join(map3, "=", ", "));
 		assertEquals("one=1, two=2, and three=3", StringUtils.Join(map3, "=", ", ", ", and "));
 		assertEquals("one=1 and two=2", StringUtils.Join(map2, "=", ", ", ", and ", " and "));
@@ -143,7 +143,7 @@ public class StringUtilsTest {
 	@Test
 	public void testArgParser() {
 		String test = "this is \"a 'quoted'\" '\\'string\\''";
-		String [] expected = new String[]{"this", "is", "a 'quoted'", "'string'"};
+		String[] expected = new String[]{"this", "is", "a 'quoted'", "'string'"};
 		assertArrayEquals(expected, StringUtils.ArgParser(test).toArray());
 	}
 
@@ -168,7 +168,7 @@ public class StringUtilsTest {
 	 */
 	@Test
 	public void testTrimSplit() {
-		String [] expected = new String[]{"1", "2", "3"};
+		String[] expected = new String[]{"1", "2", "3"};
 		assertArrayEquals(expected, StringUtils.trimSplit("1 , 2 , 3", ","));
 	}
 
@@ -179,24 +179,24 @@ public class StringUtilsTest {
 	public void testReplaceLast() {
 		assertEquals("123456", StringUtils.replaceLast("123123", "123", "456"));
 	}
-	
+
 	@Test
-	public void testPluralHelper1(){
+	public void testPluralHelper1() {
 		assertEquals("There is 1 car", "There " + StringUtils.PluralHelper(1, "car"));
 		assertEquals("There are 2 cars", "There " + StringUtils.PluralHelper(2, "car"));
 	}
-	
+
 	@Test
-	public void testPluralHelper2(){
+	public void testPluralHelper2() {
 		assertEquals("There is 1 fish", "There " + StringUtils.PluralHelper(1, "fish", "fish"));
 		assertEquals("There are 2 fish", "There " + StringUtils.PluralHelper(2, "fish", "fish"));
 	}
-	
+
 	@Test
-	public void testPluralTemplateHelper(){
-		assertEquals("There is 1 fish, and it is red.", 
+	public void testPluralTemplateHelper() {
+		assertEquals("There is 1 fish, and it is red.",
 				StringUtils.PluralTemplateHelper(1, "There is %d fish, and it is red.", "There are %d fish, and they are red."));
-		assertEquals("There are 4 fish, and they are red.", 
+		assertEquals("There are 4 fish, and they are red.",
 				StringUtils.PluralTemplateHelper(4, "There is %d fish, and it is red.", "There are %d fish, and they are red."));
 	}
 

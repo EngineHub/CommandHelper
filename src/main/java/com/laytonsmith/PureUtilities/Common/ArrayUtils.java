@@ -136,14 +136,14 @@ public class ArrayUtils {
 	public static <T> T[] slice(T[] array, int start, int finish) {
 		int size = Math.abs(start - finish) + 1;
 		Object newArray = Array.newInstance(array.getClass().getComponentType(), size);
-		if (start <= finish) {
+		if(start <= finish) {
 			int counter = 0;
-			for (int i = start; i <= finish; i++) {
+			for(int i = start; i <= finish; i++) {
 				Array.set(newArray, counter++, array[i]);
 			}
 		} else {
 			int counter = 0;
-			for (int i = start; i >= finish; i--) {
+			for(int i = start; i >= finish; i--) {
 				Array.set(newArray, counter++, array[i]);
 			}
 		}
@@ -163,14 +163,14 @@ public class ArrayUtils {
 	public static char[] slice(char[] array, int start, int finish) {
 		int size = Math.abs(start - finish) + 1;
 		char[] newArray = new char[size];
-		if (start <= finish) {
+		if(start <= finish) {
 			int counter = 0;
-			for (int i = start; i <= finish; i++) {
+			for(int i = start; i <= finish; i++) {
 				newArray[counter++] = array[i];
 			}
 		} else {
 			int counter = 0;
-			for (int i = start; i >= finish; i--) {
+			for(int i = start; i >= finish; i--) {
 				newArray[counter++] = array[i];
 			}
 		}
@@ -190,14 +190,14 @@ public class ArrayUtils {
 	public static byte[] slice(byte[] array, int start, int finish) {
 		int size = Math.abs(start - finish) + 1;
 		byte[] newArray = new byte[size];
-		if (start <= finish) {
+		if(start <= finish) {
 			int counter = 0;
-			for (int i = start; i <= finish; i++) {
+			for(int i = start; i <= finish; i++) {
 				newArray[counter++] = array[i];
 			}
 		} else {
 			int counter = 0;
-			for (int i = start; i >= finish; i--) {
+			for(int i = start; i >= finish; i--) {
 				newArray[counter++] = array[i];
 			}
 		}
@@ -217,14 +217,14 @@ public class ArrayUtils {
 	public static short[] slice(short[] array, int start, int finish) {
 		int size = Math.abs(start - finish) + 1;
 		short[] newArray = new short[size];
-		if (start <= finish) {
+		if(start <= finish) {
 			int counter = 0;
-			for (int i = start; i <= finish; i++) {
+			for(int i = start; i <= finish; i++) {
 				newArray[counter++] = array[i];
 			}
 		} else {
 			int counter = 0;
-			for (int i = start; i >= finish; i--) {
+			for(int i = start; i >= finish; i--) {
 				newArray[counter++] = array[i];
 			}
 		}
@@ -244,14 +244,14 @@ public class ArrayUtils {
 	public static int[] slice(int[] array, int start, int finish) {
 		int size = Math.abs(start - finish) + 1;
 		int[] newArray = new int[size];
-		if (start <= finish) {
+		if(start <= finish) {
 			int counter = 0;
-			for (int i = start; i <= finish; i++) {
+			for(int i = start; i <= finish; i++) {
 				newArray[counter++] = array[i];
 			}
 		} else {
 			int counter = 0;
-			for (int i = start; i >= finish; i--) {
+			for(int i = start; i >= finish; i--) {
 				newArray[counter++] = array[i];
 			}
 		}
@@ -271,14 +271,14 @@ public class ArrayUtils {
 	public static long[] slice(long[] array, int start, int finish) {
 		int size = Math.abs(start - finish) + 1;
 		long[] newArray = new long[size];
-		if (start <= finish) {
+		if(start <= finish) {
 			int counter = 0;
-			for (int i = start; i <= finish; i++) {
+			for(int i = start; i <= finish; i++) {
 				newArray[counter++] = array[i];
 			}
 		} else {
 			int counter = 0;
-			for (int i = start; i >= finish; i--) {
+			for(int i = start; i >= finish; i--) {
 				newArray[counter++] = array[i];
 			}
 		}
@@ -298,14 +298,14 @@ public class ArrayUtils {
 	public static float[] slice(float[] array, int start, int finish) {
 		int size = Math.abs(start - finish) + 1;
 		float[] newArray = new float[size];
-		if (start <= finish) {
+		if(start <= finish) {
 			int counter = 0;
-			for (int i = start; i <= finish; i++) {
+			for(int i = start; i <= finish; i++) {
 				newArray[counter++] = array[i];
 			}
 		} else {
 			int counter = 0;
-			for (int i = start; i >= finish; i--) {
+			for(int i = start; i >= finish; i--) {
 				newArray[counter++] = array[i];
 			}
 		}
@@ -325,14 +325,14 @@ public class ArrayUtils {
 	public static double[] slice(double[] array, int start, int finish) {
 		int size = Math.abs(start - finish) + 1;
 		double[] newArray = new double[size];
-		if (start <= finish) {
+		if(start <= finish) {
 			int counter = 0;
-			for (int i = start; i <= finish; i++) {
+			for(int i = start; i <= finish; i++) {
 				newArray[counter++] = array[i];
 			}
 		} else {
 			int counter = 0;
-			for (int i = start; i >= finish; i--) {
+			for(int i = start; i >= finish; i--) {
 				newArray[counter++] = array[i];
 			}
 		}
@@ -352,14 +352,14 @@ public class ArrayUtils {
 	public static boolean[] slice(boolean[] array, int start, int finish) {
 		int size = Math.abs(start - finish) + 1;
 		boolean[] newArray = new boolean[size];
-		if (start <= finish) {
+		if(start <= finish) {
 			int counter = 0;
-			for (int i = start; i <= finish; i++) {
+			for(int i = start; i <= finish; i++) {
 				newArray[counter++] = array[i];
 			}
 		} else {
 			int counter = 0;
-			for (int i = start; i >= finish; i--) {
+			for(int i = start; i >= finish; i--) {
 				newArray[counter++] = array[i];
 			}
 		}
@@ -378,13 +378,13 @@ public class ArrayUtils {
 	 */
 	@SuppressWarnings("UnnecessaryUnboxing")
 	public static char[] unbox(Character[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_CHAR_ARRAY;
 		}
 		final char[] newArray = new char[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i].charValue();
 		}
 		return newArray;
@@ -398,13 +398,13 @@ public class ArrayUtils {
 	 */
 	@SuppressWarnings("UnnecessaryUnboxing")
 	public static byte[] unbox(Byte[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_BYTE_ARRAY;
 		}
 		final byte[] newArray = new byte[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i].byteValue();
 		}
 		return newArray;
@@ -418,13 +418,13 @@ public class ArrayUtils {
 	 */
 	@SuppressWarnings("UnnecessaryUnboxing")
 	public static short[] unbox(Short[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_SHORT_ARRAY;
 		}
 		final short[] newArray = new short[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i].shortValue();
 		}
 		return newArray;
@@ -438,13 +438,13 @@ public class ArrayUtils {
 	 */
 	@SuppressWarnings("UnnecessaryUnboxing")
 	public static int[] unbox(Integer[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_INT_ARRAY;
 		}
 		final int[] newArray = new int[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i].intValue();
 		}
 		return newArray;
@@ -458,13 +458,13 @@ public class ArrayUtils {
 	 */
 	@SuppressWarnings("UnnecessaryUnboxing")
 	public static long[] unbox(Long[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_LONG_ARRAY;
 		}
 		final long[] newArray = new long[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i].longValue();
 		}
 		return newArray;
@@ -478,13 +478,13 @@ public class ArrayUtils {
 	 */
 	@SuppressWarnings("UnnecessaryUnboxing")
 	public static float[] unbox(Float[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_FLOAT_ARRAY;
 		}
 		final float[] newArray = new float[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i].floatValue();
 		}
 		return newArray;
@@ -498,13 +498,13 @@ public class ArrayUtils {
 	 */
 	@SuppressWarnings("UnnecessaryUnboxing")
 	public static double[] unbox(Double[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_DOUBLE_ARRAY;
 		}
 		final double[] newArray = new double[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i].doubleValue();
 		}
 		return newArray;
@@ -518,13 +518,13 @@ public class ArrayUtils {
 	 */
 	@SuppressWarnings("UnnecessaryUnboxing")
 	public static boolean[] unbox(Boolean[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_BOOLEAN_ARRAY;
 		}
 		final boolean[] newArray = new boolean[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i].booleanValue();
 		}
 		return newArray;
@@ -541,13 +541,13 @@ public class ArrayUtils {
 	 * @return The "boxed" array
 	 */
 	public static Character[] box(char[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_CHAR_OBJ_ARRAY;
 		}
 		final Character[] newArray = new Character[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i];
 		}
 		return newArray;
@@ -560,13 +560,13 @@ public class ArrayUtils {
 	 * @return The "boxed" array
 	 */
 	public static Byte[] box(byte[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_BYTE_OBJ_ARRAY;
 		}
 		final Byte[] newArray = new Byte[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i];
 		}
 		return newArray;
@@ -579,13 +579,13 @@ public class ArrayUtils {
 	 * @return The "boxed" array
 	 */
 	public static Short[] box(short[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_SHORT_OBJ_ARRAY;
 		}
 		final Short[] newArray = new Short[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i];
 		}
 		return newArray;
@@ -598,13 +598,13 @@ public class ArrayUtils {
 	 * @return The "boxed" array
 	 */
 	public static Integer[] box(int[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_INT_OBJ_ARRAY;
 		}
 		final Integer[] newArray = new Integer[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i];
 		}
 		return newArray;
@@ -617,13 +617,13 @@ public class ArrayUtils {
 	 * @return The "boxed" array
 	 */
 	public static Long[] box(long[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_LONG_OBJ_ARRAY;
 		}
 		final Long[] newArray = new Long[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i];
 		}
 		return newArray;
@@ -636,13 +636,13 @@ public class ArrayUtils {
 	 * @return The "boxed" array
 	 */
 	public static Float[] box(float[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_FLOAT_OBJ_ARRAY;
 		}
 		final Float[] newArray = new Float[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i];
 		}
 		return newArray;
@@ -655,13 +655,13 @@ public class ArrayUtils {
 	 * @return The "boxed" array
 	 */
 	public static Double[] box(double[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_DOUBLE_OBJ_ARRAY;
 		}
 		final Double[] newArray = new Double[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i];
 		}
 		return newArray;
@@ -674,13 +674,13 @@ public class ArrayUtils {
 	 * @return The "boxed" array
 	 */
 	public static Boolean[] box(boolean[] array) {
-		if (array == null) {
+		if(array == null) {
 			return null;
-		} else if (array.length == 0) {
+		} else if(array.length == 0) {
 			return EMPTY_BOOLEAN_OBJ_ARRAY;
 		}
 		final Boolean[] newArray = new Boolean[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for(int i = 0; i < array.length; i++) {
 			newArray[i] = array[i];
 		}
 		return newArray;
@@ -700,7 +700,7 @@ public class ArrayUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> T[] asArray(Class<T> clazz, List<T> list) {
 		T[] obj = (T[]) Array.newInstance(clazz, list.size());
-		for (int i = 0; i < list.size(); i++) {
+		for(int i = 0; i < list.size(); i++) {
 			obj[i] = list.get(i);
 		}
 		return obj;
@@ -718,14 +718,14 @@ public class ArrayUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T cast(Object array, Class<T> toArrayClass) {
-		if (!array.getClass().isArray()) {
+		if(!array.getClass().isArray()) {
 			throw new ClassCastException();
 		}
 		Object obj;
 		Class<?> toClass = toArrayClass.getComponentType();
 
 		obj = toArrayClass.cast(Array.newInstance(toClass, Array.getLength(array)));
-		for (int i = 0; i < Array.getLength(array); i++) {
+		for(int i = 0; i < Array.getLength(array); i++) {
 			doSet(obj, i, Array.get(array, i));
 		}
 		return (T) obj;
@@ -734,22 +734,22 @@ public class ArrayUtils {
 	@SuppressWarnings("UnnecessaryUnboxing")
 	private static void doSet(Object array, int index, Object o) {
 		Class<?> componentType = array.getClass().getComponentType();
-		if (componentType.isPrimitive()) {
-			if (componentType == char.class) {
+		if(componentType.isPrimitive()) {
+			if(componentType == char.class) {
 				Array.setChar(array, index, ((Character) o).charValue());
-			} else if (componentType == byte.class) {
+			} else if(componentType == byte.class) {
 				Array.setByte(array, index, ((Number) o).byteValue());
-			} else if (componentType == short.class) {
+			} else if(componentType == short.class) {
 				Array.setShort(array, index, ((Number) o).shortValue());
-			} else if (componentType == int.class) {
+			} else if(componentType == int.class) {
 				Array.setInt(array, index, ((Number) o).intValue());
-			} else if (componentType == long.class) {
+			} else if(componentType == long.class) {
 				Array.setLong(array, index, ((Number) o).longValue());
-			} else if (componentType == float.class) {
+			} else if(componentType == float.class) {
 				Array.setFloat(array, index, ((Number) o).floatValue());
-			} else if (componentType == double.class) {
+			} else if(componentType == double.class) {
 				Array.setDouble(array, index, ((Number) o).doubleValue());
-			} else if (componentType == boolean.class) {
+			} else if(componentType == boolean.class) {
 				Array.setBoolean(array, index, ((Boolean) o).booleanValue());
 			}
 		} else {

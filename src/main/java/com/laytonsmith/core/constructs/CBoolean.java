@@ -58,10 +58,10 @@ public final class CBoolean extends CPrimitive implements Cloneable {
 	public static CBoolean get(String value) {
 		try {
 			return get(Long.parseLong(value) != 0);
-		} catch (NumberFormatException e) {
+		} catch(NumberFormatException e) {
 			try {
 				return get(Double.parseDouble(value) != 0);
-			} catch (NumberFormatException f) {
+			} catch(NumberFormatException f) {
 				return get(Boolean.parseBoolean(value));
 			}
 		}

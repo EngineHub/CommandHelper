@@ -20,7 +20,7 @@ public class BukkitMCOptionStatus extends EnumConvertor<MCOptionStatus, OptionSt
 	private static BukkitMCOptionStatus instance;
 
 	public static BukkitMCOptionStatus getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new BukkitMCOptionStatus();
 		}
 		return instance;
@@ -28,7 +28,7 @@ public class BukkitMCOptionStatus extends EnumConvertor<MCOptionStatus, OptionSt
 
 	@Override
 	protected OptionStatus getConcreteEnumCustom(MCOptionStatus abstracted) {
-		if (Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9)) {
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9)) {
 			return null;
 		}
 		return super.getConcreteEnumCustom(abstracted);

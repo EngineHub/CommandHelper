@@ -52,7 +52,7 @@ public class BukkitMCMessenger implements MCMessenger {
 	@Override
 	public void closeAllChannels() {
 		Set<String> chans = getIncomingChannels();
-		for (String chan : chans) {
+		for(String chan : chans) {
 			unregisterIncomingPluginChannel(chan);
 		}
 	}

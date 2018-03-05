@@ -16,7 +16,7 @@ public class BukkitMCEntityEffect extends EnumConvertor<MCEntityEffect, EntityEf
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityEffect instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityEffect getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityEffect();
 		}
 		return instance;

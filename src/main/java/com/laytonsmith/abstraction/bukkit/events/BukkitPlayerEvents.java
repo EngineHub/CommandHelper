@@ -297,7 +297,7 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public MCLocation getTo() {
-			if (e.getTo() == null) {
+			if(e.getTo() == null) {
 				return null;
 			}
 			return new BukkitMCLocation(e.getTo());
@@ -435,7 +435,7 @@ public class BukkitPlayerEvents {
 		@Override
 		public List<MCPlayer> getRecipients() {
 			List<MCPlayer> players = new ArrayList<>();
-			for (Player p : pce.getRecipients()) {
+			for(Player p : pce.getRecipients()) {
 				players.add(new BukkitMCPlayer(p));
 			}
 			return players;
@@ -444,7 +444,7 @@ public class BukkitPlayerEvents {
 		@Override
 		public void setRecipients(List<MCPlayer> list) {
 			pce.getRecipients().clear();
-			for (MCPlayer p : list) {
+			for(MCPlayer p : list) {
 				pce.getRecipients().add(((BukkitMCPlayer) p)._Player());
 			}
 		}
@@ -550,11 +550,11 @@ public class BukkitPlayerEvents {
 		@Override
 		public MCEquipmentSlot getHand() {
 			try {
-				if (pie.getHand() == EquipmentSlot.HAND) {
+				if(pie.getHand() == EquipmentSlot.HAND) {
 					return MCEquipmentSlot.WEAPON;
 				}
 				return MCEquipmentSlot.OFF_HAND;
-			} catch (NoSuchMethodError e) {
+			} catch(NoSuchMethodError e) {
 				// before Bukkit 1.9
 				return MCEquipmentSlot.WEAPON;
 			}
@@ -755,7 +755,7 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public MCEntity getCaught() {
-			if (e.getCaught() == null) {
+			if(e.getCaught() == null) {
 				return null;
 			}
 			return BukkitConvertor.BukkitGetCorrectEntity(e.getCaught());

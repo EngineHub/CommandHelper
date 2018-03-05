@@ -59,17 +59,17 @@ public class Procedure implements Cloneable {
 		this.name = name;
 		this.definedAt = t;
 		this.varList = new HashMap<>();
-		for (IVariable var : varList) {
+		for(IVariable var : varList) {
 			try {
 				this.varList.put(var.getVariableName(), var.clone());
-			} catch (CloneNotSupportedException e) {
+			} catch(CloneNotSupportedException e) {
 				this.varList.put(var.getVariableName(), var);
 			}
 			this.varIndex.add(var);
 			this.originals.put(var.getVariableName(), var.ival());
 		}
 		this.tree = tree;
-		if (!PROCEDURE_NAME_REGEX.matcher(name).matches()) {
+		if(!PROCEDURE_NAME_REGEX.matcher(name).matches()) {
 			throw new CREFormatException("Procedure names must start with an underscore, and may only contain letters, underscores, and digits. (Found " + this.name + ")", t);
 		}
 		//Let's look through the tree now, and see if this is possibly constant or not.
@@ -82,27 +82,27 @@ public class Procedure implements Cloneable {
 	private boolean checkPossiblyConstant(ParseTree tree) {
 		//TODO: This whole thing is a mess. Instead of doing it this way,
 		//individual procs need to be inlined as deemed appropriate.
-		if (true) {
+		if(true) {
 			return false;
 		}
-		if (!tree.getData().isDynamic()) {
+		if(!tree.getData().isDynamic()) {
 			//If it isn't dynamic, it certainly could be constant
 			return true;
-		} else if (tree.getData() instanceof IVariable) {
+		} else if(tree.getData() instanceof IVariable) {
 			//Variables will return true for isDynamic, but they are technically constant, because
 			//they are being declared in this scope, or passed in. An import() would break this
 			//contract, but import() itself is dynamic, so this is not an issue.
 			return true;
-		} else if (tree.getData() instanceof CFunction) {
+		} else if(tree.getData() instanceof CFunction) {
 			//If the function itself is not optimizable, we needn't recurse.
 			try {
 				FunctionBase fb = FunctionList.getFunction(tree.getData());
-				if (fb instanceof Function) {
+				if(fb instanceof Function) {
 					Function f = (Function) fb;
-					if (f instanceof DataHandling._return) {
+					if(f instanceof DataHandling._return) {
 						//This is a special exception. Return itself is not optimizable,
 						//but if the contents are optimizable, it is still considered constant.
-						if (!tree.hasChildren()) {
+						if(!tree.hasChildren()) {
 							return true;
 						} else {
 							return checkPossiblyConstant(tree.getChildAt(0));
@@ -111,22 +111,22 @@ public class Procedure implements Cloneable {
 					//If it's optimizable, it's possible. If it's restricted, it doesn't matter, because
 					//we can't optimize it out anyways, because we need to do the permission check
 					Set<Optimizable.OptimizationOption> o = EnumSet.noneOf(Optimizable.OptimizationOption.class);
-					if (f instanceof Optimizable) {
+					if(f instanceof Optimizable) {
 						o = ((Optimizable) f).optimizationOptions();
 					}
-					if (!((o != null && (o.contains(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC)
+					if(!((o != null && (o.contains(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC)
 							|| o.contains(Optimizable.OptimizationOption.OPTIMIZE_CONSTANT))) && !f.isRestricted())) {
 						return false; //Nope. Doesn't matter if the children are or not
 					}
 				} else {
 					return false;
 				}
-			} catch (ConfigCompileException e) {
+			} catch(ConfigCompileException e) {
 				//It's a proc. We will treat this just like any other function call,
 			}
 			//Ok, well, we have to check the children first.
-			for (ParseTree child : tree.getChildren()) {
-				if (!checkPossiblyConstant(child)) {
+			for(ParseTree child : tree.getChildren()) {
+				if(!checkPossiblyConstant(child)) {
 					return false; //Nope, since our child can't be constant, neither can we
 				}
 			}
@@ -161,7 +161,7 @@ public class Procedure implements Cloneable {
 	 */
 	public Construct cexecute(List<ParseTree> args, Environment env, Target t) {
 		List<Construct> list = new ArrayList<>();
-		for (ParseTree arg : args) {
+		for(ParseTree arg : args) {
 			list.add(env.getEnv(GlobalEnv.class).GetScript().seval(arg, env));
 		}
 		return execute(list, env, t);
@@ -179,18 +179,18 @@ public class Procedure implements Cloneable {
 		env.getEnv(GlobalEnv.class).SetVarList(new IVariableList());
 		//This is what will become our @arguments var
 		CArray arguments = new CArray(Target.UNKNOWN);
-		for (String key : originals.keySet()) {
+		for(String key : originals.keySet()) {
 			Construct c = originals.get(key);
 			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, key, c, Target.UNKNOWN));
 			arguments.push(c, t);
 		}
 		Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel());//new Script(null, null);
-		for (int i = 0; i < args.size(); i++) {
+		for(int i = 0; i < args.size(); i++) {
 			Construct c = args.get(i);
 			arguments.set(i, c, t);
-			if (varIndex.size() > i) {
+			if(varIndex.size() > i) {
 				String varname = varIndex.get(i).getVariableName();
-				if (c instanceof CNull || InstanceofUtil.isInstanceof(c, varIndex.get(i).getDefinedType()) || varIndex.get(i).getDefinedType().equals(Auto.TYPE)) {
+				if(c instanceof CNull || InstanceofUtil.isInstanceof(c, varIndex.get(i).getDefinedType()) || varIndex.get(i).getDefinedType().equals(Auto.TYPE)) {
 					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varIndex.get(i).getDefinedType(), varname, c, c.getTarget()));
 				} else {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
@@ -203,7 +203,7 @@ public class Procedure implements Cloneable {
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
 		try {
-			if (tree.getData() instanceof CFunction
+			if(tree.getData() instanceof CFunction
 					&& "sconcat".equals(tree.getData().val())) {
 				//If the inner tree is just an sconcat, we can optimize by
 				//simply running the arguments to the sconcat. We're not going
@@ -213,35 +213,35 @@ public class Procedure implements Cloneable {
 				//and we still should do that, but this check is quick enough,
 				//and so can remain even once we do add the optimization to the
 				//compiler proper.
-				for (ParseTree child : tree.getChildren()) {
+				for(ParseTree child : tree.getChildren()) {
 					fakeScript.eval(child, env);
 				}
 			} else {
 				fakeScript.eval(tree, env);
 			}
-		} catch (FunctionReturnException e) {
+		} catch(FunctionReturnException e) {
 			// Normal exit
 			stManager.popStackTraceElement();
 			Construct ret = e.getReturn();
-			if (!InstanceofUtil.isInstanceof(ret, returnType)) {
+			if(!InstanceofUtil.isInstanceof(ret, returnType)) {
 				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type " + returnType.val()
 						+ " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 			}
 			return ret;
-		} catch (LoopManipulationException ex) {
+		} catch(LoopManipulationException ex) {
 			// Not exactly normal, but pop anyways
 			stManager.popStackTraceElement();
 			// These cannot bubble up past procedure calls. This will eventually be
 			// a compile error.
 			throw ConfigRuntimeException.CreateUncatchableException("Loop manipulation operations (e.g. break() or continue()) cannot"
 					+ " bubble up past procedures.", t);
-		} catch (ConfigRuntimeException e) {
-			if (e instanceof AbstractCREException) {
+		} catch(ConfigRuntimeException e) {
+			if(e instanceof AbstractCREException) {
 				((AbstractCREException) e).freezeStackTraceElements(stManager);
 			}
 			stManager.popStackTraceElement();
 			throw e;
-		} catch (Throwable th) {
+		} catch(Throwable th) {
 			// Not sure. Pop, but rethrow
 			stManager.popStackTraceElement();
 			throw th;
@@ -249,7 +249,7 @@ public class Procedure implements Cloneable {
 		// Normal exit, but no return.
 		stManager.popStackTraceElement();
 		// If we got here, then there was no return value. This is fine, but only for returnType void or auto.
-		if (!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
+		if(!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
 			throw new CRECastException("Expecting procedure \"" + name + "\" to return a value of type " + returnType.val() + ","
 					+ " but no value was returned.", tree.getTarget());
 		}
@@ -263,10 +263,10 @@ public class Procedure implements Cloneable {
 	@Override
 	public Procedure clone() throws CloneNotSupportedException {
 		Procedure clone = (Procedure) super.clone();
-		if (this.varList != null) {
+		if(this.varList != null) {
 			clone.varList = new HashMap<>(this.varList);
 		}
-		if (this.tree != null) {
+		if(this.tree != null) {
 			clone.tree = this.tree.clone();
 		}
 		return clone;

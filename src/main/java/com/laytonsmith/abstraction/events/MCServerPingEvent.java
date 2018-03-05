@@ -8,19 +8,19 @@ import java.util.Set;
 
 public interface MCServerPingEvent extends BindableEvent {
 
-    InetAddress getAddress();
+	InetAddress getAddress();
 
-    int getMaxPlayers();
+	int getMaxPlayers();
 
-    String getMOTD();
+	String getMOTD();
 
-    int getNumPlayers();
+	int getNumPlayers();
 
-    void setMaxPlayers(int max);
+	void setMaxPlayers(int max);
 
-    void setMOTD(String motd);
+	void setMOTD(String motd);
 
-    Set<MCPlayer> getPlayers();
+	Set<MCPlayer> getPlayers();
 
-    void setPlayers(Collection<MCPlayer> players);
+	void setPlayers(Collection<MCPlayer> players);
 }

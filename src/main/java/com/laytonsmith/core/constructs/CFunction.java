@@ -44,7 +44,7 @@ public class CFunction extends Construct {
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
 	public Function getFunction() throws ConfigCompileException {
-		if (function == null) {
+		if(function == null) {
 			function = (Function) FunctionList.getFunction(val(), this.getTarget());
 		}
 		return function;

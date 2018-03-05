@@ -62,7 +62,7 @@ public class SerializedPersistence extends AbstractDataSource {
 		String file;
 		try {
 			file = getConnectionMixin().getPath();
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 		storageLocation = new File(file);
@@ -84,7 +84,7 @@ public class SerializedPersistence extends AbstractDataSource {
 	 * @throws Exception
 	 */
 	private void load() throws Exception {
-		if (!isLoaded) {
+		if(!isLoaded) {
 			queue.invokeAndWait(new Callable<Object>() {
 
 				@Override
@@ -93,10 +93,10 @@ public class SerializedPersistence extends AbstractDataSource {
 						FileInputStream fis = null;
 						ObjectInputStream in = null;
 						try {
-							if (!storageLocation.exists()) {
+							if(!storageLocation.exists()) {
 								storageLocation.createNewFile();
 							}
-							if (storageLocation.length() == 0) {
+							if(storageLocation.length() == 0) {
 								data = new HashMap<String, String>();
 							} else {
 								fis = new FileInputStream(storageLocation);
@@ -104,19 +104,19 @@ public class SerializedPersistence extends AbstractDataSource {
 								data = (HashMap<String, String>) in.readObject();
 							}
 							isLoaded = true;
-						} catch (Throwable t) {
+						} catch(Throwable t) {
 							t.printStackTrace();
 						} finally {
-							if (fis != null) {
+							if(fis != null) {
 								fis.close();
 							}
-							if (in != null) {
+							if(in != null) {
 								in.close();
 							}
 						}
-					} catch (FileNotFoundException ex) {
+					} catch(FileNotFoundException ex) {
 						//ignore this one
-					} catch (Exception ex) {
+					} catch(Exception ex) {
 						throw ex;
 					}
 					return null;
@@ -141,8 +141,8 @@ public class SerializedPersistence extends AbstractDataSource {
 	 * @throws IOException
 	 */
 	private void save(final DaemonManager dm) throws IOException {
-		if (!inTransaction()) {
-			if (writer == null) {
+		if(!inTransaction()) {
+			if(writer == null) {
 				writer = MemoryMapFileUtil.getInstance(storageLocation, grabber);
 			}
 			queue.invokeLater(dm, new Runnable() {
@@ -151,10 +151,10 @@ public class SerializedPersistence extends AbstractDataSource {
 					ObjectOutputStream out = null;
 					ByteArrayOutputStream baos = null;
 					try {
-						if (storageLocation.getParentFile() != null) {
+						if(storageLocation.getParentFile() != null) {
 							storageLocation.getParentFile().mkdirs();
 						}
-						if (!storageLocation.exists()) {
+						if(!storageLocation.exists()) {
 							storageLocation.createNewFile();
 						}
 						//					fos = new FileOutputStream(storageLocation);
@@ -163,21 +163,21 @@ public class SerializedPersistence extends AbstractDataSource {
 						out.writeObject(new HashMap(data));
 						byteData = baos.toByteArray();
 						writer.mark(dm);
-					} catch (IOException ex) {
+					} catch(IOException ex) {
 						Logger.getLogger(SerializedPersistence.class.getName()).log(Level.SEVERE, null, ex);
 					} finally {
 						try {
-							if (baos != null) {
+							if(baos != null) {
 								baos.close();
 							}
-						} catch (IOException ex) {
+						} catch(IOException ex) {
 							Logger.getLogger(SerializedPersistence.class.getName()).log(Level.SEVERE, null, ex);
 						}
 						try {
-							if (out != null) {
+							if(out != null) {
 								out.close();
 							}
-						} catch (IOException ex) {
+						} catch(IOException ex) {
 							Logger.getLogger(SerializedPersistence.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
@@ -191,22 +191,22 @@ public class SerializedPersistence extends AbstractDataSource {
 	 */
 	private String setValue(DaemonManager dm, String key, String value) {
 		//defer loading until we actually try and use the data structure
-		if (isLoaded == false) {
+		if(isLoaded == false) {
 			try {
 				load();
-			} catch (Exception ex) {
+			} catch(Exception ex) {
 				Logger.getLogger("Minecraft").log(Level.SEVERE, null, ex);
 			}
 		}
 		String oldVal = data.get(key);
-		if (value == null) {
+		if(value == null) {
 			data.remove(key);
 		} else {
 			data.put(key, value);
 		}
 		try {
 			save(dm);
-		} catch (Exception ex) {
+		} catch(Exception ex) {
 			Logger.getLogger(SerializedPersistence.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		return oldVal;
@@ -214,14 +214,14 @@ public class SerializedPersistence extends AbstractDataSource {
 
 	private String getValue(String key) {
 		//defer loading until we actually try and use the data structure
-		if (isLoaded == false) {
+		if(isLoaded == false) {
 			try {
 				load();
-			} catch (Exception ex) {
+			} catch(Exception ex) {
 				Logger.getLogger(SerializedPersistence.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-		if (data == null) {
+		if(data == null) {
 			return null;
 		}
 		return data.get(key);
@@ -257,8 +257,8 @@ public class SerializedPersistence extends AbstractDataSource {
 	 */
 	private static String getNamespace0(String[] key) {
 		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < key.length; i++) {
-			if (i > 0) {
+		for(int i = 0; i < key.length; i++) {
+			if(i > 0) {
 				b.append(".").append(key[i]);
 			} else {
 				b.append(key[i]);
@@ -271,8 +271,8 @@ public class SerializedPersistence extends AbstractDataSource {
 	public Set<String[]> keySet(String[] keyBase) {
 		Set<String[]> list = new HashSet<String[]>();
 		String kb = StringUtils.Join(keyBase, ".");
-		for (String key : data.keySet()) {
-			if (key.startsWith(kb)) {
+		for(String key : data.keySet()) {
+			if(key.startsWith(kb)) {
 				list.add(key.split("\\."));
 			}
 		}
@@ -293,12 +293,12 @@ public class SerializedPersistence extends AbstractDataSource {
 
 	@Override
 	public void populate() throws DataSourceException {
-		if (!finishedInitializing) {
+		if(!finishedInitializing) {
 			return;
 		}
 		try {
 			load();
-		} catch (Exception ex) {
+		} catch(Exception ex) {
 			throw new DataSourceException(null, ex);
 		}
 	}
@@ -335,7 +335,7 @@ public class SerializedPersistence extends AbstractDataSource {
 
 	@Override
 	protected void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException {
-		if (!rollback) {
+		if(!rollback) {
 			save(dm);
 		} else {
 			data = transactionData;

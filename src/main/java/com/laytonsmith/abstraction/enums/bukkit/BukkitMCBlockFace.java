@@ -16,7 +16,7 @@ public class BukkitMCBlockFace extends EnumConvertor<MCBlockFace, BlockFace> {
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace();
 		}
 		return instance;

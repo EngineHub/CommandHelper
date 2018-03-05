@@ -22,7 +22,7 @@ public class BukkitMCCommandSender implements MCCommandSender {
 
 	public BukkitMCCommandSender(AbstractionObject a) {
 		this((CommandSender) null);
-		if (a instanceof MCCommandSender) {
+		if(a instanceof MCCommandSender) {
 			this.c = ((CommandSender) a.getHandle());
 		} else {
 			throw new ClassCastException();
@@ -96,9 +96,9 @@ public class BukkitMCCommandSender implements MCCommandSender {
 		// As in https://github.com/sk89q/WorldEdit/blob/master/
 		// worldedit-bukkit/src/main/java/com/sk89q/wepif/DinnerPermsResolver.java#L112-L126
 		List<String> groupNames = new ArrayList<String>();
-		for (PermissionAttachmentInfo permAttach : c.getEffectivePermissions()) {
+		for(PermissionAttachmentInfo permAttach : c.getEffectivePermissions()) {
 			String perm = permAttach.getPermission();
-			if (!(perm.startsWith(Static.groupPrefix) && permAttach.getValue())) {
+			if(!(perm.startsWith(Static.groupPrefix) && permAttach.getValue())) {
 				continue;
 			}
 			groupNames.add(perm.substring(Static.groupPrefix.length(), perm.length()));

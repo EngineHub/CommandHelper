@@ -47,7 +47,7 @@ public class Crypto {
 			byte[] hmac = mac.doFinal(args[1].val().getBytes());
 			String hash = StringUtils.toHex(hmac).toLowerCase();
 			return new CString(hash, t);
-		} catch (NoSuchAlgorithmException | InvalidKeyException ex) {
+		} catch(NoSuchAlgorithmException | InvalidKeyException ex) {
 			throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 		}
 	}
@@ -94,15 +94,15 @@ public class Crypto {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String s = args[0].val();
 			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < s.length(); i++) {
+			for(int i = 0; i < s.length(); i++) {
 				char c = s.charAt(i);
-				if (c >= 'a' && c <= 'm') {
+				if(c >= 'a' && c <= 'm') {
 					c += 13;
-				} else if (c >= 'n' && c <= 'z') {
+				} else if(c >= 'n' && c <= 'z') {
 					c -= 13;
-				} else if (c >= 'A' && c <= 'M') {
+				} else if(c >= 'A' && c <= 'M') {
 					c += 13;
-				} else if (c >= 'A' && c <= 'Z') {
+				} else if(c >= 'A' && c <= 'Z') {
 					c -= 13;
 				}
 				b.append(c);
@@ -174,7 +174,7 @@ public class Crypto {
 				digest.update(args[0].val().getBytes());
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 				return new CString(hash, t);
-			} catch (NoSuchAlgorithmException ex) {
+			} catch(NoSuchAlgorithmException ex) {
 				throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 			}
 		}
@@ -242,7 +242,7 @@ public class Crypto {
 				digest.update(args[0].val().getBytes());
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 				return new CString(hash, t);
-			} catch (NoSuchAlgorithmException ex) {
+			} catch(NoSuchAlgorithmException ex) {
 				throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 			}
 		}
@@ -309,7 +309,7 @@ public class Crypto {
 				digest.update(args[0].val().getBytes());
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 				return new CString(hash, t);
-			} catch (NoSuchAlgorithmException ex) {
+			} catch(NoSuchAlgorithmException ex) {
 				throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 			}
 		}
@@ -378,7 +378,7 @@ public class Crypto {
 				digest.update(args[0].val().getBytes());
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 				return new CString(hash, t);
-			} catch (NoSuchAlgorithmException ex) {
+			} catch(NoSuchAlgorithmException ex) {
 				throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 			}
 		}
@@ -421,13 +421,13 @@ public class Crypto {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int log_rounds = 5;
-			if (args.length == 2) {
+			if(args.length == 2) {
 				log_rounds = Static.getInt32(args[1], t);
 			}
 			try {
 				String hash = BCrypt.hashpw(args[0].val(), BCrypt.gensalt(log_rounds));
 				return new CString(hash, t);
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				throw new CRERangeException(ex.getMessage(), t);
 			}
 		}

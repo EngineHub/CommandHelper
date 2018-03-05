@@ -32,16 +32,16 @@ public final class Marquee {
 	}
 
 	public void setText(String text) {
-		if (text == null) {
+		if(text == null) {
 			text = "";
 		}
-		if (!text.endsWith(" ")) {
+		if(!text.endsWith(" ")) {
 			text = text + " ";
 		}
-		if (text.length() < maxChars) {
+		if(text.length() < maxChars) {
 			//Pad with spaces, so we still get the marquee effect
 			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < maxChars - text.length(); i++) {
+			for(int i = 0; i < maxChars - text.length(); i++) {
 				b.append(" ");
 			}
 			text += b.toString();
@@ -50,12 +50,12 @@ public final class Marquee {
 	}
 
 	public void start() {
-		if (run) {
+		if(run) {
 			return;
 		}
 		run = true;
 		String name = text;
-		if (name.length() > 10) {
+		if(name.length() > 10) {
 			name = text.substring(0, 10);
 		}
 
@@ -64,12 +64,12 @@ public final class Marquee {
 			public void run() {
 				int loopPointer = 0;
 				try {
-					while (run) {
+					while(run) {
 						final String composite;
 						String psuedoText = text + text + text;
 						composite = psuedoText.substring(loopPointer, maxChars + loopPointer);
 						loopPointer++;
-						if (loopPointer > text.length()) {
+						if(loopPointer > text.length()) {
 							//reset it once we go over the length
 							loopPointer = 0;
 						}
@@ -78,7 +78,7 @@ public final class Marquee {
 
 						Thread.sleep(delay);
 					}
-				} catch (Exception ex) { //We want an exception to kill us, but we also want to rethrow it as a runtime exception.
+				} catch(Exception ex) { //We want an exception to kill us, but we also want to rethrow it as a runtime exception.
 					throw new RuntimeException(ex);
 				}
 			}

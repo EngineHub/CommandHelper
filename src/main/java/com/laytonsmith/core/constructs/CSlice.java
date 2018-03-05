@@ -34,16 +34,16 @@ public class CSlice extends CArray {
 	public CSlice(String slice, Target t) throws ConfigCompileException {
 		super(t);
 		String[] split = slice.split("\\.\\.");
-		if (split.length > 2) {
+		if(split.length > 2) {
 			throw new ConfigCompileException("Invalid slice notation! (" + slice + ")", t);
 		}
 
 		String sstart;
 		String sfinish;
-		if (split.length == 1) {
+		if(split.length == 1) {
 			sstart = slice.trim().substring(0, slice.trim().length() - 2);
 			sfinish = "-1";
-		} else if (slice.trim().startsWith("..")) {
+		} else if(slice.trim().startsWith("..")) {
 			sstart = "0";
 			sfinish = slice.trim().substring(2);
 		} else {
@@ -53,7 +53,7 @@ public class CSlice extends CArray {
 		try {
 			start = Long.parseLong(sstart.trim());
 			finish = Long.parseLong(sfinish.trim());
-		} catch (NumberFormatException e) {
+		} catch(NumberFormatException e) {
 			throw new CRECastException("Expecting integer in a slice, but was given \"" + sstart + "\" and \"" + sfinish + "\"", t);
 		}
 		calculateCaches();
@@ -121,7 +121,7 @@ public class CSlice extends CArray {
 	@Override
 	public Construct get(Construct index, Target t) {
 		long i = Static.getInt(index, t);
-		if (i > max) {
+		if(i > max) {
 			throw new CRERangeException("Index out of bounds. Index: " + i + " Size: " + max, t);
 		}
 		return new CInt(start + (direction * i), t);
@@ -173,12 +173,12 @@ public class CSlice extends CArray {
 	public boolean contains(Construct c) {
 		try {
 			long i = Static.getInt(c, Target.UNKNOWN);
-			if (start < finish) {
+			if(start < finish) {
 				return start <= i && i <= finish;
 			} else {
 				return start >= i && i <= finish;
 			}
-		} catch (ConfigRuntimeException e) {
+		} catch(ConfigRuntimeException e) {
 			return false;
 		}
 	}
@@ -188,7 +188,7 @@ public class CSlice extends CArray {
 		try {
 			long i = Long.parseLong(c);
 			return i >= 0 && i < size;
-		} catch (NumberFormatException e) {
+		} catch(NumberFormatException e) {
 			return false;
 		}
 	}

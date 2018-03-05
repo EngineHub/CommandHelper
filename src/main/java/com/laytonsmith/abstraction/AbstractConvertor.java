@@ -34,7 +34,7 @@ public abstract class AbstractConvertor implements Convertor {
 			}
 		});
 		Iterator<Runnable> iter = shutdownHooks.iterator();
-		while (iter.hasNext()) {
+		while(iter.hasNext()) {
 			iter.next().run();
 			iter.remove();
 		}
@@ -76,8 +76,8 @@ public abstract class AbstractConvertor implements Convertor {
 
 	@Override
 	public void ClearAllRunnables() {
-		synchronized (tasks) {
-			for (Task task : tasks.values()) {
+		synchronized(tasks) {
+			for(Task task : tasks.values()) {
 				task.unregister();
 			}
 			tasks.clear();
@@ -86,8 +86,8 @@ public abstract class AbstractConvertor implements Convertor {
 
 	@Override
 	public void ClearFutureRunnable(int id) {
-		synchronized (tasks) {
-			if (tasks.containsKey(id)) {
+		synchronized(tasks) {
+			if(tasks.containsKey(id)) {
 				tasks.get(id).unregister();
 				tasks.remove(id);
 			}
@@ -104,7 +104,7 @@ public abstract class AbstractConvertor implements Convertor {
 				triggerRunnable(r);
 			}
 		});
-		synchronized (tasks) {
+		synchronized(tasks) {
 			tasks.put(id, t);
 			t.register();
 		}
@@ -121,7 +121,7 @@ public abstract class AbstractConvertor implements Convertor {
 				triggerRunnable(r);
 			}
 		});
-		synchronized (tasks) {
+		synchronized(tasks) {
 			tasks.put(id, t);
 			t.register();
 		}
@@ -174,7 +174,7 @@ public abstract class AbstractConvertor implements Convertor {
 			this.dm = dm;
 			this.repeater = repeater;
 			this.initialDelay = initialDelay;
-			if (repeater) {
+			if(repeater) {
 				this.interval = interval;
 			} else {
 				this.interval = Long.MAX_VALUE;
@@ -189,22 +189,22 @@ public abstract class AbstractConvertor implements Convertor {
 				@Override
 				public void run() {
 					task.run();
-					if (!repeater) {
+					if(!repeater) {
 						unregister();
-						synchronized (tasks) {
+						synchronized(tasks) {
 							tasks.remove(id);
 						}
 					}
 				}
 			}, initialDelay, interval);
-			if (dm != null) {
+			if(dm != null) {
 				dm.activateThread(null);
 			}
 		}
 
 		public void unregister() {
 			timer.cancel();
-			if (dm != null) {
+			if(dm != null) {
 				dm.deactivateThread(null);
 			}
 		}

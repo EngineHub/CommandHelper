@@ -99,7 +99,7 @@ public class ExampleScript {
 	@SuppressWarnings("unchecked")
 	private ExampleScript(String description, String script, String output, boolean intentionalCompileError) throws ConfigCompileException {
 		Class<?> c = StackTraceUtils.getCallingClass();
-		if (Function.class.isAssignableFrom(c)) {
+		if(Function.class.isAssignableFrom(c)) {
 			functionName = ReflectionUtils.instantiateUnsafe((Class<? extends Function>) c).getName();
 		}
 		this.description = description;
@@ -110,26 +110,26 @@ public class ExampleScript {
 		try {
 			this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File((OSUtils.GetOS() == OSUtils.OS.WINDOWS ? "C:\\" : "/") + "Examples.ms"), true));
 			this.output = output;
-		} catch (ConfigCompileException e) {
-			if (intentionalCompileError) {
+		} catch(ConfigCompileException e) {
+			if(intentionalCompileError) {
 				this.output = "Causes compile error: " + e.getMessage();
 			} else {
 				this.output = errorOutput;
 				System.out.println(consoleErrorOutput);
 				System.out.println(e.getMessage());
 			}
-		} catch (ConfigCompileGroupException ex) {
-			if (intentionalCompileError) {
+		} catch(ConfigCompileGroupException ex) {
+			if(intentionalCompileError) {
 				StringBuilder b = new StringBuilder();
 				b.append("Causes compile errors:\n");
-				for (ConfigCompileException e : ex.getList()) {
+				for(ConfigCompileException e : ex.getList()) {
 					b.append(e.getMessage()).append("\n");
 				}
 				this.output = b.toString();
 			} else {
 				this.output = errorOutput;
 				System.out.println(consoleErrorOutput);
-				for (ConfigCompileException e : ex.getList()) {
+				for(ConfigCompileException e : ex.getList()) {
 					System.out.println(e.getMessage());
 				}
 			}
@@ -155,26 +155,26 @@ public class ExampleScript {
 	}
 
 	private Object genericReturn(Class r) {
-		if (r.isPrimitive()) {
-			if (r == int.class) {
+		if(r.isPrimitive()) {
+			if(r == int.class) {
 				return 0;
-			} else if (r == byte.class) {
+			} else if(r == byte.class) {
 				return (byte) 0;
-			} else if (r == double.class) {
+			} else if(r == double.class) {
 				return 0.0;
-			} else if (r == float.class) {
+			} else if(r == float.class) {
 				return 0.0f;
-			} else if (r == char.class) {
+			} else if(r == char.class) {
 				return '\0';
-			} else if (r == short.class) {
+			} else if(r == short.class) {
 				return (short) 0;
-			} else if (r == boolean.class) {
+			} else if(r == boolean.class) {
 				return false;
 			} else { //long
 				return 0L;
 			}
 		} else {
-			if (r == String.class) {
+			if(r == String.class) {
 				return "";
 			}
 			return null;
@@ -186,14 +186,14 @@ public class ExampleScript {
 	}
 
 	public String getOutput() throws IOException, DataSourceException, URISyntaxException {
-		if (output != null) {
+		if(output != null) {
 			return output;
 		}
 		Script s = Script.GenerateScript(script, Static.GLOBAL_PERMISSION);
 		Environment env;
 		try {
 			env = Static.GenerateStandaloneEnvironment();
-		} catch (Profiles.InvalidProfileException ex) {
+		} catch(Profiles.InvalidProfileException ex) {
 			throw new RuntimeException(ex);
 		}
 		Class[] interfaces = new Class[]{
@@ -202,13 +202,13 @@ public class ExampleScript {
 		MCPlayer p = (MCPlayer) Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), interfaces, new InvocationHandler() {
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-				if (method.getName().equals("getName") || method.getName().equals("getDisplayName")) {
+				if(method.getName().equals("getName") || method.getName().equals("getDisplayName")) {
 					return "Player";
 				}
-				if (method.getName().equals("sendMessage")) {
+				if(method.getName().equals("sendMessage")) {
 					playerOutput.append(args[0].toString()).append("\n");
 				}
-				if (method.getName().equals("isOnline")) {
+				if(method.getName().equals("isOnline")) {
 					return true;
 				}
 				return genericReturn(method.getReturnType());
@@ -226,17 +226,17 @@ public class ExampleScript {
 
 					@Override
 					public void done(String output) {
-						if (output != null) {
+						if(output != null) {
 							finalOutput.append(output);
 						}
 					}
 				}, null, vars);
-			} catch (ConfigCompileException | ConfigCompileGroupException ex) {
+			} catch(ConfigCompileException | ConfigCompileGroupException ex) {
 				// We already checked for compile errors, so this won't happen
 			}
-		} catch (ConfigRuntimeException e) {
+		} catch(ConfigRuntimeException e) {
 			String name = e.getClass().getName();
-			if (e instanceof AbstractCREException) {
+			if(e instanceof AbstractCREException) {
 				name = ((AbstractCREException) e).getName();
 			}
 			thrown = "\n(Throws " + name + ": " + e.getMessage() + ")";
@@ -245,7 +245,7 @@ public class ExampleScript {
 		String finalOut = finalOutput.toString().trim();
 
 		String out = (playerOut.equals("") ? "" : playerOut) + (finalOut.equals("") || !playerOut.trim().equals("") ? "" : ":" + finalOut);
-		if (thrown != null) {
+		if(thrown != null) {
 			out += thrown;
 		}
 		return out;

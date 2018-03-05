@@ -16,7 +16,7 @@ public class BukkitMCTNT extends BukkitMCEntity implements MCTNT {
 
 	@Override
 	public MCEntity getSource() {
-		if (tnt.getSource() == null) {
+		if(tnt.getSource() == null) {
 			return null;
 		}
 		return new BukkitMCEntity(tnt.getSource());

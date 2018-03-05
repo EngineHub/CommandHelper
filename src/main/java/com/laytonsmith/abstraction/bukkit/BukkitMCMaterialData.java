@@ -16,7 +16,7 @@ public class BukkitMCMaterialData implements MCMaterialData {
 
 	public BukkitMCMaterialData(AbstractionObject a) {
 		this((MaterialData) null);
-		if (a instanceof MCMaterialData) {
+		if(a instanceof MCMaterialData) {
 			this.md = ((MaterialData) a.getHandle());
 		} else {
 			throw new ClassCastException();

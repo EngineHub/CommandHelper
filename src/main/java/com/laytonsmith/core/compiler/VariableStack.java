@@ -34,8 +34,8 @@ public final class VariableStack {
 	private Construct get(String name, Target t) {
 		List<Map<String, Construct>> varsReversed = new ArrayList<Map<String, Construct>>();
 		Collections.reverse(varsReversed);
-		for (Map<String, Construct> map : varsReversed) {
-			if (map.containsKey(name)) {
+		for(Map<String, Construct> map : varsReversed) {
+			if(map.containsKey(name)) {
 				return map.get(name);
 			}
 		}

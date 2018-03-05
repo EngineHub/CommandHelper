@@ -16,7 +16,7 @@ public class BukkitMCClickType extends EnumConvertor<MCClickType, ClickType> {
 	private static BukkitMCClickType instance;
 
 	public static BukkitMCClickType getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new BukkitMCClickType();
 		}
 		return instance;

@@ -76,7 +76,7 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray && !(args[0] instanceof CMutablePrimitive)) {
+			if(args[0] instanceof CArray && !(args[0] instanceof CMutablePrimitive)) {
 				return new CInt(((CArray) args[0]).size(), t);
 			}
 			throw new CRECastException("Argument 1 of array_size must be an array", t);
@@ -138,23 +138,23 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			Construct index;
 			Construct defaultConstruct = null;
-			if (args.length >= 2) {
+			if(args.length >= 2) {
 				index = args[1];
 			} else {
 				index = new CSlice(0, -1, t);
 			}
-			if (args.length >= 3) {
+			if(args.length >= 3) {
 				defaultConstruct = args[2];
 			}
 
-			if (args[0] instanceof CArray) {
+			if(args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
-				if (index instanceof CSlice) {
+				if(index instanceof CSlice) {
 
 					// Deep clone the array if the "index" is the initial one.
-					if (((CSlice) index).getStart() == 0 && ((CSlice) index).getFinish() == -1) {
+					if(((CSlice) index).getStart() == 0 && ((CSlice) index).getFinish() == -1) {
 						return ca.deepClone(t);
-					} else if (ca.inAssociativeMode()) {
+					} else if(ca.inAssociativeMode()) {
 						throw new CRECastException("Array slices are not allowed with an associative array", t);
 					}
 
@@ -163,36 +163,36 @@ public class ArrayHandling {
 					long finish = ((CSlice) index).getFinish();
 					try {
 						//Convert negative indexes
-						if (start < 0) {
+						if(start < 0) {
 							start = ca.size() + start;
 						}
-						if (finish < 0) {
+						if(finish < 0) {
 							finish = ca.size() + finish;
 						}
 						CArray na = ca.createNew(t);
-						if (finish < start) {
+						if(finish < start) {
 							//return an empty array in cases where the indexes don't make sense
 							return na;
 						}
-						for (long i = start; i <= finish; i++) {
+						for(long i = start; i <= finish; i++) {
 							try {
 								na.push(ca.get((int) i, t).clone(), t);
-							} catch (CloneNotSupportedException e) {
+							} catch(CloneNotSupportedException e) {
 								na.push(ca.get((int) i, t), t);
 							}
 						}
 						return na;
-					} catch (NumberFormatException e) {
+					} catch(NumberFormatException e) {
 						throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
 					}
 				} else {
 					try {
-						if (!ca.inAssociativeMode()) {
-							if (index instanceof CNull) {
+						if(!ca.inAssociativeMode()) {
+							if(index instanceof CNull) {
 								throw new CRECastException("Expected a number, but recieved null instead", t);
 							}
 							long iindex = Static.getInt(index, t);
-							if (iindex < 0) {
+							if(iindex < 0) {
 								//negative index, convert to positive index
 								iindex = ca.size() + iindex;
 							}
@@ -200,16 +200,16 @@ public class ArrayHandling {
 						} else {
 							return ca.get(index, t);
 						}
-					} catch (ConfigRuntimeException e) {
-						if (e instanceof CREIndexOverflowException) {
-							if (defaultConstruct != null) {
+					} catch(ConfigRuntimeException e) {
+						if(e instanceof CREIndexOverflowException) {
+							if(defaultConstruct != null) {
 								return defaultConstruct;
 							}
 						}
-						if (env.getEnv(GlobalEnv.class).GetFlag("array-special-get") != null) {
+						if(env.getEnv(GlobalEnv.class).GetFlag("array-special-get") != null) {
 							//They are asking for an array that doesn't exist yet, so let's create it now.
 							CArray c;
-							if (ca.inAssociativeMode()) {
+							if(ca.inAssociativeMode()) {
 								c = CArray.GetAssociativeArray(t);
 							} else {
 								c = new CArray(t);
@@ -220,22 +220,22 @@ public class ArrayHandling {
 						throw e;
 					}
 				}
-			} else if (args[0] instanceof ArrayAccess) {
+			} else if(args[0] instanceof ArrayAccess) {
 				ArrayAccess aa = (ArrayAccess) args[0];
-				if (index instanceof CSlice) {
+				if(index instanceof CSlice) {
 					//It's a range
 					int start = (int) ((CSlice) index).getStart();
 					int finish = (int) ((CSlice) index).getFinish();
 					try {
 						//Convert negative indexes
-						if (start < 0) {
+						if(start < 0) {
 							start = (int) aa.size() + start;
 						}
-						if (finish < 0) {
+						if(finish < 0) {
 							finish = (int) aa.size() + finish;
 						}
 						return aa.slice(start, finish + 1, t);
-					} catch (NumberFormatException e) {
+					} catch(NumberFormatException e) {
 						throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
 					}
 				} else {
@@ -281,13 +281,13 @@ public class ArrayHandling {
 
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			if (args.length == 0) {
+			if(args.length == 0) {
 				throw new CRECastException("Argument 1 of array_get must be an array", t);
 			}
-			if (args[0] instanceof ArrayAccess) {
+			if(args[0] instanceof ArrayAccess) {
 				ArrayAccess aa = (ArrayAccess) args[0];
-				if (!aa.canBeAssociative()) {
-					if (!(args[1] instanceof CInt) && !(args[1] instanceof CSlice)) {
+				if(!aa.canBeAssociative()) {
+					if(!(args[1] instanceof CInt) && !(args[1] instanceof CSlice)) {
 						throw new ConfigCompileException("Accessing an element as an associative array,"
 								+ " when it can only accept integers.", t);
 					}
@@ -345,12 +345,12 @@ public class ArrayHandling {
 			env.getEnv(GlobalEnv.class).ClearFlag("array-special-get");
 			Construct index = parent.seval(nodes[1], env);
 			Construct value = parent.seval(nodes[2], env);
-			if (!(array instanceof CArray)) {
+			if(!(array instanceof CArray)) {
 				throw new CRECastException("Argument 1 of array_set must be an array", t);
 			}
 			try {
 				((CArray) array).set(index, value, t);
-			} catch (IndexOutOfBoundsException e) {
+			} catch(IndexOutOfBoundsException e) {
 				throw new CREIndexOverflowException("The index " + index.asString().getQuote() + " is out of bounds", t);
 			}
 			return value;
@@ -358,10 +358,10 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
+			if(args[0] instanceof CArray) {
 				try {
 					((CArray) args[0]).set(args[1], args[2], t);
-				} catch (IndexOutOfBoundsException e) {
+				} catch(IndexOutOfBoundsException e) {
 					throw new CREIndexOverflowException("The index " + args[1].val() + " is out of bounds", t);
 				}
 				return args[2];
@@ -427,15 +427,15 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args.length < 2) {
+			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException("At least 2 arguments must be provided to array_push", t);
 			}
-			if (args[0] instanceof CArray) {
+			if(args[0] instanceof CArray) {
 				CArray array = (CArray) args[0];
 				int initialSize = (int) array.size();
-				for (int i = 1; i < args.length; i++) {
+				for(int i = 1; i < args.length; i++) {
 					array.push(args[i], t);
-					for (ArrayAccess.ArrayAccessIterator iterator : env.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(((ArrayAccess) args[0]))) {
+					for(ArrayAccess.ArrayAccessIterator iterator : env.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(((ArrayAccess) args[0]))) {
 						//This is always pushing after the current index.
 						//Given that this is the last one, we don't need to waste
 						//time with a call to increment the blacklist items either.
@@ -523,8 +523,8 @@ public class ArrayHandling {
 				array.push(value, index, t);
 				//If the push succeeded (actually an insert) we need to check to see if we are currently iterating
 				//and act appropriately.
-				for (ArrayAccess.ArrayAccessIterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
-					if (index <= iterator.getCurrent()) {
+				for(ArrayAccess.ArrayAccessIterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
+					if(index <= iterator.getCurrent()) {
 						//The insertion happened before (or at) this index, so we need to increment the
 						//iterator, as well as increment all the blacklist items above this one.
 						iterator.incrementCurrent();
@@ -535,9 +535,9 @@ public class ArrayHandling {
 						iterator.addToBlacklist(index);
 					}
 				}
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CRECastException(e.getMessage(), t);
-			} catch (IndexOutOfBoundsException ex) {
+			} catch(IndexOutOfBoundsException ex) {
 				throw new CREIndexOverflowException(ex.getMessage(), t);
 			}
 			return CVoid.VOID;
@@ -596,12 +596,12 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (!(args[0] instanceof CArray)) {
+			if(!(args[0] instanceof CArray)) {
 				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 			}
 			CArray ca = (CArray) args[0];
-			for (Construct key : ca.keySet()) {
-				if (new equals().exec(t, env, ca.get(key, t), args[1]).getBoolean()) {
+			for(Construct key : ca.keySet()) {
+				if(new equals().exec(t, env, ca.get(key, t), args[1]).getBoolean()) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -693,10 +693,10 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
+			if(args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
-				for (int i = 0; i < ca.size(); i++) {
-					if (new equals_ic().exec(t, environment, ca.get(i, t), args[1]).getBoolean()) {
+				for(int i = 0; i < ca.size(); i++) {
+					if(new equals_ic().exec(t, environment, ca.get(i, t), args[1]).getBoolean()) {
 						return CBoolean.TRUE;
 					}
 				}
@@ -736,12 +736,12 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (!(args[0] instanceof CArray)) {
+			if(!(args[0] instanceof CArray)) {
 				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 			}
 			CArray ca = (CArray) args[0];
-			for (Construct key : ca.keySet()) {
-				if (new sequals().exec(t, env, ca.get(key, t), args[1]).getBoolean()) {
+			for(Construct key : ca.keySet()) {
+				if(new sequals().exec(t, env, ca.get(key, t), args[1]).getBoolean()) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -840,13 +840,13 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
+			if(args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
-				if (!ca.inAssociativeMode()) {
+				if(!ca.inAssociativeMode()) {
 					try {
 						int index = Static.getInt32(args[1], t);
 						return CBoolean.get(index < ca.size());
-					} catch (ConfigRuntimeException e) {
+					} catch(ConfigRuntimeException e) {
 						//They probably sent a key that can't be translated into an int, so it doesn't exist here.
 						return CBoolean.FALSE;
 					}
@@ -860,7 +860,7 @@ public class ArrayHandling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() < 2) {
+			if(children.size() < 2) {
 				throw new ConfigCompileException(getName() + " must have 2 or more arguments", t);
 			}
 			return null;
@@ -928,14 +928,14 @@ public class ArrayHandling {
 
 		@Override
 		public CArray exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray && args[1] instanceof CInt) {
+			if(args[0] instanceof CArray && args[1] instanceof CInt) {
 				CArray original = (CArray) args[0];
 				int size = (int) ((CInt) args[1]).getInt();
 				Construct fill = CNull.NULL;
-				if (args.length == 3) {
+				if(args.length == 3) {
 					fill = args[2];
 				}
-				for (long i = original.size(); i < size; i++) {
+				for(long i = original.size(); i < size; i++) {
 					original.push(fill, t);
 				}
 			} else {
@@ -1006,21 +1006,21 @@ public class ArrayHandling {
 			long start = 0;
 			long finish = 0;
 			long increment = 1;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				finish = Static.getInt(args[0], t);
-			} else if (args.length == 2) {
+			} else if(args.length == 2) {
 				start = Static.getInt(args[0], t);
 				finish = Static.getInt(args[1], t);
-			} else if (args.length == 3) {
+			} else if(args.length == 3) {
 				start = Static.getInt(args[0], t);
 				finish = Static.getInt(args[1], t);
 				increment = Static.getInt(args[2], t);
 			}
-			if (start < finish && increment < 0 || start > finish && increment > 0 || increment == 0) {
+			if(start < finish && increment < 0 || start > finish && increment > 0 || increment == 0) {
 				return new CArray(t);
 			}
 			CArray ret = new CArray(t);
-			for (long i = start; (increment > 0 ? i < finish : i > finish); i = i + increment) {
+			for(long i = start; (increment > 0 ? i < finish : i > finish); i = i + increment) {
 				ret.push(new CInt(i, t), t);
 			}
 			return ret;
@@ -1085,10 +1085,10 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			// As an exception, strings aren't supported here. There's no reason to do this for a string that isn't accidental.
-			if (args[0] instanceof ArrayAccess && !(args[0] instanceof CString)) {
+			if(args[0] instanceof ArrayAccess && !(args[0] instanceof CString)) {
 				ArrayAccess ca = (ArrayAccess) args[0];
 				CArray ca2 = new CArray(t);
-				for (Construct c : ca.keySet()) {
+				for(Construct c : ca.keySet()) {
 					ca2.push(c, t);
 				}
 				return ca2;
@@ -1151,10 +1151,10 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
+			if(args[0] instanceof CArray) {
 				CArray ca = Static.getArray(args[0], t);
 				CArray ca2 = new CArray(t);
-				for (Construct c : ca.keySet()) {
+				for(Construct c : ca.keySet()) {
 					ca2.push(ca.get(c, t), t);
 				}
 				return ca2;
@@ -1219,19 +1219,19 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray newArray = new CArray(t);
-			if (args.length < 2) {
+			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException("array_merge must be called with at least two parameters", t);
 			}
-			for (Construct arg : args) {
-				if (arg instanceof ArrayAccess) {
+			for(Construct arg : args) {
+				if(arg instanceof ArrayAccess) {
 					ArrayAccess cur = (ArrayAccess) arg;
-					if (!cur.isAssociative()) {
-						for (int j = 0; j < cur.size(); j++) {
+					if(!cur.isAssociative()) {
+						for(int j = 0; j < cur.size(); j++) {
 							newArray.push(cur.get(j, t), t);
 						}
 					} else {
-						for (Construct key : cur.keySet()) {
-							if (key instanceof CInt) {
+						for(Construct key : cur.keySet()) {
+							if(key instanceof CInt) {
 								newArray.set(key, cur.get((int) ((CInt) key).getInt(), t), t);
 							} else {
 								newArray.set(key, cur.get(key.val(), t), t);
@@ -1303,14 +1303,14 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
-			if (array.isAssociative()) {
+			if(array.isAssociative()) {
 				return array.remove(args[1]);
 			} else {
 				int index = Static.getInt32(args[1], t);
 				Construct removed = array.remove(args[1]);
 				//If the removed index is <= the current index, we need to decrement the counter.
-				for (ArrayAccess.ArrayAccessIterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
-					if (index <= iterator.getCurrent()) {
+				for(ArrayAccess.ArrayAccessIterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
+					if(index <= iterator.getCurrent()) {
 						iterator.decrementCurrent();
 					}
 				}
@@ -1366,19 +1366,19 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (!(args[0] instanceof CArray)) {
+			if(!(args[0] instanceof CArray)) {
 				throw new CRECastException("Expecting argument 1 to be an array", t);
 			}
 			StringBuilder b = new StringBuilder();
 			CArray ca = (CArray) args[0];
 			String glue = " ";
-			if (args.length == 2) {
+			if(args.length == 2) {
 				glue = Static.getPrimitive(args[1], t).val();
 			}
 			boolean first = true;
-			for (Construct key : ca.keySet()) {
+			for(Construct key : ca.keySet()) {
 				Construct value = ca.get(key.val(), t);
-				if (!first) {
+				if(!first) {
 					b.append(glue).append(value.val());
 				} else {
 					b.append(value.val());
@@ -1480,36 +1480,36 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (!(args[0] instanceof CArray)) {
+			if(!(args[0] instanceof CArray)) {
 				throw new CRECastException("The first parameter to array_sort must be an array", t);
 			}
 			CArray ca = (CArray) args[0];
 			CArray.SortType sortType = CArray.SortType.REGULAR;
 			CClosure customSort = null;
-			if (ca.size() <= 1) {
+			if(ca.size() <= 1) {
 				return ca;
 			}
 			try {
-				if (args.length == 2) {
-					if (args[1] instanceof CClosure) {
+				if(args.length == 2) {
+					if(args[1] instanceof CClosure) {
 						sortType = null;
 						customSort = (CClosure) args[1];
 					} else {
 						sortType = CArray.SortType.valueOf(args[1].val());
 					}
 				}
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CREFormatException("The sort type must be one of either: " + StringUtils.Join(CArray.SortType.values(), ", ", " or "), t);
 			}
-			if (sortType == null) {
+			if(sortType == null) {
 				// It's a custom sort, which we have implemented below.
-				if (ca.isAssociative()) {
+				if(ca.isAssociative()) {
 					throw new CRECastException("Associative arrays may not be sorted using a custom comparator.", t);
 				}
 				CArray sorted = customSort(ca, customSort, t);
 				//Clear it out and re-apply the values, so this is in place.
 				ca.clear();
-				for (Construct c : sorted.keySet()) {
+				for(Construct c : sorted.keySet()) {
 					ca.set(c, sorted.get(c, t), t);
 				}
 			} else {
@@ -1519,17 +1519,17 @@ public class ArrayHandling {
 		}
 
 		private CArray customSort(CArray ca, CClosure closure, Target t) {
-			if (ca.size() <= 1) {
+			if(ca.size() <= 1) {
 				return ca;
 			}
 
 			CArray left = new CArray(t);
 			CArray right = new CArray(t);
 			int middle = (int) (ca.size() / 2);
-			for (int i = 0; i < middle; i++) {
+			for(int i = 0; i < middle; i++) {
 				left.push(ca.get(i, t), t);
 			}
-			for (int i = middle; i < ca.size(); i++) {
+			for(int i = middle; i < ca.size(); i++) {
 				right.push(ca.get(i, t), t);
 			}
 
@@ -1541,22 +1541,22 @@ public class ArrayHandling {
 
 		private CArray merge(CArray left, CArray right, CClosure closure, Target t) {
 			CArray result = new CArray(t);
-			while (left.size() > 0 || right.size() > 0) {
-				if (left.size() > 0 && right.size() > 0) {
+			while(left.size() > 0 || right.size() > 0) {
+				if(left.size() > 0 && right.size() > 0) {
 					// Compare the first two elements of each side
 					Construct l = left.get(0, t);
 					Construct r = right.get(0, t);
 					Construct c = null;
 					try {
 						closure.execute(l, r);
-					} catch (FunctionReturnException ex) {
+					} catch(FunctionReturnException ex) {
 						c = ex.getReturn();
 					}
 					int value;
-					if (c instanceof CNull) {
+					if(c instanceof CNull) {
 						value = 0;
-					} else if (c instanceof CBoolean) {
-						if (((CBoolean) c).getBoolean()) {
+					} else if(c instanceof CBoolean) {
+						if(((CBoolean) c).getBoolean()) {
 							value = 1;
 						} else {
 							value = -1;
@@ -1564,17 +1564,17 @@ public class ArrayHandling {
 					} else {
 						throw new CRECastException("The custom closure did not return a value. It must always return true, false, or null.", t);
 					}
-					if (value <= 0) {
+					if(value <= 0) {
 						result.push(left.get(0, t), t);
 						left.remove(0);
 					} else {
 						result.push(right.get(0, t), t);
 						right.remove(0);
 					}
-				} else if (left.size() > 0) {
+				} else if(left.size() > 0) {
 					result.push(left.get(0, t), t);
 					left.remove(0);
-				} else if (right.size() > 0) {
+				} else if(right.size() > 0) {
 					result.push(right.get(0, t), t);
 					right.remove(0);
 				}
@@ -1634,11 +1634,11 @@ public class ArrayHandling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if (children.size() == 2) {
-				if (!children.get(1).getData().isDynamic()) {
+			if(children.size() == 2) {
+				if(!children.get(1).getData().isDynamic()) {
 					try {
 						CArray.SortType.valueOf(children.get(1).getData().val().toUpperCase());
-					} catch (IllegalArgumentException e) {
+					} catch(IllegalArgumentException e) {
 						throw new ConfigCompileException("The sort type must be one of either: " + StringUtils.Join(CArray.SortType.values(), ", ", " or "), t);
 					}
 				}
@@ -1679,7 +1679,7 @@ public class ArrayHandling {
 		boolean started = false;
 
 		private void startup() {
-			if (!started) {
+			if(!started) {
 				queue.invokeLater(null, new Runnable() {
 
 					@Override
@@ -1780,11 +1780,11 @@ public class ArrayHandling {
 			//This needs to be in terms of array_remove, to ensure that the iteration
 			//logic is followed. We will iterate backwards, however, to make the
 			//process more efficient, unless this is an associative array.
-			if (array.isAssociative()) {
+			if(array.isAssociative()) {
 				array.removeValues(args[1]);
 			} else {
-				for (long i = array.size() - 1; i >= 0; i--) {
-					if (BasicLogic.equals.doEquals(array.get(i, t), args[1])) {
+				for(long i = array.size() - 1; i >= 0; i--) {
+					if(BasicLogic.equals.doEquals(array.get(i, t), args[1])) {
 						new array_remove().exec(t, environment, array, new CInt(i, t));
 					}
 				}
@@ -1845,7 +1845,7 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (!(args[0] instanceof CArray)) {
+			if(!(args[0] instanceof CArray)) {
 				throw new CRECastException("Expected parameter 1 to be an array, but was " + args[0].val(), t);
 			}
 			return ((CArray) args[0]).indexesOf(args[1]);
@@ -1909,7 +1909,7 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ca = (CArray) new array_indexes().exec(t, environment, args);
-			if (ca.isEmpty()) {
+			if(ca.isEmpty()) {
 				return CNull.NULL;
 			} else {
 				return ca.get(0, t);
@@ -1968,7 +1968,7 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ca = (CArray) new array_indexes().exec(t, environment, args);
-			if (ca.isEmpty()) {
+			if(ca.isEmpty()) {
 				return CNull.NULL;
 			} else {
 				return ca.get(ca.size() - 1, t);
@@ -2026,7 +2026,7 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
+			if(args[0] instanceof CArray) {
 				((CArray) args[0]).reverse(t);
 			}
 			return CVoid.VOID;
@@ -2089,29 +2089,29 @@ public class ArrayHandling {
 			boolean getKeys = true;
 			CArray array = Static.getArray(args[0], t);
 			CArray newArray = new CArray(t);
-			if (array.isEmpty()) {
+			if(array.isEmpty()) {
 				return newArray;
 			}
-			if (args.length > 1) {
+			if(args.length > 1) {
 				number = Static.getInt(args[1], t);
 			}
-			if (number < 1) {
+			if(number < 1) {
 				throw new CRERangeException("number may not be less than 1.", t);
 			}
-			if (number > Integer.MAX_VALUE) {
+			if(number > Integer.MAX_VALUE) {
 				throw new CRERangeException("Overflow detected. Number cannot be larger than " + Integer.MAX_VALUE, t);
 			}
-			if (args.length > 2) {
+			if(args.length > 2) {
 				getKeys = Static.getBoolean(args[2]);
 			}
 
 			LinkedHashSet<Integer> randoms = new LinkedHashSet<>();
-			while (randoms.size() < number) {
+			while(randoms.size() < number) {
 				randoms.add(java.lang.Math.abs(r.nextInt() % (int) array.size()));
 			}
 			List<Construct> keySet = new ArrayList<>(array.keySet());
-			for (Integer i : randoms) {
-				if (getKeys) {
+			for(Integer i : randoms) {
+				if(getKeys) {
 					newArray.push(keySet.get(i), t);
 				} else {
 					newArray.push(array.get(keySet.get(i), t), t);
@@ -2187,11 +2187,11 @@ public class ArrayHandling {
 		public CArray exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			boolean compareTypes = true;
-			if (args.length == 2) {
+			if(args.length == 2) {
 				compareTypes = Static.getBoolean(args[1]);
 			}
 			final boolean fCompareTypes = compareTypes;
-			if (array.inAssociativeMode()) {
+			if(array.inAssociativeMode()) {
 				return array.clone();
 			} else {
 				List<Construct> asList = array.asList();
@@ -2204,7 +2204,7 @@ public class ArrayHandling {
 								|| (!fCompareTypes && Static.getBoolean(equals.exec(t, environment, item1, item2)));
 					}
 				});
-				for (Construct c : set) {
+				for(Construct c : set) {
 					newArray.push(c, t);
 				}
 				return newArray;
@@ -2274,49 +2274,49 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			ArrayAccess array;
 			CClosure closure;
-			if (!(args[0] instanceof ArrayAccess)) {
+			if(!(args[0] instanceof ArrayAccess)) {
 				throw new CRECastException("Expecting an array for argument 1", t);
 			}
-			if (!(args[1] instanceof CClosure)) {
+			if(!(args[1] instanceof CClosure)) {
 				throw new CRECastException("Expecting a closure for argument 2", t);
 			}
 			array = (ArrayAccess) args[0];
 			closure = (CClosure) args[1];
 			CArray newArray;
-			if (array.isAssociative()) {
+			if(array.isAssociative()) {
 				newArray = CArray.GetAssociativeArray(t);
-				for (Construct key : array.keySet()) {
+				for(Construct key : array.keySet()) {
 					Construct value = array.get(key, t);
 					Construct ret = null;
 					try {
 						closure.execute(key, value);
-					} catch (FunctionReturnException ex) {
+					} catch(FunctionReturnException ex) {
 						ret = ex.getReturn();
 					}
-					if (ret == null) {
+					if(ret == null) {
 						ret = CBoolean.FALSE;
 					}
 					boolean bret = Static.getBoolean(ret);
-					if (bret) {
+					if(bret) {
 						newArray.set(key, value, t);
 					}
 				}
 			} else {
 				newArray = new CArray(t);
-				for (int i = 0; i < array.size(); i++) {
+				for(int i = 0; i < array.size(); i++) {
 					Construct key = new CInt(i, t);
 					Construct value = array.get(i, t);
 					Construct ret = null;
 					try {
 						closure.execute(key, value);
-					} catch (FunctionReturnException ex) {
+					} catch(FunctionReturnException ex) {
 						ret = ex.getReturn();
 					}
-					if (ret == null) {
+					if(ret == null) {
 						ret = CBoolean.FALSE;
 					}
 					boolean bret = Static.getBoolean(ret);
-					if (bret) {
+					if(bret) {
 						newArray.push(value, t);
 					}
 				}
@@ -2388,10 +2388,10 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length != 1) {
+			if(args.length != 1) {
 				throw new CREInsufficientArgumentsException("Expecting exactly one argument", t);
 			}
-			if (!(args[0] instanceof CArray)) {
+			if(!(args[0] instanceof CArray)) {
 				throw new CRECastException("Expecting argument 1 to be an array", t);
 			}
 			return ((CArray) args[0]).deepClone(t);
@@ -2456,15 +2456,15 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length != 1) {
+			if(args.length != 1) {
 				throw new CREInsufficientArgumentsException("Expecting exactly one argument", t);
 			}
-			if (!(args[0] instanceof CArray)) {
+			if(!(args[0] instanceof CArray)) {
 				throw new CRECastException("Expecting argument 1 to be an array", t);
 			}
 			CArray array = (CArray) args[0];
 			CArray shallowClone = (array.isAssociative() ? CArray.GetAssociativeArray(t) : new CArray(t));
-			for (Construct key : array.keySet()) {
+			for(Construct key : array.keySet()) {
 				shallowClone.set(key, array.get(key, t), t);
 			}
 			return shallowClone;
@@ -2531,10 +2531,10 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			CClosure closure = Static.getObject(args[1], t, CClosure.class);
-			for (Construct key : array.keySet()) {
+			for(Construct key : array.keySet()) {
 				try {
 					closure.execute(key, array.get(key, t));
-				} catch (ProgramFlowManipulationException ex) {
+				} catch(ProgramFlowManipulationException ex) {
 					// Ignored
 				}
 			}
@@ -2604,28 +2604,28 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			CClosure closure = Static.getObject(args[1], t, CClosure.class);
-			if (array.isEmpty()) {
+			if(array.isEmpty()) {
 				return CNull.NULL;
 			}
-			if (array.size() == 1) {
+			if(array.size() == 1) {
 				// This line looks bad, but all it does is return the first (and since we know only) value in the array,
 				// whether or not it is associative or normal.
 				return array.get(array.keySet().toArray(new Construct[0])[0], t);
 			}
 			List<Construct> keys = new ArrayList<>(array.keySet());
 			Construct lastValue = array.get(keys.get(0), t);
-			for (int i = 1; i < keys.size(); ++i) {
+			for(int i = 1; i < keys.size(); ++i) {
 				boolean hadReturn = false;
 				try {
 					closure.execute(lastValue, array.get(keys.get(i), t));
-				} catch (FunctionReturnException ex) {
+				} catch(FunctionReturnException ex) {
 					lastValue = ex.getReturn();
-					if (lastValue instanceof CVoid) {
+					if(lastValue instanceof CVoid) {
 						throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
 					}
 					hadReturn = true;
 				}
-				if (!hadReturn) {
+				if(!hadReturn) {
 					throw new CREIllegalArgumentException("The closure passed to " + getName() + " must return a value, but one was not returned.", t);
 				}
 			}
@@ -2698,28 +2698,28 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			CClosure closure = Static.getObject(args[1], t, CClosure.class);
-			if (array.isEmpty()) {
+			if(array.isEmpty()) {
 				return CNull.NULL;
 			}
-			if (array.size() == 1) {
+			if(array.size() == 1) {
 				// This line looks bad, but all it does is return the first (and since we know only) value in the array,
 				// whether or not it is associative or normal.
 				return array.get(array.keySet().toArray(new Construct[0])[0], t);
 			}
 			List<Construct> keys = new ArrayList<>(array.keySet());
 			Construct lastValue = array.get(keys.get(keys.size() - 1), t);
-			for (int i = keys.size() - 2; i >= 0; --i) {
+			for(int i = keys.size() - 2; i >= 0; --i) {
 				boolean hadReturn = false;
 				try {
 					closure.execute(lastValue, array.get(keys.get(i), t));
-				} catch (FunctionReturnException ex) {
+				} catch(FunctionReturnException ex) {
 					lastValue = ex.getReturn();
-					if (lastValue instanceof CVoid) {
+					if(lastValue instanceof CVoid) {
 						throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
 					}
 					hadReturn = true;
 				}
-				if (!hadReturn) {
+				if(!hadReturn) {
 					throw new CREIllegalArgumentException("The closure passed to " + getName() + " must return a value, but one was not returned.", t);
 				}
 			}
@@ -2792,18 +2792,18 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			CClosure closure = Static.getObject(args[1], t, CClosure.class);
-			for (Construct c : array.keySet()) {
+			for(Construct c : array.keySet()) {
 				boolean hasReturn = false;
 				try {
 					closure.execute(array.get(c, t));
-				} catch (FunctionReturnException ex) {
+				} catch(FunctionReturnException ex) {
 					hasReturn = true;
 					boolean ret = Static.getBoolean(ex.getReturn());
-					if (ret == false) {
+					if(ret == false) {
 						return CBoolean.FALSE;
 					}
 				}
-				if (!hasReturn) {
+				if(!hasReturn) {
 					throw new CREIllegalArgumentException("The closure passed to " + getName() + " must return a boolean.", t);
 				}
 			}
@@ -2873,18 +2873,18 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			CClosure closure = Static.getObject(args[1], t, CClosure.class);
-			for (Construct c : array.keySet()) {
+			for(Construct c : array.keySet()) {
 				boolean hasReturn = false;
 				try {
 					closure.execute(array.get(c, t));
-				} catch (FunctionReturnException ex) {
+				} catch(FunctionReturnException ex) {
 					hasReturn = true;
 					boolean ret = Static.getBoolean(ex.getReturn());
-					if (ret == true) {
+					if(ret == true) {
 						return CBoolean.TRUE;
 					}
 				}
-				if (!hasReturn) {
+				if(!hasReturn) {
 					throw new CREIllegalArgumentException("The closure passed to " + getName() + " must return a boolean.", t);
 				}
 			}
@@ -2956,15 +2956,15 @@ public class ArrayHandling {
 			CClosure closure = Static.getObject(args[1], t, CClosure.class);
 			CArray newArray = (array.isAssociative() ? CArray.GetAssociativeArray(t) : new CArray(t, (int) array.size()));
 
-			for (Construct c : array.keySet()) {
+			for(Construct c : array.keySet()) {
 				boolean hasReturn = false;
 				try {
 					closure.execute(array.get(c, t));
-				} catch (FunctionReturnException ex) {
+				} catch(FunctionReturnException ex) {
 					hasReturn = true;
 					newArray.set(c, ex.getReturn(), t);
 				}
-				if (!hasReturn) {
+				if(!hasReturn) {
 					throw new CREIllegalArgumentException("The closure passed to " + getName() + " must return a value.", t);
 				}
 			}

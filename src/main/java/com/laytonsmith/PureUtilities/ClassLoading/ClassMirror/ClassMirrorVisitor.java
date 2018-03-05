@@ -30,7 +30,7 @@ public class ClassMirrorVisitor extends ClassVisitor {
 	}
 
 	public ClassMirror<?> getMirror(URL source) {
-		if (!done) {
+		if(!done) {
 			throw new IllegalStateException(String.format(
 					"Not done visiting %s", classInfo.name == null ? "none" : classInfo.name
 			));
@@ -42,16 +42,16 @@ public class ClassMirrorVisitor extends ClassVisitor {
 
 	@Override
 	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-		if (done) {
+		if(done) {
 			// Ensure we never visit more than one class
 			throw new IllegalStateException(String.format(
 					"Can't visit %s, because we already visited %s", name, classInfo.name
 			));
 		}
-		if ((access & ACC_ENUM) == ACC_ENUM) {
+		if((access & ACC_ENUM) == ACC_ENUM) {
 			classInfo.isEnum = true;
 		}
-		if ((access & ACC_INTERFACE) == ACC_INTERFACE) {
+		if((access & ACC_INTERFACE) == ACC_INTERFACE) {
 			classInfo.isInterface = true;
 		}
 		classInfo.modifiers = new ModifierMirror(ModifierMirror.Type.CLASS, access);
@@ -59,30 +59,30 @@ public class ClassMirrorVisitor extends ClassVisitor {
 		classInfo.classReferenceMirror = new ClassReferenceMirror(Type.getObjectType(name).getDescriptor());
 		classInfo.superClass = superName;
 		classInfo.interfaces = interfaces;
-		if (signature != null) {
+		if(signature != null) {
 			boolean inGeneric = false;
 			ClassReferenceMirror<Object> top = null;
 			StringBuilder buffer = new StringBuilder();
-			for (char c : signature.toCharArray()) {
-				if (c == '<') {
+			for(char c : signature.toCharArray()) {
+				if(c == '<') {
 					inGeneric = true;
 					top = new ClassReferenceMirror<>(buffer.toString() + ";");
 					classInfo.genericParameters.put(top, new ArrayList<>());
 					buffer = new StringBuilder();
 					continue;
 				}
-				if (c == '>') {
+				if(c == '>') {
 					inGeneric = false;
 					top = null;
 					buffer = new StringBuilder();
 					continue;
 				}
-				if (c == ';') {
-					if (buffer.toString().isEmpty()) {
+				if(c == ';') {
+					if(buffer.toString().isEmpty()) {
 						// this happens at Lclass<Lwhatever;>; because ; always follows >
 						continue;
 					}
-					if (inGeneric) {
+					if(inGeneric) {
 						classInfo.genericParameters
 								.get(top).add(new ClassReferenceMirror<>(buffer.toString() + ";"));
 						buffer = new StringBuilder();
@@ -144,20 +144,20 @@ public class ClassMirrorVisitor extends ClassVisitor {
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-		if (STATIC_INITIALIZER_PATTERN.matcher(name).matches()) {
+		if(STATIC_INITIALIZER_PATTERN.matcher(name).matches()) {
 			return null; // Ignore static initializers
 		}
-		if (ConstructorMirror.INIT.matches(name)) {
+		if(ConstructorMirror.INIT.matches(name)) {
 			// We want to replace the V at the end with the parent class type.
 			// Yes, technically a constructor really does return void, but.. not really.
 			desc = StringUtils.replaceLast(desc, "V", classInfo.classReferenceMirror.getJVMName());
 		}
 		List<ClassReferenceMirror> parameterMirrors = new ArrayList<>();
-		for (Type type : Type.getArgumentTypes(desc)) {
+		for(Type type : Type.getArgumentTypes(desc)) {
 			parameterMirrors.add(new ClassReferenceMirror(type.getDescriptor()));
 		}
 		AbstractMethodMirror _methodMirror;
-		if (ConstructorMirror.INIT.equals(name)) {
+		if(ConstructorMirror.INIT.equals(name)) {
 			_methodMirror = new ConstructorMirror(
 					classInfo.classReferenceMirror,
 					new ModifierMirror(ModifierMirror.Type.METHOD, access),
@@ -216,7 +216,7 @@ public class ClassMirrorVisitor extends ClassVisitor {
 
 		@Override
 		public void visit(String name, Object value) {
-			if (value instanceof Type) {
+			if(value instanceof Type) {
 				value = ((Type) value).getDescriptor();
 			}
 			mirror.addAnnotationValue(name, value);

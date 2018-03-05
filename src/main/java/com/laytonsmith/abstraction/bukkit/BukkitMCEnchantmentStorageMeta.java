@@ -29,7 +29,7 @@ public class BukkitMCEnchantmentStorageMeta extends BukkitMCItemMeta implements 
 	@Override
 	public Map<MCEnchantment, Integer> getStoredEnchants() {
 		Map<MCEnchantment, Integer> ret = new HashMap<>();
-		for (Map.Entry<Enchantment, Integer> entry : es.getStoredEnchants().entrySet()) {
+		for(Map.Entry<Enchantment, Integer> entry : es.getStoredEnchants().entrySet()) {
 			ret.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
 		}
 		return ret;

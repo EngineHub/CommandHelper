@@ -36,8 +36,7 @@ import org.junit.Test;
 public class TestPersistence {
 
 	/**
-	 * TODO: Need to test the following:
-	 * Ensuring correct behavior with hidden keys that conflict
+	 * TODO: Need to test the following: Ensuring correct behavior with hidden keys that conflict
 	 */
 	public TestPersistence() {
 	}
@@ -64,7 +63,7 @@ public class TestPersistence {
 
 	@After
 	public void tearDown() {
-		for (File f : toDelete) {
+		for(File f : toDelete) {
 			f.delete();
 		}
 	}
@@ -84,7 +83,6 @@ public class TestPersistence {
 //			+ "    _: value1\n"
 //			+ "  }\n", doOutput("prettyprint:yml://testpretty.yml", testData));
 //	}
-
 	//Dumb properties get loaded in different orders, which doesn't matter, but breaks the
 	//string detection here.
 //    @Test
@@ -95,32 +93,31 @@ public class TestPersistence {
 //	public void testJSON() {
 //		assertEquals("{\"a\":{\"b\":{\"c1\":\"value2\",\"c2\":\"value3\",\"_\":\"value1\"}}}", doOutput("json://test.json", testData));
 //	}
-
 	@Test
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public void testFilterExceptions() throws URISyntaxException {
 		try {
 			new DataSourceFilter("$1alias=yml://blah.yml\na.*=$1alias\n", new URI(""));
 			fail("Expected an exception when defining numeric alias");
-		} catch (DataSourceException e) {
+		} catch(DataSourceException e) {
 			//Pass
 		}
 		try {
 			new DataSourceFilter("$alias!=yml://blah.yml\na.*.(**)=$alias\n", new URI(""));
 			fail("Expected an exception when putting bad characters in a filter");
-		} catch (DataSourceException e) {
+		} catch(DataSourceException e) {
 			//Pass
 		}
 		try {
 			new DataSourceFilter("$alias=yml://blah.yml\na.*.**=$aliasnope\n", new URI(""));
 			fail("Expected an exception when using undefined alias");
-		} catch (DataSourceException e) {
+		} catch(DataSourceException e) {
 			//Pass
 		}
 		try {
 			new DataSourceFilter("$alias=!@#$%^&*()blah$1.yml\na.*.**=$alias\n", new URI(""));
 			fail("Expected an exception when having an invalid uri");
-		} catch (DataSourceException e) {
+		} catch(DataSourceException e) {
 			//Pass
 		}
 	}
@@ -173,9 +170,8 @@ public class TestPersistence {
 //		assertEquals("{\"key2\":\"value\"}", FileUtil.read(new File("folder/default.json")));
 //		deleteFiles("folder/");
 //	}
-
 	@Test
-	public void testNotTransient() throws Exception{
+	public void testNotTransient() throws Exception {
 		PersistenceNetwork network = new PersistenceNetwork("**=json://folder/default.json", new URI("default"), options);
 		network.set(dm, new String[]{"key"}, "value");
 		dm.waitForThreads();
@@ -187,7 +183,7 @@ public class TestPersistence {
 	}
 
 	@Test
-	public void testTransient() throws Exception{
+	public void testTransient() throws Exception {
 		PersistenceNetwork network = new PersistenceNetwork("**=transient:json://folder/default.json", new URI("default"), options);
 		network.set(dm, new String[]{"key"}, "value1");
 		dm.waitForThreads();
@@ -199,7 +195,7 @@ public class TestPersistence {
 	}
 
 	@Test
-	public void testSer() throws Exception{
+	public void testSer() throws Exception {
 		//This is hard to test, since it's binary data. Instead, we just check for the file's existance, and to see if
 		//contains the key and value somewhere in the data
 		PersistenceNetwork network = new PersistenceNetwork("**=ser://folder/default.ser", new URI("default"), options);
@@ -211,7 +207,7 @@ public class TestPersistence {
 	}
 
 	@Test
-	public void testConflictingKeys() throws Exception{
+	public void testConflictingKeys() throws Exception {
 		//If two data sources have the same key, only one should be currently operated on.
 		PersistenceNetwork network = new PersistenceNetwork("**=transient:json://folder/default.json\nkey.*=transient:json://folder/other.json\n", new URI("default"), options);
 		FileUtil.write("{\"key\":{\"key\":\"value1\"}}", new File("folder/other.json"), true);
@@ -229,11 +225,10 @@ public class TestPersistence {
 //		assertEquals("value", network.get(new String[]{"key", "key"}));
 //		deleteFiles("folder/");
 //	}
-
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testNamespaceWithUnderscore() throws Exception {
 		PersistenceNetwork network = new PersistenceNetwork("**=sqlite://folder/sqlite.db", new URI("default"), options);
-		try{
+		try {
 			network.set(dm, new String[]{"Bad", "_", "Key"}, "value");
 			dm.waitForThreads();
 		} finally {
@@ -242,7 +237,7 @@ public class TestPersistence {
 	}
 
 	@Test
-	public void testMemoryDataSource() throws Exception{
+	public void testMemoryDataSource() throws Exception {
 		PersistenceNetwork network = new PersistenceNetwork("**=mem:default", new URI("default"), options);
 		String[] key = new String[]{"a", "b"};
 		network.set(dm, key, "value");
@@ -264,14 +259,14 @@ public class TestPersistence {
 	@Test
 	public void testGetValues() throws Exception {
 		PersistenceNetwork network = new PersistenceNetwork("**=json://folder/persistence.json", new URI("default"), options);
-		try{
+		try {
 			network.set(dm, new String[]{"t", "test1"}, "test");
 			network.set(dm, new String[]{"t", "test2"}, "test");
 			network.set(dm, new String[]{"t", "test3", "third"}, "test");
 			dm.waitForThreads();
 			Map<String[], String> list = network.getNamespace(new String[]{"t"});
 			List<String> output = new ArrayList<String>();
-			for(String[] key : list.keySet()){
+			for(String[] key : list.keySet()) {
 				output.add(StringUtils.Join(key, ".") + ": " + list.get(key));
 			}
 			Collections.sort(output);
@@ -285,12 +280,12 @@ public class TestPersistence {
 	public String doOutput(String uri, Map<String[], String> data) {
 		try {
 			DataSource ds = DataSourceFactory.GetDataSource(uri, options);
-			if (ds instanceof StringSerializableDataSource) {
+			if(ds instanceof StringSerializableDataSource) {
 				StringSerializableDataSource sdc = (StringSerializableDataSource) ds;
-				if (sdc.getConnectionMixin() instanceof ReadWriteFileConnection) {
+				if(sdc.getConnectionMixin() instanceof ReadWriteFileConnection) {
 
 					//It is a file based URI, so we can test this.
-					for (String[] key : data.keySet()) {
+					for(String[] key : data.keySet()) {
 						ds.set(dm, key, data.get(key));
 					}
 					dm.waitForThreads();
@@ -306,16 +301,16 @@ public class TestPersistence {
 				fail("Cannot test non string based data sources with this method!");
 				return null;
 			}
-		} catch (Exception ex) {
+		} catch(Exception ex) {
 			fail(Misc.GetStacktrace(ex));
 			return null;
 		}
 	}
 
 	File getFileFromDataSource(DataSource ds) {
-		if (ds instanceof StringSerializableDataSource) {
+		if(ds instanceof StringSerializableDataSource) {
 			Object output = GetPrivate(ds, "output", Object.class);
-			if (output instanceof ZipReader) {
+			if(output instanceof ZipReader) {
 				//It is a file based URI, so we can test this.
 				File outFile = ((ZipReader) output).getFile();
 				return outFile;
@@ -325,7 +320,7 @@ public class TestPersistence {
 	}
 
 	public static void deleteFiles(String... files) {
-		for (String f : files) {
+		for(String f : files) {
 			FileUtil.recursiveDelete(new File(f));
 		}
 	}
@@ -344,7 +339,7 @@ public class TestPersistence {
 		DataSourceFilter dsf = new DataSourceFilter(StringUtils.Join(mapping, "\n"), new URI("default"));
 		Set<URI> uris = dsf.getAllConnections(key);
 		SortedSet<String> set = new TreeSet<String>();
-		for (URI uri : uris) {
+		for(URI uri : uris) {
 			set.add(uri.toString());
 		}
 		return set;
@@ -358,7 +353,7 @@ public class TestPersistence {
 
 	public String stringifyMap(Map<String[], String> map) {
 		SortedSet<String> append = new TreeSet<String>();
-		for (String[] key : map.keySet()) {
+		for(String[] key : map.keySet()) {
 			append.add(Arrays.toString(key) + "=" + map.get(key));
 		}
 		return "[" + StringUtils.Join(append, ", ") + "]";

@@ -51,7 +51,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 	public void setVariant(MCHorseVariant variant) {
 		try {
 			h.setVariant(BukkitMCHorseVariant.getConvertor().getConcreteEnum(variant));
-		} catch (UnsupportedOperationException ex) {
+		} catch(UnsupportedOperationException ex) {
 			// 1.11 or later
 			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR,
 					"Cannot change Horse variant in Minecraft 1.11+", Target.UNKNOWN);
@@ -87,7 +87,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 	public void setHasChest(boolean hasChest) {
 		try {
 			h.setCarryingChest(hasChest);
-		} catch (UnsupportedOperationException ex) {
+		} catch(UnsupportedOperationException ex) {
 			// 1.11 or later
 			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR,
 					"Horse cannot have chest in Minecraft 1.11+", Target.UNKNOWN);
@@ -144,7 +144,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 		private static BukkitMCHorseVariant instance;
 
 		public static BukkitMCHorseVariant getConvertor() {
-			if (instance == null) {
+			if(instance == null) {
 				instance = new BukkitMCHorseVariant();
 			}
 			return instance;
@@ -152,7 +152,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 
 		@Override
 		protected MCHorseVariant getAbstractedEnumCustom(Horse.Variant concrete) {
-			switch (concrete) {
+			switch(concrete) {
 				case SKELETON_HORSE:
 					return MCHorseVariant.SKELETON;
 				case UNDEAD_HORSE:
@@ -165,7 +165,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 
 		@Override
 		protected Horse.Variant getConcreteEnumCustom(MCHorseVariant abstracted) {
-			switch (abstracted) {
+			switch(abstracted) {
 				case SKELETON:
 					return Horse.Variant.SKELETON_HORSE;
 				case ZOMBIE:
@@ -185,7 +185,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 		private static BukkitMCHorseColor instance;
 
 		public static BukkitMCHorseColor getConvertor() {
-			if (instance == null) {
+			if(instance == null) {
 				instance = new BukkitMCHorseColor();
 			}
 			return instance;
@@ -202,7 +202,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 		private static BukkitMCHorsePattern instance;
 
 		public static BukkitMCHorsePattern getConvertor() {
-			if (instance == null) {
+			if(instance == null) {
 				instance = new BukkitMCHorsePattern();
 			}
 			return instance;
@@ -210,7 +210,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 
 		@Override
 		protected MCHorsePattern getAbstractedEnumCustom(Horse.Style concrete) {
-			switch (concrete) {
+			switch(concrete) {
 				case WHITE:
 					return MCHorsePattern.SOCKS;
 			}
@@ -219,7 +219,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 
 		@Override
 		protected Horse.Style getConcreteEnumCustom(MCHorsePattern abstracted) {
-			switch (abstracted) {
+			switch(abstracted) {
 				case SOCKS:
 					return Horse.Style.WHITE;
 			}

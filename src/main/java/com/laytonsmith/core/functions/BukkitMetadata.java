@@ -107,22 +107,22 @@ public class BukkitMetadata {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			List<MCMetadataValue> metadata;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				metadata = Static.getPlayer(environment, t).getMetadata(args[0].val());
 			} else {
 				metadata = Static.getMetadatable(args[0], t).getMetadata(args[1].val());
 			}
-			if (args.length == 3) {
+			if(args.length == 3) {
 				MCPlugin plugin = Static.getPlugin(args[2], t);
-				for (MCMetadataValue value : metadata) {
-					if (value.getOwningPlugin().equals(plugin)) {
+				for(MCMetadataValue value : metadata) {
+					if(value.getOwningPlugin().equals(plugin)) {
 						return Static.getMSObject(value.value(), t);
 					}
 				}
 				return CNull.NULL;
 			} else {
 				CArray values = CArray.GetAssociativeArray(t);
-				for (MCMetadataValue value : metadata) {
+				for(MCMetadataValue value : metadata) {
 					values.set(value.getOwningPlugin().getName(), Static.getMSObject(value.value(), t), t);
 				}
 				return values;
@@ -157,18 +157,18 @@ public class BukkitMetadata {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String key;
 			MCMetadatable metadatable;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				metadatable = Static.getPlayer(environment, t);
 				key = args[0].val();
 			} else {
 				metadatable = Static.getMetadatable(args[0], t);
 				key = args[1].val();
 			}
-			if (metadatable.hasMetadata(key)) {
-				if (args.length == 3) {
+			if(metadatable.hasMetadata(key)) {
+				if(args.length == 3) {
 					MCPlugin plugin = Static.getPlugin(args[2], t);
-					for (MCMetadataValue value : metadatable.getMetadata(key)) {
-						if (value.getOwningPlugin().equals(plugin)) {
+					for(MCMetadataValue value : metadatable.getMetadata(key)) {
+						if(value.getOwningPlugin().equals(plugin)) {
 							return CBoolean.TRUE;
 						}
 					}
@@ -216,7 +216,7 @@ public class BukkitMetadata {
 			MCMetadatable metadatable;
 			Construct value;
 			MCPlugin plugin;
-			if (args.length == 2) {
+			if(args.length == 2) {
 				metadatable = Static.getPlayer(environment, t);
 				key = args[0].val();
 				value = args[1];
@@ -259,17 +259,17 @@ public class BukkitMetadata {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String key;
 			MCMetadatable metadatable;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				metadatable = Static.getPlayer(environment, t);
 				key = args[0].val();
 			} else {
 				metadatable = Static.getMetadatable(args[0], t);
 				key = args[1].val();
 			}
-			if (args.length == 3) {
+			if(args.length == 3) {
 				metadatable.removeMetadata(key, Static.getPlugin(args[2], t));
 			} else {
-				for (MCMetadataValue value : metadatable.getMetadata(key)) {
+				for(MCMetadataValue value : metadatable.getMetadata(key)) {
 					metadatable.removeMetadata(key, value.getOwningPlugin());
 				}
 			}

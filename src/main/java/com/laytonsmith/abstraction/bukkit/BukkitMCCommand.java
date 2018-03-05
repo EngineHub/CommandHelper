@@ -142,11 +142,11 @@ public class BukkitMCCommand implements MCCommand {
 
 	@Override
 	public MCPlugin getPlugin() {
-		if (!(cmd instanceof PluginCommand)) {
+		if(!(cmd instanceof PluginCommand)) {
 			return null;
 		}
 		Plugin plugin = ((PluginCommand) cmd).getPlugin();
-		if (plugin == null) {
+		if(plugin == null) {
 			return null;
 		}
 		return new BukkitMCPlugin(plugin);
@@ -155,7 +155,7 @@ public class BukkitMCCommand implements MCCommand {
 	@Override
 	public MCPlugin getExecutor() {
 		// TODO Not all plugins execute commands in their main class, so this cast won't always work
-		if (!(cmd instanceof PluginCommand)) {
+		if(!(cmd instanceof PluginCommand)) {
 			return null;
 		}
 		return new BukkitMCPlugin((Plugin) ((PluginCommand) cmd).getExecutor());
@@ -164,7 +164,7 @@ public class BukkitMCCommand implements MCCommand {
 	@Override
 	public MCPlugin getTabCompleter() {
 		// TODO see above
-		if (!(cmd instanceof PluginCommand)) {
+		if(!(cmd instanceof PluginCommand)) {
 			return null;
 		}
 		return new BukkitMCPlugin((Plugin) ((PluginCommand) cmd).getTabCompleter());
@@ -172,14 +172,14 @@ public class BukkitMCCommand implements MCCommand {
 
 	@Override
 	public void setExecutor(MCPlugin plugin) {
-		if (cmd instanceof PluginCommand) {
+		if(cmd instanceof PluginCommand) {
 			((PluginCommand) cmd).setExecutor(((BukkitMCPlugin) plugin).getHandle());
 		}
 	}
 
 	@Override
 	public void setTabCompleter(MCPlugin plugin) {
-		if (cmd instanceof PluginCommand) {
+		if(cmd instanceof PluginCommand) {
 			((PluginCommand) cmd).setTabCompleter(((BukkitMCPlugin) plugin).getHandle());
 		}
 	}
@@ -202,10 +202,10 @@ public class BukkitMCCommand implements MCCommand {
 	// I may be able to move these to c.l.c.f.Commands.java
 	@Override
 	public List<String> handleTabComplete(MCCommandSender sender, String alias, String[] args) {
-		if (Commands.onTabComplete.containsKey(cmd.getName().toLowerCase())) {
+		if(Commands.onTabComplete.containsKey(cmd.getName().toLowerCase())) {
 			Target t = Target.UNKNOWN;
 			CArray cargs = new CArray(t);
-			for (String arg : args) {
+			for(String arg : args) {
 				cargs.push(new CString(arg, t), t);
 			}
 			CClosure closure = Commands.onTabComplete.get(cmd.getName().toLowerCase());
@@ -213,22 +213,22 @@ public class BukkitMCCommand implements MCCommand {
 				closure.execute(new CString(alias, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array
 				);
-			} catch (FunctionReturnException e) {
+			} catch(FunctionReturnException e) {
 				Construct fret = e.getReturn();
-				if (fret instanceof CArray) {
+				if(fret instanceof CArray) {
 					List<String> ret = new ArrayList<>();
-					if (((CArray) fret).inAssociativeMode()) {
-						for (Construct key : ((CArray) fret).keySet()) {
+					if(((CArray) fret).inAssociativeMode()) {
+						for(Construct key : ((CArray) fret).keySet()) {
 							ret.add(((CArray) fret).get(key, Target.UNKNOWN).val());
 						}
 					} else {
-						for (Construct value : ((CArray) fret).asList()) {
+						for(Construct value : ((CArray) fret).asList()) {
 							ret.add(value.val());
 						}
 					}
 					return ret;
 				}
-			} catch (ConfigRuntimeException cre) {
+			} catch(ConfigRuntimeException cre) {
 				ConfigRuntimeException.HandleUncaughtException(cre, closure.getEnv());
 				return new ArrayList<>();
 			}
@@ -240,10 +240,10 @@ public class BukkitMCCommand implements MCCommand {
 
 	@Override
 	public boolean handleCustomCommand(MCCommandSender sender, String label, String[] args) {
-		if (Commands.onCommand.containsKey(cmd.getName().toLowerCase())) {
+		if(Commands.onCommand.containsKey(cmd.getName().toLowerCase())) {
 			Target t = Target.UNKNOWN;
 			CArray cargs = new CArray(t);
-			for (String arg : args) {
+			for(String arg : args) {
 				cargs.push(new CString(arg, t), t);
 			}
 
@@ -256,12 +256,12 @@ public class BukkitMCCommand implements MCCommand {
 				closure.execute(new CString(label, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array
 				);
-			} catch (FunctionReturnException e) {
+			} catch(FunctionReturnException e) {
 				Construct fret = e.getReturn();
-				if (fret instanceof CBoolean) {
+				if(fret instanceof CBoolean) {
 					return ((CBoolean) fret).getBoolean();
 				}
-			} catch (ConfigRuntimeException cre) {
+			} catch(ConfigRuntimeException cre) {
 				cre.setEnv(closure.getEnv());
 				ConfigRuntimeException.HandleUncaughtException(cre, closure.getEnv());
 			}

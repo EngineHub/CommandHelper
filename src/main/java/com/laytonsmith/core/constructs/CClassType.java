@@ -53,7 +53,7 @@ public class CClassType extends Construct {
 	 * @return
 	 */
 	public static CClassType get(String type) {
-		if (!cache.containsKey(type)) {
+		if(!cache.containsKey(type)) {
 			cache.put(type, new CClassType(type, Target.UNKNOWN));
 		}
 		return cache.get(type);
@@ -73,7 +73,7 @@ public class CClassType extends Construct {
 		// First, we have to canonicalize this type union
 		SortedSet<String> t = new TreeSet<>(Arrays.asList(types));
 		String type = StringUtils.Join(t, "|");
-		if (!cache.containsKey(type)) {
+		if(!cache.containsKey(type)) {
 			cache.put(type, new CClassType(Target.UNKNOWN, t.toArray(new String[t.size()])));
 		}
 		return cache.get(type);
@@ -88,7 +88,7 @@ public class CClassType extends Construct {
 	 */
 	public static CClassType get(CClassType... types) {
 		List<String> stringTypes = new ArrayList<>();
-		for (CClassType t : types) {
+		for(CClassType t : types) {
 			// Could be a type union, so we need to break that out
 			stringTypes.addAll(t.types);
 		}
@@ -209,7 +209,7 @@ public class CClassType extends Construct {
 	 */
 	protected Set<CClassType> getTypes() {
 		Set<CClassType> t = new HashSet<>();
-		for (String type : types) {
+		for(String type : types) {
 			t.add(CClassType.get(type));
 		}
 		return t;
@@ -224,21 +224,21 @@ public class CClassType extends Construct {
 	 * @return
 	 */
 	public static boolean doesExtend(CClassType checkClass, CClassType superClass) {
-		if (checkClass.equals(superClass)) {
+		if(checkClass.equals(superClass)) {
 			// more efficient check
 			return true;
 		}
-		for (CClassType tCheck : checkClass.getTypes()) {
-			for (CClassType tSuper : superClass.getTypes()) {
+		for(CClassType tCheck : checkClass.getTypes()) {
+			for(CClassType tSuper : superClass.getTypes()) {
 				try {
 					// TODO: This is currently being done in a very lazy way. It needs to be reworked.
 					// For now, this is ok, but will not work once user types are added.
 					Class cSuper = NativeTypeList.getNativeClass(tSuper.val());
 					Class cCheck = NativeTypeList.getNativeClass(tCheck.val());
-					if (!cSuper.isAssignableFrom(cCheck)) {
+					if(!cSuper.isAssignableFrom(cCheck)) {
 						return false;
 					}
-				} catch (ClassNotFoundException ex) {
+				} catch(ClassNotFoundException ex) {
 					throw new RuntimeException(ex);
 				}
 			}

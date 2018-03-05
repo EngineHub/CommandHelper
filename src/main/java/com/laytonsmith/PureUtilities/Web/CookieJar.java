@@ -21,8 +21,8 @@ public final class CookieJar {
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		for (Cookie cookie : cookies) {
-			if (!cookie.isExpired()) {
+		for(Cookie cookie : cookies) {
+			if(!cookie.isExpired()) {
 				b.append(cookie.getName()).append("=")
 						.append(cookie.getValue()).append("; used in ")
 						.append(cookie.getDomain()).append(cookie.getPath())
@@ -46,7 +46,7 @@ public final class CookieJar {
 	 * @param cookie
 	 */
 	public void addCookie(Cookie cookie) {
-		if (this.cookies.contains(cookie)) {
+		if(this.cookies.contains(cookie)) {
 			//This is an update, so remove it first
 			this.cookies.remove(cookie);
 		}
@@ -64,9 +64,9 @@ public final class CookieJar {
 		List<Cookie> usable = new ArrayList<Cookie>();
 		//So we can iterate linearly
 		List<Cookie> foundCookies = new ArrayList<Cookie>(this.cookies);
-		for (int i = 0; i < foundCookies.size(); i++) {
+		for(int i = 0; i < foundCookies.size(); i++) {
 			Cookie cookie = foundCookies.get(i);
-			if (cookie.isExpired()) {
+			if(cookie.isExpired()) {
 				//This cookie is expired. Remove it from our list, and continue.
 				this.cookies.remove(cookie);
 				foundCookies.remove(i);
@@ -74,36 +74,36 @@ public final class CookieJar {
 				continue;
 			}
 			//Or it's secure only, and we aren't in https, continue.
-			if (cookie.isSecureOnly() && !url.getProtocol().equals("https")) {
+			if(cookie.isSecureOnly() && !url.getProtocol().equals("https")) {
 				continue;
 			}
 			//If we aren't in the correct domain
 			String domain = cookie.getDomain();
-			if (domain.startsWith(".")) {
+			if(domain.startsWith(".")) {
 				domain = domain.substring(1);
 			}
-			if (!url.getHost().endsWith(domain)) {
+			if(!url.getHost().endsWith(domain)) {
 				continue;
 			}
 			//Or if we aren't in the right path
 			String path = (url.getPath().startsWith("/") ? "" : "/") + url.getPath();
-			if (!path.startsWith(cookie.getPath())) {
+			if(!path.startsWith(cookie.getPath())) {
 				continue;
 			}
 			//If we're still here, it's good.
 			usable.add(cookie);
 		}
-		if (usable.isEmpty()) {
+		if(usable.isEmpty()) {
 			return null;
 		}
 		StringBuilder b = new StringBuilder();
-		for (Cookie cookie : usable) {
-			if (b.length() != 0) {
+		for(Cookie cookie : usable) {
+			if(b.length() != 0) {
 				b.append("; ");
 			}
 			try {
 				b.append(URLEncoder.encode(cookie.getName(), "UTF-8")).append("=").append(cookie.getValue());
-			} catch (UnsupportedEncodingException ex) {
+			} catch(UnsupportedEncodingException ex) {
 				Logger.getLogger(WebUtility.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -115,9 +115,9 @@ public final class CookieJar {
 	 */
 	public void clearSessionCookies() {
 		Iterator<Cookie> it = cookies.iterator();
-		while (it.hasNext()) {
+		while(it.hasNext()) {
 			Cookie c = it.next();
-			if (c.getExpiration() == 0) {
+			if(c.getExpiration() == 0) {
 				it.remove();
 			}
 		}

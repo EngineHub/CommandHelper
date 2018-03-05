@@ -47,7 +47,7 @@ public class ClassDiscoveryURLCache {
 		discovery.setClassDiscoveryCache(null);
 		discovery.addDiscoveryLocation(url);
 
-		for (ClassMirror m : discovery.getKnownClasses(url)) {
+		for(ClassMirror m : discovery.getKnownClasses(url)) {
 			ReflectionUtils.set(ClassMirror.class, m, "originalURL", url);
 			list.add(m);
 		}
@@ -67,8 +67,8 @@ public class ClassDiscoveryURLCache {
 		ObjectInputStream ois = new ObjectInputStream(descriptor);
 		try {
 			_list = (List<ClassMirror<?>>) ois.readObject();
-		} catch (ClassNotFoundException ex) {
-			if (url != null) {
+		} catch(ClassNotFoundException ex) {
+			if(url != null) {
 				//We can recover from this one, but it won't be instant.
 				_list = new ClassDiscoveryURLCache(url).list;
 			} else {
@@ -77,7 +77,7 @@ public class ClassDiscoveryURLCache {
 		}
 		ois.close();
 
-		for (ClassMirror m : _list) {
+		for(ClassMirror m : _list) {
 			ReflectionUtils.set(ClassMirror.class, m, "originalURL", url);
 		}
 

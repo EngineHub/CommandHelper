@@ -49,9 +49,9 @@ public class NewMethodScriptCompiler {
 		//we split on newlines, those are each going to be our alias definitions
 		List<List<Token>> commands = new ArrayList<List<Token>>();
 		List<Token> working = new ArrayList<Token>();
-		for (int i = 0; i < tokenStream.size(); i++) {
+		for(int i = 0; i < tokenStream.size(); i++) {
 			Token t = tokenStream.get(i);
-			if (t.type == Token.TType.NEWLINE) {
+			if(t.type == Token.TType.NEWLINE) {
 				commands.add(working);
 				working = new ArrayList<Token>();
 				continue;
@@ -60,7 +60,7 @@ public class NewMethodScriptCompiler {
 		}
 
 		//Now they are split into individual aliases
-		for (List<Token> stream : commands) {
+		for(List<Token> stream : commands) {
 			//We need to make constructs from the left, and compile the right
 			//Compiling the right can be simply passed off to the compile
 			//function, but we need to parse the left ourselves
@@ -69,15 +69,15 @@ public class NewMethodScriptCompiler {
 			TokenStream right = new TokenStream(new ArrayList<Token>(), tokenStream.getFileOptions());
 			boolean inLeft = true;
 			boolean hasLabel = false;
-			for (Token t : stream) {
-				if (t.type == Token.TType.ALIAS_END) {
+			for(Token t : stream) {
+				if(t.type == Token.TType.ALIAS_END) {
 					inLeft = false;
 					continue;
 				}
-				if (t.type == TType.LABEL) {
+				if(t.type == TType.LABEL) {
 					hasLabel = true;
 				}
-				if (inLeft) {
+				if(inLeft) {
 					left.add(t);
 				} else {
 					right.add(t);
@@ -90,43 +90,43 @@ public class NewMethodScriptCompiler {
 			boolean pastLabel = false;
 			String label = "";
 			try {
-				for (int i = 0; i < left.size(); i++) {
+				for(int i = 0; i < left.size(); i++) {
 					Token t = left.get(i);
-					if (hasLabel && !pastLabel) {
-						if (t.type == TType.LABEL) {
+					if(hasLabel && !pastLabel) {
+						if(t.type == TType.LABEL) {
 							pastLabel = true;
 							continue;
 						}
 						label += t.val();
 						continue;
 					}
-					if (atFinalVar) {
+					if(atFinalVar) {
 						throw new ConfigCompileException("The final var must be the last declaration in the alias", t.getTarget());
 					}
-					if (t.type == TType.LSQUARE_BRACKET) {
+					if(t.type == TType.LSQUARE_BRACKET) {
 						Token tname = left.get(i + 1);
 						atOptionalVars = true;
-						if (tname.val().equals("$")) {
+						if(tname.val().equals("$")) {
 							atFinalVar = true;
 						}
-						if (tname.type != TType.VARIABLE && tname.type != TType.FINAL_VAR) {
+						if(tname.type != TType.VARIABLE && tname.type != TType.FINAL_VAR) {
 							throw new ConfigCompileException("Expecting a variable, but found " + tname.val(), tname.getTarget());
 						}
 						i++;
 						Token next = left.get(i + 1);
-						if (next.type != TType.OPT_VAR_ASSIGN && next.type != TType.RSQUARE_BRACKET) {
+						if(next.type != TType.OPT_VAR_ASSIGN && next.type != TType.RSQUARE_BRACKET) {
 							throw new ConfigCompileException("Expecting either a variable assignment or right square bracket, but found " + next.val(), next.getTarget());
 						}
 						i++;
 						String defaultVal = "";
-						if (next.type == TType.OPT_VAR_ASSIGN) {
+						if(next.type == TType.OPT_VAR_ASSIGN) {
 							//We have an assignment here
 							Token val = left.get(i + 1);
 							i++;
 							defaultVal = val.val();
 							next = left.get(i + 1);
 						}
-						if (next.type != TType.RSQUARE_BRACKET) {
+						if(next.type != TType.RSQUARE_BRACKET) {
 							throw new ConfigCompileException("Expecting a right square bracket, but found " + next.val() + " instead. (Did you forget to quote a multi word string?)", next.getTarget());
 						}
 						i++;
@@ -134,12 +134,12 @@ public class NewMethodScriptCompiler {
 						cleft.add(v);
 						continue;
 					}
-					if (t.type == TType.VARIABLE || t.type == TType.FINAL_VAR) {
+					if(t.type == TType.VARIABLE || t.type == TType.FINAL_VAR) {
 						//Required variable
-						if (atOptionalVars) {
+						if(atOptionalVars) {
 							throw new ConfigCompileException("Only optional variables may come after the first optional variable", t.getTarget());
 						}
-						if (t.val().equals("$")) {
+						if(t.val().equals("$")) {
 							atFinalVar = true;
 						}
 						Variable v = new Variable(t.val(), "", false, t.val().equals("$"), t.getTarget());
@@ -148,10 +148,10 @@ public class NewMethodScriptCompiler {
 					}
 					cleft.add(tokenToConstruct(t));
 				}
-			} catch (IndexOutOfBoundsException e) {
+			} catch(IndexOutOfBoundsException e) {
 				throw new ConfigCompileException("Expecting more tokens, but reached end of alias signature before tokens were resolved.", left.get(0).getTarget());
 			}
-			if (!cleft.isEmpty()) {
+			if(!cleft.isEmpty()) {
 				link(cright, compilerEnvironment);
 				scripts.add(new NewScript(cleft, cright, label));
 			}
@@ -181,7 +181,7 @@ public class NewMethodScriptCompiler {
 		//so we know what the tree actually looks like. Also, we want to first group all our auto includes
 		//together, along with our actual tree.
 		ParseTree master = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), root.getFileOptions());
-		for (ParseTree include : compilerEnvirontment.getEnv(CompilerEnvironment.class).getIncludes()) {
+		for(ParseTree include : compilerEnvirontment.getEnv(CompilerEnvironment.class).getIncludes()) {
 			master.addChild(include);
 		}
 		master.addChild(root);
@@ -191,16 +191,16 @@ public class NewMethodScriptCompiler {
 	}
 
 	private static Construct tokenToConstruct(Token t) {
-		if (t.type == Token.TType.STRING) {
+		if(t.type == Token.TType.STRING) {
 			return new CString(t.val(), t.getTarget());
 		}
-		if (t.type == Token.TType.BARE_STRING) {
+		if(t.type == Token.TType.BARE_STRING) {
 			return new CBareString(t.val(), t.getTarget());
 		}
-		if (t.type == Token.TType.INTEGER) {
+		if(t.type == Token.TType.INTEGER) {
 			return new CInt(Long.parseLong(t.val()), t.getTarget());
 		}
-		if (t.type == Token.TType.DOUBLE) {
+		if(t.type == Token.TType.DOUBLE) {
 			return new CDouble(Double.parseDouble(t.val()), t.getTarget());
 		}
 		return null;

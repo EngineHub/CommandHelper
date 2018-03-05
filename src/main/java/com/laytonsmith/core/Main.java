@@ -263,7 +263,7 @@ public class Main {
 			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
 
 			Prefs.SetColors();
-			if (Prefs.UseColors()) {
+			if(Prefs.UseColors()) {
 				//Use jansi to enable output to color properly, even on windows.
 				org.fusesource.jansi.AnsiConsole.systemInstall();
 			}
@@ -280,7 +280,7 @@ public class Main {
 			ExtensionManager.Initialize(cd);
 			ExtensionManager.Startup();
 
-			if (args.length == 0) {
+			if(args.length == 0) {
 				args = new String[]{"--help"};
 			}
 
@@ -295,19 +295,19 @@ public class Main {
 				ArgumentSuite.ArgumentSuiteResults results = ARGUMENT_SUITE.match(args, "help");
 				mode = results.getMode();
 				parsedArgs = results.getResults();
-			} catch (ArgumentParser.ResultUseException | ArgumentParser.ValidationException e) {
+			} catch(ArgumentParser.ResultUseException | ArgumentParser.ValidationException e) {
 				StreamUtils.GetSystemOut().println(TermColors.RED + e.getMessage() + TermColors.RESET);
 				mode = helpMode;
 				parsedArgs = null;
 			}
 
-			if (mode == helpMode) {
+			if(mode == helpMode) {
 				String modeForHelp = null;
-				if (parsedArgs != null) {
+				if(parsedArgs != null) {
 					modeForHelp = parsedArgs.getStringArgument();
 				}
 				modeForHelp = ARGUMENT_SUITE.getModeFromAlias(modeForHelp);
-				if (modeForHelp == null) {
+				if(modeForHelp == null) {
 					//Display the general help
 					StreamUtils.GetSystemOut().println(ARGUMENT_SUITE.getBuiltDescription());
 					System.exit(0);
@@ -323,14 +323,14 @@ public class Main {
 			//if it were, the help command would have run.
 			assert parsedArgs != null;
 
-			if (mode == managerMode) {
+			if(mode == managerMode) {
 				Manager.start();
 				System.exit(0);
-			} else if (mode == coreFunctionsMode) {
+			} else if(mode == coreFunctionsMode) {
 				List<String> core = new ArrayList<>();
-				for (api.Platforms platform : api.Platforms.values()) {
-					for (FunctionBase f : FunctionList.getFunctionList(platform)) {
-						if (f.isCore()) {
+				for(api.Platforms platform : api.Platforms.values()) {
+					for(FunctionBase f : FunctionList.getFunctionList(platform)) {
+						if(f.isCore()) {
 							core.add(f.getName());
 						}
 					}
@@ -338,30 +338,30 @@ public class Main {
 				Collections.sort(core);
 				StreamUtils.GetSystemOut().println(StringUtils.Join(core, ", "));
 				System.exit(0);
-			} else if (mode == interpreterMode) {
+			} else if(mode == interpreterMode) {
 				new Interpreter(parsedArgs.getStringListArgument(), parsedArgs.getStringArgument("location-----"));
 				System.exit(0);
-			} else if (mode == installCmdlineMode) {
+			} else if(mode == installCmdlineMode) {
 				Interpreter.install();
 				System.exit(0);
-			} else if (mode == uninstallCmdlineMode) {
+			} else if(mode == uninstallCmdlineMode) {
 				Interpreter.uninstall();
 				System.exit(0);
-			} else if (mode == docgenMode) {
+			} else if(mode == docgenMode) {
 				DocGenUI.main(args);
 				System.exit(0);
-			} else if (mode == mslpMode) {
+			} else if(mode == mslpMode) {
 				String mslp = parsedArgs.getStringArgument();
-				if (mslp.isEmpty()) {
+				if(mslp.isEmpty()) {
 					StreamUtils.GetSystemOut().println("Usage: --mslp path/to/folder");
 					System.exit(0);
 				}
 				MSLPMaker.start(mslp);
 				System.exit(0);
-			} else if (mode == versionMode) {
+			} else if(mode == versionMode) {
 				StreamUtils.GetSystemOut().println("You are running " + Implementation.GetServerType().getBranding() + " version " + loadSelfVersion());
 				System.exit(0);
-			} else if (mode == copyrightMode) {
+			} else if(mode == copyrightMode) {
 				StreamUtils.GetSystemOut().println("The MIT License (MIT)\n"
 						+ "\n"
 						+ "Copyright (c) 2012-2017 Methodscript Contributors\n"
@@ -383,7 +383,7 @@ public class Main {
 						+ "IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN \n"
 						+ "CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.");
 				System.exit(0);
-			} else if (mode == printDBMode) {
+			} else if(mode == printDBMode) {
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 				options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
 				PersistenceNetwork pn = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
@@ -391,15 +391,15 @@ public class Main {
 								//This replace is required on Windows.
 								.replace('\\', '/')), options);
 				Map<String[], String> values = pn.getNamespace(new String[]{});
-				for (String[] s : values.keySet()) {
+				for(String[] s : values.keySet()) {
 					StreamUtils.GetSystemOut().println(StringUtils.Join(s, ".") + "=" + values.get(s));
 				}
 				System.exit(0);
-			} else if (mode == docsMode) {
+			} else if(mode == docsMode) {
 				DocGen.MarkupType docs;
 				try {
 					docs = DocGen.MarkupType.valueOf(parsedArgs.getStringArgument().toUpperCase());
-				} catch (IllegalArgumentException e) {
+				} catch(IllegalArgumentException e) {
 					StreamUtils.GetSystemOut().println("The type of documentation must be one of the following: " + StringUtils.Join(DocGen.MarkupType.values(), ", ", ", or "));
 					System.exit(1);
 					return;
@@ -409,12 +409,12 @@ public class Main {
 				DocGen.functions(docs, api.Platforms.INTERPRETER_JAVA, true);
 				StreamUtils.GetSystemErr().println("Done.");
 				System.exit(0);
-			} else if (mode == examplesMode) {
+			} else if(mode == examplesMode) {
 				ExampleLocalPackageInstaller.run(MethodScriptFileLocations.getDefault().getJarDirectory(),
 						parsedArgs.getStringArgument());
-			} else if (mode == verifyMode) {
+			} else if(mode == verifyMode) {
 				String file = parsedArgs.getStringArgument();
-				if ("".equals(file)) {
+				if("".equals(file)) {
 					StreamUtils.GetSystemErr().println("File parameter is required.");
 					System.exit(1);
 				}
@@ -423,14 +423,14 @@ public class Main {
 				try {
 					try {
 						MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, f, file.endsWith("ms")));
-					} catch (ConfigCompileException ex) {
+					} catch(ConfigCompileException ex) {
 						Set<ConfigCompileException> s = new HashSet<>(1);
 						s.add(ex);
 						throw new ConfigCompileGroupException(s);
 					}
-				} catch (ConfigCompileGroupException ex) {
+				} catch(ConfigCompileGroupException ex) {
 					List<Map<String, Object>> err = new ArrayList<>();
-					for (ConfigCompileException e : ex.getList()) {
+					for(ConfigCompileException e : ex.getList()) {
 						Map<String, Object> error = new HashMap<>();
 						error.put("msg", e.getMessage());
 						error.put("file", e.getFile().getAbsolutePath());
@@ -443,16 +443,16 @@ public class Main {
 					String serr = JSONValue.toJSONString(err);
 					StreamUtils.GetSystemOut().println(serr);
 				}
-			} else if (mode == apiMode) {
+			} else if(mode == apiMode) {
 				String function = parsedArgs.getStringArgument();
-				if ("".equals(function)) {
+				if("".equals(function)) {
 					StreamUtils.GetSystemErr().println("Usage: java -jar CommandHelper.jar --api <function name>");
 					System.exit(1);
 				}
 				FunctionBase f;
 				try {
 					f = FunctionList.getFunction(function, Target.UNKNOWN);
-				} catch (ConfigCompileException e) {
+				} catch(ConfigCompileException e) {
 					StreamUtils.GetSystemErr().println("The function '" + function + "' was not found.");
 					System.exit(1);
 					throw new Error();
@@ -468,14 +468,14 @@ public class Main {
 					desc
 				}, " // "));
 				System.exit(0);
-			} else if (mode == syntaxMode) {
+			} else if(mode == syntaxMode) {
 				// TODO: Maybe load extensions here?
 				List<String> syntax = parsedArgs.getStringListArgument();
 				String type = (syntax.size() >= 1 ? syntax.get(0) : null);
 				String theme = (syntax.size() >= 2 ? syntax.get(1) : null);
 				StreamUtils.GetSystemOut().println(SyntaxHighlighters.generate(type, theme));
 				System.exit(0);
-			} else if (mode == optimizerTestMode) {
+			} else if(mode == optimizerTestMode) {
 				String path = parsedArgs.getStringArgument();
 				File source = new File(path);
 				String plain = FileUtil.read(source);
@@ -484,26 +484,26 @@ public class Main {
 				try {
 					try {
 						optimized = OptimizationUtilities.optimize(plain, source);
-					} catch (ConfigCompileException ex) {
+					} catch(ConfigCompileException ex) {
 						Set<ConfigCompileException> group = new HashSet<>();
 						group.add(ex);
 						throw new ConfigCompileGroupException(group);
 					}
-				} catch (ConfigCompileGroupException ex) {
+				} catch(ConfigCompileGroupException ex) {
 					ConfigRuntimeException.HandleUncaughtException(ex, null);
 					System.exit(1);
 					return;
 				}
 				StreamUtils.GetSystemOut().println(optimized);
 				System.exit(0);
-			} else if (mode == cmdlineMode) {
+			} else if(mode == cmdlineMode) {
 				//We actually can't use the parsedArgs, because there may be cmdline switches in
 				//the arguments that we want to ignore here, but otherwise pass through. parsedArgs
 				//will prevent us from seeing those, however.
 				List<String> allArgs = new ArrayList<>(Arrays.asList(args));
 				//The 0th arg is the cmdline verb though, so remove that.
 				allArgs.remove(0);
-				if (allArgs.isEmpty()) {
+				if(allArgs.isEmpty()) {
 					StreamUtils.GetSystemErr().println("Usage: path/to/file.ms [arg1 arg2]");
 					System.exit(1);
 				}
@@ -511,40 +511,40 @@ public class Main {
 				allArgs.remove(0);
 				try {
 					Interpreter.startWithTTY(fileName, allArgs);
-				} catch (Profiles.InvalidProfileException ex) {
+				} catch(Profiles.InvalidProfileException ex) {
 					StreamUtils.GetSystemErr().println("Invalid profile file at " + MethodScriptFileLocations.getDefault().getProfilesFile()
 							+ ": " + ex.getMessage());
 					System.exit(1);
 				}
 				StaticLayer.GetConvertor().runShutdownHooks();
 				System.exit(0);
-			} else if (mode == extensionDocsMode) {
+			} else if(mode == extensionDocsMode) {
 				String inputJarS = parsedArgs.getStringArgument("input-jar");
 				String outputFileS = parsedArgs.getStringArgument("output-file");
-				if (inputJarS == null) {
+				if(inputJarS == null) {
 					StreamUtils.GetSystemOut().println("Usage: --input-jar extension-docs path/to/extension.jar [--output-file path/to/output.md]\n\tIf the output is blank, it is printed to stdout.");
 					System.exit(1);
 				}
 				File inputJar = new File(inputJarS);
 				OutputStream outputFile = StreamUtils.GetSystemOut();
-				if (outputFileS != null) {
+				if(outputFileS != null) {
 					outputFile = new FileOutputStream(new File(outputFileS));
 				}
 				ExtensionDocGen.generate(inputJar, outputFile);
-			} else if (mode == docExportMode) {
+			} else if(mode == docExportMode) {
 				String extensionDirS = parsedArgs.getStringArgument("extension-dir");
 				String outputFileS = parsedArgs.getStringArgument("output-file");
 				OutputStream outputFile = StreamUtils.GetSystemOut();
-				if (outputFileS != null) {
+				if(outputFileS != null) {
 					outputFile = new FileOutputStream(new File(outputFileS));
 				}
 				Implementation.forceServerType(Implementation.Type.BUKKIT);
 				File extensionDir = new File(extensionDirS);
-				if (extensionDir.exists()) {
+				if(extensionDir.exists()) {
 					//Might not exist, but that's ok, however we will print a warning
 					//to stderr.
-					for (File f : extensionDir.listFiles()) {
-						if (f.getName().endsWith(".jar")) {
+					for(File f : extensionDir.listFiles()) {
+						if(f.getName().endsWith(".jar")) {
 							cd.addDiscoveryLocation(f.toURI().toURL());
 						}
 					}
@@ -553,9 +553,9 @@ public class Main {
 							+ extensionDirS + ". Continuing anyways.");
 				}
 				new DocGenExportTool(cd, outputFile).export();
-			} else if (mode == profilerSummaryMode) {
+			} else if(mode == profilerSummaryMode) {
 				String input = parsedArgs.getStringArgument();
-				if ("".equals(input)) {
+				if("".equals(input)) {
 					StreamUtils.GetSystemErr().println(TermColors.RED + "No input file specified! Run `help profiler-summary' for usage." + TermColors.RESET);
 					System.exit(1);
 				}
@@ -563,18 +563,18 @@ public class Main {
 				ProfilerSummary summary = new ProfilerSummary(new FileInputStream(input));
 				try {
 					summary.setIgnorePercentage(ignorePercentage);
-				} catch (IllegalArgumentException ex) {
+				} catch(IllegalArgumentException ex) {
 					StreamUtils.GetSystemErr().println(TermColors.RED + ex.getMessage() + TermColors.RESET);
 					System.exit(1);
 				}
 				StreamUtils.GetSystemOut().println(summary.getAnalysis());
 				System.exit(0);
-			} else if (mode == rsaKeyGenMode) {
+			} else if(mode == rsaKeyGenMode) {
 				String outputFileString = parsedArgs.getStringArgument('o');
 				File privOutputFile = new File(outputFileString);
 				File pubOutputFile = new File(outputFileString + ".pub");
 				String label = parsedArgs.getStringArgument('l');
-				if (privOutputFile.exists() || pubOutputFile.exists()) {
+				if(privOutputFile.exists() || pubOutputFile.exists()) {
 					StreamUtils.GetSystemErr().println("Either the public key or private key file already exists. This utility will not overwrite any existing files.");
 					System.exit(1);
 				}
@@ -582,19 +582,19 @@ public class Main {
 				FileUtil.write(enc.getPrivateKey(), privOutputFile);
 				FileUtil.write(enc.getPublicKey(), pubOutputFile);
 				System.exit(0);
-			} else if (mode == pnViewerMode) {
-				if (parsedArgs.isFlagSet("server")) {
-					if (parsedArgs.getNumberArgument("port") == null) {
+			} else if(mode == pnViewerMode) {
+				if(parsedArgs.isFlagSet("server")) {
+					if(parsedArgs.getNumberArgument("port") == null) {
 						StreamUtils.GetSystemErr().println("When running as a server, port is required.");
 						System.exit(1);
 					}
 					int port = parsedArgs.getNumberArgument("port").intValue();
-					if (port > 65535 || port < 1) {
+					if(port > 65535 || port < 1) {
 						StreamUtils.GetSystemErr().println("Port must be between 1 and 65535.");
 						System.exit(1);
 					}
 					String password = parsedArgs.getStringArgument("password");
-					if ("".equals(password)) {
+					if("".equals(password)) {
 						ConsoleReader reader = null;
 						try {
 							reader = new ConsoleReader();
@@ -602,31 +602,31 @@ public class Main {
 							Character cha = new Character((char) 0);
 							password = reader.readLine("Enter password: ", cha);
 						} finally {
-							if (reader != null) {
+							if(reader != null) {
 								reader.shutdown();
 							}
 						}
 					}
-					if (password == null) {
+					if(password == null) {
 						StreamUtils.GetSystemErr().println("Warning! Running server with no password, anyone will be able to connect!");
 						password = "";
 					}
 					try {
 						PNViewer.startServer(port, password);
-					} catch (IOException ex) {
+					} catch(IOException ex) {
 						StreamUtils.GetSystemErr().println(ex.getMessage());
 						System.exit(1);
 					}
 				} else {
 					try {
 						PNViewer.main(parsedArgs.getStringListArgument().toArray(ArrayUtils.EMPTY_STRING_ARRAY));
-					} catch (HeadlessException ex) {
+					} catch(HeadlessException ex) {
 						StreamUtils.GetSystemErr().println("The Persistence Network Viewer may not be run from a headless environment.");
 						System.exit(1);
 					}
 				}
-			} else if (mode == uiMode) {
-				if (parsedArgs.isFlagSet("in-shell")) {
+			} else if(mode == uiMode) {
+				if(parsedArgs.isFlagSet("in-shell")) {
 					// Actually launch the GUI
 					UILauncher.main(args);
 				} else {
@@ -638,11 +638,11 @@ public class Main {
 					ce.start();
 					System.exit(0);
 				}
-			} else if (mode == siteDeploy) {
+			} else if(mode == siteDeploy) {
 				boolean clearLocalCache = parsedArgs.isFlagSet("clear-local-cache");
-				if (clearLocalCache) {
+				if(clearLocalCache) {
 					PersistenceNetwork p = SiteDeploy.getPersistenceNetwork();
-					if (p == null) {
+					if(p == null) {
 						System.out.println("Cannot get reference to persistence network");
 						System.exit(1);
 						return;
@@ -657,17 +657,17 @@ public class Main {
 				boolean useLocalCache = parsedArgs.isFlagSet("use-local-cache");
 				boolean doValidation = parsedArgs.isFlagSet("do-validation");
 				String configString = parsedArgs.getStringArgument("config");
-				if ("".equals(configString)) {
+				if("".equals(configString)) {
 					System.err.println("Config file missing, check command and try again");
 					System.exit(1);
 				}
 				File config = new File(configString);
 				SiteDeploy.run(generatePrefs, useLocalCache, config, "", doValidation);
-			} else if (mode == newMode) {
+			} else if(mode == newMode) {
 				String li = OSUtils.GetLineEnding();
-				for (String file : parsedArgs.getStringListArgument()) {
+				for(String file : parsedArgs.getStringListArgument()) {
 					File f = new File(file);
-					if (f.exists() && !parsedArgs.isFlagSet('f')) {
+					if(f.exists() && !parsedArgs.isFlagSet('f')) {
 						System.out.println(file + " already exists, refusing to create");
 						continue;
 					}
@@ -686,7 +686,7 @@ public class Main {
 			} else {
 				throw new Error("Should not have gotten here");
 			}
-		} catch (NoClassDefFoundError error) {
+		} catch(NoClassDefFoundError error) {
 			StreamUtils.GetSystemErr().println(getNoClassDefFoundErrorMessage(error));
 		}
 	}
@@ -708,7 +708,7 @@ public class Main {
 	public static SimpleVersion loadSelfVersion() throws Exception {
 		File file = new File(new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()), "plugin.yml");
 		ZipReader reader = new ZipReader(file);
-		if (!reader.exists()) {
+		if(!reader.exists()) {
 			throw new FileNotFoundException(String.format("%s does not exist", file.getPath()));
 		}
 		try {
@@ -716,7 +716,7 @@ public class Main {
 			Yaml yaml = new Yaml();
 			Map<String, Object> map = (Map<String, Object>) yaml.load(contents);
 			return new SimpleVersion((String) map.get("version"));
-		} catch (RuntimeException | IOException ex) {
+		} catch(RuntimeException | IOException ex) {
 			throw new Exception(ex);
 		}
 	}

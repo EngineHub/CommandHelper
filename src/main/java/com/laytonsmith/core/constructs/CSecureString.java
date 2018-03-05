@@ -63,7 +63,7 @@ public class CSecureString extends CString {
 			encrypted = new byte[encrypter.getOutputSize(val.length)];
 			encLength = encrypter.update(val, 0, val.length, encrypted, 0);
 			encLength += encrypter.doFinal(encrypted, encLength);
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException
+		} catch(NoSuchAlgorithmException | NoSuchPaddingException
 				| InvalidKeyException | InvalidAlgorithmParameterException
 				| ShortBufferException | IllegalBlockSizeException
 				| BadPaddingException ex) {
@@ -73,15 +73,15 @@ public class CSecureString extends CString {
 
 	private static byte[] CArrayToByteArray(CArray val, Target t) {
 		List<Byte> cval = new ArrayList<>((int) val.size());
-		if (val.isAssociative()) {
+		if(val.isAssociative()) {
 			throw new CREFormatException("Expected a normal array in secure string, but an associative one was passed in", t);
 		}
-		for (int i = 0; i < val.size(); i++) {
+		for(int i = 0; i < val.size(); i++) {
 			String c = val.get(i, t).val();
-			if (c.length() != 1) {
+			if(c.length() != 1) {
 				throw new CREFormatException("The array passed in must be an array of single character strings", t);
 			}
-			for (byte b : c.getBytes()) {
+			for(byte b : c.getBytes()) {
 				cval.add(b);
 			}
 		}
@@ -94,7 +94,7 @@ public class CSecureString extends CString {
 			int decLen = decrypter.update(encrypted, 0, encLength, decrypted, 0);
 			decrypter.doFinal(decrypted, decLen);
 			return ArrayUtils.bytesToChar(decrypted);
-		} catch (ShortBufferException | IllegalBlockSizeException | BadPaddingException ex) {
+		} catch(ShortBufferException | IllegalBlockSizeException | BadPaddingException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -102,8 +102,8 @@ public class CSecureString extends CString {
 	public CArray getDecryptedCharCArray() {
 		char[] array = getDecryptedCharArray();
 		CArray carray = new CArray(Target.UNKNOWN, array.length);
-		for (char c : array) {
-			if (c == '\0') {
+		for(char c : array) {
+			if(c == '\0') {
 				continue;
 			}
 			carray.push(new CString(c, Target.UNKNOWN), Target.UNKNOWN);
@@ -169,7 +169,7 @@ public class CSecureString extends CString {
 		String errorString = "Failed manually overriding key-length permissions.";
 		int newMaxKeyLength;
 		try {
-			if ((newMaxKeyLength = Cipher.getMaxAllowedKeyLength("AES")) < 256) {
+			if((newMaxKeyLength = Cipher.getMaxAllowedKeyLength("AES")) < 256) {
 				Class c = Class.forName("javax.crypto.CryptoAllPermissionCollection");
 				Constructor con = c.getDeclaredConstructor();
 				con.setAccessible(true);
@@ -196,10 +196,10 @@ public class CSecureString extends CString {
 
 				newMaxKeyLength = Cipher.getMaxAllowedKeyLength("AES");
 			}
-		} catch (Exception e) {
+		} catch(Exception e) {
 			throw new RuntimeException(errorString, e);
 		}
-		if (newMaxKeyLength < 256) {
+		if(newMaxKeyLength < 256) {
 			throw new RuntimeException(errorString); // hack failed
 		}
 	}

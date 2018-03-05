@@ -50,7 +50,7 @@ public class CREThrowable extends AbstractCREException {
 	 */
 	@Override
 	public CClassType[] getSuperclasses() {
-		if (this.getClass() == CREThrowable.class) {
+		if(this.getClass() == CREThrowable.class) {
 			return new CClassType[]{Mixed.TYPE};
 		} else {
 			return new CClassType[]{CClassType.get(this.getClass().getSuperclass().getAnnotation(typeof.class).value())};
@@ -63,7 +63,7 @@ public class CREThrowable extends AbstractCREException {
 	 */
 	@Override
 	public CClassType[] getInterfaces() {
-		if (this.getClass() == CREThrowable.class) {
+		if(this.getClass() == CREThrowable.class) {
 			return new CClassType[]{ArrayAccess.TYPE};
 		} else {
 			return new CClassType[]{};

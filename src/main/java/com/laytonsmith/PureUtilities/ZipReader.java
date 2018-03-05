@@ -87,16 +87,16 @@ public class ZipReader {
 		chainedPath = new LinkedList<File>();
 
 		//We need to remove jar style or uri style things from the file, so do that here
-		if (file.getPath().startsWith("jar:")) {
+		if(file.getPath().startsWith("jar:")) {
 			String newFile = file.getPath().substring(4);
 			file = new File(newFile);
 		}
-		if (file.getPath().startsWith("file:")) {
+		if(file.getPath().startsWith("file:")) {
 			String newFile = file.getPath().substring(5);
 			//Replace all \ with /, to simply processing, but also replace ! with /, since jar addresses
 			//use that to denote the jar. We don't care, it's just a folder, so replace that with a slash.
 			newFile = newFile.replace('\\', '/').replace('!', '/');
-			while (newFile.startsWith("//")) {
+			while(newFile.startsWith("//")) {
 				//We only want up to one slash here
 				newFile = newFile.substring(1);
 			}
@@ -111,18 +111,18 @@ public class ZipReader {
 		File f = file;
 		chainedPath.addFirst(f); //Gotta add the file itself to the path for everything to work
 		File tempTopZip = null;
-		while ((f = f.getParentFile()) != null) {
+		while((f = f.getParentFile()) != null) {
 			chainedPath.addFirst(f);
 			try {
 				//If this works, we'll know we have our top zip file. Everything else will have
 				//to be in memory, so we'll start with this if we have to dig deeper.
-				if (tempTopZip == null) {
+				if(tempTopZip == null) {
 					ZipFile zf = new ZipFile(f);
 					tempTopZip = f;
 				}
-			} catch (ZipException ex) {
+			} catch(ZipException ex) {
 				//This is fine, it's just not a zip file
-			} catch (IOException | AccessControlException ex) {
+			} catch(IOException | AccessControlException ex) {
 				//This is fine too, it may mean we don't have permission to access this directory,
 				//but that's ok, we don't need access yet.
 			}
@@ -131,7 +131,7 @@ public class ZipReader {
 		//If it's not a zipped file, this will make operations easier to deal with,
 		//so let's save that information
 		isZipped = tempTopZip != null;
-		if (isZipped) {
+		if(isZipped) {
 			topZip = tempTopZip;
 		} else {
 			topZip = file;
@@ -157,13 +157,13 @@ public class ZipReader {
 	 * @return
 	 */
 	public boolean exists() {
-		if (!topZip.exists()) {
+		if(!topZip.exists()) {
 			return false; //Don't bother trying
 		}
 		try {
 			getInputStream().close();
 			return true;
-		} catch (IOException e) {
+		} catch(IOException e) {
 			return false;
 		}
 	}
@@ -186,7 +186,7 @@ public class ZipReader {
 	 * @return
 	 */
 	public boolean canWrite() {
-		if (isZipped) {
+		if(isZipped) {
 			return false;
 		} else {
 			return topZip.canWrite();
@@ -212,7 +212,7 @@ public class ZipReader {
 
 			@Override
 			public int read() throws IOException {
-				if (zis.available() > 0) {
+				if(zis.available() > 0) {
 					return zis.read();
 				} else {
 					return -1;
@@ -226,23 +226,23 @@ public class ZipReader {
 		};
 		boolean isZip = false;
 		List<String> recurseAttempts = new ArrayList<String>();
-		while ((entry = zis.getNextEntry()) != null) {
+		while((entry = zis.getNextEntry()) != null) {
 			//This is at least a zip file
 			isZip = true;
 			Deque<File> chain = new LinkedList<File>(fullChain);
 			File chainFile = null;
-			while ((chainFile = chain.pollFirst()) != null) {
-				if (chainFile.equals(new File(zipName + File.separator + entry.getName()))) {
+			while((chainFile = chain.pollFirst()) != null) {
+				if(chainFile.equals(new File(zipName + File.separator + entry.getName()))) {
 					//We found it. Now, chainFile is one that is in our tree
 					//We have to do some further analyzation on it
 					break;
 				}
 			}
-			if (chainFile == null) {
+			if(chainFile == null) {
 				//It's not in the chain at all, which means we don't care about it at all.
 				continue;
 			}
-			if (chain.isEmpty()) {
+			if(chain.isEmpty()) {
 				//It was the last file in the chain, so no point in looking at it at all.
 				//If it was a zip or not, it doesn't matter, because this is the file they
 				//specified, precisely. Read it out, and return it.
@@ -257,11 +257,11 @@ public class ZipReader {
 			recurseAttempts.add(zipName + File.separator + entry.getName());
 
 		}
-		for (String recurseAttempt : recurseAttempts) {
+		for(String recurseAttempt : recurseAttempts) {
 			ZipInputStream inner = new ZipInputStream(zipReader);
 			try {
 				return getFile(fullChain, recurseAttempt, inner);
-			} catch (IOException e) {
+			} catch(IOException e) {
 				//We don't care if this breaks, we'll throw out own top level exception
 				//in a moment if we got here. We still need to finish going through
 				//out recurse attempts.
@@ -269,7 +269,7 @@ public class ZipReader {
 		}
 		//If we get down here, it means either we recursed into not-a-zip file, or
 		//the file was otherwise not found
-		if (isZip) {
+		if(isZip) {
 			//if this is the terminal node in the chain, it's due to a file not found.
 			throw new FileNotFoundException(zipName + " could not be found!");
 		} else {
@@ -287,7 +287,7 @@ public class ZipReader {
 	 * @throws IOException If you specify a file that isn't a zip file as if it were a folder
 	 */
 	public InputStream getInputStream() throws FileNotFoundException, IOException {
-		if (!isZipped) {
+		if(!isZipped) {
 			return new FileInputStream(file);
 		} else {
 			return getFile(chainedPath, topZip.getAbsolutePath(), new ZipInputStream(new FileInputStream(topZip)));
@@ -303,7 +303,7 @@ public class ZipReader {
 	 * @throws IOException If you specify a file that isn't a zip file as if it were a folder
 	 */
 	public String getFileContents() throws FileNotFoundException, IOException {
-		if (!isZipped) {
+		if(!isZipped) {
 			return FileUtil.read(file);
 		} else {
 			return StreamUtils.GetString(getInputStream());
@@ -318,10 +318,10 @@ public class ZipReader {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if(obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if(getClass() != obj.getClass()) {
 			return false;
 		}
 		final ZipReader other = (ZipReader) obj;
@@ -348,17 +348,17 @@ public class ZipReader {
 	}
 
 	private void initList() throws IOException {
-		if (!isZipped) {
+		if(!isZipped) {
 			return;
 		}
-		if (this.zipEntries == null) {
+		if(this.zipEntries == null) {
 			zipEntries = new ArrayList<File>();
 			ZipInputStream zis = new ZipInputStream(new FileInputStream(topZip));
 			ZipEntry entry;
-			while ((entry = zis.getNextEntry()) != null) {
+			while((entry = zis.getNextEntry()) != null) {
 				File f = new File(topZip, entry.getName());
 				zipEntries.add(f);
-				if (entry.isDirectory()) {
+				if(entry.isDirectory()) {
 					zipDirectories.add(f);
 				}
 			}
@@ -367,7 +367,7 @@ public class ZipReader {
 	}
 
 	public boolean isDirectory() throws IOException {
-		if (!isZipped) {
+		if(!isZipped) {
 			return file.isDirectory();
 		} else {
 			initList();
@@ -386,18 +386,18 @@ public class ZipReader {
 	 * @throws IOException
 	 */
 	public File[] listFiles() throws IOException {
-		if (!isZipped) {
+		if(!isZipped) {
 			return file.listFiles();
 		} else {
 			initList();
 			List<File> files = new ArrayList<File>();
-			for (File f : zipEntries) {
+			for(File f : zipEntries) {
 				//If the paths start with the same thing...
-				if (f.getPath().startsWith(file.getPath())) {
+				if(f.getPath().startsWith(file.getPath())) {
 					//...and it's not the file we're looking from to begin with...
-					if (!file.equals(f)) {
+					if(!file.equals(f)) {
 						//...and it's not in a sub-sub folder of this file...
-						if (!f.getPath().matches(Pattern.quote(file.getPath() + File.separatorChar) + "[^" + Pattern.quote(File.separator) + "]*" + Pattern.quote(File.separator) + ".*")) {
+						if(!f.getPath().matches(Pattern.quote(file.getPath() + File.separatorChar) + "[^" + Pattern.quote(File.separator) + "]*" + Pattern.quote(File.separator) + ".*")) {
 							//...add it to the list.
 							files.add(f);
 						}
@@ -417,7 +417,7 @@ public class ZipReader {
 	public ZipReader[] zipListFiles() throws IOException {
 		File[] ret = listFiles();
 		ZipReader[] zips = new ZipReader[ret.length];
-		for (int i = 0; i < ret.length; i++) {
+		for(int i = 0; i < ret.length; i++) {
 			zips[i] = new ZipReader(new File(file, ret[i].getPath()));
 		}
 		return zips;
@@ -430,14 +430,14 @@ public class ZipReader {
 	 * @param dstFolder
 	 */
 	public void recursiveCopy(File dstFolder, boolean create) throws IOException {
-		if (create) {
+		if(create) {
 			dstFolder.mkdirs();
 		}
-		if (!dstFolder.isDirectory()) {
+		if(!dstFolder.isDirectory()) {
 			throw new IOException("Destination folder is not a directory!");
 		}
-		for (ZipReader r : zipListFiles()) {
-			if (r.isDirectory()) {
+		for(ZipReader r : zipListFiles()) {
+			if(r.isDirectory()) {
 				r.recursiveCopy(dstFolder, create);
 			} else {
 				File newFile = new File(dstFolder, r.file.getName());

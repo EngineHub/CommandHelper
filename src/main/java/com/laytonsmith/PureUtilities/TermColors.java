@@ -32,7 +32,7 @@ public final class TermColors {
 
 	static {
 		String os = System.getProperty("os.name");
-		if (os.contains("Windows")) {
+		if(os.contains("Windows")) {
 			SYSTEM = SYS.WINDOWS;
 		} else {
 			SYSTEM = SYS.UNIX;
@@ -40,9 +40,9 @@ public final class TermColors {
 	}
 
 	public static void cls() {
-		if (SYSTEM.equals(SYS.WINDOWS)) {
+		if(SYSTEM.equals(SYS.WINDOWS)) {
 			//Fuck you windows.
-			for (int i = 0; i < 50; i++) {
+			for(int i = 0; i < 50; i++) {
 				StreamUtils.GetSystemOut().println();
 			}
 		} else {
@@ -157,16 +157,16 @@ public final class TermColors {
 	private static List<Field> fields = null;
 
 	private static List<Field> fields() {
-		if (fields == null) {
+		if(fields == null) {
 			fields = new ArrayList<Field>();
-			for (Field f : TermColors.class.getFields()) {
-				if (f.getAnnotation(color.class) != null) {
+			for(Field f : TermColors.class.getFields()) {
+				if(f.getAnnotation(color.class) != null) {
 					fields.add(f);
 					try {
 						defaults.put(f.getName(), (String) f.get(null));
-					} catch (IllegalArgumentException ex) {
+					} catch(IllegalArgumentException ex) {
 						Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
-					} catch (IllegalAccessException ex) {
+					} catch(IllegalAccessException ex) {
 						Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
@@ -179,12 +179,12 @@ public final class TermColors {
 	 * Enables colors.
 	 */
 	public static void EnableColors() {
-		for (Field f : fields()) {
+		for(Field f : fields()) {
 			try {
 				f.set(null, defaults.get(f.getName()));
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
-			} catch (IllegalAccessException ex) {
+			} catch(IllegalAccessException ex) {
 				Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -194,12 +194,12 @@ public final class TermColors {
 	 * Disables colors.
 	 */
 	public static void DisableColors() {
-		for (Field f : fields()) {
+		for(Field f : fields()) {
 			try {
 				f.set(null, "");
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
-			} catch (IllegalAccessException ex) {
+			} catch(IllegalAccessException ex) {
 				Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -218,7 +218,7 @@ public final class TermColors {
 
 		// On windows, these effects (except for reset) get printed as a changed background color.
 		// This is consistent with how broadcast() messages are printed to the console.
-		switch (type) {
+		switch(type) {
 			case "blinkon":
 				return "\033[5m";
 			case "blinkoff":
@@ -265,24 +265,24 @@ public final class TermColors {
 	private static String color(Color c, boolean bright, boolean foreground, boolean resetCurrent) {
 
 		int color = 37;
-		if (c.equals(Color.RED)) {
+		if(c.equals(Color.RED)) {
 			color = 31;
-		} else if (c.equals(Color.GREEN)) {
+		} else if(c.equals(Color.GREEN)) {
 			color = 32;
-		} else if (c.equals(Color.BLUE)) {
+		} else if(c.equals(Color.BLUE)) {
 			color = 34;
-		} else if (c.equals(Color.YELLOW)) {
+		} else if(c.equals(Color.YELLOW)) {
 			color = 33;
-		} else if (c.equals(Color.CYAN)) {
+		} else if(c.equals(Color.CYAN)) {
 			color = 36;
-		} else if (c.equals(Color.MAGENTA)) {
+		} else if(c.equals(Color.MAGENTA)) {
 			color = 35;
-		} else if (c.equals(Color.BLACK)) {
+		} else if(c.equals(Color.BLACK)) {
 			color = 30;
-		} else if (c.equals(Color.WHITE)) {
+		} else if(c.equals(Color.WHITE)) {
 			color = 37;
 		}
-		if (!foreground) {
+		if(!foreground) {
 			color += 10;
 		}
 		// ANSI: 0 = reset, 1 = bright_intensity, 22 = normal_intensity.
@@ -299,7 +299,7 @@ public final class TermColors {
 	}
 
 	public static String prompt() {
-		if (scanner == null) {
+		if(scanner == null) {
 			scanner = new Scanner(System.in);
 		}
 		p(">" + MAGENTA);
@@ -319,7 +319,7 @@ public final class TermColors {
 	 * THIS BLOCK MUST REMAIN AT THE BOTTOM
 	 */
 	static {
-		if (SYSTEM == SYS.WINDOWS) {
+		if(SYSTEM == SYS.WINDOWS) {
 			DisableColors();
 		} else {
 			EnableColors();

@@ -57,7 +57,7 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 
 		@Override
 		public V put(K key, V value) {
-			if (!(value instanceof DirtyTreeSet) && value instanceof TreeSet) {
+			if(!(value instanceof DirtyTreeSet) && value instanceof TreeSet) {
 				return super.put(key, (V) DirtyTreeSet.GenerateDirtyTreeSet((TreeSet) value));
 			} else {
 				return super.put(key, value);
@@ -70,7 +70,7 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 
 		public static DirtyTreeSet GenerateDirtyTreeSet(TreeSet ts) {
 			DirtyTreeSet dts = new DirtyTreeSet(ts.comparator());
-			for (Object o : ts) {
+			for(Object o : ts) {
 				dts.add(o);
 			}
 			return dts;
@@ -82,14 +82,14 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 
 		@Override
 		public boolean add(Object e) {
-			if (!(e instanceof BukkitDirtyRegisteredListener) && e instanceof RegisteredListener) {
+			if(!(e instanceof BukkitDirtyRegisteredListener) && e instanceof RegisteredListener) {
 				try {
 					return super.add(Generate((RegisteredListener) e));
-				} catch (NoSuchFieldException ex) {
+				} catch(NoSuchFieldException ex) {
 					Logger.getLogger(BukkitDirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
-				} catch (IllegalArgumentException ex) {
+				} catch(IllegalArgumentException ex) {
 					Logger.getLogger(BukkitDirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
-				} catch (IllegalAccessException ex) {
+				} catch(IllegalAccessException ex) {
 					Logger.getLogger(BukkitDirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			} else {
@@ -164,14 +164,14 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 //        public DirtyRegisteredListener value;
 //    }
 	public static void setCancelled(Event superCancelledEvent) {
-		if (cancelledEvents.size() >= queueCapacity) {
+		if(cancelledEvents.size() >= queueCapacity) {
 			cancelledEvents.poll();
 		}
 		cancelledEvents.offer(superCancelledEvent);
 	}
 
 	public static BukkitDirtyRegisteredListener Generate(RegisteredListener real) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-		if (real instanceof BukkitDirtyRegisteredListener) {
+		if(real instanceof BukkitDirtyRegisteredListener) {
 			return (BukkitDirtyRegisteredListener) real;
 		}
 		Field rListener = real.getClass().getDeclaredField("listener");
@@ -310,13 +310,13 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 	 * Sets up CommandHelper to play-dirty, if the user has specified as such
 	 */
 	public static void PlayDirty() {
-		if (Prefs.PlayDirty()) {
+		if(Prefs.PlayDirty()) {
 			try {
 				//Set up our "proxy"
 				BukkitDirtyRegisteredListener.Repopulate();
-			} catch (NoSuchMethodException ex) {
+			} catch(NoSuchMethodException ex) {
 				Logger.getLogger(Static.class.getName()).log(Level.SEVERE, null, ex);
-			} catch (NoSuchFieldException | ClassCastException | IllegalArgumentException | IllegalAccessException ex) {
+			} catch(NoSuchFieldException | ClassCastException | IllegalArgumentException | IllegalAccessException ex) {
 				Static.getLogger().log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
 			}
 		} //else play nice :(

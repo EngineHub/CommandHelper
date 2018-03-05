@@ -99,18 +99,18 @@ public class Environment {
 			int z;
 			MCWorld w = null;
 			MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (player != null) {
+			if(player != null) {
 				w = player.getWorld();
 			}
-			if (args.length < 3) {
+			if(args.length < 3) {
 				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = loc.getBlockX();
 				y = loc.getBlockY();
 				z = loc.getBlockZ();
 				w = loc.getWorld();
-				if (args.length == 2) {
+				if(args.length == 2) {
 					w = Static.getServer().getWorld(args[1].val());
-					if (w == null) {
+					if(w == null) {
 						throw new CREInvalidWorldException("The specified world " + args[1].val() + " doesn't exist", t);
 					}
 				}
@@ -118,18 +118,18 @@ public class Environment {
 				x = (int) java.lang.Math.floor(Static.getNumber(args[0], t));
 				y = (int) java.lang.Math.floor(Static.getNumber(args[1], t));
 				z = (int) java.lang.Math.floor(Static.getNumber(args[2], t));
-				if (args.length == 4) {
+				if(args.length == 4) {
 					w = Static.getServer().getWorld(args[3].val());
-					if (w == null) {
+					if(w == null) {
 						throw new CREInvalidWorldException("The specified world " + args[3].val() + " doesn't exist", t);
 					}
 				}
 			}
-			if (w == null) {
+			if(w == null) {
 				throw new CREInvalidWorldException("No world was provided", t);
 			}
 			MCBlock b = w.getBlockAt(x, y, z);
-			if (b == null) {
+			if(b == null) {
 				throw new CRENotFoundException(
 						"Could not find the block in " + this.getName() + " (are you running in cmdline mode?)", t);
 			}
@@ -189,17 +189,17 @@ public class Environment {
 			String id;
 			MCWorld w = null;
 			MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (player != null) {
+			if(player != null) {
 				w = player.getWorld();
 			}
-			if (args.length < 4) {
+			if(args.length < 4) {
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = l.getBlockX();
 				y = l.getBlockY();
 				z = l.getBlockZ();
 				w = l.getWorld();
 				id = args[1].val();
-				if (args.length == 3) {
+				if(args.length == 3) {
 					physics = Static.getBoolean(args[2]);
 				}
 
@@ -208,15 +208,15 @@ public class Environment {
 				y = (int) java.lang.Math.floor(Static.getNumber(args[1], t));
 				z = (int) java.lang.Math.floor(Static.getNumber(args[2], t));
 				id = args[3].val();
-				if (args.length > 4) {
+				if(args.length > 4) {
 					w = Static.getServer().getWorld(args[4].val());
-					if (w == null) {
+					if(w == null) {
 						throw new CREInvalidWorldException("The specified world " + args[4].val() + " doesn't exist", t);
 					}
-					if (args.length == 6) {
+					if(args.length == 6) {
 						physics = Static.getBoolean(args[5]);
 					}
-				} else if (w == null) {
+				} else if(w == null) {
 					throw new CREInvalidWorldException("No world was provided", t);
 				}
 			}
@@ -225,21 +225,21 @@ public class Environment {
 			int data;
 			byte meta = 0;
 			try {
-				if (dataAndMeta.length == 2) {
+				if(dataAndMeta.length == 2) {
 					meta = Byte.parseByte(dataAndMeta[1]); // Throws NumberFormatException.
 				}
 				data = Integer.parseInt(dataAndMeta[0]); // Throws NumberFormatException.
-			} catch (NumberFormatException e) {
+			} catch(NumberFormatException e) {
 				throw new CREFormatException("id must be formatted as such: 'x:y' where x and y are integers", t);
 			}
 			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
-			if (mat == null || !mat.isBlock()) {
+			if(mat == null || !mat.isBlock()) {
 				throw new CRECastException("Not a block ID: " + data
 						+ ". Attempting to set an invalid id can corrupt chunks!", t);
 			}
 			try {
 				b.setTypeAndData(data, meta, physics);
-			} catch (IllegalArgumentException ex) {
+			} catch(IllegalArgumentException ex) {
 				throw new CREFormatException("Invalid block meta data: \"" + id + "\"", t);
 			}
 
@@ -298,41 +298,41 @@ public class Environment {
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			if (sender instanceof MCPlayer) {
+			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			if (l.getBlock().isSign()) {
+			if(l.getBlock().isSign()) {
 				String line1 = "";
 				String line2 = "";
 				String line3 = "";
 				String line4 = "";
-				if (args.length == 2 && args[1] instanceof CArray) {
+				if(args.length == 2 && args[1] instanceof CArray) {
 					CArray ca = (CArray) args[1];
-					if (ca.size() >= 1) {
+					if(ca.size() >= 1) {
 						line1 = ca.get(0, t).val();
 					}
-					if (ca.size() >= 2) {
+					if(ca.size() >= 2) {
 						line2 = ca.get(1, t).val();
 					}
-					if (ca.size() >= 3) {
+					if(ca.size() >= 3) {
 						line3 = ca.get(2, t).val();
 					}
-					if (ca.size() >= 4) {
+					if(ca.size() >= 4) {
 						line4 = ca.get(3, t).val();
 					}
 
 				} else {
-					if (args.length >= 2) {
+					if(args.length >= 2) {
 						line1 = args[1].val();
 					}
-					if (args.length >= 3) {
+					if(args.length >= 3) {
 						line2 = args[2].val();
 					}
-					if (args.length >= 4) {
+					if(args.length >= 4) {
 						line3 = args[3].val();
 					}
-					if (args.length >= 5) {
+					if(args.length >= 5) {
 						line4 = args[4].val();
 					}
 				}
@@ -391,11 +391,11 @@ public class Environment {
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCWorld w = null;
-			if (sender instanceof MCPlayer) {
+			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			if (l.getBlock().isSign()) {
+			if(l.getBlock().isSign()) {
 				MCSign s = l.getBlock().getSign();
 				CString line1 = new CString(s.getLine(0), t);
 				CString line2 = new CString(s.getLine(1), t);
@@ -450,7 +450,7 @@ public class Environment {
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCWorld w = null;
-			if (sender instanceof MCPlayer) {
+			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
@@ -551,10 +551,10 @@ public class Environment {
 			int z;
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCWorld w = null;
-			if (sender instanceof MCPlayer) {
+			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			if (args.length == 2) {
+			if(args.length == 2) {
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = l.getBlockX();
 				z = l.getBlockZ();
@@ -562,21 +562,21 @@ public class Environment {
 			} else {
 				x = Static.getInt32(args[0], t);
 				z = Static.getInt32(args[1], t);
-				if (args.length != 3) {
+				if(args.length != 3) {
 					w = Static.getServer().getWorld(args[2].val());
 				}
 			}
 			MCBiomeType bt;
 			try {
 				bt = MCBiomeType.valueOf(args[args.length - 1].val());
-				if (bt == null) {
+				if(bt == null) {
 					throw new CRENotFoundException(
 							"Could not find the internal biome type object (are you running in cmdline mode?)", t);
 				}
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CREFormatException("The biome type \"" + args[1].val() + "\" does not exist.", t);
 			}
-			if (w == null) {
+			if(w == null) {
 				throw new CREInvalidWorldException("The specified world doesn't exist, or no world was provided", t);
 			}
 			w.setBiome(x, z, bt);
@@ -631,10 +631,10 @@ public class Environment {
 			int z;
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCWorld w = null;
-			if (sender instanceof MCPlayer) {
+			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			if (args.length == 1) {
+			if(args.length == 1) {
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = l.getBlockX();
 				z = l.getBlockZ();
@@ -642,15 +642,15 @@ public class Environment {
 			} else {
 				x = Static.getInt32(args[0], t);
 				z = Static.getInt32(args[1], t);
-				if (args.length != 2) {
+				if(args.length != 2) {
 					w = Static.getServer().getWorld(args[2].val());
 				}
 			}
-			if (w == null) {
+			if(w == null) {
 				throw new CREInvalidWorldException("The specified world doesn't exist, or no world was provided", t);
 			}
 			MCBiomeType bt = w.getBiome(x, z);
-			if (bt == null) {
+			if(bt == null) {
 				throw new CRENotFoundException("Could not find the biome type (are you running in cmdline mode?)", t);
 			}
 			return new CString(bt.name(), t);
@@ -706,33 +706,33 @@ public class Environment {
 			MCWorld w = null;
 			String world = null;
 			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			if (sender instanceof MCPlayer) {
+			if(sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
 
-			if (args[0] instanceof CArray && !(args.length == 3)) {
+			if(args[0] instanceof CArray && !(args.length == 3)) {
 				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = loc.getX();
 				z = loc.getZ();
 				world = loc.getWorld().getName();
-				if (args.length == 2) {
+				if(args.length == 2) {
 					world = args[1].val();
 				}
-			} else if (args.length == 2 || args.length == 3) {
+			} else if(args.length == 2 || args.length == 3) {
 				x = Static.getDouble(args[0], t);
 				z = Static.getDouble(args[1], t);
-				if (args.length == 3) {
+				if(args.length == 3) {
 					world = args[2].val();
 				}
 			}
-			if (world != null) {
+			if(world != null) {
 				w = Static.getServer().getWorld(world);
 			}
-			if (w == null) {
+			if(w == null) {
 				throw new CREInvalidWorldException("The specified world " + world + " doesn't exist", t);
 			}
 			MCBlock highestBlock = w.getHighestBlockAt((int) java.lang.Math.floor(x), (int) java.lang.Math.floor(z));
-			if (highestBlock == null) {
+			if(highestBlock == null) {
 				throw new CRENotFoundException(
 						"Could not find the highest block in " + this.getName() + " (are you running in cmdline mode?)", t);
 			}
@@ -792,20 +792,20 @@ public class Environment {
 			MCPlayer m = null;
 			boolean safe = false;
 
-			if (args.length >= 3) {
+			if(args.length >= 3) {
 				safe = Static.getBoolean(args[2]);
 			}
-			if (args.length >= 2) {
-				if (!(args[1] instanceof CNull)) {
+			if(args.length >= 2) {
+				if(!(args[1] instanceof CNull)) {
 					size = Static.getInt(args[1], t);
 				}
 			}
 
-			if (size > 100) {
+			if(size > 100) {
 				throw new CRERangeException("A bit excessive, don't you think? Let's scale that back some, huh?", t);
 			}
 
-			if (!(args[0] instanceof CArray)) {
+			if(!(args[0] instanceof CArray)) {
 				throw new CRECastException("Expecting an array at parameter 1 of explosion", t);
 			}
 
@@ -815,8 +815,8 @@ public class Environment {
 			z = loc.getZ();
 			y = loc.getY();
 
-			if (w == null) {
-				if (!(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer)) {
+			if(w == null) {
+				if(!(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer)) {
 					throw new CREPlayerOfflineException(this.getName() + " needs a world in the location array, or a player so it can take the current world of that player.", t);
 				}
 
@@ -861,18 +861,18 @@ public class Environment {
 			MCLocation l;
 			int instrumentOffset;
 			int noteOffset;
-			if (args.length == 2) {
+			if(args.length == 2) {
 				Static.AssertPlayerNonNull(p, t);
 				instrumentOffset = 0;
 				noteOffset = 1;
 				l = p.getLocation();
-			} else if (args.length == 4) {
+			} else if(args.length == 4) {
 				p = Static.GetPlayer(args[0], t);
 				instrumentOffset = 1;
 				noteOffset = 2;
 				l = ObjectGenerator.GetGenerator().location(args[3], p.getWorld(), t);
 			} else {
-				if (!(args[1] instanceof CArray) && args[2] instanceof CArray) {
+				if(!(args[1] instanceof CArray) && args[2] instanceof CArray) {
 					//Player provided, location not
 					instrumentOffset = 1;
 					noteOffset = 2;
@@ -888,29 +888,29 @@ public class Environment {
 			}
 			try {
 				i = MCInstrument.valueOf(args[instrumentOffset].val().toUpperCase().trim());
-			} catch (IllegalArgumentException e) {
+			} catch(IllegalArgumentException e) {
 				throw new CREFormatException("Instrument provided is not a valid type, required one of: " + StringUtils.Join(MCInstrument.values(), ", ", ", or "), t);
 			}
 			MCTone tone = null;
-			if (args[noteOffset] instanceof CArray) {
+			if(args[noteOffset] instanceof CArray) {
 				int octave = Static.getInt32(((CArray) args[noteOffset]).get("octave", t), t);
-				if (octave < 0 || octave > 2) {
+				if(octave < 0 || octave > 2) {
 					throw new CRERangeException("The octave must be 0, 1, or 2, but was " + octave, t);
 				}
 				String ttone = ((CArray) args[noteOffset]).get("tone", t).val().toUpperCase().trim();
 				try {
 					tone = MCTone.valueOf(ttone.trim().replaceAll("#", ""));
-				} catch (IllegalArgumentException e) {
+				} catch(IllegalArgumentException e) {
 					throw new CREFormatException("Expected the tone parameter to be one of: "
 							+ StringUtils.Join(MCTone.values(), ", ", ", or ") + " but it was " + ttone, t);
 				}
 				boolean sharped = false;
-				if (ttone.trim().endsWith("#")) {
+				if(ttone.trim().endsWith("#")) {
 					sharped = true;
 				}
 				try {
 					n = StaticLayer.GetConvertor().GetNote(octave, tone, sharped);
-				} catch (IllegalArgumentException e) {
+				} catch(IllegalArgumentException e) {
 					throw new CREFormatException(e.getMessage(), t);
 				}
 			} else {
@@ -977,7 +977,7 @@ public class Environment {
 			MCSoundCategory category = null;
 			float volume = 1, pitch = 1;
 
-			if (!(args[1] instanceof CArray)) {
+			if(!(args[1] instanceof CArray)) {
 				throw new CREFormatException("An array was expected but recieved " + args[1], t);
 			}
 
@@ -985,47 +985,47 @@ public class Environment {
 
 			try {
 				sound = MCSound.valueOf(sa.get("sound", t).val().toUpperCase());
-			} catch (IllegalArgumentException iae) {
+			} catch(IllegalArgumentException iae) {
 				throw new CREFormatException("Sound name '" + sa.get("sound", t).val() + "' is invalid.", t);
 			}
 
-			if (sa.containsKey("category")) {
+			if(sa.containsKey("category")) {
 				try {
 					category = MCSoundCategory.valueOf(sa.get("category", t).val().toUpperCase());
-				} catch (IllegalArgumentException iae) {
+				} catch(IllegalArgumentException iae) {
 					throw new CREFormatException("Sound category '" + sa.get("category", t).val() + "' is invalid.", t);
 				}
 			}
 
-			if (sa.containsKey("volume")) {
+			if(sa.containsKey("volume")) {
 				volume = Static.getDouble32(sa.get("volume", t), t);
 			}
 
-			if (sa.containsKey("pitch")) {
+			if(sa.containsKey("pitch")) {
 				pitch = Static.getDouble32(sa.get("pitch", t), t);
 			}
 
-			if (args.length == 3) {
+			if(args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
-				if (args[2] instanceof CArray) {
-					for (String key : ((CArray) args[2]).stringKeySet()) {
+				if(args[2] instanceof CArray) {
+					for(String key : ((CArray) args[2]).stringKeySet()) {
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
 					}
 				} else {
 					players.add(Static.GetPlayer(args[2], t));
 				}
 
-				if (category == null) {
-					for (MCPlayer p : players) {
+				if(category == null) {
+					for(MCPlayer p : players) {
 						p.playSound(loc, sound, volume, pitch);
 					}
 				} else {
-					for (MCPlayer p : players) {
+					for(MCPlayer p : players) {
 						p.playSound(loc, sound, category, volume, pitch);
 					}
 				}
 
-			} else if (category == null) {
+			} else if(category == null) {
 				loc.getWorld().playSound(loc, sound, volume, pitch);
 			} else {
 				loc.getWorld().playSound(loc, sound, category, volume, pitch);
@@ -1094,7 +1094,7 @@ public class Environment {
 			MCSoundCategory category = null;
 			float volume = 1, pitch = 1;
 
-			if (!(args[1] instanceof CArray)) {
+			if(!(args[1] instanceof CArray)) {
 				throw new CREFormatException("An array was expected but recieved " + args[1], t);
 			}
 
@@ -1102,42 +1102,42 @@ public class Environment {
 
 			path = sa.get("sound", t).val();
 
-			if (sa.containsKey("category")) {
+			if(sa.containsKey("category")) {
 				try {
 					category = MCSoundCategory.valueOf(sa.get("category", t).val().toUpperCase());
-				} catch (IllegalArgumentException iae) {
+				} catch(IllegalArgumentException iae) {
 					throw new CREFormatException("Sound category '" + sa.get("category", t).val() + "' is invalid.", t);
 				}
 			}
 
-			if (sa.containsKey("volume")) {
+			if(sa.containsKey("volume")) {
 				volume = Static.getDouble32(sa.get("volume", t), t);
 			}
 
-			if (sa.containsKey("pitch")) {
+			if(sa.containsKey("pitch")) {
 				pitch = Static.getDouble32(sa.get("pitch", t), t);
 			}
 
-			if (args.length == 3) {
+			if(args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
-				if (args[2] instanceof CArray) {
-					for (String key : ((CArray) args[2]).stringKeySet()) {
+				if(args[2] instanceof CArray) {
+					for(String key : ((CArray) args[2]).stringKeySet()) {
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
 					}
 				} else {
 					players.add(Static.GetPlayer(args[2], t));
 				}
 
-				if (category == null) {
-					for (MCPlayer p : players) {
+				if(category == null) {
+					for(MCPlayer p : players) {
 						p.playSound(loc, path, volume, pitch);
 					}
 				} else {
-					for (MCPlayer p : players) {
+					for(MCPlayer p : players) {
 						p.playSound(loc, path, category, volume, pitch);
 					}
 				}
-			} else if (category == null) {
+			} else if(category == null) {
 				loc.getWorld().playSound(loc, path, volume, pitch);
 			} else {
 				loc.getWorld().playSound(loc, path, category, volume, pitch);
@@ -1198,8 +1198,8 @@ public class Environment {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
 			MCBlock b = l.getBlock();
-			if (args.length == 2) {
-				switch (args[1].val()) {
+			if(args.length == 2) {
+				switch(args[1].val()) {
 					case "solid":
 						return CBoolean.get(b.isSolid());
 					case "flammable":
@@ -1295,7 +1295,7 @@ public class Environment {
 				throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (pl instanceof MCPlayer) {
+			if(pl instanceof MCPlayer) {
 				w = pl.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
@@ -1349,22 +1349,22 @@ public class Environment {
 				throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (pl instanceof MCPlayer) {
+			if(pl instanceof MCPlayer) {
 				w = pl.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 			CheckMode mode;
-			if (args.length == 2) {
+			if(args.length == 2) {
 				try {
 					mode = CheckMode.valueOf(args[1].val().toUpperCase());
-				} catch (IllegalArgumentException e) {
+				} catch(IllegalArgumentException e) {
 					throw new CREFormatException("Invalid checkMode: " + args[1].val() + ".", t);
 				}
 			} else {
 				mode = CheckMode.BOTH; // Default to BOTH to make it backwards compatible.
 			}
 			boolean ret;
-			switch (mode) {
+			switch(mode) {
 				case BOTH: {
 					ret = loc.getBlock().isBlockPowered() || loc.getBlock().isBlockIndirectlyPowered();
 					break;
@@ -1437,7 +1437,7 @@ public class Environment {
 				throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (pl instanceof MCPlayer) {
+			if(pl instanceof MCPlayer) {
 				w = pl.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
@@ -1487,12 +1487,12 @@ public class Environment {
 		@Override
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCTreeType treeType;
-			if (args.length == 1) {
+			if(args.length == 1) {
 				treeType = MCTreeType.TREE;
 			} else {
 				try {
 					treeType = MCTreeType.valueOf(args[1].val().toUpperCase());
-				} catch (IllegalArgumentException exception) {
+				} catch(IllegalArgumentException exception) {
 					throw new CREFormatException("The tree type \"" + args[1].val() + "\" does not exist.", t);
 				}
 			}
@@ -1544,7 +1544,7 @@ public class Environment {
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
 				throws ConfigRuntimeException {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
-			if (loc.getBlock().isCommandBlock()) {
+			if(loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				return new CString(cb.getCommand(), t);
 			} else {
@@ -1596,15 +1596,15 @@ public class Environment {
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
 				throws ConfigRuntimeException {
 			String cmd = null;
-			if (args.length == 2 && !(args[1] instanceof CNull)) {
-				if (!(args[1] instanceof CString)) {
+			if(args.length == 2 && !(args[1] instanceof CNull)) {
+				if(!(args[1] instanceof CString)) {
 					throw new CRECastException("Parameter 2 of " + getName() + " must be a string or null", t);
 				}
 				cmd = args[1].val();
 			}
 
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
-			if (loc.getBlock().isCommandBlock()) {
+			if(loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				cb.setCommand(cmd);
 				return CVoid.VOID;
@@ -1656,7 +1656,7 @@ public class Environment {
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
 				throws ConfigRuntimeException {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
-			if (loc.getBlock().isCommandBlock()) {
+			if(loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				return new CString(cb.getName(), t);
 			} else {
@@ -1708,15 +1708,15 @@ public class Environment {
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args
 		) throws ConfigRuntimeException {
 			String name = null;
-			if (args.length == 2 && !(args[1] instanceof CNull)) {
-				if (!(args[1] instanceof CString)) {
+			if(args.length == 2 && !(args[1] instanceof CNull)) {
+				if(!(args[1] instanceof CString)) {
 					throw new CRECastException("Parameter 2 of " + getName() + " must be a string or null", t);
 				}
 				name = args[1].val();
 			}
 
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
-			if (loc.getBlock().isCommandBlock()) {
+			if(loc.getBlock().isCommandBlock()) {
 				MCCommandBlock cb = loc.getBlock().getCommandBlock();
 				cb.setName(name);
 				return CVoid.VOID;

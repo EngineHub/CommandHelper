@@ -29,7 +29,7 @@ public class BukkitMCTeam implements MCTeam {
 	public void addEntry(String entry) {
 		try {
 			t.addEntry(entry);
-		} catch (NoSuchMethodError ex) {
+		} catch(NoSuchMethodError ex) {
 			// Probably 1.8.5 or prior
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			ReflectionUtils.invokeMethod(t, "addPlayer", player);
@@ -73,12 +73,12 @@ public class BukkitMCTeam implements MCTeam {
 	public Set<String> getEntries() {
 		Set<String> ret = new HashSet<>();
 		try {
-			for (String e : t.getEntries()) {
+			for(String e : t.getEntries()) {
 				ret.add(e);
 			}
-		} catch (NoSuchMethodError ex) {
+		} catch(NoSuchMethodError ex) {
 			// Probably 1.8.5 or prior
-			for (OfflinePlayer o : (Set<OfflinePlayer>) ReflectionUtils.invokeMethod(t, "getPlayers")) {
+			for(OfflinePlayer o : (Set<OfflinePlayer>) ReflectionUtils.invokeMethod(t, "getPlayers")) {
 				ret.add(o.getName());
 			}
 		}
@@ -109,7 +109,7 @@ public class BukkitMCTeam implements MCTeam {
 	public boolean hasEntry(String entry) {
 		try {
 			return t.hasEntry(entry);
-		} catch (NoSuchMethodError ex) {
+		} catch(NoSuchMethodError ex) {
 			// Probably 1.8.5 or prior
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			return (boolean) ReflectionUtils.invokeMethod(t, "hasPlayer", player);
@@ -120,7 +120,7 @@ public class BukkitMCTeam implements MCTeam {
 	public boolean removeEntry(String entry) {
 		try {
 			return t.removeEntry(entry);
-		} catch (NoSuchMethodError ex) {
+		} catch(NoSuchMethodError ex) {
 			// Probably 1.8.5 or prior
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			return (boolean) ReflectionUtils.invokeMethod(t, "removePlayer", player);

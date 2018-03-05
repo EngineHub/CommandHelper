@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core;
 
 import org.junit.After;
@@ -9,28 +7,28 @@ import org.junit.BeforeClass;
 
 /**
  *
- * 
+ *
  */
 public class ScriptTest {
-    
-    public ScriptTest() {
-    }
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
+	public ScriptTest() {
+	}
 
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
-    
-    @Before
-    public void setUp() {
-    }
-    
-    @After
-    public void tearDown() {
-    }
+	@BeforeClass
+	public static void setUpClass() throws Exception {
+	}
+
+	@AfterClass
+	public static void tearDownClass() throws Exception {
+	}
+
+	@Before
+	public void setUp() {
+	}
+
+	@After
+	public void tearDown() {
+	}
 
 //    @Test
 //    public void testToString() {
@@ -38,7 +36,6 @@ public class ScriptTest {
 //        Script instance = new Script(null, null);
 //        assertTrue(instance.toString().length() > 0);
 //    }
-
 //    @Test
 //    public void testUncompilable() {
 //        System.out.println("uncompilable");

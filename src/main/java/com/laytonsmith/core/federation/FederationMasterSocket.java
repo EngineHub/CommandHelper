@@ -28,7 +28,7 @@ public class FederationMasterSocket {
 	 * @return
 	 */
 	public static FederationMasterSocket getFederationMasterSocket() {
-		if (defaultInstance == null) {
+		if(defaultInstance == null) {
 			defaultInstance = new FederationMasterSocket();
 		}
 		return defaultInstance;
@@ -39,7 +39,7 @@ public class FederationMasterSocket {
 	 * running.
 	 */
 	public static void clearFederationMasterSocket() {
-		if (defaultInstance != null) {
+		if(defaultInstance != null) {
 			defaultInstance.closeAll();
 			defaultInstance = null;
 		}
@@ -56,11 +56,11 @@ public class FederationMasterSocket {
 	 * Closes all the master sockets, for all open ports.
 	 */
 	public void closeAll() {
-		for (ServerSocket socket : servers.values()) {
+		for(ServerSocket socket : servers.values()) {
 			try {
 				socket.close();
 				closed = true;
-			} catch (IOException ex) {
+			} catch(IOException ex) {
 				Logger.getLogger(FederationMasterSocket.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -75,7 +75,7 @@ public class FederationMasterSocket {
 	 * @throws java.io.IOException
 	 */
 	public boolean close(int port) throws IOException {
-		if (servers.containsKey(port)) {
+		if(servers.containsKey(port)) {
 			servers.get(port).close();
 			servers.remove(port);
 			return true;
@@ -92,8 +92,8 @@ public class FederationMasterSocket {
 	 * @throws java.io.IOException
 	 */
 	public void ensureMasterSocketOpen(final PersistenceNetwork pn, int port) throws IOException {
-		if (!servers.containsKey(port) || servers.get(port).isClosed()) {
-			if (Federation.available(port)) {
+		if(!servers.containsKey(port) || servers.get(port).isClosed()) {
+			if(Federation.available(port)) {
 				// We're the first server to register on this port, so
 				// we need to actually start it up.
 				final ServerSocket masterSocket = new ServerSocket(port);
@@ -102,7 +102,7 @@ public class FederationMasterSocket {
 
 					@Override
 					public void run() {
-						while (true) {
+						while(true) {
 							try {
 								final Socket s = masterSocket.accept();
 								Thread connectionWatcher = new Thread(new Runnable() {
@@ -115,13 +115,13 @@ public class FederationMasterSocket {
 											// period, which means the connection is taking
 											// too long. Forcibly terminate it.
 											try {
-												if (s.isConnected()) {
+												if(s.isConnected()) {
 													s.close();
 												}
-											} catch (IOException ex) {
+											} catch(IOException ex) {
 												Logger.getLogger(FederationServer.class.getName()).log(Level.SEVERE, null, ex);
 											}
-										} catch (InterruptedException ex) {
+										} catch(InterruptedException ex) {
 											// Ok, it's good.
 										}
 									}
@@ -131,7 +131,7 @@ public class FederationMasterSocket {
 								FederationCommunication communicator = new FederationCommunication(new BufferedInputStream(s.getInputStream()),
 										new BufferedOutputStream(s.getOutputStream()));
 								String hello = communicator.readUnencryptedLine();
-								if (!"HELLO".equals(hello)) {
+								if(!"HELLO".equals(hello)) {
 									// Bad message. Close the socket immediately, and return.
 									s.close();
 									connectionWatcher.interrupt();
@@ -144,7 +144,7 @@ public class FederationMasterSocket {
 								try {
 									version = FederationVersion.fromVersion(sVersion);
 									communicator.writeUnencryptedLine("VERSION OK");
-								} catch (IllegalArgumentException ex) {
+								} catch(IllegalArgumentException ex) {
 									// The version is unsupported. The client is newer than this server knows how
 									// to deal with. So, write out the version error data, then close the socket and
 									// continue.
@@ -157,14 +157,14 @@ public class FederationMasterSocket {
 									return;
 								}
 								// The rest of the code may vary based on the version.
-								if (version == FederationVersion.V1_0_0) {
+								if(version == FederationVersion.V1_0_0) {
 									String command = communicator.readUnencryptedLine();
-									if ("GET PORT".equals(command)) {
+									if("GET PORT".equals(command)) {
 										String serverName = communicator.readUnencryptedLine();
 										String value = pn.get(new String[]{"federation", serverName});
-										if (value != null) {
+										if(value != null) {
 											FederationRegistration reg = FederationRegistration.fromJSON(value);
-											if (reg.updatedSince(Federation.DEAD_SERVER_TIMEOUT)) {
+											if(reg.updatedSince(Federation.DEAD_SERVER_TIMEOUT)) {
 												int port = reg.getPort();
 												communicator.writeLine("OK");
 												communicator.writeLine(Integer.toString(port));
@@ -186,7 +186,7 @@ public class FederationMasterSocket {
 									}
 								}
 
-							} catch (IOException | DataSourceException ex) {
+							} catch(IOException | DataSourceException ex) {
 								Logger.getLogger(FederationMasterSocket.class.getName()).log(Level.SEVERE, null, ex);
 							}
 
@@ -201,7 +201,7 @@ public class FederationMasterSocket {
 	@SuppressWarnings("FinalizeDeclaration")
 	protected void finalize() throws Throwable {
 		super.finalize();
-		if (!closed) {
+		if(!closed) {
 			StreamUtils.GetSystemErr().println("FederationMasterSocket was not closed properly, and cleanup is having to be done in the finalize method!");
 			closeAll();
 		}

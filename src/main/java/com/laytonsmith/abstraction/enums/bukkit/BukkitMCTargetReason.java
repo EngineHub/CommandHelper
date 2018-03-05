@@ -16,7 +16,7 @@ public class BukkitMCTargetReason extends EnumConvertor<MCTargetReason, TargetRe
 	private static com.laytonsmith.abstraction.enums.bukkit.BukkitMCTargetReason instance;
 
 	public static com.laytonsmith.abstraction.enums.bukkit.BukkitMCTargetReason getConvertor() {
-		if (instance == null) {
+		if(instance == null) {
 			instance = new com.laytonsmith.abstraction.enums.bukkit.BukkitMCTargetReason();
 		}
 		return instance;

@@ -78,16 +78,16 @@ public class VirtualFileSystem {
 	static {
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(VirtualFileSystem.class));
 		Set<ClassMirror<?>> fslayerClasses = ClassDiscovery.getDefaultInstance().getClassesWithAnnotation(FileSystemLayer.fslayer.class);
-		for (ClassMirror<?> clazzMirror : fslayerClasses) {
+		for(ClassMirror<?> clazzMirror : fslayerClasses) {
 			try {
 				Class<?> clazz = clazzMirror.loadClass();
 				Constructor<?> constructor = clazz.getConstructor(VirtualFile.class, VirtualFileSystem.class, String.class);
 				FileSystemLayer.fslayer annotation = clazz.getAnnotation(FileSystemLayer.fslayer.class);
 				FSLProviders.put(annotation.value(), constructor);
-			} catch (NoSuchMethodException ex) {
+			} catch(NoSuchMethodException ex) {
 				throw new Error(clazzMirror.getClassName() + " must implement a constructor with the signature: public " + clazzMirror.getSimpleName() + "("
 						+ VirtualFile.class.getSimpleName() + ", " + VirtualFileSystem.class.getSimpleName() + ", " + String.class.getSimpleName() + ")");
-			} catch (SecurityException ex) {
+			} catch(SecurityException ex) {
 				Logger.getLogger(VirtualFileSystem.class.getName()).log(Level.SEVERE, "Security exception while loading a class. Symlinks may not work.", ex);
 			}
 		}
@@ -109,18 +109,18 @@ public class VirtualFileSystem {
 		symlinkFile = new File(root, META_DIRECTORY_PATH + "/" + SYMLINK_FILE_NAME);
 		//TODO: If it is cordoned off, we don't need this thread either, we need a different
 		//thread, but it only needs to run once
-		if (this.settings.hasQuota()) {
+		if(this.settings.hasQuota()) {
 			//We need to kick off a thread to determine the current FS size.
 			fsSizeThread = new Thread(new Runnable() {
 
 				@Override
 				public void run() {
-					while (true) {
+					while(true) {
 						try {
 							FSSize = FileUtils.sizeOfDirectoryAsBigInteger(root);
 							//Sleep for a minute before running again.
 							Thread.sleep(60 * 1000);
-						} catch (InterruptedException ex) {
+						} catch(InterruptedException ex) {
 							Logger.getLogger(VirtualFileSystem.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
@@ -134,7 +134,7 @@ public class VirtualFileSystem {
 	}
 
 	private void install() throws IOException {
-		if (!root.exists()) {
+		if(!root.exists()) {
 			root.mkdirs();
 		}
 		File meta = new File(root, META_DIRECTORY_PATH);
@@ -145,19 +145,19 @@ public class VirtualFileSystem {
 		File symlinks = new File(meta, SYMLINK_FILE_NAME);
 		File tmpDir = new File(meta, "tmp");
 
-		if (!settingsFile.exists()) {
+		if(!settingsFile.exists()) {
 			settingsFile.createNewFile();
 		}
 
-		if (!manifest.exists()) {
+		if(!manifest.exists()) {
 			manifest.createNewFile();
 		}
 
-		if (!symlinks.exists()) {
+		if(!symlinks.exists()) {
 			symlinks.createNewFile();
 		}
 
-		if (!tmpDir.exists()) {
+		if(!tmpDir.exists()) {
 			tmpDir.mkdirs();
 		}
 
@@ -165,7 +165,7 @@ public class VirtualFileSystem {
 
 	private void assertReadPermission(VirtualFile file) {
 		Boolean hidden = (Boolean) settings.getSetting(file, VirtualFileSystemSetting.HIDDEN);
-		if (hidden) {
+		if(hidden) {
 			throw new PermissionException(file.getPath() + " cannot be read.");
 		}
 	}
@@ -173,15 +173,15 @@ public class VirtualFileSystem {
 	private void assertWritePermission(VirtualFile file) {
 		Boolean readOnly = (Boolean) settings.getSetting(file, VirtualFileSystemSetting.READONLY);
 		Boolean hidden = (Boolean) settings.getSetting(file, VirtualFileSystemSetting.HIDDEN);
-		if (readOnly || hidden) {
+		if(readOnly || hidden) {
 			throw new PermissionException(file.getPath() + " cannot be written to.");
 		}
 	}
 
 	private FileSystemLayer normalize(VirtualFile virtual) throws IOException {
 		URI uri = null;
-		for (VirtualGlob vg : symlinks.keySet()) {
-			if (vg.matches(virtual)) {
+		for(VirtualGlob vg : symlinks.keySet()) {
+			if(vg.matches(virtual)) {
 				uri = symlinks.get(vg);
 				break;
 			}
@@ -192,15 +192,15 @@ public class VirtualFileSystem {
 		//both a) who we need to instantiate to provide the fslayer for
 		//us, and b) what the symlink actually is. Default to no
 		//symlink, with a file: provider.
-		if (uri != null) {
+		if(uri != null) {
 			provider = uri.getScheme();
 			symlink = uri.getSchemeSpecificPart();
 		}
-		if (FSLProviders.containsKey(provider)) {
+		if(FSLProviders.containsKey(provider)) {
 			FileSystemLayer fsl;
 			try {
 				fsl = (FileSystemLayer) FSLProviders.get(provider).newInstance(virtual, this, symlink);
-			} catch (Exception ex) {
+			} catch(Exception ex) {
 				//This shouldn't happen ever, minus a programming mistake?
 				throw new Error(ex);
 			}
@@ -221,7 +221,7 @@ public class VirtualFileSystem {
 	public byte[] read(VirtualFile file) {
 		try {
 			return StreamUtils.GetBytes(readAsStream(file));
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -235,7 +235,7 @@ public class VirtualFileSystem {
 	public void write(VirtualFile file, InputStream data) {
 		try {
 			write(file, StreamUtils.GetBytes(data));
-		} catch (IOException ex) {
+		} catch(IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -295,7 +295,7 @@ public class VirtualFileSystem {
 	 */
 	public VirtualFile[] list(VirtualFile directory) throws IOException {
 		assertReadPermission(directory);
-		if (settings.isCordonedOff()) {
+		if(settings.isCordonedOff()) {
 			throw new UnsupportedOperationException("Not yet implemented.");
 		} else {
 			FileSystemLayer real = normalize(directory);
@@ -314,7 +314,7 @@ public class VirtualFileSystem {
 	 */
 	public void delete(VirtualFile file) throws IOException {
 		assertWritePermission(file);
-		if (settings.isCordonedOff()) {
+		if(settings.isCordonedOff()) {
 			throw new UnsupportedOperationException("Not implemented yet.");
 		} else {
 			normalize(file).delete();
@@ -329,7 +329,7 @@ public class VirtualFileSystem {
 	 */
 	public void deleteOnExit(VirtualFile file) throws IOException {
 		assertWritePermission(file);
-		if (settings.isCordonedOff()) {
+		if(settings.isCordonedOff()) {
 			throw new UnsupportedOperationException("Not implemented yet.");
 		} else {
 			normalize(file).deleteOnExit();
@@ -356,7 +356,7 @@ public class VirtualFileSystem {
 	 */
 	public boolean canRead(VirtualFile file) throws IOException {
 		assertReadPermission(file);
-		if (!exists(file)) {
+		if(!exists(file)) {
 			return false;
 		}
 		return normalize(file).canRead();
@@ -393,7 +393,7 @@ public class VirtualFileSystem {
 	 */
 	public boolean isDirectory(VirtualFile fileOrFolder) throws IOException {
 		assertReadPermission(fileOrFolder);
-		if (!exists(fileOrFolder)) {
+		if(!exists(fileOrFolder)) {
 			return false;
 		}
 		return normalize(fileOrFolder).isDirectory();
@@ -408,7 +408,7 @@ public class VirtualFileSystem {
 	 */
 	public boolean isFile(VirtualFile fileOrFolder) throws IOException {
 		assertReadPermission(fileOrFolder);
-		if (!exists(fileOrFolder)) {
+		if(!exists(fileOrFolder)) {
 			return false;
 		}
 		return normalize(fileOrFolder).isFile();
@@ -433,7 +433,7 @@ public class VirtualFileSystem {
 	 */
 	public void createEmptyFile(VirtualFile file) throws IOException {
 		assertWritePermission(file);
-		if (exists(file)) {
+		if(exists(file)) {
 			return;
 		}
 		normalize(file).createNewFile();
