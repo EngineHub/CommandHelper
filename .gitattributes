@@ -6,6 +6,11 @@
 *.xml text
 *.txt text
 *.yml text
+*.ms text
+*.msa text
+*.md text
+*.html text
+*.js text
 
 *.png binary
 *.jpg binary
