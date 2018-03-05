@@ -1,6 +1,5 @@
 package com.laytonsmith.core.exceptions;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.TermColors;
@@ -23,7 +22,6 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
-import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;

@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.natives.interfaces.AbstractMixedInterfaceRunner;
-import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *

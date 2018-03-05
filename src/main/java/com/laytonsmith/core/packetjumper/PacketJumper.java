@@ -1,7 +1,6 @@
 
 package com.laytonsmith.core.packetjumper;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.MCPlayer;

@@ -3,8 +3,6 @@ package com.laytonsmith.PureUtilities.Common;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
