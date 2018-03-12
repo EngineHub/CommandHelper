@@ -463,12 +463,11 @@ public final class WebUtility {
 		}
 		StringBuilder b = new StringBuilder();
 		boolean first = true;
-		if(!first) {
-			b.append("&");
-		}
-		first = false;
 		for(String key : parameters.keySet()) {
-
+			if(!first) {
+				b.append("&");
+			}
+			first = false;
 			List<String> values = parameters.get(key);
 			try {
 				if(values.size() == 1) {
