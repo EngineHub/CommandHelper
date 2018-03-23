@@ -4867,6 +4867,60 @@ public class PlayerManagement {
 	}
 
 	@api
+	public static class plast_known_name extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCOfflinePlayer p = Static.GetUser(args[0].val(), t);
+			if(p == null) {
+				return CNull.NULL;
+			}
+			String name = p.getName();
+			if(name == null) {
+				return CNull.NULL;
+			}
+			return new CString(name, t);
+		}
+
+		@Override
+		public String getName() {
+			return "plast_known_name";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {uuid} Returns the name for this player the last time they were on the server."
+					+ " Return null if the player has never been on the server. This is not guaranteed to be their"
+					+ " current player name. This is read directly from the player data file for offline players.";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
 	@hide("Deprecated.")
 	public static class get_player_from_entity_id extends AbstractFunction implements Optimizable {
 
