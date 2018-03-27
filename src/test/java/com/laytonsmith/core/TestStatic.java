@@ -71,11 +71,11 @@ public class TestStatic {
 
 	@Test
 	public void testGetBoolean() {
-		assertEquals(true, Static.getBoolean(C.Boolean(true)));
-		assertEquals(true, Static.getBoolean(C.String("non-empty string")));
-		assertEquals(false, Static.getBoolean(C.String("")));
-		assertEquals(true, Static.getBoolean(C.Int(1)));
-		assertEquals(false, Static.getBoolean(C.Int(0)));
+		assertEquals(true, Static.getBoolean(C.Boolean(true), Target.UNKNOWN));
+		assertEquals(true, Static.getBoolean(C.String("non-empty string"), Target.UNKNOWN));
+		assertEquals(false, Static.getBoolean(C.String(""), Target.UNKNOWN));
+		assertEquals(true, Static.getBoolean(C.Int(1), Target.UNKNOWN));
+		assertEquals(false, Static.getBoolean(C.Int(0), Target.UNKNOWN));
 	}
 
 	@Test

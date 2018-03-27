@@ -301,11 +301,11 @@ public class VehicleEvents {
 			if(event instanceof MCVehicleEnitityCollideEvent) {
 				MCVehicleEnitityCollideEvent e = (MCVehicleEnitityCollideEvent) event;
 				if(key.equals("collide")) {
-					e.setCollisionCancelled(!Static.getBoolean(value));
+					e.setCollisionCancelled(!Static.getBoolean(value, Target.UNKNOWN));
 					return true;
 				}
 				if(key.equals("pickup")) {
-					e.setPickupCancelled(!Static.getBoolean(value));
+					e.setPickupCancelled(!Static.getBoolean(value, Target.UNKNOWN));
 					return true;
 				}
 			}

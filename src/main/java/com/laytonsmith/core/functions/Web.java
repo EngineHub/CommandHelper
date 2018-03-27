@@ -161,10 +161,10 @@ public class Web {
 				expiration = Static.getInt(cookie.get("expiration", t), t);
 			}
 			if(cookie.containsKey("httpOnly")) {
-				httpOnly = Static.getBoolean(cookie.get("httpOnly", t));
+				httpOnly = Static.getBoolean(cookie.get("httpOnly", t), t);
 			}
 			if(cookie.containsKey("secureOnly")) {
-				secureOnly = Static.getBoolean(cookie.get("secureOnly", t));
+				secureOnly = Static.getBoolean(cookie.get("secureOnly", t), t);
 			}
 			Cookie c = new Cookie(name, value, domain, path, expiration, httpOnly, secureOnly);
 			ret.addCookie(c);
@@ -242,7 +242,7 @@ public class Web {
 				}
 				boolean useDefaultHeaders = true;
 				if(csettings.containsKey("useDefaultHeaders")) {
-					useDefaultHeaders = Static.getBoolean(csettings.get("useDefaultHeaders", t));
+					useDefaultHeaders = Static.getBoolean(csettings.get("useDefaultHeaders", t), t);
 				}
 				if(csettings.containsKey("headers") && !(csettings.get("headers", t) instanceof CNull)) {
 					CArray headers = Static.getArray(csettings.get("headers", t), t);
@@ -313,7 +313,7 @@ public class Web {
 					arrayJar = null;
 				}
 				if(csettings.containsKey("followRedirects")) {
-					settings.setFollowRedirects(Static.getBoolean(csettings.get("followRedirects", t)));
+					settings.setFollowRedirects(Static.getBoolean(csettings.get("followRedirects", t), t));
 				}
 				//Only required parameter
 				if(csettings.containsKey("success")) {
@@ -363,7 +363,7 @@ public class Web {
 				}
 				if(csettings.containsKey("trustStore")) {
 					Construct trustStore = csettings.get("trustStore", t);
-					if(trustStore instanceof CBoolean && Static.getBoolean(trustStore) == false) {
+					if(trustStore instanceof CBoolean && Static.getBoolean(trustStore, t) == false) {
 						settings.setDisableCertChecking(true);
 					} else if(trustStore instanceof CArray) {
 						CArray trustStoreA = ((CArray) trustStore);
@@ -400,10 +400,10 @@ public class Web {
 					}
 				}
 				if(csettings.containsKey("blocking")) {
-					boolean blocking = Static.getBoolean(csettings.get("blocking", t));
+					boolean blocking = Static.getBoolean(csettings.get("blocking", t), t);
 					settings.setBlocking(blocking);
 				}
-				if(csettings.containsKey("log") && Static.getBoolean(csettings.get("log", t))) {
+				if(csettings.containsKey("log") && Static.getBoolean(csettings.get("log", t), t)) {
 					settings.setLogger(Logger.getLogger(Web.class.getName()));
 				}
 				settings.setAuthenticationDetails(username, password);

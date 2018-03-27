@@ -120,7 +120,7 @@ public class MObject {
 							val = value.val().charAt(0);
 						}
 					} else if(fType == boolean.class) {
-						val = Static.getBoolean(value);
+						val = Static.getBoolean(value, t);
 					} else if(fType == float.class) {
 						val = Static.getDouble32(value, t);
 					} else if(fType == double.class) {

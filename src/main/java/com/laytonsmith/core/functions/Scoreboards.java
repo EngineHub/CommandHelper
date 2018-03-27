@@ -906,7 +906,7 @@ public class Scoreboards {
 			String id = args[0].val();
 			boolean nullify = true;
 			if(args.length == 2) {
-				nullify = Static.getBoolean(args[1]);
+				nullify = Static.getBoolean(args[1], t);
 			}
 			if(nullify) {
 				MCScoreboard s = getBoard(id, t);
@@ -1157,10 +1157,10 @@ public class Scoreboards {
 			if(args[1] instanceof CArray) {
 				CArray options = (CArray) args[1];
 				if(options.containsKey("friendlyfire")) {
-					team.setAllowFriendlyFire(Static.getBoolean(options.get("friendlyfire", t)));
+					team.setAllowFriendlyFire(Static.getBoolean(options.get("friendlyfire", t), t));
 				}
 				if(options.containsKey("friendlyinvisibles")) {
-					team.setCanSeeFriendlyInvisibles(Static.getBoolean(options.get("friendlyinvisibles", t)));
+					team.setCanSeeFriendlyInvisibles(Static.getBoolean(options.get("friendlyinvisibles", t), t));
 				}
 				if(options.containsKey("nametagvisibility") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
 					MCNameTagVisibility visibility;

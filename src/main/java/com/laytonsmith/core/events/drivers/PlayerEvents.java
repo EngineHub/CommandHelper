@@ -1300,10 +1300,10 @@ public class PlayerEvents {
 						e.setDeathMessage(value.nval());
 						return true;
 					case "keep_inventory":
-						e.setKeepInventory(Static.getBoolean(value));
+						e.setKeepInventory(Static.getBoolean(value, Target.UNKNOWN));
 						return true;
 					case "keep_level":
-						e.setKeepLevel(Static.getBoolean(value));
+						e.setKeepLevel(Static.getBoolean(value, Target.UNKNOWN));
 						return true;
 					case "new_exp":
 						e.setNewExp(Static.getInt32(value, Target.UNKNOWN));
@@ -2447,7 +2447,7 @@ public class PlayerEvents {
 						return true;
 					}
 				} else if(key.equalsIgnoreCase("signing")) {
-					((MCPlayerEditBookEvent) event).setSigning(Static.getBoolean(value));
+					((MCPlayerEditBookEvent) event).setSigning(Static.getBoolean(value, Target.UNKNOWN));
 					return true;
 				} else {
 					return false;

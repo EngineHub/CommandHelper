@@ -16,6 +16,7 @@ import com.laytonsmith.core.Main;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.SimpleDocumentation;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -792,5 +793,19 @@ public class DocGenTemplates {
 				+ "| '''A:''' \n"
 				+ "| " + args[1].replaceAll("\n", " ") + "\n"
 				+ "|}";
+	};
+	
+	public static Generator SupressWarningsList = (args) -> {
+		StringBuilder b = new StringBuilder();
+		for(FileOptions.SuppressWarnings s : FileOptions.SuppressWarnings.values()) {
+			b.append("* ")
+					.append(s.getName())
+					.append(" - ")
+					.append(s.docs())
+					.append(" (added ")
+					.append(s.since())
+					.append(")");
+		}
+		return b.toString();
 	};
 }

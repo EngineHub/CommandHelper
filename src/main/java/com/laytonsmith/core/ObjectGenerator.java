@@ -576,7 +576,7 @@ public class ObjectGenerator {
 
 					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
 						if(ma.containsKey("unbreakable")) {
-							meta.setUnbreakable(Static.getBoolean(ma.get("unbreakable", t)));
+							meta.setUnbreakable(Static.getBoolean(ma.get("unbreakable", t), t));
 						}
 					}
 				}
@@ -1040,10 +1040,10 @@ public class ObjectGenerator {
 					}
 				}
 				if(effect.containsKey("ambient")) {
-					ambient = Static.getBoolean(effect.get("ambient", t));
+					ambient = Static.getBoolean(effect.get("ambient", t), t);
 				}
 				if(effect.containsKey("particles")) {
-					particles = Static.getBoolean(effect.get("particles", t));
+					particles = Static.getBoolean(effect.get("particles", t), t);
 				}
 				ret.add(new MCLivingEntity.MCEffect(potionID, strength, (int) (seconds * 20), ambient, particles));
 			} else {
@@ -1116,10 +1116,10 @@ public class ObjectGenerator {
 	public MCFireworkEffect fireworkEffect(CArray fe, Target t) {
 		MCFireworkBuilder builder = StaticLayer.GetConvertor().GetFireworkBuilder();
 		if(fe.containsKey("flicker")) {
-			builder.setFlicker(Static.getBoolean(fe.get("flicker", t)));
+			builder.setFlicker(Static.getBoolean(fe.get("flicker", t), t));
 		}
 		if(fe.containsKey("trail")) {
-			builder.setTrail(Static.getBoolean(fe.get("trail", t)));
+			builder.setTrail(Static.getBoolean(fe.get("trail", t), t));
 		}
 		if(fe.containsKey("colors")) {
 			Construct colors = fe.get("colors", t);

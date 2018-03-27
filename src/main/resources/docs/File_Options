@@ -43,8 +43,7 @@ mode actually does.
 Suppresses the given compiler warnings for this file. The list should be comma separated, but can contain multiple 
 types.
 
-'''Note: There are currently no compiler warnings defined in this directive, but the existing compiler warnings will \
-be backported into this system'''
+<%SupressWarningsList%>
 
 == name ==
 

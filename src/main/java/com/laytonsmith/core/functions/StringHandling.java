@@ -347,7 +347,7 @@ public class StringHandling {
 			String string = args[0].val();
 			boolean useAdvanced = false;
 			if(args.length >= 2) {
-				useAdvanced = Static.getBoolean(args[1]);
+				useAdvanced = Static.getBoolean(args[1], t);
 			}
 			List<Construct> a = new ArrayList<>();
 			if(!useAdvanced) {
@@ -1393,7 +1393,7 @@ public class StringHandling {
 					//Further processing is needed
 					if(c == Conversion.BOOLEAN || c == Conversion.BOOLEAN_UPPER) {
 						//Boolean, parse as such
-						o = Static.getBoolean(arg);
+						o = Static.getBoolean(arg, t);
 					} else {
 						//Else it's either a string or a hash code, in which case
 						//we will treat it as a string anyways

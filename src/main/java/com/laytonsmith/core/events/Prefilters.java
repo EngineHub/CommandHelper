@@ -152,7 +152,7 @@ public final class Prefilters {
 	}
 
 	private static void BooleanMatch(Construct bool1, Construct bool2) throws PrefilterNonMatchException {
-		if(Static.getBoolean(bool1) != Static.getBoolean(bool2)) {
+		if(Static.getBoolean(bool1, Target.UNKNOWN) != Static.getBoolean(bool2, Target.UNKNOWN)) {
 			throw new PrefilterNonMatchException();
 		}
 	}

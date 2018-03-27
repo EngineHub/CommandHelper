@@ -104,7 +104,7 @@ public class ConfigRuntimeException extends RuntimeException {
 			if(ret instanceof CNull || Prefs.ScreamErrors()) {
 				reaction = Reaction.REPORT;
 			} else {
-				if(Static.getBoolean(ret)) {
+				if(Static.getBoolean(ret, Target.UNKNOWN)) {
 					reaction = Reaction.IGNORE;
 				} else {
 					reaction = Reaction.FATAL;

@@ -719,7 +719,7 @@ public class Echoes {
 			String mes = Static.MCToANSIColors(args[0].val());
 			boolean prefix = true;
 			if(args.length > 1) {
-				prefix = Static.getBoolean(args[1]);
+				prefix = Static.getBoolean(args[1], t);
 			}
 			if(prefix) {
 				mes = "CommandHelper: " + mes;

@@ -86,7 +86,7 @@ public class Performance {
 			if(!Prefs.AllowProfiling()) {
 				throw new CRESecurityException("allow-profiling is currently off, you must set it to true in your preferences.", t);
 			}
-			PERFORMANCE_LOGGING = Static.getBoolean(args[0]);
+			PERFORMANCE_LOGGING = Static.getBoolean(args[0], t);
 			return CVoid.VOID;
 		}
 

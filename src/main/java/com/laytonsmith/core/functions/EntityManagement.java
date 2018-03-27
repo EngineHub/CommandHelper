@@ -1424,7 +1424,7 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
-				Static.getEntity(args[0], t).setCustomNameVisible(Static.getBoolean(args[1]));
+				Static.getEntity(args[0], t).setCustomNameVisible(Static.getBoolean(args[1], t));
 			} catch(IllegalArgumentException e) {
 				throw new CRECastException(e.getMessage(), t);
 			}
@@ -2221,7 +2221,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ARROW_CRITICAL:
-								arrow.setCritical(Static.getBoolean(specArray.get(index, t)));
+								arrow.setCritical(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ARROW_KNOCKBACK:
 								int k = Static.getInt32(specArray.get(index, t), t);
@@ -2241,22 +2241,22 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ARMORSTAND_ARMS:
-								stand.setHasArms(Static.getBoolean(specArray.get(index, t)));
+								stand.setHasArms(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ARMORSTAND_BASEPLATE:
-								stand.setHasBasePlate(Static.getBoolean(specArray.get(index, t)));
+								stand.setHasBasePlate(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ARMORSTAND_GRAVITY:
-								stand.setHasGravity(Static.getBoolean(specArray.get(index, t)));
+								stand.setHasGravity(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ARMORSTAND_MARKER:
-								stand.setMarker(Static.getBoolean(specArray.get(index, t)));
+								stand.setMarker(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ARMORSTAND_SMALLSIZE:
-								stand.setSmall(Static.getBoolean(specArray.get(index, t)));
+								stand.setSmall(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ARMORSTAND_VISIBLE:
-								stand.setVisible(Static.getBoolean(specArray.get(index, t)));
+								stand.setVisible(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ARMORSTAND_POSES:
 								Map<MCBodyPart, Vector3D> poseMap = stand.getAllPoses();
@@ -2286,7 +2286,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_CREEPER_POWERED:
-								creeper.setPowered(Static.getBoolean(specArray.get(index, t)));
+								creeper.setPowered(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_CREEPER_MAXFUSETICKS:
 								try {
@@ -2313,7 +2313,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_HORSE_CHEST:
-								chestedhorse.setHasChest(Static.getBoolean(specArray.get(index, t)));
+								chestedhorse.setHasChest(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_HORSE_JUMP:
 								try {
@@ -2360,7 +2360,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ENDERCRYSTAL_BASE:
-								endercrystal.setShowingBottom(Static.getBoolean(specArray.get(index, t)));
+								endercrystal.setShowingBottom(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ENDERCRYSTAL_BEAMTARGET:
 								Construct c = specArray.get(index, t);
@@ -2419,7 +2419,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_FALLING_BLOCK_DROPITEM:
-								block.setDropItem(Static.getBoolean(specArray.get(index, t)));
+								block.setDropItem(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -2444,7 +2444,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_GUARDIAN_ELDER:
-								guardian.setElder(Static.getBoolean(specArray.get(index, t)));
+								guardian.setElder(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -2477,7 +2477,7 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_HORSE_CHEST:
-								horse.setHasChest(Static.getBoolean(specArray.get(index, t)));
+								horse.setHasChest(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_HORSE_JUMP:
 								try {
@@ -2512,7 +2512,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ZOMBIE_BABY:
-								husk.setBaby(Static.getBoolean(specArray.get(index, t)));
+								husk.setBaby(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -2524,7 +2524,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_IRON_GOLEM_PLAYERCREATED:
-								golem.setPlayerCreated(Static.getBoolean(specArray.get(index, t)));
+								golem.setPlayerCreated(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -2567,7 +2567,7 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_HORSE_CHEST:
-								llama.setHasChest(Static.getBoolean(specArray.get(index, t)));
+								llama.setHasChest(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
@@ -2650,7 +2650,7 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_OCELOT_SITTING:
-								ocelot.setSitting(Static.getBoolean(specArray.get(index, t)));
+								ocelot.setSitting(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -2678,7 +2678,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_PARROT_SITTING:
-								parrot.setSitting(Static.getBoolean(specArray.get(index, t)));
+								parrot.setSitting(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_PARROT_TYPE:
 								try {
@@ -2697,7 +2697,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_PIG_SADDLED:
-								pig.setSaddled(Static.getBoolean(specArray.get(index, t)));
+								pig.setSaddled(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -2709,10 +2709,10 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ZOMBIE_BABY:
-								pigZombie.setBaby(Static.getBoolean(specArray.get(index, t)));
+								pigZombie.setBaby(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_PIG_ZOMBIE_ANGRY:
-								pigZombie.setAngry(Static.getBoolean(specArray.get(index, t)));
+								pigZombie.setAngry(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_PIG_ZOMBIE_ANGER:
 								pigZombie.setAnger(Static.getInt32(specArray.get(index, t), t));
@@ -2762,7 +2762,7 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_SHEEP_SHEARED:
-								sheep.setSheared(Static.getBoolean(specArray.get(index, t)));
+								sheep.setSheared(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -2838,7 +2838,7 @@ public class EntityManagement {
 						for(String index : specArray.stringKeySet()) {
 							switch(index.toLowerCase()) {
 								case entity_spec.KEY_SNOWMAN_DERP:
-									snowman.setDerp(Static.getBoolean(specArray.get(index, t)));
+									snowman.setDerp(Static.getBoolean(specArray.get(index, t), t));
 									break;
 								default:
 									throwException(index, t);
@@ -2869,7 +2869,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ARROW_CRITICAL:
-								tippedarrow.setCritical(Static.getBoolean(specArray.get(index, t)));
+								tippedarrow.setCritical(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ARROW_KNOCKBACK:
 								int k = Static.getInt32(specArray.get(index, t), t);
@@ -2930,7 +2930,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_WITHER_SKULL_CHARGED:
-								skull.setCharged(Static.getBoolean(specArray.get(index, t)));
+								skull.setCharged(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_FIREBALL_DIRECTION:
 								skull.setDirection(ObjectGenerator.GetGenerator().vector(specArray.get(index, t), t));
@@ -2945,7 +2945,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_WOLF_ANGRY:
-								wolf.setAngry(Static.getBoolean(specArray.get(index, t)));
+								wolf.setAngry(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_WOLF_COLOR:
 								try {
@@ -2955,7 +2955,7 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_WOLF_SITTING:
-								wolf.setSitting(Static.getBoolean(specArray.get(index, t)));
+								wolf.setSitting(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -2967,10 +2967,10 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ZOMBIE_BABY:
-								zombie.setBaby(Static.getBoolean(specArray.get(index, t)));
+								zombie.setBaby(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ZOMBIE_VILLAGER:
-								zombie.setVillager(Static.getBoolean(specArray.get(index, t)));
+								zombie.setVillager(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -2982,7 +2982,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ZOMBIE_BABY:
-								zombievillager.setBaby(Static.getBoolean(specArray.get(index, t)));
+								zombievillager.setBaby(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_VILLAGER_PROFESSION:
 								try {
@@ -3138,7 +3138,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
 			if(entity instanceof MCProjectile) {
-				((MCProjectile) entity).setBounce(Static.getBoolean(args[1]));
+				((MCProjectile) entity).setBounce(Static.getBoolean(args[1], t));
 			} else {
 				throw new CREBadEntityException("The given entity is not a projectile.", t);
 			}
@@ -3215,7 +3215,7 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Static.getEntity(args[0], t).setGlowing(Static.getBoolean(args[1]));
+			Static.getEntity(args[0], t).setGlowing(Static.getBoolean(args[1], t));
 			return CVoid.VOID;
 		}
 
@@ -3290,7 +3290,7 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
-			e.setSilent(Static.getBoolean(args[1]));
+			e.setSilent(Static.getBoolean(args[1], t));
 			return CVoid.VOID;
 		}
 
@@ -3340,7 +3340,7 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
-			e.setHasGravity(Static.getBoolean(args[1]));
+			e.setHasGravity(Static.getBoolean(args[1], t));
 			return CVoid.VOID;
 		}
 
@@ -3391,7 +3391,7 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
-			e.setInvulnerable(Static.getBoolean(args[1]));
+			e.setInvulnerable(Static.getBoolean(args[1], t));
 			return CVoid.VOID;
 		}
 
@@ -3552,7 +3552,7 @@ public class EntityManagement {
 				return CNull.NULL;
 			}
 			if(args.length == 3) {
-				natural = Static.getBoolean(args[2]);
+				natural = Static.getBoolean(args[2], t);
 			}
 			MCItem item;
 			if(natural) {

@@ -337,6 +337,11 @@ public class ArgumentValidation {
 		if(c instanceof CBoolean) {
 			b = ((CBoolean) c).getBoolean();
 		} else if(c instanceof CString) {
+			if(((CString)c).val().equals("false")) {
+				CHLog.GetLogger().e(CHLog.Tags.FALSESTRING, "String \"false\" evaluates as true (non-empty strings are"
+						+ " true). This is most likely not what you meant to do. This warning can globally be disabled"
+						+ " with the logger-preferences.ini file.", t);
+			}
 			b = (c.val().length() > 0);
 		} else if(c instanceof CInt || c instanceof CDouble) {
 			b = !(getNumber(c, t) == 0);

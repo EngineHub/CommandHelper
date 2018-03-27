@@ -2102,7 +2102,7 @@ public class ArrayHandling {
 				throw new CRERangeException("Overflow detected. Number cannot be larger than " + Integer.MAX_VALUE, t);
 			}
 			if(args.length > 2) {
-				getKeys = Static.getBoolean(args[2]);
+				getKeys = Static.getBoolean(args[2], t);
 			}
 
 			LinkedHashSet<Integer> randoms = new LinkedHashSet<>();
@@ -2188,7 +2188,7 @@ public class ArrayHandling {
 			CArray array = Static.getArray(args[0], t);
 			boolean compareTypes = true;
 			if(args.length == 2) {
-				compareTypes = Static.getBoolean(args[1]);
+				compareTypes = Static.getBoolean(args[1], t);
 			}
 			final boolean fCompareTypes = compareTypes;
 			if(array.inAssociativeMode()) {
@@ -2200,8 +2200,8 @@ public class ArrayHandling {
 
 					@Override
 					public boolean checkIfEquals(Construct item1, Construct item2) {
-						return (fCompareTypes && Static.getBoolean(sequals.exec(t, environment, item1, item2)))
-								|| (!fCompareTypes && Static.getBoolean(equals.exec(t, environment, item1, item2)));
+						return (fCompareTypes && Static.getBoolean(sequals.exec(t, environment, item1, item2), t))
+								|| (!fCompareTypes && Static.getBoolean(equals.exec(t, environment, item1, item2), t));
 					}
 				});
 				for(Construct c : set) {
@@ -2296,7 +2296,7 @@ public class ArrayHandling {
 					if(ret == null) {
 						ret = CBoolean.FALSE;
 					}
-					boolean bret = Static.getBoolean(ret);
+					boolean bret = Static.getBoolean(ret, t);
 					if(bret) {
 						newArray.set(key, value, t);
 					}
@@ -2315,7 +2315,7 @@ public class ArrayHandling {
 					if(ret == null) {
 						ret = CBoolean.FALSE;
 					}
-					boolean bret = Static.getBoolean(ret);
+					boolean bret = Static.getBoolean(ret, t);
 					if(bret) {
 						newArray.push(value, t);
 					}
@@ -2798,7 +2798,7 @@ public class ArrayHandling {
 					closure.execute(array.get(c, t));
 				} catch(FunctionReturnException ex) {
 					hasReturn = true;
-					boolean ret = Static.getBoolean(ex.getReturn());
+					boolean ret = Static.getBoolean(ex.getReturn(), t);
 					if(ret == false) {
 						return CBoolean.FALSE;
 					}
@@ -2879,7 +2879,7 @@ public class ArrayHandling {
 					closure.execute(array.get(c, t));
 				} catch(FunctionReturnException ex) {
 					hasReturn = true;
-					boolean ret = Static.getBoolean(ex.getReturn());
+					boolean ret = Static.getBoolean(ex.getReturn(), t);
 					if(ret == true) {
 						return CBoolean.TRUE;
 					}

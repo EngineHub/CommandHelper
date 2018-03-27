@@ -152,7 +152,7 @@ public class XGUI {
 			int id = Static.getInt32(args[0], t);
 			boolean show = true;
 			if(args.length > 1) {
-				show = Static.getBoolean(args[1]);
+				show = Static.getBoolean(args[1], t);
 			}
 			Window w = windows.get(id);
 			w.setVisible(show);

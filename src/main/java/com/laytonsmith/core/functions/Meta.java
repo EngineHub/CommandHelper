@@ -782,10 +782,10 @@ public class Meta {
 			if(args.length == 1) {
 				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
-				state = Static.getBoolean(args[0]);
+				state = Static.getBoolean(args[0], t);
 			} else {
 				player = Static.GetPlayer(args[0].val(), t);
-				state = Static.getBoolean(args[1]);
+				state = Static.getBoolean(args[1], t);
 			}
 			player.setOp(state);
 			return CVoid.VOID;

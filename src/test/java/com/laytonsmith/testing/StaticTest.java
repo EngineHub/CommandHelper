@@ -365,7 +365,7 @@ public class StaticTest {
 	 * @param actual
 	 */
 	public static void assertCTrue(Construct actual) {
-		if(!Static.getBoolean(actual)) {
+		if(!Static.getBoolean(actual, Target.UNKNOWN)) {
 			fail("Expected '" + actual.val() + "' to resolve to true, but it did not");
 		}
 	}
@@ -377,7 +377,7 @@ public class StaticTest {
 	 * @param actual
 	 */
 	public static void assertCFalse(Construct actual) {
-		if(Static.getBoolean(actual)) {
+		if(Static.getBoolean(actual, Target.UNKNOWN)) {
 			fail("Expected '" + actual.val() + "' to resolve to false, but it did not");
 		}
 	}

@@ -374,7 +374,7 @@ public class EventBinding {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean cancelled = true;
 			if(args.length == 1) {
-				cancelled = Static.getBoolean(args[0]);
+				cancelled = Static.getBoolean(args[0], t);
 			}
 
 			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
@@ -496,7 +496,7 @@ public class EventBinding {
 			}
 			boolean serverWide = false;
 			if(args.length == 3) {
-				serverWide = Static.getBoolean(args[2]);
+				serverWide = Static.getBoolean(args[2], t);
 			}
 			EventUtils.ManualTrigger(args[0].val(), obj, t, serverWide);
 			return CVoid.VOID;
@@ -557,7 +557,7 @@ public class EventBinding {
 			Construct value = args[1];
 			boolean throwOnFailure = false;
 			if(args.length == 3) {
-				throwOnFailure = Static.getBoolean(args[3]);
+				throwOnFailure = Static.getBoolean(args[3], t);
 			}
 			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException(this.getName() + " must be called from within an event handler", t);

@@ -628,7 +628,7 @@ public class Cmdline {
 			}
 			boolean mask = true;
 			if(args.length > 1) {
-				mask = Static.getBoolean(args[1]);
+				mask = Static.getBoolean(args[1], t);
 			}
 
 			String prompt = args[0].val();
@@ -980,7 +980,7 @@ public class Cmdline {
 					exit = Static.getObject(options.get("exit", t), t, CClosure.class);
 				}
 				if(options.containsKey("subshell")) {
-					subshell = Static.getBoolean(options.get("subshell", t));
+					subshell = Static.getBoolean(options.get("subshell", t), t);
 				}
 			}
 			final CommandExecutor cmd = new CommandExecutor(command);
@@ -1488,7 +1488,7 @@ public class Cmdline {
 			}
 			boolean binary = false;
 			if(args.length > 0) {
-				binary = Static.getBoolean(args[0]);
+				binary = Static.getBoolean(args[0], t);
 			}
 			try {
 				if(binary) {

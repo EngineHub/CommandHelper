@@ -492,7 +492,7 @@ public class MobManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			boolean breed = Static.getBoolean(args[1]);
+			boolean breed = Static.getBoolean(args[1], t);
 
 			MCEntity ent = Static.getEntity(args[0], t);
 
@@ -574,7 +574,7 @@ public class MobManagement {
 			int age = Static.getInt32(args[1], t);
 			boolean lock = false;
 			if(args.length == 3) {
-				lock = (boolean) Static.getBoolean(args[2]);
+				lock = (boolean) Static.getBoolean(args[2], t);
 			}
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
 			if(ent == null) {
@@ -699,10 +699,10 @@ public class MobManagement {
 				}
 			}
 			if(args.length == 5) {
-				ambient = Static.getBoolean(args[4]);
+				ambient = Static.getBoolean(args[4], t);
 			}
 			if(args.length == 6) {
-				particles = Static.getBoolean(args[5]);
+				particles = Static.getBoolean(args[5], t);
 			}
 
 			if(seconds == 0.0) {
@@ -1060,7 +1060,7 @@ public class MobManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(args[0], t).setCanPickupItems(Static.getBoolean(args[1]));
+			Static.getLivingEntity(args[0], t).setCanPickupItems(Static.getBoolean(args[1], t));
 			return CVoid.VOID;
 		}
 
@@ -1109,7 +1109,7 @@ public class MobManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(args[0], t).setRemoveWhenFarAway(!Static.getBoolean(args[1]));
+			Static.getLivingEntity(args[0], t).setRemoveWhenFarAway(!Static.getBoolean(args[1], t));
 			return CVoid.VOID;
 		}
 
@@ -1454,7 +1454,7 @@ public class MobManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			boolean glide = Static.getBoolean(args[1]);
+			boolean glide = Static.getBoolean(args[1], t);
 
 			e.setGliding(glide);
 
@@ -1531,7 +1531,7 @@ public class MobManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			boolean ai = Static.getBoolean(args[1]);
+			boolean ai = Static.getBoolean(args[1], t);
 
 			e.setAI(ai);
 

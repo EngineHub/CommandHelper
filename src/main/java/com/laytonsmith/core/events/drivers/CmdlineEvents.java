@@ -155,7 +155,7 @@ public class CmdlineEvents {
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
 			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t).val(),
-					Static.getBoolean(manualObject.get("shellMode", t)));
+					Static.getBoolean(manualObject.get("shellMode", t), t));
 			return cpi;
 		}
 

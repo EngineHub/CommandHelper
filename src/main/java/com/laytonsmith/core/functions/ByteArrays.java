@@ -756,7 +756,7 @@ public class ByteArrays {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CByteArray ba = Static.getByteArray(args[0], t);
-			boolean setLittle = Static.getBoolean(args[1]);
+			boolean setLittle = Static.getBoolean(args[1], t);
 			ba.setOrder(setLittle ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
 			return CVoid.VOID;
 		}

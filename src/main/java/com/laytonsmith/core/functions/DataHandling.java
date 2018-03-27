@@ -580,7 +580,7 @@ public class DataHandling {
 			}
 			int _continue = 0;
 			while(true) {
-				boolean cond = Static.getBoolean(parent.seval(condition, env));
+				boolean cond = Static.getBoolean(parent.seval(condition, env), t);
 				if(cond == false) {
 					break;
 				}
@@ -1109,7 +1109,7 @@ public class DataHandling {
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			try {
-				while(Static.getBoolean(parent.seval(nodes[0], env))) {
+				while(Static.getBoolean(parent.seval(nodes[0], env), t)) {
 					//We allow while(thing()); to be done. This makes certain
 					//types of coding styles possible.
 					if(nodes.length > 1) {
@@ -1229,7 +1229,7 @@ public class DataHandling {
 					} catch(LoopContinueException e) {
 						//ok. No matter how many times it tells us to continue, we're only going to continue once.
 					}
-				} while(Static.getBoolean(parent.seval(nodes[1], env)));
+				} while(Static.getBoolean(parent.seval(nodes[1], env), t));
 			} catch(LoopBreakException e) {
 				if(e.getTimes() > 1) {
 					throw new LoopBreakException(e.getTimes() - 1, t);
@@ -3254,7 +3254,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(Static.getBoolean(args[0]));
+			return CBoolean.get(Static.getBoolean(args[0], t));
 		}
 
 		@Override

@@ -255,11 +255,11 @@ public class Sandbox {
 			MCPlayer other;
 			if(args.length == 2) {
 				me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				isVanished = Static.getBoolean(args[0]);
+				isVanished = Static.getBoolean(args[0], t);
 				other = Static.GetPlayer(args[1], t);
 			} else {
 				me = Static.GetPlayer(args[0], t);
-				isVanished = Static.getBoolean(args[1]);
+				isVanished = Static.getBoolean(args[1], t);
 				other = Static.GetPlayer(args[2], t);
 			}
 

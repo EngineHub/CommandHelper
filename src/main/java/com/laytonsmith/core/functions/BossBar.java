@@ -150,7 +150,7 @@ public class BossBar {
 					}
 				}
 				if(ca.containsKey("visible")) {
-					visible = Static.getBoolean(ca.get("visible", t));
+					visible = Static.getBoolean(ca.get("visible", t), t);
 				}
 				if(ca.containsKey("percent")) {
 					try {
@@ -235,7 +235,7 @@ public class BossBar {
 					}
 				}
 				if(ca.containsKey("visible")) {
-					bar.setVisible(Static.getBoolean(ca.get("visible", t)));
+					bar.setVisible(Static.getBoolean(ca.get("visible", t), t));
 				}
 				if(ca.containsKey("percent")) {
 					try {

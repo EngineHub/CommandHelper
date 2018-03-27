@@ -200,7 +200,7 @@ public class Environment {
 				w = l.getWorld();
 				id = args[1].val();
 				if(args.length == 3) {
-					physics = Static.getBoolean(args[2]);
+					physics = Static.getBoolean(args[2], t);
 				}
 
 			} else {
@@ -214,7 +214,7 @@ public class Environment {
 						throw new CREInvalidWorldException("The specified world " + args[4].val() + " doesn't exist", t);
 					}
 					if(args.length == 6) {
-						physics = Static.getBoolean(args[5]);
+						physics = Static.getBoolean(args[5], t);
 					}
 				} else if(w == null) {
 					throw new CREInvalidWorldException("No world was provided", t);
@@ -793,7 +793,7 @@ public class Environment {
 			boolean safe = false;
 
 			if(args.length >= 3) {
-				safe = Static.getBoolean(args[2]);
+				safe = Static.getBoolean(args[2], t);
 			}
 			if(args.length >= 2) {
 				if(!(args[1] instanceof CNull)) {

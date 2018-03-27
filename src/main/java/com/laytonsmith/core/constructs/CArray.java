@@ -876,11 +876,11 @@ public class CArray extends Construct implements ArrayAccess {
 					}
 				}
 				if(o1 instanceof CBoolean || o2 instanceof CBoolean) {
-					if(Static.getBoolean(o1) == Static.getBoolean(o2)) {
+					if(Static.getBoolean(o1, Target.UNKNOWN) == Static.getBoolean(o2, Target.UNKNOWN)) {
 						return 0;
 					} else {
-						int oo1 = Static.getBoolean(o1) ? 1 : 0;
-						int oo2 = Static.getBoolean(o2) ? 1 : 0;
+						int oo1 = Static.getBoolean(o1, Target.UNKNOWN) ? 1 : 0;
+						int oo2 = Static.getBoolean(o2, Target.UNKNOWN) ? 1 : 0;
 						return (oo1 < oo2) ? -1 : 1;
 					}
 				}
@@ -899,13 +899,13 @@ public class CArray extends Construct implements ArrayAccess {
 			}
 
 			public int compareRegular(Construct o1, Construct o2) {
-				if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1))
-						&& Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2))) {
+				if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN)
+						&& Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN)) {
 					return compareNumeric(o1, o2);
-				} else if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1))) {
+				} else if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN)) {
 					//The first is a number, the second is a string
 					return -1;
-				} else if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2))) {
+				} else if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN)) {
 					//The second is a number, the first is a string
 					return 1;
 				} else {

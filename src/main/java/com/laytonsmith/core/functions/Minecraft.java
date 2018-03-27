@@ -923,7 +923,7 @@ public class Minecraft {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			String ip = args[0].val();
-			if(Static.getBoolean(args[1])) {
+			if(Static.getBoolean(args[1], t)) {
 				s.banIP(ip);
 			} else {
 				s.unbanIP(ip);
@@ -1120,7 +1120,7 @@ public class Minecraft {
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], world, t);
 			boolean add = true;
 			if(args.length > 1) {
-				add = Static.getBoolean(args[1]);
+				add = Static.getBoolean(args[1], t);
 			}
 			Map<MCLocation, Boolean> redstoneMonitors = ServerEvents.getRedstoneMonitors();
 			if(add) {

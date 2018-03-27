@@ -167,7 +167,7 @@ public class DataTransformations {
 			CArray ca = Static.getArray(args[0], t);
 			boolean prettyPrint = false;
 			if(args.length == 2) {
-				prettyPrint = Static.getBoolean(args[1]);
+				prettyPrint = Static.getBoolean(args[1], t);
 			}
 			DumperOptions options = new DumperOptions();
 			if(prettyPrint) {
