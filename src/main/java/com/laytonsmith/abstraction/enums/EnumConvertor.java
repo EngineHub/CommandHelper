@@ -23,7 +23,7 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 	/**
 	 * This is changed reflectively by the startup mechanism. Please do not change the name of this variable.
 	 */
-	private final boolean useError = true;
+	private boolean useError = true;
 
 	protected EnumConvertor() {
 		abstractionenum annotation = this.getClass().getAnnotation(abstractionenum.class);
