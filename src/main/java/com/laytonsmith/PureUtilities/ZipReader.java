@@ -3,6 +3,7 @@ package com.laytonsmith.PureUtilities;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -59,7 +60,7 @@ public class ZipReader {
 	 * The ZipEntry contains the information of whether or not the listed file is a directory, but since we discard that
 	 * information, we cache the list of directories here.
 	 */
-	private List<File> zipDirectories = new ArrayList<File>();
+	private List<File> zipDirectories = new ArrayList<>();
 
 	/**
 	 * Convenience constructor, which allows for a URL to be passed in instead of a file, which may be useful when
@@ -84,7 +85,7 @@ public class ZipReader {
 	 * the file doesn't exist.
 	 */
 	public ZipReader(File file) {
-		chainedPath = new LinkedList<File>();
+		chainedPath = new LinkedList<>();
 
 		//We need to remove jar style or uri style things from the file, so do that here
 		if(file.getPath().startsWith("jar:")) {
@@ -208,28 +209,13 @@ public class ZipReader {
 	 */
 	private InputStream getFile(Deque<File> fullChain, String zipName, final ZipInputStream zis) throws FileNotFoundException, IOException {
 		ZipEntry entry;
-		InputStream zipReader = new InputStream() {
-
-			@Override
-			public int read() throws IOException {
-				if(zis.available() > 0) {
-					return zis.read();
-				} else {
-					return -1;
-				}
-			}
-
-			@Override
-			public void close() throws IOException {
-				zis.close();
-			}
-		};
+		InputStream zipReader = new BufferedInputStream(zis);
 		boolean isZip = false;
-		List<String> recurseAttempts = new ArrayList<String>();
+		List<String> recurseAttempts = new ArrayList<>();
 		while((entry = zis.getNextEntry()) != null) {
 			//This is at least a zip file
 			isZip = true;
-			Deque<File> chain = new LinkedList<File>(fullChain);
+			Deque<File> chain = new LinkedList<>(fullChain);
 			File chainFile = null;
 			while((chainFile = chain.pollFirst()) != null) {
 				if(chainFile.equals(new File(zipName + File.separator + entry.getName()))) {
@@ -352,17 +338,17 @@ public class ZipReader {
 			return;
 		}
 		if(this.zipEntries == null) {
-			zipEntries = new ArrayList<File>();
-			ZipInputStream zis = new ZipInputStream(new FileInputStream(topZip));
-			ZipEntry entry;
-			while((entry = zis.getNextEntry()) != null) {
-				File f = new File(topZip, entry.getName());
-				zipEntries.add(f);
-				if(entry.isDirectory()) {
-					zipDirectories.add(f);
+			zipEntries = new ArrayList<>();
+			try (ZipInputStream zis = new ZipInputStream(new FileInputStream(topZip))) {
+				ZipEntry entry;
+				while((entry = zis.getNextEntry()) != null) {
+					File f = new File(topZip, entry.getName());
+					zipEntries.add(f);
+					if(entry.isDirectory()) {
+						zipDirectories.add(f);
+					}
 				}
 			}
-			zis.close();
 		}
 	}
 
@@ -380,7 +366,8 @@ public class ZipReader {
 	}
 
 	/**
-	 * Returns a list of File objects that are subfiles or directories in this directory.
+	 * Returns a list of File objects that are subfiles or directories in this directory. This method does not
+	 * recurse, to match the behavior of 
 	 *
 	 * @return
 	 * @throws IOException
@@ -390,7 +377,7 @@ public class ZipReader {
 			return file.listFiles();
 		} else {
 			initList();
-			List<File> files = new ArrayList<File>();
+			List<File> files = new ArrayList<>();
 			for(File f : zipEntries) {
 				//If the paths start with the same thing...
 				if(f.getPath().startsWith(file.getPath())) {
@@ -418,16 +405,23 @@ public class ZipReader {
 		File[] ret = listFiles();
 		ZipReader[] zips = new ZipReader[ret.length];
 		for(int i = 0; i < ret.length; i++) {
-			zips[i] = new ZipReader(new File(file, ret[i].getPath()));
+			if(ret[i].isAbsolute()) {
+				zips[i] = new ZipReader(ret[i]);
+			} else {
+				zips[i] = new ZipReader(new File(file, ret[i].getPath()));
+			}
 		}
 		return zips;
 	}
 
 	/**
 	 * Copies all the files from this directory to the source directory. If create is false, and the folder doesn't
-	 * already exist, and IOException will be thrown. This is similar to an "unzip" operation.
+	 * already exist, and IOException will be thrown. Sub directories will always be created, however.
+	 * This is similar to an "unzip" operation.
 	 *
 	 * @param dstFolder
+	 * @param create
+	 * @throws java.io.IOException
 	 */
 	public void recursiveCopy(File dstFolder, boolean create) throws IOException {
 		if(create) {
@@ -438,12 +432,18 @@ public class ZipReader {
 		}
 		for(ZipReader r : zipListFiles()) {
 			if(r.isDirectory()) {
-				r.recursiveCopy(dstFolder, create);
+				File newFile = new File(dstFolder, r.getName());
+				// Unlike the first mkdirs, we only want to mkdir here. If create was false, and the parent directory
+				// did not already exist, we do not want this call to succeed.
+				newFile.mkdir();
+				r.recursiveCopy(newFile, create);
 			} else {
 				File newFile = new File(dstFolder, r.file.getName());
-				newFile.getParentFile().mkdirs();
-				FileOutputStream fos = new FileOutputStream(newFile, false);
-				StreamUtils.Copy(r.getInputStream(), fos);
+				newFile.getParentFile().mkdir();
+				try (FileOutputStream fos = new FileOutputStream(newFile, false); 
+						InputStream fis = r.getInputStream()) {
+					StreamUtils.Copy(fis, fos);
+				}
 			}
 		}
 	}

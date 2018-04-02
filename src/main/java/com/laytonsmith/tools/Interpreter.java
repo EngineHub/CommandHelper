@@ -1,9 +1,12 @@
 package com.laytonsmith.tools;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Common.WinRegistry;
 import com.laytonsmith.PureUtilities.LimitedQueue;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.SignalHandler;
@@ -92,6 +95,7 @@ import static com.laytonsmith.PureUtilities.TermColors.YELLOW;
 import static com.laytonsmith.PureUtilities.TermColors.p;
 import static com.laytonsmith.PureUtilities.TermColors.pl;
 import static com.laytonsmith.PureUtilities.TermColors.reset;
+import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
@@ -99,6 +103,10 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.functions.Cmdline;
 import com.laytonsmith.core.functions.Echoes;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -870,12 +878,37 @@ public final class Interpreter {
 				return;
 			}
 		} else {
-			StreamUtils.GetSystemErr().println("Sorry, cmdline functionality is currently only supported on unix systems! Check back soon though!");
-			return;
+			Path tmp = null;
+			try {
+				// 1. Unpack the csharp installer program in a temporary directory
+				File root = new File(Interpreter.class.getResource("/interpreter-helpers/csharp").toExternalForm());
+				ZipReader zReader = new ZipReader(root);
+				tmp = Files.createTempDirectory("methodscript-installer", new FileAttribute[]{});
+				zReader.recursiveCopy(tmp.toFile(), false);
+				
+				// 2. Write the location of this jar to the registry
+				String me = ClassDiscovery.GetClassContainer(Interpreter.class).toExternalForm().substring(6);
+				String keyName = "Software\\MethodScript";
+				WinRegistry.createKey(WinRegistry.HKEY_CURRENT_USER, keyName);
+				WinRegistry.writeStringValue(WinRegistry.HKEY_CURRENT_USER, keyName, "JarLocation", me);
+				
+				// 3. Execute the setup.exe file
+				File setup = new File(tmp.toFile(), "setup.exe");
+				int setupResult = new CommandExecutor(new String[]{setup.getAbsolutePath()}).start().waitFor();
+				if(setupResult != 0) {
+					StreamUtils.GetSystemErr().println("Setup failed to complete successfully (exit code " + setupResult + ")");
+					System.exit(setupResult);
+				} else {
+					StreamUtils.GetSystemOut().println("Setup has begun. Finish the installation in the GUI.");
+				}				
+			} catch(IOException | InterruptedException | IllegalAccessException | InvocationTargetException ex) {
+				ex.printStackTrace(StreamUtils.GetSystemErr());
+				System.exit(1);
+			}
 		}
 		StreamUtils.GetSystemOut().println("MethodScript has successfully been installed on your system. Note that you may need to rerun the install command"
 				+ " if you change locations of the jar, or rename it. Be sure to put \"#!" + INTERPRETER_INSTALLATION_LOCATION + "\" at the top of all your scripts,"
-				+ " if you wish them to be executable on unix systems, and set the execution bit with chmod +x <script name> on unix systems.");
+				+ " if you wish them to be executable on unix systems, and set the execution bit with chmod +x <script name> on unix systems. (Or use the 'mscript -- new' cmdline utility.)");
 		StreamUtils.GetSystemOut().println("Try this script to test out the basic features of the scripting system:\n");
 		StreamUtils.GetSystemOut().println(Static.GetStringResource("/interpreter-helpers/sample.ms"));
 	}
