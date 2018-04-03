@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities.ClassLoading.ClassMirror;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.io.Serializable;
@@ -55,6 +56,10 @@ public class AnnotationMirror implements Serializable {
 	 * Returns the value for this annotation. Note that this won't resolve default annotations, as that requires
 	 * actually loading the annotation class into memory. See {@link #getValueWithDefault} if you are ok with loading
 	 * the annotation class into memory. Null is returned if this value doesn't exist.
+	 *
+	 * If the underlying value's type is of type Class, the class name of it is returned as a String, which you can
+	 * then choose to load yourself (with either {@link ClassDiscovery#forName} or {@link Class#forName}). This is done
+	 * to prevent loading classes referenced in annotations by default.
 	 *
 	 * @param forName
 	 * @return
@@ -188,6 +193,10 @@ public class AnnotationMirror implements Serializable {
 	}
 
 	private static boolean matches(Object[] args, Class... types) {
+		if(args == null) {
+			return types.length == 0;
+		}
+
 		if(args.length != types.length) {
 			return false;
 		}

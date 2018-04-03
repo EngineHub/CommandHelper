@@ -217,7 +217,7 @@ public class ClassMirrorVisitor extends ClassVisitor {
 		@Override
 		public void visit(String name, Object value) {
 			if(value instanceof Type) {
-				value = ((Type) value).getDescriptor();
+				value = ((Type) value).getClassName();
 			}
 			mirror.addAnnotationValue(name, value);
 			super.visit(name, value);

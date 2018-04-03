@@ -461,6 +461,7 @@
 					<target>1.8</target>
 					<compilerArgs>
 						<arg>-XDignore.symbol.file</arg>
+						<arg>-parameters</arg>
 					</compilerArgs>
 					<fork>true</fork>
 					<optimize>true</optimize>
