@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCFireworkEffect;
 import com.laytonsmith.abstraction.MCFireworkEffectMeta;
 import com.laytonsmith.abstraction.MCFireworkMeta;
+import com.laytonsmith.abstraction.MCFurnaceInventory;
 import com.laytonsmith.abstraction.MCFurnaceRecipe;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemFactory;
@@ -36,6 +37,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBanner;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.blocks.MCFurnace;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCShulkerBox;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
@@ -390,6 +392,22 @@ public class ObjectGenerator {
 				} else if(bs instanceof MCCreatureSpawner) {
 					MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 					ma.set("spawntype", mccs.getSpawnedType().name());
+				} else if(bs instanceof MCFurnace) {
+					MCFurnace furnace = (MCFurnace) bs;
+					ma.set("burntime", new CString(Short.toString(furnace.getBurnTime()), t), t);
+					ma.set("cooktime", new CString(Short.toString(furnace.getCookTime()), t), t);
+					MCFurnaceInventory inv = furnace.getInventory();
+					CArray invData = CArray.GetAssociativeArray(t);
+					if(inv.getResult() != null) {
+						invData.set("result", ObjectGenerator.GetGenerator().item(inv.getResult(), t), t);
+					}
+					if(inv.getFuel() != null) {
+						invData.set("fuel", ObjectGenerator.GetGenerator().item(inv.getFuel(), t), t);
+					}
+					if(inv.getSmelting() != null) {
+						invData.set("smelting", ObjectGenerator.GetGenerator().item(inv.getSmelting(), t), t);
+					}
+					ma.set("inventory", invData, t);
 				}
 			} else if(meta instanceof MCFireworkEffectMeta) {
 				MCFireworkEffectMeta mcfem = (MCFireworkEffectMeta) meta;
@@ -634,6 +652,28 @@ public class ObjectGenerator {
 							mccs.setSpawnedType(type);
 							bsm.setBlockState(bs);
 						}
+					} else if(bs instanceof MCFurnace) {
+						MCFurnace furnace = (MCFurnace) bs;
+						if(ma.containsKey("burntime")) {
+							furnace.setBurnTime(ArgumentValidation.getInt16(ma.get("burntime", t), t));
+						}
+						if(ma.containsKey("cooktime")) {
+							furnace.setCookTime(ArgumentValidation.getInt16(ma.get("cooktime", t), t));
+						}
+						if(ma.containsKey("inventory")) {
+							CArray invData = ArgumentValidation.getArray(ma.get("inventory", t), t);
+							MCFurnaceInventory inv = furnace.getInventory();
+							if(invData.containsKey("result")) {
+								inv.setResult(ObjectGenerator.GetGenerator().item(invData.get("result", t), t));
+							}
+							if(invData.containsKey("fuel")) {
+								inv.setFuel(ObjectGenerator.GetGenerator().item(invData.get("fuel", t), t));
+							}
+							if(invData.containsKey("smelting")) {
+								inv.setSmelting(ObjectGenerator.GetGenerator().item(invData.get("smelting", t), t));
+							}
+						}
+						bsm.setBlockState(bs);
 					}
 				} else if(meta instanceof MCFireworkEffectMeta) {
 					MCFireworkEffectMeta femeta = (MCFireworkEffectMeta) meta;

@@ -29,6 +29,7 @@ import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBanner;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFurnace;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCShulkerBox;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
@@ -84,6 +85,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.block.Furnace;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.command.BlockCommandSender;
@@ -454,6 +456,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if(bs instanceof CreatureSpawner) {
 			return new BukkitMCCreatureSpawner((CreatureSpawner) bs);
+		}
+		if(bs instanceof Furnace) {
+			return new BukkitMCFurnace((Furnace) bs);
 		}
 		return new BukkitMCBlockState(bs);
 	}
