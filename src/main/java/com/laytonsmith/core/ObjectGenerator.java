@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCBannerMeta;
 import com.laytonsmith.abstraction.MCBlockStateMeta;
 import com.laytonsmith.abstraction.MCBookMeta;
+import com.laytonsmith.abstraction.MCBrewerInventory;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
 import com.laytonsmith.abstraction.MCEnchantment;
@@ -15,6 +16,7 @@ import com.laytonsmith.abstraction.MCFireworkMeta;
 import com.laytonsmith.abstraction.MCFurnaceInventory;
 import com.laytonsmith.abstraction.MCFurnaceRecipe;
 import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemFactory;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -37,7 +39,12 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBanner;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.blocks.MCBrewingStand;
+import com.laytonsmith.abstraction.blocks.MCChest;
+import com.laytonsmith.abstraction.blocks.MCDispenser;
+import com.laytonsmith.abstraction.blocks.MCDropper;
 import com.laytonsmith.abstraction.blocks.MCFurnace;
+import com.laytonsmith.abstraction.blocks.MCHopper;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCShulkerBox;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
@@ -364,9 +371,10 @@ public class ObjectGenerator {
 			// Specific ItemMeta
 			if(meta instanceof MCBlockStateMeta) {
 				MCBlockState bs = ((MCBlockStateMeta) meta).getBlockState();
-				if(bs instanceof MCShulkerBox) {
-					MCShulkerBox mcsb = (MCShulkerBox) bs;
-					MCInventory inv = mcsb.getInventory();
+				if(bs instanceof MCShulkerBox || bs instanceof MCChest
+						|| bs instanceof MCDispenser || bs instanceof MCDropper || bs instanceof MCHopper) {
+					// Handle InventoryHolders with inventory slots that do not have a special meaning.
+					MCInventory inv = ((MCInventoryHolder) bs).getInventory();
 					CArray box = CArray.GetAssociativeArray(t);
 					for(int i = 0; i < inv.getSize(); i++) {
 						Construct item = ObjectGenerator.GetGenerator().item(inv.getItem(i), t);
@@ -392,6 +400,19 @@ public class ObjectGenerator {
 				} else if(bs instanceof MCCreatureSpawner) {
 					MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 					ma.set("spawntype", mccs.getSpawnedType().name());
+				} else if(bs instanceof MCBrewingStand) {
+					MCBrewingStand brewStand = (MCBrewingStand) bs;
+					ma.set("brewtime", new CString(Integer.toString(brewStand.getBrewingTime()), t), t);
+					ma.set("fuel", new CString(Integer.toString(brewStand.getFuelLevel()), t), t);
+					MCBrewerInventory inv = brewStand.getInventory();
+					CArray invData = CArray.GetAssociativeArray(t);
+					if(inv.getFuel() != null) {
+						invData.set("fuel", ObjectGenerator.GetGenerator().item(inv.getFuel(), t), t);
+					}
+					if(inv.getIngredient() != null) {
+						invData.set("ingredient", ObjectGenerator.GetGenerator().item(inv.getIngredient(), t), t);
+					}
+					ma.set("inventory", invData, t);
 				} else if(bs instanceof MCFurnace) {
 					MCFurnace furnace = (MCFurnace) bs;
 					ma.set("burntime", new CString(Short.toString(furnace.getBurnTime()), t), t);
@@ -603,30 +624,33 @@ public class ObjectGenerator {
 				if(meta instanceof MCBlockStateMeta) {
 					MCBlockStateMeta bsm = (MCBlockStateMeta) meta;
 					MCBlockState bs = bsm.getBlockState();
-					if(bs instanceof MCShulkerBox) {
+					if(bs instanceof MCShulkerBox || bs instanceof MCChest
+							|| bs instanceof MCDispenser || bs instanceof MCDropper || bs instanceof MCHopper) {
 						if(ma.containsKey("inventory")) {
-							MCShulkerBox box = (MCShulkerBox) bs;
-							MCInventory inv = box.getInventory();
-							Construct csbm = ma.get("inventory", t);
-							if(csbm instanceof CArray) {
-								CArray cinv = (CArray) csbm;
+							MCInventory inv = ((MCInventoryHolder) bs).getInventory();
+							Construct cInvRaw = ma.get("inventory", t);
+							if(cInvRaw instanceof CArray) {
+								CArray cinv = (CArray) cInvRaw;
 								for(String key : cinv.stringKeySet()) {
 									try {
 										int index = Integer.parseInt(key);
 										if(index < 0 || index >= inv.getSize()) {
 											ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found"
-													+ " in ShulkerBox inventory array, so ignoring.");
+													+ " in " + bs.getClass().getSimpleName().replaceFirst("MC", "")
+													+ " inventory array, so ignoring.");
 										}
 										MCItemStack is = ObjectGenerator.GetGenerator().item(cinv.get(key, t), t);
 										inv.setItem(index, is);
 									} catch(NumberFormatException ex) {
-										ConfigRuntimeException.DoWarning("Expecting integer value for key in ShulkerBox"
+										ConfigRuntimeException.DoWarning("Expecting integer value for key in "
+												+ bs.getClass().getSimpleName().replaceFirst("MC", "")
 												+ " inventory array, but \"" + key + "\" was found. Ignoring.");
 									}
 								}
 								bsm.setBlockState(bs);
-							} else if(!(csbm instanceof CNull)) {
-								throw new CREFormatException("ShulkerBox inventory expected to be an array or null.", t);
+							} else if(!(cInvRaw instanceof CNull)) {
+								throw new CREFormatException(bs.getClass().getSimpleName().replaceFirst("MC", "")
+										+ " inventory expected to be an array or null.", t);
 							}
 						}
 					} else if(bs instanceof MCBanner) {
@@ -652,6 +676,25 @@ public class ObjectGenerator {
 							mccs.setSpawnedType(type);
 							bsm.setBlockState(bs);
 						}
+					} else if(bs instanceof MCBrewingStand) {
+						MCBrewingStand brewStand = (MCBrewingStand) bs;
+						if(ma.containsKey("brewtime")) {
+							brewStand.setBrewingTime(ArgumentValidation.getInt32(ma.get("brewtime", t), t));
+						}
+						if(ma.containsKey("fuel")) {
+							brewStand.setFuelLevel(ArgumentValidation.getInt32(ma.get("fuel", t), t));
+						}
+						if(ma.containsKey("inventory")) {
+							CArray invData = ArgumentValidation.getArray(ma.get("inventory", t), t);
+							MCBrewerInventory inv = brewStand.getInventory();
+							if(invData.containsKey("fuel")) {
+								inv.setFuel(ObjectGenerator.GetGenerator().item(invData.get("fuel", t), t));
+							}
+							if(invData.containsKey("ingredient")) {
+								inv.setIngredient(ObjectGenerator.GetGenerator().item(invData.get("ingredient", t), t));
+							}
+						}
+						bsm.setBlockState(bs);
 					} else if(bs instanceof MCFurnace) {
 						MCFurnace furnace = (MCFurnace) bs;
 						if(ma.containsKey("burntime")) {
