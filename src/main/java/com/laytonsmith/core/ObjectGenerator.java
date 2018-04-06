@@ -402,8 +402,8 @@ public class ObjectGenerator {
 					ma.set("spawntype", mccs.getSpawnedType().name());
 				} else if(bs instanceof MCBrewingStand) {
 					MCBrewingStand brewStand = (MCBrewingStand) bs;
-					ma.set("brewtime", new CString(Integer.toString(brewStand.getBrewingTime()), t), t);
-					ma.set("fuel", new CString(Integer.toString(brewStand.getFuelLevel()), t), t);
+					ma.set("brewtime", new CInt(brewStand.getBrewingTime(), t), t);
+					ma.set("fuel", new CInt(brewStand.getFuelLevel(), t), t);
 					MCBrewerInventory inv = brewStand.getInventory();
 					CArray invData = CArray.GetAssociativeArray(t);
 					if(inv.getFuel() != null) {
@@ -415,8 +415,8 @@ public class ObjectGenerator {
 					ma.set("inventory", invData, t);
 				} else if(bs instanceof MCFurnace) {
 					MCFurnace furnace = (MCFurnace) bs;
-					ma.set("burntime", new CString(Short.toString(furnace.getBurnTime()), t), t);
-					ma.set("cooktime", new CString(Short.toString(furnace.getCookTime()), t), t);
+					ma.set("burntime", new CInt(furnace.getBurnTime(), t), t);
+					ma.set("cooktime", new CInt(furnace.getCookTime(), t), t);
 					MCFurnaceInventory inv = furnace.getInventory();
 					CArray invData = CArray.GetAssociativeArray(t);
 					if(inv.getResult() != null) {
