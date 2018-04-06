@@ -412,6 +412,15 @@ public class ObjectGenerator {
 					if(inv.getIngredient() != null) {
 						invData.set("ingredient", ObjectGenerator.GetGenerator().item(inv.getIngredient(), t), t);
 					}
+					if(inv.getLeftBottle() != null) {
+						invData.set("leftbottle", ObjectGenerator.GetGenerator().item(inv.getLeftBottle(), t), t);
+					}
+					if(inv.getMiddleBottle() != null) {
+						invData.set("middlebottle", ObjectGenerator.GetGenerator().item(inv.getMiddleBottle(), t), t);
+					}
+					if(inv.getRightBottle() != null) {
+						invData.set("rightbottle", ObjectGenerator.GetGenerator().item(inv.getRightBottle(), t), t);
+					}
 					ma.set("inventory", invData, t);
 				} else if(bs instanceof MCFurnace) {
 					MCFurnace furnace = (MCFurnace) bs;
@@ -692,6 +701,15 @@ public class ObjectGenerator {
 							}
 							if(invData.containsKey("ingredient")) {
 								inv.setIngredient(ObjectGenerator.GetGenerator().item(invData.get("ingredient", t), t));
+							}
+							if(invData.containsKey("leftbottle")) {
+								inv.setLeftBottle(ObjectGenerator.GetGenerator().item(invData.get("leftbottle", t), t));
+							}
+							if(invData.containsKey("middlebottle")) {
+								inv.setMiddleBottle(ObjectGenerator.GetGenerator().item(invData.get("middlebottle", t), t));
+							}
+							if(invData.containsKey("rightbottle")) {
+								inv.setRightBottle(ObjectGenerator.GetGenerator().item(invData.get("rightbottle", t), t));
 							}
 						}
 						bsm.setBlockState(bs);
