@@ -406,19 +406,19 @@ public class ObjectGenerator {
 					ma.set("fuel", new CInt(brewStand.getFuelLevel(), t), t);
 					MCBrewerInventory inv = brewStand.getInventory();
 					CArray invData = CArray.GetAssociativeArray(t);
-					if(inv.getFuel() != null) {
+					if(inv.getFuel().getAmount() != 0) {
 						invData.set("fuel", ObjectGenerator.GetGenerator().item(inv.getFuel(), t), t);
 					}
-					if(inv.getIngredient() != null) {
+					if(inv.getIngredient().getAmount() != 0) {
 						invData.set("ingredient", ObjectGenerator.GetGenerator().item(inv.getIngredient(), t), t);
 					}
-					if(inv.getLeftBottle() != null) {
+					if(inv.getLeftBottle().getAmount() != 0) {
 						invData.set("leftbottle", ObjectGenerator.GetGenerator().item(inv.getLeftBottle(), t), t);
 					}
-					if(inv.getMiddleBottle() != null) {
+					if(inv.getMiddleBottle().getAmount() != 0) {
 						invData.set("middlebottle", ObjectGenerator.GetGenerator().item(inv.getMiddleBottle(), t), t);
 					}
-					if(inv.getRightBottle() != null) {
+					if(inv.getRightBottle().getAmount() != 0) {
 						invData.set("rightbottle", ObjectGenerator.GetGenerator().item(inv.getRightBottle(), t), t);
 					}
 					ma.set("inventory", invData, t);
@@ -428,13 +428,13 @@ public class ObjectGenerator {
 					ma.set("cooktime", new CInt(furnace.getCookTime(), t), t);
 					MCFurnaceInventory inv = furnace.getInventory();
 					CArray invData = CArray.GetAssociativeArray(t);
-					if(inv.getResult() != null) {
+					if(inv.getResult().getAmount() != 0) {
 						invData.set("result", ObjectGenerator.GetGenerator().item(inv.getResult(), t), t);
 					}
-					if(inv.getFuel() != null) {
+					if(inv.getFuel().getAmount() != 0) {
 						invData.set("fuel", ObjectGenerator.GetGenerator().item(inv.getFuel(), t), t);
 					}
-					if(inv.getSmelting() != null) {
+					if(inv.getSmelting().getAmount() != 0) {
 						invData.set("smelting", ObjectGenerator.GetGenerator().item(inv.getSmelting(), t), t);
 					}
 					ma.set("inventory", invData, t);
