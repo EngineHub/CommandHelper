@@ -38,7 +38,7 @@ public class MySQLDataSource extends SQLDataSource {
 	public MySQLDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		super(uri, options);
 		try {
-			Class.forName(com.mysql.jdbc.Driver.class.getName());
+			Class.forName(com.mysql.cj.jdbc.Driver.class.getName());
 		} catch(ClassNotFoundException ex) {
 			throw new DataSourceException("Could not instantiate a MySQL data source, no driver appears to exist.", ex);
 		}

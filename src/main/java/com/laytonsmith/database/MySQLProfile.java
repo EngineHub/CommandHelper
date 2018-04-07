@@ -71,7 +71,7 @@ public class MySQLProfile extends SQLProfile {
 	@Override
 	public String getConnectionString() throws SQLException {
 		try {
-			Class.forName(com.mysql.jdbc.Driver.class.getName());
+			Class.forName(com.mysql.cj.jdbc.Driver.class.getName());
 		} catch(ClassNotFoundException ex) {
 			throw new SQLException("Cannot load MySQL. Check your installation and try again");
 		}
