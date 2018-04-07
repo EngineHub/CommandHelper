@@ -1,6 +1,8 @@
 package com.laytonsmith.abstraction.blocks;
 
-public interface MCDispenser extends MCBlockState {
+import com.laytonsmith.abstraction.MCInventoryHolder;
 
+public interface MCDispenser extends MCBlockState, MCInventoryHolder {
+	boolean dispense();
 	MCBlockProjectileSource getBlockProjectileSource();
 }

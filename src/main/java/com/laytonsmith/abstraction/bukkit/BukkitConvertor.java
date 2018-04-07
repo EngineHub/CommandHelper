@@ -28,7 +28,14 @@ import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBanner;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBeacon;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBrewingStand;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCChest;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDispenser;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDropper;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFurnace;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCHopper;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCShulkerBox;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
@@ -80,10 +87,17 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Banner;
+import org.bukkit.block.Beacon;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.BrewingStand;
+import org.bukkit.block.Chest;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.block.Dispenser;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.block.Dropper;
+import org.bukkit.block.Furnace;
+import org.bukkit.block.Hopper;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.command.BlockCommandSender;
@@ -454,6 +468,27 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if(bs instanceof CreatureSpawner) {
 			return new BukkitMCCreatureSpawner((CreatureSpawner) bs);
+		}
+		if(bs instanceof Beacon) {
+			return new BukkitMCBeacon((Beacon) bs);
+		}
+		if(bs instanceof BrewingStand) {
+			return new BukkitMCBrewingStand((BrewingStand) bs);
+		}
+		if(bs instanceof Chest) {
+			return new BukkitMCChest((Chest) bs);
+		}
+		if(bs instanceof Dispenser) {
+			return new BukkitMCDispenser((Dispenser) bs);
+		}
+		if(bs instanceof Dropper) {
+			return new BukkitMCDropper((Dropper) bs);
+		}
+		if(bs instanceof Furnace) {
+			return new BukkitMCFurnace((Furnace) bs);
+		}
+		if(bs instanceof Hopper) {
+			return new BukkitMCHopper((Hopper) bs);
 		}
 		return new BukkitMCBlockState(bs);
 	}

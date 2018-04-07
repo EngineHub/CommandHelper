@@ -11,16 +11,11 @@ public class BukkitMCShulkerBox extends BukkitMCBlockState implements MCShulkerB
 
 	public BukkitMCShulkerBox(ShulkerBox block) {
 		super(block);
-		sb = block;
-	}
-
-	@Override
-	public ShulkerBox getHandle() {
-		return sb;
+		this.sb = block;
 	}
 
 	@Override
 	public MCInventory getInventory() {
-		return new BukkitMCInventory(sb.getInventory());
+		return new BukkitMCInventory(this.sb.getInventory());
 	}
 }
