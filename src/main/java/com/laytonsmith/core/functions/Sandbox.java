@@ -657,7 +657,8 @@ public class Sandbox {
 				StringBuilder b = new StringBuilder();
 				b.append("There were compile errors when trying to recompile the script at ").append(file).append("\n");
 				for(ConfigCompileException e : ex.getList()) {
-					b.append(e.getMessage()).append(" :: ").append(e.getFile().getName()).append(":").append(e.getLineNum());
+					b.append(e.getMessage()).append(" :: ").append(e.getFile().getName()).append(":")
+							.append(e.getLineNum()).append("\n");
 				}
 				throw new CREIncludeException(b.toString(), t);
 			} catch(IOException ex) {
