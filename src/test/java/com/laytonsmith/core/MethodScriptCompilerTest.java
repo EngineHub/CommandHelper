@@ -1118,4 +1118,51 @@ public class MethodScriptCompilerTest {
 		}
 	}
 
+	@Test
+	public void testMinusSignHandling() throws Exception {
+		// This tests a specific lexer part where token TType.MINUS ('-' sign) is merged with the next token
+		// based on whether the MINUS is used as a negation sign or a mathematical operator.
+		
+		// "... - 2".
+		this.verifyExecute("msg(5 - 2)", "3");
+		this.verifyExecute("msg(5- 2)", "3");
+		this.verifyExecute("msg(5 -2)", "3");
+		this.verifyExecute("msg(5-2)", "3");
+		this.verifyExecute("@arr = array(5); msg(@arr[0] - 2)", "3");
+		this.verifyExecute("@arr = array(5); msg(@arr[0]- 2)", "3");
+		this.verifyExecute("@arr = array(5); msg(@arr[0] -2)", "3");
+		this.verifyExecute("@arr = array(5); msg(@arr[0]-2)", "3");
+		this.verifyExecute("@a = 5; msg(@a - 2)", "3");
+		this.verifyExecute("@a = 5; msg(@a- 2)", "3");
+		this.verifyExecute("@a = 5; msg(@a -2)", "3");
+		this.verifyExecute("@a = 5; msg(@a-2)", "3");
+		this.verifyExecute("msg(abs(5) - 2)", "3");
+		this.verifyExecute("msg(abs(5)- 2)", "3");
+		this.verifyExecute("msg(abs(5) -2)", "3");
+		this.verifyExecute("msg(abs(5)-2)", "3");
+		
+		// "2 - ...".
+		this.verifyExecute("@arr = array(5); msg(2 - @arr[0])", "-3");
+		this.verifyExecute("@arr = array(5); msg(2- @arr[0])", "-3");
+		this.verifyExecute("@arr = array(5); msg(2 -@arr[0])", "-3");
+		this.verifyExecute("@arr = array(5); msg(2-@arr[0])", "-3");
+		this.verifyExecute("@a = 5; msg(2 - @a)", "-3");
+		this.verifyExecute("@a = 5; msg(2- @a)", "-3");
+		this.verifyExecute("@a = 5; msg(2 -@a)", "-3");
+		this.verifyExecute("@a = 5; msg(2-@a)", "-3");
+		this.verifyExecute("msg(2 - abs(5))", "-3");
+		this.verifyExecute("msg(2- abs(5))", "-3");
+		this.verifyExecute("msg(2 -abs(5))", "-3");
+		this.verifyExecute("msg(2-abs(5))", "-3");
+	}
+	
+	private void verifyExecute(String script, String expectedResponse) throws ConfigCompileException, ConfigCompileGroupException {
+		MCPlayer temp = this.env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		MCPlayer player = StaticTest.GetOnlinePlayer();
+		this.env.getEnv(CommandHelperEnvironment.class).SetPlayer(player);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(
+				MethodScriptCompiler.lex(script, null, true)), this.env, null, null);
+		verify(player).sendMessage(expectedResponse);
+		this.env.getEnv(CommandHelperEnvironment.class).SetPlayer(temp);
+	}
 }
