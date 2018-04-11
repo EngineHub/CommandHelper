@@ -7,17 +7,30 @@ import com.laytonsmith.annotations.NonInheritImplements;
  */
 public class MainSandbox {
 
-	public static interface B1 {
-		String method(int i, String b);
+	public static interface Interface {
+		void method(int i, String b, int j);
 	}
-	@NonInheritImplements(B1.class)
+	@NonInheritImplements(Interface.class)
 	public static class A1 {
-		public String method(int i, String b) {
-			return "";
+		public void method(int i, String b, int j) {
+			System.out.println("i: " + i + "; b: " + b);
 		}
 	}
-	public static void main(String[] argv) throws Exception {
 
+	public static class A2 extends A1 {
+		void moreMethods() {
+
+		}
+	}
+
+	public static void main(String[] argv) throws Exception {
+		Interface i_f = NonInheritImplements.Helper.Cast(Interface.class, new A1());
+		System.out.println(NonInheritImplements.Helper.Instanceof(new A2(), Interface.class));
+		myMethod(i_f);
+	}
+
+	public static void myMethod(Interface iface) {
+		iface.method(12, "string", 123);
 	}
 
 }
