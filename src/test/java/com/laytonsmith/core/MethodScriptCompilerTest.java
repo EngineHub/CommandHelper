@@ -1154,6 +1154,16 @@ public class MethodScriptCompilerTest {
 		this.verifyExecute("msg(2- abs(5))", "-3");
 		this.verifyExecute("msg(2 -abs(5))", "-3");
 		this.verifyExecute("msg(2-abs(5))", "-3");
+		
+		// "- something".
+		this.verifyExecute("msg(-5)", "-5");
+		this.verifyExecute("msg(typeof(-5))", "int");
+		this.verifyExecute("msg(- 5)", "-5");
+		this.verifyExecute("msg(typeof(- 5))", "int");
+		this.verifyExecute("@a = 5; msg(-@a)", "-5");
+		this.verifyExecute("@a = 5; msg(typeof(-@a))", "int");
+		this.verifyExecute("@a = 5; msg(- @a)", "-5");
+		this.verifyExecute("@a = 5; msg(typeof(- @a))", "int");
 	}
 	
 	private void verifyExecute(String script, String expectedResponse) throws ConfigCompileException, ConfigCompileGroupException {
