@@ -1118,4 +1118,125 @@ public class MethodScriptCompilerTest {
 		}
 	}
 
+	@Test
+	public void testMinusSignHandling() throws Exception {
+		// This tests a specific lexer part where token TType.MINUS ('-' sign) is merged with the next token
+		// based on whether the MINUS is used as a negation sign or a mathematical operator.
+		
+		// "... - 2".
+		this.verifyExecute("msg(5 - 2)", "3");
+		this.verifyExecute("msg(5- 2)", "3");
+		this.verifyExecute("msg(5 -2)", "3");
+		this.verifyExecute("msg(5-2)", "3");
+		this.verifyExecute("msg(0x05 - 2)", "3");
+		this.verifyExecute("msg(0x05- 2)", "3");
+		this.verifyExecute("msg(0x05 -2)", "3");
+		this.verifyExecute("msg(0x05-2)", "3");
+		this.verifyExecute("@arr = array(5); msg(@arr[0] - 2)", "3");
+		this.verifyExecute("@arr = array(5); msg(@arr[0]- 2)", "3");
+		this.verifyExecute("@arr = array(5); msg(@arr[0] -2)", "3");
+		this.verifyExecute("@arr = array(5); msg(@arr[0]-2)", "3");
+		this.verifyExecute("@a = 5; msg(@a - 2)", "3");
+		this.verifyExecute("@a = 5; msg(@a- 2)", "3");
+		this.verifyExecute("@a = 5; msg(@a -2)", "3");
+		this.verifyExecute("@a = 5; msg(@a-2)", "3");
+		this.verifyExecute("msg(abs(5) - 2)", "3");
+		this.verifyExecute("msg(abs(5)- 2)", "3");
+		this.verifyExecute("msg(abs(5) -2)", "3");
+		this.verifyExecute("msg(abs(5)-2)", "3");
+		
+		// "2 - ...".
+		this.verifyExecute("msg(2 - 0x05)", "-3");
+		this.verifyExecute("msg(2- 0x05)", "-3");
+		this.verifyExecute("msg(2 -0x05)", "-3");
+		this.verifyExecute("msg(2-0x05)", "-3");
+		this.verifyExecute("@arr = array(5); msg(2 - @arr[0])", "-3");
+		this.verifyExecute("@arr = array(5); msg(2- @arr[0])", "-3");
+		this.verifyExecute("@arr = array(5); msg(2 -@arr[0])", "-3");
+		this.verifyExecute("@arr = array(5); msg(2-@arr[0])", "-3");
+		this.verifyExecute("@a = 5; msg(2 - @a)", "-3");
+		this.verifyExecute("@a = 5; msg(2- @a)", "-3");
+		this.verifyExecute("@a = 5; msg(2 -@a)", "-3");
+		this.verifyExecute("@a = 5; msg(2-@a)", "-3");
+		this.verifyExecute("msg(2 - abs(5))", "-3");
+		this.verifyExecute("msg(2- abs(5))", "-3");
+		this.verifyExecute("msg(2 -abs(5))", "-3");
+		this.verifyExecute("msg(2-abs(5))", "-3");
+
+		// "- something".
+		this.verifyExecute("msg(-5)", "-5");
+		this.verifyExecute("msg(typeof(-5))", "int");
+		this.verifyExecute("msg(- 5)", "-5");
+		this.verifyExecute("msg(typeof(- 5))", "int");
+		this.verifyExecute("@a = 5; msg(-@a)", "-5");
+		this.verifyExecute("@a = 5; msg(typeof(-@a))", "int");
+		this.verifyExecute("@a = 5; msg(- @a)", "-5");
+		this.verifyExecute("@a = 5; msg(typeof(- @a))", "int");
+	}
+
+	@Test
+	public void testPlusSignHandling() throws Exception {
+		// This tests a specific lexer part where token TType.PLUS ('+' sign) is merged with the next token
+		// based on whether the PLUS is used as a positive sign or a mathematical operator.
+		
+		// "... + 2".
+		this.verifyExecute("msg(5 + 2)", "7");
+		this.verifyExecute("msg(5+ 2)", "7");
+		this.verifyExecute("msg(5 +2)", "7");
+		this.verifyExecute("msg(5+2)", "7");
+		this.verifyExecute("msg(0x05 + 2)", "7");
+		this.verifyExecute("msg(0x05+ 2)", "7");
+		this.verifyExecute("msg(0x05 +2)", "7");
+		this.verifyExecute("msg(0x05+2)", "7");
+		this.verifyExecute("@arr = array(5); msg(@arr[0] + 2)", "7");
+		this.verifyExecute("@arr = array(5); msg(@arr[0]+ 2)", "7");
+		this.verifyExecute("@arr = array(5); msg(@arr[0] +2)", "7");
+		this.verifyExecute("@arr = array(5); msg(@arr[0]+2)", "7");
+		this.verifyExecute("@a = 5; msg(@a + 2)", "7");
+		this.verifyExecute("@a = 5; msg(@a+ 2)", "7");
+		this.verifyExecute("@a = 5; msg(@a +2)", "7");
+		this.verifyExecute("@a = 5; msg(@a+2)", "7");
+		this.verifyExecute("msg(abs(5) + 2)", "7");
+		this.verifyExecute("msg(abs(5)+ 2)", "7");
+		this.verifyExecute("msg(abs(5) +2)", "7");
+		this.verifyExecute("msg(abs(5)+2)", "7");
+		
+		// "2 + ...".
+		this.verifyExecute("msg(2 + 0x05)", "7");
+		this.verifyExecute("msg(2+ 0x05)", "7");
+		this.verifyExecute("msg(2 +0x05)", "7");
+		this.verifyExecute("msg(2+0x05)", "7");
+		this.verifyExecute("@arr = array(5); msg(2 + @arr[0])", "7");
+		this.verifyExecute("@arr = array(5); msg(2+ @arr[0])", "7");
+		this.verifyExecute("@arr = array(5); msg(2 +@arr[0])", "7");
+		this.verifyExecute("@arr = array(5); msg(2+@arr[0])", "7");
+		this.verifyExecute("@a = 5; msg(2 + @a)", "7");
+		this.verifyExecute("@a = 5; msg(2+ @a)", "7");
+		this.verifyExecute("@a = 5; msg(2 +@a)", "7");
+		this.verifyExecute("@a = 5; msg(2+@a)", "7");
+		this.verifyExecute("msg(2 + abs(5))", "7");
+		this.verifyExecute("msg(2+ abs(5))", "7");
+		this.verifyExecute("msg(2 +abs(5))", "7");
+		this.verifyExecute("msg(2+abs(5))", "7");
+
+		// "+ something".
+		this.verifyExecute("msg(+5)", "5");
+		this.verifyExecute("msg(typeof(+5))", "int");
+		this.verifyExecute("msg(+ 5)", "5");
+		this.verifyExecute("msg(typeof(+ 5))", "int");
+		this.verifyExecute("@a = 5; msg(+@a)", "5");
+		this.verifyExecute("@a = 5; msg(typeof(+@a))", "int");
+		this.verifyExecute("@a = 5; msg(+ @a)", "5");
+		this.verifyExecute("@a = 5; msg(typeof(+ @a))", "int");
+	}
+	
+	private void verifyExecute(String script, String expectedResponse) throws ConfigCompileException, ConfigCompileGroupException {
+		MCPlayer temp = this.env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		MCPlayer player = StaticTest.GetOnlinePlayer();
+		this.env.getEnv(CommandHelperEnvironment.class).SetPlayer(player);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(
+				MethodScriptCompiler.lex(script, null, true)), this.env, null, null);
+		verify(player).sendMessage(expectedResponse);
+		this.env.getEnv(CommandHelperEnvironment.class).SetPlayer(temp);
+	}
 }
