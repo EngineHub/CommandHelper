@@ -49,6 +49,7 @@ public class DataHandlingTest {
 	public void setUp() {
 		fakePlayer = StaticTest.GetOnlinePlayer();
 		fakeServer = StaticTest.GetFakeServer();
+		when(fakeServer.getPlayer(fakePlayer.getName())).thenReturn(fakePlayer);
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 	}
 
@@ -473,6 +474,15 @@ public class DataHandlingTest {
 				+ "execute(@value, @a)\n"
 				+ "msg(@value)", fakePlayer);
 		verify(fakePlayer).sendMessage("{Hello World}");
+	}
+
+	@Test(timeout = 10000)
+	public void testClosure10() throws Exception {
+		SRun("@a = closure(msg('yes'));"
+				+ "@b = closure(msg('no'));"
+				+ "executeas('" + fakePlayer.getName() + "', null, @a);"
+				+ "execute(@b);", fakeServer.getConsole());
+		verify(fakePlayer).sendMessage("yes");
 	}
 
 	@Test(timeout = 10000)
