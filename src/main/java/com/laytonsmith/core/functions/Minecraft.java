@@ -324,7 +324,7 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "void {xyzArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
+			return "void {locationArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
 					+ " the radius (or 64 by default). The effect can be one of the following: "
 					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ")
 					+ ". Additional data can be supplied with the syntax EFFECT:DATA. The RECORD_PLAY effect takes the item"
