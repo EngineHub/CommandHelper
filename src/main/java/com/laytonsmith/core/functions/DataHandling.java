@@ -3267,7 +3267,7 @@ public class DataHandling {
 			GlobalEnv gEnv = closure.getEnv().getEnv(GlobalEnv.class);
 
 			MCCommandSender originalSender = cEnv.GetCommandSender();
-			cEnv.SetCommandSender(Static.GetCommandSender(args[0].val(), t));
+			cEnv.SetCommandSender(Static.GetPlayer(args[0].val(), t));
 
 			String originalLabel = gEnv.GetLabel();
 			if(!(args[1] instanceof CNull)) {

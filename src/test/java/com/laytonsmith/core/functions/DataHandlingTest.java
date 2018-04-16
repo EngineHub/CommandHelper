@@ -49,7 +49,6 @@ public class DataHandlingTest {
 	public void setUp() {
 		fakePlayer = StaticTest.GetOnlinePlayer();
 		fakeServer = StaticTest.GetFakeServer();
-		when(fakeServer.getPlayer(fakePlayer.getName())).thenReturn(fakePlayer);
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 	}
 
@@ -478,11 +477,12 @@ public class DataHandlingTest {
 
 	@Test(timeout = 10000)
 	public void testClosure10() throws Exception {
-		SRun("@a = closure(msg('yes'));"
-				+ "@b = closure(msg('no'));"
-				+ "executeas('" + fakePlayer.getName() + "', null, @a);"
-				+ "execute(@b);", fakeServer.getConsole());
-		verify(fakePlayer).sendMessage("yes");
+		MCPlayer fakePlayer2 = StaticTest.GetOnlinePlayer("Player02", fakeServer);
+		when(fakeServer.getPlayer("Player02")).thenReturn(fakePlayer2);
+		SRun("@c = closure(){msg(reflect_pull('label'))};"
+				+ "executeas('Player02', 'newlabel', @c);"
+				+ "execute(@c);", fakePlayer);
+		verify(fakePlayer2).sendMessage("newlabel");
 	}
 
 	@Test(timeout = 10000)
