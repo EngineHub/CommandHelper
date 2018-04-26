@@ -400,6 +400,7 @@ public class ObjectGenerator {
 				} else if(bs instanceof MCCreatureSpawner) {
 					MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 					ma.set("spawntype", mccs.getSpawnedType().name());
+					ma.set("delay", new CInt(mccs.getDelay(), t), t);
 				} else if(bs instanceof MCBrewingStand) {
 					MCBrewingStand brewStand = (MCBrewingStand) bs;
 					ma.set("brewtime", new CInt(brewStand.getBrewingTime(), t), t);
@@ -679,12 +680,16 @@ public class ObjectGenerator {
 						banner.update();
 						bsm.setBlockState(banner);
 					} else if(bs instanceof MCCreatureSpawner) {
+						MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 						if(ma.containsKey("spawntype")) {
-							MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 							MCEntityType type = MCEntityType.valueOf(ma.get("spawntype", t).val().toUpperCase());
 							mccs.setSpawnedType(type);
-							bsm.setBlockState(bs);
 						}
+						if(ma.containsKey("delay")) {
+							int delay = Static.getInt32(ma.get("delay", t), t);
+							mccs.setDelay(delay);
+						}
+						bsm.setBlockState(bs);
 					} else if(bs instanceof MCBrewingStand) {
 						MCBrewingStand brewStand = (MCBrewingStand) bs;
 						if(ma.containsKey("brewtime")) {
