@@ -4546,7 +4546,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "mixed {[player]} Returns ID of vehicle which player is in or null if player is outside the vehicle";
+			return "string {[player]} Returns ID of vehicle which player is in or null if player is outside the vehicle";
 		}
 
 		@Override

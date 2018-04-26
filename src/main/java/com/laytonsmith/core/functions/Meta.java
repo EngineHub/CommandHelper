@@ -597,7 +597,7 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "mixed {} Gets the command (as a string) that ended up triggering this script, exactly"
+			return "string {} Gets the command (as a string) that ended up triggering this script, exactly"
 					+ " how it was entered by the player. This could be null, if for instance"
 					+ " it is called from within an event.";
 		}

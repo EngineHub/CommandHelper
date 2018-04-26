@@ -590,7 +590,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "mixed {entityID} Returns the EntityType of the entity with the specified ID."
+			return "string {entityID} Returns the EntityType of the entity with the specified ID."
 					+ " Returns null if the entity does not exist.";
 		}
 
@@ -1272,7 +1272,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "mixed {entityID} Returns the ID of the given entity's rider, or null if it doesn't have one.";
+			return "string {entityID} Returns the ID of the given entity's rider, or null if it doesn't have one.";
 		}
 
 		@Override
@@ -1300,7 +1300,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "mixed {entityID} Returns the ID of the given entity's vehicle, or null if it doesn't have one. ----"
+			return "string {entityID} Returns the ID of the given entity's vehicle, or null if it doesn't have one. ----"
 					+ " If the entity is on top of a stack of other entities, this returns the bottom most entity"
 					+ " on Bukkit versions 1.9 through much of 1.12.2. This was a bug. It returns the direct entity"
 					+ " underneath on other versions.";

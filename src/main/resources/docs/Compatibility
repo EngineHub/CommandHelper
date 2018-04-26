@@ -1,6 +1,6 @@
 This page lists compatibility of various milestone versions of CommandHelper. Note that this chart was created starting with build 1498, so earlier builds may not be accurate. In general, the compatibility requirements, if not listed, are the same as the previous milestone build. The minimum requirements for the current builds are:
 
-* Java 7
+* Java 8
 * Bukkit version as specified below (when used as a Bukkit plugin)
 
 Also note that CommandHelper may still be backwards and forward compatible to a large degree, many of the advanced features that normally have hard dependencies on certain versions of external dependencies have been configured to "soft" fail, that is, individual components may not work, but in general the plugin should continue to function. Regardless, only the most current dev builds are officially supported.
@@ -13,8 +13,8 @@ Also note that CommandHelper may still be backwards and forward compatible to a 
 ! scope="col" width="40%" | Milestone
 ! scope="col" width="50%" | Compatibility
 |-
-| ??
-| ??
+| [http://builds.enginehub.org/job/commandhelper/10106 #3345-]
+| [https://github.com/EngineHub/CommandHelper/commit/40dc779ee121f771b1ac643e5d180365bec2ac80 40dc779e]
 | Updated several dependencies
 * com.jcraft:jsch ..................................... 0.1.51 -> 0.1.54
 * commons-codec:commons-codec .............................. 1.9 -> 1.11
@@ -27,29 +27,44 @@ Also note that CommandHelper may still be backwards and forward compatible to a 
 * org.yaml:snakeyaml ...................................... 1.13 -> 1.20
 * redis.clients:jedis ................................... 2.5.1 -> 2.9.0
 |-
+| [http://builds.enginehub.org/job/commandhelper/9952 #3260-]
+| [https://github.com/EngineHub/commandhelper/commit/7450f62119a36d03c12620913e4ede4728da68e1 7450f621]
+| Removed remaining backwards compatibility for versions prior to 1.7.10
+| Bukkit 1.7.10 - 1.12.2
+|-
 | [http://builds.enginehub.org/job/commandhelper/9876 #3219-]
 | [https://github.com/EngineHub/CommandHelper/commit/4d970d0dc2edb1a7a648904df01af148bba761e1 4d970d0]
-| Updated for Spigot 1.12.1
-| Spigot 1.7.8 - 1.12.1
+| Updated for Bukkit 1.12.1
+| Bukkit 1.7.8 - 1.12.1
+|-
+| [http://builds.enginehub.org/job/commandhelper/8735 #3091-]
+| [https://github.com/sk89q/commandhelper/commit/8086fe6a80b7ee2b2250d775a7f0c4a711127aa2 8086fe]
+| Finished updating for Bukkit 1.9
+| Bukkit 1.7.8 - 1.9.0
+|-
+| [http://builds.enginehub.org/job/commandhelper/8450 #3040-]
+| [https://github.com/sk89q/commandhelper/commit/8b08d139216fd13519ceb5d85ca195c77e41aca1 8b08d139]
+| 3.3.2 snapshots start. All extensions need to be updated.
+| Bukkit 1.7.8 - 1.8.8
 |-
 | [http://builds.enginehub.org/job/commandhelper/7014 #2895-]
 | [https://github.com/sk89q/commandhelper/commit/6304f912f0be41e3522e0ae4191b1319ef8a8b89 6304f91]
-| Should still be compatible with former build
-| Spigot 1.7.6 - 1.8.6
+| Updated for Bukkit 1.8.6
+| Bukkit 1.7.6 - 1.8.6
 |-
 | [http://builds.enginehub.org/job/commandhelper/6821 #2857-]
 | [https://github.com/sk89q/commandhelper/commit/f8953eb485a6689299381c8f644ea16fb92e9853 f8953eb]
-| Removed WorldEdit dependency (See SKCompat extension)
+| Removed WorldEdit dependency (See https://letsbuild.net/jenkins/job/SKCompat/ SKCompat] extension)
 |-
 | [http://builds.enginehub.org/job/commandhelper/6776 #2842-]
 | [https://github.com/sk89q/commandhelper/commit/4b485fd208f2b43d0e5bae71c74b48b212dc0140 4b485fd]
-| Removed vault dependency (See CHVault extension)
+| Removed vault dependency (See [https://letsbuild.net/jenkins/job/CHVault/ CHVault] extension)
 |-
 | [http://builds.enginehub.org/job/commandhelper/6492 #2802-]
 | [https://github.com/sk89q/CommandHelper/commit/cc0f80e9983b13c2ff6f643fbbc441f8f86268e8 cc0f80e]
-| Updated for Spigot 1.8.
+| Updated for Bukkit 1.8
 * Vault 1.4
-| Spigot 1.7.2 - 1.8
+| Bukkit 1.7.2 - 1.8.0
 |-
 | [http://builds.enginehub.org/job/commandhelper/5115/ #2717-aca997c]
 | [https://github.com/sk89q/commandhelper/commit/aca997cf7a09f00a92cd46aefc3a8f44f478a3d5 aca997c]
@@ -63,17 +78,17 @@ Also note that CommandHelper may still be backwards and forward compatible to a 
 * mysql-connector-java 5.1.30
 * jedis: 2.5.1
 |-
-| [http://builds.enginehub.org/job/commandhelper/5114/ #2716-512d9d3]
+| [http://builds.enginehub.org/job/commandhelper/5114/ #2716-]
 | [https://github.com/sk89q/commandhelper/commit/484c0645d302e22b8eec815acb54b91ea31c3b10 484c064]
 | Updated for Minecraft 1.7.9 (should still be compatible with 1.7.2 builds, excepting that Sound.BREATH and Sound.HURT have been removed).
 | Bukkit 1.7.2 - 1.7.9
 |-
-| [http://builds.enginehub.org/job/commandhelper/4876/ #2681-773d877]
+| [http://builds.enginehub.org/job/commandhelper/4876/ #2681-]
 | [https://github.com/sk89q/commandhelper/commit/773d877048514bb422b1e8755c9520ac99d9852a 773d877]
 | Updated to Minecraft 1.7.8 (should still be compatible with 1.7.2 builds, however)
 | Bukkit 1.7.2 - 1.7.8
 |-
-| [http://builds.enginehub.org/job/commandhelper/3463/ #2445-8c4b165]
+| [http://builds.enginehub.org/job/commandhelper/3463/ #2445-]
 | [https://github.com/sk89q/commandhelper/commit/8c4b1652ed5c43dddb95c7e6612aea072716aea5 8c4b165]
 | Updated to Minecraft 1.7.2
 | Bukkit 1.7.2

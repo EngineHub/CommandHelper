@@ -47,6 +47,12 @@ public class InventoryManagement {
 		return "Provides methods for managing inventory related tasks.";
 	}
 
+	private static final String ITEM_OBJECT = " An item object consists of an associative array with the following keys,"
+			+ " name: the string id of the item,"
+			+ " type: The numeric id of the item (deprecated),"
+			+ " data: The data value of the item, or the damage if a damageable item,"
+			+ " qty: The number of items in their inventory,"
+			+ " meta: An array of item meta or null if none exists (see {{function|get_itemmeta}} for details).";
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pinv extends AbstractFunction {
 
@@ -62,7 +68,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "mixed {[player, [slot]]} Gets the inventory information for the specified player, or the current "
+			return "array {[player, [slot]]} Gets the inventory information for the specified player, or the current "
 					+ " player if none specified. If the index is specified, only the slot given will be returned."
 					+ " The index of the array in the array is 0 - 35, 100 - 103, -106, which corresponds to the slot"
 					+ " in the player's inventory. To access armor slots, you may also specify the index. (100 - 103)."
@@ -70,11 +76,7 @@ public class InventoryManagement {
 					+ " of what slot is selected. If index is -106, the player's off-hand item is returned. If there is"
 					+ " no item at the slot specified, null is returned."
 					+ " ---- If all slots are requested, an associative array of item objects is returned, and if"
-					+ " only one item is requested, just that single item object is returned. An item object"
-					+ " consists of the following associative array(name: the string id of the item,"
-					+ " type: The numeric id of the item, data: The data value of the item,"
-					+ " or the damage if a damagable item, qty: The number of items in their inventory, meta: An array"
-					+ " of item meta or null if none exists. See {{function|get_itemmeta}} for details about item meta.";
+					+ " only one item is requested, just that single item object is returned." + ITEM_OBJECT;
 		}
 
 		@Override
@@ -442,8 +444,7 @@ public class InventoryManagement {
 					+ " second slot to be a stack of stone. set_pinv(array(103: array(type: 298))) gives them a hat."
 					+ " To set the item in hand, use something like set_pinv(player(), null, array(type: 298))."
 					+ " If you set a null key in an inventory array, only one of the items will be used (which one is"
-					+ " undefined). Use an index of -106 to set the item in the player's off-hand. The type key"
-					+ " supports the string item format (eg. \"35:11\") for convenience and backwards compatibility.";
+					+ " undefined). Use an index of -106 to set the item in the player's off-hand.";
 
 		}
 
@@ -1203,9 +1204,7 @@ public class InventoryManagement {
 					+ " enderchest would be: set_penderchest(array(2: array(type: 1, qty: 64))) This sets the chest's second slot"
 					+ " to be a stack of stone. set_penderchest(array(103: array(type: 298))) gives them a hat."
 					+ " Note that this uses the unsafe"
-					+ " enchantment mechanism to add enchantments, so any enchantment value will work. If"
-					+ " type uses the old format (for instance, \"35:11\"), then the second number is taken"
-					+ " to be the data, making this backwards compatible (and sometimes more convenient).";
+					+ " enchantment mechanism to add enchantments, so any enchantment value will work.";
 
 		}
 
@@ -1301,16 +1300,12 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "mixed {[player, [index]]} Gets the inventory information for the specified player's enderchest, or the current player if none specified. If the index is specified, only the slot "
-					+ " given will be returned."
-					+ " The index of the array in the array is 0 - 26, which corresponds to the slot in the enderchest inventory."
-					+ " If there is no item at the slot specified, null is returned."
+			return "array {[player, [index]]} Gets the inventory for the specified player's enderchest, or the current"
+					+ " player if none specified. If the index is specified, only the slot given will be returned."
+					+ " The index of the array in the array is 0 - 26, which corresponds to the slot in the enderchest"
+					+ " inventory. If there is no item at the slot specified, null is returned."
 					+ " ---- If all slots are requested, an associative array of item objects is returned, and if"
-					+ " only one item is requested, just that single item object is returned. An item object"
-					+ " consists of the following associative array(type: The id of the item, data: The data value of the item,"
-					+ " or the damage if a damagable item, qty: The number of items in their inventory, enchants: An array"
-					+ " of enchant objects, with 0 or more associative arrays which look like:"
-					+ " array(etype: The type of enchantment, elevel: The strength of the enchantment))";
+					+ " only one item is requested, just that single item object is returned." + ITEM_OBJECT;
 		}
 
 		@Override
@@ -1749,16 +1744,12 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "mixed {entityID, [index] | locationArray, [index]} Gets the inventory information for the specified block or entity."
+			return "array {entityID, [index] | locationArray, [index]} Gets the inventory for the specified block or entity."
 					+ " If the block or entity can't have an inventory, a FormatException is thrown. If the index is specified,"
-					+ " only the slot given will be returned. The max index of the array in the array is different for different types"
-					+ " of inventories. If there is no item at the slot specified, null is returned."
+					+ " only the slot given will be returned. The max index of the array in the array is different for"
+					+ " different types of inventories. If there is no item at the slot specified, null is returned."
 					+ " ---- If all slots are requested, an associative array of item objects is returned, and if"
-					+ " only one item is requested, just that single item object is returned. An item object"
-					+ " consists of the following associative array(type: The id of the item, data: The data value of the item,"
-					+ " or the damage if a damagable item, qty: The number of items in their inventory, enchants: An array"
-					+ " of enchant objects, with 0 or more associative arrays which look like:"
-					+ " array(etype: The type of enchantment, elevel: The strength of the enchantment))";
+					+ " only one item is requested, just that single item object is returned." + ITEM_OBJECT;
 		}
 
 		@Override
@@ -1835,9 +1826,7 @@ public class InventoryManagement {
 					+ " and it is skipped, but the function will not fail as a whole. A simple way to set one item would be:"
 					+ " set_inventory(123, array(2: array(type: 1, qty: 64))) This sets the inventory second slot"
 					+ " to be a stack of stone for entity with ID = 123. Note that this uses the unsafe"
-					+ " enchantment mechanism to add enchantments, so any enchantment value will work. If"
-					+ " type uses the old format (for instance, \"35:11\"), then the second number is taken"
-					+ " to be the data, making this backwards compatible (and sometimes more convenient).";
+					+ " enchantment mechanism to add enchantments, so any enchantment value will work.";
 
 		}
 
