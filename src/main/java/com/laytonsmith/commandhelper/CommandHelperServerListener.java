@@ -5,7 +5,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCConsoleCommandSender;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
-import com.laytonsmith.abstraction.bukkit.events.BukkitMiscEvents;
+import com.laytonsmith.abstraction.bukkit.events.BukkitServerEvents;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.InternalException;
 import com.laytonsmith.core.Static;
@@ -37,7 +37,7 @@ public class CommandHelperServerListener implements Listener {
 			sender = new BukkitMCCommandSender(event.getSender());
 		}
 
-		BukkitMiscEvents.BukkitMCServerCommandEvent cce = new BukkitMiscEvents.BukkitMCServerCommandEvent(event, sender);
+		BukkitServerEvents.BukkitMCServerCommandEvent cce = new BukkitServerEvents.BukkitMCServerCommandEvent(event, sender);
 		EventUtils.TriggerListener(Driver.SERVER_COMMAND, "server_command", cce);
 		try {
 			if(event.isCancelled()) {

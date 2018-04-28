@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.events.BukkitMiscEvents;
+import com.laytonsmith.abstraction.bukkit.events.BukkitServerEvents;
 import com.laytonsmith.abstraction.events.MCRedstoneChangedEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
@@ -18,7 +18,7 @@ public class BukkitServerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPing(ServerListPingEvent event) {
-		BukkitMiscEvents.BukkitMCServerPingEvent pe = new BukkitMiscEvents.BukkitMCServerPingEvent(event);
+		BukkitServerEvents.BukkitMCServerPingEvent pe = new BukkitServerEvents.BukkitMCServerPingEvent(event);
 		EventUtils.TriggerListener(Driver.SERVER_PING, "server_ping", pe);
 	}
 
