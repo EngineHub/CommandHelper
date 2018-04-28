@@ -101,6 +101,7 @@ public enum Driver {
 	 */
 	SERVER_COMMAND,
 	SERVER_PING,
+	BROADCAST_MESSAGE,
 	/**
 	 * Vehicle events
 	 */

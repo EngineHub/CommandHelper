@@ -2,10 +2,15 @@ package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
+import com.laytonsmith.abstraction.events.MCBroadcastMessageEvent;
 import com.laytonsmith.abstraction.events.MCServerCommandEvent;
 import com.laytonsmith.abstraction.events.MCServerPingEvent;
+
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.server.BroadcastMessageEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 
@@ -124,5 +129,72 @@ public class BukkitServerEvents {
 		}
 	}
 
-	
+	public static class BukkitMCBroadcastMessageEvent implements MCBroadcastMessageEvent {
+
+		private final BroadcastMessageEvent bme;
+
+		public BukkitMCBroadcastMessageEvent(BroadcastMessageEvent event) {
+			this.bme = event;
+		}
+		
+		@Override
+		public Object _GetObject() {
+			return this.bme;
+		}
+
+		@Override
+		public void cancel(boolean state) {
+			this.bme.setCancelled(state);
+		}
+
+		@Override
+		public String getMessage() {
+			return this.bme.getMessage();
+		}
+
+		@Override
+		public void setMessage(String message) {
+			this.bme.setMessage(message);
+		}
+
+		/**
+		 * Gets the recipients of this message.
+		 * Modifications made to the returned set do not have influence on the event itself.
+		 * This set can contain command senders like players, command blocks, command block functions and console.
+		 * To only receive the player recipients, use the {@link #getPlayerRecipients()} method.
+		 * @return The recipients of this message.
+		 */
+		@Override
+		public Set<MCCommandSender> getRecipients() {
+			Set<MCCommandSender> ret = new HashSet<MCCommandSender>();
+			for(CommandSender sender : this.bme.getRecipients()) {
+				ret.add(new BukkitMCCommandSender(sender));
+			}
+			return ret;
+		}
+
+		/**
+		 * Gets the player recipients of this message.
+		 * Modifications made to the returned set do not have influence on the event itself.
+		 * This set can contain command senders like players, command blocks, command block functions and console.
+		 * To receive player and non-player recipients, use the {@link #getRecipients()} method.
+		 * @return The player recipients of this message.
+		 */
+		@Override
+		public Set<MCPlayer> getPlayerRecipients() {
+			Set<MCPlayer> ret = new HashSet<MCPlayer>();
+			for(CommandSender sender : this.bme.getRecipients()) {
+				if(sender instanceof Player) {
+					ret.add(new BukkitMCPlayer((Player) sender));
+				}
+			}
+			return ret;
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return this.bme.isCancelled();
+		}
+		
+	}
 }

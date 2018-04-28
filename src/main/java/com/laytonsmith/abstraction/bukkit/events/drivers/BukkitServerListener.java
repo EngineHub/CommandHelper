@@ -12,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.server.BroadcastMessageEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 
 public class BukkitServerListener implements Listener {
@@ -56,5 +57,11 @@ public class BukkitServerListener implements Listener {
 				});
 			}
 		}
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onBroadcast(BroadcastMessageEvent event) {
+		EventUtils.TriggerListener(Driver.BROADCAST_MESSAGE, "broadcast_message",
+				new BukkitServerEvents.BukkitMCBroadcastMessageEvent(event));
 	}
 }
