@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.events.MCServerPingEvent;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.server.BroadcastMessageEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.ServerListPingEvent;
@@ -133,8 +134,8 @@ public class BukkitServerEvents {
 
 		private final BroadcastMessageEvent bme;
 
-		public BukkitMCBroadcastMessageEvent(BroadcastMessageEvent event) {
-			this.bme = event;
+		public BukkitMCBroadcastMessageEvent(Event event) {
+			this.bme = (BroadcastMessageEvent) event;
 		}
 		
 		@Override
