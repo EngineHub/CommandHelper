@@ -1075,9 +1075,9 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
 				Prefilters.match(prefilter, "location", pie.getClickedBlock().getLocation(), PrefilterType.LOCATION_MATCH);
-				if(prefilter.containsKey("activated")) {
-					//TODO: Once activation is supported, check for that here
-				}
+//				if(prefilter.containsKey("activated")) {
+//					//TODO: Once activation is supported, check for that here
+//				}
 				return true;
 			}
 			return false;
