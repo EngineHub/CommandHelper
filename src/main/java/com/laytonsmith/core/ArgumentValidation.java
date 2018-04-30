@@ -1,10 +1,22 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CByteArray;
+import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.CDecimal;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CMutablePrimitive;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CNumber;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 

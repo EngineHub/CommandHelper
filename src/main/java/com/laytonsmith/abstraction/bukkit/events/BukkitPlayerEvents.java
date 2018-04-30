@@ -34,7 +34,32 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFishingState;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCGameMode;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause;
-import com.laytonsmith.abstraction.events.*;
+import com.laytonsmith.abstraction.events.MCChatTabCompleteEvent;
+import com.laytonsmith.abstraction.events.MCExpChangeEvent;
+import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
+import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBedEvent;
+import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
+import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
+import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
+import com.laytonsmith.abstraction.events.MCPlayerEditBookEvent;
+import com.laytonsmith.abstraction.events.MCPlayerEvent;
+import com.laytonsmith.abstraction.events.MCPlayerFishEvent;
+import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
+import com.laytonsmith.abstraction.events.MCPlayerItemConsumeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
+import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
+import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
+import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
+import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
+import com.laytonsmith.abstraction.events.MCPlayerPreLoginEvent;
+import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
+import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
+import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
+import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.abstraction;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -45,8 +70,31 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.*;
-import org.bukkit.event.player.PlayerPreLoginEvent.Result;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerBedLeaveEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerChatTabCompleteEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerEditBookEvent;
+import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.player.PlayerExpChangeEvent;
+import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.event.player.PlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -389,7 +437,7 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public void setResult(String rst) {
-			event.setResult(Result.valueOf(rst.toUpperCase()));
+			event.setResult(PlayerPreLoginEvent.Result.valueOf(rst.toUpperCase()));
 		}
 
 		@Override
@@ -400,8 +448,7 @@ public class BukkitPlayerEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCPlayerChatEvent extends BukkitMCPlayerEvent
-			implements MCPlayerChatEvent {
+	public static class BukkitMCPlayerChatEvent extends BukkitMCPlayerEvent implements MCPlayerChatEvent {
 
 		AsyncPlayerChatEvent pce;
 
@@ -743,8 +790,7 @@ public class BukkitPlayerEvents {
 		}
 	}
 
-	public static class BukkitMCPlayerFishEvent extends BukkitMCPlayerEvent
-			implements MCPlayerFishEvent {
+	public static class BukkitMCPlayerFishEvent extends BukkitMCPlayerEvent implements MCPlayerFishEvent {
 
 		PlayerFishEvent e;
 

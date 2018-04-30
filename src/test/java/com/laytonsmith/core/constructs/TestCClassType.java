@@ -6,9 +6,13 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.testing.StaticTest;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
