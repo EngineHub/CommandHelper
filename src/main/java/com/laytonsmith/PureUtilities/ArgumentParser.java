@@ -1013,7 +1013,7 @@ public class ArgumentParser {
 				}
 			}
 		}
-		//These are arguments that are not flags. 
+		//These are arguments that are not flags.
 		List<String> looseArgs = new ArrayList<>();
 		Argument lastArg = null;
 		for (String arg : args) {
@@ -1100,7 +1100,7 @@ public class ArgumentParser {
 		}
 		Argument finishedArgument = new Argument(arg);
 		if (arg.isSingle()) {
-			//Just the first loose argument is associated with this argument, 
+			//Just the first loose argument is associated with this argument,
 			//the rest (if any) belong to the default loose argument list.
 			//Of course, looseArgs could be empty, in which case we won't add anything to the list.
 			if (looseArgs.size() > 0) {

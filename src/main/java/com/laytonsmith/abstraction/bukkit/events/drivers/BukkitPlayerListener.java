@@ -110,7 +110,7 @@ public class BukkitPlayerListener implements Listener {
 				//lot that can be done reasonably.
 
 //				SortedSet<BoundEvent> events = EventUtils.GetEvents(Driver.PLAYER_CHAT);
-//				Event driver = EventList.getEvent(Driver.PLAYER_CHAT, "player_chat");				
+//				Event driver = EventList.getEvent(Driver.PLAYER_CHAT, "player_chat");
 //				//Unfortunately, due to priority issues, if any event is syncronous, all of them
 //				//have to be synchronous.
 //				boolean canBeAsync = true;
@@ -127,7 +127,7 @@ public class BukkitPlayerListener implements Listener {
 //						if(f.runAsync() != null && f.runAsync() == false){
 //							//Nope, can't be run async :(
 //							canBeAsync = false;
-//						}						
+//						}
 //					}
 //					try {
 //						if(driver.matches(b.getPrefilter(), new BukkitPlayerEvents.BukkitMCPlayerChatEvent(event))){
@@ -138,7 +138,7 @@ public class BukkitPlayerListener implements Listener {
 //						//No need to fire this one
 //					}
 //				}
-//				
+//
 //				if(!actuallyNeedToFire){
 //					//Yay! Prefilters finally actually optimized something!
 //					return;

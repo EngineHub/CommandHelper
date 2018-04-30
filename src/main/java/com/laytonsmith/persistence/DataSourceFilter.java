@@ -90,7 +90,7 @@ public class DataSourceFilter {
 		for(String key : p.keySet()) {
 			key = key.trim();
 			if(key.matches("\\$[^a-zA-Z_]+")) {
-				//Bad alias, bail                
+				//Bad alias, bail
 				throw new DataSourceException("Aliases in your filters may not start with a digit.");
 			}
 			if(key.matches("\\$[a-zA-Z_][a-zA-Z0-9_]*")) {
@@ -258,7 +258,7 @@ public class DataSourceFilter {
 					matches.put(comparison, namespaced.get(comparison));
 					break inner;
 				} else if(comparison.length > comparing) {
-					//Ok, so we know that it has the correct number of parts.					
+					//Ok, so we know that it has the correct number of parts.
 					String requestedPart = split[comparing];
 					String myPart = comparison[comparing];
 					if(myPart.contains("*")) {
@@ -333,7 +333,7 @@ public class DataSourceFilter {
 			//Trivial case
 			return null;
 		} else if(matches.size() == 1) {
-			//Yay! Also a trivial case!            
+			//Yay! Also a trivial case!
 			closest = matches.get(0);
 		} else {
 			int lowest = Integer.MAX_VALUE;

@@ -112,5 +112,5 @@ public final class EventBuilder {
 
 //	public static MCPlayerJoinEvent MCPlayerJoinEvent(MCPlayer player, String message){
 //		return instantiate(MCPlayerJoinEvent.class, player, message);
-//	}    
+//	}
 }

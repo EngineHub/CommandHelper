@@ -244,7 +244,7 @@ public final class Static {
 	public static boolean getBoolean(Construct c, Target t) {
 		return ArgumentValidation.getBoolean(c, t);
 	}
-	
+
 	/**
 	 * Returns a boolean from any given construct. Depending on the type of the construct being converted, it follows
 	 * the following rules: If it is an integer or a double, it is false if 0, true otherwise. If it is a string, if it
@@ -252,7 +252,7 @@ public final class Static {
 	 *
 	 * @param c
 	 * @return
-	 * @deprecated Use 
+	 * @deprecated Use
 	 * {@link #getBoolean(com.laytonsmith.core.constructs.Construct, com.laytonsmith.core.constructs.Target)}
 	 * instead, as it provides better error messages for users that use the string "false" as a boolean. This method
 	 * should be removed in version 3.3.3 or above.

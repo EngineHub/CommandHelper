@@ -28,7 +28,7 @@ public final class rParser {
 		}
 	}
 
-	/* 
+	/*
 	 * 
 	 */
 	public static String combineSplit(int beginHere, String[] split, String seperator) {
@@ -187,7 +187,7 @@ public final class rParser {
 	//=====================================================================
 	//Function:	colorChange
 	//Input:	char colour: The color code to find the color for
-	//Output:	String: The color that the code identified 
+	//Output:	String: The color that the code identified
 	//Use:		Finds a color giving a color code
 	//=====================================================================
 	public static String colorChange(char colour) {

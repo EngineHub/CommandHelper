@@ -293,7 +293,7 @@ public class WinRegistry {
 		int[] info = (int[]) regQueryInfoKey.invoke(root,
 				new Object[]{new Integer(handles[0])});
 
-		int count = info[0]; // count  
+		int count = info[0]; // count
 		int maxlen = info[3]; // value length max
 		for(int index = 0; index < count; index++) {
 			byte[] name = (byte[]) regEnumValue.invoke(root, new Object[]{

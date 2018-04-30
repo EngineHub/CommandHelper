@@ -24,18 +24,18 @@ public class TypeHintingTest {
 //	@Test public void testSimpleCase1(){
 //		assertTrue(TypeHinting.Generate(STRING).matches(STRING));
 //	}
-//	
+//
 //	@Test public void testSimpleCase2(){
 //		assertTrue(TypeHinting.Generate(STRING, INT).matches(STRING, INT));
 //		assertFalse(TypeHinting.Generate(STRING, INT).matches(ARRAY));
 //	}
-//	
+//
 //	@Test public void testComplex1(){
 //		assertTrue(TypeHinting.Generate(STRING, OPTIONAL, STRING).matches(STRING));
 //		assertTrue(TypeHinting.Generate(INT, VARARGS, STRING).matches(INT, STRING, STRING, STRING));
 //		assertTrue(TypeHinting.Generate(INT, VARARGS, STRING).matches(INT));
 //	}
-//	
+//
 //	@Test public void testComplex2(){
 //		TypeHinting complex = TypeHinting.Generate(OPTIONAL, STRING, STRING, INT);
 //		assertTrue(complex.matches(STRING, STRING, INT));
@@ -43,8 +43,8 @@ public class TypeHintingTest {
 //		assertFalse(complex.matches(STRING, STRING, INT));
 //		assertFalse(complex.matches(STRING, INT, INT, INT));
 //	}
-//	
-//	@Test(expected=Error.class) 
+//
+//	@Test(expected=Error.class)
 //	public void testBadSpecification1(){
 //		TypeHinting.Generate(OPTIONAL, STRING, VARARGS, STRING, INT, OPTIONAL, INT);
 //	}

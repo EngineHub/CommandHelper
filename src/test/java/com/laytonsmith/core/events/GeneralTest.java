@@ -46,22 +46,22 @@ public class GeneralTest {
 //		//Register the event handler
 //		String script = "bind(player_join, null, null, @event, msg('success'))";
 //		SRun(script, null);
-//				
+//
 //		//Create the mock event, and have it return the fakePlayer
-//		MCPlayerJoinEvent mcpje = mock(MCPlayerJoinEvent.class);        
+//		MCPlayerJoinEvent mcpje = mock(MCPlayerJoinEvent.class);
 //		when(mcpje.getPlayer()).thenReturn(fakePlayer);
-//		
+//
 //		//Trigger the event
 //		EventUtils.TriggerListener(Driver.PLAYER_JOIN, "player_join", mcpje);
-//		
+//
 //		//Verify that it ran correctly
 //		verify(fakePlayer).sendMessage("success");
 //	}
 	//This is an invalid test. It's working as expected, because the proc is not in scope
 	//When the event is run.
-//	@Test 
+//	@Test
 //	public void testCallProcInEventHandler() throws ConfigCompileException{
-//		
+//
 //		String script = ""
 //				+ "proc(_testproc, @text, msg(@text))"
 //				+ "bind(player_join, array(priority: highest), null, @eb, "

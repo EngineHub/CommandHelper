@@ -56,7 +56,7 @@ public class MinecraftTest {
 //		when(fakePlayer.getWorld()).thenReturn(fakeWorld);
 //		when(fakePlayer.getLocation()).thenReturn(fakeLocation);
 //		when(fakeLocation.getWorld()).thenReturn(fakeWorld);
-//		
+//
 //		when(fakeWorld.spawnMob(eq("ocelot"), anyString(), anyInt(), (MCLocation)any(), (Target)any()))
 //				.thenReturn(new CArray(Target.UNKNOWN, new CInt("10", Target.UNKNOWN)));
 //		mockStatic(Static.class);
@@ -65,7 +65,7 @@ public class MinecraftTest {
 //		Preferences fakePrefs = mock(Preferences.class);
 //		when(Static.getPreferences()).thenReturn(fakePrefs);
 //		when(fakePrefs.getPreference("debug-mode")).thenReturn(false);
-//		
+//
 //		SRun("is_tameable(spawn_mob('ocelot')[0])", fakePlayer);
 //		verify(fakePlayer).sendMessage("true");
 

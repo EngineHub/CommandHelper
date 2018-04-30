@@ -112,7 +112,7 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 //			return; //We don't need to bother with it, we've already injected our poisoned EnumMap,
 //			//so further additions will go through that instead.
 //		}
-//		
+//
 //		//Remove final from the listeners, so we can modify it
 //		Field modifiersField = Field.class.getDeclaredField("modifiers");
 //		modifiersField.setAccessible(true);

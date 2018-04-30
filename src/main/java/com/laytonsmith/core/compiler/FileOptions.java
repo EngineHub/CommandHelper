@@ -62,7 +62,7 @@ public class FileOptions {
 		}
 		return l;
 	}
-	
+
 	private <T extends Enum<T>> Set<T> parseEnumSet(String list, Class<T> type) {
 		EnumSet<T> set = EnumSet.noneOf(type);
 		List<String> sList = parseList(list);
@@ -122,19 +122,19 @@ public class FileOptions {
 				+ (description == null ? "" : "File description: " + description + "\n");
 
 	}
-	
+
 	public static enum SuppressWarnings implements Documentation {
 		// In the future, when some are added, this can be removed, and the rest of the system will work
 		// quite nicely. Perhaps a good first candidate would be to allow string "false" coerced to boolean warning
 		// to be suppressed on a per file basis?
-		Note("There are currently no warning suppressions defined, but some will be added in the future", 
+		Note("There are currently no warning suppressions defined, but some will be added in the future",
 			CHVersion.V0_0_0);
 
 		private SuppressWarnings(String docs, Version version) {
 			this.docs = docs;
 			this.version = version;
 		}
-		
+
 		private final String docs;
 		private final Version version;
 		@Override

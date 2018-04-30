@@ -47,7 +47,7 @@ public class CHLog {
 	public enum Tags {
 		COMPILER("compiler", "Logs compiler errors (but not runtime errors)", LogLevel.WARNING),
 		RUNTIME("runtime", "Logs runtime errors, (exceptions that bubble all the way to the top)", LogLevel.ERROR),
-		FALSESTRING("falsestring", "Logs coersion of the string \"false\" to boolean, which is actually true", 
+		FALSESTRING("falsestring", "Logs coersion of the string \"false\" to boolean, which is actually true",
 			LogLevel.ERROR),
 		DEPRECATION("deprecation", "Shows deprecation warnings", LogLevel.WARNING),
 		PERSISTENCE("persistence", "Logs when any persistence actions occur.", LogLevel.ERROR),

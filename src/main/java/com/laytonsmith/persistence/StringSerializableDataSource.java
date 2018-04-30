@@ -82,7 +82,7 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 				try {
 					writeData(dm, serializeModel());
 				} catch(ReadOnlyException ex) {
-					//This shouldn't happen, because we won't have been allowed to set any 
+					//This shouldn't happen, because we won't have been allowed to set any
 					Logger.getLogger(StringSerializableDataSource.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}

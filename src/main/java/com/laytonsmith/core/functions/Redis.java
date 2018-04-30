@@ -21,9 +21,9 @@ public class Redis {
 		return "This class of functions provides hooks into a redis system.";
 	}
 
-//	@api 
+//	@api
 //	public static class redis extends AbstractFunction {
-//		
+//
 //		private static List<Method> functionList = null;
 //		/**
 //		 * The list of valid commands is built dynamically based on the functions listed in
@@ -44,7 +44,7 @@ public class Redis {
 //					//Generic returns aren't supported
 //					continue;
 //				}
-//				
+//
 //				for(Class c : m.getParameterTypes()){
 //					c
 //				}
@@ -86,7 +86,7 @@ public class Redis {
 //		@Override
 //		public String docs() {
 //			StringBuilder docs = new StringBuilder();
-//			
+//
 //			return docs.toString();
 //		}
 //
@@ -94,6 +94,6 @@ public class Redis {
 //		public Version since() {
 //			return CHVersion.V3_3_1;
 //		}
-//		
+//
 //	}
 }

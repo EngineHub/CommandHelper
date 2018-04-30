@@ -78,7 +78,7 @@ public final class DataSourceModel {
 
 	private void decompose(Map<String, Object> node, GenericTreeNode<Pair<String, String>> treeNode) {
 		if(treeNode.hasChildren()) {
-			//If it's not a leaf node, we need to add a new child to the map. 
+			//If it's not a leaf node, we need to add a new child to the map.
 			//However, if the data isn't null, we need to add the data now as a _ key
 			Map<String, Object> map = new HashMap<>();
 			if(treeNode.getData().getValue() != null) {

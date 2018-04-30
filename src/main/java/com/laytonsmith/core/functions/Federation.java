@@ -127,7 +127,6 @@ public class Federation {
 //								out.println(FederationVersion.V1_0_0.getVersionString());
 //								// Then the hello
 //								out.println("HELLO");
-//								// 
 //							} catch (IOException ex) {
 //								Logger.getLogger(Federation.class.getName()).log(Level.SEVERE, null, ex);
 //							}

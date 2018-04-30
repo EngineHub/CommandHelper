@@ -45,7 +45,7 @@ public class ZipReaderTest {
 //	}
 	@Test
 	public void testStringRead() throws FileNotFoundException, IOException {
-		// TODO review the generated test code and remove the default call to fail.        
+		// TODO review the generated test code and remove the default call to fail.
 		String contents = new ZipReader(TestZip).getFileContents();
 		assertNotNull("Could not read contents!", contents);
 		assertEquals("This is a file", contents.trim());

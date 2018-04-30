@@ -81,7 +81,7 @@ public final class ZipMaker {
 		for(File f : files) {
 			FileInputStream in = new FileInputStream(new File(base, f.getPath()));
 
-			// Add ZIP entry to output stream.                
+			// Add ZIP entry to output stream.
 			out.putNextEntry(new ZipEntry(topLevel + GetUnabsoluteFile(base, f).getPath()));
 
 			// Transfer bytes from the file to the ZIP file

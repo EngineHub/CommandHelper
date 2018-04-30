@@ -69,7 +69,7 @@ public class PermissionsTest {
 //		verify(fakePlayer).sendMessage("success1");
 //		verify(fakePlayer).sendMessage("success2");
 //	}
-//	
+//
 //	@Test
 //	public void testQuickPermissions() throws ConfigCompileException{
 //		when(fakePlayer.isOp()).thenReturn(false);
@@ -105,7 +105,7 @@ public class PermissionsTest {
 //		verify(fakePerms, atLeastOnce()).inGroup(fakePlayer.getName(), "group1");
 //		verify(fakePerms, atLeastOnce()).inGroup(fakePlayer.getName(), "group2");
 //	}
-//	
+//
 //	@Test(expected=ConfigRuntimeException.class)
 //	public void testNegativeGroupPermissions() throws ConfigCompileException{
 //		when(fakePlayer.isOp()).thenReturn(false);

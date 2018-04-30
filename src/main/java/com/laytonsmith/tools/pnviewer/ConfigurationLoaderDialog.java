@@ -325,7 +325,7 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 			java.util.logging.Logger.getLogger(ConfigurationLoaderDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
 		//</editor-fold>
-		
+
 		//</editor-fold>
 
 		/* Create and display the dialog */

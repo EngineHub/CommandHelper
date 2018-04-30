@@ -364,7 +364,7 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '<': {
-							if(c2 == '!') { // "<!".								
+							if(c2 == '!') { // "<!".
 								if(buf.length() > 0) {
 									token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 									buf = new StringBuilder();
@@ -801,7 +801,7 @@ public final class MethodScriptCompiler {
 			if(it.hasPrevious() && t.type == TType.UNKNOWN) {
 				Token prev1 = it.previous(); // Select 'prev1' <--.
 				if(prev1.type.isPlusMinus()) {
-					
+
 					// Find the first non-whitespace token before the '-'.
 					Token prevNonWhitespace = null;
 					while(it.hasPrevious()) {
@@ -812,7 +812,7 @@ public final class MethodScriptCompiler {
 					}
 					while(it.next() != prev1) { // Skip until selection is at 'prev1 -->'.
 					}
-					
+
 					if(prevNonWhitespace != null) {
 						// Convert "±UNKNOWN" if the '±' is used as a sign (and not an add/subtract operation).
 						if(!prevNonWhitespace.type.isIdentifier() // Don't convert "number/string/var ± ...".

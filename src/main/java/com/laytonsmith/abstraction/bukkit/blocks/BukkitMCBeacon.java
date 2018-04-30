@@ -13,19 +13,19 @@ import org.bukkit.block.Beacon;
 import org.bukkit.entity.LivingEntity;
 
 public class BukkitMCBeacon extends BukkitMCBlockState implements MCBeacon {
-	
+
 	private Beacon beacon;
-	
+
 	public BukkitMCBeacon(Beacon block) {
 		super(block);
 		this.beacon = block;
 	}
-	
+
 	@Override
 	public MCBeaconInventory getInventory() {
 		return new BukkitMCBeaconInventory(this.beacon.getInventory());
 	}
-	
+
 	@Override
 	public Collection<MCLivingEntity> getEntitiesInRange() {
 		HashSet<MCLivingEntity> ret = new HashSet<>();
@@ -34,29 +34,29 @@ public class BukkitMCBeacon extends BukkitMCBlockState implements MCBeacon {
 		}
 		return ret;
 	}
-	
+
 //	@Override
 //	public MCPotionEffect getPrimaryEffect() {
 //		// TODO Implement.
 //		return null;
 //	}
-//	
+//
 //	@Override
 //	public MCPotionEffect getSecondaryEffect() {
 //		// TODO Implement.
 //		return null;
 //	}
-	
+
 	@Override
 	public int getTier() {
 		return this.beacon.getTier();
 	}
-	
+
 //	@Override
 //	public void setPrimaryEffect(MCPotionEffect effect) {
 //		this.beacon.setPrimaryEffect(effect.getHandle());
 //	}
-//	
+//
 //	@Override
 //	public void setSecondaryEffect(MCPotionEffect effect) {
 //		this.beacon.setSecondaryEffect(effect.getHandle());
