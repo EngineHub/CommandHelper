@@ -23,7 +23,11 @@
             <property name="ignoreComments" value="false"/>
         </module>
         
+        <!-- Disallow package.* imports. -->
         <module name="AvoidStarImport"/>
+        
+        <!-- Disallow whitespaces after '(' and before ')'. -->
+        <module name="ParenPad"/>
         
     </module>
     
