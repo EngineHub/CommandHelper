@@ -200,10 +200,10 @@
 		<!-- Used for IRC hooks -->
 		<!-- NOT READY YET
 		<dependency>
-			 <groupId>org.jibble</groupId>
-			 <artifactId>pircbot</artifactId>
-			 <version>1.5.0</version>
-			 <scope>compile</scope>
+			<groupId>org.jibble</groupId>
+			<artifactId>pircbot</artifactId>
+			<version>1.5.0</version>
+			<scope>compile</scope>
 		</dependency>
 		-->
 
@@ -280,17 +280,17 @@
 
 		<!-- Evil-y things (currently not used) -->
 		<!--<dependency>
-		 <groupId>cglib</groupId>
-		 <artifactId>cglib</artifactId>
-		 <version>2.2.2</version>
-		 <scope>compile</scope>
-		 <type>jar</type>
+		<groupId>cglib</groupId>
+		<artifactId>cglib</artifactId>
+		<version>2.2.2</version>
+		<scope>compile</scope>
+		<type>jar</type>
 		</dependency>
 		<dependency>
-		 <groupId>org.javassist</groupId>
-		 <artifactId>javassist</artifactId>
-		 <version>3.15.0-GA</version>
-		 <type>jar</type>
+		<groupId>org.javassist</groupId>
+		<artifactId>javassist</artifactId>
+		<version>3.15.0-GA</version>
+		<type>jar</type>
 		</dependency>-->
 		<!-- Embedded SSH Client -->
 		<dependency>
@@ -914,6 +914,33 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			<!-- Checkstyle plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>validate</id>
+						<phase>validate</phase>
+						<configuration>
+							<sourceDirectories>${project.compileSourceRoots}</sourceDirectories>
+							<testSourceDirectories>${project.testCompileSourceRoots}</testSourceDirectories>
+							<includeTestSourceDirectory>true</includeTestSourceDirectory>
+							<configLocation>${basedir}/checkstyle.xml</configLocation>
+							<encoding>UTF-8</encoding>
+							<consoleOutput>true</consoleOutput>
+							<failsOnError>true</failsOnError>
+							<linkXRef>false</linkXRef>
+						</configuration>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
 		</plugins>
 	</build>
 	<profiles>
