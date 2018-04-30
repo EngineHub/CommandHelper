@@ -21,34 +21,34 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConcurrentSingletonHashMap<T, V> implements Map<T, V> {
 
 	/*
-     * You might notice that no fields in this class are volatile. Normally, when you double lock, you must do
-     * something like this to be totally correct:
-     *
-     * <pre>
-     * volatile Object value = null; // Note the volatility
-     * construct() {
-     *	Object result = value;
-     *	if(result == null) {
-     *	    synchronized(result) {
-     *		if(result == null) {
-     *		    result = new Object();
-     *		    value = result;
-     *		}
-     *	    }
-     *	}
-     *	return result;
-     * }
-     * </pre>
-     *
-     * Note that we are doing the double locking per usual, but the value is volatile. The local result value seems
-     * unnecessary at first, but the effect of this is that in cases where value is already initialized
-     * (i.e., most of the time), the volatile field is only accessed once (due to "return result;" instead of
-     * "return value;"), which can improve the method's overall performance by as much as 25 percent.
-     *
-     * However, in the case that we have before us, the ConcurrentHashMap handles this for us, by guaranteeing that
-     * we never get a value that is partially constructed in the get() method.
-     *
-     *
+	 * You might notice that no fields in this class are volatile. Normally, when you double lock, you must do
+	 * something like this to be totally correct:
+	 *
+	 * <pre>
+	 * volatile Object value = null; // Note the volatility
+	 * construct() {
+	 *	Object result = value;
+	 *	if(result == null) {
+	 *		synchronized(result) {
+	 *		if(result == null) {
+	 *			result = new Object();
+	 *			value = result;
+	 *		}
+	 *		}
+	 *	}
+	 *	return result;
+	 * }
+	 * </pre>
+	 *
+	 * Note that we are doing the double locking per usual, but the value is volatile. The local result value seems
+	 * unnecessary at first, but the effect of this is that in cases where value is already initialized
+	 * (i.e., most of the time), the volatile field is only accessed once (due to "return result;" instead of
+	 * "return value;"), which can improve the method's overall performance by as much as 25 percent.
+	 *
+	 * However, in the case that we have before us, the ConcurrentHashMap handles this for us, by guaranteeing that
+	 * we never get a value that is partially constructed in the get() method.
+	 *
+	 *
 	 */
 	private final Map<T, V> map = new ConcurrentHashMap<>();
 	private final ValueGenerator<T, V> generator;

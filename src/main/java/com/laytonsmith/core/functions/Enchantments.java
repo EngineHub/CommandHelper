@@ -107,19 +107,19 @@ public class Enchantments {
 			//Maybe roman numeral?
 		}
 		int i = romanToWestern(lc);
-//        if(lc.equals("i")){
-//            i = 1;
-//        } else if(lc.equals("ii")){
-//            i = 2;
-//        } else if(lc.equals("iii")){
-//            i = 3;
-//        } else if(lc.equals("iv")){
-//            i = 4;
-//        } else if(lc.equals("v")){
-//            i = 5;
-//        } else {
-//            return romanNumeral;
-//        }
+//		if(lc.equals("i")){
+//			i = 1;
+//		} else if(lc.equals("ii")){
+//			i = 2;
+//		} else if(lc.equals("iii")){
+//			i = 3;
+//		} else if(lc.equals("iv")){
+//			i = 4;
+//		} else if(lc.equals("v")){
+//			i = 5;
+//		} else {
+//			return romanNumeral;
+//		}
 		return Integer.toString(i);
 	}
 
@@ -234,12 +234,12 @@ public class Enchantments {
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
-//            if (args[1 - offset] instanceof CNull) {
-//                is = m.getItemInHand();
-//            } else {
-//                int slot = Static.getInt32(args[1 - offset]);
-//                is = m.getInventory().getItem(slot);
-//            }
+//			if (args[1 - offset] instanceof CNull) {
+//				is = m.getItemInHand();
+//			} else {
+//				int slot = Static.getInt32(args[1 - offset]);
+//				is = m.getInventory().getItem(slot);
+//			}
 			CArray enchantArray = new CArray(t);
 			if(!(args[2 - offset] instanceof CArray)) {
 				enchantArray.push(args[2 - offset], t);
@@ -326,12 +326,12 @@ public class Enchantments {
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
-//            if (args[1 - offset] instanceof CNull) {
-//                is = m.getItemInHand();
-//            } else {
-//                int slot = Static.getInt32(args[1 - offset]);
-//                is = m.getInventory().getItem(slot);
-//            }
+//			if (args[1 - offset] instanceof CNull) {
+//				is = m.getItemInHand();
+//			} else {
+//				int slot = Static.getInt32(args[1 - offset]);
+//				is = m.getInventory().getItem(slot);
+//			}
 
 			CArray enchantArray = new CArray(t);
 			if(!(args[2 - offset] instanceof CArray) && !(args[2 - offset] instanceof CNull)) {
@@ -411,12 +411,12 @@ public class Enchantments {
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}
-//            if(slot instanceof CNull){
-//                is = m.getItemInHand();
-//            } else {
-//                int slotID = Static.getInt32(slot);
-//                is = m.getInventory().getItem(slotID);
-//            }
+//			if(slot instanceof CNull){
+//				is = m.getItemInHand();
+//			} else {
+//				int slotID = Static.getInt32(slot);
+//				is = m.getInventory().getItem(slotID);
+//			}
 			CArray enchants = new CArray(t);
 			CArray levels = new CArray(t);
 			for(Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {

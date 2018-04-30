@@ -17,7 +17,7 @@ public final class rParser {
 	private static final int lineLength = 312;
 
 	/*
-     * Finds the last color sequence used in the string
+	 * Finds the last color sequence used in the string
 	 */
 	public static String lastColor(String findColor) {
 		int i = findColor.lastIndexOf('§');
@@ -29,7 +29,7 @@ public final class rParser {
 	}
 
 	/* 
-     * 
+	 * 
 	 */
 	public static String combineSplit(int beginHere, String[] split, String seperator) {
 		StringBuilder combined = new StringBuilder(split[beginHere]);

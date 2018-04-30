@@ -118,14 +118,14 @@ public class FileUtil {
 //		} finally {
 //			freeLock(file);
 //		}
-//	    FileInputStream fis = new FileInputStream(f);
-//	    try{
+//		FileInputStream fis = new FileInputStream(f);
+//		try{
 //		return StreamUtils.GetString(fis, charset);
-//	    } finally {
-//		    fis.close();
-//		    fis = null;
-//		    System.gc();
-//	    }
+//		} finally {
+//			fis.close();
+//			fis = null;
+//			System.gc();
+//		}
 	}
 
 	/**
@@ -221,9 +221,9 @@ public class FileUtil {
 //		} finally {
 //			freeLock(file);
 //		}
-//        FileWriter fw = new FileWriter(f, append);
-//        fw.write(s);
-//        fw.close();
+//		FileWriter fw = new FileWriter(f, append);
+//		fw.write(s);
+//		fw.close();
 	}
 
 	/**

@@ -70,15 +70,15 @@ public class CSymbol extends Construct {
 			case LOGICAL_NOT:
 				conversion = "not";
 				break;
-//            case BIT_AND:
-//                conversion = "bit_and";
-//                break;
-//            case BIT_OR:
-//                conversion = "bit_or";
-//                break;
-//            case BIT_XOR:
-//                conversion = "bit_xor";
-//                break;
+//			case BIT_AND:
+//				conversion = "bit_and";
+//				break;
+//			case BIT_OR:
+//				conversion = "bit_or";
+//				break;
+//			case BIT_XOR:
+//				conversion = "bit_xor";
+//				break;
 			case MODULO:
 				conversion = "mod";
 				break;
@@ -125,17 +125,17 @@ public class CSymbol extends Construct {
 		return symbolType.isEquality();
 	}
 
-//    public boolean isBitwiseAnd() {
-//        return symbolType.isBitwiseAnd();
-//    }
+//	public boolean isBitwiseAnd() {
+//		return symbolType.isBitwiseAnd();
+//	}
 //
-//    public boolean isBitwiseXor() {
-//        return symbolType.isBitwiseXor();
-//    }
+//	public boolean isBitwiseXor() {
+//		return symbolType.isBitwiseXor();
+//	}
 //
-//    public boolean isBitwiseOr() {
-//        return symbolType.isBitwiseOr();
-//    }
+//	public boolean isBitwiseOr() {
+//		return symbolType.isBitwiseOr();
+//	}
 	public boolean isLogicalAnd() {
 		return symbolType.isLogicalAnd();
 	}

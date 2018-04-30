@@ -1,6 +1,6 @@
 /*
- Copyright 2010 Visin Suresh Paliath
- Distributed under the BSD license
+ * Copyright 2010 Visin Suresh Paliath
+ * Distributed under the BSD license
  */
 package com.laytonsmith.core;
 

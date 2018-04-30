@@ -162,7 +162,7 @@ public class ArrayTest {
 				+ "msg(@arr)"
 				+ "array_set(@arr, 'key', 'value')"
 				+ "msg(is_associative(@arr))",
-				 fakePlayer);
+				fakePlayer);
 		verify(fakePlayer, times(4)).sendMessage("false");
 		verify(fakePlayer).sendMessage("{0, 1, 2, 3, 4, 5}");
 		verify(fakePlayer).sendMessage("true");
@@ -172,7 +172,7 @@ public class ArrayTest {
 	public void testDocumentationExample3() throws Exception {
 		SRun("assign(@arr, array(0, 1: 1, 2, 3: 3, a: 'a'))"
 				+ "msg(array_keys(@arr))",
-				 fakePlayer);
+				fakePlayer);
 		verify(fakePlayer).sendMessage("{0, 1, 2, 3, a}");
 	}
 

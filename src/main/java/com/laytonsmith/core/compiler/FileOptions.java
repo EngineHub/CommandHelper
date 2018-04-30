@@ -19,7 +19,7 @@ import java.util.Set;
 public class FileOptions {
 
 	/*
-     These value names are used in the syntax highlighter, and should remain the name they are in code.
+	 * These value names are used in the syntax highlighter, and should remain the name they are in code.
 	 */
 	private final Boolean strict;
 	private final Set<SuppressWarnings> suppressWarnings;

@@ -557,33 +557,33 @@ public class StaticTest {
 		return SRun(script, player, env);
 	}
 	//TODO: Fix this
-//    public static void RunVars(List<Variable> vars, String script, MCCommandSender player) throws Exception{
-//        Env env = new Env();
-//        env.SetCommandSender(player);
-//        MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null));
-//        injectAliasCore();
-//        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(script, null), env).get(0);
-//        s.compile();
-//        s.run(vars, env, null);
+//	public static void RunVars(List<Variable> vars, String script, MCCommandSender player) throws Exception{
+//		Env env = new Env();
+//		env.SetCommandSender(player);
+//		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null));
+//		injectAliasCore();
+//		Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(script, null), env).get(0);
+//		s.compile();
+//		s.run(vars, env, null);
 //
-//    }
+//	}
 
 	//Blarg. Dumb thing.
-//    private static void injectAliasCore() throws Exception{
-//        PermissionsResolverManager prm = mock(PermissionsResolverManager.class);
-//        CommandHelperPlugin chp = mock(CommandHelperPlugin.class);
-//        AliasCore ac = new AliasCore(new File("plugins/CommandHelper/config.txt"),
-//                new File("plugins/CommandHelper/LocalPackages"),
-//                new File("plugins/CommandHelper/preferences.ini"),
-//                new File("plugins/CommandHelper/main.ms"), prm, chp);
-//        try{
-//            Field aliasCore = CommandHelperPlugin.class.getDeclaredField("ac");
-//            aliasCore.setAccessible(true);
-//            aliasCore.set(null, ac);
-//        } catch(Exception e){
-//            throw new RuntimeException("Core could not be injected", e);
-//        }
-//    }
+//	private static void injectAliasCore() throws Exception{
+//		PermissionsResolverManager prm = mock(PermissionsResolverManager.class);
+//		CommandHelperPlugin chp = mock(CommandHelperPlugin.class);
+//		AliasCore ac = new AliasCore(new File("plugins/CommandHelper/config.txt"),
+//				new File("plugins/CommandHelper/LocalPackages"),
+//				new File("plugins/CommandHelper/preferences.ini"),
+//				new File("plugins/CommandHelper/main.ms"), prm, chp);
+//		try{
+//			Field aliasCore = CommandHelperPlugin.class.getDeclaredField("ac");
+//			aliasCore.setAccessible(true);
+//			aliasCore.set(null, ac);
+//		} catch(Exception e){
+//			throw new RuntimeException("Core could not be injected", e);
+//		}
+//	}
 	/**
 	 * Creates an entire fake server environment, adding players and everything.
 	 *
@@ -979,9 +979,7 @@ public class StaticTest {
 			//This shouldn't happen ever, since we are using the class provided by in, and sending
 			//get/set in as well.
 			fail(ex.getMessage());
-		}
-		//This shouldn't happen ever, since we set it to accessible
-		 catch(NoSuchFieldException ex) {
+		} catch(NoSuchFieldException ex) { //This shouldn't happen ever, since we set it to accessible
 			fail("No such field \"" + name + "\" exists in the class " + in.getClass().getName());
 		} catch(SecurityException ex) {
 			fail("A security policy is preventing the test from getting \"" + name + "\" in the object provided.");

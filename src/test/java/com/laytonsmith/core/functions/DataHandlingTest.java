@@ -283,16 +283,16 @@ public class DataHandlingTest {
 	}
 
 	// This feature has been deprecated, and now removed.
-//    @Test(timeout = 10000)
-//    public void testExportImportIVariable() throws Exception {
-//        when(fakePlayer.isOp()).thenReturn(true);
-//        String script1 =
-//                "assign(@var, 10)"
-//                + "export(@var)";
-//        SRun(script1, null);
-//        SRun("import(@var) msg(@var)", fakePlayer);
-//        verify(fakePlayer).sendMessage("10");
-//    }
+//	@Test(timeout = 10000)
+//	public void testExportImportIVariable() throws Exception {
+//		when(fakePlayer.isOp()).thenReturn(true);
+//		String script1 =
+//				"assign(@var, 10)"
+//				+ "export(@var)";
+//		SRun(script1, null);
+//		SRun("import(@var) msg(@var)", fakePlayer);
+//		verify(fakePlayer).sendMessage("10");
+//	}
 	@Test(timeout = 10000)
 	public void testExportImportStringValue1() throws Exception {
 		when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);

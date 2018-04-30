@@ -243,7 +243,7 @@ public class NewExceptionHandlingTest {
 				/* 13 */ + "} catch(CastException @e){\n"
 				/* 14 */ + "		msg(@e);\n"
 				/* 15 */ + "}\n",
-				 fakePlayer);
+				fakePlayer);
 		verify(fakePlayer).sendMessage(
 				"{"
 				+ "causedBy: {"

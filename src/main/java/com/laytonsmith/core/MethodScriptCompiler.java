@@ -814,7 +814,7 @@ public final class MethodScriptCompiler {
 					}
 					
 					if(prevNonWhitespace != null) {
-						 // Convert "±UNKNOWN" if the '±' is used as a sign (and not an add/subtract operation).
+						// Convert "±UNKNOWN" if the '±' is used as a sign (and not an add/subtract operation).
 						if(!prevNonWhitespace.type.isIdentifier() // Don't convert "number/string/var ± ...".
 								&& prevNonWhitespace.type != TType.FUNC_END // Don't convert "func() ± ...".
 								&& prevNonWhitespace.type != TType.RSQUARE_BRACKET // Don't convert "] ± ..." (arrays).

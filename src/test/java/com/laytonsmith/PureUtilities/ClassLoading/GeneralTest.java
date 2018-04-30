@@ -148,13 +148,11 @@ public class GeneralTest {
 	}
 
 	/*
-	    A -> B
-	    |
-	    | -> C -> D
-		 |    |
-		 |    | -> F
-		 |
-		 | -> E
+	 * A -> B
+	 * |
+	 * | -> C -> D -> F
+	 *      |
+	 *      | -> E
 	 */
 	public static interface A extends B, C {
 	}

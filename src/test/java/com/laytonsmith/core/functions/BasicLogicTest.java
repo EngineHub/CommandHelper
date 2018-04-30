@@ -87,21 +87,21 @@ public class BasicLogicTest {
 	public void testEquals() throws Exception {
 		BasicLogic.equals e = new BasicLogic.equals();
 
-//             T   F   1   0  -1  '1' '0' '-1' N  {} 'CH'  '' 1.0
-//        ---------------------------------------------------
-//        T    T   F   T   F   T   T   T   T   F   F   T   F   T
-//        F    -   T   F   T   F   F   F   F   T   T   F   T   F
-//        1    -   -   T   F   F   T   F   F   F   F   F   F   T
-//        0    -   -   -   T   F   F   T   F   F   F   F   F   F
-//        -1   -   -   -   -   T   F   F   T   F   F   F   F   F
-//        '1'  -   -   -   -   -   T   F   F   F   F   F   F   T
-//        '0'  -   -   -   -   -   -   T   F   F   F   F   F   F
-//        '-1' -   -   -   -   -   -   -   T   F   F   F   F   F
-//        N    -   -   -   -   -   -   -   -   T   F   F   F   F
-//        {}   -   -   -   -   -   -   -   -   -   T   F   F   F
-//        'CH' -   -   -   -   -   -   -   -   -   -   T   F   F
-//        ''   -   -   -   -   -   -   -   -   -   -   -   T   F
-//        1.0  -   -   -   -   -   -   -   -   -   -   -   -   T
+//			 T   F   1   0  -1  '1' '0' '-1' N  {} 'CH'  '' 1.0
+//		---------------------------------------------------
+//		T    T   F   T   F   T   T   T   T   F   F   T   F   T
+//		F    -   T   F   T   F   F   F   F   T   T   F   T   F
+//		1    -   -   T   F   F   T   F   F   F   F   F   F   T
+//		0    -   -   -   T   F   F   T   F   F   F   F   F   F
+//		-1   -   -   -   -   T   F   F   T   F   F   F   F   F
+//		'1'  -   -   -   -   -   T   F   F   F   F   F   F   T
+//		'0'  -   -   -   -   -   -   T   F   F   F   F   F   F
+//		'-1' -   -   -   -   -   -   -   T   F   F   F   F   F
+//		N    -   -   -   -   -   -   -   -   T   F   F   F   F
+//		{}   -   -   -   -   -   -   -   -   -   T   F   F   F
+//		'CH' -   -   -   -   -   -   -   -   -   -   T   F   F
+//		''   -   -   -   -   -   -   -   -   -   -   -   T   F
+//		1.0  -   -   -   -   -   -   -   -   -   -   -   -   T
 		_t("false", "false");
 		_f("false", "1");
 		_t("false", "0");

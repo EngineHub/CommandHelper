@@ -1475,30 +1475,30 @@ public class SiteDeploy {
 
 	private void deployFunctions() {
 //	generateQueue.submit(new Runnable() {
-//	    @Override
-//	    public void run() {
+//		@Override
+//		public void run() {
 //		currentGenerateTask.addAndGet(1);
-//	    }
+//		}
 //	});
 //	totalGenerateTasks.addAndGet(1);
 	}
 
 	private void deployEvents() {
 //	generateQueue.submit(new Runnable() {
-//	    @Override
-//	    public void run() {
+//		@Override
+//		public void run() {
 //		currentGenerateTask.addAndGet(1);
-//	    }
+//		}
 //	});
 //	totalGenerateTasks.addAndGet(1);
 	}
 
 	private void deployObjects() {
 //	generateQueue.submit(new Runnable() {
-//	    @Override
-//	    public void run() {
+//		@Override
+//		public void run() {
 //		currentGenerateTask.addAndGet(1);
-//	    }
+//		}
 //	});
 //	totalGenerateTasks.addAndGet(1);
 	}

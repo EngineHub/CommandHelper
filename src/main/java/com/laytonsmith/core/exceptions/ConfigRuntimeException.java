@@ -412,12 +412,12 @@ public class ConfigRuntimeException extends RuntimeException {
 		this.target = t;
 	}
 
-//    public ConfigRuntimeException(String msg, ExceptionType ex, int line_num){
-//        this(msg, ex, line_num, null);
-//    }
-//    public ConfigRuntimeException(String msg, int line_num){
-//        this(msg, null, line_num, null);
-//    }
+//	public ConfigRuntimeException(String msg, ExceptionType ex, int line_num){
+//		this(msg, ex, line_num, null);
+//	}
+//	public ConfigRuntimeException(String msg, int line_num){
+//		this(msg, null, line_num, null);
+//	}
 	/**
 	 * Creates an uncatchable exception. This should rarely be used. An uncatchable exception is one where the user code
 	 * is unable to catch the exception, and the type of the exception is null. Generally, this should only be used for

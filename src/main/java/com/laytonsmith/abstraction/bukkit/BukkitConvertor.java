@@ -301,32 +301,32 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 	}
 
-//    /**
-//     * We don't want to allow scripts to clear other plugin's tasks
-//     * on accident, so only ids registered through our interface
-//     * can also be cancelled.
-//     */
-//    private static final Set<Integer> validIDs = new TreeSet<Integer>();
+//	/**
+//	 * We don't want to allow scripts to clear other plugin's tasks
+//	 * on accident, so only ids registered through our interface
+//	 * can also be cancelled.
+//	 */
+//	private static final Set<Integer> validIDs = new TreeSet<Integer>();
 //
 //	@Override
-//    public synchronized int SetFutureRunnable(DaemonManager dm, long ms, Runnable r) {
-//        int id = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(CommandHelperPlugin.self, r, Static.msToTicks(ms));
-//        validIDs.add(id);
-//        return id;
-//    }
+//	public synchronized int SetFutureRunnable(DaemonManager dm, long ms, Runnable r) {
+//		int id = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(CommandHelperPlugin.self, r, Static.msToTicks(ms));
+//		validIDs.add(id);
+//		return id;
+//	}
 //
 //	@Override
-//    public synchronized int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r){
-//        int id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(CommandHelperPlugin.self, r, Static.msToTicks(initialDelay), Static.msToTicks(ms));
-//        validIDs.add(id);
-//        return id;
-//    }
+//	public synchronized int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r){
+//		int id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(CommandHelperPlugin.self, r, Static.msToTicks(initialDelay), Static.msToTicks(ms));
+//		validIDs.add(id);
+//		return id;
+//	}
 //
 //	@Override
-//    public synchronized void ClearAllRunnables() {
+//	public synchronized void ClearAllRunnables() {
 //		//Doing cancelTasks apparently does not work, so let's just manually cancel each task, which does appear to work.
 //		//Anyways, it's better that way anyhow, because we actually remove IDs from validIDs that way.
-//        //((BukkitMCServer)Static.getServer()).__Server().getScheduler().cancelTasks(CommandHelperPlugin.self);
+//		//((BukkitMCServer)Static.getServer()).__Server().getScheduler().cancelTasks(CommandHelperPlugin.self);
 //		Set<Integer> ids = new TreeSet<Integer>(validIDs);
 //		for(int id : ids){
 //			try{
@@ -336,15 +336,15 @@ public class BukkitConvertor extends AbstractConvertor {
 //				Logger.getLogger(BukkitConvertor.class.getName()).log(null, Level.SEVERE, e);
 //			}
 //		}
-//    }
+//	}
 //
 //	@Override
-//    public void ClearFutureRunnable(int id) {
-//        if(validIDs.contains(id)){
-//            Bukkit.getServer().getScheduler().cancelTask(id);
-//            validIDs.remove(id);
-//        }
-//    }
+//	public void ClearFutureRunnable(int id) {
+//		if(validIDs.contains(id)){
+//			Bukkit.getServer().getScheduler().cancelTask(id);
+//			validIDs.remove(id);
+//		}
+//	}
 	public static MCEntity BukkitGetCorrectEntity(Entity be) {
 		if(be == null) {
 			return null;

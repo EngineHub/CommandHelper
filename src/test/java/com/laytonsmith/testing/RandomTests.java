@@ -386,10 +386,10 @@ public class RandomTests {
 		}
 	}
 
-//    @Test
-//    public void testBlah() throws Throwable{
-//	    StaticTest.InstallFakeConvertor(fakePlayer);
-//	    SRun("async_read('lsmith@localhost:/home/lsmith/test.txt', closure(@ret, @ex,"
-//		    + "if(@ex != null, sys_out(@ex), sys_out(@ret))))", null);
-//    }
+//	@Test
+//	public void testBlah() throws Throwable{
+//		StaticTest.InstallFakeConvertor(fakePlayer);
+//		SRun("async_read('lsmith@localhost:/home/lsmith/test.txt', closure(@ret, @ex,"
+//			+ "if(@ex != null, sys_out(@ex), sys_out(@ret))))", null);
+//	}
 }
