@@ -25,6 +25,7 @@ import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Common.TimeConversionUtil;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
@@ -576,7 +577,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 			if(sender instanceof ConsoleCommandSender) {
 				int interpreterTimeout = Prefs.InterpreterTimeout();
 				if(interpreterTimeout != 0) {
-					interpreterUnlockedUntil = (interpreterTimeout * 60 * 1000) + System.currentTimeMillis();
+					interpreterUnlockedUntil =
+							TimeConversionUtil.inMilliseconds(interpreterTimeout, TimeConversionUtil.TimeUnit.MINUTE)
+							+ System.currentTimeMillis();
 					sender.sendMessage("Interpreter mode unlocked for " + interpreterTimeout + " minute"
 							+ (interpreterTimeout == 1 ? "" : "s"));
 				}

@@ -3,6 +3,7 @@ package com.laytonsmith.PureUtilities.VirtualFS;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.Common.TimeConversionUtil;
 import com.laytonsmith.PureUtilities.VirtualFS.VirtualFileSystemSettings.VirtualFileSystemSetting;
 import java.io.File;
 import java.io.IOException;
@@ -119,7 +120,7 @@ public class VirtualFileSystem {
 						try {
 							FSSize = FileUtils.sizeOfDirectoryAsBigInteger(root);
 							//Sleep for a minute before running again.
-							Thread.sleep(60 * 1000);
+							Thread.sleep(TimeConversionUtil.inMilliseconds(1, TimeConversionUtil.TimeUnit.MINUTE));
 						} catch(InterruptedException ex) {
 							Logger.getLogger(VirtualFileSystem.class.getName()).log(Level.SEVERE, null, ex);
 						}
