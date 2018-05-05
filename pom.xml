@@ -15,13 +15,13 @@
 			<id>ladycailin</id>
 			<name>LadyCailin</name>
 			<email>gmail: savannahcailin</email>
-			<url>http://www.laytonsmith.com#donations</url>
+			<url>https://methodscript.com</url>
 			<roles>
 				<role>project manager</role>
 				<role>developer</role>
 				<role>tester</role>
 			</roles>
-			<timezone>-6</timezone>
+			<timezone>+1</timezone>
 		</developer>
 		<developer>
 			<id>sk89q</id>

@@ -223,45 +223,51 @@ public class SQL {
 							for(int i = 1; i <= md.getColumnCount(); i++) {
 								Construct value;
 								int columnType = md.getColumnType(i);
-								if(columnType == Types.INTEGER
-										|| columnType == Types.TINYINT
-										|| columnType == Types.SMALLINT
-										|| columnType == Types.BIGINT) {
-									value = new CInt(rs.getLong(i), t);
-								} else if(columnType == Types.FLOAT
-										|| columnType == Types.DOUBLE
-										|| columnType == Types.REAL
-										|| columnType == Types.DECIMAL
-										|| columnType == Types.NUMERIC) {
-									value = new CDouble(rs.getDouble(i), t);
-								} else if(columnType == Types.VARCHAR
-										|| columnType == Types.CHAR
-										|| columnType == Types.LONGVARCHAR) {
-									value = new CString(rs.getString(i), t);
-								} else if(columnType == Types.BLOB
-										|| columnType == Types.BINARY
-										|| columnType == Types.VARBINARY
-										|| columnType == Types.LONGVARBINARY) {
-									value = CByteArray.wrap(rs.getBytes(i), t);
-								} else if(columnType == Types.DATE
-										|| columnType == Types.TIME
-										|| columnType == Types.TIMESTAMP) {
-									if(md.getColumnTypeName(i).equals("YEAR")) {
+								switch(columnType) {
+									case Types.INTEGER:
+									case Types.TINYINT:
+									case Types.SMALLINT:
+									case Types.BIGINT:
 										value = new CInt(rs.getLong(i), t);
-									} else if(rs.getTimestamp(i) == null) {
-										// Normally we check for null below, but since
-										// we want to dereference the value now, we have
-										// to have a specific null check here.
-										value = CNull.NULL;
-									} else {
-										value = new CInt(rs.getTimestamp(i).getTime(), t);
-									}
-								} else if(columnType == Types.BOOLEAN
-										|| columnType == Types.BIT) {
-									value = CBoolean.get(rs.getBoolean(i));
-								} else {
-									throw new CRECastException("SQL returned a unhandled column type "
-											+ md.getColumnTypeName(i) + " for column " + md.getColumnName(i) + ".", t);
+										break;
+									case Types.FLOAT:
+									case Types.DOUBLE:
+									case Types.REAL:
+									case Types.DECIMAL:
+									case Types.NUMERIC:
+										value = new CDouble(rs.getDouble(i), t);
+										break;
+									case Types.VARCHAR:
+									case Types.CHAR:
+									case Types.LONGVARCHAR:
+										value = new CString(rs.getString(i), t);
+										break;
+									case Types.BLOB:
+									case Types.BINARY:
+									case Types.VARBINARY:
+									case Types.LONGVARBINARY:
+										value = CByteArray.wrap(rs.getBytes(i), t);
+										break;
+									case Types.DATE:
+									case Types.TIME:
+									case Types.TIMESTAMP:
+										if(md.getColumnTypeName(i).equals("YEAR")) {
+											value = new CInt(rs.getLong(i), t);
+										} else if(rs.getTimestamp(i) == null) {
+											// Normally we check for null below, but since
+											// we want to dereference the value now, we have
+											// to have a specific null check here.
+											value = CNull.NULL;
+										} else {
+											value = new CInt(rs.getTimestamp(i).getTime(), t);
+										}	break;
+									case Types.BOOLEAN:
+									case Types.BIT:
+										value = CBoolean.get(rs.getBoolean(i));
+										break;
+									default:
+										throw new CRECastException("SQL returned a unhandled column type "
+												+ md.getColumnTypeName(i) + " for column " + md.getColumnName(i) + ".", t);
 								}
 								if(rs.wasNull()) {
 									// Since mscript can assign null to primitives, we
