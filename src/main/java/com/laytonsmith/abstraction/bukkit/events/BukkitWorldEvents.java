@@ -93,31 +93,22 @@ public final class BukkitWorldEvents {
 
 	public static class BukkitMCWorldSaveEvent extends BukkitMCWorldEvent implements MCWorldSaveEvent {
 
-		private final WorldSaveEvent _event;
-
 		public BukkitMCWorldSaveEvent(WorldSaveEvent event) {
 			super(event);
-			_event = event;
 		}
 	}
 
 	public static class BukkitMCWorldUnloadEvent extends BukkitMCWorldEvent implements MCWorldUnloadEvent {
 
-		private final WorldUnloadEvent _event;
-
 		public BukkitMCWorldUnloadEvent(WorldUnloadEvent event) {
 			super(event);
-			_event = event;
 		}
 	}
 
 	public static class BukkitMCWorldLoadEvent extends BukkitMCWorldEvent implements MCWorldLoadEvent {
 
-		private final WorldLoadEvent _event;
-
 		public BukkitMCWorldLoadEvent(WorldLoadEvent event) {
 			super(event);
-			_event = event;
 		}
 	}
 }

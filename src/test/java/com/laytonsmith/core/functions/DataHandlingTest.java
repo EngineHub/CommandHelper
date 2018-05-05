@@ -476,6 +476,16 @@ public class DataHandlingTest {
 	}
 
 	@Test(timeout = 10000)
+	public void testClosure10() throws Exception {
+		MCPlayer fakePlayer2 = StaticTest.GetOnlinePlayer("Player02", fakeServer);
+		when(fakeServer.getPlayer("Player02")).thenReturn(fakePlayer2);
+		SRun("@c = closure(){msg(reflect_pull('label'))};"
+				+ "executeas('Player02', 'newlabel', @c);"
+				+ "execute(@c);", fakePlayer);
+		verify(fakePlayer2).sendMessage("newlabel");
+	}
+
+	@Test(timeout = 10000)
 	public void testWhile() throws Exception {
 		SRun("assign(@i, 2) while(@i > 0, @i-- msg('hi'))", fakePlayer);
 		verify(fakePlayer, times(2)).sendMessage("hi");

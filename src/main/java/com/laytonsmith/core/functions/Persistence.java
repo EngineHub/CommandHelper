@@ -150,7 +150,7 @@ public class Persistence {
 
 		@Override
 		public String docs() {
-			return "Mixed {[namespace, ...,] key} Returns a stored value stored with store_value. If the key doesn't exist in storage, null"
+			return "mixed {[namespace, ...,] key} Returns a stored value stored with store_value. If the key doesn't exist in storage, null"
 					+ " is returned. On a more detailed note: If the value stored in the persistence database is not actually a construct,"
 					+ " then null is also returned.";
 		}

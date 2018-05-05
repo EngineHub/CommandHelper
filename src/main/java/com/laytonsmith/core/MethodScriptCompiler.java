@@ -798,23 +798,32 @@ public final class MethodScriptCompiler {
 
 			// Convert "-" + number to -number if allowed.
 			it.previous(); // Select 't' <--.
-			if(it.hasPrevious()) {
+			if(it.hasPrevious() && t.type == TType.UNKNOWN) {
 				Token prev1 = it.previous(); // Select 'prev1' <--.
-				if(it.hasPrevious()) {
-					Token prev2 = it.previous(); // Select 'prev2' <--.
-					if(t.type == TType.UNKNOWN && prev1.type.isPlusMinus() // Convert "± UNKNOWN".
-							&& !prev2.type.isIdentifier() // Don't convert "number/string/var ± ...".
-							&& prev2.type != TType.FUNC_END // Don't convert "func() ± ...".
-							&& !IVAR_PATTERN.matcher(t.val()).matches() // Don't convert "± @var".
-							&& !VAR_PATTERN.matcher(t.val()).matches()) { // Don't convert "± $var".
-						// It is a negative/positive number: Absorb the sign.
-						t.value = prev1.value + t.value;
-						it.next(); // Select 'prev2' -->.
-						it.next(); // Select 'prev1' -->.
-						it.remove(); // Remove 'prev1'.
-					} else {
-						it.next(); // Select 'prev2' -->.
-						it.next(); // Select 'prev1' -->.
+				if(prev1.type.isPlusMinus()) {
+					
+					// Find the first non-whitespace token before the '-'.
+					Token prevNonWhitespace = null;
+					while(it.hasPrevious()) {
+						if(it.previous().type != TType.WHITESPACE) {
+							prevNonWhitespace = it.next();
+							break;
+						}
+					}
+					while(it.next() != prev1) { // Skip until selection is at 'prev1 -->'.
+					}
+					
+					if(prevNonWhitespace != null) {
+						 // Convert "±UNKNOWN" if the '±' is used as a sign (and not an add/subtract operation).
+						if(!prevNonWhitespace.type.isIdentifier() // Don't convert "number/string/var ± ...".
+								&& prevNonWhitespace.type != TType.FUNC_END // Don't convert "func() ± ...".
+								&& prevNonWhitespace.type != TType.RSQUARE_BRACKET // Don't convert "] ± ..." (arrays).
+								&& !IVAR_PATTERN.matcher(t.val()).matches() // Don't convert "± @var".
+								&& !VAR_PATTERN.matcher(t.val()).matches()) { // Don't convert "± $var".
+							// It is a negative/positive number: Absorb the sign.
+							t.value = prev1.value + t.value;
+							it.remove(); // Remove 'prev1'.
+						}
 					}
 				} else {
 					it.next(); // Select 'prev1' -->.

@@ -259,7 +259,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		chp.registerEventsDynamic(EntityListener);
 		chp.registerEventsDynamic(InventoryListener);
 		chp.registerEvents(PlayerListener);
-		chp.registerEvents(ServerListener);
+		chp.registerEventsDynamic(ServerListener);
 		chp.registerEvents(VehicleListener);
 		chp.registerEvents(WeatherListener);
 		chp.registerEvents(WorldListener);

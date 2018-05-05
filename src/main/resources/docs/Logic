@@ -279,7 +279,7 @@ Had we left the break() out, case 2 and the default case would have merged toget
 
 {{TakeNote|text=While break() is in fact optional, it is still recommended that you use it when applicable.}}
 
-Using break() is still recommeneded however, even though it is technically optional. Consider the following example.
+Using break() is still recommended however, even though it is technically optional. Consider the following example.
 
 %%CODE|
 switch(@v){

@@ -101,6 +101,7 @@ public enum Driver {
 	 */
 	SERVER_COMMAND,
 	SERVER_PING,
+	BROADCAST_MESSAGE(MCVersion.MC1_12),
 	/**
 	 * Vehicle events
 	 */

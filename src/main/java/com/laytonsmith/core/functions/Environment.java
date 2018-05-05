@@ -44,9 +44,6 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
-/**
- *
- */
 public class Environment {
 
 	public static String docs() {
@@ -68,7 +65,7 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "string {x, y, z, [world] | xyzArray, [world]} Gets the id of the block at the coordinates. The format"
+			return "string {x, y, z, [world] | locationArray, [world]} Gets the id of the block at the coordinates. The format"
 					+ " of the return will be x:y where x is the id of the block, and y is the meta data for the block."
 					+ " All blocks will return in this format, but blocks that don't have meta data will return 0 in y"
 					+ " (eg. air is \"0:0\"). If a world isn't provided in the location array or as an argument, the"
@@ -268,7 +265,7 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {xyzLocation, lineArray | xyzLocation, line1, [line2, [line3, [line4]]]}"
+			return "void {locationArray, lineArray | locationArray, line1, [line2, [line3, [line4]]]}"
 					+ " Sets the text of the sign at the given location. If the block at x,y,z isn't a sign,"
 					+ " a RangeException is thrown. If the text on a line overflows 15 characters, it is simply"
 					+ " truncated.";
@@ -363,8 +360,8 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "array {xyzLocation} Given a location array, returns an array of 4 strings of the text in the sign at that"
-					+ " location. If the location given isn't a sign, then a RangeException is thrown.";
+			return "array {locationArray} Given a location array, returns an array of 4 strings of the text in the sign"
+					+ " at that location. If the location given isn't a sign, then a RangeException is thrown.";
 		}
 
 		@Override
@@ -423,7 +420,7 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "boolean {xyzLocation} Returns true if the block at this location is a sign.";
+			return "boolean {locationArray} Returns true if the block at this location is a sign.";
 		}
 
 		@Override
@@ -473,8 +470,7 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {locationArray} Mostly simulates a block break at a location. Does not trigger an event. Only works with"
-					+ " craftbukkit.";
+			return "void {locationArray} Mostly simulates a block break at a location. Does not trigger an event.";
 		}
 
 		@Override
@@ -604,8 +600,8 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "string {x, z, [world] | locationArray} Returns the biome type of this block column. The location array's"
-					+ " y value is ignored. ---- The value returned"
+			return "string {x, z, [world] | locationArray} Returns the biome type of this block column. The location"
+					+ " array's y value is ignored. ---- The value returned"
 					+ " may be one of the following: " + StringUtils.Join(MCBiomeType.types(), ", ", ", or ");
 		}
 
@@ -677,7 +673,7 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "array {x, z, [world] | xyzArray, [world]} Gets the xyz of the highest block at a x and a z."
+			return "array {x, z, [world] | locationArray, [world]} Gets the xyz of the highest block at a x and a z."
 					+ "It works the same as get_block_at, except that it doesn't matter now what the Y is."
 					+ "You can set it to -1000 or to 92374 it will just be ignored.";
 		}
@@ -760,11 +756,11 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {Locationarray, [size], [safe]} Creates an explosion with the given size at the given location."
-					+ "Size defaults to size of a creeper (3), and null uses the default. If safe is true, (defaults to false)"
-					+ " the explosion"
-					+ " won't hurt the surrounding blocks. If size is 0, and safe is true, you will still see the animation"
-					+ " and hear the sound, but players won't be hurt, and neither will the blocks.";
+			return "void {locationArray, [size], [safe]} Creates an explosion with a given size at a given location."
+					+ " Size defaults to size of a creeper (3), and null uses the default. If safe is true,"
+					+ " (defaults to false) the explosion won't hurt the surrounding blocks. If size is 0, and safe is"
+					+ " true, you will still see the animation and hear the sound, but players won't be hurt, and"
+					+ " neither will the blocks.";
 		}
 
 		@Override
@@ -933,7 +929,7 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {[player], instrument, note, [location]} Plays a note for the given player, at the given location."
+			return "void {[player], instrument, note, [locationArray]} Plays a note for the given player, at the given location."
 					+ " Player defaults to the current player, and location defaults to the player's location. Instrument may be one of:"
 					+ " " + StringUtils.Join(MCInstrument.values(), ", ", ", or ") + ", and note is an associative array with 2 values,"
 					+ " array(octave: 0, tone: 'F#') where octave is either 0, 1, or 2, and tone is one of the notes "

@@ -585,8 +585,8 @@
 									<shadedPattern>com.laytonsmith.libs.redis.clients</shadedPattern>
 								</relocation>
 								<relocation>
-									<pattern>com.mysql.jdbc</pattern>
-									<shadedPattern>com.laytonsmith.libs.com.mysql.jdbc</shadedPattern>
+									<pattern>com.mysql.cj</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.mysql.cj</shadedPattern>
 								</relocation>
 								<relocation> <!-- part of the mysql lib -->
 									<pattern>org.gjt.mm.mysql</pattern>

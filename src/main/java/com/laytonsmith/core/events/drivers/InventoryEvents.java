@@ -661,7 +661,7 @@ public class InventoryEvents {
 
 		@Override
 		public String docs() {
-			return "{}"
+			return "{player: <string>}"
 					+ " Fires when a player changes which quickbar slot they have selected."
 					+ " {player | to | from: the slot the player is switching from}"
 					+ " {to: the slot that the player is switching to}"
@@ -671,6 +671,10 @@ public class InventoryEvents {
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			if(event instanceof MCItemHeldEvent) {
+				MCItemHeldEvent e = (MCItemHeldEvent) event;
+				if(prefilter.containsKey("player") && !e.getPlayer().getName().equals(prefilter.get("player").val())) {
+					return false;
+				}
 				return true;
 			}
 			return false;

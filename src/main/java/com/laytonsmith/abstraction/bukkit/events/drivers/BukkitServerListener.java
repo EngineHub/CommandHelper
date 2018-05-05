@@ -2,12 +2,15 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.events.BukkitMiscEvents;
+import com.laytonsmith.abstraction.bukkit.events.BukkitServerEvents;
 import com.laytonsmith.abstraction.events.MCRedstoneChangedEvent;
+import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.ServerEvents;
 import java.util.Map;
+
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -18,7 +21,7 @@ public class BukkitServerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPing(ServerListPingEvent event) {
-		BukkitMiscEvents.BukkitMCServerPingEvent pe = new BukkitMiscEvents.BukkitMCServerPingEvent(event);
+		BukkitServerEvents.BukkitMCServerPingEvent pe = new BukkitServerEvents.BukkitMCServerPingEvent(event);
 		EventUtils.TriggerListener(Driver.SERVER_PING, "server_ping", pe);
 	}
 
@@ -56,5 +59,11 @@ public class BukkitServerListener implements Listener {
 				});
 			}
 		}
+	}
+
+	@EventIdentifier(event = Driver.BROADCAST_MESSAGE, className = "org.bukkit.event.server.BroadcastMessageEvent")
+	public void onBroadcast(Event event) {
+		EventUtils.TriggerListener(Driver.BROADCAST_MESSAGE, "broadcast_message",
+				new BukkitServerEvents.BukkitMCBroadcastMessageEvent(event));
 	}
 }

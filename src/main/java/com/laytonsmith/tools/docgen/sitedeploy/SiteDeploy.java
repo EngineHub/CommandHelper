@@ -1138,7 +1138,7 @@ public class SiteDeploy {
 						StringBuilder desc = new StringBuilder();
 						desc.append(HTMLUtils.escapeHTML(di.desc));
 						if(di.extendedDesc != null) {
-							desc.append(" [[functions/").append(f.getName()).append("|See more...]]<br>\n");
+							desc.append(" [[API/functions/").append(f.getName()).append("|See more...]]<br>\n");
 						}
 						try {
 							if(f.examples() != null && f.examples().length > 0) {
