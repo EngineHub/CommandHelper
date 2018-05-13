@@ -219,7 +219,7 @@ public class DocGenUIHandler {
 			page = page.substring(1);
 		}
 		wikiMarkup = pagePrefix + wikiMarkup;
-		//The full path 
+		//The full path
 		String fullPath = prefix + page;
 		progress.setStatus("Uploading " + fullPath);
 		//First we need to get the edit token

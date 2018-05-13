@@ -137,7 +137,7 @@ public class BukkitServerEvents {
 		public BukkitMCBroadcastMessageEvent(Event event) {
 			this.bme = (BroadcastMessageEvent) event;
 		}
-		
+
 		@Override
 		public Object _GetObject() {
 			return this.bme;
@@ -196,6 +196,6 @@ public class BukkitServerEvents {
 		public boolean isCancelled() {
 			return this.bme.isCancelled();
 		}
-		
+
 	}
 }

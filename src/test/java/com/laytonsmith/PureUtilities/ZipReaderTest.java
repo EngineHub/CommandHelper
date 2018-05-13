@@ -37,15 +37,15 @@ public class ZipReaderTest {
 
 	//TODO: Nested reads may be easier than I'm trying to make it, but either way, this
 	//is a deeper problem, and I don't care to support this just yet.
-//    @Test
-//    public void testNestedRead() throws IOException{
-//        String contents = new ZipReader(TestNestedZip).getFileContents();
-//        assertNotNull("Could not read contents!", contents);
-//        assertEquals("Hello World!", contents.trim());
-//    }
+//	@Test
+//	public void testNestedRead() throws IOException{
+//		String contents = new ZipReader(TestNestedZip).getFileContents();
+//		assertNotNull("Could not read contents!", contents);
+//		assertEquals("Hello World!", contents.trim());
+//	}
 	@Test
 	public void testStringRead() throws FileNotFoundException, IOException {
-		// TODO review the generated test code and remove the default call to fail.        
+		// TODO review the generated test code and remove the default call to fail.
 		String contents = new ZipReader(TestZip).getFileContents();
 		assertNotNull("Could not read contents!", contents);
 		assertEquals("This is a file", contents.trim());

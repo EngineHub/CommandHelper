@@ -16,7 +16,31 @@ import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
-import com.laytonsmith.abstraction.events.*;
+import com.laytonsmith.abstraction.events.MCChatTabCompleteEvent;
+import com.laytonsmith.abstraction.events.MCExpChangeEvent;
+import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
+import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBedEvent;
+import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
+import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
+import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
+import com.laytonsmith.abstraction.events.MCPlayerEditBookEvent;
+import com.laytonsmith.abstraction.events.MCPlayerFishEvent;
+import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
+import com.laytonsmith.abstraction.events.MCPlayerItemConsumeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
+import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
+import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
+import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
+import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
+import com.laytonsmith.abstraction.events.MCPlayerPreLoginEvent;
+import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
+import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
+import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
+import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -1051,9 +1075,9 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
 				Prefilters.match(prefilter, "location", pie.getClickedBlock().getLocation(), PrefilterType.LOCATION_MATCH);
-				if(prefilter.containsKey("activated")) {
-					//TODO: Once activation is supported, check for that here
-				}
+//				if(prefilter.containsKey("activated")) {
+//					//TODO: Once activation is supported, check for that here
+//				}
 				return true;
 			}
 			return false;

@@ -2193,61 +2193,61 @@ public class InventoryManagement {
 		}
 	}
 
-//    @api
-//    public static class pinv_consolidate extends AbstractFunction {
+//	@api
+//	public static class pinv_consolidate extends AbstractFunction {
 //
-//        public String getName() {
-//            return "pinv_consolidate";
-//        }
+//		public String getName() {
+//			return "pinv_consolidate";
+//		}
 //
-//        public Integer[] numArgs() {
-//            return new Integer[]{0, 1};
-//        }
+//		public Integer[] numArgs() {
+//			return new Integer[]{0, 1};
+//		}
 //
-//        public String docs() {
-//            return "void {[player]} Consolidates a player's inventory as much as possible."
-//                    + " There is no guarantee anything will happen after this function"
-//                    + " is called, and there is no way to specify details about how"
-//                    + " consolidation occurs, however, the following heuristics are followed:"
-//                    + " The hotbar items will not be moved from the hotbar, unless there are"
-//                    + " two+ slots that have the same item. Items in the main inventory area"
-//                    + " will be moved closer to the bottom of the main inventory. No empty slots"
-//                    + " will be filled in the hotbar.";
-//        }
+//		public String docs() {
+//			return "void {[player]} Consolidates a player's inventory as much as possible."
+//					+ " There is no guarantee anything will happen after this function"
+//					+ " is called, and there is no way to specify details about how"
+//					+ " consolidation occurs, however, the following heuristics are followed:"
+//					+ " The hotbar items will not be moved from the hotbar, unless there are"
+//					+ " two+ slots that have the same item. Items in the main inventory area"
+//					+ " will be moved closer to the bottom of the main inventory. No empty slots"
+//					+ " will be filled in the hotbar.";
+//		}
 //
-//        public Class<? extends CREThrowable>[] thrown() {
-//            return new Class[]{};
-//        }
+//		public Class<? extends CREThrowable>[] thrown() {
+//			return new Class[]{};
+//		}
 //
-//        public boolean isRestricted() {
-//            return true;
-//        }
+//		public boolean isRestricted() {
+//			return true;
+//		}
 //
-//        public boolean preResolveVariables() {
-//            return true;
-//        }
+//		public boolean preResolveVariables() {
+//			return true;
+//		}
 //
-//        public Boolean runAsync() {
-//            return false;
-//        }
+//		public Boolean runAsync() {
+//			return false;
+//		}
 //
-//        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-//            MCPlayer p = environment.GetPlayer();
-//            if(args.length == 1){
-//                p = Static.GetPlayer(args[0], t);
-//            }
-//            //First, we need to address the hotbar
-//            for(int i = 0; i < 10; i++){
-//                //If the stack size is maxed out, we're done.
-//            }
+//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//			MCPlayer p = environment.GetPlayer();
+//			if(args.length == 1){
+//				p = Static.GetPlayer(args[0], t);
+//			}
+//			//First, we need to address the hotbar
+//			for(int i = 0; i < 10; i++){
+//				//If the stack size is maxed out, we're done.
+//			}
 //
-//            return CVoid.VOID;
-//        }
+//			return CVoid.VOID;
+//		}
 //
-//        public CHVersion since() {
-//            return CHVersion.V3_3_1;
-//        }
-//    }
+//		public CHVersion since() {
+//			return CHVersion.V3_3_1;
+//		}
+//	}
 	private static MCInventory GetInventory(Construct specifier, MCWorld w, Target t) {
 		MCInventory inv;
 		if(specifier instanceof CArray) {

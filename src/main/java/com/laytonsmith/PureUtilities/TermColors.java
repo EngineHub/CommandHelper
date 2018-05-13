@@ -57,7 +57,7 @@ public final class TermColors {
 	}
 
 	/*
-     * Standard foreground colors
+	 * Standard foreground colors
 	 */
 	@color
 	public static String RED = color(Color.RED);
@@ -77,7 +77,7 @@ public final class TermColors {
 	public static String WHITE = color(Color.WHITE);
 
 	/*
-     * Bright foreground colors
+	 * Bright foreground colors
 	 */
 	@color
 	public static String BRIGHT_RED = color(Color.RED, true, true, true);
@@ -97,7 +97,7 @@ public final class TermColors {
 	public static String BRIGHT_WHITE = color(Color.WHITE, true, true, true);
 
 	/*
-     * Standard background colors
+	 * Standard background colors
 	 */
 	@color
 	public static String BG_RED = color(Color.RED, false, false, false);
@@ -117,7 +117,7 @@ public final class TermColors {
 	public static String BG_WHITE = color(Color.WHITE, false, false, false);
 
 	/*
-     * Bright background colors
+	 * Bright background colors
 	 */
 	@color
 	public static String BG_BRIGHT_RED = color(Color.RED, true, false, false);

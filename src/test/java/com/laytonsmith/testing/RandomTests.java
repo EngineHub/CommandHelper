@@ -58,7 +58,9 @@ import java.util.logging.Logger;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.awt.HeadlessException;
@@ -386,10 +388,10 @@ public class RandomTests {
 		}
 	}
 
-//    @Test
-//    public void testBlah() throws Throwable{
-//	    StaticTest.InstallFakeConvertor(fakePlayer);
-//	    SRun("async_read('lsmith@localhost:/home/lsmith/test.txt', closure(@ret, @ex,"
-//		    + "if(@ex != null, sys_out(@ex), sys_out(@ret))))", null);
-//    }
+//	@Test
+//	public void testBlah() throws Throwable{
+//		StaticTest.InstallFakeConvertor(fakePlayer);
+//		SRun("async_read('lsmith@localhost:/home/lsmith/test.txt', closure(@ret, @ex,"
+//			+ "if(@ex != null, sys_out(@ex), sys_out(@ret))))", null);
+//	}
 }

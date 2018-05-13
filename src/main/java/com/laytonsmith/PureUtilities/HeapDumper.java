@@ -9,7 +9,7 @@ public class HeapDumper {
 
 	private static final String HOTSPOT_BEAN_NAME
 			= "com.sun.management:type=HotSpotDiagnostic";
-	// field to store the hotspot diagnostic MBean 
+	// field to store the hotspot diagnostic MBean
 	private static volatile HotSpotDiagnosticMXBean hotspotMBean;
 
 	/**

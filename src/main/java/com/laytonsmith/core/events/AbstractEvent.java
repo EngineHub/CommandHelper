@@ -36,11 +36,11 @@ import java.util.Map;
 public abstract class AbstractEvent implements Event, Comparable<Event> {
 
 	private EventMixinInterface mixin;
-//    protected EventHandlerInterface handler;
+//	protected EventHandlerInterface handler;
 //
-//    protected AbstractEvent(EventHandlerInterface handler){
-//        this.handler = handler;
-//    }
+//	protected AbstractEvent(EventHandlerInterface handler){
+//		this.handler = handler;
+//	}
 //
 
 	public final void setAbstractEventMixin(EventMixinInterface mixin) {

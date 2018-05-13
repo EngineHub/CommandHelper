@@ -794,7 +794,7 @@ public class DocGenTemplates {
 				+ "| " + args[1].replaceAll("\n", " ") + "\n"
 				+ "|}";
 	};
-	
+
 	public static Generator SupressWarningsList = (args) -> {
 		StringBuilder b = new StringBuilder();
 		for(FileOptions.SuppressWarnings s : FileOptions.SuppressWarnings.values()) {

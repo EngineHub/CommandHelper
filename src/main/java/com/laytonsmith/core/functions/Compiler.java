@@ -770,11 +770,11 @@ public class Compiler {
 					if(complex.matches("[a-zA-Z0-9_]+")) {
 						//This is a simple variable name.
 						root.addChild(new ParseTree(new IVariable("@" + complex, t), fileOptions));
+						continue;
 					} else {
 						//Complex variable name, with arrays (or perhaps an error case)
-
+						continue;
 					}
-					continue;
 				}
 				b.append(c);
 			}

@@ -259,12 +259,12 @@ class LexerObject {
 					if(c == '*' && c2 == '/') {
 						state_in_block_comment = false;
 						i++;
-						if(state_in_smart_block_comment) {
-							//We need to process the block comment here
-							//TODO:
-							//We need to process the block comment here
-							//TODO:
-						}
+//						if(state_in_smart_block_comment) {
+//							//We need to process the block comment here
+//							//TODO:
+//							//We need to process the block comment here
+//							//TODO:
+//						}
 						clearBuffer();
 						continue;
 					}

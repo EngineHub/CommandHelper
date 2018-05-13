@@ -85,10 +85,10 @@ public class TestPersistence {
 //	}
 	//Dumb properties get loaded in different orders, which doesn't matter, but breaks the
 	//string detection here.
-//    @Test
-//    public void testINI(){
-//        assertEquals("a.b=value1\na.b.c2=value3\na.b.c1=value2\n", doOutput("ini://test.ini", testData));
-//    }
+//	@Test
+//	public void testINI(){
+//		assertEquals("a.b=value1\na.b.c2=value3\na.b.c1=value2\n", doOutput("ini://test.ini", testData));
+//	}
 //	@Test
 //	public void testJSON() {
 //		assertEquals("{\"a\":{\"b\":{\"c1\":\"value2\",\"c2\":\"value3\",\"_\":\"value1\"}}}", doOutput("json://test.json", testData));

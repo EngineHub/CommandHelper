@@ -7,9 +7,11 @@ package com.laytonsmith.PureUtilities;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import static org.hamcrest.core.Is.*;
+import static org.hamcrest.core.Is.is;
 import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import org.junit.Before;
 
 /**

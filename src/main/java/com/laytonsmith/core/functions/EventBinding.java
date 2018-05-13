@@ -804,12 +804,12 @@ public class EventBinding {
 		}
 	}
 
-//    @api public static class when_triggered extends AbstractFunction{
+//	@api public static class when_triggered extends AbstractFunction{
 //
-//    }
-//    @api public static class when_cancelled extends AbstractFunction{
+//	}
+//	@api public static class when_cancelled extends AbstractFunction{
 //
-//    }
+//	}
 	@api(environments = CommandHelperEnvironment.class)
 	public static class event_meta extends AbstractFunction {
 

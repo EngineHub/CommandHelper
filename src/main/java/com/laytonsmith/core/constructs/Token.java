@@ -165,17 +165,17 @@ public class Token {
 			return this.variants.contains(TokenVariant.EQUALITY);
 		}
 
-//        public boolean isBitwiseAnd(){
-//            return (this == BIT_AND);
-//        }
+//		public boolean isBitwiseAnd(){
+//			return (this == BIT_AND);
+//		}
 //
-//        public boolean isBitwiseXor(){
-//            return (this == BIT_XOR);
-//        }
+//		public boolean isBitwiseXor(){
+//			return (this == BIT_XOR);
+//		}
 //
-//        public boolean isBitwiseOr(){
-//            return (this == BIT_OR);
-//        }
+//		public boolean isBitwiseOr(){
+//			return (this == BIT_OR);
+//		}
 		/**
 		 * Returns true if this is a logical and
 		 *

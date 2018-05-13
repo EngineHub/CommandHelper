@@ -2,7 +2,12 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.*;
+import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleBlockCollideEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleDestroyEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleEnterEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleEntityCollideEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleExitEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitVehicleEvents.BukkitMCVehicleMoveEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.VehicleEvents;

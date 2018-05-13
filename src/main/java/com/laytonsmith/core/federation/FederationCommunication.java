@@ -135,7 +135,7 @@ public class FederationCommunication {
 	public String readUnencryptedLine() throws IOException {
 		try {
 			// Don't put the reader in a try with resources, because we don't actually
-			// want to close the reader when we're done; that would close the actual 
+			// want to close the reader when we're done; that would close the actual
 			// InputStream as well. We're just using the BufferedReader as a shortcut
 			// to reading this part of the stream.
 			List<Byte> bytes = new ArrayList<>();

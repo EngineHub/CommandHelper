@@ -301,21 +301,21 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	}
 
 	//TODO: Once ParseTree supports these again, we may bring this back
-//    /**
-//     * Returns true if this event MUST be synchronous.
-//     * @return
-//     */
-//    public boolean isSync(){
-//	    return tree.isSync();
-//    }
+//	/**
+//	 * Returns true if this event MUST be synchronous.
+//	 * @return
+//	 */
+//	public boolean isSync(){
+//		return tree.isSync();
+//	}
 //
-//    /**
-//     * Returns true if this event MUST be asynchronous.
-//     * @return
-//     */
-//    public boolean isAsync(){
-//	    return tree.isAsync();
-//    }
+//	/**
+//	 * Returns true if this event MUST be asynchronous.
+//	 * @return
+//	 */
+//	public boolean isAsync(){
+//		return tree.isAsync();
+//	}
 	public ParseTree getParseTree() {
 		return tree;
 	}
@@ -514,15 +514,15 @@ public class BoundEvent implements Comparable<BoundEvent> {
 		}
 
 		public void executeTriggered() {
-//            for(Pair<CClosure, Env> pair : whenTriggered){
-//                MethodScriptCompiler.execute(pair.fst, pair.snd, null, null);
-//            }
+//			for(Pair<CClosure, Env> pair : whenTriggered){
+//				MethodScriptCompiler.execute(pair.fst, pair.snd, null, null);
+//			}
 		}
 
 		public void executeCancelled() {
-//            for(Pair<CClosure, Env> pair : whenCancelled){
-//                MethodScriptCompiler.execute(pair.fst, pair.snd, null, null);
-//            }
+//			for(Pair<CClosure, Env> pair : whenCancelled){
+//				MethodScriptCompiler.execute(pair.fst, pair.snd, null, null);
+//			}
 		}
 	}
 }

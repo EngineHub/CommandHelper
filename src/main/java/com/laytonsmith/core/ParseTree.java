@@ -244,7 +244,7 @@ public class ParseTree implements Cloneable {
 //	 * If ANY data node REQUIRES this to be async, this will return true. If
 //	 * NONE of the data nodes REQUIRE this to be async, or if NONE of them care,
 //	 * it returns false.
-//	 * @return 
+//	 * @return
 //	 */
 //	public boolean isAsync(){
 //		if(isCached(this, CacheTypes.IS_ASYNC)){
@@ -256,19 +256,19 @@ public class ParseTree implements Cloneable {
 //				if(runAsync != null && runAsync == true){
 //					//We're done here. It's definitely async only,
 //					//so we can stop looking.
-//					ret = true;				
+//					ret = true;
 //				}
 //			}
 //			setCache(this, CacheTypes.IS_ASYNC, ret);
 //			return ret;
-//		}		
+//		}
 //	}
-//	
+//
 //	/**
 //	 * If ANY data node REQUIRES this to be sync, this will return true. If
 //	 * NONE of the data nodes REQUIRE this to be sync, or if NONE of them care,
 //	 * it returns false.
-//	 * @return 
+//	 * @return
 //	 */
 //	public boolean isSync(){
 //		if(isCached(this, CacheTypes.IS_SYNC)){

@@ -203,8 +203,8 @@ public class ZipReader {
 	}
 
 	/*
-     * This function recurses down into a zip file, ultimately returning the InputStream for the file,
-     * or throwing exceptions if it can't be found.
+	 * This function recurses down into a zip file, ultimately returning the InputStream for the file,
+	 * or throwing exceptions if it can't be found.
 	 */
 	private InputStream getFile(Deque<File> fullChain, String zipName, final ZipInputStream zis) throws FileNotFoundException, IOException {
 		ZipEntry entry;

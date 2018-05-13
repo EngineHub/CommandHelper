@@ -118,7 +118,7 @@ public class Color implements java.io.Serializable {
 	private float falpha = 0.0f;
 
 	/*
-     * JDK 1.1 serialVersionUID
+	 * JDK 1.1 serialVersionUID
 	 */
 	private static final long serialVersionUID = 118526816881161077L;
 
@@ -403,9 +403,9 @@ public class Color implements java.io.Serializable {
 		int alpha = getAlpha();
 
 		/* From 2D group:
-         * 1. black.brighter() should return grey
-         * 2. applying brighter to blue will always return blue, brighter
-         * 3. non pure color (non zero rgb) will eventually return white
+		 * 1. black.brighter() should return grey
+		 * 2. applying brighter to blue will always return blue, brighter
+		 * 3. non pure color (non zero rgb) will eventually return white
 		 */
 		int i = (int) (1.0 / (1.0 - FACTOR));
 		if(r == 0 && g == 0 && b == 0) {

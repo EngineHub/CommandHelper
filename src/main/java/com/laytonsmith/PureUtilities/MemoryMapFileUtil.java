@@ -104,12 +104,13 @@ public class MemoryMapFileUtil {
 //					}
 				} catch(IOException ex) {
 					Logger.getLogger(MemoryMapFileUtil.class.getName()).log(Level.SEVERE, null, ex);
-				} finally {
+				}
+//				finally {
 //					if(temp != null){
 //						temp.delete();
 //						temp.deleteOnExit();
 //					}
-				}
+//				}
 			}
 		} finally {
 			synchronized(this) {

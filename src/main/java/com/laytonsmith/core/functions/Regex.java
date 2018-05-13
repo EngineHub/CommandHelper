@@ -321,10 +321,10 @@ public class Regex {
 				}
 			}
 			return null;
-//            if(!children.get(0).getData().isDynamic()){
-//                getPattern(children.get(0).getData(), t);
-//            }
-//            return null;
+//			if(!children.get(0).getData().isDynamic()){
+//				getPattern(children.get(0).getData(), t);
+//			}
+//			return null;
 		}
 
 		@Override

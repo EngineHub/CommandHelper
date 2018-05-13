@@ -95,7 +95,7 @@ public class ClassDiscoveryCache {
 				if(cacheOutputName.exists()) {
 					//Cool, already exists, so we'll just return this.
 					//Note that we write the data out as a zip, since it is
-					//huge otherwise, and compresses quite well, so we have 
+					//huge otherwise, and compresses quite well, so we have
 					//to read it in as a zip now.
 					ZipReader cacheReader = new ZipReader(new File(cacheOutputName, "data"));
 					return new ClassDiscoveryURLCache(fromClassLocation, cacheReader.getInputStream());

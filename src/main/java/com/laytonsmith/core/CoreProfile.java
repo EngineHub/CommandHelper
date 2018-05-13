@@ -20,16 +20,16 @@ public class CoreProfile {
 		StreamUtils.GetSystemOut().println(finish - start + "ms");
 
 		/*
-		 Equivalent mscript:
-		 
-		 @start = time()
-		 @array = array()
-		 for(1..1000000, @i,
-		 	@array[] = @i
-			sys_out(@i)
-		 )
-		 @finish = time()
-		 sys_out(@finish - @start . 'ms')
+		 * Equivalent mscript:
+		 * 
+		 * @start = time()
+		 * @array = array()
+		 * for(1..1000000, @i,
+		 * 	@array[] = @i
+		 *	sys_out(@i)
+		 * )
+		 * @finish = time()
+		 * sys_out(@finish - @start . 'ms')
 		 */
 	}
 

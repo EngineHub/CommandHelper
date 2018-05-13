@@ -22,7 +22,20 @@ import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCIgniteCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
-import com.laytonsmith.abstraction.events.*;
+import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
+import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
+import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
+import com.laytonsmith.abstraction.events.MCBlockEvent;
+import com.laytonsmith.abstraction.events.MCBlockFadeEvent;
+import com.laytonsmith.abstraction.events.MCBlockFromToEvent;
+import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
+import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
+import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
+import com.laytonsmith.abstraction.events.MCBlockPistonExtendEvent;
+import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
+import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
+import com.laytonsmith.abstraction.events.MCNotePlayEvent;
+import com.laytonsmith.abstraction.events.MCSignChangeEvent;
 import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
@@ -30,7 +43,20 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import org.bukkit.Note;
 import org.bukkit.block.Block;
-import org.bukkit.event.block.*;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockEvent;
+import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockGrowEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPistonEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.NotePlayEvent;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -237,8 +263,7 @@ public class BukkitBlockEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCBlockIgniteEvent extends BukkitMCBlockEvent
-			implements MCBlockIgniteEvent {
+	public static class BukkitMCBlockIgniteEvent extends BukkitMCBlockEvent implements MCBlockIgniteEvent {
 
 		BlockIgniteEvent event;
 
@@ -403,8 +428,7 @@ public class BukkitBlockEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCBlockDispenseEvent extends BukkitMCBlockEvent
-			implements MCBlockDispenseEvent {
+	public static class BukkitMCBlockDispenseEvent extends BukkitMCBlockEvent implements MCBlockDispenseEvent {
 
 		BlockDispenseEvent bde;
 

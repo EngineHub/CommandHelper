@@ -2293,18 +2293,18 @@ public class DataHandling {
 			}
 		}
 
-//        @Override
-//        public boolean canOptimizeDynamic() {
-//            return true;
-//        }
+//		@Override
+//		public boolean canOptimizeDynamic() {
+//			return true;
+//		}
 //
-//        @Override
-//        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-//            //We seriously lose out on the ability to optimize this procedure
-//            //if we are assigning a dynamic value as a default, but we have to check
-//            //that here. If we don't, we lose the information
-//            return ;
-//        }
+//		@Override
+//		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+//			//We seriously lose out on the ability to optimize this procedure
+//			//if we are assigning a dynamic value as a default, but we have to check
+//			//that here. If we don't, we lose the information
+//			return ;
+//		}
 	}
 
 	@api
