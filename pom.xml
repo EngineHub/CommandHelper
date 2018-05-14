@@ -154,7 +154,7 @@
 
 		<repository>
 			<id>Plugin Metrics</id>
-			<url>http://repo.mcstats.org/content/repositories/public</url>
+			<url>http://repo.mcstats.org/content/repositories/public/</url>
 		</repository>
 
 		<!-- Java Mail -->
@@ -922,8 +922,8 @@
 				<version>3.0.0</version>
 				<executions>
 					<execution>
-						<id>validate</id>
-						<phase>validate</phase>
+						<id>checkstyle</id>
+						<phase>test</phase>
 						<configuration>
 							<sourceDirectories>${project.compileSourceRoots}</sourceDirectories>
 							<testSourceDirectories>${project.testCompileSourceRoots}</testSourceDirectories>
