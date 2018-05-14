@@ -8,33 +8,40 @@
 -->
 <module name="Checker">
     <property name="severity" value="error"/>
+    
+    <!-- Supression filter to disable specified modules/checks for specified files -->
+    <module name="SuppressionFilter">
+        <property name="file" value="checkstyle_suppressions.xml"/>
+        <property name="optional" value="false"/>
+    </module>
+    
     <module name="TreeWalker">
         
-        <!-- Line length <= 120 characters. -->
+        <!-- Line length <= 120 characters -->
         <module name="LineLength">
-            <property name="severity" value="ignore"/> <!-- TODO: Change to "error" once the >7000 violations have been resolved. -->
+            <property name="severity" value="ignore"/> <!-- TODO: Change to "error" once the >7000 violations have been resolved -->
             <property name="max" value="120"/>
         </module>
         
-        <!-- Indent must use tab characters. -->
+        <!-- Indent must use tab characters -->
         <module name="RegexpSinglelineJava">
-            <property name="format" value="^\t* ([^\*]|$)"/> <!-- Javadoc and multiline comments have a single leading whitespace, so allow " *". -->
+            <property name="format" value="^\t* ([^\*]|$)"/> <!-- Javadoc and multiline comments have a single leading whitespace, so allow " *" -->
             <property name="message" value="Indent must use tab characters"/>
             <property name="ignoreComments" value="false"/>
         </module>
         
-        <!-- Disallow package.* imports. -->
+        <!-- Disallow package.* imports -->
         <module name="AvoidStarImport"/>
         
-        <!-- Disallow whitespaces after '(' and before ')'. -->
+        <!-- Disallow whitespaces after '(' and before ')' -->
         <module name="ParenPad"/>
         
     </module>
     
-    <!-- Disallow trailing whitespaces/tabs. -->
+    <!-- Disallow trailing whitespaces/tabs -->
     <module name="RegexpSingleline">
         <property name="severity" value="error"/>
-        <property name="format" value="(?&lt;! \*)\s+$"/> <!-- Empty javadoc and multiline comment lines have a single trailing whitespace, so allow " * ". -->
+        <property name="format" value="(?&lt;! \*)\s+$"/> <!-- Empty javadoc and multiline comment lines have a single trailing whitespace, so allow " * " -->
         <property name="message" value="Line has trailing whitespaces/tabs."/>
         <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
     </module>
