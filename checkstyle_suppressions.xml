@@ -2,8 +2,11 @@
 <!DOCTYPE suppressions PUBLIC "-//Puppy Crawl//DTD Suppressions 1.1//EN" "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
-    
-    <!-- Allow star imports in "...Test.java" files -->
-    <suppress checks="AvoidStarImport" files=".*Test\.java$"/>
-    
+	
+	<!-- Allow star imports in "...Test.java" files -->
+	<suppress checks="AvoidStarImport" files=".*Test\.java$"/>
+	
+	<!-- Ignore type name check for package "com.laytonsmith.core.functions" since function classes use a different format -->
+	<suppress checks="TypeName" files="com[\\/]laytonsmith[\\/]core[\\/]functions.*\.java$"/>
+	
 </suppressions>
