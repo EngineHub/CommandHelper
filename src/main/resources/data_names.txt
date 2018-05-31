@@ -28,6 +28,7 @@
 10_0=Lava
 11_0=Stationary Lava
 12_0=Sand
+12_1=Red Sand
 13_0=Gravel
 14_0=Gold Ore
 15_0=Iron Ore
@@ -167,7 +168,7 @@
 72_0=Wooden Pressure Plate
 73_0=Redstone Ore
 74_0=Glowing Redstone Ore
-75_0=Inactive Redtone Torch
+75_0=Inactive Redstone Torch
 76_0=Redstone Torch
 77_0=Button
 78_0=Snow Cover
@@ -372,7 +373,7 @@
 179_2=Smooth Red Sandstone
 180_0=Red Sandstone Stairs
 181_0=Red Sandstone Double Slab
-182_0=Red Sanstone Slab
+182_0=Red Sandstone Slab
 183_0=Spruce Fence Gate
 184_0=Birch Fence Gate
 185_0=Jungle Fence Gate
