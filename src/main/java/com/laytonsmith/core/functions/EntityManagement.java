@@ -59,6 +59,7 @@ import com.laytonsmith.abstraction.entities.MCPig;
 import com.laytonsmith.abstraction.entities.MCPigZombie;
 import com.laytonsmith.abstraction.entities.MCRabbit;
 import com.laytonsmith.abstraction.entities.MCSheep;
+import com.laytonsmith.abstraction.entities.MCShulker;
 import com.laytonsmith.abstraction.entities.MCShulkerBullet;
 import com.laytonsmith.abstraction.entities.MCSkeleton;
 import com.laytonsmith.abstraction.entities.MCSlime;
@@ -1971,6 +1972,12 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_SHEEP_COLOR, new CString(sheep.getColor().name(), t), t);
 					specArray.set(entity_spec.KEY_SHEEP_SHEARED, CBoolean.get(sheep.isSheared()), t);
 					break;
+				case SHULKER:
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_12)) {
+						MCShulker shulker = (MCShulker) entity;
+						specArray.set(entity_spec.KEY_SHULKER_COLOR, new CString(shulker.getColor().name(), t), t);
+					}
+					break;
 				case SHULKER_BULLET:
 					MCShulkerBullet bullet = (MCShulkerBullet) entity;
 					MCEntity target = bullet.getTarget();
@@ -2114,6 +2121,7 @@ public class EntityManagement {
 		private static final String KEY_PRIMED_TNT_SOURCE = "source";
 		private static final String KEY_SHEEP_COLOR = "color";
 		private static final String KEY_SHEEP_SHEARED = "sheared";
+		private static final String KEY_SHULKER_COLOR = "color";
 		private static final String KEY_SHULKERBULLET_TARGET = "target";
 		private static final String KEY_SKELETON_TYPE = "type";
 		private static final String KEY_SLIME_SIZE = "size";
@@ -2802,6 +2810,22 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case SHULKER:
+					MCShulker shulker = (MCShulker) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_SHULKER_COLOR:
+								try {
+									shulker.setColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch(IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid shulker color: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case SHULKER_BULLET:
 					MCShulkerBullet bullet = (MCShulkerBullet) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -2866,16 +2890,14 @@ public class EntityManagement {
 					}
 					break;
 				case SNOWMAN:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9_4)) {
-						MCSnowman snowman = (MCSnowman) entity;
-						for(String index : specArray.stringKeySet()) {
-							switch(index.toLowerCase()) {
-								case entity_spec.KEY_SNOWMAN_DERP:
-									snowman.setDerp(Static.getBoolean(specArray.get(index, t), t));
-									break;
-								default:
-									throwException(index, t);
-							}
+					MCSnowman snowman = (MCSnowman) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_SNOWMAN_DERP:
+								snowman.setDerp(Static.getBoolean(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;

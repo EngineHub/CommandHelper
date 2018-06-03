@@ -180,6 +180,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_SHEEP_COLOR%: The color of the sheep (can be %DYE_COLOR%).
 * %KEY_SHEEP_SHEARED%: Whether the sheep is sheared.
 |-
+| SHULKER
+|
+* %KEY_SHULKER_COLOR%: The color of the shulker (can be %DYE_COLOR%).
+|-
 | SHULKER_BULLET
 |
 * %KEY_SHULKERBULLET_TARGET%: The UUID of the entity the bullet will head toward, or null if there is no target.
