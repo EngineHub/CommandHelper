@@ -41,6 +41,7 @@ import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.entities.MCCreeper;
 import com.laytonsmith.abstraction.entities.MCEnderDragon;
 import com.laytonsmith.abstraction.entities.MCEnderman;
+import com.laytonsmith.abstraction.entities.MCEvokerFangs;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.entities.MCGuardian;
@@ -1854,6 +1855,15 @@ public class EntityManagement {
 						specArray.set(entity_spec.KEY_ENDERMAN_CARRIED, CNull.NULL, t);
 					}
 					break;
+				case EVOKER_FANGS:
+					MCEvokerFangs fangs = (MCEvokerFangs) entity;
+					MCLivingEntity fangsource = fangs.getOwner();
+					if(fangsource == null) {
+						specArray.set(entity_spec.KEY_EVOKERFANGS_SOURCE, CNull.NULL, t);
+					} else {
+						specArray.set(entity_spec.KEY_EVOKERFANGS_SOURCE, new CString(fangsource.getUniqueId().toString(), t), t);
+					}
+					break;
 				case EXPERIENCE_ORB:
 					MCExperienceOrb orb = (MCExperienceOrb) entity;
 					specArray.set(entity_spec.KEY_EXPERIENCE_ORB_AMOUNT, new CInt(orb.getExperience(), t), t);
@@ -2090,6 +2100,7 @@ public class EntityManagement {
 		private static final String KEY_ENDERDRAGON_PHASE = "phase";
 		private static final String KEY_ENDERMAN_CARRIED = "carried";
 		private static final String KEY_EXPERIENCE_ORB_AMOUNT = "amount";
+		private static final String KEY_EVOKERFANGS_SOURCE = "source";
 		private static final String KEY_FALLING_BLOCK_BLOCK = "block";
 		private static final String KEY_FALLING_BLOCK_DROPITEM = "dropitem";
 		private static final String KEY_FALLING_BLOCK_DAMAGE = "damage";
@@ -2441,6 +2452,23 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ENDERMAN_CARRIED:
 								enderman.setCarriedMaterial(ObjectGenerator.GetGenerator().material(specArray.get(index, t), t).getData());
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case EVOKER_FANGS:
+					MCEvokerFangs fangs = (MCEvokerFangs) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_EVOKERFANGS_SOURCE:
+								Construct source = specArray.get(index, t);
+								if(source instanceof CNull) {
+									fangs.setOwner(null);
+								} else {
+									fangs.setOwner(Static.getLivingEntity(source, t));
+								}
 								break;
 							default:
 								throwException(index, t);

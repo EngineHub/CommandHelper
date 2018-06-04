@@ -70,6 +70,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_ENDERMAN_CARRIED%: The block that the Enderman is carring.
 |-
+| EVOKER_FANGS
+|
+* %KEY_EVOKERFANGS_SOURCE%: The UUID of the living entity, usually an Evoker, that is the source of the fangs. Can be null.
+|-
 | EXPERIENCE_ORB
 | 
 * %KEY_EXPERIENCE_ORB_AMOUNT%: How much experience is contained within the orb.
