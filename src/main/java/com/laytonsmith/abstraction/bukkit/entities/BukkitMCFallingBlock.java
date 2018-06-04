@@ -41,6 +41,20 @@ public class BukkitMCFallingBlock extends BukkitMCEntity implements MCFallingBlo
 	}
 
 	@Override
+	public boolean canHurtEntities() {
+		return f.canHurtEntities();
+	}
+
+	@Override
+	public void setHurtEntities(boolean hurt) {
+		try {
+			f.setHurtEntities(hurt);
+		} catch(NoSuchMethodError ex) {
+			// probably prior to 1.8.8
+		}
+	}
+
+	@Override
 	public FallingBlock getHandle() {
 		return f;
 	}

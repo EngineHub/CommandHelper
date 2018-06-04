@@ -78,6 +78,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_FALLING_BLOCK_BLOCK%: The falling block. Not editable.
 * %KEY_FALLING_BLOCK_DROPITEM%: If the falling block will break into an item if it cannot be placed.
+* %KEY_FALLING_BLOCK_DAMAGE%: If the falling block can damage entities.
 |-
 | FIREBALL
 | 

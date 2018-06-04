@@ -1860,8 +1860,11 @@ public class EntityManagement {
 					break;
 				case FALLING_BLOCK:
 					MCFallingBlock block = (MCFallingBlock) entity;
-					specArray.set(entity_spec.KEY_FALLING_BLOCK_BLOCK, new CInt(block.getMaterial().getName(), t), t);
+					specArray.set(entity_spec.KEY_FALLING_BLOCK_BLOCK, new CString(block.getMaterial().getName(), t), t);
 					specArray.set(entity_spec.KEY_FALLING_BLOCK_DROPITEM, CBoolean.get(block.getDropItem()), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8_X)) {
+						specArray.set(entity_spec.KEY_FALLING_BLOCK_DAMAGE, CBoolean.get(block.canHurtEntities()), t);
+					}
 					break;
 				case FIREBALL:
 				case SMALL_FIREBALL:
@@ -2089,6 +2092,7 @@ public class EntityManagement {
 		private static final String KEY_EXPERIENCE_ORB_AMOUNT = "amount";
 		private static final String KEY_FALLING_BLOCK_BLOCK = "block";
 		private static final String KEY_FALLING_BLOCK_DROPITEM = "dropitem";
+		private static final String KEY_FALLING_BLOCK_DAMAGE = "damage";
 		private static final String KEY_FIREBALL_DIRECTION = "direction";
 		private static final String KEY_GUARDIAN_ELDER = "elder";
 		private static final String KEY_HORSE_COLOR = "color";
@@ -2461,6 +2465,9 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_FALLING_BLOCK_DROPITEM:
 								block.setDropItem(Static.getBoolean(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_FALLING_BLOCK_DAMAGE:
+								block.setHurtEntities(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
