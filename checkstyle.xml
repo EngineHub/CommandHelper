@@ -98,7 +98,7 @@
 		<module name="ModifierOrder"/>
 		
 		<!-- Ensure that each variable has its own statement on its own line (disallows "i = j = k = 1;") -->
-		<module name="ModifierOrder"/>
+		<module name="MultipleVariableDeclarations"/>
 		
 		<!-- Ensure that do/else/for/if/while have their brace block ("{...}") -->
 		<module name="NeedBraces"/>
