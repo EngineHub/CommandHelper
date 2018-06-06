@@ -38,6 +38,10 @@ relative to the default position (where all angles are 0). Setting these values 
 where only values specified will be changed. This allows you to rotate a single body part around a single axis
 without knowing the rotations on the other axis or of other body parts beforehand.
 |-
+| BOAT
+|
+* %KEY_BOAT_TYPE%: Which tree species the boat is composed of. (can be %TREE_SPECIES%)
+|-
 | CREEPER
 | 
 * %KEY_CREEPER_POWERED%: If the Creeper is powered or not.

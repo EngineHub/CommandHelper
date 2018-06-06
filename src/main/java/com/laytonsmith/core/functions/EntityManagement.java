@@ -87,6 +87,7 @@ import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.abstraction.enums.MCRabbitType;
 import com.laytonsmith.abstraction.enums.MCRotation;
 import com.laytonsmith.abstraction.enums.MCSkeletonType;
+import com.laytonsmith.abstraction.enums.MCTreeSpecies;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
@@ -1738,6 +1739,7 @@ public class EntityManagement {
 			docs = docs.replace("%RABBIT_TYPE%", StringUtils.Join(MCRabbitType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PARTICLE%", StringUtils.Join(MCParticle.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%ENDERDRAGON_PHASE%", StringUtils.Join(MCEnderDragonPhase.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%TREE_SPECIES%", StringUtils.Join(MCTreeSpecies.values(), ", ", ", or ", " or "));
 			for(Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -1806,6 +1808,12 @@ public class EntityManagement {
 						poses.set("pose" + key.name(), ObjectGenerator.GetGenerator().vector(poseMap.get(key), t), t);
 					}
 					specArray.set(entity_spec.KEY_ARMORSTAND_POSES, poses, t);
+					break;
+				case BOAT:
+					MCBoat boat = (MCBoat) entity;
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
+						specArray.set(entity_spec.KEY_BOAT_TYPE, new CString(boat.getWoodType().name(), t), t);
+					}
 					break;
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
@@ -2090,6 +2098,7 @@ public class EntityManagement {
 		private static final String KEY_ARMORSTAND_POSES = "poses";
 		private static final String KEY_ARMORSTAND_SMALLSIZE = "small";
 		private static final String KEY_ARMORSTAND_VISIBLE = "visible";
+		private static final String KEY_BOAT_TYPE = "type";
 		private static final String KEY_CREEPER_POWERED = "powered";
 		private static final String KEY_CREEPER_MAXFUSETICKS = "maxfuseticks";
 		private static final String KEY_CREEPER_EXPLOSIONRADIUS = "explosionradius";
@@ -2337,6 +2346,22 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case BOAT:
+					MCBoat boat = (MCBoat) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_BOAT_TYPE:
+								try {
+									boat.setWoodType(MCTreeSpecies.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch(IllegalArgumentException ex) {
+									throw new CREFormatException("Invalid boat type: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -2439,7 +2464,11 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ENDERDRAGON_PHASE:
-								enderdragon.setPhase(MCEnderDragonPhase.valueOf(specArray.get(index, t).val().toUpperCase()));
+								try {
+									enderdragon.setPhase(MCEnderDragonPhase.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch(IllegalArgumentException ex) {
+									throw new CREFormatException("Invalid EnderDragon phase: " + specArray.get(index, t).val(), t);
+								}
 								break;
 							default:
 								throwException(index, t);
