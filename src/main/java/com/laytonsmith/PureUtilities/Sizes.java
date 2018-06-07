@@ -52,6 +52,57 @@ public final class Sizes {
 		return charSize;
 	}
 
+	// array bytes
+	public static long sizeof(byte[] b) {
+		return byteSize * b.length;
+	}
+
+	public static long sizeof(short[] s) {
+		return shortSize * s.length;
+	}
+
+	public static long sizeof(int[] i) {
+		return intSize * i.length;
+	}
+
+	public static long sizeof(long[] l) {
+		return longSize * l.length;
+	}
+
+	public static long sizeof(float[] f) {
+		return floatSize * f.length;
+	}
+
+	public static long sizeof(double[] d) {
+		return doubleSize * d.length;
+	}
+
+	public static long sizeof(char[] c) {
+		return charSize * c.length;
+	}
+
+	// Class types
+	public static int sizeof(Class<?> c) {
+		if(c.isPrimitive()) {
+			if(c == byte.class) {
+				return byteSize;
+			} else if(c == short.class) {
+				return shortSize;
+			} else if(c == int.class) {
+				return intSize;
+			} else if(c == long.class) {
+				return longSize;
+			} else if(c == float.class) {
+				return floatSize;
+			} else if(c == double.class) {
+				return doubleSize;
+			} else if(c == char.class) {
+				return charSize;
+			}
+		}
+		throw new RuntimeException("Only non-boolean primitives are supported");
+	}
+
 	// NOTE: no sizeof for boolean, only sizeofBits
 	// bits
 	public static int sizeofBits(byte b) {
@@ -84,35 +135,6 @@ public final class Sizes {
 
 	public static int sizeofBits(boolean b) {
 		return booleanSizeBits;
-	}
-
-	// array bytes
-	public static long sizeof(byte[] b) {
-		return byteSize * b.length;
-	}
-
-	public static long sizeof(short[] s) {
-		return shortSize * s.length;
-	}
-
-	public static long sizeof(int[] i) {
-		return intSize * i.length;
-	}
-
-	public static long sizeof(long[] l) {
-		return longSize * l.length;
-	}
-
-	public static long sizeof(float[] f) {
-		return floatSize * f.length;
-	}
-
-	public static long sizeof(double[] d) {
-		return doubleSize * d.length;
-	}
-
-	public static long sizeof(char[] c) {
-		return charSize * c.length;
 	}
 
 	// array bits
@@ -148,28 +170,7 @@ public final class Sizes {
 		return booleanSizeBits * b.length;
 	}
 
-	//Class types
-	public static int sizeof(Class<?> c) {
-		if(c.isPrimitive()) {
-			if(c == byte.class) {
-				return byteSize;
-			} else if(c == short.class) {
-				return shortSize;
-			} else if(c == int.class) {
-				return intSize;
-			} else if(c == long.class) {
-				return longSize;
-			} else if(c == float.class) {
-				return floatSize;
-			} else if(c == double.class) {
-				return doubleSize;
-			} else if(c == char.class) {
-				return charSize;
-			}
-		}
-		throw new RuntimeException("Only non-boolean primitives are supported");
-	}
-
+	// Class types
 	public static int sizeofBits(Class<?> c) {
 		if(c.isPrimitive()) {
 			if(c == byte.class) {

@@ -473,6 +473,16 @@ public class SSHWrapper {
 	}
 
 	/**
+	 * Writes some textual contents to a remote file.
+	 *
+	 * @param contents
+	 * @param to
+	 */
+	public static void SCPWrite(String contents, String to) throws IOException {
+		SCPWrite(StreamUtils.GetInputStream(contents), to);
+	}
+
+	/**
 	 * Returns an InputStream to a file on a remote file system.
 	 *
 	 * @param from
@@ -484,16 +494,6 @@ public class SSHWrapper {
 		FileInputStream fis = new FileInputStream(temp);
 		temp.deleteOnExit();
 		return fis;
-	}
-
-	/**
-	 * Writes some textual contents to a remote file.
-	 *
-	 * @param contents
-	 * @param to
-	 */
-	public static void SCPWrite(String contents, String to) throws IOException {
-		SCPWrite(StreamUtils.GetInputStream(contents), to);
 	}
 
 	public static String SCPReadString(String from) throws IOException {

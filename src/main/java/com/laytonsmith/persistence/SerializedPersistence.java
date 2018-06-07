@@ -212,21 +212,6 @@ public class SerializedPersistence extends AbstractDataSource {
 		return oldVal;
 	}
 
-	private String getValue(String key) {
-		//defer loading until we actually try and use the data structure
-		if(isLoaded == false) {
-			try {
-				load();
-			} catch (Exception ex) {
-				Logger.getLogger(SerializedPersistence.class.getName()).log(Level.SEVERE, null, ex);
-			}
-		}
-		if(data == null) {
-			return null;
-		}
-		return data.get(key);
-	}
-
 	/**
 	 * Adds or modifies the value of the key. Typically, this convention should be followed:
 	 * <pre>
@@ -247,6 +232,21 @@ public class SerializedPersistence extends AbstractDataSource {
 	 */
 	private String setValue(DaemonManager dm, String[] key, String value) {
 		return setValue(dm, getNamespace0(key), (String) value);
+	}
+
+	private String getValue(String key) {
+		//defer loading until we actually try and use the data structure
+		if(isLoaded == false) {
+			try {
+				load();
+			} catch (Exception ex) {
+				Logger.getLogger(SerializedPersistence.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+		if(data == null) {
+			return null;
+		}
+		return data.get(key);
 	}
 
 	/**

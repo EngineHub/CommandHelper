@@ -56,12 +56,12 @@ public final class StaticLayer {
 		return convertor.GetLocation(w, x, y, z, yaw, pitch);
 	}
 
-	public static Class<?> GetServerEventMixin() {
-		return convertor.GetServerEventMixin();
-	}
-
 	public static MCLocation GetLocation(MCWorld w, double x, double y, double z) {
 		return GetLocation(w, x, y, z, 0, 0);
+	}
+
+	public static Class<?> GetServerEventMixin() {
+		return convertor.GetServerEventMixin();
 	}
 
 	public static MCItemStack GetItemStack(int type, int qty) {

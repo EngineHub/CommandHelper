@@ -164,6 +164,50 @@ public final class WebUtility {
 	}
 
 	/**
+	 * Makes an asynchronous call to a URL, and runs the callback when finished.
+	 */
+	public static void GetPage(final URL url, final RequestSettings settings, final HTTPResponseCallback callback) {
+		urlRetrieverPool.submit(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					HTTPResponse response = GetPage(url, settings);
+					if(callback == null) {
+						return;
+					}
+					callback.response(response);
+				} catch (IOException ex) {
+					if(callback == null) {
+						return;
+					}
+					callback.error(ex);
+				}
+			}
+		});
+	}
+
+	/**
+	 * A very simple convenience method to get a page, using all the default settings found in {@link RequestSettings}.
+	 *
+	 * @param url
+	 * @return
+	 */
+	public static HTTPResponse GetPage(URL url) throws IOException {
+		return GetPage(url, null);
+	}
+
+	/**
+	 * A very simple convenience method to get a page using a string url.
+	 *
+	 * @param url
+	 * @return
+	 * @throws IOException
+	 */
+	public static HTTPResponse GetPage(String url) throws IOException {
+		return GetPage(new URL(url));
+	}
+
+	/**
 	 * Returns the raw web stream. Cookies are used to initiate the request, but the cookie jar isn't updated with the
 	 * received cookies.
 	 *
@@ -505,27 +549,6 @@ public final class WebUtility {
 	}
 
 	/**
-	 * A very simple convenience method to get a page, using all the default settings found in {@link RequestSettings}.
-	 *
-	 * @param url
-	 * @return
-	 */
-	public static HTTPResponse GetPage(URL url) throws IOException {
-		return GetPage(url, null);
-	}
-
-	/**
-	 * A very simple convenience method to get a page using a string url.
-	 *
-	 * @param url
-	 * @return
-	 * @throws IOException
-	 */
-	public static HTTPResponse GetPage(String url) throws IOException {
-		return GetPage(new URL(url));
-	}
-
-	/**
 	 * A very simple convenience method to get a page. Only the contents are returned by this method.
 	 *
 	 * @param url
@@ -545,29 +568,6 @@ public final class WebUtility {
 	 */
 	public static String GetPageContents(String url) throws IOException {
 		return GetPage(url).getContent();
-	}
-
-	/**
-	 * Makes an asynchronous call to a URL, and runs the callback when finished.
-	 */
-	public static void GetPage(final URL url, final RequestSettings settings, final HTTPResponseCallback callback) {
-		urlRetrieverPool.submit(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					HTTPResponse response = GetPage(url, settings);
-					if(callback == null) {
-						return;
-					}
-					callback.response(response);
-				} catch (IOException ex) {
-					if(callback == null) {
-						return;
-					}
-					callback.error(ex);
-				}
-			}
-		});
 	}
 
 	/**

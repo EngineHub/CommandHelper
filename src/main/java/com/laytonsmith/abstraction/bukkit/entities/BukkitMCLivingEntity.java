@@ -121,6 +121,33 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 		return retn;
 	}
 
+	private List<Block> getLineOfSight(HashSet<Short> transparent, int maxDistance, int maxLength) {
+		if(maxDistance > 512) {
+			maxDistance = 512;
+		}
+		ArrayList<Block> blocks = new ArrayList<>();
+		Iterator<Block> itr = new BlockIterator(le, maxDistance);
+
+		while(itr.hasNext()) {
+			Block block = itr.next();
+			blocks.add(block);
+			if(maxLength != 0 && blocks.size() > maxLength) {
+				blocks.remove(0);
+			}
+			int id = block.getTypeId();
+			if(transparent == null) {
+				if(id != 0) {
+					break;
+				}
+			} else {
+				if(!transparent.contains((short) id)) {
+					break;
+				}
+			}
+		}
+		return blocks;
+	}
+
 	@Override
 	public boolean hasLineOfSight(MCEntity other) {
 		return le.hasLineOfSight(((BukkitMCEntity) other).getHandle());
@@ -154,33 +181,6 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	private Block getFirstTargetBlock(HashSet<Short> transparent, int maxDistance) {
 		List<Block> blocks = getLineOfSight(transparent, maxDistance, 1);
 		return blocks.get(0);
-	}
-
-	private List<Block> getLineOfSight(HashSet<Short> transparent, int maxDistance, int maxLength) {
-		if(maxDistance > 512) {
-			maxDistance = 512;
-		}
-		ArrayList<Block> blocks = new ArrayList<>();
-		Iterator<Block> itr = new BlockIterator(le, maxDistance);
-
-		while(itr.hasNext()) {
-			Block block = itr.next();
-			blocks.add(block);
-			if(maxLength != 0 && blocks.size() > maxLength) {
-				blocks.remove(0);
-			}
-			int id = block.getTypeId();
-			if(transparent == null) {
-				if(id != 0) {
-					break;
-				}
-			} else {
-				if(!transparent.contains((short) id)) {
-					break;
-				}
-			}
-		}
-		return blocks;
 	}
 
 	@Override

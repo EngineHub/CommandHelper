@@ -923,6 +923,21 @@ public class ArgumentParser {
 	}
 
 	/**
+	 * This method assumes that the arguments have already been parsed out, so,
+	 * for instance, if an argument inside of args[x] contains spaces, it will
+	 * still be considered one argument. So, ["args with spaces", "args"] may
+	 * have looked like this originally: <code>"args with spaces" args </code>
+	 * but through some means or another, you have already parsed the arguments
+	 * out.
+	 *
+	 * @param args
+	 * @return
+	 */
+	public ArgumentParserResults match(String[] args) throws ValidationException {
+		return parse(Arrays.asList(args));
+	}
+
+	/**
 	 * Returns a simple List of the arguments, parsed into a proper argument
 	 * list. This will work essentially identically to how general shell
 	 * arguments are parsed.
@@ -1131,20 +1146,5 @@ public class ArgumentParser {
 			looseArgs.clear();
 		}
 		return finishedArgument;
-	}
-
-	/**
-	 * This method assumes that the arguments have already been parsed out, so,
-	 * for instance, if an argument inside of args[x] contains spaces, it will
-	 * still be considered one argument. So, ["args with spaces", "args"] may
-	 * have looked like this originally: <code>"args with spaces" args </code>
-	 * but through some means or another, you have already parsed the arguments
-	 * out.
-	 *
-	 * @param args
-	 * @return
-	 */
-	public ArgumentParserResults match(String[] args) throws ValidationException {
-		return parse(Arrays.asList(args));
 	}
 }

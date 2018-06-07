@@ -779,6 +779,10 @@ public final class Static {
 		return p;
 	}
 
+	public static MCPlayer GetPlayer(Construct player, Target t) throws ConfigRuntimeException {
+		return GetPlayer(player.val(), t);
+	}
+
 	/**
 	 * Returns the specified command sender. Players are supported, as is the special ~console user. The special
 	 * ~console user will always return a user.
@@ -807,10 +811,6 @@ public final class Static {
 			throw new CREPlayerOfflineException("The specified player (" + player + ") is not online", t);
 		}
 		return m;
-	}
-
-	public static MCPlayer GetPlayer(Construct player, Target t) throws ConfigRuntimeException {
-		return GetPlayer(player.val(), t);
 	}
 
 	/**

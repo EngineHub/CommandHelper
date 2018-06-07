@@ -177,7 +177,7 @@ public class XMLDocument {
 					}
 				} else {
 					//It's an array
-					if(!(countChildren(parent) + 1 >= position)) {
+					if(!(countNodeChildren(parent) + 1 >= position)) {
 						//If /root/node[1] exists, but they try to create /root/node[3], this exception is thrown
 						throw new XPathExpressionException("Will not tolerate a jump in node numbers, will only create the next node in sequence.");
 					}
@@ -190,7 +190,7 @@ public class XMLDocument {
 		setDirty();
 	}
 
-	private int countChildren(Element e) {
+	private int countNodeChildren(Element e) {
 		Node child = e.getFirstChild();
 		if(child == null) {
 			return 0;

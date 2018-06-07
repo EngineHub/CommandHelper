@@ -41,16 +41,16 @@ public final class rParser {
 		return combined.toString();
 	}
 
+	public static String[] wordWarp(String msg, int lineLength) {
+		return wordWrap(msg, "", lineLength);
+	}
+
 	public static String[] wordWrap(String msg) {
 		return wordWrap(msg, "", lineLength);
 	}
 
 	public static String[] wordWrap(String msg, String prefix) {
 		return wordWrap(msg, prefix, lineLength);
-	}
-
-	public static String[] wordWarp(String msg, int lineLength) {
-		return wordWrap(msg, "", lineLength);
 	}
 
 	public static String[] wordWrap(String msg, String prefix, int lineLength) {

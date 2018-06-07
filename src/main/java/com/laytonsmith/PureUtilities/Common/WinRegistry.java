@@ -101,6 +101,20 @@ public class WinRegistry {
 		}
 	}
 
+	private static String readString(Preferences root, int hkey, String key, String value)
+			throws IllegalArgumentException, IllegalAccessException,
+			InvocationTargetException {
+		int[] handles = (int[]) regOpenKey.invoke(root, new Object[]{
+			new Integer(hkey), toCstr(key), new Integer(KEY_READ)});
+		if(handles[1] != REG_SUCCESS) {
+			return null;
+		}
+		byte[] valb = (byte[]) regQueryValueEx.invoke(root, new Object[]{
+			new Integer(handles[0]), toCstr(value)});
+		regCloseKey.invoke(root, new Object[]{new Integer(handles[0])});
+		return (valb != null ? new String(valb).trim() : null);
+	}
+
 	/**
 	 * Read value(s) and value name(s) form given key
 	 *
@@ -123,6 +137,30 @@ public class WinRegistry {
 		}
 	}
 
+	private static Map<String, String> readStringValues(Preferences root, int hkey, String key)
+			throws IllegalArgumentException, IllegalAccessException,
+			InvocationTargetException {
+		HashMap<String, String> results = new HashMap<String, String>();
+		int[] handles = (int[]) regOpenKey.invoke(root, new Object[]{
+			new Integer(hkey), toCstr(key), new Integer(KEY_READ)});
+		if(handles[1] != REG_SUCCESS) {
+			return null;
+		}
+		int[] info = (int[]) regQueryInfoKey.invoke(root,
+				new Object[]{new Integer(handles[0])});
+
+		int count = info[0]; // count
+		int maxlen = info[3]; // value length max
+		for(int index = 0; index < count; index++) {
+			byte[] name = (byte[]) regEnumValue.invoke(root, new Object[]{
+				new Integer(handles[0]), new Integer(index), new Integer(maxlen + 1)});
+			String value = readString(hkey, key, new String(name));
+			results.put(new String(name).trim(), value);
+		}
+		regCloseKey.invoke(root, new Object[]{new Integer(handles[0])});
+		return results;
+	}
+
 	/**
 	 * Read the value name(s) from a given key
 	 *
@@ -143,6 +181,31 @@ public class WinRegistry {
 		} else {
 			throw new IllegalArgumentException("hkey=" + hkey);
 		}
+	}
+
+	private static List<String> readStringSubKeys(Preferences root, int hkey, String key)
+			throws IllegalArgumentException, IllegalAccessException,
+			InvocationTargetException {
+		List<String> results = new ArrayList<String>();
+		int[] handles = (int[]) regOpenKey.invoke(root, new Object[]{
+			new Integer(hkey), toCstr(key), new Integer(KEY_READ)
+		});
+		if(handles[1] != REG_SUCCESS) {
+			return null;
+		}
+		int[] info = (int[]) regQueryInfoKey.invoke(root,
+				new Object[]{new Integer(handles[0])});
+
+		int count = info[0]; // Fix: info[2] was being used here with wrong results. Suggested by davenpcj, confirmed by Petrucio
+		int maxlen = info[3]; // value length max
+		for(int index = 0; index < count; index++) {
+			byte[] name = (byte[]) regEnumKeyEx.invoke(root, new Object[]{
+				new Integer(handles[0]), new Integer(index), new Integer(maxlen + 1)
+			});
+			results.add(new String(name).trim());
+		}
+		regCloseKey.invoke(root, new Object[]{new Integer(handles[0])});
+		return results;
 	}
 
 	/**
@@ -172,6 +235,13 @@ public class WinRegistry {
 		}
 	}
 
+	private static int[] createKey(Preferences root, int hkey, String key)
+			throws IllegalArgumentException, IllegalAccessException,
+			InvocationTargetException {
+		return (int[]) regCreateKeyEx.invoke(root,
+				new Object[]{new Integer(hkey), toCstr(key)});
+	}
+
 	/**
 	 * Write a value in a given key/value name
 	 *
@@ -195,6 +265,19 @@ public class WinRegistry {
 		}
 	}
 
+	private static void writeStringValue(Preferences root, int hkey, String key, String valueName, String value)
+			throws IllegalArgumentException, IllegalAccessException,
+			InvocationTargetException {
+		int[] handles = (int[]) regOpenKey.invoke(root, new Object[]{
+			new Integer(hkey), toCstr(key), new Integer(KEY_ALL_ACCESS)});
+
+		regSetValueEx.invoke(root,
+				new Object[]{
+					new Integer(handles[0]), toCstr(valueName), toCstr(value)
+				});
+		regCloseKey.invoke(root, new Object[]{new Integer(handles[0])});
+	}
+
 	/**
 	 * Delete a given key
 	 *
@@ -216,6 +299,14 @@ public class WinRegistry {
 		if(rc != REG_SUCCESS) {
 			throw new IllegalArgumentException("rc=" + rc + "  key=" + key);
 		}
+	}
+
+	private static int deleteKey(Preferences root, int hkey, String key)
+			throws IllegalArgumentException, IllegalAccessException,
+			InvocationTargetException {
+		int rc = ((Integer) regDeleteKey.invoke(root,
+				new Object[]{new Integer(hkey), toCstr(key)})).intValue();
+		return rc;  // can REG_NOTFOUND, REG_ACCESSDENIED, REG_SUCCESS
 	}
 
 	/**
@@ -257,97 +348,6 @@ public class WinRegistry {
 				})).intValue();
 		regCloseKey.invoke(root, new Object[]{new Integer(handles[0])});
 		return rc;
-	}
-
-	private static int deleteKey(Preferences root, int hkey, String key)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		int rc = ((Integer) regDeleteKey.invoke(root,
-				new Object[]{new Integer(hkey), toCstr(key)})).intValue();
-		return rc;  // can REG_NOTFOUND, REG_ACCESSDENIED, REG_SUCCESS
-	}
-
-	private static String readString(Preferences root, int hkey, String key, String value)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		int[] handles = (int[]) regOpenKey.invoke(root, new Object[]{
-			new Integer(hkey), toCstr(key), new Integer(KEY_READ)});
-		if(handles[1] != REG_SUCCESS) {
-			return null;
-		}
-		byte[] valb = (byte[]) regQueryValueEx.invoke(root, new Object[]{
-			new Integer(handles[0]), toCstr(value)});
-		regCloseKey.invoke(root, new Object[]{new Integer(handles[0])});
-		return (valb != null ? new String(valb).trim() : null);
-	}
-
-	private static Map<String, String> readStringValues(Preferences root, int hkey, String key)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		HashMap<String, String> results = new HashMap<String, String>();
-		int[] handles = (int[]) regOpenKey.invoke(root, new Object[]{
-			new Integer(hkey), toCstr(key), new Integer(KEY_READ)});
-		if(handles[1] != REG_SUCCESS) {
-			return null;
-		}
-		int[] info = (int[]) regQueryInfoKey.invoke(root,
-				new Object[]{new Integer(handles[0])});
-
-		int count = info[0]; // count
-		int maxlen = info[3]; // value length max
-		for(int index = 0; index < count; index++) {
-			byte[] name = (byte[]) regEnumValue.invoke(root, new Object[]{
-				new Integer(handles[0]), new Integer(index), new Integer(maxlen + 1)});
-			String value = readString(hkey, key, new String(name));
-			results.put(new String(name).trim(), value);
-		}
-		regCloseKey.invoke(root, new Object[]{new Integer(handles[0])});
-		return results;
-	}
-
-	private static List<String> readStringSubKeys(Preferences root, int hkey, String key)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		List<String> results = new ArrayList<String>();
-		int[] handles = (int[]) regOpenKey.invoke(root, new Object[]{
-			new Integer(hkey), toCstr(key), new Integer(KEY_READ)
-		});
-		if(handles[1] != REG_SUCCESS) {
-			return null;
-		}
-		int[] info = (int[]) regQueryInfoKey.invoke(root,
-				new Object[]{new Integer(handles[0])});
-
-		int count = info[0]; // Fix: info[2] was being used here with wrong results. Suggested by davenpcj, confirmed by Petrucio
-		int maxlen = info[3]; // value length max
-		for(int index = 0; index < count; index++) {
-			byte[] name = (byte[]) regEnumKeyEx.invoke(root, new Object[]{
-				new Integer(handles[0]), new Integer(index), new Integer(maxlen + 1)
-			});
-			results.add(new String(name).trim());
-		}
-		regCloseKey.invoke(root, new Object[]{new Integer(handles[0])});
-		return results;
-	}
-
-	private static int[] createKey(Preferences root, int hkey, String key)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		return (int[]) regCreateKeyEx.invoke(root,
-				new Object[]{new Integer(hkey), toCstr(key)});
-	}
-
-	private static void writeStringValue(Preferences root, int hkey, String key, String valueName, String value)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		int[] handles = (int[]) regOpenKey.invoke(root, new Object[]{
-			new Integer(hkey), toCstr(key), new Integer(KEY_ALL_ACCESS)});
-
-		regSetValueEx.invoke(root,
-				new Object[]{
-					new Integer(handles[0]), toCstr(valueName), toCstr(value)
-				});
-		regCloseKey.invoke(root, new Object[]{new Integer(handles[0])});
 	}
 
 	// utility

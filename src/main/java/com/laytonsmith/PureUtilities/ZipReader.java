@@ -202,6 +202,75 @@ public class ZipReader {
 		return isZipped;
 	}
 
+	/**
+	 * Returns a raw input stream for this file. If you just need the string contents, it would probably be easer to use
+	 * getFileContents instead, however, this method is necessary for accessing binary files.
+	 *
+	 * @return An InputStream that will read the specified file
+	 * @throws FileNotFoundException If the file is not found
+	 * @throws IOException If you specify a file that isn't a zip file as if it were a folder
+	 */
+	public InputStream getInputStream() throws FileNotFoundException, IOException {
+		if(!isZipped) {
+			return new FileInputStream(file);
+		} else {
+			return getFile(chainedPath, topZip.getAbsolutePath(), new ZipInputStream(new FileInputStream(topZip)));
+		}
+	}
+
+	/**
+	 * If the file is a simple text file, this function is your best option. It returns the contents of the file as a
+	 * string.
+	 *
+	 * @return
+	 * @throws FileNotFoundException If the file is not found
+	 * @throws IOException If you specify a file that isn't a zip file as if it were a folder
+	 */
+	public String getFileContents() throws FileNotFoundException, IOException {
+		if(!isZipped) {
+			return FileUtil.read(file);
+		} else {
+			return StreamUtils.GetString(getInputStream());
+		}
+	}
+
+	/**
+	 * Delegates the equals check to the underlying File object.
+	 *
+	 * @param obj
+	 * @return
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == null) {
+			return false;
+		}
+		if(getClass() != obj.getClass()) {
+			return false;
+		}
+		final ZipReader other = (ZipReader) obj;
+		return other.file.equals(this.file);
+	}
+
+	/**
+	 * Delegates the hashCode to the underlying File object.
+	 *
+	 * @return
+	 */
+	@Override
+	public int hashCode() {
+		return file.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return file.toString();
+	}
+
+	public File getFile() {
+		return file;
+	}
+
 	/*
 	 * This function recurses down into a zip file, ultimately returning the InputStream for the file,
 	 * or throwing exceptions if it can't be found.
@@ -276,75 +345,6 @@ public class ZipReader {
 			//if not, it's due to this not being a zip file
 			throw new IOException(zipName + " is not a zip file!");
 		}
-	}
-
-	/**
-	 * Returns a raw input stream for this file. If you just need the string contents, it would probably be easer to use
-	 * getFileContents instead, however, this method is necessary for accessing binary files.
-	 *
-	 * @return An InputStream that will read the specified file
-	 * @throws FileNotFoundException If the file is not found
-	 * @throws IOException If you specify a file that isn't a zip file as if it were a folder
-	 */
-	public InputStream getInputStream() throws FileNotFoundException, IOException {
-		if(!isZipped) {
-			return new FileInputStream(file);
-		} else {
-			return getFile(chainedPath, topZip.getAbsolutePath(), new ZipInputStream(new FileInputStream(topZip)));
-		}
-	}
-
-	/**
-	 * If the file is a simple text file, this function is your best option. It returns the contents of the file as a
-	 * string.
-	 *
-	 * @return
-	 * @throws FileNotFoundException If the file is not found
-	 * @throws IOException If you specify a file that isn't a zip file as if it were a folder
-	 */
-	public String getFileContents() throws FileNotFoundException, IOException {
-		if(!isZipped) {
-			return FileUtil.read(file);
-		} else {
-			return StreamUtils.GetString(getInputStream());
-		}
-	}
-
-	/**
-	 * Delegates the equals check to the underlying File object.
-	 *
-	 * @param obj
-	 * @return
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if(obj == null) {
-			return false;
-		}
-		if(getClass() != obj.getClass()) {
-			return false;
-		}
-		final ZipReader other = (ZipReader) obj;
-		return other.file.equals(this.file);
-	}
-
-	/**
-	 * Delegates the hashCode to the underlying File object.
-	 *
-	 * @return
-	 */
-	@Override
-	public int hashCode() {
-		return file.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return file.toString();
-	}
-
-	public File getFile() {
-		return file;
 	}
 
 	private void initList() throws IOException {

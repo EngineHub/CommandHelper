@@ -24,36 +24,20 @@ import java.util.Set;
 public class DataSourceFactory {
 
 	private static final Map<URI, DataSource> dataSourcePool = new HashMap<>();
+	private static Map<String, Class> protocolHandlers;
 
-	/**
-	 * Given a connection uri and the connection options, creates and returns a new DataSource object, which can be used
-	 * to do direct operations on the data source. Generally, you should go through the PersistenceNetwork class to
-	 * perform operations on the network as a whole, however.
-	 *
-	 * @param uri The full connection uri
-	 * @param options The connection mixin options
-	 * @return A new DataSource object
-	 * @throws DataSourceException If there is a problem connecting to the data source
-	 * @throws URISyntaxException If the URI is invalid
-	 */
-	public static DataSource GetDataSource(String uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException, URISyntaxException {
-		return GetDataSource(new URI(uri), options);
-	}
-
-	/**
-	 * Internally, DataSourceFactory re-uses connections, for efficiency reasons. When the server is shutdown, a clean
-	 * shutdown of all the cached connections is desired. This method will disconnect all persistently connecting
-	 * connections, as well as delete them from the cache.
-	 */
-	public static void DisconnectAll() {
-		for(DataSource ds : dataSourcePool.values()) {
-			try {
-				ds.disconnect();
-			} catch (DataSourceException ex) {
-				CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.WARNING, ex.getMessage(), Target.UNKNOWN);
+	private static void init() {
+		if(protocolHandlers == null) {
+			protocolHandlers = new HashMap<String, Class>();
+			Set<Class<?>> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(datasource.class);
+			for(Class<?> c : classes) {
+				if(DataSource.class.isAssignableFrom(c)) {
+					protocolHandlers.put((c.getAnnotation(datasource.class)).value(), c);
+				} else {
+					throw new Error(c.getName() + " does not implement DataSource!");
+				}
 			}
 		}
-		dataSourcePool.clear();
 	}
 
 	/**
@@ -114,20 +98,20 @@ public class DataSourceFactory {
 			throw new DataSourceException("Could not instantiate a DataSource for " + c.getName() + ": " + ex.getMessage(), ex);
 		}
 	}
-	private static Map<String, Class> protocolHandlers;
 
-	private static void init() {
-		if(protocolHandlers == null) {
-			protocolHandlers = new HashMap<String, Class>();
-			Set<Class<?>> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(datasource.class);
-			for(Class<?> c : classes) {
-				if(DataSource.class.isAssignableFrom(c)) {
-					protocolHandlers.put((c.getAnnotation(datasource.class)).value(), c);
-				} else {
-					throw new Error(c.getName() + " does not implement DataSource!");
-				}
-			}
-		}
+	/**
+	 * Given a connection uri and the connection options, creates and returns a new DataSource object, which can be used
+	 * to do direct operations on the data source. Generally, you should go through the PersistenceNetwork class to
+	 * perform operations on the network as a whole, however.
+	 *
+	 * @param uri The full connection uri
+	 * @param options The connection mixin options
+	 * @return A new DataSource object
+	 * @throws DataSourceException If there is a problem connecting to the data source
+	 * @throws URISyntaxException If the URI is invalid
+	 */
+	public static DataSource GetDataSource(String uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException, URISyntaxException {
+		return GetDataSource(new URI(uri), options);
 	}
 
 	/**
@@ -138,5 +122,21 @@ public class DataSourceFactory {
 	public static Set<String> GetSupportedProtocols() {
 		init();
 		return new HashSet<String>(protocolHandlers.keySet());
+	}
+
+	/**
+	 * Internally, DataSourceFactory re-uses connections, for efficiency reasons. When the server is shutdown, a clean
+	 * shutdown of all the cached connections is desired. This method will disconnect all persistently connecting
+	 * connections, as well as delete them from the cache.
+	 */
+	public static void DisconnectAll() {
+		for(DataSource ds : dataSourcePool.values()) {
+			try {
+				ds.disconnect();
+			} catch (DataSourceException ex) {
+				CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.WARNING, ex.getMessage(), Target.UNKNOWN);
+			}
+		}
+		dataSourcePool.clear();
 	}
 }

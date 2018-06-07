@@ -141,6 +141,15 @@ public class CArray extends Construct implements ArrayAccess {
 		return array;
 	}
 
+	private static Construct[] getArray(Collection<Construct> items) {
+		Construct c[] = new Construct[items.size()];
+		int count = 0;
+		for(Construct cc : items) {
+			c[count++] = cc;
+		}
+		return c;
+	}
+
 	/**
 	 * Returns a List based on the array. This is only applicable if this is a normal array.
 	 *
@@ -161,15 +170,6 @@ public class CArray extends Construct implements ArrayAccess {
 	 */
 	protected SortedMap<String, Construct> getAssociativeArray() {
 		return associative_array;
-	}
-
-	private static Construct[] getArray(Collection<Construct> items) {
-		Construct c[] = new Construct[items.size()];
-		int count = 0;
-		for(Construct cc : items) {
-			c[count++] = cc;
-		}
-		return c;
 	}
 
 	/**

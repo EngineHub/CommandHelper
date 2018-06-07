@@ -757,6 +757,19 @@ public final class Interpreter {
 		}
 	}
 
+	/**
+	 * Works like {@link #execute(String, List, File)} but reads the file in for you.
+	 *
+	 * @param script Path the the file
+	 * @param args Arguments to be passed to the script
+	 * @throws ConfigCompileException If there is a compile error in the script
+	 * @throws IOException
+	 */
+	public void execute(File script, List<String> args) throws ConfigCompileException, IOException, ConfigCompileGroupException {
+		String scriptString = FileUtil.read(script);
+		execute(scriptString, args, script);
+	}
+
 	public boolean doBuiltin(String script) {
 		List<String> args = StringUtils.ArgParser(script);
 		if(args.size() > 0) {
@@ -821,19 +834,6 @@ public final class Interpreter {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Works like {@link #execute(String, List, File)} but reads the file in for you.
-	 *
-	 * @param script Path the the file
-	 * @param args Arguments to be passed to the script
-	 * @throws ConfigCompileException If there is a compile error in the script
-	 * @throws IOException
-	 */
-	public void execute(File script, List<String> args) throws ConfigCompileException, IOException, ConfigCompileGroupException {
-		String scriptString = FileUtil.read(script);
-		execute(scriptString, args, script);
 	}
 
 	public static void install() {
@@ -1004,6 +1004,11 @@ public final class Interpreter {
 		}
 
 		@Override
+		public MCColor GetColor(String colorName, Target t) throws CREFormatException {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
 		public MCPattern GetPattern(MCDyeColor color, MCPatternShape shape) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
@@ -1061,11 +1066,6 @@ public final class Interpreter {
 		@Override
 		public MCPlugin GetPlugin() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
-		}
-
-		@Override
-		public MCColor GetColor(String colorName, Target t) throws CREFormatException {
-			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		@Override

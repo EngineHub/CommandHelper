@@ -812,6 +812,11 @@ public class StaticTest {
 		}
 
 		@Override
+		public MCColor GetColor(String colorName, Target t) throws CREFormatException {
+			return ConvertorHelper.GetColor(colorName, t);
+		}
+
+		@Override
 		public MCPattern GetPattern(MCDyeColor color, MCPatternShape shape) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
@@ -869,11 +874,6 @@ public class StaticTest {
 		@Override
 		public MCPlugin GetPlugin() {
 			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		@Override
-		public MCColor GetColor(String colorName, Target t) throws CREFormatException {
-			return ConvertorHelper.GetColor(colorName, t);
 		}
 
 		@Override

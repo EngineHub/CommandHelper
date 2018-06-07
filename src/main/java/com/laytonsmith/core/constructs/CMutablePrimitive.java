@@ -48,6 +48,11 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 		this.value = value;
 	}
 
+	@Override
+	public void set(Construct index, Construct c, Target t) {
+		throw new CRECastException("mutable_primitives cannot have values set in them", t);
+	}
+
 	/**
 	 * Sets the value as if
 	 * {@link #set(com.laytonsmith.core.constructs.Construct, com.laytonsmith.core.constructs.Target)} were called, then
@@ -63,6 +68,11 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	public Construct get() {
+		return value;
+	}
+
+	@Override
+	public Construct get(Construct index, Target t) {
 		return value;
 	}
 
@@ -93,11 +103,6 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 		} else {
 			return 0;
 		}
-	}
-
-	@Override
-	public Construct get(Construct index, Target t) {
-		return value;
 	}
 
 	@Override
@@ -135,11 +140,6 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	@Override
 	public void push(Construct c, Integer i, Target t) {
 		set(c, t);
-	}
-
-	@Override
-	public void set(Construct index, Construct c, Target t) {
-		throw new CRECastException("mutable_primitives cannot have values set in them", t);
 	}
 
 	@Override

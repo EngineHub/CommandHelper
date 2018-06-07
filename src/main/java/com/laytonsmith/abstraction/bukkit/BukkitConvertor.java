@@ -612,6 +612,11 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
+	public MCColor GetColor(String colorName, Target t) throws CREFormatException {
+		return ConvertorHelper.GetColor(colorName, t);
+	}
+
+	@Override
 	public MCPattern GetPattern(MCDyeColor color, MCPatternShape shape) {
 		return new BukkitMCPattern(new Pattern(BukkitMCDyeColor.getConvertor().getConcreteEnum(color),
 				BukkitMCPatternShape.getConvertor().getConcreteEnum(shape)));
@@ -728,11 +733,6 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCPlugin GetPlugin() {
 		return new BukkitMCPlugin(CommandHelperPlugin.self);
-	}
-
-	@Override
-	public MCColor GetColor(String colorName, Target t) throws CREFormatException {
-		return ConvertorHelper.GetColor(colorName, t);
 	}
 
 	@Override

@@ -45,16 +45,6 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 	}
 
 	@Override
-	public final Construct get(String index, Target t) {
-		try {
-			int i = Integer.parseInt(index);
-			return get(i, t);
-		} catch (NumberFormatException e) {
-			throw new CREFormatException("Expecting numerical index, but recieved " + index, t);
-		}
-	}
-
-	@Override
 	public long size() {
 		return val().length();
 	}
@@ -91,6 +81,22 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 	}
 
 	@Override
+	public final Construct get(Construct index, Target t) throws ConfigRuntimeException {
+		int i = Static.getInt32(index, t);
+		return get(i, t);
+	}
+
+	@Override
+	public final Construct get(String index, Target t) {
+		try {
+			int i = Integer.parseInt(index);
+			return get(i, t);
+		} catch (NumberFormatException e) {
+			throw new CREFormatException("Expecting numerical index, but recieved " + index, t);
+		}
+	}
+
+	@Override
 	public boolean isAssociative() {
 		return false;
 	}
@@ -98,12 +104,6 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 	@Override
 	public Set<Construct> keySet() {
 		throw new CREIndexOverflowException("Not supported.", Target.UNKNOWN);
-	}
-
-	@Override
-	public final Construct get(Construct index, Target t) throws ConfigRuntimeException {
-		int i = Static.getInt32(index, t);
-		return get(i, t);
 	}
 
 	@Override

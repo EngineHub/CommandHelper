@@ -171,6 +171,42 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
 	}
 
+	private static void PrintMessage(StringBuilder log, StringBuilder console, StringBuilder player, String type, String message, Throwable ex, List<StackTraceElement> st) {
+		log.append(type).append(message).append("\n");
+		console.append(TermColors.RED).append(type).append(TermColors.WHITE).append(message).append("\n");
+		player.append(MCChatColor.RED).append(type).append(MCChatColor.WHITE).append(message).append("\n");
+		for(StackTraceElement e : st) {
+			Target t = e.getDefinedAt();
+			String proc = e.getProcedureName();
+			File file = t.file();
+			int line = t.line();
+			int column = t.col();
+			String filepath;
+			String simplepath;
+			if(file == null) {
+				filepath = simplepath = "Unknown Source";
+			} else {
+				filepath = file.getPath();
+				simplepath = file.getName();
+			}
+
+			log.append("\t").append(proc).append(":").append(filepath).append(":")
+					.append(line).append(".")
+					.append(column).append("\n");
+			console.append("\t").append(TermColors.GREEN).append(proc)
+					.append(TermColors.WHITE).append(":")
+					.append(TermColors.YELLOW).append(filepath)
+					.append(TermColors.WHITE).append(":")
+					.append(TermColors.CYAN).append(line).append(".").append(column).append("\n");
+			player.append("\t").append(MCChatColor.GREEN).append(proc)
+					.append(MCChatColor.WHITE).append(":")
+					.append(MCChatColor.YELLOW).append(simplepath)
+					.append(MCChatColor.WHITE).append(":")
+					.append(MCChatColor.AQUA).append(line).append(".").append(column).append("\n");
+
+		}
+	}
+
 	/**
 	 * If the Reaction returned by GetReaction is to report the exception, this function should be used to standardize
 	 * the report format. If the error message wouldn't be very useful by itself, or if a hint is desired, an optional
@@ -244,42 +280,6 @@ public class ConfigRuntimeException extends RuntimeException {
 		//Player
 		if(currentPlayer != null) {
 			currentPlayer.sendMessage(player.toString());
-		}
-	}
-
-	private static void PrintMessage(StringBuilder log, StringBuilder console, StringBuilder player, String type, String message, Throwable ex, List<StackTraceElement> st) {
-		log.append(type).append(message).append("\n");
-		console.append(TermColors.RED).append(type).append(TermColors.WHITE).append(message).append("\n");
-		player.append(MCChatColor.RED).append(type).append(MCChatColor.WHITE).append(message).append("\n");
-		for(StackTraceElement e : st) {
-			Target t = e.getDefinedAt();
-			String proc = e.getProcedureName();
-			File file = t.file();
-			int line = t.line();
-			int column = t.col();
-			String filepath;
-			String simplepath;
-			if(file == null) {
-				filepath = simplepath = "Unknown Source";
-			} else {
-				filepath = file.getPath();
-				simplepath = file.getName();
-			}
-
-			log.append("\t").append(proc).append(":").append(filepath).append(":")
-					.append(line).append(".")
-					.append(column).append("\n");
-			console.append("\t").append(TermColors.GREEN).append(proc)
-					.append(TermColors.WHITE).append(":")
-					.append(TermColors.YELLOW).append(filepath)
-					.append(TermColors.WHITE).append(":")
-					.append(TermColors.CYAN).append(line).append(".").append(column).append("\n");
-			player.append("\t").append(MCChatColor.GREEN).append(proc)
-					.append(MCChatColor.WHITE).append(":")
-					.append(MCChatColor.YELLOW).append(simplepath)
-					.append(MCChatColor.WHITE).append(":")
-					.append(MCChatColor.AQUA).append(line).append(".").append(column).append("\n");
-
 		}
 	}
 

@@ -228,20 +228,6 @@ public class VirtualFileSystem {
 	}
 
 	/**
-	 * Writes an InputStream to a file. Requires write permission.
-	 *
-	 * @param file
-	 * @param data
-	 */
-	public void write(VirtualFile file, InputStream data) {
-		try {
-			write(file, StreamUtils.GetBytes(data));
-		} catch (IOException ex) {
-			throw new RuntimeException(ex);
-		}
-	}
-
-	/**
 	 * Reads a file as a stream. Requires read permission.
 	 *
 	 * @param file
@@ -263,6 +249,20 @@ public class VirtualFileSystem {
 		assertWritePermission(file);
 		FileSystemLayer real = normalize(file);
 		real.writeByteArray(bytes);
+	}
+
+	/**
+	 * Writes an InputStream to a file. Requires write permission.
+	 *
+	 * @param file
+	 * @param data
+	 */
+	public void write(VirtualFile file, InputStream data) {
+		try {
+			write(file, StreamUtils.GetBytes(data));
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
 	}
 
 	/**

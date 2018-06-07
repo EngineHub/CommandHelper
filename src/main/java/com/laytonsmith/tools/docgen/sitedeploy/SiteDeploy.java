@@ -288,6 +288,155 @@ public class SiteDeploy {
 				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript).deploy();
 	}
 
+	String apiJson;
+	String apiJsonVersion;
+
+	@SuppressWarnings("StringEquality")
+	private void deploy() throws InterruptedException, IOException {
+		apiJson = JSONValue.toJSONString(new APIBuilder().build());
+		apiJsonVersion = getLocalMD5(StreamUtils.GetInputStream(apiJson));
+		deployResources();
+		deployFrontPages();
+		deployLearningTrail();
+		deployAPI();
+		deployEventAPI();
+		deployFunctions();
+		deployEvents();
+		deployObjects();
+		deployAPIJSON();
+		Runnable generateFinalizer = new Runnable() {
+			@Override
+			public void run() {
+				// Just us left, shut us down
+				if(generateQueue.getQueue().isEmpty()) {
+					generateQueue.shutdown();
+				} else {
+					// Oops, we're a bit premature. Schedule us to run again.
+					generateQueue.submit(this);
+				}
+			}
+		};
+		generateQueue.submit(generateFinalizer);
+		generateQueue.awaitTermination(1, TimeUnit.DAYS);
+		Runnable uploadFinalizer = new Runnable() {
+			@Override
+			public void run() {
+				if(uploadQueue.getQueue().isEmpty()) {
+					uploadQueue.shutdown();
+				} else {
+					uploadQueue.submit(this);
+				}
+			}
+		};
+		uploadQueue.submit(uploadFinalizer);
+		uploadQueue.awaitTermination(1, TimeUnit.DAYS);
+		dm.waitForThreads();
+		deploymentMethod.finish();
+		// Next, we need to validate the pages
+		System.out.println();
+		if(doValidation) {
+			System.out.println("Upload complete, running html5 validation");
+			int filesValidated = 0;
+			int specifiedErrors = 0;
+			try {
+				for(Map.Entry<String, String> e : uploadedPages.entrySet()) {
+					Map<String, List<String>> headers = new HashMap<>();
+					RequestSettings settings = new RequestSettings();
+					//settings.setLogger(Logger.getLogger(SiteDeploy.class.getName()));
+					settings.setFollowRedirects(true);
+					headers.put("Content-Type", Arrays.asList(new String[]{"text/html; charset=utf-8"}));
+					headers.put("Content-Encoding", Arrays.asList(new String[]{"gzip"}));
+					headers.put("Accept-Encoding", Arrays.asList(new String[]{"gzip"}));
+					settings.setHeaders(headers);
+
+					byte[] outStream = e.getValue().getBytes("UTF-8");
+					ByteArrayOutputStream out = new ByteArrayOutputStream(outStream.length);
+					try(GZIPOutputStream gz = new GZIPOutputStream(out)) {
+						gz.write(outStream);
+					}
+					byte[] param = out.toByteArray();
+					settings.setRawParameter(param);
+					settings.setTimeout(10000);
+					settings.setMethod(HTTPMethod.POST);
+					HTTPResponse response = WebUtility.GetPage(new URL(validatorUrl + "?out=gnu"), settings);
+
+					if(response.getResponseCode() != 200) {
+						System.out.println(Static.MCToANSIColors("Response for "
+								+ MCChatColor.AQUA + e.getKey() + MCChatColor.PLAIN_WHITE + ":"));
+						System.out.println(response.getContent());
+						throw new IOException("Response was non-200, refusing to continue with validation");
+					}
+
+					String[] errors = response.getContent().split("\n");
+					int errorsDisplayed = 0;
+					for(String error : errors) {
+						GNUErrorMessageFormat gnuError = new GNUErrorMessageFormat(error);
+						String supressWarning = "info warning: Section lacks heading. Consider using “h2”-“h6”"
+								+ " elements to add identifying headings to all sections.";
+						if(supressWarning.equals(gnuError.message())) {
+							continue;
+						}
+						// == on String, yes this is what I want
+						if(error == errors[0]) {
+							System.out.println(Static.MCToANSIColors("Response for "
+									+ MCChatColor.AQUA + e.getKey() + MCChatColor.PLAIN_WHITE + ":"));
+						}
+						StringBuilder output = new StringBuilder();
+						switch(gnuError.messageType()) {
+							case ERROR:
+								output.append(MCChatColor.RED);
+								break;
+							case WARNING:
+								output.append(MCChatColor.GOLD);
+								break;
+						}
+						output.append("line ").append(gnuError.fromLine()).append(" ")
+								.append(gnuError.message()).append(MCChatColor.PLAIN_WHITE);
+						String[] page = e.getValue().split("\n");
+						for(int i = gnuError.fromLine(); i < gnuError.toLine() + 1; i++) {
+							output.append("\n").append(page[i - 1]);
+						}
+						output.append("\n");
+						for(int i = 0; i < gnuError.fromColumn() - 1; i++) {
+							output.append(" ");
+						}
+						output.append(MCChatColor.RED).append("^").append(MCChatColor.PLAIN_WHITE);
+						System.out.println(Static.MCToANSIColors(output.toString()));
+						specifiedErrors++;
+						errorsDisplayed++;
+					}
+					filesValidated++;
+				}
+			} catch (IOException ex) {
+				System.err.println("Validation could not occur due to the following exception: " + ex.getMessage());
+				ex.printStackTrace(System.err);
+			}
+			System.out.println("Files validated: " + filesValidated);
+			System.out.println("Errors found: " + specifiedErrors);
+		}
+		if(finalizerScript != null) {
+			System.out.println("Running post-script");
+			if(finalizerScript.getPath().endsWith(".ms")) {
+				try {
+					Interpreter.startWithTTY(finalizerScript, filesChanged, false);
+				} catch (DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+					ex.printStackTrace(System.err);
+				}
+			} else {
+				List<String> args = new ArrayList<>();
+				args.add(finalizerScript.getCanonicalPath());
+				args.addAll(filesChanged);
+				CommandExecutor exec = new CommandExecutor(args.toArray(new String[args.size()]));
+				exec.setSystemInputsAndOutputs();
+				exec.start();
+				exec.waitFor();
+			}
+		}
+		System.out.println("Done!");
+		System.out.println("Summary of changed files (" + filesChanged.size() + ")");
+		System.out.println(StringUtils.Join(filesChanged, "\n"));
+	}
+
 	private final String siteBase;
 	private final String docsBase;
 	private final String resourceBase;
@@ -551,155 +700,6 @@ public class SiteDeploy {
 			}
 		});
 		return g;
-	}
-
-	String apiJson;
-	String apiJsonVersion;
-
-	@SuppressWarnings("StringEquality")
-	private void deploy() throws InterruptedException, IOException {
-		apiJson = JSONValue.toJSONString(new APIBuilder().build());
-		apiJsonVersion = getLocalMD5(StreamUtils.GetInputStream(apiJson));
-		deployResources();
-		deployFrontPages();
-		deployLearningTrail();
-		deployAPI();
-		deployEventAPI();
-		deployFunctions();
-		deployEvents();
-		deployObjects();
-		deployAPIJSON();
-		Runnable generateFinalizer = new Runnable() {
-			@Override
-			public void run() {
-				// Just us left, shut us down
-				if(generateQueue.getQueue().isEmpty()) {
-					generateQueue.shutdown();
-				} else {
-					// Oops, we're a bit premature. Schedule us to run again.
-					generateQueue.submit(this);
-				}
-			}
-		};
-		generateQueue.submit(generateFinalizer);
-		generateQueue.awaitTermination(1, TimeUnit.DAYS);
-		Runnable uploadFinalizer = new Runnable() {
-			@Override
-			public void run() {
-				if(uploadQueue.getQueue().isEmpty()) {
-					uploadQueue.shutdown();
-				} else {
-					uploadQueue.submit(this);
-				}
-			}
-		};
-		uploadQueue.submit(uploadFinalizer);
-		uploadQueue.awaitTermination(1, TimeUnit.DAYS);
-		dm.waitForThreads();
-		deploymentMethod.finish();
-		// Next, we need to validate the pages
-		System.out.println();
-		if(doValidation) {
-			System.out.println("Upload complete, running html5 validation");
-			int filesValidated = 0;
-			int specifiedErrors = 0;
-			try {
-				for(Map.Entry<String, String> e : uploadedPages.entrySet()) {
-					Map<String, List<String>> headers = new HashMap<>();
-					RequestSettings settings = new RequestSettings();
-					//settings.setLogger(Logger.getLogger(SiteDeploy.class.getName()));
-					settings.setFollowRedirects(true);
-					headers.put("Content-Type", Arrays.asList(new String[]{"text/html; charset=utf-8"}));
-					headers.put("Content-Encoding", Arrays.asList(new String[]{"gzip"}));
-					headers.put("Accept-Encoding", Arrays.asList(new String[]{"gzip"}));
-					settings.setHeaders(headers);
-
-					byte[] outStream = e.getValue().getBytes("UTF-8");
-					ByteArrayOutputStream out = new ByteArrayOutputStream(outStream.length);
-					try(GZIPOutputStream gz = new GZIPOutputStream(out)) {
-						gz.write(outStream);
-					}
-					byte[] param = out.toByteArray();
-					settings.setRawParameter(param);
-					settings.setTimeout(10000);
-					settings.setMethod(HTTPMethod.POST);
-					HTTPResponse response = WebUtility.GetPage(new URL(validatorUrl + "?out=gnu"), settings);
-
-					if(response.getResponseCode() != 200) {
-						System.out.println(Static.MCToANSIColors("Response for "
-								+ MCChatColor.AQUA + e.getKey() + MCChatColor.PLAIN_WHITE + ":"));
-						System.out.println(response.getContent());
-						throw new IOException("Response was non-200, refusing to continue with validation");
-					}
-
-					String[] errors = response.getContent().split("\n");
-					int errorsDisplayed = 0;
-					for(String error : errors) {
-						GNUErrorMessageFormat gnuError = new GNUErrorMessageFormat(error);
-						String supressWarning = "info warning: Section lacks heading. Consider using “h2”-“h6”"
-								+ " elements to add identifying headings to all sections.";
-						if(supressWarning.equals(gnuError.message())) {
-							continue;
-						}
-						// == on String, yes this is what I want
-						if(error == errors[0]) {
-							System.out.println(Static.MCToANSIColors("Response for "
-									+ MCChatColor.AQUA + e.getKey() + MCChatColor.PLAIN_WHITE + ":"));
-						}
-						StringBuilder output = new StringBuilder();
-						switch(gnuError.messageType()) {
-							case ERROR:
-								output.append(MCChatColor.RED);
-								break;
-							case WARNING:
-								output.append(MCChatColor.GOLD);
-								break;
-						}
-						output.append("line ").append(gnuError.fromLine()).append(" ")
-								.append(gnuError.message()).append(MCChatColor.PLAIN_WHITE);
-						String[] page = e.getValue().split("\n");
-						for(int i = gnuError.fromLine(); i < gnuError.toLine() + 1; i++) {
-							output.append("\n").append(page[i - 1]);
-						}
-						output.append("\n");
-						for(int i = 0; i < gnuError.fromColumn() - 1; i++) {
-							output.append(" ");
-						}
-						output.append(MCChatColor.RED).append("^").append(MCChatColor.PLAIN_WHITE);
-						System.out.println(Static.MCToANSIColors(output.toString()));
-						specifiedErrors++;
-						errorsDisplayed++;
-					}
-					filesValidated++;
-				}
-			} catch (IOException ex) {
-				System.err.println("Validation could not occur due to the following exception: " + ex.getMessage());
-				ex.printStackTrace(System.err);
-			}
-			System.out.println("Files validated: " + filesValidated);
-			System.out.println("Errors found: " + specifiedErrors);
-		}
-		if(finalizerScript != null) {
-			System.out.println("Running post-script");
-			if(finalizerScript.getPath().endsWith(".ms")) {
-				try {
-					Interpreter.startWithTTY(finalizerScript, filesChanged, false);
-				} catch (DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
-					ex.printStackTrace(System.err);
-				}
-			} else {
-				List<String> args = new ArrayList<>();
-				args.add(finalizerScript.getCanonicalPath());
-				args.addAll(filesChanged);
-				CommandExecutor exec = new CommandExecutor(args.toArray(new String[args.size()]));
-				exec.setSystemInputsAndOutputs();
-				exec.start();
-				exec.waitFor();
-			}
-		}
-		System.out.println("Done!");
-		System.out.println("Summary of changed files (" + filesChanged.size() + ")");
-		System.out.println(StringUtils.Join(filesChanged, "\n"));
 	}
 
 	/**

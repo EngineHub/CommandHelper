@@ -288,9 +288,7 @@ public final class TermColors {
 		StreamUtils.GetSystemOut().flush();
 	}
 
-	public static void pl() {
-		pl("");
-	}
+	private static Scanner scanner;
 
 	public static String prompt() {
 		if(scanner == null) {
@@ -303,10 +301,12 @@ public final class TermColors {
 		return ret;
 	}
 
-	private static Scanner scanner;
-
 	public static void pl(CharSequence c) {
 		StreamUtils.GetSystemOut().println(c + WHITE);
+	}
+
+	public static void pl() {
+		pl("");
 	}
 
 	/**

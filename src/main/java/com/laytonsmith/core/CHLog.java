@@ -204,6 +204,48 @@ public class CHLog {
 	}
 
 	/**
+	 * Equivalent to Log(modules, level, message, t, true);
+	 *
+	 * @param modules
+	 * @param level
+	 * @param message
+	 * @param t
+	 */
+	public void Log(Tags modules, LogLevel level, String message, Target t) {
+		Log(modules, level, message, t, true);
+	}
+
+	/**
+	 * Logs the given message at the specified level.
+	 *
+	 * @param modules
+	 * @param level
+	 * @param message
+	 * @param t
+	 * @param printScreen
+	 */
+	public void Log(Tags modules, LogLevel level, String message, Target t, boolean printScreen) {
+		LogLevel moduleLevel = GetLevel(modules);
+		if(moduleLevel == LogLevel.OFF && !Prefs.ScreamErrors()) {
+			return; //Bail as quick as we can!
+		}
+		if(moduleLevel.level >= level.level || (moduleLevel == LogLevel.ERROR && Prefs.ScreamErrors())) {
+			//We want to do the log
+			try {
+				Static.LogDebug(root, "[" + Implementation.GetServerType().getBranding() + "][" + level.name() + "][" + modules.name() + "] " + message + (t != Target.UNKNOWN ? " " + t.toString() : ""),
+						level, printScreen);
+			} catch (IOException e) {
+				//Well, shoot.
+				if(level.level <= 1) {
+					StreamUtils.GetSystemErr().println("Was going to print information to the log, but instead, there was"
+							+ " an IOException: ");
+					e.printStackTrace(StreamUtils.GetSystemErr());
+				}
+			}
+		}
+	}
+
+	/**
 	 * Logs the given exception at the ERROR level.
 	 *
 	 * @param modules
@@ -267,48 +309,6 @@ public class CHLog {
 	 */
 	public void v(Tags modules, String message, Target t) {
 		Log(modules, LogLevel.VERBOSE, message, t);
-	}
-
-	/**
-	 * Equivalent to Log(modules, level, message, t, true);
-	 *
-	 * @param modules
-	 * @param level
-	 * @param message
-	 * @param t
-	 */
-	public void Log(Tags modules, LogLevel level, String message, Target t) {
-		Log(modules, level, message, t, true);
-	}
-
-	/**
-	 * Logs the given message at the specified level.
-	 *
-	 * @param modules
-	 * @param level
-	 * @param message
-	 * @param t
-	 * @param printScreen
-	 */
-	public void Log(Tags modules, LogLevel level, String message, Target t, boolean printScreen) {
-		LogLevel moduleLevel = GetLevel(modules);
-		if(moduleLevel == LogLevel.OFF && !Prefs.ScreamErrors()) {
-			return; //Bail as quick as we can!
-		}
-		if(moduleLevel.level >= level.level || (moduleLevel == LogLevel.ERROR && Prefs.ScreamErrors())) {
-			//We want to do the log
-			try {
-				Static.LogDebug(root, "[" + Implementation.GetServerType().getBranding() + "][" + level.name() + "][" + modules.name() + "] " + message + (t != Target.UNKNOWN ? " " + t.toString() : ""),
-						level, printScreen);
-			} catch (IOException e) {
-				//Well, shoot.
-				if(level.level <= 1) {
-					StreamUtils.GetSystemErr().println("Was going to print information to the log, but instead, there was"
-							+ " an IOException: ");
-					e.printStackTrace(StreamUtils.GetSystemErr());
-				}
-			}
-		}
 	}
 
 	public static class MsgBundle {

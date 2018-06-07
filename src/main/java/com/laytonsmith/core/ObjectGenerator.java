@@ -1345,18 +1345,6 @@ public class ObjectGenerator {
 		return ret;
 	}
 
-	public MCMaterial material(String name, Target t) {
-		try {
-			return StaticLayer.GetMaterial(name.toUpperCase());
-		} catch (IllegalArgumentException exception) {
-			throw new CREFormatException("Unknown material type: " + name, t);
-		}
-	}
-
-	public MCMaterial material(Construct name, Target t) {
-		return material(name.val(), t);
-	}
-
 	public MCRecipe recipe(Construct c, Target t) {
 		if(!(c instanceof CArray)) {
 			throw new CRECastException("Expected array but recieved " + c.getCType().name(), t);
@@ -1461,6 +1449,18 @@ public class ObjectGenerator {
 			default:
 				throw new CREFormatException("Could not find valid recipe type.", t);
 		}
+	}
+
+	public MCMaterial material(String name, Target t) {
+		try {
+			return StaticLayer.GetMaterial(name.toUpperCase());
+		} catch (IllegalArgumentException exception) {
+			throw new CREFormatException("Unknown material type: " + name, t);
+		}
+	}
+
+	public MCMaterial material(Construct name, Target t) {
+		return material(name.val(), t);
 	}
 
 	/**
