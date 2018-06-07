@@ -60,7 +60,7 @@ public class FederationMasterSocket {
 			try {
 				socket.close();
 				closed = true;
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				Logger.getLogger(FederationMasterSocket.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -118,10 +118,10 @@ public class FederationMasterSocket {
 												if(s.isConnected()) {
 													s.close();
 												}
-											} catch(IOException ex) {
+											} catch (IOException ex) {
 												Logger.getLogger(FederationServer.class.getName()).log(Level.SEVERE, null, ex);
 											}
-										} catch(InterruptedException ex) {
+										} catch (InterruptedException ex) {
 											// Ok, it's good.
 										}
 									}
@@ -144,7 +144,7 @@ public class FederationMasterSocket {
 								try {
 									version = FederationVersion.fromVersion(sVersion);
 									communicator.writeUnencryptedLine("VERSION OK");
-								} catch(IllegalArgumentException ex) {
+								} catch (IllegalArgumentException ex) {
 									// The version is unsupported. The client is newer than this server knows how
 									// to deal with. So, write out the version error data, then close the socket and
 									// continue.
@@ -186,7 +186,7 @@ public class FederationMasterSocket {
 									}
 								}
 
-							} catch(IOException | DataSourceException ex) {
+							} catch (IOException | DataSourceException ex) {
 								Logger.getLogger(FederationMasterSocket.class.getName()).log(Level.SEVERE, null, ex);
 							}
 

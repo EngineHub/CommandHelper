@@ -288,7 +288,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			Double d1 = Double.valueOf(this.value);
 			Double d2 = Double.valueOf(c.value);
 			return d1.compareTo(d2);
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			return this.value.compareTo(c.value);
 		}
 	}

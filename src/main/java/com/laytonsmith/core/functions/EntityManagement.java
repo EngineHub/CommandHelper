@@ -207,7 +207,7 @@ public class EntityManagement {
 						int x = Static.getInt32(args[1], t);
 						int z = Static.getInt32(args[2], t);
 						c = w.getChunkAt(x, z);
-					} catch(ConfigRuntimeException cre) {
+					} catch (ConfigRuntimeException cre) {
 						CArray l = CArray.GetAssociativeArray(t);
 						l.set("x", args[1], t);
 						l.set("z", args[2], t);
@@ -283,7 +283,7 @@ public class EntityManagement {
 			MCEntity e;
 			try {
 				e = Static.getEntity(args[0], t);
-			} catch(ConfigRuntimeException cre) {
+			} catch (ConfigRuntimeException cre) {
 				return CBoolean.FALSE;
 			}
 			return CBoolean.TRUE;
@@ -314,7 +314,7 @@ public class EntityManagement {
 
 			try {
 				e = Static.getEntity(args[0], t);
-			} catch(ConfigRuntimeException cre) {
+			} catch (ConfigRuntimeException cre) {
 				return CBoolean.FALSE;
 			}
 
@@ -610,7 +610,7 @@ public class EntityManagement {
 			MCEntity ent;
 			try {
 				ent = Static.getEntity(args[0], t);
-			} catch(ConfigRuntimeException cre) {
+			} catch (ConfigRuntimeException cre) {
 				return CNull.NULL;
 			}
 			return new CString(ent.getType().name(), t);
@@ -735,17 +735,17 @@ public class EntityManagement {
 			if(args.length >= 1) {
 				try {
 					shooter_id = Static.GetPlayer(args[0], t).getUniqueId();
-				} catch(ConfigRuntimeException notPlayer) {
+				} catch (ConfigRuntimeException notPlayer) {
 					try {
 						shooter_id = Static.GetUUID(args[0], t);
-					} catch(ConfigRuntimeException notEntIdEither) {
+					} catch (ConfigRuntimeException notEntIdEither) {
 					}
 				}
 
 				if(shooter_id == null) {
 					try {
 						from = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
-					} catch(ConfigRuntimeException badLocation) {
+					} catch (ConfigRuntimeException badLocation) {
 					}
 				}
 
@@ -760,17 +760,17 @@ public class EntityManagement {
 			if(args.length >= 3) {
 				try {
 					target_id = Static.GetPlayer(args[2], t).getUniqueId();
-				} catch(ConfigRuntimeException notPlayer) {
+				} catch (ConfigRuntimeException notPlayer) {
 					try {
 						target_id = Static.GetUUID(args[2], t);
-					} catch(ConfigRuntimeException notEntIdEither) {
+					} catch (ConfigRuntimeException notEntIdEither) {
 					}
 				}
 
 				if(target_id == null) {
 					try {
 						to = ObjectGenerator.GetGenerator().location(args[2], null, t);
-					} catch(ConfigRuntimeException badLocation) {
+					} catch (ConfigRuntimeException badLocation) {
 					}
 				}
 
@@ -797,13 +797,13 @@ public class EntityManagement {
 				if(shooter_id != null && to == null) {
 					try {
 						projectile_shoot = MCProjectileType.valueOf(args[1].val().toUpperCase());
-					} catch(IllegalArgumentException badEnum) {
+					} catch (IllegalArgumentException badEnum) {
 						throw new CREFormatException(args[1] + " is not a valid Projectile", t);
 					}
 				} else {
 					try {
 						entity_shoot = MCEntityType.valueOf(args[1].val().toUpperCase());
-					} catch(IllegalArgumentException badEnum) {
+					} catch (IllegalArgumentException badEnum) {
 						throw new CREBadEntityTypeException(args[1] + " is not a valid entity type", t);
 					}
 				}
@@ -940,7 +940,7 @@ public class EntityManagement {
 			for(String type : types) {
 				try {
 					entityType = MCEntityType.valueOf(type.toUpperCase());
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					throw new CREBadEntityException(String.format("Wrong entity type: %s", type), t);
 				}
 				newTypes.add(entityType.name());
@@ -1038,7 +1038,7 @@ public class EntityManagement {
 			MCEntityEffect mee;
 			try {
 				mee = MCEntityEffect.valueOf(args[1].val().toUpperCase());
-			} catch(IllegalArgumentException iae) {
+			} catch (IllegalArgumentException iae) {
 				throw new CREFormatException("Unknown effect at arg 2.", t);
 			}
 			ent.playEffect(mee);
@@ -1076,7 +1076,7 @@ public class EntityManagement {
 			MCEntity le = Static.getEntity(args[0], t);
 			try {
 				return new CString(le.getCustomName(), t);
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CRECastException(e.getMessage(), t);
 			}
 		}
@@ -1105,7 +1105,7 @@ public class EntityManagement {
 			MCEntity le = Static.getEntity(args[0], t);
 			try {
 				le.setCustomName(args[1].val());
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CRECastException(e.getMessage(), t);
 			}
 			return CVoid.VOID;
@@ -1170,7 +1170,7 @@ public class EntityManagement {
 				if(!entType.isSpawnable()) {
 					throw new CREFormatException("Unspawnable entitytype: " + args[0].val(), t);
 				}
-			} catch(IllegalArgumentException iae) {
+			} catch (IllegalArgumentException iae) {
 				throw new CREFormatException("Unknown entitytype: " + args[0].val(), t);
 			}
 			for(int i = 0; i < qty; i++) {
@@ -1187,7 +1187,7 @@ public class EntityManagement {
 					case PAINTING:
 						try {
 							ent = l.getWorld().spawn(l.getBlock().getLocation(), entType);
-						} catch(NullPointerException | IllegalArgumentException ex) {
+						} catch (NullPointerException | IllegalArgumentException ex) {
 							throw new CREFormatException("Unspawnable location for " + entType.getAbstracted().name(), t);
 						}
 						break;
@@ -1258,7 +1258,7 @@ public class EntityManagement {
 			} else {
 				try {
 					success = horse.setPassenger(rider);
-				} catch(IllegalStateException ex) {
+				} catch (IllegalStateException ex) {
 					throw new CREFormatException("Circular entity riding!"
 							+ " One entity is already a passenger of the other.", t);
 				}
@@ -1428,7 +1428,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				return CBoolean.get(Static.getEntity(args[0], t).isCustomNameVisible());
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CRECastException(e.getMessage(), t);
 			}
 		}
@@ -1458,7 +1458,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				Static.getEntity(args[0], t).setCustomNameVisible(Static.getBoolean(args[1], t));
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CRECastException(e.getMessage(), t);
 			}
 			return CVoid.VOID;
@@ -1567,7 +1567,7 @@ public class EntityManagement {
 			MCArt art;
 			try {
 				art = MCArt.valueOf(args[1].val());
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException("Invalid type: " + args[1].val(), t);
 			}
 			//If there's already a painting there, just use that one. Otherwise, spawn a new one.
@@ -1742,7 +1742,7 @@ public class EntityManagement {
 					if(name.startsWith("KEY_")) {
 						docs = docs.replace("%" + name + "%", (String) field.get(null));
 					}
-				} catch(IllegalArgumentException | IllegalAccessException ex) {
+				} catch (IllegalArgumentException | IllegalAccessException ex) {
 					ex.printStackTrace();
 				}
 			}
@@ -2185,7 +2185,7 @@ public class EntityManagement {
 								String particleName = specArray.get(index, t).val();
 								try {
 									cloud.setParticle(MCParticle.valueOf(particleName));
-								} catch(IllegalArgumentException ex) {
+								} catch (IllegalArgumentException ex) {
 									throw new CREFormatException("Invalid particle type: " + particleName, t);
 								}
 								break;
@@ -2299,7 +2299,7 @@ public class EntityManagement {
 										try {
 											poseMap.put(key, ObjectGenerator.GetGenerator().vector(poseMap.get(key),
 													poseArray.get("pose" + key.name(), t), t));
-										} catch(ConfigRuntimeException cre) {
+										} catch (ConfigRuntimeException cre) {
 											// Ignore, this just means the user didn't modify a body part
 										}
 									}
@@ -2324,14 +2324,14 @@ public class EntityManagement {
 							case entity_spec.KEY_CREEPER_MAXFUSETICKS:
 								try {
 									creeper.setMaxFuseTicks(Static.getInt32(specArray.get(index, t), t));
-								} catch(IllegalArgumentException ex) {
+								} catch (IllegalArgumentException ex) {
 									throw new CRERangeException("Ticks must not be negative.", t);
 								}
 								break;
 							case entity_spec.KEY_CREEPER_EXPLOSIONRADIUS:
 								try {
 									creeper.setExplosionRadius(Static.getInt32(specArray.get(index, t), t));
-								} catch(IllegalArgumentException ex) {
+								} catch (IllegalArgumentException ex) {
 									throw new CRERangeException("Radius must not be negative.", t);
 								}
 								break;
@@ -2351,14 +2351,14 @@ public class EntityManagement {
 							case entity_spec.KEY_HORSE_JUMP:
 								try {
 									chestedhorse.setJumpStrength(Static.getDouble(specArray.get(index, t), t));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("The jump strength must be between 0.0 and 2.0", t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
 									chestedhorse.setDomestication(Static.getInt32(specArray.get(index, t), t));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
 								}
 								break;
@@ -2491,21 +2491,21 @@ public class EntityManagement {
 							case entity_spec.KEY_HORSE_COLOR:
 								try {
 									horse.setColor(MCHorseColor.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid horse color: " + specArray.get(index, t).val(), t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_STYLE:
 								try {
 									horse.setPattern(MCHorsePattern.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid horse style: " + specArray.get(index, t).val(), t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_VARIANT:
 								try {
 									horse.setVariant(MCHorseVariant.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid horse variant: " + specArray.get(index, t).val(), t);
 								}
 								break;
@@ -2515,14 +2515,14 @@ public class EntityManagement {
 							case entity_spec.KEY_HORSE_JUMP:
 								try {
 									horse.setJumpStrength(Static.getDouble(specArray.get(index, t), t));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("The jump strength must be between 0.0 and 2.0", t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
 									horse.setDomestication(Static.getInt32(specArray.get(index, t), t));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
 								}
 								break;
@@ -2579,7 +2579,7 @@ public class EntityManagement {
 							case entity_spec.KEY_ITEM_FRAME_ROTATION:
 								try {
 									frame.setRotation(MCRotation.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid rotation type: " + specArray.get(index, t).val(), t);
 								}
 								break;
@@ -2595,7 +2595,7 @@ public class EntityManagement {
 							case entity_spec.KEY_HORSE_COLOR:
 								try {
 									llama.setLlamaColor(MCLlamaColor.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid llama color: " + specArray.get(index, t).val(), t);
 								}
 								break;
@@ -2605,7 +2605,7 @@ public class EntityManagement {
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
 									llama.setDomestication(Static.getInt32(specArray.get(index, t), t));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
 								}
 								break;
@@ -2678,7 +2678,7 @@ public class EntityManagement {
 							case entity_spec.KEY_OCELOT_TYPE:
 								try {
 									ocelot.setCatType(MCOcelotType.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid ocelot type: " + specArray.get(index, t).val(), t);
 								}
 								break;
@@ -2697,7 +2697,7 @@ public class EntityManagement {
 							case entity_spec.KEY_PAINTING_ART:
 								try {
 									painting.setArt(MCArt.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid art type: " + specArray.get(index, t).val(), t);
 								}
 								break;
@@ -2716,7 +2716,7 @@ public class EntityManagement {
 							case entity_spec.KEY_PARROT_TYPE:
 								try {
 									parrot.setVariant(MCParrotType.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid parrot type: " + specArray.get(index, t).val(), t);
 								}
 								break;
@@ -2774,7 +2774,7 @@ public class EntityManagement {
 							case entity_spec.KEY_RABBIT_TYPE:
 								try {
 									rabbit.setRabbitType(MCRabbitType.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid rabbit type: " + specArray.get(index, t).val(), t);
 								}
 								break;
@@ -2790,7 +2790,7 @@ public class EntityManagement {
 							case entity_spec.KEY_SHEEP_COLOR:
 								try {
 									sheep.setColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid sheep color: " + specArray.get(index, t).val(), t);
 								}
 								break;
@@ -2826,7 +2826,7 @@ public class EntityManagement {
 							case entity_spec.KEY_SKELETON_TYPE:
 								try {
 									skeleton.setSkeletonType(MCSkeletonType.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid skeleton type: " + specArray.get(index, t).val(), t);
 								}
 								break;
@@ -2843,14 +2843,14 @@ public class EntityManagement {
 							case entity_spec.KEY_HORSE_JUMP:
 								try {
 									undeadhorse.setJumpStrength(Static.getDouble(specArray.get(index, t), t));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("The jump strength must be between 0.0 and 2.0", t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
 									undeadhorse.setDomestication(Static.getInt32(specArray.get(index, t), t));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
 								}
 								break;
@@ -2888,7 +2888,7 @@ public class EntityManagement {
 								MCItemStack potionItem = ObjectGenerator.GetGenerator().item(specArray.get(index, t), t);
 								try {
 									potion.setItem(potionItem);
-								} catch(IllegalArgumentException ex) {
+								} catch (IllegalArgumentException ex) {
 									throw new CREFormatException("Invalid potion type: " + potionItem.getType().getName(), t);
 								}
 								break;
@@ -2949,7 +2949,7 @@ public class EntityManagement {
 							case entity_spec.KEY_VILLAGER_PROFESSION:
 								try {
 									villager.setProfession(MCProfession.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid profession: " + specArray.get(index, t).val(), t);
 								}
 								break;
@@ -2983,7 +2983,7 @@ public class EntityManagement {
 							case entity_spec.KEY_WOLF_COLOR:
 								try {
 									wolf.setCollarColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid collar color: " + specArray.get(index, t).val(), t);
 								}
 								break;
@@ -3020,7 +3020,7 @@ public class EntityManagement {
 							case entity_spec.KEY_VILLAGER_PROFESSION:
 								try {
 									zombievillager.setProfession(MCProfession.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid profession: " + specArray.get(index, t).val(), t);
 								}
 								break;
@@ -3674,7 +3674,7 @@ public class EntityManagement {
 				//the sake of documentation, so we'll build the color list much more carefully.
 				//Note the false, so we don't actually initialize the class.
 				c = Class.forName(MCColor.class.getName(), false, this.getClass().getClassLoader());
-			} catch(ClassNotFoundException ex) {
+			} catch (ClassNotFoundException ex) {
 				//Hrm...
 				Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
 				return "";

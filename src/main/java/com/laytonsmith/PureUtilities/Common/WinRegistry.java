@@ -70,7 +70,7 @@ public class WinRegistry {
 					"WindowsRegDeleteKey", new Class[]{int.class,
 						byte[].class});
 			regDeleteKey.setAccessible(true);
-		} catch(NoSuchMethodException | SecurityException e) {
+		} catch (NoSuchMethodException | SecurityException e) {
 			throw new Error(e);
 		}
 	}

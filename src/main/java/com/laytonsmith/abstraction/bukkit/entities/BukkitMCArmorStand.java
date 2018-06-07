@@ -277,7 +277,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	public Boolean isMarker() {
 		try {
 			return as.isMarker();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.8.7
 			return null;
 		}
@@ -287,7 +287,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 	public void setMarker(boolean marker) {
 		try {
 			as.setMarker(marker);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.8.7
 		}
 	}

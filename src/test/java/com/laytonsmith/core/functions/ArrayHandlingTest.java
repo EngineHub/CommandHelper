@@ -246,7 +246,7 @@ public class ArrayHandlingTest {
 		try {
 			SRun("msg('slice'[2..8])", fakePlayer);
 			fail("Did not expect this test to pass.");
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 		}
 	}
 
@@ -267,7 +267,7 @@ public class ArrayHandlingTest {
 		try {
 			SRun("msg('get'[5])", fakePlayer);
 			fail("Did not expect this test to pass.");
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 		}
 	}
 

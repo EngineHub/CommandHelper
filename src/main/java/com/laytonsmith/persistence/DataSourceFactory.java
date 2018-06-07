@@ -49,7 +49,7 @@ public class DataSourceFactory {
 		for(DataSource ds : dataSourcePool.values()) {
 			try {
 				ds.disconnect();
-			} catch(DataSourceException ex) {
+			} catch (DataSourceException ex) {
 				CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.WARNING, ex.getMessage(), Target.UNKNOWN);
 			}
 		}
@@ -77,7 +77,7 @@ public class DataSourceFactory {
 			modifiers.add(DataSource.DataSourceModifier.getModifier(uri.getScheme()));
 			try {
 				uri = new URI(uri.getSchemeSpecificPart());
-			} catch(URISyntaxException ex) {
+			} catch (URISyntaxException ex) {
 				throw new DataSourceException(null, ex);
 			}
 		}
@@ -94,7 +94,7 @@ public class DataSourceFactory {
 				if(ds instanceof AbstractDataSource) {
 					((AbstractDataSource) ds).checkModifiers();
 				}
-			} catch(DataSourceException e) {
+			} catch (DataSourceException e) {
 				//Warning, for invalid modifiers. This isn't an error, invalid modifiers will just be
 				//ignored, but the user probably meant something else if they're getting this warning,
 				//so we still alert them to the issue.
@@ -107,7 +107,7 @@ public class DataSourceFactory {
 			}
 			dataSourcePool.put(uri, ds);
 			return ds;
-		} catch(InvocationTargetException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | DataSourceException ex) {
+		} catch (InvocationTargetException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | DataSourceException ex) {
 			if(ex instanceof InvocationTargetException && ex.getCause() instanceof DataSourceException) {
 				throw (DataSourceException) ex.getCause();
 			}

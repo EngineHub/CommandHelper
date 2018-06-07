@@ -62,7 +62,7 @@ public class Procedure implements Cloneable {
 		for(IVariable var : varList) {
 			try {
 				this.varList.put(var.getVariableName(), var.clone());
-			} catch(CloneNotSupportedException e) {
+			} catch (CloneNotSupportedException e) {
 				this.varList.put(var.getVariableName(), var);
 			}
 			this.varIndex.add(var);
@@ -121,7 +121,7 @@ public class Procedure implements Cloneable {
 				} else {
 					return false;
 				}
-			} catch(ConfigCompileException e) {
+			} catch (ConfigCompileException e) {
 				//It's a proc. We will treat this just like any other function call,
 			}
 			//Ok, well, we have to check the children first.
@@ -219,7 +219,7 @@ public class Procedure implements Cloneable {
 			} else {
 				fakeScript.eval(tree, env);
 			}
-		} catch(FunctionReturnException e) {
+		} catch (FunctionReturnException e) {
 			// Normal exit
 			stManager.popStackTraceElement();
 			Construct ret = e.getReturn();
@@ -228,20 +228,20 @@ public class Procedure implements Cloneable {
 						+ " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 			}
 			return ret;
-		} catch(LoopManipulationException ex) {
+		} catch (LoopManipulationException ex) {
 			// Not exactly normal, but pop anyways
 			stManager.popStackTraceElement();
 			// These cannot bubble up past procedure calls. This will eventually be
 			// a compile error.
 			throw ConfigRuntimeException.CreateUncatchableException("Loop manipulation operations (e.g. break() or continue()) cannot"
 					+ " bubble up past procedures.", t);
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			if(e instanceof AbstractCREException) {
 				((AbstractCREException) e).freezeStackTraceElements(stManager);
 			}
 			stManager.popStackTraceElement();
 			throw e;
-		} catch(Throwable th) {
+		} catch (Throwable th) {
 			// Not sure. Pop, but rethrow
 			stManager.popStackTraceElement();
 			throw th;

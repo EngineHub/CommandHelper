@@ -110,7 +110,7 @@ public class ExtensionManager {
 					try {
 						// Add the trimmed absolute path.
 						toProcess.add(f.getCanonicalFile());
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						Static.getLogger().log(Level.SEVERE, "Could not get exact"
 								+ " path for " + f.getAbsolutePath(), ex);
 					}
@@ -120,7 +120,7 @@ public class ExtensionManager {
 			try {
 				// Add the trimmed absolute path.
 				toProcess.add(location.getCanonicalFile());
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not get exact path"
 						+ " for " + location.getAbsolutePath(), ex);
 			}
@@ -152,7 +152,7 @@ public class ExtensionManager {
 		for(File f : extCache.listFiles()) {
 			try {
 				Files.delete(f.toPath());
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				Static.getLogger().log(Level.WARNING,
 						"[CommandHelper] Could not delete loose file "
 						+ f.getAbsolutePath() + ": " + ex.getMessage());
@@ -190,7 +190,7 @@ public class ExtensionManager {
 			URL jar;
 			try {
 				jar = file.toURI().toURL();
-			} catch(MalformedURLException ex) {
+			} catch (MalformedURLException ex) {
 				Static.getLogger().log(Level.SEVERE, null, ex);
 				continue;
 			}
@@ -224,7 +224,7 @@ public class ExtensionManager {
 				File f;
 				try {
 					f = new File(URLDecoder.decode(plugURL.getFile(), "UTF8"));
-				} catch(UnsupportedEncodingException ex) {
+				} catch (UnsupportedEncodingException ex) {
 					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
 					continue;
 				}
@@ -269,7 +269,7 @@ public class ExtensionManager {
 
 				try {
 					Files.copy(f.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Static.getLogger().log(Level.SEVERE, "Could not copy '"
 							+ f.getName() + "' to cache: " + ex.getMessage());
 				}
@@ -286,7 +286,7 @@ public class ExtensionManager {
 				File f;
 				try {
 					f = new File(URLDecoder.decode(plugURL.getFile(), "UTF8"));
-				} catch(UnsupportedEncodingException ex) {
+				} catch (UnsupportedEncodingException ex) {
 					Logger.getLogger(ExtensionManager.class.getName()).log(Level.SEVERE, null, ex);
 					continue;
 				}
@@ -313,7 +313,7 @@ public class ExtensionManager {
 
 					try {
 						Files.copy(f.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						Static.getLogger().log(Level.SEVERE, "Could not copy '"
 								+ f.getName() + "' to cache: " + ex.getMessage());
 					}
@@ -368,7 +368,7 @@ public class ExtensionManager {
 					cd.addDiscoveryLocation(jar);
 
 					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.DEBUG, "Loaded " + f.getAbsolutePath(), Target.UNKNOWN);
-				} catch(MalformedURLException ex) {
+				} catch (MalformedURLException ex) {
 					Static.getLogger().log(Level.SEVERE, null, ex);
 				}
 			}
@@ -393,7 +393,7 @@ public class ExtensionManager {
 
 			try {
 				extcls = extmirror.loadClass(dcl, true);
-			} catch(Throwable ex) {
+			} catch (Throwable ex) {
 				// May throw anything, and kill the loading process.
 				// Lets prevent that!
 				Static.getLogger().log(Level.SEVERE, "Could not load class '"
@@ -404,7 +404,7 @@ public class ExtensionManager {
 
 			try {
 				ext = extcls.newInstance();
-			} catch(InstantiationException | IllegalAccessException ex) {
+			} catch (InstantiationException | IllegalAccessException ex) {
 				//Error, but skip this one, don't throw an exception ourselves, just log it.
 				Static.getLogger().log(Level.SEVERE, "Could not instantiate "
 						+ extcls.getName() + ": " + ex.getMessage());
@@ -425,7 +425,7 @@ public class ExtensionManager {
 				trk.identifier = ext.getName();
 				try {
 					trk.version = ext.getVersion();
-				} catch(AbstractMethodError ex) {
+				} catch (AbstractMethodError ex) {
 					// getVersion() was added later. This is a temporary fix
 					// to allow extension authors some time to update.
 					// TODO: Remove this soon.
@@ -456,7 +456,7 @@ public class ExtensionManager {
 
 				try {
 					c = klass.loadClass(dcl, true);
-				} catch(Throwable ex) {
+				} catch (Throwable ex) {
 					// May throw anything, and kill the loading process.
 					// Lets prevent that!
 					Static.getLogger().log(Level.SEVERE, "Could not load class '"
@@ -512,9 +512,9 @@ public class ExtensionManager {
 
 						trk.registerFunction(f);
 					}
-				} catch(InstantiationException ex) {
+				} catch (InstantiationException ex) {
 					Static.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-				} catch(IllegalAccessException ex) {
+				} catch (IllegalAccessException ex) {
 					Static.getLogger().log(Level.SEVERE, null, ex);
 				}
 			}
@@ -537,7 +537,7 @@ public class ExtensionManager {
 				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
 						+ ": Loaded " + events.size() + " event" + (events.size() == 1 ? "." : "s."));
 			}
-		} catch(Throwable e) {
+		} catch (Throwable e) {
 			// Prefs weren't loaded, probably caused by running tests.
 		}
 	}
@@ -577,7 +577,7 @@ public class ExtensionManager {
 		for(File f : cacheDir.listFiles()) {
 			try {
 				Files.delete(f.toPath());
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				StreamUtils.GetSystemOut().println("[CommandHelper] Could not delete loose file "
 						+ f.getAbsolutePath() + ": " + ex.getMessage());
 			}
@@ -592,7 +592,7 @@ public class ExtensionManager {
 			for(Extension ext : trk.getExtensions()) {
 				try {
 					ext.onStartup();
-				} catch(Throwable e) {
+				} catch (Throwable e) {
 					Logger log = Static.getLogger();
 					log.log(Level.SEVERE, ext.getClass().getName()
 							+ "'s onStartup caused an exception:");
@@ -610,7 +610,7 @@ public class ExtensionManager {
 			for(Extension ext : trk.getExtensions()) {
 				try {
 					ext.onShutdown();
-				} catch(Throwable e) {
+				} catch (Throwable e) {
 					Logger log = Static.getLogger();
 					log.log(Level.SEVERE, ext.getClass().getName()
 							+ "'s onShutdown caused an exception:");
@@ -625,7 +625,7 @@ public class ExtensionManager {
 			for(Extension ext : trk.getExtensions()) {
 				try {
 					ext.onPreReloadAliases(options);
-				} catch(Throwable e) {
+				} catch (Throwable e) {
 					Logger log = Static.getLogger();
 					log.log(Level.SEVERE, ext.getClass().getName()
 							+ "'s onPreReloadAliases caused an exception:");
@@ -640,7 +640,7 @@ public class ExtensionManager {
 			for(Extension ext : trk.getExtensions()) {
 				try {
 					ext.onPostReloadAliases();
-				} catch(Throwable e) {
+				} catch (Throwable e) {
 					Logger log = Static.getLogger();
 					log.log(Level.SEVERE, ext.getClass().getName()
 							+ "'s onPreReloadAliases caused an exception:");
@@ -653,7 +653,7 @@ public class ExtensionManager {
 	public static void AddDiscoveryLocation(File file) {
 		try {
 			locations.add(file.getCanonicalFile());
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Static.getLogger().log(Level.SEVERE, null, ex);
 		}
 	}
@@ -713,7 +713,7 @@ public class ExtensionManager {
 		for(Event event : GetEvents()) {
 			try {
 				event.hook();
-			} catch(UnsupportedOperationException ex) {
+			} catch (UnsupportedOperationException ex) {
 			}
 		}
 	}

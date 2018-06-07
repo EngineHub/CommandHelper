@@ -52,7 +52,7 @@ public class Crypto {
 			byte[] hmac = mac.doFinal(getByteArrayFromArg(args[1]));
 			String hash = StringUtils.toHex(hmac).toLowerCase();
 			return new CString(hash, t);
-		} catch(NoSuchAlgorithmException | InvalidKeyException ex) {
+		} catch (NoSuchAlgorithmException | InvalidKeyException ex) {
 			throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 		}
 	}
@@ -190,7 +190,7 @@ public class Crypto {
 				digest.update(val);
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 				return new CString(hash, t);
-			} catch(NoSuchAlgorithmException ex) {
+			} catch (NoSuchAlgorithmException ex) {
 				throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 			}
 		}
@@ -260,7 +260,7 @@ public class Crypto {
 				digest.update(val);
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 				return new CString(hash, t);
-			} catch(NoSuchAlgorithmException ex) {
+			} catch (NoSuchAlgorithmException ex) {
 				throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 			}
 		}
@@ -329,7 +329,7 @@ public class Crypto {
 				digest.update(val);
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 				return new CString(hash, t);
-			} catch(NoSuchAlgorithmException ex) {
+			} catch (NoSuchAlgorithmException ex) {
 				throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 			}
 		}
@@ -400,7 +400,7 @@ public class Crypto {
 				digest.update(val);
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 				return new CString(hash, t);
-			} catch(NoSuchAlgorithmException ex) {
+			} catch (NoSuchAlgorithmException ex) {
 				throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 			}
 		}
@@ -455,7 +455,7 @@ public class Crypto {
 				}
 				String hash = BCrypt.hashpw(val, BCrypt.gensalt(log_rounds));
 				return new CString(hash, t);
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CRERangeException(ex.getMessage(), t);
 			}
 		}

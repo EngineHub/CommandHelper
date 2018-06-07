@@ -44,7 +44,7 @@ public class BukkitMCInventory implements MCInventory {
 	public MCItemStack getItem(int slot) {
 		try {
 			return new BukkitMCItemStack(i.getItem(slot));
-		} catch(ArrayIndexOutOfBoundsException aioobe) {
+		} catch (ArrayIndexOutOfBoundsException aioobe) {
 			if(slot > 0 && slot < getSize()) {
 				CHLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
 						+ " accessible, however the server implementation does not give access."
@@ -61,7 +61,7 @@ public class BukkitMCInventory implements MCInventory {
 	public void setItem(int slot, MCItemStack stack) {
 		try {
 			this.i.setItem(slot, stack == null ? null : ((BukkitMCItemStack) stack).is);
-		} catch(ArrayIndexOutOfBoundsException aioobe) {
+		} catch (ArrayIndexOutOfBoundsException aioobe) {
 			if(slot > 0 && slot < getSize()) {
 				CHLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
 						+ " accessible, however the server implementation does not give access."

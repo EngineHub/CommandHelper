@@ -92,7 +92,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 				} else if(t.action == Action.SET) {
 					set0(null, t.key.split("\\."), t.value);
 				}
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				Logger.getLogger(MemoryDataSource.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}

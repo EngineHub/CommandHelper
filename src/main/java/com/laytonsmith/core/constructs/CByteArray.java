@@ -120,7 +120,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			data.rewind();
 			try {
 				value = new String(data.array(), "UTF-8");
-			} catch(UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				throw new Error(ex);
 			}
 			data.position(position);
@@ -557,7 +557,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			int i = Static.getInt32(index, t);
 			try {
 				return new CInt(backing[i], t);
-			} catch(ArrayIndexOutOfBoundsException e) {
+			} catch (ArrayIndexOutOfBoundsException e) {
 				throw new CRERangeException("Index out of range. Found " + i + ", but array length is only " + backing.length, t);
 			}
 		}
@@ -572,7 +572,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			if(value == null) {
 				try {
 					value = new String(backing, "UTF-8");
-				} catch(UnsupportedEncodingException ex) {
+				} catch (UnsupportedEncodingException ex) {
 					throw new Error(ex);
 				}
 			}

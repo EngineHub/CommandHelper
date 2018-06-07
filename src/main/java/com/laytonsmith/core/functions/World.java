@@ -705,7 +705,7 @@ public class World {
 					String name = e.nextElement().toString();
 					TimeLookup.put(name, new CString(p.getProperty(name), Target.UNKNOWN));
 				}
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -806,7 +806,7 @@ public class World {
 			}
 			try {
 				w.setTime(Long.parseLong(stime));
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				throw new CREFormatException("Invalid time provided", t);
 			}
 			return CVoid.VOID;
@@ -893,14 +893,14 @@ public class World {
 				MCWorldType type;
 				try {
 					type = MCWorldType.valueOf(args[1].val().toUpperCase());
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					throw new CREFormatException(args[1].val() + " is not a valid world type. Must be one of: "
 							+ StringUtils.Join(MCWorldType.values(), ", "), t);
 				}
 				MCWorldEnvironment environment;
 				try {
 					environment = MCWorldEnvironment.valueOf(args[2].val().toUpperCase());
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					throw new CREFormatException(args[2].val() + " is not a valid environment type. Must be one of: "
 							+ StringUtils.Join(MCWorldEnvironment.values(), ", "), t);
 				}
@@ -1345,7 +1345,7 @@ public class World {
 			if(args.length == 1) {
 				try {
 					difficulty = MCDifficulty.valueOf(args[0].val().toUpperCase());
-				} catch(IllegalArgumentException exception) {
+				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The difficulty \"" + args[0].val() + "\" does not exist.", t);
 				}
 				for(MCWorld world : Static.getServer().getWorlds()) {
@@ -1358,7 +1358,7 @@ public class World {
 				}
 				try {
 					difficulty = MCDifficulty.valueOf(args[1].val().toUpperCase());
-				} catch(IllegalArgumentException exception) {
+				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The difficulty \"" + args[1].val() + "\" does not exist.", t);
 				}
 				world.setDifficulty(difficulty);
@@ -1533,7 +1533,7 @@ public class World {
 								+ "\" does not exist in this version.", t);
 					}
 					return Static.resolveConstruct(value, t);
-				} catch(IllegalArgumentException exception) {
+				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The gamerule \"" + args[1].val() + "\" does not exist.", t);
 				}
 			}
@@ -1587,7 +1587,7 @@ public class World {
 			if(args.length == 2) {
 				try {
 					gameRule = MCGameRule.valueOf(args[0].val().toUpperCase());
-				} catch(IllegalArgumentException exception) {
+				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The gamerule \"" + args[0].val() + "\" does not exist.", t);
 				}
 				if(!args[1].getCType().equals(gameRule.getRuleType())) {
@@ -1600,7 +1600,7 @@ public class World {
 			} else {
 				try {
 					gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
-				} catch(IllegalArgumentException exception) {
+				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The gamerule \"" + args[1].val() + "\" does not exist.", t);
 				}
 				MCWorld world = Static.getServer().getWorld(args[0].val());
@@ -1674,7 +1674,7 @@ public class World {
 				try {
 					MCBlockFace facing = MCBlockFace.valueOf(args[1].val().toUpperCase());
 					vector = new Vector3D(facing.getModX(), facing.getModY(), facing.getModZ()).normalize();
-				} catch(IllegalArgumentException iae) {
+				} catch (IllegalArgumentException iae) {
 					throw new CREFormatException("Expected a location array or direction.", t);
 				}
 			}
@@ -1745,7 +1745,7 @@ public class World {
 			MCLocation subtract;
 			try {
 				subtract = to.subtract(from);
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CREFormatException("Locations are in differing worlds.", t);
 			}
 			double dX = subtract.getX();
@@ -1916,7 +1916,7 @@ public class World {
 			MCLocation loc2 = ObjectGenerator.GetGenerator().location(args[1], null, t);
 			try {
 				return new CDouble(loc1.distance(loc2), t);
-			} catch(IllegalArgumentException iae) {
+			} catch (IllegalArgumentException iae) {
 				throw new CREIllegalArgumentException("Cannot measure distance between two different worlds.", t);
 			}
 		}

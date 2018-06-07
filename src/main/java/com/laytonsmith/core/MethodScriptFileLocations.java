@@ -45,7 +45,7 @@ public class MethodScriptFileLocations extends FileLocations {
 		} else {
 			try {
 				return new File(URLDecoder.decode(MethodScriptFileLocations.class.getProtectionDomain().getCodeSource().getLocation().getFile(), "UTF-8"));
-			} catch(UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				throw new Error(ex);
 			}
 		}

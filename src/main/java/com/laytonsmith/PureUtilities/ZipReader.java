@@ -120,9 +120,9 @@ public class ZipReader {
 					ZipFile zf = new ZipFile(f);
 					tempTopZip = f;
 				}
-			} catch(ZipException ex) {
+			} catch (ZipException ex) {
 				//This is fine, it's just not a zip file
-			} catch(IOException | AccessControlException ex) {
+			} catch (IOException | AccessControlException ex) {
 				//This is fine too, it may mean we don't have permission to access this directory,
 				//but that's ok, we don't need access yet.
 			}
@@ -163,7 +163,7 @@ public class ZipReader {
 		try {
 			getInputStream().close();
 			return true;
-		} catch(IOException e) {
+		} catch (IOException e) {
 			return false;
 		}
 	}
@@ -261,7 +261,7 @@ public class ZipReader {
 			ZipInputStream inner = new ZipInputStream(zipReader);
 			try {
 				return getFile(fullChain, recurseAttempt, inner);
-			} catch(IOException e) {
+			} catch (IOException e) {
 				//We don't care if this breaks, we'll throw out own top level exception
 				//in a moment if we got here. We still need to finish going through
 				//out recurse attempts.

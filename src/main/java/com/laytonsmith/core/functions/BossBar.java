@@ -138,14 +138,14 @@ public class BossBar {
 				if(ca.containsKey("color")) {
 					try {
 						color = MCBarColor.valueOf(ca.get("color", t).val());
-					} catch(IllegalArgumentException ex) {
+					} catch (IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar color.", t);
 					}
 				}
 				if(ca.containsKey("style")) {
 					try {
 						style = MCBarStyle.valueOf(ca.get("style", t).val());
-					} catch(IllegalArgumentException ex) {
+					} catch (IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar style.", t);
 					}
 				}
@@ -155,7 +155,7 @@ public class BossBar {
 				if(ca.containsKey("percent")) {
 					try {
 						percent = Static.getDouble(ca.get("percent", t), t);
-					} catch(IllegalArgumentException ex) {
+					} catch (IllegalArgumentException ex) {
 						throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 					}
 				}
@@ -212,7 +212,7 @@ public class BossBar {
 			} else if(args[1] instanceof CDouble) {
 				try {
 					bar.setProgress(Static.getDouble(args[1], t));
-				} catch(IllegalArgumentException ex) {
+				} catch (IllegalArgumentException ex) {
 					throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 				}
 			} else if(args[1] instanceof CArray) {
@@ -223,14 +223,14 @@ public class BossBar {
 				if(ca.containsKey("color")) {
 					try {
 						bar.setColor(MCBarColor.valueOf(ca.get("color", t).val()));
-					} catch(IllegalArgumentException ex) {
+					} catch (IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar color.", t);
 					}
 				}
 				if(ca.containsKey("style")) {
 					try {
 						bar.setStyle(MCBarStyle.valueOf(ca.get("style", t).val()));
-					} catch(IllegalArgumentException ex) {
+					} catch (IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar style.", t);
 					}
 				}
@@ -240,7 +240,7 @@ public class BossBar {
 				if(ca.containsKey("percent")) {
 					try {
 						bar.setProgress(Static.getDouble(ca.get("percent", t), t));
-					} catch(IllegalArgumentException ex) {
+					} catch (IllegalArgumentException ex) {
 						throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 					}
 				}

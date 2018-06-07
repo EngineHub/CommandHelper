@@ -67,7 +67,7 @@ public class ClassDiscoveryURLCache {
 		ObjectInputStream ois = new ObjectInputStream(descriptor);
 		try {
 			_list = (List<ClassMirror<?>>) ois.readObject();
-		} catch(ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			if(url != null) {
 				//We can recover from this one, but it won't be instant.
 				_list = new ClassDiscoveryURLCache(url).list;

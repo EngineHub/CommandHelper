@@ -40,7 +40,7 @@ public class DoKeyword extends Keyword {
 			list.set(keywordPosition, dowhile);
 			list.remove(keywordPosition + 2);
 			list.remove(keywordPosition + 1);
-		} catch(IndexOutOfBoundsException ex) {
+		} catch (IndexOutOfBoundsException ex) {
 			throw new ConfigCompileException("Unexpected keyword \"do\"", t);
 		}
 		return keywordPosition;

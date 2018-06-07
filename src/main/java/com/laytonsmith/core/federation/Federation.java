@@ -224,7 +224,7 @@ public class Federation {
 			ds = new DatagramSocket(port);
 			ds.setReuseAddress(true);
 			return true;
-		} catch(IOException e) {
+		} catch (IOException e) {
 		} finally {
 			if(ds != null) {
 				ds.close();
@@ -233,7 +233,7 @@ public class Federation {
 			if(ss != null) {
 				try {
 					ss.close();
-				} catch(IOException e) {
+				} catch (IOException e) {
 					/* should not be thrown */
 				}
 			}

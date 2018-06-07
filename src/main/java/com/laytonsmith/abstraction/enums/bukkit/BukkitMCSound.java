@@ -42,7 +42,7 @@ public class BukkitMCSound extends MCSound<Sound> {
 	public static BukkitMCSound valueOfConcrete(String test) {
 		try {
 			return valueOfConcrete(Sound.valueOf(test));
-		} catch(IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			return (BukkitMCSound) NULL;
 		}
 	}
@@ -477,7 +477,7 @@ public class BukkitMCSound extends MCSound<Sound> {
 		}
 		try {
 			return Sound.valueOf(v.name());
-		} catch(IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			return null;
 		}
 	}

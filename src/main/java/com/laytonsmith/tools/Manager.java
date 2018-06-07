@@ -94,7 +94,7 @@ public class Manager {
 		try {
 			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null, true)), env, null, null);
-		} catch(ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 		}
 		pl(GREEN + "Welcome to the CommandHelper " + CYAN + "Data Manager!");
 		pl(BLINKON + RED + "Warning!" + BLINKOFF + YELLOW + " Be sure your server is not running before using this tool to make changes to your database!");
@@ -153,7 +153,7 @@ public class Manager {
 				try {
 					source = DataSourceFactory.GetDataSource(ssource, mixinOptions);
 					break;
-				} catch(DataSourceException | URISyntaxException ex) {
+				} catch (DataSourceException | URISyntaxException ex) {
 					pl(RED + ex.getMessage());
 				}
 			} while(true);
@@ -165,7 +165,7 @@ public class Manager {
 				try {
 					destination = DataSourceFactory.GetDataSource(sdestination, mixinOptions);
 					break;
-				} catch(DataSourceException | URISyntaxException ex) {
+				} catch (DataSourceException | URISyntaxException ex) {
 					pl(RED + ex.getMessage());
 				}
 			} while(true);
@@ -254,11 +254,11 @@ public class Manager {
 				}
 				try {
 					dm.waitForThreads();
-				} catch(InterruptedException ex) {
+				} catch (InterruptedException ex) {
 					//
 				}
 				break;
-			} catch(DataSourceException | ReadOnlyException | IOException ex) {
+			} catch (DataSourceException | ReadOnlyException | IOException ex) {
 				pl(RED + ex.getMessage());
 			}
 		} while(true);
@@ -280,13 +280,13 @@ public class Manager {
 					for(String[] key : keySet) {
 						try {
 							persistenceNetwork.clearKey(dm, key);
-						} catch(ReadOnlyException ex) {
+						} catch (ReadOnlyException ex) {
 							pl(RED + "Read only data source found: " + ex.getMessage());
 						}
 					}
 					try {
 						dm.waitForThreads();
-					} catch(InterruptedException e) {
+					} catch (InterruptedException e) {
 						//
 					}
 					pl("Done!");
@@ -294,7 +294,7 @@ public class Manager {
 			} else if(choice.equalsIgnoreCase("yes")) {
 				pl("No, you have to type YES exactly.");
 			}
-		} catch(DataSourceException | IOException ex) {
+		} catch (DataSourceException | IOException ex) {
 			pl(RED + ex.getMessage());
 		}
 	}
@@ -439,7 +439,7 @@ public class Manager {
 			}
 			pl(CYAN + key + ":" + WHITE + persistenceNetwork.get(k));
 			return true;
-		} catch(DataSourceException ex) {
+		} catch (DataSourceException ex) {
 			pl(RED + ex.getMessage());
 			return false;
 		}
@@ -456,11 +456,11 @@ public class Manager {
 			persistenceNetwork.set(dm, k, value);
 			try {
 				dm.waitForThreads();
-			} catch(InterruptedException e) {
+			} catch (InterruptedException e) {
 				//
 			}
 			return true;
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			pl(RED + ex.getMessage());
 			return false;
 		}
@@ -474,14 +474,14 @@ public class Manager {
 				persistenceNetwork.clearKey(dm, k);
 				try {
 					dm.waitForThreads();
-				} catch(InterruptedException e) {
+				} catch (InterruptedException e) {
 					//
 				}
 				return true;
 			} else {
 				return false;
 			}
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			pl(RED + ex.getMessage());
 			return false;
 		}
@@ -495,7 +495,7 @@ public class Manager {
 				pl(CYAN + StringUtils.Join(key, ".") + ": " + WHITE + persistenceNetwork.get(key));
 			}
 			pl(BLUE + count + " items found");
-		} catch(Exception e) {
+		} catch (Exception e) {
 			pl(RED + e.getMessage());
 		}
 	}
@@ -576,7 +576,7 @@ public class Manager {
 			URI defaultURI;
 			try {
 				defaultURI = new URI("file://persistence.db");
-			} catch(URISyntaxException ex) {
+			} catch (URISyntaxException ex) {
 				throw new Error(ex);
 			}
 			ConnectionMixinFactory.ConnectionMixinOptions mixinOptions = new ConnectionMixinFactory.ConnectionMixinOptions();
@@ -605,12 +605,12 @@ public class Manager {
 							transferred++;
 							try {
 								pninput.clearKey(dm, k);
-							} catch(ReadOnlyException ex) {
+							} catch (ReadOnlyException ex) {
 								pl(RED + "Could not clear out original key for the value for \"" + MAGENTA + StringUtils.Join(k, ".") + RED + "\", as the input"
 										+ " file is set to read only.");
 								errors = true;
 							}
-						} catch(ReadOnlyException ex) {
+						} catch (ReadOnlyException ex) {
 							pl(RED + "Could not write out the value for \"" + MAGENTA + StringUtils.Join(k, ".") + RED + "\", as the output"
 									+ " file is set to read only.");
 							errors = true;
@@ -628,7 +628,7 @@ public class Manager {
 				}
 				pl(GREEN + "If this is being done as part of an entire transfer process, don't forget to set " + output.toString()
 						+ " as your main Persistence Network configuration file.");
-			} catch(IOException | DataSourceException ex) {
+			} catch (IOException | DataSourceException ex) {
 				Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -707,13 +707,13 @@ public class Manager {
 						}
 					}
 					runningTotal += map.size();
-				} catch(ReadOnlyException ex) {
+				} catch (ReadOnlyException ex) {
 					pl(RED + "Cannot delete any keys from " + uri + " as it is marked as read only, so it is being skipped.");
 				}
 				if("delete".equals(action)) {
 					try {
 						dm.waitForThreads();
-					} catch(InterruptedException ex) {
+					} catch (InterruptedException ex) {
 						// Ignored
 					}
 				}
@@ -741,7 +741,7 @@ public class Manager {
 					pl(GREEN + "Found " + StringUtils.PluralTemplateHelper(runningTotal, "one hidden key", "%d hidden keys") + " in total.");
 				}
 			}
-		} catch(URISyntaxException | IOException | DataSourceException ex) {
+		} catch (URISyntaxException | IOException | DataSourceException ex) {
 			pl(RED + ex.getMessage());
 			ex.printStackTrace(StreamUtils.GetSystemErr());
 		}

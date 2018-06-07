@@ -85,10 +85,10 @@ public class VirtualFileSystem {
 				Constructor<?> constructor = clazz.getConstructor(VirtualFile.class, VirtualFileSystem.class, String.class);
 				FileSystemLayer.fslayer annotation = clazz.getAnnotation(FileSystemLayer.fslayer.class);
 				FSLProviders.put(annotation.value(), constructor);
-			} catch(NoSuchMethodException ex) {
+			} catch (NoSuchMethodException ex) {
 				throw new Error(clazzMirror.getClassName() + " must implement a constructor with the signature: public " + clazzMirror.getSimpleName() + "("
 						+ VirtualFile.class.getSimpleName() + ", " + VirtualFileSystem.class.getSimpleName() + ", " + String.class.getSimpleName() + ")");
-			} catch(SecurityException ex) {
+			} catch (SecurityException ex) {
 				Logger.getLogger(VirtualFileSystem.class.getName()).log(Level.SEVERE, "Security exception while loading a class. Symlinks may not work.", ex);
 			}
 		}
@@ -121,7 +121,7 @@ public class VirtualFileSystem {
 							FSSize = FileUtils.sizeOfDirectoryAsBigInteger(root);
 							//Sleep for a minute before running again.
 							Thread.sleep(TimeConversionUtil.inMilliseconds(1, TimeConversionUtil.TimeUnit.MINUTE));
-						} catch(InterruptedException ex) {
+						} catch (InterruptedException ex) {
 							Logger.getLogger(VirtualFileSystem.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
@@ -201,7 +201,7 @@ public class VirtualFileSystem {
 			FileSystemLayer fsl;
 			try {
 				fsl = (FileSystemLayer) FSLProviders.get(provider).newInstance(virtual, this, symlink);
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				//This shouldn't happen ever, minus a programming mistake?
 				throw new Error(ex);
 			}
@@ -222,7 +222,7 @@ public class VirtualFileSystem {
 	public byte[] read(VirtualFile file) {
 		try {
 			return StreamUtils.GetBytes(readAsStream(file));
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -236,7 +236,7 @@ public class VirtualFileSystem {
 	public void write(VirtualFile file, InputStream data) {
 		try {
 			write(file, StreamUtils.GetBytes(data));
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}

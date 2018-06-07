@@ -48,7 +48,7 @@ public class RegexTest {
 		try {
 			SRun("reg_match(array(word, l), hi)", null);
 			fail();
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			//Pass
 		}
 	}
@@ -146,9 +146,9 @@ public class RegexTest {
 		try {
 			Matcher.class.getMethod("group", String.class);
 			return true;
-		} catch(NoSuchMethodException ex) {
+		} catch (NoSuchMethodException ex) {
 			return false;
-		} catch(SecurityException ex) {
+		} catch (SecurityException ex) {
 			throw new Error(ex);
 		}
 	}

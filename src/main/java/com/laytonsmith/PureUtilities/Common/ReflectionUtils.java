@@ -66,7 +66,7 @@ public class ReflectionUtils {
 			Constructor<T> c = clazz.getDeclaredConstructor(argTypes);
 			c.setAccessible(true);
 			return c.newInstance(args);
-		} catch(InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
@@ -113,7 +113,7 @@ public class ReflectionUtils {
 				f.setAccessible(true);
 				return f.get(instance);
 			}
-		} catch(IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
+		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
@@ -169,7 +169,7 @@ public class ReflectionUtils {
 				f.set(instance, value);
 
 			}
-		} catch(IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
+		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
@@ -232,7 +232,7 @@ public class ReflectionUtils {
 							m.setAccessible(true);
 							return m.invoke(instance, params);
 						}
-					} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 						throw new ReflectionException(ex);
 					}
 				}
@@ -258,7 +258,7 @@ public class ReflectionUtils {
 				if(methodName.equals(m.getName())) {
 					try {
 						return m.invoke(instance);
-					} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 						throw new ReflectionException(ex);
 					}
 				}
@@ -283,7 +283,7 @@ public class ReflectionUtils {
 			Method m = clazz.getDeclaredMethod(methodName, argTypes);
 			m.setAccessible(true);
 			return m.invoke(instance, args);
-		} catch(InvocationTargetException | NoSuchMethodException | IllegalArgumentException | IllegalAccessException | SecurityException ex) {
+		} catch (InvocationTargetException | NoSuchMethodException | IllegalArgumentException | IllegalAccessException | SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 	}
@@ -330,7 +330,7 @@ public class ReflectionUtils {
 					if(o != null) {
 						value = o.toString();
 					}
-				} catch(SecurityException e) {
+				} catch (SecurityException e) {
 					value = "Could not access value due to a SecurityException";
 				}
 				output.println("(" + f.getType() + ") " + f.getName() + ": " + value);
@@ -379,9 +379,9 @@ public class ReflectionUtils {
 		Method m;
 		try {
 			m = c.getMethod(methodName, params);
-		} catch(NoSuchMethodException ex) {
+		} catch (NoSuchMethodException ex) {
 			return false;
-		} catch(SecurityException ex) {
+		} catch (SecurityException ex) {
 			throw new ReflectionException(ex);
 		}
 		if(returnType != null) {
@@ -400,7 +400,7 @@ public class ReflectionUtils {
 		Object unsafe;
 		try {
 			unsafe = ReflectionUtils.get(Class.forName("sun.misc.Unsafe"), "theUnsafe");
-		} catch(ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			throw new RuntimeException(ex);
 		}
 		return unsafe;

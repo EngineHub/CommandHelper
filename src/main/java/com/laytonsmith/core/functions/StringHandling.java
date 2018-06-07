@@ -242,7 +242,7 @@ public class StringHandling {
 						if(InstanceofUtil.isInstanceof(child.getData(), "string")) {
 							return child;
 						}
-					} catch(IllegalArgumentException ex) {
+					} catch (IllegalArgumentException ex) {
 						// Ignored, we'll just toString it, because it's an unknown type.
 					}
 					ParseTree node = new ParseTree(new CFunction(STRING, t), fileOptions);
@@ -825,7 +825,7 @@ public class StringHandling {
 					end = s.length();
 				}
 				return new CString(s.substring(begin, end), t);
-			} catch(IndexOutOfBoundsException e) {
+			} catch (IndexOutOfBoundsException e) {
 				throw new CRERangeException("The indices given are not valid for string '" + args[0].val() + "'", t);
 			}
 		}
@@ -1336,7 +1336,7 @@ public class StringHandling {
 			List<FormatString> parsed;
 			try {
 				parsed = parse(formatString, t);
-			} catch(IllegalFormatException e) {
+			} catch (IllegalFormatException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}
 			if(requiredArgs(parsed) != numArgs - 2) {
@@ -1564,7 +1564,7 @@ public class StringHandling {
 							convertArgument(children.get(i).getData(), parsed.get(i - 2).getExpectedType(), i, t);
 						}
 					}
-				} catch(IllegalFormatException e) {
+				} catch (IllegalFormatException e) {
 					throw new CREFormatException(e.getMessage(), t);
 				}
 				return me;
@@ -1640,7 +1640,7 @@ public class StringHandling {
 			Object parse;
 			try {
 				parse = ReflectionUtils.invokeMethod(Formatter.class, new Formatter(), "parse", new Class[]{String.class}, new Object[]{format});
-			} catch(ReflectionException e) {
+			} catch (ReflectionException e) {
 				if(e.getCause() instanceof InvocationTargetException) {
 					Throwable th = e.getCause().getCause();
 					throw new CREFormatException("A format exception was thrown for the argument \"" + format + "\": " + th.getClass().getSimpleName() + ": " + th.getMessage(), t);
@@ -1818,7 +1818,7 @@ public class StringHandling {
 			}
 			try {
 				return CByteArray.wrap(val.getBytes(encoding), t);
-			} catch(UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				throw new CREFormatException("Unknown encoding type \"" + encoding + "\"", t);
 			}
 		}
@@ -1874,7 +1874,7 @@ public class StringHandling {
 			}
 			try {
 				return new CString(new String(ba.asByteArrayCopy(), encoding), t);
-			} catch(UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				throw new CREFormatException("Unknown encoding type \"" + encoding + "\"", t);
 			}
 		}
@@ -2013,7 +2013,7 @@ public class StringHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				return new CString(new String(Character.toChars(Static.getInt32(args[0], t))), t);
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CRERangeException("Code point out of range: " + args[0].val(), t);
 			}
 		}

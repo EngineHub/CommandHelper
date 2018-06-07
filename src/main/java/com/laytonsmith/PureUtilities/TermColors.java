@@ -164,7 +164,7 @@ public final class TermColors {
 					fields.add(f);
 					try {
 						defaults.put(f.getName(), (String) f.get(null));
-					} catch(IllegalArgumentException | IllegalAccessException ex) {
+					} catch (IllegalArgumentException | IllegalAccessException ex) {
 						Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
@@ -180,7 +180,7 @@ public final class TermColors {
 		for(Field f : fields()) {
 			try {
 				f.set(null, defaults.get(f.getName()));
-			} catch(IllegalArgumentException | IllegalAccessException ex) {
+			} catch (IllegalArgumentException | IllegalAccessException ex) {
 				Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -193,7 +193,7 @@ public final class TermColors {
 		for(Field f : fields()) {
 			try {
 				f.set(null, "");
-			} catch(IllegalArgumentException | IllegalAccessException ex) {
+			} catch (IllegalArgumentException | IllegalAccessException ex) {
 				Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}

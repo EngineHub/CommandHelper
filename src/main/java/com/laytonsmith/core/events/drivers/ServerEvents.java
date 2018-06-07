@@ -173,7 +173,7 @@ public class ServerEvents {
 				String ip;
 				try {
 					ip = event.getAddress().getHostAddress();
-				} catch(NullPointerException npe) {
+				} catch (NullPointerException npe) {
 					ip = "";
 				}
 				ret.put("ip", new CString(ip, t));

@@ -175,7 +175,7 @@ public abstract class AbstractFunction implements Function {
 	protected String getBundledDocs() {
 		try {
 			return getBundledDocs(null);
-		} catch(GenerateException ex) {
+		} catch (GenerateException ex) {
 			// This condition is impossible, so we just ignore this case.
 			return "";
 		}

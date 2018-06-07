@@ -52,10 +52,10 @@ public class IncludeCache {
 			CHLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Compilation succeeded, adding to cache.", t);
 			IncludeCache.add(file, tree);
 			return tree;
-		} catch(ConfigCompileException ex) {
+		} catch (ConfigCompileException ex) {
 			throw new CREIncludeException("There was a compile error when trying to include the script at " + file
 					+ "\n" + ex.getMessage() + " :: " + file.getName() + ":" + ex.getLineNum(), t);
-		} catch(ConfigCompileGroupException ex) {
+		} catch (ConfigCompileGroupException ex) {
 			StringBuilder b = new StringBuilder();
 			b.append("There were compile errors when trying to include the script at ").append(file).append("\n");
 			for(ConfigCompileException e : ex.getList()) {
@@ -63,7 +63,7 @@ public class IncludeCache {
 						.append(e.getLineNum()).append("\n");
 			}
 			throw new CREIncludeException(b.toString(), t);
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			throw new CREIOException("The script at " + file + " could not be found or read in.", t);
 		}
 	}

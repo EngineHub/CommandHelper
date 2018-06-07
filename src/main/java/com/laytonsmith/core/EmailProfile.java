@@ -31,7 +31,7 @@ public class EmailProfile extends Profiles.Profile {
 		if(elements.containsKey("port")) {
 			try {
 				port = Integer.parseInt(elements.get("port"));
-			} catch(NumberFormatException ex) {
+			} catch (NumberFormatException ex) {
 				throw new Profiles.InvalidProfileException(ex.getMessage());
 			}
 		}
@@ -44,7 +44,7 @@ public class EmailProfile extends Profiles.Profile {
 		if(elements.containsKey("timeout")) {
 			try {
 				timeout = Integer.parseInt(elements.get("timeout"));
-			} catch(NumberFormatException ex) {
+			} catch (NumberFormatException ex) {
 				throw new Profiles.InvalidProfileException(ex.getMessage());
 			}
 		}

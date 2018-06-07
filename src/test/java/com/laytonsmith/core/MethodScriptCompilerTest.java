@@ -103,7 +103,7 @@ public class MethodScriptCompilerTest {
 				MethodScriptCompiler.lex(c, null, false);
 				//Shouldn't get here
 				fail(c + " should not have lexed, but did.");
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				//Success!
 			}
 		}
@@ -116,28 +116,28 @@ public class MethodScriptCompilerTest {
 			//extra parameter
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another', 'oops') 'function')", null, false)).get(0).compileRight();
 			fail("Did not expect test to pass");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//passed
 		}
 		try {
 			//missing parenthesis
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function'", null, false)).get(0).compileRight();
 			fail("Did not expect test to pass");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//passed
 		}
 		try {
 			//extra parenthesis
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function')))))", null, false)).get(0).compileRight();
 			fail("Did not expect test to pass");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//passed
 		}
 		try {
 			//extra multiline end construct
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function') <<<", null, false)).get(0).compileRight();
 			fail("Did not expect test to pass");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//passed
 		}
 
@@ -145,7 +145,7 @@ public class MethodScriptCompilerTest {
 			//no multiline end construct
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = >>>\nmsg('hi')\n", null, false)).get(0).compileRight();
 			fail("Did not expect no multiline end construct to pass");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//passed
 		}
 
@@ -174,7 +174,7 @@ public class MethodScriptCompilerTest {
 	public void testCompile15() throws Exception {
 		try {
 			SRun("\n\nmsg(/, 'test')\n\n", fakePlayer);
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			assertEquals("3", e.getLineNum());
 		}
 	}
@@ -216,7 +216,7 @@ public class MethodScriptCompilerTest {
 					= "[";
 			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
 			fail("Test passed, but wasn't supposed to");
-		} catch(ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 			//Passed
 		}
 		try {
@@ -224,7 +224,7 @@ public class MethodScriptCompilerTest {
 					= "]";
 			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
 			fail("Test passed, but wasn't supposed to");
-		} catch(ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 			//Passed
 		}
 	}
@@ -439,7 +439,7 @@ public class MethodScriptCompilerTest {
 			String config = "/cmd [$p] $q = msg('')";
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0).compile();
 			fail("Test passed, but wasn't supposed to");
-		} catch(ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 			//Passed
 		}
 	}
@@ -484,7 +484,7 @@ public class MethodScriptCompilerTest {
 			String config = "/cmd [$p=player()] = msg('')";
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0).compile();
 			fail("Test passed, but wasn't supposed to");
-		} catch(ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 			//Passed
 		}
 	}
@@ -671,7 +671,7 @@ public class MethodScriptCompilerTest {
 		try {
 			SRun("(+ * 2)", fakePlayer);
 			fail("Did not expect test to pass");
-		} catch(ConfigCompileException | ConfigRuntimeException e) {
+		} catch (ConfigCompileException | ConfigRuntimeException e) {
 			//pass
 		}
 		//pass?
@@ -745,7 +745,7 @@ public class MethodScriptCompilerTest {
 				+ "assign(@d, @a[@b])\n"; //Line 3
 		try {
 			SRun(script, fakePlayer);
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			assertEquals(3, e.getTarget().line());
 		}
 
@@ -762,7 +762,7 @@ public class MethodScriptCompilerTest {
 				+ "msg('test2')\n";
 		try {
 			SRun(script, fakePlayer);
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			assertEquals(5, e.getTarget().line());
 		}
 	}
@@ -773,7 +773,7 @@ public class MethodScriptCompilerTest {
 			SRun("\n"
 					+ "\n"
 					+ "player())\n", fakePlayer);
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			assertEquals("3", e.getLineNum());
 		}
 	}
@@ -872,16 +872,16 @@ public class MethodScriptCompilerTest {
 			try {
 				SRun("1[4]", null);
 				fail("Did not expect test to pass");
-			} catch(ConfigCompileException e) {
+			} catch (ConfigCompileException e) {
 				//Pass
 			}
 			try {
 				SRun("'string'['index']", null);
 				fail("Did not expect test to pass");
-			} catch(ConfigCompileException e) {
+			} catch (ConfigCompileException e) {
 				//Pass
 			}
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			fail("Expecting a compile error here, not a runtime exception");
 		}
 	}
@@ -955,7 +955,7 @@ public class MethodScriptCompilerTest {
 		try {
 			SRun("1..2[10]", null);
 			fail("Expected an exception");
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			//pass
 		}
 
@@ -1080,7 +1080,7 @@ public class MethodScriptCompilerTest {
 			s2 = scripts.get(1);
 			s1.compile();
 			s2.compile();
-		} catch(ConfigCompileGroupException | ConfigCompileException | IndexOutOfBoundsException e) {
+		} catch (ConfigCompileGroupException | ConfigCompileException | IndexOutOfBoundsException e) {
 			fail("Encountered unexpected " + e.getClass().getSimpleName() + " with message: " + e.getMessage());
 			return;
 		}
@@ -1089,12 +1089,12 @@ public class MethodScriptCompilerTest {
 		ConfigCompileException e1 = null, e2 = null;
 		try {
 			s2.checkAmbiguous(Arrays.asList(new Script[]{s1}));
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			e1 = e;
 		}
 		try {
 			s1.checkAmbiguous(Arrays.asList(new Script[]{s2}));
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			e2 = e;
 		}
 

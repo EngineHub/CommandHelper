@@ -177,12 +177,12 @@ public class ArrayHandling {
 						for(long i = start; i <= finish; i++) {
 							try {
 								na.push(ca.get((int) i, t).clone(), t);
-							} catch(CloneNotSupportedException e) {
+							} catch (CloneNotSupportedException e) {
 								na.push(ca.get((int) i, t), t);
 							}
 						}
 						return na;
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
 					}
 				} else {
@@ -200,7 +200,7 @@ public class ArrayHandling {
 						} else {
 							return ca.get(index, t);
 						}
-					} catch(ConfigRuntimeException e) {
+					} catch (ConfigRuntimeException e) {
 						if(e instanceof CREIndexOverflowException) {
 							if(defaultConstruct != null) {
 								return defaultConstruct;
@@ -235,7 +235,7 @@ public class ArrayHandling {
 							finish = (int) aa.size() + finish;
 						}
 						return aa.slice(start, finish + 1, t);
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
 					}
 				} else {
@@ -350,7 +350,7 @@ public class ArrayHandling {
 			}
 			try {
 				((CArray) array).set(index, value, t);
-			} catch(IndexOutOfBoundsException e) {
+			} catch (IndexOutOfBoundsException e) {
 				throw new CREIndexOverflowException("The index " + index.asString().getQuote() + " is out of bounds", t);
 			}
 			return value;
@@ -361,7 +361,7 @@ public class ArrayHandling {
 			if(args[0] instanceof CArray) {
 				try {
 					((CArray) args[0]).set(args[1], args[2], t);
-				} catch(IndexOutOfBoundsException e) {
+				} catch (IndexOutOfBoundsException e) {
 					throw new CREIndexOverflowException("The index " + args[1].val() + " is out of bounds", t);
 				}
 				return args[2];
@@ -535,9 +535,9 @@ public class ArrayHandling {
 						iterator.addToBlacklist(index);
 					}
 				}
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CRECastException(e.getMessage(), t);
-			} catch(IndexOutOfBoundsException ex) {
+			} catch (IndexOutOfBoundsException ex) {
 				throw new CREIndexOverflowException(ex.getMessage(), t);
 			}
 			return CVoid.VOID;
@@ -846,7 +846,7 @@ public class ArrayHandling {
 					try {
 						int index = Static.getInt32(args[1], t);
 						return CBoolean.get(index < ca.size());
-					} catch(ConfigRuntimeException e) {
+					} catch (ConfigRuntimeException e) {
 						//They probably sent a key that can't be translated into an int, so it doesn't exist here.
 						return CBoolean.FALSE;
 					}
@@ -1498,7 +1498,7 @@ public class ArrayHandling {
 						sortType = CArray.SortType.valueOf(args[1].val());
 					}
 				}
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException("The sort type must be one of either: " + StringUtils.Join(CArray.SortType.values(), ", ", " or "), t);
 			}
 			if(sortType == null) {
@@ -1549,7 +1549,7 @@ public class ArrayHandling {
 					Construct c = null;
 					try {
 						closure.execute(l, r);
-					} catch(FunctionReturnException ex) {
+					} catch (FunctionReturnException ex) {
 						c = ex.getReturn();
 					}
 					int value;
@@ -1638,7 +1638,7 @@ public class ArrayHandling {
 				if(!children.get(1).getData().isDynamic()) {
 					try {
 						CArray.SortType.valueOf(children.get(1).getData().val().toUpperCase());
-					} catch(IllegalArgumentException e) {
+					} catch (IllegalArgumentException e) {
 						throw new ConfigCompileException("The sort type must be one of either: " + StringUtils.Join(CArray.SortType.values(), ", ", " or "), t);
 					}
 				}
@@ -2290,7 +2290,7 @@ public class ArrayHandling {
 					Construct ret = null;
 					try {
 						closure.execute(key, value);
-					} catch(FunctionReturnException ex) {
+					} catch (FunctionReturnException ex) {
 						ret = ex.getReturn();
 					}
 					if(ret == null) {
@@ -2309,7 +2309,7 @@ public class ArrayHandling {
 					Construct ret = null;
 					try {
 						closure.execute(key, value);
-					} catch(FunctionReturnException ex) {
+					} catch (FunctionReturnException ex) {
 						ret = ex.getReturn();
 					}
 					if(ret == null) {
@@ -2534,7 +2534,7 @@ public class ArrayHandling {
 			for(Construct key : array.keySet()) {
 				try {
 					closure.execute(key, array.get(key, t));
-				} catch(ProgramFlowManipulationException ex) {
+				} catch (ProgramFlowManipulationException ex) {
 					// Ignored
 				}
 			}
@@ -2618,7 +2618,7 @@ public class ArrayHandling {
 				boolean hadReturn = false;
 				try {
 					closure.execute(lastValue, array.get(keys.get(i), t));
-				} catch(FunctionReturnException ex) {
+				} catch (FunctionReturnException ex) {
 					lastValue = ex.getReturn();
 					if(lastValue instanceof CVoid) {
 						throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
@@ -2712,7 +2712,7 @@ public class ArrayHandling {
 				boolean hadReturn = false;
 				try {
 					closure.execute(lastValue, array.get(keys.get(i), t));
-				} catch(FunctionReturnException ex) {
+				} catch (FunctionReturnException ex) {
 					lastValue = ex.getReturn();
 					if(lastValue instanceof CVoid) {
 						throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
@@ -2796,7 +2796,7 @@ public class ArrayHandling {
 				boolean hasReturn = false;
 				try {
 					closure.execute(array.get(c, t));
-				} catch(FunctionReturnException ex) {
+				} catch (FunctionReturnException ex) {
 					hasReturn = true;
 					boolean ret = Static.getBoolean(ex.getReturn(), t);
 					if(ret == false) {
@@ -2877,7 +2877,7 @@ public class ArrayHandling {
 				boolean hasReturn = false;
 				try {
 					closure.execute(array.get(c, t));
-				} catch(FunctionReturnException ex) {
+				} catch (FunctionReturnException ex) {
 					hasReturn = true;
 					boolean ret = Static.getBoolean(ex.getReturn(), t);
 					if(ret == true) {
@@ -2960,7 +2960,7 @@ public class ArrayHandling {
 				boolean hasReturn = false;
 				try {
 					closure.execute(array.get(c, t));
-				} catch(FunctionReturnException ex) {
+				} catch (FunctionReturnException ex) {
 					hasReturn = true;
 					newArray.set(c, ex.getReturn(), t);
 				}

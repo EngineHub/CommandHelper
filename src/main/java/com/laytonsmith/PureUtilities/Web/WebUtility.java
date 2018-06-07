@@ -246,7 +246,7 @@ public final class WebUtility {
 			final SSLContext sslc;
 			try {
 				sslc = SSLContext.getInstance("SSL");
-			} catch(NoSuchAlgorithmException ex) {
+			} catch (NoSuchAlgorithmException ex) {
 				throw new IOException(ex);
 			}
 			TrustManager _defaultTrustManager = null;
@@ -255,12 +255,12 @@ public final class WebUtility {
 					TrustManagerFactory tmf;
 					try {
 						tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-					} catch(NoSuchAlgorithmException ex) {
+					} catch (NoSuchAlgorithmException ex) {
 						throw new RuntimeException(ex);
 					}
 					try {
 						tmf.init((KeyStore) null);
-					} catch(KeyStoreException ex) {
+					} catch (KeyStoreException ex) {
 						throw new IOException(ex);
 					}
 					for(TrustManager tm : tmf.getTrustManagers()) {
@@ -292,7 +292,7 @@ public final class WebUtility {
 						if(defaultTrustManager != null) {
 							try {
 								defaultTrustManager.checkClientTrusted(xcs, string);
-							} catch(CertificateException ex) {
+							} catch (CertificateException ex) {
 								trusted = false;
 							}
 						}
@@ -313,7 +313,7 @@ public final class WebUtility {
 									if(fp.equals(fingerprint)) {
 										return;
 									}
-								} catch(NoSuchAlgorithmException | CertificateEncodingException ex) {
+								} catch (NoSuchAlgorithmException | CertificateEncodingException ex) {
 									throw new RuntimeException(ex);
 								}
 							}
@@ -336,7 +336,7 @@ public final class WebUtility {
 			};
 			try {
 				sslc.init(null, overrideTrustManager, new java.security.SecureRandom());
-			} catch(KeyManagementException ex) {
+			} catch (KeyManagementException ex) {
 				throw new IOException(ex);
 			}
 			final SSLSocketFactory ssf;
@@ -429,9 +429,9 @@ public final class WebUtility {
 		InputStream is;
 		try {
 			is = conn.getInputStream();
-		} catch(UnknownHostException e) {
+		} catch (UnknownHostException e) {
 			throw e;
-		} catch(Exception e) {
+		} catch (Exception e) {
 			if(logger != null) {
 				logger.log(Level.SEVERE, "Exception occurred, {0} response from server", conn.getResponseCode());
 			}
@@ -491,7 +491,7 @@ public final class WebUtility {
 						b.append(URLEncoder.encode(key + "[]", "UTF-8")).append("=").append(URLEncoder.encode(value, "UTF-8"));
 					}
 				}
-			} catch(UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				throw new Error(ex);
 			}
 		}
@@ -560,7 +560,7 @@ public final class WebUtility {
 						return;
 					}
 					callback.response(response);
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					if(callback == null) {
 						return;
 					}

@@ -292,7 +292,7 @@ public class ArgumentSuite {
 				}
 				System.exit(0);
 			}
-		} catch(ResultUseException | ValidationException ex) {
+		} catch (ResultUseException | ValidationException ex) {
 			showHelp(suite);
 		}
 	}

@@ -111,7 +111,7 @@ public class SQL {
 								for(Connection c : connectionPool.values()) {
 									try {
 										c.close();
-									} catch(SQLException ex) {
+									} catch (SQLException ex) {
 										//
 									}
 								}
@@ -127,7 +127,7 @@ public class SQL {
 				boolean isValid = false;
 				try {
 					isValid = c.isValid(3);
-				} catch(AbstractMethodError ex) {
+				} catch (AbstractMethodError ex) {
 					// isValid is added in later versions. We want to continue working, (as if the connection
 					// is not valid) but still warn the user that this will
 					// be slower.
@@ -184,7 +184,7 @@ public class SQL {
 								if(ps.getParameterMetaData().isNullable(i + 1) == ParameterMetaData.parameterNoNulls) {
 									throw new CRESQLException("Parameter " + (i + 1) + " cannot be set to null. Check your parameters and try again.", t);
 								}
-							} catch(SQLException ex) {
+							} catch (SQLException ex) {
 								//Ignored. This appears to be able to happen in various cases, but in the case where it *does* work, we don't want
 								//to completely disable the feature.
 							}
@@ -206,7 +206,7 @@ public class SQL {
 								throw new CRECastException("The type " + params[i].getClass().getSimpleName()
 										+ " of parameter " + (i + 1) + " is not supported.", t);
 							}
-						} catch(ClassCastException ex) {
+						} catch (ClassCastException ex) {
 							throw new CRECastException("Could not cast parameter " + (i + 1) + " to "
 									+ ps.getParameterMetaData().getParameterTypeName(i + 1) + " from "
 									+ params[i].getClass().getSimpleName() + ".", t, ex);
@@ -298,7 +298,7 @@ public class SQL {
 						conn.close();
 					}
 				}
-			} catch(Profiles.InvalidProfileException | SQLException ex) {
+			} catch (Profiles.InvalidProfileException | SQLException ex) {
 				throw new CRESQLException(ex.getMessage(), t, ex);
 			}
 		}
@@ -489,7 +489,7 @@ public class SQL {
 					Construct exception = CNull.NULL;
 					try {
 						returnValue = new query().exec(t, environment, newArgs);
-					} catch(ConfigRuntimeException ex) {
+					} catch (ConfigRuntimeException ex) {
 						exception = ObjectGenerator.GetGenerator().exception(ex, environment, t);
 					}
 					final Construct cret = returnValue;

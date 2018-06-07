@@ -25,7 +25,7 @@ public class BukkitMCGuardian extends BukkitMCLivingEntity implements MCGuardian
 	public void setElder(boolean shouldBeElder) {
 		try {
 			e.setElder(shouldBeElder);
-		} catch(UnsupportedOperationException ex) {
+		} catch (UnsupportedOperationException ex) {
 			// 1.11 or later
 			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR,
 					"Cannot change Guardian to ElderGuardian in Minecraft 1.11+", Target.UNKNOWN);

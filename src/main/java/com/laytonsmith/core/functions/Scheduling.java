@@ -215,7 +215,7 @@ public class Scheduling {
 			double time = Static.getNumber(x, t);
 			try {
 				Thread.sleep((int) (time * 1000));
-			} catch(InterruptedException ex) {
+			} catch (InterruptedException ex) {
 			}
 			return CVoid.VOID;
 		}
@@ -291,11 +291,11 @@ public class Scheduling {
 						} finally {
 							p.stop();
 						}
-					} catch(ConfigRuntimeException e) {
+					} catch (ConfigRuntimeException e) {
 						ConfigRuntimeException.HandleUncaughtException(e, environment);
-					} catch(CancelCommandException e) {
+					} catch (CancelCommandException e) {
 						//Ok
-					} catch(ProgramFlowManipulationException e) {
+					} catch (ProgramFlowManipulationException e) {
 						ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
 					}
 				}
@@ -381,11 +381,11 @@ public class Scheduling {
 						} finally {
 							p.stop();
 						}
-					} catch(ConfigRuntimeException e) {
+					} catch (ConfigRuntimeException e) {
 						ConfigRuntimeException.HandleUncaughtException(e, environment);
-					} catch(CancelCommandException e) {
+					} catch (CancelCommandException e) {
 						//Ok
-					} catch(ProgramFlowManipulationException e) {
+					} catch (ProgramFlowManipulationException e) {
 						ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
 					} finally {
 						taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.FINISHED);
@@ -521,7 +521,7 @@ public class Scheduling {
 					String[] timezones = ArrayUtils.EMPTY_STRING_ARRAY;
 					try {
 						timezones = TimeZone.getAvailableIDs();
-					} catch(NullPointerException e) {
+					} catch (NullPointerException e) {
 						//This is due to a JDK bug. As you can see, the code above
 						//should never NPE due to our mistake, so it would only occur
 						//during an internal error. The solution that worked for me is here:
@@ -538,7 +538,7 @@ public class Scheduling {
 			});
 			try {
 				return getBundledDocs(map);
-			} catch(DocGenTemplates.Generator.GenerateException ex) {
+			} catch (DocGenTemplates.Generator.GenerateException ex) {
 				Logger.getLogger(Scheduling.class.getName()).log(Level.SEVERE, null, ex);
 				return getBundledDocs();
 			}
@@ -590,7 +590,7 @@ public class Scheduling {
 			SimpleDateFormat dateFormat;
 			try {
 				dateFormat = new SimpleDateFormat(args[0].toString(), locale);
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CREFormatException(ex.getMessage(), t);
 			}
 			dateFormat.setTimeZone(timezone);
@@ -642,7 +642,7 @@ public class Scheduling {
 				dateFormat = new SimpleDateFormat(args[0].toString());
 				Date d = dateFormat.parse(args[1].val());
 				return new CInt(d.getTime(), t);
-			} catch(IllegalArgumentException | ParseException ex) {
+			} catch (IllegalArgumentException | ParseException ex) {
 				throw new CREFormatException(ex.getMessage(), t);
 			}
 		}
@@ -708,7 +708,7 @@ public class Scheduling {
 			String[] timezones = ArrayUtils.EMPTY_STRING_ARRAY;
 			try {
 				timezones = TimeZone.getAvailableIDs();
-			} catch(NullPointerException e) {
+			} catch (NullPointerException e) {
 				//This is due to a JDK bug. As you can see, the code above
 				//should never NPE due to our mistake, so it would only occur
 				//during an internal error. The solution that worked for me is here:
@@ -850,7 +850,7 @@ public class Scheduling {
 													public void run() {
 														try {
 															f.job.execute();
-														} catch(ConfigRuntimeException ex) {
+														} catch (ConfigRuntimeException ex) {
 															ConfigRuntimeException.HandleUncaughtException(ex, f.job.getEnv());
 														}
 													}
@@ -862,7 +862,7 @@ public class Scheduling {
 								synchronized(cronThreadLock) {
 									try {
 										cronThreadLock.wait(1000);
-									} catch(InterruptedException ex) {
+									} catch (InterruptedException ex) {
 										//Continue
 									}
 								}
@@ -1044,7 +1044,7 @@ public class Scheduling {
 				for(String s : segment) {
 					try {
 						list.add(Integer.parseInt(s));
-					} catch(NumberFormatException ex) {
+					} catch (NumberFormatException ex) {
 						//Any unexpected strings would show up here. The expected string values would have already
 						//been replaced with a number, so this should work if there are no errors.
 						throw new CREFormatException("Unknown string passed in format for " + getName() + " \"" + s + "\"", t);

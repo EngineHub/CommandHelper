@@ -32,7 +32,7 @@ public class IClosureKeyword extends Keyword {
 						list.get(keywordPosition - 1).setChildren(children);
 						return keywordPosition - 1;
 					}
-				} catch(IndexOutOfBoundsException ex) {
+				} catch (IndexOutOfBoundsException ex) {
 					// Ignore, it's not a typed closure
 				}
 				return keywordPosition;
@@ -41,7 +41,7 @@ public class IClosureKeyword extends Keyword {
 				list.set(keywordPosition, new ParseTree(CIClosure.TYPE, list.get(keywordPosition).getFileOptions()));
 				return keywordPosition;
 			}
-		} catch(IndexOutOfBoundsException ex) {
+		} catch (IndexOutOfBoundsException ex) {
 			throw new ConfigCompileException("Unexpected \"iclosure\" reference", list.get(keywordPosition).getTarget());
 		}
 	}

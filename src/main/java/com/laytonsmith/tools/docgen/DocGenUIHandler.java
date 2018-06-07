@@ -198,7 +198,7 @@ public class DocGenUIHandler {
 					doUpload(DocGen.Template(r.getFile().getName(), isStaged), articleName, true);
 				}
 			}
-		} catch(URISyntaxException ex) {
+		} catch (URISyntaxException ex) {
 			Logger.getLogger(DocGenUIHandler.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -346,7 +346,7 @@ public class DocGenUIHandler {
 				}
 			}
 			return count;
-		} catch(URISyntaxException ex) {
+		} catch (URISyntaxException ex) {
 			throw new APIException(ex);
 		}
 	}
@@ -402,7 +402,7 @@ public class DocGenUIHandler {
 			digest.update(content.getBytes());
 			String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 			return hash;
-		} catch(NoSuchAlgorithmException ex) {
+		} catch (NoSuchAlgorithmException ex) {
 			throw new RuntimeException("An error occured while trying to hash your data", ex);
 		}
 	}
@@ -431,7 +431,7 @@ public class DocGenUIHandler {
 				throw new APIException(doc.getNode("/api/error/@info"));
 			}
 			return doc;
-		} catch(XPathExpressionException | SAXException | IOException e) {
+		} catch (XPathExpressionException | SAXException | IOException e) {
 			throw new APIException(e);
 		}
 	}
@@ -478,7 +478,7 @@ public class DocGenUIHandler {
 				Function f = (Function) fb;
 				try {
 					f.examples();
-				} catch(ConfigCompileException e) {
+				} catch (ConfigCompileException e) {
 					throw new RuntimeException("Compilation error while compiling examples for " + f.getName(), e);
 				}
 			}

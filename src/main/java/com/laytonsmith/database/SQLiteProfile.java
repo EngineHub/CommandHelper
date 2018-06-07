@@ -34,7 +34,7 @@ public class SQLiteProfile extends SQLProfile {
 	public String getConnectionString() throws SQLException {
 		try {
 			Class.forName(org.sqlite.JDBC.class.getName());
-		} catch(ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			throw new SQLException("Cannot load SQLite. Check your installation and try again");
 		}
 		return "jdbc:sqlite:" + getFile();

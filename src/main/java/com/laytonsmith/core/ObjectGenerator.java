@@ -275,7 +275,7 @@ public class ObjectGenerator {
 				if(seperatorIndex != -1) {
 					try {
 						data = Integer.parseInt(type.val().substring(seperatorIndex + 1));
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						throw new CRERangeException("The item data \"" + type.val().substring(seperatorIndex + 1)
 								+ "\" is not a valid integer.", t);
 					}
@@ -315,7 +315,7 @@ public class ObjectGenerator {
 				for(Map.Entry<MCEnchantment, Integer> entry : enchants.entrySet()) {
 					ret.addUnsafeEnchantment(entry.getKey(), entry.getValue());
 				}
-			} catch(ClassCastException ex) {
+			} catch (ClassCastException ex) {
 				throw new CREFormatException("Enchants must be an array of enchantment arrays.", t);
 			}
 		}
@@ -651,7 +651,7 @@ public class ObjectGenerator {
 										}
 										MCItemStack is = ObjectGenerator.GetGenerator().item(cinv.get(key, t), t);
 										inv.setItem(index, is);
-									} catch(NumberFormatException ex) {
+									} catch (NumberFormatException ex) {
 										ConfigRuntimeException.DoWarning("Expecting integer value for key in "
 												+ bs.getClass().getSimpleName().replaceFirst("MC", "")
 												+ " inventory array, but \"" + key + "\" was found. Ignoring.");
@@ -899,7 +899,7 @@ public class ObjectGenerator {
 						}
 					}
 				}
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new CREFormatException(ex.getMessage(), t, ex);
 			}
 		} else {
@@ -967,7 +967,7 @@ public class ObjectGenerator {
 		}
 		try {
 			return StaticLayer.GetConvertor().GetColor(red, green, blue);
-		} catch(IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			throw new CRERangeException(ex.getMessage(), t, ex);
 		}
 	}
@@ -1099,7 +1099,7 @@ public class ObjectGenerator {
 					}
 				}
 				ret.put(etype, elevel);
-			} catch(ClassCastException cce) {
+			} catch (ClassCastException cce) {
 				throw new CREFormatException("Expected an array at index " + key, t);
 			}
 		}
@@ -1191,7 +1191,7 @@ public class ObjectGenerator {
 		}
 		try {
 			return StaticLayer.GetPotionData(type, extended, upgraded);
-		} catch(IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			throw new CREFormatException(ex.getMessage(), t, ex);
 		}
 	}
@@ -1300,7 +1300,7 @@ public class ObjectGenerator {
 		if(fe.containsKey("type")) {
 			try {
 				builder.setType(MCFireworkType.valueOf(fe.get("type", t).val().toUpperCase()));
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CREFormatException(ex.getMessage(), t, ex);
 			}
 		}
@@ -1348,7 +1348,7 @@ public class ObjectGenerator {
 	public MCMaterial material(String name, Target t) {
 		try {
 			return StaticLayer.GetMaterial(name.toUpperCase());
-		} catch(IllegalArgumentException exception) {
+		} catch (IllegalArgumentException exception) {
 			throw new CREFormatException("Unknown material type: " + name, t);
 		}
 	}
@@ -1371,7 +1371,7 @@ public class ObjectGenerator {
 		MCRecipeType recipeType;
 		try {
 			recipeType = MCRecipeType.valueOf(recipe.get("type", t).val());
-		} catch(IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			throw new CREFormatException("Invalid recipe type.", t);
 		}
 
@@ -1380,7 +1380,7 @@ public class ObjectGenerator {
 		MCRecipe ret;
 		try {
 			ret = StaticLayer.GetNewRecipe(recipeKey, recipeType, result);
-		} catch(IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			throw new CREFormatException(ex.getMessage(), t);
 		}
 		switch(recipeType) {

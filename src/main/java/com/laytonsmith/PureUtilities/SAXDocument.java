@@ -61,7 +61,7 @@ public class SAXDocument {
 		SAXParser saxParser;
 		try {
 			saxParser = factory.newSAXParser();
-		} catch(ParserConfigurationException | SAXException ex) {
+		} catch (ParserConfigurationException | SAXException ex) {
 			throw new RuntimeException(ex);
 		}
 		saxParser.parse(stream, new DefaultHandler() {

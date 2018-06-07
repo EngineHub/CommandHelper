@@ -187,7 +187,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public boolean hasAI() {
 		try {
 			return le.hasAI();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9.2
 			return true;
 		}
@@ -205,7 +205,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 			if(le != null) {
 				le.addPotionEffect(pe, true);
 			}
-		} catch(NullPointerException e) {
+		} catch (NullPointerException e) {
 			Logger.getLogger(BukkitMCLivingEntity.class.getName()).log(Level.SEVERE,
 					"Bukkit appears to have derped. This is a problem with Bukkit, not CommandHelper."
 					+ "The effect should have still been applied.", e);
@@ -217,7 +217,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 		try {
 			PotionEffectType[] arr = (PotionEffectType[]) ReflectionUtils.get(PotionEffectType.class, "byId");
 			return arr.length - 1;
-		} catch(ReflectionUtils.ReflectionException e) {
+		} catch (ReflectionUtils.ReflectionException e) {
 			return Integer.MAX_VALUE;
 		}
 	}
@@ -371,7 +371,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public boolean isGliding() {
 		try {
 			return le.isGliding();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9
 			return false;
 		}
@@ -381,7 +381,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public void setGliding(Boolean glide) {
 		try {
 			le.setGliding(glide);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9
 		}
 	}
@@ -390,7 +390,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public void setAI(Boolean ai) {
 		try {
 			le.setAI(ai);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9.2
 		}
 	}

@@ -104,7 +104,7 @@ public final class EventBuilder {
 			BindableEvent be = (BindableEvent) constructor.newInstance(o);
 			return (T) be;
 
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;

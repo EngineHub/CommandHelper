@@ -234,7 +234,7 @@ public class Debug {
 			if(Prefs.DebugMode()) {
 				try {
 					Static.LogDebug(MethodScriptFileLocations.getDefault().getConfigDirectory(), args[0].val(), LogLevel.DEBUG);
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					throw new CREIOException(ex.getMessage(), t, ex);
 				}
 			}
@@ -565,7 +565,7 @@ public class Debug {
 			File file = new File("dump.bin");
 			try {
 				HeapDumper.dumpHeap(file.getAbsolutePath(), true);
-			} catch(Throwable tt) {
+			} catch (Throwable tt) {
 				throw new CREPluginInternalException("Could not create a heap dump: " + tt.getMessage(), t, tt);
 			}
 			return CVoid.VOID;

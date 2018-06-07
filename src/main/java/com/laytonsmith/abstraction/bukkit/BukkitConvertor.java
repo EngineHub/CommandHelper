@@ -190,7 +190,7 @@ public class BukkitConvertor extends AbstractConvertor {
 			//If they are looking it up by number, we can support that too
 			int i = Integer.valueOf(name);
 			return new BukkitMCEnchantment(Enchantment.getById(i));
-		} catch(NumberFormatException | NullPointerException e) {
+		} catch (NumberFormatException | NullPointerException e) {
 			return null;
 		}
 	}
@@ -302,12 +302,12 @@ public class BukkitConvertor extends AbstractConvertor {
 					return null;
 				}
 			});
-		} catch(CancellationException ex) {
+		} catch (CancellationException ex) {
 			// Ignore the Exception when the plugin is disabled (server shutting down).
 			if(CommandHelperPlugin.self.isEnabled()) {
 				java.util.logging.Logger.getLogger(BukkitConvertor.class.getName()).log(Level.SEVERE, null, ex);
 			}
-		} catch(InterruptedException | ExecutionException ex) {
+		} catch (InterruptedException | ExecutionException ex) {
 			java.util.logging.Logger.getLogger(BukkitConvertor.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -340,10 +340,10 @@ public class BukkitConvertor extends AbstractConvertor {
 //		//((BukkitMCServer)Static.getServer()).__Server().getScheduler().cancelTasks(CommandHelperPlugin.self);
 //		Set<Integer> ids = new TreeSet<Integer>(validIDs);
 //		for(int id : ids){
-//			try{
+//			try {
 //				//If this doesn't work, it shouldn't kill everything.
 //				ClearFutureRunnable(id);
-//			} catch(Exception e){
+//			} catch (Exception e){
 //				Logger.getLogger(BukkitConvertor.class.getName()).log(null, Level.SEVERE, e);
 //			}
 //		}
@@ -432,7 +432,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		Entity be = ((BukkitMCEntity) e).getHandle();
 		try {
 			return BukkitConvertor.BukkitGetCorrectEntity(be);
-		} catch(IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.INFO, iae.getMessage(), Target.UNKNOWN);
 			return e;
 		}
@@ -456,7 +456,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		Collection<Entity> near;
 		try {
 			near = l.getWorld().getNearbyEntities(l, radius, radius, radius);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.8.3
 			Entity tempEntity = l.getWorld().spawnEntity(l, EntityType.ARROW);
 			near = tempEntity.getNearbyEntities(radius, radius, radius);

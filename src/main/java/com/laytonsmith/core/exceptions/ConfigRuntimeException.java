@@ -98,7 +98,7 @@ public class ConfigRuntimeException extends RuntimeException {
 			Construct ret = CNull.NULL;
 			try {
 				c.execute(new Construct[]{ex});
-			} catch(FunctionReturnException retException) {
+			} catch (FunctionReturnException retException) {
 				ret = retException.getReturn();
 			}
 			if(ret instanceof CNull || Prefs.ScreamErrors()) {
@@ -523,7 +523,7 @@ public class ConfigRuntimeException extends RuntimeException {
 					name = getDefinedAt().file().getCanonicalPath();
 				}
 				element.set("file", name);
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				// This shouldn't happen, but if it does, we want to fall back to something marginally useful
 				String name = "Unknown file";
 				if(getDefinedAt().file() != null) {

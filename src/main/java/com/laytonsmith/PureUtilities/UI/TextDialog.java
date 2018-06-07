@@ -55,7 +55,7 @@ public class TextDialog extends javax.swing.JDialog {
 		HTMLEditorKit editorKit = (HTMLEditorKit) inputDialog.getEditorKit();
 		try {
 			editorKit.insertHTML(doc, doc.getLength(), "<html>" + text + "</html>", 0, 0, null);
-		} catch(BadLocationException | IOException ex) {
+		} catch (BadLocationException | IOException ex) {
 			Logger.getLogger(TextDialog.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		inputDialog.setCaretPosition(0);
@@ -103,7 +103,7 @@ public class TextDialog extends javax.swing.JDialog {
 						try {
 							// It's an external link
 							UIUtils.openWebpage(url);
-						} catch(IOException | URISyntaxException ex) {
+						} catch (IOException | URISyntaxException ex) {
 							Logger.getLogger(TextDialog.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}

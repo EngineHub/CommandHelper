@@ -22,7 +22,7 @@ public class CInt extends CNumber implements Cloneable {
 		super(value, Construct.ConstructType.INT, t);
 		try {
 			val = Long.parseLong(value);
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			throw new CREFormatException("Could not parse " + value + " as an integer", t);
 		}
 	}

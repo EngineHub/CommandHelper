@@ -108,7 +108,7 @@ public class Regex {
 					for(String key : namedGroups) {
 						ret.set(key, (String) ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
 					}
-				} catch(ReflectionUtils.ReflectionException ex) {
+				} catch (ReflectionUtils.ReflectionException ex) {
 					throw new CREFormatException("Named captures are only supported with Java 7.", t);
 				}
 			}
@@ -206,7 +206,7 @@ public class Regex {
 					for(String key : namedGroups) {
 						ret.set(key, (String) ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
 					}
-				} catch(ReflectionUtils.ReflectionException e) {
+				} catch (ReflectionUtils.ReflectionException e) {
 					throw new CREFormatException("Named captures are only supported with Java 7.", t);
 				}
 				fret.push(ret, t);
@@ -294,9 +294,9 @@ public class Regex {
 
 			try {
 				ret = pattern.matcher(subject).replaceAll(replacement);
-			} catch(IndexOutOfBoundsException e) {
+			} catch (IndexOutOfBoundsException e) {
 				throw new CREFormatException("Expecting a regex group at parameter 1 of reg_replace", t);
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}
 
@@ -615,7 +615,7 @@ public class Regex {
 		}
 		try {
 			return Pattern.compile(regex, flags);
-		} catch(PatternSyntaxException e) {
+		} catch (PatternSyntaxException e) {
 			throw new CREFormatException(e.getMessage(), t);
 		}
 	}

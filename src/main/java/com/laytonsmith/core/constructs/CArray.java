@@ -95,7 +95,7 @@ public class CArray extends Construct implements ArrayAccess {
 							try {
 								int i = Integer.parseInt(key);
 								max = java.lang.Math.max(max, i);
-							} catch(NumberFormatException e) {
+							} catch (NumberFormatException e) {
 							}
 						}
 						if(max == Integer.MIN_VALUE) {
@@ -266,7 +266,7 @@ public class CArray extends Construct implements ArrayAccess {
 				try {
 					int i = Integer.parseInt(key);
 					max = java.lang.Math.max(max, i);
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 				}
 			}
 			if(c instanceof CEntry) {
@@ -352,7 +352,7 @@ public class CArray extends Construct implements ArrayAccess {
 					} else {
 						array.set(indx, c);
 					}
-				} catch(ConfigRuntimeException e) {
+				} catch (ConfigRuntimeException e) {
 					// Not a number
 					setAssociative();
 				}
@@ -389,7 +389,7 @@ public class CArray extends Construct implements ArrayAccess {
 		if(!associative_mode) {
 			try {
 				return array.get(Static.getInt32(index, t));
-			} catch(IndexOutOfBoundsException e) {
+			} catch (IndexOutOfBoundsException e) {
 				throw new CREIndexOverflowException("The element at index \"" + index.val() + "\" does not exist", t, e);
 			}
 		} else {
@@ -428,7 +428,7 @@ public class CArray extends Construct implements ArrayAccess {
 		} else {
 			try {
 				return Integer.valueOf(c) < array.size();
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				return false;
 			}
 		}
@@ -572,7 +572,7 @@ public class CArray extends Construct implements ArrayAccess {
 		CArray clone;
 		try {
 			clone = (CArray) super.clone();
-		} catch(CloneNotSupportedException ex) {
+		} catch (CloneNotSupportedException ex) {
 			throw new RuntimeException(ex);
 		}
 		clone.associative_mode = associative_mode;
@@ -669,10 +669,10 @@ public class CArray extends Construct implements ArrayAccess {
 			try {
 				ret = array.remove(Integer.parseInt(c));
 				next_index--;
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				throw new CRECastException("Expecting an integer, but received \"" + c
 						+ "\" (were you expecting an associative array? This array is a normal array.)", construct.getTarget());
-			} catch(IndexOutOfBoundsException e) {
+			} catch (IndexOutOfBoundsException e) {
 				throw new CRERangeException("Cannot remove the value at '" + c
 						+ "', as no such index exists in the array", construct.getTarget());
 			}
@@ -721,12 +721,12 @@ public class CArray extends Construct implements ArrayAccess {
 			Constructor<CArray> con = (Constructor<CArray>) this.getClass().getConstructor(Target.class);
 			try {
 				return con.newInstance(t);
-			} catch(InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 				throw new RuntimeException(ex);
 			}
-		} catch(NoSuchMethodException ex) {
+		} catch (NoSuchMethodException ex) {
 			throw new RuntimeException(this.typeof() + " does not support creating a new value.");
-		} catch(SecurityException ex) {
+		} catch (SecurityException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -765,18 +765,18 @@ public class CArray extends Construct implements ArrayAccess {
 			if(o1.matches(".*[^0-9\\.]+.*") || o2.matches(".*[^0-9\\.]+.*")){
 				return normalize(o1.compareTo(o2));
 			}
-			try{
+			try {
 				int i1 = Integer.parseInt(o1);
 				int i2 = Integer.parseInt(o2);
 				//They're both integers, do an integer comparison
 				return new Integer(i1).compareTo(new Integer(i2));
-			} catch(NumberFormatException e){
-				try{
+			} catch (NumberFormatException e){
+				try {
 					double d1 = Double.parseDouble(o1);
 					double d2 = Double.parseDouble(o2);
 					//They're both doubles, do a double comparison
 					return new Double(d1).compareTo(new Double(d2));
-				} catch(NumberFormatException ee){
+				} catch (NumberFormatException ee){
 					//Just do a string comparison
 					return normalize(o1.compareTo(o2));
 				}

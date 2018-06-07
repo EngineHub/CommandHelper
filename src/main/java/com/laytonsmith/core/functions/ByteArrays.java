@@ -153,7 +153,7 @@ public class ByteArrays {
 			Integer pos = get_getPos(args, t);
 			try {
 				return new CInt(ba.getByte(pos), t);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e) {
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
@@ -185,7 +185,7 @@ public class ByteArrays {
 			Integer pos = get_getPos(args, t);
 			try {
 				return new CString(ba.getChar(pos), t);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e) {
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
@@ -217,7 +217,7 @@ public class ByteArrays {
 			Integer pos = get_getPos(args, t);
 			try {
 				return new CInt(ba.getShort(pos), t);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e) {
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
@@ -248,7 +248,7 @@ public class ByteArrays {
 			Integer pos = get_getPos(args, t);
 			try {
 				return new CInt(ba.getInt(pos), t);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e) {
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
@@ -280,7 +280,7 @@ public class ByteArrays {
 			Integer pos = get_getPos(args, t);
 			try {
 				return new CInt(ba.getLong(pos), t);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e) {
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
@@ -312,7 +312,7 @@ public class ByteArrays {
 			Integer pos = get_getPos(args, t);
 			try {
 				return new CDouble(ba.getFloat(pos), t);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e) {
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
@@ -344,7 +344,7 @@ public class ByteArrays {
 			Integer pos = get_getPos(args, t);
 			try {
 				return new CDouble(ba.getDouble(pos), t);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e) {
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
@@ -384,7 +384,7 @@ public class ByteArrays {
 			}
 			try {
 				return ba.getBytes(size, pos);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e) {
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
 		}
@@ -420,11 +420,11 @@ public class ByteArrays {
 			}
 			try {
 				return new CString(ba.readUTF8String(pos, encoding), t);
-			} catch(UnsupportedEncodingException e) {
+			} catch (UnsupportedEncodingException e) {
 				throw new CREFormatException(e.getMessage(), t);
-			} catch(IndexOutOfBoundsException | BufferUnderflowException e) {
+			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
-			} catch(NegativeArraySizeException e) {
+			} catch (NegativeArraySizeException e) {
 				throw new CREFormatException("Invalid data", t);
 			}
 		}
@@ -706,9 +706,9 @@ public class ByteArrays {
 			}
 			try {
 				ba.writeUTF8String(s, pos, encoding);
-			} catch(IndexOutOfBoundsException e) {
+			} catch (IndexOutOfBoundsException e) {
 				throw new CRERangeException(e.getMessage(), t);
-			} catch(UnsupportedEncodingException e) {
+			} catch (UnsupportedEncodingException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}
 			return CVoid.VOID;

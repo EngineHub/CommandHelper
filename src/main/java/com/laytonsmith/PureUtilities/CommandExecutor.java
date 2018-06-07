@@ -111,13 +111,13 @@ public class CommandExecutor {
 					if(out != null) {
 						out.flush();
 					}
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 				} finally {
 					if(out != null) {
 						try {
 							out.close();
-						} catch(IOException ex) {
+						} catch (IOException ex) {
 							Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
@@ -140,13 +140,13 @@ public class CommandExecutor {
 					if(err != null) {
 						err.flush();
 					}
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 				} finally {
 					if(err != null) {
 						try {
 							err.close();
-						} catch(IOException ex) {
+						} catch (IOException ex) {
 							Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
@@ -165,13 +165,13 @@ public class CommandExecutor {
 						while((ret = in.read()) != -1) {
 							bin.write(ret);
 						}
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 					} finally {
 						if(in != null) {
 							try {
 								in.close();
-							} catch(IOException ex) {
+							} catch (IOException ex) {
 								Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 							}
 						}
@@ -239,14 +239,14 @@ public class CommandExecutor {
 		if(out != null) {
 			try {
 				out.flush();
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
 		if(err != null) {
 			try {
 				err.flush();
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				Logger.getLogger(CommandExecutor.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}

@@ -131,13 +131,13 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 			String remote = remoteFileField.getText().trim();
 			try {
 				new URI(host);
-			} catch(URISyntaxException ex) {
+			} catch (URISyntaxException ex) {
 				return ex.getMessage();
 			}
 			int port;
 			try {
 				port = Integer.parseInt(sport);
-			} catch(NumberFormatException ex) {
+			} catch (NumberFormatException ex) {
 				return "Port must be a number.";
 			}
 			if(port < 1 || port > 65535) {
@@ -321,7 +321,7 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 					break;
 				}
 			}
-		} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
 			java.util.logging.Logger.getLogger(ConfigurationLoaderDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
 		//</editor-fold>

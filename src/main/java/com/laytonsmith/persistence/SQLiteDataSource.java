@@ -73,11 +73,11 @@ public class SQLiteDataSource extends SQLDataSource {
 					}
 					updateLastConnected();
 					break;
-				} catch(SQLException ex) {
+				} catch (SQLException ex) {
 					if(ex.getMessage().startsWith("[SQLITE_BUSY]") || ex.getMessage().equals("database is locked")) {
 						try {
 							Thread.sleep(getRandomSleepTime());
-						} catch(InterruptedException ex1) {
+						} catch (InterruptedException ex1) {
 							//
 						}
 					} else {
@@ -85,7 +85,7 @@ public class SQLiteDataSource extends SQLDataSource {
 					}
 				}
 			}
-		} catch(ClassNotFoundException | UnsupportedOperationException | IOException | SQLException ex) {
+		} catch (ClassNotFoundException | UnsupportedOperationException | IOException | SQLException ex) {
 			throw new DataSourceException("An error occured while setting up a connection to the SQLite database", ex);
 		} finally {
 			if(DO_DISCONNECTS) {
@@ -143,13 +143,13 @@ public class SQLiteDataSource extends SQLDataSource {
 							statement.executeUpdate();
 						}
 						break;
-					} catch(SQLException ex) {
+					} catch (SQLException ex) {
 						if(ex.getMessage().startsWith("[SQLITE_BUSY]")
 								// This one only happens with SETs
 								|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")) {
 							try {
 								Thread.sleep(getRandomSleepTime());
-							} catch(InterruptedException ex1) {
+							} catch (InterruptedException ex1) {
 								//
 							}
 						} else {
@@ -160,7 +160,7 @@ public class SQLiteDataSource extends SQLDataSource {
 			}
 			updateLastConnected();
 			return true;
-		} catch(SQLException ex) {
+		} catch (SQLException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
 			if(DO_DISCONNECTS) {
@@ -194,11 +194,11 @@ public class SQLiteDataSource extends SQLDataSource {
 					}
 					updateLastConnected();
 					break;
-				} catch(SQLException ex) {
+				} catch (SQLException ex) {
 					if(ex.getMessage().startsWith("[SQLITE_BUSY]")) {
 						try {
 							Thread.sleep(getRandomSleepTime());
-						} catch(InterruptedException ex1) {
+						} catch (InterruptedException ex1) {
 							//
 						}
 					} else {
@@ -207,7 +207,7 @@ public class SQLiteDataSource extends SQLDataSource {
 				}
 			}
 			return set;
-		} catch(SQLException | IOException ex) {
+		} catch (SQLException | IOException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
 			if(DO_DISCONNECTS) {
@@ -239,11 +239,11 @@ public class SQLiteDataSource extends SQLDataSource {
 						}
 					}
 					break;
-				} catch(SQLException ex) {
+				} catch (SQLException ex) {
 					if(ex.getMessage().startsWith("[SQLITE_BUSY]")) {
 						try {
 							Thread.sleep(getRandomSleepTime());
-						} catch(InterruptedException ex1) {
+						} catch (InterruptedException ex1) {
 							//
 						}
 					} else {
@@ -253,7 +253,7 @@ public class SQLiteDataSource extends SQLDataSource {
 			}
 			updateLastConnected();
 			return ret;
-		} catch(SQLException | IOException ex) {
+		} catch (SQLException | IOException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
 			if(DO_DISCONNECTS) {
@@ -285,11 +285,11 @@ public class SQLiteDataSource extends SQLDataSource {
 						}
 					}
 					break;
-				} catch(SQLException ex) {
+				} catch (SQLException ex) {
 					if(ex.getMessage().startsWith("[SQLITE_BUSY]")) {
 						try {
 							Thread.sleep(getRandomSleepTime());
-						} catch(InterruptedException ex1) {
+						} catch (InterruptedException ex1) {
 							//
 						}
 					} else {
@@ -299,7 +299,7 @@ public class SQLiteDataSource extends SQLDataSource {
 			}
 			updateLastConnected();
 			return map;
-		} catch(SQLException | IOException ex) {
+		} catch (SQLException | IOException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		} finally {
 			if(DO_DISCONNECTS) {
@@ -328,13 +328,13 @@ public class SQLiteDataSource extends SQLDataSource {
 						updateLastConnected();
 					}
 					break;
-				} catch(SQLException ex) {
+				} catch (SQLException ex) {
 					if(ex.getMessage().startsWith("[SQLITE_BUSY]")
 							// This one only happens with SETs
 							|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")) {
 						try {
 							Thread.sleep(getRandomSleepTime());
-						} catch(InterruptedException ex1) {
+						} catch (InterruptedException ex1) {
 							//
 						}
 					} else {
@@ -342,7 +342,7 @@ public class SQLiteDataSource extends SQLDataSource {
 					}
 				}
 			}
-		} catch(IOException | SQLException e) {
+		} catch (IOException | SQLException e) {
 			throw new DataSourceException(e.getMessage(), e);
 		} finally {
 			if(DO_DISCONNECTS) {
@@ -383,7 +383,7 @@ public class SQLiteDataSource extends SQLDataSource {
 				statement.execute();
 			}
 			updateLastConnected();
-		} catch(SQLException ex) {
+		} catch (SQLException ex) {
 			Logger.getLogger(SQLiteDataSource.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -401,7 +401,7 @@ public class SQLiteDataSource extends SQLDataSource {
 				}
 			}
 			updateLastConnected();
-		} catch(SQLException ex) {
+		} catch (SQLException ex) {
 			Logger.getLogger(SQLiteDataSource.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}

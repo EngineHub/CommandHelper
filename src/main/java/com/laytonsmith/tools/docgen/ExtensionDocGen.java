@@ -80,7 +80,7 @@ public class ExtensionDocGen {
 				Method docsMethod = enclosingClass.getMethod("docs", (Class[]) null);
 				Object o = enclosingClass.newInstance();
 				fdocs.append((String) docsMethod.invoke(o, (Object[]) null)).append(nl).append(nl);
-			} catch(NoSuchMethodException
+			} catch (NoSuchMethodException
 					| SecurityException
 					| InstantiationException
 					| IllegalAccessException
@@ -136,7 +136,7 @@ public class ExtensionDocGen {
 				Method docsMethod = enclosingClass.getMethod("docs", (Class[]) null);
 				Object o = enclosingClass.newInstance();
 				fdocs.append((String) docsMethod.invoke(o, (Object[]) null)).append(nl).append(nl);
-			} catch(NoSuchMethodException
+			} catch (NoSuchMethodException
 					| SecurityException
 					| InstantiationException
 					| IllegalAccessException

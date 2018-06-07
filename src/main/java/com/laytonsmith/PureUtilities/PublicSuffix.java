@@ -107,7 +107,7 @@ public class PublicSuffix {
 		if(defaultInstance == null) {
 			try {
 				defaultInstance = new PublicSuffix();
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
 		}

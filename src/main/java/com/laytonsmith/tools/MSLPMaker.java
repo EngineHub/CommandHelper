@@ -46,10 +46,10 @@ public class MSLPMaker {
 		for(AliasCore.LocalPackage.FileInfo fi : localPackage.getMSFiles()) {
 			try {
 				MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents(), fi.file(), true));
-			} catch(ConfigCompileException e) {
+			} catch (ConfigCompileException e) {
 				error = true;
 				ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", null);
-			} catch(ConfigCompileGroupException ex) {
+			} catch (ConfigCompileGroupException ex) {
 				error = true;
 				ConfigRuntimeException.HandleUncaughtException(ex, null);
 			}
@@ -64,15 +64,15 @@ public class MSLPMaker {
 						s.compile();
 						s.checkAmbiguous(allScripts);
 						allScripts.add(s);
-					} catch(ConfigCompileException e) {
+					} catch (ConfigCompileException e) {
 						error = true;
 						ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", null);
-					} catch(ConfigCompileGroupException e) {
+					} catch (ConfigCompileGroupException e) {
 						error = true;
 						ConfigRuntimeException.HandleUncaughtException(e, "Compile errors in script. Compilation will attempt to continue, however.", null);
 					}
 				}
-			} catch(ConfigCompileException e) {
+			} catch (ConfigCompileException e) {
 				error = true;
 				ConfigRuntimeException.HandleUncaughtException(e, "Could not compile file " + fi.file() + " compilation will halt.", null);
 			}

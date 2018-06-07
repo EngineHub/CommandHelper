@@ -149,7 +149,7 @@ public class Reflection {
 				} else {
 					try {
 						return new CString(t.file().getCanonicalPath().replace('\\', '/'), t);
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						throw new CREIOException(ex.getMessage(), t);
 					}
 				}
@@ -246,7 +246,7 @@ public class Reflection {
 			DocField docField;
 			try {
 				docField = DocField.getValue(args[1].val());
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException("Invalid docField provided: " + args[1].val(), t);
 			}
 			//For now, we have special handling, since functions are actually the only thing that will work,
@@ -264,7 +264,7 @@ public class Reflection {
 				try {
 					Function f = (Function) FunctionList.getFunction(new CFunction(element, t));
 					return new CString(formatFunctionDoc(f.docs(), docField), t);
-				} catch(ConfigCompileException ex) {
+				} catch (ConfigCompileException ex) {
 					throw new CREFormatException("Unknown function: " + element, t);
 				}
 			}
@@ -307,7 +307,7 @@ public class Reflection {
 			if(children.get(1).isConst()) {
 				try {
 					DocField.getValue(children.get(1).getData().val());
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					throw new ConfigCompileException("Invalid docField provided: " + children.get(1).getData().val(), t);
 				}
 			}

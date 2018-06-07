@@ -139,7 +139,7 @@ public class BasicLogicTest {
 	public void _t(String val1, String val2) throws Exception {
 		try {
 			assertEquals("true", SRun("equals(" + val1 + ", " + val2 + ")", null));
-		} catch(ConfigCompileException ex) {
+		} catch (ConfigCompileException ex) {
 			fail(ex.getMessage());
 		}
 	}
@@ -147,7 +147,7 @@ public class BasicLogicTest {
 	public void _f(String val1, String val2) throws Exception {
 		try {
 			assertEquals("false", SRun("equals(" + val1 + ", " + val2 + ")", null));
-		} catch(ConfigCompileException ex) {
+		} catch (ConfigCompileException ex) {
 			fail(ex.getMessage());
 		}
 	}

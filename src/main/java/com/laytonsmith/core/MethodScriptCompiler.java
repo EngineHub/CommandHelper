@@ -543,7 +543,7 @@ public final class MethodScriptCompiler {
 									} else {
 										token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
 									}
-								} catch(NoSuchElementException e) {
+								} catch (NoSuchElementException e) {
 									// This is the first element on the list, so, it's another autoconcat.
 									token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
 								}
@@ -697,7 +697,7 @@ public final class MethodScriptCompiler {
 							int unicodeNum;
 							try {
 								unicodeNum = Integer.parseInt(unicode, 16);
-							} catch(NumberFormatException e) {
+							} catch (NumberFormatException e) {
 								throw new ConfigCompileException(
 										"Unrecognized unicode escape sequence: \\u" + unicode, target);
 							}
@@ -714,7 +714,7 @@ public final class MethodScriptCompiler {
 							int unicodeNum;
 							try {
 								unicodeNum = Integer.parseInt(unicode, 16);
-							} catch(NumberFormatException e) {
+							} catch (NumberFormatException e) {
 								throw new ConfigCompileException(
 										"Unrecognized unicode escape sequence: \\u" + unicode, target);
 							}
@@ -1117,7 +1117,7 @@ public final class MethodScriptCompiler {
 		try {
 			//Instead of using Target.UNKNOWN, we can at least set the file.
 			unknown = new Target(0, stream.get(0).target.file(), 0);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			unknown = Target.UNKNOWN;
 		}
 
@@ -1210,7 +1210,7 @@ public final class MethodScriptCompiler {
 				constructCount.pop();
 				try {
 					constructCount.peek().incrementAndGet();
-				} catch(EmptyStackException e) {
+				} catch (EmptyStackException e) {
 					throw new ConfigCompileException("Unexpected end curly brace", t.target);
 				}
 				continue;
@@ -1354,12 +1354,12 @@ public final class MethodScriptCompiler {
 				constructCount.pop();
 				try {
 					constructCount.peek().incrementAndGet();
-				} catch(EmptyStackException e) {
+				} catch (EmptyStackException e) {
 					throw new ConfigCompileException("Unexpected end parenthesis", t.target);
 				}
 				try {
 					tree = parents.peek();
-				} catch(EmptyStackException e) {
+				} catch (EmptyStackException e) {
 					throw new ConfigCompileException("Unexpected end parenthesis", t.target);
 				}
 
@@ -1418,7 +1418,7 @@ public final class MethodScriptCompiler {
 					tree.addChild(new ParseTree(slice, fileOptions));
 					constructCount.peek().incrementAndGet();
 					continue;
-				} catch(ConfigRuntimeException ex) {
+				} catch (ConfigRuntimeException ex) {
 					//CSlice can throw CREs, but at this stage, we have to
 					//turn them into a CCE.
 					throw new ConfigCompileException(ex);
@@ -1477,7 +1477,7 @@ public final class MethodScriptCompiler {
 					tree.addChild(new ParseTree(slice, fileOptions));
 					constructCount.peek().incrementAndGet();
 					continue;
-				} catch(ConfigRuntimeException ex) {
+				} catch (ConfigRuntimeException ex) {
 					//CSlice can throw CREs, but at this stage, we have to
 					//turn them into a CCE.
 					throw new ConfigCompileException(ex);
@@ -1502,7 +1502,7 @@ public final class MethodScriptCompiler {
 							c = new CDouble(Double.parseDouble(t.val() + '.' + next2.val()), t.target);
 						}
 						i += 2;
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						// Not a double
 					}
 				}
@@ -1556,7 +1556,7 @@ public final class MethodScriptCompiler {
 					try {
 						c = new CDouble(Double.parseDouble('.' + next1.val()), t.target);
 						i++;
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						// Not a double
 					}
 				}
@@ -1633,7 +1633,7 @@ public final class MethodScriptCompiler {
 		Function func;
 		try {
 			func = ((CFunction) tree.getData()).getFunction();
-		} catch(ConfigCompileException ex) {
+		} catch (ConfigCompileException ex) {
 			compilerErrors.add(ex);
 			return;
 		}
@@ -1700,7 +1700,7 @@ public final class MethodScriptCompiler {
 				ParseTree ret = ((Compiler.__autoconcat__) ((CFunction) root.getData()).getFunction()).optimizeDynamic(root.getTarget(), root.getChildren(), root.getFileOptions());
 				root.setData(ret.getData());
 				root.setChildren(ret.getChildren());
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				compilerExceptions.add(ex);
 			}
 		}
@@ -1742,7 +1742,7 @@ public final class MethodScriptCompiler {
 				//Don't link children of a nolinking function.
 				return;
 			}
-		} catch(ConfigCompileException ex) {
+		} catch (ConfigCompileException ex) {
 			//This can happen if the treeFunction isn't a function, is a proc, etc,
 			//but we don't care, we just want to continue.
 		}
@@ -1759,7 +1759,7 @@ public final class MethodScriptCompiler {
 				if(op.optimizationOptions().contains(OptimizationOption.CUSTOM_LINK)) {
 					try {
 						op.link(tree.getData().getTarget(), tree.getChildren());
-					} catch(ConfigCompileException ex) {
+					} catch (ConfigCompileException ex) {
 						compilerErrors.add(ex);
 					}
 				}
@@ -1772,7 +1772,7 @@ public final class MethodScriptCompiler {
 					// This will throw an exception if the function doesn't exist.
 					try {
 						FunctionList.getFunction(child.getData());
-					} catch(ConfigCompileException ex) {
+					} catch (ConfigCompileException ex) {
 						compilerErrors.add(ex);
 					}
 				}
@@ -1810,7 +1810,7 @@ public final class MethodScriptCompiler {
 		Function func;
 		try {
 			func = (Function) FunctionList.getFunction(cFunction);
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			func = null;
 		}
 		if(func != null) {
@@ -1834,11 +1834,11 @@ public final class MethodScriptCompiler {
 			// would cause an error, even though the user did in fact provide code in that section.
 			try {
 				((Optimizable) func).optimizeDynamic(tree.getTarget(), children, tree.getFileOptions());
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				// If an error occurs, we will skip the rest of this element
 				compilerErrors.add(ex);
 				return;
-			} catch(ConfigRuntimeException ex) {
+			} catch (ConfigRuntimeException ex) {
 				compilerErrors.add(new ConfigCompileException(ex));
 				return;
 			}
@@ -1889,7 +1889,7 @@ public final class MethodScriptCompiler {
 				Function f;
 				try {
 					f = (Function) FunctionList.getFunction(t.getData());
-				} catch(ConfigCompileException ex) {
+				} catch (ConfigCompileException ex) {
 					compilerErrors.add(ex);
 					return;
 				}
@@ -1949,7 +1949,7 @@ public final class MethodScriptCompiler {
 						tree.removeChildren();
 						return;
 					}//else Nope, couldn't optimize.
-				} catch(ConfigRuntimeException ex) {
+				} catch (ConfigRuntimeException ex) {
 					//Cool. Caught a runtime error at compile time :D
 					compilerErrors.add(new ConfigCompileException(ex));
 				}
@@ -1983,15 +1983,15 @@ public final class MethodScriptCompiler {
 					} else {
 						env = Static.GenerateStandaloneEnvironment(false);
 					}
-				} catch(IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e) {
+				} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e) {
 					//
 				}
 				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(new ParseTree[children.size()]));
 				procs.peek().add(myProc); //Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				//Well, they have an error in there somewhere
 				compilerErrors.add(new ConfigCompileException(e));
-			} catch(NullPointerException e) {
+			} catch (NullPointerException e) {
 				//Nope, can't optimize.
 				return;
 			}
@@ -2009,7 +2009,7 @@ public final class MethodScriptCompiler {
 				ParseTree tempNode;
 				try {
 					tempNode = ((Optimizable) func).optimizeDynamic(tree.getData().getTarget(), tree.getChildren(), tree.getFileOptions());
-				} catch(ConfigRuntimeException e) {
+				} catch (ConfigRuntimeException e) {
 					//Turn it into a compile exception, then rethrow
 					throw new ConfigCompileException(e);
 				}
@@ -2036,7 +2036,7 @@ public final class MethodScriptCompiler {
 						fullyStatic = true;
 					}
 				} //else it wasn't an optimization, but a compile check
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				compilerErrors.add(ex);
 			}
 		}
@@ -2081,11 +2081,11 @@ public final class MethodScriptCompiler {
 						tree.setData(result);
 						tree.removeChildren();
 					}
-				} catch(ConfigRuntimeException e) {
+				} catch (ConfigRuntimeException e) {
 					//Turn this into a ConfigCompileException, then rethrow
 					throw new ConfigCompileException(e);
 				}
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				compilerErrors.add(ex);
 			}
 		}
@@ -2216,9 +2216,9 @@ public final class MethodScriptCompiler {
 		for(File f : Static.getAliasCore().autoIncludes) {
 			try {
 				MethodScriptCompiler.execute(IncludeCache.get(f, new Target(0, f, 0)), env, null, s);
-			} catch(ProgramFlowManipulationException e) {
+			} catch (ProgramFlowManipulationException e) {
 				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in auto include files.", e.getTarget()), env);
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				e.setEnv(env);
 				ConfigRuntimeException.HandleUncaughtException(e, env);
 			}

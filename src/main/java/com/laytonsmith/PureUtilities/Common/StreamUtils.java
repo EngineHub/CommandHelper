@@ -44,7 +44,7 @@ public class StreamUtils {
 	public static String GetString(InputStream in) {
 		try {
 			return GetString(in, "UTF-8");
-		} catch(UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -76,7 +76,7 @@ public class StreamUtils {
 					read = input.read(buffer, 0, buffer.length)) {
 				output.append(buffer, 0, read);
 			}
-		} catch(IOException ignore) {
+		} catch (IOException ignore) {
 		}
 
 		return output.toString();
@@ -109,7 +109,7 @@ public class StreamUtils {
 	public static InputStream GetInputStream(String contents) {
 		try {
 			return GetInputStream(contents, "UTF-8");
-		} catch(UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -135,7 +135,7 @@ public class StreamUtils {
 	public static PrintStream GetSystemOut() {
 		try {
 			return new PrintStream(System.out, true, "UTF-8");
-		} catch(UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -149,7 +149,7 @@ public class StreamUtils {
 	public static PrintStream GetSystemErr() {
 		try {
 			return new PrintStream(System.err, true, "UTF-8");
-		} catch(UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}

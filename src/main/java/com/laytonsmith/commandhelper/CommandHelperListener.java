@@ -115,11 +115,11 @@ public class CommandHelperListener implements Listener {
 					BukkitDirtyRegisteredListener.setCancelled(event);
 				}
 			}
-		} catch(InternalException e) {
+		} catch (InternalException e) {
 			logger.log(Level.SEVERE, e.getMessage());
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			logger.log(Level.WARNING, e.getMessage());
-		} catch(Throwable e) {
+		} catch (Throwable e) {
 			player.sendMessage(MCChatColor.RED + "Command failed with following reason: " + e.getMessage());
 			//Obviously the command is registered, but it somehow failed. Cancel the event.
 			event.setCancelled(true);

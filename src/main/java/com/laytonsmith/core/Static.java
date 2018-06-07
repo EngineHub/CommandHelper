@@ -374,7 +374,7 @@ public final class Static {
 		} else {
 			try {
 				v = Main.loadSelfVersion();
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				//Ignored
 			}
 		}
@@ -513,7 +513,7 @@ public final class Static {
 		}
 		try {
 			return new CInt(Long.parseLong(val), t);
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			try {
 				if(!(val.contains(" ") || val.contains("\t"))) {
 					//Interesting behavior in Double.parseDouble causes it to "trim" strings first, then
@@ -521,7 +521,7 @@ public final class Static {
 					//any characters other than [\-0-9\.], we want to make it a string instead
 					return new CDouble(Double.parseDouble(val), t);
 				}
-			} catch(NumberFormatException g) {
+			} catch (NumberFormatException g) {
 				// Not a double either
 			}
 		}
@@ -586,7 +586,7 @@ public final class Static {
 	public static void SendMessage(final MCCommandSender m, String msg) {
 		try {
 			SendMessage(m, msg, Target.UNKNOWN);
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			//Ignored
 		}
 	}
@@ -632,7 +632,7 @@ public final class Static {
 			} else {
 				type = Integer.parseInt(notation);
 			}
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			throw new CREFormatException("Invalid item notation: " + notation, t);
 		}
 		return StaticLayer.GetItemStack(type, data, qty);
@@ -694,7 +694,7 @@ public final class Static {
 				throw new CRELengthException("A UUID is expected to be 32 or 36 characters,"
 						+ " but the given string was " + subject.length() + " characters.", t);
 			}
-		} catch(IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			throw new CREIllegalArgumentException("A UUID length string was given, but was not a valid UUID.", t);
 		}
 	}
@@ -723,7 +723,7 @@ public final class Static {
 		} else {
 			try {
 				ofp = getServer().getOfflinePlayer(GetUUID(search, t));
-			} catch(ConfigRuntimeException cre) {
+			} catch (ConfigRuntimeException cre) {
 				if(cre instanceof CRELengthException) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
@@ -757,7 +757,7 @@ public final class Static {
 		} else {
 			try {
 				m = getServer().getPlayer(GetUUID(player, t));
-			} catch(ConfigRuntimeException cre) {
+			} catch (ConfigRuntimeException cre) {
 				if(cre instanceof CRELengthException) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
@@ -797,7 +797,7 @@ public final class Static {
 		} else {
 			try {
 				m = Static.getServer().getPlayer(player);
-			} catch(Exception e) {
+			} catch (Exception e) {
 				//Apparently the server can occasionally throw exceptions here, so instead of rethrowing
 				//a NPE or whatever, we'll assume that the player just isn't online, and
 				//throw a CRE instead.
@@ -886,7 +886,7 @@ public final class Static {
 				if(e.getUniqueId().compareTo(id) == 0) {
 					try {
 						return (MCLivingEntity) StaticLayer.GetCorrectEntity(e);
-					} catch(ClassCastException cce) {
+					} catch (ClassCastException cce) {
 						throw new CREBadEntityException("The entity found was misinterpreted by the converter, this is"
 								+ " a developer mistake, please file a ticket.", t);
 					}

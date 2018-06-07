@@ -46,9 +46,9 @@ public class MObject {
 		T instance;
 		try {
 			instance = type.newInstance();
-		} catch(InstantiationException ex) {
+		} catch (InstantiationException ex) {
 			throw new RuntimeException(type.getName() + " does not have a default constructor.");
-		} catch(IllegalAccessException ex) {
+		} catch (IllegalAccessException ex) {
 			throw new RuntimeException(type.getName() + "'s default constructor is not public.");
 		}
 		return null; //TODO
@@ -157,7 +157,7 @@ public class MObject {
 					//val is now set correctly, guaranteed.
 					f.set(this, val);
 					//These exceptions cannot happen.
-				} catch(IllegalArgumentException | IllegalAccessException ex) {
+				} catch (IllegalArgumentException | IllegalAccessException ex) {
 					throw new Error(ex);
 				}
 			}

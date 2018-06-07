@@ -58,7 +58,7 @@ public class DataSourceFilter {
 	public DataSourceFilter(File file, URI defaultURI) throws IOException, DataSourceException {
 		try {
 			process(FileUtil.read(file), defaultURI);
-		} catch(DataSourceException e) {
+		} catch (DataSourceException e) {
 			throw new DataSourceException("Could not process filter file located at " + file.getAbsolutePath() + ": " + e.getMessage());
 		}
 	}
@@ -145,7 +145,7 @@ public class DataSourceFilter {
 				URI uriValue;
 				try {
 					uriValue = new URI(value);
-				} catch(URISyntaxException e) {
+				} catch (URISyntaxException e) {
 					throw new DataSourceException("Invalid URI for " + value
 							+ (isAlias ? "(Defined for alias " + originalValue + ")" : "") + ".");
 				}
@@ -216,7 +216,7 @@ public class DataSourceFilter {
 		for(String uri : namespaced.values()) {
 			try {
 				set.add(new URI(uri));
-			} catch(URISyntaxException ex) {
+			} catch (URISyntaxException ex) {
 				//Won't happen
 				throw new Error(ex);
 			}
@@ -288,7 +288,7 @@ public class DataSourceFilter {
 			String uri = matches.get(match);
 			try {
 				list.add(new URI(uri));
-			} catch(URISyntaxException ex) {
+			} catch (URISyntaxException ex) {
 				//Won't happen
 				throw new Error(ex);
 			}
@@ -360,7 +360,7 @@ public class DataSourceFilter {
 			//Store it in our cache
 			cache.put(key, u);
 			return u;
-		} catch(URISyntaxException ex) {
+		} catch (URISyntaxException ex) {
 			//We already verified that this won't happen, so yeah.
 			return null;
 		}

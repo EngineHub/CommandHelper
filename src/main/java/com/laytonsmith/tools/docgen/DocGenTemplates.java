@@ -100,7 +100,7 @@ public class DocGenTemplates {
 	public static String Generate(String forPage, Map<String, String> customTemplates) {
 		try {
 			Prefs.init(null);
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenTemplates.class));
@@ -145,7 +145,7 @@ public class DocGenTemplates {
 							+ " is not an instance of " + Generator.class.getSimpleName()
 							+ ", or is not static. Please correct this error to use it as a template.");
 				}
-			} catch(Exception e) {
+			} catch (Exception e) {
 				System.out.println(e);
 				//Oh well, skip it.
 			}
@@ -167,7 +167,7 @@ public class DocGenTemplates {
 			if(Generator.class.isAssignableFrom(f.getType())) {
 				try {
 					generators.put(f.getName(), (Generator) f.get(null));
-				} catch(IllegalArgumentException | IllegalAccessException ex) {
+				} catch (IllegalArgumentException | IllegalAccessException ex) {
 					Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
@@ -188,7 +188,7 @@ public class DocGenTemplates {
 			if(Implementation.GetServerType() != Implementation.Type.BUKKIT) {
 				Prefs.init(null);
 			}
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenTemplates.class));
@@ -274,9 +274,9 @@ public class DocGenTemplates {
 				}
 				lastMatch = m.end();
 				appended = false;
-			} catch(GenerateException e) {
+			} catch (GenerateException e) {
 				throw e;
-			} catch(Exception e) {
+			} catch (Exception e) {
 				//Oh well, skip it.
 				e.printStackTrace();
 			}
@@ -320,7 +320,7 @@ public class DocGenTemplates {
 						try {
 							constructor = c.getDeclaredConstructor();
 							constructor.setAccessible(true);
-						} catch(NoSuchMethodException e) {
+						} catch (NoSuchMethodException e) {
 							throw new RuntimeException("No no-argument constructor was found for " + c.getName() + ". A no-arg constructor must be provided, even if it is"
 									+ " private, so that the documentation functions can be accessed.", e);
 						}
@@ -345,7 +345,7 @@ public class DocGenTemplates {
 						b.append("|-\n| ").append(name).append("\n| ").append(description)
 								.append("\n| ").append(example).append("\n| ").append(ds.since().toString()).append("\n");
 						set.add(b.toString());
-					} catch(Exception e) {
+					} catch (Exception e) {
 						throw new Error(e);
 					}
 				} else {
@@ -474,7 +474,7 @@ public class DocGenTemplates {
 					c = c.getEnclosingClass();
 				}
 				return "[" + githubBaseURL + "/" + c.getName().replace('.', '/') + ".java " + b.getName() + "]";
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				return "Unknown function: " + args[0];
 			}
 
@@ -524,7 +524,7 @@ public class DocGenTemplates {
 					TermColors.EnableColors();
 				}
 				return initial + HTMLUtils.escapeHTML(baos.toString("UTF-8"));
-			} catch(UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				throw new Error(ex);
 			}
 		}
@@ -543,7 +543,7 @@ public class DocGenTemplates {
 			String out;
 			try {
 				out = SimpleSyntaxHighlighter.Highlight(code, false);
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				throw new GenerateException(ex.getMessage() + "\nFor code: " + code, ex);
 			}
 			return out;
@@ -565,7 +565,7 @@ public class DocGenTemplates {
 			String out;
 			try {
 				out = SimpleSyntaxHighlighter.Highlight(code, true);
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				throw new GenerateException(ex.getMessage() + "\nFor code: " + code, ex);
 			}
 			return out;
@@ -704,18 +704,18 @@ public class DocGenTemplates {
 			Class c;
 			try {
 				c = Class.forName(clazz);
-			} catch(ClassNotFoundException ex) {
+			} catch (ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 			Field f;
 			try {
 				f = c.getField(constant);
-			} catch(NoSuchFieldException | SecurityException ex) {
+			} catch (NoSuchFieldException | SecurityException ex) {
 				throw new RuntimeException(ex);
 			}
 			try {
 				return f.get(null).toString();
-			} catch(IllegalArgumentException | IllegalAccessException ex) {
+			} catch (IllegalArgumentException | IllegalAccessException ex) {
 				throw new RuntimeException(ex);
 			}
 		}

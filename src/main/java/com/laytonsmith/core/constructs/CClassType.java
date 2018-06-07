@@ -238,7 +238,7 @@ public class CClassType extends Construct {
 					if(!cSuper.isAssignableFrom(cCheck)) {
 						return false;
 					}
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					throw new RuntimeException(ex);
 				}
 			}

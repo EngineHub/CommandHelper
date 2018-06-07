@@ -186,7 +186,7 @@ public class PlayerManagement {
 			if(args.length >= 1) {
 				try {
 					pl = Static.GetPlayer(args[0], t);
-				} catch(ConfigRuntimeException cre) {
+				} catch (ConfigRuntimeException cre) {
 					pl = Static.GetUser(args[0], t);
 				}
 			}
@@ -609,7 +609,7 @@ public class PlayerManagement {
 			MCBlock b;
 			try {
 				b = p.getTargetBlock(trans, 512);
-			} catch(IllegalStateException ise) {
+			} catch (IllegalStateException ise) {
 				throw new CREPluginInternalException("The server's method of finding the target block has failed."
 						+ " There is nothing that can be done about this except standing somewhere else.", t);
 			}
@@ -922,7 +922,7 @@ public class PlayerManagement {
 				MCBlock b;
 				try {
 					b = p.getTargetBlock(null, 200);
-				} catch(IllegalStateException ise) {
+				} catch (IllegalStateException ise) {
 					b = null;
 				}
 				if(b == null) {
@@ -936,7 +936,7 @@ public class PlayerManagement {
 				String add;
 				try {
 					add = p.getAddress().getAddress().getHostAddress();
-				} catch(NullPointerException npe) {
+				} catch (NullPointerException npe) {
 					add = "";
 				}
 
@@ -975,7 +975,7 @@ public class PlayerManagement {
 				String hostname;
 				try {
 					hostname = p.getAddress().getAddress().getHostAddress();
-				} catch(NullPointerException npe) {
+				} catch (NullPointerException npe) {
 					hostname = "";
 				}
 
@@ -1416,7 +1416,7 @@ public class PlayerManagement {
 					}
 					yaw = (float) Static.getNumber(args[0], t);
 					pitch = (float) Static.getNumber(args[1], t);
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					//It's the MCPlayer, F variation
 					toSet = Static.GetPlayer(args[0], t);
 					pitch = toSet.getLocation().getPitch();
@@ -1575,7 +1575,7 @@ public class PlayerManagement {
 
 			try {
 				gm = MCGameMode.valueOf(mode.toUpperCase());
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException("Mode must be either " + StringUtils.Join(MCGameMode.values(), ", ", ", or "), t);
 			}
 			Static.AssertPlayerNonNull(m, t);
@@ -2519,7 +2519,7 @@ public class PlayerManagement {
 			MCPlayer p = null;
 			try {
 				p = Static.GetPlayer(args[0], t);
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				//They aren't in the player list
 			}
 			//If the player we grabbed doesn't match exactly, we're referring to another player
@@ -3397,7 +3397,7 @@ public class PlayerManagement {
 				String name = e.nextElement().toString();
 				TimeLookup.put(name, new CString(p.getProperty(name), Target.UNKNOWN));
 			}
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -3500,7 +3500,7 @@ public class PlayerManagement {
 			}
 			try {
 				Long.valueOf(stime);
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				throw new CREFormatException("Invalid time provided", t);
 			}
 			time = Long.parseLong(stime);
@@ -3758,7 +3758,7 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(m, t);
 			try {
 				m.setPlayerListName(listName);
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				if(listName.length() > 16) {
 					throw new CRELengthException("set_list_name([player,] name)"
 							+ " expects name to be 16 characters or less for MineCraft versions prior to 1.8.", t);
@@ -4493,7 +4493,7 @@ public class PlayerManagement {
 				try {
 					m = Static.GetPlayer(args[0], t);
 					locationIndex = 1;
-				} catch(ConfigRuntimeException e) {
+				} catch (ConfigRuntimeException e) {
 					if(p instanceof MCPlayer) {
 						m = (MCPlayer) p;
 					}
@@ -4954,7 +4954,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				return new CString(((MCPlayer) Static.getLivingEntity(args[0], t)).getName(), t);
-			} catch(Exception exception) {
+			} catch (Exception exception) {
 				return CNull.NULL;
 			}
 		}
@@ -5259,7 +5259,7 @@ public class PlayerManagement {
 			MCSound sound;
 			try {
 				sound = MCSound.valueOf(args[1].val().toUpperCase());
-			} catch(IllegalArgumentException iae) {
+			} catch (IllegalArgumentException iae) {
 				throw new CREFormatException("Sound name '" + args[1].val() + "' is invalid.", t);
 			}
 
@@ -5267,7 +5267,7 @@ public class PlayerManagement {
 				MCSoundCategory category;
 				try {
 					category = MCSoundCategory.valueOf(args[2].val().toUpperCase());
-				} catch(IllegalArgumentException iae) {
+				} catch (IllegalArgumentException iae) {
 					throw new CREFormatException("Sound category '" + args[2].val() + "' is invalid.", t);
 				}
 				p.stopSound(sound, category);
@@ -5330,7 +5330,7 @@ public class PlayerManagement {
 				MCSoundCategory category;
 				try {
 					category = MCSoundCategory.valueOf(args[2].val().toUpperCase());
-				} catch(IllegalArgumentException iae) {
+				} catch (IllegalArgumentException iae) {
 					throw new CREFormatException("Sound category '" + args[2].val() + "' is invalid.", t);
 				}
 				p.stopSound(sound, category);

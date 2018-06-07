@@ -295,7 +295,7 @@ public class Main {
 				ArgumentSuite.ArgumentSuiteResults results = ARGUMENT_SUITE.match(args, "help");
 				mode = results.getMode();
 				parsedArgs = results.getResults();
-			} catch(ArgumentParser.ResultUseException | ArgumentParser.ValidationException e) {
+			} catch (ArgumentParser.ResultUseException | ArgumentParser.ValidationException e) {
 				StreamUtils.GetSystemOut().println(TermColors.RED + e.getMessage() + TermColors.RESET);
 				mode = helpMode;
 				parsedArgs = null;
@@ -399,7 +399,7 @@ public class Main {
 				DocGen.MarkupType docs;
 				try {
 					docs = DocGen.MarkupType.valueOf(parsedArgs.getStringArgument().toUpperCase());
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					StreamUtils.GetSystemOut().println("The type of documentation must be one of the following: " + StringUtils.Join(DocGen.MarkupType.values(), ", ", ", or "));
 					System.exit(1);
 					return;
@@ -423,12 +423,12 @@ public class Main {
 				try {
 					try {
 						MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, f, file.endsWith("ms")));
-					} catch(ConfigCompileException ex) {
+					} catch (ConfigCompileException ex) {
 						Set<ConfigCompileException> s = new HashSet<>(1);
 						s.add(ex);
 						throw new ConfigCompileGroupException(s);
 					}
-				} catch(ConfigCompileGroupException ex) {
+				} catch (ConfigCompileGroupException ex) {
 					List<Map<String, Object>> err = new ArrayList<>();
 					for(ConfigCompileException e : ex.getList()) {
 						Map<String, Object> error = new HashMap<>();
@@ -452,7 +452,7 @@ public class Main {
 				FunctionBase f;
 				try {
 					f = FunctionList.getFunction(function, Target.UNKNOWN);
-				} catch(ConfigCompileException e) {
+				} catch (ConfigCompileException e) {
 					StreamUtils.GetSystemErr().println("The function '" + function + "' was not found.");
 					System.exit(1);
 					throw new Error();
@@ -484,12 +484,12 @@ public class Main {
 				try {
 					try {
 						optimized = OptimizationUtilities.optimize(plain, source);
-					} catch(ConfigCompileException ex) {
+					} catch (ConfigCompileException ex) {
 						Set<ConfigCompileException> group = new HashSet<>();
 						group.add(ex);
 						throw new ConfigCompileGroupException(group);
 					}
-				} catch(ConfigCompileGroupException ex) {
+				} catch (ConfigCompileGroupException ex) {
 					ConfigRuntimeException.HandleUncaughtException(ex, null);
 					System.exit(1);
 					return;
@@ -511,7 +511,7 @@ public class Main {
 				allArgs.remove(0);
 				try {
 					Interpreter.startWithTTY(fileName, allArgs);
-				} catch(Profiles.InvalidProfileException ex) {
+				} catch (Profiles.InvalidProfileException ex) {
 					StreamUtils.GetSystemErr().println("Invalid profile file at " + MethodScriptFileLocations.getDefault().getProfilesFile()
 							+ ": " + ex.getMessage());
 					System.exit(1);
@@ -563,7 +563,7 @@ public class Main {
 				ProfilerSummary summary = new ProfilerSummary(new FileInputStream(input));
 				try {
 					summary.setIgnorePercentage(ignorePercentage);
-				} catch(IllegalArgumentException ex) {
+				} catch (IllegalArgumentException ex) {
 					StreamUtils.GetSystemErr().println(TermColors.RED + ex.getMessage() + TermColors.RESET);
 					System.exit(1);
 				}
@@ -613,14 +613,14 @@ public class Main {
 					}
 					try {
 						PNViewer.startServer(port, password);
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						StreamUtils.GetSystemErr().println(ex.getMessage());
 						System.exit(1);
 					}
 				} else {
 					try {
 						PNViewer.main(parsedArgs.getStringListArgument().toArray(ArrayUtils.EMPTY_STRING_ARRAY));
-					} catch(HeadlessException ex) {
+					} catch (HeadlessException ex) {
 						StreamUtils.GetSystemErr().println("The Persistence Network Viewer may not be run from a headless environment.");
 						System.exit(1);
 					}
@@ -686,7 +686,7 @@ public class Main {
 			} else {
 				throw new Error("Should not have gotten here");
 			}
-		} catch(NoClassDefFoundError error) {
+		} catch (NoClassDefFoundError error) {
 			StreamUtils.GetSystemErr().println(getNoClassDefFoundErrorMessage(error));
 		}
 	}
@@ -716,7 +716,7 @@ public class Main {
 			Yaml yaml = new Yaml();
 			Map<String, Object> map = (Map<String, Object>) yaml.load(contents);
 			return new SimpleVersion((String) map.get("version"));
-		} catch(RuntimeException | IOException ex) {
+		} catch (RuntimeException | IOException ex) {
 			throw new Exception(ex);
 		}
 	}

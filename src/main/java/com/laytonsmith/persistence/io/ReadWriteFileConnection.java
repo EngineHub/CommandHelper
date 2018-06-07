@@ -113,9 +113,9 @@ public class ReadWriteFileConnection implements ConnectionMixin {
 		}
 		try {
 			return new String(future.get(), encoding);
-		} catch(InterruptedException ex) {
+		} catch (InterruptedException ex) {
 			throw new RuntimeException(ex);
-		} catch(ExecutionException ex) {
+		} catch (ExecutionException ex) {
 			if(ex.getCause() instanceof IOException) {
 				throw (IOException) ex.getCause();
 			} else {
@@ -143,7 +143,7 @@ public class ReadWriteFileConnection implements ConnectionMixin {
 				public void run() {
 					try {
 						FileUtil.write(data, file);
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						Logger.getLogger(ReadWriteFileConnection.class.getName()).log(Level.SEVERE, null, ex);
 					}
 					dm.deactivateThread(null);

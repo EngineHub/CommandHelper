@@ -206,7 +206,7 @@ public class Compiler {
 							conversion.addChild(lhs);
 							conversion.addChild(rhs);
 							list.set(i + 2, conversion);
-						} catch(IndexOutOfBoundsException e) {
+						} catch (IndexOutOfBoundsException e) {
 							throw new ConfigCompileException("Invalid symbol listed", node.getTarget());
 						}
 					}
@@ -448,7 +448,7 @@ public class Compiler {
 							i--;
 						}
 					}
-				} catch(IndexOutOfBoundsException e) {
+				} catch (IndexOutOfBoundsException e) {
 					throw new ConfigCompileException("Unexpected symbol (" + list.get(list.size() - 1).getData().val() + "). Did you forget to quote your symbols?", list.get(list.size() - 1).getTarget());
 				}
 			}
@@ -534,7 +534,7 @@ public class Compiler {
 								Function f = (Function) FunctionList.getFunction(identifier);
 								ParseTree node = new ParseTree(f.execs(identifier.getTarget(), null, null, child), child.getFileOptions());
 								return node;
-							} catch(Exception e) {
+							} catch (Exception e) {
 								throw new Error("Unknown function " + identifier.val() + "?");
 							}
 						} else {

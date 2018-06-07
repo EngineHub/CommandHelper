@@ -56,7 +56,7 @@ public class XMLDocument {
 			XPathFactory xpf = XPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI,
 					"com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl", XMLDocument.class.getClassLoader());
 			xpath = xpf.newXPath();
-		} catch(ParserConfigurationException | XPathFactoryConfigurationException ex) {
+		} catch (ParserConfigurationException | XPathFactoryConfigurationException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -71,7 +71,7 @@ public class XMLDocument {
 		this();
 		try {
 			doc = docBuilder.parse(new ByteArrayInputStream(document.getBytes(encoding)));
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -86,7 +86,7 @@ public class XMLDocument {
 		this();
 		try {
 			doc = docBuilder.parse(new ByteArrayInputStream(document.getBytes("UTF-8")));
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -420,7 +420,7 @@ public class XMLDocument {
 					uglyRender = writer.toString();
 					uglyDirty = false;
 				}
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
 		}

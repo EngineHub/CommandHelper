@@ -167,7 +167,7 @@ public class Script {
 			if(left.size() >= 1) {
 				try {
 					target = new Target(left.get(0).line_num, left.get(0).file, left.get(0).column);
-				} catch(NullPointerException e) {
+				} catch (NullPointerException e) {
 					//Oh well, we tried to get more information
 				}
 			}
@@ -195,23 +195,23 @@ public class Script {
 				MethodScriptCompiler.registerAutoIncludes(CurrentEnv, this);
 				MethodScriptCompiler.execute(rootNode, CurrentEnv, done, this);
 			}
-		} catch(ConfigRuntimeException ex) {
+		} catch (ConfigRuntimeException ex) {
 			//We don't know how to handle this really, so let's pass it up the chain.
 			throw ex;
-		} catch(CancelCommandException e) {
+		} catch (CancelCommandException e) {
 			//p.sendMessage(e.getMessage());
 			//The message in the exception is actually empty
-		} catch(LoopBreakException e) {
+		} catch (LoopBreakException e) {
 			if(p != null) {
 				p.sendMessage("The break() function must be used inside a for() or foreach() loop");
 			}
 			StreamUtils.GetSystemOut().println("The break() function must be used inside a for() or foreach() loop");
-		} catch(LoopContinueException e) {
+		} catch (LoopContinueException e) {
 			if(p != null) {
 				p.sendMessage("The continue() function must be used inside a for() or foreach() loop");
 			}
 			StreamUtils.GetSystemOut().println("The continue() function must be used inside a for() or foreach() loop");
-		} catch(FunctionReturnException e) {
+		} catch (FunctionReturnException e) {
 			if(myEnv.getEnv(GlobalEnv.class).GetEvent() != null) {
 				//Oh, we're running in an event handler. Those know how to catch it too.
 				throw e;
@@ -220,7 +220,7 @@ public class Script {
 				p.sendMessage("The return() function must be used inside a procedure.");
 			}
 			StreamUtils.GetSystemOut().println("The return() function must be used inside a procedure.");
-		} catch(Throwable t) {
+		} catch (Throwable t) {
 			StreamUtils.GetSystemOut().println("An unexpected exception occurred during the execution of a script.");
 			t.printStackTrace();
 			if(p != null) {
@@ -293,7 +293,7 @@ public class Script {
 				Environment newEnv = env;
 				try {
 					newEnv = env.clone();
-				} catch(CloneNotSupportedException e) {
+				} catch (CloneNotSupportedException e) {
 				}
 				ProfilePoint pp = env.getEnv(GlobalEnv.class).GetProfiler().start(m.val() + " execution", LogLevel.INFO);
 				Construct ret;
@@ -307,7 +307,7 @@ public class Script {
 			final Function f;
 			try {
 				f = (Function) FunctionList.getFunction(m);
-			} catch(ConfigCompileException e) {
+			} catch (ConfigCompileException e) {
 				//Turn it into a config runtime exception. This shouldn't ever happen though.
 				throw ConfigRuntimeException.CreateUncatchableException("Unable to find function " + m.val(), m.getTarget());
 			}
@@ -379,17 +379,17 @@ public class Script {
 				}
 				//We want to catch and rethrow the ones we know how to catch, and then
 				//catch and report anything else.
-			} catch(ConfigRuntimeException | ProgramFlowManipulationException e) {
+			} catch (ConfigRuntimeException | ProgramFlowManipulationException e) {
 				if(e instanceof AbstractCREException) {
 					((AbstractCREException) e).freezeStackTraceElements(stManager);
 				}
 				throw e;
-			} catch(InvalidEnvironmentException e) {
+			} catch (InvalidEnvironmentException e) {
 				if(!e.isDataSet()) {
 					e.setData(f.getName());
 				}
 				throw e;
-			} catch(Exception e) {
+			} catch (Exception e) {
 				String brand = Implementation.GetServerType().getBranding();
 				SimpleVersion version = Static.getVersion();
 
@@ -449,7 +449,7 @@ public class Script {
 				String modVersion;
 				try {
 					modVersion = StaticLayer.GetConvertor().GetServer().getAPIVersion();
-				} catch(Exception ex) {
+				} catch (Exception ex) {
 					modVersion = Implementation.GetServerType().name();
 				}
 
@@ -459,7 +459,7 @@ public class Script {
 						try {
 							extensionData += TermColors.CYAN + extension.getName() + TermColors.RED
 									+ " (" + TermColors.RESET + extension.getVersion() + TermColors.RED + ")\n";
-						} catch(AbstractMethodError ex) {
+						} catch (AbstractMethodError ex) {
 							// This happens with an old style extensions. Just skip it.
 							extensionData += TermColors.CYAN + "Unknown Extension" + TermColors.RED + "\n";
 						}
@@ -585,7 +585,7 @@ public class Script {
 								args.get(j), Target.UNKNOWN);
 					}
 				}
-			} catch(IndexOutOfBoundsException e) {
+			} catch (IndexOutOfBoundsException e) {
 				v = new Variable(((Variable) cleft.get(j)).getVariableName(),
 						((Variable) cleft.get(j)).getDefault(), Target.UNKNOWN);
 			}
@@ -601,7 +601,7 @@ public class Script {
 			verifyLeft();
 			compileLeft();
 			compileRight();
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			compilerError = true;
 			throw e;
 		}

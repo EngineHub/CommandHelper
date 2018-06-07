@@ -82,14 +82,14 @@ public class Threading {
 					dm.activateThread(Thread.currentThread());
 					try {
 						closure.execute();
-					} catch(FunctionReturnException ex) {
+					} catch (FunctionReturnException ex) {
 						// Do nothing
-					} catch(LoopManipulationException ex) {
+					} catch (LoopManipulationException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Unexpected loop manipulation"
 								+ " operation was triggered inside the closure.", t), environment);
-					} catch(ConfigRuntimeException ex) {
+					} catch (ConfigRuntimeException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ex, environment);
-					} catch(CancelCommandException ex) {
+					} catch (CancelCommandException ex) {
 						if(ex.getMessage() != null) {
 							new Echoes.console().exec(t, environment, new CString(ex.getMessage(), t), CBoolean.FALSE);
 						}
@@ -225,9 +225,9 @@ public class Threading {
 				public void run() {
 					try {
 						closure.execute();
-					} catch(ConfigRuntimeException e) {
+					} catch (ConfigRuntimeException e) {
 						ConfigRuntimeException.HandleUncaughtException(e, environment);
-					} catch(ProgramFlowManipulationException e) {
+					} catch (ProgramFlowManipulationException e) {
 						// Ignored
 					}
 				}
@@ -290,16 +290,16 @@ public class Threading {
 					public Object call() throws Exception {
 						try {
 							closure.execute();
-						} catch(FunctionReturnException e) {
+						} catch (FunctionReturnException e) {
 							return e.getReturn();
-						} catch(ConfigRuntimeException | ProgramFlowManipulationException e) {
+						} catch (ConfigRuntimeException | ProgramFlowManipulationException e) {
 							return e;
 						}
 						return CNull.NULL;
 					}
 				});
 
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
 			if(ret instanceof RuntimeException) {
@@ -409,7 +409,7 @@ public class Threading {
 				synchronized(syncObject) {
 					parent.seval(code, env);
 				}
-			} catch(RuntimeException e) {
+			} catch (RuntimeException e) {
 				throw e;
 			} finally {
 

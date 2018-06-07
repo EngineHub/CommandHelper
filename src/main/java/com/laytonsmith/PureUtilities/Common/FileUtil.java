@@ -80,7 +80,7 @@ public class FileUtil {
 		try {
 			byte[] bytes = org.apache.commons.io.FileUtils.readFileToByteArray(file);
 			return new ByteArrayInputStream(bytes);
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			//Apache IO has an interesting feature/bug where the error message "Unexpected readed size" is thrown.
 			//If this is the case, we're going to try using a normal java file connection. Other IOExceptions
 			//are just going be rethrown.
@@ -99,7 +99,7 @@ public class FileUtil {
 				throw ex;
 			}
 		}
-//		try{
+//		try {
 //			synchronized (getLock(file)) {
 //				RandomAccessFile raf = new RandomAccessFile(file, "rw");
 //				FileLock lock = null;
@@ -119,7 +119,7 @@ public class FileUtil {
 //			freeLock(file);
 //		}
 //		FileInputStream fis = new FileInputStream(f);
-//		try{
+//		try {
 //		return StreamUtils.GetString(fis, charset);
 //		} finally {
 //			fis.close();
@@ -167,7 +167,7 @@ public class FileUtil {
 			file.getAbsoluteFile().createNewFile();
 		}
 		FileUtils.writeByteArrayToFile(file, data, append);
-//		try{
+//		try {
 //			synchronized (getLock(file)) {
 //				int sleepTime = 0;
 //				int sleepTimes = 0;
@@ -196,7 +196,7 @@ public class FileUtil {
 //						//We assume it worked at this point, so let's break;
 //						break loop;
 //						//raf.getChannel().write(ByteBuffer.wrap(data));
-//					} catch(IOException e){
+//					} catch (IOException e){
 //						//If we get this dumb message, we're on windows. We'll try again here shortly,
 //						//but we don't want to bother the user with this exception if we can help it.
 //						//http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6354433
@@ -353,7 +353,7 @@ public class FileUtil {
 	public static boolean move(File from, File to) throws IOException {
 		FileUtils.moveFile(from, to);
 		return true;
-//		try{
+//		try {
 //			synchronized(getLock(to)){
 //				return from.renameTo(to);
 //			}

@@ -86,7 +86,7 @@ public class Environment implements Cloneable {
 				clone.addEnv(ee);
 			}
 			return clone;
-		} catch(CloneNotSupportedException ex) {
+		} catch (CloneNotSupportedException ex) {
 			throw new RuntimeException(ex);
 		}
 	}

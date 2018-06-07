@@ -31,7 +31,7 @@ class LocalDeploymentMethod implements DeploymentMethod {
 			String currentFile;
 			try {
 				currentFile = SiteDeploy.getLocalMD5(new FileInputStream(outLoc));
-			} catch(FileNotFoundException ex) {
+			} catch (FileNotFoundException ex) {
 				// Doesn't exist, so just set the currentFile to INVALID
 				currentFile = "INVALID";
 			}
@@ -40,7 +40,7 @@ class LocalDeploymentMethod implements DeploymentMethod {
 				return false;
 			}
 			FileUtil.write(d, outLoc, FileUtil.OVERWRITE, true);
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 			return false;
 		}

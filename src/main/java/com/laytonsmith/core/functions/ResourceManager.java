@@ -115,7 +115,7 @@ public class ResourceManager {
 			Construct data = null;
 			try {
 				type = ResourceTypes.valueOf(args[0].val());
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}
 			if(args.length > 1) {
@@ -129,7 +129,7 @@ public class ResourceManager {
 							throw new CRENullPointerException("data cannot be empty", t);
 						}
 						resource = new CResource<XMLDocument>(new XMLDocument(data.val()), t);
-					} catch(SAXException ex) {
+					} catch (SAXException ex) {
 						throw new CREFormatException(ex.getMessage(), t);
 					}
 					break;

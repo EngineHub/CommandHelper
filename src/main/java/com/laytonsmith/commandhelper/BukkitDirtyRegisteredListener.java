@@ -85,7 +85,7 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 			if(!(e instanceof BukkitDirtyRegisteredListener) && e instanceof RegisteredListener) {
 				try {
 					return super.add(Generate((RegisteredListener) e));
-				} catch(NoSuchFieldException | IllegalArgumentException | IllegalAccessException ex) {
+				} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException ex) {
 					Logger.getLogger(BukkitDirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			} else {
@@ -283,9 +283,9 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 //					+ (event.getType() == Event.Type.CUSTOM_EVENT ? "CUSTOM_EVENT/" + event.getEventName() : event.getType().name()) //Event name
 //					);
 //		}
-//		try{
+//		try {
 //			executor.execute(listener, event);
-//		} catch(EventException e){
+//		} catch (EventException e){
 //			Logger.getLogger(BukkitDirtyRegisteredListener.class.getName()).log(Level.SEVERE, e.getMessage(), e);
 //		}
 //		if(stopWatch != null) {
@@ -310,9 +310,9 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 			try {
 				//Set up our "proxy"
 				BukkitDirtyRegisteredListener.Repopulate();
-			} catch(NoSuchMethodException ex) {
+			} catch (NoSuchMethodException ex) {
 				Logger.getLogger(Static.class.getName()).log(Level.SEVERE, null, ex);
-			} catch(NoSuchFieldException | ClassCastException | IllegalArgumentException | IllegalAccessException ex) {
+			} catch (NoSuchFieldException | ClassCastException | IllegalArgumentException | IllegalAccessException ex) {
 				Static.getLogger().log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
 			}
 		} //else play nice :(

@@ -124,7 +124,7 @@ public class EventBinding {
 			Environment newEnv = env;
 			try {
 				newEnv = env.clone();
-			} catch(Exception e) {
+			} catch (Exception e) {
 			}
 			newEnv.getEnv(GlobalEnv.class).SetVarList(custom_params);
 			ParseTree tree = nodes[nodes.length - 1];
@@ -153,7 +153,7 @@ public class EventBinding {
 				EventUtils.RegisterEvent(be);
 				id = new CString(be.getId(), t);
 				event = EventList.getEvent(be.getEventName());
-			} catch(EventException ex) {
+			} catch (EventException ex) {
 				throw new CREBindException(ex.getMessage(), t);
 			}
 
@@ -206,7 +206,7 @@ public class EventBinding {
 			String name = children.get(0).getData().val();
 			try {
 				EventUtils.verifyEventName(name);
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new ConfigCompileException(ex.getMessage(), t);
 			}
 		}
@@ -571,7 +571,7 @@ public class EventBinding {
 			if(!active.isLocked(parameter)) {
 				try {
 					success = e.modifyEvent(parameter, value, environment.getEnv(GlobalEnv.class).GetEvent().getUnderlyingEvent());
-				} catch(ConfigRuntimeException ex) {
+				} catch (ConfigRuntimeException ex) {
 					ex.setTarget(t);
 					throw ex;
 				}

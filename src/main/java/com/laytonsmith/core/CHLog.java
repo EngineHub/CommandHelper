@@ -100,7 +100,7 @@ public class CHLog {
 		CHLog.prefs = new Preferences("CommandHelper", Static.getLogger(), myPrefs, header);
 		try {
 			CHLog.prefs.init(MethodScriptFileLocations.getDefault().getLoggerPreferencesFile());
-		} catch(IOException e) {
+		} catch (IOException e) {
 			Static.getLogger().log(java.util.logging.Level.SEVERE, "Could not create logger preferences", e);
 		}
 	}
@@ -123,7 +123,7 @@ public class CHLog {
 			} else {
 				level = LogLevel.valueOf(pref);
 			}
-		} catch(IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			level = LogLevel.ERROR;
 		}
 		lookup.put(tag, level);
@@ -300,7 +300,7 @@ public class CHLog {
 			try {
 				Static.LogDebug(root, "[" + Implementation.GetServerType().getBranding() + "][" + level.name() + "][" + modules.name() + "] " + message + (t != Target.UNKNOWN ? " " + t.toString() : ""),
 						level, printScreen);
-			} catch(IOException e) {
+			} catch (IOException e) {
 				//Well, shoot.
 				if(level.level <= 1) {
 					StreamUtils.GetSystemErr().println("Was going to print information to the log, but instead, there was"

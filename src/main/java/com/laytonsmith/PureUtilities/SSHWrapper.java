@@ -84,7 +84,7 @@ public class SSHWrapper {
 				if(port == 0) {
 					port = 22;
 				}
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				//They may have been trying this:
 				//user@host:password:/file/path
 				//If that's the case, password will
@@ -172,7 +172,7 @@ public class SSHWrapper {
 
 				return true;
 
-			} catch(JSchException | SftpException ex) {
+			} catch (JSchException | SftpException ex) {
 				throw new IOException(ex);
 			}
 		} else {
@@ -202,7 +202,7 @@ public class SSHWrapper {
 			try {
 				// Try to cd to the parent folder
 				channel.cd(frfile.getParent());
-			} catch(SftpException ex) {
+			} catch (SftpException ex) {
 				// But if that doesn't work, we need to create one or more of the folders, so we start at the beginning
 				channel.cd("/");
 				for(int i = 0; i < folders.length - 1; i++) {
@@ -210,7 +210,7 @@ public class SSHWrapper {
 					if(folder.length() > 0) {
 						try {
 							channel.cd(folder);
-						} catch(SftpException e) {
+						} catch (SftpException e) {
 							channel.mkdir(folder);
 							channel.cd(folder);
 						}
@@ -247,7 +247,7 @@ public class SSHWrapper {
 			digest.update(f);
 			String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 			return hash;
-		} catch(NoSuchAlgorithmException ex) {
+		} catch (NoSuchAlgorithmException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -286,7 +286,7 @@ public class SSHWrapper {
 				}
 				try {
 					Thread.sleep(1);
-				} catch(Exception ee) {
+				} catch (Exception ee) {
 				}
 			}
 		} finally {

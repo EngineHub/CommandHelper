@@ -34,7 +34,7 @@ public class Performance {
 		try {
 			Static.QuickAppend(Static.profilingLogFile(root), "start[" + stopWatch.getStartTime() + "] time[" + stopWatch.getElapsedTime() + "] "
 					+ "tag[" + stopWatch.getTag() + "]\n");
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(Performance.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}

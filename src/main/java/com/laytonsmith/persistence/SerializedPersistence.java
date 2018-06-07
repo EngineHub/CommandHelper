@@ -62,7 +62,7 @@ public class SerializedPersistence extends AbstractDataSource {
 		String file;
 		try {
 			file = getConnectionMixin().getPath();
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 		storageLocation = new File(file);
@@ -104,7 +104,7 @@ public class SerializedPersistence extends AbstractDataSource {
 								data = (HashMap<String, String>) in.readObject();
 							}
 							isLoaded = true;
-						} catch(Throwable t) {
+						} catch (Throwable t) {
 							t.printStackTrace();
 						} finally {
 							if(fis != null) {
@@ -114,9 +114,9 @@ public class SerializedPersistence extends AbstractDataSource {
 								in.close();
 							}
 						}
-					} catch(FileNotFoundException ex) {
+					} catch (FileNotFoundException ex) {
 						//ignore this one
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						throw ex;
 					}
 					return null;
@@ -163,21 +163,21 @@ public class SerializedPersistence extends AbstractDataSource {
 						out.writeObject(new HashMap(data));
 						byteData = baos.toByteArray();
 						writer.mark(dm);
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						Logger.getLogger(SerializedPersistence.class.getName()).log(Level.SEVERE, null, ex);
 					} finally {
 						try {
 							if(baos != null) {
 								baos.close();
 							}
-						} catch(IOException ex) {
+						} catch (IOException ex) {
 							Logger.getLogger(SerializedPersistence.class.getName()).log(Level.SEVERE, null, ex);
 						}
 						try {
 							if(out != null) {
 								out.close();
 							}
-						} catch(IOException ex) {
+						} catch (IOException ex) {
 							Logger.getLogger(SerializedPersistence.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
@@ -194,7 +194,7 @@ public class SerializedPersistence extends AbstractDataSource {
 		if(isLoaded == false) {
 			try {
 				load();
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				Logger.getLogger("Minecraft").log(Level.SEVERE, null, ex);
 			}
 		}
@@ -206,7 +206,7 @@ public class SerializedPersistence extends AbstractDataSource {
 		}
 		try {
 			save(dm);
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			Logger.getLogger(SerializedPersistence.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		return oldVal;
@@ -217,7 +217,7 @@ public class SerializedPersistence extends AbstractDataSource {
 		if(isLoaded == false) {
 			try {
 				load();
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				Logger.getLogger(SerializedPersistence.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -298,7 +298,7 @@ public class SerializedPersistence extends AbstractDataSource {
 		}
 		try {
 			load();
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			throw new DataSourceException(null, ex);
 		}
 	}

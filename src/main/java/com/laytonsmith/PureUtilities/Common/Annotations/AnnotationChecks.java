@@ -40,7 +40,7 @@ public class AnnotationChecks {
 				if(!TYPE.val().equals(clazz.getAnnotation(typeof.class).getValue("value"))) {
 					errors.add(clazz.getClassName() + "'s TYPE value is different than the typeof annotation on it");
 				}
-			} catch(ReflectionUtils.ReflectionException ex) {
+			} catch (ReflectionUtils.ReflectionException ex) {
 				errors.add(clazz.getClassName() + " needs to add the following:\n\t@SuppressWarnings(\"FieldNameHidesFieldInSuperclass\")\n"
 						+ "\tpublic static final CClassType TYPE = CClassType.get(\"" + clazz.getAnnotation(typeof.class).getValue("value") + "\");");
 			}
@@ -156,7 +156,7 @@ public class AnnotationChecks {
 			for(Method im : iface.getDeclaredMethods()) {
 				try {
 					c.getMethod(im.getName(), im.getParameterTypes());
-				} catch(NoSuchMethodException ex) {
+				} catch (NoSuchMethodException ex) {
 					String msg = "The class " + c.getClassName() + " implements " + iface.getSimpleName() + " but does not"
 							+ " implement the method public " + im.getReturnType().getSimpleName() + " " + im.getName() + "(";
 					List<String> params = new ArrayList<>();

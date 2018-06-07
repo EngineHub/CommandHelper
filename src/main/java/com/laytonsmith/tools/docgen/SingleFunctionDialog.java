@@ -96,11 +96,11 @@ public class SingleFunctionDialog extends javax.swing.JDialog {
 			try {
 				String docs = DocGen.examples(f.getName(), parent.handler.isStaged);
 				parent.handler.doUpload(docs, "/API/" + f.getName(), true);
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				statusLabel.setText(ex.getMessage());
 				ex.printStackTrace(StreamUtils.GetSystemErr());
 			}
-		} catch(ConfigCompileException ex) {
+		} catch (ConfigCompileException ex) {
 			statusLabel.setText("That function doesn't exist.");
 			return;
 		}

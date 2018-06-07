@@ -418,7 +418,7 @@ public class BasicLogic {
 				if(nodes.length % 2 == 0) {
 					return parent.seval(nodes[nodes.length - 1], env);
 				}
-			} catch(LoopBreakException ex) {
+			} catch (LoopBreakException ex) {
 				//Ignored, unless the value passed in is greater than 1, in which case
 				//we rethrow.
 				if(ex.getTimes() > 1) {
@@ -835,7 +835,7 @@ public class BasicLogic {
 					}
 				}
 				return CBoolean.TRUE;
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
 		}
@@ -1176,7 +1176,7 @@ public class BasicLogic {
 					}
 				}
 				return CBoolean.TRUE;
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
 		}

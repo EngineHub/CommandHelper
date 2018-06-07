@@ -184,7 +184,7 @@ class CompilerObject {
 		try {
 			nodes.pop();
 			pointer = nodes.peek();
-		} catch(EmptyStackException e) {
+		} catch (EmptyStackException e) {
 			throw new ConfigCompileException("Unmatched closing parenthesis. (Did you put too many right parenthesis?)", t);
 		}
 	}

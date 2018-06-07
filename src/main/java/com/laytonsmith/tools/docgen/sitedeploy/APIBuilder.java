@@ -75,7 +75,7 @@ public class APIBuilder {
 								thrown.add(c.getAnnotation(typeof.class).value());
 							}
 						}
-					} catch(Throwable t) {
+					} catch (Throwable t) {
 						Logger.getLogger("default").log(Level.SEVERE, null, t);
 					}
 					function.put("thrown", thrown);
@@ -130,7 +130,7 @@ public class APIBuilder {
 					String extId = ExtensionManager.getTrackers().get(e.getSourceJar()).getIdentifier();
 					event.put("source", extId);
 					events.put(e.getName(), event);
-				} catch(Exception ex) {
+				} catch (Exception ex) {
 					Logger.getLogger("default").log(Level.SEVERE, e.getName(), ex);
 				}
 			}
@@ -206,10 +206,10 @@ public class APIBuilder {
 					//obj.put("containingClass", m.getContainingClass().getName());
 					//obj.put("objectModifiers", m.getObjectModifiers());
 					objects.put(name, obj);
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					// Pretty sure this isn't possible?
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
-				} catch(Exception ex) {
+				} catch (Exception ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Could not instantiate " + t, ex);
 				}
 			}

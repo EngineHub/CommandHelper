@@ -505,7 +505,7 @@ public class Math {
 			Function f;
 			try {
 				f = ((CFunction) nodes[0].getData()).getFunction();
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				// This can't really happen, as the compiler would have already caught this
 				throw new Error(ex);
 			}
@@ -733,7 +733,7 @@ public class Math {
 				Construct oldVal = null;
 				try {
 					oldVal = v.ival().clone();
-				} catch(CloneNotSupportedException ex) {
+				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t);
@@ -975,7 +975,7 @@ public class Math {
 				Construct oldVal = null;
 				try {
 					oldVal = v.ival().clone();
-				} catch(CloneNotSupportedException ex) {
+				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t);
@@ -2386,7 +2386,7 @@ public class Math {
 			try {
 				eClazz = Class.forName(eClass);
 				errClazz = Class.forName(errClass);
-			} catch(ClassNotFoundException cnf) {
+			} catch (ClassNotFoundException cnf) {
 				throw new CREPluginInternalException("You are missing a required dependency: " + eClass, t);
 			}
 			try {
@@ -2395,7 +2395,7 @@ public class Math {
 				Object d = ReflectionUtils.invokeMethod(eClazz, e, "evaluate",
 						new Class[]{double[].class}, new Object[]{da});
 				return new CDouble((double) d, t);
-			} catch(ReflectionUtils.ReflectionException rex) {
+			} catch (ReflectionUtils.ReflectionException rex) {
 				if(rex.getCause().getClass().isAssignableFrom(errClazz)) {
 					throw new CREPluginInternalException("Your expression was invalidly formatted", args[0].getTarget(), rex.getCause());
 				} else {
@@ -2613,7 +2613,7 @@ public class Math {
 				} else {
 					return new CInt((Integer) c.getValue(), t);
 				}
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CRECastException("No constant with the value " + args[0].val() + " exists.", t);
 			}
 		}

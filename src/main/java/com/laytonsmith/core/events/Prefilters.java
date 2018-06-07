@@ -178,7 +178,7 @@ public final class Prefilters {
 			if(dOne != dTwo) {
 				throw new PrefilterNonMatchException();
 			}
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			throw new PrefilterNonMatchException();
 		}
 	}
@@ -195,7 +195,7 @@ public final class Prefilters {
 		try {
 			eClazz = Class.forName(eClass);
 			errClazz = Class.forName(errClass);
-		} catch(ClassNotFoundException cnf) {
+		} catch (ClassNotFoundException cnf) {
 			throw new CREPluginInternalException("You are missing a required dependency: " + eClass, expression.getTarget(), cnf);
 		}
 		try {
@@ -213,7 +213,7 @@ public final class Prefilters {
 					throw new PrefilterNonMatchException();
 				}
 			}
-		} catch(ReflectionUtils.ReflectionException rex) {
+		} catch (ReflectionUtils.ReflectionException rex) {
 			if(rex.getCause().getClass().isAssignableFrom(errClazz)) {
 				throw new CREPluginInternalException("Your expression was invalidly formatted", expression.getTarget(), rex.getCause());
 			} else {

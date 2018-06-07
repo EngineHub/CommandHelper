@@ -42,7 +42,7 @@ public class IfKeyword extends Keyword {
 						list.set(keywordPosition, newNode);
 						node = newNode;
 					}
-				} catch(IndexOutOfBoundsException ex) {
+				} catch (IndexOutOfBoundsException ex) {
 					// Doesn't matter, we're apparently at the end of the stream
 				}
 				node.addChild(getArgumentOrNull(list.get(keywordPosition + 1)));
@@ -84,7 +84,7 @@ public class IfKeyword extends Keyword {
 							// Anything else is unexpected.
 							throw new IndexOutOfBoundsException();
 						}
-					} catch(IndexOutOfBoundsException ex) {
+					} catch (IndexOutOfBoundsException ex) {
 						throw new ConfigCompileException("Expecting either braces, or continuing if statement after \"else\" keyword",
 								list.get(keywordPosition + 1).getTarget());
 					}

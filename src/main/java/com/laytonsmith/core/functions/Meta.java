@@ -290,7 +290,7 @@ public class Meta {
 			MCPlayer p = (MCPlayer) player;
 			try {
 				p.setTempOp(value);
-			} catch(Exception e) {
+			} catch (Exception e) {
 				if(Prefs.UseSudoFallback()) {
 					p.setOp(value);
 				} else {
@@ -354,7 +354,7 @@ public class Meta {
 			}
 			try {
 				Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new CREPluginInternalException("While running the command: \"" + cmd + "\""
 						+ " the plugin threw an unexpected exception (turn on debug mode to see the full"
 						+ " stacktrace): " + ex.getMessage() + "\n\nThis is not a bug in " + Implementation.GetServerType().getBranding()
@@ -665,7 +665,7 @@ public class Meta {
 			String ret;
 			try {
 				ret = Static.getServer().dispatchAndCaptureCommand(operator, cmd);
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new CREPluginInternalException(ex.getMessage(), t, ex);
 			}
 
@@ -1007,7 +1007,7 @@ public class Meta {
 				String jar = ClassDiscovery.GetClassContainer(Meta.class).toString();
 				jar = jar.replaceFirst("file:", "");
 				jf = new JarFile(jar);
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				return CNull.NULL;
 			}
 			ZipEntry manifest = jf.getEntry("META-INF/MANIFEST.MF");

@@ -601,7 +601,7 @@ public class BukkitPlayerEvents {
 					return MCEquipmentSlot.WEAPON;
 				}
 				return MCEquipmentSlot.OFF_HAND;
-			} catch(NoSuchMethodError e) {
+			} catch (NoSuchMethodError e) {
 				// before Bukkit 1.9
 				return MCEquipmentSlot.WEAPON;
 			}

@@ -157,13 +157,13 @@ public final class Interpreter {
 		Interpreter interpreter = new Interpreter(args, fromFile.getParentFile().getPath(), true);
 		try {
 			interpreter.execute(FileUtil.read(fromFile), args, fromFile);
-		} catch(ConfigCompileException ex) {
+		} catch (ConfigCompileException ex) {
 			ConfigRuntimeException.HandleUncaughtException(ex, null, null);
 			StreamUtils.GetSystemOut().println(TermColors.reset());
 			if(systemExitOnFailure) {
 				System.exit(1);
 			}
-		} catch(ConfigCompileGroupException ex) {
+		} catch (ConfigCompileGroupException ex) {
 			ConfigRuntimeException.HandleUncaughtException(ex, null);
 			StreamUtils.GetSystemOut().println(TermColors.reset());
 			if(systemExitOnFailure) {
@@ -184,7 +184,7 @@ public final class Interpreter {
 				+ "with $$. Use - on a line by itself to exit this mode as well.";
 		try {
 			msg += "\nYour current working directory is: " + env.getEnv(GlobalEnv.class).GetRootFolder().getCanonicalPath();
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			//
 		}
 		return msg;
@@ -221,18 +221,18 @@ public final class Interpreter {
 				while((line = scanner.nextLine()) != null) {
 					script.append(line).append("\n");
 				}
-			} catch(NoSuchElementException e) {
+			} catch (NoSuchElementException e) {
 				//Done
 			}
 			try {
 				execute(script.toString(), args);
 				StreamUtils.GetSystemOut().print(TermColors.reset());
 				System.exit(0);
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				ConfigRuntimeException.HandleUncaughtException(ex, null, null);
 				StreamUtils.GetSystemOut().print(TermColors.reset());
 				System.exit(1);
-			} catch(ConfigCompileGroupException ex) {
+			} catch (ConfigCompileGroupException ex) {
 				ConfigRuntimeException.HandleUncaughtException(ex, null);
 				StreamUtils.GetSystemOut().println(TermColors.reset());
 				System.exit(1);
@@ -448,10 +448,10 @@ public final class Interpreter {
 		if(c != null) {
 			try {
 				c.execute(CBoolean.get(inShellMode));
-			} catch(FunctionReturnException ex) {
+			} catch (FunctionReturnException ex) {
 				String val = ex.getReturn().val();
 				return Static.MCToANSIColors(val) + TermColors.RESET;
-			} catch(ConfigRuntimeException ex) {
+			} catch (ConfigRuntimeException ex) {
 				ConfigRuntimeException.HandleUncaughtException(ex, env);
 			}
 		}
@@ -474,9 +474,9 @@ public final class Interpreter {
 		String auto_include = FileUtil.read(MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile());
 		try {
 			MethodScriptCompiler.execute(auto_include, MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile(), true, env, null, null, null);
-		} catch(ConfigCompileException ex) {
+		} catch (ConfigCompileException ex) {
 			ConfigRuntimeException.HandleUncaughtException(ex, "Interpreter will continue to run, however.", null);
-		} catch(ConfigCompileGroupException ex) {
+		} catch (ConfigCompileGroupException ex) {
 			ConfigRuntimeException.HandleUncaughtException(ex, null);
 		}
 		//Install our signal handlers.
@@ -508,12 +508,12 @@ public final class Interpreter {
 		};
 		try {
 			SignalHandler.addHandler(Signals.SIGTERM, signalHandler);
-		} catch(IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			// Oh well.
 		}
 		try {
 			SignalHandler.addHandler(Signals.SIGINT, signalHandler);
-		} catch(IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			// Oh well again.
 		}
 	}
@@ -552,9 +552,9 @@ public final class Interpreter {
 				try {
 					execute(script, null);
 					script = "";
-				} catch(ConfigCompileException e) {
+				} catch (ConfigCompileException e) {
 					ConfigRuntimeException.HandleUncaughtException(e, null, null);
-				} catch(ConfigCompileGroupException e) {
+				} catch (ConfigCompileGroupException e) {
 					ConfigRuntimeException.HandleUncaughtException(e, null);
 				}
 				break;
@@ -569,9 +569,9 @@ public final class Interpreter {
 					try {
 						//Execute single line
 						execute(line, null);
-					} catch(ConfigCompileException ex) {
+					} catch (ConfigCompileException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ex, null, null);
-					} catch(ConfigCompileGroupException ex) {
+					} catch (ConfigCompileGroupException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ex, null);
 					}
 				}
@@ -709,17 +709,17 @@ public final class Interpreter {
 									}
 								}
 							}, null, vars);
-						} catch(CancelCommandException e) {
+						} catch (CancelCommandException e) {
 							//Nothing, though we could have been Ctrl+C cancelled, so we need to reset
 							//the interrupt flag. But we do that unconditionally below, in the finally,
 							//in the other thread.
-						} catch(ConfigRuntimeException e) {
+						} catch (ConfigRuntimeException e) {
 							ConfigRuntimeException.HandleUncaughtException(e, env);
 							//No need for the full stack trace
 							if(System.console() == null) {
 								System.exit(1);
 							}
-						} catch(NoClassDefFoundError e) {
+						} catch (NoClassDefFoundError e) {
 							StreamUtils.GetSystemErr().println(RED + Main.getNoClassDefFoundErrorMessage(e) + reset());
 							StreamUtils.GetSystemErr().println("Since you're running from standalone interpreter mode, this is not a fatal error, but one of the functions you just used required"
 									+ " an actual backing engine that isn't currently loaded. (It still might fail even if you load the engine though.) You simply won't be"
@@ -727,12 +727,12 @@ public final class Interpreter {
 							if(System.console() == null) {
 								System.exit(1);
 							}
-						} catch(InvalidEnvironmentException ex) {
+						} catch (InvalidEnvironmentException ex) {
 							StreamUtils.GetSystemErr().println(RED + ex.getMessage() + " " + ex.getData() + "() cannot be used in this context.");
 							if(System.console() == null) {
 								System.exit(1);
 							}
-						} catch(RuntimeException e) {
+						} catch (RuntimeException e) {
 							pl(RED + e.toString());
 							e.printStackTrace(StreamUtils.GetSystemErr());
 							if(System.console() == null) {
@@ -744,7 +744,7 @@ public final class Interpreter {
 				scriptThread.start();
 				try {
 					scriptThread.join();
-				} catch(InterruptedException ex) {
+				} catch (InterruptedException ex) {
 					//
 				}
 
@@ -790,7 +790,7 @@ public final class Interpreter {
 					}
 					try {
 						new Cmdline.cd().exec(Target.UNKNOWN, env, a);
-					} catch(CREIOException ex) {
+					} catch (CREIOException ex) {
 						pl(RED + ex.getMessage());
 					}
 					return true;
@@ -844,7 +844,7 @@ public final class Interpreter {
 				String bashScript = Static.GetStringResource("/interpreter-helpers/bash.sh");
 				try {
 					bashScript = bashScript.replaceAll("%%LOCATION%%", jar.toURI().getPath());
-				} catch(URISyntaxException ex) {
+				} catch (URISyntaxException ex) {
 					ex.printStackTrace();
 				}
 				exe.createNewFile();
@@ -861,11 +861,11 @@ public final class Interpreter {
 						manPage = DocGenTemplates.DoTemplateReplacement(manPage, DocGenTemplates.GetGenerators());
 						File manPageFile = new File(manDir, "mscript.1");
 						FileUtil.write(manPage, manPageFile);
-					} catch(DocGenTemplates.Generator.GenerateException ex) {
+					} catch (DocGenTemplates.Generator.GenerateException ex) {
 						Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
-			} catch(IOException e) {
+			} catch (IOException e) {
 				StreamUtils.GetSystemErr().println("Cannot install. You must run the command with sudo for it to succeed, however, did you do that?");
 				return;
 			}
@@ -887,7 +887,7 @@ public final class Interpreter {
 				if(!exe.delete()) {
 					throw new IOException();
 				}
-			} catch(IOException e) {
+			} catch (IOException e) {
 				StreamUtils.GetSystemErr().println("Cannot uninstall. You must run the command with sudo for it to succeed, however, did you do that?");
 				return;
 			}

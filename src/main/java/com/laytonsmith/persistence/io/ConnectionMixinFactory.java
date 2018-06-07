@@ -73,7 +73,7 @@ public class ConnectionMixinFactory {
 			try {
 				//This is a WebConnection
 				return new WebConnection(uri, modifiers.contains(DataSource.DataSourceModifier.HTTP) ? false : true);
-			} catch(MalformedURLException ex) {
+			} catch (MalformedURLException ex) {
 				throw new DataSourceException("Malformed URL.", ex);
 			}
 		} else if(modifiers.contains(DataSource.DataSourceModifier.SSH)) {
@@ -88,7 +88,7 @@ public class ConnectionMixinFactory {
 				} else {
 					return new ReadWriteFileConnection(uri, options.workingDirectory, blankDataModel);
 				}
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				throw new DataSourceException("IOException: " + ex.getMessage(), ex);
 			}
 		}

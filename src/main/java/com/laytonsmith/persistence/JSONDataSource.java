@@ -31,7 +31,7 @@ public class JSONDataSource extends StringSerializableDataSource {
 		try {
 			Map map = (Map) JSONValue.parse(data);
 			model = new DataSourceModel(map);
-		} catch(ClassCastException e) {
+		} catch (ClassCastException e) {
 			throw new DataSourceException("Could not cast value returned from JSON parser to a map!", e);
 		}
 	}
@@ -41,7 +41,7 @@ public class JSONDataSource extends StringSerializableDataSource {
 		StringWriter writer = new StringWriter();
 		try {
 			JSONValue.writeJSONString(model.toMap(), writer);
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			//Won't ever happen
 			Logger.getLogger(JSONDataSource.class.getName()).log(Level.SEVERE, null, ex);
 		}

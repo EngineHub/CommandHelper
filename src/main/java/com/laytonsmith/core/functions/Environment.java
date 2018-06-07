@@ -226,7 +226,7 @@ public class Environment {
 					meta = Byte.parseByte(dataAndMeta[1]); // Throws NumberFormatException.
 				}
 				data = Integer.parseInt(dataAndMeta[0]); // Throws NumberFormatException.
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				throw new CREFormatException("id must be formatted as such: 'x:y' where x and y are integers", t);
 			}
 			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
@@ -236,7 +236,7 @@ public class Environment {
 			}
 			try {
 				b.setTypeAndData(data, meta, physics);
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CREFormatException("Invalid block meta data: \"" + id + "\"", t);
 			}
 
@@ -569,7 +569,7 @@ public class Environment {
 					throw new CRENotFoundException(
 							"Could not find the internal biome type object (are you running in cmdline mode?)", t);
 				}
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException("The biome type \"" + args[1].val() + "\" does not exist.", t);
 			}
 			if(w == null) {
@@ -884,7 +884,7 @@ public class Environment {
 			}
 			try {
 				i = MCInstrument.valueOf(args[instrumentOffset].val().toUpperCase().trim());
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException("Instrument provided is not a valid type, required one of: " + StringUtils.Join(MCInstrument.values(), ", ", ", or "), t);
 			}
 			MCTone tone = null;
@@ -896,7 +896,7 @@ public class Environment {
 				String ttone = ((CArray) args[noteOffset]).get("tone", t).val().toUpperCase().trim();
 				try {
 					tone = MCTone.valueOf(ttone.trim().replaceAll("#", ""));
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					throw new CREFormatException("Expected the tone parameter to be one of: "
 							+ StringUtils.Join(MCTone.values(), ", ", ", or ") + " but it was " + ttone, t);
 				}
@@ -906,7 +906,7 @@ public class Environment {
 				}
 				try {
 					n = StaticLayer.GetConvertor().GetNote(octave, tone, sharped);
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					throw new CREFormatException(e.getMessage(), t);
 				}
 			} else {
@@ -981,14 +981,14 @@ public class Environment {
 
 			try {
 				sound = MCSound.valueOf(sa.get("sound", t).val().toUpperCase());
-			} catch(IllegalArgumentException iae) {
+			} catch (IllegalArgumentException iae) {
 				throw new CREFormatException("Sound name '" + sa.get("sound", t).val() + "' is invalid.", t);
 			}
 
 			if(sa.containsKey("category")) {
 				try {
 					category = MCSoundCategory.valueOf(sa.get("category", t).val().toUpperCase());
-				} catch(IllegalArgumentException iae) {
+				} catch (IllegalArgumentException iae) {
 					throw new CREFormatException("Sound category '" + sa.get("category", t).val() + "' is invalid.", t);
 				}
 			}
@@ -1101,7 +1101,7 @@ public class Environment {
 			if(sa.containsKey("category")) {
 				try {
 					category = MCSoundCategory.valueOf(sa.get("category", t).val().toUpperCase());
-				} catch(IllegalArgumentException iae) {
+				} catch (IllegalArgumentException iae) {
 					throw new CREFormatException("Sound category '" + sa.get("category", t).val() + "' is invalid.", t);
 				}
 			}
@@ -1353,7 +1353,7 @@ public class Environment {
 			if(args.length == 2) {
 				try {
 					mode = CheckMode.valueOf(args[1].val().toUpperCase());
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					throw new CREFormatException("Invalid checkMode: " + args[1].val() + ".", t);
 				}
 			} else {
@@ -1488,7 +1488,7 @@ public class Environment {
 			} else {
 				try {
 					treeType = MCTreeType.valueOf(args[1].val().toUpperCase());
-				} catch(IllegalArgumentException exception) {
+				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The tree type \"" + args[1].val() + "\" does not exist.", t);
 				}
 			}

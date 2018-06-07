@@ -33,7 +33,7 @@ public class KeywordList {
 			try {
 				Keyword kk = k.newInstance();
 				keywordList.put(kk.getKeywordName(), kk);
-			} catch(InstantiationException | IllegalAccessException ex) {
+			} catch (InstantiationException | IllegalAccessException ex) {
 				Logger.getLogger(KeywordList.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}

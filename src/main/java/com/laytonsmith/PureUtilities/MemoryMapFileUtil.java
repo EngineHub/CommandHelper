@@ -68,7 +68,7 @@ public class MemoryMapFileUtil {
 				if(lastWriteDelta < WRITE_DELAY) {
 					try {
 						Thread.sleep(lastWriteDelta);
-					} catch(InterruptedException ex) {
+					} catch (InterruptedException ex) {
 					}
 				}
 //				File temp = null;
@@ -102,7 +102,7 @@ public class MemoryMapFileUtil {
 //							System.out.println("Could not move tmp file.");
 //						}
 //					}
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(MemoryMapFileUtil.class.getName()).log(Level.SEVERE, null, ex);
 				}
 //				finally {

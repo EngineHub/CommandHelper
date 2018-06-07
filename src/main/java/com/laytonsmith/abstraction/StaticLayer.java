@@ -42,7 +42,7 @@ public final class StaticLayer {
 					}
 					convertor = (Convertor) c.newInstance();
 					//At this point we are all set
-				} catch(Exception e) {
+				} catch (Exception e) {
 					StreamUtils.GetSystemErr().println("Tried to instantiate the Convertor, but couldn't!");
 				}
 			}

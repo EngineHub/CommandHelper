@@ -108,7 +108,7 @@ public class ExecutionQueue {
 			Deque<Runnable> q = prepareQueue(queue);
 			try {
 				q.removeLast();
-			} catch(NoSuchElementException e) {
+			} catch (NoSuchElementException e) {
 				//
 			}
 		}
@@ -122,7 +122,7 @@ public class ExecutionQueue {
 	public final void removeFront(String queue) {
 		try {
 			pop(queue);
-		} catch(NoSuchElementException e) {
+		} catch (NoSuchElementException e) {
 			//
 		}
 	}
@@ -245,7 +245,7 @@ public class ExecutionQueue {
 					public void run() {
 						try {
 							pumpQueue(queue);
-						} catch(RuntimeException t) {
+						} catch (RuntimeException t) {
 							if(uncaughtExceptionHandler != null) {
 								uncaughtExceptionHandler.uncaughtException(Thread.currentThread(), t);
 							} else {

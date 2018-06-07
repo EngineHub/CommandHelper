@@ -68,7 +68,7 @@ public class ZipReaderTest {
 		try {
 			new ZipReader(new File(new File(TestZip.getParent(), "file.txt"), "file.txt")).getFileContents();
 			fail("Wanted IOException, but none was thrown");
-		} catch(IOException e) {
+		} catch (IOException e) {
 			//pass
 		}
 	}

@@ -1529,7 +1529,7 @@ public class PlayerEvents {
 							Construct v = ((CArray) value).get(index, value.getTarget());
 							try {
 								list.add(Static.GetPlayer(v, value.getTarget()));
-							} catch(ConfigRuntimeException ex) {
+							} catch (ConfigRuntimeException ex) {
 								//Ignored
 							}
 						}
@@ -1548,7 +1548,7 @@ public class PlayerEvents {
 						// Throws UnknownFormatConversionException, MissingFormatException,
 						// IllegalFormatConversionException, FormatFlagsConversionMismatchException, NullPointerException and possibly more.
 						e.setFormat(format);
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						// Check the format to give a better exception message.
 						if(format.replaceAll("%%", "").replaceAll("\\%\\%|\\%[12]\\$s", "").contains("%")) {
 							throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
@@ -1659,7 +1659,7 @@ public class PlayerEvents {
 							Construct v = ((CArray) value).get(index, value.getTarget());
 							try {
 								list.add(Static.GetPlayer(v, value.getTarget()));
-							} catch(ConfigRuntimeException ex) {
+							} catch (ConfigRuntimeException ex) {
 								//Ignored
 							}
 						}
@@ -1671,7 +1671,7 @@ public class PlayerEvents {
 				if("format".equals(key)) {
 					try {
 						e.setFormat(value.nval());
-					} catch(UnknownFormatConversionException | IllegalFormatConversionException ex) {
+					} catch (UnknownFormatConversionException | IllegalFormatConversionException ex) {
 						throw new CREFormatException(ex.getMessage(), value.getTarget());
 					}
 				}

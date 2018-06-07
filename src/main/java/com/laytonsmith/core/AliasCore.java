@@ -165,7 +165,7 @@ public class AliasCore {
 													}
 												}
 											}
-										} catch(Throwable e) {
+										} catch (Throwable e) {
 											StreamUtils.GetSystemErr().println(e.getMessage());
 											player.sendMessage(MCChatColor.RED + e.getMessage());
 										} finally {
@@ -176,10 +176,10 @@ public class AliasCore {
 							} finally {
 								alias.stop();
 							}
-						} catch(ConfigRuntimeException ex) {
+						} catch (ConfigRuntimeException ex) {
 							ex.setEnv(env);
 							ConfigRuntimeException.HandleUncaughtException(ex, env);
-						} catch(Throwable e) {
+						} catch (Throwable e) {
 							//This is not a simple user script error, this is a deeper problem, so we always handle this.
 							StreamUtils.GetSystemErr().println("An unexpected exception occured: " + e.getClass().getSimpleName());
 							player.sendMessage("An unexpected exception occured: " + MCChatColor.RED + e.getClass().getSimpleName());
@@ -190,13 +190,13 @@ public class AliasCore {
 						match = true;
 						break;
 					}
-				} catch(Exception e) {
+				} catch (Exception e) {
 					StreamUtils.GetSystemErr().println("An unexpected exception occured inside the command " + s.toString());
 					e.printStackTrace();
 				}
 			}
 
-		} catch(Throwable e) {
+		} catch (Throwable e) {
 			//Not only did an error happen, an error happened in our error handler
 			throw new InternalException(TermColors.RED + "An unexpected error occured in the CommandHelper plugin. "
 					+ "Further, this is likely an error with the error handler, so it may be caused by your script, "
@@ -220,7 +220,7 @@ public class AliasCore {
 		ReloadOptions options;
 		try {
 			options = new ReloadOptions(settings);
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			if(player != null) {
 				player.sendMessage(ex.getMessage());
 			} else {
@@ -292,7 +292,7 @@ public class AliasCore {
 			}
 			try {
 				parent.profiles = new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile());
-			} catch(IOException | Profiles.InvalidProfileException ex) {
+			} catch (IOException | Profiles.InvalidProfileException ex) {
 				CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 				return;
 			}
@@ -335,7 +335,7 @@ public class AliasCore {
 					//line endings
 					samp_aliases = samp_aliases.replaceAll("\n|\r\n", System.getProperty("line.separator"));
 					file_put_contents(aliasConfig, samp_aliases, "o");
-				} catch(Exception e) {
+				} catch (Exception e) {
 					logger.log(Level.WARNING, "CommandHelper: Could not write sample config file");
 				}
 			}
@@ -347,7 +347,7 @@ public class AliasCore {
 					String samp_main = getStringResource(AliasCore.class.getResourceAsStream("/samp_main.txt"));
 					samp_main = samp_main.replaceAll("\n|\r\n", System.getProperty("line.separator"));
 					file_put_contents(mainFile, samp_main, "o");
-				} catch(Exception e) {
+				} catch (Exception e) {
 					logger.log(Level.WARNING, "CommandHelper: Could not write sample main file");
 				}
 			}
@@ -409,10 +409,10 @@ public class AliasCore {
 					compilerMSA.stop();
 				}
 			}
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			logger.log(Level.SEVERE, "[CommandHelper]: Path to config file is not correct/accessable. Please"
 					+ " check the location and try loading the plugin again.");
-		} catch(Throwable t) {
+		} catch (Throwable t) {
 			t.printStackTrace();
 		}
 
@@ -685,20 +685,20 @@ public class AliasCore {
 								s.compile();
 								s.checkAmbiguous((ArrayList<Script>) scripts);
 								scripts.add(s);
-							} catch(ConfigCompileException e) {
+							} catch (ConfigCompileException e) {
 								ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", player);
-							} catch(ConfigCompileGroupException ex) {
+							} catch (ConfigCompileGroupException ex) {
 								for(ConfigCompileException e : ex.getList()) {
 									ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", player);
 								}
 							}
-						} catch(RuntimeException ee) {
+						} catch (RuntimeException ee) {
 							throw new RuntimeException("While processing a script, "
 									+ "(" + fi.file() + ") an unexpected exception occurred. (No further information"
 									+ " is available, unfortunately.)", ee);
 						}
 					}
-				} catch(ConfigCompileException e) {
+				} catch (ConfigCompileException e) {
 					ConfigRuntimeException.HandleUncaughtException(e, "Could not compile file " + fi.file + " compilation will halt.", player);
 					return;
 				}
@@ -727,20 +727,20 @@ public class AliasCore {
 				boolean exception = false;
 				try {
 					MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file, true)), env, null, null);
-				} catch(ConfigCompileGroupException e) {
+				} catch (ConfigCompileGroupException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath() + " could not be compiled, due to compile errors.", player);
-				} catch(ConfigCompileException e) {
+				} catch (ConfigCompileException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath() + " could not be compiled, due to a compile error.", player);
-				} catch(ConfigRuntimeException e) {
+				} catch (ConfigRuntimeException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(e, env);
-				} catch(CancelCommandException e) {
+				} catch (CancelCommandException e) {
 					if(e.getMessage() != null && !"".equals(e.getMessage().trim())) {
 						logger.log(Level.INFO, e.getMessage());
 					}
-				} catch(ProgramFlowManipulationException e) {
+				} catch (ProgramFlowManipulationException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in main files.", e.getTarget()), env);
 				}
@@ -767,7 +767,7 @@ public class AliasCore {
 			if(start.getName().endsWith(".msa")) {
 				try {
 					pack.appendMSA(file_get_contents(start.getAbsolutePath()), start);
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			} else if(start.getName().endsWith(".ms")) {
@@ -776,16 +776,16 @@ public class AliasCore {
 				} else {
 					try {
 						pack.appendMS(file_get_contents(start.getAbsolutePath()), start);
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
 			} else if(start.getName().endsWith(".mslp")) {
 				try {
 					GetAuxZipAliases(new ZipFile(start), pack);
-				} catch(ZipException ex) {
+				} catch (ZipException ex) {
 					Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
@@ -803,14 +803,14 @@ public class AliasCore {
 				} else {
 					try {
 						pack.appendMS(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName() + File.separator + ze.getName()));
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
 			} else if(ze.getName().endsWith(".msa")) {
 				try {
 					pack.appendMSA(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName() + File.separator + ze.getName()));
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}

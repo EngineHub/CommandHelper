@@ -105,7 +105,7 @@ public class BukkitServerEvents {
 				while(iterator.hasNext()) {
 					players.add(new BukkitMCPlayer(iterator.next()));
 				}
-			} catch(UnsupportedOperationException ex) {
+			} catch (UnsupportedOperationException ex) {
 				// not implemented, ignore
 			}
 			return players;
@@ -124,7 +124,7 @@ public class BukkitServerEvents {
 						iterator.remove();
 					}
 				}
-			} catch(UnsupportedOperationException ex) {
+			} catch (UnsupportedOperationException ex) {
 				// not implemented, ignore
 			}
 		}

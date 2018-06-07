@@ -158,14 +158,14 @@ class LexerObject {
 		try {
 			Long.parseLong(item.trim());
 			return new Token(Token.TType.INTEGER, item, target);
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			//Not an integer
 			//Not an integer
 		}
 		try {
 			Double.parseDouble(item);
 			return new Token(Token.TType.DOUBLE, item, target);
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			//Not a double
 			//Not a double
 		}
@@ -318,14 +318,14 @@ class LexerObject {
 							for(int m = 0; m < 4; m++) {
 								try {
 									unicode.append(config.charAt(i + 2 + m));
-								} catch(IndexOutOfBoundsException e) {
+								} catch (IndexOutOfBoundsException e) {
 									//If this fails, they didn't put enough characters in the stream
 									error("Incomplete unicode escape");
 								}
 							}
 							try {
 								Integer.parseInt(unicode.toString(), 16);
-							} catch(NumberFormatException e) {
+							} catch (NumberFormatException e) {
 								error("Unrecognized unicode escape sequence");
 							}
 							buffer(Character.toChars(Integer.parseInt(unicode.toString(), 16)));

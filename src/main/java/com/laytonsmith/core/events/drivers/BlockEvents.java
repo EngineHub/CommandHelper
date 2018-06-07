@@ -491,7 +491,7 @@ public class BlockEvents {
 					byte b;
 					try {
 						b = Byte.parseByte(value.val());
-					} catch(NumberFormatException exc) {
+					} catch (NumberFormatException exc) {
 						if(Integer.parseInt(value.val()) < 0) {
 							b = 0;
 						} else {
@@ -825,14 +825,14 @@ public class BlockEvents {
 				} else {
 					try {
 						block.setTypeId(Integer.parseInt(blockArray.get("type", value.getTarget()).val()));
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						throw new CREFormatException("blockArray is invalid", value.getTarget());
 					}
 				}
 				if(blockArray.containsKey("data")) {
 					try {
 						block.setData((byte) Integer.parseInt(blockArray.get("data", value.getTarget()).val()));
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						throw new CREFormatException("blockArray is invalid", value.getTarget());
 					}
 				}
@@ -851,14 +851,14 @@ public class BlockEvents {
 				} else {
 					try {
 						block.setTypeId(Integer.parseInt(blockArray.get("type", value.getTarget()).val()));
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						throw new CREFormatException("blockArray is invalid", value.getTarget());
 					}
 				}
 				if(blockArray.containsKey("data")) {
 					try {
 						block.setData((byte) Integer.parseInt(blockArray.get("data", value.getTarget()).val()));
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						throw new CREFormatException("blockArray is invalid", value.getTarget());
 					}
 				}
@@ -1275,7 +1275,7 @@ public class BlockEvents {
 						event.setNote(StaticLayer.GetConvertor().GetNote(octave, tone, sharp));
 						return true;
 					}
-				} catch(IllegalArgumentException ex) {
+				} catch (IllegalArgumentException ex) {
 					throw new CREIllegalArgumentException("No " + key + " with the value " + value + " exists", value.getTarget(), ex);
 				}
 			}

@@ -153,7 +153,7 @@ public final class FederationConnection {
 						case "OK":
 							try {
 								port = Integer.parseInt(reader.readLine());
-							} catch(NumberFormatException ex) {
+							} catch (NumberFormatException ex) {
 								//
 							}
 							break;
@@ -230,7 +230,7 @@ public final class FederationConnection {
 			}
 
 			socket.close();
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(FederationConnection.class.getName()).log(Level.SEVERE, null, ex);
 		}
 

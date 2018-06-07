@@ -59,7 +59,7 @@ public class CheckOverrides extends AbstractProcessor {
 				Class c = null;
 				try {
 					c = getClassFromName(className);
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				if(c != null) {
@@ -75,7 +75,7 @@ public class CheckOverrides extends AbstractProcessor {
 				Class c = null;
 				try {
 					c = getClassFromName(className);
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
 				}
 
@@ -105,7 +105,7 @@ public class CheckOverrides extends AbstractProcessor {
 						for(int i = 0; i < args.length; i++) {
 							try {
 								argTypes[i] = getClassFromName(args[i]);
-							} catch(ClassNotFoundException e) {
+							} catch (ClassNotFoundException e) {
 								//It may be a template parameter, so check in the enclosing class name for that
 								//template type.
 								String codeClassName = element.getEnclosingElement().asType().toString();
@@ -130,7 +130,7 @@ public class CheckOverrides extends AbstractProcessor {
 								}
 								try {
 									argTypes[i] = Class.forName(args[i]);
-								} catch(ClassNotFoundException ex) {
+								} catch (ClassNotFoundException ex) {
 									//Won't happen
 								}
 							}
@@ -168,7 +168,7 @@ public class CheckOverrides extends AbstractProcessor {
 									it.remove();
 								}
 							}
-						} catch(NoSuchMethodException | SecurityException ex) {
+						} catch (NoSuchMethodException | SecurityException ex) {
 							Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}

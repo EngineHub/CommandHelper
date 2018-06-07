@@ -509,7 +509,7 @@ public class DataHandling {
 					pre.addChild(children.get(2).getChildAt(0));
 					children.set(2, pre);
 				}
-			} catch(IndexOutOfBoundsException e) {
+			} catch (IndexOutOfBoundsException e) {
 				//Just ignore it. It's a compile error, but we'll let the rest of the
 				//existing system sort that out.
 			}
@@ -593,14 +593,14 @@ public class DataHandling {
 				}
 				try {
 					parent.eval(runnable, env);
-				} catch(LoopBreakException e) {
+				} catch (LoopBreakException e) {
 					int num = e.getTimes();
 					if(num > 1) {
 						e.setTimes(--num);
 						throw e;
 					}
 					return CVoid.VOID;
-				} catch(LoopContinueException e) {
+				} catch (LoopContinueException e) {
 					_continue = e.getTimes() - 1;
 					parent.eval(expression, env);
 					continue;
@@ -728,14 +728,14 @@ public class DataHandling {
 						//Execute the code
 						parent.eval(code, env);
 						//And handle any break/continues.
-					} catch(LoopBreakException e) {
+					} catch (LoopBreakException e) {
 						int num = e.getTimes();
 						if(num > 1) {
 							e.setTimes(--num);
 							throw e;
 						}
 						return CVoid.VOID;
-					} catch(LoopContinueException e) {
+					} catch (LoopContinueException e) {
 						// In associative arrays, (unlike with normal arrays) we need to decrement it by one, because the nature of
 						// the normal array is such that the counter is handled manually by our code. Because we are letting java
 						// handle our code though, this run actually counts as one run.
@@ -781,14 +781,14 @@ public class DataHandling {
 							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getVariableName(), one.get(current, t), t));
 							try {
 								parent.eval(code, env);
-							} catch(LoopBreakException e) {
+							} catch (LoopBreakException e) {
 								int num = e.getTimes();
 								if(num > 1) {
 									e.setTimes(--num);
 									throw e;
 								}
 								return CVoid.VOID;
-							} catch(LoopContinueException e) {
+							} catch (LoopContinueException e) {
 								continues += e.getTimes();
 								continue;
 							}
@@ -1116,12 +1116,12 @@ public class DataHandling {
 					if(nodes.length > 1) {
 						try {
 							parent.seval(nodes[1], env);
-						} catch(LoopContinueException e) {
+						} catch (LoopContinueException e) {
 							//ok.
 						}
 					}
 				}
-			} catch(LoopBreakException e) {
+			} catch (LoopBreakException e) {
 				if(e.getTimes() > 1) {
 					throw new LoopBreakException(e.getTimes() - 1, t);
 				}
@@ -1227,11 +1227,11 @@ public class DataHandling {
 				do {
 					try {
 						parent.seval(nodes[0], env);
-					} catch(LoopContinueException e) {
+					} catch (LoopContinueException e) {
 						//ok. No matter how many times it tells us to continue, we're only going to continue once.
 					}
 				} while(Static.getBoolean(parent.seval(nodes[1], env), t));
-			} catch(LoopBreakException e) {
+			} catch (LoopBreakException e) {
 				if(e.getTimes() > 1) {
 					throw new LoopBreakException(e.getTimes() - 1, t);
 				}
@@ -2004,7 +2004,7 @@ public class DataHandling {
 			boolean b = true;
 			try {
 				Static.getNumber(args[0], t);
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				b = false;
 			}
 			return CBoolean.get(b);
@@ -2078,7 +2078,7 @@ public class DataHandling {
 			double d;
 			try {
 				d = Static.getDouble(args[0], t);
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
 			return CBoolean.get((long) d == d);
@@ -2223,7 +2223,7 @@ public class DataHandling {
 								c = new CString("", t);
 							}
 							ivar = new IVariable(((IVariable) cons).getDefinedType(), ((IVariable) cons).getVariableName(), c.clone(), t);
-						} catch(CloneNotSupportedException ex) {
+						} catch (CloneNotSupportedException ex) {
 							//
 						}
 						vars.add(ivar);
@@ -2273,7 +2273,7 @@ public class DataHandling {
 					Construct c = myProc.cexecute(children, env, t);
 					//Yup! It worked. It's a const proc.
 					return c;
-				} catch(ConfigRuntimeException e) {
+				} catch (ConfigRuntimeException e) {
 					if(e instanceof CREInvalidProcedureException) {
 						//This is the only valid exception that doesn't strictly mean it's a bad
 						//call.
@@ -2282,7 +2282,7 @@ public class DataHandling {
 					throw e; //Rethrow it. Since the functions are all static, and we actually are
 					//running it with a mostly legit environment, this is a real runtime error,
 					//and we can safely convert it to a compile error upstream
-				} catch(Exception e) {
+				} catch (Exception e) {
 					//Nope. Something is preventing us from running it statically.
 					//We don't really care. We just know it can't be optimized.
 					return null;
@@ -2496,7 +2496,7 @@ public class DataHandling {
 				Environment newEnv = null;
 				try {
 					newEnv = env.clone();
-				} catch(CloneNotSupportedException ex) {
+				} catch (CloneNotSupportedException ex) {
 					throw new RuntimeException(ex);
 				}
 				return proc.execute(vars, newEnv, t);
@@ -2970,7 +2970,7 @@ public class DataHandling {
 			Environment myEnv;
 			try {
 				myEnv = env.clone();
-			} catch(CloneNotSupportedException ex) {
+			} catch (CloneNotSupportedException ex) {
 				myEnv = env;
 			}
 			for(int i = 0; i < nodes.length - 1; i++) {
@@ -2990,7 +2990,7 @@ public class DataHandling {
 				try {
 					defaults[i] = ((IVariable) ret).ival().clone();
 					types[i] = ((IVariable) ret).getDefinedType();
-				} catch(CloneNotSupportedException ex) {
+				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
@@ -3074,7 +3074,7 @@ public class DataHandling {
 			Environment myEnv;
 			try {
 				myEnv = env.clone();
-			} catch(CloneNotSupportedException ex) {
+			} catch (CloneNotSupportedException ex) {
 				myEnv = env;
 			}
 			for(int i = 0; i < nodes.length - 1; i++) {
@@ -3094,7 +3094,7 @@ public class DataHandling {
 				try {
 					defaults[i] = ((IVariable) ret).ival().clone();
 					types[i] = ((IVariable) ret).getDefinedType();
-				} catch(CloneNotSupportedException ex) {
+				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
@@ -3203,7 +3203,7 @@ public class DataHandling {
 				CClosure closure = (CClosure) args[args.length - 1];
 				try {
 					closure.execute(vals);
-				} catch(FunctionReturnException e) {
+				} catch (FunctionReturnException e) {
 					return e.getReturn();
 				}
 			} else {
@@ -3654,7 +3654,7 @@ public class DataHandling {
 			long ret;
 			try {
 				ret = Long.parseLong(value, radix);
-			} catch(NumberFormatException ex) {
+			} catch (NumberFormatException ex) {
 				throw new CREFormatException("The input string: \"" + value + "\" is improperly formatted. (Perhaps you're using a character greater than"
 						+ " the radix specified?)", t);
 			}
@@ -3733,7 +3733,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				return args[0].typeof();
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new Error("Class " + args[0].getClass().getName() + " is not annotated with @typeof. Please report this"
 						+ " error to the developers.");
 			}
@@ -3834,9 +3834,9 @@ public class DataHandling {
 					count++;
 				}
 				return new CString(b.toString(), t);
-			} catch(ConfigCompileException e) {
+			} catch (ConfigCompileException e) {
 				throw new CREFormatException("Could not compile eval'd code: " + e.getMessage(), t);
-			} catch(ConfigCompileGroupException ex) {
+			} catch (ConfigCompileGroupException ex) {
 				StringBuilder b = new StringBuilder();
 				b.append("Could not compile eval'd code: ");
 				for(ConfigCompileException e : ex.getList()) {

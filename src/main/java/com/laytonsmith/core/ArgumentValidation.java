@@ -143,7 +143,7 @@ public class ArgumentValidation {
 		} else if(c instanceof CString) {
 			try {
 				d = Double.parseDouble(c.val());
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				throw new CRECastException("Expecting a number, but received \"" + c.val() + "\" instead", t);
 			}
 		} else if(c instanceof CBoolean) {
@@ -205,7 +205,7 @@ public class ArgumentValidation {
 		}
 		try {
 			return getNumber(c, t);
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			throw new CRECastException("Expecting a double, but received " + c.val() + " instead", t);
 		}
 	}
@@ -259,7 +259,7 @@ public class ArgumentValidation {
 		} else {
 			try {
 				i = Long.parseLong(c.val());
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				throw new CRECastException("Expecting an integer, but received \"" + c.val() + "\" instead", t);
 			}
 		}

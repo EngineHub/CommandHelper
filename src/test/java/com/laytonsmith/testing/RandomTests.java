@@ -143,21 +143,21 @@ public class RandomTests {
 							StaticTest.TestClassDocs(docs, upper);
 							classDocs.add(docs);
 						}
-					} catch(NullPointerException ex) {
+					} catch (NullPointerException ex) {
 						fail(upper.getName() + "'s docs function should be static");
 					}
-				} catch(IllegalAccessException | IllegalArgumentException | SecurityException ex) {
+				} catch (IllegalAccessException | IllegalArgumentException | SecurityException ex) {
 					Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
-				} catch(InvocationTargetException ex) {
+				} catch (InvocationTargetException ex) {
 					fail(upper.getName() + " throws an exception!");
-				} catch(NoSuchMethodException ex) {
+				} catch (NoSuchMethodException ex) {
 					fail(upper.getName() + " does not include a class level documentation function.");
-				} catch(HeadlessException ex) {
+				} catch (HeadlessException ex) {
 					// Hmm. Whatever's running us doesn't have a head, and we just tested a function
 					// that requires a head. Whatever, just skip it and move on. It'll have to be tested
 					// manually.
 				}
-			} catch(Throwable t) {
+			} catch (Throwable t) {
 				uhohs.put(f.getClass().getName(), t);
 				t.printStackTrace();
 			}
@@ -291,10 +291,10 @@ public class RandomTests {
 			double d = (double) ReflectionUtils.invokeMethod(clazz, e, "evaluate",
 					new Class[]{double.class, double.class}, new Object[]{2, 4});
 			assertEquals(16, d, 0.00001);
-		} catch(ClassNotFoundException cnf) {
+		} catch (ClassNotFoundException cnf) {
 			/* Not much we can really do about this during testing.
 			throw new CREPluginInternalException("You are missing a required dependency: " + eClass, Target.UNKNOWN);*/
-		} catch(ReflectionUtils.ReflectionException rex) {
+		} catch (ReflectionUtils.ReflectionException rex) {
 			throw new CREPluginInternalException("Your expression was invalidly formatted", Target.UNKNOWN, rex.getCause());
 		}
 	}

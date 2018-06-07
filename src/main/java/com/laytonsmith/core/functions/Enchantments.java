@@ -103,7 +103,7 @@ public class Enchantments {
 		try {
 			Integer.parseInt(lc);
 			return lc;
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			//Maybe roman numeral?
 		}
 		int i = romanToWestern(lc);
@@ -483,7 +483,7 @@ public class Enchantments {
 					is = Static.ParseItemNotation(null, args[1].val(), 1, t);
 				}
 				return CBoolean.get(e.canEnchantItem(is));
-			} catch(NullPointerException e) {
+			} catch (NullPointerException e) {
 				throw new CREEnchantmentException(args[0].val().toUpperCase() + " is not a known enchantment type.", t);
 			}
 		}
@@ -534,7 +534,7 @@ public class Enchantments {
 				String name = Enchantments.ConvertName(args[0].val());
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
 				return new CInt(e.getMaxLevel(), t);
-			} catch(NullPointerException e) {
+			} catch (NullPointerException e) {
 				throw new CREEnchantmentException(args[0].val().toUpperCase() + " is not a known enchantment type.", t);
 			}
 		}
@@ -653,7 +653,7 @@ public class Enchantments {
 			try {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(args[0].val());
 				return CBoolean.TRUE;
-			} catch(NullPointerException e) {
+			} catch (NullPointerException e) {
 				return CBoolean.FALSE;
 			}
 		}

@@ -26,11 +26,11 @@ public class TryKeyword extends Keyword {
 		 *
 		 * The simplest case: try { } catch { } In this case, both try and catch will be CKeywords.
 		 *
-		 * A case with a specific exception type. In this case, catch will be a CFunction try { } catch(ExceptionType
+		 * A case with a specific exception type. In this case, catch will be a CFunction try { } catch (ExceptionType
 		 *
 		 * @e) { }
 		 *
-		 * A multi catch try { } catch(ExceptionType1 @e) { } catch(ExceptionType2 @e) { } As many blocks as desired can
+		 * A multi catch try { } catch (ExceptionType1 @e) { } catch (ExceptionType2 @e) { } As many blocks as desired can
 		 * be added here.
 		 *
 		 * TODO: Consider in the future allowing just try { }
@@ -72,7 +72,7 @@ public class TryKeyword extends Keyword {
 				throw new ConfigCompileException("catch must be followed by a code block, but none was found", list.get(i).getTarget());
 			}
 			if(list.get(i).getData() instanceof CFunction) {
-				// We have something like catch(Exception @e) { }
+				// We have something like catch (Exception @e) { }
 				ParseTree n = list.get(i);
 				if(n.getChildren().size() != 1) {
 					throw new ConfigCompileException("Unexpected parameters passed to the \"catch\" clause."

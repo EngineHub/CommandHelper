@@ -85,7 +85,7 @@ public class Marquee {
 								return null;
 							}
 						});
-					} catch(Exception e) {
+					} catch (Exception e) {
 						//We don't want this to affect our code, so just log it,
 						//but we also want to stop this marquee
 						String message = "An error occured while running " + (marqueeName == null ? "an unnamed marquee" : "the " + marqueeName + " marquee")

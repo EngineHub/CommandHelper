@@ -359,7 +359,7 @@ public class SiteDeploy {
 					localCache = "{}";
 				}
 				lc = (Map<String, String>) JSONValue.parse(localCache);
-			} catch(DataSourceException | IllegalArgumentException ex) {
+			} catch (DataSourceException | IllegalArgumentException ex) {
 				Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Could not read in local cache", ex);
 				notificationAboutLocalCache = false;
 			}
@@ -378,7 +378,7 @@ public class SiteDeploy {
 					new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile()
 							.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace('\\', '/')),
 					new ConnectionMixinFactory.ConnectionMixinOptions());
-		} catch(DataSourceException | URISyntaxException | IOException ex) {
+		} catch (DataSourceException | URISyntaxException | IOException ex) {
 			p = null;
 		}
 		return p;
@@ -407,7 +407,7 @@ public class SiteDeploy {
 			resetLine();
 			reader.getOutput().write(message);
 			reader.flush();
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			System.out.println(message);
 		}
 	}
@@ -470,7 +470,7 @@ public class SiteDeploy {
 						throw new RuntimeException("Could not find " + loc + " in resources folder for cacheBuster template");
 					}
 					hash = getLocalMD5(in);
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				return resourceLoc + "?v=" + hash;
@@ -672,7 +672,7 @@ public class SiteDeploy {
 					}
 					filesValidated++;
 				}
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				System.err.println("Validation could not occur due to the following exception: " + ex.getMessage());
 				ex.printStackTrace(System.err);
 			}
@@ -684,7 +684,7 @@ public class SiteDeploy {
 			if(finalizerScript.getPath().endsWith(".ms")) {
 				try {
 					Interpreter.startWithTTY(finalizerScript, filesChanged, false);
-				} catch(DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+				} catch (DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
 					ex.printStackTrace(System.err);
 				}
 			} else {
@@ -743,7 +743,7 @@ public class SiteDeploy {
 										}
 									}
 								}
-							} catch(IllegalArgumentException ex) {
+							} catch (IllegalArgumentException ex) {
 								Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Could not use local cache", ex);
 								notificationAboutLocalCache = false;
 							}
@@ -756,14 +756,14 @@ public class SiteDeploy {
 						try {
 							lc.put(deploymentMethod.getID() + toLocation, hash);
 							pn.set(dm, new String[]{"site_deploy", "local_cache"}, JSONValue.toJSONString(lc));
-						} catch(DataSourceException | ReadOnlyException | IllegalArgumentException ex) {
+						} catch (DataSourceException | ReadOnlyException | IllegalArgumentException ex) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 							notificationAboutLocalCache = false;
 						}
 					}
 					currentUploadTask.addAndGet(1);
 					writeStatus("");
-				} catch(Throwable ex) {
+				} catch (Throwable ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed while uploading " + toLocation, ex);
 					generateQueue.shutdownNow();
 					uploadQueue.shutdownNow();
@@ -780,7 +780,7 @@ public class SiteDeploy {
 			digest.update(f);
 			String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 			return hash;
-		} catch(NoSuchAlgorithmException ex) {
+		} catch (NoSuchAlgorithmException ex) {
 			throw new RuntimeException(ex);
 		} finally {
 			localFile.close();
@@ -879,7 +879,7 @@ public class SiteDeploy {
 						Map<String, Generator> standard = getStandardGenerators();
 						standard.putAll(DocGenTemplates.GetGenerators());
 						b = DocGenTemplates.DoTemplateReplacement(bW, standard);
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						if(ex instanceof GenerateException) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed to substitute template"
 									+ " while trying to upload resource to " + toLocation, ex);
@@ -941,7 +941,7 @@ public class SiteDeploy {
 					writeFromString(bb, toLocation);
 					currentGenerateTask.addAndGet(1);
 					writeStatus("");
-				} catch(Exception ex) {
+				} catch (Exception ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While writing " + toLocation + " the following error occured:", ex);
 				}
 			}
@@ -972,13 +972,13 @@ public class SiteDeploy {
 							writeFromStream(r.getInputStream(), "resources" + fileName);
 						}
 					}
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				String index_js = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/index.js"));
 				try {
 					writeFromString(DocGenTemplates.DoTemplateReplacement(index_js, getStandardGenerators()), "resources/js/index.js");
-				} catch(Generator.GenerateException ex) {
+				} catch (Generator.GenerateException ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "GenerateException in /siteDeploy/index.js", ex);
 				}
 				currentGenerateTask.addAndGet(1);
@@ -1062,7 +1062,7 @@ public class SiteDeploy {
 						writePageFromResource(r.getName(), "/docs" + filename, r.getName() + ".html",
 								Arrays.asList(new String[]{r.getName().replace("_", " ")}), "Learning trail page for " + r.getName().replace("_", " "));
 					}
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				currentGenerateTask.addAndGet(1);
@@ -1105,7 +1105,7 @@ public class SiteDeploy {
 						final Function f;
 						try {
 							f = ReflectionUtils.instantiateUnsafe(functionClass);
-						} catch(ReflectionUtils.ReflectionException ex) {
+						} catch (ReflectionUtils.ReflectionException ex) {
 							throw new RuntimeException("While trying to construct " + functionClass + ", got the following", ex);
 						}
 						final DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
@@ -1144,7 +1144,7 @@ public class SiteDeploy {
 							if(f.examples() != null && f.examples().length > 0) {
 								desc.append("<br>([[API/functions/").append(f.getName()).append("#Examples|Examples...]])\n");
 							}
-						} catch(ConfigCompileException | NoClassDefFoundError ex) {
+						} catch (ConfigCompileException | NoClassDefFoundError ex) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 						}
 						c.add(desc.toString());
@@ -1192,7 +1192,7 @@ public class SiteDeploy {
 							}
 							b.append("|}\n");
 							b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
-						} catch(Error ex) {
+						} catch (Error ex) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
 						}
 					}
@@ -1212,7 +1212,7 @@ public class SiteDeploy {
 							Arrays.asList(new String[]{"API", "functions"}),
 							"A list of all " + Implementation.GetServerType().getBranding() + " functions");
 					currentGenerateTask.addAndGet(1);
-				} catch(Error ex) {
+				} catch (Error ex) {
 					ex.printStackTrace(System.err);
 				}
 			}
@@ -1311,7 +1311,7 @@ public class SiteDeploy {
 			} else {
 				exampleBuilder.append("Sorry, there are no examples for this function! :(\n");
 			}
-		} catch(ConfigCompileException | IOException | DataSourceException | URISyntaxException ex) {
+		} catch (ConfigCompileException | IOException | DataSourceException | URISyntaxException ex) {
 			exampleBuilder.append("Error while compiling the examples for ").append(f.getName());
 		}
 
@@ -1388,7 +1388,7 @@ public class SiteDeploy {
 						final Event e;
 						try {
 							e = ReflectionUtils.instantiateUnsafe(eventClass);
-						} catch(ReflectionUtils.ReflectionException ex) {
+						} catch (ReflectionUtils.ReflectionException ex) {
 							throw new RuntimeException("While trying to construct " + eventClass + ", got the following", ex);
 						}
 						final DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
@@ -1457,7 +1457,7 @@ public class SiteDeploy {
 							}
 							b.append("|}\n");
 							b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
-						} catch(Error ex) {
+						} catch (Error ex) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
 						}
 					}
@@ -1465,7 +1465,7 @@ public class SiteDeploy {
 							Arrays.asList(new String[]{"API", "events"}),
 							"A list of all " + Implementation.GetServerType().getBranding() + " events");
 					currentGenerateTask.addAndGet(1);
-				} catch(Error ex) {
+				} catch (Error ex) {
 					ex.printStackTrace(System.err);
 				}
 			}

@@ -32,7 +32,7 @@ public class ExampleLocalPackageInstaller {
 			for(ZipReader z : reader.zipListFiles()) {
 				StreamUtils.GetSystemOut().println(z.getName());
 			}
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(ExampleLocalPackageInstaller.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
