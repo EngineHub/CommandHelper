@@ -2353,7 +2353,7 @@ public class EntityManagement {
 							case entity_spec.KEY_BOAT_TYPE:
 								try {
 									boat.setWoodType(MCTreeSpecies.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException ex) {
+								} catch (IllegalArgumentException ex) {
 									throw new CREFormatException("Invalid boat type: " + specArray.get(index, t).val(), t);
 								}
 								break;
@@ -2466,7 +2466,7 @@ public class EntityManagement {
 							case entity_spec.KEY_ENDERDRAGON_PHASE:
 								try {
 									enderdragon.setPhase(MCEnderDragonPhase.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException ex) {
+								} catch (IllegalArgumentException ex) {
 									throw new CREFormatException("Invalid EnderDragon phase: " + specArray.get(index, t).val(), t);
 								}
 								break;
@@ -2881,7 +2881,7 @@ public class EntityManagement {
 							case entity_spec.KEY_SHULKER_COLOR:
 								try {
 									shulker.setColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch(IllegalArgumentException exception) {
+								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid shulker color: " + specArray.get(index, t).val(), t);
 								}
 								break;

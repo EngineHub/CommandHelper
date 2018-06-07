@@ -20,7 +20,7 @@ public class BukkitMCSnowman extends BukkitMCLivingEntity implements MCSnowman {
 	public void setDerp(boolean derp) {
 		try {
 			((Snowman) getHandle()).setDerp(derp);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// probably prior to 1.9.4
 		}
 	}
@@ -29,7 +29,7 @@ public class BukkitMCSnowman extends BukkitMCLivingEntity implements MCSnowman {
 	public boolean isDerp() {
 		try {
 			return ((Snowman) getHandle()).isDerp();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// probably prior to 1.9.4
 		}
 		return false;

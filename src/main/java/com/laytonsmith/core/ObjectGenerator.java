@@ -1171,7 +1171,7 @@ public class ObjectGenerator {
 		MCPotionType type;
 		try {
 			type = MCPotionType.valueOf(pd.get("type", t).val().toUpperCase());
-		} catch(IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			throw new CREFormatException("Invalid potion type: " + pd.get("type", t).val(), t);
 		}
 		boolean extended = false;
