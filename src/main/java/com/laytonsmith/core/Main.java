@@ -697,7 +697,7 @@ public class Main {
 				+ " you are altogether not using craftbukkit. If this is the case, you can download craftbukkit and place"
 				+ " it in the correct directory (one above this one) or you can download bukkit, rename it to bukkit.jar,"
 				+ " and put it in the CommandHelper directory.";
-		//if (Prefs.DebugMode()) {
+		//if(Prefs.DebugMode()) {
 		ret += " If you're dying for more details, here:\n";
 		ret += Misc.GetStacktrace(error);
 		//}

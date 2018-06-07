@@ -234,7 +234,7 @@ public class Enchantments {
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
-//			if (args[1 - offset] instanceof CNull) {
+//			if(args[1 - offset] instanceof CNull) {
 //				is = m.getItemInHand();
 //			} else {
 //				int slot = Static.getInt32(args[1 - offset]);
@@ -326,7 +326,7 @@ public class Enchantments {
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
-//			if (args[1 - offset] instanceof CNull) {
+//			if(args[1 - offset] instanceof CNull) {
 //				is = m.getItemInHand();
 //			} else {
 //				int slot = Static.getInt32(args[1 - offset]);

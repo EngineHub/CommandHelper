@@ -1794,7 +1794,7 @@ public final class MethodScriptCompiler {
 		if(tree.isOptimized()) {
 			return; //Don't need to re-run this
 		}
-//		if (tree.getData() instanceof CIdentifier) {
+//		if(tree.getData() instanceof CIdentifier) {
 //			optimize(((CIdentifier) tree.getData()).contained(), procs);
 //			return;
 //		}

@@ -1431,11 +1431,11 @@ public class StringHandling {
 			// java.util.Date, java.util.Calendar, long
 			static final char DATE_TIME = 't';
 			static final char DATE_TIME_UPPER = 'T';
-			// if (arg.TYPE != boolean) return boolean
-			// if (arg != null) return true; else return false;
+			// if(arg.TYPE != boolean) return boolean
+			// if(arg != null) return true; else return false;
 			static final char BOOLEAN = 'b';
 			static final char BOOLEAN_UPPER = 'B';
-			// if (arg instanceof Formattable) arg.formatTo()
+			// if(arg instanceof Formattable) arg.formatTo()
 			// else arg.toString();
 			static final char STRING = 's';
 			static final char STRING_UPPER = 'S';

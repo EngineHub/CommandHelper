@@ -109,7 +109,7 @@ public class FileUtil {
 //					raf.getChannel().read(buffer);
 //					return new ByteArrayInputStream(buffer.array());
 //				} finally {
-//					if (lock != null) {
+//					if(lock != null) {
 //						lock.release();
 //					}
 //					raf.close();
@@ -184,7 +184,7 @@ public class FileUtil {
 //					try {
 //						lock = raf.getChannel().lock();
 //						//Clear out the file
-//						if (!append) {
+//						if(!append) {
 //							raf.getChannel().truncate(0);
 //						} else {
 //							raf.seek(raf.length());
@@ -209,7 +209,7 @@ public class FileUtil {
 //							throw e;
 //						}
 //					} finally {
-//						if (lock != null) {
+//						if(lock != null) {
 //							lock.release();
 //						}
 //						raf.close();
@@ -323,18 +323,18 @@ public class FileUtil {
 //			byte[] buffer = new byte[4096];
 //			int bytesRead;
 //
-//			while ((bytesRead = from.read(buffer)) != -1) {
+//			while((bytesRead = from.read(buffer)) != -1) {
 //				to.write(buffer, 0, bytesRead); // write
 //			}
 //		} finally {
-//			if (from != null) {
+//			if(from != null) {
 //				try {
 //					from.close();
 //				} catch (IOException e) {
 //					;
 //				}
 //			}
-//			if (to != null) {
+//			if(to != null) {
 //				try {
 //					to.close();
 //				} catch (IOException e) {

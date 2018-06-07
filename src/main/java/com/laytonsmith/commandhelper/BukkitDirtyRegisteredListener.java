@@ -108,7 +108,7 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 //		EnumMap<Event.Type, SortedSet<RegisteredListener>> listeners =
 //				(EnumMap<Event.Type, SortedSet<RegisteredListener>>) fListener.get(pm);
 //
-//		if (listeners instanceof DirtyEnumMap) {
+//		if(listeners instanceof DirtyEnumMap) {
 //			return; //We don't need to bother with it, we've already injected our poisoned EnumMap,
 //			//so further additions will go through that instead.
 //		}
@@ -133,21 +133,21 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 //
 //		Set<Map.Entry<Event.Type, SortedSet<RegisteredListener>>> entrySet = listeners.entrySet();
 //		Iterator i = entrySet.iterator();
-//		while (i.hasNext()) {
+//		while(i.hasNext()) {
 //			final Map.Entry<Event.Type, SortedSet<RegisteredListener>> mySet = (Map.Entry<Event.Type, SortedSet<RegisteredListener>>) i.next();
 //			Iterator k = mySet.getValue().iterator();
 //			SortedSet<RegisteredListener> rls = new DirtyTreeSet<RegisteredListener>(comparator);
 //			newListeners.put(mySet.getKey(), rls);
-//			while (k.hasNext()) {
+//			while(k.hasNext()) {
 //				final RegisteredListener rl = (RegisteredListener) k.next();
-//				if (!(rl instanceof BukkitDirtyRegisteredListener)) {
+//				if(!(rl instanceof BukkitDirtyRegisteredListener)) {
 //					doReplace = true;
 //				}
 //				rls.add(BukkitDirtyRegisteredListener.Generate(rl));
 //			}
 //		}
 //
-//		if (doReplace) {
+//		if(doReplace) {
 //			//Only replace it if we've made changes
 //			fListener.set(pm, newListeners);
 //		}
@@ -201,26 +201,26 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 	 */
 	@Override
 	public void callEvent(Event event) {
-//		if (Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)) {
+//		if(Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)) {
 //			Debug.DoLog(event.getType(), 1, "Bukkit Event received: " + event.getType().name());
 //		}
 //		//If it isn't super cancelled, call it, even if it is cancelled
-//		if (!BukkitDirtyRegisteredListener.cancelledEvents.contains(event)) {
-//			if (Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
+//		if(!BukkitDirtyRegisteredListener.cancelledEvents.contains(event)) {
+//			if(Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
 //					&& Debug.EVENT_LOGGING_FILTER.contains(event.getType())) {
 //				Debug.DoLog(event.getType(), 3, "\tEvent is not super cancelled, so triggering now");
 //			}
 //			callEvent0(event);
 //		} else {
 //			//If it's a cancellable event, and this listener isn't Monitor priority, just return
-//			if (event instanceof Cancellable && this.priority != EventPriority.MONITOR) {
-//				if (Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
+//			if(event instanceof Cancellable && this.priority != EventPriority.MONITOR) {
+//				if(Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
 //						&& Debug.EVENT_LOGGING_FILTER.contains(event.getType())) {
 //					Debug.DoLog(event.getType(), 3, "\tEvent is being ignored, due to play-dirty mode rules");
 //				}
 //				return;
 //			} else {
-//				if (Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
+//				if(Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
 //						&& Debug.EVENT_LOGGING_FILTER.contains(event.getType())) {
 //					Debug.DoLog(event.getType(), 3, "\tEvent is super cancelled, but this listener is either monitor priority (Y/N:"
 //							+ (this.priority == EventPriority.MONITOR ? "y" : "n") + " or it it is not cancellable (Y/N:"
@@ -233,26 +233,26 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 
 	private void callEvent0(Event event) {
 //		StopWatch stopWatch = null;
-//		if (Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
+//		if(Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
 //				&& Debug.EVENT_LOGGING_FILTER.contains(event.getType())) {
-//			if (Debug.EVENT_LOGGING_LEVEL >= 1) {
+//			if(Debug.EVENT_LOGGING_LEVEL >= 1) {
 //				Debug.DoLog(event.getType(), 1, "\tEvent type: " + event.getType().name());
 //				Debug.DoLog(event.getType(), 1, "\tCalled from plugin: " + this.plugin.getClass().getSimpleName());
 //			}
-//			if (Debug.EVENT_LOGGING_LEVEL >= 2) {
+//			if(Debug.EVENT_LOGGING_LEVEL >= 2) {
 //				Debug.DoLog(event.getType(), 1, "\tListener Registered: " + this.listener.getClass().getCanonicalName());
 //				Debug.DoLog(event.getType(), 2, "\tIs Cancellable? " + (event instanceof Cancellable ? "Y" : "N"));
-//				if (event instanceof Cancellable) {
+//				if(event instanceof Cancellable) {
 //					Debug.DoLog(event.getType(), 2, "\t\tIs Cancelled? " + (((Cancellable) event).isCancelled() ? "Y" : "N"));
 //				}
 //			}
-//			if (Debug.EVENT_LOGGING_LEVEL >= 3) {
+//			if(Debug.EVENT_LOGGING_LEVEL >= 3) {
 //				Debug.DoLog(event.getType(), 3, "\tEvent class: " + event.getClass().getCanonicalName());
 //			}
-//			if (Debug.EVENT_LOGGING_LEVEL >= 4) {
+//			if(Debug.EVENT_LOGGING_LEVEL >= 4) {
 //				//Let's just dump the fields
 //				StringBuilder b = new StringBuilder("\n\tFields in this event:\n");
-//				for (Field f : event.getClass().getSuperclass().getDeclaredFields()) {
+//				for(Field f : event.getClass().getSuperclass().getDeclaredFields()) {
 //					b.append("\t\t").append(f.getType().getSimpleName()).append(" ").append(f.getName());
 //					f.setAccessible(true);
 //					try {
@@ -266,16 +266,16 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 //				}
 //				Debug.DoLog(event.getType(), 4, b.toString());
 //			}
-//			if (Debug.EVENT_LOGGING_LEVEL == 5) {
+//			if(Debug.EVENT_LOGGING_LEVEL == 5) {
 //				//dump ALL the things
 //				StringBuilder b = new StringBuilder("\n\tMethods in this event:\n");
-//				for (Method m : event.getClass().getSuperclass().getDeclaredMethods()) {
+//				for(Method m : event.getClass().getSuperclass().getDeclaredMethods()) {
 //					b.append("\t\t").append(m.getReturnType().getSimpleName()).append(" ").append(m.getName()).append("(").append(Static.strJoin(m.getParameterTypes(), ", ")).append(");\n");
 //				}
 //				Debug.DoLog(event.getType(), 5, b.toString());
 //			}
 //		}
-//		if ((Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
+//		if((Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
 //				&& Debug.EVENT_LOGGING_FILTER.contains(event.getType()) && Debug.EVENT_LOGGING_LEVEL >= 2) || Performance.PERFORMANCE_LOGGING) {
 //			stopWatch = new StopWatch(
 //					this.plugin.getClass().getSimpleName() + "."//Plugin name
@@ -288,16 +288,16 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 //		} catch(EventException e){
 //			Logger.getLogger(BukkitDirtyRegisteredListener.class.getName()).log(Level.SEVERE, e.getMessage(), e);
 //		}
-//		if (stopWatch != null) {
+//		if(stopWatch != null) {
 //			stopWatch.stop();
-//			if (Debug.EVENT_LOGGING) {
+//			if(Debug.EVENT_LOGGING) {
 //				Debug.DoLog(event.getType(), 2, "\t\t\tEvent completed in " + stopWatch.getElapsedTime() + " milliseconds");
 //			}
-//			if (Performance.PERFORMANCE_LOGGING) {
+//			if(Performance.PERFORMANCE_LOGGING) {
 //				Performance.DoLog(stopWatch);
 //			}
 //		}
-//		if (Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)) {
+//		if(Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)) {
 //			Debug.DoLog(event.getType(), 1, "--------------------------------------------------------------\n");
 //		}
 	}
