@@ -177,6 +177,7 @@ public final class MethodScriptCompiler {
 							i++;
 							continue;
 						}
+						break;
 					}
 					case '>': {
 						if(saveAllTokens) {
@@ -934,15 +935,14 @@ public final class MethodScriptCompiler {
 						continue outerLoop;
 					}
 					case NEWLINE: {
-						while(true) {
-							if(!it.hasNext()) {
-								break outerLoop;
-							} else if((token = it.next()).type == TType.NEWLINE) {
+						while(it.hasNext()) {
+							if((token = it.next()).type == TType.NEWLINE) {
 								it.remove(); // Remove duplicate newlines.
 							} else {
 								continue outerLoop;
 							}
 						}
+						break outerLoop;
 					}
 					default: {
 						if(!it.hasNext()) {
