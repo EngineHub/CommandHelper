@@ -640,6 +640,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 								switch(ztype) {
 									case HUSK:
 										mobType = Husk.class;
+										continue;
 									case BABY:
 										continue;
 									case VILLAGER_BLACKSMITH:
