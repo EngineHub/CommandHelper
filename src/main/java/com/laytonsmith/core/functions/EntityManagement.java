@@ -41,6 +41,7 @@ import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.entities.MCCreeper;
 import com.laytonsmith.abstraction.entities.MCEnderDragon;
 import com.laytonsmith.abstraction.entities.MCEnderman;
+import com.laytonsmith.abstraction.entities.MCEvokerFangs;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.entities.MCGuardian;
@@ -59,6 +60,7 @@ import com.laytonsmith.abstraction.entities.MCPig;
 import com.laytonsmith.abstraction.entities.MCPigZombie;
 import com.laytonsmith.abstraction.entities.MCRabbit;
 import com.laytonsmith.abstraction.entities.MCSheep;
+import com.laytonsmith.abstraction.entities.MCShulker;
 import com.laytonsmith.abstraction.entities.MCShulkerBullet;
 import com.laytonsmith.abstraction.entities.MCSkeleton;
 import com.laytonsmith.abstraction.entities.MCSlime;
@@ -85,6 +87,7 @@ import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.abstraction.enums.MCRabbitType;
 import com.laytonsmith.abstraction.enums.MCRotation;
 import com.laytonsmith.abstraction.enums.MCSkeletonType;
+import com.laytonsmith.abstraction.enums.MCTreeSpecies;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
@@ -1736,6 +1739,7 @@ public class EntityManagement {
 			docs = docs.replace("%RABBIT_TYPE%", StringUtils.Join(MCRabbitType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PARTICLE%", StringUtils.Join(MCParticle.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%ENDERDRAGON_PHASE%", StringUtils.Join(MCEnderDragonPhase.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%TREE_SPECIES%", StringUtils.Join(MCTreeSpecies.values(), ", ", ", or ", " or "));
 			for(Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -1805,6 +1809,12 @@ public class EntityManagement {
 					}
 					specArray.set(entity_spec.KEY_ARMORSTAND_POSES, poses, t);
 					break;
+				case BOAT:
+					MCBoat boat = (MCBoat) entity;
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
+						specArray.set(entity_spec.KEY_BOAT_TYPE, new CString(boat.getWoodType().name(), t), t);
+					}
+					break;
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
 					specArray.set(entity_spec.KEY_CREEPER_POWERED, CBoolean.get(creeper.isPowered()), t);
@@ -1853,14 +1863,26 @@ public class EntityManagement {
 						specArray.set(entity_spec.KEY_ENDERMAN_CARRIED, CNull.NULL, t);
 					}
 					break;
+				case EVOKER_FANGS:
+					MCEvokerFangs fangs = (MCEvokerFangs) entity;
+					MCLivingEntity fangsource = fangs.getOwner();
+					if(fangsource == null) {
+						specArray.set(entity_spec.KEY_EVOKERFANGS_SOURCE, CNull.NULL, t);
+					} else {
+						specArray.set(entity_spec.KEY_EVOKERFANGS_SOURCE, new CString(fangsource.getUniqueId().toString(), t), t);
+					}
+					break;
 				case EXPERIENCE_ORB:
 					MCExperienceOrb orb = (MCExperienceOrb) entity;
 					specArray.set(entity_spec.KEY_EXPERIENCE_ORB_AMOUNT, new CInt(orb.getExperience(), t), t);
 					break;
 				case FALLING_BLOCK:
 					MCFallingBlock block = (MCFallingBlock) entity;
-					specArray.set(entity_spec.KEY_FALLING_BLOCK_BLOCK, new CInt(block.getMaterial().getName(), t), t);
+					specArray.set(entity_spec.KEY_FALLING_BLOCK_BLOCK, new CString(block.getMaterial().getName(), t), t);
 					specArray.set(entity_spec.KEY_FALLING_BLOCK_DROPITEM, CBoolean.get(block.getDropItem()), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8_X)) {
+						specArray.set(entity_spec.KEY_FALLING_BLOCK_DAMAGE, CBoolean.get(block.canHurtEntities()), t);
+					}
 					break;
 				case FIREBALL:
 				case SMALL_FIREBALL:
@@ -1971,6 +1993,12 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_SHEEP_COLOR, new CString(sheep.getColor().name(), t), t);
 					specArray.set(entity_spec.KEY_SHEEP_SHEARED, CBoolean.get(sheep.isSheared()), t);
 					break;
+				case SHULKER:
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_12)) {
+						MCShulker shulker = (MCShulker) entity;
+						specArray.set(entity_spec.KEY_SHULKER_COLOR, new CString(shulker.getColor().name(), t), t);
+					}
+					break;
 				case SHULKER_BULLET:
 					MCShulkerBullet bullet = (MCShulkerBullet) entity;
 					MCEntity target = bullet.getTarget();
@@ -2070,6 +2098,7 @@ public class EntityManagement {
 		private static final String KEY_ARMORSTAND_POSES = "poses";
 		private static final String KEY_ARMORSTAND_SMALLSIZE = "small";
 		private static final String KEY_ARMORSTAND_VISIBLE = "visible";
+		private static final String KEY_BOAT_TYPE = "type";
 		private static final String KEY_CREEPER_POWERED = "powered";
 		private static final String KEY_CREEPER_MAXFUSETICKS = "maxfuseticks";
 		private static final String KEY_CREEPER_EXPLOSIONRADIUS = "explosionradius";
@@ -2080,8 +2109,10 @@ public class EntityManagement {
 		private static final String KEY_ENDERDRAGON_PHASE = "phase";
 		private static final String KEY_ENDERMAN_CARRIED = "carried";
 		private static final String KEY_EXPERIENCE_ORB_AMOUNT = "amount";
+		private static final String KEY_EVOKERFANGS_SOURCE = "source";
 		private static final String KEY_FALLING_BLOCK_BLOCK = "block";
 		private static final String KEY_FALLING_BLOCK_DROPITEM = "dropitem";
+		private static final String KEY_FALLING_BLOCK_DAMAGE = "damage";
 		private static final String KEY_FIREBALL_DIRECTION = "direction";
 		private static final String KEY_GUARDIAN_ELDER = "elder";
 		private static final String KEY_HORSE_COLOR = "color";
@@ -2114,6 +2145,7 @@ public class EntityManagement {
 		private static final String KEY_PRIMED_TNT_SOURCE = "source";
 		private static final String KEY_SHEEP_COLOR = "color";
 		private static final String KEY_SHEEP_SHEARED = "sheared";
+		private static final String KEY_SHULKER_COLOR = "color";
 		private static final String KEY_SHULKERBULLET_TARGET = "target";
 		private static final String KEY_SKELETON_TYPE = "type";
 		private static final String KEY_SLIME_SIZE = "size";
@@ -2314,6 +2346,22 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case BOAT:
+					MCBoat boat = (MCBoat) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_BOAT_TYPE:
+								try {
+									boat.setWoodType(MCTreeSpecies.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch(IllegalArgumentException ex) {
+									throw new CREFormatException("Invalid boat type: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -2416,7 +2464,11 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ENDERDRAGON_PHASE:
-								enderdragon.setPhase(MCEnderDragonPhase.valueOf(specArray.get(index, t).val().toUpperCase()));
+								try {
+									enderdragon.setPhase(MCEnderDragonPhase.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch(IllegalArgumentException ex) {
+									throw new CREFormatException("Invalid EnderDragon phase: " + specArray.get(index, t).val(), t);
+								}
 								break;
 							default:
 								throwException(index, t);
@@ -2429,6 +2481,23 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ENDERMAN_CARRIED:
 								enderman.setCarriedMaterial(ObjectGenerator.GetGenerator().material(specArray.get(index, t), t).getData());
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case EVOKER_FANGS:
+					MCEvokerFangs fangs = (MCEvokerFangs) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_EVOKERFANGS_SOURCE:
+								Construct source = specArray.get(index, t);
+								if(source instanceof CNull) {
+									fangs.setOwner(null);
+								} else {
+									fangs.setOwner(Static.getLivingEntity(source, t));
+								}
 								break;
 							default:
 								throwException(index, t);
@@ -2453,6 +2522,9 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_FALLING_BLOCK_DROPITEM:
 								block.setDropItem(Static.getBoolean(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_FALLING_BLOCK_DAMAGE:
+								block.setHurtEntities(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -2802,6 +2874,22 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case SHULKER:
+					MCShulker shulker = (MCShulker) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_SHULKER_COLOR:
+								try {
+									shulker.setColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch(IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid shulker color: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case SHULKER_BULLET:
 					MCShulkerBullet bullet = (MCShulkerBullet) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -2866,16 +2954,14 @@ public class EntityManagement {
 					}
 					break;
 				case SNOWMAN:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9_4)) {
-						MCSnowman snowman = (MCSnowman) entity;
-						for(String index : specArray.stringKeySet()) {
-							switch(index.toLowerCase()) {
-								case entity_spec.KEY_SNOWMAN_DERP:
-									snowman.setDerp(Static.getBoolean(specArray.get(index, t), t));
-									break;
-								default:
-									throwException(index, t);
-							}
+					MCSnowman snowman = (MCSnowman) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_SNOWMAN_DERP:
+								snowman.setDerp(Static.getBoolean(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;

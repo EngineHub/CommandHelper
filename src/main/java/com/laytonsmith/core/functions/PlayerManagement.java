@@ -3847,7 +3847,6 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	@hide("TODO: I'm not sure why this is hidden.")
 	public static class pvelocity extends AbstractFunction {
 
 		@Override
@@ -3885,21 +3884,20 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p;
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
+			} else {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
 			}
-			Static.AssertPlayerNonNull(p, t);
-			CArray vector = CArray.GetAssociativeArray(t);
 			Vector3D velocity = p.getVelocity();
 			if(velocity == null) {
 				throw new CRENotFoundException(
 						"The players velocity could not be found (Are you running in cmdline mode?)", t);
 			}
+			CArray vector = ObjectGenerator.GetGenerator().vector(velocity, t);
 			vector.set("magnitude", new CDouble(velocity.length(), t), t);
-			vector.set("x", new CDouble(velocity.X(), t), t);
-			vector.set("y", new CDouble(velocity.Y(), t), t);
-			vector.set("z", new CDouble(velocity.Z(), t), t);
 			return vector;
 		}
 

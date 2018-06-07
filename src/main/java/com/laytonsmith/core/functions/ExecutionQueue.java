@@ -83,6 +83,8 @@ public class ExecutionQueue {
 								return null;
 							}
 						});
+					} catch (InterruptedException ex) {
+						// ignore
 					} catch (Exception ex) {
 						Logger.getLogger(ExecutionQueue.class.getName()).log(Level.SEVERE, null, ex);
 					}
@@ -163,6 +165,8 @@ public class ExecutionQueue {
 								return null;
 							}
 						});
+					} catch (InterruptedException ex) {
+						// ignore
 					} catch (Exception ex) {
 						Logger.getLogger(ExecutionQueue.class.getName()).log(Level.SEVERE, null, ex);
 					}

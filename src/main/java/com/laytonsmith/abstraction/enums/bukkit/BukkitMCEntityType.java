@@ -2,10 +2,14 @@ package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCExplosiveMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHopperMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItem;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLightningStrike;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCMinecart;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPoweredMinecart;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCStorageMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTNT;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCThrownPotion;
 import com.laytonsmith.abstraction.enums.MCEntityType;
@@ -125,25 +129,33 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 			case LINGERING_POTION:
 				wrapperClass = BukkitMCThrownPotion.class;
 				break;
+			case MINECART_CHEST:
+				wrapperClass = BukkitMCStorageMinecart.class;
+				break;
+			case MINECART_FURNACE:
+				wrapperClass = BukkitMCPoweredMinecart.class;
+				break;
+			case MINECART_HOPPER:
+				wrapperClass = BukkitMCHopperMinecart.class;
+				break;
+			case MINECART_TNT:
+				wrapperClass = BukkitMCExplosiveMinecart.class;
+				break;
+			case MINECART_MOB_SPAWNER:
+				wrapperClass = BukkitMCMinecart.class;
+				break;
+			case MINECART_COMMAND:
+				wrapperClass = BukkitMCCommandMinecart.class;
+				break;
+			case FISHING_HOOK:
+				wrapperClass = BukkitMCFishHook.class;
+				break;
 			default:
 				String[] split = abstracted.name().toLowerCase().split("_");
 				if(split.length == 0 || "".equals(split[0])) {
 					break;
 				}
 				String name = "com.laytonsmith.abstraction.bukkit.entities.BukkitMC";
-				if("minecart".equals(split[0])) {
-					if(split.length == 1 || !"command".equals(split[1])) {
-						wrapperClass = BukkitMCMinecart.class;
-						break;
-					} else {
-						wrapperClass = BukkitMCCommandMinecart.class;
-						break;
-					}
-				}
-				if(split[0].startsWith("fish")) { // Bukkit enum matches neither the old class or the new
-					wrapperClass = BukkitMCFishHook.class;
-					break;
-				}
 				for(String s : split) {
 					name = name.concat(Character.toUpperCase(s.charAt(0)) + s.substring(1));
 				}

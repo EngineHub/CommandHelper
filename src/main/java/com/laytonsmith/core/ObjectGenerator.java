@@ -1168,7 +1168,12 @@ public class ObjectGenerator {
 	}
 
 	public MCPotionData potionData(CArray pd, Target t) {
-		MCPotionType type = MCPotionType.valueOf(pd.get("type", t).val().toUpperCase());
+		MCPotionType type;
+		try {
+			type = MCPotionType.valueOf(pd.get("type", t).val().toUpperCase());
+		} catch(IllegalArgumentException ex) {
+			throw new CREFormatException("Invalid potion type: " + pd.get("type", t).val(), t);
+		}
 		boolean extended = false;
 		boolean upgraded = false;
 		if(pd.containsKey("extended")) {
