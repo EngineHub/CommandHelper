@@ -15,7 +15,13 @@
 		<property name="optional" value="false"/>
 	</module>
 	
+	<!-- Allow "@SuppressWarnings(checkstyle:<CHECK>)" checkstyle violation suppression -->
+	<module name="SuppressWarningsFilter"/>
+	
 	<module name="TreeWalker">
+		
+		<!-- Enable usage of "@SuppressWarnings(checkstyle:<CHECK>)" to suppress checkstyle violations -->
+		<module name="SuppressWarningsHolder"/>
 		
 		<!-- Set tabWidth property for checks such as line length -->
 		<property name="tabWidth" value="4"/>
