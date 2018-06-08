@@ -389,6 +389,7 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		}
 
 		@Override
+		@SuppressWarnings("checkstyle:fallthrough")
 		public void setArmorContents(ItemStack[] itemStacks) {
 			switch(itemStacks.length) {
 				case 4:
