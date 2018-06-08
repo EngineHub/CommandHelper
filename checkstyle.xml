@@ -48,6 +48,9 @@
 		<!-- Disallow empty statements (just a single ";") -->
 		<module name="EmptyStatement"/>
 		
+		<!-- Ensure that "break" or "return" is used in non-empty switch/case cases -->
+		<module name="FallThrough"/>
+		
 		<!-- Ensure that classes without public constructor are final -->
 		<module name="FinalClass"/>
 		
