@@ -246,6 +246,7 @@ public class Preferences {
 	 * @param name
 	 * @return
 	 */
+	@Deprecated
 	public Object getPreference(String name) {
 		if(prefs.get(name).objectValue == null) {
 			prefs.get(name).objectValue = getObject(prefs.get(name).value, prefs.get(name));

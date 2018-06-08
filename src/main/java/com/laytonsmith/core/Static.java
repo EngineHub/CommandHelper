@@ -619,6 +619,7 @@ public final class Static {
 	 * @param qty
 	 * @throws CREFormatException If the notation is invalid.
 	 * @return
+	 * @deprecated Use {@link StaticLayer#GetItemStack(int, int, int)} instead.
 	 */
 	@Deprecated
 	public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, Target t) {

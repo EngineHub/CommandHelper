@@ -13,6 +13,9 @@ public interface MCBlock extends MCMetadatable {
 
 	MCMaterial getType();
 
+	/**
+	 * @deprecated Magic value
+	 */
 	@Deprecated
 	int getTypeId();
 
@@ -20,11 +23,17 @@ public interface MCBlock extends MCMetadatable {
 
 	void setType(MCMaterial mat);
 
+	/**
+	 * @deprecated Magic value
+	 */
 	@Deprecated
 	void setTypeId(int idata);
 
 	void setData(byte imeta);
 
+	/**
+	 * @deprecated Magic value
+	 */
 	@Deprecated
 	void setTypeAndData(int type, byte data, boolean physics);
 
