@@ -144,7 +144,7 @@ public class Compiler {
 			return optimizeSpecial(list, true);
 		}
 
-		private final static String ASSIGN = new DataHandling.assign().getName();
+		private static final String ASSIGN = new DataHandling.assign().getName();
 
 		/**
 		 * __autoconcat__ has special optimization techniques needed, since it's really a part of the compiler itself,

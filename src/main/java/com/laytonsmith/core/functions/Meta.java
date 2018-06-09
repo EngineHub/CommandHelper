@@ -815,9 +815,9 @@ public class Meta {
 	@api(environments = CommandHelperEnvironment.class)
 	public static class run_cmd extends AbstractFunction {
 
-		private final static run run = new run();
-		private final static call_alias call_alias = new call_alias();
-		private final static is_alias is_alias = new is_alias();
+		private static final run run = new run();
+		private static final call_alias call_alias = new call_alias();
+		private static final is_alias is_alias = new is_alias();
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {

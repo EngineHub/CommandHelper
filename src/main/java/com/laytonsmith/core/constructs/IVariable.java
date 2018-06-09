@@ -13,10 +13,10 @@ public class IVariable extends Construct implements Cloneable {
 
 	public static final long serialVersionUID = 1L;
 	private Construct var_value;
-	final private String name;
-	final private CClassType type;
-	final private Target definedTarget;
-	final public static String VARIABLE_NAME_REGEX = "@[\\p{L}0-9_]+";
+	private final String name;
+	private final CClassType type;
+	private final Target definedTarget;
+	public static final String VARIABLE_NAME_REGEX = "@[\\p{L}0-9_]+";
 
 	public IVariable(String name, Target t) throws ConfigCompileException {
 		super(name, ConstructType.IVARIABLE, t);

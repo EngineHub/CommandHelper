@@ -853,7 +853,7 @@ public class ByteArrays {
 		}
 	}
 
-	private static abstract class ba extends AbstractFunction {
+	private abstract static class ba extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -871,7 +871,7 @@ public class ByteArrays {
 		}
 	}
 
-	public static abstract class ba_put extends ba {
+	public abstract static class ba_put extends ba {
 
 		@Override
 		public Integer[] numArgs() {
@@ -880,7 +880,7 @@ public class ByteArrays {
 
 	}
 
-	public static abstract class ba_get extends ba {
+	public abstract static class ba_get extends ba {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {

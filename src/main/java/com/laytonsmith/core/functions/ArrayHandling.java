@@ -2165,8 +2165,8 @@ public class ArrayHandling {
 	@api
 	public static class array_unique extends AbstractFunction implements Optimizable {
 
-		private final static equals equals = new equals();
-		private final static BasicLogic.sequals sequals = new BasicLogic.sequals();
+		private static final equals equals = new equals();
+		private static final BasicLogic.sequals sequals = new BasicLogic.sequals();
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {

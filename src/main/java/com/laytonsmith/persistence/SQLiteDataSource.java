@@ -41,13 +41,13 @@ public class SQLiteDataSource extends SQLDataSource {
 	 * the issue could be solved using a more complex transaction system. Regardless, it seems to work in all cases
 	 * without transactions, so long as this remains true.
 	 */
-	private final static boolean DO_DISCONNECTS = true;
+	private static final boolean DO_DISCONNECTS = true;
 	/**
 	 * If the connection takes this long to connect, it will give up, throw an exception, and continue on. This timeout
 	 * should be large enough to never cause false positives, but small enough that the host itself won't decide the
 	 * connection has completely stalled out.
 	 */
-	private final static int TIMEOUT = 30000;
+	private static final int TIMEOUT = 30000;
 
 	private SQLiteDataSource() {
 

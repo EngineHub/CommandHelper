@@ -59,7 +59,7 @@ public class BlockEvents {
 	}
 
 	// Stub for actual events below.
-	public static abstract class piston_event extends AbstractEvent {
+	public abstract static class piston_event extends AbstractEvent {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {

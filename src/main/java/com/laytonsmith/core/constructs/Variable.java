@@ -10,7 +10,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 public class Variable extends Construct {
 
 	public static final long serialVersionUID = 1L;
-	final private String name;
+	private final String name;
 	private String def;
 	private boolean optional;
 	private boolean final_var;

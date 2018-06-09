@@ -31,7 +31,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 	/**
 	 * Clears all data from all databases. Should be called when a natural reload type operation is called.
 	 */
-	public synchronized static void ClearDatabases() {
+	public static synchronized void ClearDatabases() {
 		for(String s : databasePool.keySet()) {
 			databasePool.get(s).clear();
 		}
@@ -50,7 +50,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 	 * @param name
 	 * @return
 	 */
-	public synchronized static Map<String, String> getDatabase(String name) {
+	public static synchronized Map<String, String> getDatabase(String name) {
 		if(!databasePool.containsKey(name)) {
 			databasePool.put(name, Collections.synchronizedMap(new TreeMap<String, String>()));
 		}

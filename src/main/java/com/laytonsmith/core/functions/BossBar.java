@@ -40,7 +40,7 @@ public class BossBar {
 
 	private static final Map<String, MCBossBar> bars = new HashMap<>();
 
-	public static abstract class BossBarFunction extends AbstractFunction {
+	public abstract static class BossBarFunction extends AbstractFunction {
 
 		@Override
 		public boolean isRestricted() {

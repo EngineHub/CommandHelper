@@ -37,7 +37,7 @@ public class WorldEvents {
 		return "Contains events related to the world.";
 	}
 
-	public static abstract class WorldEvent extends AbstractEvent {
+	public abstract static class WorldEvent extends AbstractEvent {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {

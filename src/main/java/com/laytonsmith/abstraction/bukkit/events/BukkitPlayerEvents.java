@@ -151,7 +151,7 @@ public class BukkitPlayerEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static abstract class BukkitMCPlayerEvent implements MCPlayerEvent {
+	public abstract static class BukkitMCPlayerEvent implements MCPlayerEvent {
 
 		PlayerEvent pe;
 

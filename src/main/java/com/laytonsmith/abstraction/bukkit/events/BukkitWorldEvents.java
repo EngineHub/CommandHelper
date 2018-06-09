@@ -31,7 +31,7 @@ public final class BukkitWorldEvents {
 	private BukkitWorldEvents() {
 	}
 
-	public static abstract class BukkitMCWorldEvent implements MCWorldEvent {
+	public abstract static class BukkitMCWorldEvent implements MCWorldEvent {
 
 		private final WorldEvent _event;
 

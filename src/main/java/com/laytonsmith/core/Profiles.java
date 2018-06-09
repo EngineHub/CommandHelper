@@ -198,7 +198,7 @@ public class Profiles {
 	 * (String id, Map&lt;String, String&gt; elements) that contains the parsed xml for that profile. validation can be
 	 * done in the constructor, and an InvalidProfileException can be thrown if there is invalid or missing data.
 	 */
-	public static abstract class Profile implements Comparable<Profile> {
+	public abstract static class Profile implements Comparable<Profile> {
 
 		private final String id;
 

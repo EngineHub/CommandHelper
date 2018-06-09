@@ -147,7 +147,7 @@ public final class Profiler {
 		operations.put(operationName, System.nanoTime());
 	}
 
-	private final static Map<Long, String> indents = new TreeMap<Long, String>();
+	private static final Map<Long, String> indents = new TreeMap<Long, String>();
 
 	static {
 		//Let's just warm it up some
@@ -166,7 +166,7 @@ public final class Profiler {
 		}
 		return indents.get(count);
 	}
-	private final static String gcString = " (however, the garbage collector was run during this profile point)";
+	private static final String gcString = " (however, the garbage collector was run during this profile point)";
 
 	public void stop(ProfilePoint operationName) {
 		//This line should ALWAYS be first in the function

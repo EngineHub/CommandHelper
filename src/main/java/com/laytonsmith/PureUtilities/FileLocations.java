@@ -15,9 +15,9 @@ public class FileLocations {
 
 	private static FileLocations defaultInstance = null;
 
-	private final static File USER_HOME;
-	private final static File USER_DIR;
-	private final static File JAVA_HOME;
+	private static final File USER_HOME;
+	private static final File USER_DIR;
+	private static final File JAVA_HOME;
 
 	static {
 		File userHome = null;

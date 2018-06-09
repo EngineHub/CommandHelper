@@ -142,7 +142,7 @@ public class EntityManagement {
 		return "This class of functions allow entities to be managed.";
 	}
 
-	public static abstract class EntityFunction extends AbstractFunction {
+	public abstract static class EntityFunction extends AbstractFunction {
 
 		@Override
 		public boolean isRestricted() {
@@ -155,7 +155,7 @@ public class EntityManagement {
 		}
 	}
 
-	public static abstract class EntityGetterFunction extends EntityFunction {
+	public abstract static class EntityGetterFunction extends EntityFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -168,7 +168,7 @@ public class EntityManagement {
 		}
 	}
 
-	public static abstract class EntitySetterFunction extends EntityFunction {
+	public abstract static class EntitySetterFunction extends EntityFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {

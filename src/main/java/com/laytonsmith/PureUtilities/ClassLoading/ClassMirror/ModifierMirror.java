@@ -19,7 +19,7 @@ public class ModifierMirror implements Serializable {
 	/**
 	 * This is the canonical order of modifiers, used in the toString method.
 	 */
-	private static transient final Object[] order = new Object[]{
+	private static final transient Object[] order = new Object[]{
 		Modifier.PUBLIC, "public",
 		Modifier.PRIVATE, "private",
 		Modifier.PROTECTED, "protected",

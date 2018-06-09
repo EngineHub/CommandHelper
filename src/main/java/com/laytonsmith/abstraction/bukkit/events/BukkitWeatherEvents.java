@@ -15,7 +15,7 @@ import org.bukkit.event.weather.WeatherEvent;
 
 public final class BukkitWeatherEvents {
 
-	public static abstract class BukkitMCWeatherEvent implements MCWeatherEvent {
+	public abstract static class BukkitMCWeatherEvent implements MCWeatherEvent {
 
 		private final WeatherEvent _event;
 

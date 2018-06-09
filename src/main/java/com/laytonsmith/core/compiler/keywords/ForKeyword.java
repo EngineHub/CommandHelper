@@ -17,7 +17,7 @@ import java.util.List;
 @Keyword.keyword("for")
 public class ForKeyword extends Keyword {
 
-	private final static String FORELSE = new DataHandling.forelse().getName();
+	private static final String FORELSE = new DataHandling.forelse().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {

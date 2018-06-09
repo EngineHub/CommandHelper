@@ -29,7 +29,7 @@ public class Recipes {
 		return "This class of functions allows recipes to be managed.";
 	}
 
-	public static abstract class recipeFunction extends AbstractFunction {
+	public abstract static class recipeFunction extends AbstractFunction {
 
 		@Override
 		public boolean isRestricted() {

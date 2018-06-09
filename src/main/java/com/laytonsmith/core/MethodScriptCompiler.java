@@ -69,7 +69,7 @@ import java.util.regex.Pattern;
  */
 public final class MethodScriptCompiler {
 
-	private final static EnumSet<Optimizable.OptimizationOption> NO_OPTIMIZATIONS = EnumSet.noneOf(Optimizable.OptimizationOption.class);
+	private static final EnumSet<Optimizable.OptimizationOption> NO_OPTIMIZATIONS = EnumSet.noneOf(Optimizable.OptimizationOption.class);
 
 	private MethodScriptCompiler() {
 	}

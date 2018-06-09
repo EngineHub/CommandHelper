@@ -237,7 +237,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		return this.getClass().getAnnotation(hide.class) != null;
 	}
 
-	private final static Class[] EMPTY_CLASS = new Class[0];
+	private static final Class[] EMPTY_CLASS = new Class[0];
 
 	@Override
 	public Class<? extends Documentation>[] seeAlso() {

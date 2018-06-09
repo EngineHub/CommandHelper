@@ -213,7 +213,7 @@ public class Scoreboards {
 	/**
 	 * Contains methods that should be the same for most scoreboard functions
 	 */
-	public static abstract class SBFunction extends AbstractFunction {
+	public abstract static class SBFunction extends AbstractFunction {
 
 		/**
 		 * @return true

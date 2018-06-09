@@ -101,7 +101,7 @@ public enum MCChatColor {
 	PLAIN_WHITE('r');
 
 	private final char code;
-	private final static Map<Character, MCChatColor> charColors = new HashMap<>();
+	private static final Map<Character, MCChatColor> charColors = new HashMap<>();
 
 	MCChatColor(char code) {
 		this.code = code;

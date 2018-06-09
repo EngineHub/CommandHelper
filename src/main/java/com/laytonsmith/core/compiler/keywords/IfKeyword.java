@@ -17,7 +17,7 @@ import java.util.List;
 @Keyword.keyword("if")
 public class IfKeyword extends Keyword {
 
-	private final static String IFELSE = new BasicLogic.ifelse().getName();
+	private static final String IFELSE = new BasicLogic.ifelse().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {

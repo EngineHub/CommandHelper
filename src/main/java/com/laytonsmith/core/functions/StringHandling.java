@@ -192,7 +192,7 @@ public class StringHandling {
 			return null;
 		}
 
-		public final static String STRING = new DataHandling._string().getName();
+		public static final String STRING = new DataHandling._string().getName();
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
