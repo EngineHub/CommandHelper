@@ -817,6 +817,24 @@ public class PlayerEvents {
 			return e;
 		}
 
+		@Override
+		public void preExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerJoinEvent) {
+				//Static lookups of the player as entity don't seem to work here, but
+				//the player is passed in with the event.
+				MCPlayer player = ((MCPlayerJoinEvent) activeEvent.getUnderlyingEvent()).getPlayer();
+				Static.InjectEntity(player);
+			}
+		}
+
+		@Override
+		public void postExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerJoinEvent) {
+				MCPlayer player = ((MCPlayerJoinEvent) activeEvent.getUnderlyingEvent()).getPlayer();
+				Static.UninjectEntity(player);
+			}
+		}
+
 	}
 
 	@api
