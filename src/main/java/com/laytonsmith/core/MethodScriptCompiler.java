@@ -1948,7 +1948,7 @@ public final class MethodScriptCompiler {
 						tree.setData(c);
 						tree.removeChildren();
 						return;
-					}//else Nope, couldn't optimize.
+					} //else Nope, couldn't optimize.
 				} catch (ConfigRuntimeException ex) {
 					//Cool. Caught a runtime error at compile time :D
 					compilerErrors.add(new ConfigCompileException(ex));

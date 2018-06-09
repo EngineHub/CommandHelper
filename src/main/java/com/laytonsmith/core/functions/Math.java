@@ -119,7 +119,7 @@ public class Math {
 				new ExampleScript("Demonstrates adding two numbers together", "msg(add(2, 2))"),
 				new ExampleScript("Demonstrates adding two numbers together, using the operator syntax", "2 + 2"),
 				new ExampleScript("Demonstrates grouping with parenthesis", "(2 + 5) * 2"),
-				new ExampleScript("Demonstrates order of operations", "2 + 5 * 2"),};
+				new ExampleScript("Demonstrates order of operations", "2 + 5 * 2")};
 		}
 
 		@Override
@@ -199,7 +199,7 @@ public class Math {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates basic usage", "subtract(4 - 3)"),
-				new ExampleScript("Demonstrates operator syntax", "12 - 5"),};
+				new ExampleScript("Demonstrates operator syntax", "12 - 5")};
 		}
 
 		@Override
@@ -278,7 +278,7 @@ public class Math {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "multiply(8, 8)"),
-				new ExampleScript("Operator syntax", "8 * 8"),};
+				new ExampleScript("Operator syntax", "8 * 8")};
 		}
 
 		@Override
@@ -355,7 +355,7 @@ public class Math {
 				new ExampleScript("Functional usage", "divide(4, 2)"),
 				new ExampleScript("Demonstrates double return", "divide(2, 4)"),
 				new ExampleScript("Operator syntax", "2 / 4"),
-				new ExampleScript("Demonstrates divide by zero error", "@zero = 0;\nmsg(1 / @zero);"),};
+				new ExampleScript("Demonstrates divide by zero error", "@zero = 0;\nmsg(1 / @zero);")};
 		}
 
 		@Override
@@ -419,7 +419,7 @@ public class Math {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "mod(2, 2)"),
-				new ExampleScript("Operator syntax", "2 % 2"),};
+				new ExampleScript("Operator syntax", "2 % 2")};
 		}
 
 		@Override
@@ -480,7 +480,7 @@ public class Math {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "pow(2, 4)"),
-				new ExampleScript("Operator syntax", "2 ** 4"),};
+				new ExampleScript("Operator syntax", "2 ** 4")};
 		}
 
 		@Override
@@ -664,7 +664,7 @@ public class Math {
 				new ExampleScript("Demonstrates symbolic usage", "@x = 0;\n"
 				+ "msg(@x);\n"
 				+ "(++@x); // Note the use of parenthesis, which is required in this case, otherwise it applies to the previous operation\n"
-				+ "msg(@x);"),};
+				+ "msg(@x);")};
 		}
 
 		@Override
@@ -805,7 +805,7 @@ public class Math {
 				+ "msg(@a);"),
 				new ExampleScript("Operator syntax", "@a = 5;\n"
 				+ "msg(@a++);\n"
-				+ "msg(@a);"),};
+				+ "msg(@a);")};
 		}
 
 	}
@@ -921,7 +921,7 @@ public class Math {
 				new ExampleScript("Demonstrates symbolic usage", "@x = 1;\n"
 				+ "msg(@x);\n"
 				+ "(--@x); // Note the use of parenthesis, which is required in this case, otherwise it applies to the previous operation\n"
-				+ "msg(@x);"),};
+				+ "msg(@x);")};
 		}
 
 	}
@@ -1047,7 +1047,7 @@ public class Math {
 				+ "msg(@a);"),
 				new ExampleScript("Operator syntax", "@a = 5;\n"
 				+ "msg(@a--);\n"
-				+ "msg(@a);"),};
+				+ "msg(@a);")};
 		}
 	}
 
@@ -2215,7 +2215,7 @@ public class Math {
 			return new ExampleScript[]{
 				new ExampleScript("Rounding up", "round(2.5)"),
 				new ExampleScript("Rounding down", "round(2.229)"),
-				new ExampleScript("Higher precision round", "round(2.229, 2)"),};
+				new ExampleScript("Higher precision round", "round(2.229, 2)")};
 		}
 
 		@Override
@@ -2497,7 +2497,7 @@ public class Math {
 			double r;
 			if(args.length == 1) {
 				r = java.lang.Math.log(val);
-			} else {// if(args.length == 2){
+			} else { // if(args.length == 2) {
 				r = java.lang.Math.log(val) / java.lang.Math.log(Static.getDouble(args[1], t));
 			}
 			return new CDouble(r, t);
@@ -2541,7 +2541,7 @@ public class Math {
 				new ExampleScript("log base 10", "logarithm(1000)"),
 				new ExampleScript("log base n", "logarithm(123, 3)"),
 				new ExampleScript("Error condition", "logarithm(0)", true),
-				new ExampleScript("Error condition", "logarithm(-1)", true),};
+				new ExampleScript("Error condition", "logarithm(-1)", true)};
 		}
 
 	}

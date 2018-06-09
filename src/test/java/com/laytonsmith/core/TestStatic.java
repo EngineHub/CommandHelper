@@ -66,7 +66,8 @@ public class TestStatic {
 			Static.getInt(C.Double(1.0), t);
 			fail("Should not have been able to parse 1.0 as an int");
 		} catch (ConfigRuntimeException e) {
-			/* Test Passed */ }
+			// Test Passed.
+		}
 	}
 
 	@Test

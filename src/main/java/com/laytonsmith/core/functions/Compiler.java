@@ -258,7 +258,7 @@ public class Compiler {
 					inSymbolMode = true;
 				}
 				if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isPostfix()) {
-					if(i - 1 >= 0) {// && list.get(i - 1).getData() instanceof IVariable) {
+					if(i - 1 >= 0) { // && list.get(i - 1).getData() instanceof IVariable) {
 						CSymbol sy = (CSymbol) node.getData();
 						ParseTree conversion;
 						if(sy.val().equals("++")) {

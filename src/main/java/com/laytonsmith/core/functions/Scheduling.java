@@ -612,7 +612,7 @@ public class Scheduling {
 				/* 10 */ new ExampleScript("Long format", "simple_date('EEE, d MMM yyyy HH:mm:ss Z')", ":Wed, 5 Jun 2013 11:42:56 -0500"),
 				/* 10 */ new ExampleScript("Long format with alternate locale", "simple_date('EEE, d MMM yyyy HH:mm:ss Z', 1444418254496, 'CET', 'no_NO')"),
 				/* 11 */ new ExampleScript("Computer readable format", "simple_date('yyMMddHHmmssZ')", ":130605114256-0500"),
-				/* 12 */ new ExampleScript("With milliseconds", "simple_date('yyyy-MM-dd\\'T\\'HH:mm:ss.SSSZ')", ":2013-06-05T11:42:56.799-0500"),};
+				/* 12 */ new ExampleScript("With milliseconds", "simple_date('yyyy-MM-dd\\'T\\'HH:mm:ss.SSSZ')", ":2013-06-05T11:42:56.799-0500")};
 		}
 	}
 

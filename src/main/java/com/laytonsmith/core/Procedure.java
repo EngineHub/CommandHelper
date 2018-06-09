@@ -184,7 +184,7 @@ public class Procedure implements Cloneable {
 			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, key, c, Target.UNKNOWN));
 			arguments.push(c, t);
 		}
-		Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel());//new Script(null, null);
+		Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel()); // new Script(null, null);
 		for(int i = 0; i < args.size(); i++) {
 			Construct c = args.get(i);
 			arguments.set(i, c, t);

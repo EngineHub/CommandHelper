@@ -56,7 +56,7 @@ public final class Profiler {
 			new Preference("write-to-screen", "false", Preferences.Type.BOOLEAN, "If true, will write results out to screen."),
 			new Preference("profile-log-threshold", "0.005", Preferences.Type.DOUBLE, "If a profile point took less than this amount of time (in ms) to run, it won't be logged. This is good for reducing data blindness"
 			+ " caused by too much data being displayed. Normally you only care about things that took longer than a certain amount, not things that took less than a certain amount. Setting this to 0"
-			+ " will trigger everything."),}));
+			+ " will trigger everything.")}));
 		Preferences prefs = new Preferences("CommandHelper", Static.getLogger(), defaults, "These settings control the integrated profiler");
 		prefs.init(initFile);
 		return prefs;

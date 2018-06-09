@@ -22,7 +22,7 @@ public final class Globals {
 	 * @param value The value itself
 	 */
 	public static synchronized void SetGlobal(String name, Construct value) {
-		Map<String, Construct> vars = global_construct;//(HashMap<String, Construct>)env.get("global_construct");
+		Map<String, Construct> vars = global_construct; // (HashMap<String, Construct>)env.get("global_construct");
 		if(value instanceof CNull) {
 			vars.remove(name);
 		} else {
@@ -38,7 +38,7 @@ public final class Globals {
 	 * @return the construct stored at this name, or CNull if none exists
 	 */
 	public static synchronized Construct GetGlobalConstruct(String name) {
-		Map<String, Construct> vars = global_construct;//(HashMap<String, Construct>)env.get("global_construct");
+		Map<String, Construct> vars = global_construct; // (HashMap<String, Construct>)env.get("global_construct");
 		return vars.getOrDefault(name, CNull.NULL);
 	}
 

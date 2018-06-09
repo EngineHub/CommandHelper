@@ -271,9 +271,9 @@ public class DocGenUI extends javax.swing.JFrame {
 		);
 
 		pack();
-	}// </editor-fold>//GEN-END:initComponents
+	} // </editor-fold>//GEN-END:initComponents
 
-	private void uploadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uploadButtonActionPerformed
+	private void uploadButtonActionPerformed(java.awt.event.ActionEvent evt) { // GEN-FIRST:event_uploadButtonActionPerformed
 		uploadButton.setText("Stop");
 		if(handler != null) {
 			handler.stop();
@@ -292,11 +292,11 @@ public class DocGenUI extends javax.swing.JFrame {
 				}
 			}, "UploadThread").start();
 		}
-	}//GEN-LAST:event_uploadButtonActionPerformed
+	} // GEN-LAST:event_uploadButtonActionPerformed
 
-	private void singleFunctionUploadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_singleFunctionUploadButtonActionPerformed
+	private void singleFunctionUploadButtonActionPerformed(java.awt.event.ActionEvent evt) { // GEN-FIRST:event_singleFunctionUploadButtonActionPerformed
 		// TODO add your handling code here:
-	}//GEN-LAST:event_singleFunctionUploadButtonActionPerformed
+	} // GEN-LAST:event_singleFunctionUploadButtonActionPerformed
 
 	/**
 	 * @param args the command line arguments

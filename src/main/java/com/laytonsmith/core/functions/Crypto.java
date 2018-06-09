@@ -137,7 +137,7 @@ public class Crypto {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "rot13('string')"),
-				new ExampleScript("Basic usage", "rot13('fgevat')"),};
+				new ExampleScript("Basic usage", "rot13('fgevat')")};
 		}
 
 	}
@@ -207,7 +207,7 @@ public class Crypto {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "md5('string')"),
-				new ExampleScript("Basic usage", "md5('String')"),};
+				new ExampleScript("Basic usage", "md5('String')")};
 		}
 	}
 
@@ -277,7 +277,7 @@ public class Crypto {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "sha1('string')"),
-				new ExampleScript("Basic usage", "sha1('String')"),};
+				new ExampleScript("Basic usage", "sha1('String')")};
 		}
 	}
 
@@ -346,7 +346,7 @@ public class Crypto {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "sha256('string')"),
-				new ExampleScript("Basic usage", "sha256('String')"),};
+				new ExampleScript("Basic usage", "sha256('String')")};
 		}
 
 	}
@@ -417,7 +417,7 @@ public class Crypto {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "sha512('string')"),
-				new ExampleScript("Basic usage", "sha512('String')"),};
+				new ExampleScript("Basic usage", "sha512('String')")};
 		}
 
 	}
@@ -493,7 +493,7 @@ public class Crypto {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "bcrypt('string')", ":$2a$05$aBMYDJAu6C3O.142N/n7yO6Dl3KC0L/zHUEZnOXQuaX13XUKec8Gy"),
-				new ExampleScript("Basic usage", "bcrypt('String')", ":$2a$05$jYm.4yath40V2DqjipWSje3Ed0ZNLO8IcDjIF50PJoPvWSmF1J7L2"),};
+				new ExampleScript("Basic usage", "bcrypt('String')", ":$2a$05$jYm.4yath40V2DqjipWSje3Ed0ZNLO8IcDjIF50PJoPvWSmF1J7L2")};
 		}
 
 	}
@@ -559,7 +559,7 @@ public class Crypto {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "assign(@plain, 'plaintext')\nassign(@hash, bcrypt(@plain))\n"
 				+ "msg(if(check_bcrypt(@plain, @hash), 'They match!', 'They do not match!'))\n"
-				+ "msg(if(check_bcrypt('notTheRightPassword', @hash), 'They match!', 'They do not match!'))"),};
+				+ "msg(if(check_bcrypt('notTheRightPassword', @hash), 'They match!', 'They do not match!'))")};
 		}
 
 	}
@@ -729,7 +729,7 @@ public class Crypto {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "hmac_md5('secret_key', 'string')"),};
+				new ExampleScript("Basic usage", "hmac_md5('secret_key', 'string')")};
 		}
 	}
 
@@ -788,7 +788,7 @@ public class Crypto {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "hmac_sha1('secret_key', 'string')"),};
+				new ExampleScript("Basic usage", "hmac_sha1('secret_key', 'string')")};
 		}
 	}
 
@@ -847,7 +847,7 @@ public class Crypto {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "hmac_sha256('secret_key', 'string')"),};
+				new ExampleScript("Basic usage", "hmac_sha256('secret_key', 'string')")};
 		}
 	}
 

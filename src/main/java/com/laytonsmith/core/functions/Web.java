@@ -388,8 +388,7 @@ public class Web {
 					Construct download = csettings.get("download", t);
 					if(download instanceof CNull) {
 						settings.setDownloadTo(null);
-					} else //TODO: Remove this check and tie into the VFS once that is complete.
-					{
+					} else { // TODO: Remove this check and tie into the VFS once that is complete.
 						if(Static.InCmdLine(environment)) {
 							File file = new File(download.val());
 							if(!file.isAbsolute()) {
@@ -1100,7 +1099,7 @@ public class Web {
 				+ "\t\t\tdisposition: 'inline', // Technically we could leave this off, because it defaults to inline\n"
 				+ "\t\t\tdescription: 'An image',\n"
 				+ "\t)\n"
-				+ ")));", "<Would send an html email, and the attached image would show up>"),};
+				+ ")));", "<Would send an html email, and the attached image would show up>")};
 		}
 
 	}

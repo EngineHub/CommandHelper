@@ -110,7 +110,7 @@ public class ArrayHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates usage", "array_size(array(1, 2, 3, 4, 5));"),};
+				new ExampleScript("Demonstrates usage", "array_size(array(1, 2, 3, 4, 5));")};
 		}
 
 		@Override
@@ -307,7 +307,7 @@ public class ArrayHandling {
 				new ExampleScript("Demonstrates exception", "msg(array()[1]);"),
 				new ExampleScript("Demonstrates basic functional usage", "msg(array_get(array(1, 2, 3), 2));"),
 				new ExampleScript("Demonstrates default (note that you cannot use the bracket syntax with this)",
-				"msg(array_get(array(), 1, 'default'));"),};
+				"msg(array_get(array(), 1, 'default'));")};
 		}
 
 		@Override
@@ -407,7 +407,7 @@ public class ArrayHandling {
 				"array @array = array(null);\n"
 				+ "msg(@array);\n"
 				+ "array_set(@array, 0, 'value0');\n"
-				+ "msg(@array);"),};
+				+ "msg(@array);")};
 		}
 	}
 
@@ -492,7 +492,7 @@ public class ArrayHandling {
 				"array @array = array();\n"
 				+ "msg(@array);\n"
 				+ "array_push(@array, 0, 1, 2);\n"
-				+ "msg(@array);"),};
+				+ "msg(@array);")};
 		}
 	}
 
@@ -711,7 +711,7 @@ public class ArrayHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'A')"),
 				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'a')"),
-				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'd')"),};
+				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'd')")};
 		}
 
 		@Override
@@ -956,7 +956,7 @@ public class ArrayHandling {
 				"array @array = array();\n"
 				+ "msg(@array);\n"
 				+ "array_resize(@array, 2, 'a');\n"
-				+ "msg(@array);"),};
+				+ "msg(@array);")};
 		}
 	}
 
@@ -1033,7 +1033,7 @@ public class ArrayHandling {
 				new ExampleScript("Complex usage", "range(0, 10)"),
 				new ExampleScript("With skips", "range(0, 10, 2)"),
 				new ExampleScript("Invalid input", "range(0, 10, -1)"),
-				new ExampleScript("In reverse", "range(10, 0, -1)"),};
+				new ExampleScript("In reverse", "range(10, 0, -1)")};
 		}
 
 		@Override
@@ -1101,7 +1101,7 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "array_keys(array('a', 'b', 'c'))"),
-				new ExampleScript("With associative array", "array_keys(array(one: 'a', two: 'b', three: 'c'))"),};
+				new ExampleScript("With associative array", "array_keys(array(one: 'a', two: 'b', three: 'c'))")};
 		}
 
 		@Override
@@ -1167,7 +1167,7 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "array_normalize(array(one: 'a', two: 'b', three: 'c'))"),
-				new ExampleScript("Usage with normal array", "array_normalize(array(1, 2, 3))"),};
+				new ExampleScript("Usage with normal array", "array_normalize(array(1, 2, 3))")};
 		}
 
 		@Override
@@ -1250,7 +1250,7 @@ public class ArrayHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "array_merge(array(1), array(2), array(3))"),
 				new ExampleScript("With associative arrays", "array_merge(array(one: 1), array(two: 2), array(three: 3))"),
-				new ExampleScript("With overwrites", "array_merge(array(one: 1), array(one: 2), array(one: 3))"),};
+				new ExampleScript("With overwrites", "array_merge(array(one: 1), array(one: 2), array(one: 3))")};
 		}
 
 		@Override
@@ -1324,7 +1324,7 @@ public class ArrayHandling {
 				new ExampleScript("Basic usage",
 				"assign(@array, array(1, 2, 3))\nmsg(array_remove(@array, 2))\nmsg(@array)"),
 				new ExampleScript("With associative array",
-				"assign(@array, array(one: 'a', two: 'b', three: 'c'))\nmsg(array_remove(@array, 'two'))\nmsg(@array)"),};
+				"assign(@array, array(one: 'a', two: 'b', three: 'c'))\nmsg(array_remove(@array, 'two'))\nmsg(@array)")};
 		}
 	}
 
@@ -1397,7 +1397,7 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "array_implode(array(1, 2, 3), '-')"),
-				new ExampleScript("With associative array", "array_implode(array(one: 'a', two: 'b', three: 'c'), '-')"),};
+				new ExampleScript("With associative array", "array_implode(array(one: 'a', two: 'b', three: 'c'), '-')")};
 		}
 	}
 
@@ -1450,7 +1450,7 @@ public class ArrayHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "array(1, 2, 3)[cslice(0, 1)]"),};
+				new ExampleScript("Basic usage", "array(1, 2, 3)[cslice(0, 1)]")};
 		}
 
 		@Override
@@ -1820,7 +1820,7 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage",
-				"assign(@array, array(1, 2, 2, 3))\nmsg(@array)\narray_remove_values(@array, 2)\nmsg(@array)"),};
+				"assign(@array, array(1, 2, 2, 3))\nmsg(@array)\narray_remove_values(@array, 2)\nmsg(@array)")};
 		}
 
 	}
@@ -1878,7 +1878,7 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 2))"),
-				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 5))"),};
+				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 5))")};
 		}
 
 		@Override
@@ -1942,7 +1942,7 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 2))"),
-				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 5))"),};
+				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 5))")};
 		}
 
 	}
@@ -2001,7 +2001,7 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_last_index(@array, 2))"),
-				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_last_index(@array, 5))"),};
+				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_last_index(@array, 5))")};
 		}
 
 	}
@@ -2153,7 +2153,7 @@ public class ArrayHandling {
 				new ExampleScript("Usage with a normal array, using getKeys false, and returning 2 results",
 				"assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array, 2, false))", "{b, c}"),
 				new ExampleScript("Usage with an associative array",
-				"assign(@array, array(one: 'a', two: 'b', three: 'c', four: 'd', five: 'e'))\nmsg(array_rand(@array))", "two"),};
+				"assign(@array, array(one: 'a', two: 'b', three: 'c', four: 'd', five: 'e'))\nmsg(array_rand(@array))", "two")};
 		}
 
 		@Override
@@ -2242,7 +2242,7 @@ public class ArrayHandling {
 				new ExampleScript("Basic usage", "array_unique(array(1, 2, 2, 3, 4))"),
 				new ExampleScript("No removal of different datatypes", "array_unique(array(1, '1'))"),
 				new ExampleScript("Removal of different datatypes, by setting compareTypes to false",
-				"array_unique(array(1, '1'), false)"),};
+				"array_unique(array(1, '1'), false)")};
 		}
 
 		@Override

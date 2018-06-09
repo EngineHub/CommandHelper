@@ -376,7 +376,7 @@ public class Exceptions {
 				// Can't automatically run this, since the examples don't have
 				// the exception handling fully working.
 				"Exception caught!\n"
-				+ "{RangeException, Division by 0!, /path/to/script.ms, 8}"),};
+				+ "{RangeException, Division by 0!, /path/to/script.ms, 8}")};
 		}
 
 	}

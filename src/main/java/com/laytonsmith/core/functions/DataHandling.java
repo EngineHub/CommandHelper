@@ -142,7 +142,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nmsg(@array)"),
-				new ExampleScript("Associative array creation", "assign(@array, array(one: 'apple', two: 'banana'))\nmsg(@array)"),};
+				new ExampleScript("Associative array creation", "assign(@array, array(one: 'apple', two: 'banana'))\nmsg(@array)")};
 		}
 
 		@Override
@@ -242,7 +242,7 @@ public class DataHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Usage with an empty array", "assign(@array, associative_array())\nmsg(is_associative(@array))"),
 				new ExampleScript("Usage with an array with sequential keys", "assign(@array, array(0: '0', 1: '1'))\nmsg(is_associative(@array))\n"
-				+ "assign(@array, associative_array(0: '0', 1: '1'))\nmsg(is_associative(@array))"),};
+				+ "assign(@array, associative_array(0: '0', 1: '1'))\nmsg(is_associative(@array))")};
 		}
 
 	}
@@ -407,7 +407,7 @@ public class DataHandling {
 				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable += 10;\nmsg(@variable);"),
 				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable -= 10;\nmsg(@variable);"),
 				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable *= 10;\nmsg(@variable);"),
-				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable /= 10;\nmsg(@variable);"),};
+				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable /= 10;\nmsg(@variable);")};
 		}
 	}
 
@@ -479,7 +479,7 @@ public class DataHandling {
 				new ExampleScript("With continue. (See continue() for more examples)", "for(assign(@i, 0), @i < 2, @i++){\n"
 				+ "\tif(@i == 1, continue())\n"
 				+ "\tmsg(@i)\n"
-				+ "}"),};
+				+ "}")};
 		}
 
 		@Override
@@ -875,7 +875,7 @@ public class DataHandling {
 				new ExampleScript("With braces", "assign(@array, array(1, 2, 3))\nforeach(@array, @i){\n\tmsg(@i)\n}"),
 				new ExampleScript("With a slice", "foreach(1..3, @i){\n\tmsg(@i)\n}"),
 				new ExampleScript("With a slice, counting down", "foreach(3..1, @i){\n\tmsg(@i)\n}"),
-				new ExampleScript("With array keys", "@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}"),};
+				new ExampleScript("With array keys", "@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}")};
 		}
 
 		@Override
@@ -1059,7 +1059,7 @@ public class DataHandling {
 				+ "    msg(@val)\n"
 				+ ", #else \n"
 				+ "    msg('No values in the array')\n"
-				+ ")"),};
+				+ ")")};
 		}
 
 	}
@@ -1150,7 +1150,7 @@ public class DataHandling {
 				+ "\tmsg(@i)\n"
 				+ "\t@i++\n"
 				+ "\tif(@i > 5, break())\n"
-				+ ")"),};
+				+ ")")};
 		}
 
 		@Override
@@ -1328,7 +1328,7 @@ public class DataHandling {
 				+ "\tfor(assign(@j, 0), @j < 1000, @j++,\n"
 				+ "\t\tbreak(3) #There are only 2 loops to break out of\n"
 				+ "\t)"
-				+ ")", true),};
+				+ ")", true)};
 		}
 
 		@Override
@@ -1417,7 +1417,7 @@ public class DataHandling {
 				new ExampleScript("Argument specified", "for(assign(@i, 0), @i < 5, @i++){\n"
 				+ "\tif(@i == 2, continue(2))\n"
 				+ "\tmsg(@i)\n"
-				+ "}"),};
+				+ "}")};
 		}
 	}
 
@@ -1477,7 +1477,7 @@ public class DataHandling {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_stringable('yes')"),
 				new ExampleScript("True condition", "is_stringable(1) #This can be used as a string, yes"),
-				new ExampleScript("False condition", "is_stringable(array(1))"),};
+				new ExampleScript("False condition", "is_stringable(array(1))")};
 		}
 	}
 
@@ -1537,7 +1537,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_string('yes')"),
-				new ExampleScript("False condition", "is_string(1) #is_stringable() would return true here"),};
+				new ExampleScript("False condition", "is_string(1) #is_stringable() would return true here")};
 		}
 	}
 
@@ -1597,7 +1597,7 @@ public class DataHandling {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_bytearray(string_get_bytes('yay'))"),
 				new ExampleScript("False condition", "is_bytearray('Nay')"),
-				new ExampleScript("False condition", "is_bytearray(123)"),};
+				new ExampleScript("False condition", "is_bytearray(123)")};
 		}
 	}
 
@@ -1657,7 +1657,7 @@ public class DataHandling {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_array(array(1))"),
 				new ExampleScript("True condition", "is_array(array(one: 1))"),
-				new ExampleScript("False condition", "is_array('no')"),};
+				new ExampleScript("False condition", "is_array('no')")};
 		}
 	}
 
@@ -1781,7 +1781,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_double(1.0)"),
-				new ExampleScript("False condition", "is_double(1)"),};
+				new ExampleScript("False condition", "is_double(1)")};
 		}
 	}
 
@@ -1842,7 +1842,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_integer(1)"),
-				new ExampleScript("False condition", "is_integer(1.0)"),};
+				new ExampleScript("False condition", "is_integer(1.0)")};
 		}
 	}
 
@@ -1902,7 +1902,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_boolean(false)"),
-				new ExampleScript("False condition", "is_boolean(0)"),};
+				new ExampleScript("False condition", "is_boolean(0)")};
 		}
 	}
 
@@ -1961,7 +1961,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_null(null)"),
-				new ExampleScript("False condition", "is_null(0)"),};
+				new ExampleScript("False condition", "is_null(0)")};
 		}
 	}
 
@@ -2031,7 +2031,7 @@ public class DataHandling {
 				new ExampleScript("True condition", "is_numeric(1)"),
 				new ExampleScript("True condition", "is_numeric(1.5)"),
 				new ExampleScript("False condition", "is_numeric('string')"),
-				new ExampleScript("True condition, because null is coerced to 0.0, which is numeric.", "is_numeric(null)"),};
+				new ExampleScript("True condition, because null is coerced to 0.0, which is numeric.", "is_numeric(null)")};
 		}
 	}
 
@@ -2105,7 +2105,7 @@ public class DataHandling {
 				new ExampleScript("True condition", "is_integral('5.0')"),
 				new ExampleScript("True condition", "is_integral('6')"),
 				new ExampleScript("False condition", "is_integral(1.5)"),
-				new ExampleScript("True condition, because null is coerced to 0, which is integral", "is_integral(null)"),};
+				new ExampleScript("True condition, because null is coerced to 0, which is integral", "is_integral(null)")};
 		}
 	}
 
@@ -2679,7 +2679,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_associative(array(one: 1, two: 2))"),
-				new ExampleScript("False condition", "is_associative(array(1, 2, 3))"),};
+				new ExampleScript("False condition", "is_associative(array(1, 2, 3))")};
 		}
 	}
 
@@ -2731,7 +2731,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_closure(closure(msg('code')))"),
-				new ExampleScript("False condition", "is_closure('a string')"),};
+				new ExampleScript("False condition", "is_closure('a string')")};
 		}
 	}
 
@@ -3353,7 +3353,7 @@ public class DataHandling {
 				new ExampleScript("Basic usage", "boolean(array())"),
 				new ExampleScript("Basic usage", "boolean(null)"),
 				new ExampleScript("Basic usage", "boolean('string')"),
-				new ExampleScript("Basic usage", "boolean('')"),};
+				new ExampleScript("Basic usage", "boolean('')")};
 		}
 	}
 
@@ -3418,7 +3418,7 @@ public class DataHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "integer(1.0)"),
 				new ExampleScript("Basic usage", "integer(1.5)"),
-				new ExampleScript("Failure", "assign(@var, 'string')\ninteger(@var)"),};
+				new ExampleScript("Failure", "assign(@var, 'string')\ninteger(@var)")};
 		}
 	}
 
@@ -3479,7 +3479,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "double(1)"),
-				new ExampleScript("Failure", "@var = 'string';\ndouble(@var);"),};
+				new ExampleScript("Failure", "@var = 'string';\ndouble(@var);")};
 		}
 	}
 
@@ -3549,7 +3549,7 @@ public class DataHandling {
 				new ExampleScript("Basic usage", "string(false)"),
 				new ExampleScript("Basic usage", "string(null)"),
 				new ExampleScript("Basic usage", "string(array(1, 2))"),
-				new ExampleScript("Basic usage", "string(array(one: 'one', two: 'two'))"),};
+				new ExampleScript("Basic usage", "string(array(one: 'one', two: 'two'))")};
 		}
 	}
 
@@ -3766,7 +3766,7 @@ public class DataHandling {
 				new ExampleScript("Basic usage, typeof string", "typeof('value')"),
 				new ExampleScript("Basic usage, typeof int", "typeof(1)"),
 				new ExampleScript("Basic usage, typeof double", "typeof(1.0)"),
-				new ExampleScript("Basic usage, typeof closure", "typeof(closure(){ msg('test') })"),};
+				new ExampleScript("Basic usage, typeof closure", "typeof(closure(){ msg('test') })")};
 		}
 
 		@Override

@@ -174,7 +174,7 @@ public class NewExceptionHandlingTest {
 	}
 
 	@Test
-	public void testExceptionTypeIsCorrectInMulticatch () throws Exception {
+	public void testExceptionTypeIsCorrectInMulticatch() throws Exception {
 		SRun("try { throw(CastException, ''); } catch (CastException @e){ msg('run'); } catch (IOException @e){ msg('no run'); }", fakePlayer);
 		SRun("try { throw(IOException, ''); } catch (CastException @e){ msg('no run'); } catch (IOException @e){ msg('run'); }", fakePlayer);
 		verify(fakePlayer, times(2)).sendMessage("run");

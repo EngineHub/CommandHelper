@@ -28,7 +28,7 @@ public class NonInheritImplementsTest {
 		assertTrue(a1 == b1);
 	}
 
-	@Test(expected=ClassCastException.class)
+	@Test(expected = ClassCastException.class)
 	public void testNormalFailsCorrectly1() throws Exception {
 		assertThat(NonInheritImplements.Helper.Instanceof(new A1(), NonInheritImplements.class), is(false));
 		NonInheritImplements.Helper.Cast(NonInheritImplements.class, this);

@@ -181,7 +181,7 @@ public class TextDialog extends javax.swing.JDialog {
 		);
 
 		pack();
-	}// </editor-fold>//GEN-END:initComponents
+	} // </editor-fold>//GEN-END:initComponents
 
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {

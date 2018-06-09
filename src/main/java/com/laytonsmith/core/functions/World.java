@@ -1690,7 +1690,7 @@ public class World {
 				"{0: 0.0, 1: 64.0, 2: 1.0, 3: world, 4: 0.0, 5: 90.0, x: 0.0, y: 64.0, z: 1.0, world: world, yaw: 0.0, pitch: 90.0}"),
 				new ExampleScript("Using a direction to get the block 2 meters above the player's targeted block.",
 				"location_shift(pcursor(), 'UP', 2)",
-				"{0: 0.0, 1: 66.0, 2: 0.0, 3: world, 4: 0.0, 5: 0.0, x: 0.0, y: 66.0, z: 0.0, world: world, yaw: 0.0, pitch: 0.0}"),};
+				"{0: 0.0, 1: 66.0, 2: 0.0, 3: world, 4: 0.0, 5: 0.0, x: 0.0, y: 66.0, z: 0.0, world: world, yaw: 0.0, pitch: 0.0}")};
 		}
 	}
 

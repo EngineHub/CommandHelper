@@ -260,7 +260,8 @@ public class SQL {
 											value = CNull.NULL;
 										} else {
 											value = new CInt(rs.getTimestamp(i).getTime(), t);
-										}	break;
+										}
+										break;
 									case Types.BOOLEAN:
 									case Types.BIT:
 										value = CBoolean.get(rs.getBoolean(i));

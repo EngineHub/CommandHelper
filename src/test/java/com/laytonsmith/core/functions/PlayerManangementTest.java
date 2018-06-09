@@ -118,7 +118,7 @@ public class PlayerManangementTest {
 		Run("set_ploc(1, 1, 1)", fakePlayer);
 		//when(StaticLayer.GetLocation(w, 1, 2, 1)).thenReturn(loc);
 		MCLocation loc1 = StaticTest.GetFakeLocation(w, 1, 2, 1);
-		assertEquals(fakePlayer.getLocation().getX(), loc1.getX(), 0.00000000000001);//verify(fakePlayer).teleport(loc1);
+		assertEquals(fakePlayer.getLocation().getX(), loc1.getX(), 0.00000000000001); // verify(fakePlayer).teleport(loc1);
 
 		Run("set_ploc(array(2, 2, 2))", fakePlayer);
 		verify(fakePlayer).teleport(StaticLayer.GetLocation(w, 2, 3, 2, 0, 0));

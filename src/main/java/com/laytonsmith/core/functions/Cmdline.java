@@ -367,7 +367,7 @@ public class Cmdline {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "#Causes the JVM to exit with an exit code of 0\nexit(0)", ""),
-				new ExampleScript("Basic usage", "#Causes the JVM to exit with an exit code of 1\nexit(1)", ""),};
+				new ExampleScript("Basic usage", "#Causes the JVM to exit with an exit code of 1\nexit(1)", "")};
 		}
 	}
 
@@ -454,7 +454,7 @@ public class Cmdline {
 			return new ExampleScript[]{
 				new ExampleScript("Gets all properties", "array_size(sys_properties())"),
 				new ExampleScript("Gets a single property", "sys_properties('java.specification.vendor')"),
-				new ExampleScript("Gets a single property", "sys_properties('methodscript.preference.debug-mode')"),};
+				new ExampleScript("Gets a single property", "sys_properties('methodscript.preference.debug-mode')")};
 		}
 	}
 
@@ -1266,7 +1266,7 @@ public class Cmdline {
 			return new com.laytonsmith.core.functions.ExampleScript[]{
 				new com.laytonsmith.core.functions.ExampleScript("Basic usage with array", "shell(array('grep', '-r', 'search content', '*'))", "<output of command>"),
 				new com.laytonsmith.core.functions.ExampleScript("Basic usage with string", "shell('grep -r \"search content\" *')", "<output of command>"),
-				new com.laytonsmith.core.functions.ExampleScript("Changing the working directory", "shell('grep -r \"search content\" *', array(workingDir: '/'))", "<output of command>"),};
+				new com.laytonsmith.core.functions.ExampleScript("Changing the working directory", "shell('grep -r \"search content\" *', array(workingDir: '/'))", "<output of command>")};
 		}
 
 	}

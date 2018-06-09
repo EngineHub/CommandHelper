@@ -1026,21 +1026,15 @@ public class BukkitPlayerEvents {
 			return threshold;
 		}
 
-		;
-
 		@Override
 		public MCLocation getFrom() {
 			return new BukkitMCLocation(from);
 		}
 
-		;
-
 		@Override
 		public MCLocation getTo() {
 			return new BukkitMCLocation(pme.getTo());
 		}
-
-		;
 
 		@Override
 		public boolean isCancelled() {

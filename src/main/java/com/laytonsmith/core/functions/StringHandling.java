@@ -126,7 +126,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "concat('1', '2', '3', '4')"),
-				new ExampleScript("Symbolic usage", "'1' . '2' . '3' . '4'"),};
+				new ExampleScript("Symbolic usage", "'1' . '2' . '3' . '4'")};
 		}
 
 		@Override
@@ -257,7 +257,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "sconcat('1', '2', '3', '4')"),
-				new ExampleScript("Implied usage, due to no operators", "'1' '2' '3' '4'"),};
+				new ExampleScript("Implied usage, due to no operators", "'1' '2' '3' '4'")};
 		}
 
 		@Override
@@ -318,7 +318,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("", "replace('Where in the world is Carmen Sandiego?', 'Carmen Sandiego', 'Waldo')"),
-				new ExampleScript("No match found", "replace('The same thing', 'not found', '404')"),};
+				new ExampleScript("No match found", "replace('The same thing', 'not found', '404')")};
 		}
 
 		@Override
@@ -459,7 +459,7 @@ public class StringHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("", "'->' . trim('    <- spaces ->    ') . '<-'"),};
+				new ExampleScript("", "'->' . trim('    <- spaces ->    ') . '<-'")};
 		}
 
 		@Override
@@ -516,7 +516,7 @@ public class StringHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("", "'->' . trimr('    <- spaces ->    ') . '<-'"),};
+				new ExampleScript("", "'->' . trimr('    <- spaces ->    ') . '<-'")};
 		}
 
 		@Override
@@ -573,7 +573,7 @@ public class StringHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("", "'->' . triml('    <- spaces ->    ') . '<-'"),};
+				new ExampleScript("", "'->' . triml('    <- spaces ->    ') . '<-'")};
 		}
 
 		@Override
@@ -635,7 +635,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Strings", "length('this is a string')"),
-				new ExampleScript("Arrays", "length(array('1', 2, '3', 4))"),};
+				new ExampleScript("Arrays", "length(array('1', 2, '3', 4))")};
 		}
 
 		@Override
@@ -698,7 +698,7 @@ public class StringHandling {
 			return new ExampleScript[]{
 				new ExampleScript("", "to_upper('uppercase')"),
 				new ExampleScript("", "to_upper('MiXeD cAsE')"),
-				new ExampleScript("", "to_upper('Numbers (and SYMBOLS: 25)')"),};
+				new ExampleScript("", "to_upper('Numbers (and SYMBOLS: 25)')")};
 		}
 
 		@Override
@@ -761,7 +761,7 @@ public class StringHandling {
 			return new ExampleScript[]{
 				new ExampleScript("", "to_lower('LOWERCASE')"),
 				new ExampleScript("", "to_lower('MiXeD cAsE')"),
-				new ExampleScript("", "to_lower('Numbers (and SYMBOLS: 25)')"),};
+				new ExampleScript("", "to_lower('Numbers (and SYMBOLS: 25)')")};
 		}
 
 		@Override
@@ -836,7 +836,7 @@ public class StringHandling {
 				new ExampleScript("", "substr('hamburger', 4, 8)"),
 				new ExampleScript("", "substr('smiles', 1, 5)"),
 				new ExampleScript("", "substr('lightning', 5)"),
-				new ExampleScript("If the indexes are too large", "assign(@big, 25)\nsubstr('small', @big)"),};
+				new ExampleScript("If the indexes are too large", "assign(@big, 25)\nsubstr('small', @big)")};
 		}
 
 		@Override
@@ -1057,7 +1057,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "char_is_uppercase('a')"),
-				new ExampleScript("Basic usage", "char_is_uppercase('D')"),};
+				new ExampleScript("Basic usage", "char_is_uppercase('D')")};
 		}
 	}
 
@@ -1114,7 +1114,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "string_position('this is the string', 'string')"),
-				new ExampleScript("String not found", "string_position('Where\\'s Waldo?', 'Dunno.')"),};
+				new ExampleScript("String not found", "string_position('Where\\'s Waldo?', 'Dunno.')")};
 		}
 
 		@Override
@@ -1729,7 +1729,7 @@ public class StringHandling {
 				new ExampleScript("Other formatting: plain string", "lsprintf('en_US', '%s', 'plain string')"),
 				new ExampleScript("Other formatting: boolean", "lsprintf('en_US', '%b', 1)"),
 				new ExampleScript("Other formatting: boolean (with capitalization)", "lsprintf('en_US', '%B', 0)"),
-				new ExampleScript("Other formatting: hash code", "lsprintf('en_US', '%h', 'will be hashed')"),};
+				new ExampleScript("Other formatting: hash code", "lsprintf('en_US', '%h', 'will be hashed')")};
 		}
 
 	}
@@ -1786,7 +1786,7 @@ public class StringHandling {
 				new ExampleScript("Other formatting: plain string", "sprintf('%s', 'plain string')"),
 				new ExampleScript("Other formatting: boolean", "sprintf('%b', 1)"),
 				new ExampleScript("Other formatting: boolean (with capitalization)", "sprintf('%B', 0)"),
-				new ExampleScript("Other formatting: hash code", "sprintf('%h', 'will be hashed')"),};
+				new ExampleScript("Other formatting: hash code", "sprintf('%h', 'will be hashed')")};
 		}
 
 	}

@@ -83,9 +83,9 @@ public class SingleFunctionDialog extends javax.swing.JDialog {
 		);
 
 		pack();
-	}// </editor-fold>//GEN-END:initComponents
+	} // </editor-fold>//GEN-END:initComponents
 
-	private void uploadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uploadButtonActionPerformed
+	private void uploadButtonActionPerformed(java.awt.event.ActionEvent evt) { // GEN-FIRST:event_uploadButtonActionPerformed
 		Function f;
 		try {
 			f = (Function) FunctionList.getFunction(functionNameField.getText(), Target.UNKNOWN);
@@ -105,7 +105,7 @@ public class SingleFunctionDialog extends javax.swing.JDialog {
 			return;
 		}
 
-	}//GEN-LAST:event_uploadButtonActionPerformed
+	} // GEN-LAST:event_uploadButtonActionPerformed
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JTextField functionNameField;
