@@ -1379,7 +1379,6 @@ public class ObjectGenerator {
 		switch(recipeType) {
 			case SHAPED:
 				CArray shaped = Static.getArray(recipe.get("shape", t), t);
-				;
 				String[] shape = new String[(int) shaped.size()];
 				if(shaped.size() < 1 || shaped.size() > 3 || shaped.inAssociativeMode()) {
 					throw new CREFormatException("Shape array is invalid.", t);

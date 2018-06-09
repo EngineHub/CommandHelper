@@ -4624,7 +4624,7 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(args.length == 1) {;
+			if(args.length == 1) {
 				p = Static.GetPlayer(args[0].val(), t);
 			}
 			Static.AssertPlayerNonNull(p, t);
