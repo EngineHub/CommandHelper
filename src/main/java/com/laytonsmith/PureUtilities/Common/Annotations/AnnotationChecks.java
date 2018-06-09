@@ -161,7 +161,7 @@ public class AnnotationChecks {
 							+ " implement the method public " + im.getReturnType().getSimpleName() + " " + im.getName() + "(";
 					List<String> params = new ArrayList<>();
 					msg += StringUtils.Join(im.getParameters(), ", ", ", ", ", ", "", (Object item) -> {
-						Parameter ci = (Parameter)item;
+						Parameter ci = (Parameter) item;
 						return ci.getType().getSimpleName() + " " + ci.getName();
 					});
 					msg += ") {}";

@@ -354,7 +354,7 @@ public class Federation {
 //								// Else, we need to ask the server for a port, then listen on that port.
 //								int port;
 //								Socket masterSocket = new Socket("localhost", master_port);
-//								try (
+//								try(
 //										OutputStream os = masterSocket.getOutputStream();
 //										InputStream is = new BufferedInputStream(masterSocket.getInputStream());
 //										PrintWriter out = new PrintWriter(os, true);

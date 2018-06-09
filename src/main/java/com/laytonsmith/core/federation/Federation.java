@@ -249,7 +249,7 @@ public class Federation {
 //
 //	@SuppressWarnings("ConvertToStringSwitch")
 //	private static void HandleConnection(PersistenceNetwork pn, Socket s) throws IOException {
-//		try (
+//		try(
 //				BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream(), "UTF-8"));
 //				PrintWriter out = new PrintWriter(s.getOutputStream(), true);) {
 //			FederationVersion version;

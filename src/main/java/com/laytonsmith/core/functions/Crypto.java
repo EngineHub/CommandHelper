@@ -60,7 +60,7 @@ public class Crypto {
 	private static byte[] getByteArrayFromArg(Construct c) {
 		byte[] val;
 		if(c instanceof CSecureString) {
-			val = ArrayUtils.charToBytes(((CSecureString)c).getDecryptedCharArray());
+			val = ArrayUtils.charToBytes(((CSecureString) c).getDecryptedCharArray());
 		} else {
 			val = c.val().getBytes();
 		}
@@ -449,7 +449,7 @@ public class Crypto {
 			try {
 				String val;
 				if(args[0] instanceof CSecureString) {
-					val = new String(((CSecureString)args[0]).getDecryptedCharArray());
+					val = new String(((CSecureString) args[0]).getDecryptedCharArray());
 				} else {
 					val = args[0].val();
 				}
@@ -520,7 +520,7 @@ public class Crypto {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String val;
 			if(args[0] instanceof CSecureString) {
-				val = new String(((CSecureString)args[0]).getDecryptedCharArray());
+				val = new String(((CSecureString) args[0]).getDecryptedCharArray());
 			} else {
 				val = args[0].val();
 			}
