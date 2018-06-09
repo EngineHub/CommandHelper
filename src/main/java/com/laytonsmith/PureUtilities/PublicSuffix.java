@@ -88,7 +88,7 @@ import java.util.regex.Pattern;
  *
  * @author stack
  */
-public class PublicSuffix {
+public final class PublicSuffix {
 
 	private final SubdomainNode root = new SubdomainNode(false, false);
 	private static final String WILDCARD = "*";

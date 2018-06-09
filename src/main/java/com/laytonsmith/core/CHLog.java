@@ -19,7 +19,7 @@ import java.util.List;
  * to the debug log file.
  *
  */
-public class CHLog {
+public final class CHLog {
 
 	private CHLog() {
 	}

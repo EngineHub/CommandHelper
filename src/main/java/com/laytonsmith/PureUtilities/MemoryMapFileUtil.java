@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  *
  *
  */
-public class MemoryMapFileUtil {
+public final class MemoryMapFileUtil {
 
 	private static final Map<String, MemoryMapFileUtil> instances = new HashMap<>();
 	/**

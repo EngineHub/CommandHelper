@@ -3,7 +3,7 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCColor;
 import org.bukkit.Color;
 
-public class BukkitMCColor implements MCColor {
+public final class BukkitMCColor implements MCColor {
 
 	private static final BukkitMCColor builder = new BukkitMCColor();
 

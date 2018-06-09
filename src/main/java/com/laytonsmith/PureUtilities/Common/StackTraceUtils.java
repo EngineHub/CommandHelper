@@ -8,7 +8,7 @@ import java.io.Writer;
  *
  *
  */
-public class StackTraceUtils {
+public final class StackTraceUtils {
 
 	private StackTraceUtils() {
 	}

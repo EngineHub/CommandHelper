@@ -16,7 +16,7 @@ import java.util.WeakHashMap;
  * source itself is threadsafe, as incompatible code will be able to bypass restrictions, but all code that uses this
  * class can ensure that amongst those classes, the accesses will be threadsafe.
  */
-public class ThreadsafeDataSource implements DataSource {
+public final class ThreadsafeDataSource implements DataSource {
 
 	private static final WeakHashMap<Pair<URI, ConnectionMixinFactory.ConnectionMixinOptions>, ThreadsafeDataSource> sources
 			= new WeakHashMap<>();

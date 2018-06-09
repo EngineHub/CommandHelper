@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * The SimpleSyntaxHighlighter class contains a method to do HTML syntax highlighting on a given block of plain text
  * code.
  */
-public class SimpleSyntaxHighlighter {
+public final class SimpleSyntaxHighlighter {
 
 	public static void main(String[] args) throws Exception {
 		String script = "<!\nstrict: on;\n>";

@@ -79,7 +79,7 @@ import org.json.simple.JSONValue;
  *
  * @author cailin
  */
-public class SiteDeploy {
+public final class SiteDeploy {
 
 	private static final String USERNAME = "username";
 	private static final String HOSTNAME = "hostname";

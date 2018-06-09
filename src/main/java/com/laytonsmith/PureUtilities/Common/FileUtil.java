@@ -19,7 +19,7 @@ import org.mozilla.intl.chardet.nsPSMDetector;
 /**
  *
  */
-public class FileUtil {
+public final class FileUtil {
 
 	private FileUtil() {
 	}

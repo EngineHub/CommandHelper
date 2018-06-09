@@ -20,7 +20,7 @@ import java.util.TreeSet;
  *
  */
 @typeof("ClassType")
-public class CClassType extends Construct {
+public final class CClassType extends Construct {
 
 	private static final Map<String, CClassType> cache = new HashMap<>();
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")

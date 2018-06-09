@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * way, ultimately retrieving java objects from the arguments. Many of these methods were originally from the Static
  * class, but have been moved into this class, which better groups them together.
  */
-public class ArgumentValidation {
+public final class ArgumentValidation {
 
 	private ArgumentValidation() {
 		//

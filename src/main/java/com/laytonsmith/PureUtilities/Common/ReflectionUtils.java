@@ -15,7 +15,7 @@ import java.util.Set;
  *
  *
  */
-public class ReflectionUtils {
+public final class ReflectionUtils {
 
 	private ReflectionUtils() {
 	}

@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  *
  *
  */
-public class SSHWrapper {
+public final class SSHWrapper {
 
 	private SSHWrapper() {
 	}

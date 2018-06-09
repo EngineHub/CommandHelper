@@ -209,7 +209,7 @@ public class ArgumentSuite {
 		}
 	}
 
-	public static class ArgumentSuiteResults {
+	public static final class ArgumentSuiteResults {
 
 		private final ArgumentParser mode;
 		private final ArgumentParserResults results;

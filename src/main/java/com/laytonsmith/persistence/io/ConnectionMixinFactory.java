@@ -14,7 +14,7 @@ import java.util.Set;
  * this class grabs the appropriate mixin based on the original URI.
  *
  */
-public class ConnectionMixinFactory {
+public final class ConnectionMixinFactory {
 
 	private ConnectionMixinFactory() {
 	}

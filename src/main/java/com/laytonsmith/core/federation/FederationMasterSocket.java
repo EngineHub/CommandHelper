@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  * machine has the master socket for a given port. This class manages having a master socket running for each listening
  * port, but only if needed.
  */
-public class FederationMasterSocket {
+public final class FederationMasterSocket {
 
 	private static FederationMasterSocket defaultInstance;
 

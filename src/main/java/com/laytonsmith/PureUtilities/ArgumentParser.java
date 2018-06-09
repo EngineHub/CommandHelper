@@ -12,7 +12,7 @@ import java.util.List;
  * argument is present.
  *
  */
-public class ArgumentParser {
+public final class ArgumentParser {
 
 	/**
 	 * A description of the command itself.
@@ -58,7 +58,7 @@ public class ArgumentParser {
 		return null;
 	}
 
-	private class Argument {
+	private final class Argument {
 
 		Character shortArg;
 		String longArg;
@@ -212,7 +212,7 @@ public class ArgumentParser {
 	private ArgumentParser() {
 	}
 
-	public static class ValidationException extends Exception {
+	public static final class ValidationException extends Exception {
 
 		private ValidationException(String string) {
 			super(string);

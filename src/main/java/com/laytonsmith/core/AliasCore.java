@@ -627,7 +627,7 @@ public class AliasCore {
 
 	public static class LocalPackage {
 
-		public static class FileInfo {
+		public static final class FileInfo {
 
 			String contents;
 			File file;
