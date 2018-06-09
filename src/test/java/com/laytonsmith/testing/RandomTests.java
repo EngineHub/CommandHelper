@@ -82,7 +82,7 @@ public class RandomTests {
 		fakePlayer = StaticTest.GetOnlinePlayer();
 		StaticTest.InstallFakeConvertor(fakePlayer);
 	}
-	private static final Set<String> testedFunctions = new TreeSet<>();
+	private static final Set<String> TESTED_FUNCTIONS = new TreeSet<>();
 
 	/**
 	 * This function automatically tests all the boilerplate portions of all functions. Note that this can be disabled
@@ -124,10 +124,10 @@ public class RandomTests {
 
 		for(FunctionBase f : FunctionList.getFunctionList(null)) {
 			try {
-				if(testedFunctions.contains(f.getName())) {
+				if(TESTED_FUNCTIONS.contains(f.getName())) {
 					continue;
 				}
-				testedFunctions.add(f.getName());
+				TESTED_FUNCTIONS.add(f.getName());
 
 				StaticTest.TestBoilerplate(f, f.getName());
 				Class upper = f.getClass().getEnclosingClass();

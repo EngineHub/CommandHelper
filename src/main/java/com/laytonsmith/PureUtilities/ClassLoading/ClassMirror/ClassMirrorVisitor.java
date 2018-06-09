@@ -160,9 +160,9 @@ public class ClassMirrorVisitor extends ClassVisitor {
 		for(Type type : Type.getArgumentTypes(desc)) {
 			parameterMirrors.add(new ClassReferenceMirror(type.getDescriptor()));
 		}
-		AbstractMethodMirror _methodMirror;
+		AbstractMethodMirror methodMirror;
 		if(ConstructorMirror.INIT.equals(name)) {
-			_methodMirror = new ConstructorMirror(
+			methodMirror = new ConstructorMirror(
 					classInfo.classReferenceMirror,
 					new ModifierMirror(ModifierMirror.Type.METHOD, access),
 					new ClassReferenceMirror(Type.getReturnType(desc).getDescriptor()),
@@ -172,7 +172,7 @@ public class ClassMirrorVisitor extends ClassVisitor {
 					(access & ACC_SYNTHETIC) == ACC_SYNTHETIC
 			);
 		} else {
-			_methodMirror = new MethodMirror(
+			methodMirror = new MethodMirror(
 					classInfo.classReferenceMirror,
 					new ModifierMirror(ModifierMirror.Type.METHOD, access),
 					new ClassReferenceMirror(Type.getReturnType(desc).getDescriptor()),
@@ -182,7 +182,7 @@ public class ClassMirrorVisitor extends ClassVisitor {
 					(access & ACC_SYNTHETIC) == ACC_SYNTHETIC
 			);
 		}
-		final AbstractMethodMirror methodMirror = _methodMirror;
+		final AbstractMethodMirror finalMethodMirror = methodMirror;
 		return new MethodVisitor(ASM5, super.visitMethod(access, name, desc, signature, exceptions)) {
 			@Override
 			public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
@@ -190,14 +190,14 @@ public class ClassMirrorVisitor extends ClassVisitor {
 				return new AnnotationMirrorVisitor(super.visitAnnotation(desc, visible), annotationMirror) {
 					@Override
 					public void visitEnd() {
-						methodMirror.addAnnotation(annotationMirror);
+						finalMethodMirror.addAnnotation(annotationMirror);
 					}
 				};
 			}
 
 			@Override
 			public void visitEnd() {
-				classInfo.methods.add(methodMirror);
+				classInfo.methods.add(finalMethodMirror);
 				super.visitEnd();
 			}
 		};

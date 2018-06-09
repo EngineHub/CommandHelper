@@ -209,13 +209,13 @@ public class StaticTest {
 		//TODO
 	}
 
-	private static final ArrayList<String> tested = new ArrayList<String>();
+	private static final ArrayList<String> TESTED = new ArrayList<String>();
 
 	public static void TestExec(Function f, MCCommandSender p, String commandType) throws Exception {
-		if(tested.contains(f.getName() + String.valueOf(p))) {
+		if(TESTED.contains(f.getName() + String.valueOf(p))) {
 			return;
 		}
-		tested.add(f.getName() + String.valueOf(p));
+		TESTED.add(f.getName() + String.valueOf(p));
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(p);
 		//See if the function throws something other than a ConfigRuntimeException or CancelCommandException if we send it bad arguments,
 		//keeping in mind of course, that it isn't supposed to be able to accept the wrong number of arguments. Specifically, we want to try

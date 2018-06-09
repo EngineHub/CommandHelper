@@ -334,7 +334,8 @@ public class ServerEvents {
 		}
 	}
 
-	private static final Map<MCLocation, Boolean> redstoneMonitors = Collections.synchronizedMap(new HashMap<MCLocation, Boolean>());
+	private static final Map<MCLocation, Boolean> REDSTONE_MONITORS =
+			Collections.synchronizedMap(new HashMap<MCLocation, Boolean>());
 
 	/**
 	 * Returns a synchronized set of redstone monitors. When iterating on the list, be sure to synchronize manually.
@@ -342,7 +343,7 @@ public class ServerEvents {
 	 * @return
 	 */
 	public static Map<MCLocation, Boolean> getRedstoneMonitors() {
-		return redstoneMonitors;
+		return REDSTONE_MONITORS;
 	}
 
 	@api
@@ -350,7 +351,7 @@ public class ServerEvents {
 
 		@Override
 		public void hook() {
-			redstoneMonitors.clear();
+			REDSTONE_MONITORS.clear();
 		}
 
 		@Override

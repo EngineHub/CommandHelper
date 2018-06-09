@@ -96,13 +96,14 @@ public final class Static {
 	private Static() {
 	}
 
-	private static final Logger logger = Logger.getLogger("CommandHelper");
+	private static final Logger LOGGER = Logger.getLogger("CommandHelper");
 
-	private static final Map<String, String> hostCache = new HashMap<String, String>();
+	private static final Map<String, String> HOST_CACHE = new HashMap<String, String>();
 
-	private static final String consoleName = "~console";
+	private static final String CONSOLE_NAME = "~console";
 
-	private static final String blockPrefix = "#"; // Chosen over @ because that does special things when used by the block
+	// Chosen over @ because that does special things when used by the block.
+	private static final String BLOCK_PREFIX = "#";
 
 	/**
 	 * In case the API being used doesn't support permission groups, a permission node in the format
@@ -330,7 +331,7 @@ public final class Static {
 	 * @return
 	 */
 	public static Logger getLogger() {
-		return logger;
+		return LOGGER;
 	}
 
 	/**
@@ -598,7 +599,7 @@ public final class Static {
 	 * @return
 	 */
 	public static String getConsoleName() {
-		return consoleName;
+		return CONSOLE_NAME;
 	}
 
 	/**
@@ -607,7 +608,7 @@ public final class Static {
 	 * @return
 	 */
 	public static String getBlockPrefix() {
-		return blockPrefix;
+		return BLOCK_PREFIX;
 	}
 
 	/**
@@ -669,7 +670,7 @@ public final class Static {
 		return b.getTypeId() + (data == 0 ? "" : ":" + Byte.toString(data));
 	}
 
-	private static final Map<String, MCCommandSender> injectedPlayers = new HashMap<>();
+	private static final Map<String, MCCommandSender> INJECTED_PLAYERS = new HashMap<>();
 	private static MCEntity injectedEntity;
 	private static final Pattern DASHLESS_PATTERN = Pattern.compile("^([A-Fa-f0-9]{8})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{12})$");
 
@@ -795,9 +796,9 @@ public final class Static {
 	 */
 	public static MCCommandSender GetCommandSender(String player, Target t) throws ConfigRuntimeException {
 		MCCommandSender m = null;
-		if(injectedPlayers.containsKey(player)) {
-			m = injectedPlayers.get(player);
-		} else if(consoleName.equals(player)) {
+		if(INJECTED_PLAYERS.containsKey(player)) {
+			m = INJECTED_PLAYERS.get(player);
+		} else if(CONSOLE_NAME.equals(player)) {
 			m = Static.getServer().getConsole();
 		} else {
 			try {
@@ -808,7 +809,7 @@ public final class Static {
 				//throw a CRE instead.
 			}
 		}
-		if(m == null || (m instanceof MCPlayer && (!((MCPlayer) m).isOnline() && !injectedPlayers.containsKey(player)))) {
+		if(m == null || (m instanceof MCPlayer && (!((MCPlayer) m).isOnline() && !INJECTED_PLAYERS.containsKey(player)))) {
 			throw new CREPlayerOfflineException("The specified player (" + player + ") is not online", t);
 		}
 		return m;
@@ -1176,7 +1177,7 @@ public final class Static {
 		if("CONSOLE".equals(name)) {
 			name = "~console";
 		}
-		injectedPlayers.put(name, player);
+		INJECTED_PLAYERS.put(name, player);
 	}
 
 	/**
@@ -1190,7 +1191,7 @@ public final class Static {
 		if("CONSOLE".equals(name)) {
 			name = "~console";
 		}
-		return injectedPlayers.remove(name);
+		return INJECTED_PLAYERS.remove(name);
 	}
 
 	public static void InjectEntity(MCEntity entity) {
@@ -1211,11 +1212,11 @@ public final class Static {
 	}
 
 	public static void SetPlayerHost(String playerName, String host) {
-		hostCache.put(playerName, host);
+		HOST_CACHE.put(playerName, host);
 	}
 
 	public static String GetHost(MCPlayer p) {
-		return hostCache.get(p.getName());
+		return HOST_CACHE.get(p.getName());
 	}
 
 	public static void AssertPlayerNonNull(MCPlayer p, Target t) throws ConfigRuntimeException {

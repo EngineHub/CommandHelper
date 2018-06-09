@@ -20,7 +20,7 @@ public class Target {
 	private final File file;
 	private final int col;
 
-	private Target(int line, File file, int col, String Null) {
+	private Target(int line, File file, int col, String ignored) {
 		this.line = line;
 		this.file = file;
 		this.col = col;

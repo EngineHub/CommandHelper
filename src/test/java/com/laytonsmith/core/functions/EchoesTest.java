@@ -117,11 +117,12 @@ public class EchoesTest {
 		assertEquals(String.format("\u00A7%s", "a"), SRun("color(a)", fakePlayer));
 	}
 
-	private static final String a = new color().exec(Target.UNKNOWN, null, new CString("a", Target.UNKNOWN)).val();
+	private static final String LOWERCASE_A =
+			new color().exec(Target.UNKNOWN, null, new CString("a", Target.UNKNOWN)).val();
 
 	@Test
 	public void testColorize1() throws Exception {
-		assertEquals(a + "Hi", SRun("colorize('&aHi')", fakePlayer));
+		assertEquals(LOWERCASE_A + "Hi", SRun("colorize('&aHi')", fakePlayer));
 	}
 
 	@Test
@@ -136,7 +137,7 @@ public class EchoesTest {
 
 	@Test
 	public void testColorize4() throws Exception {
-		assertEquals("&&" + a + "Hi", SRun("colorize('&&&&&aHi')", fakePlayer));
+		assertEquals("&&" + LOWERCASE_A + "Hi", SRun("colorize('&&&&&aHi')", fakePlayer));
 	}
 
 	@Test
@@ -146,6 +147,6 @@ public class EchoesTest {
 
 	@Test
 	public void testColorize6() throws Exception {
-		assertEquals("&&" + a + "Hi", SRun("colorize('&&&&&&aHi', '&&')", fakePlayer));
+		assertEquals("&&" + LOWERCASE_A + "Hi", SRun("colorize('&&&&&&aHi', '&&')", fakePlayer));
 	}
 }

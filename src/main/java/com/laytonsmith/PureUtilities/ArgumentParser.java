@@ -949,17 +949,17 @@ public final class ArgumentParser {
 		//First, we have to tokenize the strings. Since we can have quoted arguments, we can't simply split on spaces.
 		List<String> arguments = new ArrayList<String>();
 		StringBuilder buf = new StringBuilder();
-		boolean state_in_single_quote = false;
-		boolean state_in_double_quote = false;
+		boolean stateInSingleQuote = false;
+		boolean stateInDoubleQuote = false;
 		for(int i = 0; i < args.length(); i++) {
 			Character c0 = args.charAt(i);
 			Character c1 = i + 1 < args.length() ? args.charAt(i + 1) : null;
 
 			if(c0 == '\\') {
-				if(c1 == '\'' && state_in_single_quote
-						|| c1 == '"' && state_in_double_quote
-						|| c1 == ' ' && !state_in_double_quote && !state_in_single_quote
-						|| c1 == '\\' && (state_in_double_quote || state_in_single_quote)) {
+				if(c1 == '\'' && stateInSingleQuote
+						|| c1 == '"' && stateInDoubleQuote
+						|| c1 == ' ' && !stateInDoubleQuote && !stateInSingleQuote
+						|| c1 == '\\' && (stateInDoubleQuote || stateInSingleQuote)) {
 					//We are escaping the next character. Add it to the buffer instead, and
 					//skip ahead two
 					buf.append(c1);
@@ -970,7 +970,7 @@ public final class ArgumentParser {
 			}
 
 			if(c0 == ' ') {
-				if(!state_in_double_quote && !state_in_single_quote) {
+				if(!stateInDoubleQuote && !stateInSingleQuote) {
 					//argument split
 					if(buf.length() != 0) {
 						arguments.add(buf.toString());
@@ -979,9 +979,9 @@ public final class ArgumentParser {
 					continue;
 				}
 			}
-			if(c0 == '\'' && !state_in_double_quote) {
-				if(state_in_single_quote) {
-					state_in_single_quote = false;
+			if(c0 == '\'' && !stateInDoubleQuote) {
+				if(stateInSingleQuote) {
+					stateInSingleQuote = false;
 					arguments.add(buf.toString());
 					buf = new StringBuilder();
 				} else {
@@ -989,13 +989,13 @@ public final class ArgumentParser {
 						arguments.add(buf.toString());
 						buf = new StringBuilder();
 					}
-					state_in_single_quote = true;
+					stateInSingleQuote = true;
 				}
 				continue;
 			}
-			if(c0 == '"' && !state_in_single_quote) {
-				if(state_in_double_quote) {
-					state_in_double_quote = false;
+			if(c0 == '"' && !stateInSingleQuote) {
+				if(stateInDoubleQuote) {
+					stateInDoubleQuote = false;
 					arguments.add(buf.toString());
 					buf = new StringBuilder();
 				} else {
@@ -1003,7 +1003,7 @@ public final class ArgumentParser {
 						arguments.add(buf.toString());
 						buf = new StringBuilder();
 					}
-					state_in_double_quote = true;
+					stateInDoubleQuote = true;
 				}
 				continue;
 			}

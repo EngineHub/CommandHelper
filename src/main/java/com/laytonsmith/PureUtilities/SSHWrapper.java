@@ -33,16 +33,16 @@ public final class SSHWrapper {
 	private SSHWrapper() {
 	}
 
-	private static final Map<String, Session> sessionList = new HashMap<>();
+	private static final Map<String, Session> SESSION_LIST = new HashMap<>();
 
 	/**
 	 * Sessions are cached, and should be closed after use.
 	 */
 	public static void closeSessions() {
-		for(Session s : sessionList.values()) {
+		for(Session s : SESSION_LIST.values()) {
 			s.disconnect();
 		}
-		sessionList.clear();
+		SESSION_LIST.clear();
 	}
 
 	/**
@@ -101,13 +101,13 @@ public final class SSHWrapper {
 			try {
 				JSch jsch = new JSch();
 				Session sshSession = null;
-				File known_hosts = new File(System.getProperty("user.home") + "/.ssh/known_hosts");
-				if(!known_hosts.exists()) {
+				File knownHosts = new File(System.getProperty("user.home") + "/.ssh/known_hosts");
+				if(!knownHosts.exists()) {
 					if(password == null) {
-						throw new IOException("No known hosts file exists at " + known_hosts.getAbsolutePath() + ", and no password was provided");
+						throw new IOException("No known hosts file exists at " + knownHosts.getAbsolutePath() + ", and no password was provided");
 					}
 				} else {
-					jsch.setKnownHosts(known_hosts.getAbsolutePath());
+					jsch.setKnownHosts(knownHosts.getAbsolutePath());
 				}
 				if(password == null) {
 					//We need to try public key authentication
@@ -118,7 +118,7 @@ public final class SSHWrapper {
 						throw new IOException("No password provided, and no private key exists at " + privKey.getAbsolutePath());
 					}
 				}
-				if(!sessionList.containsKey(user + host + port)) {
+				if(!SESSION_LIST.containsKey(user + host + port)) {
 					sshSession = jsch.getSession(user, host, port);
 					sshSession.setUserInfo(new UserInfo() {
 						@Override
@@ -155,9 +155,9 @@ public final class SSHWrapper {
 					});
 					//15 second timeout
 					sshSession.connect(10 * 1500);
-					sessionList.put(user + host + port, sshSession);
+					SESSION_LIST.put(user + host + port, sshSession);
 				} else {
-					sshSession = sessionList.get(user + host + port);
+					sshSession = SESSION_LIST.get(user + host + port);
 				}
 				// http://www.jcraft.com/jsch/examples/
 				if(from.contains("@")) {

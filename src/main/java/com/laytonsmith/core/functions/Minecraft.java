@@ -60,8 +60,8 @@ public class Minecraft {
 	public static String docs() {
 		return "These functions provide a hook into game functionality.";
 	}
-	private static final SortedMap<String, Construct> DataValueLookup = new TreeMap<>();
-	private static final SortedMap<String, Construct> DataNameLookup = new TreeMap<>();
+	private static final SortedMap<String, Construct> DATA_VALUE_LOOKUP = new TreeMap<>();
+	private static final SortedMap<String, Construct> DATA_NAME_LOOKUP = new TreeMap<>();
 
 	static {
 		Properties p1 = new Properties();
@@ -70,7 +70,7 @@ public class Minecraft {
 			Enumeration e = p1.propertyNames();
 			while(e.hasMoreElements()) {
 				String name = e.nextElement().toString();
-				DataValueLookup.put(name, new CString(p1.getProperty(name), Target.UNKNOWN));
+				DATA_VALUE_LOOKUP.put(name, new CString(p1.getProperty(name), Target.UNKNOWN));
 			}
 		} catch (IOException ex) {
 			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
@@ -82,7 +82,7 @@ public class Minecraft {
 			Enumeration e = p2.propertyNames();
 			while(e.hasMoreElements()) {
 				String name = e.nextElement().toString();
-				DataNameLookup.put(name, new CString(p2.getProperty(name), Target.UNKNOWN));
+				DATA_NAME_LOOKUP.put(name, new CString(p2.getProperty(name), Target.UNKNOWN));
 			}
 		} catch (IOException ex) {
 			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
@@ -123,8 +123,8 @@ public class Minecraft {
 			//Remove anything that isn't a letter or a number
 			changed = changed.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
 			//Do a lookup in the DataLookup table
-			if(DataValueLookup.containsKey(changed)) {
-				String split[] = DataValueLookup.get(changed).toString().split(":");
+			if(DATA_VALUE_LOOKUP.containsKey(changed)) {
+				String split[] = DATA_VALUE_LOOKUP.get(changed).toString().split(":");
 				if(split[1].equals("0")) {
 					return new CInt(split[0], t);
 				}
@@ -228,10 +228,10 @@ public class Minecraft {
 			if(i2 == -1) {
 				i2 = 0;
 			}
-			if(DataNameLookup.containsKey(i + "_" + i2)) {
-				return DataNameLookup.get(i + "_" + i2);
-			} else if(DataNameLookup.containsKey(i + "_0")) {
-				return DataNameLookup.get(i + "_0");
+			if(DATA_NAME_LOOKUP.containsKey(i + "_" + i2)) {
+				return DATA_NAME_LOOKUP.get(i + "_" + i2);
+			} else if(DATA_NAME_LOOKUP.containsKey(i + "_0")) {
+				return DATA_NAME_LOOKUP.get(i + "_0");
 			}
 			try {
 				return new CString(StaticLayer.LookupMaterialName(i), t);

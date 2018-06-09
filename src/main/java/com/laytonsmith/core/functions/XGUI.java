@@ -42,7 +42,7 @@ public class XGUI {
 	}
 
 	private static Map<Integer, Window> windows = new HashMap<>();
-	private static final AtomicInteger windowIDs = new AtomicInteger(0);
+	private static final AtomicInteger WINDOW_IDS = new AtomicInteger(0);
 
 	static {
 		StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
@@ -80,7 +80,7 @@ public class XGUI {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			JFrame frame = new JFrame();
-			int id = windowIDs.incrementAndGet();
+			int id = WINDOW_IDS.incrementAndGet();
 			String title = "";
 			int width = 300;
 			int height = 300;

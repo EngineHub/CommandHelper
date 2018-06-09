@@ -543,7 +543,7 @@ public class Enchantments {
 	@api
 	public static class get_enchants extends AbstractFunction {
 
-		private static final Map<String, CArray> cache = new HashMap<>();
+		private static final Map<String, CArray> CACHE = new HashMap<>();
 
 		@Override
 		public String getName() {
@@ -595,8 +595,8 @@ public class Enchantments {
 			 * Because enchantment types won't change from run to run, we can
 			 * cache here, and save time on duplicate lookups.
 			 */
-			if(cache.containsKey(name)) {
-				return cache.get(name).clone();
+			if(CACHE.containsKey(name)) {
+				return CACHE.get(name).clone();
 			}
 			CArray ca = new CArray(t);
 			for(MCEnchantment e : StaticLayer.GetEnchantmentValues()) {
@@ -604,7 +604,7 @@ public class Enchantments {
 					ca.push(new CString(e.getName(), t), t);
 				}
 			}
-			cache.put(name, ca);
+			CACHE.put(name, ca);
 			return ca.clone();
 		}
 	}

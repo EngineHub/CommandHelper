@@ -380,15 +380,15 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public MCLightningStrike strikeLightning(MCLocation GetLocation) {
+	public MCLightningStrike strikeLightning(MCLocation location) {
 		return new BukkitMCLightningStrike(
-				w.strikeLightning(((BukkitMCLocation) GetLocation).l));
+				w.strikeLightning(((BukkitMCLocation) location).l));
 	}
 
 	@Override
-	public MCLightningStrike strikeLightningEffect(MCLocation GetLocation) {
+	public MCLightningStrike strikeLightningEffect(MCLocation location) {
 		return new BukkitMCLightningStrike(
-				w.strikeLightningEffect(((BukkitMCLocation) GetLocation).l));
+				w.strikeLightningEffect(((BukkitMCLocation) location).l));
 	}
 
 	@Override
@@ -937,11 +937,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public MCChunk[] getLoadedChunks() {
 		Chunk[] chunks = w.getLoadedChunks();
-		MCChunk[] MCChunks = new MCChunk[chunks.length];
+		MCChunk[] mcChunks = new MCChunk[chunks.length];
 		for(int i = 0; i < chunks.length; i++) {
-			MCChunks[i] = new BukkitMCChunk(chunks[i]);
+			mcChunks[i] = new BukkitMCChunk(chunks[i]);
 		}
-		return MCChunks;
+		return mcChunks;
 	}
 
 	@Override

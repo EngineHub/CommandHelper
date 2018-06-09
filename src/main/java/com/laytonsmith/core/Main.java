@@ -71,32 +71,32 @@ import org.yaml.snakeyaml.Yaml;
 public class Main {
 
 	public static final ArgumentSuite ARGUMENT_SUITE;
-	private static final ArgumentParser helpMode;
-	private static final ArgumentParser managerMode;
-	private static final ArgumentParser interpreterMode;
-	private static final ArgumentParser mslpMode;
-	private static final ArgumentParser versionMode;
-	private static final ArgumentParser copyrightMode;
-	private static final ArgumentParser printDBMode;
-	private static final ArgumentParser docsMode;
-	private static final ArgumentParser verifyMode;
-	private static final ArgumentParser installCmdlineMode;
-	private static final ArgumentParser uninstallCmdlineMode;
-	private static final ArgumentParser syntaxMode;
-	private static final ArgumentParser docgenMode;
-	private static final ArgumentParser apiMode;
-	private static final ArgumentParser examplesMode;
-	private static final ArgumentParser optimizerTestMode;
-	private static final ArgumentParser cmdlineMode;
-	private static final ArgumentParser extensionDocsMode;
-	private static final ArgumentParser docExportMode;
-	private static final ArgumentParser profilerSummaryMode;
-	private static final ArgumentParser rsaKeyGenMode;
-	private static final ArgumentParser pnViewerMode;
-	private static final ArgumentParser coreFunctionsMode;
-	private static final ArgumentParser uiMode;
-	private static final ArgumentParser newMode;
-	private static final ArgumentParser siteDeploy;
+	private static final ArgumentParser HELP_MODE;
+	private static final ArgumentParser MANAGER_MODE;
+	private static final ArgumentParser INTERPRETER_MODE;
+	private static final ArgumentParser MSLP_MODE;
+	private static final ArgumentParser VERSION_MODE;
+	private static final ArgumentParser COPYRIGHT_MODE;
+	private static final ArgumentParser PRINT_DB_MODE;
+	private static final ArgumentParser DOCS_MODE;
+	private static final ArgumentParser VERIFY_MODE;
+	private static final ArgumentParser INSTALL_CMDLINE_MODE;
+	private static final ArgumentParser UNINSTALL_CMDLINE_MODE;
+	private static final ArgumentParser SYNTAX_MODE;
+	private static final ArgumentParser DOCGEN_MODE;
+	private static final ArgumentParser API_MODE;
+	private static final ArgumentParser EXAMPLES_MODE;
+	private static final ArgumentParser OPTIMIZER_TEST_MODE;
+	private static final ArgumentParser CMDLINE_MODE;
+	private static final ArgumentParser EXTENSION_DOCS_MODE;
+	private static final ArgumentParser DOC_EXPORT_MODE;
+	private static final ArgumentParser PROFILER_SUMMARY_MODE;
+	private static final ArgumentParser RSA_KEY_GEN_MODE;
+	private static final ArgumentParser PM_VIEWER_MODE;
+	private static final ArgumentParser CORE_FUNCTIONS_MODE;
+	private static final ArgumentParser UI_MODE;
+	private static final ArgumentParser NEW_MODE;
+	private static final ArgumentParser SITE_DEPLOY;
 
 	static {
 		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
@@ -104,116 +104,116 @@ public class Main {
 				.addDescription("These are the command line tools for CommandHelper. For more information about a"
 						+ " particular mode, run help <mode name>. To run a command, in general, use the command:\n\n"
 						+ "\tjava -jar " + MethodScriptFileLocations.getDefault().getJarFile().getName() + " <mode name> <[mode specific arguments]>\n");
-		helpMode = ArgumentParser.GetParser()
+		HELP_MODE = ArgumentParser.GetParser()
 				.addDescription("Displays help for all modes, or the given mode if one is provided.")
 				.addArgument("Displays help for the given mode.", "mode name", false);
-		suite.addMode("help", helpMode).addModeAlias("--help", "help").addModeAlias("-help", "help")
+		suite.addMode("help", HELP_MODE).addModeAlias("--help", "help").addModeAlias("-help", "help")
 				.addModeAlias("/?", "help");
-		managerMode = ArgumentParser.GetParser()
+		MANAGER_MODE = ArgumentParser.GetParser()
 				.addDescription("Launches the built in interactive data manager, which will allow command line access to the full persistence database.");
-		suite.addMode("manager", managerMode);
-		interpreterMode = ArgumentParser.GetParser()
+		suite.addMode("manager", MANAGER_MODE);
+		INTERPRETER_MODE = ArgumentParser.GetParser()
 				.addDescription("Launches the minimal cmdline interpreter.")
 				.addArgument("location-----", ArgumentParser.Type.STRING, ".", "Sets the initial working directory of the interpreter. This is optional, but"
 						+ " is automatically set by the mscript program. The option name is strange, to avoid any conflicts with"
 						+ " script arguments.", "location-----", false);
-		suite.addMode("interpreter", interpreterMode);
-		mslpMode = ArgumentParser.GetParser()
+		suite.addMode("interpreter", INTERPRETER_MODE);
+		MSLP_MODE = ArgumentParser.GetParser()
 				.addDescription("Creates an MSLP file based on the directory specified.")
 				.addArgument("The path to the folder", "path/to/folder", true);
-		suite.addMode("mslp", mslpMode);
-		versionMode = ArgumentParser.GetParser()
+		suite.addMode("mslp", MSLP_MODE);
+		VERSION_MODE = ArgumentParser.GetParser()
 				.addDescription("Prints the version of CommandHelper, and exits.");
-		suite.addMode("version", versionMode).addModeAlias("--version", "version").addModeAlias("-version", "version")
+		suite.addMode("version", VERSION_MODE).addModeAlias("--version", "version").addModeAlias("-version", "version")
 				.addModeAlias("-v", "version");
-		copyrightMode = ArgumentParser.GetParser()
+		COPYRIGHT_MODE = ArgumentParser.GetParser()
 				.addDescription("Prints the copyright and exits.");
-		suite.addMode("copyright", copyrightMode);
-		printDBMode = ArgumentParser.GetParser()
+		suite.addMode("copyright", COPYRIGHT_MODE);
+		PRINT_DB_MODE = ArgumentParser.GetParser()
 				.addDescription("Prints out the built in database in a human readable form, then exits.");
-		suite.addMode("print-db", printDBMode);
-		docsMode = ArgumentParser.GetParser()
+		suite.addMode("print-db", PRINT_DB_MODE);
+		DOCS_MODE = ArgumentParser.GetParser()
 				.addDescription("Prints documentation for the functions that CommandHelper knows about, then exits.")
 				.addArgument("html", "The type of the documentation, defaulting to html. It may be one of the following: " + StringUtils.Join(DocGen.MarkupType.values(), ", ", ", or "), "type", false);
-		suite.addMode("docs", docsMode);
-		verifyMode = ArgumentParser.GetParser()
+		suite.addMode("docs", DOCS_MODE);
+		VERIFY_MODE = ArgumentParser.GetParser()
 				.addDescription("Compiles the given file, returning a json describing the errors in the file, or returning"
 						+ " nothing if the file compiles cleanly.")
 				.addArgument("The file to check", "<file>", true);
-		suite.addMode("verify", verifyMode);
-		installCmdlineMode = ArgumentParser.GetParser()
+		suite.addMode("verify", VERIFY_MODE);
+		INSTALL_CMDLINE_MODE = ArgumentParser.GetParser()
 				.addDescription("Installs MethodScript to your system, so that commandline scripts work. (Currently only unix is supported.)");
-		suite.addMode("install-cmdline", installCmdlineMode);
-		uninstallCmdlineMode = ArgumentParser.GetParser()
+		suite.addMode("install-cmdline", INSTALL_CMDLINE_MODE);
+		UNINSTALL_CMDLINE_MODE = ArgumentParser.GetParser()
 				.addDescription("Uninstalls the MethodScript interpreter from your system.");
-		suite.addMode("uninstall-cmdline", uninstallCmdlineMode);
-		syntaxMode = ArgumentParser.GetParser()
+		suite.addMode("uninstall-cmdline", UNINSTALL_CMDLINE_MODE);
+		SYNTAX_MODE = ArgumentParser.GetParser()
 				.addDescription("Generates the syntax highlighter for the specified editor (if available).")
 				.addArgument("The type of the syntax file to generate. Don't specify a type to see the available options.", "[type]", false);
-		suite.addMode("syntax", syntaxMode);
-		docgenMode = ArgumentParser.GetParser()
+		suite.addMode("syntax", SYNTAX_MODE);
+		DOCGEN_MODE = ArgumentParser.GetParser()
 				.addDescription("Starts the automatic wiki uploader GUI.");
-		suite.addMode("docgen", docgenMode);
-		apiMode = ArgumentParser.GetParser()
+		suite.addMode("docgen", DOCGEN_MODE);
+		API_MODE = ArgumentParser.GetParser()
 				.addDescription("Prints documentation for the function specified, then exits.")
 				.addArgument("The name of the function to print the information for", "function", true);
-		suite.addMode("api", apiMode);
-		examplesMode = ArgumentParser.GetParser()
+		suite.addMode("api", API_MODE);
+		EXAMPLES_MODE = ArgumentParser.GetParser()
 				.addDescription("Installs one of the built in LocalPackage examples, which may in and of itself be useful.")
 				.addArgument("The name of the package to install. Leave blank to see a list of examples to choose from.", "[packageName]", true);
-		suite.addMode("examples", examplesMode);
-		optimizerTestMode = ArgumentParser.GetParser()
+		suite.addMode("examples", EXAMPLES_MODE);
+		OPTIMIZER_TEST_MODE = ArgumentParser.GetParser()
 				.addDescription("Given a source file, reads it in and outputs the \"optimized\" version. This is meant as a debug"
 						+ " tool, but could be used as an obfuscation tool as well.")
 				.addArgument("File path", "file", true);
-		suite.addMode("optimizer-test", optimizerTestMode);
-		cmdlineMode = ArgumentParser.GetParser()
+		suite.addMode("optimizer-test", OPTIMIZER_TEST_MODE);
+		CMDLINE_MODE = ArgumentParser.GetParser()
 				.addDescription("Given a source file, runs it in cmdline mode. This is similar to"
 						+ " the interpreter mode, but allows for tty input (which is required for some functions,"
 						+ " like the prompt_* functions) and provides better information for errors, as the"
 						+ " file is known.")
 				.addArgument("File path/arguments", "fileAndArgs", true);
-		suite.addMode("cmdline", cmdlineMode);
-		extensionDocsMode = ArgumentParser.GetParser()
+		suite.addMode("cmdline", CMDLINE_MODE);
+		EXTENSION_DOCS_MODE = ArgumentParser.GetParser()
 				.addDescription("Generates markdown documentation for the specified extension utilizing its code, to be used most likely on the extensions github page.")
 				.addArgument('i', "input-jar", ArgumentParser.Type.STRING, "The extension jar to generate doucmenation for.", "input-jar", true)
 				.addArgument('o', "output-file", ArgumentParser.Type.STRING, "The file to output the generated documentation to.", "output-file", false);
-		suite.addMode("extension-docs", extensionDocsMode);
-		docExportMode = ArgumentParser.GetParser()
+		suite.addMode("extension-docs", EXTENSION_DOCS_MODE);
+		DOC_EXPORT_MODE = ArgumentParser.GetParser()
 				.addDescription("Outputs all known function documentation as a json. This includes known extensions"
 						+ " as well as the built in functions.")
 				.addArgument("extension-dir", ArgumentParser.Type.STRING, "./CommandHelper/extensions", "Provides the path to your extension directory, if not the default, \"./CommandHelper/extensions\"", "extension-dir", false)
 				.addArgument('o', "output-file", ArgumentParser.Type.STRING, "The file to output the generated json to. If this parameter is missing, it is simply printed to screen.", "output-file", false);
-		suite.addMode("doc-export", docExportMode);
-		profilerSummaryMode = ArgumentParser.GetParser()
+		suite.addMode("doc-export", DOC_EXPORT_MODE);
+		PROFILER_SUMMARY_MODE = ArgumentParser.GetParser()
 				.addDescription("Analyzes the output file for a profiler session, and generates a summary report of the results.")
 				.addArgument('i', "ignore-percentage", ArgumentParser.Type.NUMBER, "0", "This value dictates how much of the lower end data is ignored."
 						+ " If the function took less time than this percentage of the total time, it is omitted from the"
 						+ " results.", "ignore-percentage", false)
 				.addArgument("Path to the profiler file to use", "input-file", true);
-		suite.addMode("profiler-summary", profilerSummaryMode);
-		rsaKeyGenMode = ArgumentParser.GetParser()
+		suite.addMode("profiler-summary", PROFILER_SUMMARY_MODE);
+		RSA_KEY_GEN_MODE = ArgumentParser.GetParser()
 				.addDescription("Creates an ssh compatible rsa key pair. This is used with the Federation system, but is useful with other tools as well.")
 				.addArgument('o', "output-file", ArgumentParser.Type.STRING, "Output file for the keys. For instance, \"/home/user/.ssh/id_rsa\"."
 						+ " The public key will have the same name, with \".pub\" appended.", "output-file", true)
 				.addArgument('l', "label", ArgumentParser.Type.STRING, "Label for the public key. For instance, \"user@localhost\"", "label", true);
-		suite.addMode("key-gen", rsaKeyGenMode);
-		pnViewerMode = ArgumentParser.GetParser()
+		suite.addMode("key-gen", RSA_KEY_GEN_MODE);
+		PM_VIEWER_MODE = ArgumentParser.GetParser()
 				.addDescription("Launches the Persistence Network viewer. This is a GUI tool that can help you visualize your databases.")
 				.addFlag("server", "Sets up a server running on this machine, that can be accessed by remote Persistence Network Viewers."
 						+ " If this is set, you must also provide the --port and --password options.")
 				.addArgument("port", ArgumentParser.Type.NUMBER, "The port for the server to listen on.", "port", false)
 				.addArgument("password", ArgumentParser.Type.STRING, "The password that remote clients will need to provide to connect. Leave the field blank to be prompted for a password.", "password", false);
-		suite.addMode("pn-viewer", pnViewerMode);
-		coreFunctionsMode = ArgumentParser.GetParser()
+		suite.addMode("pn-viewer", PM_VIEWER_MODE);
+		CORE_FUNCTIONS_MODE = ArgumentParser.GetParser()
 				.addDescription("Prints a list of functions tagged with the @core annotation, then exits.");
-		suite.addMode("core-functions", coreFunctionsMode);
-		uiMode = ArgumentParser.GetParser()
+		suite.addMode("core-functions", CORE_FUNCTIONS_MODE);
+		UI_MODE = ArgumentParser.GetParser()
 				.addDescription("Launches a GUI that provides a list of all the sub GUI tools provided, and allows selection of a module. This"
 						+ " command creates a subshell to run the launcher in, so that the original cmdline shell returns.")
 				.addFlag("in-shell", "Runs the launcher in the same shell process. By default, it creates a new process and causes the initial shell to return.");
-		suite.addMode("ui", uiMode);
-		siteDeploy = ArgumentParser.GetParser()
+		suite.addMode("ui", UI_MODE);
+		SITE_DEPLOY = ArgumentParser.GetParser()
 				.addDescription("Deploys the documentation site, using the preferences specified in the configuration file. This mechanism completely re-writes"
 						+ " the remote site, so that builds are totally reproduceable.")
 				.addArgument('c', "config", ArgumentParser.Type.STRING,
@@ -243,13 +243,13 @@ public class Main {
 						+ " flag. If this flag is set, additional options need to be added to the config file. The remote server"
 						+ " is assumed to be an already running AWS ubuntu instance, with security groups configured and a pem"
 						+ " file available, but no login is necessary.");
-		suite.addMode("site-deploy", siteDeploy);
-		newMode = ArgumentParser.GetParser()
+		suite.addMode("site-deploy", SITE_DEPLOY);
+		NEW_MODE = ArgumentParser.GetParser()
 				.addDescription("Creates a blank script in the specified location with the appropriate permissions, having the correct hashbang, and ready to be executed. If"
 						+ " the specified file already exists, it will refuse to create it, unless --force is set.")
 				.addArgument("Location and name to create the script as. Multiple arguments can be provided, and they will create multiple files.", "<file>", true)
 				.addFlag('f', "force", "Forces the file to be overwritten, even if it already exists");
-		suite.addMode("new", newMode);
+		suite.addMode("new", NEW_MODE);
 
 		ARGUMENT_SUITE = suite;
 	}
@@ -297,11 +297,11 @@ public class Main {
 				parsedArgs = results.getResults();
 			} catch (ArgumentParser.ResultUseException | ArgumentParser.ValidationException e) {
 				StreamUtils.GetSystemOut().println(TermColors.RED + e.getMessage() + TermColors.RESET);
-				mode = helpMode;
+				mode = HELP_MODE;
 				parsedArgs = null;
 			}
 
-			if(mode == helpMode) {
+			if(mode == HELP_MODE) {
 				String modeForHelp = null;
 				if(parsedArgs != null) {
 					modeForHelp = parsedArgs.getStringArgument();
@@ -323,10 +323,10 @@ public class Main {
 			//if it were, the help command would have run.
 			assert parsedArgs != null;
 
-			if(mode == managerMode) {
+			if(mode == MANAGER_MODE) {
 				Manager.start();
 				System.exit(0);
-			} else if(mode == coreFunctionsMode) {
+			} else if(mode == CORE_FUNCTIONS_MODE) {
 				List<String> core = new ArrayList<>();
 				for(api.Platforms platform : api.Platforms.values()) {
 					for(FunctionBase f : FunctionList.getFunctionList(platform)) {
@@ -338,19 +338,19 @@ public class Main {
 				Collections.sort(core);
 				StreamUtils.GetSystemOut().println(StringUtils.Join(core, ", "));
 				System.exit(0);
-			} else if(mode == interpreterMode) {
+			} else if(mode == INTERPRETER_MODE) {
 				new Interpreter(parsedArgs.getStringListArgument(), parsedArgs.getStringArgument("location-----"));
 				System.exit(0);
-			} else if(mode == installCmdlineMode) {
+			} else if(mode == INSTALL_CMDLINE_MODE) {
 				Interpreter.install();
 				System.exit(0);
-			} else if(mode == uninstallCmdlineMode) {
+			} else if(mode == UNINSTALL_CMDLINE_MODE) {
 				Interpreter.uninstall();
 				System.exit(0);
-			} else if(mode == docgenMode) {
+			} else if(mode == DOCGEN_MODE) {
 				DocGenUI.main(args);
 				System.exit(0);
-			} else if(mode == mslpMode) {
+			} else if(mode == MSLP_MODE) {
 				String mslp = parsedArgs.getStringArgument();
 				if(mslp.isEmpty()) {
 					StreamUtils.GetSystemOut().println("Usage: --mslp path/to/folder");
@@ -358,10 +358,10 @@ public class Main {
 				}
 				MSLPMaker.start(mslp);
 				System.exit(0);
-			} else if(mode == versionMode) {
+			} else if(mode == VERSION_MODE) {
 				StreamUtils.GetSystemOut().println("You are running " + Implementation.GetServerType().getBranding() + " version " + loadSelfVersion());
 				System.exit(0);
-			} else if(mode == copyrightMode) {
+			} else if(mode == COPYRIGHT_MODE) {
 				StreamUtils.GetSystemOut().println("The MIT License (MIT)\n"
 						+ "\n"
 						+ "Copyright (c) 2012-2017 Methodscript Contributors\n"
@@ -383,7 +383,7 @@ public class Main {
 						+ "IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN \n"
 						+ "CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.");
 				System.exit(0);
-			} else if(mode == printDBMode) {
+			} else if(mode == PRINT_DB_MODE) {
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 				options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
 				PersistenceNetwork pn = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
@@ -395,7 +395,7 @@ public class Main {
 					StreamUtils.GetSystemOut().println(StringUtils.Join(s, ".") + "=" + values.get(s));
 				}
 				System.exit(0);
-			} else if(mode == docsMode) {
+			} else if(mode == DOCS_MODE) {
 				DocGen.MarkupType docs;
 				try {
 					docs = DocGen.MarkupType.valueOf(parsedArgs.getStringArgument().toUpperCase());
@@ -409,10 +409,10 @@ public class Main {
 				DocGen.functions(docs, api.Platforms.INTERPRETER_JAVA, true);
 				StreamUtils.GetSystemErr().println("Done.");
 				System.exit(0);
-			} else if(mode == examplesMode) {
+			} else if(mode == EXAMPLES_MODE) {
 				ExampleLocalPackageInstaller.run(MethodScriptFileLocations.getDefault().getJarDirectory(),
 						parsedArgs.getStringArgument());
-			} else if(mode == verifyMode) {
+			} else if(mode == VERIFY_MODE) {
 				String file = parsedArgs.getStringArgument();
 				if("".equals(file)) {
 					StreamUtils.GetSystemErr().println("File parameter is required.");
@@ -443,7 +443,7 @@ public class Main {
 					String serr = JSONValue.toJSONString(err);
 					StreamUtils.GetSystemOut().println(serr);
 				}
-			} else if(mode == apiMode) {
+			} else if(mode == API_MODE) {
 				String function = parsedArgs.getStringArgument();
 				if("".equals(function)) {
 					StreamUtils.GetSystemErr().println("Usage: java -jar CommandHelper.jar --api <function name>");
@@ -468,14 +468,14 @@ public class Main {
 					desc
 				}, " // "));
 				System.exit(0);
-			} else if(mode == syntaxMode) {
+			} else if(mode == SYNTAX_MODE) {
 				// TODO: Maybe load extensions here?
 				List<String> syntax = parsedArgs.getStringListArgument();
 				String type = (syntax.size() >= 1 ? syntax.get(0) : null);
 				String theme = (syntax.size() >= 2 ? syntax.get(1) : null);
 				StreamUtils.GetSystemOut().println(SyntaxHighlighters.generate(type, theme));
 				System.exit(0);
-			} else if(mode == optimizerTestMode) {
+			} else if(mode == OPTIMIZER_TEST_MODE) {
 				String path = parsedArgs.getStringArgument();
 				File source = new File(path);
 				String plain = FileUtil.read(source);
@@ -496,7 +496,7 @@ public class Main {
 				}
 				StreamUtils.GetSystemOut().println(optimized);
 				System.exit(0);
-			} else if(mode == cmdlineMode) {
+			} else if(mode == CMDLINE_MODE) {
 				//We actually can't use the parsedArgs, because there may be cmdline switches in
 				//the arguments that we want to ignore here, but otherwise pass through. parsedArgs
 				//will prevent us from seeing those, however.
@@ -518,7 +518,7 @@ public class Main {
 				}
 				StaticLayer.GetConvertor().runShutdownHooks();
 				System.exit(0);
-			} else if(mode == extensionDocsMode) {
+			} else if(mode == EXTENSION_DOCS_MODE) {
 				String inputJarS = parsedArgs.getStringArgument("input-jar");
 				String outputFileS = parsedArgs.getStringArgument("output-file");
 				if(inputJarS == null) {
@@ -531,7 +531,7 @@ public class Main {
 					outputFile = new FileOutputStream(new File(outputFileS));
 				}
 				ExtensionDocGen.generate(inputJar, outputFile);
-			} else if(mode == docExportMode) {
+			} else if(mode == DOC_EXPORT_MODE) {
 				String extensionDirS = parsedArgs.getStringArgument("extension-dir");
 				String outputFileS = parsedArgs.getStringArgument("output-file");
 				OutputStream outputFile = StreamUtils.GetSystemOut();
@@ -553,7 +553,7 @@ public class Main {
 							+ extensionDirS + ". Continuing anyways.");
 				}
 				new DocGenExportTool(cd, outputFile).export();
-			} else if(mode == profilerSummaryMode) {
+			} else if(mode == PROFILER_SUMMARY_MODE) {
 				String input = parsedArgs.getStringArgument();
 				if("".equals(input)) {
 					StreamUtils.GetSystemErr().println(TermColors.RED + "No input file specified! Run `help profiler-summary' for usage." + TermColors.RESET);
@@ -569,7 +569,7 @@ public class Main {
 				}
 				StreamUtils.GetSystemOut().println(summary.getAnalysis());
 				System.exit(0);
-			} else if(mode == rsaKeyGenMode) {
+			} else if(mode == RSA_KEY_GEN_MODE) {
 				String outputFileString = parsedArgs.getStringArgument('o');
 				File privOutputFile = new File(outputFileString);
 				File pubOutputFile = new File(outputFileString + ".pub");
@@ -582,7 +582,7 @@ public class Main {
 				FileUtil.write(enc.getPrivateKey(), privOutputFile);
 				FileUtil.write(enc.getPublicKey(), pubOutputFile);
 				System.exit(0);
-			} else if(mode == pnViewerMode) {
+			} else if(mode == PM_VIEWER_MODE) {
 				if(parsedArgs.isFlagSet("server")) {
 					if(parsedArgs.getNumberArgument("port") == null) {
 						StreamUtils.GetSystemErr().println("When running as a server, port is required.");
@@ -625,7 +625,7 @@ public class Main {
 						System.exit(1);
 					}
 				}
-			} else if(mode == uiMode) {
+			} else if(mode == UI_MODE) {
 				if(parsedArgs.isFlagSet("in-shell")) {
 					// Actually launch the GUI
 					UILauncher.main(args);
@@ -638,7 +638,7 @@ public class Main {
 					ce.start();
 					System.exit(0);
 				}
-			} else if(mode == siteDeploy) {
+			} else if(mode == SITE_DEPLOY) {
 				boolean clearLocalCache = parsedArgs.isFlagSet("clear-local-cache");
 				if(clearLocalCache) {
 					PersistenceNetwork p = SiteDeploy.getPersistenceNetwork();
@@ -663,7 +663,7 @@ public class Main {
 				}
 				File config = new File(configString);
 				SiteDeploy.run(generatePrefs, useLocalCache, config, "", doValidation);
-			} else if(mode == newMode) {
+			} else if(mode == NEW_MODE) {
 				String li = OSUtils.GetLineEnding();
 				for(String file : parsedArgs.getStringListArgument()) {
 					File f = new File(file);

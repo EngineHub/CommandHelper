@@ -80,12 +80,12 @@ public class Script {
 	private List<ParseTree> cright;
 	private boolean nolog = false;
 	//This should be null if we are running in non-alias mode
-	private Map<String, Variable> left_vars;
+	private Map<String, Variable> leftVars;
 	boolean hasBeenCompiled = false;
 	boolean compilerError = false;
 	private final long compileTime;
 	private String label;
-	private Environment CurrentEnv;
+	private Environment currentEnv;
 	private FileOptions fileOptions;
 
 	@Override
@@ -99,11 +99,11 @@ public class Script {
 	}
 
 	private Procedure getProc(String name) {
-		return CurrentEnv.getEnv(GlobalEnv.class).GetProcs().get(name);
+		return currentEnv.getEnv(GlobalEnv.class).GetProcs().get(name);
 	}
 
 	public Environment getCurrentEnv() {
-		return CurrentEnv;
+		return currentEnv;
 	}
 
 	public String getLabel() {
@@ -127,7 +127,7 @@ public class Script {
 	public Script(List<Token> left, List<Token> right, String label, FileOptions fileOptions) {
 		this.left = left;
 		this.fullRight = right;
-		this.left_vars = new HashMap<>();
+		this.leftVars = new HashMap<>();
 		this.label = label;
 		compileTime = System.currentTimeMillis();
 		this.fileOptions = fileOptions;
@@ -159,14 +159,14 @@ public class Script {
 
 	public void run(final List<Variable> vars, Environment myEnv, final MethodScriptComplete done) {
 		//Some things, such as the label are determined at compile time
-		this.CurrentEnv = myEnv;
-		this.CurrentEnv.getEnv(GlobalEnv.class).SetLabel(this.label);
+		this.currentEnv = myEnv;
+		this.currentEnv.getEnv(GlobalEnv.class).SetLabel(this.label);
 		MCCommandSender p = myEnv.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 		if(!hasBeenCompiled || compilerError) {
 			Target target = Target.UNKNOWN;
 			if(left.size() >= 1) {
 				try {
-					target = new Target(left.get(0).line_num, left.get(0).file, left.get(0).column);
+					target = new Target(left.get(0).lineNum, left.get(0).file, left.get(0).column);
 				} catch (NullPointerException e) {
 					//Oh well, we tried to get more information
 				}
@@ -183,17 +183,17 @@ public class Script {
 				}
 				for(Construct tempNode : rootNode.getAllData()) {
 					if(tempNode instanceof Variable) {
-						if(left_vars == null) {
+						if(leftVars == null) {
 							throw ConfigRuntimeException.CreateUncatchableException("$variables may not be used in this context."
 									+ " Only @variables may be.", tempNode.getTarget());
 						}
-						Construct c = Static.resolveDollarVar(left_vars.get(((Variable) tempNode).getVariableName()), vars);
+						Construct c = Static.resolveDollarVar(leftVars.get(((Variable) tempNode).getVariableName()), vars);
 						((Variable) tempNode).setVal(new CString(c.toString(), tempNode.getTarget()));
 					}
 				}
 
-				MethodScriptCompiler.registerAutoIncludes(CurrentEnv, this);
-				MethodScriptCompiler.execute(rootNode, CurrentEnv, done, this);
+				MethodScriptCompiler.registerAutoIncludes(currentEnv, this);
+				MethodScriptCompiler.execute(rootNode, currentEnv, done, this);
 			}
 		} catch (ConfigRuntimeException ex) {
 			//We don't know how to handle this really, so let's pass it up the chain.
@@ -265,7 +265,7 @@ public class Script {
 		}
 
 		final Construct m = c.getData();
-		CurrentEnv = env;
+		currentEnv = env;
 		if(m.getCType() != ConstructType.FUNCTION) {
 			if(m.getCType() == ConstructType.VARIABLE) {
 				return new CString(m.val(), m.getTarget());
@@ -490,7 +490,7 @@ public class Script {
 			//we can't match it, nor can we even tell if it's what they intended for us to run.
 			return false;
 		}
-		boolean case_sensitive = Prefs.CaseSensitive();
+		boolean caseSensitive = Prefs.CaseSensitive();
 		String[] cmds = command.split(" ");
 		List<String> args = new ArrayList<>(Arrays.asList(cmds));
 		boolean isAMatch = true;
@@ -510,7 +510,7 @@ public class Script {
 			}
 			String arg = args.get(j);
 			if(c.getCType() != ConstructType.VARIABLE) {
-				if(case_sensitive && !c.val().equals(arg) || !case_sensitive && !c.val().equalsIgnoreCase(arg)) {
+				if(caseSensitive && !c.val().equals(arg) || !caseSensitive && !c.val().equalsIgnoreCase(arg)) {
 					isAMatch = false;
 					continue;
 				}
@@ -611,8 +611,8 @@ public class Script {
 	}
 
 	private boolean verifyLeft() throws ConfigCompileException {
-		boolean inside_opt_var = false;
-		boolean after_no_def_opt_var = false;
+		boolean insideOptVar = false;
+		boolean afterNoDefOptVar = false;
 		String lastVar = null;
 		//Go through our token list and readjust non-spaced symbols. Any time we combine a symbol,
 		//the token becomes a string
@@ -676,12 +676,12 @@ public class Script {
 		for(int j = 0; j < left.size(); j++) {
 			Token t = left.get(j);
 			//Token prev_token = j - 2 >= 0?c.tokens.get(j - 2):new Token(TType.UNKNOWN, "", t.line_num);
-			Token last_token = j - 1 >= 0 ? left.get(j - 1) : new Token(TType.UNKNOWN, "", t.getTarget());
-			Token next_token = j + 1 < left.size() ? left.get(j + 1) : new Token(TType.UNKNOWN, "", t.getTarget());
-			Token after_token = j + 2 < left.size() ? left.get(j + 2) : new Token(TType.UNKNOWN, "", t.getTarget());
+			Token lastToken = j - 1 >= 0 ? left.get(j - 1) : new Token(TType.UNKNOWN, "", t.getTarget());
+			Token nextToken = j + 1 < left.size() ? left.get(j + 1) : new Token(TType.UNKNOWN, "", t.getTarget());
+			Token afterToken = j + 2 < left.size() ? left.get(j + 2) : new Token(TType.UNKNOWN, "", t.getTarget());
 
 			if(j == 0) {
-				if(next_token.type == TType.LABEL) {
+				if(nextToken.type == TType.LABEL) {
 					this.label = t.val();
 					j--;
 					left.remove(0);
@@ -700,29 +700,29 @@ public class Script {
 			if(t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
 				Variable v = new Variable(t.val(), null, t.target);
 				lastVar = t.val();
-				v.setOptional(last_token.type.equals(TType.LSQUARE_BRACKET));
-				left_vars.put(t.val(), v);
+				v.setOptional(lastToken.type.equals(TType.LSQUARE_BRACKET));
+				leftVars.put(t.val(), v);
 				if(v.isOptional()) {
-					after_no_def_opt_var = true;
+					afterNoDefOptVar = true;
 				} else {
 					v.setDefault("");
 				}
 			}
 			//We're looking for a command up front
 			if(j == 0 && !t.value.startsWith("/")) {
-				if(!(next_token.type == TType.LABEL && after_token.type == TType.COMMAND)) {
+				if(!(nextToken.type == TType.LABEL && afterToken.type == TType.COMMAND)) {
 					throw new ConfigCompileException("Expected command (/command) at start of alias."
 							+ " Instead, found " + t.type + " (" + t.val() + ")", t.target);
 				}
 			}
-			if(last_token.type.equals(TType.LSQUARE_BRACKET)) {
-				inside_opt_var = true;
+			if(lastToken.type.equals(TType.LSQUARE_BRACKET)) {
+				insideOptVar = true;
 				if(!(t.type.equals(TType.FINAL_VAR) || t.type.equals(TType.VARIABLE))) {
 					throw new ConfigCompileException("Unexpected " + t.type.toString() + " (" + t.val() + "), was expecting"
 							+ " a $variable", t.target);
 				}
 			}
-			if(after_no_def_opt_var && !inside_opt_var) {
+			if(afterNoDefOptVar && !insideOptVar) {
 				if(t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
 					throw new ConfigCompileException("You cannot have anything other than optional arguments after your"
 							+ " first optional argument.", t.target);
@@ -739,25 +739,25 @@ public class Script {
 					throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ")", t.target);
 				}
 			}
-			if(last_token.type.equals(TType.COMMAND)) {
+			if(lastToken.type.equals(TType.COMMAND)) {
 				if(!(t.type.equals(TType.VARIABLE) || t.type.equals(TType.LSQUARE_BRACKET) || t.type.equals(TType.FINAL_VAR)
 						|| t.type.equals(TType.LIT) || t.type.equals(TType.STRING))) {
 					throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ") after command", t.target);
 				}
 			}
-			if(inside_opt_var && t.type.equals(TType.OPT_VAR_ASSIGN)) {
-				if(!(next_token.type.isAtomicLit() && after_token.type.equals(TType.RSQUARE_BRACKET)
-						|| (next_token.type.equals(TType.RSQUARE_BRACKET)))) {
+			if(insideOptVar && t.type.equals(TType.OPT_VAR_ASSIGN)) {
+				if(!(nextToken.type.isAtomicLit() && afterToken.type.equals(TType.RSQUARE_BRACKET)
+						|| (nextToken.type.equals(TType.RSQUARE_BRACKET)))) {
 					throw new ConfigCompileException("Unexpected token in optional variable", t.target);
-				} else if(next_token.type.isAtomicLit()) {
-					left_vars.get(lastVar).setDefault(next_token.val());
+				} else if(nextToken.type.isAtomicLit()) {
+					leftVars.get(lastVar).setDefault(nextToken.val());
 				}
 			}
 			if(t.type.equals(TType.RSQUARE_BRACKET)) {
-				if(!inside_opt_var) {
+				if(!insideOptVar) {
 					throw new ConfigCompileException("Unexpected " + t.type.toString(), t.target);
 				}
-				inside_opt_var = false;
+				insideOptVar = false;
 			}
 		}
 
@@ -903,14 +903,14 @@ public class Script {
 	}
 
 	public void enforceLabelPermissions() {
-		String label = CurrentEnv.getEnv(GlobalEnv.class).GetLabel();
+		String label = currentEnv.getEnv(GlobalEnv.class).GetLabel();
 		if(label == null || label.equals(Static.GLOBAL_PERMISSION)) {
 			return;
 		}
-		MCPlayer p = CurrentEnv.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		MCPlayer p = currentEnv.getEnv(CommandHelperEnvironment.class).GetPlayer();
 		if(p == null) {
 			// labels only apply to players
-			CurrentEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
+			currentEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
 		} else if(label.startsWith("~")) {
 			// group labels
 			String[] groups = label.substring(1).split("/");
@@ -921,17 +921,17 @@ public class Script {
 							Target.UNKNOWN);
 				} else if(p.inGroup(group)) {
 					// they have explicit permission.
-					CurrentEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
+					currentEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
 					return;
 				}
 			}
 		} else if(label.indexOf('.') != -1) {
 			// custom permission label
 			if(p.hasPermission(label)) {
-				CurrentEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
+				currentEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
 			}
 		} else if(p.hasPermission("ch.alias." + label) || p.hasPermission("commandhelper.alias." + label)) {
-			CurrentEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
+			currentEnv.getEnv(GlobalEnv.class).SetLabel(Static.GLOBAL_PERMISSION);
 		}
 	}
 

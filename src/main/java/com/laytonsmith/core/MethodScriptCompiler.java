@@ -121,25 +121,25 @@ public final class MethodScriptCompiler {
 		script = script.replaceAll("\r\n", "\n");
 		script = script + "\n";
 		final Set<String> keywords = KeywordList.getKeywordNames();
-		final TokenStream token_list = new TokenStream();
+		final TokenStream tokenList = new TokenStream();
 
 		// Set our state variables.
-		boolean state_in_quote = false;
+		boolean stateInQuote = false;
 		int quoteLineNumberStart = 1;
-		boolean in_smart_quote = false;
+		boolean inSmartQuote = false;
 		int smartQuoteLineNumberStart = 1;
-		boolean in_comment = false;
+		boolean inComment = false;
 		int commentLineNumberStart = 1;
-		boolean comment_is_block = false;
-		boolean in_opt_var = false;
+		boolean commentIsBlock = false;
+		boolean inOptVar = false;
 		boolean inCommand = (!inPureMScript);
 		boolean inMultiline = false;
-		boolean in_smart_comment = false;
-		boolean in_file_options = false;
+		boolean inSmartComment = false;
+		boolean inFileOptions = false;
 		int fileOptionsLineNumberStart = 1;
 
 		StringBuilder buf = new StringBuilder();
-		int line_num = 1;
+		int lineNum = 1;
 		int column = 1;
 		int lastColumn = 0;
 		Target target = Target.UNKNOWN;
@@ -155,18 +155,18 @@ public final class MethodScriptCompiler {
 			column += i - lastColumn;
 			lastColumn = i;
 			if(c == '\n') {
-				line_num++;
+				lineNum++;
 				column = 1;
 				if(!inMultiline && !inPureMScript) {
 					inCommand = true;
 				}
 			}
 			if(buf.length() == 0) {
-				target = new Target(line_num, file, column);
+				target = new Target(lineNum, file, column);
 			}
 
 			// If we are in file options, add the character to the buffer if it's not a file options end character.
-			if(in_file_options) {
+			if(inFileOptions) {
 				// For a '>' character outside of a comment, '\>' would have to be used in file options.
 				// Other characters than '>'cannot be escaped.
 				// If support for more escaped characters would be desired in the future, it could be added here.
@@ -181,11 +181,11 @@ public final class MethodScriptCompiler {
 					}
 					case '>': {
 						if(saveAllTokens) {
-							token_list.add(new Token(TType.FILE_OPTIONS_STRING,
+							tokenList.add(new Token(TType.FILE_OPTIONS_STRING,
 									fileOptions.toString(), target));
-							token_list.add(new Token(TType.FILE_OPTIONS_END, ">", target));
+							tokenList.add(new Token(TType.FILE_OPTIONS_END, ">", target));
 						}
-						in_file_options = false;
+						inFileOptions = false;
 						continue;
 					}
 				}
@@ -194,27 +194,27 @@ public final class MethodScriptCompiler {
 			}
 
 			// Comment handling. This is bypassed if we are in a string.
-			if(!state_in_quote && !in_smart_quote) {
+			if(!stateInQuote && !inSmartQuote) {
 				switch(c) {
 
 					// Block comments start (/* and /**) and Double slash line comment start (//).
 					case '/': {
-						if(!in_comment) {
+						if(!inComment) {
 							if(c2 == '*') { // "/*" or "/**".
 								buf.append("/*");
-								in_comment = true;
-								comment_is_block = true;
+								inComment = true;
+								commentIsBlock = true;
 								if(i < script.length() - 2 && script.charAt(i + 2) == '*') { // "/**".
-									in_smart_comment = true;
+									inSmartComment = true;
 									buf.append("*");
 									i++;
 								}
-								commentLineNumberStart = line_num;
+								commentLineNumberStart = lineNum;
 								i++;
 								continue;
 							} else if(c2 == '/') { // "//".
 								buf.append("//");
-								in_comment = true;
+								inComment = true;
 								i++;
 								continue;
 							}
@@ -224,9 +224,9 @@ public final class MethodScriptCompiler {
 
 					// Line comment start (#).
 					case '#': {
-						if(!in_comment) { // "#".
+						if(!inComment) { // "#".
 							buf.append("#");
-							in_comment = true;
+							inComment = true;
 							continue;
 						}
 						break;
@@ -234,17 +234,17 @@ public final class MethodScriptCompiler {
 
 					// Block comment end (*/).
 					case '*': {
-						if(in_comment && comment_is_block && c2 == '/') { // "*/".
-							if(saveAllTokens || in_smart_comment) {
+						if(inComment && commentIsBlock && c2 == '/') { // "*/".
+							if(saveAllTokens || inSmartComment) {
 								buf.append("*/");
-								token_list.add(new Token(in_smart_comment ? TType.SMART_COMMENT : TType.COMMENT,
+								tokenList.add(new Token(inSmartComment ? TType.SMART_COMMENT : TType.COMMENT,
 										buf.toString(), target));
 							}
 							buf = new StringBuilder();
-							target = new Target(line_num, file, column);
-							in_comment = false;
-							comment_is_block = false;
-							in_smart_comment = false;
+							target = new Target(lineNum, file, column);
+							inComment = false;
+							commentIsBlock = false;
+							inSmartComment = false;
 							i++;
 							continue;
 						}
@@ -253,14 +253,14 @@ public final class MethodScriptCompiler {
 
 					// Line comment end (\n).
 					case '\n': {
-						if(in_comment && !comment_is_block) { // "\n".
-							in_comment = false;
+						if(inComment && !commentIsBlock) { // "\n".
+							inComment = false;
 							if(saveAllTokens) {
-								token_list.add(new Token(TType.COMMENT, buf.toString(), target));
-								token_list.add(new Token(TType.NEWLINE, "\n", new Target(line_num + 1, file, 0)));
+								tokenList.add(new Token(TType.COMMENT, buf.toString(), target));
+								tokenList.add(new Token(TType.NEWLINE, "\n", new Target(lineNum + 1, file, 0)));
 							}
 							buf = new StringBuilder();
-							target = new Target(line_num, file, column);
+							target = new Target(lineNum, file, column);
 							continue;
 						}
 						break;
@@ -269,13 +269,13 @@ public final class MethodScriptCompiler {
 			}
 
 			// If we are in a comment, add the character to the buffer.
-			if(in_comment) {
+			if(inComment) {
 				buf.append(c);
 				continue;
 			}
 
 			// Handle non-comment non-quoted characters.
-			if(!state_in_quote) {
+			if(!stateInQuote) {
 				// We're not in a comment or quoted string, handle: +=, -=, *=, /=, .=, ->, ++, --, %, **, *, +, -, /,
 				// >=, <=, <<<, >>>, <, >, ===, !==, ==, !=, &&&, |||, &&, ||, !, {, }, .., ., ::, [, =, ], :, comma,
 				// (, ), ;, and whitespace.
@@ -367,16 +367,16 @@ public final class MethodScriptCompiler {
 						case '<': {
 							if(c2 == '!') { // "<!".
 								if(buf.length() > 0) {
-									token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+									tokenList.add(new Token(TType.UNKNOWN, buf.toString(), target));
 									buf = new StringBuilder();
-									target = new Target(line_num, file, column);
+									target = new Target(lineNum, file, column);
 								}
 
 								if(saveAllTokens) {
-									token_list.add(new Token(TType.FILE_OPTIONS_START, "<!", target));
+									tokenList.add(new Token(TType.FILE_OPTIONS_START, "<!", target));
 								}
-								in_file_options = true;
-								fileOptionsLineNumberStart = line_num;
+								inFileOptions = true;
+								fileOptionsLineNumberStart = lineNum;
 								i++;
 								continue;
 							} else if(c2 == '=') { // "<=".
@@ -402,7 +402,7 @@ public final class MethodScriptCompiler {
 								}
 							} else { // "=".
 								if(inCommand) {
-									if(in_opt_var) {
+									if(inOptVar) {
 										token = new Token(TType.OPT_VAR_ASSIGN, "=", target);
 									} else {
 										token = new Token(TType.ALIAS_END, "=", target);
@@ -484,12 +484,12 @@ public final class MethodScriptCompiler {
 						}
 						case '[': {
 							token = new Token(TType.LSQUARE_BRACKET, "[", target);
-							in_opt_var = true;
+							inOptVar = true;
 							break;
 						}
 						case ']': {
 							token = new Token(TType.RSQUARE_BRACKET, "]", target);
-							in_opt_var = false;
+							inOptVar = false;
 							break;
 						}
 						case ',': {
@@ -512,23 +512,23 @@ public final class MethodScriptCompiler {
 									// true, because we know that won't be used by the compiler.
 									if(KeywordList.getKeywordByName(buf.toString()) != null) {
 										// It's a keyword.
-										token_list.add(new Token(TType.KEYWORD, buf.toString(), target));
+										tokenList.add(new Token(TType.KEYWORD, buf.toString(), target));
 									} else {
 										// It's not a keyword, but a normal function.
-										token_list.add(new Token(TType.FUNC_NAME, buf.toString(), target));
+										tokenList.add(new Token(TType.FUNC_NAME, buf.toString(), target));
 									}
 								} else {
-									token_list.add(new Token(TType.FUNC_NAME, buf.toString(), target));
+									tokenList.add(new Token(TType.FUNC_NAME, buf.toString(), target));
 								}
 								buf = new StringBuilder();
-								target = new Target(line_num, file, column);
+								target = new Target(lineNum, file, column);
 							} else {
 								// The previous token, if unknown, should be changed to a FUNC_NAME. If it's not
 								// unknown, we may be doing standalone parenthesis, so auto tack on the __autoconcat__
 								// function.
 								try {
 									int count = 0;
-									Iterator<Token> it = token_list.descendingIterator();
+									Iterator<Token> it = tokenList.descendingIterator();
 									Token t;
 									while((t = it.next()).type == TType.WHITESPACE) {
 										count++;
@@ -538,14 +538,14 @@ public final class MethodScriptCompiler {
 										// Go ahead and remove the whitespace here too, they break things.
 										count--;
 										for(int a = 0; a < count; a++) {
-											token_list.removeLast();
+											tokenList.removeLast();
 										}
 									} else {
-										token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
+										tokenList.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
 									}
 								} catch (NoSuchElementException e) {
 									// This is the first element on the list, so, it's another autoconcat.
-									token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
+									tokenList.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
 								}
 							}
 							break;
@@ -570,13 +570,13 @@ public final class MethodScriptCompiler {
 
 					// Add previous characters as UNKNOWN token.
 					if(buf.length() > 0) {
-						token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+						tokenList.add(new Token(TType.UNKNOWN, buf.toString(), target));
 						buf = new StringBuilder();
-						target = new Target(line_num, file, column);
+						target = new Target(lineNum, file, column);
 					}
 
 					// Add the new token to the token list.
-					token_list.add(token);
+					tokenList.add(token);
 
 					// Continue lexing.
 					continue;
@@ -586,20 +586,20 @@ public final class MethodScriptCompiler {
 			// Handle non-comment characters that might start or stop a quoted string.
 			switch(c) {
 				case '\'': {
-					if(state_in_quote && !in_smart_quote) {
-						token_list.add(new Token(TType.STRING, buf.toString(), target));
+					if(stateInQuote && !inSmartQuote) {
+						tokenList.add(new Token(TType.STRING, buf.toString(), target));
 						buf = new StringBuilder();
-						target = new Target(line_num, file, column);
-						state_in_quote = false;
+						target = new Target(lineNum, file, column);
+						stateInQuote = false;
 						continue;
-					} else if(!state_in_quote) {
-						state_in_quote = true;
-						quoteLineNumberStart = line_num;
-						in_smart_quote = false;
+					} else if(!stateInQuote) {
+						stateInQuote = true;
+						quoteLineNumberStart = lineNum;
+						inSmartQuote = false;
 						if(buf.length() > 0) {
-							token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+							tokenList.add(new Token(TType.UNKNOWN, buf.toString(), target));
 							buf = new StringBuilder();
-							target = new Target(line_num, file, column);
+							target = new Target(lineNum, file, column);
 						}
 						continue;
 					} else {
@@ -609,21 +609,21 @@ public final class MethodScriptCompiler {
 					break;
 				}
 				case '"': {
-					if(state_in_quote && in_smart_quote) {
-						token_list.add(new Token(TType.SMART_STRING, buf.toString(), target));
+					if(stateInQuote && inSmartQuote) {
+						tokenList.add(new Token(TType.SMART_STRING, buf.toString(), target));
 						buf = new StringBuilder();
-						target = new Target(line_num, file, column);
-						state_in_quote = false;
-						in_smart_quote = false;
+						target = new Target(lineNum, file, column);
+						stateInQuote = false;
+						inSmartQuote = false;
 						continue;
-					} else if(!state_in_quote) {
-						state_in_quote = true;
-						in_smart_quote = true;
-						smartQuoteLineNumberStart = line_num;
+					} else if(!stateInQuote) {
+						stateInQuote = true;
+						inSmartQuote = true;
+						smartQuoteLineNumberStart = lineNum;
 						if(buf.length() > 0) {
-							token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+							tokenList.add(new Token(TType.UNKNOWN, buf.toString(), target));
 							buf = new StringBuilder();
-							target = new Target(line_num, file, column);
+							target = new Target(lineNum, file, column);
 						}
 						continue;
 					} else {
@@ -635,16 +635,16 @@ public final class MethodScriptCompiler {
 				case '\n': {
 
 					// Append a newline to the buffer if it's quoted.
-					if(state_in_quote) {
+					if(stateInQuote) {
 						buf.append(c);
 					} else {
 						// Newline is not quoted. Move the buffer to an UNKNOWN token and add a NEWLINE token.
 						if(buf.length() > 0) {
-							token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+							tokenList.add(new Token(TType.UNKNOWN, buf.toString(), target));
 							buf = new StringBuilder();
-							target = new Target(line_num, file, column);
+							target = new Target(lineNum, file, column);
 						}
-						token_list.add(new Token(TType.NEWLINE, "\n", target));
+						tokenList.add(new Token(TType.NEWLINE, "\n", target));
 					}
 					continue;
 				}
@@ -652,8 +652,8 @@ public final class MethodScriptCompiler {
 					// Handle escaped characters in quotes or a single "\" seperator token otherwise.
 
 					// Handle backslash character outside of quotes.
-					if(!state_in_quote) {
-						token_list.add(new Token(TType.SEPERATOR, "\\", target));
+					if(!stateInQuote) {
+						tokenList.add(new Token(TType.SEPERATOR, "\\", target));
 						break;
 					}
 
@@ -723,7 +723,7 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '@': {
-							if(!in_smart_quote) {
+							if(!inSmartQuote) {
 								throw new ConfigCompileException("The escape sequence \\@ is not"
 										+ " a recognized escape sequence in a non-smart string", target);
 							}
@@ -744,7 +744,7 @@ public final class MethodScriptCompiler {
 					// At this point, only non-comment and non-escaped characters that are not part of a
 					// quote start/end are left.
 					// Disallow Non-Breaking Space Characters.
-					if(!state_in_quote && c == '\u00A0'/*nbsp*/) {
+					if(!stateInQuote && c == '\u00A0'/*nbsp*/) {
 						throw new ConfigCompileException("NBSP character in script", target);
 					}
 
@@ -756,14 +756,14 @@ public final class MethodScriptCompiler {
 		} // End of lexing.
 
 		// Handle unended file options.
-		if(in_file_options) {
+		if(inFileOptions) {
 			throw new ConfigCompileException("Unended file options. You started the the file options on line "
 					+ fileOptionsLineNumberStart, target);
 		}
 
 		// Handle unended string literals.
-		if(state_in_quote) {
-			if(in_smart_quote) {
+		if(stateInQuote) {
+			if(inSmartQuote) {
 				throw new ConfigCompileException("Unended string literal. You started the last double quote on line "
 						+ smartQuoteLineNumberStart, target);
 			} else {
@@ -773,14 +773,14 @@ public final class MethodScriptCompiler {
 		}
 
 		// Handle unended comment blocks. Since a newline is added to the end of the script, line comments are ended.
-		if(in_comment || comment_is_block) {
+		if(inComment || commentIsBlock) {
 			throw new ConfigCompileException("Unended block comment. You started the comment on line "
 					+ commentLineNumberStart, target);
 		}
 
 		// Look at the tokens and get meaning from them. Also, look for improper symbol locations
 		// and go ahead and absorb unary +- into the token.
-		ListIterator<Token> it = token_list.listIterator(0);
+		ListIterator<Token> it = tokenList.listIterator(0);
 		while(it.hasNext()) {
 			Token t = it.next();
 
@@ -876,11 +876,11 @@ public final class MethodScriptCompiler {
 		}
 
 		// Set file options
-		token_list.setFileOptions(fileOptions.toString());
+		tokenList.setFileOptions(fileOptions.toString());
 		// Make sure that the file options are the first non-comment code in the file
 		{
 			boolean foundCode = false;
-			for(Token t : token_list) {
+			for(Token t : tokenList) {
 				if(t.type.isFileOption()) {
 					if(foundCode) {
 						throw new ConfigCompileException("File options must be the first non-comment section in the"
@@ -894,7 +894,7 @@ public final class MethodScriptCompiler {
 			}
 		}
 
-		return token_list;
+		return tokenList;
 	}
 
 	/**
@@ -958,7 +958,7 @@ public final class MethodScriptCompiler {
 		// Handle multiline constructs.
 		// Take out newlines between the '= >>>' and '<<<' tokens (also removing the '>>>' and '<<<' tokens).
 		// Also remove comments and also remove newlines that are behind a '\'.
-		boolean inside_multiline = false;
+		boolean insideMultiline = false;
 		ListIterator<Token> it = tokenStream.listIterator(0);
 		Token token = null;
 		while(it.hasNext()) {
@@ -968,7 +968,7 @@ public final class MethodScriptCompiler {
 				case ALIAS_END: { // "=".
 					if(it.hasNext()) {
 						if(it.next().type == TType.MULTILINE_START) { // "= >>>".
-							inside_multiline = true;
+							insideMultiline = true;
 							it.remove(); // Remove multiline start (>>>).
 							it.previous(); // Select 'token' <---.
 							it.next(); // Select 'token' -->.
@@ -981,19 +981,19 @@ public final class MethodScriptCompiler {
 				case MULTILINE_END: { // "<<<".
 
 					// Handle multiline end token (<<<) without start.
-					if(!inside_multiline) {
+					if(!insideMultiline) {
 						throw new ConfigCompileException(
 								"Found multiline end symbol, and no multiline start found", token.target);
 					}
 
-					inside_multiline = false;
+					insideMultiline = false;
 					it.remove(); // Remove multiline end (<<<).
 					continue;
 				}
 				case MULTILINE_START: { // ">>>".
 
 					// Handle multiline start token (>>>) while already in multiline.
-					if(inside_multiline) {
+					if(insideMultiline) {
 						throw new ConfigCompileException("Did not expect a multiline start symbol here,"
 								+ " are you missing a multiline end symbol above this line?", token.target);
 					}
@@ -1011,7 +1011,7 @@ public final class MethodScriptCompiler {
 				case NEWLINE: { // "\n".
 
 					// Skip newlines that are inside a multiline construct.
-					if(inside_multiline) {
+					if(insideMultiline) {
 						it.remove(); // Remove newline.
 					}
 					continue;
@@ -1042,7 +1042,7 @@ public final class MethodScriptCompiler {
 		assert token != null;
 
 		// Handle missing multiline end token.
-		if(inside_multiline) {
+		if(insideMultiline) {
 			throw new ConfigCompileException("Expecting a multiline end symbol, but your last multiline alias appears to be missing one.", token.target);
 		}
 
@@ -1781,6 +1781,7 @@ public final class MethodScriptCompiler {
 		}
 	}
 
+	@SuppressWarnings("checkstyle:constantname") // Variable is more clear when named after the function it represents.
 	private static final String __autoconcat__ = new Compiler.__autoconcat__().getName();
 
 	/**

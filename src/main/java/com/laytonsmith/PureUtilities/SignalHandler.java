@@ -11,9 +11,9 @@ import sun.misc.Signal;
  */
 public class SignalHandler {
 
-	private static final Map<SignalType, SignalCallback> handlers = new HashMap<>();
+	private static final Map<SignalType, SignalCallback> HANDLERS = new HashMap<>();
 
-	private static final Set<SignalType> setup = new HashSet<>();
+	private static final Set<SignalType> SETUP = new HashSet<>();
 
 	/**
 	 * Registers a new signal handler, and returns the last one
@@ -30,16 +30,16 @@ public class SignalHandler {
 			throw new IllegalArgumentException(type.getSignalName() + " cannot be caught, and therefore cannot be registered.");
 		}
 		SignalCallback last = null;
-		if(handlers.containsKey(type)) {
-			last = handlers.get(type);
+		if(HANDLERS.containsKey(type)) {
+			last = HANDLERS.get(type);
 		}
-		handlers.put(type, handler);
-		if(!setup.contains(type)) {
+		HANDLERS.put(type, handler);
+		if(!SETUP.contains(type)) {
 			sun.misc.Signal.handle(new sun.misc.Signal(type.getSignalName()), new sun.misc.SignalHandler() {
 
 				@Override
 				public void handle(Signal sig) {
-					boolean handled = handlers.get(type).handle(type);
+					boolean handled = HANDLERS.get(type).handle(type);
 					if(!handled) {
 						if(type.getDefaultAction() == SignalType.DefaultAction.IGNORE) {
 							sun.misc.SignalHandler.SIG_IGN.handle(sig);
@@ -49,7 +49,7 @@ public class SignalHandler {
 					}
 				}
 			});
-			setup.add(type);
+			SETUP.add(type);
 		}
 		return last;
 	}

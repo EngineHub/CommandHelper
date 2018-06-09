@@ -935,7 +935,6 @@ public class PlayerEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if(event instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) event;
-
 			}
 			return false;
 		}
@@ -1853,28 +1852,27 @@ public class PlayerEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if(event instanceof MCWorldChangedEvent) {
 				MCWorldChangedEvent e = (MCWorldChangedEvent) event;
-				return true;
 			}
 			return false;
 		}
 
 	}
 
-	private static final Set<Integer> thresholdList = new HashSet<>();
+	private static final Set<Integer> THRESHOLD_LIST = new HashSet<>();
 
 	public static Set<Integer> GetThresholdList() {
-		return thresholdList;
+		return THRESHOLD_LIST;
 	}
 
-	private static final Map<Integer, Map<String, MCLocation>> lastPlayerLocations = new HashMap<>();
+	private static final Map<Integer, Map<String, MCLocation>> LAST_PLAYER_LOCATIONS = new HashMap<>();
 
 	public static Map<String, MCLocation> GetLastLocations(Integer i) {
-		if(!lastPlayerLocations.containsKey(i)) {
+		if(!LAST_PLAYER_LOCATIONS.containsKey(i)) {
 			HashMap<String, MCLocation> newLocation = new HashMap<>();
-			lastPlayerLocations.put(i, newLocation);
+			LAST_PLAYER_LOCATIONS.put(i, newLocation);
 			return newLocation;
 		}
-		return (lastPlayerLocations.get(i));
+		return (LAST_PLAYER_LOCATIONS.get(i));
 	}
 
 	@api
@@ -1903,8 +1901,8 @@ public class PlayerEvents {
 
 		@Override
 		public void hook() {
-			thresholdList.clear();
-			lastPlayerLocations.clear();
+			THRESHOLD_LIST.clear();
+			LAST_PLAYER_LOCATIONS.clear();
 		}
 
 		@Override
@@ -1914,7 +1912,7 @@ public class PlayerEvents {
 			if(prefilters.containsKey("threshold")) {
 				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
 			}
-			thresholdList.add(threshold);
+			THRESHOLD_LIST.add(threshold);
 		}
 
 		@Override
@@ -1934,8 +1932,8 @@ public class PlayerEvents {
 					}
 				}
 			}
-			thresholdList.remove(threshold);
-			lastPlayerLocations.remove(threshold);
+			THRESHOLD_LIST.remove(threshold);
+			LAST_PLAYER_LOCATIONS.remove(threshold);
 		}
 
 		@Override

@@ -97,7 +97,7 @@ public final class SiteDeploy {
 	private static final String INSTALL_PEM_FILE = "install-pem-file";
 	private static final String INSTALL_PUB_KEYS = "install-pub-keys";
 
-	public static void run(boolean generate_prefs, boolean useLocalCache, File sitedeploy, String password,
+	public static void run(boolean generatePrefs, boolean useLocalCache, File sitedeploy, String password,
 			boolean doValidation) throws Exception {
 		List<Preferences.Preference> defaults = new ArrayList<>();
 		// SCP Options
@@ -162,7 +162,7 @@ public final class SiteDeploy {
 				+ " will be uploaded."));
 
 		Preferences prefs = new Preferences("Site-Deploy", Logger.getLogger(SiteDeploy.class.getName()), defaults);
-		if(generate_prefs) {
+		if(generatePrefs) {
 			prefs.init(sitedeploy);
 			System.out.println("Preferences file is now located at " + sitedeploy.getAbsolutePath() + ". Please fill in the"
 					+ " values, then re-run this command without the --generate-prefs option.");
@@ -174,7 +174,7 @@ public final class SiteDeploy {
 		String hostname = (String) prefs.getPreference(HOSTNAME);
 		Integer port = (Integer) prefs.getPreference(PORT);
 		String directory = (String) prefs.getPreference(DIRECTORY);
-		Boolean use_password = (Boolean) prefs.getPreference(PASSWORD);
+		Boolean usePassword = (Boolean) prefs.getPreference(PASSWORD);
 		String docsBase = (String) prefs.getPreference(DOCSBASE);
 		String siteBase = (String) prefs.getPreference(SITEBASE);
 		Boolean showTemplateCredit = (Boolean) prefs.getPreference(SHOW_TEMPLATE_CREDIT);
@@ -251,7 +251,7 @@ public final class SiteDeploy {
 			System.out.println("validator-url: " + validatorUrl);
 		}
 
-		if(use_password && password != null) {
+		if(usePassword && password != null) {
 			jline.console.ConsoleReader reader = null;
 			try {
 				Character cha = (char) 0;
@@ -629,10 +629,11 @@ public final class SiteDeploy {
 		final Generator learningTrailGen = new Generator() {
 			@Override
 			public String generate(String... args) {
-				String learning_trail = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/LearningTrail.json"));
+				String learningTrail =
+						StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/LearningTrail.json"));
 				List<Map<String, List<Map<String, String>>>> ret = new ArrayList<>();
 				@SuppressWarnings("unchecked")
-				List<Map<String, List<Object>>> lt = (List<Map<String, List<Object>>>) JSONValue.parse(learning_trail);
+				List<Map<String, List<Object>>> lt = (List<Map<String, List<Object>>>) JSONValue.parse(learningTrail);
 				for(Map<String, List<Object>> l : lt) {
 					for(Map.Entry<String, List<Object>> e : l.entrySet()) {
 						String category = e.getKey();
@@ -975,9 +976,9 @@ public final class SiteDeploy {
 				} catch (IOException ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				String index_js = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/index.js"));
+				String indexJs = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/index.js"));
 				try {
-					writeFromString(DocGenTemplates.DoTemplateReplacement(index_js, getStandardGenerators()), "resources/js/index.js");
+					writeFromString(DocGenTemplates.DoTemplateReplacement(indexJs, getStandardGenerators()), "resources/js/index.js");
 				} catch (Generator.GenerateException ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "GenerateException in /siteDeploy/index.js", ex);
 				}

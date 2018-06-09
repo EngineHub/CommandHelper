@@ -69,12 +69,12 @@ public class VirtualFileSystem {
 	protected final File root;
 	public final File symlinkFile;
 	private final BigInteger quota = new BigInteger("-1");
-	private BigInteger FSSize = new BigInteger("0");
+	private BigInteger fsSize = new BigInteger("0");
 	private Thread fsSizeThread;
 	private final List<FileSystemLayer> currentTmpFiles = new ArrayList<FileSystemLayer>();
 	private final Map<VirtualGlob, URI> symlinks = new HashMap<VirtualGlob, URI>();
 
-	private static final Map<String, Constructor> FSLProviders = new HashMap<String, Constructor>();
+	private static final Map<String, Constructor> FSL_PROVIDERS = new HashMap<String, Constructor>();
 
 	static {
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(VirtualFileSystem.class));
@@ -84,7 +84,7 @@ public class VirtualFileSystem {
 				Class<?> clazz = clazzMirror.loadClass();
 				Constructor<?> constructor = clazz.getConstructor(VirtualFile.class, VirtualFileSystem.class, String.class);
 				FileSystemLayer.fslayer annotation = clazz.getAnnotation(FileSystemLayer.fslayer.class);
-				FSLProviders.put(annotation.value(), constructor);
+				FSL_PROVIDERS.put(annotation.value(), constructor);
 			} catch (NoSuchMethodException ex) {
 				throw new Error(clazzMirror.getClassName() + " must implement a constructor with the signature: public " + clazzMirror.getSimpleName() + "("
 						+ VirtualFile.class.getSimpleName() + ", " + VirtualFileSystem.class.getSimpleName() + ", " + String.class.getSimpleName() + ")");
@@ -118,7 +118,7 @@ public class VirtualFileSystem {
 				public void run() {
 					while(true) {
 						try {
-							FSSize = FileUtils.sizeOfDirectoryAsBigInteger(root);
+							fsSize = FileUtils.sizeOfDirectoryAsBigInteger(root);
 							//Sleep for a minute before running again.
 							Thread.sleep(TimeConversionUtil.inMilliseconds(1, TimeConversionUtil.TimeUnit.MINUTE));
 						} catch (InterruptedException ex) {
@@ -197,10 +197,10 @@ public class VirtualFileSystem {
 			provider = uri.getScheme();
 			symlink = uri.getSchemeSpecificPart();
 		}
-		if(FSLProviders.containsKey(provider)) {
+		if(FSL_PROVIDERS.containsKey(provider)) {
 			FileSystemLayer fsl;
 			try {
-				fsl = (FileSystemLayer) FSLProviders.get(provider).newInstance(virtual, this, symlink);
+				fsl = (FileSystemLayer) FSL_PROVIDERS.get(provider).newInstance(virtual, this, symlink);
 			} catch (Exception ex) {
 				//This shouldn't happen ever, minus a programming mistake?
 				throw new Error(ex);

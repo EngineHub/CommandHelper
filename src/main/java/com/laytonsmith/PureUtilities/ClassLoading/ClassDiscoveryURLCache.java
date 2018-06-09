@@ -63,36 +63,36 @@ public class ClassDiscoveryURLCache {
 	 * @throws java.lang.ClassNotFoundException
 	 */
 	public ClassDiscoveryURLCache(URL url, InputStream descriptor) throws IOException, ClassNotFoundException {
-		List<ClassMirror<?>> _list;
+		List<ClassMirror<?>> list;
 		ObjectInputStream ois = new ObjectInputStream(descriptor);
 		try {
-			_list = (List<ClassMirror<?>>) ois.readObject();
+			list = (List<ClassMirror<?>>) ois.readObject();
 		} catch (ClassNotFoundException ex) {
 			if(url != null) {
 				//We can recover from this one, but it won't be instant.
-				_list = new ClassDiscoveryURLCache(url).list;
+				list = new ClassDiscoveryURLCache(url).list;
 			} else {
 				throw ex;
 			}
 		}
 		ois.close();
 
-		for(ClassMirror m : _list) {
+		for(ClassMirror m : list) {
 			ReflectionUtils.set(ClassMirror.class, m, "originalURL", url);
 		}
 
-		this.list = _list;
+		this.list = list;
 	}
 
 	public void writeDescriptor(OutputStream out) throws IOException {
 		ObjectOutputStream oos = new ObjectOutputStream(out);
-		oos.writeObject(list);
+		oos.writeObject(this.list);
 		oos.close();
 	}
 
 	@Override
 	public String toString() {
-		return "[" + ClassDiscoveryURLCache.class.getSimpleName() + ": " + list.size() + "]";
+		return "[" + ClassDiscoveryURLCache.class.getSimpleName() + ": " + this.list.size() + "]";
 	}
 
 	/**

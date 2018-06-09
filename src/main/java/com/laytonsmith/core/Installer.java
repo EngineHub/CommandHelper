@@ -27,12 +27,12 @@ public final class Installer {
 		//Extensions folder
 		new File(root, "extensions").mkdirs();
 		//Check to see if the auto_include file exists. If not, include it now
-		File auto_include = new File(root, "auto_include.ms");
-		if(!auto_include.exists()) {
+		File autoInclude = new File(root, "auto_include.ms");
+		if(!autoInclude.exists()) {
 			String sample = parseISToString(Installer.class.getResourceAsStream("/samp_auto_include.txt"));
 			sample = sample.replaceAll("\n|\r\n", System.getProperty("line.separator"));
 			try {
-				FileUtil.write(sample, auto_include);
+				FileUtil.write(sample, autoInclude);
 			} catch (IOException ex) {
 				Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
 			}

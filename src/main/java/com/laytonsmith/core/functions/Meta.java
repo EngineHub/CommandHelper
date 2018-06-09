@@ -815,8 +815,16 @@ public class Meta {
 	@api(environments = CommandHelperEnvironment.class)
 	public static class run_cmd extends AbstractFunction {
 
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
 		private static final run run = new run();
+
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
 		private static final call_alias call_alias = new call_alias();
+
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
 		private static final is_alias is_alias = new is_alias();
 
 		@Override

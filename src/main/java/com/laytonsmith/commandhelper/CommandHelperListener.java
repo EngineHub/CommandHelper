@@ -51,7 +51,7 @@ public class CommandHelperListener implements Listener {
 	/**
 	 * Logger.
 	 */
-	private static final Logger logger = Logger.getLogger("Minecraft");
+	private static final Logger LOGGER = Logger.getLogger("Minecraft");
 
 	/**
 	 * List of global aliases.
@@ -67,7 +67,7 @@ public class CommandHelperListener implements Listener {
 	 * Load global aliases.
 	 */
 	public void loadGlobalAliases() {
-		ac = CommandHelperPlugin.getCore();
+		this.ac = CommandHelperPlugin.getCore();
 	}
 
 	/**
@@ -116,9 +116,9 @@ public class CommandHelperListener implements Listener {
 				}
 			}
 		} catch (InternalException e) {
-			logger.log(Level.SEVERE, e.getMessage());
+			LOGGER.log(Level.SEVERE, e.getMessage());
 		} catch (ConfigRuntimeException e) {
-			logger.log(Level.WARNING, e.getMessage());
+			LOGGER.log(Level.WARNING, e.getMessage());
 		} catch (Throwable e) {
 			player.sendMessage(MCChatColor.RED + "Command failed with following reason: " + e.getMessage());
 			//Obviously the command is registered, but it somehow failed. Cancel the event.

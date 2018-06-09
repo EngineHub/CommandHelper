@@ -38,7 +38,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	private final Environment originalEnv;
 	private final ParseTree tree; //The code closure for this event
 	private final Driver driver; //For efficiency sake, cache it here
-	private static int EventID = 0;
+	private static int eventId = 0;
 	private final Target target;
 
 	/**
@@ -48,7 +48,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	 */
 	private static int GetUniqueID() {
 		synchronized(BoundEvent.class) {
-			return ++EventID;
+			return ++eventId;
 		}
 	}
 

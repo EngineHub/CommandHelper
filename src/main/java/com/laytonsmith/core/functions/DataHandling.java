@@ -86,8 +86,16 @@ import java.util.logging.Logger;
 @core
 public class DataHandling {
 
+	// Variable is more clear when named after the function it represents.
+	@SuppressWarnings("checkstyle:constantname")
 	private static final String array_get = new ArrayHandling.array_get().getName();
+
+	// Variable is more clear when named after the function it represents.
+	@SuppressWarnings("checkstyle:constantname")
 	private static final String array_set = new ArrayHandling.array_set().getName();
+
+	// Variable is more clear when named after the function it represents.
+	@SuppressWarnings("checkstyle:constantname")
 	private static final String array_push = new ArrayHandling.array_push().getName();
 
 	public static String docs() {

@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  */
 public class ExtensionDocGen {
 
-	private static final String nl = StringUtils.nl();
+	private static final String NL = StringUtils.nl();
 	private static final Pattern WIKI_LINK = Pattern.compile("\\[([a-zA-Z]+://[^ ]+) ([^\\]]+)]");
 
 	public static void generate(File inputExtension, OutputStream outputStream) throws InstantiationException, IllegalAccessException, MalformedURLException, IOException {
@@ -70,16 +70,16 @@ public class ExtensionDocGen {
 			});
 		}
 		if(!functionEntryList.isEmpty()) {
-			fdocs.append("# Functions").append(nl);
+			fdocs.append("# Functions").append(NL);
 		}
 		for(Entry<Class<?>, ArrayList<Class<? extends Function>>> entry : functionEntryList) {
 			Class enclosingClass = entry.getKey();
 			String[] split = enclosingClass.getName().split("\\.");
-			fdocs.append("## ").append(split[split.length - 1]).append(nl);
+			fdocs.append("## ").append(split[split.length - 1]).append(NL);
 			try {
 				Method docsMethod = enclosingClass.getMethod("docs", (Class[]) null);
 				Object o = enclosingClass.newInstance();
-				fdocs.append((String) docsMethod.invoke(o, (Object[]) null)).append(nl).append(nl);
+				fdocs.append((String) docsMethod.invoke(o, (Object[]) null)).append(NL).append(NL);
 			} catch (NoSuchMethodException
 					| SecurityException
 					| InstantiationException
@@ -91,10 +91,10 @@ public class ExtensionDocGen {
 				Function f = cf.newInstance();
 				if(f.appearInDocumentation()) {
 					DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
-					String d = "### " + markdownEscape(di.ret) + " " + markdownEscape(f.getName()) + "(" + markdownEscape(di.originalArgs) + "):" + nl
-							+ convertWiki(di.topDesc != null ? di.topDesc : di.desc) + nl
-							+ convertWiki(di.extendedDesc != null ? nl + di.extendedDesc + nl : "");
-					fdocs.append(d).append(nl);
+					String d = "### " + markdownEscape(di.ret) + " " + markdownEscape(f.getName()) + "(" + markdownEscape(di.originalArgs) + "):" + NL
+							+ convertWiki(di.topDesc != null ? di.topDesc : di.desc) + NL
+							+ convertWiki(di.extendedDesc != null ? NL + di.extendedDesc + NL : "");
+					fdocs.append(d).append(NL);
 				}
 			}
 		}
@@ -126,16 +126,16 @@ public class ExtensionDocGen {
 			});
 		}
 		if(!eventEntryList.isEmpty()) {
-			fdocs.append("# Events").append(nl);
+			fdocs.append("# Events").append(NL);
 		}
 		for(Entry<Class<?>, ArrayList<Class<? extends Event>>> entry : eventEntryList) {
 			Class enclosingClass = entry.getKey();
 			String[] split = enclosingClass.getName().split("\\.");
-			fdocs.append("## ").append(split[split.length - 1]).append(nl);
+			fdocs.append("## ").append(split[split.length - 1]).append(NL);
 			try {
 				Method docsMethod = enclosingClass.getMethod("docs", (Class[]) null);
 				Object o = enclosingClass.newInstance();
-				fdocs.append((String) docsMethod.invoke(o, (Object[]) null)).append(nl).append(nl);
+				fdocs.append((String) docsMethod.invoke(o, (Object[]) null)).append(NL).append(NL);
 			} catch (NoSuchMethodException
 					| SecurityException
 					| InstantiationException
@@ -155,11 +155,11 @@ public class ExtensionDocGen {
 					String mutability = DocGen.MutabilityData.Get(m.group(4).split("\\|"), DocGen.MarkupType.MARKDOWN);
 					//String manualTrigger = ManualTriggerData.Get(m.group(5).split("\\|"), DocGen.MarkupType.MARKDOWN);
 					//String since = e.since().toString();
-					fdocs.append("### ").append(markdownEscape(name)).append(nl);
-					fdocs.append(description).append(nl);
-					fdocs.append("#### Prefilters").append(nl).append(prefilter).append(nl);
-					fdocs.append("#### Event Data").append(nl).append(eventData).append(nl);
-					fdocs.append("#### Mutable Fields").append(nl).append(mutability).append(nl);
+					fdocs.append("### ").append(markdownEscape(name)).append(NL);
+					fdocs.append(description).append(NL);
+					fdocs.append("#### Prefilters").append(NL).append(prefilter).append(NL);
+					fdocs.append("#### Event Data").append(NL).append(eventData).append(NL);
+					fdocs.append("#### Mutable Fields").append(NL).append(mutability).append(NL);
 				}
 			}
 		}

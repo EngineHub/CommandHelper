@@ -25,12 +25,12 @@ import java.util.Map;
  */
 public abstract class CompositeFunction extends AbstractFunction {
 
-	private static final Map<Class<? extends CompositeFunction>, ParseTree> cachedScripts = new HashMap<>();
+	private static final Map<Class<? extends CompositeFunction>, ParseTree> CACHED_SCRIPTS = new HashMap<>();
 
 	@Override
 	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 		ParseTree tree;
-		if(!cachedScripts.containsKey(this.getClass())) {
+		if(!CACHED_SCRIPTS.containsKey(this.getClass())) {
 			try {
 
 				String script = script();
@@ -42,10 +42,10 @@ public abstract class CompositeFunction extends AbstractFunction {
 				throw new Error(ex);
 			}
 			if(cacheCompile()) {
-				cachedScripts.put(this.getClass(), tree);
+				CACHED_SCRIPTS.put(this.getClass(), tree);
 			}
 		} else {
-			tree = cachedScripts.get(this.getClass());
+			tree = CACHED_SCRIPTS.get(this.getClass());
 		}
 		GlobalEnv env = environment.getEnv(GlobalEnv.class);
 		IVariableList oldVariables = env.GetVarList();

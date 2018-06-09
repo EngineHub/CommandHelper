@@ -23,7 +23,7 @@ public class PacketJumper {
 	private static SortedSet<PacketInfo> packetInfo;
 	@SuppressWarnings("FieldMayBeFinal")
 	private static Thread initializingThread = null;
-	private static final String protocolDocs = "";
+	private static final String PROTOCOL_DOCS = "";
 
 	public static void startup() {
 		if(true) {
@@ -44,8 +44,8 @@ public class PacketJumper {
 //				}
 				String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
 				try {
-					Class PacketClass = Class.forName("net.minecraft.server." + version + ".Packet");
-					Set<Class> packets = ReflectionUtils.getAllExtensions(PacketClass);
+					Class packetClass = Class.forName("net.minecraft.server." + version + ".Packet");
+					Set<Class> packets = ReflectionUtils.getAllExtensions(packetClass);
 					for(Class packet : packets) {
 						packetInfo.add(new PacketInfo(packet));
 					}

@@ -471,9 +471,9 @@ public final class Interpreter {
 			TermColors.DisableColors();
 		}
 
-		String auto_include = FileUtil.read(MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile());
+		String autoInclude = FileUtil.read(MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile());
 		try {
-			MethodScriptCompiler.execute(auto_include, MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile(), true, env, null, null, null);
+			MethodScriptCompiler.execute(autoInclude, MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile(), true, env, null, null, null);
 		} catch (ConfigCompileException ex) {
 			ConfigRuntimeException.HandleUncaughtException(ex, "Interpreter will continue to run, however.", null);
 		} catch (ConfigCompileGroupException ex) {

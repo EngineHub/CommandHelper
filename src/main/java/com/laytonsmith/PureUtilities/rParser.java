@@ -14,7 +14,7 @@ public final class rParser {
 	private rParser() {
 	}
 
-	private static final int lineLength = 312;
+	private static final int LINE_LENGTH = 312;
 
 	/*
 	 * Finds the last color sequence used in the string
@@ -46,11 +46,11 @@ public final class rParser {
 	}
 
 	public static String[] wordWrap(String msg) {
-		return wordWrap(msg, "", lineLength);
+		return wordWrap(msg, "", LINE_LENGTH);
 	}
 
 	public static String[] wordWrap(String msg, String prefix) {
-		return wordWrap(msg, prefix, lineLength);
+		return wordWrap(msg, prefix, LINE_LENGTH);
 	}
 
 	public static String[] wordWrap(String msg, String prefix, int lineLength) {

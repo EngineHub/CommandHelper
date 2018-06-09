@@ -188,7 +188,7 @@ class CompilerObject {
 			throw new ConfigCompileException("Unmatched closing parenthesis. (Did you put too many right parenthesis?)", t);
 		}
 	}
-	private static final List<String> keywords = Arrays.asList(new String[]{"else", "bind", "proc"});
+	private static final List<String> KEYWORDS = Arrays.asList(new String[]{"else", "bind", "proc"});
 
 	private Construct resolveIdentifier(Token t) throws ConfigCompileException {
 		switch(t.type) {
@@ -208,7 +208,7 @@ class CompilerObject {
 					return CBoolean.GenerateCBoolean(false, t.getTarget());
 				} else if(t.val().equals("null")) {
 					return CNull.GenerateCNull(t.getTarget());
-				} else if(keywords.contains(t.val())) {
+				} else if(KEYWORDS.contains(t.val())) {
 					return new CKeyword(t.val(), t.getTarget());
 				} else {
 					if(stream.getFileOptions().isStrict()) {

@@ -518,7 +518,7 @@ public final class StringUtils {
 		StringBuilder buf = new StringBuilder();
 		char escape = 0;
 		char quote = 0;
-		boolean was_quote = false;
+		boolean wasQuote = false;
 		for(int i = 0; i < args.length(); i++) {
 			char ch = args.charAt(i);
 			if(quote != 0) {  // we're in a quote
@@ -534,7 +534,7 @@ public final class StringUtils {
 					continue;
 				} else if(ch == quote) {  // Specifying the same quote again terminates the quote.
 					quote = 0;
-					was_quote = true;
+					wasQuote = true;
 					continue;
 				}
 			} else if(escape != 0) {
@@ -546,10 +546,10 @@ public final class StringUtils {
 			} else { // outside of quotes and escapes
 				switch(ch) {
 					case ' ':  // we can tokenize
-						if(was_quote || buf.length() != 0) {
+						if(wasQuote || buf.length() != 0) {
 							arguments.add(buf.toString());
 							buf = new StringBuilder();
-							was_quote = false;
+							wasQuote = false;
 						}
 						continue;
 					case '"':  // we can start quotes
@@ -570,7 +570,7 @@ public final class StringUtils {
 		if(escape != 0) {  // makes trailing escapes be appended (erroneous string, though, IMO)
 			buf.append(escape);
 		}
-		if(was_quote || buf.length() != 0) {  // add the final string
+		if(wasQuote || buf.length() != 0) {  // add the final string
 			arguments.add(buf.toString());
 		}
 		return arguments;

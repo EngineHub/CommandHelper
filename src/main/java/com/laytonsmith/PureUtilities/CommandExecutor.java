@@ -51,11 +51,9 @@ public class CommandExecutor {
 		c.setSystemOut(os);
 		c.start();
 		c.waitFor();
-		Byte[] Bytes = new Byte[output.size()];
 		byte[] bytes = new byte[output.size()];
-		Bytes = output.toArray(Bytes);
-		for(int i = 0; i < Bytes.length; i++) {
-			bytes[i] = Bytes[i];
+		for(int i = 0; i < output.size(); i++) {
+			bytes[i] = output.get(i).byteValue();
 		}
 
 		return new String(bytes, "UTF-8");

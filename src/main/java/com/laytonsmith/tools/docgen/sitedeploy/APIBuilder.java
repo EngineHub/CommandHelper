@@ -4,7 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.api.Platforms;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MethodScriptFileLocations;
@@ -59,8 +59,8 @@ public class APIBuilder {
 		Map<String, Object> json = new TreeMap<>();
 		{
 			// functions
-			Map<String, Map<String, Object>> API = new TreeMap<>();
-			for(FunctionBase f : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
+			Map<String, Map<String, Object>> api = new TreeMap<>();
+			for(FunctionBase f : FunctionList.getFunctionList(Platforms.INTERPRETER_JAVA)) {
 				if(f instanceof Function) {
 					Function ff = (Function) f;
 					Map<String, Object> function = new TreeMap<>();
@@ -97,10 +97,10 @@ public class APIBuilder {
 					function.put("hidden", hidden);
 					String extId = ExtensionManager.getTrackers().get(ff.getSourceJar()).getIdentifier();
 					function.put("source", extId);
-					API.put(ff.getName(), function);
+					api.put(ff.getName(), function);
 				}
 			}
-			json.put("functions", API);
+			json.put("functions", api);
 		}
 		{
 			// events

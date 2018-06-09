@@ -37,13 +37,13 @@ public class BasicLogicTest {
 	MCPlayer fakePlayer;
 	MCServer fakeServer;
 	CArray commonArray;
-	CInt arg1_1;
-	CInt arg1_2;
-	CInt arg2_1;
-	CInt argn1_1;
-	CInt argn2_1;
-	CBoolean _true;
-	CBoolean _false;
+	CInt argOne;
+	CInt argOne2;
+	CInt argTwo;
+	CInt argNegOne;
+	CInt argNegTwo;
+	CBoolean cTrue;
+	CBoolean cFalse;
 	com.laytonsmith.core.environments.Environment env;
 
 	public BasicLogicTest() throws Exception {
@@ -62,13 +62,13 @@ public class BasicLogicTest {
 	@Before
 	public void setUp() {
 		commonArray = C.Array(C.Null(), C.Int(1), C.String("2"), C.Double(3.0));
-		arg1_1 = C.Int(1);
-		arg1_2 = C.Int(1);
-		arg2_1 = C.Int(2);
-		argn1_1 = C.Int(-1);
-		argn2_1 = C.Int(-2);
-		_true = C.Boolean(true);
-		_false = C.Boolean(false);
+		argOne = C.Int(1);
+		argOne2 = C.Int(1);
+		argTwo = C.Int(2);
+		argNegOne = C.Int(-1);
+		argNegTwo = C.Int(-2);
+		cTrue = C.Boolean(true);
+		cFalse = C.Boolean(false);
 		fakeServer = GetFakeServer();
 		fakePlayer = GetOnlinePlayer(fakeServer);
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
@@ -206,48 +206,48 @@ public class BasicLogicTest {
 	@Test(timeout = 10000)
 	public void testNot() throws CancelCommandException {
 		BasicLogic.not a = new BasicLogic.not();
-		assertCFalse(a.exec(Target.UNKNOWN, env, _true));
-		assertCTrue(a.exec(Target.UNKNOWN, env, _false));
+		assertCFalse(a.exec(Target.UNKNOWN, env, cTrue));
+		assertCTrue(a.exec(Target.UNKNOWN, env, cFalse));
 	}
 
 	@Test(timeout = 10000)
 	public void testGt() throws CancelCommandException {
 		BasicLogic.gt a = new BasicLogic.gt();
-		assertCFalse(a.exec(Target.UNKNOWN, env, arg1_1, arg1_2));
-		assertCTrue(a.exec(Target.UNKNOWN, env, arg2_1, arg1_1));
-		assertCFalse(a.exec(Target.UNKNOWN, env, arg1_1, arg2_1));
-		assertCFalse(a.exec(Target.UNKNOWN, env, argn1_1, arg1_1));
-		assertCTrue(a.exec(Target.UNKNOWN, env, arg1_1, argn1_1));
+		assertCFalse(a.exec(Target.UNKNOWN, env, argOne, argOne2));
+		assertCTrue(a.exec(Target.UNKNOWN, env, argTwo, argOne));
+		assertCFalse(a.exec(Target.UNKNOWN, env, argOne, argTwo));
+		assertCFalse(a.exec(Target.UNKNOWN, env, argNegOne, argOne));
+		assertCTrue(a.exec(Target.UNKNOWN, env, argOne, argNegOne));
 	}
 
 	@Test(timeout = 10000)
 	public void testGte() throws CancelCommandException {
 		BasicLogic.gte a = new BasicLogic.gte();
-		assertCTrue(a.exec(Target.UNKNOWN, env, arg1_1, arg1_2));
-		assertCTrue(a.exec(Target.UNKNOWN, env, arg2_1, arg1_1));
-		assertCFalse(a.exec(Target.UNKNOWN, env, arg1_1, arg2_1));
-		assertCFalse(a.exec(Target.UNKNOWN, env, argn1_1, arg1_1));
-		assertCTrue(a.exec(Target.UNKNOWN, env, arg1_1, argn1_1));
+		assertCTrue(a.exec(Target.UNKNOWN, env, argOne, argOne2));
+		assertCTrue(a.exec(Target.UNKNOWN, env, argTwo, argOne));
+		assertCFalse(a.exec(Target.UNKNOWN, env, argOne, argTwo));
+		assertCFalse(a.exec(Target.UNKNOWN, env, argNegOne, argOne));
+		assertCTrue(a.exec(Target.UNKNOWN, env, argOne, argNegOne));
 	}
 
 	@Test(timeout = 10000)
 	public void testLt() throws CancelCommandException {
 		BasicLogic.lt a = new BasicLogic.lt();
-		assertCFalse(a.exec(Target.UNKNOWN, env, arg1_1, arg1_2));
-		assertCFalse(a.exec(Target.UNKNOWN, env, arg2_1, arg1_1));
-		assertCTrue(a.exec(Target.UNKNOWN, env, arg1_1, arg2_1));
-		assertCTrue(a.exec(Target.UNKNOWN, env, argn1_1, arg1_1));
-		assertCFalse(a.exec(Target.UNKNOWN, env, arg1_1, argn1_1));
+		assertCFalse(a.exec(Target.UNKNOWN, env, argOne, argOne2));
+		assertCFalse(a.exec(Target.UNKNOWN, env, argTwo, argOne));
+		assertCTrue(a.exec(Target.UNKNOWN, env, argOne, argTwo));
+		assertCTrue(a.exec(Target.UNKNOWN, env, argNegOne, argOne));
+		assertCFalse(a.exec(Target.UNKNOWN, env, argOne, argNegOne));
 	}
 
 	@Test(timeout = 10000)
 	public void testLte() throws CancelCommandException {
 		BasicLogic.lte a = new BasicLogic.lte();
-		assertCTrue(a.exec(Target.UNKNOWN, env, arg1_1, arg1_2));
-		assertCFalse(a.exec(Target.UNKNOWN, env, arg2_1, arg1_1));
-		assertCTrue(a.exec(Target.UNKNOWN, env, arg1_1, arg2_1));
-		assertCTrue(a.exec(Target.UNKNOWN, env, argn1_1, arg1_1));
-		assertCFalse(a.exec(Target.UNKNOWN, env, arg1_1, argn1_1));
+		assertCTrue(a.exec(Target.UNKNOWN, env, argOne, argOne2));
+		assertCFalse(a.exec(Target.UNKNOWN, env, argTwo, argOne));
+		assertCTrue(a.exec(Target.UNKNOWN, env, argOne, argTwo));
+		assertCTrue(a.exec(Target.UNKNOWN, env, argNegOne, argOne));
+		assertCFalse(a.exec(Target.UNKNOWN, env, argOne, argNegOne));
 	}
 
 	@Test(timeout = 10000)

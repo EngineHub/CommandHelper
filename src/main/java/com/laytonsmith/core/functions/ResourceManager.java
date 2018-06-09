@@ -59,14 +59,14 @@ public class ResourceManager {
 		}
 	}
 
-	private static final Map<Long, CResource<?>> resources = new HashMap<>();
+	private static final Map<Long, CResource<?>> RESOURCES = new HashMap<>();
 
 	static {
 		StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
 			@Override
 			public void run() {
-				resources.clear();
+				RESOURCES.clear();
 			}
 		});
 	}
@@ -153,7 +153,7 @@ public class ResourceManager {
 				default:
 					throw new Error("Unhandled case in switch statement");
 			}
-			resources.put(resource.getId(), resource);
+			RESOURCES.put(resource.getId(), resource);
 			return resource;
 		}
 
@@ -207,8 +207,8 @@ public class ResourceManager {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CResource) {
 				CResource<?> resource = (CResource<?>) args[0];
-				if(resources.containsKey(resource.getId())) {
-					resources.remove(resource.getId());
+				if(RESOURCES.containsKey(resource.getId())) {
+					RESOURCES.remove(resource.getId());
 					return CVoid.VOID;
 				} else {
 					throw new CRENotFoundException("That resource is not a valid resource.", t);

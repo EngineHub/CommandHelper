@@ -67,9 +67,9 @@ public class StreamUtils {
 		}
 		InputStreamReader input;
 		input = new InputStreamReader(new BufferedInputStream(in), encoding);
-		final int CHARS_PER_PAGE = 5000; //counting spaces
-		final char[] buffer = new char[CHARS_PER_PAGE];
-		StringBuilder output = new StringBuilder(CHARS_PER_PAGE);
+		final int charsPerPage = 5000; //counting spaces
+		final char[] buffer = new char[charsPerPage];
+		StringBuilder output = new StringBuilder(charsPerPage);
 		try {
 			for(int read = input.read(buffer, 0, buffer.length);
 					read != -1;

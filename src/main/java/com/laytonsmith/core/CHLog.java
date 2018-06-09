@@ -19,12 +19,13 @@ import java.util.List;
  * to the debug log file.
  *
  */
-public final class CHLog {
+@SuppressWarnings("checkstyle:finalclass") // StaticTest.InstallFakeLogger() mocks this class, so it cannot be final.
+public class CHLog {
 
 	private CHLog() {
 	}
 
-	private static final String header = "The logger preferences allow you to granularly define what information\n"
+	private static final String HEADER = "The logger preferences allow you to granularly define what information\n"
 			+ "is written out to file, to assist you in debugging or general logging.\n"
 			+ "You may set the granularity of all the tags individually, to any one of\n"
 			+ "the following values:\n"
@@ -42,7 +43,7 @@ public final class CHLog {
 			+ "";
 
 	private static Preferences prefs;
-	private static final EnumMap<Tags, LogLevel> lookup = new EnumMap<Tags, LogLevel>(Tags.class);
+	private static final EnumMap<Tags, LogLevel> LOOKUP = new EnumMap<Tags, LogLevel>(Tags.class);
 
 	public enum Tags {
 		COMPILER("compiler", "Logs compiler errors (but not runtime errors)", LogLevel.WARNING),
@@ -97,7 +98,7 @@ public final class CHLog {
 		for(Tags t : Tags.values()) {
 			myPrefs.add(new Preference(t.name, t.level.name(), Preferences.Type.STRING, t.description));
 		}
-		CHLog.prefs = new Preferences("CommandHelper", Static.getLogger(), myPrefs, header);
+		CHLog.prefs = new Preferences("CommandHelper", Static.getLogger(), myPrefs, HEADER);
 		try {
 			CHLog.prefs.init(MethodScriptFileLocations.getDefault().getLoggerPreferencesFile());
 		} catch (IOException e) {
@@ -112,8 +113,8 @@ public final class CHLog {
 	 * @return
 	 */
 	private static LogLevel GetLevel(Tags tag) {
-		if(lookup.containsKey(tag)) {
-			return lookup.get(tag);
+		if(LOOKUP.containsKey(tag)) {
+			return LOOKUP.get(tag);
 		}
 		LogLevel level;
 		try {
@@ -126,7 +127,7 @@ public final class CHLog {
 		} catch (IllegalArgumentException e) {
 			level = LogLevel.ERROR;
 		}
-		lookup.put(tag, level);
+		LOOKUP.put(tag, level);
 		return level;
 	}
 
@@ -168,7 +169,7 @@ public final class CHLog {
 			for(MsgBundle b : messages) {
 				if(b.level == l && b.level == tagLevel) {
 					//Found it.
-					Log(tag, l, header, t);
+					Log(tag, l, HEADER, t);
 					return;
 				}
 			}

@@ -23,7 +23,7 @@ import java.util.Set;
  */
 public class DataSourceFactory {
 
-	private static final Map<URI, DataSource> dataSourcePool = new HashMap<>();
+	private static final Map<URI, DataSource> DATA_SOURCE_POOL = new HashMap<>();
 	private static Map<String, Class> protocolHandlers;
 
 	private static void init() {
@@ -52,7 +52,7 @@ public class DataSourceFactory {
 	 */
 	public static DataSource GetDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		init();
-		DataSource source = dataSourcePool.get(uri);
+		DataSource source = DATA_SOURCE_POOL.get(uri);
 		if(source != null) {
 			return source;
 		}
@@ -89,7 +89,7 @@ public class DataSourceFactory {
 			if(!ds.getModifiers().contains(DataSource.DataSourceModifier.TRANSIENT)) {
 				ds.populate();
 			}
-			dataSourcePool.put(uri, ds);
+			DATA_SOURCE_POOL.put(uri, ds);
 			return ds;
 		} catch (InvocationTargetException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | DataSourceException ex) {
 			if(ex instanceof InvocationTargetException && ex.getCause() instanceof DataSourceException) {
@@ -130,13 +130,13 @@ public class DataSourceFactory {
 	 * connections, as well as delete them from the cache.
 	 */
 	public static void DisconnectAll() {
-		for(DataSource ds : dataSourcePool.values()) {
+		for(DataSource ds : DATA_SOURCE_POOL.values()) {
 			try {
 				ds.disconnect();
 			} catch (DataSourceException ex) {
 				CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.WARNING, ex.getMessage(), Target.UNKNOWN);
 			}
 		}
-		dataSourcePool.clear();
+		DATA_SOURCE_POOL.clear();
 	}
 }

@@ -2553,7 +2553,7 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "boolean {player} Returns whether or not this player is whitelisted. Note that"
-					+ " this will work with offline players, but the name must be exact." + uuidwarning;
+					+ " this will work with offline players, but the name must be exact." + UUID_WARNING;
 		}
 
 		@Override
@@ -2605,7 +2605,7 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "void {player, isWhitelisted} Sets the whitelist flag of the specified player. Note that"
-					+ " this will work with offline players, but the name must be exact." + uuidwarning;
+					+ " this will work with offline players, but the name must be exact." + UUID_WARNING;
 		}
 
 		@Override
@@ -2641,7 +2641,7 @@ public class PlayerManagement {
 		}
 	}
 
-	static final String uuidwarning = " NOTICE: This function accepts UUIDs in place of player names,"
+	private static final String UUID_WARNING = " NOTICE: This function accepts UUIDs in place of player names,"
 			+ " however due to lack of API from Mojang, some server software is not able to"
 			+ " correctly associate a uuid with a player if the player has not recently been online."
 			+ " As such, it may not always be possible to ban or whitelist a player by UUID."
@@ -2668,7 +2668,7 @@ public class PlayerManagement {
 					+ " this will work with offline players, but the name must be exact. At this"
 					+ " time, this function only works with the vanilla ban system. If you use"
 					+ " a third party ban system, you should instead run the command for that"
-					+ " plugin instead." + uuidwarning;
+					+ " plugin instead." + UUID_WARNING;
 		}
 
 		@Override
@@ -2721,7 +2721,7 @@ public class PlayerManagement {
 					+ " this will work with offline players, but the name must be exact. At this"
 					+ " time, this function only works with the vanilla ban system. If you use"
 					+ " a third party ban system, you should instead run the command for that"
-					+ " plugin instead." + uuidwarning;
+					+ " plugin instead." + UUID_WARNING;
 		}
 
 		@Override
@@ -3386,7 +3386,7 @@ public class PlayerManagement {
 			return CHVersion.V3_3_1;
 		}
 	}
-	private static final SortedMap<String, Construct> TimeLookup = new TreeMap<String, Construct>();
+	private static final SortedMap<String, Construct> TIME_LOOKUP = new TreeMap<String, Construct>();
 
 	static {
 		Properties p = new Properties();
@@ -3395,7 +3395,7 @@ public class PlayerManagement {
 			Enumeration e = p.propertyNames();
 			while(e.hasMoreElements()) {
 				String name = e.nextElement().toString();
-				TimeLookup.put(name, new CString(p.getProperty(name), Target.UNKNOWN));
+				TIME_LOOKUP.put(name, new CString(p.getProperty(name), Target.UNKNOWN));
 			}
 		} catch (IOException ex) {
 			Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
@@ -3424,8 +3424,8 @@ public class PlayerManagement {
 					+ " Alternatively, common time notation (9:30pm, 4:00 am) is acceptable,"
 					+ " and convenient english mappings also exist:");
 			doc.append("<ul>");
-			for(String key : TimeLookup.keySet()) {
-				doc.append("<li>").append(key).append(" = ").append(TimeLookup.get(key)).append("</li>");
+			for(String key : TIME_LOOKUP.keySet()) {
+				doc.append("<li>").append(key).append(" = ").append(TIME_LOOKUP.get(key)).append("</li>");
 			}
 			doc.append("</ul>");
 			return doc.toString();
@@ -3467,8 +3467,8 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(p, t);
 			long time = 0;
 			String stime = (args.length == 1 ? args[0] : args[1]).val().toLowerCase();
-			if(TimeLookup.containsKey(stime.replaceAll("[^a-z]", ""))) {
-				stime = TimeLookup.get(stime.replaceAll("[^a-z]", "")).val();
+			if(TIME_LOOKUP.containsKey(stime.replaceAll("[^a-z]", ""))) {
+				stime = TIME_LOOKUP.get(stime.replaceAll("[^a-z]", "")).val();
 			}
 			if(stime.matches("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$")) {
 				Pattern pa = Pattern.compile("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$");

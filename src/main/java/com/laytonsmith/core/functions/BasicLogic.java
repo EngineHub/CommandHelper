@@ -140,6 +140,7 @@ public class BasicLogic {
 			);
 		}
 
+		@SuppressWarnings("checkstyle:constantname")
 		private static final String and = new and().getName();
 
 		@Override
@@ -296,8 +297,6 @@ public class BasicLogic {
 					Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC
 			);
 		}
-
-		private static final String g = new DataHandling.g().getName();
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
@@ -615,12 +614,12 @@ public class BasicLogic {
 			//make sure that each value is not dynamic.
 			String notConstant = "Cases for a switch statement must be constant, not variable";
 			String alreadyContains = "The switch statement already contains a case for this value, remove the duplicate value";
-			final equals EQUALS = new equals();
+			final equals equals = new equals();
 			Set<Construct> values = new TreeSet<>(new Comparator<Construct>() {
 
 				@Override
 				public int compare(Construct t, Construct t1) {
-					if(EQUALS.exec(Target.UNKNOWN, null, t, t1).getBoolean()) {
+					if(equals.exec(Target.UNKNOWN, null, t, t1).getBoolean()) {
 						return 0;
 					} else {
 						return t.val().compareTo(t1.val());
@@ -707,7 +706,7 @@ public class BasicLogic {
 									break;
 								}
 							}
-						} else if(EQUALS.exec(t, null, children.get(0).getData(), value).getBoolean()) {
+						} else if(equals.exec(t, null, children.get(0).getData(), value).getBoolean()) {
 							toReturn = children.get(i + 1);
 							break;
 						}
@@ -744,7 +743,7 @@ public class BasicLogic {
 	@seealso({nequals.class, sequals.class, snequals.class})
 	public static class equals extends AbstractFunction implements Optimizable {
 
-		private static final equals self = new equals();
+		private static final equals SELF = new equals();
 
 		/**
 		 * Returns the results that this function would provide, but in a java specific manner, so other code may easily
@@ -755,7 +754,7 @@ public class BasicLogic {
 		 * @return
 		 */
 		public static boolean doEquals(Construct one, Construct two) {
-			CBoolean ret = self.exec(Target.UNKNOWN, null, one, two);
+			CBoolean ret = SELF.exec(Target.UNKNOWN, null, one, two);
 			return ret.getBoolean();
 		}
 
@@ -823,7 +822,6 @@ public class BasicLogic {
 				if(!ArgumentValidation.isNumber(args[0])) {
 					return CBoolean.FALSE;
 				}
-				boolean equals = true;
 				for(int i = 1; i < args.length; i++) {
 					if(!ArgumentValidation.isNumber(args[i])) {
 						return CBoolean.FALSE;

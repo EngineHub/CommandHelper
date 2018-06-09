@@ -353,6 +353,8 @@ public class Regex {
 	@seealso({StringHandling.split.class, ArrayHandling.array_implode.class})
 	public static class reg_split extends AbstractFunction implements Optimizable {
 
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
 		private static final String split = new StringHandling.split().getName();
 
 		@Override

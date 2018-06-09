@@ -18,8 +18,8 @@ import java.util.WeakHashMap;
  */
 public final class ThreadsafeDataSource implements DataSource {
 
-	private static final WeakHashMap<Pair<URI, ConnectionMixinFactory.ConnectionMixinOptions>, ThreadsafeDataSource> sources
-			= new WeakHashMap<>();
+	private static final WeakHashMap<Pair<URI, ConnectionMixinFactory.ConnectionMixinOptions>, ThreadsafeDataSource>
+			SOURCES = new WeakHashMap<>();
 
 	/**
 	 * Returns the threadsafe data source for the given uri and options. If an existing reference to a DataSource is
@@ -34,12 +34,12 @@ public final class ThreadsafeDataSource implements DataSource {
 	 */
 	public static synchronized ThreadsafeDataSource GetDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		Pair<URI, ConnectionMixinFactory.ConnectionMixinOptions> pair = new Pair<>(uri, options);
-		ThreadsafeDataSource source = sources.get(pair);
+		ThreadsafeDataSource source = SOURCES.get(pair);
 		if(source != null) {
 			return source;
 		} else {
 			ThreadsafeDataSource ds = new ThreadsafeDataSource(DataSourceFactory.GetDataSource(uri, options));
-			sources.put(pair, ds);
+			SOURCES.put(pair, ds);
 			return ds;
 		}
 	}

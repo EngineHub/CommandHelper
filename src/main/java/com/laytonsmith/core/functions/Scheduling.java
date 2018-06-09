@@ -753,9 +753,9 @@ public class Scheduling {
 	public static class set_cron extends AbstractFunction implements Optimizable {
 
 		private static Thread cronThread = null;
-		private static final Object cronThreadLock = new Object();
-		private static final Map<Integer, CronFormat> cronJobs = new HashMap<Integer, CronFormat>();
-		private static final AtomicInteger jobIDs = new AtomicInteger(1);
+		private static final Object CRON_THREAD_LOCK = new Object();
+		private static final Map<Integer, CronFormat> CRON_JOBS = new HashMap<Integer, CronFormat>();
+		private static final AtomicInteger JOB_IDS = new AtomicInteger(1);
 
 		/**
 		 * Stops a job from running again, and returns true if the value was actually removed. False is returned
@@ -765,9 +765,9 @@ public class Scheduling {
 		 * @param jobID The job ID
 		 */
 		public static boolean stopJob(int jobID) {
-			synchronized(cronJobs) {
-				if(cronJobs.containsKey(jobID)) {
-					cronJobs.remove(jobID);
+			synchronized(CRON_JOBS) {
+				if(CRON_JOBS.containsKey(jobID)) {
+					CRON_JOBS.remove(jobID);
 					return true;
 				} else {
 					return false;
@@ -803,7 +803,7 @@ public class Scheduling {
 			format.job = ((CClosure) args[1]);
 			//At this point, the format is complete. We need to start up the cron thread if it's not running, and
 			//then register this job, as well as inform clear_task of this id.
-			synchronized(cronThreadLock) {
+			synchronized(CRON_THREAD_LOCK) {
 				if(cronThread == null) {
 					final DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
 					final MutableObject<Boolean> stopCron = new MutableObject<>(false);
@@ -813,11 +813,11 @@ public class Scheduling {
 						public void run() {
 							cronThread = null;
 							stopCron.setObject(true);
-							synchronized(cronJobs) {
-								cronJobs.clear();
+							synchronized(CRON_JOBS) {
+								CRON_JOBS.clear();
 							}
-							synchronized(cronThreadLock) {
-								cronThreadLock.notifyAll();
+							synchronized(CRON_THREAD_LOCK) {
+								CRON_THREAD_LOCK.notifyAll();
 							}
 						}
 					});
@@ -834,9 +834,9 @@ public class Scheduling {
 									//Set the lastMinute value to now
 									lastMinute = System.currentTimeMillis() / 1000 / 60;
 									//Activate
-									synchronized(cronJobs) {
+									synchronized(CRON_JOBS) {
 										Calendar c = Calendar.getInstance();
-										for(final CronFormat f : cronJobs.values()) {
+										for(final CronFormat f : CRON_JOBS.values()) {
 											//Check to see if it is currently time to run each job
 											if(f.min.contains(c.get(Calendar.MINUTE))
 													&& f.hour.contains(c.get(Calendar.HOUR_OF_DAY))
@@ -859,9 +859,9 @@ public class Scheduling {
 										}
 									}
 								} //else continue, we'll wait another second.
-								synchronized(cronThreadLock) {
+								synchronized(CRON_THREAD_LOCK) {
 									try {
-										cronThreadLock.wait(1000);
+										CRON_THREAD_LOCK.wait(1000);
 									} catch (InterruptedException ex) {
 										//Continue
 									}
@@ -874,9 +874,9 @@ public class Scheduling {
 					cronThread.start();
 				}
 			}
-			int jobID = jobIDs.getAndIncrement();
-			synchronized(cronJobs) {
-				cronJobs.put(jobID, format);
+			int jobID = JOB_IDS.getAndIncrement();
+			synchronized(CRON_JOBS) {
+				CRON_JOBS.put(jobID, format);
 				format.job.getEnv().getEnv(GlobalEnv.class).SetCustom("cron-task-id", jobID);
 			}
 			return new CInt(jobID, t);

@@ -51,7 +51,7 @@ public class EventBinding {
 		return "This class of functions provide methods to hook deep into the server's event architecture";
 	}
 
-	private static final AtomicInteger bindCounter = new AtomicInteger(0);
+	private static final AtomicInteger BIND_COUNTER = new AtomicInteger(0);
 
 	@api(environments = CommandHelperEnvironment.class)
 	public static class bind extends AbstractFunction implements Optimizable {
@@ -159,20 +159,20 @@ public class EventBinding {
 
 			//Set up our bind counter, but only if the event is supposed to be added to the counter
 			if(event.addCounter()) {
-				synchronized(bindCounter) {
-					if(bindCounter.get() == 0) {
+				synchronized(BIND_COUNTER) {
+					if(BIND_COUNTER.get() == 0) {
 						env.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
 						StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
 							@Override
 							public void run() {
-								synchronized(bindCounter) {
-									bindCounter.set(0);
+								synchronized(BIND_COUNTER) {
+									BIND_COUNTER.set(0);
 								}
 							}
 						});
 					}
-					bindCounter.incrementAndGet();
+					BIND_COUNTER.incrementAndGet();
 				}
 			}
 			return id;
@@ -318,9 +318,9 @@ public class EventBinding {
 			EventUtils.UnregisterEvent(id);
 			//Only remove the counter if it had been added in the first place.
 			if(event != null && event.addCounter()) {
-				synchronized(bindCounter) {
-					bindCounter.decrementAndGet();
-					if(bindCounter.get() == 0) {
+				synchronized(BIND_COUNTER) {
+					BIND_COUNTER.decrementAndGet();
+					if(BIND_COUNTER.get() == 0) {
 						environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
 					}
 				}

@@ -182,7 +182,7 @@ public class Web {
 		 */
 		private static final int MAX_HTTP_THREADS = 3;
 		private static int threadCount = 0;
-		private static final ExecutorService threadPool = Executors.newFixedThreadPool(MAX_HTTP_THREADS, new ThreadFactory() {
+		private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(MAX_HTTP_THREADS, new ThreadFactory() {
 
 			@Override
 			public Thread newThread(Runnable r) {
@@ -463,7 +463,7 @@ public class Web {
 			if(settings.getBlocking()) {
 				task.run();
 			} else {
-				threadPool.submit(task);
+				THREAD_POOL.submit(task);
 			}
 			return CVoid.VOID;
 		}

@@ -67,7 +67,7 @@ public final class WebUtility {
 	private WebUtility() {
 	}
 	private static int urlRetrieverPoolId = 0;
-	private static final ExecutorService urlRetrieverPool = Executors.newCachedThreadPool(new ThreadFactory() {
+	private static final ExecutorService URL_RETRIEVER_POOL = Executors.newCachedThreadPool(new ThreadFactory() {
 		@Override
 		public Thread newThread(Runnable r) {
 			return new Thread(r, "URLRetrieverThread-" + (++urlRetrieverPoolId));
@@ -167,7 +167,7 @@ public final class WebUtility {
 	 * Makes an asynchronous call to a URL, and runs the callback when finished.
 	 */
 	public static void GetPage(final URL url, final RequestSettings settings, final HTTPResponseCallback callback) {
-		urlRetrieverPool.submit(new Runnable() {
+		URL_RETRIEVER_POOL.submit(new Runnable() {
 			@Override
 			public void run() {
 				try {
@@ -217,11 +217,12 @@ public final class WebUtility {
 	 * @throws SocketTimeoutException
 	 * @throws IOException
 	 */
-	public static RawHTTPResponse getWebStream(URL url, RequestSettings _settings) throws SocketTimeoutException, IOException {
-		if(_settings == null) {
-			_settings = new RequestSettings();
+	public static RawHTTPResponse getWebStream(URL url, RequestSettings requestSettings)
+			throws SocketTimeoutException, IOException {
+		if(requestSettings == null) {
+			requestSettings = new RequestSettings();
 		}
-		final RequestSettings settings = _settings;
+		final RequestSettings settings = requestSettings;
 		Logger logger = settings.getLogger();
 		HTTPMethod method = settings.getMethod();
 		Map<String, List<String>> headers = settings.getHeaders();
@@ -293,7 +294,7 @@ public final class WebUtility {
 			} catch (NoSuchAlgorithmException ex) {
 				throw new IOException(ex);
 			}
-			TrustManager _defaultTrustManager = null;
+			TrustManager defaultTrustManager = null;
 			{
 				if(settings.getUseDefaultTrustStore()) {
 					TrustManagerFactory tmf;
@@ -309,15 +310,15 @@ public final class WebUtility {
 					}
 					for(TrustManager tm : tmf.getTrustManagers()) {
 						if(tm instanceof X509TrustManager) {
-							_defaultTrustManager = tm;
+							defaultTrustManager = tm;
 							break;
 						}
 					}
 				} else {
-					_defaultTrustManager = null;
+					defaultTrustManager = null;
 				}
 			}
-			final X509TrustManager defaultTrustManager = (X509TrustManager) _defaultTrustManager;
+			final X509TrustManager finalDefaultTrustManager = (X509TrustManager) defaultTrustManager;
 			final TrustManager[] overrideTrustManager = new TrustManager[]{
 				new X509TrustManager() {
 					@Override
@@ -333,9 +334,9 @@ public final class WebUtility {
 							return;
 						}
 						boolean trusted = true;
-						if(defaultTrustManager != null) {
+						if(finalDefaultTrustManager != null) {
 							try {
-								defaultTrustManager.checkClientTrusted(xcs, string);
+								finalDefaultTrustManager.checkClientTrusted(xcs, string);
 							} catch (CertificateException ex) {
 								trusted = false;
 							}
@@ -371,8 +372,8 @@ public final class WebUtility {
 						if(settings.getDisableCertChecking()) {
 							return new X509Certificate[0];
 						}
-						if(defaultTrustManager != null) {
-							return defaultTrustManager.getAcceptedIssuers();
+						if(finalDefaultTrustManager != null) {
+							return finalDefaultTrustManager.getAcceptedIssuers();
 						}
 						return new X509Certificate[0];
 					}

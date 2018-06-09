@@ -58,10 +58,10 @@ public class DocGenUIHandler {
 		DocGenUI.main(args);
 	}
 
-	private static final Map<String, List<String>> baseHeaders = new HashMap<String, List<String>>();
+	private static final Map<String, List<String>> BASE_HEADERS = new HashMap<String, List<String>>();
 
 	static {
-		baseHeaders.put("User-Agent", Arrays.asList(new String[]{"CommandHelper-DocUploader"}));
+		BASE_HEADERS.put("User-Agent", Arrays.asList(new String[]{"CommandHelper-DocUploader"}));
 	}
 
 	URL url;
@@ -455,7 +455,7 @@ public class DocGenUIHandler {
 	 * @throws IOException
 	 */
 	private static HTTPResponse getPage(URL url, Map<String, String> params, boolean useURL) throws IOException {
-		Map<String, List<String>> headers = new HashMap<>(baseHeaders);
+		Map<String, List<String>> headers = new HashMap<>(BASE_HEADERS);
 		if(params != null && !params.isEmpty() && useURL) {
 			StringBuilder b = new StringBuilder(url.getQuery() == null ? "" : url.getQuery());
 			if(b.length() != 0) {

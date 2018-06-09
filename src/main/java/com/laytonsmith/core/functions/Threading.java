@@ -340,7 +340,7 @@ public class Threading {
 	@seealso({x_new_thread.class})
 	public static class _synchronized extends AbstractFunction {
 
-		private static final Map<Object, Integer> syncObjectMap = new HashMap<Object, Integer>();
+		private static final Map<Object, Integer> SYNC_OBJECT_MAP = new HashMap<Object, Integer>();
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -388,10 +388,10 @@ public class Threading {
 
 			// Add String sync objects to the map to be able to synchronize by value.
 			if(syncObject instanceof String) {
-				synchronized(syncObjectMap) {
+				synchronized(SYNC_OBJECT_MAP) {
 					searchLabel:
 					{
-						for(Entry<Object, Integer> entry : syncObjectMap.entrySet()) {
+						for(Entry<Object, Integer> entry : SYNC_OBJECT_MAP.entrySet()) {
 							Object key = entry.getKey();
 							if(key instanceof String && key.equals(syncObject)) {
 								syncObject = key; // Get reference, value of this assign is the same.
@@ -399,7 +399,7 @@ public class Threading {
 								break searchLabel;
 							}
 						}
-						syncObjectMap.put(syncObject, 1);
+						SYNC_OBJECT_MAP.put(syncObject, 1);
 					}
 				}
 			}
@@ -415,12 +415,12 @@ public class Threading {
 
 				// Remove 1 from the call count or remove the sync object from the map if it was a sync-by-value.
 				if(syncObject instanceof String) {
-					synchronized(syncObjectMap) {
-						int count = syncObjectMap.get(syncObject); // This should never return null.
+					synchronized(SYNC_OBJECT_MAP) {
+						int count = SYNC_OBJECT_MAP.get(syncObject); // This should never return null.
 						if(count <= 1) {
-							syncObjectMap.remove(syncObject);
+							SYNC_OBJECT_MAP.remove(syncObject);
 						} else {
-							for(Entry<Object, Integer> entry : syncObjectMap.entrySet()) {
+							for(Entry<Object, Integer> entry : SYNC_OBJECT_MAP.entrySet()) {
 								if(entry.getKey() == syncObject) { // Equals by reference.
 									entry.setValue(count - 1);
 									break;

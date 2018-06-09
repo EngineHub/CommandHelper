@@ -65,8 +65,8 @@ public class FileHandling {
 	@noboilerplate
 	public static class read extends AbstractFunction {
 
-		public static String file_get_contents(String file_location) throws Exception {
-			return new ZipReader(new File(file_location)).getFileContents();
+		public static String file_get_contents(String fileLocation) throws Exception {
+			return new ZipReader(new File(fileLocation)).getFileContents();
 		}
 
 		@Override

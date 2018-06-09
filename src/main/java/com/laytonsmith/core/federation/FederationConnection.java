@@ -23,7 +23,7 @@ public final class FederationConnection {
 	 * While the server may need to support multiple Federation protocol versions, the client does not. We always use
 	 * this version through this class.
 	 */
-	private static final String version = FederationVersion.V1_0_0.getVersionString();
+	private static final String VERSION = FederationVersion.V1_0_0.getVersionString();
 
 	private final String serverName;
 	private final String host;
@@ -134,7 +134,7 @@ public final class FederationConnection {
 					BufferedReader reader = new BufferedReader(new InputStreamReader(masterSocket.getInputStream(), "UTF-8"));
 					PrintWriter out = new PrintWriter(masterSocket.getOutputStream(), true);) {
 				out.println("HELLO");
-				out.println(version);
+				out.println(VERSION);
 				String versionOK = reader.readLine();
 				if(!"VERSION OK".equals(versionOK)) {
 					// (If we get here, the message would have been VERSION BAD
@@ -177,7 +177,7 @@ public final class FederationConnection {
 			// A HELLO is the first thing we ever send.
 			communicator.writeUnencryptedLine("HELLO");
 			// Version is next, then whether or not we're encrypting things.
-			communicator.writeUnencryptedLine(version);
+			communicator.writeUnencryptedLine(VERSION);
 			String versionOK = communicator.readLine();
 			if(!"VERSION OK".equals(versionOK)) {
 				// (If we get here, the message would have been VERSION BAD

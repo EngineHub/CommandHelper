@@ -12,10 +12,10 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
  */
 public final class CommandHelperMessageListener implements PluginMessageListener {
 
-	private static final CommandHelperMessageListener instance = new CommandHelperMessageListener();
+	private static final CommandHelperMessageListener INSTANCE = new CommandHelperMessageListener();
 
 	public static CommandHelperMessageListener getInstance() {
-		return instance;
+		return INSTANCE;
 	}
 
 	private CommandHelperMessageListener() {

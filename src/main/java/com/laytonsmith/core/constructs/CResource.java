@@ -18,7 +18,7 @@ public class CResource<T> extends Construct {
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get("resource");
 
-	private static final AtomicLong resourcePool = new AtomicLong(0);
+	private static final AtomicLong RESOURCE_POOL = new AtomicLong(0);
 
 	private final long id;
 	private final T resource;
@@ -64,7 +64,7 @@ public class CResource<T> extends Construct {
 			throw new NullPointerException();
 		}
 		this.toString = toString;
-		id = resourcePool.incrementAndGet();
+		id = RESOURCE_POOL.incrementAndGet();
 	}
 
 	public long getId() {

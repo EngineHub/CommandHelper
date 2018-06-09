@@ -101,7 +101,7 @@ public enum MCChatColor {
 	PLAIN_WHITE('r');
 
 	private final char code;
-	private static final Map<Character, MCChatColor> charColors = new HashMap<>();
+	private static final Map<Character, MCChatColor> CHAR_COLORS = new HashMap<>();
 
 	MCChatColor(char code) {
 		this.code = code;
@@ -121,7 +121,7 @@ public enum MCChatColor {
 	}
 
 	public static MCChatColor getByChar(char code) {
-		return charColors.get(code);
+		return CHAR_COLORS.get(code);
 	}
 
 	/**
@@ -140,7 +140,7 @@ public enum MCChatColor {
 
 	static {
 		for(MCChatColor color : MCChatColor.values()) {
-			charColors.put(color.getChar(), color);
+			CHAR_COLORS.put(color.getChar(), color);
 		}
 	}
 }

@@ -949,10 +949,10 @@ public class Cmdline {
 			}
 			String[] command;
 			File workingDir = null;
-			CClosure stdout = null;
-			CClosure stderr = null;
-			CClosure exit = null;
-			boolean subshell = false;
+			final CClosure stdout;
+			final CClosure stderr;
+			final CClosure exit;
+			final boolean subshell;
 			if(args[0] instanceof CArray) {
 				CArray array = (CArray) args[0];
 				command = new String[(int) array.size()];
@@ -970,30 +970,28 @@ public class Cmdline {
 						workingDir = new File(t.file().getParentFile(), workingDir.getPath());
 					}
 				}
-				if(options.containsKey("stdout") && !(options.get("stdout", t) instanceof CNull)) {
-					stdout = Static.getObject(options.get("stdout", t), t, CClosure.class);
-				}
-				if(options.containsKey("stderr") && !(options.get("stderr", t) instanceof CNull)) {
-					stderr = Static.getObject(options.get("stderr", t), t, CClosure.class);
-				}
-				if(options.containsKey("exit") && !(options.get("exit", t) instanceof CNull)) {
-					exit = Static.getObject(options.get("exit", t), t, CClosure.class);
-				}
-				if(options.containsKey("subshell")) {
-					subshell = Static.getBoolean(options.get("subshell", t), t);
-				}
+				stdout = (options.containsKey("stdout") && !(options.get("stdout", t) instanceof CNull)
+						? Static.getObject(options.get("stdout", t), t, CClosure.class) : null);
+				stderr = (options.containsKey("stderr") && !(options.get("stderr", t) instanceof CNull)
+						? Static.getObject(options.get("stderr", t), t, CClosure.class) : null);
+				exit = (options.containsKey("exit") && !(options.get("exit", t) instanceof CNull)
+						? Static.getObject(options.get("exit", t), t, CClosure.class) : null);
+				subshell = (options.containsKey("subshell")
+						? Static.getBoolean(options.get("subshell", t), t) : false);
+			} else {
+				stdout = null;
+				stderr = null;
+				exit = null;
+				subshell = false;
 			}
 			final CommandExecutor cmd = new CommandExecutor(command);
 			cmd.setWorkingDir(workingDir);
-			final CClosure _stdout = stdout;
-			final CClosure _stderr = stderr;
-			final CClosure _exit = exit;
 			final MutableObject<StringBuilder> sbout = new MutableObject(new StringBuilder());
 			final MutableObject<StringBuilder> sberr = new MutableObject(new StringBuilder());
 			cmd.setSystemOut(new OutputStream() {
 				@Override
 				public void write(int b) throws IOException {
-					if(_stdout == null) {
+					if(stdout == null) {
 						return;
 					}
 					char c = (char) b;
@@ -1003,7 +1001,7 @@ public class Cmdline {
 
 								@Override
 								public Object call() throws Exception {
-									_stdout.execute(new CString(sbout.getObject(), t));
+									stdout.execute(new CString(sbout.getObject(), t));
 									return null;
 								}
 							});
@@ -1019,7 +1017,7 @@ public class Cmdline {
 			cmd.setSystemErr(new OutputStream() {
 				@Override
 				public void write(int b) throws IOException {
-					if(_stderr == null) {
+					if(stderr == null) {
 						return;
 					}
 					char c = (char) b;
@@ -1029,7 +1027,7 @@ public class Cmdline {
 
 								@Override
 								public Object call() throws Exception {
-									_stderr.execute(new CString(sberr.getObject(), t));
+									stderr.execute(new CString(sberr.getObject(), t));
 									return null;
 								}
 							});
@@ -1071,13 +1069,13 @@ public class Cmdline {
 						} catch (IOException ex) {
 							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
 						}
-						if(_exit != null) {
+						if(exit != null) {
 							try {
 								StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
 
 									@Override
 									public Object call() throws Exception {
-										_exit.execute(new CInt(exitCode, t));
+										exit.execute(new CInt(exitCode, t));
 										return null;
 									}
 								});

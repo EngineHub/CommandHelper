@@ -6,30 +6,30 @@ import org.bukkit.entity.Entity;
 
 public class BukkitMCArrow extends BukkitMCProjectile implements MCArrow {
 
-	private final Arrow _arrow;
+	private final Arrow arrow;
 
 	public BukkitMCArrow(Entity arrow) {
 		super(arrow);
-		_arrow = (Arrow) arrow;
+		this.arrow = (Arrow) arrow;
 	}
 
 	@Override
 	public int getKnockbackStrength() {
-		return _arrow.getKnockbackStrength();
+		return this.arrow.getKnockbackStrength();
 	}
 
 	@Override
 	public void setKnockbackStrength(int strength) {
-		_arrow.setKnockbackStrength(strength);
+		this.arrow.setKnockbackStrength(strength);
 	}
 
 	@Override
 	public boolean isCritical() {
-		return _arrow.isCritical();
+		return this.arrow.isCritical();
 	}
 
 	@Override
 	public void setCritical(boolean critical) {
-		_arrow.setCritical(critical);
+		this.arrow.setCritical(critical);
 	}
 }

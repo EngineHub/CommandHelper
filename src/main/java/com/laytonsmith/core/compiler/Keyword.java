@@ -22,6 +22,7 @@ import java.util.List;
  */
 public abstract class Keyword implements Documentation {
 
+	@SuppressWarnings("checkstyle:constantname") // Variable is more clear when named after the function it represents.
 	private static final String __CBRACE__ = new com.laytonsmith.core.functions.Compiler.__cbrace__().getName();
 
 	protected Keyword() {

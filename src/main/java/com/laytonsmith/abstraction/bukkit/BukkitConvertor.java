@@ -255,25 +255,25 @@ public class BukkitConvertor extends AbstractConvertor {
 		return new BukkitMCMetadataValue(new FixedMetadataValue(((BukkitMCPlugin) plugin).getHandle(), value));
 	}
 
-	public static final BukkitBlockListener BlockListener = new BukkitBlockListener();
-	public static final BukkitEntityListener EntityListener = new BukkitEntityListener();
-	public static final BukkitInventoryListener InventoryListener = new BukkitInventoryListener();
-	public static final BukkitPlayerListener PlayerListener = new BukkitPlayerListener();
-	public static final BukkitServerListener ServerListener = new BukkitServerListener();
-	public static final BukkitVehicleListener VehicleListener = new BukkitVehicleListener();
-	public static final BukkitWeatherListener WeatherListener = new BukkitWeatherListener();
-	public static final BukkitWorldListener WorldListener = new BukkitWorldListener();
+	public static final BukkitBlockListener BLOCK_LISTENER = new BukkitBlockListener();
+	public static final BukkitEntityListener ENTITY_LISTENER = new BukkitEntityListener();
+	public static final BukkitInventoryListener INVENTORY_LISTENER = new BukkitInventoryListener();
+	public static final BukkitPlayerListener PLAYER_LISTENER = new BukkitPlayerListener();
+	public static final BukkitServerListener SERVER_LISTENER = new BukkitServerListener();
+	public static final BukkitVehicleListener VEHICLE_LISTENER = new BukkitVehicleListener();
+	public static final BukkitWeatherListener WEATHER_LISTENER = new BukkitWeatherListener();
+	public static final BukkitWorldListener WORLD_LISTENER = new BukkitWorldListener();
 
 	@Override
 	public void Startup(CommandHelperPlugin chp) {
-		chp.registerEvents(BlockListener);
-		chp.registerEventsDynamic(EntityListener);
-		chp.registerEventsDynamic(InventoryListener);
-		chp.registerEvents(PlayerListener);
-		chp.registerEventsDynamic(ServerListener);
-		chp.registerEvents(VehicleListener);
-		chp.registerEvents(WeatherListener);
-		chp.registerEvents(WorldListener);
+		chp.registerEvents(BLOCK_LISTENER);
+		chp.registerEventsDynamic(ENTITY_LISTENER);
+		chp.registerEventsDynamic(INVENTORY_LISTENER);
+		chp.registerEvents(PLAYER_LISTENER);
+		chp.registerEventsDynamic(SERVER_LISTENER);
+		chp.registerEvents(VEHICLE_LISTENER);
+		chp.registerEvents(WEATHER_LISTENER);
+		chp.registerEvents(WORLD_LISTENER);
 	}
 
 	@Override

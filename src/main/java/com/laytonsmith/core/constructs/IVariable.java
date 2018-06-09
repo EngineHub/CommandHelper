@@ -12,7 +12,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 public class IVariable extends Construct implements Cloneable {
 
 	public static final long serialVersionUID = 1L;
-	private Construct var_value;
+	private Construct varValue;
 	private final String name;
 	private final CClassType type;
 	private final Target definedTarget;
@@ -23,7 +23,7 @@ public class IVariable extends Construct implements Cloneable {
 		if(!name.matches(VARIABLE_NAME_REGEX)) {
 			throw new ConfigCompileException("IVariables must match the regex: " + VARIABLE_NAME_REGEX, t);
 		}
-		this.var_value = new CString("", t);
+		this.varValue = new CString("", t);
 		this.name = name;
 		this.type = Auto.TYPE;
 		this.definedTarget = t;
@@ -44,19 +44,19 @@ public class IVariable extends Construct implements Cloneable {
 		if(value == null) {
 			throw new NullPointerException();
 		}
-		this.var_value = value;
+		this.varValue = value;
 		this.name = name;
 		this.definedTarget = t;
 	}
 
 	@Override
 	public String val() {
-		return var_value.val();
+		return varValue.val();
 	}
 
 	public Construct ival() {
-		var_value.setTarget(getTarget());
-		return var_value;
+		varValue.setTarget(getTarget());
+		return varValue;
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class IVariable extends Construct implements Cloneable {
 	}
 
 	public void setIval(Construct c) {
-		var_value = c;
+		varValue = c;
 	}
 
 	@Override
@@ -80,8 +80,8 @@ public class IVariable extends Construct implements Cloneable {
 	@Override
 	public IVariable clone() throws CloneNotSupportedException {
 		IVariable clone = (IVariable) super.clone();
-		if(this.var_value != null) {
-			clone.var_value = this.var_value.clone();
+		if(this.varValue != null) {
+			clone.varValue = this.varValue.clone();
 		}
 		return (IVariable) clone;
 	}

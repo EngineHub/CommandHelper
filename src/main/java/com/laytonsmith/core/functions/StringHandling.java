@@ -142,7 +142,12 @@ public class StringHandling {
 	@noprofile
 	public static class sconcat extends AbstractFunction implements Optimizable {
 
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
 		private static final String g = new DataHandling.g().getName();
+
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
 		private static final String p = new Compiler.p().getName();
 
 		@Override
@@ -1576,9 +1581,9 @@ public class StringHandling {
 		private static class FormatString {
 
 			private Object ref;
-			private static final Class FormatString;
-			private static final Class FixedString;
-			private static final Class FormatSpecifier;
+			private static final Class FORMAT_STRING;
+			private static final Class FIXED_STRING;
+			private static final Class FORMAT_SPECIFIER;
 
 			static {
 				Class tFormatString = null;
@@ -1598,36 +1603,36 @@ public class StringHandling {
 						continue;
 					}
 				}
-				FormatString = tFormatString;
-				FixedString = tFixedString;
-				FormatSpecifier = tFormatSpecifier;
+				FORMAT_STRING = tFormatString;
+				FIXED_STRING = tFixedString;
+				FORMAT_SPECIFIER = tFormatSpecifier;
 			}
 
 			public FormatString(Object ref) {
 				if(ref == null) {
 					throw new NullPointerException();
 				}
-				if(!FormatString.isAssignableFrom(ref.getClass())) {
-					throw new RuntimeException("Unexpected class type. Was expecting ref to be an instance of " + FormatString.getName() + " but was " + ref.getClass().getName());
+				if(!FORMAT_STRING.isAssignableFrom(ref.getClass())) {
+					throw new RuntimeException("Unexpected class type. Was expecting ref to be an instance of " + FORMAT_STRING.getName() + " but was " + ref.getClass().getName());
 				}
 				this.ref = ref;
 			}
 
 			public Character getExpectedType() {
-				if(ref.getClass() == FixedString) {
+				if(ref.getClass() == FIXED_STRING) {
 					return null;
-				} else if(ref.getClass() == FormatSpecifier) {
-					if(((Boolean) ReflectionUtils.get(FormatSpecifier, ref, "dt"))) {
+				} else if(ref.getClass() == FORMAT_SPECIFIER) {
+					if(((Boolean) ReflectionUtils.get(FORMAT_SPECIFIER, ref, "dt"))) {
 						return 't';
 					}
-					return ((Character) ReflectionUtils.get(FormatSpecifier, ref, "c"));
+					return ((Character) ReflectionUtils.get(FORMAT_SPECIFIER, ref, "c"));
 				} else {
 					throw new RuntimeException("Unknown type: " + ref.getClass());
 				}
 			}
 
 			public int getArgIndex() {
-				return ((Integer) ReflectionUtils.get(FormatSpecifier, ref, "index"));
+				return ((Integer) ReflectionUtils.get(FORMAT_SPECIFIER, ref, "index"));
 			}
 
 			public boolean isFixed() {

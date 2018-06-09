@@ -722,62 +722,62 @@ public class EntityManagement {
 			MCLivingEntity shooter = null;
 			MCLivingEntity target;
 
-			UUID shooter_id = null;
-			UUID target_id = null;
+			UUID shooterId = null;
+			UUID targetId = null;
 
 			MCLocation from = null;
 			MCLocation to = null;
 
-			MCLocation shifted_from;
+			MCLocation shiftedFrom;
 
-			MCEntityType entity_shoot = null;
-			MCProjectileType projectile_shoot = null;
+			MCEntityType entityShoot = null;
+			MCProjectileType projectileShoot = null;
 
 			double speed = 0.0;
 
 			if(args.length >= 1) {
 				try {
-					shooter_id = Static.GetPlayer(args[0], t).getUniqueId();
+					shooterId = Static.GetPlayer(args[0], t).getUniqueId();
 				} catch (ConfigRuntimeException notPlayer) {
 					try {
-						shooter_id = Static.GetUUID(args[0], t);
+						shooterId = Static.GetUUID(args[0], t);
 					} catch (ConfigRuntimeException notEntIdEither) {
 					}
 				}
 
-				if(shooter_id == null) {
+				if(shooterId == null) {
 					try {
 						from = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
 					} catch (ConfigRuntimeException badLocation) {
 					}
 				}
 
-				if(shooter_id == null && from == null) {
+				if(shooterId == null && from == null) {
 					throw new CREFormatException("Could not find an entity or location matching " + args[0] + "!", t);
 				}
 			} else {
 				Static.AssertPlayerNonNull(p, t);
-				shooter_id = p.getUniqueId();
+				shooterId = p.getUniqueId();
 			}
 
 			if(args.length >= 3) {
 				try {
-					target_id = Static.GetPlayer(args[2], t).getUniqueId();
+					targetId = Static.GetPlayer(args[2], t).getUniqueId();
 				} catch (ConfigRuntimeException notPlayer) {
 					try {
-						target_id = Static.GetUUID(args[2], t);
+						targetId = Static.GetUUID(args[2], t);
 					} catch (ConfigRuntimeException notEntIdEither) {
 					}
 				}
 
-				if(target_id == null) {
+				if(targetId == null) {
 					try {
 						to = ObjectGenerator.GetGenerator().location(args[2], null, t);
 					} catch (ConfigRuntimeException badLocation) {
 					}
 				}
 
-				if(target_id == null && to == null) {
+				if(targetId == null && to == null) {
 					throw new CREFormatException("Could not find an entity or location matching " + args[2] + " for target!", t);
 				}
 			}
@@ -786,53 +786,53 @@ public class EntityManagement {
 				speed = Static.getDouble(args[3], t);
 			}
 
-			if(shooter_id != null) {
-				shooter = Static.getLivingByUUID(shooter_id, t);
+			if(shooterId != null) {
+				shooter = Static.getLivingByUUID(shooterId, t);
 				from = shooter.getEyeLocation();
 			}
 
-			if(target_id != null) {
-				target = Static.getLivingByUUID(target_id, t);
+			if(targetId != null) {
+				target = Static.getLivingByUUID(targetId, t);
 				to = target.getEyeLocation();
 			}
 
 			if(args.length >= 2) {
-				if(shooter_id != null && to == null) {
+				if(shooterId != null && to == null) {
 					try {
-						projectile_shoot = MCProjectileType.valueOf(args[1].val().toUpperCase());
+						projectileShoot = MCProjectileType.valueOf(args[1].val().toUpperCase());
 					} catch (IllegalArgumentException badEnum) {
 						throw new CREFormatException(args[1] + " is not a valid Projectile", t);
 					}
 				} else {
 					try {
-						entity_shoot = MCEntityType.valueOf(args[1].val().toUpperCase());
+						entityShoot = MCEntityType.valueOf(args[1].val().toUpperCase());
 					} catch (IllegalArgumentException badEnum) {
 						throw new CREBadEntityTypeException(args[1] + " is not a valid entity type", t);
 					}
 				}
 			} else {
-				if(shooter_id != null && to == null) {
-					projectile_shoot = MCProjectileType.FIREBALL;
+				if(shooterId != null && to == null) {
+					projectileShoot = MCProjectileType.FIREBALL;
 				} else {
-					entity_shoot = MCEntityType.valueOfVanillaType(MCEntityType.MCVanillaEntityType.FIREBALL);
+					entityShoot = MCEntityType.valueOfVanillaType(MCEntityType.MCVanillaEntityType.FIREBALL);
 				}
 			}
 
-			if(args.length < 3 && shooter_id == null) {
+			if(args.length < 3 && shooterId == null) {
 				throw new CREFormatException("You must specify target location if you want shoot from location, not entity.", t);
 			}
 
-			if(shooter_id != null && to == null) {
-				MCProjectile projectile = shooter.launchProjectile(projectile_shoot);
+			if(shooterId != null && to == null) {
+				MCProjectile projectile = shooter.launchProjectile(projectileShoot);
 				return new CString(projectile.getUniqueId().toString(), t);
 			} else {
 				Vector3D velocity = to.toVector().subtract(from.toVector()).normalize();
-				if(shooter_id != null) {
-					shifted_from = from.add(velocity);
+				if(shooterId != null) {
+					shiftedFrom = from.add(velocity);
 				} else {
-					shifted_from = from;
+					shiftedFrom = from;
 				}
-				MCEntity entity = from.getWorld().spawn(shifted_from, entity_shoot);
+				MCEntity entity = from.getWorld().spawn(shiftedFrom, entityShoot);
 				if(speed == 0.0) {
 					entity.setVelocity(velocity);
 				} else {

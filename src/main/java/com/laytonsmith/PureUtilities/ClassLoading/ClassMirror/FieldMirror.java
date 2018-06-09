@@ -20,13 +20,13 @@ public class FieldMirror extends AbstractElementMirror {
 	 */
 	public FieldMirror(Field field) {
 		super(field);
-		Object _value = null;
+		Object value = null;
 		try {
-			_value = field.get(null);
+			value = field.get(null);
 		} catch (IllegalArgumentException | IllegalAccessException ex) {
 			//
 		}
-		this.value = _value;
+		this.value = value;
 	}
 
 	/**

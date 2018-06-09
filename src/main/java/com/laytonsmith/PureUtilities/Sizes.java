@@ -7,97 +7,97 @@ package com.laytonsmith.PureUtilities;
  */
 public final class Sizes {
 
-	public static final int booleanSizeBits = 1;
-	public static final int byteSize = 1;
-	public static final int byteSizeBits = byteSize * 8;
-	public static final int shortSize = 2;
-	public static final int shortSizeBits = shortSize * byteSizeBits;
-	public static final int intSize = 4;
-	public static final int intSizeBits = intSize * byteSizeBits;
-	public static final int longSize = 8;
-	public static final int longSizeBits = longSize * byteSizeBits;
-	public static final int floatSize = 4;
-	public static final int floatSizeBits = floatSize * byteSizeBits;
-	public static final int doubleSize = 8;
-	public static final int doubleSizeBits = doubleSize * byteSizeBits;
-	public static final int charSize = 2;
-	public static final int charSizeBits = charSize * byteSizeBits;
+	public static final int BOOLEAN_SIZE_BITS = 1;
+	public static final int BYTE_SIZE = 1;
+	public static final int BYTE_SIZE_BITS = BYTE_SIZE * 8;
+	public static final int SHORT_SIZE = 2;
+	public static final int SHORT_SIZE_BITS = SHORT_SIZE * BYTE_SIZE_BITS;
+	public static final int INT_SIZE = 4;
+	public static final int INT_SIZE_BITS = INT_SIZE * BYTE_SIZE_BITS;
+	public static final int LONG_SIZE = 8;
+	public static final int LONG_SIZE_BITS = LONG_SIZE * BYTE_SIZE_BITS;
+	public static final int FLOAT_SIZE = 4;
+	public static final int FLOAT_SIZE_BITS = FLOAT_SIZE * BYTE_SIZE_BITS;
+	public static final int DOUBLE_SIZE = 8;
+	public static final int DOUBLE_SIZE_BITS = DOUBLE_SIZE * BYTE_SIZE_BITS;
+	public static final int CHAR_SIZE = 2;
+	public static final int CHAR_SIZE_BITS = CHAR_SIZE * BYTE_SIZE_BITS;
 
 	// bytes
 	public static int sizeof(byte b) {
-		return byteSize;
+		return BYTE_SIZE;
 	}
 
 	public static int sizeof(short s) {
-		return shortSize;
+		return SHORT_SIZE;
 	}
 
 	public static int sizeof(int i) {
-		return intSize;
+		return INT_SIZE;
 	}
 
 	public static int sizeof(long l) {
-		return longSize;
+		return LONG_SIZE;
 	}
 
 	public static int sizeof(float f) {
-		return floatSize;
+		return FLOAT_SIZE;
 	}
 
 	public static int sizeof(double d) {
-		return doubleSize;
+		return DOUBLE_SIZE;
 	}
 
 	public static int sizeof(char c) {
-		return charSize;
+		return CHAR_SIZE;
 	}
 
 	// array bytes
 	public static long sizeof(byte[] b) {
-		return byteSize * b.length;
+		return BYTE_SIZE * b.length;
 	}
 
 	public static long sizeof(short[] s) {
-		return shortSize * s.length;
+		return SHORT_SIZE * s.length;
 	}
 
 	public static long sizeof(int[] i) {
-		return intSize * i.length;
+		return INT_SIZE * i.length;
 	}
 
 	public static long sizeof(long[] l) {
-		return longSize * l.length;
+		return LONG_SIZE * l.length;
 	}
 
 	public static long sizeof(float[] f) {
-		return floatSize * f.length;
+		return FLOAT_SIZE * f.length;
 	}
 
 	public static long sizeof(double[] d) {
-		return doubleSize * d.length;
+		return DOUBLE_SIZE * d.length;
 	}
 
 	public static long sizeof(char[] c) {
-		return charSize * c.length;
+		return CHAR_SIZE * c.length;
 	}
 
 	// Class types
 	public static int sizeof(Class<?> c) {
 		if(c.isPrimitive()) {
 			if(c == byte.class) {
-				return byteSize;
+				return BYTE_SIZE;
 			} else if(c == short.class) {
-				return shortSize;
+				return SHORT_SIZE;
 			} else if(c == int.class) {
-				return intSize;
+				return INT_SIZE;
 			} else if(c == long.class) {
-				return longSize;
+				return LONG_SIZE;
 			} else if(c == float.class) {
-				return floatSize;
+				return FLOAT_SIZE;
 			} else if(c == double.class) {
-				return doubleSize;
+				return DOUBLE_SIZE;
 			} else if(c == char.class) {
-				return charSize;
+				return CHAR_SIZE;
 			}
 		}
 		throw new RuntimeException("Only non-boolean primitives are supported");
@@ -106,89 +106,89 @@ public final class Sizes {
 	// NOTE: no sizeof for boolean, only sizeofBits
 	// bits
 	public static int sizeofBits(byte b) {
-		return byteSizeBits;
+		return BYTE_SIZE_BITS;
 	}
 
 	public static int sizeofBits(short s) {
-		return shortSizeBits;
+		return SHORT_SIZE_BITS;
 	}
 
 	public static int sizeofBits(int i) {
-		return intSizeBits;
+		return INT_SIZE_BITS;
 	}
 
 	public static int sizeofBits(long l) {
-		return longSizeBits;
+		return LONG_SIZE_BITS;
 	}
 
 	public static int sizeofBits(float f) {
-		return floatSizeBits;
+		return FLOAT_SIZE_BITS;
 	}
 
 	public static int sizeofBits(double d) {
-		return doubleSizeBits;
+		return DOUBLE_SIZE_BITS;
 	}
 
 	public static int sizeofBits(char c) {
-		return charSizeBits;
+		return CHAR_SIZE_BITS;
 	}
 
 	public static int sizeofBits(boolean b) {
-		return booleanSizeBits;
+		return BOOLEAN_SIZE_BITS;
 	}
 
 	// array bits
 	public static long sizeofBits(byte[] b) {
-		return byteSizeBits * b.length;
+		return BYTE_SIZE_BITS * b.length;
 	}
 
 	public static long sizeofBits(short[] s) {
-		return shortSizeBits * s.length;
+		return SHORT_SIZE_BITS * s.length;
 	}
 
 	public static long sizeofBits(int[] i) {
-		return intSizeBits * i.length;
+		return INT_SIZE_BITS * i.length;
 	}
 
 	public static long sizeofBits(long[] l) {
-		return longSizeBits * l.length;
+		return LONG_SIZE_BITS * l.length;
 	}
 
 	public static long sizeofBits(float[] f) {
-		return floatSizeBits * f.length;
+		return FLOAT_SIZE_BITS * f.length;
 	}
 
 	public static long sizeofBits(double[] d) {
-		return doubleSizeBits * d.length;
+		return DOUBLE_SIZE_BITS * d.length;
 	}
 
 	public static long sizeofBits(char[] c) {
-		return charSizeBits * c.length;
+		return CHAR_SIZE_BITS * c.length;
 	}
 
 	public static long sizeofBits(boolean[] b) {
-		return booleanSizeBits * b.length;
+		return BOOLEAN_SIZE_BITS * b.length;
 	}
 
 	// Class types
 	public static int sizeofBits(Class<?> c) {
 		if(c.isPrimitive()) {
 			if(c == byte.class) {
-				return byteSizeBits;
+				return BYTE_SIZE_BITS;
 			} else if(c == short.class) {
-				return shortSizeBits;
+				return SHORT_SIZE_BITS;
 			} else if(c == int.class) {
-				return intSizeBits;
+				return INT_SIZE_BITS;
 			} else if(c == long.class) {
-				return longSizeBits;
+				return LONG_SIZE_BITS;
 			} else if(c == float.class) {
-				return floatSizeBits;
+				return FLOAT_SIZE_BITS;
 			} else if(c == double.class) {
-				return doubleSizeBits;
+				return DOUBLE_SIZE_BITS;
 			} else if(c == char.class) {
-				return charSizeBits;
+				return CHAR_SIZE_BITS;
 			} else if(c == boolean.class) {
-				return booleanSizeBits;
+				return BOOLEAN_SIZE_BITS;
 			}
 		}
 		throw new RuntimeException("Only primitives are supported");

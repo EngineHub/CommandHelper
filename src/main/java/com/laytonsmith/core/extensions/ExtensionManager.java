@@ -46,8 +46,8 @@ import java.util.logging.Logger;
 
 public class ExtensionManager {
 
-	private static final Map<URL, ExtensionTracker> extensions = new HashMap<>();
-	private static final List<File> locations = new ArrayList<>();
+	private static final Map<URL, ExtensionTracker> EXTENSIONS = new HashMap<>();
+	private static final List<File> LOCATIONS = new ArrayList<>();
 
 	/**
 	 * Allow an external source (such as a Bukkit plugin) register it's own functions and events. EXPERIMENTAL! Could
@@ -58,11 +58,11 @@ public class ExtensionManager {
 	 * @param tracker
 	 */
 	public static void RegisterTracker(URL url, ExtensionTracker tracker) {
-		if(extensions.containsKey(url) || extensions.containsValue(tracker)) {
+		if(EXTENSIONS.containsKey(url) || EXTENSIONS.containsValue(tracker)) {
 			return;
 		}
 
-		extensions.put(url, tracker);
+		EXTENSIONS.put(url, tracker);
 	}
 
 	/**
@@ -75,7 +75,7 @@ public class ExtensionManager {
 	 */
 	public static ExtensionTracker UnregisterTracker(URL url) {
 		if(!url.equals(ClassDiscovery.GetClassContainer(ExtensionManager.class))) {
-			ExtensionTracker trk = extensions.remove(url);
+			ExtensionTracker trk = EXTENSIONS.remove(url);
 			trk.shutdownTracker();
 
 			return trk;
@@ -130,7 +130,7 @@ public class ExtensionManager {
 	}
 
 	public static Map<URL, ExtensionTracker> getTrackers() {
-		return Collections.unmodifiableMap(extensions);
+		return Collections.unmodifiableMap(EXTENSIONS);
 	}
 
 	public static void Cache(File extCache, Class... extraClasses) {
@@ -177,7 +177,7 @@ public class ExtensionManager {
 		//Look in the given locations for jars, add them to our class discovery.
 		List<File> toProcess = new ArrayList<>();
 
-		for(File location : locations) {
+		for(File location : LOCATIONS) {
 			toProcess.addAll(getFiles(location));
 		}
 
@@ -337,7 +337,7 @@ public class ExtensionManager {
 	 * @param cd the ClassDiscovery to use for loading files.
 	 */
 	public static void Initialize(ClassDiscovery cd) {
-		extensions.clear();
+		EXTENSIONS.clear();
 
 		// Look in the extension folder for jars, add them to our class discover,
 		// then initialize everything
@@ -350,7 +350,7 @@ public class ExtensionManager {
 		if(onWindows) {
 			toProcess.addAll(getFiles(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory()));
 		} else {
-			for(File location : locations) {
+			for(File location : LOCATIONS) {
 				toProcess.addAll(getFiles(location));
 			}
 		}
@@ -411,12 +411,12 @@ public class ExtensionManager {
 				continue;
 			}
 
-			ExtensionTracker trk = extensions.get(url);
+			ExtensionTracker trk = EXTENSIONS.get(url);
 
 			if(trk == null) {
 				trk = new ExtensionTracker(url, cd, dcl);
 
-				extensions.put(url, trk);
+				EXTENSIONS.put(url, trk);
 			}
 
 			// Grab the identifier for the first lifecycle we come across and
@@ -465,12 +465,12 @@ public class ExtensionManager {
 					continue;
 				}
 
-				ExtensionTracker trk = extensions.get(url);
+				ExtensionTracker trk = EXTENSIONS.get(url);
 
 				if(trk == null) {
 					trk = new ExtensionTracker(url, cd, dcl);
 
-					extensions.put(url, trk);
+					EXTENSIONS.put(url, trk);
 				}
 
 				// Instantiate, register and store.
@@ -548,11 +548,11 @@ public class ExtensionManager {
 	public static void Cleanup() {
 		// Shutdown and release all the extensions
 		Shutdown();
-		for(ExtensionTracker trk : extensions.values()) {
+		for(ExtensionTracker trk : EXTENSIONS.values()) {
 			trk.shutdownTracker();
 		}
 
-		extensions.clear();
+		EXTENSIONS.clear();
 
 		// Clean up the loaders and discovery instances.
 		ClassDiscovery.getDefaultInstance().invalidateCaches();
@@ -588,7 +588,7 @@ public class ExtensionManager {
 	 * This should be run each time the "startup" of the runtime occurs or extensions are reloaded.
 	 */
 	public static void Startup() {
-		for(ExtensionTracker trk : extensions.values()) {
+		for(ExtensionTracker trk : EXTENSIONS.values()) {
 			for(Extension ext : trk.getExtensions()) {
 				try {
 					ext.onStartup();
@@ -606,7 +606,7 @@ public class ExtensionManager {
 	 * This should be run each time the "shutdown" of the runtime occurs or extensions are reloaded.
 	 */
 	public static void Shutdown() {
-		for(ExtensionTracker trk : extensions.values()) {
+		for(ExtensionTracker trk : EXTENSIONS.values()) {
 			for(Extension ext : trk.getExtensions()) {
 				try {
 					ext.onShutdown();
@@ -621,7 +621,7 @@ public class ExtensionManager {
 	}
 
 	public static void PreReloadAliases(AliasCore.ReloadOptions options) {
-		for(ExtensionTracker trk : extensions.values()) {
+		for(ExtensionTracker trk : EXTENSIONS.values()) {
 			for(Extension ext : trk.getExtensions()) {
 				try {
 					ext.onPreReloadAliases(options);
@@ -636,7 +636,7 @@ public class ExtensionManager {
 	}
 
 	public static void PostReloadAliases() {
-		for(ExtensionTracker trk : extensions.values()) {
+		for(ExtensionTracker trk : EXTENSIONS.values()) {
 			for(Extension ext : trk.getExtensions()) {
 				try {
 					ext.onPostReloadAliases();
@@ -652,7 +652,7 @@ public class ExtensionManager {
 
 	public static void AddDiscoveryLocation(File file) {
 		try {
-			locations.add(file.getCanonicalFile());
+			LOCATIONS.add(file.getCanonicalFile());
 		} catch (IOException ex) {
 			Static.getLogger().log(Level.SEVERE, null, ex);
 		}
@@ -661,7 +661,7 @@ public class ExtensionManager {
 	public static Set<Event> GetEvents() {
 		Set<Event> retn = new HashSet<>();
 
-		for(ExtensionTracker trk : extensions.values()) {
+		for(ExtensionTracker trk : EXTENSIONS.values()) {
 			retn.addAll(trk.getEvents());
 		}
 
@@ -671,7 +671,7 @@ public class ExtensionManager {
 	public static Set<Event> GetEvents(Driver type) {
 		Set<Event> retn = new HashSet<>();
 
-		for(ExtensionTracker trk : extensions.values()) {
+		for(ExtensionTracker trk : EXTENSIONS.values()) {
 			retn.addAll(trk.getEvents(type));
 		}
 
@@ -679,7 +679,7 @@ public class ExtensionManager {
 	}
 
 	public static Event GetEvent(Driver type, String name) {
-		for(ExtensionTracker trk : extensions.values()) {
+		for(ExtensionTracker trk : EXTENSIONS.values()) {
 			Set<Event> events = trk.getEvents(type);
 
 			for(Event event : events) {
@@ -693,7 +693,7 @@ public class ExtensionManager {
 	}
 
 	public static Event GetEvent(String name) {
-		for(ExtensionTracker trk : extensions.values()) {
+		for(ExtensionTracker trk : EXTENSIONS.values()) {
 			Set<Event> events = trk.getEvents();
 
 			for(Event event : events) {
@@ -725,7 +725,7 @@ public class ExtensionManager {
 		}
 
 		if(c instanceof CFunction) {
-			for(ExtensionTracker trk : extensions.values()) {
+			for(ExtensionTracker trk : EXTENSIONS.values()) {
 				if(trk.functions.get(platform).containsKey(c.val())
 						&& trk.supportedPlatforms.get(c.val()).contains(platform)) {
 					return trk.functions.get(platform).get(c.val());
@@ -753,7 +753,7 @@ public class ExtensionManager {
 
 		Set<FunctionBase> retn = new HashSet<>();
 
-		for(ExtensionTracker trk : extensions.values()) {
+		for(ExtensionTracker trk : EXTENSIONS.values()) {
 			for(FunctionBase func : trk.functions.get(platform).values()) {
 				retn.add(func);
 			}

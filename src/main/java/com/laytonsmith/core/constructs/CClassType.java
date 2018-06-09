@@ -22,7 +22,7 @@ import java.util.TreeSet;
 @typeof("ClassType")
 public final class CClassType extends Construct {
 
-	private static final Map<String, CClassType> cache = new HashMap<>();
+	private static final Map<String, CClassType> CACHE = new HashMap<>();
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = new CClassType("ClassType", Target.UNKNOWN);
 
@@ -33,7 +33,7 @@ public final class CClassType extends Construct {
 	public static final CClassType[] EMPTY_CLASS_ARRAY = new CClassType[0];
 
 	static {
-		cache.put("ClassType", TYPE);
+		CACHE.put("ClassType", TYPE);
 	}
 
 	private final boolean isTypeUnion;
@@ -53,10 +53,10 @@ public final class CClassType extends Construct {
 	 * @return
 	 */
 	public static CClassType get(String type) {
-		if(!cache.containsKey(type)) {
-			cache.put(type, new CClassType(type, Target.UNKNOWN));
+		if(!CACHE.containsKey(type)) {
+			CACHE.put(type, new CClassType(type, Target.UNKNOWN));
 		}
-		return cache.get(type);
+		return CACHE.get(type);
 	}
 
 	/**
@@ -73,10 +73,10 @@ public final class CClassType extends Construct {
 		// First, we have to canonicalize this type union
 		SortedSet<String> t = new TreeSet<>(Arrays.asList(types));
 		String type = StringUtils.Join(t, "|");
-		if(!cache.containsKey(type)) {
-			cache.put(type, new CClassType(Target.UNKNOWN, t.toArray(new String[t.size()])));
+		if(!CACHE.containsKey(type)) {
+			CACHE.put(type, new CClassType(Target.UNKNOWN, t.toArray(new String[t.size()])));
 		}
-		return cache.get(type);
+		return CACHE.get(type);
 	}
 
 	/**

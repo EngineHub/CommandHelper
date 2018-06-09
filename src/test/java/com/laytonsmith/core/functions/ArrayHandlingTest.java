@@ -60,7 +60,7 @@ public class ArrayHandlingTest {
 		ArrayHandling.array_size a = new ArrayHandling.array_size();
 		CArray arr = commonArray;
 		Construct ret = a.exec(Target.UNKNOWN, env, arr);
-		assertReturn(ret, C.Int);
+		assertReturn(ret, C.INT);
 		assertCEquals(C.onstruct(3), ret);
 	}
 
@@ -155,7 +155,7 @@ public class ArrayHandlingTest {
 	@Test(timeout = 10000)
 	public void testArrayPush() throws CancelCommandException {
 		ArrayHandling.array_push a = new ArrayHandling.array_push();
-		assertReturn(a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(4)), C.Void);
+		assertReturn(a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(4)), C.VOID);
 		assertCEquals(C.onstruct(1), commonArray.get(0, Target.UNKNOWN));
 		assertCEquals(C.onstruct(2), commonArray.get(1, Target.UNKNOWN));
 		assertCEquals(C.onstruct(3), commonArray.get(2, Target.UNKNOWN));

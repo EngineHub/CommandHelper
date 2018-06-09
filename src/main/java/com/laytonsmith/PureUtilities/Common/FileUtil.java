@@ -26,8 +26,8 @@ public final class FileUtil {
 	public static final int OVERWRITE = 0;
 	public static final int APPEND = 1;
 
-	private static final Map<String, Object> fileLocks = new HashMap<>();
-	private static final Map<String, Integer> fileLockCounter = new HashMap<>();
+	private static final Map<String, Object> FILE_LOCKS = new HashMap<>();
+	private static final Map<String, Integer> FILE_LOCK_COUNTER = new HashMap<>();
 
 	/**
 	 * A more complicated mechanism is required to ensure global access across the JVM is synchronized, so file system
@@ -39,20 +39,20 @@ public final class FileUtil {
 	 */
 	private static synchronized Object getLock(File file) throws IOException {
 		String canonical = file.getAbsoluteFile().getCanonicalPath();
-		if(!fileLocks.containsKey(canonical)) {
-			fileLocks.put(canonical, new Object());
-			fileLockCounter.put(canonical, 0);
+		if(!FILE_LOCKS.containsKey(canonical)) {
+			FILE_LOCKS.put(canonical, new Object());
+			FILE_LOCK_COUNTER.put(canonical, 0);
 		}
-		fileLockCounter.put(canonical, fileLockCounter.get(canonical) + 1);
-		return fileLocks.get(canonical);
+		FILE_LOCK_COUNTER.put(canonical, FILE_LOCK_COUNTER.get(canonical) + 1);
+		return FILE_LOCKS.get(canonical);
 	}
 
 	private static synchronized void freeLock(File file) throws IOException {
 		String canonical = file.getAbsoluteFile().getCanonicalPath();
-		fileLockCounter.put(canonical, fileLockCounter.get(canonical) - 1);
-		if(fileLockCounter.get(canonical) == 0) {
-			fileLockCounter.remove(canonical);
-			fileLocks.remove(canonical);
+		FILE_LOCK_COUNTER.put(canonical, FILE_LOCK_COUNTER.get(canonical) - 1);
+		if(FILE_LOCK_COUNTER.get(canonical) == 0) {
+			FILE_LOCK_COUNTER.remove(canonical);
+			FILE_LOCKS.remove(canonical);
 		}
 	}
 

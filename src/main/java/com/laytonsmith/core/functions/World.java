@@ -693,7 +693,7 @@ public class World {
 		}
 	}
 
-	private static final SortedMap<String, Construct> TimeLookup = new TreeMap<>();
+	private static final SortedMap<String, Construct> TIME_LOOKUP = new TreeMap<>();
 
 	static {
 		synchronized(World.class) {
@@ -703,7 +703,7 @@ public class World {
 				Enumeration e = p.propertyNames();
 				while(e.hasMoreElements()) {
 					String name = e.nextElement().toString();
-					TimeLookup.put(name, new CString(p.getProperty(name), Target.UNKNOWN));
+					TIME_LOOKUP.put(name, new CString(p.getProperty(name), Target.UNKNOWN));
 				}
 			} catch (IOException ex) {
 				Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
@@ -732,8 +732,8 @@ public class World {
 						+ " 24000, if not, it is modulo scaled. ---- Alternatively, common time notation (9:30pm, 4:00 am)"
 						+ " is acceptable, and convenient english mappings also exist:");
 				doc.append("<ul>");
-				for(String key : TimeLookup.keySet()) {
-					doc.append("<li>").append(key).append(" = ").append(TimeLookup.get(key)).append("</li>");
+				for(String key : TIME_LOOKUP.keySet()) {
+					doc.append("<li>").append(key).append(" = ").append(TIME_LOOKUP.get(key)).append("</li>");
 				}
 				doc.append("</ul>");
 			}
@@ -773,8 +773,8 @@ public class World {
 				throw new CREInvalidWorldException("No world specified", t);
 			}
 			String stime = (args.length == 1 ? args[0] : args[1]).val().toLowerCase();
-			if(TimeLookup.containsKey(stime.replaceAll("[^a-z]", ""))) {
-				stime = TimeLookup.get(stime.replaceAll("[^a-z]", "")).val();
+			if(TIME_LOOKUP.containsKey(stime.replaceAll("[^a-z]", ""))) {
+				stime = TIME_LOOKUP.get(stime.replaceAll("[^a-z]", "")).val();
 			}
 			if(stime.matches("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$")) {
 				Pattern p = Pattern.compile("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$");

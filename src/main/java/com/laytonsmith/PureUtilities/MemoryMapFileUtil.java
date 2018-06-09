@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  */
 public final class MemoryMapFileUtil {
 
-	private static final Map<String, MemoryMapFileUtil> instances = new HashMap<>();
+	private static final Map<String, MemoryMapFileUtil> INSTANCES = new HashMap<>();
 	/**
 	 * The minimum delay between FS writes. In milliseconds.
 	 */
@@ -28,11 +28,11 @@ public final class MemoryMapFileUtil {
 	public static synchronized MemoryMapFileUtil getInstance(File f, DataGrabber grabber) throws IOException {
 		String s = f.getCanonicalPath();
 		MemoryMapFileUtil mem;
-		if(!instances.containsKey(s)) {
+		if(!INSTANCES.containsKey(s)) {
 			mem = new MemoryMapFileUtil(f, grabber);
-			instances.put(s, mem);
+			INSTANCES.put(s, mem);
 		} else {
-			mem = instances.get(s);
+			mem = INSTANCES.get(s);
 		}
 		mem.grabber = grabber;
 		return mem;

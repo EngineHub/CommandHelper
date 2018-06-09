@@ -32,12 +32,12 @@ public class AnnotationChecks {
 		for(ClassMirror<?> clazz : classes) {
 			try {
 				// Make sure that TYPE has the same type as the typeof annotation
-				CClassType TYPE = (CClassType) ReflectionUtils.get(clazz.loadClass(), "TYPE");
-				if(TYPE == null) {
+				CClassType type = (CClassType) ReflectionUtils.get(clazz.loadClass(), "TYPE");
+				if(type == null) {
 					errors.add("TYPE is null? " + clazz.getClassName());
 					continue;
 				}
-				if(!TYPE.val().equals(clazz.getAnnotation(typeof.class).getValue("value"))) {
+				if(!type.val().equals(clazz.getAnnotation(typeof.class).getValue("value"))) {
 					errors.add(clazz.getClassName() + "'s TYPE value is different than the typeof annotation on it");
 				}
 			} catch (ReflectionUtils.ReflectionException ex) {

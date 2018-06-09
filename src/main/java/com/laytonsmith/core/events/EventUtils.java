@@ -36,7 +36,7 @@ public final class EventUtils {
 	private EventUtils() {
 	}
 
-	private static final Map<Driver, SortedSet<BoundEvent>> event_handles
+	private static final Map<Driver, SortedSet<BoundEvent>> EVENT_HANDLES
 			= new EnumMap<Driver, SortedSet<BoundEvent>>(Driver.class);
 
 	/**
@@ -50,11 +50,11 @@ public final class EventUtils {
 		if(event == null) {
 			throw new EventException("The event type \"" + b.getEventName() + "\" could not be found.");
 		}
-		if(!event_handles.containsKey(event.driver())) {
-			event_handles.put(event.driver(), new TreeSet<BoundEvent>());
+		if(!EVENT_HANDLES.containsKey(event.driver())) {
+			EVENT_HANDLES.put(event.driver(), new TreeSet<BoundEvent>());
 		}
 		//Check for duplicate IDs
-		for(Set<BoundEvent> s : event_handles.values()) {
+		for(Set<BoundEvent> s : EVENT_HANDLES.values()) {
 			for(BoundEvent bb : s) {
 				if(bb.getId().equals(b.getId())) {
 					throw new CREBindException("Cannot have duplicate IDs defined."
@@ -64,7 +64,7 @@ public final class EventUtils {
 				}
 			}
 		}
-		SortedSet<BoundEvent> set = event_handles.get(event.driver());
+		SortedSet<BoundEvent> set = EVENT_HANDLES.get(event.driver());
 		set.add(b);
 		event.bind(b);
 	}
@@ -76,7 +76,7 @@ public final class EventUtils {
 	 * @param id
 	 */
 	public static void UnregisterEvent(String id) {
-		for(SortedSet<BoundEvent> set : event_handles.values()) {
+		for(SortedSet<BoundEvent> set : EVENT_HANDLES.values()) {
 			Iterator<BoundEvent> i = set.iterator();
 			while(i.hasNext()) {
 				BoundEvent b = i.next();
@@ -96,7 +96,7 @@ public final class EventUtils {
 	 * @return
 	 */
 	public static BoundEvent GetEventById(String id) {
-		for(SortedSet<BoundEvent> set : event_handles.values()) {
+		for(SortedSet<BoundEvent> set : EVENT_HANDLES.values()) {
 			for(BoundEvent b : set) {
 				if(b.getId().equals(id)) {
 					return b;
@@ -110,7 +110,7 @@ public final class EventUtils {
 	 * Unregisters all event handlers. Runs in O(n)
 	 */
 	public static void UnregisterAll(String name) {
-		for(SortedSet<BoundEvent> set : event_handles.values()) {
+		for(SortedSet<BoundEvent> set : EVENT_HANDLES.values()) {
 			Iterator<BoundEvent> i = set.iterator();
 			while(i.hasNext()) {
 				BoundEvent b = i.next();
@@ -126,7 +126,7 @@ public final class EventUtils {
 	 * This should be used in the case the plugin is disabled, or /reloadalises is run.
 	 */
 	public static void UnregisterAll() {
-		event_handles.clear();
+		EVENT_HANDLES.clear();
 	}
 
 	/**
@@ -136,11 +136,11 @@ public final class EventUtils {
 	 * @return
 	 */
 	public static SortedSet<BoundEvent> GetEvents(Driver type) {
-		return event_handles.get(type);
+		return EVENT_HANDLES.get(type);
 	}
 
 	public static void ManualTrigger(String eventName, CArray object, Target t, boolean serverWide) {
-		for(Driver type : event_handles.keySet()) {
+		for(Driver type : EVENT_HANDLES.keySet()) {
 			SortedSet<BoundEvent> toRun = new TreeSet<>();
 			SortedSet<BoundEvent> bounded = GetEvents(type);
 			Event driver = EventList.getEvent(type, eventName);
@@ -327,7 +327,7 @@ public final class EventUtils {
 
 	public static Construct DumpEvents() {
 		CArray ca = new CArray(Target.UNKNOWN);
-		for(SortedSet<BoundEvent> set : event_handles.values()) {
+		for(SortedSet<BoundEvent> set : EVENT_HANDLES.values()) {
 			Iterator<BoundEvent> i = set.iterator();
 			while(i.hasNext()) {
 				BoundEvent b = i.next();

@@ -26,16 +26,16 @@ import java.util.logging.Logger;
 @datasource("mem")
 public final class MemoryDataSource extends AbstractDataSource {
 
-	private static final Map<String, Map<String, String>> databasePool = new TreeMap<String, Map<String, String>>();
+	private static final Map<String, Map<String, String>> DATABASE_POOL = new TreeMap<String, Map<String, String>>();
 
 	/**
 	 * Clears all data from all databases. Should be called when a natural reload type operation is called.
 	 */
 	public static synchronized void ClearDatabases() {
-		for(String s : databasePool.keySet()) {
-			databasePool.get(s).clear();
+		for(String s : DATABASE_POOL.keySet()) {
+			DATABASE_POOL.get(s).clear();
 		}
-		databasePool.clear();
+		DATABASE_POOL.clear();
 	}
 
 	@Override
@@ -51,10 +51,10 @@ public final class MemoryDataSource extends AbstractDataSource {
 	 * @return
 	 */
 	public static synchronized Map<String, String> getDatabase(String name) {
-		if(!databasePool.containsKey(name)) {
-			databasePool.put(name, Collections.synchronizedMap(new TreeMap<String, String>()));
+		if(!DATABASE_POOL.containsKey(name)) {
+			DATABASE_POOL.put(name, Collections.synchronizedMap(new TreeMap<String, String>()));
 		}
-		return databasePool.get(name);
+		return DATABASE_POOL.get(name);
 	}
 
 	private String dbName;

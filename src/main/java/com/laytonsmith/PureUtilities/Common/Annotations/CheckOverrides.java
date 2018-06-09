@@ -39,16 +39,16 @@ import javax.tools.Diagnostic;
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class CheckOverrides extends AbstractProcessor {
 
-	private static final boolean enabled = true;
+	private static final boolean ENABLED = true;
 
 	private static Map<Class, Set<Method>> methods = null;
-	private static final Set<Class> interfacesWithMustUseOverride = new HashSet<>();
+	private static final Set<Class> INTERFACES_WITH_MUST_USE_OVERRIDE = new HashSet<>();
 	private static final Pattern METHOD_SIGNATURE = Pattern.compile("[a-zA-Z0-9_]+\\((.*)\\)");
 	private static final Pattern CLASS_TEMPLATES = Pattern.compile("^.*?<(.*)>?$");
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-		if(!enabled) {
+		if(!ENABLED) {
 			processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "CheckOverrides processor is turned off!");
 			return false;
 		}
@@ -67,7 +67,7 @@ public class CheckOverrides extends AbstractProcessor {
 						processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
 								"Only interfaces may be annotated with " + MustUseOverride.class.getName());
 					}
-					interfacesWithMustUseOverride.add(c);
+					INTERFACES_WITH_MUST_USE_OVERRIDE.add(c);
 				}
 			}
 			for(Element element : roundEnv.getElementsAnnotatedWith(Override.class)) {
@@ -262,7 +262,7 @@ public class CheckOverrides extends AbstractProcessor {
 		}
 		getAllSupers(c.getSuperclass(), building, false);
 		for(Class cc : c.getInterfaces()) {
-			if(interfacesWithMustUseOverride.contains(cc)) {
+			if(INTERFACES_WITH_MUST_USE_OVERRIDE.contains(cc)) {
 				building.add(cc);
 			}
 		}

@@ -162,7 +162,7 @@ public final class SimpleSyntaxHighlighter {
 			tokens.remove(0);
 		}
 		String newlineString = "<div><span style=\"font-style: italic; " + getColor(ElementTypes.LINE_NUMBER) + "\">"
-				+ "%0" + Integer.toString(tokens.get(tokens.size() - 1).line_num - 1).length() + "d</span>&nbsp;&nbsp;&nbsp;";
+				+ "%0" + Integer.toString(tokens.get(tokens.size() - 1).lineNum - 1).length() + "d</span>&nbsp;&nbsp;&nbsp;";
 		StringBuilder out = new StringBuilder();
 		AtomicInteger lineNum = new AtomicInteger(1);
 		out.append(String.format(newlineString, lineNum.get()));

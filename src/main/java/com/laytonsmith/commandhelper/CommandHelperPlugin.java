@@ -355,18 +355,18 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 		version = new SimpleVersion(getDescription().getVersion());
 
-		String script_name = Prefs.ScriptName();
-		String main_file = Prefs.MainFile();
+		String scriptName = Prefs.ScriptName();
+		String mainFile = Prefs.MainFile();
 		boolean showSplashScreen = Prefs.ShowSplashScreen();
 		if(showSplashScreen) {
 			StreamUtils.GetSystemOut().println(TermColors.reset());
 			//StreamUtils.GetSystemOut().flush();
 			StreamUtils.GetSystemOut().println("\n\n" + Static.Logo());
 		}
-		ac = new AliasCore(new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), script_name),
+		ac = new AliasCore(new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), scriptName),
 				CommandHelperFileLocations.getDefault().getLocalPackagesDirectory(),
 				CommandHelperFileLocations.getDefault().getPreferencesFile(),
-				new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), main_file), this);
+				new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), mainFile), this);
 		ac.reload(null, null, true);
 
 		//Clear out our hostname cache

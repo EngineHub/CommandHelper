@@ -2165,7 +2165,12 @@ public class ArrayHandling {
 	@api
 	public static class array_unique extends AbstractFunction implements Optimizable {
 
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
 		private static final equals equals = new equals();
+
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
 		private static final BasicLogic.sequals sequals = new BasicLogic.sequals();
 
 		@Override

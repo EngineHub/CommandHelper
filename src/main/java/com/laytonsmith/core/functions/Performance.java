@@ -23,7 +23,7 @@ import org.perf4j.StopWatch;
  */
 public class Performance {
 
-	public static boolean PERFORMANCE_LOGGING = false;
+	public static boolean performanceLogging = false;
 
 	public static String docs() {
 		return "This class provides functions for hooking into CommandHelper's powerful Performance measuring. To use the functions, you must have"
@@ -86,7 +86,7 @@ public class Performance {
 			if(!Prefs.AllowProfiling()) {
 				throw new CRESecurityException("allow-profiling is currently off, you must set it to true in your preferences.", t);
 			}
-			PERFORMANCE_LOGGING = Static.getBoolean(args[0], t);
+			performanceLogging = Static.getBoolean(args[0], t);
 			return CVoid.VOID;
 		}
 

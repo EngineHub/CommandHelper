@@ -69,7 +69,7 @@ public class AliasCore {
 	private final File mainFile;
 	//AliasConfig config;
 	private List<Script> scripts;
-	static final Logger logger = Logger.getLogger("Minecraft");
+	static final Logger LOGGER = Logger.getLogger("Minecraft");
 	private final Set<String> echoCommand = new HashSet<String>();
 	public List<File> autoIncludes;
 	public static CommandHelperPlugin parent;
@@ -330,13 +330,13 @@ public class AliasCore {
 				aliasConfig.getParentFile().mkdirs();
 				aliasConfig.createNewFile();
 				try {
-					String samp_aliases = getStringResource(AliasCore.class.getResourceAsStream("/samp_aliases.txt"));
+					String sampAliases = getStringResource(AliasCore.class.getResourceAsStream("/samp_aliases.txt"));
 					//Because the sample config may have been written an a machine that isn't this type, replace all
 					//line endings
-					samp_aliases = samp_aliases.replaceAll("\n|\r\n", System.getProperty("line.separator"));
-					file_put_contents(aliasConfig, samp_aliases, "o");
+					sampAliases = sampAliases.replaceAll("\n|\r\n", System.getProperty("line.separator"));
+					file_put_contents(aliasConfig, sampAliases, "o");
 				} catch (Exception e) {
-					logger.log(Level.WARNING, "CommandHelper: Could not write sample config file");
+					LOGGER.log(Level.WARNING, "CommandHelper: Could not write sample config file");
 				}
 			}
 
@@ -344,11 +344,11 @@ public class AliasCore {
 				mainFile.getParentFile().mkdirs();
 				mainFile.createNewFile();
 				try {
-					String samp_main = getStringResource(AliasCore.class.getResourceAsStream("/samp_main.txt"));
-					samp_main = samp_main.replaceAll("\n|\r\n", System.getProperty("line.separator"));
-					file_put_contents(mainFile, samp_main, "o");
+					String sampMain = getStringResource(AliasCore.class.getResourceAsStream("/samp_main.txt"));
+					sampMain = sampMain.replaceAll("\n|\r\n", System.getProperty("line.separator"));
+					file_put_contents(mainFile, sampMain, "o");
 				} catch (Exception e) {
-					logger.log(Level.WARNING, "CommandHelper: Could not write sample main file");
+					LOGGER.log(Level.WARNING, "CommandHelper: Could not write sample main file");
 				}
 			}
 
@@ -380,12 +380,12 @@ public class AliasCore {
 				String main = file_get_contents(mainFile.getAbsolutePath());
 				localPackages.appendMS(main, mainFile);
 
-				String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
-				localPackages.appendMSA(alias_config, aliasConfig);
+				String aliasConfigStr = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
+				localPackages.appendMSA(aliasConfigStr, aliasConfig);
 
-				File auto_include = new File(env.getEnv(GlobalEnv.class).GetRootFolder(), "auto_include.ms");
-				if(auto_include.exists()) {
-					localPackages.addAutoInclude(auto_include);
+				File autoInclude = new File(env.getEnv(GlobalEnv.class).GetRootFolder(), "auto_include.ms");
+				if(autoInclude.exists()) {
+					localPackages.addAutoInclude(autoInclude);
 				}
 
 				//Now that we've included the default files, search the local_packages directory
@@ -410,7 +410,7 @@ public class AliasCore {
 				}
 			}
 		} catch (IOException ex) {
-			logger.log(Level.SEVERE, "[CommandHelper]: Path to config file is not correct/accessable. Please"
+			LOGGER.log(Level.SEVERE, "[CommandHelper]: Path to config file is not correct/accessable. Please"
 					+ " check the location and try loading the plugin again.");
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -531,12 +531,12 @@ public class AliasCore {
 	/**
 	 * Returns the contents of a file as a string. Accepts the file location as a string.
 	 *
-	 * @param file_location
+	 * @param fileLocation
 	 * @return the contents of the file as a string
 	 * @throws Exception if the file cannot be found
 	 */
-	public static String file_get_contents(String file_location) throws IOException {
-		BufferedReader in = new BufferedReader(new FileReader(file_location));
+	public static String file_get_contents(String fileLocation) throws IOException {
+		BufferedReader in = new BufferedReader(new FileReader(fileLocation));
 		String ret = "";
 		String str;
 		while((str = in.readLine()) != null) {
@@ -549,7 +549,7 @@ public class AliasCore {
 	/**
 	 * This function writes the contents of a string to a file.
 	 *
-	 * @param file_location the location of the file on the disk
+	 * @param fileLocation the location of the file on the disk
 	 * @param contents the string to be written to the file
 	 * @param mode the mode in which to write the file: <br /> <ul> <li>"o" - overwrite the file if it exists, without
 	 * asking</li> <li>"a" - append to the file if it exists, without asking</li> <li>"c" - cancel the operation if the
@@ -558,23 +558,23 @@ public class AliasCore {
 	 * or if the mode is not valid.
 	 * @throws Exception if the file could not be created
 	 */
-	public static boolean file_put_contents(File file_location, String contents, String mode)
+	public static boolean file_put_contents(File fileLocation, String contents, String mode)
 			throws Exception {
 		BufferedWriter out = null;
-		File f = file_location;
+		File f = fileLocation;
 		if(f.exists()) {
 			//do different things depending on our mode
 			if(mode.equalsIgnoreCase("o")) {
-				out = new BufferedWriter(new FileWriter(file_location));
+				out = new BufferedWriter(new FileWriter(fileLocation));
 			} else if(mode.equalsIgnoreCase("a")) {
-				out = new BufferedWriter(new FileWriter(file_location, true));
+				out = new BufferedWriter(new FileWriter(fileLocation, true));
 			} else if(mode.equalsIgnoreCase("c")) {
 				return false;
 			} else {
 				throw new RuntimeException("Undefined mode in file_put_contents: " + mode);
 			}
 		} else {
-			out = new BufferedWriter(new FileWriter(file_location));
+			out = new BufferedWriter(new FileWriter(fileLocation));
 		}
 		//At this point, we are assured that the file is open, and ready to be written in
 		//from this point in the file.
@@ -738,7 +738,7 @@ public class AliasCore {
 					ConfigRuntimeException.HandleUncaughtException(e, env);
 				} catch (CancelCommandException e) {
 					if(e.getMessage() != null && !"".equals(e.getMessage().trim())) {
-						logger.log(Level.INFO, e.getMessage());
+						LOGGER.log(Level.INFO, e.getMessage());
 					}
 				} catch (ProgramFlowManipulationException e) {
 					exception = true;
@@ -746,12 +746,12 @@ public class AliasCore {
 				}
 				if(exception) {
 					if(Prefs.HaltOnFailure()) {
-						logger.log(Level.SEVERE, TermColors.RED + "[CommandHelper]: Compilation halted due to unrecoverable failure." + TermColors.reset());
+						LOGGER.log(Level.SEVERE, TermColors.RED + "[CommandHelper]: Compilation halted due to unrecoverable failure." + TermColors.reset());
 						return;
 					}
 				}
 			}
-			logger.log(Level.INFO, TermColors.YELLOW + "[CommandHelper]: MethodScript files processed" + TermColors.reset());
+			LOGGER.log(Level.INFO, TermColors.YELLOW + "[CommandHelper]: MethodScript files processed" + TermColors.reset());
 			if(player != null) {
 				player.sendMessage(MCChatColor.YELLOW + "[CommandHelper]: MethodScript files processed");
 			}

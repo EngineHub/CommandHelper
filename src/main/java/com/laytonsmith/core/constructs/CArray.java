@@ -41,10 +41,10 @@ import java.util.TreeMap;
 public class CArray extends Construct implements ArrayAccess {
 
 	public static final CClassType TYPE = CClassType.get("array");
-	private boolean associative_mode = false;
-	private long next_index = 0;
+	private boolean associativeMode = false;
+	private long nextIndex = 0;
 	private List<Construct> array;
-	private SortedMap<String, Construct> associative_array;
+	private SortedMap<String, Construct> associativeArray;
 	private String mutVal;
 	private CArray parent = null;
 	private boolean valueDirty = true;
@@ -72,26 +72,26 @@ public class CArray extends Construct implements ArrayAccess {
 	public CArray(Target t, int initialCapacity, Construct... items) {
 		super("{}", ConstructType.ARRAY, t);
 		if(initialCapacity == -1) {
-			associative_mode = true;
+			associativeMode = true;
 		} else if(items != null) {
 			for(Construct item : items) {
 				if(item instanceof CEntry) {
 					//it's an associative array
-					associative_mode = true;
+					associativeMode = true;
 					break;
 				}
 			}
 		}
-		associative_array = new TreeMap<>(comparator);
-		array = associative_mode ? new ArrayList<>() : initialCapacity > 0 ? new ArrayList<>(initialCapacity) : items != null ? new ArrayList<>(items.length) : new ArrayList<>();
-		if(associative_mode) {
+		associativeArray = new TreeMap<>(comparator);
+		array = associativeMode ? new ArrayList<>() : initialCapacity > 0 ? new ArrayList<>(initialCapacity) : items != null ? new ArrayList<>(items.length) : new ArrayList<>();
+		if(associativeMode) {
 			if(items != null) {
 				for(Construct item : items) {
 					if(item instanceof CEntry) {
-						associative_array.put(normalizeConstruct(((CEntry) item).ckey), ((CEntry) item).construct);
+						associativeArray.put(normalizeConstruct(((CEntry) item).ckey), ((CEntry) item).construct);
 					} else {
 						int max = Integer.MIN_VALUE;
-						for(String key : associative_array.keySet()) {
+						for(String key : associativeArray.keySet()) {
 							try {
 								int i = Integer.parseInt(key);
 								max = java.lang.Math.max(max, i);
@@ -101,7 +101,7 @@ public class CArray extends Construct implements ArrayAccess {
 						if(max == Integer.MIN_VALUE) {
 							max = -1; //Special case, there are no integer indexes in here yet.
 						}
-						associative_array.put(Integer.toString(max + 1), item);
+						associativeArray.put(Integer.toString(max + 1), item);
 						if(item instanceof CArray) {
 							((CArray) item).parent = this;
 						}
@@ -117,7 +117,7 @@ public class CArray extends Construct implements ArrayAccess {
 					}
 				}
 			}
-			this.next_index = array.size();
+			this.nextIndex = array.size();
 		}
 		setDirty();
 	}
@@ -129,7 +129,7 @@ public class CArray extends Construct implements ArrayAccess {
 	 */
 	@Override
 	public boolean isAssociative() {
-		return associative_mode;
+		return associativeMode;
 	}
 
 	/**
@@ -169,14 +169,14 @@ public class CArray extends Construct implements ArrayAccess {
 	 * @return
 	 */
 	protected SortedMap<String, Construct> getAssociativeArray() {
-		return associative_array;
+		return associativeArray;
 	}
 
 	/**
 	 * @return Whether or not this array is operating in associative mode
 	 */
 	public boolean inAssociativeMode() {
-		return associative_mode;
+		return associativeMode;
 	}
 
 	/**
@@ -221,7 +221,7 @@ public class CArray extends Construct implements ArrayAccess {
 	 * @param t
 	 */
 	public void reverse(Target t) {
-		if(!associative_mode) {
+		if(!associativeMode) {
 			Collections.reverse(array);
 			setDirty();
 		} else {
@@ -250,19 +250,19 @@ public class CArray extends Construct implements ArrayAccess {
 	 * @throws IndexOutOfBoundsException If the index is not null, and the index specified is out of range.
 	 */
 	public void push(Construct c, Integer index, Target t) throws IllegalArgumentException, IndexOutOfBoundsException {
-		if(!associative_mode) {
+		if(!associativeMode) {
 			if(index != null) {
 				array.add(index, c);
 			} else {
 				array.add(c);
 			}
-			next_index++;
+			nextIndex++;
 		} else {
 			if(index != null) {
 				throw new IllegalArgumentException("Cannot insert into an associative array");
 			}
 			int max = 0;
-			for(String key : associative_array.keySet()) {
+			for(String key : associativeArray.keySet()) {
 				try {
 					int i = Integer.parseInt(key);
 					max = java.lang.Math.max(max, i);
@@ -270,9 +270,9 @@ public class CArray extends Construct implements ArrayAccess {
 				}
 			}
 			if(c instanceof CEntry) {
-				associative_array.put(Integer.toString(max + 1), ((CEntry) c).construct());
+				associativeArray.put(Integer.toString(max + 1), ((CEntry) c).construct());
 			} else {
-				associative_array.put(Integer.toString(max + 1), c);
+				associativeArray.put(Integer.toString(max + 1), c);
 			}
 		}
 		if(c instanceof CArray) {
@@ -290,14 +290,14 @@ public class CArray extends Construct implements ArrayAccess {
 	@Override
 	public Set<Construct> keySet() {
 		Set<Construct> set;
-		if(!associative_mode) {
+		if(!associativeMode) {
 			set = new LinkedHashSet<>(array.size());
 			for(int i = 0; i < array.size(); i++) {
 				set.add(new CInt(i, Target.UNKNOWN));
 			}
 		} else {
-			set = new LinkedHashSet<>(associative_array.size());
-			for(String key : associative_array.keySet()) {
+			set = new LinkedHashSet<>(associativeArray.size());
+			for(String key : associativeArray.keySet()) {
 				set.add(new CString(key, Target.UNKNOWN));
 			}
 		}
@@ -311,23 +311,23 @@ public class CArray extends Construct implements ArrayAccess {
 	 * @return
 	 */
 	public Set<String> stringKeySet() {
-		if(!associative_mode) {
+		if(!associativeMode) {
 			Set<String> set = new LinkedHashSet<>(array.size());
 			for(int i = 0; i < array.size(); i++) {
 				set.add(Integer.toString(i));
 			}
 			return set;
 		} else {
-			return associative_array.keySet();
+			return associativeArray.keySet();
 		}
 	}
 
 	private void setAssociative() {
-		associative_array = new TreeMap<>(comparator);
+		associativeArray = new TreeMap<>(comparator);
 		for(int i = 0; i < array.size(); i++) {
-			associative_array.put(Integer.toString(i), array.get(i));
+			associativeArray.put(Integer.toString(i), array.get(i));
 		}
-		associative_mode = true;
+		associativeMode = true;
 		array = null; // null out the original array container so it can be GC'd
 	}
 
@@ -337,17 +337,17 @@ public class CArray extends Construct implements ArrayAccess {
 	 * @param c
 	 */
 	public void set(Construct index, Construct c, Target t) {
-		if(!associative_mode) {
+		if(!associativeMode) {
 			if(index instanceof CNull) {
 				// Invalid normal array index
 				setAssociative();
 			} else {
 				try {
 					int indx = Static.getInt32(index, t);
-					if(indx > next_index || indx < 0) {
+					if(indx > nextIndex || indx < 0) {
 						// Out of range
 						setAssociative();
-					} else if(indx == next_index) {
+					} else if(indx == nextIndex) {
 						this.push(c, t);
 					} else {
 						array.set(indx, c);
@@ -358,8 +358,8 @@ public class CArray extends Construct implements ArrayAccess {
 				}
 			}
 		}
-		if(associative_mode) {
-			associative_array.put(normalizeConstruct(index), c);
+		if(associativeMode) {
+			associativeArray.put(normalizeConstruct(index), c);
 		}
 		if(c instanceof CArray) {
 			((CArray) c).parent = this;
@@ -386,14 +386,14 @@ public class CArray extends Construct implements ArrayAccess {
 
 	@Override
 	public Construct get(Construct index, Target t) {
-		if(!associative_mode) {
+		if(!associativeMode) {
 			try {
 				return array.get(Static.getInt32(index, t));
 			} catch (IndexOutOfBoundsException e) {
 				throw new CREIndexOverflowException("The element at index \"" + index.val() + "\" does not exist", t, e);
 			}
 		} else {
-			Construct val = associative_array.get(normalizeConstruct(index));
+			Construct val = associativeArray.get(normalizeConstruct(index));
 			if(val != null) {
 				if(val instanceof CEntry) {
 					return ((CEntry) val).construct();
@@ -423,8 +423,8 @@ public class CArray extends Construct implements ArrayAccess {
 	}
 
 	public boolean containsKey(String c) {
-		if(associative_mode) {
-			return associative_array.containsKey(c);
+		if(associativeMode) {
+			return associativeArray.containsKey(c);
 		} else {
 			try {
 				return Integer.valueOf(c) < array.size();
@@ -439,8 +439,8 @@ public class CArray extends Construct implements ArrayAccess {
 	}
 
 	public boolean contains(Construct c) {
-		if(associative_mode) {
-			return associative_array.containsValue(c);
+		if(associativeMode) {
+			return associativeArray.containsValue(c);
 		} else {
 			return array.contains(c);
 		}
@@ -462,9 +462,9 @@ public class CArray extends Construct implements ArrayAccess {
 	 */
 	public CArray indexesOf(Construct value) {
 		CArray ret = new CArray(Target.UNKNOWN);
-		if(associative_mode) {
-			for(String key : associative_array.keySet()) {
-				if(BasicLogic.equals.doEquals(associative_array.get(key), value)) {
+		if(associativeMode) {
+			for(String key : associativeArray.keySet()) {
+				if(BasicLogic.equals.doEquals(associativeArray.get(key), value)) {
 					ret.push(new CString(key, Target.UNKNOWN), Target.UNKNOWN);
 				}
 			}
@@ -560,8 +560,8 @@ public class CArray extends Construct implements ArrayAccess {
 
 	@Override
 	public long size() {
-		if(associative_mode) {
-			return associative_array.size();
+		if(associativeMode) {
+			return associativeArray.size();
 		} else {
 			return array.size();
 		}
@@ -575,13 +575,13 @@ public class CArray extends Construct implements ArrayAccess {
 		} catch (CloneNotSupportedException ex) {
 			throw new RuntimeException(ex);
 		}
-		clone.associative_mode = associative_mode;
-		if(!associative_mode) {
+		clone.associativeMode = associativeMode;
+		if(!associativeMode) {
 			if(array != null) {
 				clone.array = new ArrayList<>(this.array);
 			}
-		} else if(associative_array != null) {
-			clone.associative_array = new TreeMap<>(this.associative_array);
+		} else if(associativeArray != null) {
+			clone.associativeArray = new TreeMap<>(this.associativeArray);
 		}
 		clone.setDirty();
 		return clone;
@@ -602,7 +602,7 @@ public class CArray extends Construct implements ArrayAccess {
 
 		// Create the clone to put array in and add it to the cloneRefs list.
 		CArray clone = new CArray(t, (int) array.size());
-		clone.associative_mode = array.associative_mode;
+		clone.associativeMode = array.associativeMode;
 		cloneRefs.add(new CArray[]{array, clone});
 
 		// Iterate over the array, recursively calling this method to perform a deep clone.
@@ -665,10 +665,10 @@ public class CArray extends Construct implements ArrayAccess {
 	public Construct remove(Construct construct) {
 		String c = normalizeConstruct(construct);
 		Construct ret;
-		if(!associative_mode) {
+		if(!associativeMode) {
 			try {
 				ret = array.remove(Integer.parseInt(c));
-				next_index--;
+				nextIndex--;
 			} catch (NumberFormatException e) {
 				throw new CRECastException("Expecting an integer, but received \"" + c
 						+ "\" (were you expecting an associative array? This array is a normal array.)", construct.getTarget());
@@ -677,7 +677,7 @@ public class CArray extends Construct implements ArrayAccess {
 						+ "', as no such index exists in the array", construct.getTarget());
 			}
 		} else {
-			ret = associative_array.remove(c);
+			ret = associativeArray.remove(c);
 		}
 		setDirty();
 		return ret;
@@ -689,9 +689,9 @@ public class CArray extends Construct implements ArrayAccess {
 	 * @param construct
 	 */
 	public void removeValues(Construct construct) {
-		if(associative_mode) {
+		if(associativeMode) {
 			Iterator<Construct> it;
-			it = associative_array.values().iterator();
+			it = associativeArray.values().iterator();
 			while(it.hasNext()) {
 				Construct c = it.next();
 				if(BasicLogic.equals.doEquals(c, construct)) {
@@ -838,11 +838,11 @@ public class CArray extends Construct implements ArrayAccess {
 	}
 
 	public void sort(final SortType sort) {
-		if(this.associative_mode) {
-			array = new ArrayList(associative_array.values());
-			this.associative_array.clear();
-			this.associative_array = null;
-			this.associative_mode = false;
+		if(this.associativeMode) {
+			array = new ArrayList(associativeArray.values());
+			this.associativeArray.clear();
+			this.associativeArray = null;
+			this.associativeMode = false;
 			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Attempting to sort an associative array; key values will be lost.", this.getTarget());
 		}
 		array.sort(new Comparator<Construct>() {
@@ -936,8 +936,8 @@ public class CArray extends Construct implements ArrayAccess {
 	 */
 	public void clear() {
 		this.array.clear();
-		this.associative_array.clear();
-		this.next_index = 0;
+		this.associativeArray.clear();
+		this.nextIndex = 0;
 		this.parent = null;
 		this.valueDirty = true;
 	}

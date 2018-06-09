@@ -29,8 +29,8 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 	private final EventPriority priority;
 	private final Plugin plugin;
 	private final EventExecutor executor;
-	private static final int queueCapacity = 20;
-	private static Queue<Event> cancelledEvents = new LinkedBlockingQueue<Event>(queueCapacity);
+	private static final int QUEUE_CAPACITY = 20;
+	private static Queue<Event> cancelledEvents = new LinkedBlockingQueue<Event>(QUEUE_CAPACITY);
 
 	public BukkitDirtyRegisteredListener(final Listener pluginListener, final EventExecutor eventExecutor, final EventPriority eventPriority, final Plugin registeredPlugin,
 			boolean ignoreCancelled) {
@@ -160,7 +160,7 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 //		public DirtyRegisteredListener value;
 //	}
 	public static void setCancelled(Event superCancelledEvent) {
-		if(cancelledEvents.size() >= queueCapacity) {
+		if(cancelledEvents.size() >= QUEUE_CAPACITY) {
 			cancelledEvents.poll();
 		}
 		cancelledEvents.offer(superCancelledEvent);

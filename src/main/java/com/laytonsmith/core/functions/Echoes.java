@@ -310,12 +310,12 @@ public class Echoes {
 	public static class color extends AbstractFunction implements Optimizable {
 
 		private final Map<String, CString> colors = new TreeMap<>();
-		private static final String symbols = "0123456789abcdefABCDEFmMnNoOlLkKrR";
+		private static final String SYMBOLS = "0123456789abcdefABCDEFmMnNoOlLkKrR";
 		public static final Set<Character> COLOR_SYMBOLS;
 
 		static {
 			Set<Character> temp = new TreeSet<>();
-			for(Character c : symbols.toCharArray()) {
+			for(Character c : SYMBOLS.toCharArray()) {
 				temp.add(c);
 			}
 			COLOR_SYMBOLS = Collections.unmodifiableSet(temp);

@@ -92,7 +92,7 @@ public class SQL {
 			return null;
 		}
 
-		private static final Object connectionPoolLock = new Object();
+		private static final Object CONNECTION_POOL_LOCK = new Object();
 		private static Map<String, Connection> connectionPool = null;
 		private static final boolean USE_CONNECTION_POOL = true;
 
@@ -100,14 +100,14 @@ public class SQL {
 			if(!USE_CONNECTION_POOL) {
 				return DriverManager.getConnection(connectionString);
 			}
-			synchronized(connectionPoolLock) {
+			synchronized(CONNECTION_POOL_LOCK) {
 				if(connectionPool == null) {
 					connectionPool = new HashMap<>();
 					StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
 						@Override
 						public void run() {
-							synchronized(connectionPoolLock) {
+							synchronized(CONNECTION_POOL_LOCK) {
 								for(Connection c : connectionPool.values()) {
 									try {
 										c.close();

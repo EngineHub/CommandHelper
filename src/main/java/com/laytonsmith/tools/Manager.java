@@ -65,11 +65,12 @@ public class Manager {
 
 	private static Profiler profiler;
 	private static GlobalEnv gEnv;
-	private static final File jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
-	private static final File chDirectory = new File(jarLocation, "CommandHelper");
+	private static final File JAR_LOCATION =
+			new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
+	private static final File CH_DIRECTORY = new File(JAR_LOCATION, "CommandHelper");
 	private static PersistenceNetwork persistenceNetwork;
 	public static PrintStream out = StreamUtils.GetSystemOut();
-	public static final String[] options = new String[]{
+	public static final String[] OPTIONS = new String[]{
 		"refactor", "print", "cleardb", "edit", "interpreter", "merge", "hidden-keys"
 	};
 
@@ -78,14 +79,14 @@ public class Manager {
 		Implementation.useAbstractEnumThread(false);
 		Implementation.forceServerType(Implementation.Type.BUKKIT);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
-		options.setWorkingDirectory(chDirectory);
+		options.setWorkingDirectory(CH_DIRECTORY);
 		persistenceNetwork = new PersistenceNetwork(CommandHelperFileLocations.getDefault().getPersistenceConfig(),
 				CommandHelperFileLocations.getDefault().getDefaultPersistenceDBFile().toURI(), options);
-		Installer.Install(chDirectory);
-		CHLog.initialize(chDirectory);
+		Installer.Install(CH_DIRECTORY);
+		CHLog.initialize(CH_DIRECTORY);
 		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
 		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork,
-				chDirectory, new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile()),
+				CH_DIRECTORY, new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile()),
 				new TaskManager());
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
@@ -137,7 +138,7 @@ public class Manager {
 				+ "them straight into another database. If there are key conflicts, this tool will prompt\n"
 				+ "you for an action.");
 		ConnectionMixinFactory.ConnectionMixinOptions mixinOptions = new ConnectionMixinFactory.ConnectionMixinOptions();
-		mixinOptions.setWorkingDirectory(chDirectory);
+		mixinOptions.setWorkingDirectory(CH_DIRECTORY);
 		DataSource source;
 		DataSource destination;
 
@@ -526,14 +527,14 @@ public class Manager {
 				File def = MethodScriptFileLocations.getDefault().getPersistenceConfig();
 				while(true) {
 					pl("What is the input configuration (where keys will be read in from, then deleted)? Leave blank for the default, which is " + def.toString()
-							+ ". The path should be relative to " + jarLocation.toString());
+							+ ". The path should be relative to " + JAR_LOCATION.toString());
 					String sinput = prompt();
 					if("".equals(sinput.trim())) {
 						input = def;
 					} else {
 						File temp = new File(sinput);
 						if(!temp.isAbsolute()) {
-							temp = new File(jarLocation, sinput);
+							temp = new File(JAR_LOCATION, sinput);
 						}
 						input = temp;
 					}
@@ -544,7 +545,7 @@ public class Manager {
 					}
 				}
 				while(true) {
-					pl("What is the output configuration (where keys will be written to)? The path should be relative to " + jarLocation.toString());
+					pl("What is the output configuration (where keys will be written to)? The path should be relative to " + JAR_LOCATION.toString());
 					String soutput = prompt();
 					if("".equals(soutput.trim())) {
 						pl(RED + "The output cannot be empty");
@@ -552,7 +553,7 @@ public class Manager {
 					} else {
 						File temp = new File(soutput);
 						if(!temp.isAbsolute()) {
-							temp = new File(jarLocation, soutput);
+							temp = new File(JAR_LOCATION, soutput);
 						}
 						output = temp;
 					}
@@ -582,7 +583,7 @@ public class Manager {
 			ConnectionMixinFactory.ConnectionMixinOptions mixinOptions = new ConnectionMixinFactory.ConnectionMixinOptions();
 			try {
 				DaemonManager dm = new DaemonManager();
-				mixinOptions.setWorkingDirectory(chDirectory);
+				mixinOptions.setWorkingDirectory(CH_DIRECTORY);
 				PersistenceNetwork pninput = new PersistenceNetwork(input, defaultURI, mixinOptions);
 				PersistenceNetwork pnoutput = new PersistenceNetwork(output, defaultURI, mixinOptions);
 				Pattern p = Pattern.compile(DataSourceFilter.toRegex(filter));
