@@ -2382,7 +2382,8 @@ public class Math {
 			}*/
 			String eClass = "com.sk89q.worldedit.internal.expression.Expression";
 			String errClass = "com.sk89q.worldedit.internal.expression.ExpressionException";
-			Class eClazz, errClazz;
+			Class eClazz;
+			Class errClazz;
 			try {
 				eClazz = Class.forName(eClass);
 				errClazz = Class.forName(errClass);

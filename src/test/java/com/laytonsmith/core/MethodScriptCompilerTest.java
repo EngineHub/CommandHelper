@@ -1072,7 +1072,8 @@ public class MethodScriptCompilerTest {
 	 * @param expectFail - True if cmd1 and cmd2 are expected to be ambigous, false otherwise.
 	 */
 	private void ambigousCommandRegistrationHelper(String cmd1, String cmd2, boolean expectFail) {
-		Script s1, s2;
+		Script s1;
+		Script s2;
 		try {
 			List<Script> scripts = MethodScriptCompiler.preprocess(
 					MethodScriptCompiler.lex(cmd1 + "\n" + cmd2, null, false));
@@ -1086,7 +1087,8 @@ public class MethodScriptCompilerTest {
 		}
 
 		// Check scripts 1 and 2 against eachother.
-		ConfigCompileException e1 = null, e2 = null;
+		ConfigCompileException e1 = null;
+		ConfigCompileException e2 = null;
 		try {
 			s2.checkAmbiguous(Arrays.asList(new Script[]{s1}));
 		} catch (ConfigCompileException e) {

@@ -179,7 +179,8 @@ public class ItemMeta {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			Construct slot, meta;
+			Construct slot;
+			Construct meta;
 			MCItemStack is;
 			if(args.length == 3) {
 				p = Static.GetPlayer(args[0], t);

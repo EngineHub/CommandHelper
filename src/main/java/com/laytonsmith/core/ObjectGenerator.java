@@ -331,7 +331,8 @@ public class ObjectGenerator {
 		if(!is.hasItemMeta()) {
 			return CNull.NULL;
 		} else {
-			Construct display, lore;
+			Construct display;
+			Construct lore;
 			CArray ma = CArray.GetAssociativeArray(t);
 			MCItemMeta meta = is.getItemMeta();
 			if(meta.hasDisplayName()) {
@@ -462,7 +463,9 @@ public class ObjectGenerator {
 				CArray color = color(((MCLeatherArmorMeta) meta).getColor(), t);
 				ma.set("color", color, t);
 			} else if(meta instanceof MCBookMeta) {
-				Construct title, author, pages;
+				Construct title;
+				Construct author;
+				Construct pages;
 				if(((MCBookMeta) meta).hasTitle()) {
 					title = new CString(((MCBookMeta) meta).getTitle(), t);
 				} else {
@@ -1125,7 +1128,8 @@ public class ObjectGenerator {
 		for(String key : ea.stringKeySet()) {
 			if(ea.get(key, t) instanceof CArray) {
 				CArray effect = (CArray) ea.get(key, t);
-				int potionID = 0, strength = 0;
+				int potionID = 0;
+				int strength = 0;
 				double seconds = 30.0;
 				boolean ambient = false;
 				boolean particles = true;

@@ -971,7 +971,8 @@ public class Environment {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			MCSound sound;
 			MCSoundCategory category = null;
-			float volume = 1, pitch = 1;
+			float volume = 1;
+			float pitch = 1;
 
 			if(!(args[1] instanceof CArray)) {
 				throw new CREFormatException("An array was expected but recieved " + args[1], t);
@@ -1088,7 +1089,8 @@ public class Environment {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			String path;
 			MCSoundCategory category = null;
-			float volume = 1, pitch = 1;
+			float volume = 1;
+			float pitch = 1;
 
 			if(!(args[1] instanceof CArray)) {
 				throw new CREFormatException("An array was expected but recieved " + args[1], t);

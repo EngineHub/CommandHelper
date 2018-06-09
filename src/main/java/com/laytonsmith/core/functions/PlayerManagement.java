@@ -4204,13 +4204,13 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			int hunger, hungerIndex = 0;
+			int hungerIndex = 0;
 			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				hungerIndex = 1;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			hunger = Static.getInt32(args[hungerIndex], t);
+			int hunger = Static.getInt32(args[hungerIndex], t);
 			p.setFoodLevel(hunger);
 			return CVoid.VOID;
 		}

@@ -1240,7 +1240,8 @@ public class EntityManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity horse, rider;
+			MCEntity horse;
+			MCEntity rider;
 			boolean success;
 			if(args[0] instanceof CNull) {
 				horse = null;

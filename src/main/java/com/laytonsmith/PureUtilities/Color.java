@@ -594,7 +594,9 @@ public class Color implements java.io.Serializable {
 	 * @since JDK1.0
 	 */
 	public static int HSBtoRGB(float hue, float saturation, float brightness) {
-		int r = 0, g = 0, b = 0;
+		int r = 0;
+		int g = 0;
+		int b = 0;
 		if(saturation == 0) {
 			r = g = b = (int) (brightness * 255.0f + 0.5f);
 		} else {
@@ -658,7 +660,9 @@ public class Color implements java.io.Serializable {
 	 * @since JDK1.0
 	 */
 	public static float[] RGBtoHSB(int r, int g, int b, float[] hsbvals) {
-		float hue, saturation, brightness;
+		float hue;
+		float saturation;
+		float brightness;
 		if(hsbvals == null) {
 			hsbvals = new float[3];
 		}
