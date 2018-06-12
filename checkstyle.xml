@@ -63,9 +63,6 @@
 		<!-- Ensure proper whitespace usage around "<" and ">" for generic types -->
 		<module name="GenericWhitespace"/>
 		
-		<!-- Ensure that classes with only static methods do not have a public constructor -->
-		<module name="HideUtilityClassConstructor"/>
-		
 		<!-- Disallow native literals -->
 		<module name="IllegalToken">
 			<property name="tokens" value="LITERAL_NATIVE"/>
@@ -86,16 +83,16 @@
 		<module name="MemberName"/>
 		
 		<!-- Ensure method name format and disallow methods to be named the same as the class (and therefore constructor). Default format: "^[a-z][a-zA-Z0-9]*$" -->
-		<module name="MethodName"/>
+		<module name="MethodName">
+			<!-- TODO: Disable rule or fix violations with the chance to break extensions. There are 479 violations as of 14-06-2018 dd-mm-yyyy -->
+			<property name="severity" value="ignore"/>
+		</module>
 		
 		<!-- Check method parameter padding -->
 		<module name="MethodParamPad"/>
 		
 		<!-- Check method type name format. Default format: "^[A-Z]$" -->
 		<module name="MethodTypeParameterName"/>
-		
-		<!-- Ensure that non-abstract classes define a constructor and not rely on the default one -->
-		<module name="MissingCtor"/>
 		
 		<!-- Ensure that both the @Deprecated and the @deprecated javadoc tag are present when one is present -->
 		<module name="MissingDeprecated"/>
@@ -137,7 +134,7 @@
 			<property name="allowEmptyCatches" value="true"/>
 			<property name="tokens" value="ASSIGN, BAND, BAND_ASSIGN, BOR, BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR,
 				BXOR_ASSIGN, COLON, DIV, DIV_ASSIGN, EQUAL, GE, GT, LAMBDA, LAND, LCURLY, LE, LITERAL_CATCH, LITERAL_DO,
-				LITERAL_ELSE, LITERAL_FINALLY, LITERAL_RETURN, LITERAL_TRY,
+				LITERAL_ELSE, LITERAL_FINALLY, LITERAL_RETURN,
 				LOR, LT, MINUS, MINUS_ASSIGN, MOD, MOD_ASSIGN, NOT_EQUAL, PLUS, PLUS_ASSIGN, QUESTION,
 				RCURLY, SL, SLIST, SL_ASSIGN, SR, SR_ASSIGN, STAR, STAR_ASSIGN, TYPE_EXTENSION_AND"/>
 		</module>
@@ -163,9 +160,6 @@
 		<!-- Disallow redundant (double or default-available class) imports -->
 		<module name="RedundantImport"/>
 		
-		<!-- Require "this" for non-static field access -->
-		<module name="RequireThis"/>
-		
 		<!-- Ensure usage of "}" for the given tokens -->
 		<module name="RightCurly">
 			<property name="tokens" value="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE"/>
@@ -188,12 +182,6 @@
 		
 		<!-- Disallow the "==" operator for string literals -->
 		<module name="StringLiteralEquality"/>
-		
-		<!-- Ensure that an overriding clone() method invokes super.clone() -->
-		<module name="SuperClone"/>
-		
-		<!-- Ensure that an overriding finalize() method invokes super.finalize() -->
-		<module name="SuperFinalize"/>
 		
 		<!-- Disallow whitespaces between type cast parenthesis (No whitespace at X: "(XObjectX) obj") -->
 		<module name="TypecastParenPad"/>
@@ -219,8 +207,22 @@
 	<!-- Disallow whitespaces between if/for/while and '(' -->
 	<module name="RegexpSingleline">
 		<property name="severity" value="error"/>
-		<property name="format" value="(^|[^w\._])(if|for|while)[\s]+\("/>
+		<property name="format" value="(^|[^\w\._])(if|for|while)[\s]+\("/>
 		<property name="message" value="Whitespace between if/for/while and '(' is not allowed."/>
+	</module>
+	
+	<!-- Ensure whitespace between try and '{' -->
+	<module name="RegexpSingleline">
+		<property name="severity" value="error"/>
+		<property name="format" value="(^|[^\w\._])try\{"/>
+		<property name="message" value="'try' is not followed by whitespace."/>
+	</module>
+	
+	<!-- Disallow whitespaces between try and '(' (try-with-resources) -->
+	<module name="RegexpSingleline">
+		<property name="severity" value="error"/>
+		<property name="format" value="(^|[^\w\._])try[\s]+\("/>
+		<property name="message" value="'try' with resources is followed by whitespace."/>
 	</module>
 	
 	<!-- Ensure that every file ends with a newline -->
