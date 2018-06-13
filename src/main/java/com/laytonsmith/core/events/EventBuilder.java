@@ -21,26 +21,46 @@ public final class EventBuilder {
 	private EventBuilder() {
 	}
 
-	private static final Map<Class<BindableEvent>, Method> methods = new HashMap<Class<BindableEvent>, Method>();
-	private static final Map<Class<BindableEvent>, Constructor<? extends BindableEvent>> constructors = new HashMap<Class<BindableEvent>, Constructor<? extends BindableEvent>>();
-	private static final Map<Class<BindableEvent>, Class<BindableEvent>> eventImplementations = new HashMap<Class<BindableEvent>, Class<BindableEvent>>();
+	private static final Map<Class<BindableEvent>, Method> METHODS = new HashMap<Class<BindableEvent>, Method>();
+	private static final Map<Class<BindableEvent>, Constructor<? extends BindableEvent>> CONSTRUCTORS =
+			new HashMap<Class<BindableEvent>, Constructor<? extends BindableEvent>>();
+	private static final Map<Class<BindableEvent>, Class<BindableEvent>> EVENT_IMPLEMENTATIONS =
+			new HashMap<Class<BindableEvent>, Class<BindableEvent>>();
 
 	static {
-		//First, we need to pull all the event implementors
+		// First, we need to pull all the event implementors.
 		for(Class c : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(abstraction.class)) {
 			if(BindableEvent.class.isAssignableFrom(c)) {
 				abstraction abs = (abstraction) c.getAnnotation(abstraction.class);
 				if(abs.type().equals(Implementation.GetServerType())) {
-					Class cinterface = null;
-					for(Class implementor : c.getInterfaces()) {
-						if(BindableEvent.class.isAssignableFrom(implementor)) {
-							cinterface = implementor;
-							break;
+					Class cInterface = null;
+					Class bindableEventImplementorClass = c;
+					matchLoop:
+					do {
+
+						// Get the interface, implemented by c, that extends from BindableEvent.
+						for(Class implementor : bindableEventImplementorClass.getInterfaces()) {
+							if(BindableEvent.class.isAssignableFrom(implementor)) {
+								cInterface = implementor;
+								break matchLoop;
+							}
 						}
-					}
-					eventImplementations.put(cinterface, c);
-					//Also, warm it up
-					warmup(cinterface);
+
+						// No interface found, this means the class extends from an object that implements the
+						// interface (in)directly. So retry with the class it extends from.
+						bindableEventImplementorClass = bindableEventImplementorClass.getSuperclass();
+
+						// Prevent infinite loop when a bug would be present in this code. This should never trigger.
+						if(bindableEventImplementorClass.getClass().equals(Object.class)) {
+							throw new InternalError("BindableEvent is assignable from some class c, but class c does"
+									+ " not implement BindableEvent (in)directly. This is a bug in "
+									+ EventBuilder.class.getSimpleName() + "'s static code block.");
+						}
+
+					} while(cInterface == null);
+
+					// Add the interface implemented by c to the implementations map.
+					EVENT_IMPLEMENTATIONS.put(cInterface, c);
 				}
 			}
 		}
@@ -48,12 +68,12 @@ public final class EventBuilder {
 
 	/**
 	 * Finds the _instantiate method in an event, and caches it for later use.
-	 *
+	 * Does nothing if the _instantiate method for the given class is already cached.
 	 * @param clazz
 	 */
 	private static void warmup(Class<? extends BindableEvent> clazz) {
-		if(!methods.containsKey((Class<BindableEvent>) clazz)) {
-			Class implementor = eventImplementations.get((Class<BindableEvent>) clazz);
+		if(!METHODS.containsKey((Class<BindableEvent>) clazz)) {
+			Class implementor = EVENT_IMPLEMENTATIONS.get((Class<BindableEvent>) clazz);
 			Method method = null;
 			for(Method m : implementor.getMethods()) {
 				if(m.getName().equals("_instantiate") && (m.getModifiers() & Modifier.STATIC) != 0) {
@@ -67,20 +87,22 @@ public final class EventBuilder {
 						+ " if an attempt is made. Did you forget to add"
 						+ " public static <Event> _instantiate(...) to " + clazz.getSimpleName() + "?");
 			}
-			methods.put((Class<BindableEvent>) clazz, method);
+			METHODS.put((Class<BindableEvent>) clazz, method);
 		}
 	}
 
 	public static <T extends BindableEvent> T instantiate(Class<? extends BindableEvent> clazz, Object... params) {
 		try {
-			if(!methods.containsKey((Class<BindableEvent>) clazz)) {
-				warmup(clazz);
-			}
-			Object o = methods.get((Class<BindableEvent>) clazz).invoke(null, params);
+			// Cache the _instantiate(...) method for clazz if it has not been cached yet.
+			warmup(clazz);
+
+			// Invoke the _instantiate(...) method to obtain a server software specific event object.
+			Object o = METHODS.get((Class<BindableEvent>) clazz).invoke(null, params);
+
 			//Now, we have an instance of the underlying object, which the instance
 			//of the event BindableEvent should know how to handle in a constructor.
-			if(!constructors.containsKey((Class<BindableEvent>) clazz)) {
-				Class bindableEvent = eventImplementations.get((Class<BindableEvent>) clazz);
+			if(!CONSTRUCTORS.containsKey((Class<BindableEvent>) clazz)) {
+				Class bindableEvent = EVENT_IMPLEMENTATIONS.get((Class<BindableEvent>) clazz);
 				Constructor constructor = null;
 				for(Constructor c : bindableEvent.getConstructors()) {
 					if(c.getParameterTypes().length == 1) {
@@ -97,14 +119,14 @@ public final class EventBuilder {
 							+ " public " + bindableEvent.getClass().getSimpleName() + "(" + o.getClass().getSimpleName() + " event)."
 							+ " Please notify the plugin author of this error.", Target.UNKNOWN);
 				}
-				constructors.put((Class<BindableEvent>) clazz, constructor);
+				CONSTRUCTORS.put((Class<BindableEvent>) clazz, constructor);
 			}
 			//Construct a new instance, then return it.
-			Constructor constructor = constructors.get((Class<BindableEvent>) clazz);
+			Constructor constructor = CONSTRUCTORS.get((Class<BindableEvent>) clazz);
 			BindableEvent be = (BindableEvent) constructor.newInstance(o);
 			return (T) be;
 
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;

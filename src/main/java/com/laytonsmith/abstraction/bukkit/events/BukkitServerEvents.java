@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
@@ -7,6 +8,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.events.MCBroadcastMessageEvent;
 import com.laytonsmith.abstraction.events.MCServerCommandEvent;
 import com.laytonsmith.abstraction.events.MCServerPingEvent;
+import com.laytonsmith.annotations.abstraction;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -23,6 +25,7 @@ import java.util.Set;
 
 public class BukkitServerEvents {
 
+	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCServerCommandEvent implements MCServerCommandEvent {
 
 		ServerCommandEvent sce;
@@ -54,6 +57,7 @@ public class BukkitServerEvents {
 		}
 	}
 
+	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCServerPingEvent implements MCServerPingEvent {
 
 		private final ServerListPingEvent slp;
@@ -130,12 +134,28 @@ public class BukkitServerEvents {
 		}
 	}
 
+	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCBroadcastMessageEvent implements MCBroadcastMessageEvent {
 
 		private final BroadcastMessageEvent bme;
 
 		public BukkitMCBroadcastMessageEvent(Event event) {
 			this.bme = (BroadcastMessageEvent) event;
+		}
+
+		// This constructor is required by EventBuilder.instantiate(...).
+		public BukkitMCBroadcastMessageEvent(BroadcastMessageEvent event) {
+			this.bme = event;
+		}
+
+		public static BroadcastMessageEvent _instantiate(String message, Set<MCCommandSender> recipients) {
+			Set<CommandSender> bukkitRecipients = new HashSet<>(recipients.size());
+			for(MCCommandSender commandSender : recipients) {
+				if(commandSender.getHandle() instanceof CommandSender) {
+					bukkitRecipients.add((CommandSender) commandSender.getHandle());
+				}
+			}
+			return new BroadcastMessageEvent(message, bukkitRecipients);
 		}
 
 		@Override
