@@ -30,11 +30,13 @@ import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -456,17 +458,22 @@ public class EventBinding {
 
 		@Override
 		public String docs() {
-			return "void {eventName, eventObject, [serverWide]} Manually triggers bound events. The event object passed to this function is "
-					+ " sent directly as-is to the bound events. Check the documentation for each event to see what is required."
-					+ " No checks will be done on the data here, but it is not recommended to fail to send all parameters required."
-					+ " If serverWide is true, the event is triggered directly in the server, unless it is a CommandHelper specific"
-					+ " event, in which case, serverWide is irrelevant. Defaults to false, which means that only CommandHelper code"
-					+ " will receive the event.";
+			return "void {eventName, eventObject, [serverWide]} Manually triggers bound events."
+					+ " The event object passed to this function is sent directly as-is to the bound events."
+					+ " Check the documentation for each event to see what is required."
+					+ " No checks will be done on the data here,"
+					+ " but it is not recommended to fail to send all parameters required."
+					+ " If serverWide is true, the event is triggered directly in the server,"
+					+ " unless it is a CommandHelper specific event, in which case, serverWide is irrelevant."
+					+ " Defaults to false, which means that only CommandHelper code will receive the event."
+					+ " Throws a CastException when eventObject is not an array and not null."
+					+ " Throws a BindException when " + getName() + "() is not yet supported by the given event."
+					+ " Throws a IllegalArgumentException exception, if the event does not exist.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREBindException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
