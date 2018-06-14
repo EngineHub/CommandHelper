@@ -238,8 +238,8 @@ public class CheckOverrides extends AbstractProcessor {
 								"are %d methods which override or implement a method in a super class/super interface"
 								+ " but don't use the @Override tag. Please tag these methods"))
 						.append(" with @Override to continue the build process.")
-						.append(StringUtils.nl)
-						.append(StringUtils.Join(stringMethodsInError, StringUtils.nl));
+						.append(StringUtils.NL)
+						.append(StringUtils.Join(stringMethodsInError, StringUtils.NL));
 				processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, b.toString());
 			} else {
 				StreamUtils.GetSystemOut().println("No @Override annotations were found to be missing.");

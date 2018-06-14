@@ -63,6 +63,7 @@ public abstract class FileSystemLayer {
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
+	@SuppressWarnings("checkstyle:typename") // Fixing this violation might break dependents.
 	public static @interface fslayer {
 
 		/**

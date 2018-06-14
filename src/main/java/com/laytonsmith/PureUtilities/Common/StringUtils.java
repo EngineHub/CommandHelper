@@ -764,7 +764,14 @@ public final class StringUtils {
 	 * This is the system newline string. For instance, on windows, this would likely be \r\n, and unix systems would
 	 * likely be \n.
 	 */
-	public static final String nl = System.getProperty("line.separator");
+	public static final String NL = System.getProperty("line.separator");
+
+	/**
+	 * @deprecated Use {@link #NL} instead.
+	 */
+	@SuppressWarnings("checkstyle:constantname") // Fixing this violation might break dependents.
+	@Deprecated // Deprecated on 14-06-2018 dd-mm-yyyy.
+	public static final String nl = NL;
 
 	/**
 	 * This returns the system newline string. For instance, on windows, this would likely return \r\n, and unix systems
@@ -773,7 +780,7 @@ public final class StringUtils {
 	 * @return The system newline string.
 	 */
 	public static String nl() {
-		return nl;
+		return NL;
 	}
 
 	/**

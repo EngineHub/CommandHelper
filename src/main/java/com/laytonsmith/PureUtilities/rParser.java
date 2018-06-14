@@ -9,6 +9,7 @@ import java.util.Arrays;
  * written by Nossr50, with portions contributed by Reil.
  *
  */
+@SuppressWarnings("checkstyle:typename") // Fixing this violation might break dependents.
 public final class rParser {
 
 	private rParser() {

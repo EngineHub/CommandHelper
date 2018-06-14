@@ -112,7 +112,13 @@ public final class Static {
 	 *
 	 * Third party APIs may provide better access.
 	 */
-	public static final String groupPrefix = "group.";
+	public static final String GROUP_PREFIX = "group.";
+	/**
+	 * @deprecated Use {@link #GROUP_PREFIX} instead.
+	 */
+	@Deprecated // Deprecated on 14-06-2018 dd-mm-yyyy.
+	@SuppressWarnings("checkstyle:constantname") // Fixing this violation might break dependents.
+	public static final String groupPrefix = GROUP_PREFIX;
 
 	/**
 	 * The label representing unrestricted access.
