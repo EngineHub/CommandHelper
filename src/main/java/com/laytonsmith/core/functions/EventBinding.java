@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -442,6 +443,9 @@ public class EventBinding {
 	}
 
 	@api
+	@hide("At the time this function was hidden, it was completely broken. Before unhiding this function, implement a"
+			+ " working version, reviewing at least the following points: Should all events implement support for this?"
+			+ " Should usage of this function change to support getting event results (cancelled, modified)?")
 	public static class trigger extends AbstractFunction {
 
 		@Override
