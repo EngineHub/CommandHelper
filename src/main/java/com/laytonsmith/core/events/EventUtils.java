@@ -10,7 +10,9 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREEventException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.extensions.Extension;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
@@ -140,24 +142,34 @@ public final class EventUtils {
 	}
 
 	public static void ManualTrigger(String eventName, CArray object, Target t, boolean serverWide) {
-		for(Driver type : event_handles.keySet()) {
+		// Get the event
+		Event event = EventList.getEvent(eventName);
+		if(event == null) {
+			// Abort if event is not existing
+			throw new CREIllegalArgumentException("Non existant event is being triggered: " + eventName, t);
+		}
+
+		BindableEvent convertedEvent = null;
+		try {
+			// Either an exception will be thrown, or null returned
+			convertedEvent = event.convert(object, t);
+		} catch(UnsupportedOperationException ex) {
+		}
+		if(convertedEvent == null) {
+			throw new CREBindException(eventName + " doesn't support the use of trigger() yet.", t);
+		}
+
+		// By Javadoc, if supportsExternal() false there is no use to call it serverwide
+		if(serverWide && event.supportsExternal()) {
+			event.manualTrigger(convertedEvent);
+		} else {
 			SortedSet<BoundEvent> toRun = new TreeSet<>();
-			SortedSet<BoundEvent> bounded = GetEvents(type);
-			Event driver = EventList.getEvent(type, eventName);
-			if(bounded != null) {
-				for(BoundEvent b : bounded) {
-					if(b.getEventName().equalsIgnoreCase(eventName)) {
+			for(Driver type : event_handles.keySet()) {
+				for(BoundEvent boundEvent: GetEvents(type)) {
+					if(boundEvent.getEventName().equalsIgnoreCase(eventName)) {
 						try {
-							BindableEvent convertedEvent = null;
-							try {
-								convertedEvent = driver.convert(object, t);
-							} catch(UnsupportedOperationException ex) {
-								// The event will stay null, and be caught below
-							}
-							if(convertedEvent == null) {
-								throw new CREBindException(eventName + " doesn't support the use of trigger() yet.", t);
-							} else if(driver.matches(b.getPrefilter(), convertedEvent)) {
-								toRun.add(b);
+							if(event.matches(boundEvent.getPrefilter(), convertedEvent)) {
+								toRun.add(boundEvent);
 							}
 						} catch(PrefilterNonMatchException ex) {
 							//Not running this one
@@ -165,17 +177,9 @@ public final class EventUtils {
 					}
 				}
 			}
-			//If it's not a serverwide event, or this event doesn't support external events.
+
 			if(!toRun.isEmpty()) {
-				if(!serverWide || !driver.supportsExternal()) {
-					FireListeners(toRun, driver, driver.convert(object, t));
-				} else {
-					//It's serverwide, so we can just trigger it normally with the driver, and it should trickle back down to us
-					driver.manualTrigger(driver.convert(object, t));
-				}
-			} else {
-				//They have fired a non existant event
-				ConfigRuntimeException.DoWarning(ConfigRuntimeException.CreateUncatchableException("Non existant event is being triggered: " + eventName, object.getTarget()));
+				FireListeners(toRun, event, convertedEvent);
 			}
 		}
 	}
