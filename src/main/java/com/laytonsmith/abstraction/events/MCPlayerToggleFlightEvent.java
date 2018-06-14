@@ -1,12 +1,8 @@
 package com.laytonsmith.abstraction.events;
 
-import com.laytonsmith.abstraction.MCPlayer;
-
-public interface MCPlayerToggleFlightEvent {
+public interface MCPlayerToggleFlightEvent extends MCPlayerEvent {
 
 	boolean isFlying();
-
-	MCPlayer getPlayer();
 
 	void setCancelled(boolean state);
 

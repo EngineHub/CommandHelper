@@ -552,8 +552,8 @@ public class BukkitPlayerEvents {
 			pje.setJoinMessage(message);
 		}
 
-		public static PlayerJoinEvent _instantiate(MCPlayer player, String message) {
-			return new PlayerJoinEvent(((BukkitMCPlayer) player)._Player(), message);
+		public static BukkitMCPlayerJoinEvent _instantiate(MCPlayer player, String message) {
+			return new BukkitMCPlayerJoinEvent(new PlayerJoinEvent(((BukkitMCPlayer) player)._Player(), message));
 		}
 	}
 
