@@ -1942,6 +1942,10 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_SLIME_SIZE, new CInt(cube.getSize(), t), t);
 					break;
 				case MINECART:
+				case MINECART_FURNACE:
+				case MINECART_HOPPER:
+				case MINECART_MOB_SPAWNER:
+				case MINECART_TNT:
 					MCMinecart minecart = (MCMinecart) entity;
 					specArray.set(entity_spec.KEY_MINECART_BLOCK, new CString(minecart.getDisplayBlock().getMaterial().getName(), t), t);
 					specArray.set(entity_spec.KEY_MINECART_OFFSET, new CInt(minecart.getDisplayBlockOffset(), t), t);
@@ -1950,6 +1954,8 @@ public class EntityManagement {
 					MCCommandMinecart commandminecart = (MCCommandMinecart) entity;
 					specArray.set(entity_spec.KEY_MINECART_COMMAND_COMMAND, new CString(commandminecart.getCommand(), t), t);
 					specArray.set(entity_spec.KEY_MINECART_COMMAND_CUSTOMNAME, new CString(commandminecart.getName(), t), t);
+					specArray.set(entity_spec.KEY_MINECART_BLOCK, new CString(commandminecart.getDisplayBlock().getMaterial().getName(), t), t);
+					specArray.set(entity_spec.KEY_MINECART_OFFSET, new CInt(commandminecart.getDisplayBlockOffset(), t), t);
 					break;
 				case OCELOT:
 					MCOcelot ocelot = (MCOcelot) entity;
@@ -2533,6 +2539,7 @@ public class EntityManagement {
 					}
 					break;
 				case FIREBALL:
+				case DRAGON_FIREBALL:
 				case SMALL_FIREBALL:
 					MCFireball ball = (MCFireball) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -2738,6 +2745,12 @@ public class EntityManagement {
 								} else {
 									commandminecart.setCommand(specArray.get(index, t).val());
 								}
+								break;
+							case entity_spec.KEY_MINECART_BLOCK:
+								commandminecart.setDisplayBlock(ObjectGenerator.GetGenerator().material(specArray.get(index, t), t).getData());
+								break;
+							case entity_spec.KEY_MINECART_OFFSET:
+								commandminecart.setDisplayBlockOffset(Static.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);

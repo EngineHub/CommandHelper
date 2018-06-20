@@ -43,6 +43,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFireball;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHanging;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLivingEntity;
@@ -109,6 +110,7 @@ import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Hanging;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -375,6 +377,12 @@ public class BukkitConvertor extends AbstractConvertor {
 			// Must come before Vehicle
 			type.setWrapperClass(BukkitMCMinecart.class);
 			return new BukkitMCMinecart(be);
+		}
+
+		if(be instanceof Fireball) {
+			// Must come before Projectile
+			type.setWrapperClass(BukkitMCFireball.class);
+			return new BukkitMCFireball(be);
 		}
 
 		if(be instanceof Projectile) {

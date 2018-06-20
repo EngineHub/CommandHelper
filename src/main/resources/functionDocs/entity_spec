@@ -88,7 +88,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_FALLING_BLOCK_DROPITEM%: If the falling block will break into an item if it cannot be placed.
 * %KEY_FALLING_BLOCK_DAMAGE%: If the falling block can damage entities.
 |-
-| FIREBALL
+| FIREBALL, DRAGON_FIREBALL, SMALL_FIREBALL
 | 
 * %KEY_FIREBALL_DIRECTION%: The direction the fireball is heading toward.
 |-
@@ -141,7 +141,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_SLIME_SIZE%: The size of the magma cube.
 |-
-| MINECART
+| MINECART, MINECART_FURNACE, MINECART_HOPPER, MINECART_MOB_SPAWNER, MINECART_TNT
 |
 * %KEY_MINECART_BLOCK%: The material name of the block being displayed.
 * %KEY_MINECART_OFFSET%: The offset of the block being displayed.
@@ -150,6 +150,8 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_MINECART_COMMAND_COMMAND%: The command that the command minecart will run when activated.
 * %KEY_MINECART_COMMAND_CUSTOMNAME%: The name of the command minecart.
+* %KEY_MINECART_BLOCK%: The material name of the block being displayed.
+* %KEY_MINECART_OFFSET%: The offset of the block being displayed.
 |- 
 | OCELOT
 | 
@@ -215,10 +217,6 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | SNOWMAN
 | 
 * %KEY_SNOWMAN_DERP%: With derp mode set to true the snowman wears no pumpkin
-|-
-| SMALL_FIREBALL
-| 
-* %KEY_FIREBALL_DIRECTION%: The direction the small fireball is heading toward.
 |-
 | SPLASH_POTION
 | 
