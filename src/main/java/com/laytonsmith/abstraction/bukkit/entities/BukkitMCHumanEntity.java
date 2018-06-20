@@ -92,7 +92,7 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 	public int getCooldown(MCMaterial material) {
 		try {
 			return he.getCooldown((Material) material.getHandle());
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably prior to 1.11.2
 			return 0;
 		}
@@ -102,7 +102,7 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 	public void setCooldown(MCMaterial material, int ticks) {
 		try {
 			he.setCooldown((Material) material.getHandle(), ticks);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably prior to 1.11.2
 		}
 	}

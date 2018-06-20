@@ -1,14 +1,9 @@
 package com.laytonsmith.PureUtilities;
 
 import com.laytonsmith.annotations.NonInheritImplements;
-import org.junit.After;
-import org.junit.AfterClass;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -33,7 +28,7 @@ public class NonInheritImplementsTest {
 		assertTrue(a1 == b1);
 	}
 
-	@Test(expected=ClassCastException.class)
+	@Test(expected = ClassCastException.class)
 	public void testNormalFailsCorrectly1() throws Exception {
 		assertThat(NonInheritImplements.Helper.Instanceof(new A1(), NonInheritImplements.class), is(false));
 		NonInheritImplements.Helper.Cast(NonInheritImplements.class, this);

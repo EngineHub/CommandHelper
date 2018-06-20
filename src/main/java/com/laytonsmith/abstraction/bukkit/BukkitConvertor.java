@@ -190,7 +190,7 @@ public class BukkitConvertor extends AbstractConvertor {
 			//If they are looking it up by number, we can support that too
 			int i = Integer.valueOf(name);
 			return new BukkitMCEnchantment(Enchantment.getById(i));
-		} catch(NumberFormatException | NullPointerException e) {
+		} catch (NumberFormatException | NullPointerException e) {
 			return null;
 		}
 	}
@@ -255,25 +255,25 @@ public class BukkitConvertor extends AbstractConvertor {
 		return new BukkitMCMetadataValue(new FixedMetadataValue(((BukkitMCPlugin) plugin).getHandle(), value));
 	}
 
-	public static final BukkitBlockListener BlockListener = new BukkitBlockListener();
-	public static final BukkitEntityListener EntityListener = new BukkitEntityListener();
-	public static final BukkitInventoryListener InventoryListener = new BukkitInventoryListener();
-	public static final BukkitPlayerListener PlayerListener = new BukkitPlayerListener();
-	public static final BukkitServerListener ServerListener = new BukkitServerListener();
-	public static final BukkitVehicleListener VehicleListener = new BukkitVehicleListener();
-	public static final BukkitWeatherListener WeatherListener = new BukkitWeatherListener();
-	public static final BukkitWorldListener WorldListener = new BukkitWorldListener();
+	public static final BukkitBlockListener BLOCK_LISTENER = new BukkitBlockListener();
+	public static final BukkitEntityListener ENTITY_LISTENER = new BukkitEntityListener();
+	public static final BukkitInventoryListener INVENTORY_LISTENER = new BukkitInventoryListener();
+	public static final BukkitPlayerListener PLAYER_LISTENER = new BukkitPlayerListener();
+	public static final BukkitServerListener SERVER_LISTENER = new BukkitServerListener();
+	public static final BukkitVehicleListener VEHICLE_LISTENER = new BukkitVehicleListener();
+	public static final BukkitWeatherListener WEATHER_LISTENER = new BukkitWeatherListener();
+	public static final BukkitWorldListener WORLD_LISTENER = new BukkitWorldListener();
 
 	@Override
 	public void Startup(CommandHelperPlugin chp) {
-		chp.registerEvents(BlockListener);
-		chp.registerEventsDynamic(EntityListener);
-		chp.registerEventsDynamic(InventoryListener);
-		chp.registerEvents(PlayerListener);
-		chp.registerEventsDynamic(ServerListener);
-		chp.registerEvents(VehicleListener);
-		chp.registerEvents(WeatherListener);
-		chp.registerEvents(WorldListener);
+		chp.registerEvents(BLOCK_LISTENER);
+		chp.registerEventsDynamic(ENTITY_LISTENER);
+		chp.registerEventsDynamic(INVENTORY_LISTENER);
+		chp.registerEvents(PLAYER_LISTENER);
+		chp.registerEventsDynamic(SERVER_LISTENER);
+		chp.registerEvents(VEHICLE_LISTENER);
+		chp.registerEvents(WEATHER_LISTENER);
+		chp.registerEvents(WORLD_LISTENER);
 	}
 
 	@Override
@@ -302,12 +302,12 @@ public class BukkitConvertor extends AbstractConvertor {
 					return null;
 				}
 			});
-		} catch(CancellationException ex) {
+		} catch (CancellationException ex) {
 			// Ignore the Exception when the plugin is disabled (server shutting down).
 			if(CommandHelperPlugin.self.isEnabled()) {
 				java.util.logging.Logger.getLogger(BukkitConvertor.class.getName()).log(Level.SEVERE, null, ex);
 			}
-		} catch(InterruptedException | ExecutionException ex) {
+		} catch (InterruptedException | ExecutionException ex) {
 			java.util.logging.Logger.getLogger(BukkitConvertor.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -340,10 +340,10 @@ public class BukkitConvertor extends AbstractConvertor {
 //		//((BukkitMCServer)Static.getServer()).__Server().getScheduler().cancelTasks(CommandHelperPlugin.self);
 //		Set<Integer> ids = new TreeSet<Integer>(validIDs);
 //		for(int id : ids){
-//			try{
+//			try {
 //				//If this doesn't work, it shouldn't kill everything.
 //				ClearFutureRunnable(id);
-//			} catch(Exception e){
+//			} catch (Exception e){
 //				Logger.getLogger(BukkitConvertor.class.getName()).log(null, Level.SEVERE, e);
 //			}
 //		}
@@ -432,7 +432,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		Entity be = ((BukkitMCEntity) e).getHandle();
 		try {
 			return BukkitConvertor.BukkitGetCorrectEntity(be);
-		} catch(IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.INFO, iae.getMessage(), Target.UNKNOWN);
 			return e;
 		}
@@ -456,7 +456,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		Collection<Entity> near;
 		try {
 			near = l.getWorld().getNearbyEntities(l, radius, radius, radius);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.8.3
 			Entity tempEntity = l.getWorld().spawnEntity(l, EntityType.ARROW);
 			near = tempEntity.getNearbyEntities(radius, radius, radius);
@@ -612,6 +612,11 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
+	public MCColor GetColor(String colorName, Target t) throws CREFormatException {
+		return ConvertorHelper.GetColor(colorName, t);
+	}
+
+	@Override
 	public MCPattern GetPattern(MCDyeColor color, MCPatternShape shape) {
 		return new BukkitMCPattern(new Pattern(BukkitMCDyeColor.getConvertor().getConcreteEnum(color),
 				BukkitMCPatternShape.getConvertor().getConcreteEnum(shape)));
@@ -728,11 +733,6 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCPlugin GetPlugin() {
 		return new BukkitMCPlugin(CommandHelperPlugin.self);
-	}
-
-	@Override
-	public MCColor GetColor(String colorName, Target t) throws CREFormatException {
-		return ConvertorHelper.GetColor(colorName, t);
 	}
 
 	@Override

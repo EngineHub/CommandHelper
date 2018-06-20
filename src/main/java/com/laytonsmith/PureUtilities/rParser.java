@@ -9,12 +9,13 @@ import java.util.Arrays;
  * written by Nossr50, with portions contributed by Reil.
  *
  */
+@SuppressWarnings("checkstyle:typename") // Fixing this violation might break dependents.
 public final class rParser {
 
 	private rParser() {
 	}
 
-	private static final int lineLength = 312;
+	private static final int LINE_LENGTH = 312;
 
 	/*
 	 * Finds the last color sequence used in the string
@@ -41,16 +42,16 @@ public final class rParser {
 		return combined.toString();
 	}
 
-	public static String[] wordWrap(String msg) {
+	public static String[] wordWarp(String msg, int lineLength) {
 		return wordWrap(msg, "", lineLength);
+	}
+
+	public static String[] wordWrap(String msg) {
+		return wordWrap(msg, "", LINE_LENGTH);
 	}
 
 	public static String[] wordWrap(String msg, String prefix) {
-		return wordWrap(msg, prefix, lineLength);
-	}
-
-	public static String[] wordWarp(String msg, int lineLength) {
-		return wordWrap(msg, "", lineLength);
+		return wordWrap(msg, prefix, LINE_LENGTH);
 	}
 
 	public static String[] wordWrap(String msg, String prefix, int lineLength) {

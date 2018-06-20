@@ -149,7 +149,7 @@ public class Reflection {
 				} else {
 					try {
 						return new CString(t.file().getCanonicalPath().replace('\\', '/'), t);
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						throw new CREIOException(ex.getMessage(), t);
 					}
 				}
@@ -246,7 +246,7 @@ public class Reflection {
 			DocField docField;
 			try {
 				docField = DocField.getValue(args[1].val());
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException("Invalid docField provided: " + args[1].val(), t);
 			}
 			//For now, we have special handling, since functions are actually the only thing that will work,
@@ -264,7 +264,7 @@ public class Reflection {
 				try {
 					Function f = (Function) FunctionList.getFunction(new CFunction(element, t));
 					return new CString(formatFunctionDoc(f.docs(), docField), t);
-				} catch(ConfigCompileException ex) {
+				} catch (ConfigCompileException ex) {
 					throw new CREFormatException("Unknown function: " + element, t);
 				}
 			}
@@ -307,7 +307,7 @@ public class Reflection {
 			if(children.get(1).isConst()) {
 				try {
 					DocField.getValue(children.get(1).getData().val());
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					throw new ConfigCompileException("Invalid docField provided: " + children.get(1).getData().val(), t);
 				}
 			}
@@ -375,28 +375,28 @@ public class Reflection {
 			return false;
 		}
 
-		private static final Map<String, List<String>> funcs = new HashMap<String, List<String>>();
+		private static final Map<String, List<String>> FUNCS = new HashMap<String, List<String>>();
 
 		private void initf() {
 			for(FunctionBase f : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
 				String[] pack = f.getClass().getEnclosingClass().getName().split("\\.");
 				String clazz = pack[pack.length - 1];
-				if(!funcs.containsKey(clazz)) {
-					funcs.put(clazz, new ArrayList<String>());
+				if(!FUNCS.containsKey(clazz)) {
+					FUNCS.put(clazz, new ArrayList<String>());
 				}
-				funcs.get(clazz).add(f.getName());
+				FUNCS.get(clazz).add(f.getName());
 			}
 		}
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ret = CArray.GetAssociativeArray(t);
-			if(funcs.keySet().size() < 10) {
+			if(FUNCS.keySet().size() < 10) {
 				initf();
 			}
-			for(String cname : funcs.keySet()) {
+			for(String cname : FUNCS.keySet()) {
 				CArray fnames = new CArray(t);
-				for(String fname : funcs.get(cname)) {
+				for(String fname : FUNCS.get(cname)) {
 					fnames.push(new CString(fname, t), t);
 				}
 				ret.set(new CString(cname, t), fnames, t);

@@ -186,7 +186,7 @@ public class PlayerManagement {
 			if(args.length >= 1) {
 				try {
 					pl = Static.GetPlayer(args[0], t);
-				} catch(ConfigRuntimeException cre) {
+				} catch (ConfigRuntimeException cre) {
 					pl = Static.GetUser(args[0], t);
 				}
 			}
@@ -609,7 +609,7 @@ public class PlayerManagement {
 			MCBlock b;
 			try {
 				b = p.getTargetBlock(trans, 512);
-			} catch(IllegalStateException ise) {
+			} catch (IllegalStateException ise) {
 				throw new CREPluginInternalException("The server's method of finding the target block has failed."
 						+ " There is nothing that can be done about this except standing somewhere else.", t);
 			}
@@ -922,7 +922,7 @@ public class PlayerManagement {
 				MCBlock b;
 				try {
 					b = p.getTargetBlock(null, 200);
-				} catch(IllegalStateException ise) {
+				} catch (IllegalStateException ise) {
 					b = null;
 				}
 				if(b == null) {
@@ -936,7 +936,7 @@ public class PlayerManagement {
 				String add;
 				try {
 					add = p.getAddress().getAddress().getHostAddress();
-				} catch(NullPointerException npe) {
+				} catch (NullPointerException npe) {
 					add = "";
 				}
 
@@ -975,7 +975,7 @@ public class PlayerManagement {
 				String hostname;
 				try {
 					hostname = p.getAddress().getAddress().getHostAddress();
-				} catch(NullPointerException npe) {
+				} catch (NullPointerException npe) {
 					hostname = "";
 				}
 
@@ -1416,7 +1416,7 @@ public class PlayerManagement {
 					}
 					yaw = (float) Static.getNumber(args[0], t);
 					pitch = (float) Static.getNumber(args[1], t);
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					//It's the MCPlayer, F variation
 					toSet = Static.GetPlayer(args[0], t);
 					pitch = toSet.getLocation().getPitch();
@@ -1575,7 +1575,7 @@ public class PlayerManagement {
 
 			try {
 				gm = MCGameMode.valueOf(mode.toUpperCase());
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException("Mode must be either " + StringUtils.Join(MCGameMode.values(), ", ", ", or "), t);
 			}
 			Static.AssertPlayerNonNull(m, t);
@@ -2519,7 +2519,7 @@ public class PlayerManagement {
 			MCPlayer p = null;
 			try {
 				p = Static.GetPlayer(args[0], t);
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				//They aren't in the player list
 			}
 			//If the player we grabbed doesn't match exactly, we're referring to another player
@@ -2553,7 +2553,7 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "boolean {player} Returns whether or not this player is whitelisted. Note that"
-					+ " this will work with offline players, but the name must be exact." + uuidwarning;
+					+ " this will work with offline players, but the name must be exact." + UUID_WARNING;
 		}
 
 		@Override
@@ -2605,7 +2605,7 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "void {player, isWhitelisted} Sets the whitelist flag of the specified player. Note that"
-					+ " this will work with offline players, but the name must be exact." + uuidwarning;
+					+ " this will work with offline players, but the name must be exact." + UUID_WARNING;
 		}
 
 		@Override
@@ -2641,7 +2641,7 @@ public class PlayerManagement {
 		}
 	}
 
-	static final String uuidwarning = " NOTICE: This function accepts UUIDs in place of player names,"
+	private static final String UUID_WARNING = " NOTICE: This function accepts UUIDs in place of player names,"
 			+ " however due to lack of API from Mojang, some server software is not able to"
 			+ " correctly associate a uuid with a player if the player has not recently been online."
 			+ " As such, it may not always be possible to ban or whitelist a player by UUID."
@@ -2668,7 +2668,7 @@ public class PlayerManagement {
 					+ " this will work with offline players, but the name must be exact. At this"
 					+ " time, this function only works with the vanilla ban system. If you use"
 					+ " a third party ban system, you should instead run the command for that"
-					+ " plugin instead." + uuidwarning;
+					+ " plugin instead." + UUID_WARNING;
 		}
 
 		@Override
@@ -2721,7 +2721,7 @@ public class PlayerManagement {
 					+ " this will work with offline players, but the name must be exact. At this"
 					+ " time, this function only works with the vanilla ban system. If you use"
 					+ " a third party ban system, you should instead run the command for that"
-					+ " plugin instead." + uuidwarning;
+					+ " plugin instead." + UUID_WARNING;
 		}
 
 		@Override
@@ -3386,7 +3386,7 @@ public class PlayerManagement {
 			return CHVersion.V3_3_1;
 		}
 	}
-	private static final SortedMap<String, Construct> TimeLookup = new TreeMap<String, Construct>();
+	private static final SortedMap<String, Construct> TIME_LOOKUP = new TreeMap<String, Construct>();
 
 	static {
 		Properties p = new Properties();
@@ -3395,9 +3395,9 @@ public class PlayerManagement {
 			Enumeration e = p.propertyNames();
 			while(e.hasMoreElements()) {
 				String name = e.nextElement().toString();
-				TimeLookup.put(name, new CString(p.getProperty(name), Target.UNKNOWN));
+				TIME_LOOKUP.put(name, new CString(p.getProperty(name), Target.UNKNOWN));
 			}
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -3424,8 +3424,8 @@ public class PlayerManagement {
 					+ " Alternatively, common time notation (9:30pm, 4:00 am) is acceptable,"
 					+ " and convenient english mappings also exist:");
 			doc.append("<ul>");
-			for(String key : TimeLookup.keySet()) {
-				doc.append("<li>").append(key).append(" = ").append(TimeLookup.get(key)).append("</li>");
+			for(String key : TIME_LOOKUP.keySet()) {
+				doc.append("<li>").append(key).append(" = ").append(TIME_LOOKUP.get(key)).append("</li>");
 			}
 			doc.append("</ul>");
 			return doc.toString();
@@ -3467,8 +3467,8 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(p, t);
 			long time = 0;
 			String stime = (args.length == 1 ? args[0] : args[1]).val().toLowerCase();
-			if(TimeLookup.containsKey(stime.replaceAll("[^a-z]", ""))) {
-				stime = TimeLookup.get(stime.replaceAll("[^a-z]", "")).val();
+			if(TIME_LOOKUP.containsKey(stime.replaceAll("[^a-z]", ""))) {
+				stime = TIME_LOOKUP.get(stime.replaceAll("[^a-z]", "")).val();
 			}
 			if(stime.matches("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$")) {
 				Pattern pa = Pattern.compile("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$");
@@ -3500,7 +3500,7 @@ public class PlayerManagement {
 			}
 			try {
 				Long.valueOf(stime);
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				throw new CREFormatException("Invalid time provided", t);
 			}
 			time = Long.parseLong(stime);
@@ -3758,7 +3758,7 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(m, t);
 			try {
 				m.setPlayerListName(listName);
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				if(listName.length() > 16) {
 					throw new CRELengthException("set_list_name([player,] name)"
 							+ " expects name to be 16 characters or less for MineCraft versions prior to 1.8.", t);
@@ -4204,13 +4204,13 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			int hunger, hungerIndex = 0;
+			int hungerIndex = 0;
 			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				hungerIndex = 1;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			hunger = Static.getInt32(args[hungerIndex], t);
+			int hunger = Static.getInt32(args[hungerIndex], t);
 			p.setFoodLevel(hunger);
 			return CVoid.VOID;
 		}
@@ -4491,7 +4491,7 @@ public class PlayerManagement {
 				try {
 					m = Static.GetPlayer(args[0], t);
 					locationIndex = 1;
-				} catch(ConfigRuntimeException e) {
+				} catch (ConfigRuntimeException e) {
 					if(p instanceof MCPlayer) {
 						m = (MCPlayer) p;
 					}
@@ -4624,7 +4624,7 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(args.length == 1) {;
+			if(args.length == 1) {
 				p = Static.GetPlayer(args[0].val(), t);
 			}
 			Static.AssertPlayerNonNull(p, t);
@@ -4952,7 +4952,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				return new CString(((MCPlayer) Static.getLivingEntity(args[0], t)).getName(), t);
-			} catch(Exception exception) {
+			} catch (Exception exception) {
 				return CNull.NULL;
 			}
 		}
@@ -5257,7 +5257,7 @@ public class PlayerManagement {
 			MCSound sound;
 			try {
 				sound = MCSound.valueOf(args[1].val().toUpperCase());
-			} catch(IllegalArgumentException iae) {
+			} catch (IllegalArgumentException iae) {
 				throw new CREFormatException("Sound name '" + args[1].val() + "' is invalid.", t);
 			}
 
@@ -5265,7 +5265,7 @@ public class PlayerManagement {
 				MCSoundCategory category;
 				try {
 					category = MCSoundCategory.valueOf(args[2].val().toUpperCase());
-				} catch(IllegalArgumentException iae) {
+				} catch (IllegalArgumentException iae) {
 					throw new CREFormatException("Sound category '" + args[2].val() + "' is invalid.", t);
 				}
 				p.stopSound(sound, category);
@@ -5328,7 +5328,7 @@ public class PlayerManagement {
 				MCSoundCategory category;
 				try {
 					category = MCSoundCategory.valueOf(args[2].val().toUpperCase());
-				} catch(IllegalArgumentException iae) {
+				} catch (IllegalArgumentException iae) {
 					throw new CREFormatException("Sound category '" + args[2].val() + "' is invalid.", t);
 				}
 				p.stopSound(sound, category);

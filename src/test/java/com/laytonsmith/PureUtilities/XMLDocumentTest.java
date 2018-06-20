@@ -73,7 +73,7 @@ public class XMLDocumentTest {
 		try {
 			doc.setNode("/root/other/node[4]/node", "value");
 			fail("Did not expect this to pass");
-		} catch(XPathExpressionException e) {
+		} catch (XPathExpressionException e) {
 			//Pass
 		}
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"

@@ -121,6 +121,33 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 		return retn;
 	}
 
+	private List<Block> getLineOfSight(HashSet<Short> transparent, int maxDistance, int maxLength) {
+		if(maxDistance > 512) {
+			maxDistance = 512;
+		}
+		ArrayList<Block> blocks = new ArrayList<>();
+		Iterator<Block> itr = new BlockIterator(le, maxDistance);
+
+		while(itr.hasNext()) {
+			Block block = itr.next();
+			blocks.add(block);
+			if(maxLength != 0 && blocks.size() > maxLength) {
+				blocks.remove(0);
+			}
+			int id = block.getTypeId();
+			if(transparent == null) {
+				if(id != 0) {
+					break;
+				}
+			} else {
+				if(!transparent.contains((short) id)) {
+					break;
+				}
+			}
+		}
+		return blocks;
+	}
+
 	@Override
 	public boolean hasLineOfSight(MCEntity other) {
 		return le.hasLineOfSight(((BukkitMCEntity) other).getHandle());
@@ -156,38 +183,11 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 		return blocks.get(0);
 	}
 
-	private List<Block> getLineOfSight(HashSet<Short> transparent, int maxDistance, int maxLength) {
-		if(maxDistance > 512) {
-			maxDistance = 512;
-		}
-		ArrayList<Block> blocks = new ArrayList<>();
-		Iterator<Block> itr = new BlockIterator(le, maxDistance);
-
-		while(itr.hasNext()) {
-			Block block = itr.next();
-			blocks.add(block);
-			if(maxLength != 0 && blocks.size() > maxLength) {
-				blocks.remove(0);
-			}
-			int id = block.getTypeId();
-			if(transparent == null) {
-				if(id != 0) {
-					break;
-				}
-			} else {
-				if(!transparent.contains((short) id)) {
-					break;
-				}
-			}
-		}
-		return blocks;
-	}
-
 	@Override
 	public boolean hasAI() {
 		try {
 			return le.hasAI();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9.2
 			return true;
 		}
@@ -205,7 +205,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 			if(le != null) {
 				le.addPotionEffect(pe, true);
 			}
-		} catch(NullPointerException e) {
+		} catch (NullPointerException e) {
 			Logger.getLogger(BukkitMCLivingEntity.class.getName()).log(Level.SEVERE,
 					"Bukkit appears to have derped. This is a problem with Bukkit, not CommandHelper."
 					+ "The effect should have still been applied.", e);
@@ -217,7 +217,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 		try {
 			PotionEffectType[] arr = (PotionEffectType[]) ReflectionUtils.get(PotionEffectType.class, "byId");
 			return arr.length - 1;
-		} catch(ReflectionUtils.ReflectionException e) {
+		} catch (ReflectionUtils.ReflectionException e) {
 			return Integer.MAX_VALUE;
 		}
 	}
@@ -371,7 +371,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public boolean isGliding() {
 		try {
 			return le.isGliding();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9
 			return false;
 		}
@@ -381,7 +381,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public void setGliding(Boolean glide) {
 		try {
 			le.setGliding(glide);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9
 		}
 	}
@@ -390,7 +390,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public void setAI(Boolean ai) {
 		try {
 			le.setAI(ai);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9.2
 		}
 	}

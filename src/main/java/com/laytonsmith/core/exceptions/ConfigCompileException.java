@@ -11,7 +11,7 @@ import java.util.Objects;
 public class ConfigCompileException extends Exception {
 
 	final String message;
-	final int line_num;
+	final int lineNum;
 	final File file;
 	final int col;
 	final Target t;
@@ -23,7 +23,7 @@ public class ConfigCompileException extends Exception {
 	public ConfigCompileException(String message, Target t, Throwable cause) {
 		super(cause);
 		this.message = message;
-		this.line_num = t.line();
+		this.lineNum = t.line();
 		this.file = t.file();
 		this.col = t.col();
 		this.t = t;
@@ -44,7 +44,7 @@ public class ConfigCompileException extends Exception {
 	}
 
 	public String getLineNum() {
-		return Integer.toString(line_num);
+		return Integer.toString(lineNum);
 	}
 
 	public int getColumn() {
@@ -57,8 +57,8 @@ public class ConfigCompileException extends Exception {
 
 	@Override
 	public String toString() {
-		if(line_num != 0) {
-			return "Configuration Compile Exception: " + message + " near line " + line_num + ". Please "
+		if(lineNum != 0) {
+			return "Configuration Compile Exception: " + message + " near line " + lineNum + ". Please "
 					+ "check your code and try again. " + (file != null ? "(" + file.getAbsolutePath() + ")" : "");
 		} else {
 			return "Configuration Compile Exception: " + message + ". Please check your code and try again. "
@@ -82,7 +82,7 @@ public class ConfigCompileException extends Exception {
 	public int hashCode() {
 		int hash = 5;
 		hash = 31 * hash + Objects.hashCode(this.message);
-		hash = 31 * hash + this.line_num;
+		hash = 31 * hash + this.lineNum;
 		hash = 31 * hash + Objects.hashCode(this.file);
 		hash = 31 * hash + this.col;
 		hash = 31 * hash + Objects.hashCode(this.t);
@@ -101,7 +101,7 @@ public class ConfigCompileException extends Exception {
 		if(!Objects.equals(this.message, other.message)) {
 			return false;
 		}
-		if(this.line_num != other.line_num) {
+		if(this.lineNum != other.lineNum) {
 			return false;
 		}
 		if(!Objects.equals(this.file, other.file)) {

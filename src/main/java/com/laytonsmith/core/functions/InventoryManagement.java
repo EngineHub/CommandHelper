@@ -506,7 +506,7 @@ public class InventoryManagement {
 						int index = Integer.parseInt(key);
 						MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t), t);
 						setInvSlot(inv, index, is);
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to"
 								+ " set_pinv(), but \"" + key + "\" was found. Ignoring.");
 					}
@@ -866,7 +866,7 @@ public class InventoryManagement {
 				Map<Integer, MCItemStack> h;
 				try {
 					h = p.getInventory().addItem(is);
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					throw new CREIllegalArgumentException("Item value is invalid", t);
 				}
 				p.updateInventory();
@@ -1064,7 +1064,7 @@ public class InventoryManagement {
 				Map<Integer, MCItemStack> h;
 				try {
 					h = p.getEnderChest().addItem(is);
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					throw new CREIllegalArgumentException("Item value is invalid", t);
 				}
 				if(!h.isEmpty()) {
@@ -1261,7 +1261,7 @@ public class InventoryManagement {
 
 					try {
 						index = Integer.parseInt(key);
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						if(key.isEmpty()) {
 							throw new CRERangeException("Slot index must be 0-26", t);
 						} else {
@@ -1276,7 +1276,7 @@ public class InventoryManagement {
 					} else {
 						ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found in array passed to set_penderchest(), so ignoring.");
 					}
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_penderchest(), but \"" + key + "\" was found. Ignoring.");
 				}
 			}
@@ -1420,7 +1420,7 @@ public class InventoryManagement {
 			try {
 				MCItemStack is = inv.getItem(slot);
 				return ObjectGenerator.GetGenerator().item(is, t);
-			} catch(ArrayIndexOutOfBoundsException e) {
+			} catch (ArrayIndexOutOfBoundsException e) {
 				throw new CRERangeException("Index out of bounds for the inventory type.", t);
 			}
 		}
@@ -1485,7 +1485,7 @@ public class InventoryManagement {
 				inv.setItem(slot, is);
 				inv.updateViewers();
 				return CVoid.VOID;
-			} catch(ArrayIndexOutOfBoundsException e) {
+			} catch (ArrayIndexOutOfBoundsException e) {
 				throw new CRERangeException("Index out of bounds for the inventory type.", t);
 			}
 		}
@@ -1868,7 +1868,7 @@ public class InventoryManagement {
 					int index;
 					try {
 						index = Integer.parseInt(key);
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						throw e;
 					}
 					if(index < 0 || index >= size) {
@@ -1877,7 +1877,7 @@ public class InventoryManagement {
 						MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t), t);
 						inventory.setItem(index, is);
 					}
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_inventory(), but \"" + key + "\" was found. Ignoring.");
 				}
 			}
@@ -1942,7 +1942,7 @@ public class InventoryManagement {
 			Map<Integer, MCItemStack> h;
 			try {
 				h = inventory.addItem(is);
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREIllegalArgumentException("Item value is invalid", t);
 			}
 
@@ -2099,7 +2099,7 @@ public class InventoryManagement {
 			int slot;
 			try {
 				slot = Integer.parseInt(args[args.length - 1].val());
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				throw new CREFormatException("Slot number must be an integer in range of [0-8].", t);
 			}
 			if(slot < 0 || slot > 8) {

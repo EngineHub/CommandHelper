@@ -299,7 +299,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public boolean isGlowing() {
 		try {
 			return e.isGlowing();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9
 			return false;
 		}
@@ -309,7 +309,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public void setGlowing(Boolean glow) {
 		try {
 			e.setGlowing(glow);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9
 		}
 	}
@@ -318,7 +318,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public boolean hasGravity() {
 		try {
 			return e.hasGravity();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.10
 			return true;
 		}
@@ -328,7 +328,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public void setHasGravity(boolean gravity) {
 		try {
 			e.setGravity(gravity);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.10
 		}
 	}
@@ -337,7 +337,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public boolean isSilent() {
 		try {
 			return e.isSilent();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9.4
 			return false;
 		}
@@ -347,7 +347,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public void setSilent(boolean silent) {
 		try {
 			e.setSilent(silent);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9.4
 		}
 	}
@@ -356,7 +356,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public boolean isInvulnerable() {
 		try {
 			return e.isInvulnerable();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9.2
 			return false;
 		}
@@ -366,7 +366,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public void setInvulnerable(boolean invulnerable) {
 		try {
 			e.setInvulnerable(invulnerable);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.9.2
 		}
 	}
@@ -375,7 +375,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public Set<String> getScoreboardTags() {
 		try {
 			return e.getScoreboardTags();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.10.2
 			return Collections.emptySet();
 		}
@@ -385,7 +385,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public boolean addScoreboardTag(String tag) {
 		try {
 			return e.addScoreboardTag(tag);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.10.2
 			return false;
 		}
@@ -395,7 +395,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public boolean removeScoreboardTag(String tag) {
 		try {
 			return e.removeScoreboardTag(tag);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.10.2
 			return false;
 		}

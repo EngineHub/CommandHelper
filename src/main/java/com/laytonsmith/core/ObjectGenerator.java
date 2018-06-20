@@ -275,7 +275,7 @@ public class ObjectGenerator {
 				if(seperatorIndex != -1) {
 					try {
 						data = Integer.parseInt(type.val().substring(seperatorIndex + 1));
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						throw new CRERangeException("The item data \"" + type.val().substring(seperatorIndex + 1)
 								+ "\" is not a valid integer.", t);
 					}
@@ -315,7 +315,7 @@ public class ObjectGenerator {
 				for(Map.Entry<MCEnchantment, Integer> entry : enchants.entrySet()) {
 					ret.addUnsafeEnchantment(entry.getKey(), entry.getValue());
 				}
-			} catch(ClassCastException ex) {
+			} catch (ClassCastException ex) {
 				throw new CREFormatException("Enchants must be an array of enchantment arrays.", t);
 			}
 		}
@@ -331,7 +331,8 @@ public class ObjectGenerator {
 		if(!is.hasItemMeta()) {
 			return CNull.NULL;
 		} else {
-			Construct display, lore;
+			Construct display;
+			Construct lore;
 			CArray ma = CArray.GetAssociativeArray(t);
 			MCItemMeta meta = is.getItemMeta();
 			if(meta.hasDisplayName()) {
@@ -462,7 +463,9 @@ public class ObjectGenerator {
 				CArray color = color(((MCLeatherArmorMeta) meta).getColor(), t);
 				ma.set("color", color, t);
 			} else if(meta instanceof MCBookMeta) {
-				Construct title, author, pages;
+				Construct title;
+				Construct author;
+				Construct pages;
 				if(((MCBookMeta) meta).hasTitle()) {
 					title = new CString(((MCBookMeta) meta).getTitle(), t);
 				} else {
@@ -651,7 +654,7 @@ public class ObjectGenerator {
 										}
 										MCItemStack is = ObjectGenerator.GetGenerator().item(cinv.get(key, t), t);
 										inv.setItem(index, is);
-									} catch(NumberFormatException ex) {
+									} catch (NumberFormatException ex) {
 										ConfigRuntimeException.DoWarning("Expecting integer value for key in "
 												+ bs.getClass().getSimpleName().replaceFirst("MC", "")
 												+ " inventory array, but \"" + key + "\" was found. Ignoring.");
@@ -899,7 +902,7 @@ public class ObjectGenerator {
 						}
 					}
 				}
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new CREFormatException(ex.getMessage(), t, ex);
 			}
 		} else {
@@ -967,7 +970,7 @@ public class ObjectGenerator {
 		}
 		try {
 			return StaticLayer.GetConvertor().GetColor(red, green, blue);
-		} catch(IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			throw new CRERangeException(ex.getMessage(), t, ex);
 		}
 	}
@@ -1099,7 +1102,7 @@ public class ObjectGenerator {
 					}
 				}
 				ret.put(etype, elevel);
-			} catch(ClassCastException cce) {
+			} catch (ClassCastException cce) {
 				throw new CREFormatException("Expected an array at index " + key, t);
 			}
 		}
@@ -1125,7 +1128,8 @@ public class ObjectGenerator {
 		for(String key : ea.stringKeySet()) {
 			if(ea.get(key, t) instanceof CArray) {
 				CArray effect = (CArray) ea.get(key, t);
-				int potionID = 0, strength = 0;
+				int potionID = 0;
+				int strength = 0;
 				double seconds = 30.0;
 				boolean ambient = false;
 				boolean particles = true;
@@ -1171,7 +1175,7 @@ public class ObjectGenerator {
 		MCPotionType type;
 		try {
 			type = MCPotionType.valueOf(pd.get("type", t).val().toUpperCase());
-		} catch(IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			throw new CREFormatException("Invalid potion type: " + pd.get("type", t).val(), t);
 		}
 		boolean extended = false;
@@ -1196,7 +1200,7 @@ public class ObjectGenerator {
 		}
 		try {
 			return StaticLayer.GetPotionData(type, extended, upgraded);
-		} catch(IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			throw new CREFormatException(ex.getMessage(), t, ex);
 		}
 	}
@@ -1305,7 +1309,7 @@ public class ObjectGenerator {
 		if(fe.containsKey("type")) {
 			try {
 				builder.setType(MCFireworkType.valueOf(fe.get("type", t).val().toUpperCase()));
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CREFormatException(ex.getMessage(), t, ex);
 			}
 		}
@@ -1350,18 +1354,6 @@ public class ObjectGenerator {
 		return ret;
 	}
 
-	public MCMaterial material(String name, Target t) {
-		try {
-			return StaticLayer.GetMaterial(name.toUpperCase());
-		} catch(IllegalArgumentException exception) {
-			throw new CREFormatException("Unknown material type: " + name, t);
-		}
-	}
-
-	public MCMaterial material(Construct name, Target t) {
-		return material(name.val(), t);
-	}
-
 	public MCRecipe recipe(Construct c, Target t) {
 		if(!(c instanceof CArray)) {
 			throw new CRECastException("Expected array but recieved " + c.getCType().name(), t);
@@ -1376,7 +1368,7 @@ public class ObjectGenerator {
 		MCRecipeType recipeType;
 		try {
 			recipeType = MCRecipeType.valueOf(recipe.get("type", t).val());
-		} catch(IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			throw new CREFormatException("Invalid recipe type.", t);
 		}
 
@@ -1385,13 +1377,12 @@ public class ObjectGenerator {
 		MCRecipe ret;
 		try {
 			ret = StaticLayer.GetNewRecipe(recipeKey, recipeType, result);
-		} catch(IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			throw new CREFormatException(ex.getMessage(), t);
 		}
 		switch(recipeType) {
 			case SHAPED:
 				CArray shaped = Static.getArray(recipe.get("shape", t), t);
-				;
 				String[] shape = new String[(int) shaped.size()];
 				if(shaped.size() < 1 || shaped.size() > 3 || shaped.inAssociativeMode()) {
 					throw new CREFormatException("Shape array is invalid.", t);
@@ -1466,6 +1457,18 @@ public class ObjectGenerator {
 			default:
 				throw new CREFormatException("Could not find valid recipe type.", t);
 		}
+	}
+
+	public MCMaterial material(String name, Target t) {
+		try {
+			return StaticLayer.GetMaterial(name.toUpperCase());
+		} catch (IllegalArgumentException exception) {
+			throw new CREFormatException("Unknown material type: " + name, t);
+		}
+	}
+
+	public MCMaterial material(Construct name, Target t) {
+		return material(name.val(), t);
 	}
 
 	/**

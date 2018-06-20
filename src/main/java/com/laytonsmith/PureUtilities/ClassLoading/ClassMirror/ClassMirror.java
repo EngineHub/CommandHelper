@@ -79,7 +79,7 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public ModifierMirror getModifiers() {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			return new ModifierMirror(underlyingClass.getModifiers());
 		}
 		return info.modifiers;
@@ -93,7 +93,7 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public String getJVMClassName() {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			return ClassUtils.getJVMName(underlyingClass);
 		}
 		return "L" + info.name + ";";
@@ -106,7 +106,7 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public String getClassName() {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			return underlyingClass.getName().replace('$', '.');
 		}
 		return info.name.replaceAll("[/$]", ".");
@@ -118,7 +118,7 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public boolean isEnum() {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			return underlyingClass.isEnum();
 		}
 		return info.isEnum;
@@ -130,7 +130,7 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public boolean isInterface() {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			return underlyingClass.isInterface();
 		}
 		return info.isInterface;
@@ -143,7 +143,7 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public boolean isAbstract() {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			return (underlyingClass.getModifiers() & Modifier.ABSTRACT) > 0;
 		}
 		return info.modifiers.isAbstract();
@@ -155,7 +155,7 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public ClassReferenceMirror<?> getSuperClass() {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			return ClassReferenceMirror.fromClass(underlyingClass.getSuperclass());
 		}
 		return new ClassReferenceMirror<>("L" + info.superClass + ";");
@@ -169,12 +169,12 @@ public class ClassMirror<T> implements Serializable {
 	 */
 	public List<ClassReferenceMirror<?>> getInterfaces() {
 		List<ClassReferenceMirror<?>> l = new ArrayList<>();
-		if (underlyingClass != null) {
-			for (Class<?> inter : underlyingClass.getInterfaces()) {
+		if(underlyingClass != null) {
+			for(Class<?> inter : underlyingClass.getInterfaces()) {
 				l.add(ClassReferenceMirror.fromClass(inter));
 			}
 		} else {
-			for (String inter : info.interfaces) {
+			for(String inter : info.interfaces) {
 				l.add(new ClassReferenceMirror<>("L" + inter + ";"));
 			}
 		}
@@ -188,12 +188,12 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public boolean hasAnnotation(Class<? extends Annotation> annotation) {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			return underlyingClass.getAnnotation(annotation) != null;
 		}
 		String name = ClassUtils.getJVMName(annotation);
-		for (AnnotationMirror a : info.annotations) {
-			if (a.getType().getJVMName().equals(name)) {
+		for(AnnotationMirror a : info.annotations) {
+			if(a.getType().getJVMName().equals(name)) {
 				return true;
 			}
 		}
@@ -216,12 +216,12 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public Boolean isAnnotationVisible(Class<? extends Annotation> annotation) {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			return hasAnnotation(annotation);
 		}
 		String name = ClassUtils.getJVMName(annotation);
-		for (AnnotationMirror a : info.annotations) {
-			if (a.getType().getJVMName().equals(name)) {
+		for(AnnotationMirror a : info.annotations) {
+			if(a.getType().getJVMName().equals(name)) {
 				return a.isVisible();
 			}
 		}
@@ -235,16 +235,16 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public AnnotationMirror getAnnotation(Class<? extends Annotation> clazz) {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			Annotation ann = underlyingClass.getAnnotation(clazz);
-			if (ann == null) {
+			if(ann == null) {
 				return null;
 			}
 			return new AnnotationMirror(ann);
 		}
 		String name = ClassUtils.getJVMName(clazz);
-		for (AnnotationMirror a : info.annotations) {
-			if (a.getType().getJVMName().equals(name)) {
+		for(AnnotationMirror a : info.annotations) {
+			if(a.getType().getJVMName().equals(name)) {
 				return a;
 			}
 		}
@@ -257,9 +257,9 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public List<AnnotationMirror> getAnnotations() {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			List<AnnotationMirror> list = new ArrayList<>();
-			for (Annotation a : underlyingClass.getAnnotations()) {
+			for(Annotation a : underlyingClass.getAnnotations()) {
 				list.add(new AnnotationMirror(ClassReferenceMirror.fromClass(a.annotationType()), true));
 			}
 			return list;
@@ -280,11 +280,11 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public <T extends Annotation> T loadAnnotation(Class<T> type) {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			return underlyingClass.getAnnotation(type);
 		}
 		AnnotationMirror mirror = getAnnotation(type);
-		if (mirror == null) {
+		if(mirror == null) {
 			return null;
 		}
 		return mirror.getProxy(type);
@@ -298,9 +298,9 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public FieldMirror[] getFields() {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			FieldMirror[] fields = new FieldMirror[this.underlyingClass.getDeclaredFields().length];
-			for (int i = 0; i < fields.length; i++) {
+			for(int i = 0; i < fields.length; i++) {
 				Field f = this.underlyingClass.getDeclaredFields()[i];
 				fields[i] = new FieldMirror(f);
 			}
@@ -325,11 +325,11 @@ public class ClassMirror<T> implements Serializable {
 	 * IllegalArgumentException
 	 */
 	public Map<ClassReferenceMirror<?>, List<ClassReferenceMirror<?>>> getGenerics() throws IllegalArgumentException {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			throw new IllegalArgumentException("Cannot get generics of a real class");
 		}
 		Map<ClassReferenceMirror<?>, List<ClassReferenceMirror<?>>> map = new HashMap<>(info.genericParameters.size());
-		for (Map.Entry<ClassReferenceMirror<?>, List<ClassReferenceMirror<?>>> k : info.genericParameters.entrySet()) {
+		for(Map.Entry<ClassReferenceMirror<?>, List<ClassReferenceMirror<?>>> k : info.genericParameters.entrySet()) {
 			map.put(k.getKey(), new ArrayList<>(k.getValue()));
 		}
 		return map;
@@ -344,8 +344,8 @@ public class ClassMirror<T> implements Serializable {
 	 * @throws java.lang.NoSuchFieldException
 	 */
 	public FieldMirror getField(String name) throws NoSuchFieldException {
-		for (FieldMirror m : getFields()) {
-			if (m.getName().equals(name)) {
+		for(FieldMirror m : getFields()) {
+			if(m.getName().equals(name)) {
 				return m;
 			}
 		}
@@ -361,8 +361,8 @@ public class ClassMirror<T> implements Serializable {
 	 */
 	public MethodMirror[] getMethods() {
 		List<MethodMirror> l = new ArrayList<>();
-		for (AbstractMethodMirror m : getAllMethods()) {
-			if (m instanceof MethodMirror) {
+		for(AbstractMethodMirror m : getAllMethods()) {
+			if(m instanceof MethodMirror) {
 				l.add((MethodMirror) m);
 			}
 		}
@@ -377,8 +377,8 @@ public class ClassMirror<T> implements Serializable {
 	@SuppressWarnings("unchecked")
 	public ConstructorMirror<T>[] getConstructors() {
 		List<ConstructorMirror<T>> l = new ArrayList<>();
-		for (AbstractMethodMirror m : getAllMethods()) {
-			if (m instanceof ConstructorMirror) {
+		for(AbstractMethodMirror m : getAllMethods()) {
+			if(m instanceof ConstructorMirror) {
 				l.add((ConstructorMirror<T>) m);
 			}
 		}
@@ -391,9 +391,9 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public AbstractMethodMirror[] getAllMethods() {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			MethodMirror[] mirrors = new MethodMirror[underlyingClass.getDeclaredMethods().length];
-			for (int i = 0; i < mirrors.length; i++) {
+			for(int i = 0; i < mirrors.length; i++) {
 				mirrors[i] = new MethodMirror(underlyingClass.getDeclaredMethods()[i]);
 			}
 			return mirrors;
@@ -413,7 +413,7 @@ public class ClassMirror<T> implements Serializable {
 	 */
 	public MethodMirror getMethod(String name, Class<?>... params) throws NoSuchMethodException {
 		ClassReferenceMirror<?> mm[] = new ClassReferenceMirror<?>[params.length];
-		for (int i = 0; i < params.length; i++) {
+		for(int i = 0; i < params.length; i++) {
 			mm[i] = new ClassReferenceMirror<>(ClassUtils.getJVMName(params[i]));
 		}
 		return getMethod(name, mm);
@@ -432,8 +432,8 @@ public class ClassMirror<T> implements Serializable {
 	public MethodMirror getMethod(String name, ClassReferenceMirror<?>... params) throws NoSuchMethodException {
 		List<ClassReferenceMirror<?>> crmParams = new ArrayList<>();
 		crmParams.addAll(Arrays.asList(params));
-		for (AbstractMethodMirror m : getAllMethods()) {
-			if (m instanceof MethodMirror && m.getName().equals(name) && m.getParams().equals(crmParams)) {
+		for(AbstractMethodMirror m : getAllMethods()) {
+			if(m instanceof MethodMirror && m.getName().equals(name) && m.getParams().equals(crmParams)) {
 				return (MethodMirror) m;
 			}
 		}
@@ -451,7 +451,7 @@ public class ClassMirror<T> implements Serializable {
 	 */
 	@SuppressWarnings("unchecked")
 	public Class<T> loadClass() throws NoClassDefFoundError {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			return (Class<T>) underlyingClass;
 		}
 		try {
@@ -473,7 +473,7 @@ public class ClassMirror<T> implements Serializable {
 	 */
 	@SuppressWarnings("unchecked")
 	public Class<T> loadClass(ClassLoader loader, boolean initialize) throws NoClassDefFoundError {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			return (Class<T>) underlyingClass;
 		}
 		try {
@@ -497,22 +497,22 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public boolean directlyExtendsFrom(Class<?> superClass) {
-		if (underlyingClass != null) {
-			if (underlyingClass == superClass) {
+		if(underlyingClass != null) {
+			if(underlyingClass == superClass) {
 				return true;
 			}
-			if (underlyingClass.isInterface()) {
+			if(underlyingClass.isInterface()) {
 				return Arrays.asList(underlyingClass.getInterfaces()).contains(superClass);
 			} else {
 				return (underlyingClass.getSuperclass() == superClass);
 			}
 		}
 		String name = superClass.getName().replace('.', '/');
-		if (info.superClass.equals(name)) {
+		if(info.superClass.equals(name)) {
 			return true;
 		}
-		for (String in : info.interfaces) {
-			if (in.equals(name)) {
+		for(String in : info.interfaces) {
+			if(in.equals(name)) {
 				return true;
 			}
 		}
@@ -526,16 +526,16 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public PackageMirror getPackage() {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			return new PackageMirror(underlyingClass.getPackage().getName());
 		}
 		String[] split = getClassName().split("\\.");
-		if (split.length == 1) {
+		if(split.length == 1) {
 			return null;
 		}
 		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < split.length - 1; i++) {
-			if (i != 0) {
+		for(int i = 0; i < split.length - 1; i++) {
+			if(i != 0) {
 				b.append(".");
 			}
 			b.append(split[i]);
@@ -550,7 +550,7 @@ public class ClassMirror<T> implements Serializable {
 	 * @return
 	 */
 	public String getSimpleName() {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			return underlyingClass.getSimpleName();
 		}
 		String[] split = getClassName().split("\\.");
@@ -580,7 +580,7 @@ public class ClassMirror<T> implements Serializable {
 	 */
 	@SuppressWarnings("unchecked")
 	public ClassReferenceMirror<T> getClassReference() {
-		if (underlyingClass != null) {
+		if(underlyingClass != null) {
 			return ClassReferenceMirror.fromClass(underlyingClass);
 		}
 		return new ClassReferenceMirror<>(getJVMClassName());
@@ -595,10 +595,10 @@ public class ClassMirror<T> implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if(obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if(getClass() != obj.getClass()) {
 			return false;
 		}
 		final ClassMirror<?> other = (ClassMirror<?>) obj;

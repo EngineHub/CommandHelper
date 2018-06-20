@@ -84,7 +84,7 @@ public class UpgradeLog {
 		FileUtil.write(newJSON, logFile);
 	}
 
-	public static abstract class UpgradeTask implements Runnable {
+	public abstract static class UpgradeTask implements Runnable {
 
 		UpgradeLog that = null;
 

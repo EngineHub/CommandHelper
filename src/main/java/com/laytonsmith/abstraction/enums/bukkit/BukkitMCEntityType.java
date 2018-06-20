@@ -85,7 +85,7 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 	public static BukkitMCEntityType valueOfConcrete(String test) {
 		try {
 			return valueOfConcrete(EntityType.valueOf(test));
-		} catch(IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			return (BukkitMCEntityType) NULL;
 		}
 	}
@@ -98,7 +98,7 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 		}
 		try {
 			return EntityType.valueOf(v.name());
-		} catch(IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			return null;
 		}
 	}
@@ -161,7 +161,7 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 				}
 				try {
 					wrapperClass = (Class<? extends MCEntity>) Class.forName(name);
-				} catch(ClassNotFoundException e) {
+				} catch (ClassNotFoundException e) {
 					String url = "https://github.com/sk89q/CommandHelper/tree/master/src/main/java/"
 							+ "com/laytonsmith/abstraction/bukkit/entities";
 					CHLog.GetLogger().d(CHLog.Tags.RUNTIME, "While trying to find the correct entity class for "

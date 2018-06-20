@@ -342,11 +342,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		}
 		try {
 			p.sendTitle(title, subtitle, fadein, stay, fadeout);
-		} catch(NoSuchMethodError ex1) {
+		} catch (NoSuchMethodError ex1) {
 			// Probably prior to 1.11, try the deprecated method
 			try {
 				p.sendTitle(title, subtitle);
-			} catch(NoSuchMethodError ex2) {
+			} catch (NoSuchMethodError ex2) {
 				// Probably prior to 1.8.7, no title API
 			}
 		}
@@ -405,7 +405,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 				return;
 			}
 			p.setSpectatorTarget((Entity) entity.getHandle());
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably 1.8.6 or prior
 		}
 	}
@@ -414,7 +414,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public MCEntity getSpectatorTarget() {
 		try {
 			return BukkitConvertor.BukkitGetCorrectEntity(p.getSpectatorTarget());
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably 1.8.6 or prior
 			return null;
 		}
@@ -443,7 +443,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			Class nmsGameProfile;
 			try {
 				/*com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("com.mojang.authlib.GameProfile");
-			} catch(ClassNotFoundException eee) {
+			} catch (ClassNotFoundException eee) {
 
 
 				// Prior to 1.8
@@ -453,7 +453,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			Object opListEntry;
 			try {
 				opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class, boolean.class}, new Object[]{gameProfile, 4, false});
-			} catch(ReflectionUtils.ReflectionException e) {
+			} catch (ReflectionUtils.ReflectionException e) {
 				// Prior to 1.8.6
 				opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class}, new Object[]{gameProfile, 4});
 			}
@@ -538,7 +538,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		try {
 			p.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
 					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
-		} catch(NoClassDefFoundError ex) {
+		} catch (NoClassDefFoundError ex) {
 			// probably prior to 1.11, ignore category
 			playSound(l, sound, volume, pitch);
 		}
@@ -549,7 +549,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		try {
 			p.playSound((Location) l.getHandle(), sound,
 					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
-		} catch(NoClassDefFoundError ex) {
+		} catch (NoClassDefFoundError ex) {
 			// probably prior to 1.11, ignore category
 			playSound(l, sound, volume, pitch);
 		}
@@ -559,7 +559,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void stopSound(MCSound sound) {
 		try {
 			p.stopSound(((BukkitMCSound) sound).getConcrete());
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// probably prior to 1.10
 		}
 	}
@@ -568,7 +568,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void stopSound(String sound) {
 		try {
 			p.stopSound(sound);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// probably prior to 1.10
 		}
 	}
@@ -578,7 +578,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		try {
 			p.stopSound(((BukkitMCSound) sound).getConcrete(),
 					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category));
-		} catch(NoClassDefFoundError ex) {
+		} catch (NoClassDefFoundError ex) {
 			// probably prior to 1.11, ignore category
 			stopSound(sound);
 		}
@@ -588,7 +588,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void stopSound(String sound, MCSoundCategory category) {
 		try {
 			p.stopSound(sound, BukkitMCSoundCategory.getConvertor().getConcreteEnum(category));
-		} catch(NoClassDefFoundError ex) {
+		} catch (NoClassDefFoundError ex) {
 			// probably prior to 1.11, ignore category
 			stopSound(sound);
 		}
@@ -604,7 +604,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			} else {
 				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);
 			}
-		} catch(NoClassDefFoundError ex) {
+		} catch (NoClassDefFoundError ex) {
 			// probably prior to 1.9
 		}
 	}

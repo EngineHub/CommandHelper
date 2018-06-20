@@ -75,17 +75,17 @@ public class ExecutionQueue {
 							public Object call() throws Exception {
 								try {
 									c.execute();
-								} catch(ConfigRuntimeException ex) {
+								} catch (ConfigRuntimeException ex) {
 									ConfigRuntimeException.HandleUncaughtException(ex, environment);
-								} catch(ProgramFlowManipulationException ex) {
+								} catch (ProgramFlowManipulationException ex) {
 									// Ignored
 								}
 								return null;
 							}
 						});
-					} catch(InterruptedException ex) {
+					} catch (InterruptedException ex) {
 						// ignore
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						Logger.getLogger(ExecutionQueue.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
@@ -157,17 +157,17 @@ public class ExecutionQueue {
 							public Object call() throws Exception {
 								try {
 									c.execute();
-								} catch(ConfigRuntimeException ex) {
+								} catch (ConfigRuntimeException ex) {
 									ConfigRuntimeException.HandleUncaughtException(ex, environment);
-								} catch(ProgramFlowManipulationException ex) {
+								} catch (ProgramFlowManipulationException ex) {
 									// Ignored
 								}
 								return null;
 							}
 						});
-					} catch(InterruptedException ex) {
+					} catch (InterruptedException ex) {
 						// ignore
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						Logger.getLogger(ExecutionQueue.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
@@ -430,7 +430,7 @@ public class ExecutionQueue {
 				public void run() {
 					try {
 						Thread.sleep(delay);
-					} catch(InterruptedException ex) {
+					} catch (InterruptedException ex) {
 						//
 					}
 				}
@@ -492,7 +492,7 @@ public class ExecutionQueue {
 				public void run() {
 					try {
 						Thread.sleep(delay);
-					} catch(InterruptedException ex) {
+					} catch (InterruptedException ex) {
 						//
 					}
 				}

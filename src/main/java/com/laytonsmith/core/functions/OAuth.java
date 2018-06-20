@@ -164,21 +164,21 @@ public class OAuth {
 							accessToken = tokenJson.get("access_token", t).val();
 							storeAccessToken(env, clientId, new AccessToken(accessToken, Static.getInt32(tokenJson.get("expires_in", t), t) * 1000));
 						}
-					} catch(InterruptedException ex) {
+					} catch (InterruptedException ex) {
 						return CNull.NULL;
-					} catch(OAuthSystemException ex) {
+					} catch (OAuthSystemException ex) {
 						// TODO
 						throw new CREOAuthException(ex.getMessage(), t, ex);
-					} catch(MalformedURLException ex) {
+					} catch (MalformedURLException ex) {
 						throw new CREFormatException(ex.getMessage(), t, ex);
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						throw new CREIOException(ex.getMessage(), t, ex);
 					}
 				}
 				return new CString(accessToken, t);
-			} catch(DataSourceException ex) {
+			} catch (DataSourceException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
-			} catch(ReadOnlyException ex) {
+			} catch (ReadOnlyException ex) {
 				throw new CREReadOnlyException(ex.getMessage(), t, ex);
 			}
 		}
@@ -275,7 +275,7 @@ public class OAuth {
 		private static String formatValue(String value) {
 			try {
 				return Construct.json_encode(new CString(value, Target.UNKNOWN), Target.UNKNOWN);
-			} catch(MarshalException ex) {
+			} catch (MarshalException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -283,7 +283,7 @@ public class OAuth {
 		private static String unformatValue(String pnVersion) {
 			try {
 				return Construct.json_decode(pnVersion, Target.UNKNOWN).val();
-			} catch(MarshalException ex) {
+			} catch (MarshalException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -352,7 +352,7 @@ public class OAuth {
 						synchronized(ret) {
 							ret.notifyAll();
 						}
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						ex.printStackTrace();
 					}
 				}
@@ -429,11 +429,11 @@ public class OAuth {
 				for(String[] key : list.keySet()) {
 					pn.clearKey(dm, key);
 				}
-			} catch(DataSourceException | IOException ex) {
+			} catch (DataSourceException | IOException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CREFormatException(ex.getMessage(), t, ex);
-			} catch(ReadOnlyException ex) {
+			} catch (ReadOnlyException ex) {
 				throw new CREReadOnlyException(ex.getMessage(), t, ex);
 			}
 			return CVoid.VOID;

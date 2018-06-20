@@ -622,13 +622,13 @@ public class InventoryEvents {
 
 				if(key.equalsIgnoreCase("expcosts")) {
 					if(value instanceof CArray) {
-						CArray CexpCosts = (CArray) value;
-						if(!CexpCosts.inAssociativeMode()) {
-							int[] ExpCosts = e.getExpLevelCostsOffered();
+						CArray cExpCosts = (CArray) value;
+						if(!cExpCosts.inAssociativeMode()) {
+							int[] expCosts = e.getExpLevelCostsOffered();
 
 							for(int i = 0; i <= 2; i++) {
-								if(CexpCosts.get(i, value.getTarget()) instanceof CInt) {
-									ExpCosts[i] = (int) ((CInt) CexpCosts.get(i, value.getTarget())).getInt();
+								if(cExpCosts.get(i, value.getTarget()) instanceof CInt) {
+									expCosts[i] = (int) ((CInt) cExpCosts.get(i, value.getTarget())).getInt();
 								} else {
 									throw new CREFormatException("Expected an intger at index " + i + "!", value.getTarget());
 								}

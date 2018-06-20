@@ -103,7 +103,7 @@ public final class CookieJar {
 			}
 			try {
 				b.append(URLEncoder.encode(cookie.getName(), "UTF-8")).append("=").append(cookie.getValue());
-			} catch(UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				Logger.getLogger(WebUtility.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}

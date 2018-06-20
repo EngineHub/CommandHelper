@@ -38,7 +38,7 @@ public class Clipboard {
 	static {
 		try {
 			clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-		} catch(HeadlessException ex) {
+		} catch (HeadlessException ex) {
 			clipboard = null;
 		}
 	}
@@ -70,10 +70,10 @@ public class Clipboard {
 				try {
 					String data = (String) tr.getTransferData(DataFlavor.stringFlavor);
 					return new CString(data, t);
-				} catch(UnsupportedFlavorException ex) {
+				} catch (UnsupportedFlavorException ex) {
 					// Can't happen
 					throw new RuntimeException(ex);
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					throw new CREIOException(ex.getMessage(), t, ex);
 				}
 			} else {

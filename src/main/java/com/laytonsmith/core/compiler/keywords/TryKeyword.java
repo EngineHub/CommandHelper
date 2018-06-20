@@ -26,11 +26,11 @@ public class TryKeyword extends Keyword {
 		 *
 		 * The simplest case: try { } catch { } In this case, both try and catch will be CKeywords.
 		 *
-		 * A case with a specific exception type. In this case, catch will be a CFunction try { } catch(ExceptionType
+		 * A case with a specific exception type. In this case, catch will be a CFunction try { } catch (ExceptionType
 		 *
 		 * @e) { }
 		 *
-		 * A multi catch try { } catch(ExceptionType1 @e) { } catch(ExceptionType2 @e) { } As many blocks as desired can
+		 * A multi catch try { } catch (ExceptionType1 @e) { } catch (ExceptionType2 @e) { } As many blocks as desired can
 		 * be added here.
 		 *
 		 * TODO: Consider in the future allowing just try { }
@@ -46,8 +46,8 @@ public class TryKeyword extends Keyword {
 		// Otherwise it's not, and we can continue on, assuming keyword usage.
 		this.validateCodeBlock(list.get(keywordPosition + 1), "Expecting braces after try keyword");
 
-		ParseTree complex_try = new ParseTree(new CFunction(COMPLEX_TRY, list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
-		complex_try.addChild(getArgumentOrNull(list.get(keywordPosition + 1)));
+		ParseTree complexTry = new ParseTree(new CFunction(COMPLEX_TRY, list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
+		complexTry.addChild(getArgumentOrNull(list.get(keywordPosition + 1)));
 		// Remove the keyword and the try block
 		list.remove(keywordPosition);
 		list.remove(keywordPosition);
@@ -56,7 +56,7 @@ public class TryKeyword extends Keyword {
 		// if we want to remove it in the future, we can do so by removing this code block.
 		{
 			if(!(list.size() > keywordPosition && (nodeIsCatchKeyword(list.get(keywordPosition)) || nodeIsFinallyKeyword(list.get(keywordPosition))))) {
-				throw new ConfigCompileException("Expecting \"catch\" or \"finally\" keyword to follow try, but none found", complex_try.getTarget());
+				throw new ConfigCompileException("Expecting \"catch\" or \"finally\" keyword to follow try, but none found", complexTry.getTarget());
 			}
 		}
 
@@ -72,14 +72,14 @@ public class TryKeyword extends Keyword {
 				throw new ConfigCompileException("catch must be followed by a code block, but none was found", list.get(i).getTarget());
 			}
 			if(list.get(i).getData() instanceof CFunction) {
-				// We have something like catch(Exception @e) { }
+				// We have something like catch (Exception @e) { }
 				ParseTree n = list.get(i);
 				if(n.getChildren().size() != 1) {
 					throw new ConfigCompileException("Unexpected parameters passed to the \"catch\" clause."
 							+ " Exactly one argument must be passed.", n.getTarget());
 				}
-				complex_try.addChild(n.getChildAt(0));
-				complex_try.addChild(getArgumentOrNull(list.get(i + 1)));
+				complexTry.addChild(n.getChildAt(0));
+				complexTry.addChild(getArgumentOrNull(list.get(i + 1)));
 			} else {
 				// We have something like finally { }. In this case, this must be the final
 				// clause statement, and we need to verify that there isn't a catch following it.
@@ -90,7 +90,7 @@ public class TryKeyword extends Keyword {
 					}
 				}
 				// Passed the inspection.
-				complex_try.addChild(getArgumentOrNull(list.get(i + 1)));
+				complexTry.addChild(getArgumentOrNull(list.get(i + 1)));
 			}
 			// remove the catch keyword and the code block
 			list.remove(i);
@@ -99,7 +99,7 @@ public class TryKeyword extends Keyword {
 		}
 
 		// Set the new function into place
-		list.add(keywordPosition, complex_try);
+		list.add(keywordPosition, complexTry);
 
 		return keywordPosition;
 	}

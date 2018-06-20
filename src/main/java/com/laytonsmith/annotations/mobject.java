@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@SuppressWarnings("checkstyle:typename") // Fixing this violation might break dependents.
 public @interface mobject {
 
 	/**

@@ -45,16 +45,6 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 	}
 
 	@Override
-	public final Construct get(String index, Target t) {
-		try {
-			int i = Integer.parseInt(index);
-			return get(i, t);
-		} catch(NumberFormatException e) {
-			throw new CREFormatException("Expecting numerical index, but recieved " + index, t);
-		}
-	}
-
-	@Override
 	public long size() {
 		return val().length();
 	}
@@ -71,7 +61,7 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 		}
 		try {
 			return new CString(this.val().substring(begin, end), t);
-		} catch(StringIndexOutOfBoundsException e) {
+		} catch (StringIndexOutOfBoundsException e) {
 			throw new CRERangeException("String bounds out of range. Indices only go up to " + (this.val().length() - 1), t);
 		}
 	}
@@ -85,8 +75,24 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 	public Construct get(int index, Target t) throws ConfigRuntimeException {
 		try {
 			return new CString(this.val().charAt(index), t);
-		} catch(StringIndexOutOfBoundsException e) {
+		} catch (StringIndexOutOfBoundsException e) {
 			throw new CRERangeException("No character at index " + index + ". Indices only go up to " + (this.val().length() - 1), t);
+		}
+	}
+
+	@Override
+	public final Construct get(Construct index, Target t) throws ConfigRuntimeException {
+		int i = Static.getInt32(index, t);
+		return get(i, t);
+	}
+
+	@Override
+	public final Construct get(String index, Target t) {
+		try {
+			int i = Integer.parseInt(index);
+			return get(i, t);
+		} catch (NumberFormatException e) {
+			throw new CREFormatException("Expecting numerical index, but recieved " + index, t);
 		}
 	}
 
@@ -98,12 +104,6 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 	@Override
 	public Set<Construct> keySet() {
 		throw new CREIndexOverflowException("Not supported.", Target.UNKNOWN);
-	}
-
-	@Override
-	public final Construct get(Construct index, Target t) throws ConfigRuntimeException {
-		int i = Static.getInt32(index, t);
-		return get(i, t);
 	}
 
 	@Override

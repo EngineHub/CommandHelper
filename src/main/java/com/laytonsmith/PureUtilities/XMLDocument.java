@@ -56,7 +56,7 @@ public class XMLDocument {
 			XPathFactory xpf = XPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI,
 					"com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl", XMLDocument.class.getClassLoader());
 			xpath = xpf.newXPath();
-		} catch(ParserConfigurationException | XPathFactoryConfigurationException ex) {
+		} catch (ParserConfigurationException | XPathFactoryConfigurationException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -71,7 +71,7 @@ public class XMLDocument {
 		this();
 		try {
 			doc = docBuilder.parse(new ByteArrayInputStream(document.getBytes(encoding)));
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -86,7 +86,7 @@ public class XMLDocument {
 		this();
 		try {
 			doc = docBuilder.parse(new ByteArrayInputStream(document.getBytes("UTF-8")));
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -177,7 +177,7 @@ public class XMLDocument {
 					}
 				} else {
 					//It's an array
-					if(!(countChildren(parent) + 1 >= position)) {
+					if(!(countNodeChildren(parent) + 1 >= position)) {
 						//If /root/node[1] exists, but they try to create /root/node[3], this exception is thrown
 						throw new XPathExpressionException("Will not tolerate a jump in node numbers, will only create the next node in sequence.");
 					}
@@ -190,7 +190,7 @@ public class XMLDocument {
 		setDirty();
 	}
 
-	private int countChildren(Element e) {
+	private int countNodeChildren(Element e) {
 		Node child = e.getFirstChild();
 		if(child == null) {
 			return 0;
@@ -420,7 +420,7 @@ public class XMLDocument {
 					uglyRender = writer.toString();
 					uglyDirty = false;
 				}
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
 		}

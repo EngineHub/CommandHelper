@@ -21,9 +21,11 @@ public final class EventBuilder {
 	private EventBuilder() {
 	}
 
-	private static final Map<Class<BindableEvent>, Method> methods = new HashMap<Class<BindableEvent>, Method>();
-	private static final Map<Class<BindableEvent>, Constructor<? extends BindableEvent>> constructors = new HashMap<Class<BindableEvent>, Constructor<? extends BindableEvent>>();
-	private static final Map<Class<BindableEvent>, Class<BindableEvent>> eventImplementations = new HashMap<Class<BindableEvent>, Class<BindableEvent>>();
+	private static final Map<Class<BindableEvent>, Method> METHODS = new HashMap<Class<BindableEvent>, Method>();
+	private static final Map<Class<BindableEvent>, Constructor<? extends BindableEvent>> CONSTRUCTORS =
+			new HashMap<Class<BindableEvent>, Constructor<? extends BindableEvent>>();
+	private static final Map<Class<BindableEvent>, Class<BindableEvent>> EVENT_IMPLEMENTATIONS =
+			new HashMap<Class<BindableEvent>, Class<BindableEvent>>();
 
 	static {
 		//First, we need to pull all the event implementors
@@ -38,7 +40,7 @@ public final class EventBuilder {
 							break;
 						}
 					}
-					eventImplementations.put(cinterface, c);
+					EVENT_IMPLEMENTATIONS.put(cinterface, c);
 					//Also, warm it up
 					warmup(cinterface);
 				}
@@ -52,8 +54,8 @@ public final class EventBuilder {
 	 * @param clazz
 	 */
 	private static void warmup(Class<? extends BindableEvent> clazz) {
-		if(!methods.containsKey((Class<BindableEvent>) clazz)) {
-			Class implementor = eventImplementations.get((Class<BindableEvent>) clazz);
+		if(!METHODS.containsKey((Class<BindableEvent>) clazz)) {
+			Class implementor = EVENT_IMPLEMENTATIONS.get((Class<BindableEvent>) clazz);
 			Method method = null;
 			for(Method m : implementor.getMethods()) {
 				if(m.getName().equals("_instantiate") && (m.getModifiers() & Modifier.STATIC) != 0) {
@@ -67,20 +69,20 @@ public final class EventBuilder {
 						+ " if an attempt is made. Did you forget to add"
 						+ " public static <Event> _instantiate(...) to " + clazz.getSimpleName() + "?");
 			}
-			methods.put((Class<BindableEvent>) clazz, method);
+			METHODS.put((Class<BindableEvent>) clazz, method);
 		}
 	}
 
 	public static <T extends BindableEvent> T instantiate(Class<? extends BindableEvent> clazz, Object... params) {
 		try {
-			if(!methods.containsKey((Class<BindableEvent>) clazz)) {
+			if(!METHODS.containsKey((Class<BindableEvent>) clazz)) {
 				warmup(clazz);
 			}
-			Object o = methods.get((Class<BindableEvent>) clazz).invoke(null, params);
+			Object o = METHODS.get((Class<BindableEvent>) clazz).invoke(null, params);
 			//Now, we have an instance of the underlying object, which the instance
 			//of the event BindableEvent should know how to handle in a constructor.
-			if(!constructors.containsKey((Class<BindableEvent>) clazz)) {
-				Class bindableEvent = eventImplementations.get((Class<BindableEvent>) clazz);
+			if(!CONSTRUCTORS.containsKey((Class<BindableEvent>) clazz)) {
+				Class bindableEvent = EVENT_IMPLEMENTATIONS.get((Class<BindableEvent>) clazz);
 				Constructor constructor = null;
 				for(Constructor c : bindableEvent.getConstructors()) {
 					if(c.getParameterTypes().length == 1) {
@@ -97,14 +99,14 @@ public final class EventBuilder {
 							+ " public " + bindableEvent.getClass().getSimpleName() + "(" + o.getClass().getSimpleName() + " event)."
 							+ " Please notify the plugin author of this error.", Target.UNKNOWN);
 				}
-				constructors.put((Class<BindableEvent>) clazz, constructor);
+				CONSTRUCTORS.put((Class<BindableEvent>) clazz, constructor);
 			}
 			//Construct a new instance, then return it.
-			Constructor constructor = constructors.get((Class<BindableEvent>) clazz);
+			Constructor constructor = CONSTRUCTORS.get((Class<BindableEvent>) clazz);
 			BindableEvent be = (BindableEvent) constructor.newInstance(o);
 			return (T) be;
 
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;

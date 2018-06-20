@@ -44,7 +44,7 @@ public class FederationCommunication {
 			socketWriter.write(encode(line.getBytes("UTF-8")));
 			socketWriter.write("\n".getBytes("UTF-8"));
 			socketWriter.flush();
-		} catch(UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -73,7 +73,7 @@ public class FederationCommunication {
 			}
 			ba = decode(ba);
 			return new String(ba, "UTF-8");
-		} catch(UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -153,7 +153,7 @@ public class FederationCommunication {
 				ba[i] = bytes.get(i);
 			}
 			return new String(ba, "UTF-8");
-		} catch(UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}

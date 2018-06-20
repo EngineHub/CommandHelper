@@ -34,7 +34,7 @@ public class BukkitMCBoat extends BukkitMCVehicle implements MCBoat {
 	public void setWoodType(MCTreeSpecies type) {
 		try {
 			b.setWoodType(BukkitMCTreeSpecies.getConvertor().getConcreteEnum(type));
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// probably prior to 1.9
 		}
 	}

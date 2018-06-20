@@ -88,7 +88,7 @@ import java.util.regex.Pattern;
  *
  * @author stack
  */
-public class PublicSuffix {
+public final class PublicSuffix {
 
 	private final SubdomainNode root = new SubdomainNode(false, false);
 	private static final String WILDCARD = "*";
@@ -107,7 +107,7 @@ public class PublicSuffix {
 		if(defaultInstance == null) {
 			try {
 				defaultInstance = new PublicSuffix();
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
 		}

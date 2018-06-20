@@ -56,7 +56,7 @@ public final class Profiler {
 			new Preference("write-to-screen", "false", Preferences.Type.BOOLEAN, "If true, will write results out to screen."),
 			new Preference("profile-log-threshold", "0.005", Preferences.Type.DOUBLE, "If a profile point took less than this amount of time (in ms) to run, it won't be logged. This is good for reducing data blindness"
 			+ " caused by too much data being displayed. Normally you only care about things that took longer than a certain amount, not things that took less than a certain amount. Setting this to 0"
-			+ " will trigger everything."),}));
+			+ " will trigger everything.")}));
 		Preferences prefs = new Preferences("CommandHelper", Static.getLogger(), defaults, "These settings control the integrated profiler");
 		prefs.init(initFile);
 		return prefs;
@@ -75,6 +75,7 @@ public final class Profiler {
 	private double logThreshold;
 	//To prevent file fights across threads, we only want one outputQueue.
 	private static ExecutionQueue outputQueue;
+	@SuppressWarnings("checkstyle:membername") // Allow custom name since it more clearly describes the object.
 	private final ProfilePoint NULL_OP = new ProfilePoint("NULL_OP", this);
 
 	private Profiler() {
@@ -147,7 +148,7 @@ public final class Profiler {
 		operations.put(operationName, System.nanoTime());
 	}
 
-	private final static Map<Long, String> indents = new TreeMap<Long, String>();
+	private static final Map<Long, String> INDENTS = new TreeMap<Long, String>();
 
 	static {
 		//Let's just warm it up some
@@ -157,16 +158,16 @@ public final class Profiler {
 	}
 
 	private static String getIndent(long count) {
-		if(!indents.containsKey(count)) {
+		if(!INDENTS.containsKey(count)) {
 			StringBuilder b = new StringBuilder();
 			for(int i = 0; i < count; i++) {
 				b.append(" ");
 			}
-			indents.put(count, b.toString());
+			INDENTS.put(count, b.toString());
 		}
-		return indents.get(count);
+		return INDENTS.get(count);
 	}
-	private final static String gcString = " (however, the garbage collector was run during this profile point)";
+	private static final String GC_STRING = " (however, the garbage collector was run during this profile point)";
 
 	public void stop(ProfilePoint operationName) {
 		//This line should ALWAYS be first in the function
@@ -195,7 +196,7 @@ public final class Profiler {
 			}
 			String operationMessage = operationName.getMessage() != null ? " Message: " + operationName.getMessage() : "";
 			doLog("[" + stringTime + "][Lvl:" + (operationName.getGranularity().getLevel()) + "]:" + getIndent(queuedProfilePoints)
-					+ operationName.toString() + operationMessage + (operationName.wasGCd() ? gcString : ""));
+					+ operationName.toString() + operationMessage + (operationName.wasGCd() ? GC_STRING : ""));
 		}
 		queuedProfilePoints--;
 	}
@@ -227,7 +228,7 @@ public final class Profiler {
 								file, //File to output to
 								FileUtil.APPEND, //We want to append
 								true); //Create it for us if it doesn't exist
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						StreamUtils.GetSystemErr().println("While trying to write to the profiler log file (" + file.getAbsolutePath() + "), recieved an IOException: " + ex.getMessage());
 					}
 				}

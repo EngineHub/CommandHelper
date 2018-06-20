@@ -78,7 +78,7 @@ public final class Marquee {
 
 						Thread.sleep(delay);
 					}
-				} catch(Exception ex) { //We want an exception to kill us, but we also want to rethrow it as a runtime exception.
+				} catch (Exception ex) { //We want an exception to kill us, but we also want to rethrow it as a runtime exception.
 					throw new RuntimeException(ex);
 				}
 			}

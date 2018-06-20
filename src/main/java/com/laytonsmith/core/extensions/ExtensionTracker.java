@@ -110,7 +110,7 @@ public class ExtensionTracker {
 		for(api.Platforms platform : platforms) {
 			try {
 				functions.get(platform).put(f.getName(), f);
-			} catch(UnsupportedOperationException e) {
+			} catch (UnsupportedOperationException e) {
 				//This function isn't done yet, and during production this is a serious problem,
 				//but it will be caught when we test all the functions, so for now just ignore it,
 				//since this function is called during initial initialization
@@ -148,7 +148,7 @@ public class ExtensionTracker {
 				Constructor mixinConstructor = mixinClass.getConstructor(AbstractEvent.class);
 				EventMixinInterface mixin = (EventMixinInterface) mixinConstructor.newInstance(e);
 				ae.setAbstractEventMixin(mixin);
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				//This is a serious problem, and it should kill the plugin, for fast failure detection.
 				throw new Error("Could not properly instantiate the mixin class. "
 						+ "The constructor with the signature \"public " + mixinClass.getSimpleName() + "(AbstractEvent e)\" is missing"

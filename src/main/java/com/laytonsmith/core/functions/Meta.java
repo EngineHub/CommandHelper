@@ -290,7 +290,7 @@ public class Meta {
 			MCPlayer p = (MCPlayer) player;
 			try {
 				p.setTempOp(value);
-			} catch(Exception e) {
+			} catch (Exception e) {
 				if(Prefs.UseSudoFallback()) {
 					p.setOp(value);
 				} else {
@@ -354,7 +354,7 @@ public class Meta {
 			}
 			try {
 				Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new CREPluginInternalException("While running the command: \"" + cmd + "\""
 						+ " the plugin threw an unexpected exception (turn on debug mode to see the full"
 						+ " stacktrace): " + ex.getMessage() + "\n\nThis is not a bug in " + Implementation.GetServerType().getBranding()
@@ -665,7 +665,7 @@ public class Meta {
 			String ret;
 			try {
 				ret = Static.getServer().dispatchAndCaptureCommand(operator, cmd);
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new CREPluginInternalException(ex.getMessage(), t, ex);
 			}
 
@@ -815,9 +815,17 @@ public class Meta {
 	@api(environments = CommandHelperEnvironment.class)
 	public static class run_cmd extends AbstractFunction {
 
-		private final static run run = new run();
-		private final static call_alias call_alias = new call_alias();
-		private final static is_alias is_alias = new is_alias();
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
+		private static final run run = new run();
+
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
+		private static final call_alias call_alias = new call_alias();
+
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
+		private static final is_alias is_alias = new is_alias();
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1007,7 +1015,7 @@ public class Meta {
 				String jar = ClassDiscovery.GetClassContainer(Meta.class).toString();
 				jar = jar.replaceFirst("file:", "");
 				jf = new JarFile(jar);
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				return CNull.NULL;
 			}
 			ZipEntry manifest = jf.getEntry("META-INF/MANIFEST.MF");

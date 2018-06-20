@@ -310,12 +310,12 @@ public class Echoes {
 	public static class color extends AbstractFunction implements Optimizable {
 
 		private final Map<String, CString> colors = new TreeMap<>();
-		private static final String symbols = "0123456789abcdefABCDEFmMnNoOlLkKrR";
+		private static final String SYMBOLS = "0123456789abcdefABCDEFmMnNoOlLkKrR";
 		public static final Set<Character> COLOR_SYMBOLS;
 
 		static {
 			Set<Character> temp = new TreeSet<>();
-			for(Character c : symbols.toCharArray()) {
+			for(Character c : SYMBOLS.toCharArray()) {
 				temp.add(c);
 			}
 			COLOR_SYMBOLS = Collections.unmodifiableSet(temp);
@@ -343,7 +343,7 @@ public class Echoes {
 			}
 			try {
 				color = MCChatColor.valueOf(val.toUpperCase()).toString();
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 			}
 			String a = val.toLowerCase();
 			switch(a) {
@@ -406,7 +406,7 @@ public class Echoes {
 						cc = MCChatColor.WHITE;
 					}
 					color = cc.toString();
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 				}
 			}
 
@@ -654,7 +654,7 @@ public class Echoes {
 						for(Construct p : array.asList()) {
 							try {
 								Static.GetPlayer(p, t).sendMessage(args[0].val());
-							} catch(CREPlayerOfflineException cre) {
+							} catch (CREPlayerOfflineException cre) {
 								// ignore offline players
 							}
 						}
@@ -789,13 +789,13 @@ public class Echoes {
 								i += (sl * 2) - 1;
 								continue;
 							}
-						} catch(IndexOutOfBoundsException e) {
+						} catch (IndexOutOfBoundsException e) {
 							//Ignored, it just means there aren't enough characters to do a second subsequence
 						}
 						Character c;
 						try {
 							c = stext.charAt(i + sl);
-						} catch(IndexOutOfBoundsException e) {
+						} catch (IndexOutOfBoundsException e) {
 							b.append(stext.charAt(i + sl - 1));
 							break;
 						}

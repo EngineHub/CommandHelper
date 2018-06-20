@@ -37,7 +37,7 @@ public class ClassInfoTest {
 					if(m.getInterfaces() != null && m.getInterfaces().length > 0) {
 						failures.add(m.getClass().getName() + " is an interface, but getInterfaces() has returned a non-zero list");
 					}
-				} catch(UnsupportedOperationException ex) {
+				} catch (UnsupportedOperationException ex) {
 					failures.add(m.getClass().getName() + " cannot throw an exception for getInterfaces()");
 				}
 			}

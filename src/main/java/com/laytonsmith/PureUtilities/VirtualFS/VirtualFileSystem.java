@@ -69,12 +69,12 @@ public class VirtualFileSystem {
 	protected final File root;
 	public final File symlinkFile;
 	private final BigInteger quota = new BigInteger("-1");
-	private BigInteger FSSize = new BigInteger("0");
+	private BigInteger fsSize = new BigInteger("0");
 	private Thread fsSizeThread;
 	private final List<FileSystemLayer> currentTmpFiles = new ArrayList<FileSystemLayer>();
 	private final Map<VirtualGlob, URI> symlinks = new HashMap<VirtualGlob, URI>();
 
-	private static final Map<String, Constructor> FSLProviders = new HashMap<String, Constructor>();
+	private static final Map<String, Constructor> FSL_PROVIDERS = new HashMap<String, Constructor>();
 
 	static {
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(VirtualFileSystem.class));
@@ -84,11 +84,11 @@ public class VirtualFileSystem {
 				Class<?> clazz = clazzMirror.loadClass();
 				Constructor<?> constructor = clazz.getConstructor(VirtualFile.class, VirtualFileSystem.class, String.class);
 				FileSystemLayer.fslayer annotation = clazz.getAnnotation(FileSystemLayer.fslayer.class);
-				FSLProviders.put(annotation.value(), constructor);
-			} catch(NoSuchMethodException ex) {
+				FSL_PROVIDERS.put(annotation.value(), constructor);
+			} catch (NoSuchMethodException ex) {
 				throw new Error(clazzMirror.getClassName() + " must implement a constructor with the signature: public " + clazzMirror.getSimpleName() + "("
 						+ VirtualFile.class.getSimpleName() + ", " + VirtualFileSystem.class.getSimpleName() + ", " + String.class.getSimpleName() + ")");
-			} catch(SecurityException ex) {
+			} catch (SecurityException ex) {
 				Logger.getLogger(VirtualFileSystem.class.getName()).log(Level.SEVERE, "Security exception while loading a class. Symlinks may not work.", ex);
 			}
 		}
@@ -118,10 +118,10 @@ public class VirtualFileSystem {
 				public void run() {
 					while(true) {
 						try {
-							FSSize = FileUtils.sizeOfDirectoryAsBigInteger(root);
+							fsSize = FileUtils.sizeOfDirectoryAsBigInteger(root);
 							//Sleep for a minute before running again.
 							Thread.sleep(TimeConversionUtil.inMilliseconds(1, TimeConversionUtil.TimeUnit.MINUTE));
-						} catch(InterruptedException ex) {
+						} catch (InterruptedException ex) {
 							Logger.getLogger(VirtualFileSystem.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
@@ -197,11 +197,11 @@ public class VirtualFileSystem {
 			provider = uri.getScheme();
 			symlink = uri.getSchemeSpecificPart();
 		}
-		if(FSLProviders.containsKey(provider)) {
+		if(FSL_PROVIDERS.containsKey(provider)) {
 			FileSystemLayer fsl;
 			try {
-				fsl = (FileSystemLayer) FSLProviders.get(provider).newInstance(virtual, this, symlink);
-			} catch(Exception ex) {
+				fsl = (FileSystemLayer) FSL_PROVIDERS.get(provider).newInstance(virtual, this, symlink);
+			} catch (Exception ex) {
 				//This shouldn't happen ever, minus a programming mistake?
 				throw new Error(ex);
 			}
@@ -222,21 +222,7 @@ public class VirtualFileSystem {
 	public byte[] read(VirtualFile file) {
 		try {
 			return StreamUtils.GetBytes(readAsStream(file));
-		} catch(IOException ex) {
-			throw new RuntimeException(ex);
-		}
-	}
-
-	/**
-	 * Writes an InputStream to a file. Requires write permission.
-	 *
-	 * @param file
-	 * @param data
-	 */
-	public void write(VirtualFile file, InputStream data) {
-		try {
-			write(file, StreamUtils.GetBytes(data));
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -263,6 +249,20 @@ public class VirtualFileSystem {
 		assertWritePermission(file);
 		FileSystemLayer real = normalize(file);
 		real.writeByteArray(bytes);
+	}
+
+	/**
+	 * Writes an InputStream to a file. Requires write permission.
+	 *
+	 * @param file
+	 * @param data
+	 */
+	public void write(VirtualFile file, InputStream data) {
+		try {
+			write(file, StreamUtils.GetBytes(data));
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
 	}
 
 	/**

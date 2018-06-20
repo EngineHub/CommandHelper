@@ -19,6 +19,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	protected static Map<String, MCEntityType> mappings;
 	protected static Map<MCVanillaEntityType, MCEntityType> vanilla;
 
+	@SuppressWarnings("checkstyle:staticvariablename") // Fixing this violation might break dependents.
 	public static MCEntityType NULL = null;
 
 	protected Class<? extends MCEntity> wrapperClass;

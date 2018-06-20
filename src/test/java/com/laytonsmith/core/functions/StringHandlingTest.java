@@ -154,28 +154,28 @@ public class StringHandlingTest {
 		try {
 			SRun("lsprintf('en_US', '%d')", null);
 			fail("Expected lsprintf('en_US', '%d') to throw a compile exception");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//pass
 		}
 
 		try {
 			SRun("lsprintf('en_US', '%d', 1, 1)", null);
 			fail("Expected lsprintf('en_US', '%d') to throw a compile exception");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//pass
 		}
 
 		try {
 			SRun("lsprintf('en_US', '%c', 'toobig')", null);
 			fail("Expected lsprintf('en_US', '%c', 'toobig') to throw a compile exception");
-		} catch(ConfigCompileException | ConfigCompileGroupException e) {
+		} catch (ConfigCompileException | ConfigCompileGroupException e) {
 			//pass
 		}
 
 		try {
 			SRun("lsprintf('en_US', '%0.3f', 1.1)", null);
 			fail("Expected lsprintf('en_US', '%0.3f', 1.1) to throw a compile exception");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//pass
 		}
 
@@ -199,28 +199,28 @@ public class StringHandlingTest {
 		try {
 			SRun("sprintf('%d')", null);
 			fail("Expected sprintf('%d') to throw a compile exception");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//pass
 		}
 
 		try {
 			SRun("sprintf('%d', 1, 1)", null);
 			fail("Expected sprintf('%d') to throw a compile exception");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//pass
 		}
 
 		try {
 			SRun("sprintf('%c', 'toobig')", null);
 			fail("Expected sprintf('%c', 'toobig') to throw a compile exception");
-		} catch(ConfigCompileException | ConfigCompileGroupException e) {
+		} catch (ConfigCompileException | ConfigCompileGroupException e) {
 			//pass
 		}
 
 		try {
 			SRun("sprintf('%0.3f', 1.1)", null);
 			fail("Expected sprintf('%0.3f', 1.1) to throw a compile exception");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//pass
 		}
 
@@ -256,42 +256,42 @@ public class StringHandlingTest {
 		try {
 			SRun("char_is_uppercase('magic')", null);
 			fail("Expected char_is_uppercase('magic') to throw an exception.");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//pass
 		}
 
 		try {
 			SRun("char_is_uppercase('1')", null);
 			fail("Expected char_is_uppercase('1') to throw an exception.");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//pass
 		}
 
 		try {
 			SRun("char_is_uppercase('!')", null);
 			fail("Expected char_is_uppercase('!') to throw an exception.");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//pass
 		}
 
 		try {
 			SRun("char_is_uppercase(1)", null);
 			fail("Expected char_is_uppercase(1) to throw an exception.");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//pass
 		}
 
 		try {
 			SRun("char_is_uppercase(dyn('stuff'))", null);
 			fail("Expected char_is_uppercase(dyn('stuff')) to throw an exception.");
-		} catch(CREFormatException e) {
+		} catch (CREFormatException e) {
 			//pass
 		}
 
 		try {
 			SRun("char_is_uppercase('')", null);
 			fail("Expected char_is_uppercase('') to throw an exception.");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//pass
 		}
 	}
@@ -310,13 +310,13 @@ public class StringHandlingTest {
 		try {
 			SRun("string_starts_with('magic', null)", null);
 			fail("Expected string_starts_with('magic', null) to throw an exception.");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//pass
 		}
 		try {
 			SRun("string_starts_with('null', null)", null);
 			fail("Expected string_starts_with('null', null) to throw an exception.");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//pass
 		}
 	}
@@ -336,13 +336,13 @@ public class StringHandlingTest {
 		try {
 			SRun("string_ends_with('magic', null)", null);
 			fail("Expected string_ends_with('magic', null) to throw an exception.");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//pass
 		}
 		try {
 			SRun("string_ends_with('null', null)", null);
 			fail("Expected string_ends_with('null', null) to throw an exception.");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//HALT_AND_CATCH_FIRE; pass
 		}
 	}

@@ -21,15 +21,15 @@ import com.laytonsmith.core.constructs.Variable;
 public class C {
 
 	//Shortcut to Construct.class
-	public static Class Array = CArray.class;
-	public static Class Boolean = CBoolean.class;
-	public static Class Double = CDouble.class;
-	public static Class Int = CInt.class;
-	public static Class Null = CNull.class;
-	public static Class String = CString.class;
-	public static Class Void = CVoid.class;
-	public static Class IVariable = IVariable.class;
-	public static Class Variable = Variable.class;
+	public static final Class<CArray> ARRAY = CArray.class;
+	public static final Class<CBoolean> BOOLEAN = CBoolean.class;
+	public static final Class<CDouble> DOUBLE = CDouble.class;
+	public static final Class<CInt> INT = CInt.class;
+	public static final Class<CNull> NULL = CNull.class;
+	public static final Class<CString> STRING = CString.class;
+	public static final Class<CVoid> VOID = CVoid.class;
+	public static final Class<IVariable> IVARIABLE = IVariable.class;
+	public static final Class<Variable> VARIABLE = Variable.class;
 
 	public static CArray Array(Construct... elems) {
 		return new CArray(Target.UNKNOWN, elems);

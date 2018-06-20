@@ -29,7 +29,7 @@ public class Recipes {
 		return "This class of functions allows recipes to be managed.";
 	}
 
-	public static abstract class recipeFunction extends AbstractFunction {
+	public abstract static class recipeFunction extends AbstractFunction {
 
 		@Override
 		public boolean isRestricted() {
@@ -55,7 +55,7 @@ public class Recipes {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				return CBoolean.get(Static.getServer().addRecipe(ObjectGenerator.GetGenerator().recipe(args[0], t)));
-			} catch(IllegalStateException ex) {
+			} catch (IllegalStateException ex) {
 				// recipe with the given key probably already exists
 				return CBoolean.FALSE;
 			}

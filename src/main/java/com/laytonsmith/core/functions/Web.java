@@ -182,7 +182,7 @@ public class Web {
 		 */
 		private static final int MAX_HTTP_THREADS = 3;
 		private static int threadCount = 0;
-		private static final ExecutorService threadPool = Executors.newFixedThreadPool(MAX_HTTP_THREADS, new ThreadFactory() {
+		private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(MAX_HTTP_THREADS, new ThreadFactory() {
 
 			@Override
 			public Thread newThread(Runnable r) {
@@ -220,7 +220,7 @@ public class Web {
 			final URL url;
 			try {
 				url = new URL(args[0].val());
-			} catch(MalformedURLException ex) {
+			} catch (MalformedURLException ex) {
 				throw new CREFormatException(ex.getMessage(), t);
 			}
 			final RequestSettings settings = new RequestSettings();
@@ -236,7 +236,7 @@ public class Web {
 				if(csettings.containsKey("method")) {
 					try {
 						settings.setMethod(HTTPMethod.valueOf(csettings.get("method", t).val()));
-					} catch(IllegalArgumentException e) {
+					} catch (IllegalArgumentException e) {
 						throw new CREFormatException(e.getMessage(), t);
 					}
 				}
@@ -300,7 +300,7 @@ public class Web {
 						} else {
 							try {
 								settings.setRawParameter(csettings.get("params", t).val().getBytes("UTF-8"));
-							} catch(UnsupportedEncodingException ex) {
+							} catch (UnsupportedEncodingException ex) {
 								throw new Error(ex);
 							}
 						}
@@ -352,7 +352,7 @@ public class Web {
 					int port;
 					try {
 						type = Proxy.Type.valueOf(proxySettings.get("type", t).val());
-					} catch(IllegalArgumentException e) {
+					} catch (IllegalArgumentException e) {
 						throw new CREFormatException(e.getMessage(), t, e);
 					}
 					proxyURL = proxySettings.get("url", t).val();
@@ -388,8 +388,7 @@ public class Web {
 					Construct download = csettings.get("download", t);
 					if(download instanceof CNull) {
 						settings.setDownloadTo(null);
-					} else //TODO: Remove this check and tie into the VFS once that is complete.
-					{
+					} else { // TODO: Remove this check and tie into the VFS once that is complete.
 						if(Static.InCmdLine(environment)) {
 							File file = new File(download.val());
 							if(!file.isAbsolute()) {
@@ -440,7 +439,7 @@ public class Web {
 								executeFinish(success, array, t, environment);
 							}
 						});
-					} catch(IOException e) {
+					} catch (IOException e) {
 						final ConfigRuntimeException ex = new CREIOException((e instanceof UnknownHostException ? "Unknown host: " : "")
 								+ e.getMessage(), t);
 						if(error != null) {
@@ -454,7 +453,7 @@ public class Web {
 						} else {
 							ConfigRuntimeException.HandleUncaughtException(ex, environment);
 						}
-					} catch(Exception e) {
+					} catch (Exception e) {
 						e.printStackTrace();
 					} finally {
 						environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
@@ -464,7 +463,7 @@ public class Web {
 			if(settings.getBlocking()) {
 				task.run();
 			} else {
-				threadPool.submit(task);
+				THREAD_POOL.submit(task);
 			}
 			return CVoid.VOID;
 		}
@@ -472,19 +471,19 @@ public class Web {
 		private void executeFinish(CClosure closure, Construct arg, Target t, Environment environment) {
 			try {
 				closure.execute(new Construct[]{arg});
-			} catch(FunctionReturnException e) {
+			} catch (FunctionReturnException e) {
 				//Just ignore this if it's returning void. Otherwise, warn.
 				//TODO: Eventually, this should be taggable as a compile error
 				if(!(e.getReturn() instanceof CVoid)) {
 					CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Returning a value from the closure. The value is"
 							+ " being ignored.", t);
 				}
-			} catch(ProgramFlowManipulationException e) {
+			} catch (ProgramFlowManipulationException e) {
 				//This is an error
 				CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Only return may be used inside the closure.", t);
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				ConfigRuntimeException.HandleUncaughtException(e, environment);
-			} catch(Throwable e) {
+			} catch (Throwable e) {
 				//Other throwables we just need to report
 				CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, "An unexpected exception has occurred. No extra"
 						+ " information is available, but please report this error:\n" + StackTraceUtils.GetStacktrace(e), t);
@@ -518,7 +517,7 @@ public class Web {
 			templates.put("CODE", DocGenTemplates.CODE);
 			try {
 				return super.getBundledDocs(templates);
-			} catch(DocGenTemplates.Generator.GenerateException ex) {
+			} catch (DocGenTemplates.Generator.GenerateException ex) {
 				Logger.getLogger(Web.class.getName()).log(Level.SEVERE, null, ex);
 				// just return the unformatted docs, which are more useful than nothing.
 				return super.getBundledDocs();
@@ -637,7 +636,7 @@ public class Web {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				return new CString(URLEncoder.encode(args[0].val(), "UTF-8"), t);
-			} catch(UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				throw new Error();
 			}
 		}
@@ -694,7 +693,7 @@ public class Web {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				return new CString(URLDecoder.decode(args[0].val(), "UTF-8"), t);
-			} catch(UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				throw new Error();
 			}
 		}
@@ -761,7 +760,7 @@ public class Web {
 				Profiles.Profile p;
 				try {
 					p = environment.getEnv(GlobalEnv.class).getProfiles().getProfileById(profileName);
-				} catch(Profiles.InvalidProfileException ex) {
+				} catch (Profiles.InvalidProfileException ex) {
 					throw new CREFormatException(ex.getMessage(), t, ex);
 				}
 				if(!(p instanceof EmailProfile)) {
@@ -963,7 +962,7 @@ public class Web {
 					tr.close();
 				}
 
-			} catch(MessagingException ex) {
+			} catch (MessagingException ex) {
 				if(ex.getCause() instanceof SocketTimeoutException) {
 					throw new CREIOException(ex.getCause().getMessage(), t, ex);
 				}
@@ -1100,7 +1099,7 @@ public class Web {
 				+ "\t\t\tdisposition: 'inline', // Technically we could leave this off, because it defaults to inline\n"
 				+ "\t\t\tdescription: 'An image',\n"
 				+ "\t)\n"
-				+ ")));", "<Would send an html email, and the attached image would show up>"),};
+				+ ")));", "<Would send an html email, and the attached image would show up>")};
 		}
 
 	}

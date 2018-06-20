@@ -18,6 +18,8 @@ import java.util.logging.Logger;
  *
  *
  */
+// Variables can be set through DisableColors(), but should be handled as if they were final.
+@SuppressWarnings("checkstyle:staticvariablename")
 public final class TermColors {
 
 	private TermColors() {
@@ -53,118 +55,118 @@ public final class TermColors {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
-	private @interface color {
+	private @interface TermColor {
 	}
 
 	/*
 	 * Standard foreground colors
 	 */
-	@color
+	@TermColor
 	public static String RED = color(Color.RED);
-	@color
+	@TermColor
 	public static String GREEN = color(Color.GREEN);
-	@color
+	@TermColor
 	public static String BLUE = color(Color.BLUE);
-	@color
+	@TermColor
 	public static String YELLOW = color(Color.YELLOW);
-	@color
+	@TermColor
 	public static String CYAN = color(Color.CYAN);
-	@color
+	@TermColor
 	public static String MAGENTA = color(Color.MAGENTA);
-	@color
+	@TermColor
 	public static String BLACK = color(Color.BLACK);
-	@color
+	@TermColor
 	public static String WHITE = color(Color.WHITE);
 
 	/*
 	 * Bright foreground colors
 	 */
-	@color
+	@TermColor
 	public static String BRIGHT_RED = color(Color.RED, true, true, true);
-	@color
+	@TermColor
 	public static String BRIGHT_GREEN = color(Color.GREEN, true, true, true);
-	@color
+	@TermColor
 	public static String BRIGHT_BLUE = color(Color.BLUE, true, true, true);
-	@color
+	@TermColor
 	public static String BRIGHT_YELLOW = color(Color.YELLOW, true, true, true);
-	@color
+	@TermColor
 	public static String BRIGHT_CYAN = color(Color.CYAN, true, true, true);
-	@color
+	@TermColor
 	public static String BRIGHT_MAGENTA = color(Color.MAGENTA, true, true, true);
-	@color
+	@TermColor
 	public static String BRIGHT_BLACK = color(Color.BLACK, true, true, true);
-	@color
+	@TermColor
 	public static String BRIGHT_WHITE = color(Color.WHITE, true, true, true);
 
 	/*
 	 * Standard background colors
 	 */
-	@color
+	@TermColor
 	public static String BG_RED = color(Color.RED, false, false, false);
-	@color
+	@TermColor
 	public static String BG_GREEN = color(Color.GREEN, false, false, false);
-	@color
+	@TermColor
 	public static String BG_BLUE = color(Color.BLUE, false, false, false);
-	@color
+	@TermColor
 	public static String BG_YELLOW = color(Color.YELLOW, false, false, false);
-	@color
+	@TermColor
 	public static String BG_CYAN = color(Color.CYAN, false, false, false);
-	@color
+	@TermColor
 	public static String BG_MAGENTA = color(Color.MAGENTA, false, false, false);
-	@color
+	@TermColor
 	public static String BG_BLACK = color(Color.BLACK, false, false, false);
-	@color
+	@TermColor
 	public static String BG_WHITE = color(Color.WHITE, false, false, false);
 
 	/*
 	 * Bright background colors
 	 */
-	@color
+	@TermColor
 	public static String BG_BRIGHT_RED = color(Color.RED, true, false, false);
-	@color
+	@TermColor
 	public static String BG_BRIGHT_GREEN = color(Color.GREEN, true, false, false);
-	@color
+	@TermColor
 	public static String BG_BRIGHT_BLUE = color(Color.BLUE, true, false, false);
-	@color
+	@TermColor
 	public static String BG_BRIGHT_YELLOW = color(Color.YELLOW, true, false, false);
-	@color
+	@TermColor
 	public static String BG_BRIGHT_CYAN = color(Color.CYAN, true, false, false);
-	@color
+	@TermColor
 	public static String BG_BRIGHT_MAGENTA = color(Color.MAGENTA, true, false, false);
-	@color
+	@TermColor
 	public static String BG_BRIGHT_BLACK = color(Color.BLACK, true, false, false);
-	@color
+	@TermColor
 	public static String BG_BRIGHT_WHITE = color(Color.WHITE, true, false, false);
 
-	@color
+	@TermColor
 	public static String BLINKON = special("blinkon");
-	@color
+	@TermColor
 	public static String BLINKOFF = special("blinkoff");
 
-	@color
+	@TermColor
 	public static String BOLD = special("bold");
-	@color
+	@TermColor
 	public static String STRIKE = special("strike");
-	@color
+	@TermColor
 	public static String UNDERLINE = special("underline");
-	@color
+	@TermColor
 	public static String ITALIC = special("italic");
 
-	@color
+	@TermColor
 	public static String RESET = special("reset");
 
-	private static final Map<String, String> defaults = new HashMap<String, String>();
+	private static final Map<String, String> DEFAULTS = new HashMap<String, String>();
 	private static List<Field> fields = null;
 
 	private static List<Field> fields() {
 		if(fields == null) {
 			fields = new ArrayList<Field>();
 			for(Field f : TermColors.class.getFields()) {
-				if(f.getAnnotation(color.class) != null) {
+				if(f.getAnnotation(TermColor.class) != null) {
 					fields.add(f);
 					try {
-						defaults.put(f.getName(), (String) f.get(null));
-					} catch(IllegalArgumentException | IllegalAccessException ex) {
+						DEFAULTS.put(f.getName(), (String) f.get(null));
+					} catch (IllegalArgumentException | IllegalAccessException ex) {
 						Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
@@ -179,8 +181,8 @@ public final class TermColors {
 	public static void EnableColors() {
 		for(Field f : fields()) {
 			try {
-				f.set(null, defaults.get(f.getName()));
-			} catch(IllegalArgumentException | IllegalAccessException ex) {
+				f.set(null, DEFAULTS.get(f.getName()));
+			} catch (IllegalArgumentException | IllegalAccessException ex) {
 				Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -193,7 +195,7 @@ public final class TermColors {
 		for(Field f : fields()) {
 			try {
 				f.set(null, "");
-			} catch(IllegalArgumentException | IllegalAccessException ex) {
+			} catch (IllegalArgumentException | IllegalAccessException ex) {
 				Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -288,9 +290,7 @@ public final class TermColors {
 		StreamUtils.GetSystemOut().flush();
 	}
 
-	public static void pl() {
-		pl("");
-	}
+	private static Scanner scanner;
 
 	public static String prompt() {
 		if(scanner == null) {
@@ -303,10 +303,12 @@ public final class TermColors {
 		return ret;
 	}
 
-	private static Scanner scanner;
-
 	public static void pl(CharSequence c) {
 		StreamUtils.GetSystemOut().println(c + WHITE);
+	}
+
+	public static void pl() {
+		pl("");
 	}
 
 	/**

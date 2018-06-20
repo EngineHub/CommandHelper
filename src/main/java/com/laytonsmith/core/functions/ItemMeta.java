@@ -39,7 +39,7 @@ public class ItemMeta {
 		return "These functions manipulate an item's meta data. The items are modified in a player's inventory.";
 	}
 
-	private static final String applicableItemMeta = "<ul>"
+	private static final String APPLICABLE_ITEM_META = "<ul>"
 			+ "<li>All items - \"display\" (string), \"lore\" (array of strings), \"enchants\" (An array of enchantment"
 			+ " arrays, which are associative arrays that look like: array(\"etype\": The type of enchantment, \"elevel\":"
 			+ " The strength of the enchantment)), \"repair\" (int, repair cost), \"unbreakable\" (boolean), \"flags\""
@@ -118,7 +118,7 @@ public class ItemMeta {
 			return "array {[player,] inventorySlot} Returns an associative array of known ItemMeta for the slot given,"
 					+ " or null if there isn't any. All items can have a display(name), lore, and/or enchants, "
 					+ " and more info will be available for the items that have it. ---- Returned keys: "
-					+ applicableItemMeta;
+					+ APPLICABLE_ITEM_META;
 		}
 
 		@Override
@@ -179,7 +179,8 @@ public class ItemMeta {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			Construct slot, meta;
+			Construct slot;
+			Construct meta;
 			MCItemStack is;
 			if(args.length == 3) {
 				p = Static.GetPlayer(args[0], t);
@@ -217,7 +218,7 @@ public class ItemMeta {
 			return "void {[player,] inventorySlot, ItemMetaArray} Applies the data from the given array to the item at the"
 					+ " specified slot. Unused fields will be ignored. If null or an empty array is supplied, or if none of"
 					+ " the given fields are applicable, the item will become default, as this function overwrites any"
-					+ " existing data. ---- Available fields: " + applicableItemMeta;
+					+ " existing data. ---- Available fields: " + APPLICABLE_ITEM_META;
 		}
 
 		@Override

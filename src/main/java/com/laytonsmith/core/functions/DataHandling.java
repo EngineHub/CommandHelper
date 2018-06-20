@@ -86,8 +86,16 @@ import java.util.logging.Logger;
 @core
 public class DataHandling {
 
+	// Variable is more clear when named after the function it represents.
+	@SuppressWarnings("checkstyle:constantname")
 	private static final String array_get = new ArrayHandling.array_get().getName();
+
+	// Variable is more clear when named after the function it represents.
+	@SuppressWarnings("checkstyle:constantname")
 	private static final String array_set = new ArrayHandling.array_set().getName();
+
+	// Variable is more clear when named after the function it represents.
+	@SuppressWarnings("checkstyle:constantname")
 	private static final String array_push = new ArrayHandling.array_push().getName();
 
 	public static String docs() {
@@ -142,7 +150,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nmsg(@array)"),
-				new ExampleScript("Associative array creation", "assign(@array, array(one: 'apple', two: 'banana'))\nmsg(@array)"),};
+				new ExampleScript("Associative array creation", "assign(@array, array(one: 'apple', two: 'banana'))\nmsg(@array)")};
 		}
 
 		@Override
@@ -242,7 +250,7 @@ public class DataHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Usage with an empty array", "assign(@array, associative_array())\nmsg(is_associative(@array))"),
 				new ExampleScript("Usage with an array with sequential keys", "assign(@array, array(0: '0', 1: '1'))\nmsg(is_associative(@array))\n"
-				+ "assign(@array, associative_array(0: '0', 1: '1'))\nmsg(is_associative(@array))"),};
+				+ "assign(@array, associative_array(0: '0', 1: '1'))\nmsg(is_associative(@array))")};
 		}
 
 	}
@@ -407,7 +415,7 @@ public class DataHandling {
 				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable += 10;\nmsg(@variable);"),
 				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable -= 10;\nmsg(@variable);"),
 				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable *= 10;\nmsg(@variable);"),
-				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable /= 10;\nmsg(@variable);"),};
+				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable /= 10;\nmsg(@variable);")};
 		}
 	}
 
@@ -479,7 +487,7 @@ public class DataHandling {
 				new ExampleScript("With continue. (See continue() for more examples)", "for(assign(@i, 0), @i < 2, @i++){\n"
 				+ "\tif(@i == 1, continue())\n"
 				+ "\tmsg(@i)\n"
-				+ "}"),};
+				+ "}")};
 		}
 
 		@Override
@@ -509,7 +517,7 @@ public class DataHandling {
 					pre.addChild(children.get(2).getChildAt(0));
 					children.set(2, pre);
 				}
-			} catch(IndexOutOfBoundsException e) {
+			} catch (IndexOutOfBoundsException e) {
 				//Just ignore it. It's a compile error, but we'll let the rest of the
 				//existing system sort that out.
 			}
@@ -593,14 +601,14 @@ public class DataHandling {
 				}
 				try {
 					parent.eval(runnable, env);
-				} catch(LoopBreakException e) {
+				} catch (LoopBreakException e) {
 					int num = e.getTimes();
 					if(num > 1) {
 						e.setTimes(--num);
 						throw e;
 					}
 					return CVoid.VOID;
-				} catch(LoopContinueException e) {
+				} catch (LoopContinueException e) {
 					_continue = e.getTimes() - 1;
 					parent.eval(expression, env);
 					continue;
@@ -728,14 +736,14 @@ public class DataHandling {
 						//Execute the code
 						parent.eval(code, env);
 						//And handle any break/continues.
-					} catch(LoopBreakException e) {
+					} catch (LoopBreakException e) {
 						int num = e.getTimes();
 						if(num > 1) {
 							e.setTimes(--num);
 							throw e;
 						}
 						return CVoid.VOID;
-					} catch(LoopContinueException e) {
+					} catch (LoopContinueException e) {
 						// In associative arrays, (unlike with normal arrays) we need to decrement it by one, because the nature of
 						// the normal array is such that the counter is handled manually by our code. Because we are letting java
 						// handle our code though, this run actually counts as one run.
@@ -781,14 +789,14 @@ public class DataHandling {
 							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getVariableName(), one.get(current, t), t));
 							try {
 								parent.eval(code, env);
-							} catch(LoopBreakException e) {
+							} catch (LoopBreakException e) {
 								int num = e.getTimes();
 								if(num > 1) {
 									e.setTimes(--num);
 									throw e;
 								}
 								return CVoid.VOID;
-							} catch(LoopContinueException e) {
+							} catch (LoopContinueException e) {
 								continues += e.getTimes();
 								continue;
 							}
@@ -875,7 +883,7 @@ public class DataHandling {
 				new ExampleScript("With braces", "assign(@array, array(1, 2, 3))\nforeach(@array, @i){\n\tmsg(@i)\n}"),
 				new ExampleScript("With a slice", "foreach(1..3, @i){\n\tmsg(@i)\n}"),
 				new ExampleScript("With a slice, counting down", "foreach(3..1, @i){\n\tmsg(@i)\n}"),
-				new ExampleScript("With array keys", "@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}"),};
+				new ExampleScript("With array keys", "@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}")};
 		}
 
 		@Override
@@ -1059,7 +1067,7 @@ public class DataHandling {
 				+ "    msg(@val)\n"
 				+ ", #else \n"
 				+ "    msg('No values in the array')\n"
-				+ ")"),};
+				+ ")")};
 		}
 
 	}
@@ -1116,12 +1124,12 @@ public class DataHandling {
 					if(nodes.length > 1) {
 						try {
 							parent.seval(nodes[1], env);
-						} catch(LoopContinueException e) {
+						} catch (LoopContinueException e) {
 							//ok.
 						}
 					}
 				}
-			} catch(LoopBreakException e) {
+			} catch (LoopBreakException e) {
 				if(e.getTimes() > 1) {
 					throw new LoopBreakException(e.getTimes() - 1, t);
 				}
@@ -1150,7 +1158,7 @@ public class DataHandling {
 				+ "\tmsg(@i)\n"
 				+ "\t@i++\n"
 				+ "\tif(@i > 5, break())\n"
-				+ ")"),};
+				+ ")")};
 		}
 
 		@Override
@@ -1227,11 +1235,11 @@ public class DataHandling {
 				do {
 					try {
 						parent.seval(nodes[0], env);
-					} catch(LoopContinueException e) {
+					} catch (LoopContinueException e) {
 						//ok. No matter how many times it tells us to continue, we're only going to continue once.
 					}
 				} while(Static.getBoolean(parent.seval(nodes[1], env), t));
-			} catch(LoopBreakException e) {
+			} catch (LoopBreakException e) {
 				if(e.getTimes() > 1) {
 					throw new LoopBreakException(e.getTimes() - 1, t);
 				}
@@ -1328,7 +1336,7 @@ public class DataHandling {
 				+ "\tfor(assign(@j, 0), @j < 1000, @j++,\n"
 				+ "\t\tbreak(3) #There are only 2 loops to break out of\n"
 				+ "\t)"
-				+ ")", true),};
+				+ ")", true)};
 		}
 
 		@Override
@@ -1417,7 +1425,7 @@ public class DataHandling {
 				new ExampleScript("Argument specified", "for(assign(@i, 0), @i < 5, @i++){\n"
 				+ "\tif(@i == 2, continue(2))\n"
 				+ "\tmsg(@i)\n"
-				+ "}"),};
+				+ "}")};
 		}
 	}
 
@@ -1477,7 +1485,7 @@ public class DataHandling {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_stringable('yes')"),
 				new ExampleScript("True condition", "is_stringable(1) #This can be used as a string, yes"),
-				new ExampleScript("False condition", "is_stringable(array(1))"),};
+				new ExampleScript("False condition", "is_stringable(array(1))")};
 		}
 	}
 
@@ -1537,7 +1545,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_string('yes')"),
-				new ExampleScript("False condition", "is_string(1) #is_stringable() would return true here"),};
+				new ExampleScript("False condition", "is_string(1) #is_stringable() would return true here")};
 		}
 	}
 
@@ -1597,7 +1605,7 @@ public class DataHandling {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_bytearray(string_get_bytes('yay'))"),
 				new ExampleScript("False condition", "is_bytearray('Nay')"),
-				new ExampleScript("False condition", "is_bytearray(123)"),};
+				new ExampleScript("False condition", "is_bytearray(123)")};
 		}
 	}
 
@@ -1657,7 +1665,7 @@ public class DataHandling {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_array(array(1))"),
 				new ExampleScript("True condition", "is_array(array(one: 1))"),
-				new ExampleScript("False condition", "is_array('no')"),};
+				new ExampleScript("False condition", "is_array('no')")};
 		}
 	}
 
@@ -1781,7 +1789,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_double(1.0)"),
-				new ExampleScript("False condition", "is_double(1)"),};
+				new ExampleScript("False condition", "is_double(1)")};
 		}
 	}
 
@@ -1842,7 +1850,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_integer(1)"),
-				new ExampleScript("False condition", "is_integer(1.0)"),};
+				new ExampleScript("False condition", "is_integer(1.0)")};
 		}
 	}
 
@@ -1902,7 +1910,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_boolean(false)"),
-				new ExampleScript("False condition", "is_boolean(0)"),};
+				new ExampleScript("False condition", "is_boolean(0)")};
 		}
 	}
 
@@ -1961,7 +1969,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_null(null)"),
-				new ExampleScript("False condition", "is_null(0)"),};
+				new ExampleScript("False condition", "is_null(0)")};
 		}
 	}
 
@@ -2004,7 +2012,7 @@ public class DataHandling {
 			boolean b = true;
 			try {
 				Static.getNumber(args[0], t);
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				b = false;
 			}
 			return CBoolean.get(b);
@@ -2031,7 +2039,7 @@ public class DataHandling {
 				new ExampleScript("True condition", "is_numeric(1)"),
 				new ExampleScript("True condition", "is_numeric(1.5)"),
 				new ExampleScript("False condition", "is_numeric('string')"),
-				new ExampleScript("True condition, because null is coerced to 0.0, which is numeric.", "is_numeric(null)"),};
+				new ExampleScript("True condition, because null is coerced to 0.0, which is numeric.", "is_numeric(null)")};
 		}
 	}
 
@@ -2078,7 +2086,7 @@ public class DataHandling {
 			double d;
 			try {
 				d = Static.getDouble(args[0], t);
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
 			return CBoolean.get((long) d == d);
@@ -2105,7 +2113,7 @@ public class DataHandling {
 				new ExampleScript("True condition", "is_integral('5.0')"),
 				new ExampleScript("True condition", "is_integral('6')"),
 				new ExampleScript("False condition", "is_integral(1.5)"),
-				new ExampleScript("True condition, because null is coerced to 0, which is integral", "is_integral(null)"),};
+				new ExampleScript("True condition, because null is coerced to 0, which is integral", "is_integral(null)")};
 		}
 	}
 
@@ -2223,7 +2231,7 @@ public class DataHandling {
 								c = new CString("", t);
 							}
 							ivar = new IVariable(((IVariable) cons).getDefinedType(), ((IVariable) cons).getVariableName(), c.clone(), t);
-						} catch(CloneNotSupportedException ex) {
+						} catch (CloneNotSupportedException ex) {
 							//
 						}
 						vars.add(ivar);
@@ -2273,7 +2281,7 @@ public class DataHandling {
 					Construct c = myProc.cexecute(children, env, t);
 					//Yup! It worked. It's a const proc.
 					return c;
-				} catch(ConfigRuntimeException e) {
+				} catch (ConfigRuntimeException e) {
 					if(e instanceof CREInvalidProcedureException) {
 						//This is the only valid exception that doesn't strictly mean it's a bad
 						//call.
@@ -2282,7 +2290,7 @@ public class DataHandling {
 					throw e; //Rethrow it. Since the functions are all static, and we actually are
 					//running it with a mostly legit environment, this is a real runtime error,
 					//and we can safely convert it to a compile error upstream
-				} catch(Exception e) {
+				} catch (Exception e) {
 					//Nope. Something is preventing us from running it statically.
 					//We don't really care. We just know it can't be optimized.
 					return null;
@@ -2496,7 +2504,7 @@ public class DataHandling {
 				Environment newEnv = null;
 				try {
 					newEnv = env.clone();
-				} catch(CloneNotSupportedException ex) {
+				} catch (CloneNotSupportedException ex) {
 					throw new RuntimeException(ex);
 				}
 				return proc.execute(vars, newEnv, t);
@@ -2679,7 +2687,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_associative(array(one: 1, two: 2))"),
-				new ExampleScript("False condition", "is_associative(array(1, 2, 3))"),};
+				new ExampleScript("False condition", "is_associative(array(1, 2, 3))")};
 		}
 	}
 
@@ -2731,7 +2739,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("True condition", "is_closure(closure(msg('code')))"),
-				new ExampleScript("False condition", "is_closure('a string')"),};
+				new ExampleScript("False condition", "is_closure('a string')")};
 		}
 	}
 
@@ -2970,7 +2978,7 @@ public class DataHandling {
 			Environment myEnv;
 			try {
 				myEnv = env.clone();
-			} catch(CloneNotSupportedException ex) {
+			} catch (CloneNotSupportedException ex) {
 				myEnv = env;
 			}
 			for(int i = 0; i < nodes.length - 1; i++) {
@@ -2990,7 +2998,7 @@ public class DataHandling {
 				try {
 					defaults[i] = ((IVariable) ret).ival().clone();
 					types[i] = ((IVariable) ret).getDefinedType();
-				} catch(CloneNotSupportedException ex) {
+				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
@@ -3074,7 +3082,7 @@ public class DataHandling {
 			Environment myEnv;
 			try {
 				myEnv = env.clone();
-			} catch(CloneNotSupportedException ex) {
+			} catch (CloneNotSupportedException ex) {
 				myEnv = env;
 			}
 			for(int i = 0; i < nodes.length - 1; i++) {
@@ -3094,7 +3102,7 @@ public class DataHandling {
 				try {
 					defaults[i] = ((IVariable) ret).ival().clone();
 					types[i] = ((IVariable) ret).getDefinedType();
-				} catch(CloneNotSupportedException ex) {
+				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
@@ -3203,7 +3211,7 @@ public class DataHandling {
 				CClosure closure = (CClosure) args[args.length - 1];
 				try {
 					closure.execute(vals);
-				} catch(FunctionReturnException e) {
+				} catch (FunctionReturnException e) {
 					return e.getReturn();
 				}
 			} else {
@@ -3353,7 +3361,7 @@ public class DataHandling {
 				new ExampleScript("Basic usage", "boolean(array())"),
 				new ExampleScript("Basic usage", "boolean(null)"),
 				new ExampleScript("Basic usage", "boolean('string')"),
-				new ExampleScript("Basic usage", "boolean('')"),};
+				new ExampleScript("Basic usage", "boolean('')")};
 		}
 	}
 
@@ -3418,7 +3426,7 @@ public class DataHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "integer(1.0)"),
 				new ExampleScript("Basic usage", "integer(1.5)"),
-				new ExampleScript("Failure", "assign(@var, 'string')\ninteger(@var)"),};
+				new ExampleScript("Failure", "assign(@var, 'string')\ninteger(@var)")};
 		}
 	}
 
@@ -3479,7 +3487,7 @@ public class DataHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "double(1)"),
-				new ExampleScript("Failure", "@var = 'string';\ndouble(@var);"),};
+				new ExampleScript("Failure", "@var = 'string';\ndouble(@var);")};
 		}
 	}
 
@@ -3549,7 +3557,7 @@ public class DataHandling {
 				new ExampleScript("Basic usage", "string(false)"),
 				new ExampleScript("Basic usage", "string(null)"),
 				new ExampleScript("Basic usage", "string(array(1, 2))"),
-				new ExampleScript("Basic usage", "string(array(one: 'one', two: 'two'))"),};
+				new ExampleScript("Basic usage", "string(array(one: 'one', two: 'two'))")};
 		}
 	}
 
@@ -3654,7 +3662,7 @@ public class DataHandling {
 			long ret;
 			try {
 				ret = Long.parseLong(value, radix);
-			} catch(NumberFormatException ex) {
+			} catch (NumberFormatException ex) {
 				throw new CREFormatException("The input string: \"" + value + "\" is improperly formatted. (Perhaps you're using a character greater than"
 						+ " the radix specified?)", t);
 			}
@@ -3733,7 +3741,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				return args[0].typeof();
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new Error("Class " + args[0].getClass().getName() + " is not annotated with @typeof. Please report this"
 						+ " error to the developers.");
 			}
@@ -3766,7 +3774,7 @@ public class DataHandling {
 				new ExampleScript("Basic usage, typeof string", "typeof('value')"),
 				new ExampleScript("Basic usage, typeof int", "typeof(1)"),
 				new ExampleScript("Basic usage, typeof double", "typeof(1.0)"),
-				new ExampleScript("Basic usage, typeof closure", "typeof(closure(){ msg('test') })"),};
+				new ExampleScript("Basic usage, typeof closure", "typeof(closure(){ msg('test') })")};
 		}
 
 		@Override
@@ -3834,9 +3842,9 @@ public class DataHandling {
 					count++;
 				}
 				return new CString(b.toString(), t);
-			} catch(ConfigCompileException e) {
+			} catch (ConfigCompileException e) {
 				throw new CREFormatException("Could not compile eval'd code: " + e.getMessage(), t);
-			} catch(ConfigCompileGroupException ex) {
+			} catch (ConfigCompileGroupException ex) {
 				StringBuilder b = new StringBuilder();
 				b.append("Could not compile eval'd code: ");
 				for(ConfigCompileException e : ex.getList()) {

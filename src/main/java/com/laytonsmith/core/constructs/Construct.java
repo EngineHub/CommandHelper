@@ -82,11 +82,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		return target;
 	}
 
-	public Construct(String value, ConstructType ctype, int line_num, File file, int column) {
+	public Construct(String value, ConstructType ctype, int lineNum, File file, int column) {
 		this.value = value;
 		Static.AssertNonNull(value, "The string value may not be null.");
 		this.ctype = ctype;
-		this.target = new Target(line_num, file, column);
+		this.target = new Target(lineNum, file, column);
 	}
 
 	public Construct(String value, ConstructType ctype, Target t) {
@@ -288,7 +288,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			Double d1 = Double.valueOf(this.value);
 			Double d2 = Double.valueOf(c.value);
 			return d1.compareTo(d2);
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			return this.value.compareTo(c.value);
 		}
 	}

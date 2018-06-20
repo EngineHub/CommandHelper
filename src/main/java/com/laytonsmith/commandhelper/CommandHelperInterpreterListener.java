@@ -106,9 +106,9 @@ public class CommandHelperInterpreterListener implements Listener {
 			multilineMode.remove(p.getName());
 			try {
 				execute(script, p);
-			} catch(ConfigCompileException e) {
+			} catch (ConfigCompileException e) {
 				Static.SendMessage(p, MCChatColor.RED + e.getMessage() + ":" + e.getLineNum());
-			} catch(ConfigCompileGroupException ex) {
+			} catch (ConfigCompileGroupException ex) {
 				for(ConfigCompileException e : ex.getList()) {
 					Static.SendMessage(p, MCChatColor.RED + e.getMessage() + ":" + e.getLineNum());
 				}
@@ -122,9 +122,9 @@ public class CommandHelperInterpreterListener implements Listener {
 				try {
 					//Execute single line
 					execute(line, p);
-				} catch(ConfigCompileException ex) {
+				} catch (ConfigCompileException ex) {
 					Static.SendMessage(p, MCChatColor.RED + ex.getMessage());
-				} catch(ConfigCompileGroupException e) {
+				} catch (ConfigCompileGroupException e) {
 					for(ConfigCompileException ex : e.getList()) {
 						Static.SendMessage(p, MCChatColor.RED + ex.getMessage());
 					}
@@ -169,13 +169,13 @@ public class CommandHelperInterpreterListener implements Listener {
 					interpreterMode.add(p.getName());
 				}
 			}, null);
-		} catch(CancelCommandException e) {
+		} catch (CancelCommandException e) {
 			interpreterMode.add(p.getName());
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			ConfigRuntimeException.HandleUncaughtException(e, env);
 			Static.SendMessage(p, MCChatColor.RED + e.toString());
 			interpreterMode.add(p.getName());
-		} catch(Exception e) {
+		} catch (Exception e) {
 			Static.SendMessage(p, MCChatColor.RED + e.toString());
 			Logger.getLogger(CommandHelperInterpreterListener.class.getName()).log(Level.SEVERE, null, e);
 			interpreterMode.add(p.getName());

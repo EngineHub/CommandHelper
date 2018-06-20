@@ -120,9 +120,9 @@ public class ZipReader {
 					ZipFile zf = new ZipFile(f);
 					tempTopZip = f;
 				}
-			} catch(ZipException ex) {
+			} catch (ZipException ex) {
 				//This is fine, it's just not a zip file
-			} catch(IOException | AccessControlException ex) {
+			} catch (IOException | AccessControlException ex) {
 				//This is fine too, it may mean we don't have permission to access this directory,
 				//but that's ok, we don't need access yet.
 			}
@@ -163,7 +163,7 @@ public class ZipReader {
 		try {
 			getInputStream().close();
 			return true;
-		} catch(IOException e) {
+		} catch (IOException e) {
 			return false;
 		}
 	}
@@ -200,82 +200,6 @@ public class ZipReader {
 	 */
 	public boolean isZipped() {
 		return isZipped;
-	}
-
-	/*
-	 * This function recurses down into a zip file, ultimately returning the InputStream for the file,
-	 * or throwing exceptions if it can't be found.
-	 */
-	private InputStream getFile(Deque<File> fullChain, String zipName, final ZipInputStream zis) throws FileNotFoundException, IOException {
-		ZipEntry entry;
-		InputStream zipReader = new InputStream() {
-
-			@Override
-			public int read() throws IOException {
-				if(zis.available() > 0) {
-					return zis.read();
-				} else {
-					return -1;
-				}
-			}
-
-			@Override
-			public void close() throws IOException {
-				zis.close();
-			}
-		};
-		boolean isZip = false;
-		List<String> recurseAttempts = new ArrayList<String>();
-		while((entry = zis.getNextEntry()) != null) {
-			//This is at least a zip file
-			isZip = true;
-			Deque<File> chain = new LinkedList<File>(fullChain);
-			File chainFile = null;
-			while((chainFile = chain.pollFirst()) != null) {
-				if(chainFile.equals(new File(zipName + File.separator + entry.getName()))) {
-					//We found it. Now, chainFile is one that is in our tree
-					//We have to do some further analyzation on it
-					break;
-				}
-			}
-			if(chainFile == null) {
-				//It's not in the chain at all, which means we don't care about it at all.
-				continue;
-			}
-			if(chain.isEmpty()) {
-				//It was the last file in the chain, so no point in looking at it at all.
-				//If it was a zip or not, it doesn't matter, because this is the file they
-				//specified, precisely. Read it out, and return it.
-				return zipReader;
-			}
-
-			//It's a single file, it's in the chain, and the chain isn't finished, so that
-			//must mean it's a container (or it's being used as one, anyways).
-			//It could be that either this is just a folder in the entry list, or it could
-			//mean that this is a zip. We will make note of this as one we need to attempt to
-			//recurse, but only if it doesn't pan out that this is a file.
-			recurseAttempts.add(zipName + File.separator + entry.getName());
-
-		}
-		for(String recurseAttempt : recurseAttempts) {
-			ZipInputStream inner = new ZipInputStream(zipReader);
-			try {
-				return getFile(fullChain, recurseAttempt, inner);
-			} catch(IOException e) {
-				//We don't care if this breaks, we'll throw out own top level exception
-				//in a moment if we got here. We still need to finish going through
-				//out recurse attempts.
-			}
-		}
-		//If we get down here, it means either we recursed into not-a-zip file, or
-		//the file was otherwise not found
-		if(isZip) {
-			//if this is the terminal node in the chain, it's due to a file not found.
-			throw new FileNotFoundException(zipName + " could not be found!");
-		} else {
-			//if not, it's due to this not being a zip file
-			throw new IOException(zipName + " is not a zip file!");
-		}
 	}
 
 	/**
@@ -345,6 +269,82 @@ public class ZipReader {
 
 	public File getFile() {
 		return file;
+	}
+
+	/*
+	 * This function recurses down into a zip file, ultimately returning the InputStream for the file,
+	 * or throwing exceptions if it can't be found.
+	 */
+	private InputStream getFile(Deque<File> fullChain, String zipName, final ZipInputStream zis) throws FileNotFoundException, IOException {
+		ZipEntry entry;
+		InputStream zipReader = new InputStream() {
+
+			@Override
+			public int read() throws IOException {
+				if(zis.available() > 0) {
+					return zis.read();
+				} else {
+					return -1;
+				}
+			}
+
+			@Override
+			public void close() throws IOException {
+				zis.close();
+			}
+		};
+		boolean isZip = false;
+		List<String> recurseAttempts = new ArrayList<String>();
+		while((entry = zis.getNextEntry()) != null) {
+			//This is at least a zip file
+			isZip = true;
+			Deque<File> chain = new LinkedList<File>(fullChain);
+			File chainFile = null;
+			while((chainFile = chain.pollFirst()) != null) {
+				if(chainFile.equals(new File(zipName + File.separator + entry.getName()))) {
+					//We found it. Now, chainFile is one that is in our tree
+					//We have to do some further analyzation on it
+					break;
+				}
+			}
+			if(chainFile == null) {
+				//It's not in the chain at all, which means we don't care about it at all.
+				continue;
+			}
+			if(chain.isEmpty()) {
+				//It was the last file in the chain, so no point in looking at it at all.
+				//If it was a zip or not, it doesn't matter, because this is the file they
+				//specified, precisely. Read it out, and return it.
+				return zipReader;
+			}
+
+			//It's a single file, it's in the chain, and the chain isn't finished, so that
+			//must mean it's a container (or it's being used as one, anyways).
+			//It could be that either this is just a folder in the entry list, or it could
+			//mean that this is a zip. We will make note of this as one we need to attempt to
+			//recurse, but only if it doesn't pan out that this is a file.
+			recurseAttempts.add(zipName + File.separator + entry.getName());
+
+		}
+		for(String recurseAttempt : recurseAttempts) {
+			ZipInputStream inner = new ZipInputStream(zipReader);
+			try {
+				return getFile(fullChain, recurseAttempt, inner);
+			} catch (IOException e) {
+				//We don't care if this breaks, we'll throw out own top level exception
+				//in a moment if we got here. We still need to finish going through
+				//out recurse attempts.
+			}
+		}
+		//If we get down here, it means either we recursed into not-a-zip file, or
+		//the file was otherwise not found
+		if(isZip) {
+			//if this is the terminal node in the chain, it's due to a file not found.
+			throw new FileNotFoundException(zipName + " could not be found!");
+		} else {
+			//if not, it's due to this not being a zip file
+			throw new IOException(zipName + " is not a zip file!");
+		}
 	}
 
 	private void initList() throws IOException {

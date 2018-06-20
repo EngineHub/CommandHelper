@@ -65,11 +65,12 @@ public class Manager {
 
 	private static Profiler profiler;
 	private static GlobalEnv gEnv;
-	private static final File jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
-	private static final File chDirectory = new File(jarLocation, "CommandHelper");
+	private static final File JAR_LOCATION =
+			new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
+	private static final File CH_DIRECTORY = new File(JAR_LOCATION, "CommandHelper");
 	private static PersistenceNetwork persistenceNetwork;
 	public static PrintStream out = StreamUtils.GetSystemOut();
-	public static final String[] options = new String[]{
+	public static final String[] OPTIONS = new String[]{
 		"refactor", "print", "cleardb", "edit", "interpreter", "merge", "hidden-keys"
 	};
 
@@ -78,14 +79,14 @@ public class Manager {
 		Implementation.useAbstractEnumThread(false);
 		Implementation.forceServerType(Implementation.Type.BUKKIT);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
-		options.setWorkingDirectory(chDirectory);
+		options.setWorkingDirectory(CH_DIRECTORY);
 		persistenceNetwork = new PersistenceNetwork(CommandHelperFileLocations.getDefault().getPersistenceConfig(),
 				CommandHelperFileLocations.getDefault().getDefaultPersistenceDBFile().toURI(), options);
-		Installer.Install(chDirectory);
-		CHLog.initialize(chDirectory);
+		Installer.Install(CH_DIRECTORY);
+		CHLog.initialize(CH_DIRECTORY);
 		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
 		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork,
-				chDirectory, new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile()),
+				CH_DIRECTORY, new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile()),
 				new TaskManager());
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
@@ -94,7 +95,7 @@ public class Manager {
 		try {
 			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null, true)), env, null, null);
-		} catch(ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 		}
 		pl(GREEN + "Welcome to the CommandHelper " + CYAN + "Data Manager!");
 		pl(BLINKON + RED + "Warning!" + BLINKOFF + YELLOW + " Be sure your server is not running before using this tool to make changes to your database!");
@@ -137,7 +138,7 @@ public class Manager {
 				+ "them straight into another database. If there are key conflicts, this tool will prompt\n"
 				+ "you for an action.");
 		ConnectionMixinFactory.ConnectionMixinOptions mixinOptions = new ConnectionMixinFactory.ConnectionMixinOptions();
-		mixinOptions.setWorkingDirectory(chDirectory);
+		mixinOptions.setWorkingDirectory(CH_DIRECTORY);
 		DataSource source;
 		DataSource destination;
 
@@ -153,7 +154,7 @@ public class Manager {
 				try {
 					source = DataSourceFactory.GetDataSource(ssource, mixinOptions);
 					break;
-				} catch(DataSourceException | URISyntaxException ex) {
+				} catch (DataSourceException | URISyntaxException ex) {
 					pl(RED + ex.getMessage());
 				}
 			} while(true);
@@ -165,7 +166,7 @@ public class Manager {
 				try {
 					destination = DataSourceFactory.GetDataSource(sdestination, mixinOptions);
 					break;
-				} catch(DataSourceException | URISyntaxException ex) {
+				} catch (DataSourceException | URISyntaxException ex) {
 					pl(RED + ex.getMessage());
 				}
 			} while(true);
@@ -254,11 +255,11 @@ public class Manager {
 				}
 				try {
 					dm.waitForThreads();
-				} catch(InterruptedException ex) {
+				} catch (InterruptedException ex) {
 					//
 				}
 				break;
-			} catch(DataSourceException | ReadOnlyException | IOException ex) {
+			} catch (DataSourceException | ReadOnlyException | IOException ex) {
 				pl(RED + ex.getMessage());
 			}
 		} while(true);
@@ -280,13 +281,13 @@ public class Manager {
 					for(String[] key : keySet) {
 						try {
 							persistenceNetwork.clearKey(dm, key);
-						} catch(ReadOnlyException ex) {
+						} catch (ReadOnlyException ex) {
 							pl(RED + "Read only data source found: " + ex.getMessage());
 						}
 					}
 					try {
 						dm.waitForThreads();
-					} catch(InterruptedException e) {
+					} catch (InterruptedException e) {
 						//
 					}
 					pl("Done!");
@@ -294,7 +295,7 @@ public class Manager {
 			} else if(choice.equalsIgnoreCase("yes")) {
 				pl("No, you have to type YES exactly.");
 			}
-		} catch(DataSourceException | IOException ex) {
+		} catch (DataSourceException | IOException ex) {
 			pl(RED + ex.getMessage());
 		}
 	}
@@ -439,7 +440,7 @@ public class Manager {
 			}
 			pl(CYAN + key + ":" + WHITE + persistenceNetwork.get(k));
 			return true;
-		} catch(DataSourceException ex) {
+		} catch (DataSourceException ex) {
 			pl(RED + ex.getMessage());
 			return false;
 		}
@@ -456,11 +457,11 @@ public class Manager {
 			persistenceNetwork.set(dm, k, value);
 			try {
 				dm.waitForThreads();
-			} catch(InterruptedException e) {
+			} catch (InterruptedException e) {
 				//
 			}
 			return true;
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			pl(RED + ex.getMessage());
 			return false;
 		}
@@ -474,14 +475,14 @@ public class Manager {
 				persistenceNetwork.clearKey(dm, k);
 				try {
 					dm.waitForThreads();
-				} catch(InterruptedException e) {
+				} catch (InterruptedException e) {
 					//
 				}
 				return true;
 			} else {
 				return false;
 			}
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			pl(RED + ex.getMessage());
 			return false;
 		}
@@ -495,7 +496,7 @@ public class Manager {
 				pl(CYAN + StringUtils.Join(key, ".") + ": " + WHITE + persistenceNetwork.get(key));
 			}
 			pl(BLUE + count + " items found");
-		} catch(Exception e) {
+		} catch (Exception e) {
 			pl(RED + e.getMessage());
 		}
 	}
@@ -526,14 +527,14 @@ public class Manager {
 				File def = MethodScriptFileLocations.getDefault().getPersistenceConfig();
 				while(true) {
 					pl("What is the input configuration (where keys will be read in from, then deleted)? Leave blank for the default, which is " + def.toString()
-							+ ". The path should be relative to " + jarLocation.toString());
+							+ ". The path should be relative to " + JAR_LOCATION.toString());
 					String sinput = prompt();
 					if("".equals(sinput.trim())) {
 						input = def;
 					} else {
 						File temp = new File(sinput);
 						if(!temp.isAbsolute()) {
-							temp = new File(jarLocation, sinput);
+							temp = new File(JAR_LOCATION, sinput);
 						}
 						input = temp;
 					}
@@ -544,7 +545,7 @@ public class Manager {
 					}
 				}
 				while(true) {
-					pl("What is the output configuration (where keys will be written to)? The path should be relative to " + jarLocation.toString());
+					pl("What is the output configuration (where keys will be written to)? The path should be relative to " + JAR_LOCATION.toString());
 					String soutput = prompt();
 					if("".equals(soutput.trim())) {
 						pl(RED + "The output cannot be empty");
@@ -552,7 +553,7 @@ public class Manager {
 					} else {
 						File temp = new File(soutput);
 						if(!temp.isAbsolute()) {
-							temp = new File(jarLocation, soutput);
+							temp = new File(JAR_LOCATION, soutput);
 						}
 						output = temp;
 					}
@@ -576,13 +577,13 @@ public class Manager {
 			URI defaultURI;
 			try {
 				defaultURI = new URI("file://persistence.db");
-			} catch(URISyntaxException ex) {
+			} catch (URISyntaxException ex) {
 				throw new Error(ex);
 			}
 			ConnectionMixinFactory.ConnectionMixinOptions mixinOptions = new ConnectionMixinFactory.ConnectionMixinOptions();
 			try {
 				DaemonManager dm = new DaemonManager();
-				mixinOptions.setWorkingDirectory(chDirectory);
+				mixinOptions.setWorkingDirectory(CH_DIRECTORY);
 				PersistenceNetwork pninput = new PersistenceNetwork(input, defaultURI, mixinOptions);
 				PersistenceNetwork pnoutput = new PersistenceNetwork(output, defaultURI, mixinOptions);
 				Pattern p = Pattern.compile(DataSourceFilter.toRegex(filter));
@@ -605,12 +606,12 @@ public class Manager {
 							transferred++;
 							try {
 								pninput.clearKey(dm, k);
-							} catch(ReadOnlyException ex) {
+							} catch (ReadOnlyException ex) {
 								pl(RED + "Could not clear out original key for the value for \"" + MAGENTA + StringUtils.Join(k, ".") + RED + "\", as the input"
 										+ " file is set to read only.");
 								errors = true;
 							}
-						} catch(ReadOnlyException ex) {
+						} catch (ReadOnlyException ex) {
 							pl(RED + "Could not write out the value for \"" + MAGENTA + StringUtils.Join(k, ".") + RED + "\", as the output"
 									+ " file is set to read only.");
 							errors = true;
@@ -628,7 +629,7 @@ public class Manager {
 				}
 				pl(GREEN + "If this is being done as part of an entire transfer process, don't forget to set " + output.toString()
 						+ " as your main Persistence Network configuration file.");
-			} catch(IOException | DataSourceException ex) {
+			} catch (IOException | DataSourceException ex) {
 				Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -707,13 +708,13 @@ public class Manager {
 						}
 					}
 					runningTotal += map.size();
-				} catch(ReadOnlyException ex) {
+				} catch (ReadOnlyException ex) {
 					pl(RED + "Cannot delete any keys from " + uri + " as it is marked as read only, so it is being skipped.");
 				}
 				if("delete".equals(action)) {
 					try {
 						dm.waitForThreads();
-					} catch(InterruptedException ex) {
+					} catch (InterruptedException ex) {
 						// Ignored
 					}
 				}
@@ -741,7 +742,7 @@ public class Manager {
 					pl(GREEN + "Found " + StringUtils.PluralTemplateHelper(runningTotal, "one hidden key", "%d hidden keys") + " in total.");
 				}
 			}
-		} catch(URISyntaxException | IOException | DataSourceException ex) {
+		} catch (URISyntaxException | IOException | DataSourceException ex) {
 			pl(RED + ex.getMessage());
 			ex.printStackTrace(StreamUtils.GetSystemErr());
 		}

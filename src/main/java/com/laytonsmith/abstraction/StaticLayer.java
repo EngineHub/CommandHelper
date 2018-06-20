@@ -42,7 +42,7 @@ public final class StaticLayer {
 					}
 					convertor = (Convertor) c.newInstance();
 					//At this point we are all set
-				} catch(Exception e) {
+				} catch (Exception e) {
 					StreamUtils.GetSystemErr().println("Tried to instantiate the Convertor, but couldn't!");
 				}
 			}
@@ -56,12 +56,12 @@ public final class StaticLayer {
 		return convertor.GetLocation(w, x, y, z, yaw, pitch);
 	}
 
-	public static Class<?> GetServerEventMixin() {
-		return convertor.GetServerEventMixin();
-	}
-
 	public static MCLocation GetLocation(MCWorld w, double x, double y, double z) {
 		return GetLocation(w, x, y, z, 0, 0);
+	}
+
+	public static Class<?> GetServerEventMixin() {
+		return convertor.GetServerEventMixin();
 	}
 
 	public static MCItemStack GetItemStack(int type, int qty) {

@@ -62,7 +62,7 @@ public class DocGen {
 			//System.exit(0);
 			//events("wiki");
 			//StreamUtils.GetSystemOut().println(Template("persistence_network"));
-		} catch(Throwable t) {
+		} catch (Throwable t) {
 			t.printStackTrace();
 			System.exit(1);
 		} finally {
@@ -172,7 +172,7 @@ public class DocGen {
 					template = template.replaceAll("%%" + Pattern.quote(name) + "%%", templateValue.replace("$", "\\$").replaceAll("\\'", "\\\\'"));
 				}
 				return template;
-			} catch(RuntimeException e) {
+			} catch (RuntimeException e) {
 				throw new RuntimeException("Caught a runtime exception while generating template for " + function, e);
 			}
 		} else {
@@ -248,12 +248,12 @@ public class DocGen {
 				if((m.getModifiers() & Modifier.STATIC) == 0) {
 					try {
 						o = apiClass.newInstance();
-					} catch(InstantiationException ex) {
+					} catch (InstantiationException ex) {
 					}
 				}
 				classDocs = (String) m.invoke(o, (Object[]) null);
-			} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException ex) {
-			} catch(Exception e) {
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException ex) {
+			} catch (Exception e) {
 				e.printStackTrace(StreamUtils.GetSystemErr());
 				StreamUtils.GetSystemErr().println("Continuing however.");
 			}
@@ -407,7 +407,7 @@ public class DocGen {
 					Constructor<Event> cons = (Constructor<Event>) c.getConstructor();
 					Documentation docs = cons.newInstance();
 					list.add(docs);
-				} catch(Exception ex) {
+				} catch (Exception ex) {
 					StreamUtils.GetSystemErr().println("Could not get documentation for " + c.getSimpleName());
 				}
 			}

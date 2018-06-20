@@ -35,7 +35,7 @@ public class Federation {
 //			final CArray connection_data = Static.AssertType(CArray.class, args, 0, this, t);
 //			final CClosure remote_callback = Static.AssertType(CClosure.class, args, 1, this, t);
 //			final CClosure local_callback;
-//			if (args.length >= 3) {
+//			if(args.length >= 3) {
 //				local_callback = Static.AssertType(CClosure.class, args, 2, this, t);
 //			} else {
 //				local_callback = null;
@@ -46,32 +46,32 @@ public class Federation {
 //			final String password;
 //			final File remote_public_key;
 //			final int master_port;
-//			if (connection_data.containsKey("host")) {
+//			if(connection_data.containsKey("host")) {
 //				host = connection_data.get("host").val();
 //			} else {
 //				host = "localhost";
 //			}
-//			if (connection_data.containsKey("server_name")) {
+//			if(connection_data.containsKey("server_name")) {
 //				server_name = connection_data.get("server_name").val();
 //			} else {
 //				throw new ConfigRuntimeException("", ExceptionType.FormatException, t);
 //			}
-//			if (connection_data.containsKey("timeout")) {
+//			if(connection_data.containsKey("timeout")) {
 //				timeout = Static.getInt32(connection_data.get("timeout"), t);
 //			} else {
 //				timeout = 30;
 //			}
-//			if (connection_data.containsKey("password")) {
+//			if(connection_data.containsKey("password")) {
 //				password = connection_data.get("password").val();
 //			} else {
 //				password = null;
 //			}
-//			if (connection_data.containsKey("remote_public_key")) {
+//			if(connection_data.containsKey("remote_public_key")) {
 //				remote_public_key = Static.GetFileFromArgument(connection_data.get("remote_public_key").val(), environment, t, null);
 //			} else {
 //				remote_public_key = null;
 //			}
-//			if (connection_data.containsKey("master_port")) {
+//			if(connection_data.containsKey("master_port")) {
 //				master_port = Static.getInt32(connection_data.get("master_port"), t);
 //			} else {
 //				master_port = com.laytonsmith.core.federation.Federation.MASTER_PORT;
@@ -86,14 +86,14 @@ public class Federation {
 //					Socket s;
 //					// Search through the existing connections, and try to find it. If it's already connected, we'll reuse that socket.
 //					synchronized (FederationConnection.connectionEstablishmentLock) {
-//						if (federationConnections.containsKey(server_name)) {
+//						if(federationConnections.containsKey(server_name)) {
 //							s = federationConnections.get(server_name).socket;
 //						} else {
 //							s = new Socket();
 //							try {
 //								s.connect(new InetSocketAddress(host, master_port), timeout);
 //							} catch (SocketTimeoutException ex) {
-//								if (local_callback != null) {
+//								if(local_callback != null) {
 //									StaticLayer.GetConvertor().runOnMainThreadLater(dm, new Runnable() {
 //
 //										@Override
@@ -105,7 +105,7 @@ public class Federation {
 //								return;
 //							} catch (IOException ex) {
 //								//Could not connect for some other reason
-//								if (local_callback != null) {
+//								if(local_callback != null) {
 //									final CArray exception = ObjectGenerator.GetGenerator().exception(new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex), t);
 //									StaticLayer.GetConvertor().runOnMainThreadLater(dm, new Runnable() {
 //
@@ -263,41 +263,41 @@ public class Federation {
 //			final String allow_from;
 //			final int master_port;
 //
-//			if (!(args[0] instanceof CArray)) {
+//			if(!(args[0] instanceof CArray)) {
 //				throw new Exceptions.CastException("Expecting argument 1 to be an array.", t);
 //			}
 //
 //			CArray connection_details = (CArray) args[0];
-//			if (connection_details.containsKey("server_name")) {
+//			if(connection_details.containsKey("server_name")) {
 //				server_name = connection_details.get("server_name").val();
 //			} else {
 //				throw new Exceptions.FormatException("server_name is a required key in " + getName(), t);
 //			}
-//			if (connection_details.containsKey("password")) {
+//			if(connection_details.containsKey("password")) {
 //				password = connection_details.get("password").val();
 //			} else {
 //				password = null;
 //			}
-//			if (connection_details.containsKey("authorized_keys")) {
+//			if(connection_details.containsKey("authorized_keys")) {
 //				authorized_keys = Static.GetFileFromArgument(connection_details.get("authorized_keys").val(), environment, t, null);
 //			} else {
 //				authorized_keys = null;
 //			}
-//			if (connection_details.containsKey("allow_from")) {
+//			if(connection_details.containsKey("allow_from")) {
 //				allow_from = connection_details.get("allow_from").val();
 //			} else {
 //				throw new Exceptions.FormatException("allow_from is a required key in " + getName(), t);
 //			}
-//			if (connection_details.containsKey("master_port")) {
+//			if(connection_details.containsKey("master_port")) {
 //				master_port = Static.getInt32(connection_details.get("master_port"), t);
 //			} else {
 //				master_port = MASTER_PORT;
 //			}
-//			if (master_port < 0 || master_port > 65535) {
+//			if(master_port < 0 || master_port > 65535) {
 //				throw new Exceptions.RangeException("master_port must be between 0 and 65535.", t);
 //			}
 //
-//			if (federationServers.containsKey(server_name)) {
+//			if(federationServers.containsKey(server_name)) {
 //				// Quick check to see if the server is already registered on this server. We still can't assume that it's globally
 //				// unregistered though, we have to check in the registration database.
 //				throw new Exceptions.FormatException("A server with the name \"" + server_name + "\" is already registered.", t);
@@ -308,9 +308,9 @@ public class Federation {
 //			// Argument parsing and validation is now done.
 //			final boolean is_master;
 //			try {
-//				if (pn.hasKey(new String[]{"federation", server_name})) {
+//				if(pn.hasKey(new String[]{"federation", server_name})) {
 //					FederationRegistration reg = FederationRegistration.fromJSON(pn.get(new String[]{"federation", server_name}));
-//					if (reg.updatedSince(DEAD_SERVER_TIMEOUT * 1000)) {
+//					if(reg.updatedSince(DEAD_SERVER_TIMEOUT * 1000)) {
 //						// There's already a server that has reported in in the last X seconds, so we need
 //						// to error out.
 //						throw new Exceptions.FormatException("A server with the name \"" + server_name + "\" is already registered.", t);
@@ -331,13 +331,13 @@ public class Federation {
 //			federationServers.put(server_name, server);
 //
 //			synchronized (serverCountLock) {
-//				if (serverCount == 0) {
+//				if(serverCount == 0) {
 //					dm.activateThread(null);
 //				}
 //				serverCount++;
 //			}
 //
-//			if (is_master) {
+//			if(is_master) {
 //				// We have to do this on the main thread, otherwise it runs a higher risk of becoming unavailable due
 //				// to threading issues.
 //				StartMasterSocket(pn, dm, server_name, master_port);
@@ -349,12 +349,12 @@ public class Federation {
 //
 //					@Override
 //					public void run() {
-//						while (true) {
+//						while(true) {
 //							try {
 //								// Else, we need to ask the server for a port, then listen on that port.
 //								int port;
 //								Socket masterSocket = new Socket("localhost", master_port);
-//								try (
+//								try(
 //										OutputStream os = masterSocket.getOutputStream();
 //										InputStream is = new BufferedInputStream(masterSocket.getInputStream());
 //										PrintWriter out = new PrintWriter(os, true);
@@ -371,7 +371,7 @@ public class Federation {
 //								// We're also going to set up a heartbeat thread, which will update our heartbeat every X seconds in the registration table.
 //								AddShutdownHook(pn, dm, socket, server_name);
 //								AddHeartbeatThread(pn, dm, server_name, socket);
-//								while (!socket.isClosed()) {
+//								while(!socket.isClosed()) {
 //									Socket s = socket.accept();
 //									HandleConnection(pn, s);
 //								}
@@ -379,7 +379,7 @@ public class Federation {
 //								// The master socket has been denied, so let's try to start up the master again.
 //								ServerSocket s = StartMasterSocket(pn, dm, server_name, master_port);
 //								// If the master socket is now us, we can break.
-//								if (s.getLocalPort() == master_port) {
+//								if(s.getLocalPort() == master_port) {
 //									break;
 //								} else {
 //									// Otherwise restart ourselves.
@@ -486,8 +486,8 @@ public class Federation {
 //		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 //			String server_name = args[0].val();
 //
-//			for (FederationServer server : federationServers.values()) {
-//				if (server.server_name.equals(server_name)) {
+//			for(FederationServer server : federationServers.values()) {
+//				if(server.server_name.equals(server_name)) {
 //					try {
 //						// Simply closing the socket should shutdown all the appropriate threads correctly.
 //						server.getServerSocket().close();
@@ -500,7 +500,7 @@ public class Federation {
 //			federationServers.remove(server_name);
 //			synchronized (serverCountLock) {
 //				serverCount--;
-//				if (serverCount == 0) {
+//				if(serverCount == 0) {
 //					environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
 //				}
 //			}

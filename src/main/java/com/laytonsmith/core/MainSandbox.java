@@ -24,9 +24,9 @@ public class MainSandbox {
 	}
 
 	public static void main(String[] argv) throws Exception {
-		Interface i_f = NonInheritImplements.Helper.Cast(Interface.class, new A1());
+		Interface interf = NonInheritImplements.Helper.Cast(Interface.class, new A1());
 		System.out.println(NonInheritImplements.Helper.Instanceof(new A2(), Interface.class));
-		myMethod(i_f);
+		myMethod(interf);
 	}
 
 	public static void myMethod(Interface iface) {

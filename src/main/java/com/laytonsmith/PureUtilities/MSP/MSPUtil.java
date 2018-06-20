@@ -4,7 +4,7 @@ package com.laytonsmith.PureUtilities.MSP;
  * Contains static utility methods for the MSP package.
  *
  */
-public class MSPUtil {
+public final class MSPUtil {
 
 	private MSPUtil() {
 	}

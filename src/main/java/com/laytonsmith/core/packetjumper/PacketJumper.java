@@ -23,7 +23,7 @@ public class PacketJumper {
 	private static SortedSet<PacketInfo> packetInfo;
 	@SuppressWarnings("FieldMayBeFinal")
 	private static Thread initializingThread = null;
-	private static final String protocolDocs = "";
+	private static final String PROTOCOL_DOCS = "";
 
 	public static void startup() {
 		if(true) {
@@ -44,13 +44,13 @@ public class PacketJumper {
 //				}
 				String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
 				try {
-					Class PacketClass = Class.forName("net.minecraft.server." + version + ".Packet");
-					Set<Class> packets = ReflectionUtils.getAllExtensions(PacketClass);
+					Class packetClass = Class.forName("net.minecraft.server." + version + ".Packet");
+					Set<Class> packets = ReflectionUtils.getAllExtensions(packetClass);
 					for(Class packet : packets) {
 						packetInfo.add(new PacketInfo(packet));
 					}
 					started = true;
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					StreamUtils.GetSystemOut().println("[CommandHelper] Failed to find Minecraft Packet classes.");
 				}
 			}
@@ -78,7 +78,7 @@ public class PacketJumper {
 	public static Set<PacketInfo> getPacketInfo() {
 		try {
 			waitForInitialization();
-		} catch(InterruptedException ex) {
+		} catch (InterruptedException ex) {
 			Logger.getLogger(PacketJumper.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		return new TreeSet<>(packetInfo);
@@ -87,7 +87,7 @@ public class PacketJumper {
 	public static void fakePacketToPlayer(MCPlayer player, PacketInstance packet) {
 		try {
 			waitForInitialization();
-		} catch(InterruptedException ex) {
+		} catch (InterruptedException ex) {
 			Logger.getLogger(PacketJumper.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		//TODO:
@@ -97,7 +97,7 @@ public class PacketJumper {
 	public static void fakePacketFromPlayer(MCPlayer player, PacketInstance packet) {
 		try {
 			waitForInitialization();
-		} catch(InterruptedException ex) {
+		} catch (InterruptedException ex) {
 			Logger.getLogger(PacketJumper.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		//TODO:
@@ -109,7 +109,7 @@ public class PacketJumper {
 	public static void setPacketRecievedInterceptor(int id, PacketHandler handler) {
 		try {
 			waitForInitialization();
-		} catch(InterruptedException ex) {
+		} catch (InterruptedException ex) {
 			Logger.getLogger(PacketJumper.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		//TODO:
@@ -119,7 +119,7 @@ public class PacketJumper {
 	public static void setPacketSentInterceptor(int id, PacketHandler handler) {
 		try {
 			waitForInitialization();
-		} catch(InterruptedException ex) {
+		} catch (InterruptedException ex) {
 			Logger.getLogger(PacketJumper.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		//TODO:
@@ -129,7 +129,7 @@ public class PacketJumper {
 	public static PacketInstance getPacket(int id, Construct... args) {
 		try {
 			waitForInitialization();
-		} catch(InterruptedException ex) {
+		} catch (InterruptedException ex) {
 			Logger.getLogger(PacketJumper.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		//TODO:

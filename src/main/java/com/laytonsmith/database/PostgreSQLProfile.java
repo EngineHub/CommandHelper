@@ -43,7 +43,7 @@ public class PostgreSQLProfile extends SQLProfile {
 		if(elements.containsKey("port")) {
 			try {
 				port = Integer.parseInt(elements.get("port"));
-			} catch(NumberFormatException ex) {
+			} catch (NumberFormatException ex) {
 				throw new Profiles.InvalidProfileException(ex.getMessage());
 			}
 		} else {
@@ -73,7 +73,7 @@ public class PostgreSQLProfile extends SQLProfile {
 	public String getConnectionString() throws SQLException {
 		try {
 			Class.forName(org.postgresql.Driver.class.getName());
-		} catch(ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			throw new SQLException("Could not load PostgreSQL, check your installation and try again");
 		}
 		try {
@@ -81,7 +81,7 @@ public class PostgreSQLProfile extends SQLProfile {
 					+ (username == null ? "" : "&user=" + URLEncoder.encode(username, "UTF-8"))
 					+ (password == null ? "" : "&password=" + URLEncoder.encode(password, "UTF-8"))
 					+ (ssl == false ? "" : "&ssl=true");
-		} catch(UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException ex) {
 			throw new Error();
 		}
 	}

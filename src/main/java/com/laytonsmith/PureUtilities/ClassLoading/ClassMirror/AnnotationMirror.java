@@ -36,7 +36,7 @@ public class AnnotationMirror implements Serializable {
 		for(Method m : annotation.annotationType().getDeclaredMethods()) {
 			try {
 				values.add(new AnnotationValue(m.getName(), m.invoke(annotation)));
-			} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -108,9 +108,9 @@ public class AnnotationMirror implements Serializable {
 		try {
 			Method m = c.getMethod(forName);
 			return m.getDefaultValue();
-		} catch(NoSuchMethodException ex) {
+		} catch (NoSuchMethodException ex) {
 			return null;
-		} catch(SecurityException ex) {
+		} catch (SecurityException ex) {
 			throw new RuntimeException(ex);
 		}
 	}

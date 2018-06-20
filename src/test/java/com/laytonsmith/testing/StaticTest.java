@@ -110,7 +110,7 @@ public class StaticTest {
 		try {
 			Implementation.setServerType(Implementation.Type.TEST);
 			env = Static.GenerateStandaloneEnvironment();
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -209,13 +209,13 @@ public class StaticTest {
 		//TODO
 	}
 
-	private static final ArrayList<String> tested = new ArrayList<String>();
+	private static final ArrayList<String> TESTED = new ArrayList<String>();
 
 	public static void TestExec(Function f, MCCommandSender p, String commandType) throws Exception {
-		if(tested.contains(f.getName() + String.valueOf(p))) {
+		if(TESTED.contains(f.getName() + String.valueOf(p))) {
 			return;
 		}
-		tested.add(f.getName() + String.valueOf(p));
+		TESTED.add(f.getName() + String.valueOf(p));
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(p);
 		//See if the function throws something other than a ConfigRuntimeException or CancelCommandException if we send it bad arguments,
 		//keeping in mind of course, that it isn't supposed to be able to accept the wrong number of arguments. Specifically, we want to try
@@ -267,8 +267,8 @@ public class StaticTest {
 				}
 				try {
 					f.exec(Target.UNKNOWN, env, con);
-				} catch(CancelCommandException e) {
-				} catch(ConfigRuntimeException e) {
+				} catch (CancelCommandException e) {
+				} catch (ConfigRuntimeException e) {
 					if(f.getName().equals("throw")) {
 						// throw() can throw anything.
 						return;
@@ -285,7 +285,7 @@ public class StaticTest {
 						fail("The documentation for " + f.getName() + " doesn't state that it can throw a "
 								+ name + ", but it did.");
 					}
-				} catch(Throwable e) {
+				} catch (Throwable e) {
 					if(e instanceof LoopBreakException && !f.getName().equals("break")) {
 						fail("Only break() can throw LoopBreakExceptions");
 					}
@@ -576,11 +576,11 @@ public class StaticTest {
 //				new File("plugins/CommandHelper/LocalPackages"),
 //				new File("plugins/CommandHelper/preferences.ini"),
 //				new File("plugins/CommandHelper/main.ms"), prm, chp);
-//		try{
+//		try {
 //			Field aliasCore = CommandHelperPlugin.class.getDeclaredField("ac");
 //			aliasCore.setAccessible(true);
 //			aliasCore.set(null, ac);
-//		} catch(Exception e){
+//		} catch (Exception e){
 //			throw new RuntimeException("Core could not be injected", e);
 //		}
 //	}
@@ -623,7 +623,7 @@ public class StaticTest {
 		frontendInstalled = true;
 		try {
 			Prefs.init(new File("preferences.ini"));
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(StaticTest.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		CHLog.initialize(new File("."));
@@ -642,7 +642,7 @@ public class StaticTest {
 			//We need to add the test directory to the ClassDiscovery path
 			//This should probably not be hard coded at some point.
 			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(new File("./target/test-classes").toURI().toURL());
-		} catch(MalformedURLException ex) {
+		} catch (MalformedURLException ex) {
 			throw new RuntimeException(ex);
 		}
 
@@ -812,6 +812,11 @@ public class StaticTest {
 		}
 
 		@Override
+		public MCColor GetColor(String colorName, Target t) throws CREFormatException {
+			return ConvertorHelper.GetColor(colorName, t);
+		}
+
+		@Override
 		public MCPattern GetPattern(MCDyeColor color, MCPatternShape shape) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
@@ -869,11 +874,6 @@ public class StaticTest {
 		@Override
 		public MCPlugin GetPlugin() {
 			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		@Override
-		public MCColor GetColor(String colorName, Target t) throws CREFormatException {
-			return ConvertorHelper.GetColor(colorName, t);
 		}
 
 		@Override
@@ -959,7 +959,7 @@ public class StaticTest {
 				try {
 					f = search.getDeclaredField(name);
 					break;
-				} catch(NoSuchFieldException e) {
+				} catch (NoSuchFieldException e) {
 					search = search.getSuperclass();
 				}
 			}
@@ -975,13 +975,13 @@ public class StaticTest {
 			} else {
 				ret = f.get(in);
 			}
-		} catch(IllegalArgumentException | IllegalAccessException ex) {
+		} catch (IllegalArgumentException | IllegalAccessException ex) {
 			//This shouldn't happen ever, since we are using the class provided by in, and sending
 			//get/set in as well.
 			fail(ex.getMessage());
-		} catch(NoSuchFieldException ex) { //This shouldn't happen ever, since we set it to accessible
+		} catch (NoSuchFieldException ex) { //This shouldn't happen ever, since we set it to accessible
 			fail("No such field \"" + name + "\" exists in the class " + in.getClass().getName());
-		} catch(SecurityException ex) {
+		} catch (SecurityException ex) {
 			fail("A security policy is preventing the test from getting \"" + name + "\" in the object provided.");
 		}
 		return (T) ret;

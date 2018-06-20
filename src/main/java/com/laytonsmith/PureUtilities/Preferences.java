@@ -174,35 +174,35 @@ public class Preferences {
 			case INT:
 				try {
 					return Integer.parseInt(value);
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					logger.log(Level.WARNING, "[" + appName + "] expects the value of " + p.name + " to be an integer. Using the default of " + p.value);
 					return Integer.parseInt(p.value);
 				}
 			case DOUBLE:
 				try {
 					return Double.parseDouble(value);
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					logger.log(Level.WARNING, "[" + appName + "] expects the value of " + p.name + " to be an double. Using the default of " + p.value);
 					return Double.parseDouble(p.value);
 				}
 			case BOOLEAN:
 				try {
 					return getBoolean(value);
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					logger.log(Level.WARNING, "[" + appName + "] expects the value of " + p.name + " to be an boolean. Using the default of " + p.value);
 					return getBoolean(p.value);
 				}
 			case NUMBER:
 				try {
 					return Integer.parseInt(value);
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					try {
 						return Double.parseDouble(value);
-					} catch(NumberFormatException f) {
+					} catch (NumberFormatException f) {
 						logger.log(Level.WARNING, "[" + appName + "] expects the value of " + p.name + " to be a number. Using the default of " + p.value);
 						try {
 							return Integer.parseInt(p.value);
-						} catch(NumberFormatException g) {
+						} catch (NumberFormatException g) {
 							return Double.parseDouble(p.value);
 						}
 					}
@@ -246,6 +246,7 @@ public class Preferences {
 	 * @param name
 	 * @return
 	 */
+	@Deprecated
 	public Object getPreference(String name) {
 		if(prefs.get(name).objectValue == null) {
 			prefs.get(name).objectValue = getObject(prefs.get(name).value, prefs.get(name));
@@ -367,7 +368,7 @@ public class Preferences {
 			if(prefFile != null) {
 				FileUtil.write(b.toString(), prefFile);
 			}
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			logger.log(Level.WARNING, "[" + appName + "] Could not write out preferences file: " + (prefFile != null ? prefFile.getAbsolutePath() : "null"), ex);
 		}
 	}

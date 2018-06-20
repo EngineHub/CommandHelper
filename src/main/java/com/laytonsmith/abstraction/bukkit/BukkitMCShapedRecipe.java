@@ -21,7 +21,7 @@ public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedReci
 	public String getKey() {
 		try {
 			return r.getKey().getKey();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably prior to 1.12
 			return null;
 		}

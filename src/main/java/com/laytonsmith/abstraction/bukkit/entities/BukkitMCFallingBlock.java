@@ -49,7 +49,7 @@ public class BukkitMCFallingBlock extends BukkitMCEntity implements MCFallingBlo
 	public void setHurtEntities(boolean hurt) {
 		try {
 			f.setHurtEntities(hurt);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// probably prior to 1.8.8
 		}
 	}

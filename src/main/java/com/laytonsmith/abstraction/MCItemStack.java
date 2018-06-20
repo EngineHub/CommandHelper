@@ -9,6 +9,9 @@ public interface MCItemStack extends AbstractionObject {
 
 	short getDurability();
 
+	/**
+	 * @deprecated Magic value
+	 */
 	@Deprecated
 	int getTypeId();
 
@@ -24,6 +27,9 @@ public interface MCItemStack extends AbstractionObject {
 
 	MCMaterial getType();
 
+	/**
+	 * @deprecated Magic value
+	 */
 	@Deprecated
 	void setTypeId(int type);
 

@@ -65,8 +65,8 @@ public class FileHandling {
 	@noboilerplate
 	public static class read extends AbstractFunction {
 
-		public static String file_get_contents(String file_location) throws Exception {
-			return new ZipReader(new File(file_location)).getFileContents();
+		public static String file_get_contents(String fileLocation) throws Exception {
+			return new ZipReader(new File(fileLocation)).getFileContents();
 		}
 
 		@Override
@@ -93,7 +93,7 @@ public class FileHandling {
 				String s = file_get_contents(location.getAbsolutePath());
 				s = s.replaceAll("\n|\r\n", "\n");
 				return new CString(s, t);
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.INFO, "Could not read in file while attempting to find "
 						+ location.getAbsolutePath()
 						+ "\nFile " + (location.exists() ? "exists" : "does not exist"), t);
@@ -196,7 +196,7 @@ public class FileHandling {
 			Environment env;
 			try {
 				env = Static.GenerateStandaloneEnvironment();
-			} catch(IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+			} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
 				throw new ConfigCompileException(ex.getMessage(), t, ex);
 			}
 			String ret = new read().exec(t, env, children.get(0).getData()).val();
@@ -275,7 +275,7 @@ public class FileHandling {
 							//It's an SCP transfer
 							returnString = SSHWrapper.SCPReadString(file);
 							SSHWrapper.closeSessions();
-						} catch(IOException ex) {
+						} catch (IOException ex) {
 							exception = new CREIOException(ex.getMessage(), t, ex);
 						}
 					} else {
@@ -283,7 +283,7 @@ public class FileHandling {
 							//It's a local file read
 							File _file = Static.GetFileFromArgument(file, environment, t, null);
 							returnString = FileUtil.read(_file);
-						} catch(IOException ex) {
+						} catch (IOException ex) {
 							exception = new CREIOException(ex.getMessage(), t, ex);
 						}
 					}
@@ -424,7 +424,7 @@ public class FileHandling {
 			try {
 				InputStream stream = new GZIPInputStream(new FileInputStream(location));
 				return CByteArray.wrap(StreamUtils.GetBytes(stream), t);
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
 						+ "\nFile " + (location.exists() ? "exists" : "does not exist"));
 				throw new CREIOException("File could not be read in.", t);
@@ -486,7 +486,7 @@ public class FileHandling {
 			try {
 				InputStream stream = new BufferedInputStream(new FileInputStream(location));
 				return CByteArray.wrap(StreamUtils.GetBytes(stream), t);
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + location.getAbsolutePath()
 						+ "\nFile " + (location.exists() ? "exists" : "does not exist"));
 				throw new CREIOException("File could not be read in.", t);
@@ -604,7 +604,7 @@ public class FileHandling {
 			File f = Static.GetFileFromArgument(args[0].val(), environment, t, null);
 			try {
 				return new CString(f.getCanonicalPath(), t);
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
 			}
 		}

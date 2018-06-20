@@ -40,7 +40,7 @@ public class BukkitMetadata {
 		return "This class allows manipulation of entity metadata.";
 	}
 
-	public static abstract class MetadataFunction extends AbstractFunction {
+	public abstract static class MetadataFunction extends AbstractFunction {
 
 		@Override
 		public boolean isRestricted() {

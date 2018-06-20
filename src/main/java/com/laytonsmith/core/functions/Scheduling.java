@@ -215,7 +215,7 @@ public class Scheduling {
 			double time = Static.getNumber(x, t);
 			try {
 				Thread.sleep((int) (time * 1000));
-			} catch(InterruptedException ex) {
+			} catch (InterruptedException ex) {
 			}
 			return CVoid.VOID;
 		}
@@ -291,11 +291,11 @@ public class Scheduling {
 						} finally {
 							p.stop();
 						}
-					} catch(ConfigRuntimeException e) {
+					} catch (ConfigRuntimeException e) {
 						ConfigRuntimeException.HandleUncaughtException(e, environment);
-					} catch(CancelCommandException e) {
+					} catch (CancelCommandException e) {
 						//Ok
-					} catch(ProgramFlowManipulationException e) {
+					} catch (ProgramFlowManipulationException e) {
 						ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
 					}
 				}
@@ -381,11 +381,11 @@ public class Scheduling {
 						} finally {
 							p.stop();
 						}
-					} catch(ConfigRuntimeException e) {
+					} catch (ConfigRuntimeException e) {
 						ConfigRuntimeException.HandleUncaughtException(e, environment);
-					} catch(CancelCommandException e) {
+					} catch (CancelCommandException e) {
 						//Ok
-					} catch(ProgramFlowManipulationException e) {
+					} catch (ProgramFlowManipulationException e) {
 						ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
 					} finally {
 						taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.FINISHED);
@@ -521,7 +521,7 @@ public class Scheduling {
 					String[] timezones = ArrayUtils.EMPTY_STRING_ARRAY;
 					try {
 						timezones = TimeZone.getAvailableIDs();
-					} catch(NullPointerException e) {
+					} catch (NullPointerException e) {
 						//This is due to a JDK bug. As you can see, the code above
 						//should never NPE due to our mistake, so it would only occur
 						//during an internal error. The solution that worked for me is here:
@@ -538,7 +538,7 @@ public class Scheduling {
 			});
 			try {
 				return getBundledDocs(map);
-			} catch(DocGenTemplates.Generator.GenerateException ex) {
+			} catch (DocGenTemplates.Generator.GenerateException ex) {
 				Logger.getLogger(Scheduling.class.getName()).log(Level.SEVERE, null, ex);
 				return getBundledDocs();
 			}
@@ -590,7 +590,7 @@ public class Scheduling {
 			SimpleDateFormat dateFormat;
 			try {
 				dateFormat = new SimpleDateFormat(args[0].toString(), locale);
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CREFormatException(ex.getMessage(), t);
 			}
 			dateFormat.setTimeZone(timezone);
@@ -612,7 +612,7 @@ public class Scheduling {
 				/* 10 */ new ExampleScript("Long format", "simple_date('EEE, d MMM yyyy HH:mm:ss Z')", ":Wed, 5 Jun 2013 11:42:56 -0500"),
 				/* 10 */ new ExampleScript("Long format with alternate locale", "simple_date('EEE, d MMM yyyy HH:mm:ss Z', 1444418254496, 'CET', 'no_NO')"),
 				/* 11 */ new ExampleScript("Computer readable format", "simple_date('yyMMddHHmmssZ')", ":130605114256-0500"),
-				/* 12 */ new ExampleScript("With milliseconds", "simple_date('yyyy-MM-dd\\'T\\'HH:mm:ss.SSSZ')", ":2013-06-05T11:42:56.799-0500"),};
+				/* 12 */ new ExampleScript("With milliseconds", "simple_date('yyyy-MM-dd\\'T\\'HH:mm:ss.SSSZ')", ":2013-06-05T11:42:56.799-0500")};
 		}
 	}
 
@@ -642,7 +642,7 @@ public class Scheduling {
 				dateFormat = new SimpleDateFormat(args[0].toString());
 				Date d = dateFormat.parse(args[1].val());
 				return new CInt(d.getTime(), t);
-			} catch(IllegalArgumentException | ParseException ex) {
+			} catch (IllegalArgumentException | ParseException ex) {
 				throw new CREFormatException(ex.getMessage(), t);
 			}
 		}
@@ -708,7 +708,7 @@ public class Scheduling {
 			String[] timezones = ArrayUtils.EMPTY_STRING_ARRAY;
 			try {
 				timezones = TimeZone.getAvailableIDs();
-			} catch(NullPointerException e) {
+			} catch (NullPointerException e) {
 				//This is due to a JDK bug. As you can see, the code above
 				//should never NPE due to our mistake, so it would only occur
 				//during an internal error. The solution that worked for me is here:
@@ -753,9 +753,9 @@ public class Scheduling {
 	public static class set_cron extends AbstractFunction implements Optimizable {
 
 		private static Thread cronThread = null;
-		private static final Object cronThreadLock = new Object();
-		private static final Map<Integer, CronFormat> cronJobs = new HashMap<Integer, CronFormat>();
-		private static final AtomicInteger jobIDs = new AtomicInteger(1);
+		private static final Object CRON_THREAD_LOCK = new Object();
+		private static final Map<Integer, CronFormat> CRON_JOBS = new HashMap<Integer, CronFormat>();
+		private static final AtomicInteger JOB_IDS = new AtomicInteger(1);
 
 		/**
 		 * Stops a job from running again, and returns true if the value was actually removed. False is returned
@@ -765,9 +765,9 @@ public class Scheduling {
 		 * @param jobID The job ID
 		 */
 		public static boolean stopJob(int jobID) {
-			synchronized(cronJobs) {
-				if(cronJobs.containsKey(jobID)) {
-					cronJobs.remove(jobID);
+			synchronized(CRON_JOBS) {
+				if(CRON_JOBS.containsKey(jobID)) {
+					CRON_JOBS.remove(jobID);
 					return true;
 				} else {
 					return false;
@@ -803,7 +803,7 @@ public class Scheduling {
 			format.job = ((CClosure) args[1]);
 			//At this point, the format is complete. We need to start up the cron thread if it's not running, and
 			//then register this job, as well as inform clear_task of this id.
-			synchronized(cronThreadLock) {
+			synchronized(CRON_THREAD_LOCK) {
 				if(cronThread == null) {
 					final DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
 					final MutableObject<Boolean> stopCron = new MutableObject<>(false);
@@ -813,11 +813,11 @@ public class Scheduling {
 						public void run() {
 							cronThread = null;
 							stopCron.setObject(true);
-							synchronized(cronJobs) {
-								cronJobs.clear();
+							synchronized(CRON_JOBS) {
+								CRON_JOBS.clear();
 							}
-							synchronized(cronThreadLock) {
-								cronThreadLock.notifyAll();
+							synchronized(CRON_THREAD_LOCK) {
+								CRON_THREAD_LOCK.notifyAll();
 							}
 						}
 					});
@@ -834,9 +834,9 @@ public class Scheduling {
 									//Set the lastMinute value to now
 									lastMinute = System.currentTimeMillis() / 1000 / 60;
 									//Activate
-									synchronized(cronJobs) {
+									synchronized(CRON_JOBS) {
 										Calendar c = Calendar.getInstance();
-										for(final CronFormat f : cronJobs.values()) {
+										for(final CronFormat f : CRON_JOBS.values()) {
 											//Check to see if it is currently time to run each job
 											if(f.min.contains(c.get(Calendar.MINUTE))
 													&& f.hour.contains(c.get(Calendar.HOUR_OF_DAY))
@@ -850,7 +850,7 @@ public class Scheduling {
 													public void run() {
 														try {
 															f.job.execute();
-														} catch(ConfigRuntimeException ex) {
+														} catch (ConfigRuntimeException ex) {
 															ConfigRuntimeException.HandleUncaughtException(ex, f.job.getEnv());
 														}
 													}
@@ -859,10 +859,10 @@ public class Scheduling {
 										}
 									}
 								} //else continue, we'll wait another second.
-								synchronized(cronThreadLock) {
+								synchronized(CRON_THREAD_LOCK) {
 									try {
-										cronThreadLock.wait(1000);
-									} catch(InterruptedException ex) {
+										CRON_THREAD_LOCK.wait(1000);
+									} catch (InterruptedException ex) {
 										//Continue
 									}
 								}
@@ -874,9 +874,9 @@ public class Scheduling {
 					cronThread.start();
 				}
 			}
-			int jobID = jobIDs.getAndIncrement();
-			synchronized(cronJobs) {
-				cronJobs.put(jobID, format);
+			int jobID = JOB_IDS.getAndIncrement();
+			synchronized(CRON_JOBS) {
+				CRON_JOBS.put(jobID, format);
 				format.job.getEnv().getEnv(GlobalEnv.class).SetCustom("cron-task-id", jobID);
 			}
 			return new CInt(jobID, t);
@@ -1044,7 +1044,7 @@ public class Scheduling {
 				for(String s : segment) {
 					try {
 						list.add(Integer.parseInt(s));
-					} catch(NumberFormatException ex) {
+					} catch (NumberFormatException ex) {
 						//Any unexpected strings would show up here. The expected string values would have already
 						//been replaced with a number, so this should work if there are no errors.
 						throw new CREFormatException("Unknown string passed in format for " + getName() + " \"" + s + "\"", t);

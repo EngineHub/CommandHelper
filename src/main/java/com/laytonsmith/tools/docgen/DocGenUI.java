@@ -79,20 +79,20 @@ public class DocGenUI extends javax.swing.JFrame {
 						functions.isSelected(), examples.isSelected(), events.isSelected(), templates.isSelected());
 				handler.go();
 				manager.setStatus("Done.");
-			} catch(DocGenUIHandler.APIException e) {
+			} catch (DocGenUIHandler.APIException e) {
 				e.printStackTrace();
 				manager.setStatus("Error: " + e.getMessage());
-			} catch(DocGenUIHandler.QuickStop e) {
+			} catch (DocGenUIHandler.QuickStop e) {
 				manager.setStatus("Info: Stopped");
-			} catch(Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 				throw e;
 			}
-		} catch(MalformedURLException ex) {
+		} catch (MalformedURLException ex) {
 			manager.setStatus("Info: Malformed URL");
-		} catch(UnknownHostException e) {
+		} catch (UnknownHostException e) {
 			manager.setStatus("Error: Unknown host: " + e.getMessage());
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			manager.setStatus(ex.getClass().getSimpleName() + ": " + ex.getMessage());
 		} finally {
 			handler = null;
@@ -271,9 +271,9 @@ public class DocGenUI extends javax.swing.JFrame {
 		);
 
 		pack();
-	}// </editor-fold>//GEN-END:initComponents
+	} // </editor-fold>//GEN-END:initComponents
 
-	private void uploadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uploadButtonActionPerformed
+	private void uploadButtonActionPerformed(java.awt.event.ActionEvent evt) { // GEN-FIRST:event_uploadButtonActionPerformed
 		uploadButton.setText("Stop");
 		if(handler != null) {
 			handler.stop();
@@ -285,18 +285,18 @@ public class DocGenUI extends javax.swing.JFrame {
 					try {
 						Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
 						CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
 					}
 					doUpload();
 				}
 			}, "UploadThread").start();
 		}
-	}//GEN-LAST:event_uploadButtonActionPerformed
+	} // GEN-LAST:event_uploadButtonActionPerformed
 
-	private void singleFunctionUploadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_singleFunctionUploadButtonActionPerformed
+	private void singleFunctionUploadButtonActionPerformed(java.awt.event.ActionEvent evt) { // GEN-FIRST:event_singleFunctionUploadButtonActionPerformed
 		// TODO add your handling code here:
-	}//GEN-LAST:event_singleFunctionUploadButtonActionPerformed
+	} // GEN-LAST:event_singleFunctionUploadButtonActionPerformed
 
 	/**
 	 * @param args the command line arguments
@@ -305,7 +305,7 @@ public class DocGenUI extends javax.swing.JFrame {
 		Implementation.forceServerType(Implementation.Type.BUKKIT);
 		try {
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
@@ -325,7 +325,7 @@ public class DocGenUI extends javax.swing.JFrame {
 //			});
 //		} catch (Exception ex) {
 //			Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
-//		} catch(NoClassDefFoundError e){
+//		} catch (NoClassDefFoundError e){
 //			//This shouldn't be an error, they just won't have the awesome
 //			//theme
 //			System.err.println("NoClassDefFoundError occured while trying to install LaF. Do you have Substance installed?");

@@ -53,7 +53,7 @@ public class CSlice extends CArray {
 		try {
 			start = Long.parseLong(sstart.trim());
 			finish = Long.parseLong(sfinish.trim());
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			throw new CRECastException("Expecting integer in a slice, but was given \"" + sstart + "\" and \"" + sfinish + "\"", t);
 		}
 		calculateCaches();
@@ -178,7 +178,7 @@ public class CSlice extends CArray {
 			} else {
 				return start >= i && i <= finish;
 			}
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			return false;
 		}
 	}
@@ -188,7 +188,7 @@ public class CSlice extends CArray {
 		try {
 			long i = Long.parseLong(c);
 			return i >= 0 && i < size;
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			return false;
 		}
 	}

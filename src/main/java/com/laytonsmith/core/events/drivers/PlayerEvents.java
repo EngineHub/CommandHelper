@@ -953,7 +953,6 @@ public class PlayerEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if(event instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) event;
-
 			}
 			return false;
 		}
@@ -1547,7 +1546,7 @@ public class PlayerEvents {
 							Construct v = ((CArray) value).get(index, value.getTarget());
 							try {
 								list.add(Static.GetPlayer(v, value.getTarget()));
-							} catch(ConfigRuntimeException ex) {
+							} catch (ConfigRuntimeException ex) {
 								//Ignored
 							}
 						}
@@ -1566,7 +1565,7 @@ public class PlayerEvents {
 						// Throws UnknownFormatConversionException, MissingFormatException,
 						// IllegalFormatConversionException, FormatFlagsConversionMismatchException, NullPointerException and possibly more.
 						e.setFormat(format);
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						// Check the format to give a better exception message.
 						if(format.replaceAll("%%", "").replaceAll("\\%\\%|\\%[12]\\$s", "").contains("%")) {
 							throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
@@ -1677,7 +1676,7 @@ public class PlayerEvents {
 							Construct v = ((CArray) value).get(index, value.getTarget());
 							try {
 								list.add(Static.GetPlayer(v, value.getTarget()));
-							} catch(ConfigRuntimeException ex) {
+							} catch (ConfigRuntimeException ex) {
 								//Ignored
 							}
 						}
@@ -1689,7 +1688,7 @@ public class PlayerEvents {
 				if("format".equals(key)) {
 					try {
 						e.setFormat(value.nval());
-					} catch(UnknownFormatConversionException | IllegalFormatConversionException ex) {
+					} catch (UnknownFormatConversionException | IllegalFormatConversionException ex) {
 						throw new CREFormatException(ex.getMessage(), value.getTarget());
 					}
 				}
@@ -1871,28 +1870,27 @@ public class PlayerEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if(event instanceof MCWorldChangedEvent) {
 				MCWorldChangedEvent e = (MCWorldChangedEvent) event;
-				return true;
 			}
 			return false;
 		}
 
 	}
 
-	private static final Set<Integer> thresholdList = new HashSet<>();
+	private static final Set<Integer> THRESHOLD_LIST = new HashSet<>();
 
 	public static Set<Integer> GetThresholdList() {
-		return thresholdList;
+		return THRESHOLD_LIST;
 	}
 
-	private static final Map<Integer, Map<String, MCLocation>> lastPlayerLocations = new HashMap<>();
+	private static final Map<Integer, Map<String, MCLocation>> LAST_PLAYER_LOCATIONS = new HashMap<>();
 
 	public static Map<String, MCLocation> GetLastLocations(Integer i) {
-		if(!lastPlayerLocations.containsKey(i)) {
+		if(!LAST_PLAYER_LOCATIONS.containsKey(i)) {
 			HashMap<String, MCLocation> newLocation = new HashMap<>();
-			lastPlayerLocations.put(i, newLocation);
+			LAST_PLAYER_LOCATIONS.put(i, newLocation);
 			return newLocation;
 		}
-		return (lastPlayerLocations.get(i));
+		return (LAST_PLAYER_LOCATIONS.get(i));
 	}
 
 	@api
@@ -1921,8 +1919,8 @@ public class PlayerEvents {
 
 		@Override
 		public void hook() {
-			thresholdList.clear();
-			lastPlayerLocations.clear();
+			THRESHOLD_LIST.clear();
+			LAST_PLAYER_LOCATIONS.clear();
 		}
 
 		@Override
@@ -1932,7 +1930,7 @@ public class PlayerEvents {
 			if(prefilters.containsKey("threshold")) {
 				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
 			}
-			thresholdList.add(threshold);
+			THRESHOLD_LIST.add(threshold);
 		}
 
 		@Override
@@ -1952,8 +1950,8 @@ public class PlayerEvents {
 					}
 				}
 			}
-			thresholdList.remove(threshold);
-			lastPlayerLocations.remove(threshold);
+			THRESHOLD_LIST.remove(threshold);
+			LAST_PLAYER_LOCATIONS.remove(threshold);
 		}
 
 		@Override

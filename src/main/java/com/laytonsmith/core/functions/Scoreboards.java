@@ -57,11 +57,11 @@ public class Scoreboards {
 		if(!isBoard(MAIN)) {
 			try {
 				addBoard(MAIN, Static.getServer().getMainScoreboard(), Target.UNKNOWN);
-			} catch(NotInitializedYetException e) {
+			} catch (NotInitializedYetException e) {
 				//This should only happen during testing or from the shell (or some other cases) so just log
 				//it and continue on.
 				e.printStackTrace(StreamUtils.GetSystemErr());
-			} catch(NoClassDefFoundError ex) {
+			} catch (NoClassDefFoundError ex) {
 				// This will only happen in cases where we are not linked with the bukkit server.
 				// In that case, it means that literally no minecraft functions will work, so
 				// probably we are running from command line or some other tool. In that case,
@@ -213,7 +213,7 @@ public class Scoreboards {
 	/**
 	 * Contains methods that should be the same for most scoreboard functions
 	 */
-	public static abstract class SBFunction extends AbstractFunction {
+	public abstract static class SBFunction extends AbstractFunction {
 
 		/**
 		 * @return true
@@ -254,7 +254,7 @@ public class Scoreboards {
 			String ret;
 			try {
 				ret = getBoardID(p.getScoreboard(), t);
-			} catch(ConfigRuntimeException cre) {
+			} catch (ConfigRuntimeException cre) {
 				ret = p.getName();
 				addBoard(ret, p.getScoreboard(), t);
 			}
@@ -379,7 +379,7 @@ public class Scoreboards {
 				MCCriteria crit;
 				try {
 					crit = MCCriteria.valueOf(args[1].val());
-				} catch(IllegalArgumentException iae) {
+				} catch (IllegalArgumentException iae) {
 					crit = MCCriteria.DUMMY;
 				}
 				os = s.getObjectivesByCriteria(crit.getCriteria());
@@ -529,13 +529,13 @@ public class Scoreboards {
 			if(args.length > 1) {
 				try {
 					criteria = MCCriteria.valueOf(args[1].val().toUpperCase());
-				} catch(IllegalArgumentException iae) {
+				} catch (IllegalArgumentException iae) {
 					// Leave as dummy
 				}
 			}
 			try {
 				s.registerNewObjective(name, criteria.getCriteria());
-			} catch(IllegalArgumentException iae) {
+			} catch (IllegalArgumentException iae) {
 				throw new CREScoreboardException("An objective by that name already exists.", t);
 			}
 			return CVoid.VOID;
@@ -584,7 +584,7 @@ public class Scoreboards {
 			}
 			try {
 				s.registerNewTeam(name);
-			} catch(IllegalArgumentException iae) {
+			} catch (IllegalArgumentException iae) {
 				throw new CREScoreboardException("A team by that name already exists.", t);
 			}
 			return CVoid.VOID;
@@ -641,7 +641,7 @@ public class Scoreboards {
 				} else {
 					try {
 						slot = MCDisplaySlot.valueOf(dis.get("slot", t).val().toUpperCase());
-					} catch(IllegalArgumentException iae) {
+					} catch (IllegalArgumentException iae) {
 						throw new CREFormatException("Unknown displayslot: " + dis.get("slot", t).val(), t);
 					}
 				}
@@ -963,9 +963,9 @@ public class Scoreboards {
 			MCObjective o = s.getObjective(args[0].val());
 			try {
 				o.unregister();
-			} catch(NullPointerException npe) {
+			} catch (NullPointerException npe) {
 				throw new CREScoreboardException("The objective does not exist.", t);
-			} catch(IllegalStateException ise) {
+			} catch (IllegalStateException ise) {
 				throw new CREScoreboardException("The objective has already been unregistered.", t);
 			}
 			return CVoid.VOID;
@@ -1001,9 +1001,9 @@ public class Scoreboards {
 			MCTeam team = s.getTeam(args[0].val());
 			try {
 				team.unregister();
-			} catch(NullPointerException npe) {
+			} catch (NullPointerException npe) {
 				throw new CREScoreboardException("The team does not exist.", t);
-			} catch(IllegalStateException ise) {
+			} catch (IllegalStateException ise) {
 				throw new CREScoreboardException("The team has already been unregistered.", t);
 			}
 			return CVoid.VOID;
@@ -1166,7 +1166,7 @@ public class Scoreboards {
 					MCNameTagVisibility visibility;
 					try {
 						visibility = MCNameTagVisibility.valueOf(options.get("nametagvisibility", t).val().toUpperCase());
-					} catch(IllegalArgumentException iae) {
+					} catch (IllegalArgumentException iae) {
 						throw new CREFormatException("Unknown nametagvisibility: "
 								+ options.get("nametagvisibility", t).val(), t);
 					}
@@ -1177,7 +1177,7 @@ public class Scoreboards {
 						MCOptionStatus collision;
 						try {
 							collision = MCOptionStatus.valueOf(options.get("collisionrule", t).val().toUpperCase());
-						} catch(IllegalArgumentException iae) {
+						} catch (IllegalArgumentException iae) {
 							throw new CREFormatException("Unknown collisionrule: "
 									+ options.get("collisionrule", t).val(), t);
 						}
@@ -1187,7 +1187,7 @@ public class Scoreboards {
 						MCOptionStatus visibility;
 						try {
 							visibility = MCOptionStatus.valueOf(options.get("deathmessagevisibility", t).val().toUpperCase());
-						} catch(IllegalArgumentException iae) {
+						} catch (IllegalArgumentException iae) {
 							throw new CREFormatException("Unknown deathmessagevisibility: "
 									+ options.get("deathmessagevisibility", t).val(), t);
 						}

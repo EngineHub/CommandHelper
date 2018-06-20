@@ -10,15 +10,15 @@ import org.bukkit.metadata.Metadatable;
 
 public class BukkitMCMetadatable implements MCMetadatable {
 
-	private final Metadatable _metadatable;
+	private final Metadatable metadatable;
 
 	public BukkitMCMetadatable(Metadatable metadatable) {
-		_metadatable = metadatable;
+		this.metadatable = metadatable;
 	}
 
 	@Override
 	public List<MCMetadataValue> getMetadata(String metadataKey) {
-		List<MetadataValue> lst = _metadatable.getMetadata(metadataKey);
+		List<MetadataValue> lst = this.metadatable.getMetadata(metadataKey);
 		List<MCMetadataValue> retn = new ArrayList<>();
 		for(MetadataValue val : lst) {
 			retn.add(new BukkitMCMetadataValue(val));
@@ -28,36 +28,36 @@ public class BukkitMCMetadatable implements MCMetadatable {
 
 	@Override
 	public boolean hasMetadata(String metadataKey) {
-		return _metadatable.hasMetadata(metadataKey);
+		return this.metadatable.hasMetadata(metadataKey);
 	}
 
 	@Override
 	public void removeMetadata(String metadataKey, MCPlugin owningPlugin) {
-		_metadatable.removeMetadata(metadataKey, ((BukkitMCPlugin) owningPlugin).getHandle());
+		this.metadatable.removeMetadata(metadataKey, ((BukkitMCPlugin) owningPlugin).getHandle());
 	}
 
 	@Override
 	public void setMetadata(String metadataKey, MCMetadataValue newMetadataValue) {
-		_metadatable.setMetadata(metadataKey, ((BukkitMCMetadataValue) newMetadataValue).getHandle());
+		this.metadatable.setMetadata(metadataKey, ((BukkitMCMetadataValue) newMetadataValue).getHandle());
 	}
 
 	@Override
 	public Metadatable getHandle() {
-		return _metadatable;
+		return this.metadatable;
 	}
 
 	@Override
 	public String toString() {
-		return _metadatable.toString();
+		return this.metadatable.toString();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof BukkitMCMetadatable && _metadatable.equals(((BukkitMCMetadatable) obj)._metadatable);
+		return obj instanceof BukkitMCMetadatable && this.metadatable.equals(((BukkitMCMetadatable) obj).metadatable);
 	}
 
 	@Override
 	public int hashCode() {
-		return _metadatable.hashCode();
+		return this.metadatable.hashCode();
 	}
 }

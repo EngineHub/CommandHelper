@@ -20,34 +20,34 @@ class LexerObject {
 	//We have 5 states we need to monitor, multiline, line/block comment, single/double quote.
 	//Additionally, we want to have counters for the line number for the applicable ones that
 	//can span multiple lines.
-	boolean state_in_single_quote = false;
-	boolean state_in_double_quote = false;
-	boolean state_in_multiline = false;
-	boolean state_in_line_comment = false;
-	boolean state_in_block_comment = false;
-	boolean state_in_smart_block_comment = false;
-	boolean state_in_pure_mscript = false;
-	boolean state_in_opt_var = false;
-	boolean state_in_var = false;
-	boolean state_in_ivar = false;
-	boolean state_in_fileopts = false;
+	boolean stateInSingleQuote = false;
+	boolean stateInDoubleQuote = false;
+	boolean stateInMultiline = false;
+	boolean stateInLineComment = false;
+	boolean stateInBlockComment = false;
+	boolean stateInSmartBlockComment = false;
+	boolean stateInPureMscript = false;
+	boolean stateInOptVar = false;
+	boolean stateInVar = false;
+	boolean stateInIvar = false;
+	boolean stateInFileopts = false;
 	StringBuffer fileopts = new StringBuffer();
-	int start_single_quote = 1;
-	int start_double_quote = 1;
-	int start_multiline = 1;
-	int start_block_comment = 1;
-	int brace_stack = 0;
-	int square_brace_stack = 0;
-	List<Token> token_list = null;
+	int startSingleQuote = 1;
+	int startDoubleQuote = 1;
+	int startMultiline = 1;
+	int startBlockComment = 1;
+	int braceStack = 0;
+	int squareBraceStack = 0;
+	List<Token> tokenList = null;
 	String config;
 	File file;
 	//Code target information
-	int line_num = 1;
+	int lineNum = 1;
 	int column = 1;
 	int lastColumn = 0;
 	Target target = Target.UNKNOWN;
 	final boolean usingNonPure;
-	private static final SortedSet<TokenMap> tokenMap = new TreeSet<TokenMap>();
+	private static final SortedSet<TokenMap> TOKEN_MAP = new TreeSet<TokenMap>();
 
 	private static class TokenMap implements Comparable<TokenMap> {
 
@@ -87,39 +87,39 @@ class LexerObject {
 		//far enough in advance, we need to add them to this list
 		//			tokenMap.add(new TokenMap(">>>", Token.TType.MULTILINE_START));
 		//			tokenMap.add(new TokenMap("<<<", Token.TType.MULTILINE_END));
-		tokenMap.add(new TokenMap("<=", Token.TType.LTE));
-		tokenMap.add(new TokenMap("<", Token.TType.LT));
-		tokenMap.add(new TokenMap(">", Token.TType.GT));
-		tokenMap.add(new TokenMap(">=", Token.TType.GTE));
-		tokenMap.add(new TokenMap("==", Token.TType.EQUALS));
-		tokenMap.add(new TokenMap("===", Token.TType.STRICT_EQUALS));
-		tokenMap.add(new TokenMap("!=", Token.TType.NOT_EQUALS));
-		tokenMap.add(new TokenMap("!==", Token.TType.STRICT_NOT_EQUALS));
-		tokenMap.add(new TokenMap("&&", Token.TType.LOGICAL_AND));
-		tokenMap.add(new TokenMap("||", Token.TType.LOGICAL_OR));
-		tokenMap.add(new TokenMap("!", Token.TType.LOGICAL_NOT));
-		tokenMap.add(new TokenMap("+", Token.TType.PLUS));
-		tokenMap.add(new TokenMap("-", Token.TType.MINUS));
-		tokenMap.add(new TokenMap("*", Token.TType.MULTIPLICATION));
-		tokenMap.add(new TokenMap("/", Token.TType.DIVISION));
-		tokenMap.add(new TokenMap("++", Token.TType.INCREMENT));
-		tokenMap.add(new TokenMap("--", Token.TType.DECREMENT));
-		tokenMap.add(new TokenMap("%", Token.TType.MODULO));
-		tokenMap.add(new TokenMap("**", Token.TType.EXPONENTIAL));
-		tokenMap.add(new TokenMap(".", Token.TType.CONCAT));
-		tokenMap.add(new TokenMap("->", Token.TType.DEREFERENCE));
-		tokenMap.add(new TokenMap("::", Token.TType.DEREFERENCE));
-		tokenMap.add(new TokenMap("${", Token.TType.CONST_START));
-		tokenMap.add(new TokenMap("{", Token.TType.LCURLY_BRACKET));
-		tokenMap.add(new TokenMap("}", Token.TType.RCURLY_BRACKET));
-		tokenMap.add(new TokenMap("[", Token.TType.LSQUARE_BRACKET));
-		tokenMap.add(new TokenMap("]", Token.TType.RSQUARE_BRACKET));
-		tokenMap.add(new TokenMap("..", Token.TType.SLICE));
-		tokenMap.add(new TokenMap("=", Token.TType.ASSIGNMENT));
-		tokenMap.add(new TokenMap(":", Token.TType.LABEL));
-		tokenMap.add(new TokenMap(",", Token.TType.COMMA));
-		tokenMap.add(new TokenMap("(", Token.TType.FUNC_START));
-		tokenMap.add(new TokenMap(")", Token.TType.FUNC_END));
+		TOKEN_MAP.add(new TokenMap("<=", Token.TType.LTE));
+		TOKEN_MAP.add(new TokenMap("<", Token.TType.LT));
+		TOKEN_MAP.add(new TokenMap(">", Token.TType.GT));
+		TOKEN_MAP.add(new TokenMap(">=", Token.TType.GTE));
+		TOKEN_MAP.add(new TokenMap("==", Token.TType.EQUALS));
+		TOKEN_MAP.add(new TokenMap("===", Token.TType.STRICT_EQUALS));
+		TOKEN_MAP.add(new TokenMap("!=", Token.TType.NOT_EQUALS));
+		TOKEN_MAP.add(new TokenMap("!==", Token.TType.STRICT_NOT_EQUALS));
+		TOKEN_MAP.add(new TokenMap("&&", Token.TType.LOGICAL_AND));
+		TOKEN_MAP.add(new TokenMap("||", Token.TType.LOGICAL_OR));
+		TOKEN_MAP.add(new TokenMap("!", Token.TType.LOGICAL_NOT));
+		TOKEN_MAP.add(new TokenMap("+", Token.TType.PLUS));
+		TOKEN_MAP.add(new TokenMap("-", Token.TType.MINUS));
+		TOKEN_MAP.add(new TokenMap("*", Token.TType.MULTIPLICATION));
+		TOKEN_MAP.add(new TokenMap("/", Token.TType.DIVISION));
+		TOKEN_MAP.add(new TokenMap("++", Token.TType.INCREMENT));
+		TOKEN_MAP.add(new TokenMap("--", Token.TType.DECREMENT));
+		TOKEN_MAP.add(new TokenMap("%", Token.TType.MODULO));
+		TOKEN_MAP.add(new TokenMap("**", Token.TType.EXPONENTIAL));
+		TOKEN_MAP.add(new TokenMap(".", Token.TType.CONCAT));
+		TOKEN_MAP.add(new TokenMap("->", Token.TType.DEREFERENCE));
+		TOKEN_MAP.add(new TokenMap("::", Token.TType.DEREFERENCE));
+		TOKEN_MAP.add(new TokenMap("${", Token.TType.CONST_START));
+		TOKEN_MAP.add(new TokenMap("{", Token.TType.LCURLY_BRACKET));
+		TOKEN_MAP.add(new TokenMap("}", Token.TType.RCURLY_BRACKET));
+		TOKEN_MAP.add(new TokenMap("[", Token.TType.LSQUARE_BRACKET));
+		TOKEN_MAP.add(new TokenMap("]", Token.TType.RSQUARE_BRACKET));
+		TOKEN_MAP.add(new TokenMap("..", Token.TType.SLICE));
+		TOKEN_MAP.add(new TokenMap("=", Token.TType.ASSIGNMENT));
+		TOKEN_MAP.add(new TokenMap(":", Token.TType.LABEL));
+		TOKEN_MAP.add(new TokenMap(",", Token.TType.COMMA));
+		TOKEN_MAP.add(new TokenMap("(", Token.TType.FUNC_START));
+		TOKEN_MAP.add(new TokenMap(")", Token.TType.FUNC_END));
 	}
 
 	static {
@@ -129,7 +129,7 @@ class LexerObject {
 	LexerObject(String config, File file, boolean startInPureMscript) {
 		this.config = config.replaceAll("\r\n", "\n") + "\n";
 		this.file = file;
-		state_in_pure_mscript = startInPureMscript;
+		stateInPureMscript = startInPureMscript;
 		usingNonPure = !startInPureMscript;
 		clearBuffer();
 	}
@@ -158,14 +158,14 @@ class LexerObject {
 		try {
 			Long.parseLong(item.trim());
 			return new Token(Token.TType.INTEGER, item, target);
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			//Not an integer
 			//Not an integer
 		}
 		try {
 			Double.parseDouble(item);
 			return new Token(Token.TType.DOUBLE, item, target);
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			//Not a double
 			//Not a double
 		}
@@ -187,14 +187,14 @@ class LexerObject {
 	}
 
 	private void append(Token t) {
-		token_list.add(t);
+		tokenList.add(t);
 	}
 
 	public TokenStream lex() throws ConfigCompileException {
-		if(token_list != null) {
-			return new TokenStream(new ArrayList<Token>(token_list), "");
+		if(tokenList != null) {
+			return new TokenStream(new ArrayList<Token>(tokenList), "");
 		} else {
-			token_list = new ArrayList<Token>();
+			tokenList = new ArrayList<Token>();
 		}
 		for(int i = 0; i < config.length(); i++) {
 			Character c = config.charAt(i);
@@ -209,20 +209,20 @@ class LexerObject {
 			column += i - lastColumn;
 			lastColumn = i;
 			if(c == '\n') {
-				line_num++;
+				lineNum++;
 				column = 1;
 			}
-			target = new Target(line_num, file, column);
+			target = new Target(lineNum, file, column);
 			//First, lets identify our stateful parameters
 			//File Options
-			if(state_in_fileopts) {
+			if(stateInFileopts) {
 				if(c == '\\' && c2 == '>') {
 					//literal >
 					fileopts.append('>');
 					i++;
 					continue;
 				} else if(c == '>') {
-					state_in_fileopts = false;
+					stateInFileopts = false;
 					continue;
 				} else {
 					fileopts.append(c);
@@ -230,20 +230,20 @@ class LexerObject {
 				}
 			}
 			//Comments are only applicable if we are not inside a string
-			if(!state_in_double_quote && !state_in_single_quote) {
+			if(!stateInDoubleQuote && !stateInSingleQuote) {
 				//If we aren't already in a comment, we might be starting one here
-				if(!state_in_block_comment && !state_in_line_comment) {
+				if(!stateInBlockComment && !stateInLineComment) {
 					if(c == '/' && c2 == '*') {
 						//Start of block comment
 						parseBuffer();
-						state_in_block_comment = true;
-						start_block_comment = line_num;
+						stateInBlockComment = true;
+						startBlockComment = lineNum;
 						if(c3 == '*') {
 							//It's also a smart block comment
-							state_in_smart_block_comment = true;
+							stateInSmartBlockComment = true;
 							i++;
 						} else {
-							state_in_smart_block_comment = false;
+							stateInSmartBlockComment = false;
 						}
 						i++;
 						continue;
@@ -251,13 +251,13 @@ class LexerObject {
 					if(c == '#') {
 						parseBuffer();
 						//Start of line comment
-						state_in_line_comment = true;
+						stateInLineComment = true;
 						continue;
 					}
-				} else if(state_in_block_comment) {
+				} else if(stateInBlockComment) {
 					//We might be ending the block comment
 					if(c == '*' && c2 == '/') {
-						state_in_block_comment = false;
+						stateInBlockComment = false;
 						i++;
 //						if(state_in_smart_block_comment) {
 //							//We need to process the block comment here
@@ -268,40 +268,40 @@ class LexerObject {
 						clearBuffer();
 						continue;
 					}
-				} else if(state_in_line_comment) {
+				} else if(stateInLineComment) {
 					if(c == '\n') {
-						state_in_line_comment = false;
+						stateInLineComment = false;
 						clearBuffer();
 						continue;
 					}
 				}
 			}
 			//Ok, now if we are in a comment, we should just continue
-			if(state_in_block_comment || state_in_line_comment) {
-				if(state_in_smart_block_comment) {
+			if(stateInBlockComment || stateInLineComment) {
+				if(stateInSmartBlockComment) {
 					buffer(c);
 				}
 			}
 			//Now we need to check for strings
-			if(!state_in_double_quote) {
+			if(!stateInDoubleQuote) {
 				if(c == '"') {
 					parseBuffer();
 					//Start of smart string
-					state_in_double_quote = true;
-					start_double_quote = line_num;
+					stateInDoubleQuote = true;
+					startDoubleQuote = lineNum;
 					continue;
 				}
 			}
-			if(!state_in_single_quote) {
+			if(!stateInSingleQuote) {
 				if(c == '\'') {
 					//Start of string
 					parseBuffer();
-					state_in_single_quote = true;
-					start_single_quote = line_num;
+					stateInSingleQuote = true;
+					startSingleQuote = lineNum;
 					continue;
 				}
 			}
-			if(state_in_double_quote || state_in_single_quote) {
+			if(stateInDoubleQuote || stateInSingleQuote) {
 				if(c == '\\') {
 					//It's an escaped something or another
 					switch(c2) {
@@ -318,21 +318,21 @@ class LexerObject {
 							for(int m = 0; m < 4; m++) {
 								try {
 									unicode.append(config.charAt(i + 2 + m));
-								} catch(IndexOutOfBoundsException e) {
+								} catch (IndexOutOfBoundsException e) {
 									//If this fails, they didn't put enough characters in the stream
 									error("Incomplete unicode escape");
 								}
 							}
 							try {
 								Integer.parseInt(unicode.toString(), 16);
-							} catch(NumberFormatException e) {
+							} catch (NumberFormatException e) {
 								error("Unrecognized unicode escape sequence");
 							}
 							buffer(Character.toChars(Integer.parseInt(unicode.toString(), 16)));
 							i += 4;
 							break;
 						case '\'':
-							if(state_in_double_quote) {
+							if(stateInDoubleQuote) {
 								//It's an error if we're in double quotes to escape a single quote
 								error("Invalid escape found. It is an error to escape single quotes inside a double quote.");
 							} else {
@@ -341,7 +341,7 @@ class LexerObject {
 							}
 							break;
 						case '"':
-							if(state_in_single_quote) {
+							if(stateInSingleQuote) {
 								//It's an error if we're in single quotes to escape a double quote
 								error("Invalid escape found. It is an error to escape double quotes inside a single quote.");
 							} else {
@@ -358,9 +358,9 @@ class LexerObject {
 				}
 			}
 			//Now deal with ending a quote
-			if(state_in_double_quote) {
+			if(stateInDoubleQuote) {
 				if(c == '"') {
-					state_in_double_quote = false;
+					stateInDoubleQuote = false;
 					append(clearBuffer(), Token.TType.SMART_STRING);
 					//This is currently an error, but won't be forever
 					error("Double quotes are currently unsupported");
@@ -370,9 +370,9 @@ class LexerObject {
 					continue;
 				}
 			}
-			if(state_in_single_quote) {
+			if(stateInSingleQuote) {
 				if(c == '\'') {
-					state_in_single_quote = false;
+					stateInSingleQuote = false;
 					append(clearBuffer(), Token.TType.STRING);
 					continue;
 				} else {
@@ -383,19 +383,19 @@ class LexerObject {
 			//Now deal with multiline states
 			if(c == '>' && c2 == '>' && c3 == '>') {
 				//Multiline start
-				if(state_in_multiline) {
+				if(stateInMultiline) {
 					error("Found multiline start symbol while already in multiline!");
 				}
-				state_in_multiline = true;
-				start_multiline = line_num;
+				stateInMultiline = true;
+				startMultiline = lineNum;
 				i += 2;
 				continue;
 			}
 			if(c == '<' && c2 == '<' && c3 == '<') {
-				if(!state_in_multiline) {
+				if(!stateInMultiline) {
 					error("Found multiline end symbol while not in multiline!");
 				}
-				state_in_multiline = false;
+				stateInMultiline = false;
 				i += 2;
 				continue;
 			}
@@ -406,36 +406,36 @@ class LexerObject {
 				continue;
 			}
 			if(c == '<' && c2 == '!') {
-				if(!token_list.isEmpty()) {
+				if(!tokenList.isEmpty()) {
 					throw new ConfigCompileException("File options must come first in the file.", target);
 				}
-				state_in_fileopts = true;
+				stateInFileopts = true;
 				i++;
 				continue;
 			}
 			//To simplify token processing later, we will go ahead and do special handling if we're
 			//not in pure mscript. Therefore, = will
 			//get special handling up here, as well as square brackets
-			if(!state_in_pure_mscript) {
+			if(!stateInPureMscript) {
 				if(c == '[') {
-					if(state_in_opt_var) {
+					if(stateInOptVar) {
 						error("Found [ symbol, but a previous optional variable had already been started");
 					}
-					state_in_opt_var = true;
+					stateInOptVar = true;
 					parseBuffer();
 					append("[", Token.TType.LSQUARE_BRACKET);
 					continue;
 				}
 				if(c == ']') {
-					if(!state_in_opt_var) {
+					if(!stateInOptVar) {
 						error("Found ] symbol, but no optional variable had been started");
 					}
-					state_in_opt_var = false;
+					stateInOptVar = false;
 					parseBuffer();
 					append("]", Token.TType.RSQUARE_BRACKET);
 					continue;
 				}
-				if(state_in_opt_var) {
+				if(stateInOptVar) {
 					if(c == '=') {
 						//This is an optional variable declaration
 						parseBuffer();
@@ -444,7 +444,7 @@ class LexerObject {
 					}
 				}
 				if(c == '=') {
-					state_in_pure_mscript = true;
+					stateInPureMscript = true;
 					parseBuffer();
 					append("=", Token.TType.ALIAS_END);
 					continue;
@@ -456,7 +456,7 @@ class LexerObject {
 				}
 				if(c == '\n') {
 					parseBuffer();
-					if(token_list.isEmpty() || token_list.get(token_list.size() - 1).type != TType.NEWLINE) {
+					if(tokenList.isEmpty() || tokenList.get(tokenList.size() - 1).type != TType.NEWLINE) {
 						append("\n", TType.NEWLINE);
 					}
 					continue;
@@ -469,20 +469,20 @@ class LexerObject {
 			//Remember, if we are in multiline mode (or pure mscript), newlines are simply removed, otherwise they are
 			//kept (except duplicate ones)
 			if(c == '\n') {
-				if(state_in_multiline) {
+				if(stateInMultiline) {
 					continue;
 				} else {
-					if(!token_list.isEmpty() && token_list.get(token_list.size() - 1).type != Token.TType.NEWLINE) {
+					if(!tokenList.isEmpty() && tokenList.get(tokenList.size() - 1).type != Token.TType.NEWLINE) {
 						parseBuffer();
 						if(usingNonPure) {
-							if(token_list.get(token_list.size() - 1).type != TType.NEWLINE) {
+							if(tokenList.get(tokenList.size() - 1).type != TType.NEWLINE) {
 								//Don't add duplicates
 								append("\n", Token.TType.NEWLINE);
 							}
 							//This also signals the end of pure mscript
-							state_in_pure_mscript = false;
+							stateInPureMscript = false;
 							continue;
-						} else if(state_in_pure_mscript) {
+						} else if(stateInPureMscript) {
 							continue;
 						}
 					} else {
@@ -513,7 +513,7 @@ class LexerObject {
 			buffer(c);
 		}
 		parseBuffer();
-		return new TokenStream(new ArrayList<Token>(token_list), fileopts.toString());
+		return new TokenStream(new ArrayList<Token>(tokenList), fileopts.toString());
 	}
 
 	/**
@@ -526,7 +526,7 @@ class LexerObject {
 	 */
 	private int identifySymbol(int startAt) {
 		//We need as much of a lookahead as our largest token
-		char[] lookahead = new char[tokenMap.first().token.length()];
+		char[] lookahead = new char[TOKEN_MAP.first().token.length()];
 		//Fill in our lookahead buffer
 		for(int i = 0; i < lookahead.length; i++) {
 			if(i + startAt < config.length() - 1) {
@@ -536,7 +536,7 @@ class LexerObject {
 			}
 		}
 		//Now walk through our token list, and if we find a match, use it.
-		for(TokenMap tm : tokenMap) {
+		for(TokenMap tm : TOKEN_MAP) {
 			boolean found = true;
 			for(int i = 0; i < tm.token.length(); i++) {
 				if(tm.token.charAt(i) != lookahead[i]) {

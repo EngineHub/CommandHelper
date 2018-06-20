@@ -160,7 +160,7 @@ public class MobManagement {
 
 			try {
 				return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll(" ", "")), secondary, qty, l, t);
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException("Invalid mob name: " + mob, t);
 			}
 		}
@@ -851,7 +851,7 @@ public class MobManagement {
 				for(String key : ea.stringKeySet()) {
 					try {
 						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), ObjectGenerator.GetGenerator().item(ea.get(key, t), t));
-					} catch(IllegalArgumentException iae) {
+					} catch (IllegalArgumentException iae) {
 						throw new CREFormatException("Not an equipment slot: " + key, t);
 					}
 				}
@@ -1002,7 +1002,7 @@ public class MobManagement {
 				for(String key : ea.stringKeySet()) {
 					try {
 						eq.put(MCEquipmentSlot.valueOf(key.toUpperCase()), Static.getDouble32(ea.get(key, t), t));
-					} catch(IllegalArgumentException iae) {
+					} catch (IllegalArgumentException iae) {
 						throw new CREFormatException("Not an equipment slot: " + key, t);
 					}
 				}

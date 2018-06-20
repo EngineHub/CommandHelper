@@ -18,6 +18,7 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 	// To be filled by the implementer
 	protected static Map<String, MCSound> mappings;
 
+	@SuppressWarnings("checkstyle:staticvariablename") // Fixing this violation might break dependents.
 	public static MCSound NULL = null;
 
 	public MCSound(MCVanillaSound mcVanillaSound, Concrete concrete) {

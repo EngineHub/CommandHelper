@@ -22,7 +22,7 @@ public class CDecimal extends CPrimitive implements Cloneable {
 		super(value, ConstructType.INT, t);
 		try {
 			val = new BigDecimal(value);
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			throw new CREFormatException("Could not create decimal from value \"" + value + "\"", t);
 		}
 	}

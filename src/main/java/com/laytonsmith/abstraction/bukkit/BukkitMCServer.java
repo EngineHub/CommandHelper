@@ -511,7 +511,7 @@ public class BukkitMCServer implements MCServer {
 	public MCBossBar createBossBar(String title, MCBarColor color, MCBarStyle style) {
 		try {
 			return new BukkitMCBossBar(s.createBossBar(title, BarColor.valueOf(color.name()), BarStyle.valueOf(style.name())));
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably prior to 1.9
 			return null;
 		}

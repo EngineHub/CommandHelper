@@ -17,6 +17,7 @@ import java.util.List;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@SuppressWarnings("checkstyle:typename") // Fixing this violation might break dependents.
 public @interface api {
 
 	public enum Platforms {
