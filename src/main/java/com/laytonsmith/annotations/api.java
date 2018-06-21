@@ -47,9 +47,9 @@ public @interface api {
 	}
 
 	/**
-	 * Returns the platform this is implemented for. The default is {
+	 * Returns the platform this is implemented for. The default is {@link api.Platforms#INTERPRETER_JAVA}.
 	 *
-	 * @see api.Platforms#INTERPRETER_JAVA}.
+	 * @see {@link api.Platforms#INTERPRETER_JAVA}.
 	 * @return
 	 */
 	Platforms[] platform() default {api.Platforms.INTERPRETER_JAVA};

@@ -16,6 +16,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,7 +55,12 @@ public abstract class CompositeFunction extends AbstractFunction {
 		env.SetVarList(newVariables);
 		Construct ret = CVoid.VOID;
 		try {
-			env.GetScript().eval(tree, environment);
+			if(env.GetScript() != null) {
+				env.GetScript().eval(tree, environment);
+			} else {
+				// This can happen when the environment is not fully setup during tests.
+				Script.GenerateScript(null, null).eval(tree, environment);
+			}
 		} catch (FunctionReturnException ex) {
 			ret = ex.getReturn();
 		}
