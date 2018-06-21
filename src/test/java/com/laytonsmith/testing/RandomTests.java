@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.api.Platforms;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ObjectGenerator;
@@ -363,26 +364,37 @@ public class RandomTests {
 	public void testFunctionsAreOnlyDefinedOnce() throws Exception {
 		Set<String> uhohs = new HashSet<>();
 		Set<Class<Function>> set = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(Function.class);
-		for(Class<Function> cf1 : set) {
-			for(Class<Function> cf2 : set) {
-				if(cf1 == cf2) {
-					continue;
-				}
-				api cf1a = cf1.getAnnotation(api.class);
-				api cf2a = cf2.getAnnotation(api.class);
-				if(cf1a == null || cf2a == null) {
-					continue;
-				}
-				if(!Arrays.equals(cf1a.platform(), cf2a.platform())) {
-					continue;
-				}
-				Function f1 = ReflectionUtils.instantiateUnsafe(cf1);
-				Function f2 = ReflectionUtils.instantiateUnsafe(cf2);
-				if(f1.getName().equals(f2.getName())) {
-					uhohs.add(f1.getName() + " is implemented in two places, " + cf1 + " and " + cf2);
-				}
+
+		// Iterate over all function classes, adding a message to "uhohs" if they are double defined.
+		Map<String, Class<Function>> funcMap = new HashMap<>();
+		for(Class<Function> funcClass : set) {
+
+			// Ignore non-api functions.
+			api funcClassApi = funcClass.getAnnotation(api.class);
+			if(funcClassApi == null) {
+				continue;
+			}
+
+			// Get the function name.
+			String funcName = ReflectionUtils.instantiateUnsafe(funcClass).getName();
+
+			// Create an identifier string of the function name and its platforms.
+			// Format: "funcName\tplatform1\tplatform2\t...platformN". Platforms are sorted to 'compare as sets'.
+			StringBuilder idStr = new StringBuilder(funcName);
+			Platforms[] platforms = funcClassApi.platform();
+			Arrays.sort(platforms, (Platforms p1, Platforms p2) -> p1.toString().compareTo(p2.toString()));
+			for(Platforms platform : platforms) {
+				idStr.append("\t").append(platform.toString());
+			}
+
+			// Store the function in the map by its identifier, adding an message if it is double defined.
+			Class<Function> replacedFuncClass = funcMap.put(idStr.toString(), funcClass);
+			if(replacedFuncClass != null) {
+				uhohs.add(funcName + " is implemented in two places, " + funcClass + " and " + replacedFuncClass);
 			}
 		}
+
+		// Fail if a function was double defined.
 		if(!uhohs.isEmpty()) {
 			fail(StringUtils.Join(uhohs, "\n"));
 		}
