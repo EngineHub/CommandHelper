@@ -36,7 +36,7 @@ public final class EventUtils {
 	private EventUtils() {
 	}
 
-	private static final Map<Driver, SortedSet<BoundEvent>> event_handles
+	private static final Map<Driver, SortedSet<BoundEvent>> EVENT_HANDLES
 			= new EnumMap<Driver, SortedSet<BoundEvent>>(Driver.class);
 
 	/**
@@ -50,11 +50,11 @@ public final class EventUtils {
 		if(event == null) {
 			throw new EventException("The event type \"" + b.getEventName() + "\" could not be found.");
 		}
-		if(!event_handles.containsKey(event.driver())) {
-			event_handles.put(event.driver(), new TreeSet<BoundEvent>());
+		if(!EVENT_HANDLES.containsKey(event.driver())) {
+			EVENT_HANDLES.put(event.driver(), new TreeSet<BoundEvent>());
 		}
 		//Check for duplicate IDs
-		for(Set<BoundEvent> s : event_handles.values()) {
+		for(Set<BoundEvent> s : EVENT_HANDLES.values()) {
 			for(BoundEvent bb : s) {
 				if(bb.getId().equals(b.getId())) {
 					throw new CREBindException("Cannot have duplicate IDs defined."
@@ -64,7 +64,7 @@ public final class EventUtils {
 				}
 			}
 		}
-		SortedSet<BoundEvent> set = event_handles.get(event.driver());
+		SortedSet<BoundEvent> set = EVENT_HANDLES.get(event.driver());
 		set.add(b);
 		event.bind(b);
 	}
@@ -76,7 +76,7 @@ public final class EventUtils {
 	 * @param id
 	 */
 	public static void UnregisterEvent(String id) {
-		for(SortedSet<BoundEvent> set : event_handles.values()) {
+		for(SortedSet<BoundEvent> set : EVENT_HANDLES.values()) {
 			Iterator<BoundEvent> i = set.iterator();
 			while(i.hasNext()) {
 				BoundEvent b = i.next();
@@ -96,7 +96,7 @@ public final class EventUtils {
 	 * @return
 	 */
 	public static BoundEvent GetEventById(String id) {
-		for(SortedSet<BoundEvent> set : event_handles.values()) {
+		for(SortedSet<BoundEvent> set : EVENT_HANDLES.values()) {
 			for(BoundEvent b : set) {
 				if(b.getId().equals(id)) {
 					return b;
@@ -110,7 +110,7 @@ public final class EventUtils {
 	 * Unregisters all event handlers. Runs in O(n)
 	 */
 	public static void UnregisterAll(String name) {
-		for(SortedSet<BoundEvent> set : event_handles.values()) {
+		for(SortedSet<BoundEvent> set : EVENT_HANDLES.values()) {
 			Iterator<BoundEvent> i = set.iterator();
 			while(i.hasNext()) {
 				BoundEvent b = i.next();
@@ -126,7 +126,7 @@ public final class EventUtils {
 	 * This should be used in the case the plugin is disabled, or /reloadalises is run.
 	 */
 	public static void UnregisterAll() {
-		event_handles.clear();
+		EVENT_HANDLES.clear();
 	}
 
 	/**
@@ -136,11 +136,11 @@ public final class EventUtils {
 	 * @return
 	 */
 	public static SortedSet<BoundEvent> GetEvents(Driver type) {
-		return event_handles.get(type);
+		return EVENT_HANDLES.get(type);
 	}
 
 	public static void ManualTrigger(String eventName, CArray object, Target t, boolean serverWide) {
-		for(Driver type : event_handles.keySet()) {
+		for(Driver type : EVENT_HANDLES.keySet()) {
 			SortedSet<BoundEvent> toRun = new TreeSet<>();
 			SortedSet<BoundEvent> bounded = GetEvents(type);
 			Event driver = EventList.getEvent(type, eventName);
@@ -151,7 +151,7 @@ public final class EventUtils {
 							BindableEvent convertedEvent = null;
 							try {
 								convertedEvent = driver.convert(object, t);
-							} catch(UnsupportedOperationException ex) {
+							} catch (UnsupportedOperationException ex) {
 								// The event will stay null, and be caught below
 							}
 							if(convertedEvent == null) {
@@ -159,7 +159,7 @@ public final class EventUtils {
 							} else if(driver.matches(b.getPrefilter(), convertedEvent)) {
 								toRun.add(b);
 							}
-						} catch(PrefilterNonMatchException ex) {
+						} catch (PrefilterNonMatchException ex) {
 							//Not running this one
 						}
 					}
@@ -202,13 +202,13 @@ public final class EventUtils {
 					boolean matches = false;
 					try {
 						matches = driver.matches(b.getPrefilter(), e);
-					} catch(ConfigRuntimeException ex) {
+					} catch (ConfigRuntimeException ex) {
 						//This can happen in limited cases, but still needs to be
 						//handled properly. This would happen if, for instance, a
 						//prefilter was configured improperly with bad runtime data.
 						//We use the environment from the bound event.
 						ConfigRuntimeException.HandleUncaughtException(ex, b.getEnvironment());
-					} catch(NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError err) {
+					} catch (NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError err) {
 						// This happens when a CH extension depends on a not-included or binary outdated class.
 						// Log the error and continue since there's nothing we can do about it.
 
@@ -231,7 +231,7 @@ public final class EventUtils {
 						String modVersion;
 						try {
 							modVersion = StaticLayer.GetConvertor().GetServer().getAPIVersion();
-						} catch(Exception ex) {
+						} catch (Exception ex) {
 							modVersion = Implementation.GetServerType().name();
 						}
 
@@ -241,7 +241,7 @@ public final class EventUtils {
 								try {
 									extensionData += TermColors.CYAN + extension.getName() + TermColors.RED
 											+ " (" + TermColors.RESET + extension.getVersion() + TermColors.RED + ")\n";
-								} catch(AbstractMethodError ex) {
+								} catch (AbstractMethodError ex) {
 									// This happens with an old style extensions. Just skip it.
 									extensionData += TermColors.CYAN + "Unknown Extension" + TermColors.RED + "\n";
 								}
@@ -269,7 +269,7 @@ public final class EventUtils {
 					if(b.getEventName().equals(eventName) && matches) {
 						toRun.add(b);
 					}
-				} catch(PrefilterNonMatchException ex) {
+				} catch (PrefilterNonMatchException ex) {
 					//Not running this one
 				}
 			}
@@ -305,11 +305,11 @@ public final class EventUtils {
 					activeEvent.setBoundEvent(b);
 					activeEvent.setParsedEvent(driver.evaluate(e));
 					b.trigger(activeEvent);
-				} catch(FunctionReturnException ex) {
+				} catch (FunctionReturnException ex) {
 					//We also know how to deal with this
-				} catch(EventException ex) {
+				} catch (EventException ex) {
 					throw new CREEventException(ex.getMessage(), Target.UNKNOWN, ex);
-				} catch(ConfigRuntimeException ex) {
+				} catch (ConfigRuntimeException ex) {
 					//An exception has bubbled all the way up
 					ConfigRuntimeException.HandleUncaughtException(ex, b.getEnvironment());
 				}
@@ -327,7 +327,7 @@ public final class EventUtils {
 
 	public static Construct DumpEvents() {
 		CArray ca = new CArray(Target.UNKNOWN);
-		for(SortedSet<BoundEvent> set : event_handles.values()) {
+		for(SortedSet<BoundEvent> set : EVENT_HANDLES.values()) {
 			Iterator<BoundEvent> i = set.iterator();
 			while(i.hasNext()) {
 				BoundEvent b = i.next();

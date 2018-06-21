@@ -52,7 +52,7 @@ public class Crypto {
 			byte[] hmac = mac.doFinal(getByteArrayFromArg(args[1]));
 			String hash = StringUtils.toHex(hmac).toLowerCase();
 			return new CString(hash, t);
-		} catch(NoSuchAlgorithmException | InvalidKeyException ex) {
+		} catch (NoSuchAlgorithmException | InvalidKeyException ex) {
 			throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 		}
 	}
@@ -60,7 +60,7 @@ public class Crypto {
 	private static byte[] getByteArrayFromArg(Construct c) {
 		byte[] val;
 		if(c instanceof CSecureString) {
-			val = ArrayUtils.charToBytes(((CSecureString)c).getDecryptedCharArray());
+			val = ArrayUtils.charToBytes(((CSecureString) c).getDecryptedCharArray());
 		} else {
 			val = c.val().getBytes();
 		}
@@ -137,7 +137,7 @@ public class Crypto {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "rot13('string')"),
-				new ExampleScript("Basic usage", "rot13('fgevat')"),};
+				new ExampleScript("Basic usage", "rot13('fgevat')")};
 		}
 
 	}
@@ -190,7 +190,7 @@ public class Crypto {
 				digest.update(val);
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 				return new CString(hash, t);
-			} catch(NoSuchAlgorithmException ex) {
+			} catch (NoSuchAlgorithmException ex) {
 				throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 			}
 		}
@@ -207,7 +207,7 @@ public class Crypto {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "md5('string')"),
-				new ExampleScript("Basic usage", "md5('String')"),};
+				new ExampleScript("Basic usage", "md5('String')")};
 		}
 	}
 
@@ -260,7 +260,7 @@ public class Crypto {
 				digest.update(val);
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 				return new CString(hash, t);
-			} catch(NoSuchAlgorithmException ex) {
+			} catch (NoSuchAlgorithmException ex) {
 				throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 			}
 		}
@@ -277,7 +277,7 @@ public class Crypto {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "sha1('string')"),
-				new ExampleScript("Basic usage", "sha1('String')"),};
+				new ExampleScript("Basic usage", "sha1('String')")};
 		}
 	}
 
@@ -329,7 +329,7 @@ public class Crypto {
 				digest.update(val);
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 				return new CString(hash, t);
-			} catch(NoSuchAlgorithmException ex) {
+			} catch (NoSuchAlgorithmException ex) {
 				throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 			}
 		}
@@ -346,7 +346,7 @@ public class Crypto {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "sha256('string')"),
-				new ExampleScript("Basic usage", "sha256('String')"),};
+				new ExampleScript("Basic usage", "sha256('String')")};
 		}
 
 	}
@@ -400,7 +400,7 @@ public class Crypto {
 				digest.update(val);
 				String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 				return new CString(hash, t);
-			} catch(NoSuchAlgorithmException ex) {
+			} catch (NoSuchAlgorithmException ex) {
 				throw new CREPluginInternalException("An error occured while trying to hash your data", t, ex);
 			}
 		}
@@ -417,7 +417,7 @@ public class Crypto {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "sha512('string')"),
-				new ExampleScript("Basic usage", "sha512('String')"),};
+				new ExampleScript("Basic usage", "sha512('String')")};
 		}
 
 	}
@@ -449,13 +449,13 @@ public class Crypto {
 			try {
 				String val;
 				if(args[0] instanceof CSecureString) {
-					val = new String(((CSecureString)args[0]).getDecryptedCharArray());
+					val = new String(((CSecureString) args[0]).getDecryptedCharArray());
 				} else {
 					val = args[0].val();
 				}
 				String hash = BCrypt.hashpw(val, BCrypt.gensalt(log_rounds));
 				return new CString(hash, t);
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CRERangeException(ex.getMessage(), t);
 			}
 		}
@@ -493,7 +493,7 @@ public class Crypto {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "bcrypt('string')", ":$2a$05$aBMYDJAu6C3O.142N/n7yO6Dl3KC0L/zHUEZnOXQuaX13XUKec8Gy"),
-				new ExampleScript("Basic usage", "bcrypt('String')", ":$2a$05$jYm.4yath40V2DqjipWSje3Ed0ZNLO8IcDjIF50PJoPvWSmF1J7L2"),};
+				new ExampleScript("Basic usage", "bcrypt('String')", ":$2a$05$jYm.4yath40V2DqjipWSje3Ed0ZNLO8IcDjIF50PJoPvWSmF1J7L2")};
 		}
 
 	}
@@ -520,7 +520,7 @@ public class Crypto {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String val;
 			if(args[0] instanceof CSecureString) {
-				val = new String(((CSecureString)args[0]).getDecryptedCharArray());
+				val = new String(((CSecureString) args[0]).getDecryptedCharArray());
 			} else {
 				val = args[0].val();
 			}
@@ -559,7 +559,7 @@ public class Crypto {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "assign(@plain, 'plaintext')\nassign(@hash, bcrypt(@plain))\n"
 				+ "msg(if(check_bcrypt(@plain, @hash), 'They match!', 'They do not match!'))\n"
-				+ "msg(if(check_bcrypt('notTheRightPassword', @hash), 'They match!', 'They do not match!'))"),};
+				+ "msg(if(check_bcrypt('notTheRightPassword', @hash), 'They match!', 'They do not match!'))")};
 		}
 
 	}
@@ -729,7 +729,7 @@ public class Crypto {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "hmac_md5('secret_key', 'string')"),};
+				new ExampleScript("Basic usage", "hmac_md5('secret_key', 'string')")};
 		}
 	}
 
@@ -788,7 +788,7 @@ public class Crypto {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "hmac_sha1('secret_key', 'string')"),};
+				new ExampleScript("Basic usage", "hmac_sha1('secret_key', 'string')")};
 		}
 	}
 
@@ -847,7 +847,7 @@ public class Crypto {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "hmac_sha256('secret_key', 'string')"),};
+				new ExampleScript("Basic usage", "hmac_sha256('secret_key', 'string')")};
 		}
 	}
 

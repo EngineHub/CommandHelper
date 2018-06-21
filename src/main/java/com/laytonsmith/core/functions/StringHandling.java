@@ -126,7 +126,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "concat('1', '2', '3', '4')"),
-				new ExampleScript("Symbolic usage", "'1' . '2' . '3' . '4'"),};
+				new ExampleScript("Symbolic usage", "'1' . '2' . '3' . '4'")};
 		}
 
 		@Override
@@ -142,7 +142,12 @@ public class StringHandling {
 	@noprofile
 	public static class sconcat extends AbstractFunction implements Optimizable {
 
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
 		private static final String g = new DataHandling.g().getName();
+
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
 		private static final String p = new Compiler.p().getName();
 
 		@Override
@@ -192,7 +197,7 @@ public class StringHandling {
 			return null;
 		}
 
-		public final static String STRING = new DataHandling._string().getName();
+		public static final String STRING = new DataHandling._string().getName();
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
@@ -242,7 +247,7 @@ public class StringHandling {
 						if(InstanceofUtil.isInstanceof(child.getData(), "string")) {
 							return child;
 						}
-					} catch(IllegalArgumentException ex) {
+					} catch (IllegalArgumentException ex) {
 						// Ignored, we'll just toString it, because it's an unknown type.
 					}
 					ParseTree node = new ParseTree(new CFunction(STRING, t), fileOptions);
@@ -257,7 +262,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "sconcat('1', '2', '3', '4')"),
-				new ExampleScript("Implied usage, due to no operators", "'1' '2' '3' '4'"),};
+				new ExampleScript("Implied usage, due to no operators", "'1' '2' '3' '4'")};
 		}
 
 		@Override
@@ -318,7 +323,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("", "replace('Where in the world is Carmen Sandiego?', 'Carmen Sandiego', 'Waldo')"),
-				new ExampleScript("No match found", "replace('The same thing', 'not found', '404')"),};
+				new ExampleScript("No match found", "replace('The same thing', 'not found', '404')")};
 		}
 
 		@Override
@@ -459,7 +464,7 @@ public class StringHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("", "'->' . trim('    <- spaces ->    ') . '<-'"),};
+				new ExampleScript("", "'->' . trim('    <- spaces ->    ') . '<-'")};
 		}
 
 		@Override
@@ -516,7 +521,7 @@ public class StringHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("", "'->' . trimr('    <- spaces ->    ') . '<-'"),};
+				new ExampleScript("", "'->' . trimr('    <- spaces ->    ') . '<-'")};
 		}
 
 		@Override
@@ -573,7 +578,7 @@ public class StringHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("", "'->' . triml('    <- spaces ->    ') . '<-'"),};
+				new ExampleScript("", "'->' . triml('    <- spaces ->    ') . '<-'")};
 		}
 
 		@Override
@@ -635,7 +640,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Strings", "length('this is a string')"),
-				new ExampleScript("Arrays", "length(array('1', 2, '3', 4))"),};
+				new ExampleScript("Arrays", "length(array('1', 2, '3', 4))")};
 		}
 
 		@Override
@@ -698,7 +703,7 @@ public class StringHandling {
 			return new ExampleScript[]{
 				new ExampleScript("", "to_upper('uppercase')"),
 				new ExampleScript("", "to_upper('MiXeD cAsE')"),
-				new ExampleScript("", "to_upper('Numbers (and SYMBOLS: 25)')"),};
+				new ExampleScript("", "to_upper('Numbers (and SYMBOLS: 25)')")};
 		}
 
 		@Override
@@ -761,7 +766,7 @@ public class StringHandling {
 			return new ExampleScript[]{
 				new ExampleScript("", "to_lower('LOWERCASE')"),
 				new ExampleScript("", "to_lower('MiXeD cAsE')"),
-				new ExampleScript("", "to_lower('Numbers (and SYMBOLS: 25)')"),};
+				new ExampleScript("", "to_lower('Numbers (and SYMBOLS: 25)')")};
 		}
 
 		@Override
@@ -825,7 +830,7 @@ public class StringHandling {
 					end = s.length();
 				}
 				return new CString(s.substring(begin, end), t);
-			} catch(IndexOutOfBoundsException e) {
+			} catch (IndexOutOfBoundsException e) {
 				throw new CRERangeException("The indices given are not valid for string '" + args[0].val() + "'", t);
 			}
 		}
@@ -836,7 +841,7 @@ public class StringHandling {
 				new ExampleScript("", "substr('hamburger', 4, 8)"),
 				new ExampleScript("", "substr('smiles', 1, 5)"),
 				new ExampleScript("", "substr('lightning', 5)"),
-				new ExampleScript("If the indexes are too large", "assign(@big, 25)\nsubstr('small', @big)"),};
+				new ExampleScript("If the indexes are too large", "assign(@big, 25)\nsubstr('small', @big)")};
 		}
 
 		@Override
@@ -1057,7 +1062,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "char_is_uppercase('a')"),
-				new ExampleScript("Basic usage", "char_is_uppercase('D')"),};
+				new ExampleScript("Basic usage", "char_is_uppercase('D')")};
 		}
 	}
 
@@ -1114,7 +1119,7 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "string_position('this is the string', 'string')"),
-				new ExampleScript("String not found", "string_position('Where\\'s Waldo?', 'Dunno.')"),};
+				new ExampleScript("String not found", "string_position('Where\\'s Waldo?', 'Dunno.')")};
 		}
 
 		@Override
@@ -1336,7 +1341,7 @@ public class StringHandling {
 			List<FormatString> parsed;
 			try {
 				parsed = parse(formatString, t);
-			} catch(IllegalFormatException e) {
+			} catch (IllegalFormatException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}
 			if(requiredArgs(parsed) != numArgs - 2) {
@@ -1431,11 +1436,11 @@ public class StringHandling {
 			// java.util.Date, java.util.Calendar, long
 			static final char DATE_TIME = 't';
 			static final char DATE_TIME_UPPER = 'T';
-			// if (arg.TYPE != boolean) return boolean
-			// if (arg != null) return true; else return false;
+			// if(arg.TYPE != boolean) return boolean
+			// if(arg != null) return true; else return false;
 			static final char BOOLEAN = 'b';
 			static final char BOOLEAN_UPPER = 'B';
-			// if (arg instanceof Formattable) arg.formatTo()
+			// if(arg instanceof Formattable) arg.formatTo()
 			// else arg.toString();
 			static final char STRING = 's';
 			static final char STRING_UPPER = 'S';
@@ -1564,7 +1569,7 @@ public class StringHandling {
 							convertArgument(children.get(i).getData(), parsed.get(i - 2).getExpectedType(), i, t);
 						}
 					}
-				} catch(IllegalFormatException e) {
+				} catch (IllegalFormatException e) {
 					throw new CREFormatException(e.getMessage(), t);
 				}
 				return me;
@@ -1576,9 +1581,9 @@ public class StringHandling {
 		private static class FormatString {
 
 			private Object ref;
-			private static final Class FormatString;
-			private static final Class FixedString;
-			private static final Class FormatSpecifier;
+			private static final Class FORMAT_STRING;
+			private static final Class FIXED_STRING;
+			private static final Class FORMAT_SPECIFIER;
 
 			static {
 				Class tFormatString = null;
@@ -1598,36 +1603,36 @@ public class StringHandling {
 						continue;
 					}
 				}
-				FormatString = tFormatString;
-				FixedString = tFixedString;
-				FormatSpecifier = tFormatSpecifier;
+				FORMAT_STRING = tFormatString;
+				FIXED_STRING = tFixedString;
+				FORMAT_SPECIFIER = tFormatSpecifier;
 			}
 
 			public FormatString(Object ref) {
 				if(ref == null) {
 					throw new NullPointerException();
 				}
-				if(!FormatString.isAssignableFrom(ref.getClass())) {
-					throw new RuntimeException("Unexpected class type. Was expecting ref to be an instance of " + FormatString.getName() + " but was " + ref.getClass().getName());
+				if(!FORMAT_STRING.isAssignableFrom(ref.getClass())) {
+					throw new RuntimeException("Unexpected class type. Was expecting ref to be an instance of " + FORMAT_STRING.getName() + " but was " + ref.getClass().getName());
 				}
 				this.ref = ref;
 			}
 
 			public Character getExpectedType() {
-				if(ref.getClass() == FixedString) {
+				if(ref.getClass() == FIXED_STRING) {
 					return null;
-				} else if(ref.getClass() == FormatSpecifier) {
-					if(((Boolean) ReflectionUtils.get(FormatSpecifier, ref, "dt"))) {
+				} else if(ref.getClass() == FORMAT_SPECIFIER) {
+					if(((Boolean) ReflectionUtils.get(FORMAT_SPECIFIER, ref, "dt"))) {
 						return 't';
 					}
-					return ((Character) ReflectionUtils.get(FormatSpecifier, ref, "c"));
+					return ((Character) ReflectionUtils.get(FORMAT_SPECIFIER, ref, "c"));
 				} else {
 					throw new RuntimeException("Unknown type: " + ref.getClass());
 				}
 			}
 
 			public int getArgIndex() {
-				return ((Integer) ReflectionUtils.get(FormatSpecifier, ref, "index"));
+				return ((Integer) ReflectionUtils.get(FORMAT_SPECIFIER, ref, "index"));
 			}
 
 			public boolean isFixed() {
@@ -1640,7 +1645,7 @@ public class StringHandling {
 			Object parse;
 			try {
 				parse = ReflectionUtils.invokeMethod(Formatter.class, new Formatter(), "parse", new Class[]{String.class}, new Object[]{format});
-			} catch(ReflectionException e) {
+			} catch (ReflectionException e) {
 				if(e.getCause() instanceof InvocationTargetException) {
 					Throwable th = e.getCause().getCause();
 					throw new CREFormatException("A format exception was thrown for the argument \"" + format + "\": " + th.getClass().getSimpleName() + ": " + th.getMessage(), t);
@@ -1729,7 +1734,7 @@ public class StringHandling {
 				new ExampleScript("Other formatting: plain string", "lsprintf('en_US', '%s', 'plain string')"),
 				new ExampleScript("Other formatting: boolean", "lsprintf('en_US', '%b', 1)"),
 				new ExampleScript("Other formatting: boolean (with capitalization)", "lsprintf('en_US', '%B', 0)"),
-				new ExampleScript("Other formatting: hash code", "lsprintf('en_US', '%h', 'will be hashed')"),};
+				new ExampleScript("Other formatting: hash code", "lsprintf('en_US', '%h', 'will be hashed')")};
 		}
 
 	}
@@ -1786,7 +1791,7 @@ public class StringHandling {
 				new ExampleScript("Other formatting: plain string", "sprintf('%s', 'plain string')"),
 				new ExampleScript("Other formatting: boolean", "sprintf('%b', 1)"),
 				new ExampleScript("Other formatting: boolean (with capitalization)", "sprintf('%B', 0)"),
-				new ExampleScript("Other formatting: hash code", "sprintf('%h', 'will be hashed')"),};
+				new ExampleScript("Other formatting: hash code", "sprintf('%h', 'will be hashed')")};
 		}
 
 	}
@@ -1818,7 +1823,7 @@ public class StringHandling {
 			}
 			try {
 				return CByteArray.wrap(val.getBytes(encoding), t);
-			} catch(UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				throw new CREFormatException("Unknown encoding type \"" + encoding + "\"", t);
 			}
 		}
@@ -1874,7 +1879,7 @@ public class StringHandling {
 			}
 			try {
 				return new CString(new String(ba.asByteArrayCopy(), encoding), t);
-			} catch(UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				throw new CREFormatException("Unknown encoding type \"" + encoding + "\"", t);
 			}
 		}
@@ -2013,7 +2018,7 @@ public class StringHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				return new CString(new String(Character.toChars(Static.getInt32(args[0], t))), t);
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CRERangeException("Code point out of range: " + args[0].val(), t);
 			}
 		}

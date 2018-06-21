@@ -15,9 +15,9 @@ public class FileLocations {
 
 	private static FileLocations defaultInstance = null;
 
-	private final static File USER_HOME;
-	private final static File USER_DIR;
-	private final static File JAVA_HOME;
+	private static final File USER_HOME;
+	private static final File USER_DIR;
+	private static final File JAVA_HOME;
 
 	static {
 		File userHome = null;
@@ -27,7 +27,7 @@ public class FileLocations {
 			userHome = new File(System.getProperty("user.home"));
 			userDir = new File(System.getProperty("user.dir"));
 			javaHome = new File(System.getProperty("java.home"));
-		} catch(SecurityException e) {
+		} catch (SecurityException e) {
 			//This could happen in applets or some other wierd security configuration.
 			//Regardless, we don't want this to ever fail.
 		}

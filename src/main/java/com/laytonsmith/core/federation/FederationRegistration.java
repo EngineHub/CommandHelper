@@ -105,10 +105,10 @@ public final class FederationRegistration {
 		Map<String, String> map = (Map<String, String>) JSONValue.parse(json);
 		String serverName = map.get("server_name");
 		int port = Integer.parseInt(map.get("port"));
-		long last_updated = Long.parseLong(map.get("last_updated"));
+		long lastUpdated = Long.parseLong(map.get("last_updated"));
 		FederationRegistration reg = new FederationRegistration(serverName);
 		reg.setPort(port);
-		reg.lastUpdated = last_updated;
+		reg.lastUpdated = lastUpdated;
 		return reg;
 	}
 }

@@ -25,27 +25,27 @@ import java.util.Map;
  */
 public abstract class CompositeFunction extends AbstractFunction {
 
-	private static final Map<Class<? extends CompositeFunction>, ParseTree> cachedScripts = new HashMap<>();
+	private static final Map<Class<? extends CompositeFunction>, ParseTree> CACHED_SCRIPTS = new HashMap<>();
 
 	@Override
 	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 		ParseTree tree;
-		if(!cachedScripts.containsKey(this.getClass())) {
+		if(!CACHED_SCRIPTS.containsKey(this.getClass())) {
 			try {
 
 				String script = script();
 				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true))
 						// the root of the tree is null, so go ahead and pull it up
 						.getChildAt(0);
-			} catch(ConfigCompileException | ConfigCompileGroupException ex) {
+			} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 				// This is really bad.
 				throw new Error(ex);
 			}
 			if(cacheCompile()) {
-				cachedScripts.put(this.getClass(), tree);
+				CACHED_SCRIPTS.put(this.getClass(), tree);
 			}
 		} else {
-			tree = cachedScripts.get(this.getClass());
+			tree = CACHED_SCRIPTS.get(this.getClass());
 		}
 		GlobalEnv env = environment.getEnv(GlobalEnv.class);
 		IVariableList oldVariables = env.GetVarList();
@@ -55,7 +55,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 		Construct ret = CVoid.VOID;
 		try {
 			env.GetScript().eval(tree, environment);
-		} catch(FunctionReturnException ex) {
+		} catch (FunctionReturnException ex) {
 			ret = ex.getReturn();
 		}
 		env.SetVarList(oldVariables);

@@ -60,7 +60,7 @@ public class ExtensionMeta {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				FunctionList.getFunction(args[0].val().toLowerCase(), t);
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				return CBoolean.FALSE;
 			}
 

@@ -208,9 +208,9 @@ public class BukkitPlayerListener implements Listener {
 						try {
 							f.get();
 							break;
-						} catch(InterruptedException ex) {
+						} catch (InterruptedException ex) {
 							//I don't know why this happens, but screw it, we're gonna try again, and it's gonna like it.
-						} catch(ExecutionException ex) {
+						} catch (ExecutionException ex) {
 							Logger.getLogger(BukkitPlayerListener.class.getName()).log(Level.SEVERE, null, ex);
 							break;
 						}

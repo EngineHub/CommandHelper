@@ -13,7 +13,7 @@ import java.util.Map;
  * cast to that, a compile error can be given.
  *
  */
-public class DataType {
+public final class DataType {
 
 	private static enum DataTypes {
 		DOUBLE,

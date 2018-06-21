@@ -124,9 +124,9 @@ public class CClosure extends Construct {
 	 * <pre>
 	 * try {
 	 *	closure.execute();
-	 * } catch(ConfigRuntimeException e){
+	 * } catch (ConfigRuntimeException e){
 	 *	ConfigRuntimeException.HandleUncaughtException(e);
-	 * } catch(ProgramFlowManipulationException e){
+	 * } catch (ProgramFlowManipulationException e){
 	 *	// Ignored
 	 * }
 	 * </pre>
@@ -154,7 +154,7 @@ public class CClosure extends Construct {
 					Construct value;
 					try {
 						value = values[i];
-					} catch(Exception e) {
+					} catch (Exception e) {
 						value = defaults[i].clone();
 					}
 					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value, getTarget()));
@@ -184,13 +184,13 @@ public class CClosure extends Construct {
 			newNode.setChildren(children);
 			try {
 				MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class).GetScript());
-			} catch(LoopManipulationException e) {
+			} catch (LoopManipulationException e) {
 				//This shouldn't ever happen.
 				LoopManipulationException lme = ((LoopManipulationException) e);
 				Target t = lme.getTarget();
 				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A " + lme.getName() + "() bubbled up to the top of"
 						+ " a closure, which is unexpected behavior.", t), environment);
-			} catch(FunctionReturnException ex) {
+			} catch (FunctionReturnException ex) {
 				// Check the return type of the closure to see if it matches the defined type
 				// Normal execution.
 				Construct ret = ex.getReturn();
@@ -200,14 +200,14 @@ public class CClosure extends Construct {
 				}
 				// Now rethrow it
 				throw ex;
-			} catch(CancelCommandException e) {
+			} catch (CancelCommandException e) {
 				// die()
-			} catch(ConfigRuntimeException ex) {
+			} catch (ConfigRuntimeException ex) {
 				if(ex instanceof AbstractCREException) {
 					((AbstractCREException) ex).freezeStackTraceElements(stManager);
 				}
 				throw ex;
-			} catch(Throwable t) {
+			} catch (Throwable t) {
 				// Not sure. Pop and re-throw.
 				throw t;
 			} finally {
@@ -218,7 +218,7 @@ public class CClosure extends Construct {
 				throw new CRECastException("Expecting closure to return a value of type " + returnType.val() + ","
 						+ " but no value was returned.", node.getTarget());
 			}
-		} catch(CloneNotSupportedException ex) {
+		} catch (CloneNotSupportedException ex) {
 			Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}

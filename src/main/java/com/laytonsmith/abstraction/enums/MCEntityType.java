@@ -19,6 +19,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	protected static Map<String, MCEntityType> mappings;
 	protected static Map<MCVanillaEntityType, MCEntityType> vanilla;
 
+	@SuppressWarnings("checkstyle:staticvariablename") // Fixing this violation might break dependents.
 	public static MCEntityType NULL = null;
 
 	protected Class<? extends MCEntity> wrapperClass;
@@ -132,7 +133,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		ENDER_EYE(true),
 		ENDER_PEARL(true),
 		EVOKER(true, MCVersion.MC1_11),
-		EVOKER_FANGS(false, MCVersion.MC1_11),
+		EVOKER_FANGS(true, MCVersion.MC1_11),
 		EXPERIENCE_ORB(true),
 		/**
 		 * Spawn with world.spawnFallingBlock() I'm not sure what version we switched to FALLING_BLOCK from

@@ -79,7 +79,7 @@ import org.json.simple.JSONValue;
  *
  * @author cailin
  */
-public class SiteDeploy {
+public final class SiteDeploy {
 
 	private static final String USERNAME = "username";
 	private static final String HOSTNAME = "hostname";
@@ -97,7 +97,7 @@ public class SiteDeploy {
 	private static final String INSTALL_PEM_FILE = "install-pem-file";
 	private static final String INSTALL_PUB_KEYS = "install-pub-keys";
 
-	public static void run(boolean generate_prefs, boolean useLocalCache, File sitedeploy, String password,
+	public static void run(boolean generatePrefs, boolean useLocalCache, File sitedeploy, String password,
 			boolean doValidation) throws Exception {
 		List<Preferences.Preference> defaults = new ArrayList<>();
 		// SCP Options
@@ -162,7 +162,7 @@ public class SiteDeploy {
 				+ " will be uploaded."));
 
 		Preferences prefs = new Preferences("Site-Deploy", Logger.getLogger(SiteDeploy.class.getName()), defaults);
-		if(generate_prefs) {
+		if(generatePrefs) {
 			prefs.init(sitedeploy);
 			System.out.println("Preferences file is now located at " + sitedeploy.getAbsolutePath() + ". Please fill in the"
 					+ " values, then re-run this command without the --generate-prefs option.");
@@ -174,7 +174,7 @@ public class SiteDeploy {
 		String hostname = (String) prefs.getPreference(HOSTNAME);
 		Integer port = (Integer) prefs.getPreference(PORT);
 		String directory = (String) prefs.getPreference(DIRECTORY);
-		Boolean use_password = (Boolean) prefs.getPreference(PASSWORD);
+		Boolean usePassword = (Boolean) prefs.getPreference(PASSWORD);
 		String docsBase = (String) prefs.getPreference(DOCSBASE);
 		String siteBase = (String) prefs.getPreference(SITEBASE);
 		Boolean showTemplateCredit = (Boolean) prefs.getPreference(SHOW_TEMPLATE_CREDIT);
@@ -251,7 +251,7 @@ public class SiteDeploy {
 			System.out.println("validator-url: " + validatorUrl);
 		}
 
-		if(use_password && password != null) {
+		if(usePassword && password != null) {
 			jline.console.ConsoleReader reader = null;
 			try {
 				Character cha = (char) 0;
@@ -286,271 +286,6 @@ public class SiteDeploy {
 			String githubBaseUrl, String validatorUrl, File finalizerScript) throws IOException, InterruptedException {
 		new SiteDeploy(siteBase, docsBase, useLocalCache, deploymentMethod, doValidation,
 				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript).deploy();
-	}
-
-	private final String siteBase;
-	private final String docsBase;
-	private final String resourceBase;
-	private final jline.console.ConsoleReader reader;
-	private final ThreadPoolExecutor generateQueue;
-	private final ThreadPoolExecutor uploadQueue;
-	private final AtomicInteger currentUploadTask = new AtomicInteger(0);
-	private final AtomicInteger totalUploadTasks = new AtomicInteger(0);
-	private final AtomicInteger currentGenerateTask = new AtomicInteger(0);
-	private final AtomicInteger totalGenerateTasks = new AtomicInteger(0);
-	private final List<String> filesChanged = new ArrayList<>();
-	private final PersistenceNetwork pn;
-	private final boolean useLocalCache;
-	private final DaemonManager dm = new DaemonManager();
-	private Map<String, String> lc = null;
-	private DeploymentMethod deploymentMethod;
-	private final boolean doValidation;
-	private final Map<String, String> uploadedPages = new HashMap<>();
-	private final boolean showTemplateCredit;
-	private final String githubBaseUrl;
-	private final String validatorUrl;
-	private final File finalizerScript;
-
-	private static final String EDIT_THIS_PAGE_PREAMBLE = "Find a bug in this page? <a rel=\"noopener noreferrer\" target=\"_blank\" href=\"";
-	private static final String EDIT_THIS_PAGE_POSTAMBLE = "\">Edit this page yourself, then submit a pull request.</a>";
-	private static final String DEFAULT_GITHUB_BASE_URL = "https://github.com/EngineHub/CommandHelper/edit/master/src/main/%s";
-
-	@SuppressWarnings("unchecked")
-	private SiteDeploy(String siteBase, String docsBase, boolean useLocalCache,
-			DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
-			String githubBaseUrl, String validatorUrl, File finalizerScript) throws IOException {
-		this.siteBase = siteBase;
-		this.docsBase = docsBase;
-		this.resourceBase = docsBase + "resources/";
-		this.finalizerScript = finalizerScript;
-		this.reader = new jline.console.ConsoleReader();
-		this.generateQueue = new ThreadPoolExecutor(1, 1,
-				0L, TimeUnit.MILLISECONDS,
-				new LinkedBlockingQueue<Runnable>(),
-				new ThreadFactory() {
-			@Override
-			public Thread newThread(Runnable r) {
-				return new Thread(r, "generateQueue");
-			}
-		});
-		this.uploadQueue = new ThreadPoolExecutor(1, 1,
-				0L, TimeUnit.MILLISECONDS,
-				new LinkedBlockingQueue<Runnable>(),
-				new ThreadFactory() {
-			@Override
-			public Thread newThread(Runnable r) {
-				return new Thread(r, "uploadQueue");
-			}
-		});
-		this.useLocalCache = useLocalCache;
-		this.deploymentMethod = deploymentMethod;
-		this.doValidation = doValidation;
-		this.showTemplateCredit = showTemplateCredit;
-		this.validatorUrl = validatorUrl;
-		if(githubBaseUrl.isEmpty()) {
-			githubBaseUrl = DEFAULT_GITHUB_BASE_URL;
-		}
-		this.githubBaseUrl = githubBaseUrl;
-		pn = getPersistenceNetwork();
-		if(pn != null) {
-			try {
-				String localCache = pn.get(new String[]{"site_deploy", "local_cache"});
-				if(localCache == null) {
-					localCache = "{}";
-				}
-				lc = (Map<String, String>) JSONValue.parse(localCache);
-			} catch(DataSourceException | IllegalArgumentException ex) {
-				Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Could not read in local cache", ex);
-				notificationAboutLocalCache = false;
-			}
-		}
-	}
-
-	/**
-	 * Returns the persistence network, or null if it couldn't be generated for whatever reason.
-	 *
-	 * @return
-	 */
-	public static PersistenceNetwork getPersistenceNetwork() {
-		PersistenceNetwork p;
-		try {
-			p = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
-					new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile()
-							.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace('\\', '/')),
-					new ConnectionMixinFactory.ConnectionMixinOptions());
-		} catch(DataSourceException | URISyntaxException | IOException ex) {
-			p = null;
-		}
-		return p;
-	}
-
-	private void resetLine() throws IOException {
-		reader.getOutput().write("\u001b[1G\u001b[K");
-		reader.flush();
-	}
-
-	private synchronized void writeStatus(String additionalInfo) {
-		int generatePercent = 0;
-		if(totalGenerateTasks.get() != 0) {
-			generatePercent = (int) (currentGenerateTask.get() / ((double) totalGenerateTasks.get()) * 100.0);
-		}
-		int uploadPercent = 0;
-		if(totalUploadTasks.get() != 0) {
-			uploadPercent = (int) (currentUploadTask.get() / ((double) totalUploadTasks.get()) * 100.0);
-		}
-		String message = "Generate progress: " + currentGenerateTask.get() + "/" + totalGenerateTasks.get()
-				+ " (" + generatePercent + "%)"
-				+ "; Upload progress: " + currentUploadTask.get() + "/" + totalUploadTasks.get()
-				+ " (" + uploadPercent + "%)"
-				+ "; " + additionalInfo;
-		try {
-			resetLine();
-			reader.getOutput().write(message);
-			reader.flush();
-		} catch(IOException ex) {
-			System.out.println(message);
-		}
-	}
-
-	private Map<String, Generator> getStandardGenerators() {
-		Map<String, Generator> g = new HashMap<>();
-		g.put("resourceBase", new Generator() {
-			@Override
-			public String generate(String... args) {
-				return SiteDeploy.this.resourceBase;
-			}
-		});
-		g.put("branding", new Generator() {
-			@Override
-			public String generate(String... args) {
-				return Implementation.GetServerType().getBranding();
-			}
-		});
-		g.put("siteRoot", new Generator() {
-			@Override
-			public String generate(String... args) {
-				return SiteDeploy.this.siteBase;
-			}
-		});
-		g.put("docsBase", new Generator() {
-			@Override
-			public String generate(String... args) {
-				return SiteDeploy.this.docsBase;
-			}
-		});
-		g.put("apiJsonVersion", new Generator() {
-			@Override
-			public String generate(String... args) throws GenerateException {
-				return apiJsonVersion;
-			}
-		});
-		/**
-		 * The cacheBuster template is meant to make it easier to deal with caching of resources. The template allows
-		 * you to specify the resource, and it creates a path to the resource using resourceBase, but it also appends a
-		 * hash of the file, so that as the file changes, so does the hash (using a ?v=hash query string). Most
-		 * resources live in /siteDeploy/resources/*, and so the shorthand is to use
-		 * %%cacheBuster|path/to/resource.css%%. However, this isn't always correct, because resources can live all over
-		 * the place. In that case, you should use the following format:
-		 * %%cacheBuster|/absolute/path/to/resource.css|path/to/resource/in/html.css%%
-		 */
-		g.put("cacheBuster", new Generator() {
-			@Override
-			public String generate(String... args) {
-				String resourceLoc = SiteDeploy.this.resourceBase + args[0];
-				String loc = args[0];
-				if(!loc.startsWith("/")) {
-					loc = "/siteDeploy/resources/" + loc;
-				} else {
-					resourceLoc = SiteDeploy.this.resourceBase + args[1];
-				}
-				String hash = "0";
-				try {
-					InputStream in = SiteDeploy.class.getResourceAsStream(loc);
-					if(in == null) {
-						throw new RuntimeException("Could not find " + loc + " in resources folder for cacheBuster template");
-					}
-					hash = getLocalMD5(in);
-				} catch(IOException ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
-				}
-				return resourceLoc + "?v=" + hash;
-			}
-
-		});
-		final Generator learningTrailGen = new Generator() {
-			@Override
-			public String generate(String... args) {
-				String learning_trail = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/LearningTrail.json"));
-				List<Map<String, List<Map<String, String>>>> ret = new ArrayList<>();
-				@SuppressWarnings("unchecked")
-				List<Map<String, List<Object>>> lt = (List<Map<String, List<Object>>>) JSONValue.parse(learning_trail);
-				for(Map<String, List<Object>> l : lt) {
-					for(Map.Entry<String, List<Object>> e : l.entrySet()) {
-						String category = e.getKey();
-						List<Map<String, String>> catInfo = new ArrayList<>();
-						for(Object ll : e.getValue()) {
-							Map<String, String> pageInfo = new LinkedHashMap<>();
-							String page = null;
-							String name = null;
-							if(ll instanceof String) {
-								name = page = (String) ll;
-							} else if(ll instanceof Map) {
-								@SuppressWarnings("unchecked")
-								Map<String, String> p = (Map<String, String>) ll;
-								if(p.entrySet().size() != 1) {
-									throw new RuntimeException("Invalid JSON for learning trail");
-								}
-								for(Map.Entry<String, String> ee : p.entrySet()) {
-									page = ee.getKey();
-									name = ee.getValue();
-								}
-							} else {
-								throw new RuntimeException("Invalid JSON for learning trail");
-							}
-							assert page != null && name != null;
-							boolean exists;
-							if(page.contains(".")) {
-								// We can't really check this, because it might be a synthetic page, like
-								// api.json. So we just have to set it to true.
-								exists = true;
-							} else {
-								exists = SiteDeploy.class.getResourceAsStream("/docs/" + page) != null;
-							}
-							pageInfo.put("name", name);
-							pageInfo.put("page", page);
-							pageInfo.put("category", category);
-							pageInfo.put("exists", Boolean.toString(exists));
-							catInfo.add(pageInfo);
-						}
-						Map<String, List<Map<String, String>>> m = new HashMap<>();
-						m.put(category, catInfo);
-						ret.add(m);
-					}
-				}
-				return JSONValue.toJSONString(ret);
-			}
-		};
-		g.put("js_string_learning_trail", new Generator() {
-			@Override
-			public String generate(String... args) throws GenerateException {
-				String g = learningTrailGen.generate(args);
-				g = g.replaceAll("\\\\", "\\\\");
-				g = g.replaceAll("\"", "\\\\\"");
-				return g;
-			}
-		});
-		g.put("learning_trail", learningTrailGen);
-		/**
-		 * If showTemplateCredit is false, then this will return "display: none;" otherwise, it will return an empty
-		 * string.
-		 */
-		g.put("showTemplateCredit", new Generator() {
-			@Override
-			public String generate(String... args) throws GenerateException {
-				return showTemplateCredit ? "" : "display: none;";
-			}
-		});
-		return g;
 	}
 
 	String apiJson;
@@ -672,7 +407,7 @@ public class SiteDeploy {
 					}
 					filesValidated++;
 				}
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				System.err.println("Validation could not occur due to the following exception: " + ex.getMessage());
 				ex.printStackTrace(System.err);
 			}
@@ -684,7 +419,7 @@ public class SiteDeploy {
 			if(finalizerScript.getPath().endsWith(".ms")) {
 				try {
 					Interpreter.startWithTTY(finalizerScript, filesChanged, false);
-				} catch(DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+				} catch (DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
 					ex.printStackTrace(System.err);
 				}
 			} else {
@@ -700,6 +435,272 @@ public class SiteDeploy {
 		System.out.println("Done!");
 		System.out.println("Summary of changed files (" + filesChanged.size() + ")");
 		System.out.println(StringUtils.Join(filesChanged, "\n"));
+	}
+
+	private final String siteBase;
+	private final String docsBase;
+	private final String resourceBase;
+	private final jline.console.ConsoleReader reader;
+	private final ThreadPoolExecutor generateQueue;
+	private final ThreadPoolExecutor uploadQueue;
+	private final AtomicInteger currentUploadTask = new AtomicInteger(0);
+	private final AtomicInteger totalUploadTasks = new AtomicInteger(0);
+	private final AtomicInteger currentGenerateTask = new AtomicInteger(0);
+	private final AtomicInteger totalGenerateTasks = new AtomicInteger(0);
+	private final List<String> filesChanged = new ArrayList<>();
+	private final PersistenceNetwork pn;
+	private final boolean useLocalCache;
+	private final DaemonManager dm = new DaemonManager();
+	private Map<String, String> lc = null;
+	private DeploymentMethod deploymentMethod;
+	private final boolean doValidation;
+	private final Map<String, String> uploadedPages = new HashMap<>();
+	private final boolean showTemplateCredit;
+	private final String githubBaseUrl;
+	private final String validatorUrl;
+	private final File finalizerScript;
+
+	private static final String EDIT_THIS_PAGE_PREAMBLE = "Find a bug in this page? <a rel=\"noopener noreferrer\" target=\"_blank\" href=\"";
+	private static final String EDIT_THIS_PAGE_POSTAMBLE = "\">Edit this page yourself, then submit a pull request.</a>";
+	private static final String DEFAULT_GITHUB_BASE_URL = "https://github.com/EngineHub/CommandHelper/edit/master/src/main/%s";
+
+	@SuppressWarnings("unchecked")
+	private SiteDeploy(String siteBase, String docsBase, boolean useLocalCache,
+			DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
+			String githubBaseUrl, String validatorUrl, File finalizerScript) throws IOException {
+		this.siteBase = siteBase;
+		this.docsBase = docsBase;
+		this.resourceBase = docsBase + "resources/";
+		this.finalizerScript = finalizerScript;
+		this.reader = new jline.console.ConsoleReader();
+		this.generateQueue = new ThreadPoolExecutor(1, 1,
+				0L, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<Runnable>(),
+				new ThreadFactory() {
+			@Override
+			public Thread newThread(Runnable r) {
+				return new Thread(r, "generateQueue");
+			}
+		});
+		this.uploadQueue = new ThreadPoolExecutor(1, 1,
+				0L, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<Runnable>(),
+				new ThreadFactory() {
+			@Override
+			public Thread newThread(Runnable r) {
+				return new Thread(r, "uploadQueue");
+			}
+		});
+		this.useLocalCache = useLocalCache;
+		this.deploymentMethod = deploymentMethod;
+		this.doValidation = doValidation;
+		this.showTemplateCredit = showTemplateCredit;
+		this.validatorUrl = validatorUrl;
+		if(githubBaseUrl.isEmpty()) {
+			githubBaseUrl = DEFAULT_GITHUB_BASE_URL;
+		}
+		this.githubBaseUrl = githubBaseUrl;
+		pn = getPersistenceNetwork();
+		if(pn != null) {
+			try {
+				String localCache = pn.get(new String[]{"site_deploy", "local_cache"});
+				if(localCache == null) {
+					localCache = "{}";
+				}
+				lc = (Map<String, String>) JSONValue.parse(localCache);
+			} catch (DataSourceException | IllegalArgumentException ex) {
+				Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Could not read in local cache", ex);
+				notificationAboutLocalCache = false;
+			}
+		}
+	}
+
+	/**
+	 * Returns the persistence network, or null if it couldn't be generated for whatever reason.
+	 *
+	 * @return
+	 */
+	public static PersistenceNetwork getPersistenceNetwork() {
+		PersistenceNetwork p;
+		try {
+			p = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
+					new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile()
+							.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace('\\', '/')),
+					new ConnectionMixinFactory.ConnectionMixinOptions());
+		} catch (DataSourceException | URISyntaxException | IOException ex) {
+			p = null;
+		}
+		return p;
+	}
+
+	private void resetLine() throws IOException {
+		reader.getOutput().write("\u001b[1G\u001b[K");
+		reader.flush();
+	}
+
+	private synchronized void writeStatus(String additionalInfo) {
+		int generatePercent = 0;
+		if(totalGenerateTasks.get() != 0) {
+			generatePercent = (int) (currentGenerateTask.get() / ((double) totalGenerateTasks.get()) * 100.0);
+		}
+		int uploadPercent = 0;
+		if(totalUploadTasks.get() != 0) {
+			uploadPercent = (int) (currentUploadTask.get() / ((double) totalUploadTasks.get()) * 100.0);
+		}
+		String message = "Generate progress: " + currentGenerateTask.get() + "/" + totalGenerateTasks.get()
+				+ " (" + generatePercent + "%)"
+				+ "; Upload progress: " + currentUploadTask.get() + "/" + totalUploadTasks.get()
+				+ " (" + uploadPercent + "%)"
+				+ "; " + additionalInfo;
+		try {
+			resetLine();
+			reader.getOutput().write(message);
+			reader.flush();
+		} catch (IOException ex) {
+			System.out.println(message);
+		}
+	}
+
+	private Map<String, Generator> getStandardGenerators() {
+		Map<String, Generator> g = new HashMap<>();
+		g.put("resourceBase", new Generator() {
+			@Override
+			public String generate(String... args) {
+				return SiteDeploy.this.resourceBase;
+			}
+		});
+		g.put("branding", new Generator() {
+			@Override
+			public String generate(String... args) {
+				return Implementation.GetServerType().getBranding();
+			}
+		});
+		g.put("siteRoot", new Generator() {
+			@Override
+			public String generate(String... args) {
+				return SiteDeploy.this.siteBase;
+			}
+		});
+		g.put("docsBase", new Generator() {
+			@Override
+			public String generate(String... args) {
+				return SiteDeploy.this.docsBase;
+			}
+		});
+		g.put("apiJsonVersion", new Generator() {
+			@Override
+			public String generate(String... args) throws GenerateException {
+				return apiJsonVersion;
+			}
+		});
+		/**
+		 * The cacheBuster template is meant to make it easier to deal with caching of resources. The template allows
+		 * you to specify the resource, and it creates a path to the resource using resourceBase, but it also appends a
+		 * hash of the file, so that as the file changes, so does the hash (using a ?v=hash query string). Most
+		 * resources live in /siteDeploy/resources/*, and so the shorthand is to use
+		 * %%cacheBuster|path/to/resource.css%%. However, this isn't always correct, because resources can live all over
+		 * the place. In that case, you should use the following format:
+		 * %%cacheBuster|/absolute/path/to/resource.css|path/to/resource/in/html.css%%
+		 */
+		g.put("cacheBuster", new Generator() {
+			@Override
+			public String generate(String... args) {
+				String resourceLoc = SiteDeploy.this.resourceBase + args[0];
+				String loc = args[0];
+				if(!loc.startsWith("/")) {
+					loc = "/siteDeploy/resources/" + loc;
+				} else {
+					resourceLoc = SiteDeploy.this.resourceBase + args[1];
+				}
+				String hash = "0";
+				try {
+					InputStream in = SiteDeploy.class.getResourceAsStream(loc);
+					if(in == null) {
+						throw new RuntimeException("Could not find " + loc + " in resources folder for cacheBuster template");
+					}
+					hash = getLocalMD5(in);
+				} catch (IOException ex) {
+					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+				}
+				return resourceLoc + "?v=" + hash;
+			}
+
+		});
+		final Generator learningTrailGen = new Generator() {
+			@Override
+			public String generate(String... args) {
+				String learningTrail =
+						StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/LearningTrail.json"));
+				List<Map<String, List<Map<String, String>>>> ret = new ArrayList<>();
+				@SuppressWarnings("unchecked")
+				List<Map<String, List<Object>>> lt = (List<Map<String, List<Object>>>) JSONValue.parse(learningTrail);
+				for(Map<String, List<Object>> l : lt) {
+					for(Map.Entry<String, List<Object>> e : l.entrySet()) {
+						String category = e.getKey();
+						List<Map<String, String>> catInfo = new ArrayList<>();
+						for(Object ll : e.getValue()) {
+							Map<String, String> pageInfo = new LinkedHashMap<>();
+							String page = null;
+							String name = null;
+							if(ll instanceof String) {
+								name = page = (String) ll;
+							} else if(ll instanceof Map) {
+								@SuppressWarnings("unchecked")
+								Map<String, String> p = (Map<String, String>) ll;
+								if(p.entrySet().size() != 1) {
+									throw new RuntimeException("Invalid JSON for learning trail");
+								}
+								for(Map.Entry<String, String> ee : p.entrySet()) {
+									page = ee.getKey();
+									name = ee.getValue();
+								}
+							} else {
+								throw new RuntimeException("Invalid JSON for learning trail");
+							}
+							assert page != null && name != null;
+							boolean exists;
+							if(page.contains(".")) {
+								// We can't really check this, because it might be a synthetic page, like
+								// api.json. So we just have to set it to true.
+								exists = true;
+							} else {
+								exists = SiteDeploy.class.getResourceAsStream("/docs/" + page) != null;
+							}
+							pageInfo.put("name", name);
+							pageInfo.put("page", page);
+							pageInfo.put("category", category);
+							pageInfo.put("exists", Boolean.toString(exists));
+							catInfo.add(pageInfo);
+						}
+						Map<String, List<Map<String, String>>> m = new HashMap<>();
+						m.put(category, catInfo);
+						ret.add(m);
+					}
+				}
+				return JSONValue.toJSONString(ret);
+			}
+		};
+		g.put("js_string_learning_trail", new Generator() {
+			@Override
+			public String generate(String... args) throws GenerateException {
+				String g = learningTrailGen.generate(args);
+				g = g.replaceAll("\\\\", "\\\\");
+				g = g.replaceAll("\"", "\\\\\"");
+				return g;
+			}
+		});
+		g.put("learning_trail", learningTrailGen);
+		/**
+		 * If showTemplateCredit is false, then this will return "display: none;" otherwise, it will return an empty
+		 * string.
+		 */
+		g.put("showTemplateCredit", new Generator() {
+			@Override
+			public String generate(String... args) throws GenerateException {
+				return showTemplateCredit ? "" : "display: none;";
+			}
+		});
+		return g;
 	}
 
 	/**
@@ -743,7 +744,7 @@ public class SiteDeploy {
 										}
 									}
 								}
-							} catch(IllegalArgumentException ex) {
+							} catch (IllegalArgumentException ex) {
 								Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Could not use local cache", ex);
 								notificationAboutLocalCache = false;
 							}
@@ -756,14 +757,14 @@ public class SiteDeploy {
 						try {
 							lc.put(deploymentMethod.getID() + toLocation, hash);
 							pn.set(dm, new String[]{"site_deploy", "local_cache"}, JSONValue.toJSONString(lc));
-						} catch(DataSourceException | ReadOnlyException | IllegalArgumentException ex) {
+						} catch (DataSourceException | ReadOnlyException | IllegalArgumentException ex) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 							notificationAboutLocalCache = false;
 						}
 					}
 					currentUploadTask.addAndGet(1);
 					writeStatus("");
-				} catch(Throwable ex) {
+				} catch (Throwable ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed while uploading " + toLocation, ex);
 					generateQueue.shutdownNow();
 					uploadQueue.shutdownNow();
@@ -780,7 +781,7 @@ public class SiteDeploy {
 			digest.update(f);
 			String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 			return hash;
-		} catch(NoSuchAlgorithmException ex) {
+		} catch (NoSuchAlgorithmException ex) {
 			throw new RuntimeException(ex);
 		} finally {
 			localFile.close();
@@ -879,7 +880,7 @@ public class SiteDeploy {
 						Map<String, Generator> standard = getStandardGenerators();
 						standard.putAll(DocGenTemplates.GetGenerators());
 						b = DocGenTemplates.DoTemplateReplacement(bW, standard);
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						if(ex instanceof GenerateException) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed to substitute template"
 									+ " while trying to upload resource to " + toLocation, ex);
@@ -941,7 +942,7 @@ public class SiteDeploy {
 					writeFromString(bb, toLocation);
 					currentGenerateTask.addAndGet(1);
 					writeStatus("");
-				} catch(Exception ex) {
+				} catch (Exception ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While writing " + toLocation + " the following error occured:", ex);
 				}
 			}
@@ -972,13 +973,13 @@ public class SiteDeploy {
 							writeFromStream(r.getInputStream(), "resources" + fileName);
 						}
 					}
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				String index_js = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/index.js"));
+				String indexJs = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/index.js"));
 				try {
-					writeFromString(DocGenTemplates.DoTemplateReplacement(index_js, getStandardGenerators()), "resources/js/index.js");
-				} catch(Generator.GenerateException ex) {
+					writeFromString(DocGenTemplates.DoTemplateReplacement(indexJs, getStandardGenerators()), "resources/js/index.js");
+				} catch (Generator.GenerateException ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "GenerateException in /siteDeploy/index.js", ex);
 				}
 				currentGenerateTask.addAndGet(1);
@@ -1062,7 +1063,7 @@ public class SiteDeploy {
 						writePageFromResource(r.getName(), "/docs" + filename, r.getName() + ".html",
 								Arrays.asList(new String[]{r.getName().replace("_", " ")}), "Learning trail page for " + r.getName().replace("_", " "));
 					}
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				currentGenerateTask.addAndGet(1);
@@ -1105,7 +1106,7 @@ public class SiteDeploy {
 						final Function f;
 						try {
 							f = ReflectionUtils.instantiateUnsafe(functionClass);
-						} catch(ReflectionUtils.ReflectionException ex) {
+						} catch (ReflectionUtils.ReflectionException ex) {
 							throw new RuntimeException("While trying to construct " + functionClass + ", got the following", ex);
 						}
 						final DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
@@ -1144,7 +1145,7 @@ public class SiteDeploy {
 							if(f.examples() != null && f.examples().length > 0) {
 								desc.append("<br>([[API/functions/").append(f.getName()).append("#Examples|Examples...]])\n");
 							}
-						} catch(ConfigCompileException | NoClassDefFoundError ex) {
+						} catch (ConfigCompileException | NoClassDefFoundError ex) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 						}
 						c.add(desc.toString());
@@ -1192,7 +1193,7 @@ public class SiteDeploy {
 							}
 							b.append("|}\n");
 							b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
-						} catch(Error ex) {
+						} catch (Error ex) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
 						}
 					}
@@ -1212,7 +1213,7 @@ public class SiteDeploy {
 							Arrays.asList(new String[]{"API", "functions"}),
 							"A list of all " + Implementation.GetServerType().getBranding() + " functions");
 					currentGenerateTask.addAndGet(1);
-				} catch(Error ex) {
+				} catch (Error ex) {
 					ex.printStackTrace(System.err);
 				}
 			}
@@ -1311,7 +1312,7 @@ public class SiteDeploy {
 			} else {
 				exampleBuilder.append("Sorry, there are no examples for this function! :(\n");
 			}
-		} catch(ConfigCompileException | IOException | DataSourceException | URISyntaxException ex) {
+		} catch (ConfigCompileException | IOException | DataSourceException | URISyntaxException ex) {
 			exampleBuilder.append("Error while compiling the examples for ").append(f.getName());
 		}
 
@@ -1388,7 +1389,7 @@ public class SiteDeploy {
 						final Event e;
 						try {
 							e = ReflectionUtils.instantiateUnsafe(eventClass);
-						} catch(ReflectionUtils.ReflectionException ex) {
+						} catch (ReflectionUtils.ReflectionException ex) {
 							throw new RuntimeException("While trying to construct " + eventClass + ", got the following", ex);
 						}
 						final DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
@@ -1457,7 +1458,7 @@ public class SiteDeploy {
 							}
 							b.append("|}\n");
 							b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
-						} catch(Error ex) {
+						} catch (Error ex) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
 						}
 					}
@@ -1465,7 +1466,7 @@ public class SiteDeploy {
 							Arrays.asList(new String[]{"API", "events"}),
 							"A list of all " + Implementation.GetServerType().getBranding() + " events");
 					currentGenerateTask.addAndGet(1);
-				} catch(Error ex) {
+				} catch (Error ex) {
 					ex.printStackTrace(System.err);
 				}
 			}

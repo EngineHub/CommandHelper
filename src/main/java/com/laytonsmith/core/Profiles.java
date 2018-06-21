@@ -36,7 +36,7 @@ public class Profiles {
 	public Profiles(String xml) throws InvalidProfileException {
 		try {
 			document = new XMLDocument(xml);
-		} catch(SAXException ex) {
+		} catch (SAXException ex) {
 			throw new InvalidProfileException(ex);
 		}
 		parse();
@@ -61,7 +61,7 @@ public class Profiles {
 	public Profiles(InputStream profileData) throws IOException, InvalidProfileException {
 		try {
 			document = new XMLDocument(profileData);
-		} catch(SAXException ex) {
+		} catch (SAXException ex) {
 			throw new InvalidProfileException(ex);
 		}
 		parse();
@@ -71,7 +71,7 @@ public class Profiles {
 		int profileCount;
 		try {
 			profileCount = document.countNodes("/profiles/profile");
-		} catch(XPathExpressionException ex) {
+		} catch (XPathExpressionException ex) {
 			throw new InvalidProfileException("Missing root /profiles element");
 		}
 
@@ -80,18 +80,18 @@ public class Profiles {
 			String type;
 			try {
 				id = document.getNode("/profiles/profile[" + i + "]/@id");
-			} catch(XPathExpressionException ex) {
+			} catch (XPathExpressionException ex) {
 				throw new InvalidProfileException("All <profile> elements must have an id attribute.");
 			}
 			try {
 				type = document.getNode("/profiles/profile[" + i + "]/type");
-			} catch(XPathExpressionException ex) {
+			} catch (XPathExpressionException ex) {
 				throw new InvalidProfileException("All <profile> elements must have a type attribute.");
 			}
 			List<String> children;
 			try {
 				children = document.getChildren("/profiles/profile[" + i + "]");
-			} catch(XPathExpressionException ex) {
+			} catch (XPathExpressionException ex) {
 				//Shouldn't happen, this is our fault.
 				throw new RuntimeException(ex);
 			}
@@ -99,7 +99,7 @@ public class Profiles {
 			for(String child : children) {
 				try {
 					elements.put(child, document.getNode("/profiles/profile[" + i + "]/" + child));
-				} catch(XPathExpressionException ex) {
+				} catch (XPathExpressionException ex) {
 					//Shouldn't happen
 					throw new RuntimeException(ex);
 				}
@@ -198,7 +198,7 @@ public class Profiles {
 	 * (String id, Map&lt;String, String&gt; elements) that contains the parsed xml for that profile. validation can be
 	 * done in the constructor, and an InvalidProfileException can be thrown if there is invalid or missing data.
 	 */
-	public static abstract class Profile implements Comparable<Profile> {
+	public abstract static class Profile implements Comparable<Profile> {
 
 		private final String id;
 

@@ -19,15 +19,15 @@ import org.mozilla.intl.chardet.nsPSMDetector;
 /**
  *
  */
-public class FileUtil {
+public final class FileUtil {
 
 	private FileUtil() {
 	}
 	public static final int OVERWRITE = 0;
 	public static final int APPEND = 1;
 
-	private static final Map<String, Object> fileLocks = new HashMap<>();
-	private static final Map<String, Integer> fileLockCounter = new HashMap<>();
+	private static final Map<String, Object> FILE_LOCKS = new HashMap<>();
+	private static final Map<String, Integer> FILE_LOCK_COUNTER = new HashMap<>();
 
 	/**
 	 * A more complicated mechanism is required to ensure global access across the JVM is synchronized, so file system
@@ -39,20 +39,20 @@ public class FileUtil {
 	 */
 	private static synchronized Object getLock(File file) throws IOException {
 		String canonical = file.getAbsoluteFile().getCanonicalPath();
-		if(!fileLocks.containsKey(canonical)) {
-			fileLocks.put(canonical, new Object());
-			fileLockCounter.put(canonical, 0);
+		if(!FILE_LOCKS.containsKey(canonical)) {
+			FILE_LOCKS.put(canonical, new Object());
+			FILE_LOCK_COUNTER.put(canonical, 0);
 		}
-		fileLockCounter.put(canonical, fileLockCounter.get(canonical) + 1);
-		return fileLocks.get(canonical);
+		FILE_LOCK_COUNTER.put(canonical, FILE_LOCK_COUNTER.get(canonical) + 1);
+		return FILE_LOCKS.get(canonical);
 	}
 
 	private static synchronized void freeLock(File file) throws IOException {
 		String canonical = file.getAbsoluteFile().getCanonicalPath();
-		fileLockCounter.put(canonical, fileLockCounter.get(canonical) - 1);
-		if(fileLockCounter.get(canonical) == 0) {
-			fileLockCounter.remove(canonical);
-			fileLocks.remove(canonical);
+		FILE_LOCK_COUNTER.put(canonical, FILE_LOCK_COUNTER.get(canonical) - 1);
+		if(FILE_LOCK_COUNTER.get(canonical) == 0) {
+			FILE_LOCK_COUNTER.remove(canonical);
+			FILE_LOCKS.remove(canonical);
 		}
 	}
 
@@ -80,7 +80,7 @@ public class FileUtil {
 		try {
 			byte[] bytes = org.apache.commons.io.FileUtils.readFileToByteArray(file);
 			return new ByteArrayInputStream(bytes);
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			//Apache IO has an interesting feature/bug where the error message "Unexpected readed size" is thrown.
 			//If this is the case, we're going to try using a normal java file connection. Other IOExceptions
 			//are just going be rethrown.
@@ -99,7 +99,7 @@ public class FileUtil {
 				throw ex;
 			}
 		}
-//		try{
+//		try {
 //			synchronized (getLock(file)) {
 //				RandomAccessFile raf = new RandomAccessFile(file, "rw");
 //				FileLock lock = null;
@@ -109,7 +109,7 @@ public class FileUtil {
 //					raf.getChannel().read(buffer);
 //					return new ByteArrayInputStream(buffer.array());
 //				} finally {
-//					if (lock != null) {
+//					if(lock != null) {
 //						lock.release();
 //					}
 //					raf.close();
@@ -119,7 +119,7 @@ public class FileUtil {
 //			freeLock(file);
 //		}
 //		FileInputStream fis = new FileInputStream(f);
-//		try{
+//		try {
 //		return StreamUtils.GetString(fis, charset);
 //		} finally {
 //			fis.close();
@@ -167,7 +167,7 @@ public class FileUtil {
 			file.getAbsoluteFile().createNewFile();
 		}
 		FileUtils.writeByteArrayToFile(file, data, append);
-//		try{
+//		try {
 //			synchronized (getLock(file)) {
 //				int sleepTime = 0;
 //				int sleepTimes = 0;
@@ -184,7 +184,7 @@ public class FileUtil {
 //					try {
 //						lock = raf.getChannel().lock();
 //						//Clear out the file
-//						if (!append) {
+//						if(!append) {
 //							raf.getChannel().truncate(0);
 //						} else {
 //							raf.seek(raf.length());
@@ -196,7 +196,7 @@ public class FileUtil {
 //						//We assume it worked at this point, so let's break;
 //						break loop;
 //						//raf.getChannel().write(ByteBuffer.wrap(data));
-//					} catch(IOException e){
+//					} catch (IOException e){
 //						//If we get this dumb message, we're on windows. We'll try again here shortly,
 //						//but we don't want to bother the user with this exception if we can help it.
 //						//http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6354433
@@ -209,7 +209,7 @@ public class FileUtil {
 //							throw e;
 //						}
 //					} finally {
-//						if (lock != null) {
+//						if(lock != null) {
 //							lock.release();
 //						}
 //						raf.close();
@@ -323,18 +323,18 @@ public class FileUtil {
 //			byte[] buffer = new byte[4096];
 //			int bytesRead;
 //
-//			while ((bytesRead = from.read(buffer)) != -1) {
+//			while((bytesRead = from.read(buffer)) != -1) {
 //				to.write(buffer, 0, bytesRead); // write
 //			}
 //		} finally {
-//			if (from != null) {
+//			if(from != null) {
 //				try {
 //					from.close();
 //				} catch (IOException e) {
 //					;
 //				}
 //			}
-//			if (to != null) {
+//			if(to != null) {
 //				try {
 //					to.close();
 //				} catch (IOException e) {
@@ -353,7 +353,7 @@ public class FileUtil {
 	public static boolean move(File from, File to) throws IOException {
 		FileUtils.moveFile(from, to);
 		return true;
-//		try{
+//		try {
 //			synchronized(getLock(to)){
 //				return from.renameTo(to);
 //			}

@@ -17,7 +17,7 @@ import java.util.List;
 @Keyword.keyword("proc")
 public class ProcKeyword extends Keyword {
 
-	private final static String PROC = new DataHandling.proc().getName();
+	private static final String PROC = new DataHandling.proc().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {

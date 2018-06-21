@@ -213,7 +213,7 @@ public class BukkitMCCommand implements MCCommand {
 				closure.execute(new CString(alias, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array
 				);
-			} catch(FunctionReturnException e) {
+			} catch (FunctionReturnException e) {
 				Construct fret = e.getReturn();
 				if(fret instanceof CArray) {
 					List<String> ret = new ArrayList<>();
@@ -228,7 +228,7 @@ public class BukkitMCCommand implements MCCommand {
 					}
 					return ret;
 				}
-			} catch(ConfigRuntimeException cre) {
+			} catch (ConfigRuntimeException cre) {
 				ConfigRuntimeException.HandleUncaughtException(cre, closure.getEnv());
 				return new ArrayList<>();
 			}
@@ -256,12 +256,12 @@ public class BukkitMCCommand implements MCCommand {
 				closure.execute(new CString(label, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array
 				);
-			} catch(FunctionReturnException e) {
+			} catch (FunctionReturnException e) {
 				Construct fret = e.getReturn();
 				if(fret instanceof CBoolean) {
 					return ((CBoolean) fret).getBoolean();
 				}
-			} catch(ConfigRuntimeException cre) {
+			} catch (ConfigRuntimeException cre) {
 				cre.setEnv(closure.getEnv());
 				ConfigRuntimeException.HandleUncaughtException(cre, closure.getEnv());
 			}

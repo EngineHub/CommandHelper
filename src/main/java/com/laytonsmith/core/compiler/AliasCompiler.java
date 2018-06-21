@@ -380,7 +380,7 @@ public class AliasCompiler {
 			}
 		}
 
-		private final Pattern LIT_PATTERN = Pattern.compile("([\\[\\]=:\\$])");
+		private static final Pattern LIT_PATTERN = Pattern.compile("([\\[\\]=:\\$])");
 
 		private void endToken() throws ConfigCompileException {
 			if(buf.length() == 0) {

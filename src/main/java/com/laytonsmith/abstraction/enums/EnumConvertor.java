@@ -51,7 +51,7 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 		}
 		try {
 			return getAbstractedEnumCustom(concrete);
-		} catch(IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			doLog(concreteClass, abstractedClass, concrete);
 			return null;
 		}
@@ -84,7 +84,7 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 		}
 		try {
 			return getConcreteEnumCustom(abstracted);
-		} catch(IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			doLog(abstractedClass, concreteClass, abstracted);
 			return null;
 		}

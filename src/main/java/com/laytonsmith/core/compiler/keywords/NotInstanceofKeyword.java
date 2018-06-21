@@ -16,8 +16,8 @@ import java.util.List;
 @Keyword.keyword("notinstanceof")
 public class NotInstanceofKeyword extends Keyword {
 
-	private final static String INSTANCEOF = new DataHandling._instanceof().getName();
-	private final static String NOT = new BasicLogic.not().getName();
+	private static final String INSTANCEOF = new DataHandling._instanceof().getName();
+	private static final String NOT = new BasicLogic.not().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {

@@ -19,12 +19,13 @@ import java.util.List;
  * to the debug log file.
  *
  */
+@SuppressWarnings("checkstyle:finalclass") // StaticTest.InstallFakeLogger() mocks this class, so it cannot be final.
 public class CHLog {
 
 	private CHLog() {
 	}
 
-	private static final String header = "The logger preferences allow you to granularly define what information\n"
+	private static final String HEADER = "The logger preferences allow you to granularly define what information\n"
 			+ "is written out to file, to assist you in debugging or general logging.\n"
 			+ "You may set the granularity of all the tags individually, to any one of\n"
 			+ "the following values:\n"
@@ -42,7 +43,7 @@ public class CHLog {
 			+ "";
 
 	private static Preferences prefs;
-	private static final EnumMap<Tags, LogLevel> lookup = new EnumMap<Tags, LogLevel>(Tags.class);
+	private static final EnumMap<Tags, LogLevel> LOOKUP = new EnumMap<Tags, LogLevel>(Tags.class);
 
 	public enum Tags {
 		COMPILER("compiler", "Logs compiler errors (but not runtime errors)", LogLevel.WARNING),
@@ -97,10 +98,10 @@ public class CHLog {
 		for(Tags t : Tags.values()) {
 			myPrefs.add(new Preference(t.name, t.level.name(), Preferences.Type.STRING, t.description));
 		}
-		CHLog.prefs = new Preferences("CommandHelper", Static.getLogger(), myPrefs, header);
+		CHLog.prefs = new Preferences("CommandHelper", Static.getLogger(), myPrefs, HEADER);
 		try {
 			CHLog.prefs.init(MethodScriptFileLocations.getDefault().getLoggerPreferencesFile());
-		} catch(IOException e) {
+		} catch (IOException e) {
 			Static.getLogger().log(java.util.logging.Level.SEVERE, "Could not create logger preferences", e);
 		}
 	}
@@ -112,8 +113,8 @@ public class CHLog {
 	 * @return
 	 */
 	private static LogLevel GetLevel(Tags tag) {
-		if(lookup.containsKey(tag)) {
-			return lookup.get(tag);
+		if(LOOKUP.containsKey(tag)) {
+			return LOOKUP.get(tag);
 		}
 		LogLevel level;
 		try {
@@ -123,10 +124,10 @@ public class CHLog {
 			} else {
 				level = LogLevel.valueOf(pref);
 			}
-		} catch(IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			level = LogLevel.ERROR;
 		}
-		lookup.put(tag, level);
+		LOOKUP.put(tag, level);
 		return level;
 	}
 
@@ -168,7 +169,7 @@ public class CHLog {
 			for(MsgBundle b : messages) {
 				if(b.level == l && b.level == tagLevel) {
 					//Found it.
-					Log(tag, l, header, t);
+					Log(tag, l, HEADER, t);
 					return;
 				}
 			}
@@ -201,6 +202,48 @@ public class CHLog {
 	 */
 	public void Log(Tags module, String message, Target t) {
 		Log(module, LogLevel.ERROR, message, t);
+	}
+
+	/**
+	 * Equivalent to Log(modules, level, message, t, true);
+	 *
+	 * @param modules
+	 * @param level
+	 * @param message
+	 * @param t
+	 */
+	public void Log(Tags modules, LogLevel level, String message, Target t) {
+		Log(modules, level, message, t, true);
+	}
+
+	/**
+	 * Logs the given message at the specified level.
+	 *
+	 * @param modules
+	 * @param level
+	 * @param message
+	 * @param t
+	 * @param printScreen
+	 */
+	public void Log(Tags modules, LogLevel level, String message, Target t, boolean printScreen) {
+		LogLevel moduleLevel = GetLevel(modules);
+		if(moduleLevel == LogLevel.OFF && !Prefs.ScreamErrors()) {
+			return; //Bail as quick as we can!
+		}
+		if(moduleLevel.level >= level.level || (moduleLevel == LogLevel.ERROR && Prefs.ScreamErrors())) {
+			//We want to do the log
+			try {
+				Static.LogDebug(root, "[" + Implementation.GetServerType().getBranding() + "][" + level.name() + "][" + modules.name() + "] " + message + (t != Target.UNKNOWN ? " " + t.toString() : ""),
+						level, printScreen);
+			} catch (IOException e) {
+				//Well, shoot.
+				if(level.level <= 1) {
+					StreamUtils.GetSystemErr().println("Was going to print information to the log, but instead, there was"
+							+ " an IOException: ");
+					e.printStackTrace(StreamUtils.GetSystemErr());
+				}
+			}
+		}
 	}
 
 	/**
@@ -267,48 +310,6 @@ public class CHLog {
 	 */
 	public void v(Tags modules, String message, Target t) {
 		Log(modules, LogLevel.VERBOSE, message, t);
-	}
-
-	/**
-	 * Equivalent to Log(modules, level, message, t, true);
-	 *
-	 * @param modules
-	 * @param level
-	 * @param message
-	 * @param t
-	 */
-	public void Log(Tags modules, LogLevel level, String message, Target t) {
-		Log(modules, level, message, t, true);
-	}
-
-	/**
-	 * Logs the given message at the specified level.
-	 *
-	 * @param modules
-	 * @param level
-	 * @param message
-	 * @param t
-	 * @param printScreen
-	 */
-	public void Log(Tags modules, LogLevel level, String message, Target t, boolean printScreen) {
-		LogLevel moduleLevel = GetLevel(modules);
-		if(moduleLevel == LogLevel.OFF && !Prefs.ScreamErrors()) {
-			return; //Bail as quick as we can!
-		}
-		if(moduleLevel.level >= level.level || (moduleLevel == LogLevel.ERROR && Prefs.ScreamErrors())) {
-			//We want to do the log
-			try {
-				Static.LogDebug(root, "[" + Implementation.GetServerType().getBranding() + "][" + level.name() + "][" + modules.name() + "] " + message + (t != Target.UNKNOWN ? " " + t.toString() : ""),
-						level, printScreen);
-			} catch(IOException e) {
-				//Well, shoot.
-				if(level.level <= 1) {
-					StreamUtils.GetSystemErr().println("Was going to print information to the log, but instead, there was"
-							+ " an IOException: ");
-					e.printStackTrace(StreamUtils.GetSystemErr());
-				}
-			}
-		}
 	}
 
 	public static class MsgBundle {

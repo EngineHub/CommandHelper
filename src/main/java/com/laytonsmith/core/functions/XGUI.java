@@ -42,7 +42,7 @@ public class XGUI {
 	}
 
 	private static Map<Integer, Window> windows = new HashMap<>();
-	private static final AtomicInteger windowIDs = new AtomicInteger(0);
+	private static final AtomicInteger WINDOW_IDS = new AtomicInteger(0);
 
 	static {
 		StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
@@ -80,7 +80,7 @@ public class XGUI {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			JFrame frame = new JFrame();
-			int id = windowIDs.incrementAndGet();
+			int id = WINDOW_IDS.incrementAndGet();
 			String title = "";
 			int width = 300;
 			int height = 300;
@@ -216,7 +216,7 @@ public class XGUI {
 					panel.getGraphics().setColor(new Color(red, green, blue));
 					panel.getGraphics().draw3DRect(x, y, 1, 1, true);
 					return CVoid.VOID;
-				} catch(ClassCastException ex) {
+				} catch (ClassCastException ex) {
 					//?
 					return CVoid.VOID;
 				}
@@ -273,9 +273,9 @@ public class XGUI {
 				if(Desktop.isDesktopSupported()) {
 					Desktop.getDesktop().browse(new URI(url));
 				}
-			} catch(URISyntaxException ex1) {
+			} catch (URISyntaxException ex1) {
 				throw new CREFormatException(ex1.getMessage(), t);
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				try {
 					// Last ditch effort
 					Runtime rt = Runtime.getRuntime();
@@ -300,7 +300,7 @@ public class XGUI {
 							rt.exec(new String[]{"sh", "-c", cmd.toString()});
 							break;
 					}
-				} catch(IOException ex1) {
+				} catch (IOException ex1) {
 					throw new CREIOException(ex1.getMessage(), t, ex1);
 				}
 			}

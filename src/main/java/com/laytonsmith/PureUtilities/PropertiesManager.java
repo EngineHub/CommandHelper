@@ -122,7 +122,7 @@ public class PropertiesManager extends LinkedHashMap<String, String> {
 		try {
 			InputStream is = new ByteArrayInputStream(properties.getBytes("UTF-8"));
 			load(new LineReader(is));
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			//Either encoding exception or IO error. Neither should actually happen here.
 			throw new Error(ex);
 		}

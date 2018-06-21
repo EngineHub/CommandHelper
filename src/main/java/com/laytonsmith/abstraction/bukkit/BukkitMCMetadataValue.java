@@ -6,69 +6,69 @@ import org.bukkit.metadata.MetadataValue;
 
 public class BukkitMCMetadataValue implements MCMetadataValue {
 
-	private final MetadataValue _value;
+	private final MetadataValue value;
 
 	public BukkitMCMetadataValue(MetadataValue value) {
-		_value = value;
+		this.value = value;
 	}
 
 	@Override
 	public boolean asBoolean() {
-		return _value.asBoolean();
+		return this.value.asBoolean();
 	}
 
 	@Override
 	public byte asByte() {
-		return _value.asByte();
+		return this.value.asByte();
 	}
 
 	@Override
 	public double asDouble() {
-		return _value.asDouble();
+		return this.value.asDouble();
 	}
 
 	@Override
 	public float asFloat() {
-		return _value.asFloat();
+		return this.value.asFloat();
 	}
 
 	@Override
 	public int asInt() {
-		return _value.asInt();
+		return this.value.asInt();
 	}
 
 	@Override
 	public long asLong() {
-		return _value.asLong();
+		return this.value.asLong();
 	}
 
 	@Override
 	public short asShort() {
-		return _value.asShort();
+		return this.value.asShort();
 	}
 
 	@Override
 	public String asString() {
-		return _value.asString();
+		return this.value.asString();
 	}
 
 	@Override
 	public MCPlugin getOwningPlugin() {
-		return new BukkitMCPlugin(_value.getOwningPlugin());
+		return new BukkitMCPlugin(this.value.getOwningPlugin());
 	}
 
 	@Override
 	public void invalidate() {
-		_value.invalidate();
+		this.value.invalidate();
 	}
 
 	@Override
 	public Object value() {
-		return _value.value();
+		return this.value.value();
 	}
 
 	@Override
 	public MetadataValue getHandle() {
-		return _value;
+		return this.value;
 	}
 }

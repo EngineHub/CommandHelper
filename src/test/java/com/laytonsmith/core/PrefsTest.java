@@ -44,7 +44,7 @@ public class PrefsTest {
 			Method function;
 			try {
 				function = Prefs.class.getDeclaredMethod(functionName);
-			} catch(NoSuchMethodException e) {
+			} catch (NoSuchMethodException e) {
 				fail("Need method " + functionName + " to be included in Prefs.");
 				return;
 			}

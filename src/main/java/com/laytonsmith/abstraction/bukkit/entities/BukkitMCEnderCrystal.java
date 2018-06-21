@@ -20,7 +20,7 @@ public class BukkitMCEnderCrystal extends BukkitMCEntity implements MCEnderCryst
 	public boolean isShowingBottom() {
 		try {
 			return ec.isShowingBottom();
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably 1.8.9 or prior
 			return true;
 		}
@@ -30,7 +30,7 @@ public class BukkitMCEnderCrystal extends BukkitMCEntity implements MCEnderCryst
 	public void setShowingBottom(boolean showing) {
 		try {
 			ec.setShowingBottom(showing);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably 1.8.9 or prior
 		}
 	}
@@ -43,7 +43,7 @@ public class BukkitMCEnderCrystal extends BukkitMCEntity implements MCEnderCryst
 				return null;
 			}
 			return new BukkitMCLocation(target);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably 1.8.9 or prior
 			return null;
 		}
@@ -57,7 +57,7 @@ public class BukkitMCEnderCrystal extends BukkitMCEntity implements MCEnderCryst
 			} else {
 				ec.setBeamTarget((Location) target.getHandle());
 			}
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably 1.8.9 or prior
 		}
 	}

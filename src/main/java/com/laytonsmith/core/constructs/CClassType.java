@@ -20,9 +20,9 @@ import java.util.TreeSet;
  *
  */
 @typeof("ClassType")
-public class CClassType extends Construct {
+public final class CClassType extends Construct {
 
-	private static final Map<String, CClassType> cache = new HashMap<>();
+	private static final Map<String, CClassType> CACHE = new HashMap<>();
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = new CClassType("ClassType", Target.UNKNOWN);
 
@@ -33,7 +33,7 @@ public class CClassType extends Construct {
 	public static final CClassType[] EMPTY_CLASS_ARRAY = new CClassType[0];
 
 	static {
-		cache.put("ClassType", TYPE);
+		CACHE.put("ClassType", TYPE);
 	}
 
 	private final boolean isTypeUnion;
@@ -53,10 +53,10 @@ public class CClassType extends Construct {
 	 * @return
 	 */
 	public static CClassType get(String type) {
-		if(!cache.containsKey(type)) {
-			cache.put(type, new CClassType(type, Target.UNKNOWN));
+		if(!CACHE.containsKey(type)) {
+			CACHE.put(type, new CClassType(type, Target.UNKNOWN));
 		}
-		return cache.get(type);
+		return CACHE.get(type);
 	}
 
 	/**
@@ -73,10 +73,10 @@ public class CClassType extends Construct {
 		// First, we have to canonicalize this type union
 		SortedSet<String> t = new TreeSet<>(Arrays.asList(types));
 		String type = StringUtils.Join(t, "|");
-		if(!cache.containsKey(type)) {
-			cache.put(type, new CClassType(Target.UNKNOWN, t.toArray(new String[t.size()])));
+		if(!CACHE.containsKey(type)) {
+			CACHE.put(type, new CClassType(Target.UNKNOWN, t.toArray(new String[t.size()])));
 		}
-		return cache.get(type);
+		return CACHE.get(type);
 	}
 
 	/**
@@ -149,6 +149,37 @@ public class CClassType extends Construct {
 	}
 
 	/**
+	 * Returns true if checkClass extends, implements, or otherwise derives from superClass
+	 *
+	 * @param checkClass
+	 * @param superClass
+	 * @throws ClassNotFoundException If the specified class type cannot be found
+	 * @return
+	 */
+	public static boolean doesExtend(CClassType checkClass, CClassType superClass) {
+		if(checkClass.equals(superClass)) {
+			// more efficient check
+			return true;
+		}
+		for(CClassType tCheck : checkClass.getTypes()) {
+			for(CClassType tSuper : superClass.getTypes()) {
+				try {
+					// TODO: This is currently being done in a very lazy way. It needs to be reworked.
+					// For now, this is ok, but will not work once user types are added.
+					Class cSuper = NativeTypeList.getNativeClass(tSuper.val());
+					Class cCheck = NativeTypeList.getNativeClass(tCheck.val());
+					if(!cSuper.isAssignableFrom(cCheck)) {
+						return false;
+					}
+				} catch (ClassNotFoundException ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Returns true if this class extends the specified one
 	 *
 	 * @param superClass
@@ -156,6 +187,19 @@ public class CClassType extends Construct {
 	 */
 	public boolean doesExtend(CClassType superClass) {
 		return doesExtend(this, superClass);
+	}
+
+	/**
+	 * Works like {@link #doesExtend(com.laytonsmith.core.constructs.CClassType, com.laytonsmith.core.constructs.CClassType)
+	 * }, however rethrows the {@link ClassNotFoundException} that doesExtend throws as an {@link Error}. This should
+	 * not be used unless the class names come from hardcoded values.
+	 *
+	 * @param checkClass
+	 * @param superClass
+	 * @return
+	 */
+	public static boolean unsafeDoesExtend(CClassType checkClass, CClassType superClass) {
+		return doesExtend(checkClass, superClass);
 	}
 
 	/**
@@ -213,50 +257,6 @@ public class CClassType extends Construct {
 			t.add(CClassType.get(type));
 		}
 		return t;
-	}
-
-	/**
-	 * Returns true if checkClass extends, implements, or otherwise derives from superClass
-	 *
-	 * @param checkClass
-	 * @param superClass
-	 * @throws ClassNotFoundException If the specified class type cannot be found
-	 * @return
-	 */
-	public static boolean doesExtend(CClassType checkClass, CClassType superClass) {
-		if(checkClass.equals(superClass)) {
-			// more efficient check
-			return true;
-		}
-		for(CClassType tCheck : checkClass.getTypes()) {
-			for(CClassType tSuper : superClass.getTypes()) {
-				try {
-					// TODO: This is currently being done in a very lazy way. It needs to be reworked.
-					// For now, this is ok, but will not work once user types are added.
-					Class cSuper = NativeTypeList.getNativeClass(tSuper.val());
-					Class cCheck = NativeTypeList.getNativeClass(tCheck.val());
-					if(!cSuper.isAssignableFrom(cCheck)) {
-						return false;
-					}
-				} catch(ClassNotFoundException ex) {
-					throw new RuntimeException(ex);
-				}
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Works like {@link #doesExtend(com.laytonsmith.core.constructs.CClassType, com.laytonsmith.core.constructs.CClassType)
-	 * }, however rethrows the {@link ClassNotFoundException} that doesExtend throws as an {@link Error}. This should
-	 * not be used unless the class names come from hardcoded values.
-	 *
-	 * @param checkClass
-	 * @param superClass
-	 * @return
-	 */
-	public static boolean unsafeDoesExtend(CClassType checkClass, CClassType superClass) {
-		return doesExtend(checkClass, superClass);
 	}
 
 	@Override

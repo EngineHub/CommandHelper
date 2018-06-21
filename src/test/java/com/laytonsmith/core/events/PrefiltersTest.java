@@ -50,13 +50,13 @@ public class PrefiltersTest {
 		map.put("x", C.String("/1|2|3/"));
 		try {
 			Prefilters.match(map, "x", C.Int(2), PrefilterType.REGEX);
-		} catch(PrefilterNonMatchException e) {
+		} catch (PrefilterNonMatchException e) {
 			fail("Expected a match here");
 		}
 		try {
 			Prefilters.match(map, "x", C.Int(4), PrefilterType.REGEX);
 			fail("Did not expect a match here");
-		} catch(PrefilterNonMatchException e) {
+		} catch (PrefilterNonMatchException e) {
 		}
 	}
 
@@ -66,18 +66,18 @@ public class PrefiltersTest {
 		map.put("x", C.String("35:2"));
 		try {
 			Prefilters.match(map, "x", "35:4", PrefilterType.ITEM_MATCH);
-		} catch(PrefilterNonMatchException e) {
+		} catch (PrefilterNonMatchException e) {
 			fail("Expected a match here");
 		}
 		try {
 			Prefilters.match(map, "x", "35", PrefilterType.ITEM_MATCH);
-		} catch(PrefilterNonMatchException e) {
+		} catch (PrefilterNonMatchException e) {
 			fail("Expected a match here");
 		}
 		try {
 			Prefilters.match(map, "x", "36:2", PrefilterType.ITEM_MATCH);
 			fail("Did not expect a match here");
-		} catch(PrefilterNonMatchException e) {
+		} catch (PrefilterNonMatchException e) {
 		}
 
 	}
@@ -88,13 +88,13 @@ public class PrefiltersTest {
 		map.put("x", C.String("test"));
 		try {
 			Prefilters.match(map, "x", "test", PrefilterType.STRING_MATCH);
-		} catch(PrefilterNonMatchException e) {
+		} catch (PrefilterNonMatchException e) {
 			fail("Expected a match here");
 		}
 		try {
 			Prefilters.match(map, "x", "nope", PrefilterType.STRING_MATCH);
 			fail("Did not expect a match here");
-		} catch(PrefilterNonMatchException e) {
+		} catch (PrefilterNonMatchException e) {
 		}
 	}
 
@@ -104,13 +104,13 @@ public class PrefiltersTest {
 		map.put("x", C.String("2"));
 		try {
 			Prefilters.match(map, "x", "2.0", PrefilterType.MATH_MATCH);
-		} catch(PrefilterNonMatchException e) {
+		} catch (PrefilterNonMatchException e) {
 			fail("Expected a match here");
 		}
 		try {
 			Prefilters.match(map, "x", "2.00001", PrefilterType.MATH_MATCH);
 			fail("Did not expect a match here");
-		} catch(PrefilterNonMatchException e) {
+		} catch (PrefilterNonMatchException e) {
 		}
 	}
 
@@ -121,39 +121,39 @@ public class PrefiltersTest {
 		try {
 			try {
 				Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION);
-			} catch(PrefilterNonMatchException e) {
+			} catch (PrefilterNonMatchException e) {
 				fail("Expected a match here");
 			}
 			try {
 				Prefilters.match(map, "x", "4", PrefilterType.EXPRESSION);
 				fail("Did not expect a match here");
-			} catch(PrefilterNonMatchException e) {
+			} catch (PrefilterNonMatchException e) {
 			}
 
 			map.put("x", C.String("(x == 5)"));
 			try {
 				Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION);
-			} catch(PrefilterNonMatchException e) {
+			} catch (PrefilterNonMatchException e) {
 				fail("Expected a match here");
 			}
 			try {
 				Prefilters.match(map, "x", "4", PrefilterType.EXPRESSION);
 				fail("Did not expect a match here");
-			} catch(PrefilterNonMatchException e) {
+			} catch (PrefilterNonMatchException e) {
 			}
 
 			map.put("x", C.String("(2 + 3)"));
 			try {
 				Prefilters.match(map, "x", "5", PrefilterType.EXPRESSION);
-			} catch(PrefilterNonMatchException e) {
+			} catch (PrefilterNonMatchException e) {
 				fail("Expected a match here");
 			}
 			try {
 				Prefilters.match(map, "x", "4", PrefilterType.EXPRESSION);
 				fail("Did not expect a match here");
-			} catch(PrefilterNonMatchException e) {
+			} catch (PrefilterNonMatchException e) {
 			}
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			if(e.getCause() instanceof ClassNotFoundException) {
 				// Nothing we can do during testing
 			} else {

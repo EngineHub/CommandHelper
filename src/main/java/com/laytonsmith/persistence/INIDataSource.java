@@ -31,7 +31,7 @@ public class INIDataSource extends StringSerializableDataSource {
 		Properties props = new Properties();
 		try {
 			props.load(new StringReader(data));
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			//Won't ever happen, but sure.
 			throw new DataSourceException(null, ex);
 		}

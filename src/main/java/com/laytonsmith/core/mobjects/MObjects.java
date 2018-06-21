@@ -5,7 +5,7 @@ import com.laytonsmith.annotations.mobject;
 /**
  * This is a utility class that contains methods for manipulating MObjects.
  */
-public class MObjects {
+public final class MObjects {
 
 	private MObjects() {
 	}

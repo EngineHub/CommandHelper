@@ -241,7 +241,7 @@ public class ExhaustiveVisitor<T> {
 		}
 		try {
 			candidate.invoke(this, object);
-		} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 			throw new RuntimeException(ex);
 		}
 	}

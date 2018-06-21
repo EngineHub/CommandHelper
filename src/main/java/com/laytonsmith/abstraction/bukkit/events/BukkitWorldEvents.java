@@ -31,37 +31,37 @@ public final class BukkitWorldEvents {
 	private BukkitWorldEvents() {
 	}
 
-	public static abstract class BukkitMCWorldEvent implements MCWorldEvent {
+	public abstract static class BukkitMCWorldEvent implements MCWorldEvent {
 
-		private final WorldEvent _event;
+		private final WorldEvent event;
 
 		public BukkitMCWorldEvent(WorldEvent event) {
-			_event = event;
+			this.event = event;
 		}
 
 		@Override
 		public Object _GetObject() {
-			return _event;
+			return this.event;
 		}
 
 		@Override
 		public MCWorld getWorld() {
-			return new BukkitMCWorld(_event.getWorld());
+			return new BukkitMCWorld(this.event.getWorld());
 		}
 	}
 
 	public static class BukkitMCStructureGrowEvent extends BukkitMCWorldEvent implements MCStructureGrowEvent {
 
-		private final StructureGrowEvent _event;
+		private final StructureGrowEvent event;
 
 		public BukkitMCStructureGrowEvent(StructureGrowEvent event) {
 			super(event);
-			_event = event;
+			this.event = event;
 		}
 
 		@Override
 		public List<MCBlockState> getBlocks() {
-			List<BlockState> blocks = _event.getBlocks();
+			List<BlockState> blocks = this.event.getBlocks();
 			ArrayList<MCBlockState> r = new ArrayList<>(blocks.size());
 			for(BlockState block : blocks) {
 				r.add(new BukkitMCBlockState(block));
@@ -71,23 +71,23 @@ public final class BukkitWorldEvents {
 
 		@Override
 		public MCLocation getLocation() {
-			return new BukkitMCLocation(_event.getLocation());
+			return new BukkitMCLocation(this.event.getLocation());
 		}
 
 		@Override
 		public MCPlayer getPlayer() {
-			Player player = _event.getPlayer();
-			return player == null ? null : new BukkitMCPlayer(_event.getPlayer());
+			Player player = this.event.getPlayer();
+			return player == null ? null : new BukkitMCPlayer(this.event.getPlayer());
 		}
 
 		@Override
 		public MCTreeType getSpecies() {
-			return BukkitMCTreeType.getConvertor().getAbstractedEnum(_event.getSpecies());
+			return BukkitMCTreeType.getConvertor().getAbstractedEnum(this.event.getSpecies());
 		}
 
 		@Override
 		public boolean isFromBonemeal() {
-			return _event.isFromBonemeal();
+			return this.event.isFromBonemeal();
 		}
 	}
 

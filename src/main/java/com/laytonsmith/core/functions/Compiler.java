@@ -144,7 +144,7 @@ public class Compiler {
 			return optimizeSpecial(list, true);
 		}
 
-		private final static String ASSIGN = new DataHandling.assign().getName();
+		private static final String ASSIGN = new DataHandling.assign().getName();
 
 		/**
 		 * __autoconcat__ has special optimization techniques needed, since it's really a part of the compiler itself,
@@ -206,7 +206,7 @@ public class Compiler {
 							conversion.addChild(lhs);
 							conversion.addChild(rhs);
 							list.set(i + 2, conversion);
-						} catch(IndexOutOfBoundsException e) {
+						} catch (IndexOutOfBoundsException e) {
 							throw new ConfigCompileException("Invalid symbol listed", node.getTarget());
 						}
 					}
@@ -258,7 +258,7 @@ public class Compiler {
 					inSymbolMode = true;
 				}
 				if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isPostfix()) {
-					if(i - 1 >= 0) {// && list.get(i - 1).getData() instanceof IVariable) {
+					if(i - 1 >= 0) { // && list.get(i - 1).getData() instanceof IVariable) {
 						CSymbol sy = (CSymbol) node.getData();
 						ParseTree conversion;
 						if(sy.val().equals("++")) {
@@ -448,7 +448,7 @@ public class Compiler {
 							i--;
 						}
 					}
-				} catch(IndexOutOfBoundsException e) {
+				} catch (IndexOutOfBoundsException e) {
 					throw new ConfigCompileException("Unexpected symbol (" + list.get(list.size() - 1).getData().val() + "). Did you forget to quote your symbols?", list.get(list.size() - 1).getTarget());
 				}
 			}
@@ -534,7 +534,7 @@ public class Compiler {
 								Function f = (Function) FunctionList.getFunction(identifier);
 								ParseTree node = new ParseTree(f.execs(identifier.getTarget(), null, null, child), child.getFileOptions());
 								return node;
-							} catch(Exception e) {
+							} catch (Exception e) {
 								throw new Error("Unknown function " + identifier.val() + "?");
 							}
 						} else {

@@ -211,17 +211,17 @@ public class GeneralTest {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface tag {
+	public static @interface Tag {
 	}
 
-	@tag
+	@Tag
 	public static interface TestMe {
 	}
 
 	@Test
 	public void testInterfaceWithAnnotationIsReturned() {
 		// Test that the interface specified is *also* returned
-		Set<ClassMirror<? extends TestMe>> t = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(tag.class, TestMe.class);
+		Set<ClassMirror<? extends TestMe>> t = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(Tag.class, TestMe.class);
 		assertTrue(t.size() == 1);
 	}
 

@@ -115,7 +115,7 @@ public abstract class ThreadPump {
 					synchronized(myLock) {
 						myLock.notifyAll();
 					}
-				} catch(Exception e) {
+				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
 			}
@@ -175,7 +175,7 @@ public abstract class ThreadPump {
 									pumpStarted = false;
 									return;
 								}
-							} catch(InterruptedException ex) {
+							} catch (InterruptedException ex) {
 								//We were notified that a new task is present,
 								//so we'll continue down to the next condition.
 							}
@@ -200,7 +200,7 @@ public abstract class ThreadPump {
 				try {
 					Thread.sleep(idleTime);
 					idleTime = 0;
-				} catch(InterruptedException ex) {
+				} catch (InterruptedException ex) {
 					//
 				}
 			}

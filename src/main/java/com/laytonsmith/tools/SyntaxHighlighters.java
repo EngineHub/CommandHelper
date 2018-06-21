@@ -236,7 +236,7 @@ public class SyntaxHighlighters {
 					Constructor<?> m = c.getConstructor();
 					Documentation e = (Documentation) m.newInstance();
 					l.add(e);
-				} catch(NoSuchMethodException | SecurityException | InstantiationException
+				} catch (NoSuchMethodException | SecurityException | InstantiationException
 						| IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 					StreamUtils.GetSystemErr().println(ex.getMessage());
 				}
@@ -252,9 +252,9 @@ public class SyntaxHighlighters {
 			if(Function.class.isAssignableFrom(c)) {
 				try {
 					fl.add((Function) c.newInstance());
-				} catch(InstantiationException | IllegalAccessException ex) {
+				} catch (InstantiationException | IllegalAccessException ex) {
 					Logger.getLogger(SyntaxHighlighters.class.getName()).log(Level.SEVERE, null, ex);
-				} catch(NoClassDefFoundError e) {
+				} catch (NoClassDefFoundError e) {
 					//Hmm. No real good way to handle this... echo out to stderr, I guess.
 					StreamUtils.GetSystemErr().println(e.getMessage());
 				}

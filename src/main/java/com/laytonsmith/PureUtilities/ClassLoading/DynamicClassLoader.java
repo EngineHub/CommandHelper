@@ -55,7 +55,7 @@ public class DynamicClassLoader extends ClassLoader {
 
 		try {
 			l.close();
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			// Whatever.
 		}
 	}
@@ -87,7 +87,7 @@ public class DynamicClassLoader extends ClassLoader {
 			//If the parent class knows about it, we're done.
 			Class c = Class.forName(name, resolve, DynamicClassLoader.class.getClassLoader());
 			return c;
-		} catch(ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			//Otherwise we need to find the class ourselves.
 			for(URLClassLoader url : classLoaders.values()) {
 				try {
@@ -96,7 +96,7 @@ public class DynamicClassLoader extends ClassLoader {
 						resolveClass(c);
 					}
 					return c;
-				} catch(ClassNotFoundException ex1) {
+				} catch (ClassNotFoundException ex1) {
 					//Don't care, move on to the next class loader
 				}
 			}

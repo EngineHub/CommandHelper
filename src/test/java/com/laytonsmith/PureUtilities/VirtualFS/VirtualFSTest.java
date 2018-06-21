@@ -21,18 +21,18 @@ public class VirtualFSTest {
 	public VirtualFSTest() {
 	}
 
-	static final File root = new File("./VirtualFS");
-	static final File settingsFile = new File(root, ".vfsmeta/settings.yml");
+	static final File ROOT = new File("./VirtualFS");
+	static final File SETTINGS_FILE = new File(ROOT, ".vfsmeta/settings.yml");
 
 	@BeforeClass
 	public static void setUpClass() {
-		root.mkdirs();
+		ROOT.mkdirs();
 	}
 
 	@AfterClass
 	public static void tearDownClass() {
-		FileUtil.recursiveDelete(root);
-		assertFalse(root.exists());
+		FileUtil.recursiveDelete(ROOT);
+		assertFalse(ROOT.exists());
 	}
 
 	@Before
@@ -49,7 +49,7 @@ public class VirtualFSTest {
 	 * @param settings
 	 */
 	private void writeSettings(String settings) throws IOException {
-		FileUtil.write(settings, settingsFile);
+		FileUtil.write(settings, SETTINGS_FILE);
 	}
 
 	/**
@@ -66,9 +66,9 @@ public class VirtualFSTest {
 				+ "  readonly: true\n"
 				+ "}\n";
 		writeSettings(settingsString);
-		new VirtualFileSystem(root, new VirtualFileSystemSettings(settingsFile));
-		assertTrue(FileUtil.read(settingsFile).contains(VirtualFileSystemSettings.getDefaultSettingsString()));
-		assertTrue(FileUtil.read(settingsFile).contains(settingsString));
+		new VirtualFileSystem(ROOT, new VirtualFileSystemSettings(SETTINGS_FILE));
+		assertTrue(FileUtil.read(SETTINGS_FILE).contains(VirtualFileSystemSettings.getDefaultSettingsString()));
+		assertTrue(FileUtil.read(SETTINGS_FILE).contains(settingsString));
 	}
 
 	/**
@@ -79,10 +79,10 @@ public class VirtualFSTest {
 	@Test
 	public void testWriteReadWithNewFile() throws Exception {
 		String fileText = "This is the text in the file";
-		VirtualFileSystem vfs = new VirtualFileSystem(root, null);
+		VirtualFileSystem vfs = new VirtualFileSystem(ROOT, null);
 		String fname = "testWriteReadWithNewFile.txt";
 		VirtualFile vf = new VirtualFile("/" + fname);
-		File realFile = new File(root, fname);
+		File realFile = new File(ROOT, fname);
 		vfs.writeUTFString(vf, fileText);
 		assertEquals(fileText, FileUtil.read(realFile));
 		assertEquals(fileText, vfs.readUTFString(vf));

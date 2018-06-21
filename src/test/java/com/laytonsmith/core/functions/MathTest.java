@@ -161,17 +161,17 @@ public class MathTest {
 		try {
 			a.exec(Target.UNKNOWN, env, C.onstruct(20), C.onstruct(10));
 			fail("Didn't expect this test to pass");
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 		}
 		try {
 			a.exec(Target.UNKNOWN, env, C.onstruct(-1));
 			fail("Didn't expect this test to pass");
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 		}
 		try {
 			a.exec(Target.UNKNOWN, env, C.onstruct(87357983597853791L));
 			fail("Didn't expect this test to pass");
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 		}
 	}
 
@@ -212,7 +212,7 @@ public class MathTest {
 		try {
 			StaticTest.SRun("sqrt(-1)", fakePlayer);
 			fail("Did not expect to pass");
-		} catch(ConfigCompileException | ConfigCompileGroupException e) {
+		} catch (ConfigCompileException | ConfigCompileGroupException e) {
 			//pass
 		}
 	}

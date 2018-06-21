@@ -490,7 +490,7 @@ public class Sandbox {
 			Random r;
 			try {
 				r = (Random) ArgumentValidation.getObject(args[0], t, CResource.class).getResource();
-			} catch(ClassCastException ex) {
+			} catch (ClassCastException ex) {
 				throw new CRECastException("Expected a resource of type " + ResourceManager.ResourceTypes.RANDOM, t, ex);
 			}
 			double d = r.nextDouble();
@@ -650,10 +650,10 @@ public class Sandbox {
 			try {
 				String s = new ZipReader(file).getFileContents();
 				return MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true));
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				throw new CREIncludeException("There was a compile error when trying to recompile the script at "
 						+ file + "\n" + ex.getMessage() + " :: " + file.getName() + ":" + ex.getLineNum(), t);
-			} catch(ConfigCompileGroupException ex) {
+			} catch (ConfigCompileGroupException ex) {
 				StringBuilder b = new StringBuilder();
 				b.append("There were compile errors when trying to recompile the script at ").append(file).append("\n");
 				for(ConfigCompileException e : ex.getList()) {
@@ -661,7 +661,7 @@ public class Sandbox {
 							.append(e.getLineNum()).append("\n");
 				}
 				throw new CREIncludeException(b.toString(), t);
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				throw new CREIOException("The script at " + file + " could not be found or read in.", t);
 			}
 		}

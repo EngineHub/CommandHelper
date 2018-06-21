@@ -110,7 +110,7 @@ public class ArrayHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates usage", "array_size(array(1, 2, 3, 4, 5));"),};
+				new ExampleScript("Demonstrates usage", "array_size(array(1, 2, 3, 4, 5));")};
 		}
 
 		@Override
@@ -177,12 +177,12 @@ public class ArrayHandling {
 						for(long i = start; i <= finish; i++) {
 							try {
 								na.push(ca.get((int) i, t).clone(), t);
-							} catch(CloneNotSupportedException e) {
+							} catch (CloneNotSupportedException e) {
 								na.push(ca.get((int) i, t), t);
 							}
 						}
 						return na;
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
 					}
 				} else {
@@ -200,7 +200,7 @@ public class ArrayHandling {
 						} else {
 							return ca.get(index, t);
 						}
-					} catch(ConfigRuntimeException e) {
+					} catch (ConfigRuntimeException e) {
 						if(e instanceof CREIndexOverflowException) {
 							if(defaultConstruct != null) {
 								return defaultConstruct;
@@ -235,7 +235,7 @@ public class ArrayHandling {
 							finish = (int) aa.size() + finish;
 						}
 						return aa.slice(start, finish + 1, t);
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
 					}
 				} else {
@@ -307,7 +307,7 @@ public class ArrayHandling {
 				new ExampleScript("Demonstrates exception", "msg(array()[1]);"),
 				new ExampleScript("Demonstrates basic functional usage", "msg(array_get(array(1, 2, 3), 2));"),
 				new ExampleScript("Demonstrates default (note that you cannot use the bracket syntax with this)",
-				"msg(array_get(array(), 1, 'default'));"),};
+				"msg(array_get(array(), 1, 'default'));")};
 		}
 
 		@Override
@@ -350,7 +350,7 @@ public class ArrayHandling {
 			}
 			try {
 				((CArray) array).set(index, value, t);
-			} catch(IndexOutOfBoundsException e) {
+			} catch (IndexOutOfBoundsException e) {
 				throw new CREIndexOverflowException("The index " + index.asString().getQuote() + " is out of bounds", t);
 			}
 			return value;
@@ -361,7 +361,7 @@ public class ArrayHandling {
 			if(args[0] instanceof CArray) {
 				try {
 					((CArray) args[0]).set(args[1], args[2], t);
-				} catch(IndexOutOfBoundsException e) {
+				} catch (IndexOutOfBoundsException e) {
 					throw new CREIndexOverflowException("The index " + args[1].val() + " is out of bounds", t);
 				}
 				return args[2];
@@ -407,7 +407,7 @@ public class ArrayHandling {
 				"array @array = array(null);\n"
 				+ "msg(@array);\n"
 				+ "array_set(@array, 0, 'value0');\n"
-				+ "msg(@array);"),};
+				+ "msg(@array);")};
 		}
 	}
 
@@ -492,7 +492,7 @@ public class ArrayHandling {
 				"array @array = array();\n"
 				+ "msg(@array);\n"
 				+ "array_push(@array, 0, 1, 2);\n"
-				+ "msg(@array);"),};
+				+ "msg(@array);")};
 		}
 	}
 
@@ -535,9 +535,9 @@ public class ArrayHandling {
 						iterator.addToBlacklist(index);
 					}
 				}
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CRECastException(e.getMessage(), t);
-			} catch(IndexOutOfBoundsException ex) {
+			} catch (IndexOutOfBoundsException ex) {
 				throw new CREIndexOverflowException(ex.getMessage(), t);
 			}
 			return CVoid.VOID;
@@ -711,7 +711,7 @@ public class ArrayHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'A')"),
 				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'a')"),
-				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'd')"),};
+				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'd')")};
 		}
 
 		@Override
@@ -846,7 +846,7 @@ public class ArrayHandling {
 					try {
 						int index = Static.getInt32(args[1], t);
 						return CBoolean.get(index < ca.size());
-					} catch(ConfigRuntimeException e) {
+					} catch (ConfigRuntimeException e) {
 						//They probably sent a key that can't be translated into an int, so it doesn't exist here.
 						return CBoolean.FALSE;
 					}
@@ -956,7 +956,7 @@ public class ArrayHandling {
 				"array @array = array();\n"
 				+ "msg(@array);\n"
 				+ "array_resize(@array, 2, 'a');\n"
-				+ "msg(@array);"),};
+				+ "msg(@array);")};
 		}
 	}
 
@@ -1033,7 +1033,7 @@ public class ArrayHandling {
 				new ExampleScript("Complex usage", "range(0, 10)"),
 				new ExampleScript("With skips", "range(0, 10, 2)"),
 				new ExampleScript("Invalid input", "range(0, 10, -1)"),
-				new ExampleScript("In reverse", "range(10, 0, -1)"),};
+				new ExampleScript("In reverse", "range(10, 0, -1)")};
 		}
 
 		@Override
@@ -1101,7 +1101,7 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "array_keys(array('a', 'b', 'c'))"),
-				new ExampleScript("With associative array", "array_keys(array(one: 'a', two: 'b', three: 'c'))"),};
+				new ExampleScript("With associative array", "array_keys(array(one: 'a', two: 'b', three: 'c'))")};
 		}
 
 		@Override
@@ -1167,7 +1167,7 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "array_normalize(array(one: 'a', two: 'b', three: 'c'))"),
-				new ExampleScript("Usage with normal array", "array_normalize(array(1, 2, 3))"),};
+				new ExampleScript("Usage with normal array", "array_normalize(array(1, 2, 3))")};
 		}
 
 		@Override
@@ -1250,7 +1250,7 @@ public class ArrayHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "array_merge(array(1), array(2), array(3))"),
 				new ExampleScript("With associative arrays", "array_merge(array(one: 1), array(two: 2), array(three: 3))"),
-				new ExampleScript("With overwrites", "array_merge(array(one: 1), array(one: 2), array(one: 3))"),};
+				new ExampleScript("With overwrites", "array_merge(array(one: 1), array(one: 2), array(one: 3))")};
 		}
 
 		@Override
@@ -1324,7 +1324,7 @@ public class ArrayHandling {
 				new ExampleScript("Basic usage",
 				"assign(@array, array(1, 2, 3))\nmsg(array_remove(@array, 2))\nmsg(@array)"),
 				new ExampleScript("With associative array",
-				"assign(@array, array(one: 'a', two: 'b', three: 'c'))\nmsg(array_remove(@array, 'two'))\nmsg(@array)"),};
+				"assign(@array, array(one: 'a', two: 'b', three: 'c'))\nmsg(array_remove(@array, 'two'))\nmsg(@array)")};
 		}
 	}
 
@@ -1397,7 +1397,7 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "array_implode(array(1, 2, 3), '-')"),
-				new ExampleScript("With associative array", "array_implode(array(one: 'a', two: 'b', three: 'c'), '-')"),};
+				new ExampleScript("With associative array", "array_implode(array(one: 'a', two: 'b', three: 'c'), '-')")};
 		}
 	}
 
@@ -1450,7 +1450,7 @@ public class ArrayHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "array(1, 2, 3)[cslice(0, 1)]"),};
+				new ExampleScript("Basic usage", "array(1, 2, 3)[cslice(0, 1)]")};
 		}
 
 		@Override
@@ -1498,7 +1498,7 @@ public class ArrayHandling {
 						sortType = CArray.SortType.valueOf(args[1].val());
 					}
 				}
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException("The sort type must be one of either: " + StringUtils.Join(CArray.SortType.values(), ", ", " or "), t);
 			}
 			if(sortType == null) {
@@ -1549,7 +1549,7 @@ public class ArrayHandling {
 					Construct c = null;
 					try {
 						closure.execute(l, r);
-					} catch(FunctionReturnException ex) {
+					} catch (FunctionReturnException ex) {
 						c = ex.getReturn();
 					}
 					int value;
@@ -1638,7 +1638,7 @@ public class ArrayHandling {
 				if(!children.get(1).getData().isDynamic()) {
 					try {
 						CArray.SortType.valueOf(children.get(1).getData().val().toUpperCase());
-					} catch(IllegalArgumentException e) {
+					} catch (IllegalArgumentException e) {
 						throw new ConfigCompileException("The sort type must be one of either: " + StringUtils.Join(CArray.SortType.values(), ", ", " or "), t);
 					}
 				}
@@ -1820,7 +1820,7 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage",
-				"assign(@array, array(1, 2, 2, 3))\nmsg(@array)\narray_remove_values(@array, 2)\nmsg(@array)"),};
+				"assign(@array, array(1, 2, 2, 3))\nmsg(@array)\narray_remove_values(@array, 2)\nmsg(@array)")};
 		}
 
 	}
@@ -1878,7 +1878,7 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 2))"),
-				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 5))"),};
+				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 5))")};
 		}
 
 		@Override
@@ -1942,7 +1942,7 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 2))"),
-				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 5))"),};
+				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 5))")};
 		}
 
 	}
@@ -2001,7 +2001,7 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_last_index(@array, 2))"),
-				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_last_index(@array, 5))"),};
+				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_last_index(@array, 5))")};
 		}
 
 	}
@@ -2153,7 +2153,7 @@ public class ArrayHandling {
 				new ExampleScript("Usage with a normal array, using getKeys false, and returning 2 results",
 				"assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array, 2, false))", "{b, c}"),
 				new ExampleScript("Usage with an associative array",
-				"assign(@array, array(one: 'a', two: 'b', three: 'c', four: 'd', five: 'e'))\nmsg(array_rand(@array))", "two"),};
+				"assign(@array, array(one: 'a', two: 'b', three: 'c', four: 'd', five: 'e'))\nmsg(array_rand(@array))", "two")};
 		}
 
 		@Override
@@ -2165,8 +2165,13 @@ public class ArrayHandling {
 	@api
 	public static class array_unique extends AbstractFunction implements Optimizable {
 
-		private final static equals equals = new equals();
-		private final static BasicLogic.sequals sequals = new BasicLogic.sequals();
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
+		private static final equals equals = new equals();
+
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
+		private static final BasicLogic.sequals sequals = new BasicLogic.sequals();
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -2242,7 +2247,7 @@ public class ArrayHandling {
 				new ExampleScript("Basic usage", "array_unique(array(1, 2, 2, 3, 4))"),
 				new ExampleScript("No removal of different datatypes", "array_unique(array(1, '1'))"),
 				new ExampleScript("Removal of different datatypes, by setting compareTypes to false",
-				"array_unique(array(1, '1'), false)"),};
+				"array_unique(array(1, '1'), false)")};
 		}
 
 		@Override
@@ -2290,7 +2295,7 @@ public class ArrayHandling {
 					Construct ret = null;
 					try {
 						closure.execute(key, value);
-					} catch(FunctionReturnException ex) {
+					} catch (FunctionReturnException ex) {
 						ret = ex.getReturn();
 					}
 					if(ret == null) {
@@ -2309,7 +2314,7 @@ public class ArrayHandling {
 					Construct ret = null;
 					try {
 						closure.execute(key, value);
-					} catch(FunctionReturnException ex) {
+					} catch (FunctionReturnException ex) {
 						ret = ex.getReturn();
 					}
 					if(ret == null) {
@@ -2534,7 +2539,7 @@ public class ArrayHandling {
 			for(Construct key : array.keySet()) {
 				try {
 					closure.execute(key, array.get(key, t));
-				} catch(ProgramFlowManipulationException ex) {
+				} catch (ProgramFlowManipulationException ex) {
 					// Ignored
 				}
 			}
@@ -2618,7 +2623,7 @@ public class ArrayHandling {
 				boolean hadReturn = false;
 				try {
 					closure.execute(lastValue, array.get(keys.get(i), t));
-				} catch(FunctionReturnException ex) {
+				} catch (FunctionReturnException ex) {
 					lastValue = ex.getReturn();
 					if(lastValue instanceof CVoid) {
 						throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
@@ -2712,7 +2717,7 @@ public class ArrayHandling {
 				boolean hadReturn = false;
 				try {
 					closure.execute(lastValue, array.get(keys.get(i), t));
-				} catch(FunctionReturnException ex) {
+				} catch (FunctionReturnException ex) {
 					lastValue = ex.getReturn();
 					if(lastValue instanceof CVoid) {
 						throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
@@ -2796,7 +2801,7 @@ public class ArrayHandling {
 				boolean hasReturn = false;
 				try {
 					closure.execute(array.get(c, t));
-				} catch(FunctionReturnException ex) {
+				} catch (FunctionReturnException ex) {
 					hasReturn = true;
 					boolean ret = Static.getBoolean(ex.getReturn(), t);
 					if(ret == false) {
@@ -2877,7 +2882,7 @@ public class ArrayHandling {
 				boolean hasReturn = false;
 				try {
 					closure.execute(array.get(c, t));
-				} catch(FunctionReturnException ex) {
+				} catch (FunctionReturnException ex) {
 					hasReturn = true;
 					boolean ret = Static.getBoolean(ex.getReturn(), t);
 					if(ret == true) {
@@ -2960,7 +2965,7 @@ public class ArrayHandling {
 				boolean hasReturn = false;
 				try {
 					closure.execute(array.get(c, t));
-				} catch(FunctionReturnException ex) {
+				} catch (FunctionReturnException ex) {
 					hasReturn = true;
 					newArray.set(c, ex.getReturn(), t);
 				}

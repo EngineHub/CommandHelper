@@ -83,7 +83,7 @@ public class Federation {
 //	 * @return
 //	 */
 //	public synchronized void StartMasterSocket(final PersistenceNetwork pn, DaemonManager dm, String server_name, int master_port) {
-//		if (!available(master_port)) {
+//		if(!available(master_port)) {
 //			//Something is already listening on this port, so we can assume the master socket is running.
 //			return;
 //		}
@@ -107,7 +107,7 @@ public class Federation {
 //			@Override
 //			public void run() {
 //				try {
-//					while (!masterSocket.isClosed()) {
+//					while(!masterSocket.isClosed()) {
 //						Socket s = masterSocket.accept();
 //						HandleConnection(pn, s);
 //					}
@@ -127,11 +127,11 @@ public class Federation {
 //			@Override
 //			@SuppressWarnings("SleepWhileInLoop")
 //			public void run() {
-//				while (!socket.isClosed()) {
+//				while(!socket.isClosed()) {
 //					// Just in case *our* master thread died, we want to restart it.
 //					FederationServer us = null;
-//					for (FederationServer s : federationServers.values()) {
-//						if (s.server_name.equals(server_name)) {
+//					for(FederationServer s : federationServers.values()) {
+//						if(s.server_name.equals(server_name)) {
 //							us = s;
 //							break;
 //						}
@@ -177,7 +177,7 @@ public class Federation {
 //			@Override
 //			public void run() {
 //				// Add a shutdown hook to kill the master server.
-//				if (!masterSocket.isClosed()) {
+//				if(!masterSocket.isClosed()) {
 //					try {
 //						try {
 //							masterSocket.close();
@@ -196,7 +196,7 @@ public class Federation {
 //					} finally {
 //						synchronized (serverCountLock) {
 //							serverCount--;
-//							if (serverCount == 0) {
+//							if(serverCount == 0) {
 //								dm.deactivateThread(null);
 //							}
 //						}
@@ -224,7 +224,7 @@ public class Federation {
 			ds = new DatagramSocket(port);
 			ds.setReuseAddress(true);
 			return true;
-		} catch(IOException e) {
+		} catch (IOException e) {
 		} finally {
 			if(ds != null) {
 				ds.close();
@@ -233,7 +233,7 @@ public class Federation {
 			if(ss != null) {
 				try {
 					ss.close();
-				} catch(IOException e) {
+				} catch (IOException e) {
 					/* should not be thrown */
 				}
 			}
@@ -249,7 +249,7 @@ public class Federation {
 //
 //	@SuppressWarnings("ConvertToStringSwitch")
 //	private static void HandleConnection(PersistenceNetwork pn, Socket s) throws IOException {
-//		try (
+//		try(
 //				BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream(), "UTF-8"));
 //				PrintWriter out = new PrintWriter(s.getOutputStream(), true);) {
 //			FederationVersion version;
@@ -265,16 +265,16 @@ public class Federation {
 //			}
 //			//Main command
 //			String header = reader.readLine();
-//			if ("GET PORT".equals(header)) {
+//			if("GET PORT".equals(header)) {
 //				// This is a port request to the master port.
 //				int newPort = -1;
 //				portFinder:
-//				while (true) {
+//				while(true) {
 //					// Generate a random port between the min and max values, and check in the
 //					// registration to see if it is already in use.
 //					Random r = new Random();
 //					newPort = r.nextInt(DYNAMIC_PORT_MAXIMUM - DYNAMIC_PORT_MINIMUM) + DYNAMIC_PORT_MINIMUM;
-//					if (!available(newPort)) {
+//					if(!available(newPort)) {
 //						continue;
 //					}
 //					Map<String[], String> servers;
@@ -284,10 +284,10 @@ public class Federation {
 //						Logger.getLogger(com.laytonsmith.core.functions.Federation.class.getName()).log(Level.SEVERE, null, ex);
 //						return;
 //					}
-//					for (String server : servers.values()) {
+//					for(String server : servers.values()) {
 //						FederationRegistration reg = FederationRegistration.fromJSON(server);
-//						if (reg.updatedSince(DEAD_SERVER_TIMEOUT * 1000)) {
-//							if (reg.port == newPort) {
+//						if(reg.updatedSince(DEAD_SERVER_TIMEOUT * 1000)) {
+//							if(reg.port == newPort) {
 //								continue portFinder;
 //							}
 //						}
@@ -295,7 +295,7 @@ public class Federation {
 //					break;
 //				}
 //				out.println(newPort);
-//			} else if ("HELLO".equals(header)) {
+//			} else if("HELLO".equals(header)) {
 //				// We are establishing the connection. We need to read in several things, namely the connection
 //				// information, and ensure that this connection is allowed by the server settings. (That is, compared
 //				// against information provided in federation_remote_allow).
@@ -304,22 +304,22 @@ public class Federation {
 //				// another thread and return. Either way, we need to return quickly, so that the socket can accept more
 //				// threads. We need the FederationServer object so we can grab the allow parameters.
 //				FederationServer server = null;
-//				for (FederationServer srv : federationServers.values()) {
-//					if (srv.serverSocket.getLocalPort() == s.getLocalPort()) {
+//				for(FederationServer srv : federationServers.values()) {
+//					if(srv.serverSocket.getLocalPort() == s.getLocalPort()) {
 //						server = srv;
 //						break;
 //					}
 //				}
 //				assert server != null;
-//				if (version == FederationVersion.V1_0_0) {
+//				if(version == FederationVersion.V1_0_0) {
 //					String server_name = reader.readLine();
-//					if (server.server_name.equals(server_name)) {
+//					if(server.server_name.equals(server_name)) {
 //						// This is the right server
 //					}
 //				}
-//			} else if ("SCRIPT".equals(header)) {
+//			} else if("SCRIPT".equals(header)) {
 //				// Protocol Version
-//				if (version == FederationVersion.V1_0_0) {
+//				if(version == FederationVersion.V1_0_0) {
 //					int contentLength = Integer.parseInt(reader.readLine());
 //					char[] request = new char[contentLength];
 //					reader.read(request);

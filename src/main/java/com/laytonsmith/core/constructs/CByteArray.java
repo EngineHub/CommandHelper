@@ -32,11 +32,11 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	/**
 	 * Initial size of the ByteBuffer
 	 */
-	private static final int initialSize = 1024;
+	private static final int INITIAL_SIZE = 1024;
 	/**
 	 * How much to scale the ByteBuffer by when re-allocating
 	 */
-	private static final int scaleMultiplier = 2;
+	private static final int SCALE_MULTIPLIER = 2;
 
 	/**
 	 * Creates a new CByteArray, wrapping the given byte buffer. It is important to note that it is NOT copied, but is
@@ -64,7 +64,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @param t
 	 */
 	public CByteArray(Target t) {
-		this(t, initialSize);
+		this(t, INITIAL_SIZE);
 	}
 
 	/**
@@ -74,7 +74,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @param capacity
 	 */
 	public CByteArray(Target t, int capacity) {
-		super(t, initialSize);
+		super(t, INITIAL_SIZE);
 		//super("", ConstructType.BYTE_ARRAY, t);
 		data = ByteBuffer.allocate(capacity);
 	}
@@ -98,7 +98,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		maxValue = Math.max(maxValue, spos + need);
 		//Reallocate if needed
 		if(spos + need >= data.limit()) {
-			int newSize = data.limit() * scaleMultiplier;
+			int newSize = data.limit() * SCALE_MULTIPLIER;
 			if(newSize <= 0) {
 				//Protect from this happening
 				newSize = 1;
@@ -120,7 +120,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			data.rewind();
 			try {
 				value = new String(data.array(), "UTF-8");
-			} catch(UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				throw new Error(ex);
 			}
 			data.position(position);
@@ -557,7 +557,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			int i = Static.getInt32(index, t);
 			try {
 				return new CInt(backing[i], t);
-			} catch(ArrayIndexOutOfBoundsException e) {
+			} catch (ArrayIndexOutOfBoundsException e) {
 				throw new CRERangeException("Index out of range. Found " + i + ", but array length is only " + backing.length, t);
 			}
 		}
@@ -572,7 +572,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			if(value == null) {
 				try {
 					value = new String(backing, "UTF-8");
-				} catch(UnsupportedEncodingException ex) {
+				} catch (UnsupportedEncodingException ex) {
 					throw new Error(ex);
 				}
 			}

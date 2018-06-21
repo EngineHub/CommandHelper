@@ -68,7 +68,7 @@ public class ExtensionAnnotationProcessor extends AbstractProcessor {
 			// Manually load the class, as the class provided by the element isn't sufficient.
 			try {
 				clazz = getClassFromName(possible.toString());
-			} catch(ClassNotFoundException ex) {
+			} catch (ClassNotFoundException ex) {
 				Logger.getLogger(ExtensionAnnotationProcessor.class.getName()).log(Level.SEVERE, null, ex);
 				continue;
 			}

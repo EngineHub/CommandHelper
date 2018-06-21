@@ -25,13 +25,13 @@ public final class Security {
 			if(pref.trim().isEmpty()) {
 				pref = ".";
 			}
-			File base_dir = new File(pref);
-			String base_final = base_dir.getAbsolutePath();
-			if(base_final.endsWith(".")) {
-				base_final = base_final.substring(0, base_final.length() - 1);
+			File baseDir = new File(pref);
+			String baseFinal = baseDir.getAbsolutePath();
+			if(baseFinal.endsWith(".")) {
+				baseFinal = baseFinal.substring(0, baseFinal.length() - 1);
 			}
 			File loc = new File(location);
-			return loc.getAbsolutePath().startsWith(base_final);
+			return loc.getAbsolutePath().startsWith(baseFinal);
 		} else {
 			return true;
 		}

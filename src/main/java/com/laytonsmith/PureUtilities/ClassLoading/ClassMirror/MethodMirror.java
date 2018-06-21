@@ -65,7 +65,7 @@ public class MethodMirror extends AbstractMethodMirror {
 		}
 		try {
 			return parent.getMethod(name, cParams.toArray(new Class[cParams.size()]));
-		} catch(NoSuchMethodException | SecurityException ex) {
+		} catch (NoSuchMethodException | SecurityException ex) {
 			//There's really no way for any exception to happen here, so just rethrow
 			throw new RuntimeException(ex);
 		}

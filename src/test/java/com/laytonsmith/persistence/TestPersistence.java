@@ -99,25 +99,25 @@ public class TestPersistence {
 		try {
 			new DataSourceFilter("$1alias=yml://blah.yml\na.*=$1alias\n", new URI(""));
 			fail("Expected an exception when defining numeric alias");
-		} catch(DataSourceException e) {
+		} catch (DataSourceException e) {
 			//Pass
 		}
 		try {
 			new DataSourceFilter("$alias!=yml://blah.yml\na.*.(**)=$alias\n", new URI(""));
 			fail("Expected an exception when putting bad characters in a filter");
-		} catch(DataSourceException e) {
+		} catch (DataSourceException e) {
 			//Pass
 		}
 		try {
 			new DataSourceFilter("$alias=yml://blah.yml\na.*.**=$aliasnope\n", new URI(""));
 			fail("Expected an exception when using undefined alias");
-		} catch(DataSourceException e) {
+		} catch (DataSourceException e) {
 			//Pass
 		}
 		try {
 			new DataSourceFilter("$alias=!@#$%^&*()blah$1.yml\na.*.**=$alias\n", new URI(""));
 			fail("Expected an exception when having an invalid uri");
-		} catch(DataSourceException e) {
+		} catch (DataSourceException e) {
 			//Pass
 		}
 	}
@@ -301,7 +301,7 @@ public class TestPersistence {
 				fail("Cannot test non string based data sources with this method!");
 				return null;
 			}
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			fail(Misc.GetStacktrace(ex));
 			return null;
 		}

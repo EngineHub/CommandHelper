@@ -59,7 +59,9 @@ public class Weather {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			int x, y, z;
+			int x;
+			int y;
+			int z;
 			UUID ent;
 			MCWorld w = null;
 			boolean safe = false;

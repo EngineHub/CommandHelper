@@ -42,7 +42,7 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 	public static BukkitMCBiomeType valueOfConcrete(String test) {
 		try {
 			return valueOfConcrete(Biome.valueOf(test));
-		} catch(IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			return (BukkitMCBiomeType) NULL;
 		}
 	}
@@ -148,7 +148,7 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 		}
 		try {
 			return Biome.valueOf(v.name());
-		} catch(IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			return null;
 		}
 	}

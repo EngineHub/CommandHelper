@@ -140,6 +140,7 @@ public class BasicLogic {
 			);
 		}
 
+		@SuppressWarnings("checkstyle:constantname")
 		private static final String and = new and().getName();
 
 		@Override
@@ -202,7 +203,7 @@ public class BasicLogic {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "if(true, msg('This is true'), msg('This is false'))"),
 				new ExampleScript("With braces, true condition", "if(true){\n\tmsg('This is true')\n}"),
-				new ExampleScript("With braces, false condition", "msg('Start')\nif(false){\n\tmsg('This will not show')\n}\nmsg('Finish')"),};
+				new ExampleScript("With braces, false condition", "msg('Start')\nif(false){\n\tmsg('This will not show')\n}\nmsg('Finish')")};
 		}
 
 	}
@@ -297,8 +298,6 @@ public class BasicLogic {
 			);
 		}
 
-		private static final String g = new DataHandling.g().getName();
-
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			// TODO: Redo this optimization.
@@ -311,7 +310,7 @@ public class BasicLogic {
 				new ExampleScript("Functional usage", "ifelse(false, msg('This is false'), true, msg('This is true'))"),
 				new ExampleScript("With braces", "if(false){\n\tmsg('This is false')\n} else {\n\tmsg('This is true')\n}"),
 				new ExampleScript("With braces, with else if", "if(false){\n\tmsg('This will not show')\n} else if(false){\n"
-				+ "\n\tmsg('This will not show')\n} else {\n\tmsg('This will show')\n}"),};
+				+ "\n\tmsg('This will not show')\n} else {\n\tmsg('This will show')\n}")};
 		}
 	}
 
@@ -418,7 +417,7 @@ public class BasicLogic {
 				if(nodes.length % 2 == 0) {
 					return parent.seval(nodes[nodes.length - 1], env);
 				}
-			} catch(LoopBreakException ex) {
+			} catch (LoopBreakException ex) {
 				//Ignored, unless the value passed in is greater than 1, in which case
 				//we rethrow.
 				if(ex.getTimes() > 1) {
@@ -499,7 +498,7 @@ public class BasicLogic {
 				+ "\t\tmsg('First'),\n"
 				+ "\t6..8,\n"
 				+ "\t\tmsg('Second')\n"
-				+ ")"),};
+				+ ")")};
 		}
 
 		@Override
@@ -615,12 +614,12 @@ public class BasicLogic {
 			//make sure that each value is not dynamic.
 			String notConstant = "Cases for a switch statement must be constant, not variable";
 			String alreadyContains = "The switch statement already contains a case for this value, remove the duplicate value";
-			final equals EQUALS = new equals();
+			final equals equals = new equals();
 			Set<Construct> values = new TreeSet<>(new Comparator<Construct>() {
 
 				@Override
 				public int compare(Construct t, Construct t1) {
-					if(EQUALS.exec(Target.UNKNOWN, null, t, t1).getBoolean()) {
+					if(equals.exec(Target.UNKNOWN, null, t, t1).getBoolean()) {
 						return 0;
 					} else {
 						return t.val().compareTo(t1.val());
@@ -707,7 +706,7 @@ public class BasicLogic {
 									break;
 								}
 							}
-						} else if(EQUALS.exec(t, null, children.get(0).getData(), value).getBoolean()) {
+						} else if(equals.exec(t, null, children.get(0).getData(), value).getBoolean()) {
 							toReturn = children.get(i + 1);
 							break;
 						}
@@ -744,7 +743,7 @@ public class BasicLogic {
 	@seealso({nequals.class, sequals.class, snequals.class})
 	public static class equals extends AbstractFunction implements Optimizable {
 
-		private static final equals self = new equals();
+		private static final equals SELF = new equals();
 
 		/**
 		 * Returns the results that this function would provide, but in a java specific manner, so other code may easily
@@ -755,7 +754,7 @@ public class BasicLogic {
 		 * @return
 		 */
 		public static boolean doEquals(Construct one, Construct two) {
-			CBoolean ret = self.exec(Target.UNKNOWN, null, one, two);
+			CBoolean ret = SELF.exec(Target.UNKNOWN, null, one, two);
 			return ret.getBoolean();
 		}
 
@@ -823,7 +822,6 @@ public class BasicLogic {
 				if(!ArgumentValidation.isNumber(args[0])) {
 					return CBoolean.FALSE;
 				}
-				boolean equals = true;
 				for(int i = 1; i < args.length; i++) {
 					if(!ArgumentValidation.isNumber(args[i])) {
 						return CBoolean.FALSE;
@@ -835,7 +833,7 @@ public class BasicLogic {
 					}
 				}
 				return CBoolean.TRUE;
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
 		}
@@ -879,7 +877,7 @@ public class BasicLogic {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "equals(1, 1.0, '1')"),
 				new ExampleScript("Operator syntax", "1 == 1"),
-				new ExampleScript("Not equivalent", "'one' == 'two'"),};
+				new ExampleScript("Not equivalent", "'one' == 'two'")};
 		}
 	}
 
@@ -959,7 +957,7 @@ public class BasicLogic {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "sequals('1', 1)"),
 				new ExampleScript("Symbolic usage", "'1' === 1"),
-				new ExampleScript("Symbolic usage", "'1' === '1'"),};
+				new ExampleScript("Symbolic usage", "'1' === '1'")};
 		}
 	}
 
@@ -1022,7 +1020,7 @@ public class BasicLogic {
 				new ExampleScript("Basic usage", "snequals('1', 1)"),
 				new ExampleScript("Basic usage", "snequals('1', '1')"),
 				new ExampleScript("Operator syntax", "'1' !== '1'"),
-				new ExampleScript("Operator syntax", "'1' !== 1"),};
+				new ExampleScript("Operator syntax", "'1' !== 1")};
 		}
 	}
 
@@ -1086,7 +1084,7 @@ public class BasicLogic {
 				new ExampleScript("Basic usage", "nequals('one', 'two')"),
 				new ExampleScript("Basic usage", "nequals(1, 1)"),
 				new ExampleScript("Operator syntax", "1 != 1"),
-				new ExampleScript("Operator syntax", "1 != 2"),};
+				new ExampleScript("Operator syntax", "1 != 2")};
 		}
 	}
 
@@ -1176,7 +1174,7 @@ public class BasicLogic {
 					}
 				}
 				return CBoolean.TRUE;
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
 		}
@@ -1193,7 +1191,7 @@ public class BasicLogic {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "equals_ic('test', 'TEST')"),
-				new ExampleScript("Basic usage", "equals_ic('completely', 'DIFFERENT')"),};
+				new ExampleScript("Basic usage", "equals_ic('completely', 'DIFFERENT')")};
 		}
 	}
 
@@ -1323,7 +1321,7 @@ public class BasicLogic {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "equals_ic('test', 'TEST')"),
-				new ExampleScript("Basic usage", "equals_ic('completely', 'DIFFERENT')"),};
+				new ExampleScript("Basic usage", "equals_ic('completely', 'DIFFERENT')")};
 		}
 	}
 
@@ -1389,7 +1387,7 @@ public class BasicLogic {
 				+ "msg(ref_equals(@a, @b)) # False, because although the arrays are == (and ===) they are different references"),
 				new ExampleScript("Usage with a duplicated array", "@a = array(1, 2, 3)\n"
 				+ "@b = array(1, 2, 3) # New array with duplicate content\n"
-				+ "msg(ref_equals(@a, @b)) # Again, even though @a == @b and @a === @b, this is false, because they are two different references"),};
+				+ "msg(ref_equals(@a, @b)) # Again, even though @a == @b and @a === @b, this is false, because they are two different references")};
 		}
 
 	}
@@ -1457,7 +1455,7 @@ public class BasicLogic {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "lt(4, 5)"),
 				new ExampleScript("Operator syntax, true condition", "4 < 5"),
-				new ExampleScript("Operator syntax, false condition", "5 < 4"),};
+				new ExampleScript("Operator syntax, false condition", "5 < 4")};
 		}
 	}
 
@@ -1524,7 +1522,7 @@ public class BasicLogic {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "gt(5, 4)"),
 				new ExampleScript("Operator syntax, true condition", "5 > 4"),
-				new ExampleScript("Operator syntax, false condition", "4 > 5"),};
+				new ExampleScript("Operator syntax, false condition", "4 > 5")};
 		}
 	}
 
@@ -1592,7 +1590,7 @@ public class BasicLogic {
 				new ExampleScript("Functional usage", "lte(4, 5)"),
 				new ExampleScript("Operator syntax, true condition", "4 <= 5"),
 				new ExampleScript("Operator syntax, true condition", "5 <= 5"),
-				new ExampleScript("Operator syntax, false condition", "5 <= 4"),};
+				new ExampleScript("Operator syntax, false condition", "5 <= 4")};
 		}
 	}
 
@@ -1659,7 +1657,7 @@ public class BasicLogic {
 			return new ExampleScript[]{
 				new ExampleScript("Functional usage", "gte(5, 4)"),
 				new ExampleScript("Operator syntax, true condition", "4 >= 4"),
-				new ExampleScript("Operator syntax, false condition", "4 >= 5"),};
+				new ExampleScript("Operator syntax, false condition", "4 >= 5")};
 		}
 	}
 
@@ -1790,7 +1788,7 @@ public class BasicLogic {
 				new ExampleScript("Functional usage", "and(true, true)"),
 				new ExampleScript("Operator syntax, true condition", "true && true"),
 				new ExampleScript("Operator syntax, false condition", "true && false"),
-				new ExampleScript("Short circuit", "false && msg('This will not show')"),};
+				new ExampleScript("Short circuit", "false && msg('This will not show')")};
 		}
 
 		@Override
@@ -2045,7 +2043,7 @@ public class BasicLogic {
 				new ExampleScript("Functional usage", "or(false, true)"),
 				new ExampleScript("Operator syntax, true condition", "true || false"),
 				new ExampleScript("Operator syntax, false condition", "false || false"),
-				new ExampleScript("Short circuit", "true || msg('This will not show')"),};
+				new ExampleScript("Short circuit", "true || msg('This will not show')")};
 		}
 
 		@Override
@@ -2242,7 +2240,7 @@ public class BasicLogic {
 				new ExampleScript("Functional usage", "not(false)"),
 				new ExampleScript("Operator syntax, true condition", "!false"),
 				new ExampleScript("Operator syntax, false condition", "!true"),
-				new ExampleScript("Operator syntax, using variable", "boolean @var = false;\nmsg(!@var);"),};
+				new ExampleScript("Operator syntax, using variable", "boolean @var = false;\nmsg(!@var);")};
 		}
 	}
 
@@ -2370,7 +2368,7 @@ public class BasicLogic {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "nand(true, true)"),};
+				new ExampleScript("Basic usage", "nand(true, true)")};
 		}
 	}
 
@@ -2431,7 +2429,7 @@ public class BasicLogic {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "nor(true, false)"),};
+				new ExampleScript("Basic usage", "nor(true, false)")};
 		}
 	}
 
@@ -2565,7 +2563,7 @@ public class BasicLogic {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "bit_and(1, 2, 4)"),
 				new ExampleScript("Usage in masking applications. Note that 5 in binary is 101 and 4 is 100. (See bit_or for a more complete example.)",
-				"assign(@var, 5)\nif(bit_and(@var, 4),\n\tmsg('Third bit set')\n)"),};
+				"assign(@var, 5)\nif(bit_and(@var, 4),\n\tmsg('Third bit set')\n)")};
 		}
 
 		@Override
@@ -2643,7 +2641,7 @@ public class BasicLogic {
 				new ExampleScript("Usage in masking applications. (Used to create a mask)", "assign(@flag1, 1)\nassign(@flag2, 2)\nassign(@flag3, 4)\n"
 				+ "assign(@flags, bit_or(@flag1, @flag3))\n"
 				+ "if(bit_and(@flags, @flag1),\n\tmsg('Contains flag 1')\n)\n"
-				+ "if(!bit_and(@flags, @flag2),\n\tmsg('Does not contain flag 2')\n)"),};
+				+ "if(!bit_and(@flags, @flag2),\n\tmsg('Does not contain flag 2')\n)")};
 		}
 
 		@Override
@@ -2717,7 +2715,7 @@ public class BasicLogic {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "bit_xor(1, 2, 4)"),};
+				new ExampleScript("Basic usage", "bit_xor(1, 2, 4)")};
 		}
 
 		@Override
@@ -2786,7 +2784,7 @@ public class BasicLogic {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "bit_not(1)"),};
+				new ExampleScript("Basic usage", "bit_not(1)")};
 		}
 	}
 
@@ -2849,7 +2847,7 @@ public class BasicLogic {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "lshift(1, 1)"),};
+				new ExampleScript("Basic usage", "lshift(1, 1)")};
 		}
 	}
 
@@ -2913,7 +2911,7 @@ public class BasicLogic {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "rshift(2, 1)"),
-				new ExampleScript("Basic usage", "rshift(-2, 1)"),};
+				new ExampleScript("Basic usage", "rshift(-2, 1)")};
 		}
 	}
 
@@ -2978,7 +2976,7 @@ public class BasicLogic {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "urshift(2, 1)"),
-				new ExampleScript("Basic usage", "urshift(-2, 1)"),};
+				new ExampleScript("Basic usage", "urshift(-2, 1)")};
 		}
 	}
 

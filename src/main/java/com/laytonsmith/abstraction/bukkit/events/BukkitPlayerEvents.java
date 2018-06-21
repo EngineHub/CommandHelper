@@ -151,7 +151,7 @@ public class BukkitPlayerEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static abstract class BukkitMCPlayerEvent implements MCPlayerEvent {
+	public abstract static class BukkitMCPlayerEvent implements MCPlayerEvent {
 
 		PlayerEvent pe;
 
@@ -601,7 +601,7 @@ public class BukkitPlayerEvents {
 					return MCEquipmentSlot.WEAPON;
 				}
 				return MCEquipmentSlot.OFF_HAND;
-			} catch(NoSuchMethodError e) {
+			} catch (NoSuchMethodError e) {
 				// before Bukkit 1.9
 				return MCEquipmentSlot.WEAPON;
 			}
@@ -1026,21 +1026,15 @@ public class BukkitPlayerEvents {
 			return threshold;
 		}
 
-		;
-
 		@Override
 		public MCLocation getFrom() {
 			return new BukkitMCLocation(from);
 		}
 
-		;
-
 		@Override
 		public MCLocation getTo() {
 			return new BukkitMCLocation(pme.getTo());
 		}
-
-		;
 
 		@Override
 		public boolean isCancelled() {

@@ -58,7 +58,7 @@ public class DataSourceFilter {
 	public DataSourceFilter(File file, URI defaultURI) throws IOException, DataSourceException {
 		try {
 			process(FileUtil.read(file), defaultURI);
-		} catch(DataSourceException e) {
+		} catch (DataSourceException e) {
 			throw new DataSourceException("Could not process filter file located at " + file.getAbsolutePath() + ": " + e.getMessage());
 		}
 	}
@@ -145,7 +145,7 @@ public class DataSourceFilter {
 				URI uriValue;
 				try {
 					uriValue = new URI(value);
-				} catch(URISyntaxException e) {
+				} catch (URISyntaxException e) {
 					throw new DataSourceException("Invalid URI for " + value
 							+ (isAlias ? "(Defined for alias " + originalValue + ")" : "") + ".");
 				}
@@ -202,6 +202,65 @@ public class DataSourceFilter {
 	 * @param key
 	 * @return
 	 */
+	public URI getConnection(String key) {
+		//Since looking through these patterns, doing the matches, calculating string distance are all
+		//fairly expensive operations, let's improve the runtime complexity by using a cache
+		URI cached = cache.get(key);
+		if(cached != null) {
+			return cached;
+		}
+		List<Pattern> matches = new ArrayList<Pattern>();
+		for(Pattern p : mappings.keySet()) {
+			if(p.matcher(key).matches()) {
+				matches.add(p);
+			}
+		}
+		//Ok, we have a list of the actual matches, we have to narrow it down to the closest
+		//match.
+		Pattern closest = null;
+		if(matches.isEmpty()) {
+			//Trivial case
+			return null;
+		} else if(matches.size() == 1) {
+			//Yay! Also a trivial case!
+			closest = matches.get(0);
+		} else {
+			int lowest = Integer.MAX_VALUE;
+			for(Pattern p : matches) {
+				//The closest match is defined as a filter that, minus wild cards, matches more characters.
+				//So, for instance, if the key is a.b.c.d, then this matches a.*.c.d better than a.*.*.d
+				//The easiest way to detect this is to simply remove * characters, and do a Levenshtein distance on the strings, and
+				//whichever one is lowest, is the closest.
+				String originalKey = original.get(p);
+				int dist = StringUtils.LevenshteinDistance(key, originalKey.replaceAll("\\*", "").replaceAll("[\\(\\)]", ""));
+				if(dist < lowest) {
+					closest = p;
+					lowest = dist;
+				}
+			}
+		}
+
+		try {
+			if(closest == null) {
+				return null;
+			}
+			String uri = mappings.get(closest);
+			URI u = new URI(uri);
+			//Store it in our cache
+			cache.put(key, u);
+			return u;
+		} catch (URISyntaxException ex) {
+			//We already verified that this won't happen, so yeah.
+			return null;
+		}
+	}
+
+	/**
+	 * Given a full key, returns the connection that contains it.
+	 *
+	 * @param key
+	 * @return
+	 */
 	public URI getConnection(String[] key) {
 		return getConnection(StringUtils.Join(key, "."));
 	}
@@ -216,7 +275,7 @@ public class DataSourceFilter {
 		for(String uri : namespaced.values()) {
 			try {
 				set.add(new URI(uri));
-			} catch(URISyntaxException ex) {
+			} catch (URISyntaxException ex) {
 				//Won't happen
 				throw new Error(ex);
 			}
@@ -288,7 +347,7 @@ public class DataSourceFilter {
 			String uri = matches.get(match);
 			try {
 				list.add(new URI(uri));
-			} catch(URISyntaxException ex) {
+			} catch (URISyntaxException ex) {
 				//Won't happen
 				throw new Error(ex);
 			}
@@ -305,64 +364,5 @@ public class DataSourceFilter {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Given a full key, returns the connection that contains it.
-	 *
-	 * @param key
-	 * @return
-	 */
-	public URI getConnection(String key) {
-		//Since looking through these patterns, doing the matches, calculating string distance are all
-		//fairly expensive operations, let's improve the runtime complexity by using a cache
-		URI cached = cache.get(key);
-		if(cached != null) {
-			return cached;
-		}
-		List<Pattern> matches = new ArrayList<Pattern>();
-		for(Pattern p : mappings.keySet()) {
-			if(p.matcher(key).matches()) {
-				matches.add(p);
-			}
-		}
-		//Ok, we have a list of the actual matches, we have to narrow it down to the closest
-		//match.
-		Pattern closest = null;
-		if(matches.isEmpty()) {
-			//Trivial case
-			return null;
-		} else if(matches.size() == 1) {
-			//Yay! Also a trivial case!
-			closest = matches.get(0);
-		} else {
-			int lowest = Integer.MAX_VALUE;
-			for(Pattern p : matches) {
-				//The closest match is defined as a filter that, minus wild cards, matches more characters.
-				//So, for instance, if the key is a.b.c.d, then this matches a.*.c.d better than a.*.*.d
-				//The easiest way to detect this is to simply remove * characters, and do a Levenshtein distance on the strings, and
-				//whichever one is lowest, is the closest.
-				String originalKey = original.get(p);
-				int dist = StringUtils.LevenshteinDistance(key, originalKey.replaceAll("\\*", "").replaceAll("[\\(\\)]", ""));
-				if(dist < lowest) {
-					closest = p;
-					lowest = dist;
-				}
-			}
-		}
-
-		try {
-			if(closest == null) {
-				return null;
-			}
-			String uri = mappings.get(closest);
-			URI u = new URI(uri);
-			//Store it in our cache
-			cache.put(key, u);
-			return u;
-		} catch(URISyntaxException ex) {
-			//We already verified that this won't happen, so yeah.
-			return null;
-		}
 	}
 }

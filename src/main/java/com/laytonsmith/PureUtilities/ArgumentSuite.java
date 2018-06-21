@@ -209,7 +209,7 @@ public class ArgumentSuite {
 		}
 	}
 
-	public static class ArgumentSuiteResults {
+	public static final class ArgumentSuiteResults {
 
 		private final ArgumentParser mode;
 		private final ArgumentParserResults results;
@@ -292,7 +292,7 @@ public class ArgumentSuite {
 				}
 				System.exit(0);
 			}
-		} catch(ResultUseException | ValidationException ex) {
+		} catch (ResultUseException | ValidationException ex) {
 			showHelp(suite);
 		}
 	}

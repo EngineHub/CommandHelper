@@ -37,7 +37,7 @@ public class MObjectAnnotationProcessor extends AbstractProcessor {
 				Class c = null;
 				try {
 					c = getClassFromName(className);
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				if(c != null) {

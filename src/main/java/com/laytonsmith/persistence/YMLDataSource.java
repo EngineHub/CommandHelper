@@ -52,7 +52,7 @@ public class YMLDataSource extends StringSerializableDataSource {
 		Yaml yaml = new Yaml();
 		try {
 			model = new DataSourceModel((Map<String, Object>) yaml.load(data));
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new DataSourceException("Could not load data source for " + uri + ": " + e.getMessage(), e);
 		}
 	}

@@ -88,7 +88,7 @@ class OptimizerObject {
 //				}
 //			}
 //		}
-//		for (int i = 0; i < tree.getChildren().size(); i++) {
+//		for(int i = 0; i < tree.getChildren().size(); i++) {
 //			ParseTree node = tree.getChildren().get(i);
 //			if(node.getData() instanceof CFunction && node.getData().val().equals("assign")){
 //				if(node.getChildAt(0).getData() instanceof NewIVariable){

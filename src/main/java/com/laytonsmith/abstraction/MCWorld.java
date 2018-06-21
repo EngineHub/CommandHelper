@@ -94,9 +94,9 @@ public interface MCWorld extends MCMetadatable {
 
 	MCItem dropItem(MCLocation l, MCItemStack is);
 
-	MCLightningStrike strikeLightning(MCLocation GetLocation);
+	MCLightningStrike strikeLightning(MCLocation location);
 
-	MCLightningStrike strikeLightningEffect(MCLocation GetLocation);
+	MCLightningStrike strikeLightningEffect(MCLocation location);
 
 	void setStorm(boolean b);
 

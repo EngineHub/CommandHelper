@@ -19,7 +19,7 @@ public class ModifierMirror implements Serializable {
 	/**
 	 * This is the canonical order of modifiers, used in the toString method.
 	 */
-	private static transient final Object[] order = new Object[]{
+	private static final transient Object[] ORDER = new Object[]{
 		Modifier.PUBLIC, "public",
 		Modifier.PRIVATE, "private",
 		Modifier.PROTECTED, "protected",
@@ -246,9 +246,9 @@ public class ModifierMirror implements Serializable {
 	@Override
 	public String toString() {
 		List<String> build = new ArrayList<String>();
-		for(int i = 0; i < order.length; i++) {
-			int type = (Integer) order[i];
-			String name = (String) order[++i];
+		for(int i = 0; i < ORDER.length; i++) {
+			int type = (Integer) ORDER[i];
+			String name = (String) ORDER[++i];
 			if((modifiers & type) > 0) {
 				build.add(name);
 			}

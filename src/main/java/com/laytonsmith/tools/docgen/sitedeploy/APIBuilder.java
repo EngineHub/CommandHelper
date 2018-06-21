@@ -4,7 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.api.Platforms;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MethodScriptFileLocations;
@@ -59,8 +59,8 @@ public class APIBuilder {
 		Map<String, Object> json = new TreeMap<>();
 		{
 			// functions
-			Map<String, Map<String, Object>> API = new TreeMap<>();
-			for(FunctionBase f : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
+			Map<String, Map<String, Object>> api = new TreeMap<>();
+			for(FunctionBase f : FunctionList.getFunctionList(Platforms.INTERPRETER_JAVA)) {
 				if(f instanceof Function) {
 					Function ff = (Function) f;
 					Map<String, Object> function = new TreeMap<>();
@@ -75,7 +75,7 @@ public class APIBuilder {
 								thrown.add(c.getAnnotation(typeof.class).value());
 							}
 						}
-					} catch(Throwable t) {
+					} catch (Throwable t) {
 						Logger.getLogger("default").log(Level.SEVERE, null, t);
 					}
 					function.put("thrown", thrown);
@@ -97,10 +97,10 @@ public class APIBuilder {
 					function.put("hidden", hidden);
 					String extId = ExtensionManager.getTrackers().get(ff.getSourceJar()).getIdentifier();
 					function.put("source", extId);
-					API.put(ff.getName(), function);
+					api.put(ff.getName(), function);
 				}
 			}
-			json.put("functions", API);
+			json.put("functions", api);
 		}
 		{
 			// events
@@ -130,7 +130,7 @@ public class APIBuilder {
 					String extId = ExtensionManager.getTrackers().get(e.getSourceJar()).getIdentifier();
 					event.put("source", extId);
 					events.put(e.getName(), event);
-				} catch(Exception ex) {
+				} catch (Exception ex) {
 					Logger.getLogger("default").log(Level.SEVERE, e.getName(), ex);
 				}
 			}
@@ -206,10 +206,10 @@ public class APIBuilder {
 					//obj.put("containingClass", m.getContainingClass().getName());
 					//obj.put("objectModifiers", m.getObjectModifiers());
 					objects.put(name, obj);
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					// Pretty sure this isn't possible?
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
-				} catch(Exception ex) {
+				} catch (Exception ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Could not instantiate " + t, ex);
 				}
 			}
