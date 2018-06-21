@@ -51,6 +51,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
@@ -65,8 +66,11 @@ import static org.mockito.Mockito.verify;
 import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.awt.HeadlessException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  *
@@ -123,6 +127,7 @@ public class RandomTests {
 		}
 		Set<String> classDocs = new TreeSet<>();
 
+		Map<String, Long> timings = new HashMap<>();
 		for(FunctionBase f : FunctionList.getFunctionList(null)) {
 			try {
 				if(TESTED_FUNCTIONS.contains(f.getName())) {
@@ -130,7 +135,10 @@ public class RandomTests {
 				}
 				TESTED_FUNCTIONS.add(f.getName());
 
+				long time = System.currentTimeMillis();
 				StaticTest.TestBoilerplate(f, f.getName());
+				long timeElapsed = System.currentTimeMillis() - time;
+				timings.put(f.getName(), timeElapsed);
 				Class upper = f.getClass().getEnclosingClass();
 				if(upper == null) {
 					fail(f.getName() + " is not enclosed in an upper class.");
@@ -162,6 +170,12 @@ public class RandomTests {
 				uhohs.put(f.getClass().getName(), t);
 				t.printStackTrace();
 			}
+		}
+		
+		List<Entry<String, Long>> sortedTimings = new ArrayList<>(timings.entrySet());
+		sortedTimings.sort((Entry<String, Long> e1, Entry<String, Long> e2) -> Long.compare(e1.getValue(), e2.getValue()));
+		for(Map.Entry<String, Long> entry : sortedTimings) {
+			System.out.println(String.format("Time: %04d\tFunction: %s", entry.getValue(), entry.getKey()));
 		}
 
 		if(!StaticTest.brokenJunk.isEmpty()) {
