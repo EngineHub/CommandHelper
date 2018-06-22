@@ -929,6 +929,7 @@ public class Meta {
 	}
 
 	@api
+	@noboilerplate // A boilerplate test on this function is relatively expensive and not necessary.
 	public static class get_locales extends AbstractFunction {
 
 		@Override
