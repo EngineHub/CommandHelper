@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
@@ -2295,6 +2296,7 @@ public class StringHandling {
 
 	@api
 	@seealso(decrypt_secure_string.class)
+	@noboilerplate // A boilerplate test on this function is very hard on Travis CI, sometimes resulting in a timeout.
 	public static class secure_string extends AbstractFunction {
 
 		@Override
