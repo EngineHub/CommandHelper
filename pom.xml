@@ -929,6 +929,7 @@
 							<testSourceDirectories>${project.testCompileSourceRoots}</testSourceDirectories>
 							<includeTestSourceDirectory>true</includeTestSourceDirectory>
 							<configLocation>${basedir}/checkstyle.xml</configLocation>
+							<propertyExpansion>config_loc=${basedir}</propertyExpansion>
 							<encoding>UTF-8</encoding>
 							<consoleOutput>true</consoleOutput>
 							<failsOnError>true</failsOnError>
