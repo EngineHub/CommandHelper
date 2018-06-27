@@ -33,6 +33,8 @@ public interface MCServer extends AbstractionObject {
 
 	void broadcastMessage(String message, String permission);
 
+	void broadcastMessage(String message, Set<MCCommandSender> recipients);
+
 	MCConsoleCommandSender getConsole();
 
 	MCItemFactory getItemFactory();

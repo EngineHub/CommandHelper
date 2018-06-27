@@ -38,6 +38,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.server.BroadcastMessageEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.Recipe;
 
@@ -212,6 +213,35 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public void broadcastMessage(String message, String permission) {
 		s.broadcast(message, permission);
+	}
+
+	@Override
+	public void broadcastMessage(String message, Set<MCCommandSender> recipients) {
+
+		// Convert MCCommandsSender recipients to CommandSender recipients.
+		Set<CommandSender> bukkitRecipients = new HashSet<>();
+		if(recipients != null) {
+			for(MCCommandSender mcSender : recipients) {
+				bukkitRecipients.add((CommandSender) mcSender.getHandle());
+			}
+		}
+
+		// Fire a BroadcastMessageEvent for this broadcast.
+		BroadcastMessageEvent broadcastMessageEvent = new BroadcastMessageEvent(message, bukkitRecipients);
+		this.s.getPluginManager().callEvent(broadcastMessageEvent);
+
+		// Return if the event was cancelled.
+		if(broadcastMessageEvent.isCancelled()) {
+			return;
+		}
+
+		// Get the possibly modified message.
+		message = broadcastMessageEvent.getMessage();
+
+		// Perform the actual broadcast to all remaining recipients.
+		for(CommandSender recipient : broadcastMessageEvent.getRecipients()) {
+			recipient.sendMessage(message);
+		}
 	}
 
 	@Override
@@ -490,8 +520,8 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public List<MCRecipe> allRecipes() {
 		List<MCRecipe> ret = new ArrayList<>();
-		for(Iterator recipes = s.recipeIterator(); recipes.hasNext();) {
-			Recipe recipe = (Recipe) recipes.next();
+		for(Iterator<Recipe> recipes = s.recipeIterator(); recipes.hasNext();) {
+			Recipe recipe = recipes.next();
 			ret.add(BukkitConvertor.BukkitGetRecipe(recipe));
 		}
 		return ret;
