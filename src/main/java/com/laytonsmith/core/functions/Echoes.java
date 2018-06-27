@@ -624,12 +624,15 @@ public class Echoes {
 
 		@Override
 		public String docs() {
-			return "void {message, [permission] | message, [players]} Broadcasts a message to all or some players."
-					+ " If permission is given, only players with that permission will see the broadcast."
+			return "void {message, [permission] | message, [players]} Broadcasts a message to all or some players"
+					+ " and/or console."
+					+ " If permission is given, only players with that permission will see the broadcast. On Bukkit"
+					+ " servers, console will only receive the broadcast when permission is 'bukkit.broadcast'."
 					+ " If an array is given, only online players in the list will see the broadcast."
+					+ " Console will receive the broadcast only when the array contains case-insensitive '~console'."
 					+ " Offline players in the list will be ignored."
-					+ " If permission/players is null, all players will see the broadcast."
-					+ " Throws a CREFormatException when the given players array is associative.";
+					+ " If permission/players is null, all players and console will see the broadcast."
+					+ " Throws CREFormatException when the given players array is associative.";
 		}
 
 		@Override
@@ -670,10 +673,14 @@ public class Echoes {
 				// Get the player recipients from the array.
 				Set<MCCommandSender> recipients = new HashSet<>();
 				for(Construct p : array.asList()) {
-					try {
-						recipients.add(Static.GetPlayer(p, t));
-					} catch (CREPlayerOfflineException cre) {
-						// Ignore offline players.
+					if(p.val().equalsIgnoreCase("~console")) {
+						recipients.add(server.getConsole());
+					} else {
+						try {
+							recipients.add(Static.GetPlayer(p, t));
+						} catch (CREPlayerOfflineException cre) {
+							// Ignore offline players.
+						}
 					}
 				}
 
