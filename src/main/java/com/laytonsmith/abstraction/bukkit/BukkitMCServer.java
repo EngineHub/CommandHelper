@@ -207,12 +207,29 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public void broadcastMessage(String message) {
-		s.broadcastMessage(message);
+
+		// Get the set of online players and include console.
+		Set<CommandSender> recipients = new HashSet<>(this.s.getOnlinePlayers());
+		recipients.add(this.s.getConsoleSender());
+
+		// Perform the broadcast.
+		this.bukkitBroadcastMessage(message, recipients);
 	}
 
 	@Override
 	public void broadcastMessage(String message, String permission) {
-		s.broadcast(message, permission);
+
+		// Get the set of online players with the given permission and include console.
+		Set<CommandSender> recipients = new HashSet<>();
+		for(Player player : this.s.getOnlinePlayers()) {
+			if(player.hasPermission(permission)) {
+				recipients.add(player);
+			}
+		}
+		recipients.add(this.s.getConsoleSender());
+
+		// Perform the broadcast.
+		this.bukkitBroadcastMessage(message, recipients);
 	}
 
 	@Override
@@ -221,27 +238,44 @@ public class BukkitMCServer implements MCServer {
 		// Convert MCCommandsSender recipients to CommandSender recipients.
 		Set<CommandSender> bukkitRecipients = new HashSet<>();
 		if(recipients != null) {
-			for(MCCommandSender mcSender : recipients) {
-				bukkitRecipients.add((CommandSender) mcSender.getHandle());
+			for(MCCommandSender recipient : recipients) {
+				bukkitRecipients.add((CommandSender) recipient.getHandle());
 			}
 		}
 
+		// Perform the broadcast.
+		this.bukkitBroadcastMessage(message, bukkitRecipients);
+	}
+
+	/**
+	 * Broadcasts a message to a list of recipients, fireing a {@link BroadcastMessageEvent} before doing so.
+	 * {@link ConsoleCommandSender Console} has to be included in this list to receive the broadcast.
+	 * @param message - The message to broadcast.
+	 * @param recipients - A list of {@link MCCommandSender command senders} to send the message to.
+	 * @return The amount of recipients that received the message.
+	 */
+	private int bukkitBroadcastMessage(String message, Set<CommandSender> recipients) {
+
 		// Fire a BroadcastMessageEvent for this broadcast.
-		BroadcastMessageEvent broadcastMessageEvent = new BroadcastMessageEvent(message, bukkitRecipients);
+		BroadcastMessageEvent broadcastMessageEvent = new BroadcastMessageEvent(message, recipients);
 		this.s.getPluginManager().callEvent(broadcastMessageEvent);
 
 		// Return if the event was cancelled.
 		if(broadcastMessageEvent.isCancelled()) {
-			return;
+			return 0;
 		}
 
-		// Get the possibly modified message.
+		// Get the possibly modified message and recipients.
 		message = broadcastMessageEvent.getMessage();
+		recipients = broadcastMessageEvent.getRecipients(); // This returns the same reference, but breaks less likely.
 
 		// Perform the actual broadcast to all remaining recipients.
-		for(CommandSender recipient : broadcastMessageEvent.getRecipients()) {
+		for(CommandSender recipient : recipients) {
 			recipient.sendMessage(message);
 		}
+
+		// Return the amount of recipients that received the message.
+		return recipients.size();
 	}
 
 	@Override

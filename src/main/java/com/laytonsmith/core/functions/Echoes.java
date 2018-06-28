@@ -624,15 +624,14 @@ public class Echoes {
 
 		@Override
 		public String docs() {
-			return "void {message, [permission] | message, [players]} Broadcasts a message to all or some players"
+			return "void {message, [permission] | message, [recipients]} Broadcasts a message to all or some players"
 					+ " and/or console."
-					+ " If permission is given, only players with that permission will see the broadcast. On Bukkit"
-					+ " servers, console will only receive the broadcast when permission is 'bukkit.broadcast'."
-					+ " If an array is given, only online players in the list will see the broadcast."
+					+ " If permission is given, only players with that permission and console will see the broadcast."
+					+ " If an array of recipients is given, only online players in the list will see the broadcast."
 					+ " Console will receive the broadcast only when the array contains case-insensitive '~console'."
-					+ " Offline players in the list will be ignored."
-					+ " If permission/players is null, all players and console will see the broadcast."
-					+ " Throws CREFormatException when the given players array is associative.";
+					+ " Offline players and duplicate recipients in the list will be ignored."
+					+ " If permission/recipients is null, all players and console will see the broadcast."
+					+ " Throws FormatException when the given recipients array is associative.";
 		}
 
 		@Override
@@ -660,7 +659,7 @@ public class Echoes {
 				return CVoid.VOID;
 			}
 
-			// Handle "broadcast(message, playerArray)".
+			// Handle "broadcast(message, recipientsArray)".
 			if(args[1] instanceof CArray) {
 
 				// Get the CArray and validate that it is non-associative.
@@ -670,7 +669,7 @@ public class Echoes {
 							"Expected a non-associative array or permission as the second parameter.", t);
 				}
 
-				// Get the player recipients from the array.
+				// Get the recipients from the array.
 				Set<MCCommandSender> recipients = new HashSet<>();
 				for(Construct p : array.asList()) {
 					if(p.val().equalsIgnoreCase("~console")) {
