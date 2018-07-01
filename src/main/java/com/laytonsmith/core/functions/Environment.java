@@ -1050,8 +1050,7 @@ public class Environment {
 					+ " be a single player or an array of players to play the sound to, if"
 					+ " not given, all players can potentially hear it. ---- Possible categories: "
 					+ StringUtils.Join(MCSoundCategory.values(), ", ", ", or ", " or ") + "."
-					+ " ---- Possible sounds: "
-					+ StringUtils.Join(MCSound.types(), ", ", ", or ", " or ");
+					+ " \nPossible sounds: " + StringUtils.Join(MCSound.types(), "\n");
 		}
 
 		@Override

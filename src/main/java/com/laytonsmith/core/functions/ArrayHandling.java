@@ -1612,7 +1612,7 @@ public class ArrayHandling {
 					+ " first. Note that the reason this function is an in place sort instead of explicitly cloning the"
 					+ " array is because in most cases, you may not need to actually clone the array, an expensive"
 					+ " operation. Due to this, it has slightly different behavior than array_normalize, which could"
-					+ " have also been implemented in place. ---- If the sortType is a closure, it will perform a"
+					+ " have also been implemented in place.\n\nIf the sortType is a closure, it will perform a"
 					+ " custom sort type, and the array may contain any values, including sub array values. The closure"
 					+ " should accept two values, @left and @right, and should return true if the left value is larger"
 					+ " than the right, and false if the left value is smaller than the right, and null if they are"

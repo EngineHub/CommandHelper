@@ -4031,7 +4031,7 @@ public class DataHandling {
 				+ "_testWithMutable(@a); // This will actually change the value\n"
 				+ "msg(@a); // Here, the value is 5\n"
 				+ "_testWithoutMutable(@a); // This will not change the value\n"
-				+ "msg(@a); // Still teh value is 5\n"),
+				+ "msg(@a); // Still the value is 5\n"),
 				new ExampleScript("Basic usage with closure", "@a = mutable_primitive(0);\n"
 				+ "execute(closure(){\n"
 				+ "\t@a++;\n"

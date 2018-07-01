@@ -221,7 +221,7 @@ public class Exceptions {
 		@Override
 		public String docs() {
 			Set<Class<? extends CREThrowable>> e = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class);
-			String exceptions = "\nValid Exceptions: ";
+			String exceptions = "\n";
 			List<String> ee = new ArrayList<>();
 			for(Class<? extends CREThrowable> c : e) {
 				String exceptionType = c.getAnnotation(typeof.class).value();
@@ -230,8 +230,10 @@ public class Exceptions {
 			Collections.sort(ee);
 			exceptions += StringUtils.Join(ee, ", ", ", and ");
 
-			return "nothing {exceptionType, msg, [causedBy] | exception} This function causes an exception to be thrown. exceptionType may be any valid exception type."
-					+ "\n\nThe core exception types are: " + exceptions + "\n\nThere may be other exception types as well, refer to the documentation of any extensions you have installed.";
+			return "nothing {exceptionType, msg, [causedBy] | exception} This function causes an exception to be thrown."
+					+ " The exceptionType may be any valid exception type."
+					+ "\n\nThe core exception types are: " + exceptions
+					+ "\n\nThere may be other exception types as well, refer to the documentation of any extensions you have installed.";
 		}
 
 		@Override

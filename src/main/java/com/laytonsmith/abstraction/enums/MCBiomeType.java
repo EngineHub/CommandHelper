@@ -41,7 +41,7 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 	}
 
 	/**
-	 * @return Names of available entity types
+	 * @return Names of available biome types
 	 */
 	public static Set<String> types() {
 		if(NULL == null) { // docs mode
@@ -55,7 +55,7 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 	}
 
 	/**
-	 * @return Our own EntityType list
+	 * @return Our own MCBiomeType list
 	 */
 	public static Collection<MCBiomeType> values() {
 		if(NULL == null) { // docs mode

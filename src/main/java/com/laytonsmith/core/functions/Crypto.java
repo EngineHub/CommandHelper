@@ -540,13 +540,8 @@ public class Crypto {
 		@Override
 		public String docs() {
 			return "boolean {plaintext, hash} Checks to see if this plaintext password does in fact hash to the hash"
-					+ " specified. Unlike md5 or sha1, simply comparing hashes won't work. Consider the following"
-					+ " usage:\n"
-					+ "string @plain = 'plaintext';\n"
-					+ "string @hash = bcrypt(@plain);\n"
-					+ "msg(if(check_bcrypt(@plain, @hash),"
-					+ " 'They match!', 'They do not match!'));\n"
-					+ "\n\nThis function is aware of and compatible with secure_string.";
+					+ " specified. Unlike md5 or sha1, simply comparing hashes won't work."
+					+ " This function is aware of and compatible with secure_string.";
 		}
 
 		@Override
