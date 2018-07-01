@@ -91,16 +91,11 @@ import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.abstraction.enums.MCTreeSpecies;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
-import com.laytonsmith.core.Optimizable;
-import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -128,7 +123,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -1637,80 +1631,6 @@ public class EntityManagement {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	@hide("Deprecated.")
-	public static class entity_id extends EntityGetterFunction implements Optimizable {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity entity = Static.getEntityByUuid(Static.GetUUID(args[0], t), t);
-			return new CString(entity.getUniqueId().toString(), t);
-		}
-
-		@Override
-		public String getName() {
-			return "entity_id";
-		}
-
-		@Override
-		public String docs() {
-			return "string {entityUUID} returns the entity id for unique persistent UUID";
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function entity_id() is deprecated.", t);
-			return Optimizable.PULL_ME_UP;
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-	}
-
-	@api
-	@hide("Deprecated.")
-	public static class entity_uuid extends EntityGetterFunction implements Optimizable {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity entity = Static.getEntity(args[0], t);
-			return new CString(entity.getUniqueId().toString(), t);
-		}
-
-		@Override
-		public String getName() {
-			return "entity_uuid";
-		}
-
-		@Override
-		public String docs() {
-			return "string {entityID} returns the persistent unique id of the entity";
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function entity_uuid() is deprecated.", t);
-			return Optimizable.PULL_ME_UP;
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 

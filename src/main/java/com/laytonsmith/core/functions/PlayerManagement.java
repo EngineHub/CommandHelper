@@ -22,17 +22,13 @@ import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCWeather;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
-import com.laytonsmith.core.Optimizable;
-import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -65,12 +61,9 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -4926,67 +4919,6 @@ public class PlayerManagement {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_2;
-		}
-	}
-
-	@api
-	@hide("Deprecated.")
-	public static class get_player_from_entity_id extends AbstractFunction implements Optimizable {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			try {
-				return new CString(((MCPlayer) Static.getLivingEntity(args[0], t)).getName(), t);
-			} catch (Exception exception) {
-				return CNull.NULL;
-			}
-		}
-
-		@Override
-		public String getName() {
-			return "get_player_from_entity_id";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		@Override
-		public String docs() {
-			return "string {entityID} Given an entity ID that represents a player, returns that player's name, or"
-					+ " null if the entity ID isn't a player's entity ID.";
-		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_1;
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function get_player_from_entity_id() is deprecated. Use player().", t);
-			return null;
-		}
-
-		@Override
-		public Set<Optimizable.OptimizationOption> optimizationOptions() {
-			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 

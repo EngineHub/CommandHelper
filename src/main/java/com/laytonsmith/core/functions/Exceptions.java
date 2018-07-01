@@ -275,7 +275,6 @@ public class Exceptions {
 				}
 			} else {
 				if(args[0] instanceof CNull) {
-					CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR, "Uncatchable exceptions are no longer supported.", t);
 					throw new CRECastException("An exception type must be specified", t);
 				}
 				Class<? extends Mixed> c;
