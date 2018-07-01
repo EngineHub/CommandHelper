@@ -40,6 +40,7 @@ import com.laytonsmith.abstraction.entities.MCChestedHorse;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.entities.MCCreeper;
 import com.laytonsmith.abstraction.entities.MCEnderDragon;
+import com.laytonsmith.abstraction.entities.MCEnderSignal;
 import com.laytonsmith.abstraction.entities.MCEnderman;
 import com.laytonsmith.abstraction.entities.MCEvokerFangs;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
@@ -1849,6 +1850,14 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case ENDER_EYE:
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_12_X)) {
+						MCEnderSignal endereye = (MCEnderSignal) entity;
+						specArray.set(entity_spec.KEY_ENDEREYE_DESPAWNTICKS, new CInt(endereye.getDespawnTicks(), t), t);
+						specArray.set(entity_spec.KEY_ENDEREYE_DROP, CBoolean.get(endereye.getDropItem()), t);
+						specArray.set(entity_spec.KEY_ENDEREYE_TARGET, ObjectGenerator.GetGenerator().location(endereye.getTargetLocation(), false), t);
+					}
+					break;
 				case ENDER_DRAGON:
 					MCEnderDragon enderdragon = (MCEnderDragon) entity;
 					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9_X)) {
@@ -2113,6 +2122,9 @@ public class EntityManagement {
 		private static final String KEY_DROPPED_ITEM_PICKUPDELAY = "pickupdelay";
 		private static final String KEY_ENDERCRYSTAL_BASE = "base";
 		private static final String KEY_ENDERCRYSTAL_BEAMTARGET = "beamtarget";
+		private static final String KEY_ENDEREYE_DESPAWNTICKS = "despawnticks";
+		private static final String KEY_ENDEREYE_DROP = "drop";
+		private static final String KEY_ENDEREYE_TARGET = "target";
 		private static final String KEY_ENDERDRAGON_PHASE = "phase";
 		private static final String KEY_ENDERMAN_CARRIED = "carried";
 		private static final String KEY_EXPERIENCE_ORB_AMOUNT = "amount";
@@ -2181,7 +2193,7 @@ public class EntityManagement {
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREBadEntityException.class, CREIndexOverflowException.class,
 				CREIndexOverflowException.class, CRERangeException.class, CREFormatException.class,
-				CRELengthException.class};
+				CRELengthException.class, CREInvalidWorldException.class};
 		}
 
 		@Override
@@ -2476,6 +2488,32 @@ public class EntityManagement {
 								} catch (IllegalArgumentException ex) {
 									throw new CREFormatException("Invalid EnderDragon phase: " + specArray.get(index, t).val(), t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case ENDER_EYE:
+					MCEnderSignal endereye = (MCEnderSignal) entity;
+					// Order matters here. Target must be set first or it will reset despawn ticks and drop.
+					if(specArray.containsKey(entity_spec.KEY_ENDEREYE_TARGET)) {
+						Construct targetLoc = specArray.get(entity_spec.KEY_ENDEREYE_TARGET, t);
+						try {
+							endereye.setTargetLocation(ObjectGenerator.GetGenerator().location(targetLoc, null, t));
+						} catch (IllegalArgumentException ex) {
+							throw new CREInvalidWorldException("An EnderEye cannot target a location in another world.", t);
+						}
+					}
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_ENDEREYE_DESPAWNTICKS:
+								endereye.setDespawnTicks(Static.getInt32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_ENDEREYE_DROP:
+								endereye.setDropItem(Static.getBoolean(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_ENDEREYE_TARGET:
 								break;
 							default:
 								throwException(index, t);
