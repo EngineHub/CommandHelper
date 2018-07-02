@@ -20,3 +20,4 @@ true
 /test-backend/
 /nbproject/
 /dependency-reduced-pom.xml
+.checkstyle

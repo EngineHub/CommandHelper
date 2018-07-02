@@ -29,9 +29,26 @@ public interface MCServer extends AbstractionObject {
 
 	List<MCWorld> getWorlds();
 
+	/**
+	 * Broadcasts a message to all online players and console.
+	 * @param message - The message to broadcast.
+	 */
 	void broadcastMessage(String message);
 
+	/**
+	 * Broadcasts a message to all online players with a given permission and console.
+	 * @param message - The message to broadcast.
+	 * @param permission - The required permission to receive the message.
+	 */
 	void broadcastMessage(String message, String permission);
+
+	/**
+	 * Broadcasts a message to a list of recipients.
+	 * {@link MCConsoleCommandSender Console} has to be included in this list to receive the broadcast.
+	 * @param message - The message to broadcast.
+	 * @param recipients - A list of {@link MCCommandSender command senders} to send the message to.
+	 */
+	void broadcastMessage(String message, Set<MCCommandSender> recipients);
 
 	MCConsoleCommandSender getConsole();
 
