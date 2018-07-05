@@ -1160,7 +1160,7 @@ public final class MethodScriptCompiler {
 		int parens = 0;
 		Token t = null;
 
-		int bracketCount = 0;
+		int braceCount = 0;
 
 		// Create a Token array to iterate over, rather than using the LinkedList's O(n) get() method.
 		Token[] tokenArray = stream.toArray(new Token[stream.size()]);
@@ -1177,13 +1177,13 @@ public final class MethodScriptCompiler {
 				tree.addChild(b);
 				tree = b;
 				parents.push(b);
-				bracketCount++;
+				braceCount++;
 				constructCount.push(new AtomicInteger(0));
 				continue;
 			}
 
 			if(t.type == TType.RCURLY_BRACKET) {
-				bracketCount--;
+				braceCount--;
 				if(constructCount.peek().get() > 1) {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
@@ -1575,14 +1575,50 @@ public final class MethodScriptCompiler {
 
 		assert t != null;
 
+		// Handle mismatching square brackets "[]".
+		assert arrayStack.size() != 0 : "The last element of arrayStack should be present, but it was popped.";
 		if(arrayStack.size() != 1) {
-			throw new ConfigCompileException("Mismatched square brackets", t.target);
+
+			// Some starting square bracket '[' was not closed at the end of the script.
+			// Find the last '[' that was not closed and use that as target instead of the last line of the script.
+			Target target = traceMismatchedOpenToken(stream, TType.LSQUARE_BRACKET, TType.RSQUARE_BRACKET);
+			assert target != null : "Mismatched bracket was detected, but target-finding code could not find it.";
+			if(target == null) {
+				target = t.target;
+			}
+
+			// Throw a CRE.
+			throw new ConfigCompileException("Mismatched square brackets", target);
 		}
+
+		// Handle mismatching parentheses "()".
 		if(parens != 0) {
-			throw new ConfigCompileException("Mismatched parenthesis", t.target);
+
+			// Some starting parentheses '(' was not closed at the end of the script.
+			// Find the last '(' that was not closed and use that as target instead of the last line of the script.
+			Target target = traceMismatchedOpenToken(stream, TType.FUNC_START, TType.FUNC_END);
+			assert target != null : "Mismatched parentheses was detected, but target-finding code could not find it.";
+			if(target == null) {
+				target = t.target;
+			}
+
+			// Throw a CRE.
+			throw new ConfigCompileException("Mismatched parentheses", target);
 		}
-		if(bracketCount != 0) {
-			throw new ConfigCompileException("Mismatched curly braces", t.target);
+
+		// Handle mismatching curly braces "{}".
+		if(braceCount != 0) {
+
+			// Some starting curly brace '{' was not closed at the end of the script.
+			// Find the last '{' that was not closed and use that as target instead of the last line of the script.
+			Target target = traceMismatchedOpenToken(stream, TType.LCURLY_BRACKET, TType.RCURLY_BRACKET);
+			assert target != null : "Mismatched curly brace was detected, but target-finding code could not find it.";
+			if(target == null) {
+				target = t.target;
+			}
+
+			// Throw a CRE.
+			throw new ConfigCompileException("Mismatched curly braces", target);
 		}
 
 		Stack<List<Procedure>> procs = new Stack<>();
@@ -1606,6 +1642,34 @@ public final class MethodScriptCompiler {
 		parents.pop();
 		tree = parents.pop();
 		return tree;
+	}
+
+	/**
+	 * Trace target of mismatching open tokens such as '(' in '()' or '{' in '{}'. This should be used when it is
+	 * known that there are more start than close tokens, but no target is known for the extra start token.
+	 * @param stream - The token stream to scan.
+	 * @param openType - The open type, which would be {@link TType#FUNC_START (} for a parentheses check.
+	 * @param closeType - The close type, which would be {@link TType#FUNC_END )} for a parentheses check.
+	 * @return The target of the last occurrence of the opening type that did not have a matching closing type.
+	 * Returns null of no target was found.
+	 */
+	private static Target traceMismatchedOpenToken(TokenStream stream, TType openType, TType closeType) {
+		// Some starting parentheses '(' was not closed at the end of the script.
+		// Find the last '(' that was not closed and use that as target instead of the last line of the script.
+		Iterator<Token> iterator = stream.descendingIterator();
+		int closingCount = 0;
+		while(iterator.hasNext()) {
+			Token token = iterator.next();
+			if(token.type == closeType) {
+				closingCount++;
+			} else if(token.type == openType) {
+				if(closingCount <= 0) {
+					return token.target;
+				}
+				closingCount--;
+			}
+		}
+		return null;
 	}
 
 	/**
