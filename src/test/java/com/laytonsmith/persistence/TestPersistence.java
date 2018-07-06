@@ -91,7 +91,8 @@ public class TestPersistence {
 //	}
 //	@Test
 //	public void testJSON() {
-//		assertEquals("{\"a\":{\"b\":{\"c1\":\"value2\",\"c2\":\"value3\",\"_\":\"value1\"}}}", doOutput("json://test.json", testData));
+//		assertEquals("{\"a\":{\"b\":{\"c1\":\"value2\",\"c2\":\"value3\",\"_\":\"value1\"}}}",
+//				doOutput("json://test.json", testData));
 //	}
 	@Test
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
@@ -145,12 +146,14 @@ public class TestPersistence {
 
 	@Test
 	public void testMultimatch2() throws Exception {
-		assertEquals(getSet("default", "yml://yes1.yml", "yml://yes2.yml"), getConnections("a.b.c", "a.**=yml://yes1.yml", "a.b.**=yml://yes2.yml", "b.**=yml://no.yml"));
+		assertEquals(getSet("default", "yml://yes1.yml", "yml://yes2.yml"),
+				getConnections("a.b.c", "a.**=yml://yes1.yml", "a.b.**=yml://yes2.yml", "b.**=yml://no.yml"));
 	}
 
 	@Test
 	public void testHasValue() throws Exception {
-		PersistenceNetwork network = new PersistenceNetwork("**=json://folder/default.json", new URI("default"), options);
+		PersistenceNetwork network =
+				new PersistenceNetwork("**=json://folder/default.json", new URI("default"), options);
 		network.set(dm, new String[]{"key"}, "value");
 		dm.waitForThreads();
 		assertTrue(network.hasKey(new String[]{"key"}));
@@ -160,7 +163,8 @@ public class TestPersistence {
 	//This test works fine on its own but not in the group >.>
 //	@Test
 //	public void testClearValue1() throws Exception {
-//		PersistenceNetwork network = new PersistenceNetwork("**=json://folder/default.json", new URI("default"), options);
+//		PersistenceNetwork network =
+//				new PersistenceNetwork("**=json://folder/default.json", new URI("default"), options);
 //		network.set(dm, new String[]{"key"}, "value");
 //		network.set(dm, new String[]{"key2"}, "value");
 //		assertTrue(network.get(new String[]{"key"}).equals("value"));
@@ -172,7 +176,8 @@ public class TestPersistence {
 //	}
 	@Test
 	public void testNotTransient() throws Exception {
-		PersistenceNetwork network = new PersistenceNetwork("**=json://folder/default.json", new URI("default"), options);
+		PersistenceNetwork network =
+				new PersistenceNetwork("**=json://folder/default.json", new URI("default"), options);
 		network.set(dm, new String[]{"key"}, "value");
 		dm.waitForThreads();
 		assertEquals("value", network.get(new String[]{"key"}));
@@ -184,7 +189,8 @@ public class TestPersistence {
 
 	@Test
 	public void testTransient() throws Exception {
-		PersistenceNetwork network = new PersistenceNetwork("**=transient:json://folder/default.json", new URI("default"), options);
+		PersistenceNetwork network =
+				new PersistenceNetwork("**=transient:json://folder/default.json", new URI("default"), options);
 		network.set(dm, new String[]{"key"}, "value1");
 		dm.waitForThreads();
 		assertEquals("value1", network.get(new String[]{"key"}));
@@ -209,7 +215,9 @@ public class TestPersistence {
 	@Test
 	public void testConflictingKeys() throws Exception {
 		//If two data sources have the same key, only one should be currently operated on.
-		PersistenceNetwork network = new PersistenceNetwork("**=transient:json://folder/default.json\nkey.*=transient:json://folder/other.json\n", new URI("default"), options);
+		PersistenceNetwork network = new PersistenceNetwork(
+				"**=transient:json://folder/default.json\nkey.*=transient:json://folder/other.json\n",
+				new URI("default"), options);
 		FileUtil.write("{\"key\":{\"key\":\"value1\"}}", new File("folder/other.json"), true);
 		FileUtil.write("{\"key\":{\"key\":\"nope\"}}", new File("folder/default.json"), true);
 		assertEquals("value1", network.get(new String[]{"key", "key"}));
@@ -219,7 +227,8 @@ public class TestPersistence {
 	//This test works alone, but not in a group >.>
 //	@Test
 //	public void testSQLiteBasic() throws Exception{
-//		PersistenceNetwork network = new PersistenceNetwork("**=sqlite://folder/sqlite.db", new URI("default"), options);
+//		PersistenceNetwork network =
+//				new PersistenceNetwork("**=sqlite://folder/sqlite.db", new URI("default"), options);
 //		network.set(dm, new String[]{"key", "key"}, "value");
 //		dm.waitForThreads();
 //		assertEquals("value", network.get(new String[]{"key", "key"}));
@@ -227,7 +236,8 @@ public class TestPersistence {
 //	}
 	@Test(expected = IllegalArgumentException.class)
 	public void testNamespaceWithUnderscore() throws Exception {
-		PersistenceNetwork network = new PersistenceNetwork("**=sqlite://folder/sqlite.db", new URI("default"), options);
+		PersistenceNetwork network =
+				new PersistenceNetwork("**=sqlite://folder/sqlite.db", new URI("default"), options);
 		try {
 			network.set(dm, new String[]{"Bad", "_", "Key"}, "value");
 			dm.waitForThreads();
@@ -258,7 +268,8 @@ public class TestPersistence {
 
 	@Test
 	public void testGetValues() throws Exception {
-		PersistenceNetwork network = new PersistenceNetwork("**=json://folder/persistence.json", new URI("default"), options);
+		PersistenceNetwork network =
+				new PersistenceNetwork("**=json://folder/persistence.json", new URI("default"), options);
 		try {
 			network.set(dm, new String[]{"t", "test1"}, "test");
 			network.set(dm, new String[]{"t", "test2"}, "test");

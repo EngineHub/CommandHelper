@@ -55,7 +55,8 @@ public @interface NonInheritImplements {
 			} else if(nii != null) {
 				Class<?> iface = nii.value();
 				@SuppressWarnings("unchecked")
-				T ifaceProxy = (T) Proxy.newProxyInstance(o.getClass().getClassLoader(), new Class[]{iface}, (Object proxy, Method method, Object[] args) -> {
+				T ifaceProxy = (T) Proxy.newProxyInstance(o.getClass().getClassLoader(),
+						new Class[]{iface}, (Object proxy, Method method, Object[] args) -> {
 					return o.getClass().getMethod(method.getName(), method.getParameterTypes()).invoke(o, args);
 				});
 				return ifaceProxy;

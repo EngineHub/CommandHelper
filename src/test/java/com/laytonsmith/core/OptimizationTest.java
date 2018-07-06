@@ -43,7 +43,8 @@ public class OptimizationTest {
 
 	@Test
 	public void testIfElse() throws Exception {
-		assertEquals("ifelse(dyn(1),msg(''),dyn(2),msg(''),msg(''))", optimize("if(dyn(1)){ msg('') } else if(dyn(2)){ msg('') } else { msg('') }"));
+		assertEquals("ifelse(dyn(1),msg(''),dyn(2),msg(''),msg(''))",
+				optimize("if(dyn(1)){ msg('') } else if(dyn(2)){ msg('') } else { msg('') }"));
 	}
 
 	@Test
@@ -69,7 +70,8 @@ public class OptimizationTest {
 	//TODO: These tests are not intended to be corrected in master, so I'm removing them for now
 //	@Test public void testProcOptimization1() throws Exception{
 //		//The proc stays there, but the call to it should be consolidated
-//		assertEquals("sconcat(proc('_add',@a,@b,return(add(@a,@b))),4)", optimize("proc(_add, @a, @b, return(@a + @b)) _add(2, 2)"));
+//		assertEquals("sconcat(proc('_add',@a,@b,return(add(@a,@b))),4)",
+//				optimize("proc(_add, @a, @b, return(@a + @b)) _add(2, 2)"));
 //	}
 	@Test
 	public void testProcOptimizationRecursion() throws Exception {
@@ -101,7 +103,8 @@ public class OptimizationTest {
 
 	@Test
 	public void testUnreachableCode() throws Exception {
-		assertEquals("sconcat(assign(@a,0),if(@a,string(die()),sconcat(msg('2'),msg('3'))))", optimize("assign(@a, 0) if(@a){ die() msg('1') } else { msg('2') msg('3') }"));
+		assertEquals("sconcat(assign(@a,0),if(@a,string(die()),sconcat(msg('2'),msg('3'))))",
+				optimize("assign(@a, 0) if(@a){ die() msg('1') } else { msg('2') msg('3') }"));
 		assertEquals("string(die())", optimize("if(true){ die() msg('1') } else { msg('2') msg('3') }"));
 	}
 
@@ -122,7 +125,8 @@ public class OptimizationTest {
 
 	@Test
 	public void testRegReplaceOptimization1() throws Exception {
-		assertEquals("replace('this is a thing','thing',dyn('hi'))", optimize("reg_replace('thing', dyn('hi'), 'this is a thing')"));
+		assertEquals("replace('this is a thing','thing',dyn('hi'))",
+				optimize("reg_replace('thing', dyn('hi'), 'this is a thing')"));
 	}
 
 	@Test
@@ -177,7 +181,8 @@ public class OptimizationTest {
 
 	@Test
 	public void testAssignmentMixedWithAddition6() throws Exception {
-		assertEquals("sconcat(add(1,assign(@_,assign(@a,add(@a,@b,@c,2)))),'blah')", optimize("1 + @_ = @a += @b + @c + 2 'blah'"));
+		assertEquals("sconcat(add(1,assign(@_,assign(@a,add(@a,@b,@c,2)))),'blah')",
+				optimize("1 + @_ = @a += @b + @c + 2 'blah'"));
 	}
 
 	@Test
@@ -298,9 +303,11 @@ public class OptimizationTest {
 
 		assertEquals("assign(@b,neg(array_get(array(1,2,3),1)))", optimize("@b = -array(1,2,3)[1]"));
 
-		assertEquals("assign(@b,neg(array_get(array_get(array_get(array(array(array(2))),0),0),0)))", optimize("@b = -array(array(array(2)))[0][0][0]"));
+		assertEquals("assign(@b,neg(array_get(array_get(array_get(array(array(array(2))),0),0),0)))",
+				optimize("@b = -array(array(array(2)))[0][0][0]"));
 
-		assertEquals("assign(@b,neg(array_get(array_get(array_get(array(array(array(2))),neg(array_get(array(1,0),1))),0),0)))",
+		assertEquals("assign(@b,neg(array_get(array_get(array_get("
+				+ "array(array(array(2))),neg(array_get(array(1,0),1))),0),0)))",
 				optimize("@b = -array(array(array(2)))[-array(1,0)[1]][0][0]"));
 
 		// Test behaviour where the value should not be negated.
@@ -365,6 +372,7 @@ public class OptimizationTest {
 
 	@Test
 	public void testCommentBlock() throws Exception {
-		assertEquals(2, MethodScriptCompiler.lex("/*/ still a comment -()*/", new File("OptimizationTest"), true, true).size());
+		assertEquals(2, MethodScriptCompiler.lex(
+				"/*/ still a comment -()*/", new File("OptimizationTest"), true, true).size());
 	}
 }

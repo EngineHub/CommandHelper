@@ -194,10 +194,10 @@ public class StringUtilsTest {
 
 	@Test
 	public void testPluralTemplateHelper() {
-		assertEquals("There is 1 fish, and it is red.",
-				StringUtils.PluralTemplateHelper(1, "There is %d fish, and it is red.", "There are %d fish, and they are red."));
-		assertEquals("There are 4 fish, and they are red.",
-				StringUtils.PluralTemplateHelper(4, "There is %d fish, and it is red.", "There are %d fish, and they are red."));
+		assertEquals("There is 1 fish, and it is red.", StringUtils.PluralTemplateHelper(
+				1, "There is %d fish, and it is red.", "There are %d fish, and they are red."));
+		assertEquals("There are 4 fish, and they are red.", StringUtils.PluralTemplateHelper(
+				4, "There is %d fish, and it is red.", "There are %d fish, and they are red."));
 	}
 
 }

@@ -58,7 +58,8 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 						}
 					}
 				} else {
-					JOptionPane.showMessageDialog(ConfigurationLoaderDialog.this, getValidationError(), "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(
+							ConfigurationLoaderDialog.this, getValidationError(), "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
@@ -273,28 +274,34 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 				.addComponent(localRadioButton)
 				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-					.addComponent(localFileField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+					.addComponent(localFileField, javax.swing.GroupLayout.PREFERRED_SIZE,
+							javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
 					.addComponent(browseLocalFileButton))
 				.addGap(18, 18, 18)
 				.addComponent(remoteRadioButton)
 				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
 					.addComponent(hostLabel)
-					.addComponent(hostField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+					.addComponent(hostField, javax.swing.GroupLayout.PREFERRED_SIZE,
+							javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
 				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
 					.addComponent(portLabel)
-					.addComponent(portField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+					.addComponent(portField, javax.swing.GroupLayout.PREFERRED_SIZE,
+							javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
 				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-					.addComponent(passwordField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+					.addComponent(passwordField, javax.swing.GroupLayout.PREFERRED_SIZE,
+							javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
 					.addComponent(passwordLabel))
 				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-					.addComponent(remoteFileField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+					.addComponent(remoteFileField, javax.swing.GroupLayout.PREFERRED_SIZE,
+							javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
 					.addComponent(remoteFileLabel))
 				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-				.addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+				.addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE,
+						10, javax.swing.GroupLayout.PREFERRED_SIZE)
 				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
 					.addComponent(loadButton)
@@ -321,8 +328,10 @@ public class ConfigurationLoaderDialog extends javax.swing.JDialog {
 					break;
 				}
 			}
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-			java.util.logging.Logger.getLogger(ConfigurationLoaderDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+		} catch (ClassNotFoundException | InstantiationException
+				| IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+			java.util.logging.Logger.getLogger(
+					ConfigurationLoaderDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
 		// </editor-fold>
 

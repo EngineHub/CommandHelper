@@ -78,7 +78,8 @@ public class BukkitAbstractEventMixin implements EventMixinInterface {
 	@Override
 	public void manualTrigger(BindableEvent e) {
 		if(e._GetObject() instanceof org.bukkit.event.Event) {
-			((BukkitMCServer) Static.getServer()).__Server().getPluginManager().callEvent((org.bukkit.event.Event) e._GetObject());
+			((BukkitMCServer) Static.getServer()).__Server()
+					.getPluginManager().callEvent((org.bukkit.event.Event) e._GetObject());
 		}
 	}
 

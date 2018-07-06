@@ -323,21 +323,23 @@ public class BukkitConvertor extends AbstractConvertor {
 //
 //	@Override
 //	public synchronized int SetFutureRunnable(DaemonManager dm, long ms, Runnable r) {
-//		int id = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(CommandHelperPlugin.self, r, Static.msToTicks(ms));
+//		int id = Bukkit.getServer().getScheduler()
+//				.scheduleSyncDelayedTask(CommandHelperPlugin.self, r, Static.msToTicks(ms));
 //		validIDs.add(id);
 //		return id;
 //	}
 //
 //	@Override
 //	public synchronized int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r){
-//		int id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(CommandHelperPlugin.self, r, Static.msToTicks(initialDelay), Static.msToTicks(ms));
+//		int id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(
+//				CommandHelperPlugin.self, r, Static.msToTicks(initialDelay), Static.msToTicks(ms));
 //		validIDs.add(id);
 //		return id;
 //	}
 //
 //	@Override
 //	public synchronized void ClearAllRunnables() {
-//		//Doing cancelTasks apparently does not work, so let's just manually cancel each task, which does appear to work.
+//		//Doing cancelTasks apparently does not work, so just manually cancel each task, which does appear to work.
 //		//Anyways, it's better that way anyhow, because we actually remove IDs from validIDs that way.
 //		//((BukkitMCServer)Static.getServer()).__Server().getScheduler().cancelTasks(CommandHelperPlugin.self);
 //		Set<Integer> ids = new TreeSet<Integer>(validIDs);
@@ -583,7 +585,8 @@ public class BukkitConvertor extends AbstractConvertor {
 	public void runOnMainThreadLater(DaemonManager dm, final Runnable r) {
 		if(!CommandHelperPlugin.self.isEnabled()) {
 			throw new CancelCommandException(Implementation.GetServerType().getBranding()
-					+ " tried to schedule a task while the plugin was disabled (is the server shutting down?).", Target.UNKNOWN);
+					+ " tried to schedule a task while the plugin was disabled (is the server shutting down?).",
+					Target.UNKNOWN);
 		}
 		Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, new Callable<Object>() {
 
@@ -599,7 +602,8 @@ public class BukkitConvertor extends AbstractConvertor {
 	public <T> T runOnMainThreadAndWait(Callable<T> callable) throws InterruptedException, ExecutionException {
 		if(!CommandHelperPlugin.self.isEnabled()) {
 			throw new CancelCommandException(Implementation.GetServerType().getBranding()
-					+ " tried to schedule a task while the plugin was disabled (is the server shutting down?).", Target.UNKNOWN);
+					+ " tried to schedule a task while the plugin was disabled (is the server shutting down?).",
+					Target.UNKNOWN);
 		}
 		return Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, callable).get();
 	}
@@ -659,14 +663,16 @@ public class BukkitConvertor extends AbstractConvertor {
 				return new BukkitMCFurnaceRecipe(recipe);
 			case SHAPED:
 				if(key != null) {
-					return new BukkitMCShapedRecipe(new ShapedRecipe(new NamespacedKey(CommandHelperPlugin.self, key), is));
+					return new BukkitMCShapedRecipe(
+							new ShapedRecipe(new NamespacedKey(CommandHelperPlugin.self, key), is));
 				} else {
 					// deprecated in 1.12
 					return new BukkitMCShapedRecipe(new ShapedRecipe(is));
 				}
 			case SHAPELESS:
 				if(key != null) {
-					return new BukkitMCShapelessRecipe(new ShapelessRecipe(new NamespacedKey(CommandHelperPlugin.self, key), is));
+					return new BukkitMCShapelessRecipe(
+							new ShapelessRecipe(new NamespacedKey(CommandHelperPlugin.self, key), is));
 				} else {
 					// deprecated in 1.12
 					return new BukkitMCShapelessRecipe(new ShapelessRecipe(is));

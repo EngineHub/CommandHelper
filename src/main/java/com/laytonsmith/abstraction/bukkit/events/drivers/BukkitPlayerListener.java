@@ -194,10 +194,12 @@ public class BukkitPlayerListener implements Listener {
 					//Fire away!
 					fireChat(event);
 				} else {
-					final AsyncPlayerChatEvent copy = new AsyncPlayerChatEvent(false, event.getPlayer(), event.getMessage(), event.getRecipients());
+					final AsyncPlayerChatEvent copy = new AsyncPlayerChatEvent(
+							false, event.getPlayer(), event.getMessage(), event.getRecipients());
 					copy.setFormat(event.getFormat());
 					//event.setCancelled(true);
-					Future f = Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, new Callable() {
+					Future<Object> f = Bukkit.getServer().getScheduler().callSyncMethod(
+							CommandHelperPlugin.self, new Callable<Object>() {
 						@Override
 						public Object call() throws Exception {
 							onPlayerChat(copy);
@@ -209,7 +211,7 @@ public class BukkitPlayerListener implements Listener {
 							f.get();
 							break;
 						} catch (InterruptedException ex) {
-							//I don't know why this happens, but screw it, we're gonna try again, and it's gonna like it.
+							//I don't know why this happens, but screw it, we'll try again, and it's gonna like it.
 						} catch (ExecutionException ex) {
 							Logger.getLogger(BukkitPlayerListener.class.getName()).log(Level.SEVERE, null, ex);
 							break;
@@ -353,7 +355,8 @@ public class BukkitPlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onNewRespawnLocation(PlayerRespawnEvent event) {
 		for(Integer i : PlayerEvents.GetThresholdList()) {
-			PlayerEvents.GetLastLocations(i).put(event.getPlayer().getName(), new BukkitMCLocation(event.getRespawnLocation()));
+			PlayerEvents.GetLastLocations(i).put(
+					event.getPlayer().getName(), new BukkitMCLocation(event.getRespawnLocation()));
 		}
 	}
 

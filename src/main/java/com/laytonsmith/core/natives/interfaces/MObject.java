@@ -136,7 +136,8 @@ public class MObject {
 						CArray ca = Static.getArray(value, t);
 						MList m = new MList();
 						if(ca.inAssociativeMode()) {
-							throw new CRECastException("Expected non-associative array, but an associative array was found instead.", t);
+							throw new CRECastException(
+									"Expected non-associative array, but an associative array was found instead.", t);
 						}
 						for(int i = 0; i < ca.size(); i++) {
 							m.add(ca.get(i, t));
@@ -149,8 +150,8 @@ public class MObject {
 						val = MObject.Construct(fType, ca);
 					} else {
 						//Programming error.
-						throw new Error(this.getClass().getName() + " contained the public field "
-								+ f.getName() + " of type " + fType.getName() + ", which is an unsupported field type.");
+						throw new Error(this.getClass().getName() + " contained the public field " + f.getName()
+								+ " of type " + fType.getName() + ", which is an unsupported field type.");
 					}
 				}
 				try {

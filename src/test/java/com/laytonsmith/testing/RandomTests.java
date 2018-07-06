@@ -9,8 +9,6 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.api.Platforms;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -118,7 +116,8 @@ public class RandomTests {
 						continue required;
 					}
 				}
-				uhohs.put(c.getName() + " " + required, new NoSuchMethodException(c.getSimpleName() + " does not define " + required));
+				uhohs.put(c.getName() + " " + required,
+						new NoSuchMethodException(c.getSimpleName() + " does not define " + required));
 			}
 		}
 		Set<String> classDocs = new TreeSet<>();
@@ -165,7 +164,8 @@ public class RandomTests {
 		}
 
 		if(!StaticTest.brokenJunk.isEmpty()) {
-			System.err.println("There " + StringUtils.PluralTemplateHelper(StaticTest.brokenJunk.size(), "is %d test that has", "are %d tests that have") + " a failure in extreme circumstances.");
+			System.err.println("There " + StringUtils.PluralTemplateHelper(StaticTest.brokenJunk.size(),
+					"is %d test that has", "are %d tests that have") + " a failure in extreme circumstances.");
 			for(String s : StaticTest.brokenJunk) {
 				uhohs.put(s, null);
 			}
@@ -216,7 +216,8 @@ public class RandomTests {
 		ca.push(new Command("/Command", Target.UNKNOWN), t);
 		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)), t);
 		//[1, 2.2, "string", "\"Quote\"", true, false, null, "", "/Command", [1]]
-		assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]", Construct.json_encode(ca, Target.UNKNOWN));
+		assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]",
+				Construct.json_encode(ca, Target.UNKNOWN));
 	}
 
 	@Test
@@ -232,12 +233,16 @@ public class RandomTests {
 		ca.push(C.Void(), Target.UNKNOWN);
 		ca.push(new Command("/Command", Target.UNKNOWN), Target.UNKNOWN);
 		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)), Target.UNKNOWN);
-		StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]", Target.UNKNOWN));
+		StaticTest.assertCEquals(ca, Construct.json_decode(
+				"[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]",
+				Target.UNKNOWN));
 	}
 
 	@Test
 	public void testReturnArrayFromProc() throws Exception {
-		assertEquals("{1, 2, 3}", SRun("proc(_test, @var, assign(@array, array(1, 2)) array_push(@array, @var) return(@array)) _test(3)", null));
+		assertEquals("{1, 2, 3}",
+				SRun("proc(_test, @var, assign(@array, array(1, 2)) array_push(@array, @var) return(@array)) _test(3)",
+						null));
 	}
 
 	/*@Test*/ public void testStaticGetLocation() {
@@ -247,8 +252,10 @@ public class RandomTests {
 		CommandHelperPlugin.myServer = fakeServer;
 		CArray ca1 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3));
 		CArray ca2 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"));
-		CArray ca3 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(45), C.onstruct(50));
-		CArray ca4 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"), C.onstruct(45), C.onstruct(50));
+		CArray ca3 = new CArray(Target.UNKNOWN,
+				C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(45), C.onstruct(50));
+		CArray ca4 = new CArray(Target.UNKNOWN,
+				C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"), C.onstruct(45), C.onstruct(50));
 		MCLocation l1 = ObjectGenerator.GetGenerator().location(ca1, fakeWorld, Target.UNKNOWN);
 		MCLocation l2 = ObjectGenerator.GetGenerator().location(ca2, fakeWorld, Target.UNKNOWN);
 		MCLocation l3 = ObjectGenerator.GetGenerator().location(ca3, fakeWorld, Target.UNKNOWN);
@@ -296,7 +303,8 @@ public class RandomTests {
 			/* Not much we can really do about this during testing.
 			throw new CREPluginInternalException("You are missing a required dependency: " + eClass, Target.UNKNOWN);*/
 		} catch (ReflectionUtils.ReflectionException rex) {
-			throw new CREPluginInternalException("Your expression was invalidly formatted", Target.UNKNOWN, rex.getCause());
+			throw new CREPluginInternalException(
+					"Your expression was invalidly formatted", Target.UNKNOWN, rex.getCause());
 		}
 	}
 
@@ -309,7 +317,7 @@ public class RandomTests {
 	@Test
 	public void testCastFromBukkitMCPlayerToBukkitMCCommandSender() throws Exception {
 		Player p = mock(Player.class);
-		BukkitMCCommandSender c = new BukkitMCCommandSender(new BukkitMCPlayer(p));
+//		BukkitMCCommandSender c = new BukkitMCCommandSender(new BukkitMCPlayer(p));
 	}
 
 	@Test
@@ -326,7 +334,8 @@ public class RandomTests {
 			ConnectionMixinFactory.ConnectionMixinOptions options;
 			options = new ConnectionMixinFactory.ConnectionMixinOptions();
 			options.setWorkingDirectory(new File("."));
-			PersistenceNetwork network = new PersistenceNetwork("**=json://persistence.json", new URI("default"), options);
+			PersistenceNetwork network =
+					new PersistenceNetwork("**=json://persistence.json", new URI("default"), options);
 			ReflectionUtils.set(GlobalEnv.class, g, "persistenceNetwork", network);
 			Run("store_value('t.test1', 'test')\n"
 					+ "store_value('t.test2', 'test')\n"

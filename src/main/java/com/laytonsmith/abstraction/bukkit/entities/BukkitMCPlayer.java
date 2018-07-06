@@ -421,7 +421,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-	public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+	public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException,
+			IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		Server server = Bukkit.getServer();
 		String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
 
@@ -433,13 +434,16 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 		// Since 1.7.8
 		Class nmsMinecraftServerClass = Class.forName("net.minecraft.server." + version + ".MinecraftServer");
-		/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
+		/*n.m.s.MinecraftServer*/ Object nmsServer =
+				ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
 		/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
-		/*n.m.s.OpList*/ Object opSet = ReflectionUtils.get(Class.forName("net.minecraft.server." + version + ".PlayerList"), nmsPlayerList, "operators");
+		/*n.m.s.OpList*/ Object opSet = ReflectionUtils.get(
+				Class.forName("net.minecraft.server." + version + ".PlayerList"), nmsPlayerList, "operators");
 		//opSet.getClass().getSuperclass() == n.m.s.JsonList
 		Map/*<String, n.m.s.OpListEntry>*/ d = (Map) ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
 		if(value) {
-			/*n.m.s.OpListEntry*/ Class nmsOpListEntry = Class.forName("net.minecraft.server." + version + ".OpListEntry");
+			/*n.m.s.OpListEntry*/ Class nmsOpListEntry =
+					Class.forName("net.minecraft.server." + version + ".OpListEntry");
 			Class nmsGameProfile;
 			try {
 				/*com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("com.mojang.authlib.GameProfile");
@@ -447,15 +451,18 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 
 				// Prior to 1.8
-				/*net.minecraft.util.com.mojang.authlib.GameProfile*/ nmsGameProfile = Class.forName("net.minecraft.util.com.mojang.authlib.GameProfile");
+				/*net.minecraft.util.com.mojang.authlib.GameProfile*/ nmsGameProfile =
+						Class.forName("net.minecraft.util.com.mojang.authlib.GameProfile");
 			}
 			Object gameProfile = ReflectionUtils.invokeMethod(p, "getProfile");
 			Object opListEntry;
 			try {
-				opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class, boolean.class}, new Object[]{gameProfile, 4, false});
+				opListEntry = ReflectionUtils.newInstance(nmsOpListEntry,
+						new Class[]{nmsGameProfile, int.class, boolean.class}, new Object[]{gameProfile, 4, false});
 			} catch (ReflectionUtils.ReflectionException e) {
 				// Prior to 1.8.6
-				opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class}, new Object[]{gameProfile, 4});
+				opListEntry = ReflectionUtils.newInstance(nmsOpListEntry,
+						new Class[]{nmsGameProfile, int.class}, new Object[]{gameProfile, 4});
 			}
 			d.put(p.getUniqueId().toString(), opListEntry);
 		} else {
@@ -519,7 +526,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void playNote(MCLocation loc, MCInstrument instrument, MCNote note) {
-		p.playNote((Location) loc.getHandle(), BukkitMCInstrument.getConvertor().getConcreteEnum(instrument), (Note) note.getHandle());
+		p.playNote((Location) loc.getHandle(),
+				BukkitMCInstrument.getConvertor().getConcreteEnum(instrument), (Note) note.getHandle());
 	}
 
 	@Override
@@ -595,12 +603,14 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
+	public void spawnParticle(MCLocation l, MCParticle pa, int count,
+			double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
 		try {
 			Particle type = Particle.valueOf(pa.name());
 			Location loc = ((BukkitMCLocation) l).asLocation();
 			if(data != null && type.getDataType().equals(ItemStack.class) && data instanceof MCItemStack) {
-				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, ((MCItemStack) data).getHandle());
+				p.spawnParticle(type, loc, count,
+						offsetX, offsetY, offsetZ, velocity, ((MCItemStack) data).getHandle());
 			} else {
 				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);
 			}

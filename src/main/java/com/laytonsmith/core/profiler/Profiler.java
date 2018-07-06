@@ -47,17 +47,25 @@ public final class Profiler {
 
 	private static Preferences GetPrefs(File initFile) throws IOException {
 		List<Preference> defaults = new ArrayList<Preference>(Arrays.asList(new Preference[]{
-			new Preference("profiler-on", "false", Preferences.Type.BOOLEAN, "Turns the profiler on or off. The profiler can cause a slight amount of lag, so generally speaking"
-			+ " you don't leave it on during normal operation."),
-			new Preference("profiler-granularity", "1", Preferences.Type.INT, "Sets the granularity of the profiler. 1 logs some things, while 5 logs everything possible."),
-			new Preference("profiler-log", "logs/profiling/internal/%Y-%M-%D-profiler.log", Preferences.Type.STRING, "The location of the profiler output log. The following macros are supported"
-			+ " and will expand to the specified values: %Y - Year, %M - Month, %D - Day, %h - Hour, %m - Minute, %s - Second"),
-			new Preference("write-to-file", "true", Preferences.Type.BOOLEAN, "If true, will write results out to file."),
-			new Preference("write-to-screen", "false", Preferences.Type.BOOLEAN, "If true, will write results out to screen."),
-			new Preference("profile-log-threshold", "0.005", Preferences.Type.DOUBLE, "If a profile point took less than this amount of time (in ms) to run, it won't be logged. This is good for reducing data blindness"
-			+ " caused by too much data being displayed. Normally you only care about things that took longer than a certain amount, not things that took less than a certain amount. Setting this to 0"
-			+ " will trigger everything.")}));
-		Preferences prefs = new Preferences("CommandHelper", Static.getLogger(), defaults, "These settings control the integrated profiler");
+			new Preference("profiler-on", "false", Preferences.Type.BOOLEAN,
+					"Turns the profiler on or off. The profiler can cause a slight amount of lag, so generally speaking"
+					+ " you don't leave it on during normal operation."),
+			new Preference("profiler-granularity", "1", Preferences.Type.INT,
+					"Sets the granularity of the profiler. 1 logs some things, while 5 logs everything possible."),
+			new Preference("profiler-log", "logs/profiling/internal/%Y-%M-%D-profiler.log", Preferences.Type.STRING,
+					"The location of the profiler output log. The following macros are supported and will expand to"
+					+ " the specified values: %Y - Year, %M - Month, %D - Day, %h - Hour, %m - Minute, %s - Second"),
+			new Preference("write-to-file", "true", Preferences.Type.BOOLEAN,
+					"If true, will write results out to file."),
+			new Preference("write-to-screen", "false", Preferences.Type.BOOLEAN,
+					"If true, will write results out to screen."),
+			new Preference("profile-log-threshold", "0.005", Preferences.Type.DOUBLE,
+					"If a profile point took less than this amount of time (in ms) to run, it won't be logged."
+					+ " This is good for reducing data blindness caused by too much data being displayed."
+					+ " Normally you only care about things that took longer than a certain amount, not things that"
+					+ " took less than a certain amount. Setting this to 0 will trigger everything.")}));
+		Preferences prefs = new Preferences("CommandHelper", Static.getLogger(), defaults,
+				"These settings control the integrated profiler");
 		prefs.init(initFile);
 		return prefs;
 	}
@@ -88,7 +96,7 @@ public final class Profiler {
 	public Profiler(File initFile) throws IOException {
 		this();
 		prefs = GetPrefs(initFile);
-		//We want speed here, not memory usage, so lets put an excessively large capacity, and excessively low load factor
+		//We want speed here, not memory usage, so we put an excessively large capacity and excessively low load factor
 		operations = new HashMap<ProfilePoint, Long>(1024, 0.25f);
 		this.initFile = initFile;
 
@@ -179,7 +187,8 @@ public final class Profiler {
 			return;
 		}
 		long total = stop - operations.get(operationName);
-		//1 million nano seconds in 1 ms. We want x.xxx ms shown, so divide by 1000, round (well, integer truncate, since it's faster), then divide by 1000 again.
+		//1 million nano seconds in 1 ms. We want x.xxx ms shown, so divide by 1000,
+		//round (well, integer truncate, since it's faster), then divide by 1000 again.
 		//voila, significant figure to the 3rd degree.
 		double time = (total / 1000) / 1000.0;
 		if(time >= logThreshold) {
@@ -194,8 +203,10 @@ public final class Profiler {
 				//Let's change this to seconds, actually.
 				stringTime = Double.toString(((long) time) / 1000.0) + "sec";
 			}
-			String operationMessage = operationName.getMessage() != null ? " Message: " + operationName.getMessage() : "";
-			doLog("[" + stringTime + "][Lvl:" + (operationName.getGranularity().getLevel()) + "]:" + getIndent(queuedProfilePoints)
+			String operationMessage = operationName.getMessage() != null
+					? " Message: " + operationName.getMessage() : "";
+			doLog("[" + stringTime + "][Lvl:" + (operationName.getGranularity().getLevel()) + "]:"
+					+ getIndent(queuedProfilePoints)
 					+ operationName.toString() + operationMessage + (operationName.wasGCd() ? GC_STRING : ""));
 		}
 		queuedProfilePoints--;
@@ -224,12 +235,14 @@ public final class Profiler {
 				if(writeToFile) {
 					File file = new File(initFile.getParentFile(), DateUtils.ParseCalendarNotation(logFile));
 					try {
-						FileUtil.write(DateUtils.ParseCalendarNotation("%Y-%M-%D %h:%m.%s") + ": " + message + Static.LF(), //Message to log
+						FileUtil.write(DateUtils.ParseCalendarNotation("%Y-%M-%D %h:%m.%s")
+								+ ": " + message + Static.LF(), // Message to log.
 								file, //File to output to
 								FileUtil.APPEND, //We want to append
 								true); //Create it for us if it doesn't exist
 					} catch (IOException ex) {
-						StreamUtils.GetSystemErr().println("While trying to write to the profiler log file (" + file.getAbsolutePath() + "), recieved an IOException: " + ex.getMessage());
+						StreamUtils.GetSystemErr().println("While trying to write to the profiler log file ("
+								+ file.getAbsolutePath() + "), recieved an IOException: " + ex.getMessage());
 					}
 				}
 

@@ -105,7 +105,8 @@ public class BukkitBlockEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCBlockPistonExtendEvent extends BukkitMCBlockPistonEvent implements MCBlockPistonExtendEvent {
+	public static class BukkitMCBlockPistonExtendEvent
+			extends BukkitMCBlockPistonEvent implements MCBlockPistonExtendEvent {
 
 		BlockPistonExtendEvent event;
 
@@ -128,7 +129,8 @@ public class BukkitBlockEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCBlockPistonRetractEvent extends BukkitMCBlockPistonEvent implements MCBlockPistonRetractEvent {
+	public static class BukkitMCBlockPistonRetractEvent
+			extends BukkitMCBlockPistonEvent implements MCBlockPistonRetractEvent {
 
 		BlockPistonRetractEvent event;
 
@@ -359,8 +361,8 @@ public class BukkitBlockEvents {
 			for(int i = 0; i < signtext.size(); i++) {
 				text[i] = signtext.get(i, Target.UNKNOWN).toString();
 			}
-			return new BukkitMCSignChangeEvent(new SignChangeEvent(((BukkitMCBlock) sign).__Block(), ((BukkitMCPlayer) player)._Player(),
-					text));
+			return new BukkitMCSignChangeEvent(new SignChangeEvent(
+					((BukkitMCBlock) sign).__Block(), ((BukkitMCPlayer) player)._Player(), text));
 		}
 
 		@Override
@@ -445,7 +447,8 @@ public class BukkitBlockEvents {
 		@Override
 		public void setItem(MCItemStack item) {
 			if(item == null || "AIR".equals(item.getType().getName())) {
-				throw new CREIllegalArgumentException("Due to Bukkit's handling of this event, the item cannot be set to null."
+				throw new CREIllegalArgumentException(
+						"Due to Bukkit's handling of this event, the item cannot be set to null."
 						+ " Until they change this, workaround by cancelling the event and manipulating the block"
 						+ " using inventory functions.", Target.UNKNOWN);
 			} else {

@@ -351,7 +351,8 @@ public class ArrayHandling {
 			try {
 				((CArray) array).set(index, value, t);
 			} catch (IndexOutOfBoundsException e) {
-				throw new CREIndexOverflowException("The index " + index.asString().getQuote() + " is out of bounds", t);
+				throw new CREIndexOverflowException(
+						"The index " + index.asString().getQuote() + " is out of bounds", t);
 			}
 			return value;
 		}
@@ -435,7 +436,8 @@ public class ArrayHandling {
 				int initialSize = (int) array.size();
 				for(int i = 1; i < args.length; i++) {
 					array.push(args[i], t);
-					for(ArrayAccess.ArrayAccessIterator iterator : env.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(((ArrayAccess) args[0]))) {
+					for(ArrayAccess.ArrayAccessIterator iterator
+							: env.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(((ArrayAccess) args[0]))) {
 						//This is always pushing after the current index.
 						//Given that this is the last one, we don't need to waste
 						//time with a call to increment the blacklist items either.
@@ -487,8 +489,8 @@ public class ArrayHandling {
 				+ "msg(@array);\n"
 				+ "array_push(@array, 0);\n"
 				+ "msg(@array);"),
-				new ExampleScript("Demonstrates pushing multiple values (note that it is not possible to use the bracket notation"
-				+ " and push multiple values)",
+				new ExampleScript("Demonstrates pushing multiple values (note that it is not possible to use the"
+				+ " bracket notation and push multiple values)",
 				"array @array = array();\n"
 				+ "msg(@array);\n"
 				+ "array_push(@array, 0, 1, 2);\n"
@@ -523,7 +525,8 @@ public class ArrayHandling {
 				array.push(value, index, t);
 				//If the push succeeded (actually an insert) we need to check to see if we are currently iterating
 				//and act appropriately.
-				for(ArrayAccess.ArrayAccessIterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
+				for(ArrayAccess.ArrayAccessIterator iterator
+						: environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
 					if(index <= iterator.getCurrent()) {
 						//The insertion happened before (or at) this index, so we need to increment the
 						//iterator, as well as increment all the blacklist items above this one.
@@ -556,9 +559,10 @@ public class ArrayHandling {
 		@Override
 		public String docs() {
 			return "void {array, item, index} Inserts an item at the specified index, and shifts all other items in the"
-					+ " array to the right one. If index is greater than the size of the array, an IndexOverflowException"
-					+ " is thrown, though the index may be equal to the size, in which case this works just like"
-					+ " array_push(). The array must be normal though; associative arrays are not supported.";
+					+ " array to the right one. If index is greater than the size of the array, an"
+					+ " IndexOverflowException is thrown, though the index may be equal to the size, in which case this"
+					+ " works just like array_push(). The array must be normal though; associative arrays are not"
+					+ " supported.";
 		}
 
 		@Override
@@ -595,7 +599,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args)
+				throws CancelCommandException, ConfigRuntimeException {
 			if(!(args[0] instanceof CArray)) {
 				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 			}
@@ -640,9 +645,11 @@ public class ArrayHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates finding a value", "array_contains(array(0, 1, 2), 2)"),
 				new ExampleScript("Demonstrates not finding a value", "array_contains(array(0, 1, 2), 5)"),
-				new ExampleScript("Demonstrates finding a value listed multiple times", "array_contains(array(1, 1, 1), 1)"),
+				new ExampleScript("Demonstrates finding a value listed multiple times",
+						"array_contains(array(1, 1, 1), 1)"),
 				new ExampleScript("Demonstrates finding a string", "array_contains(array('a', 'b', 'c'), 'b')"),
-				new ExampleScript("Demonstrates finding a value in an associative array", "array_contains(array('a': 1, 'b': 2), 2)")
+				new ExampleScript("Demonstrates finding a value in an associative array",
+						"array_contains(array('a': 1, 'b': 2), 2)")
 			};
 		}
 
@@ -735,7 +742,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args)
+				throws CancelCommandException, ConfigRuntimeException {
 			if(!(args[0] instanceof CArray)) {
 				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 			}
@@ -749,7 +757,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Class[] thrown() {
+		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class};
 		}
 
@@ -859,7 +867,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 2) {
 				throw new ConfigCompileException(getName() + " must have 2 or more arguments", t);
 			}
@@ -871,9 +880,12 @@ public class ArrayHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates a true condition", "array_index_exists(array(0, 1, 2), 0)"),
 				new ExampleScript("Demonstrates a false condition", "array_index_exists(array(0, 1, 2), 3)"),
-				new ExampleScript("Demonstrates an associative array", "array_index_exists(array(a: 'A', b: 'B'), 'a')"),
-				new ExampleScript("Demonstrates an associative array", "array_index_exists(array(a: 'A', b: 'B'), 'c')"),
-				new ExampleScript("Demonstrates nested arrays", "// Check to make sure that @array['a']['b']['c'] would work\n"
+				new ExampleScript("Demonstrates an associative array",
+						"array_index_exists(array(a: 'A', b: 'B'), 'a')"),
+				new ExampleScript("Demonstrates an associative array",
+						"array_index_exists(array(a: 'A', b: 'B'), 'c')"),
+				new ExampleScript("Demonstrates nested arrays",
+						"// Check to make sure that @array['a']['b']['c'] would work\n"
 				+ "array_index_exists(array(a: array(b: array(c: null))), 'a', 'b', 'c');")
 			};
 		}
@@ -939,7 +951,8 @@ public class ArrayHandling {
 					original.push(fill, t);
 				}
 			} else {
-				throw new CRECastException("Argument 1 must be an array, and argument 2 must be an integer in array_resize", t);
+				throw new CRECastException(
+						"Argument 1 must be an array, and argument 2 must be an integer in array_resize", t);
 			}
 			return (CArray) args[0];
 		}
@@ -1084,7 +1097,8 @@ public class ArrayHandling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			// As an exception, strings aren't supported here. There's no reason to do this for a string that isn't accidental.
+			// As an exception, strings aren't supported here.
+			// There's no reason to do this for a string that isn't accidental.
 			if(args[0] instanceof ArrayAccess && !(args[0] instanceof CString)) {
 				ArrayAccess ca = (ArrayAccess) args[0];
 				CArray ca2 = new CArray(t);
@@ -1220,7 +1234,8 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray newArray = new CArray(t);
 			if(args.length < 2) {
-				throw new CREInsufficientArgumentsException("array_merge must be called with at least two parameters", t);
+				throw new CREInsufficientArgumentsException(
+						"array_merge must be called with at least two parameters", t);
 			}
 			for(Construct arg : args) {
 				if(arg instanceof ArrayAccess) {
@@ -1249,7 +1264,8 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "array_merge(array(1), array(2), array(3))"),
-				new ExampleScript("With associative arrays", "array_merge(array(one: 1), array(two: 2), array(three: 3))"),
+				new ExampleScript("With associative arrays",
+						"array_merge(array(one: 1), array(two: 2), array(three: 3))"),
 				new ExampleScript("With overwrites", "array_merge(array(one: 1), array(one: 2), array(one: 3))")};
 		}
 
@@ -1309,7 +1325,8 @@ public class ArrayHandling {
 				int index = Static.getInt32(args[1], t);
 				Construct removed = array.remove(args[1]);
 				//If the removed index is <= the current index, we need to decrement the counter.
-				for(ArrayAccess.ArrayAccessIterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
+				for(ArrayAccess.ArrayAccessIterator iterator
+						: environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
 					if(index <= iterator.getCurrent()) {
 						iterator.decrementCurrent();
 					}
@@ -1324,7 +1341,8 @@ public class ArrayHandling {
 				new ExampleScript("Basic usage",
 				"assign(@array, array(1, 2, 3))\nmsg(array_remove(@array, 2))\nmsg(@array)"),
 				new ExampleScript("With associative array",
-				"assign(@array, array(one: 'a', two: 'b', three: 'c'))\nmsg(array_remove(@array, 'two'))\nmsg(@array)")};
+						"assign(@array, array(one: 'a', two: 'b', three: 'c'))"
+						+ "\nmsg(array_remove(@array, 'two'))\nmsg(@array)")};
 		}
 	}
 
@@ -1397,7 +1415,8 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "array_implode(array(1, 2, 3), '-')"),
-				new ExampleScript("With associative array", "array_implode(array(one: 'a', two: 'b', three: 'c'), '-')")};
+				new ExampleScript("With associative array",
+						"array_implode(array(one: 'a', two: 'b', three: 'c'), '-')")};
 		}
 	}
 
@@ -1499,7 +1518,8 @@ public class ArrayHandling {
 					}
 				}
 			} catch (IllegalArgumentException e) {
-				throw new CREFormatException("The sort type must be one of either: " + StringUtils.Join(CArray.SortType.values(), ", ", " or "), t);
+				throw new CREFormatException("The sort type must be one of either: "
+						+ StringUtils.Join(CArray.SortType.values(), ", ", " or "), t);
 			}
 			if(sortType == null) {
 				// It's a custom sort, which we have implemented below.
@@ -1562,7 +1582,8 @@ public class ArrayHandling {
 							value = -1;
 						}
 					} else {
-						throw new CRECastException("The custom closure did not return a value. It must always return true, false, or null.", t);
+						throw new CRECastException("The custom closure did not return a value."
+								+ " It must always return true, false, or null.", t);
 					}
 					if(value <= 0) {
 						result.push(left.get(0, t), t);
@@ -1600,7 +1621,8 @@ public class ArrayHandling {
 					+ " an array that is passed in as a variable, the contents of that variable will be sorted, even if"
 					+ " you don't re-assign the returned array back to the variable. If you really need the old array,"
 					+ " you should create a copy of the array first, like so: assign(@sorted, array_sort(@array[]))."
-					+ " The sort type may be one of the following: " + StringUtils.Join(CArray.SortType.values(), ", ", " or ")
+					+ " The sort type may be one of the following: "
+					+ StringUtils.Join(CArray.SortType.values(), ", ", " or ")
 					+ ", or it may be a closure, if the sort should follow custom rules (explained below). A regular"
 					+ " sort sorts the elements without changing types first. A numeric sort always converts numeric"
 					+ " values to numbers first (so 001 becomes 1). A string sort compares values as strings, and a"
@@ -1633,13 +1655,15 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 2) {
 				if(!children.get(1).getData().isDynamic()) {
 					try {
 						CArray.SortType.valueOf(children.get(1).getData().val().toUpperCase());
 					} catch (IllegalArgumentException e) {
-						throw new ConfigCompileException("The sort type must be one of either: " + StringUtils.Join(CArray.SortType.values(), ", ", " or "), t);
+						throw new ConfigCompileException("The sort type must be one of either: "
+								+ StringUtils.Join(CArray.SortType.values(), ", ", " or "), t);
 					}
 				}
 			}
@@ -1656,9 +1680,11 @@ public class ArrayHandling {
 				new ExampleScript("String sort",
 				"@array = array('03', '02', '4', '1');\narray_sort(@array, 'STRING');\nmsg(@array);"),
 				new ExampleScript("String sort (with words)",
-				"@array = array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple');\narray_sort(@array, 'STRING');\nmsg(@array);"),
+				"@array = array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple');"
+				+ "\narray_sort(@array, 'STRING');\nmsg(@array);"),
 				new ExampleScript("Ignore case sort",
-				"@array = array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple');\narray_sort(@array, 'STRING_IC');\nmsg(@array);"),
+				"@array = array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple');"
+				+ "\narray_sort(@array, 'STRING_IC');\nmsg(@array);"),
 				new ExampleScript("Custom sort", "@array = array(\n"
 				+ "\tarray(name: 'Jack', age: 20),\n"
 				+ "\tarray(name: 'Jill', age: 19)\n"
@@ -2056,7 +2082,8 @@ public class ArrayHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nmsg(@array)\narray_reverse(@array)\nmsg(@array)"),
+				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))"
+						+ "\nmsg(@array)\narray_reverse(@array)\nmsg(@array)"),
 				new ExampleScript("Failure", "assign(@array, array(one: 1, two: 2))\narray_reverse(@array)")
 			};
 		}
@@ -2133,7 +2160,8 @@ public class ArrayHandling {
 		@Override
 		public String docs() {
 			return "array {array, [number, [getKeys]]} Returns a random selection of keys or values from an array."
-					+ " The array may be either normal or associative. Number defaults to 1, and getKey defaults to true."
+					+ " The array may be either normal or associative."
+					+ " Number defaults to 1, and getKey defaults to true."
 					+ " If number is greater than the size of the array, a RangeException is thrown. No value will be"
 					+ " returned twice from the array however, one it is \"drawn\" from the array, it is not placed"
 					+ " back in. The order of the elements in the array will also be random, if order is important,"
@@ -2149,11 +2177,12 @@ public class ArrayHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Usage with a normal array",
-				"assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array))", "{1}"),
+						"assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array))", "{1}"),
 				new ExampleScript("Usage with a normal array, using getKeys false, and returning 2 results",
-				"assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array, 2, false))", "{b, c}"),
+						"assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array, 2, false))", "{b, c}"),
 				new ExampleScript("Usage with an associative array",
-				"assign(@array, array(one: 'a', two: 'b', three: 'c', four: 'd', five: 'e'))\nmsg(array_rand(@array))", "two")};
+						"assign(@array, array(one: 'a', two: 'b', three: 'c', four: 'd', five: 'e'))"
+						+ "\nmsg(array_rand(@array))", "two")};
 		}
 
 		@Override
@@ -2189,7 +2218,8 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public CArray exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CArray exec(final Target t, final Environment environment, Construct... args)
+				throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			boolean compareTypes = true;
 			if(args.length == 2) {
@@ -2201,7 +2231,8 @@ public class ArrayHandling {
 			} else {
 				List<Construct> asList = array.asList();
 				CArray newArray = new CArray(t);
-				Set<Construct> set = new LinkedComparatorSet<>(asList, new LinkedComparatorSet.EqualsComparator<Construct>() {
+				Set<Construct> set = new LinkedComparatorSet<>(asList,
+						new LinkedComparatorSet.EqualsComparator<Construct>() {
 
 					@Override
 					public boolean checkIfEquals(Construct item1, Construct item2) {
@@ -2626,12 +2657,14 @@ public class ArrayHandling {
 				} catch (FunctionReturnException ex) {
 					lastValue = ex.getReturn();
 					if(lastValue instanceof CVoid) {
-						throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
+						throw new CREIllegalArgumentException(
+								"The closure passed to " + getName() + " cannot return void.", t);
 					}
 					hadReturn = true;
 				}
 				if(!hadReturn) {
-					throw new CREIllegalArgumentException("The closure passed to " + getName() + " must return a value, but one was not returned.", t);
+					throw new CREIllegalArgumentException("The closure passed to "
+							+ getName() + " must return a value, but one was not returned.", t);
 				}
 			}
 			return lastValue;
@@ -2720,12 +2753,14 @@ public class ArrayHandling {
 				} catch (FunctionReturnException ex) {
 					lastValue = ex.getReturn();
 					if(lastValue instanceof CVoid) {
-						throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
+						throw new CREIllegalArgumentException(
+								"The closure passed to " + getName() + " cannot return void.", t);
 					}
 					hadReturn = true;
 				}
 				if(!hadReturn) {
-					throw new CREIllegalArgumentException("The closure passed to " + getName() + " must return a value, but one was not returned.", t);
+					throw new CREIllegalArgumentException("The closure passed to "
+							+ getName() + " must return a value, but one was not returned.", t);
 				}
 			}
 			return lastValue;
@@ -2809,7 +2844,8 @@ public class ArrayHandling {
 					}
 				}
 				if(!hasReturn) {
-					throw new CREIllegalArgumentException("The closure passed to " + getName() + " must return a boolean.", t);
+					throw new CREIllegalArgumentException(
+							"The closure passed to " + getName() + " must return a boolean.", t);
 				}
 			}
 			return CBoolean.TRUE;
@@ -2827,10 +2863,10 @@ public class ArrayHandling {
 
 		@Override
 		public String docs() {
-			return "boolean {array, closure} Returns true if every value in the array meets some test, which the closure"
-					+ " should return true or false about. Not all values will necessarily be checked, once a value is"
-					+ " determined to fail the check, execution is stopped, and false is returned. The closure will be"
-					+ " passed each value in the array, one at a time, and must return a boolean.";
+			return "boolean {array, closure} Returns true if every value in the array meets some test, which the"
+					+ " closure should return true or false about. Not all values will necessarily be checked, once a"
+					+ " value is determined to fail the check, execution is stopped, and false is returned. The closure"
+					+ " will be passed each value in the array, one at a time, and must return a boolean.";
 		}
 
 		@Override
@@ -2890,7 +2926,8 @@ public class ArrayHandling {
 					}
 				}
 				if(!hasReturn) {
-					throw new CREIllegalArgumentException("The closure passed to " + getName() + " must return a boolean.", t);
+					throw new CREIllegalArgumentException(
+							"The closure passed to " + getName() + " must return a boolean.", t);
 				}
 			}
 			return CBoolean.FALSE;
@@ -2959,7 +2996,8 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			CClosure closure = Static.getObject(args[1], t, CClosure.class);
-			CArray newArray = (array.isAssociative() ? CArray.GetAssociativeArray(t) : new CArray(t, (int) array.size()));
+			CArray newArray = (array.isAssociative()
+					? CArray.GetAssociativeArray(t) : new CArray(t, (int) array.size()));
 
 			for(Construct c : array.keySet()) {
 				boolean hasReturn = false;
@@ -2970,7 +3008,8 @@ public class ArrayHandling {
 					newArray.set(c, ex.getReturn(), t);
 				}
 				if(!hasReturn) {
-					throw new CREIllegalArgumentException("The closure passed to " + getName() + " must return a value.", t);
+					throw new CREIllegalArgumentException(
+							"The closure passed to " + getName() + " must return a value.", t);
 				}
 			}
 

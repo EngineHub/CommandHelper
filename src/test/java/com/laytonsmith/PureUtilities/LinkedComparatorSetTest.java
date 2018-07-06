@@ -36,7 +36,9 @@ public class LinkedComparatorSetTest {
 
 	@Test
 	public void testCreation() {
-		assertArrayEquals(new Object[]{"b", "a"}, new LinkedComparatorSet<Object>(Arrays.asList(new Object[]{"b", "B", "a"}), new LinkedComparatorSet.EqualsComparator() {
+		assertArrayEquals(new Object[]{"b", "a"},
+				new LinkedComparatorSet<Object>(Arrays.asList(new Object[]{"b", "B", "a"}),
+						new LinkedComparatorSet.EqualsComparator<Object>() {
 
 			@Override
 			public boolean checkIfEquals(Object val1, Object val2) {
@@ -48,7 +50,7 @@ public class LinkedComparatorSetTest {
 	@Test
 	public void testInsertion() {
 		Object[] expected = new Object[]{"A"};
-		Set<Object> set = new LinkedComparatorSet<Object>(new LinkedComparatorSet.EqualsComparator() {
+		Set<Object> set = new LinkedComparatorSet<Object>(new LinkedComparatorSet.EqualsComparator<Object>() {
 
 			@Override
 			public boolean checkIfEquals(Object val1, Object val2) {

@@ -36,7 +36,8 @@ public interface ConnectionMixin {
 	 * @throws UnsupportedOperationException If the datasource is intrinsically read only, this may also throw an
 	 * UnsupportedOperationException in that case.
 	 */
-	public void writeData(DaemonManager dm, String data) throws ReadOnlyException, IOException, UnsupportedOperationException;
+	public void writeData(DaemonManager dm, String data)
+			throws ReadOnlyException, IOException, UnsupportedOperationException;
 
 	/**
 	 * Some connections just need to get the path information, but don't want the mixin to get the data, so in that

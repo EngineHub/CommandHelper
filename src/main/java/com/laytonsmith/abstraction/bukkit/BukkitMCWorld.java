@@ -306,7 +306,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public boolean generateTree(MCLocation l, MCTreeType treeType) {
-		return w.generateTree(((BukkitMCLocation) l).asLocation(), BukkitMCTreeType.getConvertor().getConcreteEnum(treeType));
+		return w.generateTree(
+				((BukkitMCLocation) l).asLocation(), BukkitMCTreeType.getConvertor().getConcreteEnum(treeType));
 	}
 
 	@Override
@@ -315,12 +316,14 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
+	public void spawnParticle(MCLocation l, MCParticle pa,
+			int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
 		try {
 			Particle type = Particle.valueOf(pa.name());
 			Location loc = ((BukkitMCLocation) l).asLocation();
 			if(data != null && type.getDataType().equals(ItemStack.class) && data instanceof MCItemStack) {
-				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, ((MCItemStack) data).getHandle());
+				w.spawnParticle(
+						type, loc, count, offsetX, offsetY, offsetZ, velocity, ((MCItemStack) data).getHandle());
 			} else {
 				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);
 			}
@@ -819,7 +822,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 									case VILLAGER_LIBRARIAN:
 									case VILLAGER_PRIEST:
 										if(version.gte(MCVersion.MC1_9)) { // < MC 1.11
-											z.setVillagerProfession(Villager.Profession.valueOf(type.substring(9).toUpperCase()));
+											z.setVillagerProfession(
+													Villager.Profession.valueOf(type.substring(9).toUpperCase()));
 										} else {
 											z.setVillager(true);
 										}

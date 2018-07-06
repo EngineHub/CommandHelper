@@ -139,7 +139,8 @@ public class BukkitMCServer implements MCServer {
 		CommandSenderInterceptor interceptor = new CommandSenderInterceptor(sender);
 
 		// Create a new proxy and abstraction layer wrapper around the proxy
-		CommandSender newCommandSender = (CommandSender) Proxy.newProxyInstance(BukkitMCServer.class.getClassLoader(), new Class[]{CommandSender.class}, interceptor);
+		CommandSender newCommandSender = (CommandSender) Proxy.newProxyInstance(
+				BukkitMCServer.class.getClassLoader(), new Class[]{CommandSender.class}, interceptor);
 		BukkitMCCommandSender aCommandSender = new BukkitMCCommandSender(newCommandSender);
 
 		MCCommandSender oldSender = Static.UninjectPlayer(commandSender);
@@ -290,7 +291,8 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public MCCommandMap getCommandMap() {
-		return new BukkitMCCommandMap((SimpleCommandMap) ReflectionUtils.invokeMethod(s.getClass(), s, "getCommandMap"));
+		return new BukkitMCCommandMap(
+				(SimpleCommandMap) ReflectionUtils.invokeMethod(s.getClass(), s, "getCommandMap"));
 	}
 
 	@Override
@@ -574,7 +576,8 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCBossBar createBossBar(String title, MCBarColor color, MCBarStyle style) {
 		try {
-			return new BukkitMCBossBar(s.createBossBar(title, BarColor.valueOf(color.name()), BarStyle.valueOf(style.name())));
+			return new BukkitMCBossBar(
+					s.createBossBar(title, BarColor.valueOf(color.name()), BarStyle.valueOf(style.name())));
 		} catch (NoSuchMethodError ex) {
 			// Probably prior to 1.9
 			return null;

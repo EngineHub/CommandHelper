@@ -68,8 +68,10 @@ public final class ConnectionMixinFactory {
 	 * @param modifiers
 	 * @return
 	 */
-	public static ConnectionMixin GetConnectionMixin(URI uri, Set<DataSource.DataSourceModifier> modifiers, ConnectionMixinOptions options, String blankDataModel) throws DataSourceException {
-		if(modifiers.contains(DataSource.DataSourceModifier.HTTP) || modifiers.contains(DataSource.DataSourceModifier.HTTPS)) {
+	public static ConnectionMixin GetConnectionMixin(URI uri, Set<DataSource.DataSourceModifier> modifiers,
+			ConnectionMixinOptions options, String blankDataModel) throws DataSourceException {
+		if(modifiers.contains(DataSource.DataSourceModifier.HTTP)
+				|| modifiers.contains(DataSource.DataSourceModifier.HTTPS)) {
 			try {
 				//This is a WebConnection
 				return new WebConnection(uri, modifiers.contains(DataSource.DataSourceModifier.HTTP) ? false : true);

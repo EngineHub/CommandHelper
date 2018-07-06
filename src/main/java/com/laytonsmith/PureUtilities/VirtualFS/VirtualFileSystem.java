@@ -77,19 +77,24 @@ public class VirtualFileSystem {
 	private static final Map<String, Constructor> FSL_PROVIDERS = new HashMap<String, Constructor>();
 
 	static {
-		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(VirtualFileSystem.class));
-		Set<ClassMirror<?>> fslayerClasses = ClassDiscovery.getDefaultInstance().getClassesWithAnnotation(FileSystemLayer.fslayer.class);
+		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(
+				ClassDiscovery.GetClassContainer(VirtualFileSystem.class));
+		Set<ClassMirror<?>> fslayerClasses =
+				ClassDiscovery.getDefaultInstance().getClassesWithAnnotation(FileSystemLayer.fslayer.class);
 		for(ClassMirror<?> clazzMirror : fslayerClasses) {
 			try {
 				Class<?> clazz = clazzMirror.loadClass();
-				Constructor<?> constructor = clazz.getConstructor(VirtualFile.class, VirtualFileSystem.class, String.class);
+				Constructor<?> constructor =
+						clazz.getConstructor(VirtualFile.class, VirtualFileSystem.class, String.class);
 				FileSystemLayer.fslayer annotation = clazz.getAnnotation(FileSystemLayer.fslayer.class);
 				FSL_PROVIDERS.put(annotation.value(), constructor);
 			} catch (NoSuchMethodException ex) {
-				throw new Error(clazzMirror.getClassName() + " must implement a constructor with the signature: public " + clazzMirror.getSimpleName() + "("
-						+ VirtualFile.class.getSimpleName() + ", " + VirtualFileSystem.class.getSimpleName() + ", " + String.class.getSimpleName() + ")");
+				throw new Error(clazzMirror.getClassName() + " must implement a constructor with the signature: public "
+						+ clazzMirror.getSimpleName() + "(" + VirtualFile.class.getSimpleName() + ", "
+						+ VirtualFileSystem.class.getSimpleName() + ", " + String.class.getSimpleName() + ")");
 			} catch (SecurityException ex) {
-				Logger.getLogger(VirtualFileSystem.class.getName()).log(Level.SEVERE, "Security exception while loading a class. Symlinks may not work.", ex);
+				Logger.getLogger(VirtualFileSystem.class.getName()).log(Level.SEVERE,
+						"Security exception while loading a class. Symlinks may not work.", ex);
 			}
 		}
 	}

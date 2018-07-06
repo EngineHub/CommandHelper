@@ -32,8 +32,8 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 	private static final int QUEUE_CAPACITY = 20;
 	private static Queue<Event> cancelledEvents = new LinkedBlockingQueue<Event>(QUEUE_CAPACITY);
 
-	public BukkitDirtyRegisteredListener(final Listener pluginListener, final EventExecutor eventExecutor, final EventPriority eventPriority, final Plugin registeredPlugin,
-			boolean ignoreCancelled) {
+	public BukkitDirtyRegisteredListener(final Listener pluginListener, final EventExecutor eventExecutor,
+			final EventPriority eventPriority, final Plugin registeredPlugin, boolean ignoreCancelled) {
 		super(pluginListener, eventExecutor, eventPriority, registeredPlugin, ignoreCancelled);
 		listener = pluginListener;
 		priority = eventPriority;

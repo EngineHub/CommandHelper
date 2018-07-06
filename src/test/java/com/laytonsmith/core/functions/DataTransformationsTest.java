@@ -64,7 +64,8 @@ public class DataTransformationsTest {
 	@Test
 	public void testIniEncode() throws Exception {
 		String nl = StringUtils.NL;
-		assertThat(SRun("ini_encode(array(val1: 'value'), 'comment')", null), is(regexMatch("#comment" + nl + "#.*?" + nl + "val1=value")));
+		assertThat(SRun("ini_encode(array(val1: 'value'), 'comment')", null),
+				is(regexMatch("#comment" + nl + "#.*?" + nl + "val1=value")));
 	}
 
 }

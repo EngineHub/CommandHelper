@@ -51,7 +51,8 @@ public class StringHandlingTest {
 	@Test(timeout = 10000)
 	public void testConcat() throws Exception {
 		StringHandling.concat a = new StringHandling.concat();
-		assertCEquals(C.onstruct("1234"), a.exec(Target.UNKNOWN, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(4)));
+		assertCEquals(C.onstruct("1234"),
+				a.exec(Target.UNKNOWN, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(4)));
 		assertCEquals(C.onstruct("astring"), a.exec(Target.UNKNOWN, null, C.onstruct("a"), C.onstruct("string")));
 		assertEquals("05", SRun("'0' . 5", null));
 	}
@@ -66,8 +67,10 @@ public class StringHandlingTest {
 	@Test(timeout = 10000)
 	public void testParseArgs() {
 		StringHandling.parse_args a = new StringHandling.parse_args();
-		assertCEquals(C.Array(C.onstruct("one"), C.onstruct("two")), a.exec(Target.UNKNOWN, null, C.onstruct("one   two")));
-		assertCEquals(C.Array(C.onstruct("one"), C.onstruct("two")), a.exec(Target.UNKNOWN, null, C.onstruct("one two")));
+		assertCEquals(C.Array(C.onstruct("one"), C.onstruct("two")),
+				a.exec(Target.UNKNOWN, null, C.onstruct("one   two")));
+		assertCEquals(C.Array(C.onstruct("one"), C.onstruct("two")),
+				a.exec(Target.UNKNOWN, null, C.onstruct("one two")));
 	}
 
 	@Test(timeout = 10000)
@@ -77,9 +80,12 @@ public class StringHandlingTest {
 	@Test(timeout = 10000)
 	public void testReplace() {
 		StringHandling.replace a = new StringHandling.replace();
-		assertCEquals(C.onstruct("yay"), a.exec(Target.UNKNOWN, null, C.onstruct("yayathing"), C.onstruct("athing"), C.onstruct("")));
-		assertCEquals(C.onstruct("yaymonkey"), a.exec(Target.UNKNOWN, null, C.onstruct("yayathing"), C.onstruct("athing"), C.onstruct("monkey")));
-		assertCEquals(C.onstruct("yayathing"), a.exec(Target.UNKNOWN, null, C.onstruct("yayathing"), C.onstruct("wut"), C.onstruct("chicken")));
+		assertCEquals(C.onstruct("yay"),
+				a.exec(Target.UNKNOWN, null, C.onstruct("yayathing"), C.onstruct("athing"), C.onstruct("")));
+		assertCEquals(C.onstruct("yaymonkey"),
+				a.exec(Target.UNKNOWN, null, C.onstruct("yayathing"), C.onstruct("athing"), C.onstruct("monkey")));
+		assertCEquals(C.onstruct("yayathing"),
+				a.exec(Target.UNKNOWN, null, C.onstruct("yayathing"), C.onstruct("wut"), C.onstruct("chicken")));
 	}
 
 	@Test(timeout = 10000)
@@ -92,8 +98,10 @@ public class StringHandlingTest {
 	@Test(timeout = 10000)
 	public void testSubstr() {
 		StringHandling.substr a = new StringHandling.substr();
-		assertCEquals(C.onstruct("urge"), a.exec(Target.UNKNOWN, null, C.onstruct("hamburger"), C.onstruct(4), C.onstruct(8)));
-		assertCEquals(C.onstruct("mile"), a.exec(Target.UNKNOWN, null, C.onstruct("smiles"), C.onstruct(1), C.onstruct(5)));
+		assertCEquals(C.onstruct("urge"),
+				a.exec(Target.UNKNOWN, null, C.onstruct("hamburger"), C.onstruct(4), C.onstruct(8)));
+		assertCEquals(C.onstruct("mile"),
+				a.exec(Target.UNKNOWN, null, C.onstruct("smiles"), C.onstruct(1), C.onstruct(5)));
 		assertCEquals(C.onstruct("ning"), a.exec(Target.UNKNOWN, null, C.onstruct("lightning"), C.onstruct(5)));
 	}
 
@@ -184,7 +192,8 @@ public class StringHandlingTest {
 		assertEquals("004,000", SRun("lsprintf('no_NO', '%07.3f', 4)", null));
 
 		long s = System.currentTimeMillis();
-		assertEquals(String.format("%1$tm %1$te,%1$tY", s), SRun("lsprintf('en_US', '%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));
+		assertEquals(String.format("%1$tm %1$te,%1$tY", s),
+				SRun("lsprintf('en_US', '%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));
 
 	}
 
@@ -228,7 +237,8 @@ public class StringHandlingTest {
 		assertEquals(String.format(Locale.getDefault(), "%07.3f", 4.0), SRun("sprintf('%07.3f', 4)", null));
 
 		long s = System.currentTimeMillis();
-		assertEquals(String.format("%1$tm %1$te,%1$tY", s), SRun("sprintf('%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));
+		assertEquals(String.format("%1$tm %1$te,%1$tY", s),
+				SRun("sprintf('%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));
 
 	}
 
@@ -452,7 +462,8 @@ public class StringHandlingTest {
 //		verify(fakePlayer).sendMessage("3");
 //	}
 //
-//	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringIndexWithInnerQuoteAndNumericIndex() throws Exception {
+//	@Test public void testDoubleStringWithMultiDimensionalArrayAndStringIndexWithInnerQuoteAndNumericIndex()
+//			throws Exception {
 //		SRun("@a = array(\n"
 //				+ "'\\'q\\'': array(1, 2, 3),"
 //				+ "'\\'r\\'': array(4, 5, 6)"

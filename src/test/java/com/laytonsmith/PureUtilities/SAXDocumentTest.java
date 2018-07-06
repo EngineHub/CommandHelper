@@ -79,7 +79,7 @@ public class SAXDocumentTest {
 
 	@Test
 	public void testSimpleContents() throws Exception {
-		final MutableObject m = new MutableObject();
+		final MutableObject<String> m = new MutableObject<>();
 		doc.addListener("/root/nodes/inode[1]", new SAXDocument.ElementCallback() {
 
 			@Override
@@ -93,7 +93,7 @@ public class SAXDocumentTest {
 
 	@Test
 	public void testComplexContents() throws Exception {
-		final MutableObject m = new MutableObject();
+		final MutableObject<String> m = new MutableObject<>();
 		doc.addListener("/root/outer", new SAXDocument.ElementCallback() {
 
 			@Override
@@ -107,7 +107,7 @@ public class SAXDocumentTest {
 
 	@Test
 	public void testAttributes() throws Exception {
-		final MutableObject m = new MutableObject();
+		final MutableObject<String> m = new MutableObject<>();
 		doc.addListener("/root/node1", new SAXDocument.ElementCallback() {
 
 			@Override

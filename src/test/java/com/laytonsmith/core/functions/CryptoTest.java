@@ -60,7 +60,8 @@ public class CryptoTest {
 
 	@Test(timeout = 10000)
 	public void testHmacSha256() throws Exception {
-		assertEquals("cf1a418afaafc798df48fd804a2abf6970283afd8c40b41f818ad9b6ca4f8ca8", SRun("hmac_sha256('secret_key', 'hello world')", null));
+		assertEquals("cf1a418afaafc798df48fd804a2abf6970283afd8c40b41f818ad9b6ca4f8ca8",
+				SRun("hmac_sha256('secret_key', 'hello world')", null));
 	}
 
 }

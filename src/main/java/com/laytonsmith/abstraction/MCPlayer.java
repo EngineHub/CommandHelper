@@ -131,7 +131,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 
 	void stopSound(String sound, MCSoundCategory category);
 
-	void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data);
+	void spawnParticle(MCLocation l, MCParticle pa, int count,
+			double offsetX, double offsetY, double offsetZ, double velocity, Object data);
 
 	int getFoodLevel();
 

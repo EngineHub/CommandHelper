@@ -171,8 +171,10 @@ public class StaticTest {
 		//Same thing for optimize/canOptimize and optimizeDynamic/canOptimizeDynamic
 		if(f instanceof Optimizable) {
 			Set<Optimizable.OptimizationOption> options = ((Optimizable) f).optimizationOptions();
-			if(options.contains(Optimizable.OptimizationOption.CONSTANT_OFFLINE) && options.contains(Optimizable.OptimizationOption.OPTIMIZE_CONSTANT)) {
-				fail(f.getName() + " declares both CONSTANT_OFFLINE and OPTIMIZE_CONSTANT, which are mutually exclusive.");
+			if(options.contains(Optimizable.OptimizationOption.CONSTANT_OFFLINE)
+					&& options.contains(Optimizable.OptimizationOption.OPTIMIZE_CONSTANT)) {
+				fail(f.getName()
+						+ " declares both CONSTANT_OFFLINE and OPTIMIZE_CONSTANT, which are mutually exclusive.");
 			}
 		}
 		for(Method method : f.getClass().getDeclaredMethods()) {
@@ -191,7 +193,8 @@ public class StaticTest {
 				}
 				if(method.getName().equals("optimizeDynamic")) {
 					if(!options.contains(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC)) {
-						fail(f.getName() + " declares optimizeDynamic, but does not declare that it can OPTIMIZE_DYNAMIC");
+						fail(f.getName()
+								+ " declares optimizeDynamic, but does not declare that it can OPTIMIZE_DYNAMIC");
 					}
 				}
 			}
@@ -217,9 +220,9 @@ public class StaticTest {
 		}
 		TESTED.add(f.getName() + String.valueOf(p));
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(p);
-		//See if the function throws something other than a ConfigRuntimeException or CancelCommandException if we send it bad arguments,
-		//keeping in mind of course, that it isn't supposed to be able to accept the wrong number of arguments. Specifically, we want to try
-		//strings, numbers, arrays, and nulls
+		//See if the function throws something other than a ConfigRuntimeException or CancelCommandException
+		//if we send it bad arguments, keeping in mind of course, that it isn't supposed to be able to accept the
+		//wrong number of arguments. Specifically, we want to try strings, numbers, arrays, and nulls.
 		for(Integer i : f.numArgs()) {
 			if(i == Integer.MAX_VALUE) {
 				//er.. let's just try with 10...
@@ -296,7 +299,8 @@ public class StaticTest {
 						fail("Only return() can throw FunctionReturnExceptions");
 					}
 					if(e instanceof NullPointerException) {
-						String error = (f.getName() + " breaks if you send it the following while using a " + commandType + ": " + Arrays.deepToString(con) + "\n");
+						String error = (f.getName() + " breaks if you send it the following while using a "
+								+ commandType + ": " + Arrays.deepToString(con) + "\n");
 						error += ("Here is the first few stack trace lines:\n");
 						error += ("\t" + e.getStackTrace()[0].toString() + "\n");
 						error += ("\t" + e.getStackTrace()[1].toString() + "\n");
@@ -392,9 +396,11 @@ public class StaticTest {
 		if(!Arrays.asList(retTypes).contains(test.getClass())) {
 			StringBuilder b = new StringBuilder();
 			if(retTypes.length == 1) {
-				b.append("Expected return type to be ").append(retTypes[0].getSimpleName()).append(", but found ").append(test.getClass().getSimpleName());
+				b.append("Expected return type to be ")
+				.append(retTypes[0].getSimpleName()).append(", but found ").append(test.getClass().getSimpleName());
 			} else if(retTypes.length == 2) {
-				b.append("Expected return type to be either ").append(retTypes[0].getSimpleName()).append(" or ").append(retTypes[1].getSimpleName()).append(", but found ").append(test.getClass().getSimpleName());
+				b.append("Expected return type to be either ").append(retTypes[0].getSimpleName()).append(" or ")
+				.append(retTypes[1].getSimpleName()).append(", but found ").append(test.getClass().getSimpleName());
 			} else {
 				b.append("Expected return type to be one of: ");
 				for(int i = 0; i < retTypes.length; i++) {
@@ -512,20 +518,23 @@ public class StaticTest {
 		Run(script, player, null, null);
 	}
 
-	public static void Run(String script, MCCommandSender player, MethodScriptComplete done, Environment env) throws Exception {
+	public static void Run(String script, MCCommandSender player, MethodScriptComplete done, Environment env)
+			throws Exception {
 		InstallFakeServerFrontend();
 		if(env == null) {
 			env = StaticTest.env;
 		}
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, done, null);
+		MethodScriptCompiler.execute(
+				MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, done, null);
 	}
 
 	public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws Exception {
 		RunCommand(combinedScript, player, command, env);
 	}
 
-	public static void RunCommand(String combinedScript, MCCommandSender player, String command, Environment env) throws Exception {
+	public static void RunCommand(String combinedScript, MCCommandSender player, String command, Environment env)
+			throws Exception {
 		InstallFakeServerFrontend();
 		if(env == null) {
 			env = StaticTest.env;
@@ -968,7 +977,8 @@ public class StaticTest {
 			}
 			f.setAccessible(true);
 			if(expected != null && !expected.isAssignableFrom(f.getType())) {
-				fail("Expected the value to be a " + expected.getName() + ", but it was actually a " + f.getType().getName());
+				fail("Expected the value to be a " + expected.getName()
+						+ ", but it was actually a " + f.getType().getName());
 			}
 			if(isSet) {
 				f.set(in, value);

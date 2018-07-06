@@ -1,5 +1,27 @@
 package com.laytonsmith.core.functions;
 
+import static com.laytonsmith.testing.StaticTest.GetFakeConsoleCommandSender;
+import static com.laytonsmith.testing.StaticTest.GetFakeServer;
+import static com.laytonsmith.testing.StaticTest.GetOp;
+import static com.laytonsmith.testing.StaticTest.GetWorld;
+import static com.laytonsmith.testing.StaticTest.Run;
+import static com.laytonsmith.testing.StaticTest.SRun;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.HashSet;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
@@ -11,26 +33,6 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.testing.StaticTest;
-import static com.laytonsmith.testing.StaticTest.GetFakeConsoleCommandSender;
-import static com.laytonsmith.testing.StaticTest.GetFakeServer;
-import static com.laytonsmith.testing.StaticTest.GetOp;
-import static com.laytonsmith.testing.StaticTest.GetWorld;
-import static com.laytonsmith.testing.StaticTest.Run;
-import static com.laytonsmith.testing.StaticTest.SRun;
-import java.util.HashSet;
-import org.junit.After;
-import org.junit.AfterClass;
-import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  *
@@ -103,7 +105,8 @@ public class PlayerManangementTest {
 		when(fakePlayer.getLocation()).thenReturn(loc);
 		when(fakePlayer.getWorld()).thenReturn(w);
 		SRun(script, fakePlayer);
-		verify(fakePlayer).sendMessage("{0: 0.0, 1: 1.0, 2: 0.0, 3: world, 4: 0.0, 5: 0.0, pitch: 0.0, world: world, x: 0.0, y: 1.0, yaw: 0.0, z: 0.0}");
+		verify(fakePlayer).sendMessage("{0: 0.0, 1: 1.0, 2: 0.0, 3: world, 4: 0.0, 5: 0.0,"
+				+ " pitch: 0.0, world: world, x: 0.0, y: 1.0, yaw: 0.0, z: 0.0}");
 	}
 
 	public void testSetPloc() throws Exception, Exception {
@@ -118,7 +121,8 @@ public class PlayerManangementTest {
 		Run("set_ploc(1, 1, 1)", fakePlayer);
 		//when(StaticLayer.GetLocation(w, 1, 2, 1)).thenReturn(loc);
 		MCLocation loc1 = StaticTest.GetFakeLocation(w, 1, 2, 1);
-		assertEquals(fakePlayer.getLocation().getX(), loc1.getX(), 0.00000000000001); // verify(fakePlayer).teleport(loc1);
+		assertEquals(fakePlayer.getLocation().getX(),
+				loc1.getX(), 0.00000000000001); // verify(fakePlayer).teleport(loc1);
 
 		Run("set_ploc(array(2, 2, 2))", fakePlayer);
 		verify(fakePlayer).teleport(StaticLayer.GetLocation(w, 2, 3, 2, 0, 0));
@@ -135,13 +139,13 @@ public class PlayerManangementTest {
 		MCBlock b = mock(MCBlock.class);
 		CommandHelperPlugin.myServer = fakeServer;
 		when(fakeServer.getPlayer(fakePlayer.getName())).thenReturn(fakePlayer);
-		when(fakePlayer.getTargetBlock((HashSet) eq(null), anyInt())).thenReturn(b);
+		when(fakePlayer.getTargetBlock(ArgumentMatchers.<HashSet<Short>>eq(null), anyInt())).thenReturn(b);
 		MCWorld w = mock(MCWorld.class);
 		MCLocation loc = StaticTest.GetFakeLocation(w, 0, 0, 0);
 		when(b.getLocation()).thenReturn(loc);
 		when(b.getWorld()).thenReturn(w);
 		Run("pcursor()", fakePlayer);
-		verify(fakePlayer, times(1)).getTargetBlock((HashSet) eq(null), anyInt());
+		verify(fakePlayer, times(1)).getTargetBlock(ArgumentMatchers.<HashSet<Short>>eq(null), anyInt());
 	}
 
 	@Test(timeout = 10000)

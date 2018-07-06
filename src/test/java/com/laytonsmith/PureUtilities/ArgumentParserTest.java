@@ -54,7 +54,8 @@ public class ArgumentParserTest {
 
 	@Test
 	public void test4() throws Exception {
-		ArgumentParser p = ArgumentParser.GetParser().addArgument('c', ArgumentParser.Type.ARRAY_OF_STRINGS, "", "", true);
+		ArgumentParser p =
+				ArgumentParser.GetParser().addArgument('c', ArgumentParser.Type.ARRAY_OF_STRINGS, "", "", true);
 		ArgumentParser.ArgumentParserResults r = p.match("-c blah blarg blip");
 		assertArrayEquals(new String[]{"blah", "blarg", "blip"}, r.getStringListArgument('c').toArray());
 	}
@@ -129,7 +130,8 @@ public class ArgumentParserTest {
 				.addFlag('z', "Flag z")
 				.addFlag("", "Seperator")
 				.addArgument("This is the default argument", "", true);
-		ArgumentParser.ArgumentParserResults r = p.match("-i 'This is a \"string\"' --array blip blop --numbers 1 2 3 -nxy 4 -- loose arguments");
+		ArgumentParser.ArgumentParserResults r =
+				p.match("-i 'This is a \"string\"' --array blip blop --numbers 1 2 3 -nxy 4 -- loose arguments");
 
 		assertEquals("This is a \"string\"", r.getStringArgument('i'));
 		assertArrayEquals(new String[]{"blip", "blop"}, r.getStringListArgument('a').toArray());
@@ -170,7 +172,8 @@ public class ArgumentParserTest {
 				.addArgument("This is the default argument", "arguments", true)
 				.addDescription("This is the \ndescription");
 		String expected = "\tThis is the \ndescription\n\n"
-				+ "Usage:\n\t[-xyz] [--flag] [-a <array, ...>] -i <input> -n <#number> --numbers <#numbers, ...> <arguments, ...>\n\n"
+				+ "Usage:\n\t[-xyz] [--flag] [-a <array, ...>] -i <input> -n"
+				+ " <#number> --numbers <#numbers, ...> <arguments, ...>\n\n"
 				+ "Options:\n\n"
 				+ "\t<arguments>: This is the default argument\n"
 				+ "Flags (Short flags may be combined):\n"
@@ -195,7 +198,8 @@ public class ArgumentParserTest {
 		ArgumentParser p = ArgumentParser.GetParser()
 				.addArgument('a', ArgumentParser.Type.STRING, "", "", true)
 				.addArgument('b', ArgumentParser.Type.STRING, "", "", true);
-		ArgumentParser.ArgumentParserResults r = p.match(new String[]{"-b", "\"This is a quoted\" 'string'", "-a", "argument with spaces"});
+		ArgumentParser.ArgumentParserResults r =
+				p.match(new String[]{"-b", "\"This is a quoted\" 'string'", "-a", "argument with spaces"});
 		assertEquals("argument with spaces", r.getStringArgument('a'));
 		assertEquals("\"This is a quoted\" 'string'", r.getStringArgument('b'));
 	}

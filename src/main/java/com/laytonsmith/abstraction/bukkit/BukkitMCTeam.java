@@ -149,7 +149,8 @@ public class BukkitMCTeam implements MCTeam {
 
 	@Override
 	public void setOption(MCOption option, MCOptionStatus status) {
-		t.setOption(BukkitMCOption.getConvertor().getConcreteEnum(option), BukkitMCOptionStatus.getConvertor().getConcreteEnum(status));
+		t.setOption(BukkitMCOption.getConvertor().getConcreteEnum(option),
+				BukkitMCOptionStatus.getConvertor().getConcreteEnum(status));
 	}
 
 	@Override

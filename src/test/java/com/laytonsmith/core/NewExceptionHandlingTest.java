@@ -42,7 +42,8 @@ public class NewExceptionHandlingTest {
 
 	@Test
 	public void testBasicKeywordUsage() throws Exception {
-		assertEquals("complex_try(null,assign(IOException,@e,null),null,assign(Exception,@e,null),null,null)", optimize("try { } catch (IOException @e){ } catch (Exception @e){ } finally { }"));
+		assertEquals("complex_try(null,assign(IOException,@e,null),null,assign(Exception,@e,null),null,null)",
+				optimize("try { } catch (IOException @e){ } catch (Exception @e){ } finally { }"));
 	}
 
 	@Test
@@ -58,7 +59,8 @@ public class NewExceptionHandlingTest {
 
 	@Test
 	public void testExceptionTrickle() throws Exception {
-		SRun("try { throw(IOException, ''); } catch (NullPointerException @e) { msg('no run'); } catch (IOException @e){ msg('run'); }", fakePlayer);
+		SRun("try { throw(IOException, ''); } catch (NullPointerException @e)"
+				+ " { msg('no run'); } catch (IOException @e){ msg('run'); }", fakePlayer);
 		verify(fakePlayer).sendMessage("run");
 	}
 
@@ -76,7 +78,8 @@ public class NewExceptionHandlingTest {
 				/* 3 */ + "} catch (IOException @e){ \n"
 				/* 4 */ + "msg(@e); \n"
 				/* 5 */ + "}", fakePlayer);
-		verify(fakePlayer).sendMessage("{causedBy: null, classType: IOException, message: message, stackTrace: {{file: Unknown file, id: <<main code>>, line: 2}}}");
+		verify(fakePlayer).sendMessage("{causedBy: null, classType: IOException, message: message,"
+				+ " stackTrace: {{file: Unknown file, id: <<main code>>, line: 2}}}");
 	}
 
 	@Test
@@ -124,8 +127,8 @@ public class NewExceptionHandlingTest {
 				/* 12 */ + "} catch (RangeException @e){\n"
 				/* 13 */ + "msg(@e);\n"
 				/* 14 */ + "}", fakePlayer);
-		verify(fakePlayer).sendMessage("{causedBy: null, classType: RangeException, message: Division by 0!, stackTrace:"
-				+ " {"
+		verify(fakePlayer).sendMessage("{causedBy: null, classType: RangeException, message: Division by 0!,"
+				+ " stackTrace: {"
 				+ "{file: Unknown file, id: proc _c, line: 8}, "
 				+ "{file: Unknown file, id: proc _b, line: 5}, "
 				+ "{file: Unknown file, id: proc _a, line: 2}, "
@@ -141,15 +144,16 @@ public class NewExceptionHandlingTest {
 
 	@Test
 	public void testFinallyRunsOnException() throws Exception {
-		SRun("try { throw(IOException, ''); } catch (Exception @e) { msg('exception'); } finally { msg('run'); }", fakePlayer);
+		SRun("try { throw(IOException, ''); } catch (Exception @e) { msg('exception'); } finally { msg('run'); }",
+				fakePlayer);
 		verify(fakePlayer).sendMessage("exception");
 		verify(fakePlayer).sendMessage("run");
 	}
 
 	@Test
 	public void testFinallyRunsAndReturnIsCorrect() throws Exception {
-		SRun("proc _a(){ try { noop(); return('value'); } catch (Exception @e) { msg('nope'); } finally { msg('run'); } }"
-				+ "msg(_a());", fakePlayer);
+		SRun("proc _a(){ try { noop(); return('value'); } catch (Exception @e)"
+				+ " { msg('nope'); } finally { msg('run'); } }msg(_a());", fakePlayer);
 		verify(fakePlayer).sendMessage("run");
 		verify(fakePlayer).sendMessage("value");
 	}
@@ -175,8 +179,10 @@ public class NewExceptionHandlingTest {
 
 	@Test
 	public void testExceptionTypeIsCorrectInMulticatch() throws Exception {
-		SRun("try { throw(CastException, ''); } catch (CastException @e){ msg('run'); } catch (IOException @e){ msg('no run'); }", fakePlayer);
-		SRun("try { throw(IOException, ''); } catch (CastException @e){ msg('no run'); } catch (IOException @e){ msg('run'); }", fakePlayer);
+		SRun("try { throw(CastException, ''); } catch (CastException @e){ msg('run'); } catch (IOException @e)"
+				+ "{ msg('no run'); }", fakePlayer);
+		SRun("try { throw(IOException, ''); } catch (CastException @e){ msg('no run'); } catch (IOException @e)"
+				+ "{ msg('run'); }", fakePlayer);
 		verify(fakePlayer, times(2)).sendMessage("run");
 	}
 

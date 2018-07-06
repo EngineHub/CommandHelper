@@ -63,14 +63,16 @@ public final class Implementation {
 				public void run() {
 					try {
 						try {
-							//Let the server startup data blindness go by first, so we display any error messages prominently,
+							//Let the server startup data blindness go by first,
+							//so we display any error messages prominently,
 							//since an Error is a case of very bad code that shouldn't have been released to begin with.
 							Thread.sleep(15000);
 						} catch (InterruptedException ex) {
 							//
 						}
-						Set<Class<?>> abstractionenums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(abstractionenum.class);
-						for(Class c : abstractionenums) {
+						Set<Class<?>> abstractionenums =
+								ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(abstractionenum.class);
+						for(Class<?> c : abstractionenums) {
 							abstractionenum annotation = (abstractionenum) c.getAnnotation(abstractionenum.class);
 							if(EnumConvertor.class.isAssignableFrom(c)) {
 								EnumConvertor<Enum, Enum> convertor;
@@ -80,20 +82,25 @@ public final class Implementation {
 										continue;
 									}
 									//Next, verify usage of the annotation (it is an error if not used properly)
-									//All EnumConvertor subclasses should have public static getConvertor methods, let's grab it now
+									//All EnumConvertor subclasses should have public static getConvertor methods,
+									//let's grab it now
 									Method m = c.getDeclaredMethod("getConvertor");
 									convertor = (EnumConvertor<Enum, Enum>) m.invoke(null);
-									//Go through and check for a proper mapping both ways, from concrete to abstract, and vice versa.
+									//Go through and check for a proper mapping both ways, from concrete to abstract,
+									//and vice versa.
 									//At this point, if there is an error, it is only a warning, NOT an error.
 									Class abstractEnum = annotation.forAbstractEnum();
 									Class concreteEnum = annotation.forConcreteEnum();
 									checkEnumConvertors(convertor, abstractEnum, concreteEnum, false);
 									checkEnumConvertors(convertor, concreteEnum, abstractEnum, true);
 
-								} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+								} catch (IllegalAccessException
+										| IllegalArgumentException | InvocationTargetException ex) {
 									throw new Error(ex);
 								} catch (NoSuchMethodException ex) {
-									throw new Error(serverType.getBranding() + ": The method with signature public static " + c.getName() + " getConvertor() was not found in " + c.getName()
+									throw new Error(serverType.getBranding() + ": The method with signature public"
+											+ " static " + c.getName() + " getConvertor() was not found in "
+											+ c.getName() + "."
 											+ " Please add the following code: \n"
 											+ "private static " + c.getName() + " instance;\n"
 											+ "public static " + c.getName() + " getConvertor(){\n"
@@ -102,10 +109,12 @@ public final class Implementation {
 											+ "\t}\n"
 											+ "\treturn instance;\n"
 											+ "}\n"
-											+ "If you do not know what  error is, please report this to the developers.");
+											+ "If you do not know what  error is,"
+											+ " please report this to the developers.");
 								}
 							} else {
-								throw new Error("Only classes that extend EnumConvertor may use @abstractionenum. " + c.getName() + " does not, yet it uses the annotation.");
+								throw new Error("Only classes that extend EnumConvertor may use @abstractionenum. "
+										+ c.getName() + " does not, yet it uses the annotation.");
 							}
 
 						}
@@ -182,7 +191,8 @@ public final class Implementation {
 	 */
 	public static Type GetServerType() {
 		if(serverType == null) {
-			throw new RuntimeException("Server type has not been set yet! Please call Implementation.setServerType with the appropriate implementation.");
+			throw new RuntimeException("Server type has not been set yet!"
+					+ " Please call Implementation.setServerType with the appropriate implementation.");
 		}
 		return serverType;
 	}

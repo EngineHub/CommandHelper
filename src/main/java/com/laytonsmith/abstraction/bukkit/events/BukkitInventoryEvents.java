@@ -96,7 +96,8 @@ public class BukkitInventoryEvents {
 		}
 	}
 
-	public static class BukkitMCInventoryInteractEvent extends BukkitMCInventoryEvent implements MCInventoryInteractEvent {
+	public static class BukkitMCInventoryInteractEvent
+			extends BukkitMCInventoryEvent implements MCInventoryInteractEvent {
 
 		InventoryInteractEvent iie;
 
@@ -161,7 +162,8 @@ public class BukkitInventoryEvents {
 		}
 	}
 
-	public static class BukkitMCInventoryClickEvent extends BukkitMCInventoryInteractEvent implements MCInventoryClickEvent {
+	public static class BukkitMCInventoryClickEvent
+			extends BukkitMCInventoryInteractEvent implements MCInventoryClickEvent {
 
 		InventoryClickEvent ic;
 
@@ -251,7 +253,8 @@ public class BukkitInventoryEvents {
 		}
 	}
 
-	public static class BukkitMCInventoryDragEvent extends BukkitMCInventoryInteractEvent implements MCInventoryDragEvent {
+	public static class BukkitMCInventoryDragEvent
+			extends BukkitMCInventoryInteractEvent implements MCInventoryDragEvent {
 
 		InventoryDragEvent id;
 
@@ -396,7 +399,8 @@ public class BukkitInventoryEvents {
 		}
 	}
 
-	public static class BukkitMCPrepareItemEnchantEvent extends BukkitMCInventoryEvent implements MCPrepareItemEnchantEvent {
+	public static class BukkitMCPrepareItemEnchantEvent
+			extends BukkitMCInventoryEvent implements MCPrepareItemEnchantEvent {
 
 		PrepareItemEnchantEvent pie;
 
@@ -515,7 +519,8 @@ public class BukkitInventoryEvents {
 		}
 	}
 
-	public static class BukkitMCPrepareItemCraftEvent extends BukkitMCInventoryEvent implements MCPrepareItemCraftEvent {
+	public static class BukkitMCPrepareItemCraftEvent
+			extends BukkitMCInventoryEvent implements MCPrepareItemCraftEvent {
 
 		PrepareItemCraftEvent e;
 

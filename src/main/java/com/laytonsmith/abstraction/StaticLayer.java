@@ -30,7 +30,8 @@ public final class StaticLayer {
 		Set<Class<?>> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(convert.class);
 		for(Class<?> c : classes) {
 			if(!Convertor.class.isAssignableFrom(c)) {
-				StreamUtils.GetSystemErr().println("The Convertor " + c.getSimpleName() + " doesn't implement Convertor!");
+				StreamUtils.GetSystemErr().println(
+						"The Convertor " + c.getSimpleName() + " doesn't implement Convertor!");
 			}
 			convert convert = c.getAnnotation(convert.class);
 			if(convert.type() == Implementation.GetServerType()) {
@@ -48,7 +49,8 @@ public final class StaticLayer {
 			}
 		}
 		if(convertor == null) {
-			StreamUtils.GetSystemErr().println("Could not find a suitable convertor! You will experience serious issues with this plugin.");
+			StreamUtils.GetSystemErr().println(
+					"Could not find a suitable convertor! You will experience serious issues with this plugin.");
 		}
 	}
 

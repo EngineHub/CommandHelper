@@ -84,15 +84,18 @@ public class MathTest {
 		assertCEquals(C.onstruct(6), a.exec(Target.UNKNOWN, env, C.onstruct(3), C.onstruct(3)));
 		assertCEquals(C.onstruct(-4), a.exec(Target.UNKNOWN, env, C.onstruct(-3), C.onstruct(-1)));
 		assertCEquals(C.onstruct(1), a.exec(Target.UNKNOWN, env, C.onstruct(1), C.onstruct(0)));
-		assertCEquals(C.onstruct(562949953421310L), a.exec(Target.UNKNOWN, env, C.onstruct(281474976710655L), C.onstruct(281474976710655L)));
+		assertCEquals(C.onstruct(562949953421310L),
+				a.exec(Target.UNKNOWN, env, C.onstruct(281474976710655L), C.onstruct(281474976710655L)));
 		assertCEquals(C.onstruct(3.1415), a.exec(Target.UNKNOWN, env, C.onstruct(3), C.onstruct(0.1415)));
 	}
 
 	@Test(timeout = 10000)
 	public void testDec() throws Exception {
 		Math.dec a = new Math.dec();
-		IVariable v = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var", C.onstruct(1), Target.UNKNOWN));
-		IVariable v2 = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var2", C.onstruct(2.5), Target.UNKNOWN));
+		IVariable v = (IVariable) a.exec(
+				Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var", C.onstruct(1), Target.UNKNOWN));
+		IVariable v2 = (IVariable) a.exec(
+				Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var2", C.onstruct(2.5), Target.UNKNOWN));
 		assertCEquals(C.onstruct(0), v.ival());
 		assertCEquals(C.onstruct(1.5), v2.ival());
 		StaticTest.SRun("assign(@var, 0) dec(@var, 2) msg(@var)", fakePlayer);
@@ -110,8 +113,10 @@ public class MathTest {
 	@Test(timeout = 10000)
 	public void testInc() throws Exception {
 		Math.inc a = new Math.inc();
-		IVariable v = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var", C.onstruct(1), Target.UNKNOWN));
-		IVariable v2 = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var2", C.onstruct(2.5), Target.UNKNOWN));
+		IVariable v = (IVariable) a.exec(
+				Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var", C.onstruct(1), Target.UNKNOWN));
+		IVariable v2 = (IVariable) a.exec(
+				Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var2", C.onstruct(2.5), Target.UNKNOWN));
 		assertCEquals(C.onstruct(2), v.ival());
 		assertCEquals(C.onstruct(3.5), v2.ival());
 		StaticTest.SRun("assign(@var, 0) inc(@var, 2) msg(@var)", fakePlayer);
@@ -133,8 +138,10 @@ public class MathTest {
 		assertCEquals(C.onstruct(9), a.exec(Target.UNKNOWN, env, C.onstruct(3), C.onstruct(3)));
 		assertCEquals(C.onstruct(6), a.exec(Target.UNKNOWN, env, C.onstruct(-3), C.onstruct(-2)));
 		assertCEquals(C.onstruct(5), a.exec(Target.UNKNOWN, env, C.onstruct(10), C.onstruct(0.5)));
-		assertCEquals(C.onstruct(-562949953421311L), a.exec(Target.UNKNOWN, env, C.onstruct(281474976710655L), C.onstruct(281474976710655L)));
-		assertCEquals(C.onstruct(5312385410449346020L), a.exec(Target.UNKNOWN, env, C.onstruct(9876543210L), C.onstruct(9876543210L)));
+		assertCEquals(C.onstruct(-562949953421311L),
+				a.exec(Target.UNKNOWN, env, C.onstruct(281474976710655L), C.onstruct(281474976710655L)));
+		assertCEquals(C.onstruct(5312385410449346020L),
+				a.exec(Target.UNKNOWN, env, C.onstruct(9876543210L), C.onstruct(9876543210L)));
 	}
 
 	@Test(timeout = 10000)
@@ -188,7 +195,8 @@ public class MathTest {
 		assertCEquals(C.onstruct(0), a.exec(Target.UNKNOWN, env, C.onstruct(3), C.onstruct(3)));
 		assertCEquals(C.onstruct(-1), a.exec(Target.UNKNOWN, env, C.onstruct(-3), C.onstruct(-2)));
 		assertCEquals(C.onstruct(3), a.exec(Target.UNKNOWN, env, C.onstruct(3.1415), C.onstruct(0.1415)));
-		assertCEquals(C.onstruct(281474976710655L), a.exec(Target.UNKNOWN, env, C.onstruct(562949953421310L), C.onstruct(281474976710655L)));
+		assertCEquals(C.onstruct(281474976710655L),
+				a.exec(Target.UNKNOWN, env, C.onstruct(562949953421310L), C.onstruct(281474976710655L)));
 	}
 
 	@Test(timeout = 10000)
@@ -208,7 +216,8 @@ public class MathTest {
 	@Test(timeout = 10000)
 	public void testSqrt() throws Exception {
 		assertEquals("3", StaticTest.SRun("sqrt(9)", fakePlayer));
-		assertEquals("Test failed", java.lang.Math.sqrt(2), Double.parseDouble(StaticTest.SRun("sqrt(2)", fakePlayer)), .000001);
+		assertEquals("Test failed",
+				java.lang.Math.sqrt(2), Double.parseDouble(StaticTest.SRun("sqrt(2)", fakePlayer)), .000001);
 		try {
 			StaticTest.SRun("sqrt(-1)", fakePlayer);
 			fail("Did not expect to pass");

@@ -462,7 +462,8 @@ public class BukkitEntityEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCPlayerInteractAtEntityEvent extends BukkitMCPlayerInteractEntityEvent implements MCPlayerInteractAtEntityEvent {
+	public static class BukkitMCPlayerInteractAtEntityEvent
+			extends BukkitMCPlayerInteractEntityEvent implements MCPlayerInteractAtEntityEvent {
 
 		PlayerInteractAtEntityEvent e;
 
@@ -619,7 +620,8 @@ public class BukkitEntityEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCEntityDamageByEntityEvent extends BukkitMCEntityDamageEvent implements MCEntityDamageByEntityEvent {
+	public static class BukkitMCEntityDamageByEntityEvent
+			extends BukkitMCEntityDamageEvent implements MCEntityDamageByEntityEvent {
 
 		EntityDamageByEntityEvent event;
 
@@ -643,7 +645,8 @@ public class BukkitEntityEvents {
 			pie = (EntityTargetEvent) e;
 		}
 
-		public static BukkitMCTargetEvent _instantiate(Entity entity, LivingEntity target, EntityTargetEvent.TargetReason reason) {
+		public static BukkitMCTargetEvent _instantiate(
+				Entity entity, LivingEntity target, EntityTargetEvent.TargetReason reason) {
 			return new BukkitMCTargetEvent(new EntityTargetEvent(((BukkitMCEntity) entity).getHandle(),
 					(LivingEntity) ((BukkitMCLivingEntity) target).getLivingEntity(), reason));
 		}

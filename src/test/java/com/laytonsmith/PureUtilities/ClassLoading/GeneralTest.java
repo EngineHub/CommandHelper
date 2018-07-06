@@ -201,13 +201,19 @@ public class GeneralTest {
 	@Test
 	public void testClassThatImplementsInterfaceExtendsProperly() {
 		// Same thing, but this time make sure the concrete class works.
-		assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), A.class));
+		assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(
+				new ClassMirror<AConcrete>(AConcrete.class), A.class));
 		// just... check all of them.
-		assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), B.class));
-		assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), C.class));
-		assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), D.class));
-		assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), E.class));
-		assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(new ClassMirror<AConcrete>(AConcrete.class), F.class));
+		assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(
+				new ClassMirror<AConcrete>(AConcrete.class), B.class));
+		assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(
+				new ClassMirror<AConcrete>(AConcrete.class), C.class));
+		assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(
+				new ClassMirror<AConcrete>(AConcrete.class), D.class));
+		assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(
+				new ClassMirror<AConcrete>(AConcrete.class), E.class));
+		assertTrue(ClassDiscovery.getDefaultInstance().doesClassExtend(
+				new ClassMirror<AConcrete>(AConcrete.class), F.class));
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -221,7 +227,8 @@ public class GeneralTest {
 	@Test
 	public void testInterfaceWithAnnotationIsReturned() {
 		// Test that the interface specified is *also* returned
-		Set<ClassMirror<? extends TestMe>> t = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(Tag.class, TestMe.class);
+		Set<ClassMirror<? extends TestMe>> t =
+				ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(Tag.class, TestMe.class);
 		assertTrue(t.size() == 1);
 	}
 

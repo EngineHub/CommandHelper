@@ -22,7 +22,8 @@ public class MySQLProfile extends SQLProfile {
 	public MySQLProfile(String id, Map<String, String> elements) throws Profiles.InvalidProfileException {
 		super(id, elements);
 		if(!elements.containsKey("database")) {
-			throw new Profiles.InvalidProfileException("Required \"database\" tag is missing for profile \"" + id + "\"");
+			throw new Profiles.InvalidProfileException(
+					"Required \"database\" tag is missing for profile \"" + id + "\"");
 		}
 		database = elements.get("database");
 		if(elements.containsKey("username")) {

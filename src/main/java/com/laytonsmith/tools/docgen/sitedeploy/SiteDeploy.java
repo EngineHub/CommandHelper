@@ -106,12 +106,13 @@ public final class SiteDeploy {
 				+ " hostname of the site). If"
 				+ " the hostname is \"localhost\", this triggers special handling, which skips the upload, and simply"
 				+ " saves to the specified location on local disk. This should work with all OSes, otherwise the host"
-				+ " that this connects to must support ssh, though it does not necessarily have to be a unix based system."
+				+ " that this connects to must support ssh,"
+				+ " though it does not necessarily have to be a unix based system."
 				+ " If the value is localhost, the values " + USERNAME + ", " + PORT + ", and " + PASSWORD + " are"
 				+ " irrelevant, and not used. This should NOT begin with a protocol, i.e. http://"));
 		defaults.add(new Preferences.Preference(PORT, "22", Preferences.Type.INT, "The port to use for SCP"));
-		defaults.add(new Preferences.Preference(DIRECTORY, "/var/www/docs", Preferences.Type.STRING, "The root location of"
-				+ " the remote web server. This must be an absolute path. Note that this is the location of"
+		defaults.add(new Preferences.Preference(DIRECTORY, "/var/www/docs", Preferences.Type.STRING, "The root location"
+				+ " of the remote web server. This must be an absolute path. Note that this is the location of"
 				+ " the *docs* folder. Files may be created one directory above this folder, in this folder, and in"
 				+ " lower folders that are created by the site deploy tool. So if /var/www is your web"
 				+ " root, then you should put /var/www/docs here. It will create an index file in /var/www, as"
@@ -152,10 +153,10 @@ public final class SiteDeploy {
 				+ " step. If the file is specified, it must exist, and if it does not end"
 				+ " in .ms, it must be executable."));
 		defaults.add(new Preferences.Preference(INSTALL_URL, "", Preferences.Type.STRING, "The ec2 instance public url."
-				+ " NOTE: The security group of the instance must be configured to allow access to port 22. Ports 80 and"
-				+ " 443 are also used, and should be opened, but that will not affect the installation process."));
-		defaults.add(new Preferences.Preference(INSTALL_PEM_FILE, "", Preferences.Type.STRING, "The path to the PEM file"
-				+ " used for initial login."));
+				+ " NOTE: The security group of the instance must be configured to allow access to port 22. Ports 80"
+				+ " and 443 are also used, and should be opened, but that will not affect the installation process."));
+		defaults.add(new Preferences.Preference(INSTALL_PEM_FILE, "", Preferences.Type.STRING, "The path to the PEM"
+				+ " file used for initial login."));
 		defaults.add(new Preferences.Preference(INSTALL_PUB_KEYS, "", Preferences.Type.STRING, "A list of public keys"
 				+ " to upload to, and add to the authorized_keys file on the server. These keys will not"
 				+ " be used by this script, but can allow easier login in the future. If blank, no additional keys"
@@ -164,8 +165,8 @@ public final class SiteDeploy {
 		Preferences prefs = new Preferences("Site-Deploy", Logger.getLogger(SiteDeploy.class.getName()), defaults);
 		if(generatePrefs) {
 			prefs.init(sitedeploy);
-			System.out.println("Preferences file is now located at " + sitedeploy.getAbsolutePath() + ". Please fill in the"
-					+ " values, then re-run this command without the --generate-prefs option.");
+			System.out.println("Preferences file is now located at " + sitedeploy.getAbsolutePath() + ". Please fill"
+					+ " in the values, then re-run this command without the --generate-prefs option.");
 			System.exit(0);
 		}
 		prefs.init(sitedeploy);
@@ -214,13 +215,15 @@ public final class SiteDeploy {
 			}
 			if(finalizerScript != null) {
 				if(!finalizerScript.exists()) {
-					configErrors.add("post-script file specified does not exist (" + finalizerScript.getCanonicalPath() + ")");
+					configErrors.add(
+							"post-script file specified does not exist (" + finalizerScript.getCanonicalPath() + ")");
 				} else if(!finalizerScript.getPath().endsWith(".ms") && !finalizerScript.canExecute()) {
 					configErrors.add("post-script does not end in .ms, and is not executable");
 				}
 			}
 			if(!configErrors.isEmpty()) {
-				System.err.println("Invalid input. Check preferences in " + sitedeploy.getAbsolutePath() + " and re-run");
+				System.err.println(
+						"Invalid input. Check preferences in " + sitedeploy.getAbsolutePath() + " and re-run");
 				System.err.println(StringUtils.PluralTemplateHelper(configErrors.size(),
 						"Here is the %d error:", "Here are the %d errors:"));
 				System.err.println(" - " + StringUtils.Join(configErrors, "\n - "));
@@ -460,9 +463,12 @@ public final class SiteDeploy {
 	private final String validatorUrl;
 	private final File finalizerScript;
 
-	private static final String EDIT_THIS_PAGE_PREAMBLE = "Find a bug in this page? <a rel=\"noopener noreferrer\" target=\"_blank\" href=\"";
-	private static final String EDIT_THIS_PAGE_POSTAMBLE = "\">Edit this page yourself, then submit a pull request.</a>";
-	private static final String DEFAULT_GITHUB_BASE_URL = "https://github.com/EngineHub/CommandHelper/edit/master/src/main/%s";
+	private static final String EDIT_THIS_PAGE_PREAMBLE =
+			"Find a bug in this page? <a rel=\"noopener noreferrer\" target=\"_blank\" href=\"";
+	private static final String EDIT_THIS_PAGE_POSTAMBLE =
+			"\">Edit this page yourself, then submit a pull request.</a>";
+	private static final String DEFAULT_GITHUB_BASE_URL =
+			"https://github.com/EngineHub/CommandHelper/edit/master/src/main/%s";
 
 	@SuppressWarnings("unchecked")
 	private SiteDeploy(String siteBase, String docsBase, boolean useLocalCache,
@@ -616,7 +622,8 @@ public final class SiteDeploy {
 				try {
 					InputStream in = SiteDeploy.class.getResourceAsStream(loc);
 					if(in == null) {
-						throw new RuntimeException("Could not find " + loc + " in resources folder for cacheBuster template");
+						throw new RuntimeException(
+								"Could not find " + loc + " in resources folder for cacheBuster template");
 					}
 					hash = getLocalMD5(in);
 				} catch (IOException ex) {
@@ -745,7 +752,8 @@ public final class SiteDeploy {
 									}
 								}
 							} catch (IllegalArgumentException ex) {
-								Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Could not use local cache", ex);
+								Logger.getLogger(
+										SiteDeploy.class.getName()).log(Level.SEVERE, "Could not use local cache", ex);
 								notificationAboutLocalCache = false;
 							}
 						}
@@ -765,7 +773,8 @@ public final class SiteDeploy {
 					currentUploadTask.addAndGet(1);
 					writeStatus("");
 				} catch (Throwable ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed while uploading " + toLocation, ex);
+					Logger.getLogger(
+							SiteDeploy.class.getName()).log(Level.SEVERE, "Failed while uploading " + toLocation, ex);
 					generateQueue.shutdownNow();
 					uploadQueue.shutdownNow();
 				}
@@ -868,7 +877,8 @@ public final class SiteDeploy {
 				if(!bW.contains(EDIT_THIS_PAGE_PREAMBLE)) {
 					bW += "<p id=\"edit_this_page\">"
 							+ EDIT_THIS_PAGE_PREAMBLE
-							+ String.format(githubBaseUrl, "java/" + SiteDeploy.class.getName().replace(".", "/")) + ".java"
+							+ String.format(githubBaseUrl,
+									"java/" + SiteDeploy.class.getName().replace(".", "/")) + ".java"
 							+ EDIT_THIS_PAGE_POSTAMBLE
 							+ "</p>";
 				}
@@ -882,8 +892,8 @@ public final class SiteDeploy {
 						b = DocGenTemplates.DoTemplateReplacement(bW, standard);
 					} catch (Exception ex) {
 						if(ex instanceof GenerateException) {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed to substitute template"
-									+ " while trying to upload resource to " + toLocation, ex);
+							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed to substitute"
+									+ " template while trying to upload resource to " + toLocation, ex);
 						} else {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 						}
@@ -902,7 +912,8 @@ public final class SiteDeploy {
 					g.put("bodyEscaped", new Generator() {
 						@Override
 						public String generate(String... args) {
-							String s = b.replaceAll("\\\\", "\\\\\\\\").replaceAll("'", "\\\\'").replaceAll("\r?\n", "\\\\n");
+							String s = b.replaceAll("\\\\", "\\\\\\\\")
+									.replaceAll("'", "\\\\'").replaceAll("\r?\n", "\\\\n");
 							s = s.replaceAll("<script.*?</script>", "");
 							return s;
 						}
@@ -935,7 +946,8 @@ public final class SiteDeploy {
 					});
 					g.putAll(getStandardGenerators());
 					g.putAll(DocGenTemplates.GetGenerators());
-					String frame = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/frame.html"));
+					String frame = StreamUtils.GetString(
+							SiteDeploy.class.getResourceAsStream("/siteDeploy/frame.html"));
 					final String bb = DocGenTemplates.DoTemplateReplacement(frame, g);
 					// Write out using writeFromString
 					uploadedPages.put(toLocation, bb);
@@ -943,7 +955,8 @@ public final class SiteDeploy {
 					currentGenerateTask.addAndGet(1);
 					writeStatus("");
 				} catch (Exception ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While writing " + toLocation + " the following error occured:", ex);
+					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE,
+							"While writing " + toLocation + " the following error occured:", ex);
 				}
 			}
 		});
@@ -969,7 +982,8 @@ public final class SiteDeploy {
 						if(r.isDirectory()) {
 							q.addAll(Arrays.asList(r.listFiles()));
 						} else {
-							String fileName = r.getFile().getAbsolutePath().replaceFirst(Pattern.quote(reader.getFile().getAbsolutePath()), "");
+							String fileName = r.getFile().getAbsolutePath()
+									.replaceFirst(Pattern.quote(reader.getFile().getAbsolutePath()), "");
 							writeFromStream(r.getInputStream(), "resources" + fileName);
 						}
 					}
@@ -978,9 +992,11 @@ public final class SiteDeploy {
 				}
 				String indexJs = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/index.js"));
 				try {
-					writeFromString(DocGenTemplates.DoTemplateReplacement(indexJs, getStandardGenerators()), "resources/js/index.js");
+					writeFromString(DocGenTemplates.DoTemplateReplacement(indexJs, getStandardGenerators()),
+							"resources/js/index.js");
 				} catch (Generator.GenerateException ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "GenerateException in /siteDeploy/index.js", ex);
+					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE,
+							"GenerateException in /siteDeploy/index.js", ex);
 				}
 				currentGenerateTask.addAndGet(1);
 			}
@@ -995,8 +1011,10 @@ public final class SiteDeploy {
 		generateQueue.submit(new Runnable() {
 			@Override
 			public void run() {
-				writePageFromResource(CHVersion.LATEST.toString() + " - Docs", "/siteDeploy/VersionFrontPage", "index.html",
-						Arrays.asList(new String[]{CHVersion.LATEST.toString()}), "Front page for " + CHVersion.LATEST.toString());
+				writePageFromResource(CHVersion.LATEST.toString() + " - Docs", "/siteDeploy/VersionFrontPage",
+						"index.html",
+						Arrays.asList(new String[]{CHVersion.LATEST.toString()}),
+						"Front page for " + CHVersion.LATEST.toString());
 				currentGenerateTask.addAndGet(1);
 			}
 		});
@@ -1013,8 +1031,10 @@ public final class SiteDeploy {
 		generateQueue.submit(new Runnable() {
 			@Override
 			public void run() {
-				writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/FrontPage", "../../index.html",
-						Arrays.asList(new String[]{"index", "front page"}), "The front page for " + Implementation.GetServerType().getBranding());
+				writePageFromResource(Implementation.GetServerType().getBranding(),
+						"/siteDeploy/FrontPage", "../../index.html",
+						Arrays.asList(new String[]{"index", "front page"}),
+						"The front page for " + Implementation.GetServerType().getBranding());
 				currentGenerateTask.addAndGet(1);
 			}
 		});
@@ -1022,7 +1042,8 @@ public final class SiteDeploy {
 		generateQueue.submit(new Runnable() {
 			@Override
 			public void run() {
-				writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/Sponsors", "../../sponsors.html",
+				writePageFromResource(Implementation.GetServerType().getBranding(),
+						"/siteDeploy/Sponsors", "../../sponsors.html",
 						Arrays.asList(new String[]{"index", "front page"}), "Sponsors of MethodScript");
 				currentGenerateTask.addAndGet(1);
 			}
@@ -1059,9 +1080,11 @@ public final class SiteDeploy {
 					File root = new File(SiteDeploy.class.getResource("/docs").toExternalForm());
 					ZipReader zReader = new ZipReader(root);
 					for(File r : zReader.listFiles()) {
-						String filename = r.getAbsolutePath().replaceFirst(Pattern.quote(zReader.getFile().getAbsolutePath()), "");
+						String filename = r.getAbsolutePath()
+								.replaceFirst(Pattern.quote(zReader.getFile().getAbsolutePath()), "");
 						writePageFromResource(r.getName(), "/docs" + filename, r.getName() + ".html",
-								Arrays.asList(new String[]{r.getName().replace("_", " ")}), "Learning trail page for " + r.getName().replace("_", " "));
+								Arrays.asList(new String[]{r.getName().replace("_", " ")}),
+								"Learning trail page for " + r.getName().replace("_", " "));
 					}
 				} catch (IOException ex) {
 					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
@@ -1086,7 +1109,8 @@ public final class SiteDeploy {
 									return f1.getName().compareTo(f2.getName());
 								}
 							});
-					functionClasses.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, Function.class));
+					functionClasses.addAll(ClassDiscovery.getDefaultInstance()
+							.loadClassesWithAnnotationThatExtend(api.class, Function.class));
 					// A map of where it maps the enclosing class to the list of function rows, which contains a list of
 					// table cells.
 					Map<Class<?>, List<List<String>>> data = new TreeMap<>(new Comparator<Class<?>>() {
@@ -1107,7 +1131,8 @@ public final class SiteDeploy {
 						try {
 							f = ReflectionUtils.instantiateUnsafe(functionClass);
 						} catch (ReflectionUtils.ReflectionException ex) {
-							throw new RuntimeException("While trying to construct " + functionClass + ", got the following", ex);
+							throw new RuntimeException(
+									"While trying to construct " + functionClass + ", got the following", ex);
 						}
 						final DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
 						// If the function is hidden, we don't want to put it on the main page by default. Regardless,
@@ -1143,14 +1168,15 @@ public final class SiteDeploy {
 						}
 						try {
 							if(f.examples() != null && f.examples().length > 0) {
-								desc.append("<br>([[API/functions/").append(f.getName()).append("#Examples|Examples...]])\n");
+								desc.append("<br>([[API/functions/")
+										.append(f.getName()).append("#Examples|Examples...]])\n");
 							}
 						} catch (ConfigCompileException | NoClassDefFoundError ex) {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 						}
 						c.add(desc.toString());
-						c.add("<span class=\"api_" + (f.isRestricted() ? "yes" : "no") + "\">" + (f.isRestricted() ? "Yes" : "No")
-								+ "</span>");
+						c.add("<span class=\"api_" + (f.isRestricted() ? "yes" : "no") + "\">"
+								+ (f.isRestricted() ? "Yes" : "No") + "</span>");
 						d.add(c);
 					}
 					// data is now constructed.
@@ -1179,7 +1205,8 @@ public final class SiteDeploy {
 									+ "! scope=\"col\" width=\"10%\" | Arguments\n"
 									+ "! scope=\"col\" width=\"10%\" | Throws\n"
 									+ "! scope=\"col\" width=\"64%\" | Description\n"
-									+ "! scope=\"col\" width=\"5%\" | <span class=\"abbr\" title=\"Restricted\">Res</span>\n");
+									+ "! scope=\"col\" width=\"5%\""
+									+ " | <span class=\"abbr\" title=\"Restricted\">Res</span>\n");
 							for(List<String> row : clazzData) {
 								b.append("|-");
 								if(hiddenFunctions.contains(row.get(0))) {
@@ -1194,7 +1221,8 @@ public final class SiteDeploy {
 							b.append("|}\n");
 							b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
 						} catch (Error ex) {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
+							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE,
+									"While processing " + clazz + " got:", ex);
 						}
 					}
 
@@ -1303,7 +1331,8 @@ public final class SiteDeploy {
 					} else {
 						exampleBuilder.append("might");
 					}
-					exampleBuilder.append(" be:\n<pre class=\"pre\" style=\"border-top: 1px solid blue; border-bottom: 1px solid blue;")
+					exampleBuilder.append(" be:\n<pre class=\"pre\""
+							+ " style=\"border-top: 1px solid blue; border-bottom: 1px solid blue;")
 							.append(style).append("\"");
 					exampleBuilder.append(">%%NOWIKI|").append(es.getOutput())
 							.append("%%").append("</pre>\n");
@@ -1371,8 +1400,10 @@ public final class SiteDeploy {
 									return f1.getName().compareTo(f2.getName());
 								}
 							});
-					eventClasses.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, Event.class));
-					// A map of where it maps the enclosing class to the list of event rows, which contains a list of table cells.
+					eventClasses.addAll(ClassDiscovery.getDefaultInstance()
+							.loadClassesWithAnnotationThatExtend(api.class, Event.class));
+					// A map of where it maps the enclosing class to the list of event rows, which contains a list of
+					// table cells.
 					Map<Class<?>, List<List<String>>> data = new TreeMap<>(new Comparator<Class<?>>() {
 						@Override
 						public int compare(Class<?> o1, Class<?> o2) {
@@ -1390,7 +1421,8 @@ public final class SiteDeploy {
 						try {
 							e = ReflectionUtils.instantiateUnsafe(eventClass);
 						} catch (ReflectionUtils.ReflectionException ex) {
-							throw new RuntimeException("While trying to construct " + eventClass + ", got the following", ex);
+							throw new RuntimeException(
+									"While trying to construct " + eventClass + ", got the following", ex);
 						}
 						final DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
 						if(e.since().equals(CHVersion.V0_0_0)) {
@@ -1402,7 +1434,8 @@ public final class SiteDeploy {
 						List<String> pre = new ArrayList<>();
 						if(!edi.prefilter.isEmpty()) {
 							for(DocGen.EventDocInfo.PrefilterData pdata : edi.prefilter) {
-								pre.add("<p><strong>" + pdata.name + "</strong>: " + pdata.formatDescription(DocGen.MarkupType.HTML) + "</p>");
+								pre.add("<p><strong>" + pdata.name + "</strong>: "
+										+ pdata.formatDescription(DocGen.MarkupType.HTML) + "</p>");
 							}
 						}
 						c.add(StringUtils.Join(pre, ""));
@@ -1459,7 +1492,8 @@ public final class SiteDeploy {
 							b.append("|}\n");
 							b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
 						} catch (Error ex) {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
+							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE,
+									"While processing " + clazz + " got:", ex);
 						}
 					}
 					writePage("Event API", b.toString(), "Event_API.html",

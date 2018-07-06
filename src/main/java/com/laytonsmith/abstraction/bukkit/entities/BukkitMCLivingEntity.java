@@ -251,7 +251,8 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
 				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(), true);
 			} else {
-				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(), pe.hasParticles());
+				e = new MCEffect(
+						pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(), pe.hasParticles());
 			}
 			effects.add(e);
 		}

@@ -76,14 +76,15 @@ public class TestCClassType {
 	@Ignore("Ignored for now, but must come back to this soon")
 	public void testThatNonImplementsReturnsEMPTY_CLASS_ARRAY() throws Exception {
 		SortedSet<String> oops = new TreeSet<>();
-		Set<Class<? extends Mixed>> cc = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, Mixed.class);
+		Set<Class<? extends Mixed>> cc =
+				ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, Mixed.class);
 		for(Class<? extends Mixed> c : cc) {
 			Mixed m = ReflectionUtils.instantiateUnsafe(c);
 			CClassType[] ct = m.getInterfaces();
 			if(ct.length == 0) {
 				if(ct != CClassType.EMPTY_CLASS_ARRAY) {
-					oops.add(c.getName() + " creates a new empty array in getInterfaces, and needs to be changed to return"
-							+ " CClassType.EMPTY_CLASS_ARRAY");
+					oops.add(c.getName() + " creates a new empty array in getInterfaces,"
+							+ " and needs to be changed to return CClassType.EMPTY_CLASS_ARRAY");
 				}
 			}
 		}

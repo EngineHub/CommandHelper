@@ -41,13 +41,15 @@ public class BukkitEntityListener implements Listener {
 		EventUtils.TriggerListener(Driver.CREATURE_SPAWN, "creature_spawn", cse);
 	}
 
-	@EventIdentifier(event = Driver.PLAYER_INTERACT_ENTITY, className = "org.bukkit.event.player.PlayerInteractEntityEvent")
+	@EventIdentifier(event = Driver.PLAYER_INTERACT_ENTITY,
+			className = "org.bukkit.event.player.PlayerInteractEntityEvent")
 	public void onClickEnt(Event event) {
 		BukkitMCPlayerInteractEntityEvent piee = new BukkitMCPlayerInteractEntityEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_INTERACT_ENTITY, "player_interact_entity", piee);
 	}
 
-	@EventIdentifier(event = Driver.PLAYER_INTERACT_AT_ENTITY, className = "org.bukkit.event.player.PlayerInteractAtEntityEvent")
+	@EventIdentifier(event = Driver.PLAYER_INTERACT_AT_ENTITY,
+			className = "org.bukkit.event.player.PlayerInteractAtEntityEvent")
 	public void onClickAtEnt(Event event) {
 		BukkitMCPlayerInteractAtEntityEvent piaee = new BukkitMCPlayerInteractAtEntityEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_INTERACT_AT_ENTITY, "player_interact_at_entity", piaee);

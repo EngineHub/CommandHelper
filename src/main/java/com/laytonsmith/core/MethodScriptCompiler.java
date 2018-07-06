@@ -69,7 +69,8 @@ import java.util.regex.Pattern;
  */
 public final class MethodScriptCompiler {
 
-	private static final EnumSet<Optimizable.OptimizationOption> NO_OPTIMIZATIONS = EnumSet.noneOf(Optimizable.OptimizationOption.class);
+	private static final EnumSet<Optimizable.OptimizationOption> NO_OPTIMIZATIONS =
+			EnumSet.noneOf(Optimizable.OptimizationOption.class);
 
 	private MethodScriptCompiler() {
 	}
@@ -109,7 +110,8 @@ public final class MethodScriptCompiler {
 	 * @return A stream of tokens
 	 * @throws ConfigCompileException If compilation fails due to bad syntax
 	 */
-	public static TokenStream lex(String script, File file, boolean inPureMScript, boolean saveAllTokens) throws ConfigCompileException {
+	public static TokenStream lex(String script, File file, boolean inPureMScript, boolean saveAllTokens)
+			throws ConfigCompileException {
 		if(script.isEmpty()) {
 			return new TokenStream(new LinkedList<>(), "");
 		}
@@ -1043,7 +1045,8 @@ public final class MethodScriptCompiler {
 
 		// Handle missing multiline end token.
 		if(insideMultiline) {
-			throw new ConfigCompileException("Expecting a multiline end symbol, but your last multiline alias appears to be missing one.", token.target);
+			throw new ConfigCompileException("Expecting a multiline end symbol,"
+					+ " but your last multiline alias appears to be missing one.", token.target);
 		}
 
 		// Now that we have all lines minified, we should be able to split on newlines
@@ -1308,8 +1311,8 @@ public final class MethodScriptCompiler {
 
 			if(t.type == TType.DEREFERENCE) {
 				//Currently unimplemented, but going ahead and making it strict
-				compilerErrors.add(new ConfigCompileException("The '" + t.val() + "' symbol is not currently allowed in raw strings. You must quote all"
-						+ " symbols.", t.target));
+				compilerErrors.add(new ConfigCompileException("The '" + t.val() + "' symbol is not currently allowed"
+						+ " in raw strings. You must quote all symbols.", t.target));
 			}
 
 			if(t.type.equals(TType.FUNC_NAME)) {
@@ -1367,7 +1370,8 @@ public final class MethodScriptCompiler {
 				if(!minusFuncStack.isEmpty() && minusFuncStack.peek().get() == parens + 1) {
 					if(next1.type.equals(TType.LSQUARE_BRACKET)) {
 						// Move the negation to the array_get which contains this function.
-						minusArrayStack.push(new AtomicInteger(arrayStack.size() + 1)); // +1 because the bracket isn't counted yet.
+						minusArrayStack.push(
+								new AtomicInteger(arrayStack.size() + 1)); // +1 because the bracket isn't counted yet.
 					} else {
 						// Negate this function.
 						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
@@ -1428,7 +1432,8 @@ public final class MethodScriptCompiler {
 				//Slice notation handling
 				try {
 					CSlice slice;
-					if(t.type.isSeparator() || (t.type.isWhitespace() && prev1.type.isSeparator()) || t.type.isKeyword()) {
+					if(t.type.isSeparator()
+							|| (t.type.isWhitespace() && prev1.type.isSeparator()) || t.type.isKeyword()) {
 						//empty first
 						String value = next2.val();
 						i++;
@@ -1485,8 +1490,10 @@ public final class MethodScriptCompiler {
 			} else if(t.type == TType.LIT) {
 				Construct c = Static.resolveConstruct(t.val(), t.target);
 				if(c instanceof CString && fileOptions.isStrict()) {
-					compilerErrors.add(new ConfigCompileException("Bare strings are not allowed in strict mode", t.target));
-				} else if((c instanceof CInt || c instanceof CDecimal) && next1.type == TType.DOT && next2.type == TType.LIT) {
+					compilerErrors.add(
+							new ConfigCompileException("Bare strings are not allowed in strict mode", t.target));
+				} else if((c instanceof CInt || c instanceof CDecimal)
+						&& next1.type == TType.DOT && next2.type == TType.LIT) {
 					// make CDouble/CDecimal here because otherwise Long.parseLong() will remove
 					// minus zero before decimals and leading zeroes after decimals
 					try {
@@ -1530,13 +1537,16 @@ public final class MethodScriptCompiler {
 				if(t.type.equals(TType.MINUS) && !prev1.type.isAtomicLit() && !prev1.type.equals(TType.IVARIABLE)
 						&& !prev1.type.equals(TType.VARIABLE) && !prev1.type.equals(TType.RCURLY_BRACKET)
 						&& !prev1.type.equals(TType.RSQUARE_BRACKET) && !prev1.type.equals(TType.FUNC_END)
-						&& (next1.type.equals(TType.IVARIABLE) || next1.type.equals(TType.VARIABLE) || next1.type.equals(TType.FUNC_NAME))) {
+						&& (next1.type.equals(TType.IVARIABLE)
+								|| next1.type.equals(TType.VARIABLE) || next1.type.equals(TType.FUNC_NAME))) {
 
 					// Check if we are negating a value from an array, function or variable.
 					if(next2.type.equals(TType.LSQUARE_BRACKET)) {
-						minusArrayStack.push(new AtomicInteger(arrayStack.size() + 1)); // +1 because the bracket isn't counted yet.
+						minusArrayStack.push(
+								new AtomicInteger(arrayStack.size() + 1)); // +1 because the bracket isn't counted yet.
 					} else if(next1.type.equals(TType.FUNC_NAME)) {
-						minusFuncStack.push(new AtomicInteger(parens + 1)); // +1 because the function isn't counted yet.
+						minusFuncStack.push(
+								new AtomicInteger(parens + 1)); // +1 because the function isn't counted yet.
 					} else {
 						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
 						negTree.addChild(new ParseTree(new IVariable(next1.value, next1.target), fileOptions));
@@ -1566,7 +1576,8 @@ public final class MethodScriptCompiler {
 				tree.addChild(new ParseTree(c, fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if(t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
-				tree.addChild(new ParseTree(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target), fileOptions));
+				tree.addChild(new ParseTree(
+						new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 				//right_vars.add(new Variable(t.val(), null, t.line_num));
 			}
@@ -1682,7 +1693,8 @@ public final class MethodScriptCompiler {
 		checkBreaks0(tree, 0, null, compilerExceptions);
 	}
 
-	private static void checkBreaks0(ParseTree tree, long currentLoops, String lastUnbreakable, Set<ConfigCompileException> compilerErrors) {
+	private static void checkBreaks0(ParseTree tree, long currentLoops,
+			String lastUnbreakable, Set<ConfigCompileException> compilerErrors) {
 		if(!(tree.getData() instanceof CFunction)) {
 			//Don't care about these
 			return;
@@ -1720,11 +1732,13 @@ public final class MethodScriptCompiler {
 				// Throw an exception, as this would break above a loop. Different error messages
 				// are applied to different cases
 				if(currentLoops == 0) {
-					compilerErrors.add(new ConfigCompileException("The break() function can only break out of loops" + (lastUnbreakable == null ? "."
-							: ", but an attempt to break out of a " + lastUnbreakable + " was detected."), tree.getTarget()));
+					compilerErrors.add(new ConfigCompileException(
+							"The break() function can only break out of loops" + (lastUnbreakable == null ? "."
+							: ", but an attempt to break out of a " + lastUnbreakable + " was detected."),
+							tree.getTarget()));
 				} else {
-					compilerErrors.add(new ConfigCompileException("Too many breaks"
-							+ " detected. Check your loop nesting, and set the break count to an appropriate value.", tree.getTarget()));
+					compilerErrors.add(new ConfigCompileException("Too many breaks detected. Check your loop nesting,"
+							+ " and set the break count to an appropriate value.", tree.getTarget()));
 				}
 			}
 			return;
@@ -1761,7 +1775,8 @@ public final class MethodScriptCompiler {
 		}
 		if(root.getData() instanceof CFunction && root.getData().val().equals(__autoconcat__)) {
 			try {
-				ParseTree ret = ((Compiler.__autoconcat__) ((CFunction) root.getData()).getFunction()).optimizeDynamic(root.getTarget(), root.getChildren(), root.getFileOptions());
+				ParseTree ret = ((Compiler.__autoconcat__) ((CFunction) root.getData()).getFunction())
+						.optimizeDynamic(root.getTarget(), root.getChildren(), root.getFileOptions());
 				root.setData(ret.getData());
 				root.setChildren(ret.getChildren());
 			} catch (ConfigCompileException ex) {
@@ -1779,7 +1794,8 @@ public final class MethodScriptCompiler {
 	 * @param tree
 	 * @throws ConfigCompileException
 	 */
-	private static void checkLabels(ParseTree tree, Set<ConfigCompileException> compilerErrors) throws ConfigCompileException {
+	private static void checkLabels(ParseTree tree, Set<ConfigCompileException> compilerErrors)
+			throws ConfigCompileException {
 //		for(ParseTree t : tree.getChildren()){
 //			if(t.getData() instanceof CLabel){
 //				if(((CLabel)t.getData()).cVal() instanceof IVariable){
@@ -1855,7 +1871,8 @@ public final class MethodScriptCompiler {
 	 * @param tree
 	 * @return
 	 */
-	private static void optimize(ParseTree tree, Stack<List<Procedure>> procs, Set<ConfigCompileException> compilerErrors) {
+	private static void optimize(
+			ParseTree tree, Stack<List<Procedure>> procs, Set<ConfigCompileException> compilerErrors) {
 		if(tree.isOptimized()) {
 			return; //Don't need to re-run this
 		}
@@ -1892,7 +1909,8 @@ public final class MethodScriptCompiler {
 		}
 
 		List<ParseTree> children = tree.getChildren();
-		if(func instanceof Optimizable && ((Optimizable) func).optimizationOptions().contains(OptimizationOption.PRIORITY_OPTIMIZATION)) {
+		if(func instanceof Optimizable
+				&& ((Optimizable) func).optimizationOptions().contains(OptimizationOption.PRIORITY_OPTIMIZATION)) {
 			// This is a priority optimization function, meaning it needs to be optimized before its children are.
 			// This is required when optimization of the children could cause different internal behavior, for instance
 			// if this function is expecting the precense of soem code element, but the child gets optimized out, this
@@ -1915,8 +1933,8 @@ public final class MethodScriptCompiler {
 		//        /        \
 		//       /          \
 		//     (die)       (msg)
-		//By looking at the code, we can tell that msg() will never be called, because die() will run first,
-		//and since it is a "terminal" function, any code after it will NEVER run. However, consider a more complex condition:
+		//By looking at the code, we can tell that msg() will never be called, because die() will run first, and since
+		//it is a "terminal" function, any code after it will NEVER run. However, consider a more complex condition:
 		// if(@input){ die() msg('1') } else { msg('2') msg('3') }
 		//              if(@input)
 		//        [true]/         \[false]
@@ -1926,7 +1944,8 @@ public final class MethodScriptCompiler {
 		//          /     \       /      \
 		//       (die) (msg[1])(msg[2]) (msg[3])
 		//In this case, only msg('1') is guaranteed not to run, msg('2') and msg('3') will still run in some cases.
-		//So, we can optimize out msg('1') in this case, which would cause the tree to become much simpler, therefore a worthwile optimization:
+		//So, we can optimize out msg('1') in this case, which would cause the tree to become much simpler,
+		//therefore a worthwile optimization:
 		//              if(@input)
 		//        [true]/        \[false]
 		//             /          \
@@ -1965,7 +1984,8 @@ public final class MethodScriptCompiler {
 				if(options.contains(OptimizationOption.TERMINAL)) {
 					if(children.size() > i + 1) {
 						//First, a compiler warning
-						CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider removing this code.", children.get(i + 1).getTarget());
+						CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING,
+								"Unreachable code. Consider removing this code.", children.get(i + 1).getTarget());
 						//Now, truncate the children
 						for(int j = children.size() - 1; j > i; j--) {
 							children.remove(j);
@@ -2042,8 +2062,9 @@ public final class MethodScriptCompiler {
 				try {
 					if(Implementation.GetServerType().equals(Implementation.Type.BUKKIT)) {
 						CommandHelperPlugin plugin = CommandHelperPlugin.self;
-						GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistenceNetwork,
-								MethodScriptFileLocations.getDefault().getConfigDirectory(), plugin.profiles, new TaskManager());
+						GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler,
+								plugin.persistenceNetwork, MethodScriptFileLocations.getDefault().getConfigDirectory(),
+								plugin.profiles, new TaskManager());
 						env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 					} else {
 						env = Static.GenerateStandaloneEnvironment(false);
@@ -2051,8 +2072,10 @@ public final class MethodScriptCompiler {
 				} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e) {
 					//
 				}
-				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(new ParseTree[children.size()]));
-				procs.peek().add(myProc); //Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
+				Procedure myProc = DataHandling.proc.getProcedure(
+						tree.getTarget(), env, fakeScript, children.toArray(new ParseTree[children.size()]));
+				//Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
+				procs.peek().add(myProc);
 			} catch (ConfigRuntimeException e) {
 				//Well, they have an error in there somewhere
 				compilerErrors.add(new ConfigCompileException(e));
@@ -2073,7 +2096,8 @@ public final class MethodScriptCompiler {
 			try {
 				ParseTree tempNode;
 				try {
-					tempNode = ((Optimizable) func).optimizeDynamic(tree.getData().getTarget(), tree.getChildren(), tree.getFileOptions());
+					tempNode = ((Optimizable) func).optimizeDynamic(
+							tree.getData().getTarget(), tree.getChildren(), tree.getFileOptions());
 				} catch (ConfigRuntimeException e) {
 					//Turn it into a compile exception, then rethrow
 					throw new ConfigCompileException(e);
@@ -2118,7 +2142,8 @@ public final class MethodScriptCompiler {
 		//It could have optimized by changing the name, in that case, we
 		//don't want to run this now
 		if(tree.getData().getValue().equals(oldFunctionName)
-				&& (options.contains(OptimizationOption.OPTIMIZE_CONSTANT) || options.contains(OptimizationOption.CONSTANT_OFFLINE))) {
+				&& (options.contains(OptimizationOption.OPTIMIZE_CONSTANT)
+						|| options.contains(OptimizationOption.CONSTANT_OFFLINE))) {
 			Construct[] constructs = new Construct[tree.getChildren().size()];
 			for(int i = 0; i < tree.getChildren().size(); i++) {
 				constructs[i] = tree.getChildAt(i).getData();
@@ -2173,14 +2198,17 @@ public final class MethodScriptCompiler {
 			processKeywords(node);
 			if(node.getData() instanceof CKeyword
 					|| (node.getData() instanceof CLabel && ((CLabel) node.getData()).cVal() instanceof CKeyword)
-					|| (node.getData() instanceof CFunction && KeywordList.getKeywordByName(node.getData().val()) != null)) {
-				// This looks a bit confusing, but is fairly straightforward. We want to process the child elements of all
-				// remaining nodes, so that subchildren that need processing will be finished, and our current tree level will
-				// be able to independently process it. We don't want to process THIS level though, just the children of this level.
+					|| (node.getData() instanceof CFunction
+							&& KeywordList.getKeywordByName(node.getData().val()) != null)) {
+				// This looks a bit confusing, but is fairly straightforward. We want to process the child elements of
+				// all remaining nodes, so that subchildren that need processing will be finished, and our current tree
+				// level will be able to independently process it. We don't want to process THIS level though, just the
+				// children of this level.
 				for(int j = i + 1; j < children.size(); j++) {
 					processKeywords(children.get(j));
 				}
-				// Now that all the children of the rest of the chain are processed, we can do the processing of this level.
+				// Now that all the children of the rest of the chain are processed,
+				// we can do the processing of this level.
 				i = KeywordList.getKeywordByName(node.getData().val()).process(children, i);
 			}
 		}
@@ -2202,7 +2230,9 @@ public final class MethodScriptCompiler {
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileGroupException This indicates that a group of compile errors
 	 * occurred.
 	 */
-	public static Construct execute(String script, File file, boolean inPureMScript, Environment env, MethodScriptComplete done, Script s, List<Variable> vars) throws ConfigCompileException, ConfigCompileGroupException {
+	public static Construct execute(String script, File file, boolean inPureMScript,
+			Environment env, MethodScriptComplete done, Script s, List<Variable> vars)
+					throws ConfigCompileException, ConfigCompileGroupException {
 		return execute(compile(lex(script, file, inPureMScript)), env, done, s, vars);
 	}
 
@@ -2232,7 +2262,8 @@ public final class MethodScriptCompiler {
 	 * @param vars
 	 * @return
 	 */
-	public static Construct execute(ParseTree root, Environment env, MethodScriptComplete done, Script script, List<Variable> vars) {
+	public static Construct execute(
+			ParseTree root, Environment env, MethodScriptComplete done, Script script, List<Variable> vars) {
 		if(root == null) {
 			return CVoid.VOID;
 		}
@@ -2282,7 +2313,8 @@ public final class MethodScriptCompiler {
 			try {
 				MethodScriptCompiler.execute(IncludeCache.get(f, new Target(0, f, 0)), env, null, s);
 			} catch (ProgramFlowManipulationException e) {
-				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in auto include files.", e.getTarget()), env);
+				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException(
+						"Cannot break program flow in auto include files.", e.getTarget()), env);
 			} catch (ConfigRuntimeException e) {
 				e.setEnv(env);
 				ConfigRuntimeException.HandleUncaughtException(e, env);

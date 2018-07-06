@@ -55,7 +55,8 @@ public class RegexTest {
 
 	@Test(timeout = 10000)
 	public void testRegMatchAll() throws Exception {
-		assertEquals("{{0: This is a word, 1: word}, {0: This is a word, 1: word}}", SRun("reg_match_all('This is a (word)', 'word, This is a word, This is a word')", null));
+		assertEquals("{{0: This is a word, 1: word}, {0: This is a word, 1: word}}",
+				SRun("reg_match_all('This is a (word)', 'word, This is a word, This is a word')", null));
 		assertEquals("{}", SRun("reg_match_all('word', 'yay')", null));
 	}
 

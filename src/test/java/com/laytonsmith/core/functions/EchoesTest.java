@@ -71,8 +71,8 @@ public class EchoesTest {
 	}
 
 	@Test(timeout = 10000)
-	public void testBroadcast() throws NoSuchFieldException, InstantiationException,
-			IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, CancelCommandException {
+	public void testBroadcast() throws NoSuchFieldException, InstantiationException, IllegalAccessException,
+			NoSuchMethodException, IllegalArgumentException, InvocationTargetException, CancelCommandException {
 		Echoes.broadcast a = new Echoes.broadcast();
 		when(fakePlayer.getServer()).thenReturn(fakeServer);
 		CommandHelperPlugin.myServer = fakeServer;

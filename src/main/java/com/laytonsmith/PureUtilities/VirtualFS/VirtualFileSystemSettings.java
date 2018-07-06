@@ -53,20 +53,27 @@ public class VirtualFileSystemSettings {
 	}
 
 	public static enum VirtualFileSystemSetting {
-		HIDDEN("hidden", false, "If true, the file system will not allow the file or directory to be created, and if a file or directory already exists, it will not"
+		HIDDEN("hidden", false, "If true, the file system will not allow the file or directory to be created,"
+				+ " and if a file or directory already exists, it will not"
 				+ " be exposed. This is essentially a way to revoke both read and write privileges."),
-		QUOTA("quota", -1, "Sets the quota for the total list of files or folders that match this glob. Quotas for a cordoned off file system will only affect files"
-				+ " that are in the virtual file system, and file sizes of externally created files won't count, but in a uncordoned file system, all files that match"
-				+ " this glob are calculated. Due to real time changes in file system size, for directory based globs, this quota may not be enforced precisely, however,"
-				+ " it should generally be close. If the quota is set to -1, the quota is unrestricted, and if 0, it is \"full\". The unit of measure is bytes, so 1024 is a KB."
-				+ " This value is only applicable to the glob **, meaning that the quota can only be applied per entire virtual file system."),
+		QUOTA("quota", -1, "Sets the quota for the total list of files or folders that match this glob. Quotas for a"
+				+ " cordoned off file system will only affect files that are in the virtual file system, and file"
+				+ " sizes of externally created files won't count, but in a uncordoned file system, all files that"
+				+ " match this glob are calculated. Due to real time changes in file system size, for directory"
+				+ " based globs, this quota may not be enforced precisely, however, it should generally be close."
+				+ " If the quota is set to -1, the quota is unrestricted, and if 0, it is \"full\"."
+				+ " The unit of measure is bytes, so 1024 is a KB."
+				+ " This value is only applicable to the glob **,"
+				+ " meaning that the quota can only be applied per entire virtual file system."),
 		READONLY("readonly", false, "If true, this file or folder will not be writable."),
-		CORDONED_OFF("cordoned-off", false, "If true, files and folders in this directory will not appear to the virtual file system, unless the file was created from within"
-				+ " the virtual file system. This glob must be the ** glob, meaning that either the whole file system is cordoned off, or the whole file system is not cordoned"
-				+ " off."),
-		FOLDER_DEPTH("folder-depth", -1, "The number of folders deep that will be allowed to be created in this directory. The glob must be a directory if this is anything"
-				+ " other than -1. -1 means that the number of sub folders is unrestricted, 0 means that no folders can be created inside this one. This does not"
-				+ " affect existing folder structure."),;
+		CORDONED_OFF("cordoned-off", false, "If true, files and folders in this directory will not appear to the"
+				+ " virtual file system, unless the file was created from within the virtual file system."
+				+ " This glob must be the ** glob, meaning that either the whole file system is cordoned off,"
+				+ " or the whole file system is not cordoned off."),
+		FOLDER_DEPTH("folder-depth", -1, "The number of folders deep that will be allowed to be created in this"
+				+ " directory. The glob must be a directory if this is anything other than -1."
+				+ " -1 means that the number of sub folders is unrestricted, 0 means that no folders can be created"
+				+ " inside this one. This does not affect existing folder structure."),;
 		private String name;
 		private Object def;
 		private String description;
@@ -170,7 +177,8 @@ public class VirtualFileSystemSettings {
 
 	}
 
-	private static final Map<VirtualFileSystemSetting, Object> META_DIRECTORY_SETTINGS = new EnumMap<VirtualFileSystemSetting, Object>(VirtualFileSystemSetting.class);
+	private static final Map<VirtualFileSystemSetting, Object> META_DIRECTORY_SETTINGS =
+			new EnumMap<VirtualFileSystemSetting, Object>(VirtualFileSystemSetting.class);
 
 	static {
 		META_DIRECTORY_SETTINGS.put(VirtualFileSystemSetting.HIDDEN, true);
@@ -201,8 +209,9 @@ public class VirtualFileSystemSettings {
 					if(g.matches(new VirtualFile("/"))) {
 						hasQuota = true;
 					} else {
-						Logger.getLogger(VirtualFileSystemSettings.class.getName()).log(Level.WARNING, "The \"quota\" setting can only be applied to the root of the "
-								+ "file system at this time. The quota setting for " + g.toString() + " is being ignored.");
+						Logger.getLogger(VirtualFileSystemSettings.class.getName()).log(Level.WARNING,
+								"The \"quota\" setting can only be applied to the root of the file system at this"
+								+ " time. The quota setting for " + g.toString() + " is being ignored.");
 					}
 				}
 			}
@@ -212,8 +221,9 @@ public class VirtualFileSystemSettings {
 					if(g.matches(new VirtualFile("/"))) {
 						cordonedOff = true;
 					} else {
-						Logger.getLogger(VirtualFileSystemSettings.class.getName()).log(Level.WARNING, "The \"cordoned-off\" setting can only be applied to the root"
-								+ " of the file system at this time. The setting for " + g.toString() + " is being ignored.");
+						Logger.getLogger(VirtualFileSystemSettings.class.getName()).log(Level.WARNING,
+								"The \"cordoned-off\" setting can only be applied to the root of the file system at"
+								+ " this time. The setting for " + g.toString() + " is being ignored.");
 					}
 				}
 			}

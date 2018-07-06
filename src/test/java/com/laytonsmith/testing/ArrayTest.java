@@ -62,7 +62,8 @@ public class ArrayTest {
 
 	@Test
 	public void testArrayGetWithAssociativeArray() throws Exception {
-		assertEquals("test", SRun("g(assign(@arr, array()) array_set(@arr, 'val', 'test')) array_get(@arr, 'val')", fakePlayer));
+		assertEquals("test",
+				SRun("g(assign(@arr, array()) array_set(@arr, 'val', 'test')) array_get(@arr, 'val')", fakePlayer));
 	}
 
 	@Test(expected = ConfigRuntimeException.class)
@@ -139,7 +140,8 @@ public class ArrayTest {
 
 	@Test
 	public void testFunctionResultAsAssociativeValue() throws Exception {
-		assertEquals("{1: this was concated, 2: this was too}", SRun("array(1: this was concated, 2: this was too)", fakePlayer));
+		assertEquals("{1: this was concated, 2: this was too}",
+				SRun("array(1: this was concated, 2: this was too)", fakePlayer));
 		assertEquals("{1: thiswasconcated}", SRun("array(1: concat('this', was, concated))", fakePlayer));
 	}
 

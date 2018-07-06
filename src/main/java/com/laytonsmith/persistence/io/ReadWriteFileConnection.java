@@ -125,7 +125,8 @@ public class ReadWriteFileConnection implements ConnectionMixin {
 	}
 
 	@Override
-	public void writeData(final DaemonManager dm, final String data) throws ReadOnlyException, IOException, UnsupportedOperationException {
+	public void writeData(final DaemonManager dm, final String data)
+			throws ReadOnlyException, IOException, UnsupportedOperationException {
 		if(reader.isZipped()) {
 			throw new ReadOnlyException("Cannot write to a zipped file.");
 		}

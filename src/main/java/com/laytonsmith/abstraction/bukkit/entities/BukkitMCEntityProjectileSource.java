@@ -24,7 +24,8 @@ public class BukkitMCEntityProjectileSource extends BukkitMCEntity implements MC
 	public BukkitMCEntityProjectileSource(Entity source) {
 		super(source);
 		if(!(source instanceof ProjectileSource)) {
-			throw new IllegalArgumentException("Tried to construct BukkitMCEntityProjectileSource from invalid source.");
+			throw new IllegalArgumentException(
+					"Tried to construct BukkitMCEntityProjectileSource from invalid source.");
 		}
 		eps = (ProjectileSource) source;
 	}

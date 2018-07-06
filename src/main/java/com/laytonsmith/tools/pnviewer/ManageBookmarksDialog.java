@@ -190,13 +190,15 @@ public final class ManageBookmarksDialog extends javax.swing.JDialog {
 				.addContainerGap()
 				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 					.addGroup(layout.createSequentialGroup()
-						.addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
+						.addComponent(jScrollPane1,
+								javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
 						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 							.addGroup(layout.createSequentialGroup()
 								.addComponent(localFileLabel)
 								.addGap(43, 43, 43)
-								.addComponent(localFileField, javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE))
+								.addComponent(localFileField,
+										javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE))
 							.addComponent(remoteRadioButton)
 							.addGroup(layout.createSequentialGroup()
 								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -217,7 +219,8 @@ public final class ManageBookmarksDialog extends javax.swing.JDialog {
 						.addComponent(newButton)
 						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
 						.addComponent(deleteButton)
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+								javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 						.addComponent(saveButton)))
 				.addContainerGap())
 		);
@@ -230,31 +233,37 @@ public final class ManageBookmarksDialog extends javax.swing.JDialog {
 					.addGroup(layout.createSequentialGroup()
 						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
 							.addComponent(nameLabel)
-							.addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+							.addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE,
+									javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
 						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 						.addComponent(localRadioButton)
 						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
 							.addComponent(localFileLabel)
-							.addComponent(localFileField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+							.addComponent(localFileField, javax.swing.GroupLayout.PREFERRED_SIZE,
+									javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
 						.addGap(18, 18, 18)
 						.addComponent(remoteRadioButton)
 						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
 							.addComponent(hostLabel)
-							.addComponent(hostField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+							.addComponent(hostField, javax.swing.GroupLayout.PREFERRED_SIZE,
+									javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
 						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
 							.addComponent(portLabel)
-							.addComponent(portField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+							.addComponent(portField, javax.swing.GroupLayout.PREFERRED_SIZE,
+									javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
 						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
 							.addComponent(passwordLabel)
-							.addComponent(passwordField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+							.addComponent(passwordField, javax.swing.GroupLayout.PREFERRED_SIZE,
+									javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
 						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
 							.addComponent(remoteFileLabel)
-							.addComponent(remoteFileField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+							.addComponent(remoteFileField, javax.swing.GroupLayout.PREFERRED_SIZE,
+									javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
 						.addGap(0, 7, Short.MAX_VALUE)))
 				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -283,8 +292,10 @@ public final class ManageBookmarksDialog extends javax.swing.JDialog {
 					break;
 				}
 			}
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-			java.util.logging.Logger.getLogger(ManageBookmarksDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+		} catch (ClassNotFoundException | InstantiationException
+				| IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+			java.util.logging.Logger.getLogger(ManageBookmarksDialog.class.getName())
+					.log(java.util.logging.Level.SEVERE, null, ex);
 		}
 		// </editor-fold>
 

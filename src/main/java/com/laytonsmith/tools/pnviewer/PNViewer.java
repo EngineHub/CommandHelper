@@ -101,7 +101,9 @@ public class PNViewer extends javax.swing.JFrame {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				if(remoteSocketThread != null && remoteSocketThread.isAlive()) {
-					int sel = JOptionPane.showConfirmDialog(PNViewer.this, "A connection to the remote server is still active, are you sure you wish to disconnect?", "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+					int sel = JOptionPane.showConfirmDialog(PNViewer.this,
+							"A connection to the remote server is still active, are you sure you wish to disconnect?",
+							"Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 					if(sel == JOptionPane.YES_OPTION) {
 						System.exit(0);
 					}
@@ -116,7 +118,8 @@ public class PNViewer extends javax.swing.JFrame {
 		loaderDialog.setLoaderDialogFinish(new ConfigurationLoaderDialog.LoaderDialogFinish() {
 
 			@Override
-			public void data(boolean isLocal, String localPath, String host, int port, String password, String remoteFile) {
+			public void data(boolean isLocal, String localPath,
+					String host, int port, String password, String remoteFile) {
 				isLocalConfig = isLocal;
 				if(isLocal) {
 					loadFromLocal(localPath);
@@ -163,7 +166,8 @@ public class PNViewer extends javax.swing.JFrame {
 				try {
 					String[] key = new String[e.getNewLeadSelectionPath().getPathCount() - 1];
 					for(int i = 1; i < e.getNewLeadSelectionPath().getPathCount(); i++) {
-						key[i - 1] = (String) ((DefaultMutableTreeNode) e.getNewLeadSelectionPath().getPathComponent(i)).getUserObject();
+						key[i - 1] = (String) ((DefaultMutableTreeNode)
+								e.getNewLeadSelectionPath().getPathComponent(i)).getUserObject();
 					}
 					showData(join(key), data.get(join(key)));
 				} catch (NullPointerException ex) {
@@ -249,7 +253,8 @@ public class PNViewer extends javax.swing.JFrame {
 						return Integer.toString(PROTOCOL_VERSION);
 					}
 				});
-				String text = builder.build(StreamUtils.GetString(PNViewer.class.getResourceAsStream("AboutDialog.html")));
+				String text = builder.build(
+						StreamUtils.GetString(PNViewer.class.getResourceAsStream("AboutDialog.html")));
 				TextDialog td = new TextDialog(PNViewer.this, true, text);
 				UIUtils.centerWindowOnWindow(td, PNViewer.this);
 				td.setVisible(true);
@@ -275,7 +280,8 @@ public class PNViewer extends javax.swing.JFrame {
 						return new File(ClassDiscovery.GetClassContainer(PNViewer.class).getPath()).getName();
 					}
 				});
-				String text = builder.build(StreamUtils.GetString(PNViewer.class.getResourceAsStream("HelpDialog.html")));
+				String text = builder.build(
+						StreamUtils.GetString(PNViewer.class.getResourceAsStream("HelpDialog.html")));
 				TextDialog td = new TextDialog(PNViewer.this, false, text);
 				UIUtils.centerWindowOnWindow(td, PNViewer.this);
 				td.setVisible(true);
@@ -703,11 +709,13 @@ public class PNViewer extends javax.swing.JFrame {
 		}
 	}
 
-	private static PersistenceNetwork getPersistenceNetwork(String configPath) throws URISyntaxException, IOException, DataSourceException {
+	private static PersistenceNetwork getPersistenceNetwork(String configPath)
+			throws URISyntaxException, IOException, DataSourceException {
 		File config = new File(configPath);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(config.getParentFile().getParentFile());
-		return new PersistenceNetwork(config, new URI("sqlite://" + new File(config.getParentFile().getParentFile(), "persistence.db").toString().replace('\\', '/')), options);
+		return new PersistenceNetwork(config, new URI("sqlite://" + new File(
+				config.getParentFile().getParentFile(), "persistence.db").toString().replace('\\', '/')), options);
 	}
 
 	/**
@@ -817,7 +825,8 @@ public class PNViewer extends javax.swing.JFrame {
 	}
 
 	private static void log(String message) {
-		StreamUtils.GetSystemOut().println("[" + new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(new Date()) + "]: " + message);
+		StreamUtils.GetSystemOut().println(
+				"[" + new SimpleDateFormat("yyyy.MM.dd HH:mm:ss z").format(new Date()) + "]: " + message);
 	}
 
 	private static interface VirtualPersistenceNetwork {
@@ -1012,12 +1021,15 @@ public class PNViewer extends javax.swing.JFrame {
 						.addComponent(jLabel5)
 						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 						.addComponent(configurationFromLabel)
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+								javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 						.addComponent(reloadButton))
 					.addGroup(layout.createSequentialGroup()
 						.addComponent(statusLabel)
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(statusProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+								javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(statusProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE,
+								javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
 				.addContainerGap())
 		);
 		layout.setVerticalGroup(
@@ -1032,7 +1044,9 @@ public class PNViewer extends javax.swing.JFrame {
 				.addComponent(jSplitPane1)
 				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-					.addComponent(statusProgressBar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+					.addComponent(statusProgressBar, javax.swing.GroupLayout.Alignment.TRAILING,
+							javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE,
+							javax.swing.GroupLayout.PREFERRED_SIZE)
 					.addComponent(statusLabel, javax.swing.GroupLayout.Alignment.TRAILING))
 				.addContainerGap())
 		);
@@ -1056,7 +1070,8 @@ public class PNViewer extends javax.swing.JFrame {
 					break;
 				}
 			}
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+		} catch (ClassNotFoundException | InstantiationException
+				| IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
 			java.util.logging.Logger.getLogger(PNViewer.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
 		// </editor-fold>

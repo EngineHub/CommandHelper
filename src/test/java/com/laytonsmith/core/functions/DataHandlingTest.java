@@ -77,7 +77,8 @@ public class DataHandlingTest {
 				+ "     array_push(@array, @i)\n"
 				+ " )\n"
 				+ " msg(@array)\n";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
+		MethodScriptCompiler.execute(
+				MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
 
 	}
 
@@ -137,19 +138,22 @@ public class DataHandlingTest {
 
 	@Test(timeout = 10000)
 	public void testForeachWithKeys1() throws Exception {
-		SRun("@array = array(1: 'one', 2: 'two') @string = '' foreach(@array, @key, @value, @string .= (@key.':'.@value.';')) msg(@string)", fakePlayer);
+		SRun("@array = array(1: 'one', 2: 'two') @string = ''"
+				+ " foreach(@array, @key, @value, @string .= (@key.':'.@value.';')) msg(@string)", fakePlayer);
 		verify(fakePlayer).sendMessage("1:one;2:two;");
 	}
 
 	@Test(timeout = 10000)
 	public void testForeachWithKeys2() throws Exception {
-		SRun("@array = array('one': 1, 'two': 2) @string = '' foreach(@array, @key, @value, @string .= (@key.':'.@value.';')) msg(@string)", fakePlayer);
+		SRun("@array = array('one': 1, 'two': 2) @string = ''"
+				+ " foreach(@array, @key, @value, @string .= (@key.':'.@value.';')) msg(@string)", fakePlayer);
 		verify(fakePlayer).sendMessage("one:1;two:2;");
 	}
 
 	@Test(timeout = 10000)
 	public void testForeachWithKeys3() throws Exception {
-		SRun("@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}", fakePlayer);
+		SRun("@array = array('one': 1, 'two': 2)\n"
+				+ "foreach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}", fakePlayer);
 		verify(fakePlayer).sendMessage("one:1");
 		verify(fakePlayer).sendMessage("two:2");
 	}
@@ -275,7 +279,8 @@ public class DataHandlingTest {
 		//Create the test file
 		File test = new File("unit_test_inc.ms");
 		FileUtil.write("msg('hello')", test);
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("./script.txt"), true)), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(
+				MethodScriptCompiler.lex(script, new File("./script.txt"), true)), env, null, null);
 		verify(fakePlayer).sendMessage("hello");
 		//delete the test file
 		test.delete();

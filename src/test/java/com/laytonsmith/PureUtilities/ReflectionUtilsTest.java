@@ -45,8 +45,9 @@ public class ReflectionUtilsTest {
 
 	@Test
 	public void testFuzzyLookup() {
-		Class expected = ReflectionUtils.class;
-		Class actual = ClassDiscovery.getDefaultInstance().forFuzzyName("com.laytonsmith.Pur.*", "ReflectionUtils").loadClass();
+		Class<ReflectionUtils> expected = ReflectionUtils.class;
+		Class<?> actual = ClassDiscovery.getDefaultInstance()
+				.forFuzzyName("com.laytonsmith.Pur.*", "ReflectionUtils").loadClass();
 		assertEquals(expected, actual);
 	}
 

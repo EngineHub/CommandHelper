@@ -44,7 +44,8 @@ public class CacheAnnotations {
 		URL cacheFile = new URL("file:" + scanDir.getCanonicalPath());
 		ClassDiscoveryURLCache cache = new ClassDiscoveryURLCache(cacheFile);
 		cache.writeDescriptor(new FileOutputStream(new File(outputDir, ClassDiscoveryCache.OUTPUT_FILENAME)));
-		StreamUtils.GetSystemOut().println("Done writing " + ClassDiscoveryCache.OUTPUT_FILENAME + ", which took " + (System.currentTimeMillis() - start) + " ms.");
+		StreamUtils.GetSystemOut().println("Done writing " + ClassDiscoveryCache.OUTPUT_FILENAME
+				+ ", which took " + (System.currentTimeMillis() - start) + " ms.");
 		ClassDiscovery.getDefaultInstance().addPreCache(cacheFile, cache);
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(cacheFile);
 		StreamUtils.GetSystemOut().println("-- Checking for custom compile errors --");
@@ -102,7 +103,8 @@ public class CacheAnnotations {
 		}
 		if(!uhohs.isEmpty()) {
 			Collections.sort(uhohs);
-			throw new Exception("There " + StringUtils.PluralHelper(uhohs.size(), "compile error") + ":\n" + StringUtils.Join(uhohs, "\n"));
+			throw new Exception("There " + StringUtils.PluralHelper(uhohs.size(), "compile error") + ":\n"
+					+ StringUtils.Join(uhohs, "\n"));
 		}
 		StreamUtils.GetSystemOut().println("-- Finished with custom compiler checks --");
 	}

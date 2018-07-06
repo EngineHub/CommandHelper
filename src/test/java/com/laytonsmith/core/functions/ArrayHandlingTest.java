@@ -43,7 +43,8 @@ public class ArrayHandlingTest {
 	@Before
 	public void setUp() {
 		fakePlayer = StaticTest.GetOnlinePlayer();
-		commonArray = new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN), new CInt(2, Target.UNKNOWN), new CInt(3, Target.UNKNOWN));
+		commonArray = new CArray(Target.UNKNOWN,
+				new CInt(1, Target.UNKNOWN), new CInt(2, Target.UNKNOWN), new CInt(3, Target.UNKNOWN));
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 	}
 
@@ -84,13 +85,15 @@ public class ArrayHandlingTest {
 
 	@Test(timeout = 10000)
 	public void testArraySet2() throws Exception {
-		SRun("assign(@array, array(1, 2)) assign(@array2, @array) array_set(@array, 0, 2) msg(@array) msg(@array2)", fakePlayer);
+		SRun("assign(@array, array(1, 2)) assign(@array2, @array) array_set(@array, 0, 2) msg(@array) msg(@array2)",
+				fakePlayer);
 		verify(fakePlayer, times(2)).sendMessage("{2, 2}");
 	}
 
 	@Test(timeout = 10000)
 	public void testArrayReferenceBeingCorrect() throws Exception {
-		SRun("assign(@array, array(1, 2)) assign(@array2, @array[]) array_set(@array, 0, 2) msg(@array) msg(@array2)", fakePlayer);
+		SRun("assign(@array, array(1, 2)) assign(@array2, @array[]) array_set(@array, 0, 2) msg(@array) msg(@array2)",
+				fakePlayer);
 		verify(fakePlayer).sendMessage("{2, 2}");
 		verify(fakePlayer).sendMessage("{1, 2}");
 	}
@@ -111,7 +114,8 @@ public class ArrayHandlingTest {
 //	public void testArraySetEx() throws CancelCommandException, ConfigCompileException{
 //		String script =
 //				"assign(@array, array()) array_set(@array, 3, 1) msg(@array)";
-//		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, null, null);
+//		MethodScriptCompiler.execute(
+//				MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, null, null);
 //	}
 	@Test(timeout = 10000)
 	public void testArrayContains() throws CancelCommandException {
@@ -178,7 +182,8 @@ public class ArrayHandlingTest {
 
 	@Test(timeout = 10000)
 	public void testArrayResize() throws Exception {
-		String script = "assign(@array, array(1)) msg(@array) array_resize(@array, 2) msg(@array) array_resize(@array, 3, 'hello') msg(@array)";
+		String script = "assign(@array, array(1)) msg(@array)"
+				+ " array_resize(@array, 2) msg(@array) array_resize(@array, 3, 'hello') msg(@array)";
 		StaticTest.Run(script, fakePlayer);
 		verify(fakePlayer).sendMessage("{1}");
 		verify(fakePlayer).sendMessage("{1, null}");
@@ -219,12 +224,14 @@ public class ArrayHandlingTest {
 
 	@Test(timeout = 10000)
 	public void testArrayMergeNormal() throws Exception {
-		assertEquals("{1, 2, 3, 4, 5, {6, 7}}", SRun("array_merge(array(1, 2, 3), array(4, 5, array(6, 7)))", fakePlayer));
+		assertEquals("{1, 2, 3, 4, 5, {6, 7}}",
+				SRun("array_merge(array(1, 2, 3), array(4, 5, array(6, 7)))", fakePlayer));
 	}
 
 	@Test(timeout = 10000)
 	public void testArrayMergeAssociative() throws Exception {
-		assertEquals("{a: a, b: b, c: c, d: {1, 2}}", SRun("array_merge(array(a: a, b: b), array(c: c, d: array(1, 2)))", fakePlayer));
+		assertEquals("{a: a, b: b, c: c, d: {1, 2}}",
+				SRun("array_merge(array(a: a, b: b), array(c: c, d: array(1, 2)))", fakePlayer));
 	}
 
 	@Test(timeout = 10000)
@@ -366,22 +373,24 @@ public class ArrayHandlingTest {
 
 	@Test
 	public void testArrayGetClone() throws Exception { // This is expected to be a deep clone.
-		Run("@a = array(array(array('value'))); @b = @a[]; @b[0][0][0] = 'changedValue'; msg(@a[0][0][0]); msg(@b[0][0][0]);", fakePlayer);
+		Run("@a = array(array(array('value'))); @b = @a[]; @b[0][0][0] = 'changedValue';"
+				+ " msg(@a[0][0][0]); msg(@b[0][0][0]);", fakePlayer);
 		verify(fakePlayer).sendMessage("value");
 		verify(fakePlayer).sendMessage("changedValue");
 	}
 
 	@Test
 	public void testArrayDeepClone() throws Exception {
-		Run("@a = array(array(array('value'))); @b = array_deep_clone(@a); @b[0][0][0] = 'changedValue'; msg(@a[0][0][0]); msg(@b[0][0][0]);", fakePlayer);
+		Run("@a = array(array(array('value'))); @b = array_deep_clone(@a); @b[0][0][0] = 'changedValue';"
+				+ " msg(@a[0][0][0]); msg(@b[0][0][0]);", fakePlayer);
 		verify(fakePlayer).sendMessage("value");
 		verify(fakePlayer).sendMessage("changedValue");
 	}
 
 	@Test
 	public void testArrayShallowClone() throws Exception {
-		Run("@a = array(array('value')); @b = array_shallow_clone(@a); @b[0][0] = 'changedValue'; msg(equals(@a[0][0], @b[0][0]));"
-				+ "msg(ref_equals(@a, @b)); msg(@a[0][0])", fakePlayer);
+		Run("@a = array(array('value')); @b = array_shallow_clone(@a); @b[0][0] = 'changedValue';"
+				+ " msg(equals(@a[0][0], @b[0][0])); msg(ref_equals(@a, @b)); msg(@a[0][0])", fakePlayer);
 		verify(fakePlayer).sendMessage("true");
 		verify(fakePlayer).sendMessage("false");
 		verify(fakePlayer).sendMessage("changedValue");
@@ -389,13 +398,15 @@ public class ArrayHandlingTest {
 
 	@Test
 	public void testArrayGetCloneRefCouples() throws Exception {
-		Run("@a = array('Meow'); @b = array(@a, @a, array(@a)); @c = @b[]; msg((ref_equals(@c[0], @c[1]) && ref_equals(@c[0], @c[2][0])));", fakePlayer);
+		Run("@a = array('Meow'); @b = array(@a, @a, array(@a)); @c = @b[];"
+				+ " msg((ref_equals(@c[0], @c[1]) && ref_equals(@c[0], @c[2][0])));", fakePlayer);
 		verify(fakePlayer).sendMessage("true");
 	}
 
 	@Test
 	public void testArrayGetCloneRecursiveArray() throws Exception {
-		Run("@a = array(); @b = array(); @a[0] = @b; @b[0] = @a; @c = @a[]; msg((ref_equals(@c[0], @c[0][0][0]) && ref_equals(@c, @c[0][0])));", fakePlayer);
+		Run("@a = array(); @b = array(); @a[0] = @b; @b[0] = @a; @c = @a[];"
+				+ " msg((ref_equals(@c[0], @c[0][0][0]) && ref_equals(@c, @c[0][0])));", fakePlayer);
 		verify(fakePlayer).sendMessage("true");
 	}
 
@@ -435,7 +446,8 @@ public class ArrayHandlingTest {
 
 	@Test
 	public void testArrayReduceRight2() throws Exception {
-		Run("msg(array_reduce_right(array('a', 'b', 'c'), closure(@soFar, @next){ return(@soFar . @next); }));", fakePlayer);
+		Run("msg(array_reduce_right(array('a', 'b', 'c'),"
+				+ " closure(@soFar, @next){ return(@soFar . @next); }));", fakePlayer);
 		verify(fakePlayer).sendMessage("cba");
 	}
 

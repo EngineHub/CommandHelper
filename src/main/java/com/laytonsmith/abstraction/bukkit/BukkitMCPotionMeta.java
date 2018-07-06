@@ -33,7 +33,8 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 	}
 
 	@Override
-	public boolean addCustomEffect(int potionID, int strength, int ticks, boolean ambient, boolean overwrite, Target t) {
+	public boolean addCustomEffect(int potionID, int strength,
+			int ticks, boolean ambient, boolean overwrite, Target t) {
 		int maxID = PotionEffectType.values().length;
 		if(potionID < 1 || potionID > maxID) {
 			throw new CRERangeException("Invalid effect ID, must be from 1-" + maxID, t);

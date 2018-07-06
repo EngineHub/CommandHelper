@@ -19,7 +19,7 @@ public class ZipReaderTest {
 
 	private static File testZip;
 	private static File testFile;
-	private static File testNestedZip;
+//	private static File testNestedZip;
 
 	public ZipReaderTest() {
 	}
@@ -31,8 +31,9 @@ public class ZipReaderTest {
 
 		testFile = new File(URLDecoder.decode(ZipReaderTest.class.getResource("/test.txt").getFile(), "UTF-8"));
 
-		File nestedParent = new File(URLDecoder.decode(ZipReaderTest.class.getResource("/testNested.zip").getFile(), "UTF-8"));
-		testNestedZip = new File(nestedParent, "innerZip.zip" + File.separator + "test.txt");
+//		File nestedParent =
+//				new File(URLDecoder.decode(ZipReaderTest.class.getResource("/testNested.zip").getFile(), "UTF-8"));
+//		testNestedZip = new File(nestedParent, "innerZip.zip" + File.separator + "test.txt");
 	}
 
 	//TODO: Nested reads may be easier than I'm trying to make it, but either way, this

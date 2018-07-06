@@ -39,7 +39,8 @@ public class BukkitBlockListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPistonRetract(final BlockPistonRetractEvent e) {
-		BukkitBlockEvents.BukkitMCBlockPistonRetractEvent mce = new BukkitBlockEvents.BukkitMCBlockPistonRetractEvent(e);
+		BukkitBlockEvents.BukkitMCBlockPistonRetractEvent mce =
+				new BukkitBlockEvents.BukkitMCBlockPistonRetractEvent(e);
 		EventUtils.TriggerListener(Driver.PISTON_RETRACT, "piston_retract", mce);
 	}
 
