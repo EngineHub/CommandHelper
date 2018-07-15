@@ -2,15 +2,21 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCDoubleChest;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCInventoryHolder;
+import com.laytonsmith.abstraction.MCInventoryView;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlayerInventory;
+import com.laytonsmith.abstraction.MCVirtualInventoryHolder;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
@@ -18,8 +24,10 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -39,6 +47,9 @@ import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class InventoryManagement {
@@ -53,6 +64,7 @@ public class InventoryManagement {
 			+ " data: The data value of the item, or the damage if a damageable item,"
 			+ " qty: The number of items in their inventory,"
 			+ " meta: An array of item meta or null if none exists (see {{function|get_itemmeta}} for details).";
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class pinv extends AbstractFunction {
 
@@ -81,9 +93,8 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class,
-				CRECastException.class, CRERangeException.class,
-				CRENotFoundException.class};
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CRECastException.class,
+					CRERangeException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -186,7 +197,7 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class};
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -227,8 +238,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player]} Closes the inventory of the current player, "
-					+ "or of the specified player.";
+			return "void {[player]} Closes the inventory of the current player, or of the specified player.";
 		}
 
 		@Override
@@ -242,8 +252,8 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class,
-				CREInsufficientArgumentsException.class};
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class,
+					CREInsufficientArgumentsException.class};
 		}
 
 		@Override
@@ -302,7 +312,7 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class};
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -366,7 +376,7 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class};
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -450,7 +460,8 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class, CRECastException.class, CREFormatException.class};
+			return new Class[]{CREPlayerOfflineException.class, CRECastException.class, CREFormatException.class,
+					CRELengthException.class};
 		}
 
 		@Override
@@ -625,7 +636,7 @@ public class InventoryManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREPlayerOfflineException.class, CREFormatException.class, CRERangeException.class,
-				CRECastException.class, CRENotFoundException.class};
+					CRECastException.class, CRENotFoundException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -716,8 +727,8 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREFormatException.class,
-				CREPlayerOfflineException.class, CRENotFoundException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CRELengthException.class,
+					CREPlayerOfflineException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -814,7 +825,7 @@ public class InventoryManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREFormatException.class, CREPlayerOfflineException.class,
-				CRENotFoundException.class, CREIllegalArgumentException.class};
+					CRENotFoundException.class, CREIllegalArgumentException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -906,7 +917,7 @@ public class InventoryManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREPlayerOfflineException.class, CRERangeException.class,
-				CREFormatException.class, CRENotFoundException.class};
+					CREFormatException.class, CRENotFoundException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -1012,7 +1023,8 @@ public class InventoryManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREFormatException.class, CRECastException.class, CRERangeException.class,
-				CREPlayerOfflineException.class, CRENotFoundException.class, CREIllegalArgumentException.class};
+					CREPlayerOfflineException.class, CRENotFoundException.class, CREIllegalArgumentException.class,
+					CRELengthException.class};
 		}
 
 		@Override
@@ -1101,8 +1113,8 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREPlayerOfflineException.class,
-				CREFormatException.class, CRENotFoundException.class, CRERangeException.class};
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class, CRELengthException.class,
+					CREFormatException.class, CRENotFoundException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -1195,7 +1207,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], pinvArray} Sets a player's enderchest's inventory to the specified inventory object."
+			return "void {[player], invArray} Sets a player's enderchest's inventory to the specified inventory object."
 					+ " An inventory object is one that matches what is returned by penderchest(), so set_penderchest(penderchest()),"
 					+ " while pointless, would be a correct call. ---- The array must be associative, "
 					+ " however, it may skip items, in which case, only the specified values will be changed. If"
@@ -1210,7 +1222,8 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class, CRECastException.class, CREFormatException.class};
+			return new Class[]{CREPlayerOfflineException.class, CRECastException.class, CREFormatException.class,
+					CRELengthException.class};
 		}
 
 		@Override
@@ -1310,9 +1323,8 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class,
-				CRECastException.class, CRERangeException.class,
-				CRENotFoundException.class};
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CRECastException.class,
+					CRERangeException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -1393,8 +1405,8 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class, CRECastException.class,
-				CRELengthException.class};
+			return new Class[]{CREFormatException.class, CREBadEntityException.class, CREInvalidWorldException.class,
+					CRECastException.class, CRERangeException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -1437,7 +1449,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "array {entityID, slotNumber | locationArray, slotNumber} If a number is provided, it is assumed to be an entity, and if the entity supports"
+			return "array {specifier, slot} If a number is provided, it is assumed to be an entity, and if the entity supports"
 					+ " inventories, it will be valid. Otherwise, if a location array is provided, it is assumed to be a block (chest, brewer, etc)"
 					+ " and interpreted thusly. Depending on the inventory type, the max index will vary. If the index is too large, a RangeException is thrown,"
 					+ " otherwise, the item at that location is returned as an item array, or null, if no item is there. You can determine the inventory type"
@@ -1456,8 +1468,8 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class, CRECastException.class,
-				CRELengthException.class};
+			return new Class[]{CREFormatException.class, CREBadEntityException.class, CREInvalidWorldException.class,
+					CRECastException.class, CRERangeException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -1502,8 +1514,9 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, index, itemArray | locationArray, index, itemArray} Sets the specified item in the specified slot given either an entityID or a location array of a container"
-					+ " object. See get_inventory_type for more information. The itemArray is an array in the same format as pinv/set_pinv takes.";
+			return "void {specifier, index, itemArray} Sets the specified item in the specified inventory slot."
+					+ " The specifier can be an entity UUID, block location array or virtual inventory id. ---- "
+					+ ITEM_OBJECT;
 		}
 
 		@Override
@@ -1518,8 +1531,8 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREFormatException.class,
-				CRELengthException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CREBadEntityException.class,
+					CREInvalidWorldException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -1556,10 +1569,10 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "string {entityID | locationArray} Returns the inventory type at the location specified, or of the entity specified. If the"
-					+ " entity or location specified is not capable of having an inventory, a FormatException is thrown."
-					+ " ---- Note that not all valid inventory types are actually returnable at this time, due to lack of support in the server, but"
-					+ " the valid return types are: " + StringUtils.Join(MCInventoryType.values(), ", ");
+			return "string {specifier} Returns the inventory type at the location specified, or of the entity specified."
+					+ " If the entity or location specified is not capable of having an inventory, a FormatException is thrown."
+					+ " ---- Note that not all valid inventory types may actually be returnable, due to lack of support"
+					+ " in the server, but the valid return types are: " + StringUtils.Join(MCInventoryType.values(), ", ");
 		}
 
 		@Override
@@ -1574,8 +1587,8 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class, CRECastException.class,
-				CRELengthException.class};
+			return new Class[]{CREFormatException.class, CREBadEntityException.class, CREInvalidWorldException.class,
+					CRECastException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -1610,8 +1623,8 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "int {entityID | locationArray} Returns the max size of the inventory specified. If the block or entity can't have an inventory,"
-					+ " a FormatException is thrown.";
+			return "int {specifier} Returns the max size of the inventory specified."
+					+ " If the block or entity can't have an inventory, a FormatException is thrown.";
 		}
 
 		@Override
@@ -1627,7 +1640,7 @@ public class InventoryManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREBadEntityException.class, CRECastException.class, CREFormatException.class,
-				CREIllegalArgumentException.class, CREInvalidWorldException.class, CRELengthException.class};
+					CREInvalidWorldException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -1663,7 +1676,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "string {entityID | locationArray} Returns the name of the inventory specified. If the block or entity"
+			return "string {specifier} Returns the name of the inventory specified. If the block or entity"
 					+ " can't have an inventory, a FormatException is thrown.";
 		}
 
@@ -1679,7 +1692,7 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class};
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -1744,7 +1757,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "array {entityID, [index] | locationArray, [index]} Gets the inventory for the specified block or entity."
+			return "array {specifier, [index]} Gets an array of the specified inventory."
 					+ " If the block or entity can't have an inventory, a FormatException is thrown. If the index is specified,"
 					+ " only the slot given will be returned. The max index of the array in the array is different for"
 					+ " different types of inventories. If there is no item at the slot specified, null is returned."
@@ -1754,8 +1767,8 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRERangeException.class,
-				CREFormatException.class, CRELengthException.class};
+			return new Class[]{CRECastException.class, CRERangeException.class, CREFormatException.class,
+					CREBadEntityException.class, CREInvalidWorldException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -1817,9 +1830,10 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, pinvArray | locationArray, pinvArray} Sets a block or entity inventory to the specified"
-					+ " inventory object. If the block or entity can't have an inventory, a FormatException is thrown."
-					+ " An inventory object pinvArray is one that matches what is returned by get_inventory(), so"
+			return "void {specifier, invArray} Sets a block or entity inventory to the specified inventory object."
+					+ " The specifier can be an entity UUID, location array, or virtual inventory ID."
+					+ " If the block or entity can't have an inventory, a FormatException is thrown."
+					+ " An inventory object invArray is one that matches what is returned by get_inventory(), so"
 					+ " set_inventory(123, get_inventory(123)) while pointless, would be a correct call."
 					+ " ---- The array must be associative, however, it may skip items, in which case, only the specified"
 					+ " values will be changed. If a key is out of range, or otherwise improper, a warning is emitted,"
@@ -1832,8 +1846,8 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREFormatException.class,
-				CRELengthException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CREBadEntityException.class,
+					CREInvalidWorldException.class, CRERangeException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -1865,12 +1879,7 @@ public class InventoryManagement {
 
 			for(String key : array.stringKeySet()) {
 				try {
-					int index;
-					try {
-						index = Integer.parseInt(key);
-					} catch (NumberFormatException e) {
-						throw e;
-					}
+					int index = Integer.parseInt(key);
 					if(index < 0 || index >= size) {
 						ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found in array passed to set_inventory(), so ignoring.");
 					} else {
@@ -1901,19 +1910,19 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "int {target, itemArray | target, itemID, qty, [metaArray]} Add to block or entity inventory the"
-					+ " specified item. The target must be a location array or entity UUID. Unlike set_inventory(),"
-					+ " this does not specify a slot. The items are distributed in the inventory, first filling up"
-					+ " slots that have the same item type, up to the max stack size, then fills up empty slots, until"
-					+ " either the entire inventory is filled, or the entire amount has been given. If the inventory is"
-					+ " full, number of items that were not added is returned, which will be less than or equal to the"
-					+ " quantity provided. Otherwise, returns 0.";
+			return "int {specifier, itemArray | specifier, itemID, qty, [metaArray]} Add to inventory the specified item."
+					+ " The specifier must be a location array, entity UUID, or virtual inventory id."
+					+ " The items are distributed in the inventory, first filling up slots that have the same item type,"
+					+ " up to the max stack size, then fills up empty slots, until either the entire inventory is filled,"
+					+ " or the entire amount has been given. If the inventory is full, number of items that were not"
+					+ " added is returned, which will be less than or equal to the quantity provided. Otherwise, returns 0.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREFormatException.class, CRELengthException.class,
-				CREIllegalArgumentException.class, CRENotFoundException.class, CRERangeException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CREBadEntityException.class,
+					CREInvalidWorldException.class, CREIllegalArgumentException.class, CRENotFoundException.class,
+					CRERangeException.class};
 		}
 
 		@Override
@@ -1974,15 +1983,16 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "int {target, itemArray | target, itemID, qty} Works in reverse of add_to_inventory(), but"
+			return "int {specifier, itemArray | specifier, itemID, qty} Works in reverse of add_to_inventory(), but"
 					+ " returns the number of items actually taken, which will be from 0 to qty. Target must be a"
 					+ " location array or entity UUID." + ITEM_MATCHING;
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREFormatException.class, CRERangeException.class,
-				CRELengthException.class, CRENotFoundException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CREBadEntityException.class,
+					CREInvalidWorldException.class, CRERangeException.class, CRENotFoundException.class,
+					CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -2060,8 +2070,8 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRERangeException.class, CREPlayerOfflineException.class,
-				CREFormatException.class, CRENotFoundException.class};
+			return new Class[]{CRERangeException.class, CREPlayerOfflineException.class, CREFormatException.class,
+					CRENotFoundException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -2142,8 +2152,8 @@ public class InventoryManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class,
-				CREFormatException.class, CRENotFoundException.class};
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class, CREFormatException.class,
+					CRENotFoundException.class};
 		}
 
 		@Override
@@ -2193,75 +2203,455 @@ public class InventoryManagement {
 		}
 	}
 
-//	@api
-//	public static class pinv_consolidate extends AbstractFunction {
-//
-//		public String getName() {
-//			return "pinv_consolidate";
-//		}
-//
-//		public Integer[] numArgs() {
-//			return new Integer[]{0, 1};
-//		}
-//
-//		public String docs() {
-//			return "void {[player]} Consolidates a player's inventory as much as possible."
-//					+ " There is no guarantee anything will happen after this function"
-//					+ " is called, and there is no way to specify details about how"
-//					+ " consolidation occurs, however, the following heuristics are followed:"
-//					+ " The hotbar items will not be moved from the hotbar, unless there are"
-//					+ " two+ slots that have the same item. Items in the main inventory area"
-//					+ " will be moved closer to the bottom of the main inventory. No empty slots"
-//					+ " will be filled in the hotbar.";
-//		}
-//
-//		public Class<? extends CREThrowable>[] thrown() {
-//			return new Class[]{};
-//		}
-//
-//		public boolean isRestricted() {
-//			return true;
-//		}
-//
-//		public boolean preResolveVariables() {
-//			return true;
-//		}
-//
-//		public Boolean runAsync() {
-//			return false;
-//		}
-//
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-//			MCPlayer p = environment.GetPlayer();
-//			if(args.length == 1){
-//				p = Static.GetPlayer(args[0], t);
-//			}
-//			//First, we need to address the hotbar
-//			for(int i = 0; i < 10; i++){
-//				//If the stack size is maxed out, we're done.
-//			}
-//
-//			return CVoid.VOID;
-//		}
-//
-//		public CHVersion since() {
-//			return CHVersion.V3_3_1;
-//		}
-//	}
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class popen_inventory extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "popen_inventory";
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], specifier} Opens an inventory for a player. The specifier must be an entity UUID,"
+					+ " location array of a container block, or a virtual inventory id.";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			MCInventory inv;
+			if(args.length == 2) {
+				p = Static.GetPlayer(args[0], t);
+				inv = GetInventory(args[1], p.getWorld(), t);
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				inv = GetInventory(args[0], p.getWorld(), t);
+			}
+			p.openInventory(inv);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREFormatException.class, CREBadEntityException.class,
+					CREInvalidWorldException.class, CRECastException.class, CRELengthException.class,
+					CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class pinventory_holder extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "pinventory_holder";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {[player]} Returns the block location, entity UUID, or virtual id of the inventory the player"
+					+ " is currently viewing. If the player is viewing their own inventory or no inventory, the"
+					+ " player's UUID is returned. When the inventory is virtual but has no id, it will return null."
+					+ " The returned value can be used in other inventory functions unless it is null.";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			if(args.length == 1) {
+				p = Static.GetPlayer(args[0], t);
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			}
+			MCInventoryView view = p.getOpenInventory();
+			if(view == null) {
+				// probably tests
+				return CNull.NULL;
+			}
+			return GetInventoryHolder(view.getTopInventory(), t);
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CREFormatException.class, CREBadEntityException.class,
+					CREInvalidWorldException.class, CRECastException.class, CRELengthException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class get_inventory_viewers extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_inventory_viewers";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {specifier} Gets all players currently viewing this inventory."
+					+ " The specifier can be an entity UUID, block location array, or virtual inventory id.";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCInventory inv = GetInventory(args[0], null, t);
+			CArray list = new CArray(t);
+			for(MCHumanEntity viewer : inv.getViewers()) {
+				list.push(new CString(viewer.getName(), t), t);
+			}
+			return list;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREBadEntityException.class, CREInvalidWorldException.class,
+					CRECastException.class, CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class get_virtual_inventories extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_virtual_inventories";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Returns an array of virtual inventory ids.";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			CArray list = new CArray(t);
+			for(String id : VIRTUAL_INVENTORIES.keySet()) {
+				list.push(new CString(id, t), t);
+			}
+			return list;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class create_virtual_inventory extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "create_virtual_inventory";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3, 4};
+		}
+
+		@Override
+		public String docs() {
+			List<String> virtual = new ArrayList<>();
+			for(MCInventoryType type : MCInventoryType.values()) {
+				if(type.canVirtualize()) {
+					virtual.add(type.name());
+				}
+			}
+			return "void {id, [type/size], [title], [inventory]} Creates a virtual inventory and holds it under the"
+					+ " specified id. The string id should not be a UUID."
+					+ " If the id is already in use, an IllegalArgumentException will be thrown."
+					+ " You can use this id in other inventory functions to modify the contents, among other things."
+					+ " If a size is specified instead of a type, it is rounded up to the nearest multiple of 9."
+					+ " Size may be higher than 54, but the slots on the inventory background texture will not line up."
+					+ " A title for the top of the inventory may be given, but it will use the default for that"
+					+ " that inventory type if null is specified."
+					+ " An optional inventory array may be specified, otherwise the inventory will start empty."
+					+ " Available inventory types: " + StringUtils.Join(virtual, ", ", " or ", ", or ");
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			String id = args[0].val();
+			if(VIRTUAL_INVENTORIES.get(id) != null) {
+				throw new CREIllegalArgumentException("An inventory using the id \"" + id + "\" already exists.", t);
+			}
+
+			MCInventoryType type = null;
+			int size = 54;
+			String title = null;
+			if(args.length > 1) {
+				if(args[1] instanceof CNumber) {
+					size = Static.getInt32(args[1], t);
+					if(size < 9) {
+						size = 9; // minimum
+					} else {
+						size = (size + 8) / 9 * 9; // must be a multiple of 9
+					}
+				} else {
+					try {
+						type = MCInventoryType.valueOf(args[1].val().toUpperCase());
+					} catch (IllegalArgumentException iae) {
+						throw new CREIllegalArgumentException("Invalid inventory type: " + args[1].val().toUpperCase(), t);
+					}
+					if(!type.canVirtualize()) {
+						throw new CREIllegalArgumentException("Unable to create a virtual " + args[1].val().toUpperCase(), t);
+					}
+				}
+				if(args.length > 2) {
+					title = args[2].nval();
+				}
+			}
+
+			MCInventoryHolder holder = StaticLayer.GetConvertor().CreateInventoryHolder(id);
+			MCInventory inv;
+			if(type == null) {
+				inv = Static.getServer().createInventory(holder, size, title);
+			} else {
+				inv = Static.getServer().createInventory(holder, type, title);
+			}
+
+			if(args.length == 4) {
+				if(!(args[3] instanceof CArray)) {
+					throw new CRECastException("Inventory argument not an array in " + getName(), t);
+				}
+				CArray array = (CArray) args[3];
+				for(String key : array.stringKeySet()) {
+					try {
+						int index = Integer.parseInt(key);
+						if(index < 0 || index >= size) {
+							ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found in array passed to "
+									+ getName() + "(), so ignoring.");
+						} else {
+							MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index, t), t);
+							inv.setItem(index, is);
+						}
+					} catch (NumberFormatException e) {
+						ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to "
+								+ getName() + "(), but \"" + key + "\" was found. Ignoring.");
+					}
+				}
+			}
+
+			VIRTUAL_INVENTORIES.put(id, inv);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CRECastException.class, CREFormatException.class,
+					CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	@api
+	public static class delete_virtual_inventory extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "delete_virtual_inventory";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {id} Deletes a virtual inventory. The inventory will be closed for all viewers."
+					+ " Returns whether or not an inventory with that id existed and was removed.";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			String id = args[0].val();
+			MCInventory inv = VIRTUAL_INVENTORIES.get(id);
+			if(inv != null) {
+				for(MCHumanEntity viewer : inv.getViewers()) {
+					viewer.closeInventory();
+				}
+				VIRTUAL_INVENTORIES.remove(id);
+				return CBoolean.TRUE;
+			}
+			return CBoolean.FALSE;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_2;
+		}
+	}
+
+	public static final HashMap<String, MCInventory> VIRTUAL_INVENTORIES = new HashMap<>();
+
+	/**
+	 * Returns the inventory that this construct specifies.
+	 * @param specifier The construct representing the inventory holder, whether entity UUID, location array or virtual id.
+	 * @param t
+	 * @return
+	 */
 	private static MCInventory GetInventory(Construct specifier, MCWorld w, Target t) {
 		MCInventory inv;
 		if(specifier instanceof CArray) {
 			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
 			inv = StaticLayer.GetConvertor().GetLocationInventory(l);
-		} else {
-			MCEntity entity = Static.getEntity(specifier, t);
-			inv = StaticLayer.GetConvertor().GetEntityInventory(entity);
-		}
-		if(inv == null) {
-			throw new CREFormatException("The entity or location specified is not capable of having an inventory.", t);
-		} else {
+			if(inv == null) {
+				throw new CREIllegalArgumentException("The location specified is not capable of having an inventory.", t);
+			}
 			return inv;
 		}
+		if(specifier.val().length() == 36 || specifier.val().length() == 32) {
+			try {
+				MCEntity entity = Static.getEntity(specifier, t);
+				inv = StaticLayer.GetConvertor().GetEntityInventory(entity);
+				if(inv == null) {
+					throw new CREIllegalArgumentException("The entity specified is not capable of having an inventory.", t);
+				}
+				return inv;
+			} catch (CREFormatException iae) {
+				// not a UUID
+			}
+		}
+		inv = VIRTUAL_INVENTORIES.get(specifier.val());
+		if(inv == null) {
+			throw new CREIllegalArgumentException("An inventory for \"" + specifier.val() + "\" does not exist.", t);
+		}
+		return inv;
+	}
+
+	/**
+	 * Returns a construct representing an inventory's holder that can be used in inventory functions.
+	 * This returns CNull if this inventory does not have a holder or if it's a virtual inventory from another plugin.
+	 * @param inv
+	 * @param t
+	 * @return The construct representation of the inventory holder
+	 */
+	public static Construct GetInventoryHolder(MCInventory inv, Target t) {
+		MCInventoryHolder h = inv.getHolder();
+		if(h instanceof MCEntity) {
+			return new CString(((MCEntity) h).getUniqueId().toString(), t);
+		} else if(h instanceof MCBlockState) {
+			return ObjectGenerator.GetGenerator().location(((MCBlockState) h).getLocation(), false);
+		} else if(h instanceof MCDoubleChest) {
+			return ObjectGenerator.GetGenerator().location(((MCDoubleChest) h).getLocation(), false);
+		} else if(h instanceof MCVirtualInventoryHolder) {
+			return new CString(((MCVirtualInventoryHolder) h).getID(), t);
+		}
+		return CNull.NULL;
 	}
 
 	private static final String ITEM_MATCHING = " ---- The item array also serves as a map for what to compare."

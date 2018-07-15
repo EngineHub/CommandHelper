@@ -12,9 +12,13 @@ import com.laytonsmith.core.CHLog.Tags;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.DoubleChest;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -135,7 +139,17 @@ public class BukkitMCInventory implements MCInventory {
 
 	@Override
 	public MCInventoryHolder getHolder() {
-		return new BukkitMCInventoryHolder(i.getHolder());
+		InventoryHolder ih = i.getHolder();
+		if(ih instanceof BlockState) {
+			return (MCInventoryHolder) BukkitConvertor.BukkitGetCorrectBlockState((BlockState) ih);
+		} else if(ih instanceof Entity) {
+			return (MCInventoryHolder) BukkitConvertor.BukkitGetCorrectEntity((Entity) ih);
+		} else if(ih instanceof BukkitMCVirtualInventoryHolder.VirtualHolder) {
+			return new BukkitMCVirtualInventoryHolder(ih);
+		} else if(ih instanceof DoubleChest) {
+			return new BukkitMCDoubleChest((DoubleChest) ih);
+		}
+		return new BukkitMCInventoryHolder(ih);
 	}
 
 	@Override

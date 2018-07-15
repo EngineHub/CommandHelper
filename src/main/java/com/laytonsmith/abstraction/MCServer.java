@@ -56,11 +56,9 @@ public interface MCServer extends AbstractionObject {
 
 	MCCommandMap getCommandMap();
 
-	MCInventory createInventory(MCInventoryHolder owner, MCInventoryType type);
+	MCInventory createInventory(MCInventoryHolder owner, MCInventoryType type, String title);
 
 	MCInventory createInventory(MCInventoryHolder owner, int size, String title);
-
-	MCInventory createInventory(MCInventoryHolder owner, int size);
 
 	/**
 	 * Provides access to local user data associated with a name. Depending on the implementation, a web lookup with the

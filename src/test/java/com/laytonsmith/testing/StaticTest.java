@@ -15,6 +15,7 @@ import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
@@ -777,6 +778,11 @@ public class StaticTest {
 
 		@Override
 		public MCInventory GetLocationInventory(MCLocation location) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCInventoryHolder CreateInventoryHolder(String id) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
