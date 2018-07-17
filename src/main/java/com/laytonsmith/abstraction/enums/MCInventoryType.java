@@ -6,18 +6,33 @@ import com.laytonsmith.annotations.MEnum;
 public enum MCInventoryType {
 	BREWING,
 	CHEST,
-	CRAFTING,
-	CREATIVE,
+	CRAFTING(false), // bukkit doesn't allow opening
+	CREATIVE(false), // bukkit doesn't allow opening
 	DISPENSER,
 	DROPPER,
-	ENCHANTING,
+	ENCHANTING(false), // non-functional
 	ENDER_CHEST,
 	FURNACE,
 	HOPPER,
-	MERCHANT,
+	MERCHANT(false), // doesn't open
 	PLAYER,
 	WORKBENCH,
 	ANVIL,
 	BEACON,
-	SHULKER_BOX
+	SHULKER_BOX;
+
+	// Whether or not this inventory type can be created and used virtually
+	private final boolean canVirtualize;
+
+	MCInventoryType() {
+		this.canVirtualize = true;
+	}
+
+	MCInventoryType(boolean virtual) {
+		this.canVirtualize = virtual;
+	}
+
+	public boolean canVirtualize() {
+		return this.canVirtualize;
+	}
 }

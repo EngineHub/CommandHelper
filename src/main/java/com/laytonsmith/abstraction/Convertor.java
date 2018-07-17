@@ -128,6 +128,8 @@ public interface Convertor {
 	 */
 	MCInventory GetLocationInventory(MCLocation location);
 
+	MCInventoryHolder CreateInventoryHolder(String id);
+
 	/**
 	 * Run whenever the server is shutting down (or restarting). There is no guarantee provided as to what thread the
 	 * runnables actually run on, so you should ensure that the runnable executes it's actions on the appropriate thread
