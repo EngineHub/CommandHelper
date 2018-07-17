@@ -485,6 +485,9 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 				case CREEPER:
 					mobType = Creeper.class;
 					break;
+				case DONKEY:
+					mobType = Donkey.class;
+					break;
 				case ELDERGUARDIAN:
 					mobType = ElderGuardian.class;
 					break;
@@ -537,6 +540,9 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 						}
 					}
 					break;
+				case HUSK:
+					mobType = Husk.class;
+					break;
 				case ILLUSIONER:
 					mobType = Illusioner.class;
 					break;
@@ -550,7 +556,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					mobType = MagmaCube.class;
 					break;
 				case MOOSHROOM:
+				case MUSHROOMCOW:
 					mobType = MushroomCow.class;
+					break;
+				case MULE:
+					mobType = Mule.class;
 					break;
 				case OCELOT:
 					mobType = Ocelot.class;
@@ -598,10 +608,14 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 						subClass = "";
 					}
 					break;
+				case SKELETONHORSE:
+					mobType = SkeletonHorse.class;
+					break;
 				case SLIME:
 					mobType = Slime.class;
 					break;
 				case SNOWGOLEM:
+				case SNOWMAN:
 					mobType = Snowman.class;
 					break;
 				case SPIDER:
@@ -613,6 +627,21 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 				case SQUID:
 					mobType = Squid.class;
 					break;
+				case STRAY:
+					mobType = Stray.class;
+					break;
+				case WITCH:
+					mobType = Witch.class;
+					break;
+				case WITHER:
+					mobType = Wither.class;
+					break;
+				case WITHERSKELETON:
+					mobType = WitherSkeleton.class;
+					break;
+				case WOLF:
+					mobType = Wolf.class;
+					break;
 				case VEX:
 					mobType = Vex.class;
 					break;
@@ -621,15 +650,6 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					break;
 				case VINDICATOR:
 					mobType = Vindicator.class;
-					break;
-				case WITCH:
-					mobType = Witch.class;
-					break;
-				case WITHER:
-					mobType = Wither.class;
-					break;
-				case WOLF:
-					mobType = Wolf.class;
 					break;
 				case ZOMBIE:
 					mobType = Zombie.class;
@@ -665,6 +685,12 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							}
 						}
 					}
+					break;
+				case ZOMBIEHORSE:
+					mobType = ZombieHorse.class;
+					break;
+				case ZOMBIEVILLAGER:
+					mobType = ZombieVillager.class;
 					break;
 			}
 		} catch (NoClassDefFoundError e) {

@@ -3,8 +3,8 @@ package com.laytonsmith.abstraction.enums;
 import com.laytonsmith.annotations.MEnum;
 
 /**
- * These don't directly map to entity types, because this is mostly used for spawining mobs.
- *
+ * Not all of these directly map to entity types.
+ * These should be considered aliases for the spawn_mob() function and all living entity types.
  */
 @MEnum("Mobs")
 public enum MCMobs {
@@ -14,20 +14,24 @@ public enum MCMobs {
 	CHICKEN,
 	COW,
 	CREEPER,
+	DONKEY,
 	ELDERGUARDIAN,
 	ENDERDRAGON,
 	ENDERMAN,
 	ENDERMITE,
 	EVOKER,
 	GHAST,
-	GUARDIAN,
 	GIANT,
+	GUARDIAN,
 	HORSE,
+	HUSK,
 	ILLUSIONER,
 	IRONGOLEM,
 	LLAMA,
 	MAGMACUBE,
 	MOOSHROOM,
+	MULE,
+	MUSHROOMCOW,
 	OCELOT,
 	PARROT,
 	PIG,
@@ -38,17 +42,22 @@ public enum MCMobs {
 	SHULKER,
 	SILVERFISH,
 	SKELETON,
+	SKELETONHORSE,
 	SLIME,
 	SNOWGOLEM,
+	SNOWMAN,
 	SPIDER,
 	SPIDERJOCKEY,
 	SQUID,
+	STRAY,
+	WITCH,
+	WITHER,
+	WITHERSKELETON,
+	WOLF,
 	VEX,
 	VILLAGER,
 	VINDICATOR,
-	WITCH,
-	WITHER,
-	WITHER_SKULL,
-	WOLF,
-	ZOMBIE
+	ZOMBIE,
+	ZOMBIEHORSE,
+	ZOMBIEVILLAGER
 }
