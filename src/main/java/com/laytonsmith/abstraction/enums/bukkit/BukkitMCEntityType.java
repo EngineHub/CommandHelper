@@ -32,10 +32,11 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 		ArrayList<EntityType> counted = new ArrayList<>();
 		for(MCVanillaEntityType v : MCVanillaEntityType.values()) {
 			if(v.existsInCurrent()) {
-				EntityType type = getBukkitType(v);
-				if(type == null) {
-					CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not find a matching entity type for " + v.name()
-							+ ". This is an error, please report this to the bug tracker.", Target.UNKNOWN);
+				EntityType type;
+				try {
+					type = getBukkitType(v);
+				} catch (IllegalArgumentException | NoSuchFieldError ex) {
+					CHLog.GetLogger().w(CHLog.Tags.RUNTIME, "Could not find a Bukkit EntityType for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
 				BukkitMCEntityType wrapper = new BukkitMCEntityType(type, v);
@@ -89,16 +90,12 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 	}
 
 	// Add exceptions here
-	public static EntityType getBukkitType(MCVanillaEntityType v) {
+	private static EntityType getBukkitType(MCVanillaEntityType v) {
 		switch(v) {
 			case ENDER_EYE:
 				return EntityType.ENDER_SIGNAL;
 		}
-		try {
-			return EntityType.valueOf(v.name());
-		} catch (IllegalArgumentException iae) {
-			return null;
-		}
+		return EntityType.valueOf(v.name());
 	}
 
 	// This is here because it shouldn't be getting changed from API
