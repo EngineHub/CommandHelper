@@ -18,8 +18,9 @@ public final class EventBuilder {
 	private EventBuilder() {
 	}
 
-	private static final Map<Class<BindableEvent>, Method> methods = new HashMap<Class<BindableEvent>, Method>();
-	private static final Map<Class<BindableEvent>, Class<BindableEvent>> eventImplementations = new HashMap<Class<BindableEvent>, Class<BindableEvent>>();
+	private static final Map<Class<BindableEvent>, Method> METHODS = new HashMap<Class<BindableEvent>, Method>();
+	private static final Map<Class<BindableEvent>, Class<BindableEvent>> EVENT_IMPLEMENTATIONS =
+			new HashMap<Class<BindableEvent>, Class<BindableEvent>>();
 
 	static {
 		//First, we need to pull all the event implementors
@@ -34,7 +35,7 @@ public final class EventBuilder {
 							break;
 						}
 					}
-					eventImplementations.put(cinterface, c);
+					EVENT_IMPLEMENTATIONS.put(cinterface, c);
 				}
 			}
 		}
@@ -46,8 +47,8 @@ public final class EventBuilder {
 	 * @param clazz
 	 */
 	private static void warmup(Class<? extends BindableEvent> clazz) {
-		if(!methods.containsKey((Class<BindableEvent>) clazz)) {
-			Class implementor = eventImplementations.get((Class<BindableEvent>) clazz);
+		if(!METHODS.containsKey((Class<BindableEvent>) clazz)) {
+			Class implementor = EVENT_IMPLEMENTATIONS.get((Class<BindableEvent>) clazz);
 			Method method = null;
 			for(Method m : implementor.getMethods()) {
 				if(m.getName().equals("_instantiate") && (m.getModifiers() & Modifier.STATIC) != 0) {
@@ -61,16 +62,16 @@ public final class EventBuilder {
 						+ " if an attempt is made. Did someone forget to add"
 						+ " public static <Event> _instantiate(...) to " + clazz.getSimpleName() + "?");
 			}
-			methods.put((Class<BindableEvent>) clazz, method);
+			METHODS.put((Class<BindableEvent>) clazz, method);
 		}
 	}
 
 	public static <T extends BindableEvent> T instantiate(Class<? extends BindableEvent> clazz, Object... params) {
 		try {
-			if(!methods.containsKey((Class<BindableEvent>) clazz)) {
+			if(!METHODS.containsKey((Class<BindableEvent>) clazz)) {
 				warmup(clazz);
 			}
-			return (T) methods.get((Class<BindableEvent>) clazz).invoke(null, params);
+			return (T) METHODS.get((Class<BindableEvent>) clazz).invoke(null, params);
 
 		} catch(Exception e) {
 			e.printStackTrace();
