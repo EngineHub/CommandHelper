@@ -61,7 +61,6 @@ import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
-import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.events.drivers.EntityEvents.entity_death;
@@ -78,7 +77,6 @@ import com.laytonsmith.core.functions.StringHandling;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IllegalFormatConversionException;
 import java.util.List;
 import java.util.Map;
@@ -1876,10 +1874,10 @@ public class PlayerEvents {
 
 	}
 
-	private static final Set<Integer> THRESHOLD_LIST = new HashSet<>();
+	private static final Map<Integer, Integer> THRESHOLD_LIST = new HashMap<>();
 
 	public static Set<Integer> GetThresholdList() {
-		return THRESHOLD_LIST;
+		return THRESHOLD_LIST.keySet();
 	}
 
 	private static final Map<Integer, Map<String, MCLocation>> LAST_PLAYER_LOCATIONS = new HashMap<>();
@@ -1925,33 +1923,27 @@ public class PlayerEvents {
 
 		@Override
 		public void bind(BoundEvent event) {
-			int threshold = 1;
 			Map<String, Construct> prefilters = event.getPrefilter();
-			if(prefilters.containsKey("threshold")) {
-				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
-			}
-			THRESHOLD_LIST.add(threshold);
+			int threshold = (prefilters.containsKey("threshold")
+					? Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN) : 1);
+			Integer count = THRESHOLD_LIST.get(threshold);
+			THRESHOLD_LIST.put(threshold, (count != null ? count + 1 : 1));
 		}
 
 		@Override
 		public void unbind(BoundEvent event) {
-			int threshold = 1;
 			Map<String, Construct> prefilters = event.getPrefilter();
-			if(prefilters.containsKey("threshold")) {
-				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
-			}
-			for(BoundEvent b : EventUtils.GetEvents(event.getDriver())) {
-				if(b.getId().equals(event.getId())) {
-					continue;
-				}
-				if(b.getPrefilter().containsKey("threshold")) {
-					if(threshold == Static.getInt(b.getPrefilter().get("threshold"), Target.UNKNOWN)) {
-						return;
-					}
+			int threshold = (prefilters.containsKey("threshold")
+					? Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN) : 1);
+			Integer count = THRESHOLD_LIST.get(threshold);
+			if(count != null) {
+				if(count <= 1) {
+					THRESHOLD_LIST.remove(threshold);
+					LAST_PLAYER_LOCATIONS.remove(threshold);
+				} else {
+					THRESHOLD_LIST.put(threshold, count - 1);
 				}
 			}
-			THRESHOLD_LIST.remove(threshold);
-			LAST_PLAYER_LOCATIONS.remove(threshold);
 		}
 
 		@Override
