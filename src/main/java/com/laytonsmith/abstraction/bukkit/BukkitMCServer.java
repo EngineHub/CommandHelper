@@ -35,8 +35,8 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.server.BroadcastMessageEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.Recipe;
 
@@ -254,18 +254,26 @@ public class BukkitMCServer implements MCServer {
 	 */
 	private int bukkitBroadcastMessage(String message, Set<CommandSender> recipients) {
 
-		// Fire a BroadcastMessageEvent for this broadcast.
-		BroadcastMessageEvent broadcastMessageEvent = new BroadcastMessageEvent(message, recipients);
-		this.s.getPluginManager().callEvent(broadcastMessageEvent);
+		try {
+			// Fire a BroadcastMessageEvent for this broadcast.
+			// We have to use reflection to prevent the entire plugin from failing to load if not on MC 1.12+
+			Class broadcastMessageClass = Class.forName("org.bukkit.event.server.BroadcastMessageEvent");
+			Event broadcastMessageEvent = (Event) ReflectionUtils.newInstance(broadcastMessageClass,
+					new Class[]{String.class, Set.class},
+					new Object[]{message, recipients});
+			this.s.getPluginManager().callEvent(broadcastMessageEvent);
 
-		// Return if the event was cancelled.
-		if(broadcastMessageEvent.isCancelled()) {
-			return 0;
+			// Return if the event was cancelled.
+			if((Boolean) ReflectionUtils.invokeMethod(broadcastMessageEvent, "isCancelled")) {
+				return 0;
+			}
+
+			// Get the possibly modified message and recipients.
+			message = (String) ReflectionUtils.invokeMethod(broadcastMessageEvent, "getMessage");
+			recipients = (Set<CommandSender>) ReflectionUtils.invokeMethod(broadcastMessageEvent, "getRecipients"); // This returns the same reference, but breaks less likely.
+		} catch (ClassNotFoundException ex) {
+			// probably prior to 1.12
 		}
-
-		// Get the possibly modified message and recipients.
-		message = broadcastMessageEvent.getMessage();
-		recipients = broadcastMessageEvent.getRecipients(); // This returns the same reference, but breaks less likely.
 
 		// Perform the actual broadcast to all remaining recipients.
 		for(CommandSender recipient : recipients) {
