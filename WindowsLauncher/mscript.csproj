@@ -22,8 +22,8 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <SupportUrl>http://www.methodscript.com</SupportUrl>
-    <ErrorReportUrl>http://www.methodscript.com</ErrorReportUrl>
+    <SupportUrl>https://methodscript.com</SupportUrl>
+    <ErrorReportUrl>https://methodscript.com</ErrorReportUrl>
     <TargetCulture>en</TargetCulture>
     <ProductName>MethodScript</ProductName>
     <PublisherName>MethodScript Team</PublisherName>
@@ -86,7 +86,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="WindowsLauncher_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
