@@ -7,7 +7,7 @@
 #To put it back in normal operations, you can run unset DEBUG_MSCRIPT
 #on a unix system.
 if [ "$#" -eq 0 ]; then
-		java -jar "%%LOCATION%%" interpreter --location $0
+		java -jar "%%LOCATION%%" interpreter --location----- $0
 else
 		SCRIPT="$1"
 		shift 1
