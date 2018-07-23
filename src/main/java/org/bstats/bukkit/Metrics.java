@@ -1,3 +1,4 @@
+// CHECKSTLYE:OFF
 package org.bstats.bukkit;
 
 import org.bukkit.Bukkit;
@@ -668,3 +669,4 @@ public class Metrics {
 
     }
 }
+// CHECKSTYLE:ON

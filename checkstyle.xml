@@ -18,7 +18,10 @@
 	<!-- Allow "@SuppressWarnings(checkstyle:<CHECK>)" checkstyle violation suppression -->
 	<module name="SuppressWarningsFilter"/>
 	
-	<module name="TreeWalker">
+	
+	<module name="TreeWalker">		
+		<!-- Allow "//CHECKSTYLE:OFF/ON" -->
+		<module name="SuppressionCommentFilter"/>
 		
 		<!-- Enable usage of "@SuppressWarnings(checkstyle:<CHECK>)" to suppress checkstyle violations -->
 		<module name="SuppressWarningsHolder"/>
