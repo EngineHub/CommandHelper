@@ -25,7 +25,6 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMapMeta;
 import com.laytonsmith.abstraction.MCMetadataValue;
-import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPotionData;
@@ -488,21 +487,10 @@ public class ObjectGenerator {
 				ma.set("author", author, t);
 				ma.set("pages", pages, t);
 			} else if(meta instanceof MCSkullMeta) {
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_12_X)) {
-					if(((MCSkullMeta) meta).hasOwner()) {
-						MCOfflinePlayer player = ((MCSkullMeta) meta).getOwningPlayer();
-						ma.set("owner", new CString(player.getName(), t), t);
-						ma.set("owneruuid", new CString(player.getUniqueID().toString(), t), t);
-					} else {
-						ma.set("owner", CNull.NULL, t);
-						ma.set("owneruuid", CNull.NULL, t);
-					}
+				if(((MCSkullMeta) meta).hasOwner()) {
+					ma.set("owner", new CString(((MCSkullMeta) meta).getOwner(), t), t);
 				} else {
-					if(((MCSkullMeta) meta).hasOwner()) {
-						ma.set("owner", new CString(((MCSkullMeta) meta).getOwner(), t), t);
-					} else {
-						ma.set("owner", CNull.NULL, t);
-					}
+					ma.set("owner", CNull.NULL, t);
 				}
 			} else if(meta instanceof MCEnchantmentStorageMeta) {
 				Construct stored;
@@ -825,16 +813,9 @@ public class ObjectGenerator {
 						}
 					}
 				} else if(meta instanceof MCSkullMeta) {
-					if(ma.containsKey("owneruuid")) {
-						Construct id = ma.get("owneruuid", t);
-						if(!(id instanceof CNull)) {
-							((MCSkullMeta) meta).setOwningPlayer(Static.getServer().getOfflinePlayer(Static.GetUUID(id, t)));
-						}
-					} else if(ma.containsKey("owner")) {
-						Construct owner = ma.get("owner", t);
-						if(!(owner instanceof CNull)) {
-							((MCSkullMeta) meta).setOwner(owner.val());
-						}
+					Construct owner = ma.get("owner", t);
+					if(!(owner instanceof CNull)) {
+						((MCSkullMeta) meta).setOwner(owner.val());
 					}
 				} else if(meta instanceof MCEnchantmentStorageMeta) {
 					if(ma.containsKey("stored")) {
