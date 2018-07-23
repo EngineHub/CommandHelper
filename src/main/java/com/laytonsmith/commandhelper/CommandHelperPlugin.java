@@ -74,12 +74,13 @@ import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.TimedRegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.mcstats.Metrics;
+import org.bstats.bukkit.Metrics;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -325,21 +326,13 @@ public class CommandHelperPlugin extends JavaPlugin {
 		BukkitMCSound.build();
 
 		//Metrics
-		try {
-			Metrics m = new Metrics(this);
-			Metrics.Graph graph = m.createGraph("Player count");
-			graph.addPlotter(new Metrics.Plotter("Player count") {
-
-				@Override
-				public int getValue() {
-					return Static.getServer().getOnlinePlayers().size();
-				}
-			});
-			m.addGraph(graph);
-			m.start();
-		} catch (IOException e) {
-			// Failed to submit the stats :-(
-		}
+		Metrics m = new Metrics(this);
+		m.addCustomChart(new Metrics.SingleLineChart("player_count", new Callable<Integer>() {
+			@Override
+			public Integer call() throws Exception {
+				return Static.getServer().getOnlinePlayers().size();
+			}
+		}));
 
 		try {
 			//This may seem redundant, but on a /reload, we want to refresh these

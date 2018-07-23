@@ -152,11 +152,6 @@
 			<url>http://repo1.maven.org/maven2/</url>
 		</repository>
 
-		<repository>
-			<id>Plugin Metrics</id>
-			<url>http://repo.mcstats.org/content/repositories/public/</url>
-		</repository>
-
 		<!-- Java Mail -->
 		<repository>
 			<id>Java.Net</id>
@@ -366,12 +361,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.mcstats.bukkit</groupId>
-			<artifactId>metrics</artifactId>
-			<version>R8-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<type>jar</type>
@@ -525,7 +514,6 @@
 									<include>com.jcraft:jsch:jar:*</include>
 									<include>org.apache.commons:commons-io:jar:*</include>
 									<include>org.xerial:sqlite-jdbc:jar:*</include>
-									<include>org.mcstats.bukkit:metrics:jar:*</include>
 									<include>net.sourceforge.jchardet:jchardet:jar:*</include>
 									<include>redis.clients:jedis:jar:*</include>
 									<include>mysql:mysql-connector-java:jar:*</include>
@@ -574,10 +562,6 @@
 										<shadedPattern>com.laytonsmith.libs.org.sqlite</shadedPattern>
 								</relocation>
 								-->
-								<relocation>
-									<pattern>org.mcstats</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.mcstats</shadedPattern>
-								</relocation>
 								<relocation>
 									<pattern>org.mozilla.intl.chardet</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.mozilla.intl.chardet</shadedPattern>
@@ -665,12 +649,6 @@
 								</filter>
 								<filter>
 									<artifact>log4j:log4j:jar:*</artifact>
-									<includes>
-										<include>**</include>
-									</includes>
-								</filter>
-								<filter>
-									<artifact>org.mcstats.bukkit:metrics:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
