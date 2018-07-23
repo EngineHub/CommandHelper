@@ -122,7 +122,7 @@ public class PropertiesManager extends LinkedHashMap<String, String> {
 		try {
 			InputStream is = new ByteArrayInputStream(properties.getBytes("UTF-8"));
 			load(new LineReader(is));
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			//Either encoding exception or IO error. Neither should actually happen here.
 			throw new Error(ex);
 		}
@@ -185,10 +185,10 @@ public class PropertiesManager extends LinkedHashMap<String, String> {
 	}
 
 	/* Read in a "logical line" from an InputStream/Reader, skip all comment
-     * and blank lines and filter out those leading whitespace characters
-     * (\u0020, \u0009 and \u000c) from the beginning of a "natural line".
-     * Method returns the char length of the "logical line" and stores
-     * the line in "lineBuf".
+	 * and blank lines and filter out those leading whitespace characters
+	 * (\u0020, \u0009 and \u000c) from the beginning of a "natural line".
+	 * Method returns the char length of the "logical line" and stores
+	 * the line in "lineBuf".
 	 */
 	class LineReader {
 
@@ -317,8 +317,8 @@ public class PropertiesManager extends LinkedHashMap<String, String> {
 	}
 
 	/*
-     * Converts encoded &#92;uxxxx to unicode chars
-     * and changes special saved chars to their original forms
+	 * Converts encoded &#92;uxxxx to unicode chars
+	 * and changes special saved chars to their original forms
 	 */
 	private String loadConvert(char[] in, int off, int len, char[] convtBuf) {
 		if(convtBuf.length < len) {

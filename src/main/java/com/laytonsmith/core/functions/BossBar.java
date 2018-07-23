@@ -38,9 +38,9 @@ public class BossBar {
 		return "Functions to create and manage boss bars in Minecraft.";
 	}
 
-	private static final Map<String, MCBossBar> bars = new HashMap<>();
+	private static final Map<String, MCBossBar> BARS = new HashMap<>();
 
-	public static abstract class BossBarFunction extends AbstractFunction {
+	public abstract static class BossBarFunction extends AbstractFunction {
 
 		@Override
 		public boolean isRestricted() {
@@ -79,7 +79,7 @@ public class BossBar {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			CArray ca = new CArray(t);
-			for(String id : bars.keySet()) {
+			for(String id : BARS.keySet()) {
 				ca.push(new CString(id, t), t);
 			}
 			return ca;
@@ -119,7 +119,7 @@ public class BossBar {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
-			if(bars.containsKey(id)) {
+			if(BARS.containsKey(id)) {
 				throw new CREIllegalArgumentException("That boss bar id is already in use.", t);
 			}
 			String title = "";
@@ -138,14 +138,14 @@ public class BossBar {
 				if(ca.containsKey("color")) {
 					try {
 						color = MCBarColor.valueOf(ca.get("color", t).val());
-					} catch(IllegalArgumentException ex) {
+					} catch (IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar color.", t);
 					}
 				}
 				if(ca.containsKey("style")) {
 					try {
 						style = MCBarStyle.valueOf(ca.get("style", t).val());
-					} catch(IllegalArgumentException ex) {
+					} catch (IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar style.", t);
 					}
 				}
@@ -155,7 +155,7 @@ public class BossBar {
 				if(ca.containsKey("percent")) {
 					try {
 						percent = Static.getDouble(ca.get("percent", t), t);
-					} catch(IllegalArgumentException ex) {
+					} catch (IllegalArgumentException ex) {
 						throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 					}
 				}
@@ -164,7 +164,7 @@ public class BossBar {
 			if(bar != null) {
 				bar.setVisible(visible);
 				bar.setProgress(percent);
-				bars.put(id, bar);
+				BARS.put(id, bar);
 			} else {
 				throw new CREException("Boss bar functions require Bukkit 1.9 or later.", t);
 			}
@@ -203,7 +203,7 @@ public class BossBar {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
-			MCBossBar bar = bars.get(id);
+			MCBossBar bar = BARS.get(id);
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
@@ -212,7 +212,7 @@ public class BossBar {
 			} else if(args[1] instanceof CDouble) {
 				try {
 					bar.setProgress(Static.getDouble(args[1], t));
-				} catch(IllegalArgumentException ex) {
+				} catch (IllegalArgumentException ex) {
 					throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 				}
 			} else if(args[1] instanceof CArray) {
@@ -223,14 +223,14 @@ public class BossBar {
 				if(ca.containsKey("color")) {
 					try {
 						bar.setColor(MCBarColor.valueOf(ca.get("color", t).val()));
-					} catch(IllegalArgumentException ex) {
+					} catch (IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar color.", t);
 					}
 				}
 				if(ca.containsKey("style")) {
 					try {
 						bar.setStyle(MCBarStyle.valueOf(ca.get("style", t).val()));
-					} catch(IllegalArgumentException ex) {
+					} catch (IllegalArgumentException ex) {
 						throw new CREFormatException("Invalid boss bar style.", t);
 					}
 				}
@@ -240,7 +240,7 @@ public class BossBar {
 				if(ca.containsKey("percent")) {
 					try {
 						bar.setProgress(Static.getDouble(ca.get("percent", t), t));
-					} catch(IllegalArgumentException ex) {
+					} catch (IllegalArgumentException ex) {
 						throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 					}
 				}
@@ -279,7 +279,7 @@ public class BossBar {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
-			MCBossBar bar = bars.get(id);
+			MCBossBar bar = BARS.get(id);
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
@@ -320,12 +320,12 @@ public class BossBar {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String id = args[0].val();
-			MCBossBar bar = bars.get(id);
+			MCBossBar bar = BARS.get(id);
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
 			bar.removeAllPlayers();
-			bars.remove(id);
+			BARS.remove(id);
 			return CVoid.VOID;
 		}
 
@@ -356,7 +356,7 @@ public class BossBar {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCBossBar bar = bars.get(args[0].val());
+			MCBossBar bar = BARS.get(args[0].val());
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
@@ -390,7 +390,7 @@ public class BossBar {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCBossBar bar = bars.get(args[0].val());
+			MCBossBar bar = BARS.get(args[0].val());
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
@@ -424,7 +424,7 @@ public class BossBar {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			MCBossBar bar = bars.get(args[0].val());
+			MCBossBar bar = BARS.get(args[0].val());
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}

@@ -8,7 +8,7 @@ import java.io.Writer;
  *
  *
  */
-public class StackTraceUtils {
+public final class StackTraceUtils {
 
 	private StackTraceUtils() {
 	}
@@ -43,7 +43,7 @@ public class StackTraceUtils {
 			// The only way this can get here is if this were the bootstrap class.
 			// I doubt the JVM is calling us first thing, so just throw an Error.
 			throw new Error();
-		} catch(ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			throw new RuntimeException(ex);
 		}
 	}

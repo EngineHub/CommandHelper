@@ -161,14 +161,14 @@ public class Exceptions {
 			for(String in : interest) {
 				try {
 					NativeTypeList.getNativeClass(in);
-				} catch(ClassNotFoundException e) {
+				} catch (ClassNotFoundException e) {
 					throw new CREFormatException("Invalid exception type passed to try():" + in, t);
 				}
 			}
 
 			try {
 				that.eval(tryCode, env);
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				String name = AbstractCREException.getExceptionName(e);
 				if(Prefs.DebugMode()) {
 					StreamUtils.GetSystemOut().println("[" + Implementation.GetServerType().getBranding() + "]:"
@@ -221,7 +221,7 @@ public class Exceptions {
 		@Override
 		public String docs() {
 			Set<Class<? extends CREThrowable>> e = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class);
-			String exceptions = "\nValid Exceptions: ";
+			String exceptions = "\n";
 			List<String> ee = new ArrayList<>();
 			for(Class<? extends CREThrowable> c : e) {
 				String exceptionType = c.getAnnotation(typeof.class).value();
@@ -230,8 +230,10 @@ public class Exceptions {
 			Collections.sort(ee);
 			exceptions += StringUtils.Join(ee, ", ", ", and ");
 
-			return "nothing {exceptionType, msg, [causedBy] | exception} This function causes an exception to be thrown. exceptionType may be any valid exception type."
-					+ "\n\nThe core exception types are: " + exceptions + "\n\nThere may be other exception types as well, refer to the documentation of any extensions you have installed.";
+			return "nothing {exceptionType, msg, [causedBy] | exception} This function causes an exception to be thrown."
+					+ " The exceptionType may be any valid exception type."
+					+ "\n\nThe core exception types are: " + exceptions
+					+ "\n\nThere may be other exception types as well, refer to the documentation of any extensions you have installed.";
 		}
 
 		@Override
@@ -268,18 +270,17 @@ public class Exceptions {
 					// Exception type
 					// We need to reverse the excpetion into an object
 					throw ObjectGenerator.GetGenerator().exception(Static.getArray(args[0], t), t);
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					throw new CRECastException(ex.getMessage(), t);
 				}
 			} else {
 				if(args[0] instanceof CNull) {
-					CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR, "Uncatchable exceptions are no longer supported.", t);
 					throw new CRECastException("An exception type must be specified", t);
 				}
 				Class<? extends Mixed> c;
 				try {
 					c = NativeTypeList.getNativeClass(args[0].val());
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					throw new CREFormatException("Expected a valid exception type, but found \"" + args[0].val() + "\"", t);
 				}
 				List<Class> classes = new ArrayList<>();
@@ -376,7 +377,7 @@ public class Exceptions {
 				// Can't automatically run this, since the examples don't have
 				// the exception handling fully working.
 				"Exception caught!\n"
-				+ "{RangeException, Division by 0!, /path/to/script.ms, 8}"),};
+				+ "{RangeException, Division by 0!, /path/to/script.ms, 8}")};
 		}
 
 	}
@@ -418,7 +419,7 @@ public class Exceptions {
 			ConfigRuntimeException caughtException = null;
 			try {
 				parent.eval(nodes[0], env);
-			} catch(ConfigRuntimeException ex) {
+			} catch (ConfigRuntimeException ex) {
 				if(!(ex instanceof AbstractCREException)) {
 					// This should never actually happen, but we want to protect
 					// against errors, and continue to throw this one up the chain
@@ -440,7 +441,7 @@ public class Exceptions {
 							varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(), t));
 							parent.eval(nodes[i + 1], env);
 							varList.remove(var.getVariableName());
-						} catch(ConfigRuntimeException | FunctionReturnException newEx) {
+						} catch (ConfigRuntimeException | FunctionReturnException newEx) {
 							if(newEx instanceof ConfigRuntimeException) {
 								caughtException = (ConfigRuntimeException) newEx;
 							}
@@ -459,7 +460,7 @@ public class Exceptions {
 					// There is a finally clause. Run that here.
 					try {
 						parent.eval(nodes[nodes.length - 1], env);
-					} catch(ConfigRuntimeException | FunctionReturnException ex) {
+					} catch (ConfigRuntimeException | FunctionReturnException ex) {
 						if(exceptionCaught && (doScreamError || Prefs.ScreamErrors() || Prefs.DebugMode())) {
 							CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Exception was thrown and"
 									+ " unhandled in any catch clause,"
@@ -499,7 +500,7 @@ public class Exceptions {
 			List<CClassType> types = new ArrayList<>();
 			for(int i = 1; i < children.size() - 1; i += 2) {
 				// TODO: Eh.. should probably move this check into the keyword, since techincally
-				// catch(Exception @e = null) { } would work.
+				// catch (Exception @e = null) { } would work.
 				ParseTree assign = children.get(i);
 				if(assign.getChildAt(0).getData() instanceof CString) {
 					// This is an unknown exception type, because otherwise it would have been cast to a CClassType

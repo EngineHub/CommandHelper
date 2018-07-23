@@ -237,7 +237,7 @@ public class BukkitEntityEvents {
 		public MCEntity getHitEntity() {
 			try {
 				return BukkitConvertor.BukkitGetCorrectEntity(phe.getHitEntity());
-			} catch(NoSuchMethodError ex) {
+			} catch (NoSuchMethodError ex) {
 				// Probably prior to 1.11
 				return null;
 			}
@@ -251,7 +251,7 @@ public class BukkitEntityEvents {
 					return null;
 				}
 				return new BukkitMCBlock(blk);
-			} catch(NoSuchMethodError ex) {
+			} catch (NoSuchMethodError ex) {
 				// Probably prior to 1.11
 				return null;
 			}
@@ -454,7 +454,7 @@ public class BukkitEntityEvents {
 					return MCEquipmentSlot.WEAPON;
 				}
 				return MCEquipmentSlot.OFF_HAND;
-			} catch(NoSuchMethodError e) {
+			} catch (NoSuchMethodError e) {
 				// before Bukkit 1.9
 				return MCEquipmentSlot.WEAPON;
 			}

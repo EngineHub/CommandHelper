@@ -29,8 +29,9 @@ public class Marquee {
 				+ " resource intensive, the heavy lifting has been implemented natively.";
 	}
 
-	//TODO: This should be removed in favor of a common runtime environment stash
-	private static final Map<String, com.laytonsmith.PureUtilities.Marquee> marqeeMap = new HashMap<String, com.laytonsmith.PureUtilities.Marquee>();
+	// TODO: This should be removed in favor of a common runtime environment stash.
+	private static final Map<String, com.laytonsmith.PureUtilities.Marquee> MARQUEE_MAP =
+			new HashMap<String, com.laytonsmith.PureUtilities.Marquee>();
 
 	@api
 	public static class marquee extends AbstractFunction {
@@ -85,7 +86,7 @@ public class Marquee {
 								return null;
 							}
 						});
-					} catch(Exception e) {
+					} catch (Exception e) {
 						//We don't want this to affect our code, so just log it,
 						//but we also want to stop this marquee
 						String message = "An error occured while running " + (marqueeName == null ? "an unnamed marquee" : "the " + marqueeName + " marquee")
@@ -104,7 +105,7 @@ public class Marquee {
 				}
 			});
 			if(marqueeName != null) {
-				marqeeMap.put(marqueeName, m);
+				MARQUEE_MAP.put(marqueeName, m);
 			}
 			return CVoid.VOID;
 		}
@@ -159,8 +160,8 @@ public class Marquee {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String marqueeName = args[0].val();
-			if(marqeeMap.containsKey(marqueeName)) {
-				marqeeMap.get(marqueeName).stop();
+			if(MARQUEE_MAP.containsKey(marqueeName)) {
+				MARQUEE_MAP.get(marqueeName).stop();
 			}
 			return CVoid.VOID;
 		}

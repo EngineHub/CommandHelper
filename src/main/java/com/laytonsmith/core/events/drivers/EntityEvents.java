@@ -758,7 +758,7 @@ public class EntityEvents {
 				try {
 					type = MCEntityType.valueOf(value.val());
 					e.setType(type);
-				} catch(IllegalArgumentException iae) {
+				} catch (IllegalArgumentException iae) {
 					throw new CREFormatException(value.val() + " is not a valid entity type.", value.getTarget());
 				}
 				return true;

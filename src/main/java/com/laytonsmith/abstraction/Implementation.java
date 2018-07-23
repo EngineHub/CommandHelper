@@ -66,7 +66,7 @@ public final class Implementation {
 							//Let the server startup data blindness go by first, so we display any error messages prominently,
 							//since an Error is a case of very bad code that shouldn't have been released to begin with.
 							Thread.sleep(15000);
-						} catch(InterruptedException ex) {
+						} catch (InterruptedException ex) {
 							//
 						}
 						Set<Class<?>> abstractionenums = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(abstractionenum.class);
@@ -90,9 +90,9 @@ public final class Implementation {
 									checkEnumConvertors(convertor, abstractEnum, concreteEnum, false);
 									checkEnumConvertors(convertor, concreteEnum, abstractEnum, true);
 
-								} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+								} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 									throw new Error(ex);
-								} catch(NoSuchMethodException ex) {
+								} catch (NoSuchMethodException ex) {
 									throw new Error(serverType.getBranding() + ": The method with signature public static " + c.getName() + " getConvertor() was not found in " + c.getName()
 											+ " Please add the following code: \n"
 											+ "private static " + c.getName() + " instance;\n"
@@ -109,11 +109,11 @@ public final class Implementation {
 							}
 
 						}
-					} catch(Exception e) {
+					} catch (Exception e) {
 						boolean debugMode;
 						try {
 							debugMode = Prefs.DebugMode();
-						} catch(RuntimeException ex) {
+						} catch (RuntimeException ex) {
 							//Set it to true if we fail to load prefs, which can happen
 							//with a buggy front end.
 							debugMode = true;

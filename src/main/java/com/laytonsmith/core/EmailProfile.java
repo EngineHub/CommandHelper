@@ -13,8 +13,8 @@ public class EmailProfile extends Profiles.Profile {
 	private String user = null;
 	private String password = null;
 	private int port = 587;
-	private boolean use_ssl = false;
-	private boolean use_start_tls = false;
+	private boolean useSsl = false;
+	private boolean useStartTls = false;
 	private int timeout = 10000;
 
 	public EmailProfile(String id, Map<String, String> elements) throws Profiles.InvalidProfileException {
@@ -31,20 +31,20 @@ public class EmailProfile extends Profiles.Profile {
 		if(elements.containsKey("port")) {
 			try {
 				port = Integer.parseInt(elements.get("port"));
-			} catch(NumberFormatException ex) {
+			} catch (NumberFormatException ex) {
 				throw new Profiles.InvalidProfileException(ex.getMessage());
 			}
 		}
 		if(elements.containsKey("use_ssl")) {
-			use_ssl = Boolean.parseBoolean(elements.get("use_ssl"));
+			useSsl = Boolean.parseBoolean(elements.get("use_ssl"));
 		}
 		if(elements.containsKey("use_start_tls")) {
-			use_start_tls = Boolean.parseBoolean(elements.get("use_start_tls"));
+			useStartTls = Boolean.parseBoolean(elements.get("use_start_tls"));
 		}
 		if(elements.containsKey("timeout")) {
 			try {
 				timeout = Integer.parseInt(elements.get("timeout"));
-			} catch(NumberFormatException ex) {
+			} catch (NumberFormatException ex) {
 				throw new Profiles.InvalidProfileException(ex.getMessage());
 			}
 		}
@@ -67,11 +67,11 @@ public class EmailProfile extends Profiles.Profile {
 	}
 
 	public boolean getUseSSL() {
-		return use_ssl;
+		return useSsl;
 	}
 
 	public boolean getUseStartTLS() {
-		return use_start_tls;
+		return useStartTls;
 	}
 
 	public int getTimeout() {

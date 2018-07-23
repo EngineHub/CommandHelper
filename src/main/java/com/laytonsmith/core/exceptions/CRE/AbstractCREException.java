@@ -28,7 +28,7 @@ import java.util.Set;
  */
 public abstract class AbstractCREException extends ConfigRuntimeException implements Documentation, Mixed, ArrayAccess {
 
-	private final static Class[] EMPTY_CLASS = new Class[0];
+	private static final Class[] EMPTY_CLASS = new Class[0];
 
 	private List<StackTraceElement> stackTrace = null;
 

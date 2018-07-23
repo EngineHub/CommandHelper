@@ -25,4 +25,15 @@ public class BukkitMCCreatureSpawner extends BukkitMCBlockState implements MCCre
 		cs.setSpawnedType(((BukkitMCEntityType) type).getConcrete());
 		cs.update();
 	}
+
+	@Override
+	public int getDelay() {
+		return cs.getDelay();
+	}
+
+	@Override
+	public void setDelay(int delay) {
+		cs.setDelay(delay);
+		cs.update();
+	}
 }

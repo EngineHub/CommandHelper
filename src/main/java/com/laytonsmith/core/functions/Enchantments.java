@@ -103,23 +103,23 @@ public class Enchantments {
 		try {
 			Integer.parseInt(lc);
 			return lc;
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			//Maybe roman numeral?
 		}
 		int i = romanToWestern(lc);
-//        if(lc.equals("i")){
-//            i = 1;
-//        } else if(lc.equals("ii")){
-//            i = 2;
-//        } else if(lc.equals("iii")){
-//            i = 3;
-//        } else if(lc.equals("iv")){
-//            i = 4;
-//        } else if(lc.equals("v")){
-//            i = 5;
-//        } else {
-//            return romanNumeral;
-//        }
+//		if(lc.equals("i")){
+//			i = 1;
+//		} else if(lc.equals("ii")){
+//			i = 2;
+//		} else if(lc.equals("iii")){
+//			i = 3;
+//		} else if(lc.equals("iv")){
+//			i = 4;
+//		} else if(lc.equals("v")){
+//			i = 5;
+//		} else {
+//			return romanNumeral;
+//		}
 		return Integer.toString(i);
 	}
 
@@ -234,12 +234,12 @@ public class Enchantments {
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
-//            if (args[1 - offset] instanceof CNull) {
-//                is = m.getItemInHand();
-//            } else {
-//                int slot = Static.getInt32(args[1 - offset]);
-//                is = m.getInventory().getItem(slot);
-//            }
+//			if(args[1 - offset] instanceof CNull) {
+//				is = m.getItemInHand();
+//			} else {
+//				int slot = Static.getInt32(args[1 - offset]);
+//				is = m.getInventory().getItem(slot);
+//			}
 			CArray enchantArray = new CArray(t);
 			if(!(args[2 - offset] instanceof CArray)) {
 				enchantArray.push(args[2 - offset], t);
@@ -326,12 +326,12 @@ public class Enchantments {
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
-//            if (args[1 - offset] instanceof CNull) {
-//                is = m.getItemInHand();
-//            } else {
-//                int slot = Static.getInt32(args[1 - offset]);
-//                is = m.getInventory().getItem(slot);
-//            }
+//			if(args[1 - offset] instanceof CNull) {
+//				is = m.getItemInHand();
+//			} else {
+//				int slot = Static.getInt32(args[1 - offset]);
+//				is = m.getInventory().getItem(slot);
+//			}
 
 			CArray enchantArray = new CArray(t);
 			if(!(args[2 - offset] instanceof CArray) && !(args[2 - offset] instanceof CNull)) {
@@ -411,12 +411,12 @@ public class Enchantments {
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}
-//            if(slot instanceof CNull){
-//                is = m.getItemInHand();
-//            } else {
-//                int slotID = Static.getInt32(slot);
-//                is = m.getInventory().getItem(slotID);
-//            }
+//			if(slot instanceof CNull){
+//				is = m.getItemInHand();
+//			} else {
+//				int slotID = Static.getInt32(slot);
+//				is = m.getInventory().getItem(slotID);
+//			}
 			CArray enchants = new CArray(t);
 			CArray levels = new CArray(t);
 			for(Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {
@@ -483,7 +483,7 @@ public class Enchantments {
 					is = Static.ParseItemNotation(null, args[1].val(), 1, t);
 				}
 				return CBoolean.get(e.canEnchantItem(is));
-			} catch(NullPointerException e) {
+			} catch (NullPointerException e) {
 				throw new CREEnchantmentException(args[0].val().toUpperCase() + " is not a known enchantment type.", t);
 			}
 		}
@@ -534,7 +534,7 @@ public class Enchantments {
 				String name = Enchantments.ConvertName(args[0].val());
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
 				return new CInt(e.getMaxLevel(), t);
-			} catch(NullPointerException e) {
+			} catch (NullPointerException e) {
 				throw new CREEnchantmentException(args[0].val().toUpperCase() + " is not a known enchantment type.", t);
 			}
 		}
@@ -543,7 +543,7 @@ public class Enchantments {
 	@api
 	public static class get_enchants extends AbstractFunction {
 
-		private static final Map<String, CArray> cache = new HashMap<>();
+		private static final Map<String, CArray> CACHE = new HashMap<>();
 
 		@Override
 		public String getName() {
@@ -595,8 +595,8 @@ public class Enchantments {
 			 * Because enchantment types won't change from run to run, we can
 			 * cache here, and save time on duplicate lookups.
 			 */
-			if(cache.containsKey(name)) {
-				return cache.get(name).clone();
+			if(CACHE.containsKey(name)) {
+				return CACHE.get(name).clone();
 			}
 			CArray ca = new CArray(t);
 			for(MCEnchantment e : StaticLayer.GetEnchantmentValues()) {
@@ -604,7 +604,7 @@ public class Enchantments {
 					ca.push(new CString(e.getName(), t), t);
 				}
 			}
-			cache.put(name, ca);
+			CACHE.put(name, ca);
 			return ca.clone();
 		}
 	}
@@ -653,7 +653,7 @@ public class Enchantments {
 			try {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(args[0].val());
 				return CBoolean.TRUE;
-			} catch(NullPointerException e) {
+			} catch (NullPointerException e) {
 				return CBoolean.FALSE;
 			}
 		}

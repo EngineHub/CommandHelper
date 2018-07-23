@@ -39,19 +39,27 @@ public class ItemMeta {
 		return "These functions manipulate an item's meta data. The items are modified in a player's inventory.";
 	}
 
-	private static final String applicableItemMeta = "<ul>"
-			+ "<li>All items - display (string), lore (array of strings), enchants (An array of enchantment arrays, "
-			+ " which are associative arrays that look like: array(etype: The type of enchantment, elevel:"
-			+ " The strength of the enchantment)), repair (int, repair cost), flags(array). Possible flags: "
-			+ StringUtils.Join(MCItemFlag.values(), ", ", " or ") + "</li>"
-			+ "<li>Books - title (string), author (string), pages (array of strings)</li>"
-			+ "<li>EnchantedBooks - stored (array of enchantment arrays (see Example))</li>"
-			+ "<li>Leather Armor - color (color array (see Example))</li>"
-			+ "<li>Skulls - owner (string) NOTE: the visual change only applies to player skulls</li>"
-			+ "<li>Potions - potions (array of potion arrays), main(int, the id of the main effect)</li>"
-			+ "<li>Banners - basecolor (string), patterns (array of pattern arrays)</li>"
-			+ "<li>Fireworks - firework (array with strength (int), effects (array of effect arrays (see Example)))</li>"
-			+ "<li>Firework Charges - effect (single Firework effect array)"
+	private static final String APPLICABLE_ITEM_META = "<ul>"
+			+ "<li>All items - \"display\" (string), \"lore\" (array of strings), \"enchants\" (An array of enchantment"
+			+ " arrays, which are associative arrays that look like: array(\"etype\": The type of enchantment, \"elevel\":"
+			+ " The strength of the enchantment)), \"repair\" (int, repair cost), \"unbreakable\" (boolean), \"flags\""
+			+ " (array). Possible flags: " + StringUtils.Join(MCItemFlag.values(), ", ", " or ") + "</li>"
+			+ "<li>Books - \"title\" (string), author (string), \"pages\" (array of strings)</li>"
+			+ "<li>EnchantedBooks - \"stored\" (array of enchantment arrays (see Example))</li>"
+			+ "<li>Leather Armor - \"color\" (color array (see Example))</li>"
+			+ "<li>Player Skulls - \"owner\" (string) or \"owneruuid\" (string)</li>"
+			+ "<li>Potions - \"potions\" (array of potion arrays), \"base\" (an array with the keys \"type\","
+			+ " \"extended\", and \"upgraded\")</li>"
+			+ "<li>Banners - \"basecolor\" (string), \"patterns\" (an array of pattern arrays, each with the keys"
+			+ " \"shape\" and \"color\")</li>"
+			+ "<li>Fireworks - \"firework\" (array with strength (int), \"effects\" (array of effect arrays (see Example)))</li>"
+			+ "<li>Firework Charges - \"effect\" (single Firework effect array)</li>"
+			+ "<li>Storage Blocks - \"inventory\" (an array of item arrays)</li>"
+			+ "<li>Mob Eggs/Spawners - \"spawntype\" (an entity type)</li>"
+			+ "<li>Furnace - \"burntime\" (int), \"cooktime\" (int), and in \"inventory\" these keys can exist if an"
+			+ " item exists in that slot: \"result\", \"fuel\", and \"smelting\".</li>"
+			+ "<li>Brewing Stand - \"brewtime\" (int), \"fuel\" (int), and in \"inventory\" these keys can exist if an"
+			+ " item exists in that slot: \"fuel\", \"ingredient\", \"leftbottle\", \"middlebottle\", and \"rightbottle\".</li>"
 			+ "</ul>";
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -107,10 +115,10 @@ public class ItemMeta {
 
 		@Override
 		public String docs() {
-			return "mixed {[player,] inventorySlot} Returns an associative array of known ItemMeta for the slot given,"
+			return "array {[player,] inventorySlot} Returns an associative array of known ItemMeta for the slot given,"
 					+ " or null if there isn't any. All items can have a display(name), lore, and/or enchants, "
 					+ " and more info will be available for the items that have it. ---- Returned keys: "
-					+ applicableItemMeta;
+					+ APPLICABLE_ITEM_META;
 		}
 
 		@Override
@@ -171,7 +179,8 @@ public class ItemMeta {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			Construct slot, meta;
+			Construct slot;
+			Construct meta;
 			MCItemStack is;
 			if(args.length == 3) {
 				p = Static.GetPlayer(args[0], t);
@@ -209,7 +218,7 @@ public class ItemMeta {
 			return "void {[player,] inventorySlot, ItemMetaArray} Applies the data from the given array to the item at the"
 					+ " specified slot. Unused fields will be ignored. If null or an empty array is supplied, or if none of"
 					+ " the given fields are applicable, the item will become default, as this function overwrites any"
-					+ " existing data. ---- Available fields: " + applicableItemMeta;
+					+ " existing data. ---- Available fields: " + APPLICABLE_ITEM_META;
 		}
 
 		@Override

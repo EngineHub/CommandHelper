@@ -1,6 +1,8 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.entities.MCBoat;
+import com.laytonsmith.abstraction.enums.MCTreeSpecies;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTreeSpecies;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.Entity;
 
@@ -22,4 +24,19 @@ public class BukkitMCBoat extends BukkitMCVehicle implements MCBoat {
 	public void setMaxSpeed(double speed) {
 		b.setMaxSpeed(speed);
 	}
+
+	@Override
+	public MCTreeSpecies getWoodType() {
+		return BukkitMCTreeSpecies.getConvertor().getAbstractedEnum(b.getWoodType());
+	}
+
+	@Override
+	public void setWoodType(MCTreeSpecies type) {
+		try {
+			b.setWoodType(BukkitMCTreeSpecies.getConvertor().getConcreteEnum(type));
+		} catch (NoSuchMethodError ex) {
+			// probably prior to 1.9
+		}
+	}
+
 }

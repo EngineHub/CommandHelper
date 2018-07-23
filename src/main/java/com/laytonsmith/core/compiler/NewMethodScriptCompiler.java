@@ -148,7 +148,7 @@ public class NewMethodScriptCompiler {
 					}
 					cleft.add(tokenToConstruct(t));
 				}
-			} catch(IndexOutOfBoundsException e) {
+			} catch (IndexOutOfBoundsException e) {
 				throw new ConfigCompileException("Expecting more tokens, but reached end of alias signature before tokens were resolved.", left.get(0).getTarget());
 			}
 			if(!cleft.isEmpty()) {

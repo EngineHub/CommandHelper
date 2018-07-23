@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN" "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+
+<!--
+	Checkstyle-Configuration: CommandHelper
+	Description: A checkstyle configuration for CommandHelper.
+	Author: P.J.S. Kools
+-->
+<module name="Checker">
+	<property name="severity" value="error"/>
+	
+	<!-- Supression filter to disable specified modules/checks for specified files -->
+	<module name="SuppressionFilter">
+		<property name="file" value="${config_loc}/checkstyle_suppressions.xml"/>
+		<property name="optional" value="false"/>
+	</module>
+	
+	<!-- Allow "@SuppressWarnings(checkstyle:<CHECK>)" checkstyle violation suppression -->
+	<module name="SuppressWarningsFilter"/>
+	
+	<module name="TreeWalker">
+		
+		<!-- Enable usage of "@SuppressWarnings(checkstyle:<CHECK>)" to suppress checkstyle violations -->
+		<module name="SuppressWarningsHolder"/>
+		
+		<!-- Set tabWidth property for checks such as line length -->
+		<property name="tabWidth" value="4"/>
+		
+		<!-- Line length <= 120 characters -->
+		<module name="LineLength">
+			<property name="severity" value="ignore"/> <!-- TODO: Change to "error" once the >7000 violations have been resolved -->
+			<property name="max" value="120"/>
+		</module>
+		
+		<!-- Indent must use tab characters -->
+		<module name="RegexpSinglelineJava">
+			<property name="format" value="^\t* ([^\*]|$)"/> <!-- Javadoc and multiline comments have a single leading whitespace, so allow " *" -->
+			<property name="message" value="Indent must use tab characters"/>
+			<property name="ignoreComments" value="false"/>
+		</module>
+		
+		<!-- Disallow package.* imports -->
+		<module name="AvoidStarImport"/>
+		
+		<!-- Ensure static final field name format. Default format: "^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$" -->
+		<module name="ConstantName"/>
+		
+		<!-- Default case in switch/case statement has to come last -->
+		<module name="DefaultComesLast"/>
+		
+		<!-- Disallow "public boolean equals(Foo obj)" since this does not always override "public boolean equals(Object obj)" -->
+		<module name="CovariantEquals"/>
+		
+		<!-- Disallow empty statements (just a single ";") -->
+		<module name="EmptyStatement"/>
+		
+		<!-- Ensure that "break" or "return" is used in non-empty switch/case cases -->
+		<module name="FallThrough"/>
+		
+		<!-- Ensure that classes without public constructor are final -->
+		<module name="FinalClass"/>
+		
+		<!-- Ensure proper whitespace usage around "<" and ">" for generic types -->
+		<module name="GenericWhitespace"/>
+		
+		<!-- Disallow native literals -->
+		<module name="IllegalToken">
+			<property name="tokens" value="LITERAL_NATIVE"/>
+		</module>
+		
+		<!-- Ensure usage of "{" at the end of a line (and not on a newline) -->
+		<module name="LeftCurly"/>
+		
+		<!-- Ensure local final variable name format. Default format: "^[a-z][a-zA-Z0-9]*$" -->
+		<module name="LocalFinalVariableName"/>
+		
+		<!-- Ensure local non-final variable name format, except single-character variables in for loops. Default format: "^[a-z][a-zA-Z0-9]*$". -->
+		<module name="LocalVariableName">
+			<property name="allowOneCharVarInForLoop" value="true"/>
+		</module>
+		
+		<!-- Ensure non-static instance name format. Default format: "^[a-z][a-zA-Z0-9]*$" -->
+		<module name="MemberName"/>
+		
+		<!-- Ensure method name format and disallow methods to be named the same as the class (and therefore constructor). Default format: "^[a-z][a-zA-Z0-9]*$" -->
+		<module name="MethodName">
+			<!-- TODO: Disable rule or fix violations with the chance to break extensions. There are 479 violations as of 14-06-2018 dd-mm-yyyy -->
+			<property name="severity" value="ignore"/>
+		</module>
+		
+		<!-- Check method parameter padding -->
+		<module name="MethodParamPad"/>
+		
+		<!-- Check method type name format. Default format: "^[A-Z]$" -->
+		<module name="MethodTypeParameterName"/>
+		
+		<!-- Ensure that both the @Deprecated and the @deprecated javadoc tag are present when one is present -->
+		<module name="MissingDeprecated"/>
+		
+		<!-- Ensure that the @Override tag is present when the {@inheritDoc} javadoc tag is present -->
+		<module name="MissingOverride"/>
+		
+		<!-- Ensure modifier order is 'first > last': public > protected > private > abstract > default > static > final > transient > volatile > synchronized > native > strictfp -->
+		<module name="ModifierOrder"/>
+		
+		<!-- Ensure that each variable has its own statement on its own line (disallows "i = j = k = 1;") -->
+		<module name="MultipleVariableDeclarations"/>
+		
+		<!-- Ensure that do/else/for/if/while have their brace block ("{...}") -->
+		<module name="NeedBraces"/>
+		
+		<!-- Ensure that there is no whitespace after the given tokens -->
+		<module name="NoWhitespaceAfter">
+			<property name="tokens" value="INC,DEC,UNARY_MINUS,UNARY_PLUS,BNOT,LNOT,DOT"/>
+		</module>
+		
+		<!-- Ensure that there is no whitespace before the given tokens -->
+		<module name="NoWhitespaceBefore">
+			<property name="tokens" value="COMMA,SEMI,POST_INC,POST_DEC,GENERIC_END,ELLIPSIS,METHOD_REF"/>
+		</module>
+		
+		<!-- Ensure that there is a whitespace after the given tokens -->
+		<module name="WhitespaceAfter">
+			<property name="tokens" value="COMMA,SEMI,TYPECAST,LITERAL_ELSE,LITERAL_DO"/>
+		</module>
+		
+		<!-- Ensure that there are whitespace around the given tokens -->
+		<module name="WhitespaceAround">
+			<property name="allowEmptyConstructors" value="true"/>
+			<property name="allowEmptyMethods" value="true"/>
+			<property name="allowEmptyTypes" value="true"/>
+			<property name="allowEmptyLoops" value="true"/>
+			<property name="allowEmptyLambdas" value="true"/>
+			<property name="allowEmptyCatches" value="true"/>
+			<property name="tokens" value="ASSIGN, BAND, BAND_ASSIGN, BOR, BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR,
+				BXOR_ASSIGN, COLON, DIV, DIV_ASSIGN, EQUAL, GE, GT, LAMBDA, LAND, LCURLY, LE, LITERAL_CATCH, LITERAL_DO,
+				LITERAL_ELSE, LITERAL_FINALLY, LITERAL_RETURN,
+				LOR, LT, MINUS, MINUS_ASSIGN, MOD, MOD_ASSIGN, NOT_EQUAL, PLUS, PLUS_ASSIGN, QUESTION,
+				RCURLY, SL, SLIST, SL_ASSIGN, SR, SR_ASSIGN, STAR, STAR_ASSIGN, TYPE_EXTENSION_AND"/>
+		</module>
+		
+		<!-- Ensure that line-wrapped operators appear after the newline -->
+		<module name="OperatorWrap">
+			<property name="tokens" value="QUESTION, COLON, EQUAL, NOT_EQUAL, DIV, PLUS, MINUS, STAR, MOD, SR, BSR, GE,
+				GT, SL, LE, LT, BXOR, BOR, LOR, BAND, LAND, LITERAL_INSTANCEOF, TYPE_EXTENSION_AND"/>
+		</module>
+		
+		<!-- Ensure that overloaded methods are grouped together (have no other method in between) -->
+		<module name="OverloadMethodsDeclarationOrder"/>
+		
+		<!-- Ensure package name format. Default format: "^[a-z]+(\.[a-zA-Z_][a-zA-Z0-9_]*)*$" -->
+		<module name="PackageName"/>
+		
+		<!-- Ensure method and catch parameter name format. Default format: "^[a-z][a-zA-Z0-9]*$" -->
+		<module name="ParameterName"/>
+		
+		<!-- Disallow whitespaces after '(' and before ')' -->
+		<module name="ParenPad"/>
+		
+		<!-- Disallow redundant (double or default-available class) imports -->
+		<module name="RedundantImport"/>
+		
+		<!-- Ensure usage of "}" for the given tokens -->
+		<module name="RightCurly">
+			<property name="tokens" value="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE"/>
+		</module>
+		
+		<!-- Ensure that when lines are wrapped at a dot, this dot is on the new line. -->
+		<module name="SeparatorWrap">
+			<property name="option" value="nl"/>
+			<property name="tokens" value="DOT"/>
+		</module>
+		
+		<!-- Ensure that when lines are wrapped at a comma, this comma is at the end of the line. -->
+		<module name="SeparatorWrap">
+			<property name="option" value="eol"/>
+			<property name="tokens" value="COMMA"/>
+		</module>
+		
+		<!-- Ensure non-static, non-final field name format. Default format: "^[a-z][a-zA-Z0-9]*$" -->
+		<module name="StaticVariableName"/>
+		
+		<!-- Disallow the "==" operator for string literals -->
+		<module name="StringLiteralEquality"/>
+		
+		<!-- Disallow whitespaces between type cast parenthesis (No whitespace at X: "(XObjectX) obj") -->
+		<module name="TypecastParenPad"/>
+		
+		<!-- Ensure class, interface, enum and annotation name format. Default format: "^[A-Z][a-zA-Z0-9]*$" -->
+		<module name="TypeName"/>
+		
+		<!-- Disallow unused imports -->
+		<module name="UnusedImports"/>
+		
+		<!-- Ensure that long constants are defined using an 'L', rather than an 'l' -->
+		<module name="UpperEll"/>
+		
+	</module>
+	
+	<!-- Disallow trailing whitespaces/tabs -->
+	<module name="RegexpSingleline">
+		<property name="severity" value="error"/>
+		<property name="format" value="(?&lt;! \*)\s+$"/> <!-- Empty javadoc and multiline comment lines have a single trailing whitespace, so allow " * " -->
+		<property name="message" value="Line has trailing whitespaces/tabs."/>
+	</module>
+	
+	<!-- Disallow whitespaces between if/for/while and '(' -->
+	<module name="RegexpSingleline">
+		<property name="severity" value="error"/>
+		<property name="format" value="(^|[^\w\._])(if|for|while)[\s]+\("/>
+		<property name="message" value="Whitespace between if/for/while and '(' is not allowed."/>
+	</module>
+	
+	<!-- Ensure whitespace between try and '{' -->
+	<module name="RegexpSingleline">
+		<property name="severity" value="error"/>
+		<property name="format" value="(^|[^\w\._])try\{"/>
+		<property name="message" value="'try' is not followed by whitespace."/>
+	</module>
+	
+	<!-- Disallow whitespaces between try and '(' (try-with-resources) -->
+	<module name="RegexpSingleline">
+		<property name="severity" value="error"/>
+		<property name="format" value="(^|[^\w\._])try[\s]+\("/>
+		<property name="message" value="'try' with resources is followed by whitespace."/>
+	</module>
+	
+	<!-- Ensure that every file ends with a newline -->
+	<module name="NewlineAtEndOfFile">
+		<property name="lineSeparator" value="lf_cr_crlf"/>
+	</module>
+	
+</module>

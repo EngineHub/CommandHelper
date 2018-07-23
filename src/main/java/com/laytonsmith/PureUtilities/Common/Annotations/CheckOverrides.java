@@ -39,16 +39,16 @@ import javax.tools.Diagnostic;
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class CheckOverrides extends AbstractProcessor {
 
-	private static final boolean enabled = true;
+	private static final boolean ENABLED = true;
 
 	private static Map<Class, Set<Method>> methods = null;
-	private static final Set<Class> interfacesWithMustUseOverride = new HashSet<>();
+	private static final Set<Class> INTERFACES_WITH_MUST_USE_OVERRIDE = new HashSet<>();
 	private static final Pattern METHOD_SIGNATURE = Pattern.compile("[a-zA-Z0-9_]+\\((.*)\\)");
 	private static final Pattern CLASS_TEMPLATES = Pattern.compile("^.*?<(.*)>?$");
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-		if(!enabled) {
+		if(!ENABLED) {
 			processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "CheckOverrides processor is turned off!");
 			return false;
 		}
@@ -59,7 +59,7 @@ public class CheckOverrides extends AbstractProcessor {
 				Class c = null;
 				try {
 					c = getClassFromName(className);
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				if(c != null) {
@@ -67,7 +67,7 @@ public class CheckOverrides extends AbstractProcessor {
 						processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
 								"Only interfaces may be annotated with " + MustUseOverride.class.getName());
 					}
-					interfacesWithMustUseOverride.add(c);
+					INTERFACES_WITH_MUST_USE_OVERRIDE.add(c);
 				}
 			}
 			for(Element element : roundEnv.getElementsAnnotatedWith(Override.class)) {
@@ -75,7 +75,7 @@ public class CheckOverrides extends AbstractProcessor {
 				Class c = null;
 				try {
 					c = getClassFromName(className);
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
 				}
 
@@ -105,7 +105,7 @@ public class CheckOverrides extends AbstractProcessor {
 						for(int i = 0; i < args.length; i++) {
 							try {
 								argTypes[i] = getClassFromName(args[i]);
-							} catch(ClassNotFoundException e) {
+							} catch (ClassNotFoundException e) {
 								//It may be a template parameter, so check in the enclosing class name for that
 								//template type.
 								String codeClassName = element.getEnclosingElement().asType().toString();
@@ -130,7 +130,7 @@ public class CheckOverrides extends AbstractProcessor {
 								}
 								try {
 									argTypes[i] = Class.forName(args[i]);
-								} catch(ClassNotFoundException ex) {
+								} catch (ClassNotFoundException ex) {
 									//Won't happen
 								}
 							}
@@ -168,7 +168,7 @@ public class CheckOverrides extends AbstractProcessor {
 									it.remove();
 								}
 							}
-						} catch(NoSuchMethodException | SecurityException ex) {
+						} catch (NoSuchMethodException | SecurityException ex) {
 							Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
@@ -238,8 +238,8 @@ public class CheckOverrides extends AbstractProcessor {
 								"are %d methods which override or implement a method in a super class/super interface"
 								+ " but don't use the @Override tag. Please tag these methods"))
 						.append(" with @Override to continue the build process.")
-						.append(StringUtils.nl)
-						.append(StringUtils.Join(stringMethodsInError, StringUtils.nl));
+						.append(StringUtils.NL)
+						.append(StringUtils.Join(stringMethodsInError, StringUtils.NL));
 				processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, b.toString());
 			} else {
 				StreamUtils.GetSystemOut().println("No @Override annotations were found to be missing.");
@@ -262,7 +262,7 @@ public class CheckOverrides extends AbstractProcessor {
 		}
 		getAllSupers(c.getSuperclass(), building, false);
 		for(Class cc : c.getInterfaces()) {
-			if(interfacesWithMustUseOverride.contains(cc)) {
+			if(INTERFACES_WITH_MUST_USE_OVERRIDE.contains(cc)) {
 				building.add(cc);
 			}
 		}

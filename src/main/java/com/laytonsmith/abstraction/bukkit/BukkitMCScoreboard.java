@@ -83,7 +83,7 @@ public class BukkitMCScoreboard implements MCScoreboard {
 				return null;
 			}
 			return new BukkitMCTeam(t);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably 1.8.6 or prior
 			OfflinePlayer player = Bukkit.getOfflinePlayer(entry);
 			Object t = ReflectionUtils.invokeMethod(s, "getPlayerTeam", player);

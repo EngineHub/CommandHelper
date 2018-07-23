@@ -103,7 +103,7 @@ public class MethodScriptCompilerTest {
 				MethodScriptCompiler.lex(c, null, false);
 				//Shouldn't get here
 				fail(c + " should not have lexed, but did.");
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				//Success!
 			}
 		}
@@ -116,28 +116,28 @@ public class MethodScriptCompilerTest {
 			//extra parameter
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another', 'oops') 'function')", null, false)).get(0).compileRight();
 			fail("Did not expect test to pass");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//passed
 		}
 		try {
 			//missing parenthesis
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function'", null, false)).get(0).compileRight();
 			fail("Did not expect test to pass");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//passed
 		}
 		try {
 			//extra parenthesis
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function')))))", null, false)).get(0).compileRight();
 			fail("Did not expect test to pass");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//passed
 		}
 		try {
 			//extra multiline end construct
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function') <<<", null, false)).get(0).compileRight();
 			fail("Did not expect test to pass");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//passed
 		}
 
@@ -145,7 +145,7 @@ public class MethodScriptCompilerTest {
 			//no multiline end construct
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = >>>\nmsg('hi')\n", null, false)).get(0).compileRight();
 			fail("Did not expect no multiline end construct to pass");
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			//passed
 		}
 
@@ -174,7 +174,7 @@ public class MethodScriptCompilerTest {
 	public void testCompile15() throws Exception {
 		try {
 			SRun("\n\nmsg(/, 'test')\n\n", fakePlayer);
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			assertEquals("3", e.getLineNum());
 		}
 	}
@@ -216,7 +216,7 @@ public class MethodScriptCompilerTest {
 					= "[";
 			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
 			fail("Test passed, but wasn't supposed to");
-		} catch(ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 			//Passed
 		}
 		try {
@@ -224,7 +224,7 @@ public class MethodScriptCompilerTest {
 					= "]";
 			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
 			fail("Test passed, but wasn't supposed to");
-		} catch(ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 			//Passed
 		}
 	}
@@ -439,52 +439,52 @@ public class MethodScriptCompilerTest {
 			String config = "/cmd [$p] $q = msg('')";
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0).compile();
 			fail("Test passed, but wasn't supposed to");
-		} catch(ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 			//Passed
 		}
 	}
 
-//    @Test
-//    public void testCompileWithDoubleSlashCommand() throws Exception{
-//        AliasCore ac = mock(AliasCore.class);
-//        ac.autoIncludes = new ArrayList<File>();
-//        PowerMockito.mockStatic(CommandHelperPlugin.class);
-//        when(CommandHelperPlugin.getCore()).thenReturn(ac);
-//        assertEquals(ac, CommandHelperPlugin.getCore());
-//        String config = "//cmd blah = msg('success')";
-//        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0);
-//        s.compile();
-//        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
-//        s.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
-//        verify(fakePlayer).sendMessage("success");
-//    }
+//	@Test
+//	public void testCompileWithDoubleSlashCommand() throws Exception{
+//		AliasCore ac = mock(AliasCore.class);
+//		ac.autoIncludes = new ArrayList<File>();
+//		PowerMockito.mockStatic(CommandHelperPlugin.class);
+//		when(CommandHelperPlugin.getCore()).thenReturn(ac);
+//		assertEquals(ac, CommandHelperPlugin.getCore());
+//		String config = "//cmd blah = msg('success')";
+//		Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0);
+//		s.compile();
+//		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
+//		s.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
+//		verify(fakePlayer).sendMessage("success");
+//	}
 //
-//    @Test
-//    public void testCompileTwoAliases() throws Exception{
-//        AliasCore ac = mock(AliasCore.class);
-//        ac.autoIncludes = new ArrayList<File>();
-//        PowerMockito.mockStatic(CommandHelperPlugin.class);
-//        when(CommandHelperPlugin.getCore()).thenReturn(ac);
-//        assertEquals(ac, CommandHelperPlugin.getCore());
-//        String config = "/cmd1 = msg('success')\n"
-//                + "                 \n" //Spaces and tabs are here
-//                + "/cmd2 = msg('success')";
-//        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
-//        Script s1 = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0);
-//        s1.compile();
-//        s1.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
-//        Script s2 = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(1);
-//        s2.compile();
-//        s2.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
-//        verify(fakePlayer, times(2)).sendMessage("success");
-//    }
+//	@Test
+//	public void testCompileTwoAliases() throws Exception{
+//		AliasCore ac = mock(AliasCore.class);
+//		ac.autoIncludes = new ArrayList<File>();
+//		PowerMockito.mockStatic(CommandHelperPlugin.class);
+//		when(CommandHelperPlugin.getCore()).thenReturn(ac);
+//		assertEquals(ac, CommandHelperPlugin.getCore());
+//		String config = "/cmd1 = msg('success')\n"
+//				+ "                 \n" //Spaces and tabs are here
+//				+ "/cmd2 = msg('success')";
+//		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
+//		Script s1 = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0);
+//		s1.compile();
+//		s1.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
+//		Script s2 = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(1);
+//		s2.compile();
+//		s2.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
+//		verify(fakePlayer, times(2)).sendMessage("success");
+//	}
 	@Test
 	public void testCompile2() {
 		try {
 			String config = "/cmd [$p=player()] = msg('')";
 			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0).compile();
 			fail("Test passed, but wasn't supposed to");
-		} catch(ConfigCompileException | ConfigCompileGroupException ex) {
+		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 			//Passed
 		}
 	}
@@ -527,36 +527,36 @@ public class MethodScriptCompilerTest {
 	}
 
 	//TODO: Make these tests possible
-//    @Test
-//    public void testCompile8() throws Exception {
-//        String config = "/cmd $one $ = >>>\n"
-//                + "msg($one) \\ msg($)"
-//                + "<<<";
+//	@Test
+//	public void testCompile8() throws Exception {
+//		String config = "/cmd $one $ = >>>\n"
+//				+ "msg($one) \\ msg($)"
+//				+ "<<<";
 //
-//        RunVars(Arrays.asList(new Variable[]{new Variable("$one", "first", false, false, Target.UNKNOWN),
-//            new Variable("$", "several variables", false, true, Target.UNKNOWN)}), config, fakePlayer);
-//        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
-//        s.compile();
-//        s.run(Arrays.asList(new Variable[]{new Variable("$one", "first", false, false, Target.UNKNOWN),
-//            new Variable("$", "several variables", false, true, Target.UNKNOWN)}), env, null);
-//        verify(fakePlayer).sendMessage("first");
-//        verify(fakePlayer).sendMessage("several variables");
-//    }
+//		RunVars(Arrays.asList(new Variable[]{new Variable("$one", "first", false, false, Target.UNKNOWN),
+//			new Variable("$", "several variables", false, true, Target.UNKNOWN)}), config, fakePlayer);
+//		Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
+//		s.compile();
+//		s.run(Arrays.asList(new Variable[]{new Variable("$one", "first", false, false, Target.UNKNOWN),
+//			new Variable("$", "several variables", false, true, Target.UNKNOWN)}), env, null);
+//		verify(fakePlayer).sendMessage("first");
+//		verify(fakePlayer).sendMessage("several variables");
+//	}
 //
-//    @Test
-//    public void testCompile9() throws Exception {
-//        String config = "/test [$var=1] = >>>\n"
-//                + "msg($var)"
-//                + "<<<";
-//        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
-//        s.compile();
-//        assertTrue(s.match("/test 2"));
-//        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, Target.UNKNOWN)}), env, null);
-//        verify(fakePlayer).sendMessage("2");
-//        assertTrue(s.match("/test"));
-//        s.run(new ArrayList<Variable>(), env, null);
-//        verify(fakePlayer).sendMessage("1");
-//    }
+//	@Test
+//	public void testCompile9() throws Exception {
+//		String config = "/test [$var=1] = >>>\n"
+//				+ "msg($var)"
+//				+ "<<<";
+//		Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
+//		s.compile();
+//		assertTrue(s.match("/test 2"));
+//		s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, Target.UNKNOWN)}), env, null);
+//		verify(fakePlayer).sendMessage("2");
+//		assertTrue(s.match("/test"));
+//		s.run(new ArrayList<Variable>(), env, null);
+//		verify(fakePlayer).sendMessage("1");
+//	}
 	@Test
 	public void testCompile10() throws Exception {
 		String config = "/test $var = >>>\n"
@@ -570,24 +570,24 @@ public class MethodScriptCompilerTest {
 	}
 
 	//TODO: Make this test possible
-//    @Test public void testCompile11() throws Exception{
+//	@Test public void testCompile11() throws Exception{
 //
-//        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
-//        when(CommandHelperPlugin.perms.hasPermission(fakePlayer.getVariableName(), "ch.alias.safe")).thenReturn(true);
-//        CommandHelperPlugin.myServer = fakeServer;
-//        when(fakeServer.getOnlinePlayers()).thenReturn(new MCPlayer[]{fakePlayer});
-//        String config = "safe:/test $var = >>>\n"
-//                + "all_players()\n"
-//                + "msg($var)\n"
-//                + "<<<";
-//        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
-//        s.compile();
-//        assertEquals("safe", s.getLabel());
-//        assertTrue(s.match("/test 2"));
-//        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, Target.UNKNOWN)}), env, null);
-//        verify(fakePlayer).sendMessage("2");
-//        verify(CommandHelperPlugin.perms).hasPermission(fakePlayer.getVariableName(), "ch.alias.safe");
-//    }
+//		CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
+//		when(CommandHelperPlugin.perms.hasPermission(fakePlayer.getVariableName(), "ch.alias.safe")).thenReturn(true);
+//		CommandHelperPlugin.myServer = fakeServer;
+//		when(fakeServer.getOnlinePlayers()).thenReturn(new MCPlayer[]{fakePlayer});
+//		String config = "safe:/test $var = >>>\n"
+//				+ "all_players()\n"
+//				+ "msg($var)\n"
+//				+ "<<<";
+//		Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
+//		s.compile();
+//		assertEquals("safe", s.getLabel());
+//		assertTrue(s.match("/test 2"));
+//		s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, Target.UNKNOWN)}), env, null);
+//		verify(fakePlayer).sendMessage("2");
+//		verify(CommandHelperPlugin.perms).hasPermission(fakePlayer.getVariableName(), "ch.alias.safe");
+//	}
 	@Test
 	public void testCompile12() throws Exception {
 		String config = "/*/one = bad()*/\n"
@@ -671,11 +671,11 @@ public class MethodScriptCompilerTest {
 		try {
 			SRun("(+ * 2)", fakePlayer);
 			fail("Did not expect test to pass");
-		} catch(ConfigCompileException | ConfigRuntimeException e) {
+		} catch (ConfigCompileException | ConfigRuntimeException e) {
 			//pass
 		}
 		//pass?
-		
+
 	}
 
 	@Test
@@ -726,17 +726,17 @@ public class MethodScriptCompilerTest {
 
 	// If people complain that the old format is broken, I can see about re-adding this. For now,
 	// this is covered in the other exception handler test
-//    @Test public void testLineNumberCorrectInException1() throws Exception{
-//        String script =
-//                "try(\n" //Line 1
-//                + "assign(@a, array(1, 2))\n" //Line 2
-//                + "\n" //Line 3
-//                + "assign(@d, @a[2])\n" //Line 4
-//                + "\n" //Line 5
-//                + ", @e, msg(@e))\n"; //Line 6
-//        SRun(script, fakePlayer);
-//        verify(fakePlayer).sendMessage("4");
-//    }
+//	@Test public void testLineNumberCorrectInException1() throws Exception{
+//		String script =
+//				"try(\n" //Line 1
+//				+ "assign(@a, array(1, 2))\n" //Line 2
+//				+ "\n" //Line 3
+//				+ "assign(@d, @a[2])\n" //Line 4
+//				+ "\n" //Line 5
+//				+ ", @e, msg(@e))\n"; //Line 6
+//		SRun(script, fakePlayer);
+//		verify(fakePlayer).sendMessage("4");
+//	}
 	@Test
 	public void testLineNumberCorrectInException2() throws Exception {
 		String script
@@ -745,7 +745,7 @@ public class MethodScriptCompilerTest {
 				+ "assign(@d, @a[@b])\n"; //Line 3
 		try {
 			SRun(script, fakePlayer);
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			assertEquals(3, e.getTarget().line());
 		}
 
@@ -762,7 +762,7 @@ public class MethodScriptCompilerTest {
 				+ "msg('test2')\n";
 		try {
 			SRun(script, fakePlayer);
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			assertEquals(5, e.getTarget().line());
 		}
 	}
@@ -773,7 +773,7 @@ public class MethodScriptCompilerTest {
 			SRun("\n"
 					+ "\n"
 					+ "player())\n", fakePlayer);
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			assertEquals("3", e.getLineNum());
 		}
 	}
@@ -872,16 +872,16 @@ public class MethodScriptCompilerTest {
 			try {
 				SRun("1[4]", null);
 				fail("Did not expect test to pass");
-			} catch(ConfigCompileException e) {
+			} catch (ConfigCompileException e) {
 				//Pass
 			}
 			try {
 				SRun("'string'['index']", null);
 				fail("Did not expect test to pass");
-			} catch(ConfigCompileException e) {
+			} catch (ConfigCompileException e) {
 				//Pass
 			}
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			fail("Expecting a compile error here, not a runtime exception");
 		}
 	}
@@ -955,7 +955,7 @@ public class MethodScriptCompilerTest {
 		try {
 			SRun("1..2[10]", null);
 			fail("Expected an exception");
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			//pass
 		}
 
@@ -981,23 +981,23 @@ public class MethodScriptCompilerTest {
 //	}
 
 	//TODO: Once the lexer is rewritten, this should work
-//    @Test
-//    public void testAssignmentWithEquals1() throws Exception{
-//	    SRun("@var=yep nope msg(@var)", fakePlayer);
-//	    verify(fakePlayer).sendMessage("yep");
-//    }
+//	@Test
+//	public void testAssignmentWithEquals1() throws Exception{
+//		SRun("@var=yep nope msg(@var)", fakePlayer);
+//		verify(fakePlayer).sendMessage("yep");
+//	}
 //
-//    @Test
-//    public void testAssignmentWithEquals2() throws Exception{
-//	    SRun("@var = yep nope msg(@var)", fakePlayer);
-//	    verify(fakePlayer).sendMessage("yep");
-//    }
+//	@Test
+//	public void testAssignmentWithEquals2() throws Exception{
+//		SRun("@var = yep nope msg(@var)", fakePlayer);
+//		verify(fakePlayer).sendMessage("yep");
+//	}
 //
-//    @Test
-//    public void testAssignmentWithEquals3() throws Exception{
-//	    SRun("@var = 'yep yep' msg(@var)", fakePlayer);
-//	    verify(fakePlayer).sendMessage("yep yep");
-//    }
+//	@Test
+//	public void testAssignmentWithEquals3() throws Exception{
+//		SRun("@var = 'yep yep' msg(@var)", fakePlayer);
+//		verify(fakePlayer).sendMessage("yep yep");
+//	}
 	@Test
 	@Ignore("Ignore for now, until the feature is implemented")
 	public void testLiteralDecimal() throws Exception {
@@ -1072,7 +1072,8 @@ public class MethodScriptCompilerTest {
 	 * @param expectFail - True if cmd1 and cmd2 are expected to be ambigous, false otherwise.
 	 */
 	private void ambigousCommandRegistrationHelper(String cmd1, String cmd2, boolean expectFail) {
-		Script s1, s2;
+		Script s1;
+		Script s2;
 		try {
 			List<Script> scripts = MethodScriptCompiler.preprocess(
 					MethodScriptCompiler.lex(cmd1 + "\n" + cmd2, null, false));
@@ -1080,21 +1081,22 @@ public class MethodScriptCompilerTest {
 			s2 = scripts.get(1);
 			s1.compile();
 			s2.compile();
-		} catch(ConfigCompileGroupException | ConfigCompileException | IndexOutOfBoundsException e) {
+		} catch (ConfigCompileGroupException | ConfigCompileException | IndexOutOfBoundsException e) {
 			fail("Encountered unexpected " + e.getClass().getSimpleName() + " with message: " + e.getMessage());
 			return;
 		}
 
 		// Check scripts 1 and 2 against eachother.
-		ConfigCompileException e1 = null, e2 = null;
+		ConfigCompileException e1 = null;
+		ConfigCompileException e2 = null;
 		try {
 			s2.checkAmbiguous(Arrays.asList(new Script[]{s1}));
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			e1 = e;
 		}
 		try {
 			s1.checkAmbiguous(Arrays.asList(new Script[]{s2}));
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			e2 = e;
 		}
 
@@ -1118,4 +1120,125 @@ public class MethodScriptCompilerTest {
 		}
 	}
 
+	@Test
+	public void testMinusSignHandling() throws Exception {
+		// This tests a specific lexer part where token TType.MINUS ('-' sign) is merged with the next token
+		// based on whether the MINUS is used as a negation sign or a mathematical operator.
+
+		// "... - 2".
+		this.verifyExecute("msg(5 - 2)", "3");
+		this.verifyExecute("msg(5- 2)", "3");
+		this.verifyExecute("msg(5 -2)", "3");
+		this.verifyExecute("msg(5-2)", "3");
+		this.verifyExecute("msg(0x05 - 2)", "3");
+		this.verifyExecute("msg(0x05- 2)", "3");
+		this.verifyExecute("msg(0x05 -2)", "3");
+		this.verifyExecute("msg(0x05-2)", "3");
+		this.verifyExecute("@arr = array(5); msg(@arr[0] - 2)", "3");
+		this.verifyExecute("@arr = array(5); msg(@arr[0]- 2)", "3");
+		this.verifyExecute("@arr = array(5); msg(@arr[0] -2)", "3");
+		this.verifyExecute("@arr = array(5); msg(@arr[0]-2)", "3");
+		this.verifyExecute("@a = 5; msg(@a - 2)", "3");
+		this.verifyExecute("@a = 5; msg(@a- 2)", "3");
+		this.verifyExecute("@a = 5; msg(@a -2)", "3");
+		this.verifyExecute("@a = 5; msg(@a-2)", "3");
+		this.verifyExecute("msg(abs(5) - 2)", "3");
+		this.verifyExecute("msg(abs(5)- 2)", "3");
+		this.verifyExecute("msg(abs(5) -2)", "3");
+		this.verifyExecute("msg(abs(5)-2)", "3");
+
+		// "2 - ...".
+		this.verifyExecute("msg(2 - 0x05)", "-3");
+		this.verifyExecute("msg(2- 0x05)", "-3");
+		this.verifyExecute("msg(2 -0x05)", "-3");
+		this.verifyExecute("msg(2-0x05)", "-3");
+		this.verifyExecute("@arr = array(5); msg(2 - @arr[0])", "-3");
+		this.verifyExecute("@arr = array(5); msg(2- @arr[0])", "-3");
+		this.verifyExecute("@arr = array(5); msg(2 -@arr[0])", "-3");
+		this.verifyExecute("@arr = array(5); msg(2-@arr[0])", "-3");
+		this.verifyExecute("@a = 5; msg(2 - @a)", "-3");
+		this.verifyExecute("@a = 5; msg(2- @a)", "-3");
+		this.verifyExecute("@a = 5; msg(2 -@a)", "-3");
+		this.verifyExecute("@a = 5; msg(2-@a)", "-3");
+		this.verifyExecute("msg(2 - abs(5))", "-3");
+		this.verifyExecute("msg(2- abs(5))", "-3");
+		this.verifyExecute("msg(2 -abs(5))", "-3");
+		this.verifyExecute("msg(2-abs(5))", "-3");
+
+		// "- something".
+		this.verifyExecute("msg(-5)", "-5");
+		this.verifyExecute("msg(typeof(-5))", "int");
+		this.verifyExecute("msg(- 5)", "-5");
+		this.verifyExecute("msg(typeof(- 5))", "int");
+		this.verifyExecute("@a = 5; msg(-@a)", "-5");
+		this.verifyExecute("@a = 5; msg(typeof(-@a))", "int");
+		this.verifyExecute("@a = 5; msg(- @a)", "-5");
+		this.verifyExecute("@a = 5; msg(typeof(- @a))", "int");
+	}
+
+	@Test
+	public void testPlusSignHandling() throws Exception {
+		// This tests a specific lexer part where token TType.PLUS ('+' sign) is merged with the next token
+		// based on whether the PLUS is used as a positive sign or a mathematical operator.
+
+		// "... + 2".
+		this.verifyExecute("msg(5 + 2)", "7");
+		this.verifyExecute("msg(5+ 2)", "7");
+		this.verifyExecute("msg(5 +2)", "7");
+		this.verifyExecute("msg(5+2)", "7");
+		this.verifyExecute("msg(0x05 + 2)", "7");
+		this.verifyExecute("msg(0x05+ 2)", "7");
+		this.verifyExecute("msg(0x05 +2)", "7");
+		this.verifyExecute("msg(0x05+2)", "7");
+		this.verifyExecute("@arr = array(5); msg(@arr[0] + 2)", "7");
+		this.verifyExecute("@arr = array(5); msg(@arr[0]+ 2)", "7");
+		this.verifyExecute("@arr = array(5); msg(@arr[0] +2)", "7");
+		this.verifyExecute("@arr = array(5); msg(@arr[0]+2)", "7");
+		this.verifyExecute("@a = 5; msg(@a + 2)", "7");
+		this.verifyExecute("@a = 5; msg(@a+ 2)", "7");
+		this.verifyExecute("@a = 5; msg(@a +2)", "7");
+		this.verifyExecute("@a = 5; msg(@a+2)", "7");
+		this.verifyExecute("msg(abs(5) + 2)", "7");
+		this.verifyExecute("msg(abs(5)+ 2)", "7");
+		this.verifyExecute("msg(abs(5) +2)", "7");
+		this.verifyExecute("msg(abs(5)+2)", "7");
+
+		// "2 + ...".
+		this.verifyExecute("msg(2 + 0x05)", "7");
+		this.verifyExecute("msg(2+ 0x05)", "7");
+		this.verifyExecute("msg(2 +0x05)", "7");
+		this.verifyExecute("msg(2+0x05)", "7");
+		this.verifyExecute("@arr = array(5); msg(2 + @arr[0])", "7");
+		this.verifyExecute("@arr = array(5); msg(2+ @arr[0])", "7");
+		this.verifyExecute("@arr = array(5); msg(2 +@arr[0])", "7");
+		this.verifyExecute("@arr = array(5); msg(2+@arr[0])", "7");
+		this.verifyExecute("@a = 5; msg(2 + @a)", "7");
+		this.verifyExecute("@a = 5; msg(2+ @a)", "7");
+		this.verifyExecute("@a = 5; msg(2 +@a)", "7");
+		this.verifyExecute("@a = 5; msg(2+@a)", "7");
+		this.verifyExecute("msg(2 + abs(5))", "7");
+		this.verifyExecute("msg(2+ abs(5))", "7");
+		this.verifyExecute("msg(2 +abs(5))", "7");
+		this.verifyExecute("msg(2+abs(5))", "7");
+
+		// "+ something".
+		this.verifyExecute("msg(+5)", "5");
+		this.verifyExecute("msg(typeof(+5))", "int");
+		this.verifyExecute("msg(+ 5)", "5");
+		this.verifyExecute("msg(typeof(+ 5))", "int");
+		this.verifyExecute("@a = 5; msg(+@a)", "5");
+		this.verifyExecute("@a = 5; msg(typeof(+@a))", "int");
+		this.verifyExecute("@a = 5; msg(+ @a)", "5");
+		this.verifyExecute("@a = 5; msg(typeof(+ @a))", "int");
+	}
+
+	private void verifyExecute(String script, String expectedResponse) throws ConfigCompileException, ConfigCompileGroupException {
+		MCPlayer temp = this.env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		MCPlayer player = StaticTest.GetOnlinePlayer();
+		this.env.getEnv(CommandHelperEnvironment.class).SetPlayer(player);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(
+				MethodScriptCompiler.lex(script, null, true)), this.env, null, null);
+		verify(player).sendMessage(expectedResponse);
+		this.env.getEnv(CommandHelperEnvironment.class).SetPlayer(temp);
+	}
 }

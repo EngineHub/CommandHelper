@@ -36,11 +36,11 @@ import java.util.Map;
 public abstract class AbstractEvent implements Event, Comparable<Event> {
 
 	private EventMixinInterface mixin;
-//    protected EventHandlerInterface handler;
+//	protected EventHandlerInterface handler;
 //
-//    protected AbstractEvent(EventHandlerInterface handler){
-//        this.handler = handler;
-//    }
+//	protected AbstractEvent(EventHandlerInterface handler){
+//		this.handler = handler;
+//	}
 //
 
 	public final void setAbstractEventMixin(EventMixinInterface mixin) {
@@ -91,7 +91,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 			try {
 				MCPlayer p = Static.GetPlayer(c, Target.UNKNOWN);
 				env.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
-			} catch(CREPlayerOfflineException e) {
+			} catch (CREPlayerOfflineException e) {
 				// Set env CommandSender to prevent incorrect inherited player from being used in a player event.
 				if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
@@ -113,13 +113,13 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 				}
 				env.getEnv(GlobalEnv.class).SetLabel(label);
 				MethodScriptCompiler.execute(tree, env, null, null);
-			} catch(CancelCommandException ex) {
+			} catch (CancelCommandException ex) {
 				if(ex.getMessage() != null && !ex.getMessage().isEmpty()) {
 					StreamUtils.GetSystemOut().println(ex.getMessage());
 				}
-			} catch(FunctionReturnException ex) {
+			} catch (FunctionReturnException ex) {
 				//We simply allow this to end the event execution
-			} catch(ProgramFlowManipulationException ex) {
+			} catch (ProgramFlowManipulationException ex) {
 				ConfigRuntimeException.HandleUncaughtException(new CREFormatException("Unexpected control flow operation used.", ex.getTarget()), env);
 			}
 		} finally {
@@ -237,7 +237,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		return this.getClass().getAnnotation(hide.class) != null;
 	}
 
-	private final static Class[] EMPTY_CLASS = new Class[0];
+	private static final Class[] EMPTY_CLASS = new Class[0];
 
 	@Override
 	public Class<? extends Documentation>[] seeAlso() {

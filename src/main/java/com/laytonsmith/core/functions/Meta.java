@@ -122,12 +122,7 @@ public class Meta {
 				}
 				return CVoid.VOID;
 			}
-			if(args[0].val().equals("~op")) {
-				//TODO: Remove this after next release (3.3.1)
-				CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "Using runas(~op, " + args[1].asString().getQuote()
-						+ ") is deprecated. Use sudo(" + args[1].asString().getQuote() + ") instead.", t);
-				new sudo().exec(t, env, args[1]);
-			} else if(args[0].val().equals(Static.getConsoleName())) {
+			if(args[0].val().equals(Static.getConsoleName())) {
 				CHLog.GetLogger().Log(CHLog.Tags.META, LogLevel.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as console): " + args[1].val().trim(), t);
 				if(Prefs.DebugMode()) {
 					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as : " + args[1].val().trim());
@@ -290,7 +285,7 @@ public class Meta {
 			MCPlayer p = (MCPlayer) player;
 			try {
 				p.setTempOp(value);
-			} catch(Exception e) {
+			} catch (Exception e) {
 				if(Prefs.UseSudoFallback()) {
 					p.setOp(value);
 				} else {
@@ -354,7 +349,7 @@ public class Meta {
 			}
 			try {
 				Static.getServer().dispatchCommand(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), cmd);
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new CREPluginInternalException("While running the command: \"" + cmd + "\""
 						+ " the plugin threw an unexpected exception (turn on debug mode to see the full"
 						+ " stacktrace): " + ex.getMessage() + "\n\nThis is not a bug in " + Implementation.GetServerType().getBranding()
@@ -597,7 +592,7 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "mixed {} Gets the command (as a string) that ended up triggering this script, exactly"
+			return "string {} Gets the command (as a string) that ended up triggering this script, exactly"
 					+ " how it was entered by the player. This could be null, if for instance"
 					+ " it is called from within an event.";
 		}
@@ -665,7 +660,7 @@ public class Meta {
 			String ret;
 			try {
 				ret = Static.getServer().dispatchAndCaptureCommand(operator, cmd);
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new CREPluginInternalException(ex.getMessage(), t, ex);
 			}
 
@@ -815,9 +810,17 @@ public class Meta {
 	@api(environments = CommandHelperEnvironment.class)
 	public static class run_cmd extends AbstractFunction {
 
-		private final static run run = new run();
-		private final static call_alias call_alias = new call_alias();
-		private final static is_alias is_alias = new is_alias();
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
+		private static final run run = new run();
+
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
+		private static final call_alias call_alias = new call_alias();
+
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
+		private static final is_alias is_alias = new is_alias();
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -921,6 +924,7 @@ public class Meta {
 	}
 
 	@api
+	@noboilerplate // A boilerplate test on this function is relatively expensive and not necessary.
 	public static class get_locales extends AbstractFunction {
 
 		@Override
@@ -1007,7 +1011,7 @@ public class Meta {
 				String jar = ClassDiscovery.GetClassContainer(Meta.class).toString();
 				jar = jar.replaceFirst("file:", "");
 				jf = new JarFile(jar);
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				return CNull.NULL;
 			}
 			ZipEntry manifest = jf.getEntry("META-INF/MANIFEST.MF");

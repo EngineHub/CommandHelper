@@ -3,6 +3,7 @@ package com.laytonsmith.core.events.drivers;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.events.MCBroadcastMessageEvent;
 import com.laytonsmith.abstraction.events.MCCommandTabCompleteEvent;
 import com.laytonsmith.abstraction.events.MCServerCommandEvent;
 import com.laytonsmith.abstraction.events.MCRedstoneChangedEvent;
@@ -172,7 +173,7 @@ public class ServerEvents {
 				String ip;
 				try {
 					ip = event.getAddress().getHostAddress();
-				} catch(NullPointerException npe) {
+				} catch (NullPointerException npe) {
 					ip = "";
 				}
 				ret.put("ip", new CString(ip, t));
@@ -333,7 +334,8 @@ public class ServerEvents {
 		}
 	}
 
-	private final static Map<MCLocation, Boolean> redstoneMonitors = Collections.synchronizedMap(new HashMap<MCLocation, Boolean>());
+	private static final Map<MCLocation, Boolean> REDSTONE_MONITORS =
+			Collections.synchronizedMap(new HashMap<MCLocation, Boolean>());
 
 	/**
 	 * Returns a synchronized set of redstone monitors. When iterating on the list, be sure to synchronize manually.
@@ -341,7 +343,7 @@ public class ServerEvents {
 	 * @return
 	 */
 	public static Map<MCLocation, Boolean> getRedstoneMonitors() {
-		return redstoneMonitors;
+		return REDSTONE_MONITORS;
 	}
 
 	@api
@@ -349,7 +351,7 @@ public class ServerEvents {
 
 		@Override
 		public void hook() {
-			redstoneMonitors.clear();
+			REDSTONE_MONITORS.clear();
 		}
 
 		@Override
@@ -408,4 +410,70 @@ public class ServerEvents {
 
 	}
 
+	@api
+	public static class broadcast_message extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "broadcast_message";
+		}
+
+		@Override
+		public String docs() {
+			return "{message: <string match>}"
+					+ " Fired when a message is broadcasted on the server."
+					+ " {message: The message that will be broadcasted"
+					+ " | player_recipients: An array of players who will receive the message.}"
+					+ " {message}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if(e instanceof MCBroadcastMessageEvent) {
+				MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
+				Prefilters.match(prefilter, "message", event.getMessage(), PrefilterType.STRING_MATCH);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
+			Map<String, Construct> map = evaluate_helper(e);
+			map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
+			CArray cRecipients = new CArray(Target.UNKNOWN);
+			for(MCPlayer player : event.getPlayerRecipients()) {
+				cRecipients.push(new CString(player.getName(), Target.UNKNOWN), Target.UNKNOWN);
+			}
+			map.put("player_recipients", cRecipients);
+			return map;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.BROADCAST_MESSAGE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+			if(key.equals("message")) {
+				MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
+				event.setMessage(value.nval());
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_2;
+		}
+	}
 }

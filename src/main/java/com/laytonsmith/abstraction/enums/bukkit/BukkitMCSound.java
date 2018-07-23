@@ -42,7 +42,7 @@ public class BukkitMCSound extends MCSound<Sound> {
 	public static BukkitMCSound valueOfConcrete(String test) {
 		try {
 			return valueOfConcrete(Sound.valueOf(test));
-		} catch(IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			return (BukkitMCSound) NULL;
 		}
 	}
@@ -54,10 +54,11 @@ public class BukkitMCSound extends MCSound<Sound> {
 		ArrayList<Sound> counted = new ArrayList<>();
 		for(MCVanillaSound v : MCVanillaSound.values()) {
 			if(v.existsInCurrent()) {
-				Sound sound = getBukkitType(v);
-				if(sound == null) {
-					CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not find a matching sound for " + v.name()
-							+ ". This is an error, please report this to the bug tracker.", Target.UNKNOWN);
+				Sound sound;
+				try {
+					sound = getBukkitType(v);
+				} catch (IllegalArgumentException | NoSuchFieldError ex) {
+					CHLog.GetLogger().w(CHLog.Tags.RUNTIME, "Could not find a Bukkit Sound for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
 				BukkitMCSound wrapper = new BukkitMCSound(v, sound);
@@ -475,10 +476,6 @@ public class BukkitMCSound extends MCSound<Sound> {
 					return Sound.ENTITY_VILLAGER_YES;
 			}
 		}
-		try {
-			return Sound.valueOf(v.name());
-		} catch(IllegalArgumentException iae) {
-			return null;
-		}
+		return Sound.valueOf(v.name());
 	}
 }

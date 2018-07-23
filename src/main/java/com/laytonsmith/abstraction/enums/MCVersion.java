@@ -60,18 +60,18 @@ public enum MCVersion implements Version {
 		String attempt = "MC" + StringUtils.Join(parts, "_");
 		try {
 			return valueOf(attempt);
-		} catch(IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			if(parts.length == 3) {
 				parts[2] = "0".equals(parts[2]) ? null : "X";
 				attempt = "MC" + StringUtils.Join(parts[2] == null ? new String[]{parts[0], parts[1]} : parts, "_");
 				try {
 					return valueOf(attempt);
-				} catch(IllegalArgumentException iae2) {
+				} catch (IllegalArgumentException iae2) {
 					parts[1] = "X";
 					attempt = "MC" + StringUtils.Join(new String[]{parts[0], parts[1]}, "_");
 					try {
 						return valueOf(attempt);
-					} catch(IllegalArgumentException iae3) {
+					} catch (IllegalArgumentException iae3) {
 						return MCX_X;
 					}
 				}
@@ -81,7 +81,7 @@ public enum MCVersion implements Version {
 				attempt = "MC" + StringUtils.Join(parts, "_");
 				try {
 					return valueOf(attempt);
-				} catch(IllegalArgumentException iae2) {
+				} catch (IllegalArgumentException iae2) {
 					return MCX_X;
 				}
 			}

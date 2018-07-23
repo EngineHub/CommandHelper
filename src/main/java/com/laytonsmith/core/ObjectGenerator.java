@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCBannerMeta;
 import com.laytonsmith.abstraction.MCBlockStateMeta;
 import com.laytonsmith.abstraction.MCBookMeta;
+import com.laytonsmith.abstraction.MCBrewerInventory;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
 import com.laytonsmith.abstraction.MCEnchantment;
@@ -12,8 +13,10 @@ import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCFireworkEffect;
 import com.laytonsmith.abstraction.MCFireworkEffectMeta;
 import com.laytonsmith.abstraction.MCFireworkMeta;
+import com.laytonsmith.abstraction.MCFurnaceInventory;
 import com.laytonsmith.abstraction.MCFurnaceRecipe;
 import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemFactory;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -22,7 +25,6 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMapMeta;
 import com.laytonsmith.abstraction.MCMetadataValue;
-import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPotionData;
@@ -36,6 +38,12 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBanner;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.blocks.MCBrewingStand;
+import com.laytonsmith.abstraction.blocks.MCChest;
+import com.laytonsmith.abstraction.blocks.MCDispenser;
+import com.laytonsmith.abstraction.blocks.MCDropper;
+import com.laytonsmith.abstraction.blocks.MCFurnace;
+import com.laytonsmith.abstraction.blocks.MCHopper;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCShulkerBox;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
@@ -266,7 +274,7 @@ public class ObjectGenerator {
 				if(seperatorIndex != -1) {
 					try {
 						data = Integer.parseInt(type.val().substring(seperatorIndex + 1));
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						throw new CRERangeException("The item data \"" + type.val().substring(seperatorIndex + 1)
 								+ "\" is not a valid integer.", t);
 					}
@@ -306,7 +314,7 @@ public class ObjectGenerator {
 				for(Map.Entry<MCEnchantment, Integer> entry : enchants.entrySet()) {
 					ret.addUnsafeEnchantment(entry.getKey(), entry.getValue());
 				}
-			} catch(ClassCastException ex) {
+			} catch (ClassCastException ex) {
 				throw new CREFormatException("Enchants must be an array of enchantment arrays.", t);
 			}
 		}
@@ -322,7 +330,8 @@ public class ObjectGenerator {
 		if(!is.hasItemMeta()) {
 			return CNull.NULL;
 		} else {
-			Construct display, lore;
+			Construct display;
+			Construct lore;
 			CArray ma = CArray.GetAssociativeArray(t);
 			MCItemMeta meta = is.getItemMeta();
 			if(meta.hasDisplayName()) {
@@ -362,9 +371,10 @@ public class ObjectGenerator {
 			// Specific ItemMeta
 			if(meta instanceof MCBlockStateMeta) {
 				MCBlockState bs = ((MCBlockStateMeta) meta).getBlockState();
-				if(bs instanceof MCShulkerBox) {
-					MCShulkerBox mcsb = (MCShulkerBox) bs;
-					MCInventory inv = mcsb.getInventory();
+				if(bs instanceof MCShulkerBox || bs instanceof MCChest
+						|| bs instanceof MCDispenser || bs instanceof MCDropper || bs instanceof MCHopper) {
+					// Handle InventoryHolders with inventory slots that do not have a special meaning.
+					MCInventory inv = ((MCInventoryHolder) bs).getInventory();
 					CArray box = CArray.GetAssociativeArray(t);
 					for(int i = 0; i < inv.getSize(); i++) {
 						Construct item = ObjectGenerator.GetGenerator().item(inv.getItem(i), t);
@@ -390,6 +400,45 @@ public class ObjectGenerator {
 				} else if(bs instanceof MCCreatureSpawner) {
 					MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 					ma.set("spawntype", mccs.getSpawnedType().name());
+					ma.set("delay", new CInt(mccs.getDelay(), t), t);
+				} else if(bs instanceof MCBrewingStand) {
+					MCBrewingStand brewStand = (MCBrewingStand) bs;
+					ma.set("brewtime", new CInt(brewStand.getBrewingTime(), t), t);
+					ma.set("fuel", new CInt(brewStand.getFuelLevel(), t), t);
+					MCBrewerInventory inv = brewStand.getInventory();
+					CArray invData = CArray.GetAssociativeArray(t);
+					if(inv.getFuel().getAmount() != 0) {
+						invData.set("fuel", ObjectGenerator.GetGenerator().item(inv.getFuel(), t), t);
+					}
+					if(inv.getIngredient().getAmount() != 0) {
+						invData.set("ingredient", ObjectGenerator.GetGenerator().item(inv.getIngredient(), t), t);
+					}
+					if(inv.getLeftBottle().getAmount() != 0) {
+						invData.set("leftbottle", ObjectGenerator.GetGenerator().item(inv.getLeftBottle(), t), t);
+					}
+					if(inv.getMiddleBottle().getAmount() != 0) {
+						invData.set("middlebottle", ObjectGenerator.GetGenerator().item(inv.getMiddleBottle(), t), t);
+					}
+					if(inv.getRightBottle().getAmount() != 0) {
+						invData.set("rightbottle", ObjectGenerator.GetGenerator().item(inv.getRightBottle(), t), t);
+					}
+					ma.set("inventory", invData, t);
+				} else if(bs instanceof MCFurnace) {
+					MCFurnace furnace = (MCFurnace) bs;
+					ma.set("burntime", new CInt(furnace.getBurnTime(), t), t);
+					ma.set("cooktime", new CInt(furnace.getCookTime(), t), t);
+					MCFurnaceInventory inv = furnace.getInventory();
+					CArray invData = CArray.GetAssociativeArray(t);
+					if(inv.getResult().getAmount() != 0) {
+						invData.set("result", ObjectGenerator.GetGenerator().item(inv.getResult(), t), t);
+					}
+					if(inv.getFuel().getAmount() != 0) {
+						invData.set("fuel", ObjectGenerator.GetGenerator().item(inv.getFuel(), t), t);
+					}
+					if(inv.getSmelting().getAmount() != 0) {
+						invData.set("smelting", ObjectGenerator.GetGenerator().item(inv.getSmelting(), t), t);
+					}
+					ma.set("inventory", invData, t);
 				}
 			} else if(meta instanceof MCFireworkEffectMeta) {
 				MCFireworkEffectMeta mcfem = (MCFireworkEffectMeta) meta;
@@ -413,7 +462,9 @@ public class ObjectGenerator {
 				CArray color = color(((MCLeatherArmorMeta) meta).getColor(), t);
 				ma.set("color", color, t);
 			} else if(meta instanceof MCBookMeta) {
-				Construct title, author, pages;
+				Construct title;
+				Construct author;
+				Construct pages;
 				if(((MCBookMeta) meta).hasTitle()) {
 					title = new CString(((MCBookMeta) meta).getTitle(), t);
 				} else {
@@ -436,21 +487,10 @@ public class ObjectGenerator {
 				ma.set("author", author, t);
 				ma.set("pages", pages, t);
 			} else if(meta instanceof MCSkullMeta) {
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_12_X)) {
-					if(((MCSkullMeta) meta).hasOwner()) {
-						MCOfflinePlayer player = ((MCSkullMeta) meta).getOwningPlayer();
-						ma.set("owner", new CString(player.getName(), t), t);
-						ma.set("owneruuid", new CString(player.getUniqueID().toString(), t), t);
-					} else {
-						ma.set("owner", CNull.NULL, t);
-						ma.set("owneruuid", CNull.NULL, t);
-					}
+				if(((MCSkullMeta) meta).hasOwner()) {
+					ma.set("owner", new CString(((MCSkullMeta) meta).getOwner(), t), t);
 				} else {
-					if(((MCSkullMeta) meta).hasOwner()) {
-						ma.set("owner", new CString(((MCSkullMeta) meta).getOwner(), t), t);
-					} else {
-						ma.set("owner", CNull.NULL, t);
-					}
+					ma.set("owner", CNull.NULL, t);
 				}
 			} else if(meta instanceof MCEnchantmentStorageMeta) {
 				Construct stored;
@@ -585,30 +625,33 @@ public class ObjectGenerator {
 				if(meta instanceof MCBlockStateMeta) {
 					MCBlockStateMeta bsm = (MCBlockStateMeta) meta;
 					MCBlockState bs = bsm.getBlockState();
-					if(bs instanceof MCShulkerBox) {
+					if(bs instanceof MCShulkerBox || bs instanceof MCChest
+							|| bs instanceof MCDispenser || bs instanceof MCDropper || bs instanceof MCHopper) {
 						if(ma.containsKey("inventory")) {
-							MCShulkerBox box = (MCShulkerBox) bs;
-							MCInventory inv = box.getInventory();
-							Construct csbm = ma.get("inventory", t);
-							if(csbm instanceof CArray) {
-								CArray cinv = (CArray) csbm;
+							MCInventory inv = ((MCInventoryHolder) bs).getInventory();
+							Construct cInvRaw = ma.get("inventory", t);
+							if(cInvRaw instanceof CArray) {
+								CArray cinv = (CArray) cInvRaw;
 								for(String key : cinv.stringKeySet()) {
 									try {
 										int index = Integer.parseInt(key);
 										if(index < 0 || index >= inv.getSize()) {
 											ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found"
-													+ " in ShulkerBox inventory array, so ignoring.");
+													+ " in " + bs.getClass().getSimpleName().replaceFirst("MC", "")
+													+ " inventory array, so ignoring.");
 										}
 										MCItemStack is = ObjectGenerator.GetGenerator().item(cinv.get(key, t), t);
 										inv.setItem(index, is);
-									} catch(NumberFormatException ex) {
-										ConfigRuntimeException.DoWarning("Expecting integer value for key in ShulkerBox"
+									} catch (NumberFormatException ex) {
+										ConfigRuntimeException.DoWarning("Expecting integer value for key in "
+												+ bs.getClass().getSimpleName().replaceFirst("MC", "")
 												+ " inventory array, but \"" + key + "\" was found. Ignoring.");
 									}
 								}
 								bsm.setBlockState(bs);
-							} else if(!(csbm instanceof CNull)) {
-								throw new CREFormatException("ShulkerBox inventory expected to be an array or null.", t);
+							} else if(!(cInvRaw instanceof CNull)) {
+								throw new CREFormatException(bs.getClass().getSimpleName().replaceFirst("MC", "")
+										+ " inventory expected to be an array or null.", t);
 							}
 						}
 					} else if(bs instanceof MCBanner) {
@@ -628,12 +671,66 @@ public class ObjectGenerator {
 						banner.update();
 						bsm.setBlockState(banner);
 					} else if(bs instanceof MCCreatureSpawner) {
+						MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 						if(ma.containsKey("spawntype")) {
-							MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 							MCEntityType type = MCEntityType.valueOf(ma.get("spawntype", t).val().toUpperCase());
 							mccs.setSpawnedType(type);
-							bsm.setBlockState(bs);
 						}
+						if(ma.containsKey("delay")) {
+							int delay = Static.getInt32(ma.get("delay", t), t);
+							mccs.setDelay(delay);
+						}
+						bsm.setBlockState(bs);
+					} else if(bs instanceof MCBrewingStand) {
+						MCBrewingStand brewStand = (MCBrewingStand) bs;
+						if(ma.containsKey("brewtime")) {
+							brewStand.setBrewingTime(ArgumentValidation.getInt32(ma.get("brewtime", t), t));
+						}
+						if(ma.containsKey("fuel")) {
+							brewStand.setFuelLevel(ArgumentValidation.getInt32(ma.get("fuel", t), t));
+						}
+						if(ma.containsKey("inventory")) {
+							CArray invData = ArgumentValidation.getArray(ma.get("inventory", t), t);
+							MCBrewerInventory inv = brewStand.getInventory();
+							if(invData.containsKey("fuel")) {
+								inv.setFuel(ObjectGenerator.GetGenerator().item(invData.get("fuel", t), t));
+							}
+							if(invData.containsKey("ingredient")) {
+								inv.setIngredient(ObjectGenerator.GetGenerator().item(invData.get("ingredient", t), t));
+							}
+							if(invData.containsKey("leftbottle")) {
+								inv.setLeftBottle(ObjectGenerator.GetGenerator().item(invData.get("leftbottle", t), t));
+							}
+							if(invData.containsKey("middlebottle")) {
+								inv.setMiddleBottle(ObjectGenerator.GetGenerator().item(invData.get("middlebottle", t), t));
+							}
+							if(invData.containsKey("rightbottle")) {
+								inv.setRightBottle(ObjectGenerator.GetGenerator().item(invData.get("rightbottle", t), t));
+							}
+						}
+						bsm.setBlockState(bs);
+					} else if(bs instanceof MCFurnace) {
+						MCFurnace furnace = (MCFurnace) bs;
+						if(ma.containsKey("burntime")) {
+							furnace.setBurnTime(ArgumentValidation.getInt16(ma.get("burntime", t), t));
+						}
+						if(ma.containsKey("cooktime")) {
+							furnace.setCookTime(ArgumentValidation.getInt16(ma.get("cooktime", t), t));
+						}
+						if(ma.containsKey("inventory")) {
+							CArray invData = ArgumentValidation.getArray(ma.get("inventory", t), t);
+							MCFurnaceInventory inv = furnace.getInventory();
+							if(invData.containsKey("result")) {
+								inv.setResult(ObjectGenerator.GetGenerator().item(invData.get("result", t), t));
+							}
+							if(invData.containsKey("fuel")) {
+								inv.setFuel(ObjectGenerator.GetGenerator().item(invData.get("fuel", t), t));
+							}
+							if(invData.containsKey("smelting")) {
+								inv.setSmelting(ObjectGenerator.GetGenerator().item(invData.get("smelting", t), t));
+							}
+						}
+						bsm.setBlockState(bs);
 					}
 				} else if(meta instanceof MCFireworkEffectMeta) {
 					MCFireworkEffectMeta femeta = (MCFireworkEffectMeta) meta;
@@ -716,16 +813,9 @@ public class ObjectGenerator {
 						}
 					}
 				} else if(meta instanceof MCSkullMeta) {
-					if(ma.containsKey("owneruuid")) {
-						Construct id = ma.get("owneruuid", t);
-						if(!(id instanceof CNull)) {
-							((MCSkullMeta) meta).setOwningPlayer(Static.getServer().getOfflinePlayer(Static.GetUUID(id, t)));
-						}
-					} else if(ma.containsKey("owner")) {
-						Construct owner = ma.get("owner", t);
-						if(!(owner instanceof CNull)) {
-							((MCSkullMeta) meta).setOwner(owner.val());
-						}
+					Construct owner = ma.get("owner", t);
+					if(!(owner instanceof CNull)) {
+						((MCSkullMeta) meta).setOwner(owner.val());
 					}
 				} else if(meta instanceof MCEnchantmentStorageMeta) {
 					if(ma.containsKey("stored")) {
@@ -793,7 +883,7 @@ public class ObjectGenerator {
 						}
 					}
 				}
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new CREFormatException(ex.getMessage(), t, ex);
 			}
 		} else {
@@ -861,7 +951,7 @@ public class ObjectGenerator {
 		}
 		try {
 			return StaticLayer.GetConvertor().GetColor(red, green, blue);
-		} catch(IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			throw new CRERangeException(ex.getMessage(), t, ex);
 		}
 	}
@@ -993,7 +1083,7 @@ public class ObjectGenerator {
 					}
 				}
 				ret.put(etype, elevel);
-			} catch(ClassCastException cce) {
+			} catch (ClassCastException cce) {
 				throw new CREFormatException("Expected an array at index " + key, t);
 			}
 		}
@@ -1019,7 +1109,8 @@ public class ObjectGenerator {
 		for(String key : ea.stringKeySet()) {
 			if(ea.get(key, t) instanceof CArray) {
 				CArray effect = (CArray) ea.get(key, t);
-				int potionID = 0, strength = 0;
+				int potionID = 0;
+				int strength = 0;
 				double seconds = 30.0;
 				boolean ambient = false;
 				boolean particles = true;
@@ -1062,7 +1153,12 @@ public class ObjectGenerator {
 	}
 
 	public MCPotionData potionData(CArray pd, Target t) {
-		MCPotionType type = MCPotionType.valueOf(pd.get("type", t).val().toUpperCase());
+		MCPotionType type;
+		try {
+			type = MCPotionType.valueOf(pd.get("type", t).val().toUpperCase());
+		} catch (IllegalArgumentException ex) {
+			throw new CREFormatException("Invalid potion type: " + pd.get("type", t).val(), t);
+		}
 		boolean extended = false;
 		boolean upgraded = false;
 		if(pd.containsKey("extended")) {
@@ -1085,7 +1181,7 @@ public class ObjectGenerator {
 		}
 		try {
 			return StaticLayer.GetPotionData(type, extended, upgraded);
-		} catch(IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			throw new CREFormatException(ex.getMessage(), t, ex);
 		}
 	}
@@ -1194,7 +1290,7 @@ public class ObjectGenerator {
 		if(fe.containsKey("type")) {
 			try {
 				builder.setType(MCFireworkType.valueOf(fe.get("type", t).val().toUpperCase()));
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CREFormatException(ex.getMessage(), t, ex);
 			}
 		}
@@ -1239,18 +1335,6 @@ public class ObjectGenerator {
 		return ret;
 	}
 
-	public MCMaterial material(String name, Target t) {
-		try {
-			return StaticLayer.GetMaterial(name.toUpperCase());
-		} catch(IllegalArgumentException exception) {
-			throw new CREFormatException("Unknown material type: " + name, t);
-		}
-	}
-
-	public MCMaterial material(Construct name, Target t) {
-		return material(name.val(), t);
-	}
-
 	public MCRecipe recipe(Construct c, Target t) {
 		if(!(c instanceof CArray)) {
 			throw new CRECastException("Expected array but recieved " + c.getCType().name(), t);
@@ -1265,7 +1349,7 @@ public class ObjectGenerator {
 		MCRecipeType recipeType;
 		try {
 			recipeType = MCRecipeType.valueOf(recipe.get("type", t).val());
-		} catch(IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			throw new CREFormatException("Invalid recipe type.", t);
 		}
 
@@ -1274,13 +1358,12 @@ public class ObjectGenerator {
 		MCRecipe ret;
 		try {
 			ret = StaticLayer.GetNewRecipe(recipeKey, recipeType, result);
-		} catch(IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			throw new CREFormatException(ex.getMessage(), t);
 		}
 		switch(recipeType) {
 			case SHAPED:
 				CArray shaped = Static.getArray(recipe.get("shape", t), t);
-				;
 				String[] shape = new String[(int) shaped.size()];
 				if(shaped.size() < 1 || shaped.size() > 3 || shaped.inAssociativeMode()) {
 					throw new CREFormatException("Shape array is invalid.", t);
@@ -1355,6 +1438,18 @@ public class ObjectGenerator {
 			default:
 				throw new CREFormatException("Could not find valid recipe type.", t);
 		}
+	}
+
+	public MCMaterial material(String name, Target t) {
+		try {
+			return StaticLayer.GetMaterial(name.toUpperCase());
+		} catch (IllegalArgumentException exception) {
+			throw new CREFormatException("Unknown material type: " + name, t);
+		}
+	}
+
+	public MCMaterial material(Construct name, Target t) {
+		return material(name.val(), t);
 	}
 
 	/**

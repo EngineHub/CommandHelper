@@ -60,8 +60,8 @@ public class Minecraft {
 	public static String docs() {
 		return "These functions provide a hook into game functionality.";
 	}
-	private static final SortedMap<String, Construct> DataValueLookup = new TreeMap<>();
-	private static final SortedMap<String, Construct> DataNameLookup = new TreeMap<>();
+	private static final SortedMap<String, Construct> DATA_VALUE_LOOKUP = new TreeMap<>();
+	private static final SortedMap<String, Construct> DATA_NAME_LOOKUP = new TreeMap<>();
 
 	static {
 		Properties p1 = new Properties();
@@ -70,9 +70,9 @@ public class Minecraft {
 			Enumeration e = p1.propertyNames();
 			while(e.hasMoreElements()) {
 				String name = e.nextElement().toString();
-				DataValueLookup.put(name, new CString(p1.getProperty(name), Target.UNKNOWN));
+				DATA_VALUE_LOOKUP.put(name, new CString(p1.getProperty(name), Target.UNKNOWN));
 			}
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
@@ -82,9 +82,9 @@ public class Minecraft {
 			Enumeration e = p2.propertyNames();
 			while(e.hasMoreElements()) {
 				String name = e.nextElement().toString();
-				DataNameLookup.put(name, new CString(p2.getProperty(name), Target.UNKNOWN));
+				DATA_NAME_LOOKUP.put(name, new CString(p2.getProperty(name), Target.UNKNOWN));
 			}
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -123,8 +123,8 @@ public class Minecraft {
 			//Remove anything that isn't a letter or a number
 			changed = changed.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
 			//Do a lookup in the DataLookup table
-			if(DataValueLookup.containsKey(changed)) {
-				String split[] = DataValueLookup.get(changed).toString().split(":");
+			if(DATA_VALUE_LOOKUP.containsKey(changed)) {
+				String split[] = DATA_VALUE_LOOKUP.get(changed).toString().split(":");
 				if(split[1].equals("0")) {
 					return new CInt(split[0], t);
 				}
@@ -212,8 +212,8 @@ public class Minecraft {
 					try {
 						i = Integer.parseInt(split[0]);
 						i2 = Integer.parseInt(split[1]);
-					} catch(NumberFormatException e) {
-					} catch(ArrayIndexOutOfBoundsException e) {
+					} catch (NumberFormatException e) {
+					} catch (ArrayIndexOutOfBoundsException e) {
 						throw new CREFormatException("Incorrect format for the item notation: " + args[0].val(), t);
 					}
 				}
@@ -228,14 +228,14 @@ public class Minecraft {
 			if(i2 == -1) {
 				i2 = 0;
 			}
-			if(DataNameLookup.containsKey(i + "_" + i2)) {
-				return DataNameLookup.get(i + "_" + i2);
-			} else if(DataNameLookup.containsKey(i + "_0")) {
-				return DataNameLookup.get(i + "_0");
+			if(DATA_NAME_LOOKUP.containsKey(i + "_" + i2)) {
+				return DATA_NAME_LOOKUP.get(i + "_" + i2);
+			} else if(DATA_NAME_LOOKUP.containsKey(i + "_0")) {
+				return DATA_NAME_LOOKUP.get(i + "_0");
 			}
 			try {
 				return new CString(StaticLayer.LookupMaterialName(i), t);
-			} catch(NullPointerException e) {
+			} catch (NullPointerException e) {
 				return CNull.NULL;
 			}
 		}
@@ -324,7 +324,7 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "void {xyzArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
+			return "void {locationArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
 					+ " the radius (or 64 by default). The effect can be one of the following: "
 					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ")
 					+ ". Additional data can be supplied with the syntax EFFECT:DATA. The RECORD_PLAY effect takes the item"
@@ -363,14 +363,14 @@ public class Minecraft {
 			if(index != -1) {
 				try {
 					data = Integer.parseInt(preEff.substring(index + 1));
-				} catch(NumberFormatException ex) {
+				} catch (NumberFormatException ex) {
 					throw new CRECastException("Effect data expected an integer", t);
 				}
 				preEff = preEff.substring(0, index);
 			}
 			try {
 				e = MCEffect.valueOf(preEff.toUpperCase());
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CREFormatException("The effect type " + args[1].val() + " is not valid", t);
 			}
 			if(e.equals(MCEffect.STEP_SOUND)) {
@@ -767,7 +767,7 @@ public class Minecraft {
 			MCEntityType type;
 			try {
 				type = MCEntityType.valueOf(args[1].val().toUpperCase());
-			} catch(IllegalArgumentException iae) {
+			} catch (IllegalArgumentException iae) {
 				throw new CREBadEntityException("Not a registered entity type: " + args[1].val(), t);
 			}
 			if(location.getBlock().getState() instanceof MCCreatureSpawner) {

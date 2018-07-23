@@ -15,67 +15,67 @@ import org.bukkit.event.weather.WeatherEvent;
 
 public final class BukkitWeatherEvents {
 
-	public static abstract class BukkitMCWeatherEvent implements MCWeatherEvent {
+	public abstract static class BukkitMCWeatherEvent implements MCWeatherEvent {
 
-		private final WeatherEvent _event;
+		private final WeatherEvent event;
 
 		public BukkitMCWeatherEvent(WeatherEvent event) {
-			_event = event;
+			this.event = event;
 		}
 
 		@Override
 		public Object _GetObject() {
-			return _event;
+			return this.event;
 		}
 
 		@Override
 		public MCWorld getWorld() {
-			return new BukkitMCWorld(_event.getWorld());
+			return new BukkitMCWorld(this.event.getWorld());
 		}
 	}
 
 	public static class BukkitMCLightningStrikeEvent extends BukkitMCWeatherEvent implements MCLightningStrikeEvent {
 
-		private final LightningStrikeEvent _event;
+		private final LightningStrikeEvent event;
 
 		public BukkitMCLightningStrikeEvent(LightningStrikeEvent event) {
 			super(event);
-			_event = event;
+			this.event = event;
 		}
 
 		@Override
 		public MCLightningStrike getLightning() {
-			return new BukkitMCLightningStrike(_event.getLightning());
+			return new BukkitMCLightningStrike(this.event.getLightning());
 		}
 	}
 
 	public static class BukkitMCThunderChangeEvent extends BukkitMCWeatherEvent implements MCThunderChangeEvent {
 
-		private final ThunderChangeEvent _event;
+		private final ThunderChangeEvent event;
 
 		public BukkitMCThunderChangeEvent(ThunderChangeEvent event) {
 			super(event);
-			_event = event;
+			this.event = event;
 		}
 
 		@Override
 		public boolean toThunderState() {
-			return _event.toThunderState();
+			return this.event.toThunderState();
 		}
 	}
 
 	public static class BukkitMCWeatherChangeEvent extends BukkitMCWeatherEvent implements MCWeatherChangeEvent {
 
-		private final WeatherChangeEvent _event;
+		private final WeatherChangeEvent event;
 
 		public BukkitMCWeatherChangeEvent(WeatherChangeEvent event) {
 			super(event);
-			_event = event;
+			this.event = event;
 		}
 
 		@Override
 		public boolean toWeatherState() {
-			return _event.toWeatherState();
+			return this.event.toWeatherState();
 		}
 	}
 }

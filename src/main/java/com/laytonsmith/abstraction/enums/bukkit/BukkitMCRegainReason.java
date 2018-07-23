@@ -13,12 +13,12 @@ import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 )
 public class BukkitMCRegainReason extends EnumConvertor<MCRegainReason, RegainReason> {
 
-	private static BukkitMCRegainReason INST;
+	private static BukkitMCRegainReason instance;
 
 	public static BukkitMCRegainReason getConvertor() {
-		if(INST == null) {
-			INST = new BukkitMCRegainReason();
+		if(instance == null) {
+			instance = new BukkitMCRegainReason();
 		}
-		return INST;
+		return instance;
 	}
 }

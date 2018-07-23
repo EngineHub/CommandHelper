@@ -42,7 +42,7 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 	public static BukkitMCBiomeType valueOfConcrete(String test) {
 		try {
 			return valueOfConcrete(Biome.valueOf(test));
-		} catch(IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			return (BukkitMCBiomeType) NULL;
 		}
 	}
@@ -55,10 +55,11 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 		ArrayList<Biome> counted = new ArrayList<>();
 		for(MCVanillaBiomeType v : MCVanillaBiomeType.values()) {
 			if(v.existsInCurrent()) {
-				Biome type = getBukkitType(v);
-				if(type == null) {
-					CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not find a matching biome type for " + v.name()
-							+ ". This is an error, please report this to the bug tracker.", Target.UNKNOWN);
+				Biome type;
+				try {
+					type = getBukkitType(v);
+				} catch (IllegalArgumentException | NoSuchFieldError ex) {
+					CHLog.GetLogger().w(CHLog.Tags.RUNTIME, "Could not find a Bukkit BiomeType for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
 				BukkitMCBiomeType wrapper = new BukkitMCBiomeType(v, type);
@@ -146,10 +147,6 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 					return Biome.MUTATED_MESA_ROCK;
 			}
 		}
-		try {
-			return Biome.valueOf(v.name());
-		} catch(IllegalArgumentException iae) {
-			return null;
-		}
+		return Biome.valueOf(v.name());
 	}
 }

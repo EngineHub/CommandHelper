@@ -25,7 +25,27 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.entities.MCHorse;
-import com.laytonsmith.abstraction.enums.*;
+import com.laytonsmith.abstraction.enums.MCBiomeType;
+import com.laytonsmith.abstraction.enums.MCCreeperType;
+import com.laytonsmith.abstraction.enums.MCDifficulty;
+import com.laytonsmith.abstraction.enums.MCDyeColor;
+import com.laytonsmith.abstraction.enums.MCEffect;
+import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCGameRule;
+import com.laytonsmith.abstraction.enums.MCMobs;
+import com.laytonsmith.abstraction.enums.MCOcelotType;
+import com.laytonsmith.abstraction.enums.MCParticle;
+import com.laytonsmith.abstraction.enums.MCPigType;
+import com.laytonsmith.abstraction.enums.MCProfession;
+import com.laytonsmith.abstraction.enums.MCSkeletonType;
+import com.laytonsmith.abstraction.enums.MCSound;
+import com.laytonsmith.abstraction.enums.MCSoundCategory;
+import com.laytonsmith.abstraction.enums.MCTreeType;
+import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.abstraction.enums.MCWolfType;
+import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
+import com.laytonsmith.abstraction.enums.MCWorldType;
+import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDifficulty;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
@@ -51,7 +71,60 @@ import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Bat;
+import org.bukkit.entity.Blaze;
+import org.bukkit.entity.CaveSpider;
+import org.bukkit.entity.Chicken;
+import org.bukkit.entity.Cow;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Donkey;
+import org.bukkit.entity.ElderGuardian;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.Enderman;
+import org.bukkit.entity.Endermite;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Evoker;
+import org.bukkit.entity.Firework;
+import org.bukkit.entity.Ghast;
+import org.bukkit.entity.Giant;
+import org.bukkit.entity.Guardian;
+import org.bukkit.entity.Horse;
+import org.bukkit.entity.Husk;
+import org.bukkit.entity.Illusioner;
+import org.bukkit.entity.IronGolem;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Llama;
+import org.bukkit.entity.MagmaCube;
+import org.bukkit.entity.Mule;
+import org.bukkit.entity.MushroomCow;
+import org.bukkit.entity.Ocelot;
+import org.bukkit.entity.Parrot;
+import org.bukkit.entity.Pig;
+import org.bukkit.entity.PigZombie;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.PolarBear;
+import org.bukkit.entity.Rabbit;
+import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Shulker;
+import org.bukkit.entity.Silverfish;
+import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.SkeletonHorse;
+import org.bukkit.entity.Slime;
+import org.bukkit.entity.Snowman;
+import org.bukkit.entity.Spider;
+import org.bukkit.entity.Squid;
+import org.bukkit.entity.Stray;
+import org.bukkit.entity.Vex;
+import org.bukkit.entity.Villager;
+import org.bukkit.entity.Vindicator;
+import org.bukkit.entity.Witch;
+import org.bukkit.entity.Wither;
+import org.bukkit.entity.WitherSkeleton;
+import org.bukkit.entity.Wolf;
+import org.bukkit.entity.Zombie;
+import org.bukkit.entity.ZombieHorse;
+import org.bukkit.entity.ZombieVillager;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.material.MaterialData;
@@ -187,7 +260,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	public String getGenerator() {
 		try {
 			return w.getGenerator().toString();
-		} catch(NullPointerException npe) {
+		} catch (NullPointerException npe) {
 			return "default";
 		}
 	}
@@ -251,7 +324,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 			} else {
 				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);
 			}
-		} catch(NoClassDefFoundError ex) {
+		} catch (NoClassDefFoundError ex) {
 			// probably prior to 1.9
 		}
 	}
@@ -266,7 +339,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	public void playSound(MCLocation l, String sound, float volume, float pitch) {
 		try {
 			w.playSound((Location) l.getHandle(), sound, volume, pitch);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// probably prior to 1.9, so send to all players in world
 			for(Player p : w.getPlayers()) {
 				p.playSound(((BukkitMCLocation) l).asLocation(), sound, volume, pitch);
@@ -279,7 +352,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 		try {
 			w.playSound((Location) l.getHandle(), ((BukkitMCSound) sound).getConcrete(),
 					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
-		} catch(NoClassDefFoundError ex) {
+		} catch (NoClassDefFoundError ex) {
 			// probably before 1.11, ignore category
 			playSound(l, sound, volume, pitch);
 		}
@@ -290,7 +363,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 		try {
 			w.playSound((Location) l.getHandle(), sound,
 					BukkitMCSoundCategory.getConvertor().getConcreteEnum(category), volume, pitch);
-		} catch(NoClassDefFoundError ex) {
+		} catch (NoClassDefFoundError ex) {
 			// probably before 1.11, ignore category
 			playSound(l, sound, volume, pitch);
 		}
@@ -307,15 +380,15 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public MCLightningStrike strikeLightning(MCLocation GetLocation) {
+	public MCLightningStrike strikeLightning(MCLocation location) {
 		return new BukkitMCLightningStrike(
-				w.strikeLightning(((BukkitMCLocation) GetLocation).l));
+				w.strikeLightning(((BukkitMCLocation) location).l));
 	}
 
 	@Override
-	public MCLightningStrike strikeLightningEffect(MCLocation GetLocation) {
+	public MCLightningStrike strikeLightningEffect(MCLocation location) {
 		return new BukkitMCLightningStrike(
-				w.strikeLightningEffect(((BukkitMCLocation) GetLocation).l));
+				w.strikeLightningEffect(((BukkitMCLocation) location).l));
 	}
 
 	@Override
@@ -412,6 +485,9 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 				case CREEPER:
 					mobType = Creeper.class;
 					break;
+				case DONKEY:
+					mobType = Donkey.class;
+					break;
 				case ELDERGUARDIAN:
 					mobType = ElderGuardian.class;
 					break;
@@ -458,11 +534,14 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 								}
 								subClass = "";
 								break;
-							} catch(IllegalArgumentException notVar) {
+							} catch (IllegalArgumentException notVar) {
 								// not variant
 							}
 						}
 					}
+					break;
+				case HUSK:
+					mobType = Husk.class;
 					break;
 				case ILLUSIONER:
 					mobType = Illusioner.class;
@@ -477,7 +556,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					mobType = MagmaCube.class;
 					break;
 				case MOOSHROOM:
+				case MUSHROOMCOW:
 					mobType = MushroomCow.class;
+					break;
+				case MULE:
+					mobType = Mule.class;
 					break;
 				case OCELOT:
 					mobType = Ocelot.class;
@@ -513,7 +596,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 						for(String type : subTypes) {
 							try {
 								stype = MCSkeletonType.valueOf(type);
-							} catch(IllegalArgumentException ex) {
+							} catch (IllegalArgumentException ex) {
 								throw new CREFormatException(type + " is not a skeleton type", t);
 							}
 						}
@@ -525,10 +608,14 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 						subClass = "";
 					}
 					break;
+				case SKELETONHORSE:
+					mobType = SkeletonHorse.class;
+					break;
 				case SLIME:
 					mobType = Slime.class;
 					break;
 				case SNOWGOLEM:
+				case SNOWMAN:
 					mobType = Snowman.class;
 					break;
 				case SPIDER:
@@ -540,6 +627,21 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 				case SQUID:
 					mobType = Squid.class;
 					break;
+				case STRAY:
+					mobType = Stray.class;
+					break;
+				case WITCH:
+					mobType = Witch.class;
+					break;
+				case WITHER:
+					mobType = Wither.class;
+					break;
+				case WITHERSKELETON:
+					mobType = WitherSkeleton.class;
+					break;
+				case WOLF:
+					mobType = Wolf.class;
+					break;
 				case VEX:
 					mobType = Vex.class;
 					break;
@@ -548,15 +650,6 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					break;
 				case VINDICATOR:
 					mobType = Vindicator.class;
-					break;
-				case WITCH:
-					mobType = Witch.class;
-					break;
-				case WITHER:
-					mobType = Wither.class;
-					break;
-				case WOLF:
-					mobType = Wolf.class;
 					break;
 				case ZOMBIE:
 					mobType = Zombie.class;
@@ -567,6 +660,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 								switch(ztype) {
 									case HUSK:
 										mobType = Husk.class;
+										continue;
 									case BABY:
 										continue;
 									case VILLAGER_BLACKSMITH:
@@ -586,14 +680,20 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 										break;
 								}
 								mobType = ZombieVillager.class;
-							} catch(IllegalArgumentException ex) {
+							} catch (IllegalArgumentException ex) {
 								// not a ZombieType
 							}
 						}
 					}
 					break;
+				case ZOMBIEHORSE:
+					mobType = ZombieHorse.class;
+					break;
+				case ZOMBIEVILLAGER:
+					mobType = ZombieVillager.class;
+					break;
 			}
-		} catch(NoClassDefFoundError e) {
+		} catch (NoClassDefFoundError e) {
 			throw new CREFormatException("No mob of type " + name + " exists", t);
 		}
 		for(int i = 0; i < qty; i++) {
@@ -609,7 +709,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 						try {
 							color = MCDyeColor.valueOf(type);
 							s.setColor(BukkitMCDyeColor.getConvertor().getConcreteEnum(color));
-						} catch(IllegalArgumentException ex) {
+						} catch (IllegalArgumentException ex) {
 							throw new CREFormatException(type + " is not a valid color", t);
 						}
 					}
@@ -620,7 +720,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 						try {
 							otype = MCOcelotType.valueOf(type);
 							o.setCatType(BukkitMCOcelotType.getConvertor().getConcreteEnum(otype));
-						} catch(IllegalArgumentException ex) {
+						} catch (IllegalArgumentException ex) {
 							throw new CREFormatException(type + " is not an ocelot type", t);
 						}
 					}
@@ -636,7 +736,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 								default:
 									break;
 							}
-						} catch(IllegalArgumentException ex) {
+						} catch (IllegalArgumentException ex) {
 							throw new CREFormatException(type + " is not a creeper state", t);
 						}
 					}
@@ -655,7 +755,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 								default:
 									break;
 							}
-						} catch(IllegalArgumentException ex) {
+						} catch (IllegalArgumentException ex) {
 							throw new CREFormatException(type + " is not a wolf state", t);
 						}
 					}
@@ -666,7 +766,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 						try {
 							job = MCProfession.valueOf(type);
 							v.setProfession(BukkitMCProfession.getConvertor().getConcreteEnum(job));
-						} catch(IllegalArgumentException ex) {
+						} catch (IllegalArgumentException ex) {
 							throw new CREFormatException(type + " is not a valid profession", t);
 						}
 					}
@@ -676,7 +776,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 						try {
 							MaterialData held = new MaterialData(Material.valueOf(type));
 							en.setCarriedMaterial(held);
-						} catch(IllegalArgumentException ex) {
+						} catch (IllegalArgumentException ex) {
 							throw new CREFormatException(type + " is not a valid material", t);
 						}
 					}
@@ -686,7 +786,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 						if(!"".equals(type)) {
 							try {
 								sl.setSize(Integer.parseInt(type));
-							} catch(IllegalArgumentException ex) {
+							} catch (IllegalArgumentException ex) {
 								throw new CREFormatException(type + " is not a valid size", t);
 							}
 						}
@@ -696,7 +796,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					for(String type : subTypes) {
 						try {
 							sk.setSkeletonType(Skeleton.SkeletonType.valueOf(type));
-						} catch(IllegalArgumentException ex) {
+						} catch (IllegalArgumentException ex) {
 							throw new CREFormatException(type + " is not a skeleton type", t);
 						}
 					}
@@ -710,7 +810,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							}
 							try {
 								pz.setAnger(Integer.valueOf(value));
-							} catch(IllegalArgumentException iae) {
+							} catch (IllegalArgumentException iae) {
 								throw new CREFormatException(value + " is not a number.", t);
 							}
 						}
@@ -724,7 +824,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							try {
 								MCProfession job = MCProfession.valueOf(type);
 								zv.setVillagerProfession(BukkitMCProfession.getConvertor().getConcreteEnum(job));
-							} catch(IllegalArgumentException ex) {
+							} catch (IllegalArgumentException ex) {
 								throw new CREFormatException(type + " is not a valid profession", t);
 							}
 						}
@@ -756,7 +856,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 										}
 										break;
 								}
-							} catch(IllegalArgumentException ex) {
+							} catch (IllegalArgumentException ex) {
 								throw new CREFormatException(type + " is not a zombie state", t);
 							}
 						}
@@ -773,7 +873,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 								default:
 									break;
 							}
-						} catch(IllegalArgumentException ex) {
+						} catch (IllegalArgumentException ex) {
 							throw new CREFormatException(type + " is not a pig state", t);
 						}
 					}
@@ -785,7 +885,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 								MCHorse.MCHorseVariant htype = MCHorse.MCHorseVariant.valueOf(type);
 								h.setVariant(BukkitMCHorse.BukkitMCHorseVariant.getConvertor().getConcreteEnum(htype));
 								break; // no other variants can have colors or patterns
-							} catch(IllegalArgumentException ex) {
+							} catch (IllegalArgumentException ex) {
 								// not variant
 							}
 						}
@@ -793,13 +893,13 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							MCHorse.MCHorseColor hcolor = MCHorse.MCHorseColor.valueOf(type);
 							h.setColor(BukkitMCHorse.BukkitMCHorseColor.getConvertor().getConcreteEnum(hcolor));
 							continue;
-						} catch(IllegalArgumentException ex) {
+						} catch (IllegalArgumentException ex) {
 							// not color
 						}
 						try {
 							MCHorse.MCHorsePattern hpattern = MCHorse.MCHorsePattern.valueOf(type);
 							h.setStyle(BukkitMCHorse.BukkitMCHorsePattern.getConvertor().getConcreteEnum(hpattern));
-						} catch(IllegalArgumentException notAnything) {
+						} catch (IllegalArgumentException notAnything) {
 							throw new CREFormatException("Type " + type + " did not match any horse variants,"
 									+ " colors, or patterns.", t);
 						}
@@ -817,7 +917,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 		try {
 			w.getName();
 			return true;
-		} catch(Exception e) {
+		} catch (Exception e) {
 			return false;
 		}
 	}
@@ -863,11 +963,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public MCChunk[] getLoadedChunks() {
 		Chunk[] chunks = w.getLoadedChunks();
-		MCChunk[] MCChunks = new MCChunk[chunks.length];
+		MCChunk[] mcChunks = new MCChunk[chunks.length];
 		for(int i = 0; i < chunks.length; i++) {
-			MCChunks[i] = new BukkitMCChunk(chunks[i]);
+			mcChunks[i] = new BukkitMCChunk(chunks[i]);
 		}
-		return MCChunks;
+		return mcChunks;
 	}
 
 	@Override

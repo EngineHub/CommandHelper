@@ -19,6 +19,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	protected static Map<String, MCEntityType> mappings;
 	protected static Map<MCVanillaEntityType, MCEntityType> vanilla;
 
+	@SuppressWarnings("checkstyle:staticvariablename") // Fixing this violation might break dependents.
 	public static MCEntityType NULL = null;
 
 	protected Class<? extends MCEntity> wrapperClass;
@@ -132,7 +133,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		ENDER_EYE(true),
 		ENDER_PEARL(true),
 		EVOKER(true, MCVersion.MC1_11),
-		EVOKER_FANGS(false, MCVersion.MC1_11),
+		EVOKER_FANGS(true, MCVersion.MC1_11),
 		EXPERIENCE_ORB(true),
 		/**
 		 * Spawn with world.spawnFallingBlock() I'm not sure what version we switched to FALLING_BLOCK from
@@ -195,6 +196,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		THROWN_EXP_BOTTLE(true),
 		TIPPED_ARROW(true, MCVersion.MC1_9),
 		VEX(true, MCVersion.MC1_11),
+		VILLAGER(true),
 		VINDICATOR(true, MCVersion.MC1_11),
 		WEATHER(false),
 		WITCH(true, MCVersion.MC1_4_5),
@@ -202,7 +204,6 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		WITHER_SKELETON(true, MCVersion.MC1_11),
 		WITHER_SKULL(true, MCVersion.MC1_4),
 		WOLF(true),
-		VILLAGER(true),
 		ZOMBIE(true),
 		ZOMBIE_HORSE(true, MCVersion.MC1_11),
 		ZOMBIE_VILLAGER(true, MCVersion.MC1_11),

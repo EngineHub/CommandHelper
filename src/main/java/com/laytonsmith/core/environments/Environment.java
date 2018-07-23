@@ -11,7 +11,7 @@ import java.util.Map;
  * <p>
  * "Sub environments" must implement {@link EnvironmentImpl}, which ensures that they are cloneable.
  */
-public class Environment implements Cloneable {
+public final class Environment implements Cloneable {
 
 	/**
 	 * "Sub environments" must implement this. This ensures that they are cloneable.
@@ -86,7 +86,7 @@ public class Environment implements Cloneable {
 				clone.addEnv(ee);
 			}
 			return clone;
-		} catch(CloneNotSupportedException ex) {
+		} catch (CloneNotSupportedException ex) {
 			throw new RuntimeException(ex);
 		}
 	}

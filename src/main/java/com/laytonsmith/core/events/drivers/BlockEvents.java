@@ -10,7 +10,19 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCTone;
-import com.laytonsmith.abstraction.events.*;
+import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
+import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
+import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
+import com.laytonsmith.abstraction.events.MCBlockFadeEvent;
+import com.laytonsmith.abstraction.events.MCBlockFromToEvent;
+import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
+import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
+import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
+import com.laytonsmith.abstraction.events.MCBlockPistonExtendEvent;
+import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
+import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
+import com.laytonsmith.abstraction.events.MCNotePlayEvent;
+import com.laytonsmith.abstraction.events.MCSignChangeEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -47,7 +59,7 @@ public class BlockEvents {
 	}
 
 	// Stub for actual events below.
-	public static abstract class piston_event extends AbstractEvent {
+	public abstract static class piston_event extends AbstractEvent {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
@@ -479,7 +491,7 @@ public class BlockEvents {
 					byte b;
 					try {
 						b = Byte.parseByte(value.val());
-					} catch(NumberFormatException exc) {
+					} catch (NumberFormatException exc) {
 						if(Integer.parseInt(value.val()) < 0) {
 							b = 0;
 						} else {
@@ -813,14 +825,14 @@ public class BlockEvents {
 				} else {
 					try {
 						block.setTypeId(Integer.parseInt(blockArray.get("type", value.getTarget()).val()));
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						throw new CREFormatException("blockArray is invalid", value.getTarget());
 					}
 				}
 				if(blockArray.containsKey("data")) {
 					try {
 						block.setData((byte) Integer.parseInt(blockArray.get("data", value.getTarget()).val()));
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						throw new CREFormatException("blockArray is invalid", value.getTarget());
 					}
 				}
@@ -839,14 +851,14 @@ public class BlockEvents {
 				} else {
 					try {
 						block.setTypeId(Integer.parseInt(blockArray.get("type", value.getTarget()).val()));
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						throw new CREFormatException("blockArray is invalid", value.getTarget());
 					}
 				}
 				if(blockArray.containsKey("data")) {
 					try {
 						block.setData((byte) Integer.parseInt(blockArray.get("data", value.getTarget()).val()));
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						throw new CREFormatException("blockArray is invalid", value.getTarget());
 					}
 				}
@@ -1263,7 +1275,7 @@ public class BlockEvents {
 						event.setNote(StaticLayer.GetConvertor().GetNote(octave, tone, sharp));
 						return true;
 					}
-				} catch(IllegalArgumentException ex) {
+				} catch (IllegalArgumentException ex) {
 					throw new CREIllegalArgumentException("No " + key + " with the value " + value + " exists", value.getTarget(), ex);
 				}
 			}

@@ -61,7 +61,7 @@ public class CmdlineEvents {
 							});
 							try {
 								Thread.sleep(5000);
-							} catch(InterruptedException ex) {
+							} catch (InterruptedException ex) {
 								//
 							}
 						}

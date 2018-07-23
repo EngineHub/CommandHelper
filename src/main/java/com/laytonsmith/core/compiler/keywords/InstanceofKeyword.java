@@ -15,7 +15,7 @@ import java.util.List;
 @Keyword.keyword("instanceof")
 public class InstanceofKeyword extends Keyword {
 
-	private final static String INSTANCEOF = new DataHandling._instanceof().getName();
+	private static final String INSTANCEOF = new DataHandling._instanceof().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {

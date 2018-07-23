@@ -89,17 +89,17 @@ public class EchoesTest {
 	@Test(timeout = 10000)
 	public void testChatas() throws CancelCommandException, ConfigCompileException {
 		//TODO: Can't get this to work right, though it does work in game
-//        String script = "chatas('Player02', 'Hello World!')";
-//        Player Player02 = GetOnlinePlayer("Player02", fakeServer);
-//        Player op = GetOp("Player", fakeServer);
-//        Run(script, op);
-//        verify(Player02).chat("Hello World!");
-//        Echoes.chatas a = new Echoes.chatas();
-//        Player Player01 = GetOnlinePlayer("Player02", fakeServer);
-//        when(fakePlayer.getServer()).thenReturn(fakeServer);
-//        when(fakeServer.getPlayer("Player01")).thenReturn(Player01);
-//        a.exec(Target.UNKNOWN, fakePlayer, C.onstruct("Player02"), C.onstruct("Hello World!"));
-//        verify(Player01).chat("Hello World!");
+//		String script = "chatas('Player02', 'Hello World!')";
+//		Player Player02 = GetOnlinePlayer("Player02", fakeServer);
+//		Player op = GetOp("Player", fakeServer);
+//		Run(script, op);
+//		verify(Player02).chat("Hello World!");
+//		Echoes.chatas a = new Echoes.chatas();
+//		Player Player01 = GetOnlinePlayer("Player02", fakeServer);
+//		when(fakePlayer.getServer()).thenReturn(fakeServer);
+//		when(fakeServer.getPlayer("Player01")).thenReturn(Player01);
+//		a.exec(Target.UNKNOWN, fakePlayer, C.onstruct("Player02"), C.onstruct("Hello World!"));
+//		verify(Player01).chat("Hello World!");
 	}
 
 	@Test
@@ -117,11 +117,12 @@ public class EchoesTest {
 		assertEquals(String.format("\u00A7%s", "a"), SRun("color(a)", fakePlayer));
 	}
 
-	private static final String a = new color().exec(Target.UNKNOWN, null, new CString("a", Target.UNKNOWN)).val();
+	private static final String LOWERCASE_A =
+			new color().exec(Target.UNKNOWN, null, new CString("a", Target.UNKNOWN)).val();
 
 	@Test
 	public void testColorize1() throws Exception {
-		assertEquals(a + "Hi", SRun("colorize('&aHi')", fakePlayer));
+		assertEquals(LOWERCASE_A + "Hi", SRun("colorize('&aHi')", fakePlayer));
 	}
 
 	@Test
@@ -136,7 +137,7 @@ public class EchoesTest {
 
 	@Test
 	public void testColorize4() throws Exception {
-		assertEquals("&&" + a + "Hi", SRun("colorize('&&&&&aHi')", fakePlayer));
+		assertEquals("&&" + LOWERCASE_A + "Hi", SRun("colorize('&&&&&aHi')", fakePlayer));
 	}
 
 	@Test
@@ -146,6 +147,6 @@ public class EchoesTest {
 
 	@Test
 	public void testColorize6() throws Exception {
-		assertEquals("&&" + a + "Hi", SRun("colorize('&&&&&&aHi', '&&')", fakePlayer));
+		assertEquals("&&" + LOWERCASE_A + "Hi", SRun("colorize('&&&&&&aHi', '&&')", fakePlayer));
 	}
 }

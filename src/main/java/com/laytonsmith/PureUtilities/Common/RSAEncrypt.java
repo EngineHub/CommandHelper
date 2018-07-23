@@ -39,7 +39,7 @@ public class RSAEncrypt {
 		KeyPairGenerator keyGen;
 		try {
 			keyGen = KeyPairGenerator.getInstance(ALGORITHM);
-		} catch(NoSuchAlgorithmException ex) {
+		} catch (NoSuchAlgorithmException ex) {
 			throw new RuntimeException(ex);
 		}
 		keyGen.initialize(1024);
@@ -61,7 +61,7 @@ public class RSAEncrypt {
 		try {
 			ObjectOutputStream publicKeyOS = new ObjectOutputStream(pubBOS);
 			publicKeyOS.writeObject(key);
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 		String publicKey = Base64.encodeBase64String(pubBOS.toByteArray());
@@ -81,7 +81,7 @@ public class RSAEncrypt {
 		try {
 			privateKeyOS = new ObjectOutputStream(privBOS);
 			privateKeyOS.writeObject(key);
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 		String privateKey = Base64.encodeBase64String(privBOS.toByteArray());
@@ -124,7 +124,7 @@ public class RSAEncrypt {
 			try {
 				privOIS = new ObjectInputStream(new ByteArrayInputStream(Base64.decodeBase64(privateKey)));
 				this.privateKey = (PrivateKey) privOIS.readObject();
-			} catch(IOException | ClassNotFoundException ex) {
+			} catch (IOException | ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -143,7 +143,7 @@ public class RSAEncrypt {
 			try {
 				pubOIS = new ObjectInputStream(new ByteArrayInputStream(Base64.decodeBase64(split[1])));
 				this.publicKey = (PublicKey) pubOIS.readObject();
-			} catch(IOException | ClassNotFoundException ex) {
+			} catch (IOException | ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -213,7 +213,7 @@ public class RSAEncrypt {
 			cipher = Cipher.getInstance(ALGORITHM);
 			cipher.init(cryptMode, key);
 			cipherValue = cipher.doFinal(data);
-		} catch(InvalidKeyException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | NoSuchPaddingException ex) {
+		} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException | NoSuchPaddingException ex) {
 			throw new RuntimeException(ex);
 		}
 		return cipherValue;

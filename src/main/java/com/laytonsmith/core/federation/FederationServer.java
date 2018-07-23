@@ -156,10 +156,10 @@ public class FederationServer {
 										if(s.isConnected()) {
 											s.close();
 										}
-									} catch(IOException ex) {
+									} catch (IOException ex) {
 										Logger.getLogger(FederationServer.class.getName()).log(Level.SEVERE, null, ex);
 									}
-								} catch(InterruptedException ex) {
+								} catch (InterruptedException ex) {
 									// Ok, it's good. The connection may now
 									// idle without risk of being killed.
 								}
@@ -180,7 +180,7 @@ public class FederationServer {
 						try {
 							version = FederationVersion.fromVersion(sVersion);
 							communicator.writeUnencryptedLine("VERSION OK");
-						} catch(IllegalArgumentException ex) {
+						} catch (IllegalArgumentException ex) {
 							// The version is unsupported. The client is newer than this server knows how
 							// to deal with. So, write out the version error data, then close the socket and
 							// continue.
@@ -222,7 +222,7 @@ public class FederationServer {
 
 						}
 
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						Logger.getLogger(FederationServer.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
@@ -242,7 +242,7 @@ public class FederationServer {
 			if(subSockets.get(s) < System.currentTimeMillis() - inactiveMS) {
 				try {
 					s.close();
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(com.laytonsmith.core.functions.Federation.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				it.remove();
@@ -269,13 +269,13 @@ public class FederationServer {
 	public void closeAllSockets() {
 		try {
 			serverSocket.close();
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(FederationServer.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		for(Socket sub : subSockets.keySet()) {
 			try {
 				sub.close();
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				Logger.getLogger(FederationServer.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}

@@ -5,7 +5,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCConsoleCommandSender;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
-import com.laytonsmith.abstraction.bukkit.events.BukkitMiscEvents;
+import com.laytonsmith.abstraction.bukkit.events.BukkitServerEvents;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.InternalException;
 import com.laytonsmith.core.Static;
@@ -37,24 +37,24 @@ public class CommandHelperServerListener implements Listener {
 			sender = new BukkitMCCommandSender(event.getSender());
 		}
 
-		BukkitMiscEvents.BukkitMCServerCommandEvent cce = new BukkitMiscEvents.BukkitMCServerCommandEvent(event, sender);
+		BukkitServerEvents.BukkitMCServerCommandEvent cce = new BukkitServerEvents.BukkitMCServerCommandEvent(event, sender);
 		EventUtils.TriggerListener(Driver.SERVER_COMMAND, "server_command", cce);
 		try {
 			if(event.isCancelled()) {
 				return;
 			}
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// not cancellable before 1.8.8
 		}
 
 		boolean match = false;
 		try {
 			match = Static.getAliasCore().alias("/" + event.getCommand(), sender);
-		} catch(InternalException e) {
+		} catch (InternalException e) {
 			Static.getLogger().log(Level.SEVERE, e.getMessage());
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			Static.getLogger().log(Level.WARNING, e.getMessage());
-		} catch(Throwable e) {
+		} catch (Throwable e) {
 			sender.sendMessage(MCChatColor.RED + "Command failed with following reason: " + e.getMessage());
 			//Obviously the command is registered, but it somehow failed. Cancel the event.
 			e.printStackTrace();

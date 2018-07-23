@@ -10,9 +10,15 @@ public interface MCBlockState extends MCMetadatable {
 
 	MCMaterial getType();
 
+	/**
+	 * @deprecated Magic value
+	 */
 	@Deprecated
 	int getTypeId();
 
+	/**
+	 * @deprecated Magic value
+	 */
 	@Deprecated
 	void setTypeId(int type);
 

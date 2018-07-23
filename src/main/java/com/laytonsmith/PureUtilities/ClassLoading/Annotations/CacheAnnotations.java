@@ -51,6 +51,7 @@ public class CacheAnnotations {
 		AnnotationChecks.checkForceImplementation();
 		AnnotationChecks.checkForTypeInTypeofClasses();
 		AnnotationChecks.verifyExhaustiveVisitors();
+		AnnotationChecks.verifyNonInheritImplements();
 
 		Implementation.setServerType(Implementation.Type.SHELL);
 		List<String> uhohs = new ArrayList<>();
@@ -86,7 +87,7 @@ public class CacheAnnotations {
 			for(Method m : SimpleDocumentation.class.getDeclaredMethods()) {
 				try {
 					c.getDeclaredMethod(m.getName(), m.getParameterTypes());
-				} catch(NoSuchMethodException ex) {
+				} catch (NoSuchMethodException ex) {
 					// typeof is exempt from having getName in each individual class, because the
 					// typeof value is that information.
 					if(!m.getName().equals("getName")) {
@@ -94,7 +95,7 @@ public class CacheAnnotations {
 							uhohs.add(c.getName() + " must implement " + m.getName() + "().");
 						}
 					}
-				} catch(SecurityException ex) {
+				} catch (SecurityException ex) {
 					throw new Error(ex);
 				}
 			}

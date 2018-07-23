@@ -16,7 +16,31 @@ import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
-import com.laytonsmith.abstraction.events.*;
+import com.laytonsmith.abstraction.events.MCChatTabCompleteEvent;
+import com.laytonsmith.abstraction.events.MCExpChangeEvent;
+import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
+import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBedEvent;
+import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
+import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
+import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
+import com.laytonsmith.abstraction.events.MCPlayerEditBookEvent;
+import com.laytonsmith.abstraction.events.MCPlayerFishEvent;
+import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
+import com.laytonsmith.abstraction.events.MCPlayerItemConsumeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
+import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
+import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
+import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
+import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
+import com.laytonsmith.abstraction.events.MCPlayerPreLoginEvent;
+import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
+import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
+import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
+import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -37,7 +61,6 @@ import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
-import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.events.drivers.EntityEvents.entity_death;
@@ -54,7 +77,6 @@ import com.laytonsmith.core.functions.StringHandling;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IllegalFormatConversionException;
 import java.util.List;
 import java.util.Map;
@@ -793,6 +815,24 @@ public class PlayerEvents {
 			return e;
 		}
 
+		@Override
+		public void preExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerJoinEvent) {
+				//Static lookups of the player as entity don't seem to work here, but
+				//the player is passed in with the event.
+				MCPlayer player = ((MCPlayerJoinEvent) activeEvent.getUnderlyingEvent()).getPlayer();
+				Static.InjectEntity(player);
+			}
+		}
+
+		@Override
+		public void postExecution(Environment env, ActiveEvent activeEvent) {
+			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerJoinEvent) {
+				MCPlayer player = ((MCPlayerJoinEvent) activeEvent.getUnderlyingEvent()).getPlayer();
+				Static.UninjectEntity(player);
+			}
+		}
+
 	}
 
 	@api
@@ -911,7 +951,6 @@ public class PlayerEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if(event instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) event;
-
 			}
 			return false;
 		}
@@ -1051,9 +1090,9 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
 				Prefilters.match(prefilter, "location", pie.getClickedBlock().getLocation(), PrefilterType.LOCATION_MATCH);
-				if(prefilter.containsKey("activated")) {
-					//TODO: Once activation is supported, check for that here
-				}
+//				if(prefilter.containsKey("activated")) {
+//					//TODO: Once activation is supported, check for that here
+//				}
 				return true;
 			}
 			return false;
@@ -1505,7 +1544,7 @@ public class PlayerEvents {
 							Construct v = ((CArray) value).get(index, value.getTarget());
 							try {
 								list.add(Static.GetPlayer(v, value.getTarget()));
-							} catch(ConfigRuntimeException ex) {
+							} catch (ConfigRuntimeException ex) {
 								//Ignored
 							}
 						}
@@ -1524,7 +1563,7 @@ public class PlayerEvents {
 						// Throws UnknownFormatConversionException, MissingFormatException,
 						// IllegalFormatConversionException, FormatFlagsConversionMismatchException, NullPointerException and possibly more.
 						e.setFormat(format);
-					} catch(Exception ex) {
+					} catch (Exception ex) {
 						// Check the format to give a better exception message.
 						if(format.replaceAll("%%", "").replaceAll("\\%\\%|\\%[12]\\$s", "").contains("%")) {
 							throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
@@ -1635,7 +1674,7 @@ public class PlayerEvents {
 							Construct v = ((CArray) value).get(index, value.getTarget());
 							try {
 								list.add(Static.GetPlayer(v, value.getTarget()));
-							} catch(ConfigRuntimeException ex) {
+							} catch (ConfigRuntimeException ex) {
 								//Ignored
 							}
 						}
@@ -1647,7 +1686,7 @@ public class PlayerEvents {
 				if("format".equals(key)) {
 					try {
 						e.setFormat(value.nval());
-					} catch(UnknownFormatConversionException | IllegalFormatConversionException ex) {
+					} catch (UnknownFormatConversionException | IllegalFormatConversionException ex) {
 						throw new CREFormatException(ex.getMessage(), value.getTarget());
 					}
 				}
@@ -1829,28 +1868,27 @@ public class PlayerEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if(event instanceof MCWorldChangedEvent) {
 				MCWorldChangedEvent e = (MCWorldChangedEvent) event;
-				return true;
 			}
 			return false;
 		}
 
 	}
 
-	private static final Set<Integer> thresholdList = new HashSet<>();
+	private static final Map<Integer, Integer> THRESHOLD_LIST = new HashMap<>();
 
 	public static Set<Integer> GetThresholdList() {
-		return thresholdList;
+		return THRESHOLD_LIST.keySet();
 	}
 
-	private static final Map<Integer, Map<String, MCLocation>> lastPlayerLocations = new HashMap<>();
+	private static final Map<Integer, Map<String, MCLocation>> LAST_PLAYER_LOCATIONS = new HashMap<>();
 
 	public static Map<String, MCLocation> GetLastLocations(Integer i) {
-		if(!lastPlayerLocations.containsKey(i)) {
+		if(!LAST_PLAYER_LOCATIONS.containsKey(i)) {
 			HashMap<String, MCLocation> newLocation = new HashMap<>();
-			lastPlayerLocations.put(i, newLocation);
+			LAST_PLAYER_LOCATIONS.put(i, newLocation);
 			return newLocation;
 		}
-		return (lastPlayerLocations.get(i));
+		return (LAST_PLAYER_LOCATIONS.get(i));
 	}
 
 	@api
@@ -1879,39 +1917,33 @@ public class PlayerEvents {
 
 		@Override
 		public void hook() {
-			thresholdList.clear();
-			lastPlayerLocations.clear();
+			THRESHOLD_LIST.clear();
+			LAST_PLAYER_LOCATIONS.clear();
 		}
 
 		@Override
 		public void bind(BoundEvent event) {
-			int threshold = 1;
 			Map<String, Construct> prefilters = event.getPrefilter();
-			if(prefilters.containsKey("threshold")) {
-				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
-			}
-			thresholdList.add(threshold);
+			int threshold = (prefilters.containsKey("threshold")
+					? Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN) : 1);
+			Integer count = THRESHOLD_LIST.get(threshold);
+			THRESHOLD_LIST.put(threshold, (count != null ? count + 1 : 1));
 		}
 
 		@Override
 		public void unbind(BoundEvent event) {
-			int threshold = 1;
 			Map<String, Construct> prefilters = event.getPrefilter();
-			if(prefilters.containsKey("threshold")) {
-				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
-			}
-			for(BoundEvent b : EventUtils.GetEvents(event.getDriver())) {
-				if(b.getId().equals(event.getId())) {
-					continue;
-				}
-				if(b.getPrefilter().containsKey("threshold")) {
-					if(threshold == Static.getInt(b.getPrefilter().get("threshold"), Target.UNKNOWN)) {
-						return;
-					}
+			int threshold = (prefilters.containsKey("threshold")
+					? Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN) : 1);
+			Integer count = THRESHOLD_LIST.get(threshold);
+			if(count != null) {
+				if(count <= 1) {
+					THRESHOLD_LIST.remove(threshold);
+					LAST_PLAYER_LOCATIONS.remove(threshold);
+				} else {
+					THRESHOLD_LIST.put(threshold, count - 1);
 				}
 			}
-			thresholdList.remove(threshold);
-			lastPlayerLocations.remove(threshold);
 		}
 
 		@Override

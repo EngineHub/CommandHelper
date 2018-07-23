@@ -242,7 +242,7 @@ public class ClassDiscovery {
 			String url;
 			try {
 				url = URLDecoder.decode(rootLocation.toString(), "UTF-8");
-			} catch(UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				// apparently this should never happen, but we have to catch it anyway
 				url = null;
 			}
@@ -300,13 +300,13 @@ public class ClassDiscovery {
 							ClassMirrorVisitor mirrorVisitor = new ClassMirrorVisitor();
 							reader.accept(mirrorVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
 							mirrors.add(mirrorVisitor.getMirror(new URL(url)));
-						} catch(IOException ex) {
+						} catch (IOException ex) {
 							Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 						} finally {
 							if(stream != null) {
 								try {
 									stream.close();
-								} catch(IOException ex) {
+								} catch (IOException ex) {
 									Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 								}
 							}
@@ -335,20 +335,20 @@ public class ClassDiscovery {
 									ClassMirrorVisitor mirrorVisitor = new ClassMirrorVisitor();
 									reader.accept(mirrorVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
 									mirrors.add(mirrorVisitor.getMirror(rootLocationFile.toURI().toURL()));
-								} catch(IOException ex) {
+								} catch (IOException ex) {
 									Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 								}
 
 							}
 						}
 					}, progressIterator);
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			} else {
 				throw new RuntimeException("Unknown url type: " + rootLocation);
 			}
-		} catch(RuntimeException e) {
+		} catch (RuntimeException e) {
 			e.printStackTrace(System.err);
 		} finally {
 			if(debug) {
@@ -413,7 +413,7 @@ public class ClassDiscovery {
 				if(f.getName().endsWith(".jar")) {
 					try {
 						addDiscoveryLocation(f.toURI().toURL());
-					} catch(MalformedURLException ex) {
+					} catch (MalformedURLException ex) {
 						//
 					}
 				}
@@ -568,7 +568,7 @@ public class ClassDiscovery {
 							//We need to add change the reference to su
 							su = new ClassReferenceMirror<>("L" + clazz.getSuperclass().getName().replace('.', '/') + ";");
 						}
-					} catch(ClassNotFoundException ex) {
+					} catch (ClassNotFoundException ex) {
 						//Hmm, ok? I guess something bad happened, so let's break
 						//the loop and give up on this class.
 						return false;
@@ -597,7 +597,7 @@ public class ClassDiscovery {
 					for(Class<?> c : clazz.getInterfaces()) {
 						interfaces.add(new ClassReferenceMirror<>("L" + c.getName().replace('.', '/') + ";"));
 					}
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					return false;
 				}
 			} else {
@@ -625,7 +625,7 @@ public class ClassDiscovery {
 					if(superClass.isAssignableFrom(clazz)) {
 						return true;
 					}
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					return false;
 				}
 			}
@@ -758,7 +758,7 @@ public class ClassDiscovery {
 		for(ClassMirror<? extends T> cm : getClassesWithAnnotationThatExtend(annotation, superClass)) {
 			try {
 				set.add(cm.loadClass(loader, initialize));
-			} catch(NoClassDefFoundError e) {
+			} catch (NoClassDefFoundError e) {
 				//Ignore this for now?
 				//throw new Error("While trying to process " + cm.toString() + ", an error occurred.", e);
 			}
@@ -793,7 +793,7 @@ public class ClassDiscovery {
 		for(ClassMirror<?> cm : getClassesWithAnnotation(annotation)) {
 			try {
 				set.add(cm.loadClass(loader, initialize));
-			} catch(NoClassDefFoundError e) {
+			} catch (NoClassDefFoundError e) {
 				//Ignore this for now?
 				//throw new Error("While trying to process " + cm.toString() + ", an error occurred.", e);
 			}
@@ -877,7 +877,7 @@ public class ClassDiscovery {
 				set.add(mm.loadMethod(loader, initialize));
 			}
 			return set;
-		} catch(ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			throw new NoClassDefFoundError();
 		}
 	}
@@ -943,7 +943,7 @@ public class ClassDiscovery {
 					}
 					set.add(cc);
 				}
-			} catch(ClassNotFoundException ex) {
+			} catch (ClassNotFoundException ex) {
 				throw new NoClassDefFoundError();
 			}
 		}
@@ -1068,7 +1068,7 @@ public class ClassDiscovery {
 		try {
 			try {
 				packageRoot = StringUtils.replaceLast(thisClass, Pattern.quote(c.getName().replaceAll("\\.", "/") + ".class"), "");
-			} catch(Exception e) {
+			} catch (Exception e) {
 				//Hmm, ok, try this then
 				packageRoot = c.getProtectionDomain().getCodeSource().getLocation().toString();
 			}
@@ -1078,9 +1078,9 @@ public class ClassDiscovery {
 				packageRoot = packageRoot.replaceFirst("jar:", "");
 			}
 			return new URL(packageRoot);
-		} catch(UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown.", e);
-		} catch(MalformedURLException e) {
+		} catch (MalformedURLException e) {
 			throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown for potential URL: \"" + packageRoot + "\"", e);
 		}
 	}

@@ -1,6 +1,8 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.entities.MCVillager;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
@@ -30,5 +32,10 @@ public class BukkitMCVillager extends BukkitMCAgeable implements MCVillager {
 	@Override
 	public void setProfession(MCProfession profession) {
 		getHandle().setProfession(BukkitMCProfession.getConvertor().getConcreteEnum(profession));
+	}
+
+	@Override
+	public MCInventory getInventory() {
+		return new BukkitMCInventory(getHandle().getInventory());
 	}
 }

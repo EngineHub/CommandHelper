@@ -100,7 +100,7 @@ public class DocGenTemplates {
 	public static String Generate(String forPage, Map<String, String> customTemplates) {
 		try {
 			Prefs.init(null);
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenTemplates.class));
@@ -145,7 +145,7 @@ public class DocGenTemplates {
 							+ " is not an instance of " + Generator.class.getSimpleName()
 							+ ", or is not static. Please correct this error to use it as a template.");
 				}
-			} catch(Exception e) {
+			} catch (Exception e) {
 				System.out.println(e);
 				//Oh well, skip it.
 			}
@@ -167,7 +167,7 @@ public class DocGenTemplates {
 			if(Generator.class.isAssignableFrom(f.getType())) {
 				try {
 					generators.put(f.getName(), (Generator) f.get(null));
-				} catch(IllegalArgumentException | IllegalAccessException ex) {
+				} catch (IllegalArgumentException | IllegalAccessException ex) {
 					Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
@@ -188,7 +188,7 @@ public class DocGenTemplates {
 			if(Implementation.GetServerType() != Implementation.Type.BUKKIT) {
 				Prefs.init(null);
 			}
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(DocGenTemplates.class));
@@ -197,7 +197,6 @@ public class DocGenTemplates {
 		int templateStack = 0;
 		StringBuilder tBuilder = new StringBuilder();
 		StringBuilder tArgument = new StringBuilder();
-		boolean inTemplate = false;
 		for(int i = 0; i < template.length(); i++) {
 			Character c1 = template.charAt(i);
 			Character c2 = '\0';
@@ -206,7 +205,6 @@ public class DocGenTemplates {
 			}
 			if(c1 == '<' && c2 == '%') {
 				// start template
-				inTemplate = true;
 				templateStack++;
 				if(templateStack == 1) {
 					i++;
@@ -274,9 +272,9 @@ public class DocGenTemplates {
 				}
 				lastMatch = m.end();
 				appended = false;
-			} catch(GenerateException e) {
+			} catch (GenerateException e) {
 				throw e;
-			} catch(Exception e) {
+			} catch (Exception e) {
 				//Oh well, skip it.
 				e.printStackTrace();
 			}
@@ -290,7 +288,7 @@ public class DocGenTemplates {
 	/**
 	 * Returns a wiki table of the data source modifier list, along with the docs for each one.
 	 */
-	public static Generator data_source_modifiers = new Generator() {
+	public static final Generator DATA_SOURCE_MODIFIERS = new Generator() {
 
 		@Override
 		public String generate(String... args) {
@@ -306,7 +304,7 @@ public class DocGenTemplates {
 	/**
 	 * Returns a wiki table with documentation for each supported persistence data type.
 	 */
-	public static Generator persistence_connections = new Generator() {
+	public static final Generator PERSISTENCE_CONNECTIONS = new Generator() {
 
 		@Override
 		public String generate(String... args) {
@@ -320,7 +318,7 @@ public class DocGenTemplates {
 						try {
 							constructor = c.getDeclaredConstructor();
 							constructor.setAccessible(true);
-						} catch(NoSuchMethodException e) {
+						} catch (NoSuchMethodException e) {
 							throw new RuntimeException("No no-argument constructor was found for " + c.getName() + ". A no-arg constructor must be provided, even if it is"
 									+ " private, so that the documentation functions can be accessed.", e);
 						}
@@ -345,7 +343,7 @@ public class DocGenTemplates {
 						b.append("|-\n| ").append(name).append("\n| ").append(description)
 								.append("\n| ").append(example).append("\n| ").append(ds.since().toString()).append("\n");
 						set.add(b.toString());
-					} catch(Exception e) {
+					} catch (Exception e) {
 						throw new Error(e);
 					}
 				} else {
@@ -360,7 +358,7 @@ public class DocGenTemplates {
 	/**
 	 * Returns header listing of all the compiler optimization types
 	 */
-	public static Generator optimization_explanations = new Generator() {
+	public static final Generator OPTIMIZATION_EXPLANATIONS = new Generator() {
 
 		@Override
 		public String generate(String... args) {
@@ -375,7 +373,7 @@ public class DocGenTemplates {
 
 	};
 
-	public static Generator BURST_VALUE_TYPES = new Generator() {
+	public static final Generator BURST_VALUE_TYPES = new Generator() {
 
 		@Override
 		public String generate(String... args) {
@@ -383,7 +381,7 @@ public class DocGenTemplates {
 		}
 	};
 
-	public static Generator BURST_TYPE_DOCS = new Generator() {
+	public static final Generator BURST_TYPE_DOCS = new Generator() {
 
 		@Override
 		public String generate(String... args) {
@@ -395,7 +393,7 @@ public class DocGenTemplates {
 	/**
 	 * Returns a header list of all known exception types, along with their docs
 	 */
-	public static Generator EXCEPTION_TYPES = new Generator() {
+	public static final Generator EXCEPTION_TYPES = new Generator() {
 
 		@Override
 		public String generate(String... args) {
@@ -419,30 +417,31 @@ public class DocGenTemplates {
 		}
 	};
 
-	private static final String githubBaseURL = "https://github.com/EngineHub/commandhelper/tree/master/src/main/java";
+	private static final String GITHUB_BASE_URL =
+			"https://github.com/EngineHub/commandhelper/tree/master/src/main/java";
 
 	/**
 	 * Returns the fully qualified (and github linked) class name, given the package regex and complete class name. For
 	 * instance: %%GET_CLASS|.*|DocGenTemplates%% would (likely) return [http://url.to.github.com/path/to/file/
 	 * com/laytonsmith/tools/docgen/DocGenTemplates]
 	 */
-	public static Generator GET_CLASS = new Generator() {
+	public static final Generator GET_CLASS = new Generator() {
 
 		@Override
 		public String generate(String... args) {
 			Class c = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]).loadClass();
-			return "[" + githubBaseURL + "/" + c.getName().replace('.', '/') + ".java " + c.getName() + "]";
+			return "[" + GITHUB_BASE_URL + "/" + c.getName().replace('.', '/') + ".java " + c.getName() + "]";
 		}
 	};
 
 	/**
 	 * Returns the base github url for sources.
 	 */
-	public static Generator GITHUB_URL = new Generator() {
+	public static final Generator GITHUB_URL = new Generator() {
 
 		@Override
 		public String generate(String... args) {
-			return githubBaseURL;
+			return GITHUB_BASE_URL;
 		}
 	};
 
@@ -450,12 +449,12 @@ public class DocGenTemplates {
 	 * Returns the (github linked) simple class name, given the package regex and complete class name. For instance:
 	 * %%GET_CLASS|.*|DocGenTemplates%% would (likely) return [http://url.to.github.com/path/to/file/ DocGenTemplates]
 	 */
-	public static Generator GET_SIMPLE_CLASS = new Generator() {
+	public static final Generator GET_SIMPLE_CLASS = new Generator() {
 
 		@Override
 		public String generate(String... args) {
 			Class c = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]).loadClass();
-			return "[" + githubBaseURL + "/" + c.getName().replace('.', '/') + ".java " + c.getSimpleName() + "]";
+			return "[" + GITHUB_BASE_URL + "/" + c.getName().replace('.', '/') + ".java " + c.getSimpleName() + "]";
 		}
 	};
 
@@ -463,7 +462,7 @@ public class DocGenTemplates {
 	 * Returns a github link to the source file this function is in. Note that it is not possible to get more specific
 	 * line information (at least generically). %%GET_FUNCTION_FILE|msg%%, for instance.
 	 */
-	public static Generator GET_FUNCTION_FILE = new Generator() {
+	public static final Generator GET_FUNCTION_FILE = new Generator() {
 
 		@Override
 		public String generate(String... args) {
@@ -473,8 +472,8 @@ public class DocGenTemplates {
 				while(c.getEnclosingClass() != null) {
 					c = c.getEnclosingClass();
 				}
-				return "[" + githubBaseURL + "/" + c.getName().replace('.', '/') + ".java " + b.getName() + "]";
-			} catch(ConfigCompileException ex) {
+				return "[" + GITHUB_BASE_URL + "/" + c.getName().replace('.', '/') + ".java " + b.getName() + "]";
+			} catch (ConfigCompileException ex) {
 				return "Unknown function: " + args[0];
 			}
 
@@ -516,7 +515,7 @@ public class DocGenTemplates {
 				Manager.help(ArrayUtils.EMPTY_STRING_ARRAY);
 				String initial = HTMLUtils.escapeHTML(baos.toString("UTF-8")).replace("\n", "<br />").replace("\t", "&nbsp;&nbsp;&nbsp;");
 				baos.reset();
-				for(String option : Manager.options) {
+				for(String option : Manager.OPTIONS) {
 					Manager.out.println("\n===" + option + "===");
 					Manager.help(new String[]{option});
 				}
@@ -524,7 +523,7 @@ public class DocGenTemplates {
 					TermColors.EnableColors();
 				}
 				return initial + HTMLUtils.escapeHTML(baos.toString("UTF-8"));
-			} catch(UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				throw new Error(ex);
 			}
 		}
@@ -533,7 +532,7 @@ public class DocGenTemplates {
 	/**
 	 * This is for msa code, use CODE for pure mscript code
 	 */
-	public static Generator ALIAS = new Generator() {
+	public static final Generator ALIAS = new Generator() {
 		@Override
 		public String generate(String... args) throws GenerateException {
 			String code = StringUtils.Join(args, "|");
@@ -543,7 +542,7 @@ public class DocGenTemplates {
 			String out;
 			try {
 				out = SimpleSyntaxHighlighter.Highlight(code, false);
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				throw new GenerateException(ex.getMessage() + "\nFor code: " + code, ex);
 			}
 			return out;
@@ -554,7 +553,7 @@ public class DocGenTemplates {
 	/**
 	 * This is for pure mscript code, use ALIAS for msa code.
 	 */
-	public static Generator CODE = new Generator() {
+	public static final Generator CODE = new Generator() {
 
 		@Override
 		public String generate(String... args) throws GenerateException {
@@ -565,7 +564,7 @@ public class DocGenTemplates {
 			String out;
 			try {
 				out = SimpleSyntaxHighlighter.Highlight(code, true);
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				throw new GenerateException(ex.getMessage() + "\nFor code: " + code, ex);
 			}
 			return out;
@@ -592,7 +591,7 @@ public class DocGenTemplates {
 	/**
 	 * Escapes all &lt;nowiki&gt; blocks' contents with html entities.
 	 */
-	public static Generator NOWIKI = new Generator() {
+	public static final Generator NOWIKI = new Generator() {
 		@Override
 		public String generate(String... args) throws GenerateException {
 			String code = StringUtils.Join(args, "|");
@@ -605,7 +604,7 @@ public class DocGenTemplates {
 	/**
 	 * Creates a &lt;pre&gt; block, escaping all special characters within it.
 	 */
-	public static Generator PRE = new Generator() {
+	public static final Generator PRE = new Generator() {
 		@Override
 		public String generate(String... args) {
 			String code = StringUtils.Join(args, "|");
@@ -624,7 +623,7 @@ public class DocGenTemplates {
 	/**
 	 * Creates a syntax highlighting block. The first argument is the type, and the second argument is the code itself.
 	 */
-	public static Generator SYNTAX = new Generator() {
+	public static final Generator SYNTAX = new Generator() {
 		@Override
 		public String generate(String... args) {
 			String code = StringUtils.Join(ArrayUtils.slice(args, 1, args.length - 1), "|");
@@ -643,7 +642,7 @@ public class DocGenTemplates {
 	/**
 	 * Creates a special "warning" section, to draw attention to that message.
 	 */
-	public static Generator NOTE = new Generator() {
+	public static final Generator NOTE = new Generator() {
 		@Override
 		public String generate(String... args) {
 			String note = StringUtils.Join(args, "|");
@@ -653,7 +652,7 @@ public class DocGenTemplates {
 
 	};
 
-	public static Generator MySQL_CREATE_TABLE_QUERY = new Generator() {
+	public static final Generator MYSQL_CREATE_TABLE_QUERY = new Generator() {
 
 		@Override
 		public String generate(String... args) {
@@ -663,7 +662,7 @@ public class DocGenTemplates {
 
 	};
 
-	public static Generator SQLite_CREATE_TABLE_QUERY = new Generator() {
+	public static final Generator SQLITE_CREATE_TABLE_QUERY = new Generator() {
 
 		@Override
 		public String generate(String... args) {
@@ -686,7 +685,7 @@ public class DocGenTemplates {
 	 *
 	 * then the following would return 42: %%CONST|foo.bar.Baz.BING%%
 	 */
-	public static Generator CONST = new Generator() {
+	public static final Generator CONST = new Generator() {
 
 		@Override
 		public String generate(String... args) {
@@ -704,18 +703,18 @@ public class DocGenTemplates {
 			Class c;
 			try {
 				c = Class.forName(clazz);
-			} catch(ClassNotFoundException ex) {
+			} catch (ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 			Field f;
 			try {
 				f = c.getField(constant);
-			} catch(NoSuchFieldException | SecurityException ex) {
+			} catch (NoSuchFieldException | SecurityException ex) {
 				throw new RuntimeException(ex);
 			}
 			try {
 				return f.get(null).toString();
-			} catch(IllegalArgumentException | IllegalAccessException ex) {
+			} catch (IllegalArgumentException | IllegalAccessException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -724,7 +723,7 @@ public class DocGenTemplates {
 	/**
 	 * Returns the current date. This accepts a template in the same structure as simple_date()
 	 */
-	public static Generator DATE = new Generator() {
+	public static final Generator DATE = new Generator() {
 
 		@Override
 		public String generate(String... args) {
@@ -737,7 +736,7 @@ public class DocGenTemplates {
 	 * Returns a wikified version to link to the given doc page. Optionally, you may include the text for the link,
 	 * otherwise the link itself is used as the text. arg 0 is the documentation page, arg 1 is the text
 	 */
-	public static Generator DOCLINK = new Generator() {
+	public static final Generator DOCLINK = new Generator() {
 
 		@Override
 		public String generate(String... args) {
@@ -753,7 +752,7 @@ public class DocGenTemplates {
 	/**
 	 * Equivalent to %%NOTE%%
 	 */
-	public static Generator TAKENOTE = new Generator() {
+	public static final Generator TAKENOTE = new Generator() {
 		@Override
 		public String generate(String... args) throws GenerateException {
 			return "{{TakeNote|text=" + StringUtils.Join(args, "|") + "}}";
@@ -763,7 +762,7 @@ public class DocGenTemplates {
 	/**
 	 * Answers the question: WHAT YEAR IS IT?
 	 */
-	public static Generator CURRENTYEAR = new Generator() {
+	public static final Generator CURRENTYEAR = new Generator() {
 		@Override
 		public String generate(String... args) throws GenerateException {
 			return new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy", Target.UNKNOWN)).val();
@@ -773,7 +772,7 @@ public class DocGenTemplates {
 	/**
 	 * Returns the standard {{unimplemented}} template
 	 */
-	public static Generator UNIMPLEMENTED = (args) -> {
+	public static final Generator UNIMPLEMENTED = (args) -> {
 		return "{{Warning|text=THESE FEATURES ARE NOT IMPLEMENTED YET. This page only serves as a preview of how the"
 				+ " shown features will work, and as a guide for how the implementation will occur}}";
 	};
@@ -781,7 +780,7 @@ public class DocGenTemplates {
 	/**
 	 * Returns a Q&A style table arg 0 is the question, arg 1 is the answer
 	 */
-	public static Generator QA = (args) -> {
+	public static final Generator QA = (args) -> {
 		return "{| width=\"100%\" cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
 				+ "|-\n"
 				+ "! scope=\"col\" width=\"3%\" |\n"
@@ -794,8 +793,8 @@ public class DocGenTemplates {
 				+ "| " + args[1].replaceAll("\n", " ") + "\n"
 				+ "|}";
 	};
-	
-	public static Generator SupressWarningsList = (args) -> {
+
+	public static final Generator SUPPRESS_WARNINGS_LIST = (args) -> {
 		StringBuilder b = new StringBuilder();
 		for(FileOptions.SuppressWarnings s : FileOptions.SuppressWarnings.values()) {
 			b.append("* ")

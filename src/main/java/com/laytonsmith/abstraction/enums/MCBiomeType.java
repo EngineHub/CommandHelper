@@ -18,6 +18,7 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 	protected static Map<String, MCBiomeType> mappings;
 	protected static Map<MCVanillaBiomeType, MCBiomeType> vanilla;
 
+	@SuppressWarnings("checkstyle:staticvariablename") // Fixing this violation might break dependents.
 	public static MCBiomeType NULL = null;
 
 	public MCBiomeType(MCVanillaBiomeType mcVanillaBiomeType, Concrete concrete) {
@@ -40,7 +41,7 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 	}
 
 	/**
-	 * @return Names of available entity types
+	 * @return Names of available biome types
 	 */
 	public static Set<String> types() {
 		if(NULL == null) { // docs mode
@@ -54,7 +55,7 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 	}
 
 	/**
-	 * @return Our own EntityType list
+	 * @return Our own MCBiomeType list
 	 */
 	public static Collection<MCBiomeType> values() {
 		if(NULL == null) { // docs mode

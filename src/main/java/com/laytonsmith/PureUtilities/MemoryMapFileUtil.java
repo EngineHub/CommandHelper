@@ -17,9 +17,9 @@ import java.util.logging.Logger;
  *
  *
  */
-public class MemoryMapFileUtil {
+public final class MemoryMapFileUtil {
 
-	private static final Map<String, MemoryMapFileUtil> instances = new HashMap<>();
+	private static final Map<String, MemoryMapFileUtil> INSTANCES = new HashMap<>();
 	/**
 	 * The minimum delay between FS writes. In milliseconds.
 	 */
@@ -28,11 +28,11 @@ public class MemoryMapFileUtil {
 	public static synchronized MemoryMapFileUtil getInstance(File f, DataGrabber grabber) throws IOException {
 		String s = f.getCanonicalPath();
 		MemoryMapFileUtil mem;
-		if(!instances.containsKey(s)) {
+		if(!INSTANCES.containsKey(s)) {
 			mem = new MemoryMapFileUtil(f, grabber);
-			instances.put(s, mem);
+			INSTANCES.put(s, mem);
 		} else {
-			mem = instances.get(s);
+			mem = INSTANCES.get(s);
 		}
 		mem.grabber = grabber;
 		return mem;
@@ -68,7 +68,7 @@ public class MemoryMapFileUtil {
 				if(lastWriteDelta < WRITE_DELAY) {
 					try {
 						Thread.sleep(lastWriteDelta);
-					} catch(InterruptedException ex) {
+					} catch (InterruptedException ex) {
 					}
 				}
 //				File temp = null;
@@ -102,14 +102,15 @@ public class MemoryMapFileUtil {
 //							System.out.println("Could not move tmp file.");
 //						}
 //					}
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(MemoryMapFileUtil.class.getName()).log(Level.SEVERE, null, ex);
-				} finally {
+				}
+//				finally {
 //					if(temp != null){
 //						temp.delete();
 //						temp.deleteOnExit();
 //					}
-				}
+//				}
 			}
 		} finally {
 			synchronized(this) {

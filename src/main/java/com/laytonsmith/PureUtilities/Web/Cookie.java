@@ -51,7 +51,7 @@ public final class Cookie implements Comparable<Cookie> {
 				DateFormat formatter = new SimpleDateFormat("EEE, dd-MMM-yyyy kk:mm:ss zzz");
 				try {
 					expiration = formatter.parse(val).getTime();
-				} catch(ParseException ex) {
+				} catch (ParseException ex) {
 					Logger.getLogger(WebUtility.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			} else if("path".equals(key)) {

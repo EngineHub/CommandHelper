@@ -56,7 +56,7 @@ public class RedisDataSource extends AbstractDataSource {
 				shardInfo.setPassword(password);
 			}
 			connect();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new DataSourceException(e.getMessage(), e);
 		}
 	}
@@ -79,7 +79,7 @@ public class RedisDataSource extends AbstractDataSource {
 				// that it doesn't break.
 				connection.exists("connection.test");
 				// Nope, don't need to connect.
-			} catch(JedisConnectionException ex) {
+			} catch (JedisConnectionException ex) {
 				// Need to connect, since this broke.
 				needToConnect = true;
 			}
@@ -108,7 +108,7 @@ public class RedisDataSource extends AbstractDataSource {
 				status = connection.set(ckey, value);
 			}
 			lastConnected = System.currentTimeMillis();
-		} catch(JedisConnectionException e) {
+		} catch (JedisConnectionException e) {
 			throw new DataSourceException(e);
 		}
 		return "OK".equals(status);
@@ -125,7 +125,7 @@ public class RedisDataSource extends AbstractDataSource {
 				connection.del(ckey);
 			}
 			lastConnected = System.currentTimeMillis();
-		} catch(JedisConnectionException e) {
+		} catch (JedisConnectionException e) {
 			throw new DataSourceException(e);
 		}
 	}
@@ -143,7 +143,7 @@ public class RedisDataSource extends AbstractDataSource {
 			}
 			lastConnected = System.currentTimeMillis();
 			return ret;
-		} catch(JedisConnectionException e) {
+		} catch (JedisConnectionException e) {
 			throw new DataSourceException(e);
 		}
 	}
@@ -160,7 +160,7 @@ public class RedisDataSource extends AbstractDataSource {
 				ret = connection.keys(kb);
 			}
 			lastConnected = System.currentTimeMillis();
-		} catch(JedisConnectionException e) {
+		} catch (JedisConnectionException e) {
 			throw new DataSourceException(e);
 		}
 		Set<String[]> parsed = new HashSet<String[]>();

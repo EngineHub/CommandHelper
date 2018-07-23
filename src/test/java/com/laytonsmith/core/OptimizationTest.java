@@ -67,32 +67,32 @@ public class OptimizationTest {
 	}
 
 	//TODO: These tests are not intended to be corrected in master, so I'm removing them for now
-//    @Test public void testProcOptimization1() throws Exception{
-//        //The proc stays there, but the call to it should be consolidated
-//        assertEquals("sconcat(proc('_add',@a,@b,return(add(@a,@b))),4)", optimize("proc(_add, @a, @b, return(@a + @b)) _add(2, 2)"));
-//    }
+//	@Test public void testProcOptimization1() throws Exception{
+//		//The proc stays there, but the call to it should be consolidated
+//		assertEquals("sconcat(proc('_add',@a,@b,return(add(@a,@b))),4)", optimize("proc(_add, @a, @b, return(@a + @b)) _add(2, 2)"));
+//	}
 	@Test
 	public void testProcOptimizationRecursion() throws Exception {
 		assertEquals("sconcat(proc('_loop',@a,if(gt(@a,0),_loop(subtract(@a,1)),return(@a))),_loop(2))",
 				optimize("proc(_loop, @a, if(@a > 0, _loop(@a - 1), return(@a))) _loop(2)"));
 	}
 
-//    @Test(expected=ConfigCompileException.class)
-//    public void testProcOptimization2() throws Exception{
-//        optimize("proc(_divide, @a, return(@a / 0)) _divide(1)");
-//    }
+//	@Test(expected=ConfigCompileException.class)
+//	public void testProcOptimization2() throws Exception{
+//		optimize("proc(_divide, @a, return(@a / 0)) _divide(1)");
+//	}
 	@Test
 	public void testProcOptimization3() throws Exception {
 		//Rather, lack of optimization
 		assertEquals("sconcat(proc('_nope',msg('Hi')),_nope())", optimize("proc(_nope, msg('Hi')) _nope()"));
 	}
 
-//    @Test
-//    public void testProcOptimiztion4() throws Exception{
-//        //Test embedded procs
-//        assertEquals("sconcat(proc('_outer',sconcat(proc('_inner',@a,return(@a)),'blah')),_inner('huh'))",
-//                optimize("proc(_outer, proc(_inner, @a, return(@a)) _inner('blah')) _inner('huh')"));
-//    }
+//	@Test
+//	public void testProcOptimiztion4() throws Exception{
+//		//Test embedded procs
+//		assertEquals("sconcat(proc('_outer',sconcat(proc('_inner',@a,return(@a)),'blah')),_inner('huh'))",
+//				optimize("proc(_outer, proc(_inner, @a, return(@a)) _inner('blah')) _inner('huh')"));
+//	}
 	@Test
 	public void testProcReturn() throws Exception {
 		assertEquals("sconcat(proc('_proc',return(array(1))),array_get(_proc(),0))",
@@ -314,28 +314,28 @@ public class OptimizationTest {
 	}
 
 	//TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
-//    @Test public void testAssign() throws Exception{
-//        //In this test, there's no way it won't ever be 'hi', so do a replacement (we still need to keep
-//        //the assign, because it does need to go into the variable table for reflective purposes)
-//        assertEquals("sconcat(assign(@a,'hi'),msg('hi'))", optimize("assign(@a, 'hi') msg(@a)"));
-//        //In this case, the first use may be hardcoded, but after the if, it may have changed, so we
-//        //can no longer assume it's always going to be 'hi'
-//        assertEquals("sconcat(assign(@a,'hi'),msg('hi'),if(dyn(),assign(@a,'bye')),msg(@a))",
-//                optimize(""
-//                + "assign(@a, 'hi')"
-//                + "msg(@a)"
-//                + "if(dyn(), assign(@a, 'bye'))"
-//                + "msg(@a)"));
-//        //In this case, we have a worthless assignment; We know @a is already 'hi' and it's always going
-//        //to be that, and we're trying to assign 'hi' again, so we can completely remove this from
-//        //the code, at which point the last msg can be optimized.
-//        assertEquals("sconcat(assign(@a,'hi'),msg('hi'),if(dyn(),null),msg('hi'))",
-//                optimize(""
-//                + "assign(@a, 'hi')"
-//                + "msg(@a)"
-//                + "if(dyn(), assign(@a, 'hi'))"
-//                + "msg(@a)"));
-//    }
+//	@Test public void testAssign() throws Exception{
+//		//In this test, there's no way it won't ever be 'hi', so do a replacement (we still need to keep
+//		//the assign, because it does need to go into the variable table for reflective purposes)
+//		assertEquals("sconcat(assign(@a,'hi'),msg('hi'))", optimize("assign(@a, 'hi') msg(@a)"));
+//		//In this case, the first use may be hardcoded, but after the if, it may have changed, so we
+//		//can no longer assume it's always going to be 'hi'
+//		assertEquals("sconcat(assign(@a,'hi'),msg('hi'),if(dyn(),assign(@a,'bye')),msg(@a))",
+//				optimize(""
+//				+ "assign(@a, 'hi')"
+//				+ "msg(@a)"
+//				+ "if(dyn(), assign(@a, 'bye'))"
+//				+ "msg(@a)"));
+//		//In this case, we have a worthless assignment; We know @a is already 'hi' and it's always going
+//		//to be that, and we're trying to assign 'hi' again, so we can completely remove this from
+//		//the code, at which point the last msg can be optimized.
+//		assertEquals("sconcat(assign(@a,'hi'),msg('hi'),if(dyn(),null),msg('hi'))",
+//				optimize(""
+//				+ "assign(@a, 'hi')"
+//				+ "msg(@a)"
+//				+ "if(dyn(), assign(@a, 'hi'))"
+//				+ "msg(@a)"));
+//	}
 	@Test
 	public void testNotinstanceofKeyword() throws Exception {
 		assertEquals("msg(not(instanceof(dyn(2),int)))", optimize("msg(dyn(2) notinstanceof int);"));

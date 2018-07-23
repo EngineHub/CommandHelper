@@ -38,7 +38,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	private final Environment originalEnv;
 	private final ParseTree tree; //The code closure for this event
 	private final Driver driver; //For efficiency sake, cache it here
-	private static int EventID = 0;
+	private static int eventId = 0;
 	private final Target target;
 
 	/**
@@ -48,7 +48,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	 */
 	private static int GetUniqueID() {
 		synchronized(BoundEvent.class) {
-			return ++EventID;
+			return ++eventId;
 		}
 	}
 
@@ -61,7 +61,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	public Environment getEnvironment() {
 		try {
 			return originalEnv.clone();
-		} catch(CloneNotSupportedException ex) {
+		} catch (CloneNotSupportedException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -148,7 +148,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 		if(options != null && options.containsKey("priority")) {
 			try {
 				this.priority = Priority.valueOf(options.get("priority", t).val().toUpperCase());
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new EventException("Priority must be one of: LOWEST, LOW, NORMAL, HIGH, HIGHEST, MONITOR");
 			}
 		} else {
@@ -258,13 +258,13 @@ public class BoundEvent implements Comparable<BoundEvent> {
 				} finally {
 					p.stop();
 				}
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				//We don't know how to handle this, but we need to set the env,
 				//then pass it up the chain
 				e.setEnv(env);
 				throw e;
 			}
-		} catch(CloneNotSupportedException ex) {
+		} catch (CloneNotSupportedException ex) {
 			Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -288,7 +288,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 			activeEvent.setBoundEvent(this);
 			env.getEnv(GlobalEnv.class).SetEvent(activeEvent);
 			this.execute(env, activeEvent);
-		} catch(CloneNotSupportedException ex) {
+		} catch (CloneNotSupportedException ex) {
 			Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -301,21 +301,21 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	}
 
 	//TODO: Once ParseTree supports these again, we may bring this back
-//    /**
-//     * Returns true if this event MUST be synchronous.
-//     * @return
-//     */
-//    public boolean isSync(){
-//	    return tree.isSync();
-//    }
+//	/**
+//	 * Returns true if this event MUST be synchronous.
+//	 * @return
+//	 */
+//	public boolean isSync(){
+//		return tree.isSync();
+//	}
 //
-//    /**
-//     * Returns true if this event MUST be asynchronous.
-//     * @return
-//     */
-//    public boolean isAsync(){
-//	    return tree.isAsync();
-//    }
+//	/**
+//	 * Returns true if this event MUST be asynchronous.
+//	 * @return
+//	 */
+//	public boolean isAsync(){
+//		return tree.isAsync();
+//	}
 	public ParseTree getParseTree() {
 		return tree;
 	}
@@ -410,7 +410,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 			this.cancelled = cancelled;
 			try {
 				boundEvent.getEventDriver().cancel(underlyingEvent, cancelled);
-			} catch(EventException ex) {
+			} catch (EventException ex) {
 				//Ignore this exception. This is thrown if the event isn't cancellable.
 				//Who cares.
 			}
@@ -499,7 +499,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 			this.addHistory("Adding a whenTriggered callback. " + boundEvent);
 			try {
 				whenTriggered.add(new Pair<CClosure, Environment>(tree, boundEvent.originalEnv.clone()));
-			} catch(CloneNotSupportedException ex) {
+			} catch (CloneNotSupportedException ex) {
 				Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -508,21 +508,21 @@ public class BoundEvent implements Comparable<BoundEvent> {
 			this.addHistory("Adding a whenCancelled callback. " + boundEvent);
 			try {
 				whenCancelled.add(new Pair<CClosure, Environment>(tree, boundEvent.originalEnv.clone()));
-			} catch(CloneNotSupportedException ex) {
+			} catch (CloneNotSupportedException ex) {
 				Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
 
 		public void executeTriggered() {
-//            for(Pair<CClosure, Env> pair : whenTriggered){
-//                MethodScriptCompiler.execute(pair.fst, pair.snd, null, null);
-//            }
+//			for(Pair<CClosure, Env> pair : whenTriggered){
+//				MethodScriptCompiler.execute(pair.fst, pair.snd, null, null);
+//			}
 		}
 
 		public void executeCancelled() {
-//            for(Pair<CClosure, Env> pair : whenCancelled){
-//                MethodScriptCompiler.execute(pair.fst, pair.snd, null, null);
-//            }
+//			for(Pair<CClosure, Env> pair : whenCancelled){
+//				MethodScriptCompiler.execute(pair.fst, pair.snd, null, null);
+//			}
 		}
 	}
 }

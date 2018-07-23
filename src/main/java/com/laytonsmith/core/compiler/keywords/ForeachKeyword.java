@@ -17,7 +17,7 @@ import java.util.List;
 @Keyword.keyword("foreach")
 public class ForeachKeyword extends Keyword {
 
-	private final static String FOREACHELSE = new DataHandling.foreachelse().getName();
+	private static final String FOREACHELSE = new DataHandling.foreachelse().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {

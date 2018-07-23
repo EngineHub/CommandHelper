@@ -70,7 +70,7 @@ public class ConstructorMirror<T> extends AbstractMethodMirror {
 		}
 		try {
 			return parent.getConstructor(cParams.toArray(new Class[cParams.size()]));
-		} catch(NoSuchMethodException | SecurityException ex) {
+		} catch (NoSuchMethodException | SecurityException ex) {
 			//There's really no way for any exception to happen here, so just rethrow
 			throw new RuntimeException(ex);
 		}

@@ -2,10 +2,12 @@ package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderSignal;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHopperMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItem;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLightningStrike;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCMinecart;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCStorageMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTNT;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCThrownPotion;
 import com.laytonsmith.abstraction.enums.MCEntityType;
@@ -30,10 +32,11 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 		ArrayList<EntityType> counted = new ArrayList<>();
 		for(MCVanillaEntityType v : MCVanillaEntityType.values()) {
 			if(v.existsInCurrent()) {
-				EntityType type = getBukkitType(v);
-				if(type == null) {
-					CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not find a matching entity type for " + v.name()
-							+ ". This is an error, please report this to the bug tracker.", Target.UNKNOWN);
+				EntityType type;
+				try {
+					type = getBukkitType(v);
+				} catch (IllegalArgumentException | NoSuchFieldError ex) {
+					CHLog.GetLogger().w(CHLog.Tags.RUNTIME, "Could not find a Bukkit EntityType for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
 				BukkitMCEntityType wrapper = new BukkitMCEntityType(type, v);
@@ -81,22 +84,18 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 	public static BukkitMCEntityType valueOfConcrete(String test) {
 		try {
 			return valueOfConcrete(EntityType.valueOf(test));
-		} catch(IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			return (BukkitMCEntityType) NULL;
 		}
 	}
 
 	// Add exceptions here
-	public static EntityType getBukkitType(MCVanillaEntityType v) {
+	private static EntityType getBukkitType(MCVanillaEntityType v) {
 		switch(v) {
 			case ENDER_EYE:
 				return EntityType.ENDER_SIGNAL;
 		}
-		try {
-			return EntityType.valueOf(v.name());
-		} catch(IllegalArgumentException iae) {
-			return null;
-		}
+		return EntityType.valueOf(v.name());
 	}
 
 	// This is here because it shouldn't be getting changed from API
@@ -107,23 +106,38 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 	// run once on setup
 	private void setWrapperClass() {
 		switch(getAbstracted()) {
-			case UNKNOWN:
-				wrapperClass = null;
-				break;
 			case DROPPED_ITEM:
 				wrapperClass = BukkitMCItem.class;
 				break;
-			case PRIMED_TNT:
-				wrapperClass = BukkitMCTNT.class;
+			case ENDER_EYE:
+				wrapperClass = BukkitMCEnderSignal.class;
+				break;
+			case FISHING_HOOK:
+				wrapperClass = BukkitMCFishHook.class;
 				break;
 			case LIGHTNING:
 				wrapperClass = BukkitMCLightningStrike.class;
 				break;
+			case LINGERING_POTION:
+				wrapperClass = BukkitMCThrownPotion.class;
+				break;
+			case MINECART_CHEST:
+				wrapperClass = BukkitMCStorageMinecart.class;
+				break;
+			case MINECART_COMMAND:
+				wrapperClass = BukkitMCCommandMinecart.class;
+				break;
+			case MINECART_HOPPER:
+				wrapperClass = BukkitMCHopperMinecart.class;
+				break;
+			case PRIMED_TNT:
+				wrapperClass = BukkitMCTNT.class;
+				break;
 			case SPLASH_POTION:
 				wrapperClass = BukkitMCThrownPotion.class;
 				break;
-			case LINGERING_POTION:
-				wrapperClass = BukkitMCThrownPotion.class;
+			case UNKNOWN:
+				wrapperClass = null;
 				break;
 			default:
 				String[] split = abstracted.name().toLowerCase().split("_");
@@ -131,25 +145,12 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 					break;
 				}
 				String name = "com.laytonsmith.abstraction.bukkit.entities.BukkitMC";
-				if("minecart".equals(split[0])) {
-					if(split.length == 1 || !"command".equals(split[1])) {
-						wrapperClass = BukkitMCMinecart.class;
-						break;
-					} else {
-						wrapperClass = BukkitMCCommandMinecart.class;
-						break;
-					}
-				}
-				if(split[0].startsWith("fish")) { // Bukkit enum matches neither the old class or the new
-					wrapperClass = BukkitMCFishHook.class;
-					break;
-				}
 				for(String s : split) {
 					name = name.concat(Character.toUpperCase(s.charAt(0)) + s.substring(1));
 				}
 				try {
 					wrapperClass = (Class<? extends MCEntity>) Class.forName(name);
-				} catch(ClassNotFoundException e) {
+				} catch (ClassNotFoundException e) {
 					String url = "https://github.com/sk89q/CommandHelper/tree/master/src/main/java/"
 							+ "com/laytonsmith/abstraction/bukkit/entities";
 					CHLog.GetLogger().d(CHLog.Tags.RUNTIME, "While trying to find the correct entity class for "

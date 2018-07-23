@@ -108,7 +108,7 @@ public class Regex {
 					for(String key : namedGroups) {
 						ret.set(key, (String) ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
 					}
-				} catch(ReflectionUtils.ReflectionException ex) {
+				} catch (ReflectionUtils.ReflectionException ex) {
 					throw new CREFormatException("Named captures are only supported with Java 7.", t);
 				}
 			}
@@ -206,7 +206,7 @@ public class Regex {
 					for(String key : namedGroups) {
 						ret.set(key, (String) ReflectionUtils.invokeMethod(Matcher.class, m, "group", new Class[]{String.class}, new Object[]{key}), t);
 					}
-				} catch(ReflectionUtils.ReflectionException e) {
+				} catch (ReflectionUtils.ReflectionException e) {
 					throw new CREFormatException("Named captures are only supported with Java 7.", t);
 				}
 				fret.push(ret, t);
@@ -294,9 +294,9 @@ public class Regex {
 
 			try {
 				ret = pattern.matcher(subject).replaceAll(replacement);
-			} catch(IndexOutOfBoundsException e) {
+			} catch (IndexOutOfBoundsException e) {
 				throw new CREFormatException("Expecting a regex group at parameter 1 of reg_replace", t);
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}
 
@@ -321,10 +321,10 @@ public class Regex {
 				}
 			}
 			return null;
-//            if(!children.get(0).getData().isDynamic()){
-//                getPattern(children.get(0).getData(), t);
-//            }
-//            return null;
+//			if(!children.get(0).getData().isDynamic()){
+//				getPattern(children.get(0).getData(), t);
+//			}
+//			return null;
 		}
 
 		@Override
@@ -353,7 +353,9 @@ public class Regex {
 	@seealso({StringHandling.split.class, ArrayHandling.array_implode.class})
 	public static class reg_split extends AbstractFunction implements Optimizable {
 
-		private final static String split = new StringHandling.split().getName();
+		// Variable is more clear when named after the function it represents.
+		@SuppressWarnings("checkstyle:constantname")
+		private static final String split = new StringHandling.split().getName();
 
 		@Override
 		public String getName() {
@@ -615,7 +617,7 @@ public class Regex {
 		}
 		try {
 			return Pattern.compile(regex, flags);
-		} catch(PatternSyntaxException e) {
+		} catch (PatternSyntaxException e) {
 			throw new CREFormatException(e.getMessage(), t);
 		}
 	}

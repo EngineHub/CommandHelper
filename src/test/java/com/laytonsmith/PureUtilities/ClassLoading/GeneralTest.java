@@ -12,12 +12,15 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import static org.hamcrest.CoreMatchers.*;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 
 /**
  *
@@ -148,13 +151,11 @@ public class GeneralTest {
 	}
 
 	/*
-	    A -> B
-	    |
-	    | -> C -> D
-		 |    |
-		 |    | -> F
-		 |
-		 | -> E
+	 * A -> B
+	 * |
+	 * | -> C -> D -> F
+	 *      |
+	 *      | -> E
 	 */
 	public static interface A extends B, C {
 	}
@@ -210,17 +211,17 @@ public class GeneralTest {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface tag {
+	public static @interface Tag {
 	}
 
-	@tag
+	@Tag
 	public static interface TestMe {
 	}
 
 	@Test
 	public void testInterfaceWithAnnotationIsReturned() {
 		// Test that the interface specified is *also* returned
-		Set<ClassMirror<? extends TestMe>> t = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(tag.class, TestMe.class);
+		Set<ClassMirror<? extends TestMe>> t = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(Tag.class, TestMe.class);
 		assertTrue(t.size() == 1);
 	}
 

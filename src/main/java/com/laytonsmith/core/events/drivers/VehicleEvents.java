@@ -318,21 +318,21 @@ public class VehicleEvents {
 		}
 	}
 
-	private static final Set<Integer> thresholdList = new HashSet<>();
+	private static final Set<Integer> THRESHOLD_LIST = new HashSet<>();
 
 	public static Set<Integer> GetThresholdList() {
-		return thresholdList;
+		return THRESHOLD_LIST;
 	}
 
-	private static final Map<Integer, Map<UUID, MCLocation>> lastVehicleLocations = new HashMap<>();
+	private static final Map<Integer, Map<UUID, MCLocation>> LAST_VEHICLE_LOCATIONS = new HashMap<>();
 
 	public static Map<UUID, MCLocation> GetLastLocations(Integer i) {
-		if(!lastVehicleLocations.containsKey(i)) {
+		if(!LAST_VEHICLE_LOCATIONS.containsKey(i)) {
 			HashMap<UUID, MCLocation> newLocation = new HashMap<>();
-			lastVehicleLocations.put(i, newLocation);
+			LAST_VEHICLE_LOCATIONS.put(i, newLocation);
 			return newLocation;
 		}
-		return (lastVehicleLocations.get(i));
+		return (LAST_VEHICLE_LOCATIONS.get(i));
 	}
 
 	@api
@@ -362,8 +362,8 @@ public class VehicleEvents {
 
 		@Override
 		public void hook() {
-			thresholdList.clear();
-			lastVehicleLocations.clear();
+			THRESHOLD_LIST.clear();
+			LAST_VEHICLE_LOCATIONS.clear();
 		}
 
 		@Override
@@ -373,7 +373,7 @@ public class VehicleEvents {
 			if(prefilters.containsKey("threshold")) {
 				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
 			}
-			thresholdList.add(threshold);
+			THRESHOLD_LIST.add(threshold);
 		}
 
 		@Override
@@ -393,8 +393,8 @@ public class VehicleEvents {
 					}
 				}
 			}
-			thresholdList.remove(threshold);
-			lastVehicleLocations.remove(threshold);
+			THRESHOLD_LIST.remove(threshold);
+			LAST_VEHICLE_LOCATIONS.remove(threshold);
 		}
 
 		@Override
@@ -488,7 +488,7 @@ public class VehicleEvents {
 					ret.put("player", CNull.NULL);
 				} else {
 
-					MCEntityType passengertype = e.getVehicle().getPassenger().getType();
+					MCEntityType<?> passengertype = e.getVehicle().getPassenger().getType();
 
 					ret.put("passengertype", new CString(passengertype.name(), t));
 					ret.put("passenger", new CString(passenger.getUniqueId().toString(), t));

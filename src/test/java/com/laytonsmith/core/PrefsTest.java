@@ -40,11 +40,11 @@ public class PrefsTest {
 			}
 			String functionName = b.toString();
 			Preferences.Preference p = prefs.get(name);
-			//Ok, functionName is the name of the method. Let's first make sure it exists.            
+			//Ok, functionName is the name of the method. Let's first make sure it exists.
 			Method function;
 			try {
 				function = Prefs.class.getDeclaredMethod(functionName);
-			} catch(NoSuchMethodException e) {
+			} catch (NoSuchMethodException e) {
 				fail("Need method " + functionName + " to be included in Prefs.");
 				return;
 			}

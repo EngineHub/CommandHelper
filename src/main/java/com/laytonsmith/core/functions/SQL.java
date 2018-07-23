@@ -92,7 +92,7 @@ public class SQL {
 			return null;
 		}
 
-		private static final Object connectionPoolLock = new Object();
+		private static final Object CONNECTION_POOL_LOCK = new Object();
 		private static Map<String, Connection> connectionPool = null;
 		private static final boolean USE_CONNECTION_POOL = true;
 
@@ -100,18 +100,18 @@ public class SQL {
 			if(!USE_CONNECTION_POOL) {
 				return DriverManager.getConnection(connectionString);
 			}
-			synchronized(connectionPoolLock) {
+			synchronized(CONNECTION_POOL_LOCK) {
 				if(connectionPool == null) {
 					connectionPool = new HashMap<>();
 					StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
 						@Override
 						public void run() {
-							synchronized(connectionPoolLock) {
+							synchronized(CONNECTION_POOL_LOCK) {
 								for(Connection c : connectionPool.values()) {
 									try {
 										c.close();
-									} catch(SQLException ex) {
+									} catch (SQLException ex) {
 										//
 									}
 								}
@@ -127,7 +127,7 @@ public class SQL {
 				boolean isValid = false;
 				try {
 					isValid = c.isValid(3);
-				} catch(AbstractMethodError ex) {
+				} catch (AbstractMethodError ex) {
 					// isValid is added in later versions. We want to continue working, (as if the connection
 					// is not valid) but still warn the user that this will
 					// be slower.
@@ -184,7 +184,7 @@ public class SQL {
 								if(ps.getParameterMetaData().isNullable(i + 1) == ParameterMetaData.parameterNoNulls) {
 									throw new CRESQLException("Parameter " + (i + 1) + " cannot be set to null. Check your parameters and try again.", t);
 								}
-							} catch(SQLException ex) {
+							} catch (SQLException ex) {
 								//Ignored. This appears to be able to happen in various cases, but in the case where it *does* work, we don't want
 								//to completely disable the feature.
 							}
@@ -206,7 +206,7 @@ public class SQL {
 								throw new CRECastException("The type " + params[i].getClass().getSimpleName()
 										+ " of parameter " + (i + 1) + " is not supported.", t);
 							}
-						} catch(ClassCastException ex) {
+						} catch (ClassCastException ex) {
 							throw new CRECastException("Could not cast parameter " + (i + 1) + " to "
 									+ ps.getParameterMetaData().getParameterTypeName(i + 1) + " from "
 									+ params[i].getClass().getSimpleName() + ".", t, ex);
@@ -223,45 +223,52 @@ public class SQL {
 							for(int i = 1; i <= md.getColumnCount(); i++) {
 								Construct value;
 								int columnType = md.getColumnType(i);
-								if(columnType == Types.INTEGER
-										|| columnType == Types.TINYINT
-										|| columnType == Types.SMALLINT
-										|| columnType == Types.BIGINT) {
-									value = new CInt(rs.getLong(i), t);
-								} else if(columnType == Types.FLOAT
-										|| columnType == Types.DOUBLE
-										|| columnType == Types.REAL
-										|| columnType == Types.DECIMAL
-										|| columnType == Types.NUMERIC) {
-									value = new CDouble(rs.getDouble(i), t);
-								} else if(columnType == Types.VARCHAR
-										|| columnType == Types.CHAR
-										|| columnType == Types.LONGVARCHAR) {
-									value = new CString(rs.getString(i), t);
-								} else if(columnType == Types.BLOB
-										|| columnType == Types.BINARY
-										|| columnType == Types.VARBINARY
-										|| columnType == Types.LONGVARBINARY) {
-									value = CByteArray.wrap(rs.getBytes(i), t);
-								} else if(columnType == Types.DATE
-										|| columnType == Types.TIME
-										|| columnType == Types.TIMESTAMP) {
-									if(md.getColumnTypeName(i).equals("YEAR")) {
+								switch(columnType) {
+									case Types.INTEGER:
+									case Types.TINYINT:
+									case Types.SMALLINT:
+									case Types.BIGINT:
 										value = new CInt(rs.getLong(i), t);
-									} else if(rs.getTimestamp(i) == null) {
-										// Normally we check for null below, but since
-										// we want to dereference the value now, we have
-										// to have a specific null check here.
-										value = CNull.NULL;
-									} else {
-										value = new CInt(rs.getTimestamp(i).getTime(), t);
-									}
-								} else if(columnType == Types.BOOLEAN
-										|| columnType == Types.BIT) {
-									value = CBoolean.get(rs.getBoolean(i));
-								} else {
-									throw new CRECastException("SQL returned a unhandled column type "
-											+ md.getColumnTypeName(i) + " for column " + md.getColumnName(i) + ".", t);
+										break;
+									case Types.FLOAT:
+									case Types.DOUBLE:
+									case Types.REAL:
+									case Types.DECIMAL:
+									case Types.NUMERIC:
+										value = new CDouble(rs.getDouble(i), t);
+										break;
+									case Types.VARCHAR:
+									case Types.CHAR:
+									case Types.LONGVARCHAR:
+										value = new CString(rs.getString(i), t);
+										break;
+									case Types.BLOB:
+									case Types.BINARY:
+									case Types.VARBINARY:
+									case Types.LONGVARBINARY:
+										value = CByteArray.wrap(rs.getBytes(i), t);
+										break;
+									case Types.DATE:
+									case Types.TIME:
+									case Types.TIMESTAMP:
+										if(md.getColumnTypeName(i).equals("YEAR")) {
+											value = new CInt(rs.getLong(i), t);
+										} else if(rs.getTimestamp(i) == null) {
+											// Normally we check for null below, but since
+											// we want to dereference the value now, we have
+											// to have a specific null check here.
+											value = CNull.NULL;
+										} else {
+											value = new CInt(rs.getTimestamp(i).getTime(), t);
+										}
+										break;
+									case Types.BOOLEAN:
+									case Types.BIT:
+										value = CBoolean.get(rs.getBoolean(i));
+										break;
+									default:
+										throw new CRECastException("SQL returned a unhandled column type "
+												+ md.getColumnTypeName(i) + " for column " + md.getColumnName(i) + ".", t);
 								}
 								if(rs.wasNull()) {
 									// Since mscript can assign null to primitives, we
@@ -292,7 +299,7 @@ public class SQL {
 						conn.close();
 					}
 				}
-			} catch(Profiles.InvalidProfileException | SQLException ex) {
+			} catch (Profiles.InvalidProfileException | SQLException ex) {
 				throw new CRESQLException(ex.getMessage(), t, ex);
 			}
 		}
@@ -483,7 +490,7 @@ public class SQL {
 					Construct exception = CNull.NULL;
 					try {
 						returnValue = new query().exec(t, environment, newArgs);
-					} catch(ConfigRuntimeException ex) {
+					} catch (ConfigRuntimeException ex) {
 						exception = ObjectGenerator.GetGenerator().exception(ex, environment, t);
 					}
 					final Construct cret = returnValue;

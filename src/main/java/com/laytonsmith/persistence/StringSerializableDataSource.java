@@ -81,8 +81,8 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 			} else {
 				try {
 					writeData(dm, serializeModel());
-				} catch(ReadOnlyException ex) {
-					//This shouldn't happen, because we won't have been allowed to set any 
+				} catch (ReadOnlyException ex) {
+					//This shouldn't happen, because we won't have been allowed to set any
 					Logger.getLogger(StringSerializableDataSource.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
@@ -101,7 +101,7 @@ public abstract class StringSerializableDataSource extends AbstractDataSource {
 		String data;
 		try {
 			data = getConnectionMixin().getData();
-		} catch(DataSourceException | IOException e) {
+		} catch (DataSourceException | IOException e) {
 			throw new DataSourceException("Could not populate the data source (" + uri + ") with data: " + e.getMessage(), e);
 		}
 		populateModel(data);

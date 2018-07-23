@@ -94,7 +94,7 @@ public class BukkitMCItemStack implements MCItemStack {
 			for(Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()) {
 				map.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
 			}
-		} catch(NullPointerException npe) {
+		} catch (NullPointerException npe) {
 			// Probably invalid enchantment, always return map
 		}
 		return map;

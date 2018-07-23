@@ -17,18 +17,18 @@ import java.util.List;
 @Keyword.keyword("for")
 public class ForKeyword extends Keyword {
 
-	private final static String FORELSE = new DataHandling.forelse().getName();
+	private static final String FORELSE = new DataHandling.forelse().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
-		ParseTree _for = list.get(keywordPosition);
-		Target t = _for.getTarget();
+		ParseTree forTree = list.get(keywordPosition);
+		Target t = forTree.getTarget();
 		if(list.size() > keywordPosition + 1) {
 			// This portion handles the initial code block, i.e. foreach(...){ }
 			ParseTree codeBlock = list.get(keywordPosition + 1);
 			if(isCodeBlock(codeBlock)) {
 				validateCodeBlock(codeBlock, "");
-				_for.addChild(getArgumentOrNull(codeBlock));
+				forTree.addChild(getArgumentOrNull(codeBlock));
 				list.remove(keywordPosition + 1);
 			}
 		}
@@ -41,7 +41,7 @@ public class ForKeyword extends Keyword {
 				ParseTree codeBlock = list.get(keywordPosition + 1);
 				if(isCodeBlock(codeBlock)) {
 					validateCodeBlock(codeBlock, "");
-					_for.addChild(getArgumentOrNull(codeBlock));
+					forTree.addChild(getArgumentOrNull(codeBlock));
 				}
 				// We also have to refactor this into a foreachelse, instead of a foreach.
 				list.get(keywordPosition).setData(new CFunction(FORELSE, t));

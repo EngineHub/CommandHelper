@@ -25,22 +25,22 @@ public class DoKeyword extends Keyword {
 		// always throw an exception.
 		Target t = list.get(keywordPosition).getTarget();
 		try {
-			ParseTree code = list.get(keywordPosition + 1);
-			ParseTree _while = list.get(keywordPosition + 2);
-			this.validateCodeBlock(code, "Missing brace following \"do\" keyword");
-			if(!(_while.getData() instanceof CFunction) || !_while.getData().val().equals(WHILE)) {
+			ParseTree codeTree = list.get(keywordPosition + 1);
+			ParseTree whileTree = list.get(keywordPosition + 2);
+			this.validateCodeBlock(codeTree, "Missing brace following \"do\" keyword");
+			if(!(whileTree.getData() instanceof CFunction) || !whileTree.getData().val().equals(WHILE)) {
 				throw new ConfigCompileException("Missing while clause following \"do\" keyword", t);
 			}
-			if(_while.getChildren().isEmpty()) {
-				throw new ConfigCompileException("Missing argument to while clause", _while.getTarget());
+			if(whileTree.getChildren().isEmpty()) {
+				throw new ConfigCompileException("Missing argument to while clause", whileTree.getTarget());
 			}
 			ParseTree dowhile = new ParseTree(new CFunction(DOWHILE, t), list.get(keywordPosition).getFileOptions());
-			dowhile.addChild(this.getArgumentOrNull(code));
-			dowhile.addChild(_while.getChildAt(0));
+			dowhile.addChild(Keyword.getArgumentOrNull(codeTree));
+			dowhile.addChild(whileTree.getChildAt(0));
 			list.set(keywordPosition, dowhile);
 			list.remove(keywordPosition + 2);
 			list.remove(keywordPosition + 1);
-		} catch(IndexOutOfBoundsException ex) {
+		} catch (IndexOutOfBoundsException ex) {
 			throw new ConfigCompileException("Unexpected keyword \"do\"", t);
 		}
 		return keywordPosition;

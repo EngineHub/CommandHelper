@@ -3,12 +3,12 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCColor;
 import org.bukkit.Color;
 
-public class BukkitMCColor implements MCColor {
+public final class BukkitMCColor implements MCColor {
 
-	private static final BukkitMCColor builder = new BukkitMCColor();
+	private static final BukkitMCColor BUILDER = new BukkitMCColor();
 
 	public static MCColor GetMCColor(Color c) {
-		return builder.build(c.getRed(), c.getGreen(), c.getBlue());
+		return BUILDER.build(c.getRed(), c.getGreen(), c.getBlue());
 	}
 
 	public static Color GetColor(MCColor c) {

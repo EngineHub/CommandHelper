@@ -15,67 +15,67 @@ public class Color implements java.io.Serializable {
 	/**
 	 * The color white. In the default sRGB space.
 	 */
-	public final static Color WHITE = new Color(255, 255, 255);
+	public static final Color WHITE = new Color(255, 255, 255);
 
 	/**
 	 * The color light gray. In the default sRGB space.
 	 */
-	public final static Color LIGHT_GRAY = new Color(192, 192, 192);
+	public static final Color LIGHT_GRAY = new Color(192, 192, 192);
 
 	/**
 	 * The color gray. In the default sRGB space.
 	 */
-	public final static Color GRAY = new Color(128, 128, 128);
+	public static final Color GRAY = new Color(128, 128, 128);
 
 	/**
 	 * The color dark gray. In the default sRGB space.
 	 */
-	public final static Color DARK_GRAY = new Color(64, 64, 64);
+	public static final Color DARK_GRAY = new Color(64, 64, 64);
 
 	/**
 	 * The color black. In the default sRGB space.
 	 */
-	public final static Color BLACK = new Color(0, 0, 0);
+	public static final Color BLACK = new Color(0, 0, 0);
 
 	/**
 	 * The color red. In the default sRGB space.
 	 */
-	public final static Color RED = new Color(255, 0, 0);
+	public static final Color RED = new Color(255, 0, 0);
 
 	/**
 	 * The color pink. In the default sRGB space.
 	 */
-	public final static Color PINK = new Color(255, 175, 175);
+	public static final Color PINK = new Color(255, 175, 175);
 
 	/**
 	 * The color orange. In the default sRGB space.
 	 */
-	public final static Color ORANGE = new Color(255, 200, 0);
+	public static final Color ORANGE = new Color(255, 200, 0);
 
 	/**
 	 * The color yellow. In the default sRGB space.
 	 */
-	public final static Color YELLOW = new Color(255, 255, 0);
+	public static final Color YELLOW = new Color(255, 255, 0);
 
 	/**
 	 * The color green. In the default sRGB space.
 	 */
-	public final static Color GREEN = new Color(0, 255, 0);
+	public static final Color GREEN = new Color(0, 255, 0);
 
 	/**
 	 * The color magenta. In the default sRGB space.
 	 */
-	public final static Color MAGENTA = new Color(255, 0, 255);
+	public static final Color MAGENTA = new Color(255, 0, 255);
 
 	/**
 	 * The color cyan. In the default sRGB space.
 	 */
-	public final static Color CYAN = new Color(0, 255, 255);
+	public static final Color CYAN = new Color(0, 255, 255);
 
 	/**
 	 * The color blue. In the default sRGB space.
 	 */
-	public final static Color BLUE = new Color(0, 0, 255);
+	public static final Color BLUE = new Color(0, 0, 255);
 
 	/**
 	 * The color value.
@@ -118,7 +118,7 @@ public class Color implements java.io.Serializable {
 	private float falpha = 0.0f;
 
 	/*
-     * JDK 1.1 serialVersionUID
+	 * JDK 1.1 serialVersionUID
 	 */
 	private static final long serialVersionUID = 118526816881161077L;
 
@@ -403,9 +403,9 @@ public class Color implements java.io.Serializable {
 		int alpha = getAlpha();
 
 		/* From 2D group:
-         * 1. black.brighter() should return grey
-         * 2. applying brighter to blue will always return blue, brighter
-         * 3. non pure color (non zero rgb) will eventually return white
+		 * 1. black.brighter() should return grey
+		 * 2. applying brighter to blue will always return blue, brighter
+		 * 3. non pure color (non zero rgb) will eventually return white
 		 */
 		int i = (int) (1.0 / (1.0 - FACTOR));
 		if(r == 0 && g == 0 && b == 0) {
@@ -594,7 +594,9 @@ public class Color implements java.io.Serializable {
 	 * @since JDK1.0
 	 */
 	public static int HSBtoRGB(float hue, float saturation, float brightness) {
-		int r = 0, g = 0, b = 0;
+		int r = 0;
+		int g = 0;
+		int b = 0;
 		if(saturation == 0) {
 			r = g = b = (int) (brightness * 255.0f + 0.5f);
 		} else {
@@ -658,7 +660,9 @@ public class Color implements java.io.Serializable {
 	 * @since JDK1.0
 	 */
 	public static float[] RGBtoHSB(int r, int g, int b, float[] hsbvals) {
-		float hue, saturation, brightness;
+		float hue;
+		float saturation;
+		float brightness;
 		if(hsbvals == null) {
 			hsbvals = new float[3];
 		}

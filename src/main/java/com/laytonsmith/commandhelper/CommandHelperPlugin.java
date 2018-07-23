@@ -25,6 +25,7 @@ import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Common.TimeConversionUtil;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
@@ -143,7 +144,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				try {
 					version = "versionUpgrade-" + Main.loadSelfVersion();
 					return !hasBreadcrumb(version);
-				} catch(Exception ex) {
+				} catch (Exception ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 					return false;
 				}
@@ -174,7 +175,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 							TermColors.YELLOW + "[" + Implementation.GetServerType().getBranding() + "] Old preferences.txt file detected. Moving preferences.txt to preferences.ini." + TermColors.reset());
 					FileUtil.copy(oldPreferences, CommandHelperFileLocations.getDefault().getPreferencesFile(), true);
 					oldPreferences.deleteOnExit();
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
@@ -206,22 +207,22 @@ public class CommandHelperPlugin extends JavaPlugin {
 				CommandHelperFileLocations p = CommandHelperFileLocations.getDefault();
 				try {
 					FileUtil.move(new File(cd, "persistance.config"), p.getPersistenceConfig());
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				try {
 					FileUtil.move(new File(cd, "preferences.ini"), p.getPreferencesFile());
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				try {
 					FileUtil.move(new File(cd, "profiler.config"), p.getProfilerConfigFile());
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				try {
 					FileUtil.move(new File(cd, "sql-profiles.xml"), p.getProfilesFile());
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				new File(cd, "logs/debug/loggerPreferences.txt").delete();
@@ -247,7 +248,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				try {
 					FileUtil.move(oldProfilesFile, MethodScriptFileLocations.getDefault().getProfilesFile());
 					StreamUtils.GetSystemOut().println("CommandHelper: sql-profiles.xml has been renamed to " + MethodScriptFileLocations.getDefault().getProfilesFile().getName());
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
@@ -255,13 +256,13 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 		try {
 			upgradeLog.runTasks();
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
 		try {
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
@@ -314,7 +315,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 			try {
 				loadingThread.join();
-			} catch(InterruptedException ex) {
+			} catch (InterruptedException ex) {
 				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -336,7 +337,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			});
 			m.addGraph(graph);
 			m.start();
-		} catch(IOException e) {
+		} catch (IOException e) {
 			// Failed to submit the stats :-(
 		}
 
@@ -344,7 +345,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			//This may seem redundant, but on a /reload, we want to refresh these
 			//properties.
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		if(Prefs.UseSudoFallback()) {
@@ -354,18 +355,18 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 		version = new SimpleVersion(getDescription().getVersion());
 
-		String script_name = Prefs.ScriptName();
-		String main_file = Prefs.MainFile();
+		String scriptName = Prefs.ScriptName();
+		String mainFile = Prefs.MainFile();
 		boolean showSplashScreen = Prefs.ShowSplashScreen();
 		if(showSplashScreen) {
 			StreamUtils.GetSystemOut().println(TermColors.reset());
 			//StreamUtils.GetSystemOut().flush();
 			StreamUtils.GetSystemOut().println("\n\n" + Static.Logo());
 		}
-		ac = new AliasCore(new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), script_name),
+		ac = new AliasCore(new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), scriptName),
 				CommandHelperFileLocations.getDefault().getLocalPackagesDirectory(),
 				CommandHelperFileLocations.getDefault().getPreferencesFile(),
-				new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), main_file), this);
+				new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), mainFile), this);
 		ac.reload(null, null, true);
 
 		//Clear out our hostname cache
@@ -451,7 +452,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				if(defaultHandler != null && method.getParameterTypes().length == 1) {
 					try {
 						eventClass = (Class<? extends Event>) method.getParameterTypes()[0];
-					} catch(ClassCastException e) {
+					} catch (ClassCastException e) {
 						continue;
 					}
 				} else {
@@ -463,7 +464,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				}
 				try {
 					eventClass = (Class<? extends Event>) Class.forName(identifier.className());
-				} catch(ClassNotFoundException | ClassCastException e) {
+				} catch (ClassNotFoundException | ClassCastException e) {
 					CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
 							+ " because the class " + identifier.className() + " could not be found."
 							+ " This problem is not expected to occur, so please report it on the bug"
@@ -474,12 +475,12 @@ public class CommandHelperPlugin extends JavaPlugin {
 			HandlerList handler;
 			try {
 				handler = (HandlerList) ReflectionUtils.invokeMethod(eventClass, null, "getHandlerList");
-			} catch(ReflectionUtils.ReflectionException ref) {
+			} catch (ReflectionUtils.ReflectionException ref) {
 				Class eventSuperClass = eventClass.getSuperclass();
 				if(eventSuperClass != null) {
 					try {
 						handler = (HandlerList) ReflectionUtils.invokeMethod(eventSuperClass, null, "getHandlerList");
-					} catch(ReflectionUtils.ReflectionException refInner) {
+					} catch (ReflectionUtils.ReflectionException refInner) {
 						CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
 								+ " because the handler for class " + identifier.className()
 								+ " could not be found. An attempt has already been made to find the"
@@ -507,9 +508,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 							return;
 						}
 						method.invoke(listener, event);
-					} catch(InvocationTargetException ex) {
+					} catch (InvocationTargetException ex) {
 						throw new EventException(ex.getCause());
-					} catch(Throwable t) {
+					} catch (Throwable t) {
 						throw new EventException(t);
 					}
 				}
@@ -576,7 +577,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 			if(sender instanceof ConsoleCommandSender) {
 				int interpreterTimeout = Prefs.InterpreterTimeout();
 				if(interpreterTimeout != 0) {
-					interpreterUnlockedUntil = (interpreterTimeout * 60 * 1000) + System.currentTimeMillis();
+					interpreterUnlockedUntil =
+							TimeConversionUtil.inMilliseconds(interpreterTimeout, TimeConversionUtil.TimeUnit.MINUTE)
+							+ System.currentTimeMillis();
 					sender.sendMessage("Interpreter mode unlocked for " + interpreterTimeout + " minute"
 							+ (interpreterTimeout == 1 ? "" : "s"));
 				}

@@ -104,11 +104,11 @@ public abstract class SQLDataSource extends AbstractDataSource {
 				if(!connection.isValid(3)) {
 					needToConnect = true;
 				}
-			} catch(AbstractMethodError ex) {
+			} catch (AbstractMethodError ex) {
 				// isValid was added later, some connection types may not have that method.
 				try {
 					connection.createStatement().execute(getTestQuery());
-				} catch(SQLException e) {
+				} catch (SQLException e) {
 					needToConnect = true;
 				}
 			}
@@ -135,7 +135,7 @@ public abstract class SQLDataSource extends AbstractDataSource {
 				connection.close();
 				connection = null;
 			}
-		} catch(SQLException ex) {
+		} catch (SQLException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
@@ -157,7 +157,7 @@ public abstract class SQLDataSource extends AbstractDataSource {
 				lastConnected = System.currentTimeMillis();
 			}
 			return set;
-		} catch(SQLException | IOException ex) {
+		} catch (SQLException | IOException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
@@ -179,7 +179,7 @@ public abstract class SQLDataSource extends AbstractDataSource {
 				lastConnected = System.currentTimeMillis();
 			}
 			return map;
-		} catch(SQLException | IOException ex) {
+		} catch (SQLException | IOException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
@@ -194,7 +194,7 @@ public abstract class SQLDataSource extends AbstractDataSource {
 					statement.executeUpdate();
 				}
 				lastConnected = System.currentTimeMillis();
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new DataSourceException(e.getMessage(), e);
 			}
 		}

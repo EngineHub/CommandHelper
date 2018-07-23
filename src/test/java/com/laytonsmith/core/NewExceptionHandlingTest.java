@@ -13,7 +13,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import static com.laytonsmith.testing.StaticTest.SRun;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.eq;
 
 /**
  *
@@ -38,7 +42,7 @@ public class NewExceptionHandlingTest {
 
 	@Test
 	public void testBasicKeywordUsage() throws Exception {
-		assertEquals("complex_try(null,assign(IOException,@e,null),null,assign(Exception,@e,null),null,null)", optimize("try { } catch(IOException @e){ } catch(Exception @e){ } finally { }"));
+		assertEquals("complex_try(null,assign(IOException,@e,null),null,assign(Exception,@e,null),null,null)", optimize("try { } catch (IOException @e){ } catch (Exception @e){ } finally { }"));
 	}
 
 	@Test
@@ -48,19 +52,19 @@ public class NewExceptionHandlingTest {
 
 	@Test
 	public void testBasicUsage() throws Exception {
-		SRun("try { throw(IOException, ''); } catch(IOException @e) { msg('exception'); }", fakePlayer);
+		SRun("try { throw(IOException, ''); } catch (IOException @e) { msg('exception'); }", fakePlayer);
 		verify(fakePlayer).sendMessage("exception");
 	}
 
 	@Test
 	public void testExceptionTrickle() throws Exception {
-		SRun("try { throw(IOException, ''); } catch(NullPointerException @e) { msg('no run'); } catch(IOException @e){ msg('run'); }", fakePlayer);
+		SRun("try { throw(IOException, ''); } catch (NullPointerException @e) { msg('no run'); } catch (IOException @e){ msg('run'); }", fakePlayer);
 		verify(fakePlayer).sendMessage("run");
 	}
 
 	@Test
 	public void testExceptionInheritance() throws Exception {
-		SRun("try { throw(IOException, ''); } catch(Exception @e) { msg('run'); }", fakePlayer);
+		SRun("try { throw(IOException, ''); } catch (Exception @e) { msg('run'); }", fakePlayer);
 		verify(fakePlayer).sendMessage("run");
 	}
 
@@ -69,7 +73,7 @@ public class NewExceptionHandlingTest {
 		SRun(
 				/* 1 */"try {\n"
 				/* 2 */ + "throw(IOException, 'message'); \n"
-				/* 3 */ + "} catch(IOException @e){ \n"
+				/* 3 */ + "} catch (IOException @e){ \n"
 				/* 4 */ + "msg(@e); \n"
 				/* 5 */ + "}", fakePlayer);
 		verify(fakePlayer).sendMessage("{causedBy: null, classType: IOException, message: message, stackTrace: {{file: Unknown file, id: <<main code>>, line: 2}}}");
@@ -90,7 +94,7 @@ public class NewExceptionHandlingTest {
 				/* 09 */ + "}\n"
 				/* 10 */ + "try {\n"
 				/* 11 */ + "_a();\n"
-				/* 12 */ + "} catch(IOException @e){\n"
+				/* 12 */ + "} catch (IOException @e){\n"
 				/* 13 */ + "msg(@e);\n"
 				/* 14 */ + "}", fakePlayer);
 		verify(fakePlayer).sendMessage("{causedBy: null, classType: IOException, message: message, stackTrace:"
@@ -117,7 +121,7 @@ public class NewExceptionHandlingTest {
 				/* 09 */ + "}\n"
 				/* 10 */ + "try {\n"
 				/* 11 */ + "_a();\n"
-				/* 12 */ + "} catch(RangeException @e){\n"
+				/* 12 */ + "} catch (RangeException @e){\n"
 				/* 13 */ + "msg(@e);\n"
 				/* 14 */ + "}", fakePlayer);
 		verify(fakePlayer).sendMessage("{causedBy: null, classType: RangeException, message: Division by 0!, stackTrace:"
@@ -131,20 +135,20 @@ public class NewExceptionHandlingTest {
 
 	@Test
 	public void testFinallyRunsOnNormal() throws Exception {
-		SRun("try { noop(); } catch(Exception @e) { msg('nope'); } finally { msg('run'); }", fakePlayer);
+		SRun("try { noop(); } catch (Exception @e) { msg('nope'); } finally { msg('run'); }", fakePlayer);
 		verify(fakePlayer).sendMessage("run");
 	}
 
 	@Test
 	public void testFinallyRunsOnException() throws Exception {
-		SRun("try { throw(IOException, ''); } catch(Exception @e) { msg('exception'); } finally { msg('run'); }", fakePlayer);
+		SRun("try { throw(IOException, ''); } catch (Exception @e) { msg('exception'); } finally { msg('run'); }", fakePlayer);
 		verify(fakePlayer).sendMessage("exception");
 		verify(fakePlayer).sendMessage("run");
 	}
 
 	@Test
 	public void testFinallyRunsAndReturnIsCorrect() throws Exception {
-		SRun("proc _a(){ try { noop(); return('value'); } catch(Exception @e) { msg('nope'); } finally { msg('run'); } }"
+		SRun("proc _a(){ try { noop(); return('value'); } catch (Exception @e) { msg('nope'); } finally { msg('run'); } }"
 				+ "msg(_a());", fakePlayer);
 		verify(fakePlayer).sendMessage("run");
 		verify(fakePlayer).sendMessage("value");
@@ -157,8 +161,8 @@ public class NewExceptionHandlingTest {
 		try {
 			SRun("try { throw(IOException, 'hidden'); } finally { throw(CastException, 'shown'); }", fakePlayer);
 			fail("Expected an exception");
-		} catch(CRECastException ex) {
-		} catch(Exception ex) {
+		} catch (CRECastException ex) {
+		} catch (Exception ex) {
 			fail("Expected an exception, but of type CRECastException");
 		}
 		verify(log).Log(eq(CHLog.Tags.RUNTIME), eq(LogLevel.WARNING), anyString(), any(Target.class));
@@ -166,13 +170,13 @@ public class NewExceptionHandlingTest {
 
 	@Test(expected = ConfigCompileException.class)
 	public void testDuplicateExceptionTypeThrowsException() throws Exception {
-		SRun("try { } catch(CastException @e){ } catch(CastException @e){ }", fakePlayer);
+		SRun("try { } catch (CastException @e){ } catch (CastException @e){ }", fakePlayer);
 	}
 
 	@Test
 	public void testExceptionTypeIsCorrectInMulticatch() throws Exception {
-		SRun("try { throw(CastException, ''); } catch(CastException @e){ msg('run'); } catch(IOException @e){ msg('no run'); }", fakePlayer);
-		SRun("try { throw(IOException, ''); } catch(CastException @e){ msg('no run'); } catch(IOException @e){ msg('run'); }", fakePlayer);
+		SRun("try { throw(CastException, ''); } catch (CastException @e){ msg('run'); } catch (IOException @e){ msg('no run'); }", fakePlayer);
+		SRun("try { throw(IOException, ''); } catch (CastException @e){ msg('no run'); } catch (IOException @e){ msg('run'); }", fakePlayer);
 		verify(fakePlayer, times(2)).sendMessage("run");
 	}
 
@@ -181,10 +185,10 @@ public class NewExceptionHandlingTest {
 		SRun("try {"
 				+ "try {"
 				+ "	throw(IOException, '');"
-				+ "} catch(CastException @e){"
+				+ "} catch (CastException @e){"
 				+ "	msg('nope');"
 				+ "}"
-				+ "} catch(IOException @ex){"
+				+ "} catch (IOException @ex){"
 				+ "	msg('run');"
 				+ "}", fakePlayer);
 		verify(fakePlayer).sendMessage("run");
@@ -192,7 +196,7 @@ public class NewExceptionHandlingTest {
 
 	@Test(expected = ConfigCompileException.class)
 	public void testFinallyMustBeLast() throws Exception {
-		SRun("try { } finally { } catch(Exception @e){ }", fakePlayer);
+		SRun("try { } finally { } catch (Exception @e){ }", fakePlayer);
 	}
 
 	@Test(expected = ConfigCompileException.class)
@@ -202,7 +206,7 @@ public class NewExceptionHandlingTest {
 
 	@Test(expected = ConfigCompileException.class)
 	public void testCatchErrors() throws Exception {
-		SRun("catch(Exception @e) { }", fakePlayer);
+		SRun("catch (Exception @e) { }", fakePlayer);
 	}
 
 	@Test(expected = ConfigCompileException.class)
@@ -212,17 +216,17 @@ public class NewExceptionHandlingTest {
 
 	@Test(expected = ConfigCompileException.class)
 	public void testCatchOnlyAllows1Parameter1() throws Exception {
-		SRun("try { } catch(Exception @e, IOException @b) { }", fakePlayer);
+		SRun("try { } catch (Exception @e, IOException @b) { }", fakePlayer);
 	}
 
 	@Test(expected = ConfigCompileException.class)
 	public void testCatchOnlyAllows1Parameter2() throws Exception {
-		SRun("catch(){ }", fakePlayer);
+		SRun("catch (){ }", fakePlayer);
 	}
 
 	@Test(expected = ConfigCompileException.class)
 	public void testTryAloneFails() throws Exception {
-		SRun("try{ }", fakePlayer);
+		SRun("try { }", fakePlayer);
 	}
 
 	@Test
@@ -237,13 +241,13 @@ public class NewExceptionHandlingTest {
 				/* 07 */ + "try {\n"
 				/* 08 */ + "		try {\n"
 				/* 09 */ + "			_b();\n"
-				/* 10 */ + "		} catch(IOException @e){\n"
+				/* 10 */ + "		} catch (IOException @e){\n"
 				/* 11 */ + "			throw(CastException, 'new', @e);\n"
 				/* 12 */ + "		}\n"
-				/* 13 */ + "} catch(CastException @e){\n"
+				/* 13 */ + "} catch (CastException @e){\n"
 				/* 14 */ + "		msg(@e);\n"
 				/* 15 */ + "}\n",
-				 fakePlayer);
+				fakePlayer);
 		verify(fakePlayer).sendMessage(
 				"{"
 				+ "causedBy: {"
@@ -280,7 +284,7 @@ public class NewExceptionHandlingTest {
 
 	@Test(expected = ConfigCompileException.class)
 	public void testUnknownExceptionType() throws Exception {
-		SRun("try { } catch(NoTaReAlExCePtIoNtYpE @e){ }", fakePlayer);
+		SRun("try { } catch (NoTaReAlExCePtIoNtYpE @e){ }", fakePlayer);
 	}
 
 }

@@ -15,13 +15,13 @@
 			<id>ladycailin</id>
 			<name>LadyCailin</name>
 			<email>gmail: savannahcailin</email>
-			<url>http://www.laytonsmith.com#donations</url>
+			<url>https://methodscript.com</url>
 			<roles>
 				<role>project manager</role>
 				<role>developer</role>
 				<role>tester</role>
 			</roles>
-			<timezone>-6</timezone>
+			<timezone>+1</timezone>
 		</developer>
 		<developer>
 			<id>sk89q</id>
@@ -154,7 +154,7 @@
 
 		<repository>
 			<id>Plugin Metrics</id>
-			<url>http://repo.mcstats.org/content/repositories/public</url>
+			<url>http://repo.mcstats.org/content/repositories/public/</url>
 		</repository>
 
 		<!-- Java Mail -->
@@ -198,12 +198,14 @@
 		</dependency>
 
 		<!-- Used for IRC hooks -->
-		<!--<dependency> NOT READY YET
-		 <groupId>org.jibble</groupId>
-		 <artifactId>pircbot</artifactId>
-		 <version>1.5.0</version>
-		 <scope>compile</scope>
-		</dependency>-->
+		<!-- NOT READY YET
+		<dependency>
+			<groupId>org.jibble</groupId>
+			<artifactId>pircbot</artifactId>
+			<version>1.5.0</version>
+			<scope>compile</scope>
+		</dependency>
+		-->
 
 		<!-- Profiling library -->
 		<dependency>
@@ -278,17 +280,17 @@
 
 		<!-- Evil-y things (currently not used) -->
 		<!--<dependency>
-		 <groupId>cglib</groupId>
-		 <artifactId>cglib</artifactId>
-		 <version>2.2.2</version>
-		 <scope>compile</scope>
-		 <type>jar</type>
+		<groupId>cglib</groupId>
+		<artifactId>cglib</artifactId>
+		<version>2.2.2</version>
+		<scope>compile</scope>
+		<type>jar</type>
 		</dependency>
 		<dependency>
-		 <groupId>org.javassist</groupId>
-		 <artifactId>javassist</artifactId>
-		 <version>3.15.0-GA</version>
-		 <type>jar</type>
+		<groupId>org.javassist</groupId>
+		<artifactId>javassist</artifactId>
+		<version>3.15.0-GA</version>
+		<type>jar</type>
 		</dependency>-->
 		<!-- Embedded SSH Client -->
 		<dependency>
@@ -305,13 +307,13 @@
 			<artifactId>jchardet</artifactId>
 			<version>1.0</version>
 		</dependency>
-                <!-- https://mvnrepository.com/artifact/org.apache.oltu.oauth2/org.apache.oltu.oauth2.client -->
-                <dependency>
-                        <!-- Apache License 2.0 -->
-                        <groupId>org.apache.oltu.oauth2</groupId>
-                        <artifactId>org.apache.oltu.oauth2.client</artifactId>
-                        <version>1.0.2</version>
-                </dependency>
+			<!-- https://mvnrepository.com/artifact/org.apache.oltu.oauth2/org.apache.oltu.oauth2.client -->
+			<dependency>
+				<!-- Apache License 2.0 -->
+				<groupId>org.apache.oltu.oauth2</groupId>
+				<artifactId>org.apache.oltu.oauth2.client</artifactId>
+				<version>1.0.2</version>
+			</dependency>
 		<!-- Test libraries -->
 		<!-- Hamcrest must come before powermock -->
 		<dependency>
@@ -461,6 +463,7 @@
 					<target>1.8</target>
 					<compilerArgs>
 						<arg>-XDignore.symbol.file</arg>
+						<arg>-parameters</arg>
 					</compilerArgs>
 					<fork>true</fork>
 					<optimize>true</optimize>
@@ -487,7 +490,7 @@
 						</manifestEntries>
 					</archive>
 				</configuration>
-			</plugin>                        
+			</plugin>
 
 			<!-- Shade plugin -->
 			<plugin>
@@ -502,13 +505,13 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
-                                                    <shadedArtifactAttached>true</shadedArtifactAttached>
-                                                    <shadedClassifierName>full</shadedClassifierName>
-                                                    <minimizeJar>false</minimizeJar>
-                                                    <!-- To add a new shaded dependency, there are three steps.
-                                                            1. Add a reference to the artifact set
-                                                            2. Add a relocation tag (usually recommended, though not always)
-                                                            3. Add it to the filter list
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<shadedClassifierName>full</shadedClassifierName>
+							<minimizeJar>false</minimizeJar>
+							<!-- To add a new shaded dependency, there are three steps.
+								1. Add a reference to the artifact set
+								2. Add a relocation tag (usually recommended, though not always)
+								3. Add it to the filter list
 
 								You can copy existing structures over, and change the parameters on them.
 							-->
@@ -584,8 +587,8 @@
 									<shadedPattern>com.laytonsmith.libs.redis.clients</shadedPattern>
 								</relocation>
 								<relocation>
-									<pattern>com.mysql.jdbc</pattern>
-									<shadedPattern>com.laytonsmith.libs.com.mysql.jdbc</shadedPattern>
+									<pattern>com.mysql.cj</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.mysql.cj</shadedPattern>
 								</relocation>
 								<relocation> <!-- part of the mysql lib -->
 									<pattern>org.gjt.mm.mysql</pattern>
@@ -911,6 +914,41 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			<!-- Checkstyle plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>checkstyle</id>
+						<phase>test</phase>
+						<configuration>
+							<sourceDirectories>${project.compileSourceRoots}</sourceDirectories>
+							<testSourceDirectories>${project.testCompileSourceRoots}</testSourceDirectories>
+							<includeTestSourceDirectory>true</includeTestSourceDirectory>
+							<configLocation>${basedir}/checkstyle.xml</configLocation>
+							<propertyExpansion>config_loc=${basedir}</propertyExpansion>
+							<encoding>UTF-8</encoding>
+							<consoleOutput>true</consoleOutput>
+							<failsOnError>true</failsOnError>
+							<linkXRef>false</linkXRef>
+						</configuration>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>com.puppycrawl.tools</groupId>
+						<artifactId>checkstyle</artifactId>
+						<version>8.9</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			
 		</plugins>
 	</build>
 	<profiles>
@@ -924,6 +962,14 @@
 						<version>2.9</version>
 						<configuration>
 							<skipTests>true</skipTests>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<version>3.0.0</version>
+						<configuration>
+							<skip>true</skip>
 						</configuration>
 					</plugin>
 				</plugins>

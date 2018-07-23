@@ -1,6 +1,6 @@
 /*
- Copyright 2010 Vivin Suresh Paliath
- Distributed under the BSD License
+ * Copyright 2010 Vivin Suresh Paliath
+ * Distributed under the BSD License
  */
 package com.laytonsmith.core;
 
@@ -159,7 +159,7 @@ public class GenericTree<T> {
 	@Override
 	public String toString() {
 		/*
-         We're going to assume a pre-order traversal by default
+		 * We're going to assume a pre-order traversal by default
 		 */
 
 		String stringRepresentation = "";
@@ -174,7 +174,7 @@ public class GenericTree<T> {
 
 	public String toStringWithDepth() {
 		/*
-         We're going to assume a pre-order traversal by default
+		 * We're going to assume a pre-order traversal by default
 		 */
 
 		String stringRepresentation = "";

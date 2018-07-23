@@ -15,6 +15,7 @@ import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
@@ -110,7 +111,7 @@ public class StaticTest {
 		try {
 			Implementation.setServerType(Implementation.Type.TEST);
 			env = Static.GenerateStandaloneEnvironment();
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -209,13 +210,13 @@ public class StaticTest {
 		//TODO
 	}
 
-	private static final ArrayList<String> tested = new ArrayList<String>();
+	private static final ArrayList<String> TESTED = new ArrayList<String>();
 
 	public static void TestExec(Function f, MCCommandSender p, String commandType) throws Exception {
-		if(tested.contains(f.getName() + String.valueOf(p))) {
+		if(TESTED.contains(f.getName() + String.valueOf(p))) {
 			return;
 		}
-		tested.add(f.getName() + String.valueOf(p));
+		TESTED.add(f.getName() + String.valueOf(p));
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(p);
 		//See if the function throws something other than a ConfigRuntimeException or CancelCommandException if we send it bad arguments,
 		//keeping in mind of course, that it isn't supposed to be able to accept the wrong number of arguments. Specifically, we want to try
@@ -267,8 +268,8 @@ public class StaticTest {
 				}
 				try {
 					f.exec(Target.UNKNOWN, env, con);
-				} catch(CancelCommandException e) {
-				} catch(ConfigRuntimeException e) {
+				} catch (CancelCommandException e) {
+				} catch (ConfigRuntimeException e) {
 					if(f.getName().equals("throw")) {
 						// throw() can throw anything.
 						return;
@@ -285,7 +286,7 @@ public class StaticTest {
 						fail("The documentation for " + f.getName() + " doesn't state that it can throw a "
 								+ name + ", but it did.");
 					}
-				} catch(Throwable e) {
+				} catch (Throwable e) {
 					if(e instanceof LoopBreakException && !f.getName().equals("break")) {
 						fail("Only break() can throw LoopBreakExceptions");
 					}
@@ -557,33 +558,33 @@ public class StaticTest {
 		return SRun(script, player, env);
 	}
 	//TODO: Fix this
-//    public static void RunVars(List<Variable> vars, String script, MCCommandSender player) throws Exception{
-//        Env env = new Env();
-//        env.SetCommandSender(player);
-//        MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null));
-//        injectAliasCore();
-//        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(script, null), env).get(0);
-//        s.compile();
-//        s.run(vars, env, null);
+//	public static void RunVars(List<Variable> vars, String script, MCCommandSender player) throws Exception{
+//		Env env = new Env();
+//		env.SetCommandSender(player);
+//		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null));
+//		injectAliasCore();
+//		Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(script, null), env).get(0);
+//		s.compile();
+//		s.run(vars, env, null);
 //
-//    }
+//	}
 
 	//Blarg. Dumb thing.
-//    private static void injectAliasCore() throws Exception{
-//        PermissionsResolverManager prm = mock(PermissionsResolverManager.class);
-//        CommandHelperPlugin chp = mock(CommandHelperPlugin.class);
-//        AliasCore ac = new AliasCore(new File("plugins/CommandHelper/config.txt"),
-//                new File("plugins/CommandHelper/LocalPackages"),
-//                new File("plugins/CommandHelper/preferences.ini"),
-//                new File("plugins/CommandHelper/main.ms"), prm, chp);
-//        try{
-//            Field aliasCore = CommandHelperPlugin.class.getDeclaredField("ac");
-//            aliasCore.setAccessible(true);
-//            aliasCore.set(null, ac);
-//        } catch(Exception e){
-//            throw new RuntimeException("Core could not be injected", e);
-//        }
-//    }
+//	private static void injectAliasCore() throws Exception{
+//		PermissionsResolverManager prm = mock(PermissionsResolverManager.class);
+//		CommandHelperPlugin chp = mock(CommandHelperPlugin.class);
+//		AliasCore ac = new AliasCore(new File("plugins/CommandHelper/config.txt"),
+//				new File("plugins/CommandHelper/LocalPackages"),
+//				new File("plugins/CommandHelper/preferences.ini"),
+//				new File("plugins/CommandHelper/main.ms"), prm, chp);
+//		try {
+//			Field aliasCore = CommandHelperPlugin.class.getDeclaredField("ac");
+//			aliasCore.setAccessible(true);
+//			aliasCore.set(null, ac);
+//		} catch (Exception e){
+//			throw new RuntimeException("Core could not be injected", e);
+//		}
+//	}
 	/**
 	 * Creates an entire fake server environment, adding players and everything.
 	 *
@@ -623,7 +624,7 @@ public class StaticTest {
 		frontendInstalled = true;
 		try {
 			Prefs.init(new File("preferences.ini"));
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(StaticTest.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		CHLog.initialize(new File("."));
@@ -642,7 +643,7 @@ public class StaticTest {
 			//We need to add the test directory to the ClassDiscovery path
 			//This should probably not be hard coded at some point.
 			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(new File("./target/test-classes").toURI().toURL());
-		} catch(MalformedURLException ex) {
+		} catch (MalformedURLException ex) {
 			throw new RuntimeException(ex);
 		}
 
@@ -781,6 +782,11 @@ public class StaticTest {
 		}
 
 		@Override
+		public MCInventoryHolder CreateInventoryHolder(String id) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
 		public MCNote GetNote(int octave, MCTone tone, boolean sharp) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
@@ -809,6 +815,11 @@ public class StaticTest {
 					return GetColor(red, green, blue);
 				}
 			};
+		}
+
+		@Override
+		public MCColor GetColor(String colorName, Target t) throws CREFormatException {
+			return ConvertorHelper.GetColor(colorName, t);
 		}
 
 		@Override
@@ -869,11 +880,6 @@ public class StaticTest {
 		@Override
 		public MCPlugin GetPlugin() {
 			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		@Override
-		public MCColor GetColor(String colorName, Target t) throws CREFormatException {
-			return ConvertorHelper.GetColor(colorName, t);
 		}
 
 		@Override
@@ -959,7 +965,7 @@ public class StaticTest {
 				try {
 					f = search.getDeclaredField(name);
 					break;
-				} catch(NoSuchFieldException e) {
+				} catch (NoSuchFieldException e) {
 					search = search.getSuperclass();
 				}
 			}
@@ -975,15 +981,13 @@ public class StaticTest {
 			} else {
 				ret = f.get(in);
 			}
-		} catch(IllegalArgumentException | IllegalAccessException ex) {
+		} catch (IllegalArgumentException | IllegalAccessException ex) {
 			//This shouldn't happen ever, since we are using the class provided by in, and sending
 			//get/set in as well.
 			fail(ex.getMessage());
-		}
-		//This shouldn't happen ever, since we set it to accessible
-		 catch(NoSuchFieldException ex) {
+		} catch (NoSuchFieldException ex) { //This shouldn't happen ever, since we set it to accessible
 			fail("No such field \"" + name + "\" exists in the class " + in.getClass().getName());
-		} catch(SecurityException ex) {
+		} catch (SecurityException ex) {
 			fail("A security policy is preventing the test from getting \"" + name + "\" in the object provided.");
 		}
 		return (T) ret;

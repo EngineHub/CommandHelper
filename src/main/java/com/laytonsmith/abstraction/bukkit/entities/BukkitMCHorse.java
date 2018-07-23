@@ -51,7 +51,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 	public void setVariant(MCHorseVariant variant) {
 		try {
 			h.setVariant(BukkitMCHorseVariant.getConvertor().getConcreteEnum(variant));
-		} catch(UnsupportedOperationException ex) {
+		} catch (UnsupportedOperationException ex) {
 			// 1.11 or later
 			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR,
 					"Cannot change Horse variant in Minecraft 1.11+", Target.UNKNOWN);
@@ -87,7 +87,7 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 	public void setHasChest(boolean hasChest) {
 		try {
 			h.setCarryingChest(hasChest);
-		} catch(UnsupportedOperationException ex) {
+		} catch (UnsupportedOperationException ex) {
 			// 1.11 or later
 			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR,
 					"Horse cannot have chest in Minecraft 1.11+", Target.UNKNOWN);

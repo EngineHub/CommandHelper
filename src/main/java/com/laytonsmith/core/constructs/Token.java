@@ -13,7 +13,7 @@ public class Token {
 
 	public TType type;
 	public String value;
-	public final int line_num;
+	public final int lineNum;
 	public final int column;
 	public final File file;
 	public final Target target;
@@ -165,17 +165,17 @@ public class Token {
 			return this.variants.contains(TokenVariant.EQUALITY);
 		}
 
-//        public boolean isBitwiseAnd(){
-//            return (this == BIT_AND);
-//        }
+//		public boolean isBitwiseAnd(){
+//			return (this == BIT_AND);
+//		}
 //
-//        public boolean isBitwiseXor(){
-//            return (this == BIT_XOR);
-//        }
+//		public boolean isBitwiseXor(){
+//			return (this == BIT_XOR);
+//		}
 //
-//        public boolean isBitwiseOr(){
-//            return (this == BIT_OR);
-//        }
+//		public boolean isBitwiseOr(){
+//			return (this == BIT_OR);
+//		}
 		/**
 		 * Returns true if this is a logical and
 		 *
@@ -310,7 +310,7 @@ public class Token {
 	public Token(TType type, String value, Target t) {
 		this.type = type;
 		this.value = value;
-		this.line_num = t.line();
+		this.lineNum = t.line();
 		this.file = t.file();
 		this.column = t.col();
 		this.target = t;

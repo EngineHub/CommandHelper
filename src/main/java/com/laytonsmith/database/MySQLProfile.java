@@ -43,7 +43,7 @@ public class MySQLProfile extends SQLProfile {
 		if(elements.containsKey("port")) {
 			try {
 				port = Integer.parseInt(elements.get("port"));
-			} catch(NumberFormatException ex) {
+			} catch (NumberFormatException ex) {
 				throw new Profiles.InvalidProfileException(ex.getMessage());
 			}
 		} else {
@@ -71,8 +71,8 @@ public class MySQLProfile extends SQLProfile {
 	@Override
 	public String getConnectionString() throws SQLException {
 		try {
-			Class.forName(com.mysql.jdbc.Driver.class.getName());
-		} catch(ClassNotFoundException ex) {
+			Class.forName(com.mysql.cj.jdbc.Driver.class.getName());
+		} catch (ClassNotFoundException ex) {
 			throw new SQLException("Cannot load MySQL. Check your installation and try again");
 		}
 		try {
@@ -81,7 +81,7 @@ public class MySQLProfile extends SQLProfile {
 					+ (username == null ? "" : "&user=" + URLEncoder.encode(username, "UTF-8"))
 					+ (password == null ? "" : "&password=" + URLEncoder.encode(password, "UTF-8"))
 					+ (useSSL == null ? "" : "&useSSL=" + useSSL);
-		} catch(UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException ex) {
 			throw new Error();
 		}
 	}

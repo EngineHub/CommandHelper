@@ -110,7 +110,7 @@ public class ExampleScript {
 		try {
 			this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File((OSUtils.GetOS() == OSUtils.OS.WINDOWS ? "C:\\" : "/") + "Examples.ms"), true));
 			this.output = output;
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			if(intentionalCompileError) {
 				this.output = "Causes compile error: " + e.getMessage();
 			} else {
@@ -118,7 +118,7 @@ public class ExampleScript {
 				System.out.println(consoleErrorOutput);
 				System.out.println(e.getMessage());
 			}
-		} catch(ConfigCompileGroupException ex) {
+		} catch (ConfigCompileGroupException ex) {
 			if(intentionalCompileError) {
 				StringBuilder b = new StringBuilder();
 				b.append("Causes compile errors:\n");
@@ -193,7 +193,7 @@ public class ExampleScript {
 		Environment env;
 		try {
 			env = Static.GenerateStandaloneEnvironment();
-		} catch(Profiles.InvalidProfileException ex) {
+		} catch (Profiles.InvalidProfileException ex) {
 			throw new RuntimeException(ex);
 		}
 		Class[] interfaces = new Class[]{
@@ -231,10 +231,10 @@ public class ExampleScript {
 						}
 					}
 				}, null, vars);
-			} catch(ConfigCompileException | ConfigCompileGroupException ex) {
+			} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 				// We already checked for compile errors, so this won't happen
 			}
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			String name = e.getClass().getName();
 			if(e instanceof AbstractCREException) {
 				name = ((AbstractCREException) e).getName();

@@ -56,20 +56,20 @@ import java.util.Set;
  *   public static class PhoneNumber implements UserID {
  *	{@code @Override}
  *	public void accept(UserIDVisitor visitor) {
- *	    visitor.handle(this);
+ *		visitor.handle(this);
  *	}
  *    }
  *   public static abstract class GeneratedID implements UserID {}
  *   public static class GeneratedIDV1 extends GeneratedID {
  *	{@code @Override}
  *	public void accept(UserIDVisitor visitor) {
- *	    visitor.handle(this);
+ *		visitor.handle(this);
  *	}
  *   }
  *   public static class GeneratedIDV2 extends GeneratedID {
  *	{@code @Override}
  *	public void accept(UserIDVisitor visitor) {
- *	    visitor.handle(this);
+ *		visitor.handle(this);
  *	}
  *   }
  *
@@ -78,17 +78,17 @@ import java.util.Set;
  *
  *	{@code @Override}
  *	public void handle(PhoneNumber m) {
- *	    System.out.println("Canadian PhoneNumber");
+ *		System.out.println("Canadian PhoneNumber");
  *	}
  *
  *	{@code @Override}
  *	public void handle(GeneratedIDV1 c) {
- *	    System.out.println("Canadian GeneratedIDV1");
+ *		System.out.println("Canadian GeneratedIDV1");
  *	}
  *
  *	{@code @Override}
  *	public void handle(GeneratedIDV2 c) {
- *	    System.out.println("Canadian GeneratedIDV2");
+ *		System.out.println("Canadian GeneratedIDV2");
  *	}
  *
  *  }
@@ -97,17 +97,17 @@ import java.util.Set;
  *
  *	{@code @Override}
  *	public void handle(PhoneNumber m) {
- *	    System.out.println("American PhoneNumber");
+ *		System.out.println("American PhoneNumber");
  *	}
  *
  *	{@code @Override}
  *	public void handle(GeneratedIDV1 c) {
- *	    System.out.println("American GeneratedIDV1");
+ *		System.out.println("American GeneratedIDV1");
  *	}
  *
  *	{@code @Override}
  *	public void handle(GeneratedIDV2 c) {
- *	    System.out.println("American GeneratedIDV2");
+ *		System.out.println("American GeneratedIDV2");
  *	}
  *
  *    }
@@ -141,30 +141,30 @@ import java.util.Set;
  *   {@code @ExhaustiveVisitor.VisitorInfo(baseClass = UserID.class, directSubclassOnly = false)}
  *    public static class CanadianVisitor extends ExhaustiveVisitor<UserID> {
  *	public void visit(PhoneNumber n) {
- *	    System.out.println("Canadian PhoneNumber");
+ *		System.out.println("Canadian PhoneNumber");
  *	}
  *
  *	public void visit(GeneratedIDV1 id) {
- *	    System.out.println("Canadian GeneratedIDV1");
+ *		System.out.println("Canadian GeneratedIDV1");
  *	}
  *
  *	public void visit(GeneratedIDV2 id) {
- *	    System.out.println("Canadian GeneratedIDV1");
+ *		System.out.println("Canadian GeneratedIDV1");
  *	}
  *   }
  *
  *   {@code @ExhaustiveVisitor.VisitorInfo(baseClass = UserID.class, directSubclassOnly = false)}
  *   public static class AmericanVisitor extends ExhaustiveVisitor<UserID> {
  *	public void visit(PhoneNumber n) {
- *	    System.out.println("American PhoneNumber");
+ *		System.out.println("American PhoneNumber");
  *	}
  *
  *	public void visit(GeneratedIDV1 id) {
- *	    System.out.println("American GeneratedIDV1");
+ *		System.out.println("American GeneratedIDV1");
  *	}
  *
  *	public void visit(GeneratedIDV2 id) {
- *	    System.out.println("American GeneratedIDV1");
+ *		System.out.println("American GeneratedIDV1");
  *	}
  *   }
  *
@@ -241,7 +241,7 @@ public class ExhaustiveVisitor<T> {
 		}
 		try {
 			candidate.invoke(this, object);
-		} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 			throw new RuntimeException(ex);
 		}
 	}

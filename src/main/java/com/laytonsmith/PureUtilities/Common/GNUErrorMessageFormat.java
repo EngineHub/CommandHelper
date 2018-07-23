@@ -109,8 +109,7 @@ public class GNUErrorMessageFormat {
 					String[] s = middle.split("-");
 					fromLine = Integer.parseInt(s[0]);
 					toLine = Integer.parseInt(s[1]);
-				} // ??
-				else {
+				} else {
 					throw new IllegalArgumentException("Could not parse message");
 				}
 				break;

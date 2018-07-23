@@ -38,6 +38,10 @@ relative to the default position (where all angles are 0). Setting these values 
 where only values specified will be changed. This allows you to rotate a single body part around a single axis
 without knowing the rotations on the other axis or of other body parts beforehand.
 |-
+| BOAT
+|
+* %KEY_BOAT_TYPE%: Which tree species the boat is composed of. (can be %TREE_SPECIES%)
+|-
 | CREEPER
 | 
 * %KEY_CREEPER_POWERED%: If the Creeper is powered or not.
@@ -66,9 +70,19 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |
 * %KEY_ENDERDRAGON_PHASE%: What AI phase the EnderDragon is in. (can be %ENDERDRAGON_PHASE%)
 |-
+| ENDER_EYE
+|
+* %KEY_ENDEREYE_DESPAWNTICKS%: The number of ticks counted until despawn. (will despawn after 80 ticks)
+* %KEY_ENDEREYE_DROP%: Whether or not the EnderEye will drop an item on despawn.
+* %KEY_ENDEREYE_TARGET%: The target location array that the EnderEye will travel towards.
+|-
 | ENDERMAN
 | 
 * %KEY_ENDERMAN_CARRIED%: The block that the Enderman is carring.
+|-
+| EVOKER_FANGS
+|
+* %KEY_EVOKERFANGS_SOURCE%: The UUID of the living entity, usually an Evoker, that is the source of the fangs. Can be null.
 |-
 | EXPERIENCE_ORB
 | 
@@ -78,8 +92,9 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_FALLING_BLOCK_BLOCK%: The falling block. Not editable.
 * %KEY_FALLING_BLOCK_DROPITEM%: If the falling block will break into an item if it cannot be placed.
+* %KEY_FALLING_BLOCK_DAMAGE%: If the falling block can damage entities.
 |-
-| FIREBALL
+| FIREBALL, DRAGON_FIREBALL, SMALL_FIREBALL
 | 
 * %KEY_FIREBALL_DIRECTION%: The direction the fireball is heading toward.
 |-
@@ -132,7 +147,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_SLIME_SIZE%: The size of the magma cube.
 |-
-| MINECART
+| MINECART, MINECART_FURNACE, MINECART_HOPPER, MINECART_MOB_SPAWNER, MINECART_TNT
 |
 * %KEY_MINECART_BLOCK%: The material name of the block being displayed.
 * %KEY_MINECART_OFFSET%: The offset of the block being displayed.
@@ -141,6 +156,8 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_MINECART_COMMAND_COMMAND%: The command that the command minecart will run when activated.
 * %KEY_MINECART_COMMAND_CUSTOMNAME%: The name of the command minecart.
+* %KEY_MINECART_BLOCK%: The material name of the block being displayed.
+* %KEY_MINECART_OFFSET%: The offset of the block being displayed.
 |- 
 | OCELOT
 | 
@@ -180,6 +197,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_SHEEP_COLOR%: The color of the sheep (can be %DYE_COLOR%).
 * %KEY_SHEEP_SHEARED%: Whether the sheep is sheared.
 |-
+| SHULKER
+|
+* %KEY_SHULKER_COLOR%: The color of the shulker (can be %DYE_COLOR%).
+|-
 | SHULKER_BULLET
 |
 * %KEY_SHULKERBULLET_TARGET%: The UUID of the entity the bullet will head toward, or null if there is no target.
@@ -188,7 +209,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_SKELETON_TYPE%: The type of the skeleton (can be %SKELETON_TYPE%). (deprecated)
 |-
-| SKELTONHORSE, ZOMBIEHORSE
+| SKELTON_HORSE, ZOMBI_HORSE
 |
 * %KEY_HORSE_DOMESTICATION%: The domestication level of the horse (can't be higher than the maximum domestication level).
 * %KEY_HORSE_JUMP%: The jump strength (between 1.0 and 2.0).
@@ -202,10 +223,6 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | SNOWMAN
 | 
 * %KEY_SNOWMAN_DERP%: With derp mode set to true the snowman wears no pumpkin
-|-
-| SMALL_FIREBALL
-| 
-* %KEY_FIREBALL_DIRECTION%: The direction the small fireball is heading toward.
 |-
 | SPLASH_POTION
 | 
@@ -237,7 +254,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_ZOMBIE_BABY%: Whether the zombie is a baby.
 * %KEY_ZOMBIE_VILLAGER%: Whether the zombie is a villager. (deprecated)
 |-
-| ZOMBIEVILLAGER
+| ZOMBIE_VILLAGER
 |
 * %KEY_ZOMBIE_BABY%: Whether the zombie is a baby.
 * %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%).

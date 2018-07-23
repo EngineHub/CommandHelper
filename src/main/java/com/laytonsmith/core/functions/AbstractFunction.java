@@ -175,7 +175,7 @@ public abstract class AbstractFunction implements Function {
 	protected String getBundledDocs() {
 		try {
 			return getBundledDocs(null);
-		} catch(GenerateException ex) {
+		} catch (GenerateException ex) {
 			// This condition is impossible, so we just ignore this case.
 			return "";
 		}
@@ -214,7 +214,7 @@ public abstract class AbstractFunction implements Function {
 		return ClassDiscovery.GetClassContainer(this.getClass());
 	}
 
-	private final static Class[] EMPTY_CLASS = new Class[0];
+	private static final Class[] EMPTY_CLASS = new Class[0];
 
 	/**
 	 * Checks for the &#64;seealso annotation on this class, and returns the value listed there. This is to prevent

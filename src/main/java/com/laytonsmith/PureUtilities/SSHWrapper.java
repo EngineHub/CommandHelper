@@ -28,21 +28,21 @@ import java.util.regex.Pattern;
  *
  *
  */
-public class SSHWrapper {
+public final class SSHWrapper {
 
 	private SSHWrapper() {
 	}
 
-	private static final Map<String, Session> sessionList = new HashMap<>();
+	private static final Map<String, Session> SESSION_LIST = new HashMap<>();
 
 	/**
 	 * Sessions are cached, and should be closed after use.
 	 */
 	public static void closeSessions() {
-		for(Session s : sessionList.values()) {
+		for(Session s : SESSION_LIST.values()) {
 			s.disconnect();
 		}
-		sessionList.clear();
+		SESSION_LIST.clear();
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class SSHWrapper {
 				if(port == 0) {
 					port = 22;
 				}
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				//They may have been trying this:
 				//user@host:password:/file/path
 				//If that's the case, password will
@@ -101,13 +101,13 @@ public class SSHWrapper {
 			try {
 				JSch jsch = new JSch();
 				Session sshSession = null;
-				File known_hosts = new File(System.getProperty("user.home") + "/.ssh/known_hosts");
-				if(!known_hosts.exists()) {
+				File knownHosts = new File(System.getProperty("user.home") + "/.ssh/known_hosts");
+				if(!knownHosts.exists()) {
 					if(password == null) {
-						throw new IOException("No known hosts file exists at " + known_hosts.getAbsolutePath() + ", and no password was provided");
+						throw new IOException("No known hosts file exists at " + knownHosts.getAbsolutePath() + ", and no password was provided");
 					}
 				} else {
-					jsch.setKnownHosts(known_hosts.getAbsolutePath());
+					jsch.setKnownHosts(knownHosts.getAbsolutePath());
 				}
 				if(password == null) {
 					//We need to try public key authentication
@@ -118,7 +118,7 @@ public class SSHWrapper {
 						throw new IOException("No password provided, and no private key exists at " + privKey.getAbsolutePath());
 					}
 				}
-				if(!sessionList.containsKey(user + host + port)) {
+				if(!SESSION_LIST.containsKey(user + host + port)) {
 					sshSession = jsch.getSession(user, host, port);
 					sshSession.setUserInfo(new UserInfo() {
 						@Override
@@ -155,9 +155,9 @@ public class SSHWrapper {
 					});
 					//15 second timeout
 					sshSession.connect(10 * 1500);
-					sessionList.put(user + host + port, sshSession);
+					SESSION_LIST.put(user + host + port, sshSession);
 				} else {
-					sshSession = sessionList.get(user + host + port);
+					sshSession = SESSION_LIST.get(user + host + port);
 				}
 				// http://www.jcraft.com/jsch/examples/
 				if(from.contains("@")) {
@@ -172,7 +172,7 @@ public class SSHWrapper {
 
 				return true;
 
-			} catch(JSchException | SftpException ex) {
+			} catch (JSchException | SftpException ex) {
 				throw new IOException(ex);
 			}
 		} else {
@@ -202,7 +202,7 @@ public class SSHWrapper {
 			try {
 				// Try to cd to the parent folder
 				channel.cd(frfile.getParent());
-			} catch(SftpException ex) {
+			} catch (SftpException ex) {
 				// But if that doesn't work, we need to create one or more of the folders, so we start at the beginning
 				channel.cd("/");
 				for(int i = 0; i < folders.length - 1; i++) {
@@ -210,7 +210,7 @@ public class SSHWrapper {
 					if(folder.length() > 0) {
 						try {
 							channel.cd(folder);
-						} catch(SftpException e) {
+						} catch (SftpException e) {
 							channel.mkdir(folder);
 							channel.cd(folder);
 						}
@@ -247,7 +247,7 @@ public class SSHWrapper {
 			digest.update(f);
 			String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 			return hash;
-		} catch(NoSuchAlgorithmException ex) {
+		} catch (NoSuchAlgorithmException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -286,7 +286,7 @@ public class SSHWrapper {
 				}
 				try {
 					Thread.sleep(1);
-				} catch(Exception ee) {
+				} catch (Exception ee) {
 				}
 			}
 		} finally {
@@ -473,6 +473,16 @@ public class SSHWrapper {
 	}
 
 	/**
+	 * Writes some textual contents to a remote file.
+	 *
+	 * @param contents
+	 * @param to
+	 */
+	public static void SCPWrite(String contents, String to) throws IOException {
+		SCPWrite(StreamUtils.GetInputStream(contents), to);
+	}
+
+	/**
 	 * Returns an InputStream to a file on a remote file system.
 	 *
 	 * @param from
@@ -484,16 +494,6 @@ public class SSHWrapper {
 		FileInputStream fis = new FileInputStream(temp);
 		temp.deleteOnExit();
 		return fis;
-	}
-
-	/**
-	 * Writes some textual contents to a remote file.
-	 *
-	 * @param contents
-	 * @param to
-	 */
-	public static void SCPWrite(String contents, String to) throws IOException {
-		SCPWrite(StreamUtils.GetInputStream(contents), to);
 	}
 
 	public static String SCPReadString(String from) throws IOException {

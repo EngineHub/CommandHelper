@@ -10,19 +10,19 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 public class Variable extends Construct {
 
 	public static final long serialVersionUID = 1L;
-	final private String name;
+	private final String name;
 	private String def;
 	private boolean optional;
-	private boolean final_var;
-	private CString var_value;
+	private boolean finalVar;
+	private CString varValue;
 
-	public Variable(String name, String def, boolean optional, boolean final_var, Target t) {
+	public Variable(String name, String def, boolean optional, boolean finalVar, Target t) {
 		super(name, ConstructType.VARIABLE, t);
 		this.name = name;
 		setDefault(def);
-		this.final_var = final_var;
+		this.finalVar = finalVar;
 		this.optional = optional;
-		this.var_value = new CString(def, t);
+		this.varValue = new CString(def, t);
 	}
 
 	public Variable(String name, String def, Target t) {
@@ -38,12 +38,12 @@ public class Variable extends Construct {
 		return name;
 	}
 
-	public void setFinal(boolean final_var) {
-		this.final_var = final_var;
+	public void setFinal(boolean finalVar) {
+		this.finalVar = finalVar;
 	}
 
 	public boolean isFinal() {
-		return final_var;
+		return finalVar;
 	}
 
 	public void setOptional(boolean optional) {
@@ -67,22 +67,22 @@ public class Variable extends Construct {
 
 	@Override
 	public String val() {
-		return var_value.toString();
+		return varValue.toString();
 	}
 
 	public void setVal(CString val) {
-		this.var_value = val;
+		this.varValue = val;
 	}
 
 	public void setVal(String val) {
-		this.var_value = new CString(val, this.getTarget());
+		this.varValue = new CString(val, this.getTarget());
 	}
 
 	@Override
 	public Variable clone() throws CloneNotSupportedException {
 		Variable clone = (Variable) super.clone();
-		if(this.var_value != null) {
-			clone.var_value = var_value;
+		if(this.varValue != null) {
+			clone.varValue = varValue;
 		}
 		return clone;
 	}

@@ -283,16 +283,16 @@ public class DataHandlingTest {
 	}
 
 	// This feature has been deprecated, and now removed.
-//    @Test(timeout = 10000)
-//    public void testExportImportIVariable() throws Exception {
-//        when(fakePlayer.isOp()).thenReturn(true);
-//        String script1 =
-//                "assign(@var, 10)"
-//                + "export(@var)";
-//        SRun(script1, null);
-//        SRun("import(@var) msg(@var)", fakePlayer);
-//        verify(fakePlayer).sendMessage("10");
-//    }
+//	@Test(timeout = 10000)
+//	public void testExportImportIVariable() throws Exception {
+//		when(fakePlayer.isOp()).thenReturn(true);
+//		String script1 =
+//				"assign(@var, 10)"
+//				+ "export(@var)";
+//		SRun(script1, null);
+//		SRun("import(@var) msg(@var)", fakePlayer);
+//		verify(fakePlayer).sendMessage("10");
+//	}
 	@Test(timeout = 10000)
 	public void testExportImportStringValue1() throws Exception {
 		when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
@@ -473,6 +473,16 @@ public class DataHandlingTest {
 				+ "execute(@value, @a)\n"
 				+ "msg(@value)", fakePlayer);
 		verify(fakePlayer).sendMessage("{Hello World}");
+	}
+
+	@Test(timeout = 10000)
+	public void testClosure10() throws Exception {
+		MCPlayer fakePlayer2 = StaticTest.GetOnlinePlayer("Player02", fakeServer);
+		when(fakeServer.getPlayer("Player02")).thenReturn(fakePlayer2);
+		SRun("@c = closure(){msg(reflect_pull('label'))};"
+				+ "executeas('Player02', 'newlabel', @c);"
+				+ "execute(@c);", fakePlayer);
+		verify(fakePlayer2).sendMessage("newlabel");
 	}
 
 	@Test(timeout = 10000)

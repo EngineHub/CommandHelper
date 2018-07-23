@@ -1,10 +1,22 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CByteArray;
+import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.CDecimal;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CMutablePrimitive;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CNumber;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 
@@ -15,7 +27,7 @@ import java.util.regex.Pattern;
  * way, ultimately retrieving java objects from the arguments. Many of these methods were originally from the Static
  * class, but have been moved into this class, which better groups them together.
  */
-public class ArgumentValidation {
+public final class ArgumentValidation {
 
 	private ArgumentValidation() {
 		//
@@ -131,7 +143,7 @@ public class ArgumentValidation {
 		} else if(c instanceof CString) {
 			try {
 				d = Double.parseDouble(c.val());
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				throw new CRECastException("Expecting a number, but received \"" + c.val() + "\" instead", t);
 			}
 		} else if(c instanceof CBoolean) {
@@ -193,7 +205,7 @@ public class ArgumentValidation {
 		}
 		try {
 			return getNumber(c, t);
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			throw new CRECastException("Expecting a double, but received " + c.val() + " instead", t);
 		}
 	}
@@ -247,7 +259,7 @@ public class ArgumentValidation {
 		} else {
 			try {
 				i = Long.parseLong(c.val());
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				throw new CRECastException("Expecting an integer, but received \"" + c.val() + "\" instead", t);
 			}
 		}
@@ -337,7 +349,7 @@ public class ArgumentValidation {
 		if(c instanceof CBoolean) {
 			b = ((CBoolean) c).getBoolean();
 		} else if(c instanceof CString) {
-			if(((CString)c).val().equals("false")) {
+			if(((CString) c).val().equals("false")) {
 				CHLog.GetLogger().e(CHLog.Tags.FALSESTRING, "String \"false\" evaluates as true (non-empty strings are"
 						+ " true). This is most likely not what you meant to do. This warning can globally be disabled"
 						+ " with the logger-preferences.ini file.", t);

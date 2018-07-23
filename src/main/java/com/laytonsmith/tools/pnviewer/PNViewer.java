@@ -91,7 +91,7 @@ public class PNViewer extends javax.swing.JFrame {
 		sourceLabel.setText("");
 		try {
 			setIconImage(ImageIO.read(PNViewer.class.getResourceAsStream("GearIcon.png")));
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(PNViewer.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		setStatus("Waiting for configuration to be loaded...", false);
@@ -143,12 +143,12 @@ public class PNViewer extends javax.swing.JFrame {
 					setStatus("Closing remote connection...", false);
 					try {
 						remoteOutput.writeUTF("DISCONNECT");
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						log(ex);
 						//Fallback in case a clean close doesn't work.
 						try {
 							remoteSocket.close();
-						} catch(IOException ex1) {
+						} catch (IOException ex1) {
 							//
 						}
 					}
@@ -166,7 +166,7 @@ public class PNViewer extends javax.swing.JFrame {
 						key[i - 1] = (String) ((DefaultMutableTreeNode) e.getNewLeadSelectionPath().getPathComponent(i)).getUserObject();
 					}
 					showData(join(key), data.get(join(key)));
-				} catch(NullPointerException ex) {
+				} catch (NullPointerException ex) {
 					// Ignore
 				}
 			}
@@ -211,7 +211,7 @@ public class PNViewer extends javax.swing.JFrame {
 					} else {
 						try {
 							remoteOutput.writeUTF("LOAD-DATA");
-						} catch(IOException ex) {
+						} catch (IOException ex) {
 							Logger.getLogger(PNViewer.class.getName()).log(Level.SEVERE, null, ex);
 						}
 					}
@@ -237,7 +237,7 @@ public class PNViewer extends javax.swing.JFrame {
 					public String generate(String... args) {
 						try {
 							return Implementation.GetServerType().getBranding();
-						} catch(Exception ex) {
+						} catch (Exception ex) {
 							return "MethodScript";
 						}
 					}
@@ -334,7 +334,7 @@ public class PNViewer extends javax.swing.JFrame {
 			Construct c = CNull.NULL;
 			try {
 				c = Construct.json_decode(value, Target.UNKNOWN);
-			} catch(MarshalException ex) {
+			} catch (MarshalException ex) {
 				Logger.getLogger(PNViewer.class.getName()).log(Level.SEVERE, null, ex);
 			}
 			valueTypeLabel.setText(new DataHandling.typeof().exec(Target.UNKNOWN, null, c).val());
@@ -365,7 +365,7 @@ public class PNViewer extends javax.swing.JFrame {
 						}
 					};
 					displayData(vpn);
-				} catch(URISyntaxException | IOException | DataSourceException ex) {
+				} catch (URISyntaxException | IOException | DataSourceException ex) {
 					Logger.getLogger(PNViewer.class.getName()).log(Level.SEVERE, null, ex);
 					showError(ex.getMessage());
 				}
@@ -468,14 +468,14 @@ public class PNViewer extends javax.swing.JFrame {
 																if(sourceURI.getObject() == null) {
 																	try {
 																		sourceURI.wait();
-																	} catch(InterruptedException ex) {
+																	} catch (InterruptedException ex) {
 																		//
 																	}
 																}
 															}
 															URI uri = sourceURI.getObject();
 															sources.put(kk, uri);
-														} catch(IOException ex) {
+														} catch (IOException ex) {
 															showError(ex.getMessage());
 															log(ex);
 														}
@@ -486,11 +486,11 @@ public class PNViewer extends javax.swing.JFrame {
 											try {
 												displayData(vpn);
 												setStatus("Done.", false);
-											} catch(DataSourceException ex) {
+											} catch (DataSourceException ex) {
 												log(ex);
 												showError(ex.getMessage());
 											}
-										} catch(ClassNotFoundException ex) {
+										} catch (ClassNotFoundException ex) {
 											log(ex);
 											showError(ex.getMessage());
 										}
@@ -503,7 +503,7 @@ public class PNViewer extends javax.swing.JFrame {
 											synchronized(sourceURI) {
 												sourceURI.notifyAll();
 											}
-										} catch(ClassNotFoundException ex) {
+										} catch (ClassNotFoundException ex) {
 											log(ex);
 										}
 										break;
@@ -520,11 +520,11 @@ public class PNViewer extends javax.swing.JFrame {
 								}
 							}
 							log("Closing connection.");
-						} catch(EOFException ex) {
+						} catch (EOFException ex) {
 							log(ex);
 							showError("The server closed the connection unexpectedly.");
 						}
-					} catch(SocketTimeoutException ex) {
+					} catch (SocketTimeoutException ex) {
 						showError("Connection timed out, check your settings and try again.");
 					} finally {
 						setStatus("Connection to remote server closed.", false);
@@ -532,7 +532,7 @@ public class PNViewer extends javax.swing.JFrame {
 						remoteInput = null;
 						reloadButton.setEnabled(true);
 					}
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					showError(ex.getMessage());
 					Logger.getLogger(PNViewer.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -575,14 +575,14 @@ public class PNViewer extends javax.swing.JFrame {
 											try {
 
 												s.close();
-											} catch(IOException ex) {
+											} catch (IOException ex) {
 												//
 											}
 											break;
 										}
 										dataReceieved.set(false);
 									}
-								} catch(InterruptedException ex) {
+								} catch (InterruptedException ex) {
 									//
 								}
 							}
@@ -658,7 +658,7 @@ public class PNViewer extends javax.swing.JFrame {
 										byte[] output = baos.toByteArray();
 										os.writeInt(output.length);
 										os.write(output);
-									} catch(URISyntaxException | DataSourceException ex) {
+									} catch (URISyntaxException | DataSourceException ex) {
 										os.writeUTF("LOAD-ERROR");
 										os.writeUTF(ex.getMessage());
 										log("Load error!");
@@ -684,12 +684,12 @@ public class PNViewer extends javax.swing.JFrame {
 									break connected;
 							}
 						}
-					} catch(IOException ex) {
+					} catch (IOException ex) {
 						// Disconnected
 					} finally {
 						try {
 							s.close();
-						} catch(IOException ex) {
+						} catch (IOException ex) {
 							//
 						}
 						log("Client has disconnected.");
@@ -777,7 +777,7 @@ public class PNViewer extends javax.swing.JFrame {
 		} else {
 			try {
 				SwingUtilities.invokeAndWait(r);
-			} catch(InterruptedException | InvocationTargetException ex) {
+			} catch (InterruptedException | InvocationTargetException ex) {
 				log(ex);
 			}
 		}
@@ -802,7 +802,7 @@ public class PNViewer extends javax.swing.JFrame {
 		} else {
 			try {
 				SwingUtilities.invokeAndWait(r);
-			} catch(InterruptedException | InvocationTargetException ex) {
+			} catch (InterruptedException | InvocationTargetException ex) {
 				log(ex);
 			}
 		}
@@ -833,219 +833,219 @@ public class PNViewer extends javax.swing.JFrame {
 	 * content of this method is always regenerated by the Form Editor.
 	 */
 	@SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+	// <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+	private void initComponents() {
 
-        jSplitPane1 = new javax.swing.JSplitPane();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        keyTree = new javax.swing.JTree();
-        jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        namespaceLabel = new javax.swing.JLabel();
-        keyLabel = new javax.swing.JLabel();
-        valueTypeLabel = new javax.swing.JLabel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        valueTextArea = new javax.swing.JTextArea();
-        jLabel6 = new javax.swing.JLabel();
-        sourceLabel = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        configurationFromLabel = new javax.swing.JLabel();
-        statusLabel = new javax.swing.JLabel();
-        statusProgressBar = new javax.swing.JProgressBar();
-        reloadButton = new javax.swing.JButton();
-        jMenuBar1 = new javax.swing.JMenuBar();
-        fileMenu = new javax.swing.JMenu();
-        loadFromConfigurationMenu = new javax.swing.JMenuItem();
-        closeRemoteConnectionMenu = new javax.swing.JMenuItem();
-        bookmarksMenu = new javax.swing.JMenu();
-        manageBookmarksMenu = new javax.swing.JMenuItem();
-        jSeparator1 = new javax.swing.JPopupMenu.Separator();
-        jMenu1 = new javax.swing.JMenu();
-        helpMenu = new javax.swing.JMenuItem();
-        aboutMenu = new javax.swing.JMenuItem();
+		jSplitPane1 = new javax.swing.JSplitPane();
+		jScrollPane1 = new javax.swing.JScrollPane();
+		keyTree = new javax.swing.JTree();
+		jPanel1 = new javax.swing.JPanel();
+		jLabel1 = new javax.swing.JLabel();
+		jLabel2 = new javax.swing.JLabel();
+		jLabel3 = new javax.swing.JLabel();
+		jLabel4 = new javax.swing.JLabel();
+		namespaceLabel = new javax.swing.JLabel();
+		keyLabel = new javax.swing.JLabel();
+		valueTypeLabel = new javax.swing.JLabel();
+		jScrollPane2 = new javax.swing.JScrollPane();
+		valueTextArea = new javax.swing.JTextArea();
+		jLabel6 = new javax.swing.JLabel();
+		sourceLabel = new javax.swing.JLabel();
+		jLabel5 = new javax.swing.JLabel();
+		configurationFromLabel = new javax.swing.JLabel();
+		statusLabel = new javax.swing.JLabel();
+		statusProgressBar = new javax.swing.JProgressBar();
+		reloadButton = new javax.swing.JButton();
+		jMenuBar1 = new javax.swing.JMenuBar();
+		fileMenu = new javax.swing.JMenu();
+		loadFromConfigurationMenu = new javax.swing.JMenuItem();
+		closeRemoteConnectionMenu = new javax.swing.JMenuItem();
+		bookmarksMenu = new javax.swing.JMenu();
+		manageBookmarksMenu = new javax.swing.JMenuItem();
+		jSeparator1 = new javax.swing.JPopupMenu.Separator();
+		jMenu1 = new javax.swing.JMenu();
+		helpMenu = new javax.swing.JMenuItem();
+		aboutMenu = new javax.swing.JMenuItem();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jSplitPane1.setDividerLocation(200);
+		jSplitPane1.setDividerLocation(200);
 
-        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
-        keyTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
-        keyTree.setToolTipText("");
-        keyTree.setRootVisible(false);
-        jScrollPane1.setViewportView(keyTree);
+		javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
+		keyTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+		keyTree.setToolTipText("");
+		keyTree.setRootVisible(false);
+		jScrollPane1.setViewportView(keyTree);
 
-        jSplitPane1.setLeftComponent(jScrollPane1);
+		jSplitPane1.setLeftComponent(jScrollPane1);
 
-        jLabel1.setText("Namespace:");
+		jLabel1.setText("Namespace:");
 
-        jLabel2.setText("Key:");
+		jLabel2.setText("Key:");
 
-        jLabel3.setText("Value type:");
+		jLabel3.setText("Value type:");
 
-        jLabel4.setText("Value:");
+		jLabel4.setText("Value:");
 
-        namespaceLabel.setText(".............");
+		namespaceLabel.setText(".............");
 
-        keyLabel.setText(".............");
+		keyLabel.setText(".............");
 
-        valueTypeLabel.setText("............");
+		valueTypeLabel.setText("............");
 
-        valueTextArea.setEditable(false);
-        valueTextArea.setColumns(20);
-        valueTextArea.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
-        valueTextArea.setLineWrap(true);
-        valueTextArea.setRows(5);
-        jScrollPane2.setViewportView(valueTextArea);
+		valueTextArea.setEditable(false);
+		valueTextArea.setColumns(20);
+		valueTextArea.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
+		valueTextArea.setLineWrap(true);
+		valueTextArea.setRows(5);
+		jScrollPane2.setViewportView(valueTextArea);
 
-        jLabel6.setText("Source:");
+		jLabel6.setText("Source:");
 
-        sourceLabel.setText("...........");
+		sourceLabel.setText("...........");
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 722, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel4)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(namespaceLabel))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(keyLabel))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel6)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(sourceLabel))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel3)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(valueTypeLabel)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(namespaceLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(keyLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel6)
-                    .addComponent(sourceLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(valueTypeLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 232, Short.MAX_VALUE))
-        );
+		javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+		jPanel1.setLayout(jPanel1Layout);
+		jPanel1Layout.setHorizontalGroup(
+			jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+			.addGroup(jPanel1Layout.createSequentialGroup()
+				.addContainerGap()
+				.addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+					.addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 722, Short.MAX_VALUE)
+					.addGroup(jPanel1Layout.createSequentialGroup()
+						.addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+							.addComponent(jLabel4)
+							.addGroup(jPanel1Layout.createSequentialGroup()
+								.addComponent(jLabel1)
+								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+								.addComponent(namespaceLabel))
+							.addGroup(jPanel1Layout.createSequentialGroup()
+								.addComponent(jLabel2)
+								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+								.addComponent(keyLabel))
+							.addGroup(jPanel1Layout.createSequentialGroup()
+								.addComponent(jLabel6)
+								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+								.addComponent(sourceLabel))
+							.addGroup(jPanel1Layout.createSequentialGroup()
+								.addComponent(jLabel3)
+								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+								.addComponent(valueTypeLabel)))
+						.addGap(0, 0, Short.MAX_VALUE)))
+				.addContainerGap())
+		);
+		jPanel1Layout.setVerticalGroup(
+			jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+			.addGroup(jPanel1Layout.createSequentialGroup()
+				.addContainerGap()
+				.addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+					.addComponent(jLabel1)
+					.addComponent(namespaceLabel))
+				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+				.addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+					.addComponent(jLabel2)
+					.addComponent(keyLabel))
+				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+				.addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+					.addComponent(jLabel6)
+					.addComponent(sourceLabel))
+				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+				.addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+					.addComponent(jLabel3)
+					.addComponent(valueTypeLabel))
+				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+				.addComponent(jLabel4)
+				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+				.addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 232, Short.MAX_VALUE))
+		);
 
-        jSplitPane1.setRightComponent(jPanel1);
+		jSplitPane1.setRightComponent(jPanel1);
 
-        jLabel5.setText("Configuration from:");
+		jLabel5.setText("Configuration from:");
 
-        configurationFromLabel.setText("...............");
+		configurationFromLabel.setText("...............");
 
-        statusLabel.setText(".........");
+		statusLabel.setText(".........");
 
-        reloadButton.setText("Reload");
-        reloadButton.setToolTipText("Reloads the data from the configuration");
+		reloadButton.setText("Reload");
+		reloadButton.setToolTipText("Reloads the data from the configuration");
 
-        fileMenu.setText("File");
+		fileMenu.setText("File");
 
-        loadFromConfigurationMenu.setText("Load from Configuration...");
-        fileMenu.add(loadFromConfigurationMenu);
+		loadFromConfigurationMenu.setText("Load from Configuration...");
+		fileMenu.add(loadFromConfigurationMenu);
 
-        closeRemoteConnectionMenu.setText("Close Remote Connection");
-        fileMenu.add(closeRemoteConnectionMenu);
+		closeRemoteConnectionMenu.setText("Close Remote Connection");
+		fileMenu.add(closeRemoteConnectionMenu);
 
-        jMenuBar1.add(fileMenu);
+		jMenuBar1.add(fileMenu);
 
-        bookmarksMenu.setText("Bookmarks");
+		bookmarksMenu.setText("Bookmarks");
 
-        manageBookmarksMenu.setText("Manage Bookmarks...");
-        bookmarksMenu.add(manageBookmarksMenu);
-        bookmarksMenu.add(jSeparator1);
+		manageBookmarksMenu.setText("Manage Bookmarks...");
+		bookmarksMenu.add(manageBookmarksMenu);
+		bookmarksMenu.add(jSeparator1);
 
-        jMenuBar1.add(bookmarksMenu);
+		jMenuBar1.add(bookmarksMenu);
 
-        jMenu1.setText("Help");
+		jMenu1.setText("Help");
 
-        helpMenu.setText("Help...");
-        jMenu1.add(helpMenu);
+		helpMenu.setText("Help...");
+		jMenu1.add(helpMenu);
 
-        aboutMenu.setText("About...");
-        jMenu1.add(aboutMenu);
+		aboutMenu.setText("About...");
+		jMenu1.add(aboutMenu);
 
-        jMenuBar1.add(jMenu1);
+		jMenuBar1.add(jMenu1);
 
-        setJMenuBar(jMenuBar1);
+		setJMenuBar(jMenuBar1);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 780, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(configurationFromLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(reloadButton))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(statusLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(statusProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5)
-                    .addComponent(configurationFromLabel)
-                    .addComponent(reloadButton))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSplitPane1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(statusProgressBar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(statusLabel, javax.swing.GroupLayout.Alignment.TRAILING))
-                .addContainerGap())
-        );
+		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+		getContentPane().setLayout(layout);
+		layout.setHorizontalGroup(
+			layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+			.addGroup(layout.createSequentialGroup()
+				.addContainerGap()
+				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+					.addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 780, Short.MAX_VALUE)
+					.addGroup(layout.createSequentialGroup()
+						.addComponent(jLabel5)
+						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+						.addComponent(configurationFromLabel)
+						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(reloadButton))
+					.addGroup(layout.createSequentialGroup()
+						.addComponent(statusLabel)
+						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(statusProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+				.addContainerGap())
+		);
+		layout.setVerticalGroup(
+			layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+			.addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+				.addContainerGap()
+				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+					.addComponent(jLabel5)
+					.addComponent(configurationFromLabel)
+					.addComponent(reloadButton))
+				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+				.addComponent(jSplitPane1)
+				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+					.addComponent(statusProgressBar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+					.addComponent(statusLabel, javax.swing.GroupLayout.Alignment.TRAILING))
+				.addContainerGap())
+		);
 
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
+		pack();
+	} // </editor-fold>//GEN-END:initComponents
 
 	/**
 	 * @param args the command line arguments
 	 */
 	public static void main(String args[]) {
 		/* Set the Nimbus look and feel */
-		//<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+		// <editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
 		/* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
 		 * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
 		 */
@@ -1056,10 +1056,10 @@ public class PNViewer extends javax.swing.JFrame {
 					break;
 				}
 			}
-		} catch(ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
 			java.util.logging.Logger.getLogger(PNViewer.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
-		//</editor-fold>
+		// </editor-fold>
 
 		/* Create and display the form */
 		java.awt.EventQueue.invokeLater(new Runnable() {
@@ -1072,36 +1072,36 @@ public class PNViewer extends javax.swing.JFrame {
 		});
 	}
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenuItem aboutMenu;
-    private javax.swing.JMenu bookmarksMenu;
-    private javax.swing.JMenuItem closeRemoteConnectionMenu;
-    private javax.swing.JLabel configurationFromLabel;
-    private javax.swing.JMenu fileMenu;
-    private javax.swing.JMenuItem helpMenu;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JPopupMenu.Separator jSeparator1;
-    private javax.swing.JSplitPane jSplitPane1;
-    private javax.swing.JLabel keyLabel;
-    private javax.swing.JTree keyTree;
-    private javax.swing.JMenuItem loadFromConfigurationMenu;
-    private javax.swing.JMenuItem manageBookmarksMenu;
-    private javax.swing.JLabel namespaceLabel;
-    private javax.swing.JButton reloadButton;
-    private javax.swing.JLabel sourceLabel;
-    private javax.swing.JLabel statusLabel;
-    private javax.swing.JProgressBar statusProgressBar;
-    private javax.swing.JTextArea valueTextArea;
-    private javax.swing.JLabel valueTypeLabel;
-    // End of variables declaration//GEN-END:variables
+	// Variables declaration - do not modify//GEN-BEGIN:variables
+	private javax.swing.JMenuItem aboutMenu;
+	private javax.swing.JMenu bookmarksMenu;
+	private javax.swing.JMenuItem closeRemoteConnectionMenu;
+	private javax.swing.JLabel configurationFromLabel;
+	private javax.swing.JMenu fileMenu;
+	private javax.swing.JMenuItem helpMenu;
+	private javax.swing.JLabel jLabel1;
+	private javax.swing.JLabel jLabel2;
+	private javax.swing.JLabel jLabel3;
+	private javax.swing.JLabel jLabel4;
+	private javax.swing.JLabel jLabel5;
+	private javax.swing.JLabel jLabel6;
+	private javax.swing.JMenu jMenu1;
+	private javax.swing.JMenuBar jMenuBar1;
+	private javax.swing.JPanel jPanel1;
+	private javax.swing.JScrollPane jScrollPane1;
+	private javax.swing.JScrollPane jScrollPane2;
+	private javax.swing.JPopupMenu.Separator jSeparator1;
+	private javax.swing.JSplitPane jSplitPane1;
+	private javax.swing.JLabel keyLabel;
+	private javax.swing.JTree keyTree;
+	private javax.swing.JMenuItem loadFromConfigurationMenu;
+	private javax.swing.JMenuItem manageBookmarksMenu;
+	private javax.swing.JLabel namespaceLabel;
+	private javax.swing.JButton reloadButton;
+	private javax.swing.JLabel sourceLabel;
+	private javax.swing.JLabel statusLabel;
+	private javax.swing.JProgressBar statusProgressBar;
+	private javax.swing.JTextArea valueTextArea;
+	private javax.swing.JLabel valueTypeLabel;
+	// End of variables declaration//GEN-END:variables
 }

@@ -80,14 +80,14 @@ public class Range {
 	 */
 	public List<Integer> getRange() {
 		//Calculate the size once
-		double _size = Math.abs(leftBound - rightBound);
+		double size = Math.abs(leftBound - rightBound);
 		if(!leftInclusive) {
-			_size--;
+			size--;
 		}
 		if(rightInclusive) {
-			_size++;
+			size++;
 		}
-		final int size = (int) _size;
+		final int finalSize = (int) size;
 		return new AbstractList<Integer>() {
 
 			@Override
@@ -101,7 +101,7 @@ public class Range {
 
 			@Override
 			public int size() {
-				return size;
+				return finalSize;
 			}
 		};
 	}

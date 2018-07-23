@@ -58,17 +58,6 @@ public final class ZipMaker {
 		}
 	}
 
-	private static void GetFiles(Set<File> ongoing, File directory, File base) throws IOException {
-		if(directory.isDirectory()) {
-			for(File f : directory.listFiles()) {
-				GetFiles(ongoing, f, base);
-			}
-		} else {
-			File file = new File(directory.getAbsolutePath().replaceFirst(Pattern.quote(base.getAbsolutePath() + "/"), ""));
-			ongoing.add(file);
-		}
-	}
-
 	private static void MakeZip(Set<File> files, File output, File base, String topLevel) throws IOException {
 		// These are the files to include in the ZIP file
 
@@ -81,7 +70,7 @@ public final class ZipMaker {
 		for(File f : files) {
 			FileInputStream in = new FileInputStream(new File(base, f.getPath()));
 
-			// Add ZIP entry to output stream.                
+			// Add ZIP entry to output stream.
 			out.putNextEntry(new ZipEntry(topLevel + GetUnabsoluteFile(base, f).getPath()));
 
 			// Transfer bytes from the file to the ZIP file
@@ -100,6 +89,17 @@ public final class ZipMaker {
 
 		// Complete the ZIP file
 		out.close();
+	}
+
+	private static void GetFiles(Set<File> ongoing, File directory, File base) throws IOException {
+		if(directory.isDirectory()) {
+			for(File f : directory.listFiles()) {
+				GetFiles(ongoing, f, base);
+			}
+		} else {
+			File file = new File(directory.getAbsolutePath().replaceFirst(Pattern.quote(base.getAbsolutePath() + "/"), ""));
+			ongoing.add(file);
+		}
 	}
 
 	private static File GetUnabsoluteFile(File base, File child) throws IOException {

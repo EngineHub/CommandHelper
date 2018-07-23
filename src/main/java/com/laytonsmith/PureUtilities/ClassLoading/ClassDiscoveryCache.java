@@ -95,14 +95,14 @@ public class ClassDiscoveryCache {
 				if(cacheOutputName.exists()) {
 					//Cool, already exists, so we'll just return this.
 					//Note that we write the data out as a zip, since it is
-					//huge otherwise, and compresses quite well, so we have 
+					//huge otherwise, and compresses quite well, so we have
 					//to read it in as a zip now.
 					ZipReader cacheReader = new ZipReader(new File(cacheOutputName, "data"));
 					return new ClassDiscoveryURLCache(fromClassLocation, cacheReader.getInputStream());
 				}
 				//Doesn't exist, but we set cacheOutputName, so it will save it there
 				//after it scans.
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				//Hmm. Ok, well, we'll just regenerate.
 			}
 
@@ -118,12 +118,12 @@ public class ClassDiscoveryCache {
 
 						try {
 							return new ClassDiscoveryURLCache(fromClassLocation, is);
-						} catch(Exception ex) {
+						} catch (Exception ex) {
 							//Do nothing, we'll just re-load from disk.
 						}
 					}
 				}
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				Logger.getLogger(ClassDiscoveryCache.class.getName()).log(Level.SEVERE, null, ex);
 			}
 
@@ -139,7 +139,7 @@ public class ClassDiscoveryCache {
 						zos.putNextEntry(new ZipEntry("data"));
 						cache.writeDescriptor(zos);
 					}
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					//Well, we couldn't write it out, so report the error, but continue anyways.
 					if(logger != null) {
 						logger.log(Level.SEVERE, null, ex);

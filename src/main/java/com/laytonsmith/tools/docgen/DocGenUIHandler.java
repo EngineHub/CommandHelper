@@ -58,10 +58,10 @@ public class DocGenUIHandler {
 		DocGenUI.main(args);
 	}
 
-	private static final Map<String, List<String>> baseHeaders = new HashMap<String, List<String>>();
+	private static final Map<String, List<String>> BASE_HEADERS = new HashMap<String, List<String>>();
 
 	static {
-		baseHeaders.put("User-Agent", Arrays.asList(new String[]{"CommandHelper-DocUploader"}));
+		BASE_HEADERS.put("User-Agent", Arrays.asList(new String[]{"CommandHelper-DocUploader"}));
 	}
 
 	URL url;
@@ -198,7 +198,7 @@ public class DocGenUIHandler {
 					doUpload(DocGen.Template(r.getFile().getName(), isStaged), articleName, true);
 				}
 			}
-		} catch(URISyntaxException ex) {
+		} catch (URISyntaxException ex) {
 			Logger.getLogger(DocGenUIHandler.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -219,7 +219,7 @@ public class DocGenUIHandler {
 			page = page.substring(1);
 		}
 		wikiMarkup = pagePrefix + wikiMarkup;
-		//The full path 
+		//The full path
 		String fullPath = prefix + page;
 		progress.setStatus("Uploading " + fullPath);
 		//First we need to get the edit token
@@ -346,7 +346,7 @@ public class DocGenUIHandler {
 				}
 			}
 			return count;
-		} catch(URISyntaxException ex) {
+		} catch (URISyntaxException ex) {
 			throw new APIException(ex);
 		}
 	}
@@ -402,7 +402,7 @@ public class DocGenUIHandler {
 			digest.update(content.getBytes());
 			String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 			return hash;
-		} catch(NoSuchAlgorithmException ex) {
+		} catch (NoSuchAlgorithmException ex) {
 			throw new RuntimeException("An error occured while trying to hash your data", ex);
 		}
 	}
@@ -431,7 +431,7 @@ public class DocGenUIHandler {
 				throw new APIException(doc.getNode("/api/error/@info"));
 			}
 			return doc;
-		} catch(XPathExpressionException | SAXException | IOException e) {
+		} catch (XPathExpressionException | SAXException | IOException e) {
 			throw new APIException(e);
 		}
 	}
@@ -455,7 +455,7 @@ public class DocGenUIHandler {
 	 * @throws IOException
 	 */
 	private static HTTPResponse getPage(URL url, Map<String, String> params, boolean useURL) throws IOException {
-		Map<String, List<String>> headers = new HashMap<>(baseHeaders);
+		Map<String, List<String>> headers = new HashMap<>(BASE_HEADERS);
 		if(params != null && !params.isEmpty() && useURL) {
 			StringBuilder b = new StringBuilder(url.getQuery() == null ? "" : url.getQuery());
 			if(b.length() != 0) {
@@ -478,7 +478,7 @@ public class DocGenUIHandler {
 				Function f = (Function) fb;
 				try {
 					f.examples();
-				} catch(ConfigCompileException e) {
+				} catch (ConfigCompileException e) {
 					throw new RuntimeException("Compilation error while compiling examples for " + f.getName(), e);
 				}
 			}

@@ -44,9 +44,6 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
-/**
- *
- */
 public class Environment {
 
 	public static String docs() {
@@ -68,7 +65,7 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "string {x, y, z, [world] | xyzArray, [world]} Gets the id of the block at the coordinates. The format"
+			return "string {x, y, z, [world] | locationArray, [world]} Gets the id of the block at the coordinates. The format"
 					+ " of the return will be x:y where x is the id of the block, and y is the meta data for the block."
 					+ " All blocks will return in this format, but blocks that don't have meta data will return 0 in y"
 					+ " (eg. air is \"0:0\"). If a world isn't provided in the location array or as an argument, the"
@@ -229,7 +226,7 @@ public class Environment {
 					meta = Byte.parseByte(dataAndMeta[1]); // Throws NumberFormatException.
 				}
 				data = Integer.parseInt(dataAndMeta[0]); // Throws NumberFormatException.
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				throw new CREFormatException("id must be formatted as such: 'x:y' where x and y are integers", t);
 			}
 			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
@@ -239,7 +236,7 @@ public class Environment {
 			}
 			try {
 				b.setTypeAndData(data, meta, physics);
-			} catch(IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				throw new CREFormatException("Invalid block meta data: \"" + id + "\"", t);
 			}
 
@@ -268,7 +265,7 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {xyzLocation, lineArray | xyzLocation, line1, [line2, [line3, [line4]]]}"
+			return "void {locationArray, lineArray | locationArray, line1, [line2, [line3, [line4]]]}"
 					+ " Sets the text of the sign at the given location. If the block at x,y,z isn't a sign,"
 					+ " a RangeException is thrown. If the text on a line overflows 15 characters, it is simply"
 					+ " truncated.";
@@ -363,8 +360,8 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "array {xyzLocation} Given a location array, returns an array of 4 strings of the text in the sign at that"
-					+ " location. If the location given isn't a sign, then a RangeException is thrown.";
+			return "array {locationArray} Given a location array, returns an array of 4 strings of the text in the sign"
+					+ " at that location. If the location given isn't a sign, then a RangeException is thrown.";
 		}
 
 		@Override
@@ -423,7 +420,7 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "boolean {xyzLocation} Returns true if the block at this location is a sign.";
+			return "boolean {locationArray} Returns true if the block at this location is a sign.";
 		}
 
 		@Override
@@ -473,8 +470,7 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {locationArray} Mostly simulates a block break at a location. Does not trigger an event. Only works with"
-					+ " craftbukkit.";
+			return "void {locationArray} Mostly simulates a block break at a location. Does not trigger an event.";
 		}
 
 		@Override
@@ -573,7 +569,7 @@ public class Environment {
 					throw new CRENotFoundException(
 							"Could not find the internal biome type object (are you running in cmdline mode?)", t);
 				}
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException("The biome type \"" + args[1].val() + "\" does not exist.", t);
 			}
 			if(w == null) {
@@ -604,8 +600,8 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "string {x, z, [world] | locationArray} Returns the biome type of this block column. The location array's"
-					+ " y value is ignored. ---- The value returned"
+			return "string {x, z, [world] | locationArray} Returns the biome type of this block column. The location"
+					+ " array's y value is ignored. ---- The value returned"
 					+ " may be one of the following: " + StringUtils.Join(MCBiomeType.types(), ", ", ", or ");
 		}
 
@@ -677,7 +673,7 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "array {x, z, [world] | xyzArray, [world]} Gets the xyz of the highest block at a x and a z."
+			return "array {x, z, [world] | locationArray, [world]} Gets the xyz of the highest block at a x and a z."
 					+ "It works the same as get_block_at, except that it doesn't matter now what the Y is."
 					+ "You can set it to -1000 or to 92374 it will just be ignored.";
 		}
@@ -760,11 +756,11 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {Locationarray, [size], [safe]} Creates an explosion with the given size at the given location."
-					+ "Size defaults to size of a creeper (3), and null uses the default. If safe is true, (defaults to false)"
-					+ " the explosion"
-					+ " won't hurt the surrounding blocks. If size is 0, and safe is true, you will still see the animation"
-					+ " and hear the sound, but players won't be hurt, and neither will the blocks.";
+			return "void {locationArray, [size], [safe]} Creates an explosion with a given size at a given location."
+					+ " Size defaults to size of a creeper (3), and null uses the default. If safe is true,"
+					+ " (defaults to false) the explosion won't hurt the surrounding blocks. If size is 0, and safe is"
+					+ " true, you will still see the animation and hear the sound, but players won't be hurt, and"
+					+ " neither will the blocks.";
 		}
 
 		@Override
@@ -888,7 +884,7 @@ public class Environment {
 			}
 			try {
 				i = MCInstrument.valueOf(args[instrumentOffset].val().toUpperCase().trim());
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new CREFormatException("Instrument provided is not a valid type, required one of: " + StringUtils.Join(MCInstrument.values(), ", ", ", or "), t);
 			}
 			MCTone tone = null;
@@ -900,7 +896,7 @@ public class Environment {
 				String ttone = ((CArray) args[noteOffset]).get("tone", t).val().toUpperCase().trim();
 				try {
 					tone = MCTone.valueOf(ttone.trim().replaceAll("#", ""));
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					throw new CREFormatException("Expected the tone parameter to be one of: "
 							+ StringUtils.Join(MCTone.values(), ", ", ", or ") + " but it was " + ttone, t);
 				}
@@ -910,7 +906,7 @@ public class Environment {
 				}
 				try {
 					n = StaticLayer.GetConvertor().GetNote(octave, tone, sharped);
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					throw new CREFormatException(e.getMessage(), t);
 				}
 			} else {
@@ -933,7 +929,7 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {[player], instrument, note, [location]} Plays a note for the given player, at the given location."
+			return "void {[player], instrument, note, [locationArray]} Plays a note for the given player, at the given location."
 					+ " Player defaults to the current player, and location defaults to the player's location. Instrument may be one of:"
 					+ " " + StringUtils.Join(MCInstrument.values(), ", ", ", or ") + ", and note is an associative array with 2 values,"
 					+ " array(octave: 0, tone: 'F#') where octave is either 0, 1, or 2, and tone is one of the notes "
@@ -975,7 +971,8 @@ public class Environment {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			MCSound sound;
 			MCSoundCategory category = null;
-			float volume = 1, pitch = 1;
+			float volume = 1;
+			float pitch = 1;
 
 			if(!(args[1] instanceof CArray)) {
 				throw new CREFormatException("An array was expected but recieved " + args[1], t);
@@ -985,14 +982,14 @@ public class Environment {
 
 			try {
 				sound = MCSound.valueOf(sa.get("sound", t).val().toUpperCase());
-			} catch(IllegalArgumentException iae) {
+			} catch (IllegalArgumentException iae) {
 				throw new CREFormatException("Sound name '" + sa.get("sound", t).val() + "' is invalid.", t);
 			}
 
 			if(sa.containsKey("category")) {
 				try {
 					category = MCSoundCategory.valueOf(sa.get("category", t).val().toUpperCase());
-				} catch(IllegalArgumentException iae) {
+				} catch (IllegalArgumentException iae) {
 					throw new CREFormatException("Sound category '" + sa.get("category", t).val() + "' is invalid.", t);
 				}
 			}
@@ -1053,8 +1050,7 @@ public class Environment {
 					+ " be a single player or an array of players to play the sound to, if"
 					+ " not given, all players can potentially hear it. ---- Possible categories: "
 					+ StringUtils.Join(MCSoundCategory.values(), ", ", ", or ", " or ") + "."
-					+ " ---- Possible sounds: "
-					+ StringUtils.Join(MCSound.types(), ", ", ", or ", " or ");
+					+ " \nPossible sounds: " + StringUtils.Join(MCSound.types(), "\n");
 		}
 
 		@Override
@@ -1092,7 +1088,8 @@ public class Environment {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			String path;
 			MCSoundCategory category = null;
-			float volume = 1, pitch = 1;
+			float volume = 1;
+			float pitch = 1;
 
 			if(!(args[1] instanceof CArray)) {
 				throw new CREFormatException("An array was expected but recieved " + args[1], t);
@@ -1105,7 +1102,7 @@ public class Environment {
 			if(sa.containsKey("category")) {
 				try {
 					category = MCSoundCategory.valueOf(sa.get("category", t).val().toUpperCase());
-				} catch(IllegalArgumentException iae) {
+				} catch (IllegalArgumentException iae) {
 					throw new CREFormatException("Sound category '" + sa.get("category", t).val() + "' is invalid.", t);
 				}
 			}
@@ -1357,7 +1354,7 @@ public class Environment {
 			if(args.length == 2) {
 				try {
 					mode = CheckMode.valueOf(args[1].val().toUpperCase());
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					throw new CREFormatException("Invalid checkMode: " + args[1].val() + ".", t);
 				}
 			} else {
@@ -1492,7 +1489,7 @@ public class Environment {
 			} else {
 				try {
 					treeType = MCTreeType.valueOf(args[1].val().toUpperCase());
-				} catch(IllegalArgumentException exception) {
+				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The tree type \"" + args[1].val() + "\" does not exist.", t);
 				}
 			}

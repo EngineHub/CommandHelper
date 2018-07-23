@@ -4,7 +4,15 @@ import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -59,7 +67,7 @@ public final class WebUtility {
 	private WebUtility() {
 	}
 	private static int urlRetrieverPoolId = 0;
-	private static final ExecutorService urlRetrieverPool = Executors.newCachedThreadPool(new ThreadFactory() {
+	private static final ExecutorService URL_RETRIEVER_POOL = Executors.newCachedThreadPool(new ThreadFactory() {
 		@Override
 		public Thread newThread(Runnable r) {
 			return new Thread(r, "URLRetrieverThread-" + (++urlRetrieverPoolId));
@@ -156,6 +164,50 @@ public final class WebUtility {
 	}
 
 	/**
+	 * Makes an asynchronous call to a URL, and runs the callback when finished.
+	 */
+	public static void GetPage(final URL url, final RequestSettings settings, final HTTPResponseCallback callback) {
+		URL_RETRIEVER_POOL.submit(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					HTTPResponse response = GetPage(url, settings);
+					if(callback == null) {
+						return;
+					}
+					callback.response(response);
+				} catch (IOException ex) {
+					if(callback == null) {
+						return;
+					}
+					callback.error(ex);
+				}
+			}
+		});
+	}
+
+	/**
+	 * A very simple convenience method to get a page, using all the default settings found in {@link RequestSettings}.
+	 *
+	 * @param url
+	 * @return
+	 */
+	public static HTTPResponse GetPage(URL url) throws IOException {
+		return GetPage(url, null);
+	}
+
+	/**
+	 * A very simple convenience method to get a page using a string url.
+	 *
+	 * @param url
+	 * @return
+	 * @throws IOException
+	 */
+	public static HTTPResponse GetPage(String url) throws IOException {
+		return GetPage(new URL(url));
+	}
+
+	/**
 	 * Returns the raw web stream. Cookies are used to initiate the request, but the cookie jar isn't updated with the
 	 * received cookies.
 	 *
@@ -165,11 +217,12 @@ public final class WebUtility {
 	 * @throws SocketTimeoutException
 	 * @throws IOException
 	 */
-	public static RawHTTPResponse getWebStream(URL url, RequestSettings _settings) throws SocketTimeoutException, IOException {
-		if(_settings == null) {
-			_settings = new RequestSettings();
+	public static RawHTTPResponse getWebStream(URL url, RequestSettings requestSettings)
+			throws SocketTimeoutException, IOException {
+		if(requestSettings == null) {
+			requestSettings = new RequestSettings();
 		}
-		final RequestSettings settings = _settings;
+		final RequestSettings settings = requestSettings;
 		Logger logger = settings.getLogger();
 		HTTPMethod method = settings.getMethod();
 		Map<String, List<String>> headers = settings.getHeaders();
@@ -238,34 +291,34 @@ public final class WebUtility {
 			final SSLContext sslc;
 			try {
 				sslc = SSLContext.getInstance("SSL");
-			} catch(NoSuchAlgorithmException ex) {
+			} catch (NoSuchAlgorithmException ex) {
 				throw new IOException(ex);
 			}
-			TrustManager _defaultTrustManager = null;
+			TrustManager defaultTrustManager = null;
 			{
 				if(settings.getUseDefaultTrustStore()) {
 					TrustManagerFactory tmf;
 					try {
 						tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-					} catch(NoSuchAlgorithmException ex) {
+					} catch (NoSuchAlgorithmException ex) {
 						throw new RuntimeException(ex);
 					}
 					try {
 						tmf.init((KeyStore) null);
-					} catch(KeyStoreException ex) {
+					} catch (KeyStoreException ex) {
 						throw new IOException(ex);
 					}
 					for(TrustManager tm : tmf.getTrustManagers()) {
 						if(tm instanceof X509TrustManager) {
-							_defaultTrustManager = tm;
+							defaultTrustManager = tm;
 							break;
 						}
 					}
 				} else {
-					_defaultTrustManager = null;
+					defaultTrustManager = null;
 				}
 			}
-			final X509TrustManager defaultTrustManager = (X509TrustManager) _defaultTrustManager;
+			final X509TrustManager finalDefaultTrustManager = (X509TrustManager) defaultTrustManager;
 			final TrustManager[] overrideTrustManager = new TrustManager[]{
 				new X509TrustManager() {
 					@Override
@@ -281,10 +334,10 @@ public final class WebUtility {
 							return;
 						}
 						boolean trusted = true;
-						if(defaultTrustManager != null) {
+						if(finalDefaultTrustManager != null) {
 							try {
-								defaultTrustManager.checkClientTrusted(xcs, string);
-							} catch(CertificateException ex) {
+								finalDefaultTrustManager.checkClientTrusted(xcs, string);
+							} catch (CertificateException ex) {
 								trusted = false;
 							}
 						}
@@ -305,7 +358,7 @@ public final class WebUtility {
 									if(fp.equals(fingerprint)) {
 										return;
 									}
-								} catch(NoSuchAlgorithmException | CertificateEncodingException ex) {
+								} catch (NoSuchAlgorithmException | CertificateEncodingException ex) {
 									throw new RuntimeException(ex);
 								}
 							}
@@ -319,8 +372,8 @@ public final class WebUtility {
 						if(settings.getDisableCertChecking()) {
 							return new X509Certificate[0];
 						}
-						if(defaultTrustManager != null) {
-							return defaultTrustManager.getAcceptedIssuers();
+						if(finalDefaultTrustManager != null) {
+							return finalDefaultTrustManager.getAcceptedIssuers();
 						}
 						return new X509Certificate[0];
 					}
@@ -328,7 +381,7 @@ public final class WebUtility {
 			};
 			try {
 				sslc.init(null, overrideTrustManager, new java.security.SecureRandom());
-			} catch(KeyManagementException ex) {
+			} catch (KeyManagementException ex) {
 				throw new IOException(ex);
 			}
 			final SSLSocketFactory ssf;
@@ -421,9 +474,9 @@ public final class WebUtility {
 		InputStream is;
 		try {
 			is = conn.getInputStream();
-		} catch(UnknownHostException e) {
+		} catch (UnknownHostException e) {
 			throw e;
-		} catch(Exception e) {
+		} catch (Exception e) {
 			if(logger != null) {
 				logger.log(Level.SEVERE, "Exception occurred, {0} response from server", conn.getResponseCode());
 			}
@@ -483,7 +536,7 @@ public final class WebUtility {
 						b.append(URLEncoder.encode(key + "[]", "UTF-8")).append("=").append(URLEncoder.encode(value, "UTF-8"));
 					}
 				}
-			} catch(UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				throw new Error(ex);
 			}
 		}
@@ -494,27 +547,6 @@ public final class WebUtility {
 		for(Character c : data.toCharArray()) {
 			bw.write((int) c.charValue());
 		}
-	}
-
-	/**
-	 * A very simple convenience method to get a page, using all the default settings found in {@link RequestSettings}.
-	 *
-	 * @param url
-	 * @return
-	 */
-	public static HTTPResponse GetPage(URL url) throws IOException {
-		return GetPage(url, null);
-	}
-
-	/**
-	 * A very simple convenience method to get a page using a string url.
-	 *
-	 * @param url
-	 * @return
-	 * @throws IOException
-	 */
-	public static HTTPResponse GetPage(String url) throws IOException {
-		return GetPage(new URL(url));
 	}
 
 	/**
@@ -537,29 +569,6 @@ public final class WebUtility {
 	 */
 	public static String GetPageContents(String url) throws IOException {
 		return GetPage(url).getContent();
-	}
-
-	/**
-	 * Makes an asynchronous call to a URL, and runs the callback when finished.
-	 */
-	public static void GetPage(final URL url, final RequestSettings settings, final HTTPResponseCallback callback) {
-		urlRetrieverPool.submit(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					HTTPResponse response = GetPage(url, settings);
-					if(callback == null) {
-						return;
-					}
-					callback.response(response);
-				} catch(IOException ex) {
-					if(callback == null) {
-						return;
-					}
-					callback.error(ex);
-				}
-			}
-		});
 	}
 
 	/**

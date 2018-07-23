@@ -9,7 +9,7 @@ public class HeapDumper {
 
 	private static final String HOTSPOT_BEAN_NAME
 			= "com.sun.management:type=HotSpotDiagnostic";
-	// field to store the hotspot diagnostic MBean 
+	// field to store the hotspot diagnostic MBean
 	private static volatile HotSpotDiagnosticMXBean hotspotMBean;
 
 	/**
@@ -23,9 +23,9 @@ public class HeapDumper {
 		initHotspotMBean();
 		try {
 			hotspotMBean.dumpHeap(fileName, live);
-		} catch(RuntimeException re) {
+		} catch (RuntimeException re) {
 			throw re;
-		} catch(Exception exp) {
+		} catch (Exception exp) {
 			throw new RuntimeException(exp);
 		}
 	}
@@ -50,9 +50,9 @@ public class HeapDumper {
 					= ManagementFactory.newPlatformMXBeanProxy(server,
 							HOTSPOT_BEAN_NAME, HotSpotDiagnosticMXBean.class);
 			return bean;
-		} catch(RuntimeException re) {
+		} catch (RuntimeException re) {
 			throw re;
-		} catch(Exception exp) {
+		} catch (Exception exp) {
 			throw new RuntimeException(exp);
 		}
 	}

@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.api.Platforms;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ObjectGenerator;
@@ -58,7 +59,9 @@ import java.util.logging.Logger;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.awt.HeadlessException;
@@ -80,7 +83,7 @@ public class RandomTests {
 		fakePlayer = StaticTest.GetOnlinePlayer();
 		StaticTest.InstallFakeConvertor(fakePlayer);
 	}
-	private static final Set<String> testedFunctions = new TreeSet<>();
+	private static final Set<String> TESTED_FUNCTIONS = new TreeSet<>();
 
 	/**
 	 * This function automatically tests all the boilerplate portions of all functions. Note that this can be disabled
@@ -122,10 +125,10 @@ public class RandomTests {
 
 		for(FunctionBase f : FunctionList.getFunctionList(null)) {
 			try {
-				if(testedFunctions.contains(f.getName())) {
+				if(TESTED_FUNCTIONS.contains(f.getName())) {
 					continue;
 				}
-				testedFunctions.add(f.getName());
+				TESTED_FUNCTIONS.add(f.getName());
 
 				StaticTest.TestBoilerplate(f, f.getName());
 				Class upper = f.getClass().getEnclosingClass();
@@ -141,21 +144,21 @@ public class RandomTests {
 							StaticTest.TestClassDocs(docs, upper);
 							classDocs.add(docs);
 						}
-					} catch(NullPointerException ex) {
+					} catch (NullPointerException ex) {
 						fail(upper.getName() + "'s docs function should be static");
 					}
-				} catch(IllegalAccessException | IllegalArgumentException | SecurityException ex) {
+				} catch (IllegalAccessException | IllegalArgumentException | SecurityException ex) {
 					Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
-				} catch(InvocationTargetException ex) {
+				} catch (InvocationTargetException ex) {
 					fail(upper.getName() + " throws an exception!");
-				} catch(NoSuchMethodException ex) {
+				} catch (NoSuchMethodException ex) {
 					fail(upper.getName() + " does not include a class level documentation function.");
-				} catch(HeadlessException ex) {
+				} catch (HeadlessException ex) {
 					// Hmm. Whatever's running us doesn't have a head, and we just tested a function
 					// that requires a head. Whatever, just skip it and move on. It'll have to be tested
 					// manually.
 				}
-			} catch(Throwable t) {
+			} catch (Throwable t) {
 				uhohs.put(f.getClass().getName(), t);
 				t.printStackTrace();
 			}
@@ -289,10 +292,10 @@ public class RandomTests {
 			double d = (double) ReflectionUtils.invokeMethod(clazz, e, "evaluate",
 					new Class[]{double.class, double.class}, new Object[]{2, 4});
 			assertEquals(16, d, 0.00001);
-		} catch(ClassNotFoundException cnf) {
+		} catch (ClassNotFoundException cnf) {
 			/* Not much we can really do about this during testing.
 			throw new CREPluginInternalException("You are missing a required dependency: " + eClass, Target.UNKNOWN);*/
-		} catch(ReflectionUtils.ReflectionException rex) {
+		} catch (ReflectionUtils.ReflectionException rex) {
 			throw new CREPluginInternalException("Your expression was invalidly formatted", Target.UNKNOWN, rex.getCause());
 		}
 	}
@@ -361,35 +364,46 @@ public class RandomTests {
 	public void testFunctionsAreOnlyDefinedOnce() throws Exception {
 		Set<String> uhohs = new HashSet<>();
 		Set<Class<Function>> set = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(Function.class);
-		for(Class<Function> cf1 : set) {
-			for(Class<Function> cf2 : set) {
-				if(cf1 == cf2) {
-					continue;
-				}
-				api cf1a = cf1.getAnnotation(api.class);
-				api cf2a = cf2.getAnnotation(api.class);
-				if(cf1a == null || cf2a == null) {
-					continue;
-				}
-				if(!Arrays.equals(cf1a.platform(), cf2a.platform())) {
-					continue;
-				}
-				Function f1 = ReflectionUtils.instantiateUnsafe(cf1);
-				Function f2 = ReflectionUtils.instantiateUnsafe(cf2);
-				if(f1.getName().equals(f2.getName())) {
-					uhohs.add(f1.getName() + " is implemented in two places, " + cf1 + " and " + cf2);
-				}
+
+		// Iterate over all function classes, adding a message to "uhohs" if they are double defined.
+		Map<String, Class<Function>> funcMap = new HashMap<>();
+		for(Class<Function> funcClass : set) {
+
+			// Ignore non-api functions.
+			api funcClassApi = funcClass.getAnnotation(api.class);
+			if(funcClassApi == null) {
+				continue;
+			}
+
+			// Get the function name.
+			String funcName = ReflectionUtils.instantiateUnsafe(funcClass).getName();
+
+			// Create an identifier string of the function name and its platforms.
+			// Format: "funcName\tplatform1\tplatform2\t...platformN". Platforms are sorted to 'compare as sets'.
+			StringBuilder idStr = new StringBuilder(funcName);
+			Platforms[] platforms = funcClassApi.platform();
+			Arrays.sort(platforms, (Platforms p1, Platforms p2) -> p1.toString().compareTo(p2.toString()));
+			for(Platforms platform : platforms) {
+				idStr.append("\t").append(platform.toString());
+			}
+
+			// Store the function in the map by its identifier, adding an message if it is double defined.
+			Class<Function> replacedFuncClass = funcMap.put(idStr.toString(), funcClass);
+			if(replacedFuncClass != null) {
+				uhohs.add(funcName + " is implemented in two places, " + funcClass + " and " + replacedFuncClass);
 			}
 		}
+
+		// Fail if a function was double defined.
 		if(!uhohs.isEmpty()) {
 			fail(StringUtils.Join(uhohs, "\n"));
 		}
 	}
 
-//    @Test
-//    public void testBlah() throws Throwable{
-//	    StaticTest.InstallFakeConvertor(fakePlayer);
-//	    SRun("async_read('lsmith@localhost:/home/lsmith/test.txt', closure(@ret, @ex,"
-//		    + "if(@ex != null, sys_out(@ex), sys_out(@ret))))", null);
-//    }
+//	@Test
+//	public void testBlah() throws Throwable{
+//		StaticTest.InstallFakeConvertor(fakePlayer);
+//		SRun("async_read('lsmith@localhost:/home/lsmith/test.txt', closure(@ret, @ex,"
+//			+ "if(@ex != null, sys_out(@ex), sys_out(@ret))))", null);
+//	}
 }

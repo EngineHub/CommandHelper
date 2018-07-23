@@ -34,7 +34,7 @@ public abstract class AbstractDataSource implements DataSource {
 	protected AbstractDataSource() {
 		try {
 			uri = new URI("");
-		} catch(URISyntaxException ex) {
+		} catch (URISyntaxException ex) {
 			throw new RuntimeException(ex);
 		}
 	}

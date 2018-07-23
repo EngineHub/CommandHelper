@@ -30,6 +30,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -310,12 +311,12 @@ public class Echoes {
 	public static class color extends AbstractFunction implements Optimizable {
 
 		private final Map<String, CString> colors = new TreeMap<>();
-		private static final String symbols = "0123456789abcdefABCDEFmMnNoOlLkKrR";
+		private static final String SYMBOLS = "0123456789abcdefABCDEFmMnNoOlLkKrR";
 		public static final Set<Character> COLOR_SYMBOLS;
 
 		static {
 			Set<Character> temp = new TreeSet<>();
-			for(Character c : symbols.toCharArray()) {
+			for(Character c : SYMBOLS.toCharArray()) {
 				temp.add(c);
 			}
 			COLOR_SYMBOLS = Collections.unmodifiableSet(temp);
@@ -343,7 +344,7 @@ public class Echoes {
 			}
 			try {
 				color = MCChatColor.valueOf(val.toUpperCase()).toString();
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 			}
 			String a = val.toLowerCase();
 			switch(a) {
@@ -406,7 +407,7 @@ public class Echoes {
 						cc = MCChatColor.WHITE;
 					}
 					color = cc.toString();
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 				}
 			}
 
@@ -623,9 +624,14 @@ public class Echoes {
 
 		@Override
 		public String docs() {
-			return "void {message, [permission] | message, [players]} Broadcasts a message to all or some players."
-					+ " If permission is given, only players with that permission will see the broadcast."
-					+ " If an array is given, only players in the list will see the broadcast.";
+			return "void {message, [permission] | message, [recipients]} Broadcasts a message to all or some players"
+					+ " and/or console."
+					+ " If permission is given, only players with that permission and console will see the broadcast."
+					+ " If an array of recipients is given, only online players in the list will see the broadcast."
+					+ " Console will receive the broadcast only when the array contains case-insensitive '~console'."
+					+ " Offline players and duplicate recipients in the list will be ignored."
+					+ " If permission/recipients is null, all players and console will see the broadcast."
+					+ " Throws FormatException when the given recipients array is associative.";
 		}
 
 		@Override
@@ -646,29 +652,45 @@ public class Echoes {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			final MCServer server = Static.getServer();
-			String permission = null;
-			if(args.length == 2) {
-				if(args[1] instanceof CArray) {
-					CArray array = (CArray) args[1];
-					if(!array.isAssociative()) {
-						for(Construct p : array.asList()) {
-							try {
-								Static.GetPlayer(p, t).sendMessage(args[0].val());
-							} catch(CREPlayerOfflineException cre) {
-								// ignore offline players
-							}
-						}
-						return CVoid.VOID;
-					}
-					throw new CREFormatException("Expected a normal array or permission as the second parameter.", t);
-				}
-				permission = args[1].nval();
-			}
-			if(permission == null) {
+
+			// Handle "broadcast(message, [null])".
+			if(args.length == 1 || args[1].nval() == null) { // args.length can only be 1 or 2 due to the numArgs().
 				server.broadcastMessage(args[0].val());
-			} else {
-				server.broadcastMessage(args[0].val(), permission);
+				return CVoid.VOID;
 			}
+
+			// Handle "broadcast(message, recipientsArray)".
+			if(args[1] instanceof CArray) {
+
+				// Get the CArray and validate that it is non-associative.
+				CArray array = (CArray) args[1];
+				if(array.isAssociative()) {
+					throw new CREFormatException(
+							"Expected a non-associative array or permission as the second parameter.", t);
+				}
+
+				// Get the recipients from the array.
+				Set<MCCommandSender> recipients = new HashSet<>();
+				for(Construct p : array.asList()) {
+					if(p.val().equalsIgnoreCase("~console")) {
+						recipients.add(server.getConsole());
+					} else {
+						try {
+							recipients.add(Static.GetPlayer(p, t));
+						} catch (CREPlayerOfflineException cre) {
+							// Ignore offline players.
+						}
+					}
+				}
+
+				// Perform the broadcast and return cvoid.
+				server.broadcastMessage(args[0].val(), recipients);
+				return CVoid.VOID;
+			}
+
+			// Handle "broadcast(message, permission)".
+			String permission = args[1].nval();
+			server.broadcastMessage(args[0].val(), permission);
 			return CVoid.VOID;
 		}
 
@@ -789,13 +811,13 @@ public class Echoes {
 								i += (sl * 2) - 1;
 								continue;
 							}
-						} catch(IndexOutOfBoundsException e) {
+						} catch (IndexOutOfBoundsException e) {
 							//Ignored, it just means there aren't enough characters to do a second subsequence
 						}
 						Character c;
 						try {
 							c = stext.charAt(i + sl);
-						} catch(IndexOutOfBoundsException e) {
+						} catch (IndexOutOfBoundsException e) {
 							b.append(stext.charAt(i + sl - 1));
 							break;
 						}

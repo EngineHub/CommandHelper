@@ -29,7 +29,7 @@ public class Recipes {
 		return "This class of functions allows recipes to be managed.";
 	}
 
-	public static abstract class recipeFunction extends AbstractFunction {
+	public abstract static class recipeFunction extends AbstractFunction {
 
 		@Override
 		public boolean isRestricted() {
@@ -55,7 +55,7 @@ public class Recipes {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				return CBoolean.get(Static.getServer().addRecipe(ObjectGenerator.GetGenerator().recipe(args[0], t)));
-			} catch(IllegalStateException ex) {
+			} catch (IllegalStateException ex) {
 				// recipe with the given key probably already exists
 				return CBoolean.FALSE;
 			}
@@ -84,7 +84,7 @@ public class Recipes {
 					+ "   ingredients: Ingredients array of the recipe. See examples. (shaped and shapeless recipes)\n"
 					+ "   input: The input item array of the recipe. (furnace recipes)"
 					+ " </pre>"
-					+ " ---- Shaped Recipe. Turns 9 stone into obsidian."
+					+ " Shaped Recipe. Turns 9 stone into obsidian."
 					+ " <pre>"
 					+ "{\n"
 					+ "    key: 'stone_to_obsidian',"
@@ -94,7 +94,7 @@ public class Recipes {
 					+ "    ingredients: {A: {name: STONE}}\n"
 					+ "}"
 					+ "</pre>"
-					+ " ---- Shapeless Recipe. Combines tall grass and dirt to make grass."
+					+ " Shapeless Recipe. Combines tall grass and dirt to make grass."
 					+ "<pre>"
 					+ "{\n"
 					+ "    key: 'dirt_to_grass',"
@@ -103,7 +103,7 @@ public class Recipes {
 					+ "    ingredients: {{name: 'DIRT'}, {name: 'LONG_GRASS', data: 1}}\n"
 					+ "}"
 					+ "</pre>"
-					+ " ---- Furnace Recipe. Turns grass into dirt through smelting."
+					+ " Furnace Recipe. Turns grass into dirt through smelting."
 					+ " <pre>"
 					+ "{\n"
 					+ "    type: 'FURNACE',\n"

@@ -20,58 +20,59 @@ import java.lang.annotation.Target;
  */
 public abstract class FileSystemLayer {
 
-    protected final VirtualFile path;
-    protected final VirtualFileSystem fileSystem;
+	protected final VirtualFile path;
+	protected final VirtualFileSystem fileSystem;
 
-    protected FileSystemLayer(VirtualFile path, VirtualFileSystem fileSystem) {
-        this.path = path;
-        this.fileSystem = fileSystem;
-    }
+	protected FileSystemLayer(VirtualFile path, VirtualFileSystem fileSystem) {
+		this.path = path;
+		this.fileSystem = fileSystem;
+	}
 
-    public abstract InputStream getInputStream() throws IOException;
+	public abstract InputStream getInputStream() throws IOException;
 
-    public abstract void writeByteArray(byte[] bytes) throws IOException;
+	public abstract void writeByteArray(byte[] bytes) throws IOException;
 
-    public abstract VirtualFile[] listFiles() throws IOException;
+	public abstract VirtualFile[] listFiles() throws IOException;
 
-    public abstract void delete() throws IOException;
+	public abstract void delete() throws IOException;
 
-    /**
-     * This may work the exact same as delete in some cases, but otherwise, the
-     * file will be deleted upon exit of the virtual machine.
-     *
-     * @throws IOException
-     */
-    public abstract void deleteOnExit() throws IOException;
+	/**
+	 * This may work the exact same as delete in some cases, but otherwise, the
+	 * file will be deleted upon exit of the virtual machine.
+	 *
+	 * @throws IOException
+	 */
+	public abstract void deleteOnExit() throws IOException;
 
-    public abstract boolean exists() throws IOException;
+	public abstract boolean exists() throws IOException;
 
-    public abstract boolean canRead() throws IOException;
+	public abstract boolean canRead() throws IOException;
 
-    public abstract boolean canWrite() throws IOException;
+	public abstract boolean canWrite() throws IOException;
 
-    public abstract boolean isDirectory() throws IOException;
+	public abstract boolean isDirectory() throws IOException;
 
-    public abstract boolean isFile() throws IOException;
+	public abstract boolean isFile() throws IOException;
 
-    public abstract void mkdirs() throws IOException;
+	public abstract void mkdirs() throws IOException;
 
-    public abstract void createNewFile() throws IOException;
+	public abstract void createNewFile() throws IOException;
 
-    /**
-     * Used to denote a FileSystemLayer protocol
-     */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
-    public static @interface fslayer {
+	/**
+	 * Used to denote a FileSystemLayer protocol
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@SuppressWarnings("checkstyle:typename") // Fixing this violation might break dependents.
+	public static @interface fslayer {
 
-        /**
-         * The protocol identifier, for instance, "file", which would map to a
-         * file://uri type uri.
-         *
-         * @return
-         */
-        String value();
-    }
+		/**
+		 * The protocol identifier, for instance, "file", which would map to a
+		 * file://uri type uri.
+		 *
+		 * @return
+		 */
+		String value();
+	}
 
 }

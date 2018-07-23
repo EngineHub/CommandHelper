@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
@@ -28,7 +29,14 @@ import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBanner;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBeacon;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBrewingStand;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCChest;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDispenser;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDropper;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFurnace;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCHopper;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCShulkerBox;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
@@ -36,6 +44,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFireball;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHanging;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLivingEntity;
@@ -80,10 +89,15 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Banner;
-import org.bukkit.block.Block;
+import org.bukkit.block.Beacon;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.BrewingStand;
+import org.bukkit.block.Chest;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.block.DoubleChest;
+import org.bukkit.block.Dispenser;
+import org.bukkit.block.Dropper;
+import org.bukkit.block.Furnace;
+import org.bukkit.block.Hopper;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.command.BlockCommandSender;
@@ -95,6 +109,7 @@ import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Hanging;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -110,7 +125,18 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
-import org.bukkit.inventory.meta.*;
+import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.FireworkEffectMeta;
+import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.MapMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.inventory.meta.SpawnEggMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionData;
 import org.yaml.snakeyaml.Yaml;
@@ -165,7 +191,7 @@ public class BukkitConvertor extends AbstractConvertor {
 			//If they are looking it up by number, we can support that too
 			int i = Integer.valueOf(name);
 			return new BukkitMCEnchantment(Enchantment.getById(i));
-		} catch(NumberFormatException | NullPointerException e) {
+		} catch (NumberFormatException | NullPointerException e) {
 			return null;
 		}
 	}
@@ -230,25 +256,25 @@ public class BukkitConvertor extends AbstractConvertor {
 		return new BukkitMCMetadataValue(new FixedMetadataValue(((BukkitMCPlugin) plugin).getHandle(), value));
 	}
 
-	public static final BukkitBlockListener BlockListener = new BukkitBlockListener();
-	public static final BukkitEntityListener EntityListener = new BukkitEntityListener();
-	public static final BukkitInventoryListener InventoryListener = new BukkitInventoryListener();
-	public static final BukkitPlayerListener PlayerListener = new BukkitPlayerListener();
-	public static final BukkitServerListener ServerListener = new BukkitServerListener();
-	public static final BukkitVehicleListener VehicleListener = new BukkitVehicleListener();
-	public static final BukkitWeatherListener WeatherListener = new BukkitWeatherListener();
-	public static final BukkitWorldListener WorldListener = new BukkitWorldListener();
+	public static final BukkitBlockListener BLOCK_LISTENER = new BukkitBlockListener();
+	public static final BukkitEntityListener ENTITY_LISTENER = new BukkitEntityListener();
+	public static final BukkitInventoryListener INVENTORY_LISTENER = new BukkitInventoryListener();
+	public static final BukkitPlayerListener PLAYER_LISTENER = new BukkitPlayerListener();
+	public static final BukkitServerListener SERVER_LISTENER = new BukkitServerListener();
+	public static final BukkitVehicleListener VEHICLE_LISTENER = new BukkitVehicleListener();
+	public static final BukkitWeatherListener WEATHER_LISTENER = new BukkitWeatherListener();
+	public static final BukkitWorldListener WORLD_LISTENER = new BukkitWorldListener();
 
 	@Override
 	public void Startup(CommandHelperPlugin chp) {
-		chp.registerEvents(BlockListener);
-		chp.registerEventsDynamic(EntityListener);
-		chp.registerEventsDynamic(InventoryListener);
-		chp.registerEvents(PlayerListener);
-		chp.registerEvents(ServerListener);
-		chp.registerEvents(VehicleListener);
-		chp.registerEvents(WeatherListener);
-		chp.registerEvents(WorldListener);
+		chp.registerEvents(BLOCK_LISTENER);
+		chp.registerEventsDynamic(ENTITY_LISTENER);
+		chp.registerEventsDynamic(INVENTORY_LISTENER);
+		chp.registerEvents(PLAYER_LISTENER);
+		chp.registerEventsDynamic(SERVER_LISTENER);
+		chp.registerEvents(VEHICLE_LISTENER);
+		chp.registerEvents(WEATHER_LISTENER);
+		chp.registerEvents(WORLD_LISTENER);
 	}
 
 	@Override
@@ -277,60 +303,60 @@ public class BukkitConvertor extends AbstractConvertor {
 					return null;
 				}
 			});
-		} catch(CancellationException ex) {
+		} catch (CancellationException ex) {
 			// Ignore the Exception when the plugin is disabled (server shutting down).
 			if(CommandHelperPlugin.self.isEnabled()) {
 				java.util.logging.Logger.getLogger(BukkitConvertor.class.getName()).log(Level.SEVERE, null, ex);
 			}
-		} catch(InterruptedException | ExecutionException ex) {
+		} catch (InterruptedException | ExecutionException ex) {
 			java.util.logging.Logger.getLogger(BukkitConvertor.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 
-//    /**
-//     * We don't want to allow scripts to clear other plugin's tasks
-//     * on accident, so only ids registered through our interface
-//     * can also be cancelled.
-//     */
-//    private static final Set<Integer> validIDs = new TreeSet<Integer>();
+//	/**
+//	 * We don't want to allow scripts to clear other plugin's tasks
+//	 * on accident, so only ids registered through our interface
+//	 * can also be cancelled.
+//	 */
+//	private static final Set<Integer> validIDs = new TreeSet<Integer>();
 //
 //	@Override
-//    public synchronized int SetFutureRunnable(DaemonManager dm, long ms, Runnable r) {
-//        int id = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(CommandHelperPlugin.self, r, Static.msToTicks(ms));
-//        validIDs.add(id);
-//        return id;
-//    }
+//	public synchronized int SetFutureRunnable(DaemonManager dm, long ms, Runnable r) {
+//		int id = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(CommandHelperPlugin.self, r, Static.msToTicks(ms));
+//		validIDs.add(id);
+//		return id;
+//	}
 //
 //	@Override
-//    public synchronized int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r){
-//        int id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(CommandHelperPlugin.self, r, Static.msToTicks(initialDelay), Static.msToTicks(ms));
-//        validIDs.add(id);
-//        return id;
-//    }
+//	public synchronized int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r){
+//		int id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(CommandHelperPlugin.self, r, Static.msToTicks(initialDelay), Static.msToTicks(ms));
+//		validIDs.add(id);
+//		return id;
+//	}
 //
 //	@Override
-//    public synchronized void ClearAllRunnables() {
+//	public synchronized void ClearAllRunnables() {
 //		//Doing cancelTasks apparently does not work, so let's just manually cancel each task, which does appear to work.
 //		//Anyways, it's better that way anyhow, because we actually remove IDs from validIDs that way.
-//        //((BukkitMCServer)Static.getServer()).__Server().getScheduler().cancelTasks(CommandHelperPlugin.self);
+//		//((BukkitMCServer)Static.getServer()).__Server().getScheduler().cancelTasks(CommandHelperPlugin.self);
 //		Set<Integer> ids = new TreeSet<Integer>(validIDs);
 //		for(int id : ids){
-//			try{
+//			try {
 //				//If this doesn't work, it shouldn't kill everything.
 //				ClearFutureRunnable(id);
-//			} catch(Exception e){
+//			} catch (Exception e){
 //				Logger.getLogger(BukkitConvertor.class.getName()).log(null, Level.SEVERE, e);
 //			}
 //		}
-//    }
+//	}
 //
 //	@Override
-//    public void ClearFutureRunnable(int id) {
-//        if(validIDs.contains(id)){
-//            Bukkit.getServer().getScheduler().cancelTask(id);
-//            validIDs.remove(id);
-//        }
-//    }
+//	public void ClearFutureRunnable(int id) {
+//		if(validIDs.contains(id)){
+//			Bukkit.getServer().getScheduler().cancelTask(id);
+//			validIDs.remove(id);
+//		}
+//	}
 	public static MCEntity BukkitGetCorrectEntity(Entity be) {
 		if(be == null) {
 			return null;
@@ -350,6 +376,12 @@ public class BukkitConvertor extends AbstractConvertor {
 			// Must come before Vehicle
 			type.setWrapperClass(BukkitMCMinecart.class);
 			return new BukkitMCMinecart(be);
+		}
+
+		if(be instanceof Fireball) {
+			// Must come before Projectile
+			type.setWrapperClass(BukkitMCFireball.class);
+			return new BukkitMCFireball(be);
 		}
 
 		if(be instanceof Projectile) {
@@ -407,7 +439,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		Entity be = ((BukkitMCEntity) e).getHandle();
 		try {
 			return BukkitConvertor.BukkitGetCorrectEntity(be);
-		} catch(IllegalArgumentException iae) {
+		} catch (IllegalArgumentException iae) {
 			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.INFO, iae.getMessage(), Target.UNKNOWN);
 			return e;
 		}
@@ -431,7 +463,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		Collection<Entity> near;
 		try {
 			near = l.getWorld().getNearbyEntities(l, radius, radius, radius);
-		} catch(NoSuchMethodError ex) {
+		} catch (NoSuchMethodError ex) {
 			// Probably before 1.8.3
 			Entity tempEntity = l.getWorld().spawnEntity(l, EntityType.ARROW);
 			near = tempEntity.getNearbyEntities(radius, radius, radius);
@@ -454,6 +486,27 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if(bs instanceof CreatureSpawner) {
 			return new BukkitMCCreatureSpawner((CreatureSpawner) bs);
+		}
+		if(bs instanceof Beacon) {
+			return new BukkitMCBeacon((Beacon) bs);
+		}
+		if(bs instanceof BrewingStand) {
+			return new BukkitMCBrewingStand((BrewingStand) bs);
+		}
+		if(bs instanceof Chest) {
+			return new BukkitMCChest((Chest) bs);
+		}
+		if(bs instanceof Dispenser) {
+			return new BukkitMCDispenser((Dispenser) bs);
+		}
+		if(bs instanceof Dropper) {
+			return new BukkitMCDropper((Dropper) bs);
+		}
+		if(bs instanceof Furnace) {
+			return new BukkitMCFurnace((Furnace) bs);
+		}
+		if(bs instanceof Hopper) {
+			return new BukkitMCHopper((Hopper) bs);
 		}
 		return new BukkitMCBlockState(bs);
 	}
@@ -502,27 +555,24 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(entity instanceof InventoryHolder) {
 			if(entity instanceof Player) {
 				return new BukkitMCPlayerInventory(((Player) entity).getInventory());
-			} else {
-				return new BukkitMCInventory(((InventoryHolder) entity).getInventory());
 			}
-		} else {
-			return null;
+			return new BukkitMCInventory(((InventoryHolder) entity).getInventory());
 		}
+		return null;
 	}
 
 	@Override
 	public MCInventory GetLocationInventory(MCLocation location) {
-		Block b = ((Location) location.getHandle()).getBlock();
-		if(b.getState() instanceof InventoryHolder) {
-			if(b.getState() instanceof DoubleChest) {
-				DoubleChest dc = (DoubleChest) b.getState();
-				return new BukkitMCDoubleChest(dc.getLeftSide().getInventory(), dc.getRightSide().getInventory());
-			} else {
-				return new BukkitMCInventory(((InventoryHolder) b.getState()).getInventory());
-			}
-		} else {
-			return null;
+		BlockState bs = ((Location) location.getHandle()).getBlock().getState();
+		if(bs instanceof InventoryHolder) {
+			return new BukkitMCInventory(((InventoryHolder) bs).getInventory());
 		}
+		return null;
+	}
+
+	@Override
+	public MCInventoryHolder CreateInventoryHolder(String id) {
+		return new BukkitMCVirtualInventoryHolder(id);
 	}
 
 	@Override
@@ -563,6 +613,11 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCColor GetColor(int red, int green, int blue) {
 		return BukkitMCColor.GetMCColor(Color.fromRGB(red, green, blue));
+	}
+
+	@Override
+	public MCColor GetColor(String colorName, Target t) throws CREFormatException {
+		return ConvertorHelper.GetColor(colorName, t);
 	}
 
 	@Override
@@ -682,11 +737,6 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCPlugin GetPlugin() {
 		return new BukkitMCPlugin(CommandHelperPlugin.self);
-	}
-
-	@Override
-	public MCColor GetColor(String colorName, Target t) throws CREFormatException {
-		return ConvertorHelper.GetColor(colorName, t);
 	}
 
 	@Override

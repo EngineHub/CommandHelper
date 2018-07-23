@@ -66,7 +66,7 @@ public class NativeTypeList {
 	public static Class<? extends Mixed> getNativeClassOrInterfaceRunner(String methodscriptType) throws ClassNotFoundException {
 		try {
 			return getInterfaceRunnerFor(methodscriptType);
-		} catch(ClassNotFoundException | IllegalArgumentException ex) {
+		} catch (ClassNotFoundException | IllegalArgumentException ex) {
 			return getNativeClass(methodscriptType);
 		}
 	}

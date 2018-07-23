@@ -24,8 +24,9 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -87,13 +88,13 @@ public class PlayerManangementTest {
 		assertEquals("~console", SRun("player()", c));
 	}
 
-//    @Test(timeout = 10000)
-//    public void testAllPlayers() throws Exception {
-//        String script = "all_players()";
-//        String done = SRun(script, fakePlayer);
-//        //This output is too long to test with msg()
-//        assertEquals("{player1, player2, player3, player}", done);
-//    }
+//	@Test(timeout = 10000)
+//	public void testAllPlayers() throws Exception {
+//		String script = "all_players()";
+//		String done = SRun(script, fakePlayer);
+//		//This output is too long to test with msg()
+//		assertEquals("{player1, player2, player3, player}", done);
+//	}
 	@Test
 	public void testPloc() throws Exception, Exception {
 		String script = "msg(ploc())";
@@ -117,7 +118,7 @@ public class PlayerManangementTest {
 		Run("set_ploc(1, 1, 1)", fakePlayer);
 		//when(StaticLayer.GetLocation(w, 1, 2, 1)).thenReturn(loc);
 		MCLocation loc1 = StaticTest.GetFakeLocation(w, 1, 2, 1);
-		assertEquals(fakePlayer.getLocation().getX(), loc1.getX(), 0.00000000000001);//verify(fakePlayer).teleport(loc1);
+		assertEquals(fakePlayer.getLocation().getX(), loc1.getX(), 0.00000000000001); // verify(fakePlayer).teleport(loc1);
 
 		Run("set_ploc(array(2, 2, 2))", fakePlayer);
 		verify(fakePlayer).teleport(StaticLayer.GetLocation(w, 2, 3, 2, 0, 0));
@@ -168,43 +169,43 @@ public class PlayerManangementTest {
 		assertEquals("~console", SRun("player()", fakeConsole));
 	}
 
-//    //@Test(timeout=10000)
-//    public void testPinfo(){
+//	//@Test(timeout=10000)
+//	public void testPinfo(){
 //
-//    }
+//	}
 //
-//    //@Test(timeout=10000)
-//    public void testPworld(){
+//	//@Test(timeout=10000)
+//	public void testPworld(){
 //
-//    }
+//	}
 //
-//    //@Test(timeout=10000)
-//    public void testKick(){
+//	//@Test(timeout=10000)
+//	public void testKick(){
 //
-//    }
+//	}
 //
-//    //@Test(timeout=10000)
-//    public void testSetDisplayName(){
+//	//@Test(timeout=10000)
+//	public void testSetDisplayName(){
 //
-//    }
+//	}
 //
-//    //@Test(timeout=10000)
-//    public void testResetDisplayName(){
+//	//@Test(timeout=10000)
+//	public void testResetDisplayName(){
 //
-//    }
+//	}
 //
-//    //@Test(timeout=10000)
-//    public void testPFacing(){
+//	//@Test(timeout=10000)
+//	public void testPFacing(){
 //
-//    }
+//	}
 //
-//    //@Test(timeout=10000)
-//    public void testPinv(){
+//	//@Test(timeout=10000)
+//	public void testPinv(){
 //
-//    }
+//	}
 //
-//    //@Test(timeout=10000)
-//    public void testSetPinv(){
+//	//@Test(timeout=10000)
+//	public void testSetPinv(){
 //
-//    }
+//	}
 }

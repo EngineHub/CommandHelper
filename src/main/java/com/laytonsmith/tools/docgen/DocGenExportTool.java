@@ -58,7 +58,7 @@ public class DocGenExportTool {
 			Function f;
 			try {
 				f = ReflectionUtils.newInstance(functionC);
-			} catch(NoClassDefFoundError ex) {
+			} catch (NoClassDefFoundError ex) {
 				StreamUtils.GetSystemErr().println("While attempting to load: " + functionC.getName() + ": " + ex.getMessage());
 				continue;
 			}
@@ -95,7 +95,7 @@ public class DocGenExportTool {
 		try {
 			out.write(output.getBytes("UTF-8"));
 			out.flush();
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			Logger.getLogger(DocGenExportTool.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}

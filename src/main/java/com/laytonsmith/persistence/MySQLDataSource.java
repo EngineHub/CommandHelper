@@ -38,8 +38,8 @@ public class MySQLDataSource extends SQLDataSource {
 	public MySQLDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		super(uri, options);
 		try {
-			Class.forName(com.mysql.jdbc.Driver.class.getName());
-		} catch(ClassNotFoundException ex) {
+			Class.forName(com.mysql.cj.jdbc.Driver.class.getName());
+		} catch (ClassNotFoundException ex) {
 			throw new DataSourceException("Could not instantiate a MySQL data source, no driver appears to exist.", ex);
 		}
 		host = uri.getHost();
@@ -75,7 +75,7 @@ public class MySQLDataSource extends SQLDataSource {
 			try(Statement statement = getConnection().createStatement()) {
 				statement.executeUpdate(getTableCreationQuery(table));
 			}
-		} catch(IOException | SQLException ex) {
+		} catch (IOException | SQLException ex) {
 			throw new DataSourceException("Could not connect to MySQL data source \"" + uri.toString() + "\": " + ex.getMessage(), ex);
 		}
 
@@ -117,7 +117,7 @@ public class MySQLDataSource extends SQLDataSource {
 					+ "&jdbcCompliantTruncation=false"
 					+ (username == null ? "" : "&user=" + URLEncoder.encode(username, "UTF-8"))
 					+ (password == null ? "" : "&password=" + URLEncoder.encode(password, "UTF-8"));
-		} catch(UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -141,7 +141,7 @@ public class MySQLDataSource extends SQLDataSource {
 			}
 			updateLastConnected();
 			return ret;
-		} catch(SQLException | IOException ex) {
+		} catch (SQLException | IOException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
@@ -166,7 +166,7 @@ public class MySQLDataSource extends SQLDataSource {
 			}
 			updateLastConnected();
 			return true;
-		} catch(SQLException ex) {
+		} catch (SQLException ex) {
 			throw new DataSourceException(ex.getMessage(), ex);
 		}
 	}
@@ -183,7 +183,7 @@ public class MySQLDataSource extends SQLDataSource {
 					statement.executeUpdate();
 				}
 				updateLastConnected();
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new DataSourceException(e.getMessage(), e);
 			}
 		}
@@ -215,7 +215,7 @@ public class MySQLDataSource extends SQLDataSource {
 			try(Statement statement = getConnection().createStatement()) {
 				statement.execute("START TRANSACTION");
 			}
-		} catch(SQLException ex) {
+		} catch (SQLException ex) {
 			Logger.getLogger(MySQLDataSource.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -233,7 +233,7 @@ public class MySQLDataSource extends SQLDataSource {
 				}
 			}
 			updateLastConnected();
-		} catch(SQLException ex) {
+		} catch (SQLException ex) {
 			Logger.getLogger(MySQLDataSource.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}

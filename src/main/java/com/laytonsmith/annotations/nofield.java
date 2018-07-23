@@ -11,6 +11,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
+@SuppressWarnings("checkstyle:typename") // Fixing this violation might break dependents.
 public @interface nofield {
 
 }

@@ -69,7 +69,7 @@ import java.util.regex.Pattern;
  */
 public final class MethodScriptCompiler {
 
-	private final static EnumSet<Optimizable.OptimizationOption> NO_OPTIMIZATIONS = EnumSet.noneOf(Optimizable.OptimizationOption.class);
+	private static final EnumSet<Optimizable.OptimizationOption> NO_OPTIMIZATIONS = EnumSet.noneOf(Optimizable.OptimizationOption.class);
 
 	private MethodScriptCompiler() {
 	}
@@ -121,25 +121,25 @@ public final class MethodScriptCompiler {
 		script = script.replaceAll("\r\n", "\n");
 		script = script + "\n";
 		final Set<String> keywords = KeywordList.getKeywordNames();
-		final TokenStream token_list = new TokenStream();
+		final TokenStream tokenList = new TokenStream();
 
 		// Set our state variables.
-		boolean state_in_quote = false;
+		boolean stateInQuote = false;
 		int quoteLineNumberStart = 1;
-		boolean in_smart_quote = false;
+		boolean inSmartQuote = false;
 		int smartQuoteLineNumberStart = 1;
-		boolean in_comment = false;
+		boolean inComment = false;
 		int commentLineNumberStart = 1;
-		boolean comment_is_block = false;
-		boolean in_opt_var = false;
+		boolean commentIsBlock = false;
+		boolean inOptVar = false;
 		boolean inCommand = (!inPureMScript);
 		boolean inMultiline = false;
-		boolean in_smart_comment = false;
-		boolean in_file_options = false;
+		boolean inSmartComment = false;
+		boolean inFileOptions = false;
 		int fileOptionsLineNumberStart = 1;
 
 		StringBuilder buf = new StringBuilder();
-		int line_num = 1;
+		int lineNum = 1;
 		int column = 1;
 		int lastColumn = 0;
 		Target target = Target.UNKNOWN;
@@ -155,18 +155,18 @@ public final class MethodScriptCompiler {
 			column += i - lastColumn;
 			lastColumn = i;
 			if(c == '\n') {
-				line_num++;
+				lineNum++;
 				column = 1;
 				if(!inMultiline && !inPureMScript) {
 					inCommand = true;
 				}
 			}
 			if(buf.length() == 0) {
-				target = new Target(line_num, file, column);
+				target = new Target(lineNum, file, column);
 			}
 
 			// If we are in file options, add the character to the buffer if it's not a file options end character.
-			if(in_file_options) {
+			if(inFileOptions) {
 				// For a '>' character outside of a comment, '\>' would have to be used in file options.
 				// Other characters than '>'cannot be escaped.
 				// If support for more escaped characters would be desired in the future, it could be added here.
@@ -177,14 +177,15 @@ public final class MethodScriptCompiler {
 							i++;
 							continue;
 						}
+						break;
 					}
 					case '>': {
 						if(saveAllTokens) {
-							token_list.add(new Token(TType.FILE_OPTIONS_STRING,
+							tokenList.add(new Token(TType.FILE_OPTIONS_STRING,
 									fileOptions.toString(), target));
-							token_list.add(new Token(TType.FILE_OPTIONS_END, ">", target));
+							tokenList.add(new Token(TType.FILE_OPTIONS_END, ">", target));
 						}
-						in_file_options = false;
+						inFileOptions = false;
 						continue;
 					}
 				}
@@ -193,27 +194,27 @@ public final class MethodScriptCompiler {
 			}
 
 			// Comment handling. This is bypassed if we are in a string.
-			if(!state_in_quote && !in_smart_quote) {
+			if(!stateInQuote && !inSmartQuote) {
 				switch(c) {
 
 					// Block comments start (/* and /**) and Double slash line comment start (//).
 					case '/': {
-						if(!in_comment) {
+						if(!inComment) {
 							if(c2 == '*') { // "/*" or "/**".
 								buf.append("/*");
-								in_comment = true;
-								comment_is_block = true;
+								inComment = true;
+								commentIsBlock = true;
 								if(i < script.length() - 2 && script.charAt(i + 2) == '*') { // "/**".
-									in_smart_comment = true;
+									inSmartComment = true;
 									buf.append("*");
 									i++;
 								}
-								commentLineNumberStart = line_num;
+								commentLineNumberStart = lineNum;
 								i++;
 								continue;
 							} else if(c2 == '/') { // "//".
 								buf.append("//");
-								in_comment = true;
+								inComment = true;
 								i++;
 								continue;
 							}
@@ -223,9 +224,9 @@ public final class MethodScriptCompiler {
 
 					// Line comment start (#).
 					case '#': {
-						if(!in_comment) { // "#".
+						if(!inComment) { // "#".
 							buf.append("#");
-							in_comment = true;
+							inComment = true;
 							continue;
 						}
 						break;
@@ -233,17 +234,17 @@ public final class MethodScriptCompiler {
 
 					// Block comment end (*/).
 					case '*': {
-						if(in_comment && comment_is_block && c2 == '/') { // "*/".
-							if(saveAllTokens || in_smart_comment) {
+						if(inComment && commentIsBlock && c2 == '/') { // "*/".
+							if(saveAllTokens || inSmartComment) {
 								buf.append("*/");
-								token_list.add(new Token(in_smart_comment ? TType.SMART_COMMENT : TType.COMMENT,
+								tokenList.add(new Token(inSmartComment ? TType.SMART_COMMENT : TType.COMMENT,
 										buf.toString(), target));
 							}
 							buf = new StringBuilder();
-							target = new Target(line_num, file, column);
-							in_comment = false;
-							comment_is_block = false;
-							in_smart_comment = false;
+							target = new Target(lineNum, file, column);
+							inComment = false;
+							commentIsBlock = false;
+							inSmartComment = false;
 							i++;
 							continue;
 						}
@@ -252,14 +253,14 @@ public final class MethodScriptCompiler {
 
 					// Line comment end (\n).
 					case '\n': {
-						if(in_comment && !comment_is_block) { // "\n".
-							in_comment = false;
+						if(inComment && !commentIsBlock) { // "\n".
+							inComment = false;
 							if(saveAllTokens) {
-								token_list.add(new Token(TType.COMMENT, buf.toString(), target));
-								token_list.add(new Token(TType.NEWLINE, "\n", new Target(line_num + 1, file, 0)));
+								tokenList.add(new Token(TType.COMMENT, buf.toString(), target));
+								tokenList.add(new Token(TType.NEWLINE, "\n", new Target(lineNum + 1, file, 0)));
 							}
 							buf = new StringBuilder();
-							target = new Target(line_num, file, column);
+							target = new Target(lineNum, file, column);
 							continue;
 						}
 						break;
@@ -268,13 +269,13 @@ public final class MethodScriptCompiler {
 			}
 
 			// If we are in a comment, add the character to the buffer.
-			if(in_comment) {
+			if(inComment) {
 				buf.append(c);
 				continue;
 			}
 
 			// Handle non-comment non-quoted characters.
-			if(!state_in_quote) {
+			if(!stateInQuote) {
 				// We're not in a comment or quoted string, handle: +=, -=, *=, /=, .=, ->, ++, --, %, **, *, +, -, /,
 				// >=, <=, <<<, >>>, <, >, ===, !==, ==, !=, &&&, |||, &&, ||, !, {, }, .., ., ::, [, =, ], :, comma,
 				// (, ), ;, and whitespace.
@@ -364,18 +365,18 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '<': {
-							if(c2 == '!') { // "<!".								
+							if(c2 == '!') { // "<!".
 								if(buf.length() > 0) {
-									token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+									tokenList.add(new Token(TType.UNKNOWN, buf.toString(), target));
 									buf = new StringBuilder();
-									target = new Target(line_num, file, column);
+									target = new Target(lineNum, file, column);
 								}
 
 								if(saveAllTokens) {
-									token_list.add(new Token(TType.FILE_OPTIONS_START, "<!", target));
+									tokenList.add(new Token(TType.FILE_OPTIONS_START, "<!", target));
 								}
-								in_file_options = true;
-								fileOptionsLineNumberStart = line_num;
+								inFileOptions = true;
+								fileOptionsLineNumberStart = lineNum;
 								i++;
 								continue;
 							} else if(c2 == '=') { // "<=".
@@ -401,7 +402,7 @@ public final class MethodScriptCompiler {
 								}
 							} else { // "=".
 								if(inCommand) {
-									if(in_opt_var) {
+									if(inOptVar) {
 										token = new Token(TType.OPT_VAR_ASSIGN, "=", target);
 									} else {
 										token = new Token(TType.ALIAS_END, "=", target);
@@ -483,12 +484,12 @@ public final class MethodScriptCompiler {
 						}
 						case '[': {
 							token = new Token(TType.LSQUARE_BRACKET, "[", target);
-							in_opt_var = true;
+							inOptVar = true;
 							break;
 						}
 						case ']': {
 							token = new Token(TType.RSQUARE_BRACKET, "]", target);
-							in_opt_var = false;
+							inOptVar = false;
 							break;
 						}
 						case ',': {
@@ -511,23 +512,23 @@ public final class MethodScriptCompiler {
 									// true, because we know that won't be used by the compiler.
 									if(KeywordList.getKeywordByName(buf.toString()) != null) {
 										// It's a keyword.
-										token_list.add(new Token(TType.KEYWORD, buf.toString(), target));
+										tokenList.add(new Token(TType.KEYWORD, buf.toString(), target));
 									} else {
 										// It's not a keyword, but a normal function.
-										token_list.add(new Token(TType.FUNC_NAME, buf.toString(), target));
+										tokenList.add(new Token(TType.FUNC_NAME, buf.toString(), target));
 									}
 								} else {
-									token_list.add(new Token(TType.FUNC_NAME, buf.toString(), target));
+									tokenList.add(new Token(TType.FUNC_NAME, buf.toString(), target));
 								}
 								buf = new StringBuilder();
-								target = new Target(line_num, file, column);
+								target = new Target(lineNum, file, column);
 							} else {
 								// The previous token, if unknown, should be changed to a FUNC_NAME. If it's not
 								// unknown, we may be doing standalone parenthesis, so auto tack on the __autoconcat__
 								// function.
 								try {
 									int count = 0;
-									Iterator<Token> it = token_list.descendingIterator();
+									Iterator<Token> it = tokenList.descendingIterator();
 									Token t;
 									while((t = it.next()).type == TType.WHITESPACE) {
 										count++;
@@ -537,14 +538,14 @@ public final class MethodScriptCompiler {
 										// Go ahead and remove the whitespace here too, they break things.
 										count--;
 										for(int a = 0; a < count; a++) {
-											token_list.removeLast();
+											tokenList.removeLast();
 										}
 									} else {
-										token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
+										tokenList.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
 									}
-								} catch(NoSuchElementException e) {
+								} catch (NoSuchElementException e) {
 									// This is the first element on the list, so, it's another autoconcat.
-									token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
+									tokenList.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
 								}
 							}
 							break;
@@ -569,13 +570,13 @@ public final class MethodScriptCompiler {
 
 					// Add previous characters as UNKNOWN token.
 					if(buf.length() > 0) {
-						token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+						tokenList.add(new Token(TType.UNKNOWN, buf.toString(), target));
 						buf = new StringBuilder();
-						target = new Target(line_num, file, column);
+						target = new Target(lineNum, file, column);
 					}
 
 					// Add the new token to the token list.
-					token_list.add(token);
+					tokenList.add(token);
 
 					// Continue lexing.
 					continue;
@@ -585,20 +586,20 @@ public final class MethodScriptCompiler {
 			// Handle non-comment characters that might start or stop a quoted string.
 			switch(c) {
 				case '\'': {
-					if(state_in_quote && !in_smart_quote) {
-						token_list.add(new Token(TType.STRING, buf.toString(), target));
+					if(stateInQuote && !inSmartQuote) {
+						tokenList.add(new Token(TType.STRING, buf.toString(), target));
 						buf = new StringBuilder();
-						target = new Target(line_num, file, column);
-						state_in_quote = false;
+						target = new Target(lineNum, file, column);
+						stateInQuote = false;
 						continue;
-					} else if(!state_in_quote) {
-						state_in_quote = true;
-						quoteLineNumberStart = line_num;
-						in_smart_quote = false;
+					} else if(!stateInQuote) {
+						stateInQuote = true;
+						quoteLineNumberStart = lineNum;
+						inSmartQuote = false;
 						if(buf.length() > 0) {
-							token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+							tokenList.add(new Token(TType.UNKNOWN, buf.toString(), target));
 							buf = new StringBuilder();
-							target = new Target(line_num, file, column);
+							target = new Target(lineNum, file, column);
 						}
 						continue;
 					} else {
@@ -608,21 +609,21 @@ public final class MethodScriptCompiler {
 					break;
 				}
 				case '"': {
-					if(state_in_quote && in_smart_quote) {
-						token_list.add(new Token(TType.SMART_STRING, buf.toString(), target));
+					if(stateInQuote && inSmartQuote) {
+						tokenList.add(new Token(TType.SMART_STRING, buf.toString(), target));
 						buf = new StringBuilder();
-						target = new Target(line_num, file, column);
-						state_in_quote = false;
-						in_smart_quote = false;
+						target = new Target(lineNum, file, column);
+						stateInQuote = false;
+						inSmartQuote = false;
 						continue;
-					} else if(!state_in_quote) {
-						state_in_quote = true;
-						in_smart_quote = true;
-						smartQuoteLineNumberStart = line_num;
+					} else if(!stateInQuote) {
+						stateInQuote = true;
+						inSmartQuote = true;
+						smartQuoteLineNumberStart = lineNum;
 						if(buf.length() > 0) {
-							token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+							tokenList.add(new Token(TType.UNKNOWN, buf.toString(), target));
 							buf = new StringBuilder();
-							target = new Target(line_num, file, column);
+							target = new Target(lineNum, file, column);
 						}
 						continue;
 					} else {
@@ -634,16 +635,16 @@ public final class MethodScriptCompiler {
 				case '\n': {
 
 					// Append a newline to the buffer if it's quoted.
-					if(state_in_quote) {
+					if(stateInQuote) {
 						buf.append(c);
 					} else {
 						// Newline is not quoted. Move the buffer to an UNKNOWN token and add a NEWLINE token.
 						if(buf.length() > 0) {
-							token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+							tokenList.add(new Token(TType.UNKNOWN, buf.toString(), target));
 							buf = new StringBuilder();
-							target = new Target(line_num, file, column);
+							target = new Target(lineNum, file, column);
 						}
-						token_list.add(new Token(TType.NEWLINE, "\n", target));
+						tokenList.add(new Token(TType.NEWLINE, "\n", target));
 					}
 					continue;
 				}
@@ -651,8 +652,8 @@ public final class MethodScriptCompiler {
 					// Handle escaped characters in quotes or a single "\" seperator token otherwise.
 
 					// Handle backslash character outside of quotes.
-					if(!state_in_quote) {
-						token_list.add(new Token(TType.SEPERATOR, "\\", target));
+					if(!stateInQuote) {
+						tokenList.add(new Token(TType.SEPERATOR, "\\", target));
 						break;
 					}
 
@@ -696,7 +697,7 @@ public final class MethodScriptCompiler {
 							int unicodeNum;
 							try {
 								unicodeNum = Integer.parseInt(unicode, 16);
-							} catch(NumberFormatException e) {
+							} catch (NumberFormatException e) {
 								throw new ConfigCompileException(
 										"Unrecognized unicode escape sequence: \\u" + unicode, target);
 							}
@@ -713,7 +714,7 @@ public final class MethodScriptCompiler {
 							int unicodeNum;
 							try {
 								unicodeNum = Integer.parseInt(unicode, 16);
-							} catch(NumberFormatException e) {
+							} catch (NumberFormatException e) {
 								throw new ConfigCompileException(
 										"Unrecognized unicode escape sequence: \\u" + unicode, target);
 							}
@@ -722,7 +723,7 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '@': {
-							if(!in_smart_quote) {
+							if(!inSmartQuote) {
 								throw new ConfigCompileException("The escape sequence \\@ is not"
 										+ " a recognized escape sequence in a non-smart string", target);
 							}
@@ -743,7 +744,7 @@ public final class MethodScriptCompiler {
 					// At this point, only non-comment and non-escaped characters that are not part of a
 					// quote start/end are left.
 					// Disallow Non-Breaking Space Characters.
-					if(!state_in_quote && c == '\u00A0'/*nbsp*/) {
+					if(!stateInQuote && c == '\u00A0'/*nbsp*/) {
 						throw new ConfigCompileException("NBSP character in script", target);
 					}
 
@@ -755,14 +756,14 @@ public final class MethodScriptCompiler {
 		} // End of lexing.
 
 		// Handle unended file options.
-		if(in_file_options) {
+		if(inFileOptions) {
 			throw new ConfigCompileException("Unended file options. You started the the file options on line "
 					+ fileOptionsLineNumberStart, target);
 		}
 
 		// Handle unended string literals.
-		if(state_in_quote) {
-			if(in_smart_quote) {
+		if(stateInQuote) {
+			if(inSmartQuote) {
 				throw new ConfigCompileException("Unended string literal. You started the last double quote on line "
 						+ smartQuoteLineNumberStart, target);
 			} else {
@@ -772,14 +773,14 @@ public final class MethodScriptCompiler {
 		}
 
 		// Handle unended comment blocks. Since a newline is added to the end of the script, line comments are ended.
-		if(in_comment || comment_is_block) {
+		if(inComment || commentIsBlock) {
 			throw new ConfigCompileException("Unended block comment. You started the comment on line "
 					+ commentLineNumberStart, target);
 		}
 
 		// Look at the tokens and get meaning from them. Also, look for improper symbol locations
 		// and go ahead and absorb unary +- into the token.
-		ListIterator<Token> it = token_list.listIterator(0);
+		ListIterator<Token> it = tokenList.listIterator(0);
 		while(it.hasNext()) {
 			Token t = it.next();
 
@@ -798,23 +799,32 @@ public final class MethodScriptCompiler {
 
 			// Convert "-" + number to -number if allowed.
 			it.previous(); // Select 't' <--.
-			if(it.hasPrevious()) {
+			if(it.hasPrevious() && t.type == TType.UNKNOWN) {
 				Token prev1 = it.previous(); // Select 'prev1' <--.
-				if(it.hasPrevious()) {
-					Token prev2 = it.previous(); // Select 'prev2' <--.
-					if(t.type == TType.UNKNOWN && prev1.type.isPlusMinus() // Convert "± UNKNOWN".
-							&& !prev2.type.isIdentifier() // Don't convert "number/string/var ± ...".
-							&& prev2.type != TType.FUNC_END // Don't convert "func() ± ...".
-							&& !IVAR_PATTERN.matcher(t.val()).matches() // Don't convert "± @var".
-							&& !VAR_PATTERN.matcher(t.val()).matches()) { // Don't convert "± $var".
-						// It is a negative/positive number: Absorb the sign.
-						t.value = prev1.value + t.value;
-						it.next(); // Select 'prev2' -->.
-						it.next(); // Select 'prev1' -->.
-						it.remove(); // Remove 'prev1'.
-					} else {
-						it.next(); // Select 'prev2' -->.
-						it.next(); // Select 'prev1' -->.
+				if(prev1.type.isPlusMinus()) {
+
+					// Find the first non-whitespace token before the '-'.
+					Token prevNonWhitespace = null;
+					while(it.hasPrevious()) {
+						if(it.previous().type != TType.WHITESPACE) {
+							prevNonWhitespace = it.next();
+							break;
+						}
+					}
+					while(it.next() != prev1) { // Skip until selection is at 'prev1 -->'.
+					}
+
+					if(prevNonWhitespace != null) {
+						// Convert "±UNKNOWN" if the '±' is used as a sign (and not an add/subtract operation).
+						if(!prevNonWhitespace.type.isIdentifier() // Don't convert "number/string/var ± ...".
+								&& prevNonWhitespace.type != TType.FUNC_END // Don't convert "func() ± ...".
+								&& prevNonWhitespace.type != TType.RSQUARE_BRACKET // Don't convert "] ± ..." (arrays).
+								&& !IVAR_PATTERN.matcher(t.val()).matches() // Don't convert "± @var".
+								&& !VAR_PATTERN.matcher(t.val()).matches()) { // Don't convert "± $var".
+							// It is a negative/positive number: Absorb the sign.
+							t.value = prev1.value + t.value;
+							it.remove(); // Remove 'prev1'.
+						}
 					}
 				} else {
 					it.next(); // Select 'prev1' -->.
@@ -866,11 +876,11 @@ public final class MethodScriptCompiler {
 		}
 
 		// Set file options
-		token_list.setFileOptions(fileOptions.toString());
+		tokenList.setFileOptions(fileOptions.toString());
 		// Make sure that the file options are the first non-comment code in the file
 		{
 			boolean foundCode = false;
-			for(Token t : token_list) {
+			for(Token t : tokenList) {
 				if(t.type.isFileOption()) {
 					if(foundCode) {
 						throw new ConfigCompileException("File options must be the first non-comment section in the"
@@ -884,7 +894,7 @@ public final class MethodScriptCompiler {
 			}
 		}
 
-		return token_list;
+		return tokenList;
 	}
 
 	/**
@@ -925,15 +935,14 @@ public final class MethodScriptCompiler {
 						continue outerLoop;
 					}
 					case NEWLINE: {
-						while(true) {
-							if(!it.hasNext()) {
-								break outerLoop;
-							} else if((token = it.next()).type == TType.NEWLINE) {
+						while(it.hasNext()) {
+							if((token = it.next()).type == TType.NEWLINE) {
 								it.remove(); // Remove duplicate newlines.
 							} else {
 								continue outerLoop;
 							}
 						}
+						break outerLoop;
 					}
 					default: {
 						if(!it.hasNext()) {
@@ -949,7 +958,7 @@ public final class MethodScriptCompiler {
 		// Handle multiline constructs.
 		// Take out newlines between the '= >>>' and '<<<' tokens (also removing the '>>>' and '<<<' tokens).
 		// Also remove comments and also remove newlines that are behind a '\'.
-		boolean inside_multiline = false;
+		boolean insideMultiline = false;
 		ListIterator<Token> it = tokenStream.listIterator(0);
 		Token token = null;
 		while(it.hasNext()) {
@@ -959,7 +968,7 @@ public final class MethodScriptCompiler {
 				case ALIAS_END: { // "=".
 					if(it.hasNext()) {
 						if(it.next().type == TType.MULTILINE_START) { // "= >>>".
-							inside_multiline = true;
+							insideMultiline = true;
 							it.remove(); // Remove multiline start (>>>).
 							it.previous(); // Select 'token' <---.
 							it.next(); // Select 'token' -->.
@@ -972,19 +981,19 @@ public final class MethodScriptCompiler {
 				case MULTILINE_END: { // "<<<".
 
 					// Handle multiline end token (<<<) without start.
-					if(!inside_multiline) {
+					if(!insideMultiline) {
 						throw new ConfigCompileException(
 								"Found multiline end symbol, and no multiline start found", token.target);
 					}
 
-					inside_multiline = false;
+					insideMultiline = false;
 					it.remove(); // Remove multiline end (<<<).
 					continue;
 				}
 				case MULTILINE_START: { // ">>>".
 
 					// Handle multiline start token (>>>) while already in multiline.
-					if(inside_multiline) {
+					if(insideMultiline) {
 						throw new ConfigCompileException("Did not expect a multiline start symbol here,"
 								+ " are you missing a multiline end symbol above this line?", token.target);
 					}
@@ -1002,7 +1011,7 @@ public final class MethodScriptCompiler {
 				case NEWLINE: { // "\n".
 
 					// Skip newlines that are inside a multiline construct.
-					if(inside_multiline) {
+					if(insideMultiline) {
 						it.remove(); // Remove newline.
 					}
 					continue;
@@ -1033,7 +1042,7 @@ public final class MethodScriptCompiler {
 		assert token != null;
 
 		// Handle missing multiline end token.
-		if(inside_multiline) {
+		if(insideMultiline) {
 			throw new ConfigCompileException("Expecting a multiline end symbol, but your last multiline alias appears to be missing one.", token.target);
 		}
 
@@ -1108,7 +1117,7 @@ public final class MethodScriptCompiler {
 		try {
 			//Instead of using Target.UNKNOWN, we can at least set the file.
 			unknown = new Target(0, stream.get(0).target.file(), 0);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			unknown = Target.UNKNOWN;
 		}
 
@@ -1151,7 +1160,7 @@ public final class MethodScriptCompiler {
 		int parens = 0;
 		Token t = null;
 
-		int bracketCount = 0;
+		int braceCount = 0;
 
 		// Create a Token array to iterate over, rather than using the LinkedList's O(n) get() method.
 		Token[] tokenArray = stream.toArray(new Token[stream.size()]);
@@ -1168,13 +1177,13 @@ public final class MethodScriptCompiler {
 				tree.addChild(b);
 				tree = b;
 				parents.push(b);
-				bracketCount++;
+				braceCount++;
 				constructCount.push(new AtomicInteger(0));
 				continue;
 			}
 
 			if(t.type == TType.RCURLY_BRACKET) {
-				bracketCount--;
+				braceCount--;
 				if(constructCount.peek().get() > 1) {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
@@ -1201,7 +1210,7 @@ public final class MethodScriptCompiler {
 				constructCount.pop();
 				try {
 					constructCount.peek().incrementAndGet();
-				} catch(EmptyStackException e) {
+				} catch (EmptyStackException e) {
 					throw new ConfigCompileException("Unexpected end curly brace", t.target);
 				}
 				continue;
@@ -1345,12 +1354,12 @@ public final class MethodScriptCompiler {
 				constructCount.pop();
 				try {
 					constructCount.peek().incrementAndGet();
-				} catch(EmptyStackException e) {
+				} catch (EmptyStackException e) {
 					throw new ConfigCompileException("Unexpected end parenthesis", t.target);
 				}
 				try {
 					tree = parents.peek();
-				} catch(EmptyStackException e) {
+				} catch (EmptyStackException e) {
 					throw new ConfigCompileException("Unexpected end parenthesis", t.target);
 				}
 
@@ -1409,7 +1418,7 @@ public final class MethodScriptCompiler {
 					tree.addChild(new ParseTree(slice, fileOptions));
 					constructCount.peek().incrementAndGet();
 					continue;
-				} catch(ConfigRuntimeException ex) {
+				} catch (ConfigRuntimeException ex) {
 					//CSlice can throw CREs, but at this stage, we have to
 					//turn them into a CCE.
 					throw new ConfigCompileException(ex);
@@ -1468,7 +1477,7 @@ public final class MethodScriptCompiler {
 					tree.addChild(new ParseTree(slice, fileOptions));
 					constructCount.peek().incrementAndGet();
 					continue;
-				} catch(ConfigRuntimeException ex) {
+				} catch (ConfigRuntimeException ex) {
 					//CSlice can throw CREs, but at this stage, we have to
 					//turn them into a CCE.
 					throw new ConfigCompileException(ex);
@@ -1493,7 +1502,7 @@ public final class MethodScriptCompiler {
 							c = new CDouble(Double.parseDouble(t.val() + '.' + next2.val()), t.target);
 						}
 						i += 2;
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						// Not a double
 					}
 				}
@@ -1547,7 +1556,7 @@ public final class MethodScriptCompiler {
 					try {
 						c = new CDouble(Double.parseDouble('.' + next1.val()), t.target);
 						i++;
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						// Not a double
 					}
 				}
@@ -1566,14 +1575,50 @@ public final class MethodScriptCompiler {
 
 		assert t != null;
 
+		// Handle mismatching square brackets "[]".
+		assert arrayStack.size() != 0 : "The last element of arrayStack should be present, but it was popped.";
 		if(arrayStack.size() != 1) {
-			throw new ConfigCompileException("Mismatched square brackets", t.target);
+
+			// Some starting square bracket '[' was not closed at the end of the script.
+			// Find the last '[' that was not closed and use that as target instead of the last line of the script.
+			Target target = traceMismatchedOpenToken(stream, TType.LSQUARE_BRACKET, TType.RSQUARE_BRACKET);
+			assert target != null : "Mismatched bracket was detected, but target-finding code could not find it.";
+			if(target == null) {
+				target = t.target;
+			}
+
+			// Throw a CRE.
+			throw new ConfigCompileException("Mismatched square brackets", target);
 		}
+
+		// Handle mismatching parentheses "()".
 		if(parens != 0) {
-			throw new ConfigCompileException("Mismatched parenthesis", t.target);
+
+			// Some starting parentheses '(' was not closed at the end of the script.
+			// Find the last '(' that was not closed and use that as target instead of the last line of the script.
+			Target target = traceMismatchedOpenToken(stream, TType.FUNC_START, TType.FUNC_END);
+			assert target != null : "Mismatched parentheses was detected, but target-finding code could not find it.";
+			if(target == null) {
+				target = t.target;
+			}
+
+			// Throw a CRE.
+			throw new ConfigCompileException("Mismatched parentheses", target);
 		}
-		if(bracketCount != 0) {
-			throw new ConfigCompileException("Mismatched curly braces", t.target);
+
+		// Handle mismatching curly braces "{}".
+		if(braceCount != 0) {
+
+			// Some starting curly brace '{' was not closed at the end of the script.
+			// Find the last '{' that was not closed and use that as target instead of the last line of the script.
+			Target target = traceMismatchedOpenToken(stream, TType.LCURLY_BRACKET, TType.RCURLY_BRACKET);
+			assert target != null : "Mismatched curly brace was detected, but target-finding code could not find it.";
+			if(target == null) {
+				target = t.target;
+			}
+
+			// Throw a CRE.
+			throw new ConfigCompileException("Mismatched curly braces", target);
 		}
 
 		Stack<List<Procedure>> procs = new Stack<>();
@@ -1597,6 +1642,34 @@ public final class MethodScriptCompiler {
 		parents.pop();
 		tree = parents.pop();
 		return tree;
+	}
+
+	/**
+	 * Trace target of mismatching open tokens such as '(' in '()' or '{' in '{}'. This should be used when it is
+	 * known that there are more start than close tokens, but no target is known for the extra start token.
+	 * @param stream - The token stream to scan.
+	 * @param openType - The open type, which would be {@link TType#FUNC_START (} for a parentheses check.
+	 * @param closeType - The close type, which would be {@link TType#FUNC_END )} for a parentheses check.
+	 * @return The target of the last occurrence of the opening type that did not have a matching closing type.
+	 * Returns null of no target was found.
+	 */
+	private static Target traceMismatchedOpenToken(TokenStream stream, TType openType, TType closeType) {
+		// Some starting parentheses '(' was not closed at the end of the script.
+		// Find the last '(' that was not closed and use that as target instead of the last line of the script.
+		Iterator<Token> iterator = stream.descendingIterator();
+		int closingCount = 0;
+		while(iterator.hasNext()) {
+			Token token = iterator.next();
+			if(token.type == closeType) {
+				closingCount++;
+			} else if(token.type == openType) {
+				if(closingCount <= 0) {
+					return token.target;
+				}
+				closingCount--;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -1624,7 +1697,7 @@ public final class MethodScriptCompiler {
 		Function func;
 		try {
 			func = ((CFunction) tree.getData()).getFunction();
-		} catch(ConfigCompileException ex) {
+		} catch (ConfigCompileException ex) {
 			compilerErrors.add(ex);
 			return;
 		}
@@ -1691,7 +1764,7 @@ public final class MethodScriptCompiler {
 				ParseTree ret = ((Compiler.__autoconcat__) ((CFunction) root.getData()).getFunction()).optimizeDynamic(root.getTarget(), root.getChildren(), root.getFileOptions());
 				root.setData(ret.getData());
 				root.setChildren(ret.getChildren());
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				compilerExceptions.add(ex);
 			}
 		}
@@ -1733,7 +1806,7 @@ public final class MethodScriptCompiler {
 				//Don't link children of a nolinking function.
 				return;
 			}
-		} catch(ConfigCompileException ex) {
+		} catch (ConfigCompileException ex) {
 			//This can happen if the treeFunction isn't a function, is a proc, etc,
 			//but we don't care, we just want to continue.
 		}
@@ -1750,7 +1823,7 @@ public final class MethodScriptCompiler {
 				if(op.optimizationOptions().contains(OptimizationOption.CUSTOM_LINK)) {
 					try {
 						op.link(tree.getData().getTarget(), tree.getChildren());
-					} catch(ConfigCompileException ex) {
+					} catch (ConfigCompileException ex) {
 						compilerErrors.add(ex);
 					}
 				}
@@ -1763,7 +1836,7 @@ public final class MethodScriptCompiler {
 					// This will throw an exception if the function doesn't exist.
 					try {
 						FunctionList.getFunction(child.getData());
-					} catch(ConfigCompileException ex) {
+					} catch (ConfigCompileException ex) {
 						compilerErrors.add(ex);
 					}
 				}
@@ -1772,6 +1845,7 @@ public final class MethodScriptCompiler {
 		}
 	}
 
+	@SuppressWarnings("checkstyle:constantname") // Variable is more clear when named after the function it represents.
 	private static final String __autoconcat__ = new Compiler.__autoconcat__().getName();
 
 	/**
@@ -1785,7 +1859,7 @@ public final class MethodScriptCompiler {
 		if(tree.isOptimized()) {
 			return; //Don't need to re-run this
 		}
-//		if (tree.getData() instanceof CIdentifier) {
+//		if(tree.getData() instanceof CIdentifier) {
 //			optimize(((CIdentifier) tree.getData()).contained(), procs);
 //			return;
 //		}
@@ -1801,7 +1875,7 @@ public final class MethodScriptCompiler {
 		Function func;
 		try {
 			func = (Function) FunctionList.getFunction(cFunction);
-		} catch(ConfigCompileException e) {
+		} catch (ConfigCompileException e) {
 			func = null;
 		}
 		if(func != null) {
@@ -1825,11 +1899,11 @@ public final class MethodScriptCompiler {
 			// would cause an error, even though the user did in fact provide code in that section.
 			try {
 				((Optimizable) func).optimizeDynamic(tree.getTarget(), children, tree.getFileOptions());
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				// If an error occurs, we will skip the rest of this element
 				compilerErrors.add(ex);
 				return;
-			} catch(ConfigRuntimeException ex) {
+			} catch (ConfigRuntimeException ex) {
 				compilerErrors.add(new ConfigCompileException(ex));
 				return;
 			}
@@ -1880,7 +1954,7 @@ public final class MethodScriptCompiler {
 				Function f;
 				try {
 					f = (Function) FunctionList.getFunction(t.getData());
-				} catch(ConfigCompileException ex) {
+				} catch (ConfigCompileException ex) {
 					compilerErrors.add(ex);
 					return;
 				}
@@ -1939,8 +2013,8 @@ public final class MethodScriptCompiler {
 						tree.setData(c);
 						tree.removeChildren();
 						return;
-					}//else Nope, couldn't optimize.
-				} catch(ConfigRuntimeException ex) {
+					} //else Nope, couldn't optimize.
+				} catch (ConfigRuntimeException ex) {
 					//Cool. Caught a runtime error at compile time :D
 					compilerErrors.add(new ConfigCompileException(ex));
 				}
@@ -1974,15 +2048,15 @@ public final class MethodScriptCompiler {
 					} else {
 						env = Static.GenerateStandaloneEnvironment(false);
 					}
-				} catch(IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e) {
+				} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e) {
 					//
 				}
 				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(new ParseTree[children.size()]));
 				procs.peek().add(myProc); //Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				//Well, they have an error in there somewhere
 				compilerErrors.add(new ConfigCompileException(e));
-			} catch(NullPointerException e) {
+			} catch (NullPointerException e) {
 				//Nope, can't optimize.
 				return;
 			}
@@ -2000,7 +2074,7 @@ public final class MethodScriptCompiler {
 				ParseTree tempNode;
 				try {
 					tempNode = ((Optimizable) func).optimizeDynamic(tree.getData().getTarget(), tree.getChildren(), tree.getFileOptions());
-				} catch(ConfigRuntimeException e) {
+				} catch (ConfigRuntimeException e) {
 					//Turn it into a compile exception, then rethrow
 					throw new ConfigCompileException(e);
 				}
@@ -2027,7 +2101,7 @@ public final class MethodScriptCompiler {
 						fullyStatic = true;
 					}
 				} //else it wasn't an optimization, but a compile check
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				compilerErrors.add(ex);
 			}
 		}
@@ -2072,11 +2146,11 @@ public final class MethodScriptCompiler {
 						tree.setData(result);
 						tree.removeChildren();
 					}
-				} catch(ConfigRuntimeException e) {
+				} catch (ConfigRuntimeException e) {
 					//Turn this into a ConfigCompileException, then rethrow
 					throw new ConfigCompileException(e);
 				}
-			} catch(ConfigCompileException ex) {
+			} catch (ConfigCompileException ex) {
 				compilerErrors.add(ex);
 			}
 		}
@@ -2207,9 +2281,9 @@ public final class MethodScriptCompiler {
 		for(File f : Static.getAliasCore().autoIncludes) {
 			try {
 				MethodScriptCompiler.execute(IncludeCache.get(f, new Target(0, f, 0)), env, null, s);
-			} catch(ProgramFlowManipulationException e) {
+			} catch (ProgramFlowManipulationException e) {
 				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in auto include files.", e.getTarget()), env);
-			} catch(ConfigRuntimeException e) {
+			} catch (ConfigRuntimeException e) {
 				e.setEnv(env);
 				ConfigRuntimeException.HandleUncaughtException(e, env);
 			}

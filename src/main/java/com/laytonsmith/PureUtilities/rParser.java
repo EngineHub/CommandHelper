@@ -9,15 +9,16 @@ import java.util.Arrays;
  * written by Nossr50, with portions contributed by Reil.
  *
  */
+@SuppressWarnings("checkstyle:typename") // Fixing this violation might break dependents.
 public final class rParser {
 
 	private rParser() {
 	}
 
-	private static final int lineLength = 312;
+	private static final int LINE_LENGTH = 312;
 
 	/*
-     * Finds the last color sequence used in the string
+	 * Finds the last color sequence used in the string
 	 */
 	public static String lastColor(String findColor) {
 		int i = findColor.lastIndexOf('§');
@@ -28,8 +29,8 @@ public final class rParser {
 		}
 	}
 
-	/* 
-     * 
+	/*
+	 * 
 	 */
 	public static String combineSplit(int beginHere, String[] split, String seperator) {
 		StringBuilder combined = new StringBuilder(split[beginHere]);
@@ -41,16 +42,16 @@ public final class rParser {
 		return combined.toString();
 	}
 
-	public static String[] wordWrap(String msg) {
+	public static String[] wordWarp(String msg, int lineLength) {
 		return wordWrap(msg, "", lineLength);
+	}
+
+	public static String[] wordWrap(String msg) {
+		return wordWrap(msg, "", LINE_LENGTH);
 	}
 
 	public static String[] wordWrap(String msg, String prefix) {
-		return wordWrap(msg, prefix, lineLength);
-	}
-
-	public static String[] wordWarp(String msg, int lineLength) {
-		return wordWrap(msg, "", lineLength);
+		return wordWrap(msg, prefix, LINE_LENGTH);
 	}
 
 	public static String[] wordWrap(String msg, String prefix, int lineLength) {
@@ -187,7 +188,7 @@ public final class rParser {
 	//=====================================================================
 	//Function:	colorChange
 	//Input:	char colour: The color code to find the color for
-	//Output:	String: The color that the code identified 
+	//Output:	String: The color that the code identified
 	//Use:		Finds a color giving a color code
 	//=====================================================================
 	public static String colorChange(char colour) {

@@ -118,7 +118,7 @@ public class ClassUtils {
 			} else {
 				c = Class.forName(className);
 			}
-		} catch(ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			//Ok, try replacing the last . with $ as this may be an inner class
 			String name = className;
 			while(name.contains(".")) {
@@ -131,7 +131,7 @@ public class ClassUtils {
 					}
 					//Awesome, found it.
 					break;
-				} catch(ClassNotFoundException e) {
+				} catch (ClassNotFoundException e) {
 					//No? Try again then.
 				}
 			}

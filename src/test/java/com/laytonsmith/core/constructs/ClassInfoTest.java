@@ -6,13 +6,15 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.ObjectModifier;
 import com.laytonsmith.core.natives.interfaces.ObjectType;
 import com.laytonsmith.testing.StaticTest;
+
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -35,7 +37,7 @@ public class ClassInfoTest {
 					if(m.getInterfaces() != null && m.getInterfaces().length > 0) {
 						failures.add(m.getClass().getName() + " is an interface, but getInterfaces() has returned a non-zero list");
 					}
-				} catch(UnsupportedOperationException ex) {
+				} catch (UnsupportedOperationException ex) {
 					failures.add(m.getClass().getName() + " cannot throw an exception for getInterfaces()");
 				}
 			}

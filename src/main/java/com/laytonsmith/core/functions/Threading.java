@@ -82,14 +82,14 @@ public class Threading {
 					dm.activateThread(Thread.currentThread());
 					try {
 						closure.execute();
-					} catch(FunctionReturnException ex) {
+					} catch (FunctionReturnException ex) {
 						// Do nothing
-					} catch(LoopManipulationException ex) {
+					} catch (LoopManipulationException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Unexpected loop manipulation"
 								+ " operation was triggered inside the closure.", t), environment);
-					} catch(ConfigRuntimeException ex) {
+					} catch (ConfigRuntimeException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ex, environment);
-					} catch(CancelCommandException ex) {
+					} catch (CancelCommandException ex) {
 						if(ex.getMessage() != null) {
 							new Echoes.console().exec(t, environment, new CString(ex.getMessage(), t), CBoolean.FALSE);
 						}
@@ -225,9 +225,9 @@ public class Threading {
 				public void run() {
 					try {
 						closure.execute();
-					} catch(ConfigRuntimeException e) {
+					} catch (ConfigRuntimeException e) {
 						ConfigRuntimeException.HandleUncaughtException(e, environment);
-					} catch(ProgramFlowManipulationException e) {
+					} catch (ProgramFlowManipulationException e) {
 						// Ignored
 					}
 				}
@@ -290,16 +290,16 @@ public class Threading {
 					public Object call() throws Exception {
 						try {
 							closure.execute();
-						} catch(FunctionReturnException e) {
+						} catch (FunctionReturnException e) {
 							return e.getReturn();
-						} catch(ConfigRuntimeException | ProgramFlowManipulationException e) {
+						} catch (ConfigRuntimeException | ProgramFlowManipulationException e) {
 							return e;
 						}
 						return CNull.NULL;
 					}
 				});
 
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
 			if(ret instanceof RuntimeException) {
@@ -340,7 +340,7 @@ public class Threading {
 	@seealso({x_new_thread.class})
 	public static class _synchronized extends AbstractFunction {
 
-		private static final Map<Object, Integer> syncObjectMap = new HashMap<Object, Integer>();
+		private static final Map<Object, Integer> SYNC_OBJECT_MAP = new HashMap<Object, Integer>();
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -388,10 +388,10 @@ public class Threading {
 
 			// Add String sync objects to the map to be able to synchronize by value.
 			if(syncObject instanceof String) {
-				synchronized(syncObjectMap) {
+				synchronized(SYNC_OBJECT_MAP) {
 					searchLabel:
 					{
-						for(Entry<Object, Integer> entry : syncObjectMap.entrySet()) {
+						for(Entry<Object, Integer> entry : SYNC_OBJECT_MAP.entrySet()) {
 							Object key = entry.getKey();
 							if(key instanceof String && key.equals(syncObject)) {
 								syncObject = key; // Get reference, value of this assign is the same.
@@ -399,7 +399,7 @@ public class Threading {
 								break searchLabel;
 							}
 						}
-						syncObjectMap.put(syncObject, 1);
+						SYNC_OBJECT_MAP.put(syncObject, 1);
 					}
 				}
 			}
@@ -409,18 +409,18 @@ public class Threading {
 				synchronized(syncObject) {
 					parent.seval(code, env);
 				}
-			} catch(RuntimeException e) {
+			} catch (RuntimeException e) {
 				throw e;
 			} finally {
 
 				// Remove 1 from the call count or remove the sync object from the map if it was a sync-by-value.
 				if(syncObject instanceof String) {
-					synchronized(syncObjectMap) {
-						int count = syncObjectMap.get(syncObject); // This should never return null.
+					synchronized(SYNC_OBJECT_MAP) {
+						int count = SYNC_OBJECT_MAP.get(syncObject); // This should never return null.
 						if(count <= 1) {
-							syncObjectMap.remove(syncObject);
+							SYNC_OBJECT_MAP.remove(syncObject);
 						} else {
-							for(Entry<Object, Integer> entry : syncObjectMap.entrySet()) {
+							for(Entry<Object, Integer> entry : SYNC_OBJECT_MAP.entrySet()) {
 								if(entry.getKey() == syncObject) { // Equals by reference.
 									entry.setValue(count - 1);
 									break;

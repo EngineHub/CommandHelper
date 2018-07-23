@@ -47,7 +47,6 @@ import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
-import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidPluginException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
@@ -96,13 +95,14 @@ public final class Static {
 	private Static() {
 	}
 
-	private static final Logger logger = Logger.getLogger("CommandHelper");
+	private static final Logger LOGGER = Logger.getLogger("CommandHelper");
 
-	private static final Map<String, String> hostCache = new HashMap<String, String>();
+	private static final Map<String, String> HOST_CACHE = new HashMap<String, String>();
 
-	private static final String consoleName = "~console";
+	private static final String CONSOLE_NAME = "~console";
 
-	private static final String blockPrefix = "#"; // Chosen over @ because that does special things when used by the block
+	// Chosen over @ because that does special things when used by the block.
+	private static final String BLOCK_PREFIX = "#";
 
 	/**
 	 * In case the API being used doesn't support permission groups, a permission node in the format
@@ -111,7 +111,13 @@ public final class Static {
 	 *
 	 * Third party APIs may provide better access.
 	 */
-	public static final String groupPrefix = "group.";
+	public static final String GROUP_PREFIX = "group.";
+	/**
+	 * @deprecated Use {@link #GROUP_PREFIX} instead.
+	 */
+	@Deprecated // Deprecated on 14-06-2018 dd-mm-yyyy.
+	@SuppressWarnings("checkstyle:constantname") // Fixing this violation might break dependents.
+	public static final String groupPrefix = GROUP_PREFIX;
 
 	/**
 	 * The label representing unrestricted access.
@@ -244,7 +250,7 @@ public final class Static {
 	public static boolean getBoolean(Construct c, Target t) {
 		return ArgumentValidation.getBoolean(c, t);
 	}
-	
+
 	/**
 	 * Returns a boolean from any given construct. Depending on the type of the construct being converted, it follows
 	 * the following rules: If it is an integer or a double, it is false if 0, true otherwise. If it is a string, if it
@@ -252,7 +258,7 @@ public final class Static {
 	 *
 	 * @param c
 	 * @return
-	 * @deprecated Use 
+	 * @deprecated Use
 	 * {@link #getBoolean(com.laytonsmith.core.constructs.Construct, com.laytonsmith.core.constructs.Target)}
 	 * instead, as it provides better error messages for users that use the string "false" as a boolean. This method
 	 * should be removed in version 3.3.3 or above.
@@ -330,7 +336,7 @@ public final class Static {
 	 * @return
 	 */
 	public static Logger getLogger() {
-		return logger;
+		return LOGGER;
 	}
 
 	/**
@@ -374,7 +380,7 @@ public final class Static {
 		} else {
 			try {
 				v = Main.loadSelfVersion();
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				//Ignored
 			}
 		}
@@ -513,7 +519,7 @@ public final class Static {
 		}
 		try {
 			return new CInt(Long.parseLong(val), t);
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			try {
 				if(!(val.contains(" ") || val.contains("\t"))) {
 					//Interesting behavior in Double.parseDouble causes it to "trim" strings first, then
@@ -521,7 +527,7 @@ public final class Static {
 					//any characters other than [\-0-9\.], we want to make it a string instead
 					return new CDouble(Double.parseDouble(val), t);
 				}
-			} catch(NumberFormatException g) {
+			} catch (NumberFormatException g) {
 				// Not a double either
 			}
 		}
@@ -586,7 +592,7 @@ public final class Static {
 	public static void SendMessage(final MCCommandSender m, String msg) {
 		try {
 			SendMessage(m, msg, Target.UNKNOWN);
-		} catch(ConfigRuntimeException e) {
+		} catch (ConfigRuntimeException e) {
 			//Ignored
 		}
 	}
@@ -598,7 +604,7 @@ public final class Static {
 	 * @return
 	 */
 	public static String getConsoleName() {
-		return consoleName;
+		return CONSOLE_NAME;
 	}
 
 	/**
@@ -607,7 +613,7 @@ public final class Static {
 	 * @return
 	 */
 	public static String getBlockPrefix() {
-		return blockPrefix;
+		return BLOCK_PREFIX;
 	}
 
 	/**
@@ -619,6 +625,7 @@ public final class Static {
 	 * @param qty
 	 * @throws CREFormatException If the notation is invalid.
 	 * @return
+	 * @deprecated Use {@link StaticLayer#GetItemStack(int, int, int)} instead.
 	 */
 	@Deprecated
 	public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, Target t) {
@@ -632,7 +639,7 @@ public final class Static {
 			} else {
 				type = Integer.parseInt(notation);
 			}
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			throw new CREFormatException("Invalid item notation: " + notation, t);
 		}
 		return StaticLayer.GetItemStack(type, data, qty);
@@ -668,7 +675,7 @@ public final class Static {
 		return b.getTypeId() + (data == 0 ? "" : ":" + Byte.toString(data));
 	}
 
-	private static final Map<String, MCCommandSender> injectedPlayers = new HashMap<>();
+	private static final Map<String, MCCommandSender> INJECTED_PLAYERS = new HashMap<>();
 	private static MCEntity injectedEntity;
 	private static final Pattern DASHLESS_PATTERN = Pattern.compile("^([A-Fa-f0-9]{8})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{12})$");
 
@@ -694,8 +701,8 @@ public final class Static {
 				throw new CRELengthException("A UUID is expected to be 32 or 36 characters,"
 						+ " but the given string was " + subject.length() + " characters.", t);
 			}
-		} catch(IllegalArgumentException iae) {
-			throw new CREIllegalArgumentException("A UUID length string was given, but was not a valid UUID.", t);
+		} catch (IllegalArgumentException iae) {
+			throw new CREFormatException("A UUID length string was given, but was not a valid UUID.", t);
 		}
 	}
 
@@ -723,7 +730,7 @@ public final class Static {
 		} else {
 			try {
 				ofp = getServer().getOfflinePlayer(GetUUID(search, t));
-			} catch(ConfigRuntimeException cre) {
+			} catch (ConfigRuntimeException cre) {
 				if(cre instanceof CRELengthException) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
@@ -757,7 +764,7 @@ public final class Static {
 		} else {
 			try {
 				m = getServer().getPlayer(GetUUID(player, t));
-			} catch(ConfigRuntimeException cre) {
+			} catch (ConfigRuntimeException cre) {
 				if(cre instanceof CRELengthException) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
@@ -779,6 +786,10 @@ public final class Static {
 		return p;
 	}
 
+	public static MCPlayer GetPlayer(Construct player, Target t) throws ConfigRuntimeException {
+		return GetPlayer(player.val(), t);
+	}
+
 	/**
 	 * Returns the specified command sender. Players are supported, as is the special ~console user. The special
 	 * ~console user will always return a user.
@@ -790,27 +801,23 @@ public final class Static {
 	 */
 	public static MCCommandSender GetCommandSender(String player, Target t) throws ConfigRuntimeException {
 		MCCommandSender m = null;
-		if(injectedPlayers.containsKey(player)) {
-			m = injectedPlayers.get(player);
-		} else if(consoleName.equals(player)) {
+		if(INJECTED_PLAYERS.containsKey(player)) {
+			m = INJECTED_PLAYERS.get(player);
+		} else if(CONSOLE_NAME.equals(player)) {
 			m = Static.getServer().getConsole();
 		} else {
 			try {
 				m = Static.getServer().getPlayer(player);
-			} catch(Exception e) {
+			} catch (Exception e) {
 				//Apparently the server can occasionally throw exceptions here, so instead of rethrowing
 				//a NPE or whatever, we'll assume that the player just isn't online, and
 				//throw a CRE instead.
 			}
 		}
-		if(m == null || (m instanceof MCPlayer && (!((MCPlayer) m).isOnline() && !injectedPlayers.containsKey(player)))) {
+		if(m == null || (m instanceof MCPlayer && (!((MCPlayer) m).isOnline() && !INJECTED_PLAYERS.containsKey(player)))) {
 			throw new CREPlayerOfflineException("The specified player (" + player + ") is not online", t);
 		}
 		return m;
-	}
-
-	public static MCPlayer GetPlayer(Construct player, Target t) throws ConfigRuntimeException {
-		return GetPlayer(player.val(), t);
 	}
 
 	/**
@@ -886,7 +893,7 @@ public final class Static {
 				if(e.getUniqueId().compareTo(id) == 0) {
 					try {
 						return (MCLivingEntity) StaticLayer.GetCorrectEntity(e);
-					} catch(ClassCastException cce) {
+					} catch (ClassCastException cce) {
 						throw new CREBadEntityException("The entity found was misinterpreted by the converter, this is"
 								+ " a developer mistake, please file a ticket.", t);
 					}
@@ -1175,7 +1182,7 @@ public final class Static {
 		if("CONSOLE".equals(name)) {
 			name = "~console";
 		}
-		injectedPlayers.put(name, player);
+		INJECTED_PLAYERS.put(name, player);
 	}
 
 	/**
@@ -1189,7 +1196,7 @@ public final class Static {
 		if("CONSOLE".equals(name)) {
 			name = "~console";
 		}
-		return injectedPlayers.remove(name);
+		return INJECTED_PLAYERS.remove(name);
 	}
 
 	public static void InjectEntity(MCEntity entity) {
@@ -1210,11 +1217,11 @@ public final class Static {
 	}
 
 	public static void SetPlayerHost(String playerName, String host) {
-		hostCache.put(playerName, host);
+		HOST_CACHE.put(playerName, host);
 	}
 
 	public static String GetHost(MCPlayer p) {
-		return hostCache.get(p.getName());
+		return HOST_CACHE.get(p.getName());
 	}
 
 	public static void AssertPlayerNonNull(MCPlayer p, Target t) throws ConfigRuntimeException {

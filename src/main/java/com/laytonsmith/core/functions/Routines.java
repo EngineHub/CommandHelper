@@ -12,7 +12,7 @@ public class Routines {
 		return "This class of functions provides Routines capabilities. Currently all these functions"
 				+ " are only available via cmdline.";
 	}
-//	
+//
 //	@api public static class get_lock extends AbstractFunction {
 //
 //		@Override
@@ -55,9 +55,9 @@ public class Routines {
 //		public Version since() {
 //			return CHVersion.V3_3_1;
 //		}
-//		
+//
 //	}
-//	
+//
 //	@api public static class is_lock extends AbstractFunction {
 //
 //		@Override
@@ -99,9 +99,9 @@ public class Routines {
 //		public Version since() {
 //			return CHVersion.V3_3_1;
 //		}
-//		
+//
 //	}
-//	
+//
 //	@api public static class routine extends AbstractFunction {
 //
 //		@Override
@@ -143,6 +143,6 @@ public class Routines {
 //		public Version since() {
 //			return CHVersion.V3_3_1;
 //		}
-//		
+//
 //	}
 }

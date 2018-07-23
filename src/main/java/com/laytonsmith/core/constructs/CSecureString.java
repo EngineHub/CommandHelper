@@ -37,6 +37,7 @@ public class CSecureString extends CString {
 	private byte[] encrypted;
 	private Cipher decrypter;
 	private int encLength;
+	private int actualLength;
 
 	public CSecureString(char[] val, Target t) {
 		super("**secure string**", t);
@@ -50,6 +51,7 @@ public class CSecureString extends CString {
 
 	private void construct(byte[] val) {
 		try {
+			actualLength = val.length;
 			SecureRandom rand = SecureRandom.getInstanceStrong();
 			byte[] keyBytes = new byte[24];
 			rand.nextBytes(keyBytes);
@@ -63,7 +65,7 @@ public class CSecureString extends CString {
 			encrypted = new byte[encrypter.getOutputSize(val.length)];
 			encLength = encrypter.update(val, 0, val.length, encrypted, 0);
 			encLength += encrypter.doFinal(encrypted, encLength);
-		} catch(NoSuchAlgorithmException | NoSuchPaddingException
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException
 				| InvalidKeyException | InvalidAlgorithmParameterException
 				| ShortBufferException | IllegalBlockSizeException
 				| BadPaddingException ex) {
@@ -93,8 +95,9 @@ public class CSecureString extends CString {
 			byte[] decrypted = new byte[decrypter.getOutputSize(encLength)];
 			int decLen = decrypter.update(encrypted, 0, encLength, decrypted, 0);
 			decrypter.doFinal(decrypted, decLen);
+			decrypted = ArrayUtils.slice(decrypted, 0, actualLength - 1);
 			return ArrayUtils.bytesToChar(decrypted);
-		} catch(ShortBufferException | IllegalBlockSizeException | BadPaddingException ex) {
+		} catch (ShortBufferException | IllegalBlockSizeException | BadPaddingException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -103,9 +106,6 @@ public class CSecureString extends CString {
 		char[] array = getDecryptedCharArray();
 		CArray carray = new CArray(Target.UNKNOWN, array.length);
 		for(char c : array) {
-			if(c == '\0') {
-				continue;
-			}
 			carray.push(new CString(c, Target.UNKNOWN), Target.UNKNOWN);
 		}
 		return carray;
@@ -196,7 +196,7 @@ public class CSecureString extends CString {
 
 				newMaxKeyLength = Cipher.getMaxAllowedKeyLength("AES");
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RuntimeException(errorString, e);
 		}
 		if(newMaxKeyLength < 256) {

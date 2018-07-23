@@ -51,23 +51,23 @@ public class MinecraftTest {
 	@Test
 	public void testIsTameable() throws ConfigCompileException {
 		//Y U NO COOPERATE, TEST FRAMEWORK?
-//        MCWorld fakeWorld = mock(MCWorld.class);
-//        MCLocation fakeLocation = mock(MCLocation.class);
-//        when(fakePlayer.getWorld()).thenReturn(fakeWorld);
-//        when(fakePlayer.getLocation()).thenReturn(fakeLocation);
-//        when(fakeLocation.getWorld()).thenReturn(fakeWorld);
-//        
-//        when(fakeWorld.spawnMob(eq("ocelot"), anyString(), anyInt(), (MCLocation)any(), (Target)any()))
-//                .thenReturn(new CArray(Target.UNKNOWN, new CInt("10", Target.UNKNOWN)));
-//        mockStatic(Static.class);
-//        MCTameable fakeTameable = mock(MCTameable.class);
-//        when(Static.getEntity(10)).thenReturn(fakeTameable);
-//        Preferences fakePrefs = mock(Preferences.class);
-//        when(Static.getPreferences()).thenReturn(fakePrefs);
-//        when(fakePrefs.getPreference("debug-mode")).thenReturn(false);
-//        
-//        SRun("is_tameable(spawn_mob('ocelot')[0])", fakePlayer);
-//        verify(fakePlayer).sendMessage("true");
+//		MCWorld fakeWorld = mock(MCWorld.class);
+//		MCLocation fakeLocation = mock(MCLocation.class);
+//		when(fakePlayer.getWorld()).thenReturn(fakeWorld);
+//		when(fakePlayer.getLocation()).thenReturn(fakeLocation);
+//		when(fakeLocation.getWorld()).thenReturn(fakeWorld);
+//
+//		when(fakeWorld.spawnMob(eq("ocelot"), anyString(), anyInt(), (MCLocation)any(), (Target)any()))
+//				.thenReturn(new CArray(Target.UNKNOWN, new CInt("10", Target.UNKNOWN)));
+//		mockStatic(Static.class);
+//		MCTameable fakeTameable = mock(MCTameable.class);
+//		when(Static.getEntity(10)).thenReturn(fakeTameable);
+//		Preferences fakePrefs = mock(Preferences.class);
+//		when(Static.getPreferences()).thenReturn(fakePrefs);
+//		when(fakePrefs.getPreference("debug-mode")).thenReturn(false);
+//
+//		SRun("is_tameable(spawn_mob('ocelot')[0])", fakePlayer);
+//		verify(fakePlayer).sendMessage("true");
 
 	}
 

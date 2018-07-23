@@ -44,7 +44,7 @@ public class FederationCommunication {
 			socketWriter.write(encode(line.getBytes("UTF-8")));
 			socketWriter.write("\n".getBytes("UTF-8"));
 			socketWriter.flush();
-		} catch(UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -73,7 +73,7 @@ public class FederationCommunication {
 			}
 			ba = decode(ba);
 			return new String(ba, "UTF-8");
-		} catch(UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -135,7 +135,7 @@ public class FederationCommunication {
 	public String readUnencryptedLine() throws IOException {
 		try {
 			// Don't put the reader in a try with resources, because we don't actually
-			// want to close the reader when we're done; that would close the actual 
+			// want to close the reader when we're done; that would close the actual
 			// InputStream as well. We're just using the BufferedReader as a shortcut
 			// to reading this part of the stream.
 			List<Byte> bytes = new ArrayList<>();
@@ -153,7 +153,7 @@ public class FederationCommunication {
 				ba[i] = bytes.get(i);
 			}
 			return new String(ba, "UTF-8");
-		} catch(UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}

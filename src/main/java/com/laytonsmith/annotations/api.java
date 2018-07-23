@@ -17,6 +17,7 @@ import java.util.List;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@SuppressWarnings("checkstyle:typename") // Fixing this violation might break dependents.
 public @interface api {
 
 	public enum Platforms {
@@ -46,9 +47,9 @@ public @interface api {
 	}
 
 	/**
-	 * Returns the platform this is implemented for. The default is {
+	 * Returns the platform this is implemented for. The default is {@link api.Platforms#INTERPRETER_JAVA}.
 	 *
-	 * @see api.Platforms#INTERPRETER_JAVA}.
+	 * @see {@link api.Platforms#INTERPRETER_JAVA}.
 	 * @return
 	 */
 	Platforms[] platform() default {api.Platforms.INTERPRETER_JAVA};

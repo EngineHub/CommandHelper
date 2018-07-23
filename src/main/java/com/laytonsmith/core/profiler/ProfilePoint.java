@@ -10,13 +10,13 @@ public class ProfilePoint implements Comparable<ProfilePoint> {
 
 	private final String name;
 	private String message;
-	boolean GCRun;
+	boolean gcRun;
 	private final Profiler parent;
 	private LogLevel granularity;
 
 	public ProfilePoint(String name, Profiler parent) {
 		this.name = name;
-		GCRun = false;
+		gcRun = false;
 		this.parent = parent;
 		this.message = null;
 	}
@@ -27,11 +27,11 @@ public class ProfilePoint implements Comparable<ProfilePoint> {
 	}
 
 	void garbageCollectorRun() {
-		GCRun = true;
+		gcRun = true;
 	}
 
 	boolean wasGCd() {
-		return GCRun;
+		return gcRun;
 	}
 
 	public void stop() {

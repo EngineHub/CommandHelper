@@ -367,7 +367,7 @@ public class Cmdline {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "#Causes the JVM to exit with an exit code of 0\nexit(0)", ""),
-				new ExampleScript("Basic usage", "#Causes the JVM to exit with an exit code of 1\nexit(1)", ""),};
+				new ExampleScript("Basic usage", "#Causes the JVM to exit with an exit code of 1\nexit(1)", "")};
 		}
 	}
 
@@ -454,7 +454,7 @@ public class Cmdline {
 			return new ExampleScript[]{
 				new ExampleScript("Gets all properties", "array_size(sys_properties())"),
 				new ExampleScript("Gets a single property", "sys_properties('java.specification.vendor')"),
-				new ExampleScript("Gets a single property", "sys_properties('methodscript.preference.debug-mode')"),};
+				new ExampleScript("Gets a single property", "sys_properties('methodscript.preference.debug-mode')")};
 		}
 	}
 
@@ -547,7 +547,7 @@ public class Cmdline {
 				Map<String, String> cienv = (Map<String, String>) theCaseInsensitiveEnvironmentField.get(null);
 				cienv.putAll(newenv);
 				ret = true;
-			} catch(NoSuchFieldException e) {
+			} catch (NoSuchFieldException e) {
 				try {
 					Class[] classes = Collections.class.getDeclaredClasses();
 					Map<String, String> env = System.getenv();
@@ -562,13 +562,13 @@ public class Cmdline {
 						}
 					}
 					ret = true;
-				} catch(Exception e2) {
+				} catch (Exception e2) {
 					ret = false;
 					if(Prefs.DebugMode()) {
 						CHLog.GetLogger().e(CHLog.Tags.GENERAL, e2, t);
 					}
 				}
-			} catch(Exception e1) {
+			} catch (Exception e1) {
 				ret = false;
 				if(Prefs.DebugMode()) {
 					CHLog.GetLogger().e(CHLog.Tags.GENERAL, e1, t);
@@ -641,7 +641,7 @@ public class Cmdline {
 				reader = new jline.console.ConsoleReader();
 				reader.setExpandEvents(false);
 				return new CSecureString(reader.readLine(Static.MCToANSIColors(prompt), cha).toCharArray(), t);
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t);
 			} finally {
 				if(reader != null) {
@@ -719,7 +719,7 @@ public class Cmdline {
 				char c = (char) reader.readCharacter();
 				StreamUtils.GetSystemOut().println(c);
 				return new CString(c, t);
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t);
 			} finally {
 				if(reader != null) {
@@ -784,7 +784,7 @@ public class Cmdline {
 				reader.setExpandEvents(false);
 				String line = reader.readLine(Static.MCToANSIColors(prompt));
 				return new CString(line, t);
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t);
 			} finally {
 				if(reader != null) {
@@ -888,7 +888,7 @@ public class Cmdline {
 			if(Static.InCmdLine(environment)) {
 				try {
 					new jline.console.ConsoleReader().clearScreen();
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					throw new CREIOException(ex.getMessage(), t);
 				}
 			}
@@ -949,10 +949,10 @@ public class Cmdline {
 			}
 			String[] command;
 			File workingDir = null;
-			CClosure stdout = null;
-			CClosure stderr = null;
-			CClosure exit = null;
-			boolean subshell = false;
+			final CClosure stdout;
+			final CClosure stderr;
+			final CClosure exit;
+			final boolean subshell;
 			if(args[0] instanceof CArray) {
 				CArray array = (CArray) args[0];
 				command = new String[(int) array.size()];
@@ -970,30 +970,28 @@ public class Cmdline {
 						workingDir = new File(t.file().getParentFile(), workingDir.getPath());
 					}
 				}
-				if(options.containsKey("stdout") && !(options.get("stdout", t) instanceof CNull)) {
-					stdout = Static.getObject(options.get("stdout", t), t, CClosure.class);
-				}
-				if(options.containsKey("stderr") && !(options.get("stderr", t) instanceof CNull)) {
-					stderr = Static.getObject(options.get("stderr", t), t, CClosure.class);
-				}
-				if(options.containsKey("exit") && !(options.get("exit", t) instanceof CNull)) {
-					exit = Static.getObject(options.get("exit", t), t, CClosure.class);
-				}
-				if(options.containsKey("subshell")) {
-					subshell = Static.getBoolean(options.get("subshell", t), t);
-				}
+				stdout = (options.containsKey("stdout") && !(options.get("stdout", t) instanceof CNull)
+						? Static.getObject(options.get("stdout", t), t, CClosure.class) : null);
+				stderr = (options.containsKey("stderr") && !(options.get("stderr", t) instanceof CNull)
+						? Static.getObject(options.get("stderr", t), t, CClosure.class) : null);
+				exit = (options.containsKey("exit") && !(options.get("exit", t) instanceof CNull)
+						? Static.getObject(options.get("exit", t), t, CClosure.class) : null);
+				subshell = (options.containsKey("subshell")
+						? Static.getBoolean(options.get("subshell", t), t) : false);
+			} else {
+				stdout = null;
+				stderr = null;
+				exit = null;
+				subshell = false;
 			}
 			final CommandExecutor cmd = new CommandExecutor(command);
 			cmd.setWorkingDir(workingDir);
-			final CClosure _stdout = stdout;
-			final CClosure _stderr = stderr;
-			final CClosure _exit = exit;
 			final MutableObject<StringBuilder> sbout = new MutableObject(new StringBuilder());
 			final MutableObject<StringBuilder> sberr = new MutableObject(new StringBuilder());
 			cmd.setSystemOut(new OutputStream() {
 				@Override
 				public void write(int b) throws IOException {
-					if(_stdout == null) {
+					if(stdout == null) {
 						return;
 					}
 					char c = (char) b;
@@ -1003,11 +1001,11 @@ public class Cmdline {
 
 								@Override
 								public Object call() throws Exception {
-									_stdout.execute(new CString(sbout.getObject(), t));
+									stdout.execute(new CString(sbout.getObject(), t));
 									return null;
 								}
 							});
-						} catch(Exception ex) {
+						} catch (Exception ex) {
 							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
 						}
 						sbout.setObject(new StringBuilder());
@@ -1019,7 +1017,7 @@ public class Cmdline {
 			cmd.setSystemErr(new OutputStream() {
 				@Override
 				public void write(int b) throws IOException {
-					if(_stderr == null) {
+					if(stderr == null) {
 						return;
 					}
 					char c = (char) b;
@@ -1029,11 +1027,11 @@ public class Cmdline {
 
 								@Override
 								public Object call() throws Exception {
-									_stderr.execute(new CString(sberr.getObject(), t));
+									stderr.execute(new CString(sberr.getObject(), t));
 									return null;
 								}
 							});
-						} catch(Exception ex) {
+						} catch (Exception ex) {
 							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
 						}
 						sberr.setObject(new StringBuilder());
@@ -1044,7 +1042,7 @@ public class Cmdline {
 			});
 			try {
 				cmd.start();
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t);
 			}
 
@@ -1060,7 +1058,7 @@ public class Cmdline {
 							if(cmd.getSystemOut() != StreamUtils.GetSystemOut()) {
 								cmd.getSystemOut().close();
 							}
-						} catch(IOException ex) {
+						} catch (IOException ex) {
 							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
 						}
 						try {
@@ -1068,24 +1066,24 @@ public class Cmdline {
 							if(cmd.getSystemErr() != StreamUtils.GetSystemErr()) {
 								cmd.getSystemErr().close();
 							}
-						} catch(IOException ex) {
+						} catch (IOException ex) {
 							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
 						}
-						if(_exit != null) {
+						if(exit != null) {
 							try {
 								StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
 
 									@Override
 									public Object call() throws Exception {
-										_exit.execute(new CInt(exitCode, t));
+										exit.execute(new CInt(exitCode, t));
 										return null;
 									}
 								});
-							} catch(Exception ex) {
+							} catch (Exception ex) {
 								Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
 							}
 						}
-					} catch(InterruptedException ex) {
+					} catch (InterruptedException ex) {
 						throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
 					} finally {
 						environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
@@ -1223,9 +1221,9 @@ public class Cmdline {
 					out.close();
 					err.close();
 				}
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t);
-			} catch(InterruptedException ex) {
+			} catch (InterruptedException ex) {
 				throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
 			}
 		}
@@ -1266,7 +1264,7 @@ public class Cmdline {
 			return new com.laytonsmith.core.functions.ExampleScript[]{
 				new com.laytonsmith.core.functions.ExampleScript("Basic usage with array", "shell(array('grep', '-r', 'search content', '*'))", "<output of command>"),
 				new com.laytonsmith.core.functions.ExampleScript("Basic usage with string", "shell('grep -r \"search content\" *')", "<output of command>"),
-				new com.laytonsmith.core.functions.ExampleScript("Changing the working directory", "shell('grep -r \"search content\" *', array(workingDir: '/'))", "<output of command>"),};
+				new com.laytonsmith.core.functions.ExampleScript("Changing the working directory", "shell('grep -r \"search content\" *', array(workingDir: '/'))", "<output of command>")};
 		}
 
 	}
@@ -1299,7 +1297,7 @@ public class Cmdline {
 				OSUtils.OS os;
 				try {
 					os = OSUtils.OS.valueOf(osSS);
-				} catch(IllegalArgumentException ex) {
+				} catch (IllegalArgumentException ex) {
 					throw new CREFormatException("Input OS must be one of " + StringUtils.Join(OSUtils.OS.values(), ", ", ", or "), t, ex);
 				}
 				oses.add(os);
@@ -1365,7 +1363,7 @@ public class Cmdline {
 				OSUtils.OS os;
 				try {
 					os = OSUtils.OS.valueOf(osSS);
-				} catch(IllegalArgumentException ex) {
+				} catch (IllegalArgumentException ex) {
 					throw new CREFormatException("Input OS must be one of " + StringUtils.Join(OSUtils.OS.values(), ", ", ", or "), t, ex);
 				}
 				oses.add(os);
@@ -1514,7 +1512,7 @@ public class Cmdline {
 					}
 					return new CString(b.toString(), t);
 				}
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
 			}
 		}
@@ -1578,7 +1576,7 @@ public class Cmdline {
 				try {
 					String ret = root.getCanonicalPath();
 					return new CString(ret, t);
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					//This shouldn't happen, because the current working directory will only be
 					//set programmatically.
 					throw new RuntimeException(ex);
@@ -1796,7 +1794,7 @@ public class Cmdline {
 			try {
 				int i = new jline.console.ConsoleReader().getTerminal().getWidth();
 				return new CInt(i, t);
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
 			}
 		}
