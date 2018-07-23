@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
@@ -89,13 +90,11 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Beacon;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.BrewingStand;
 import org.bukkit.block.Chest;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Dispenser;
-import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Dropper;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.Hopper;
@@ -558,27 +557,24 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(entity instanceof InventoryHolder) {
 			if(entity instanceof Player) {
 				return new BukkitMCPlayerInventory(((Player) entity).getInventory());
-			} else {
-				return new BukkitMCInventory(((InventoryHolder) entity).getInventory());
 			}
-		} else {
-			return null;
+			return new BukkitMCInventory(((InventoryHolder) entity).getInventory());
 		}
+		return null;
 	}
 
 	@Override
 	public MCInventory GetLocationInventory(MCLocation location) {
-		Block b = ((Location) location.getHandle()).getBlock();
-		if(b.getState() instanceof InventoryHolder) {
-			if(b.getState() instanceof DoubleChest) {
-				DoubleChest dc = (DoubleChest) b.getState();
-				return new BukkitMCDoubleChest(dc.getLeftSide().getInventory(), dc.getRightSide().getInventory());
-			} else {
-				return new BukkitMCInventory(((InventoryHolder) b.getState()).getInventory());
-			}
-		} else {
-			return null;
+		BlockState bs = ((Location) location.getHandle()).getBlock().getState();
+		if(bs instanceof InventoryHolder) {
+			return new BukkitMCInventory(((InventoryHolder) bs).getInventory());
 		}
+		return null;
+	}
+
+	@Override
+	public MCInventoryHolder CreateInventoryHolder(String id) {
+		return new BukkitMCVirtualInventoryHolder(id);
 	}
 
 	@Override

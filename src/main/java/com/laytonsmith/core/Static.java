@@ -47,7 +47,6 @@ import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
-import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidPluginException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
@@ -703,7 +702,7 @@ public final class Static {
 						+ " but the given string was " + subject.length() + " characters.", t);
 			}
 		} catch (IllegalArgumentException iae) {
-			throw new CREIllegalArgumentException("A UUID length string was given, but was not a valid UUID.", t);
+			throw new CREFormatException("A UUID length string was given, but was not a valid UUID.", t);
 		}
 	}
 

@@ -5,7 +5,6 @@ import com.laytonsmith.abstraction.MCBossBar;
 import com.laytonsmith.abstraction.MCCommandMap;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
-import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemFactory;
@@ -17,7 +16,6 @@ import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.pluginmessages.BukkitMCMessenger;
 import com.laytonsmith.abstraction.enums.MCBarColor;
@@ -37,8 +35,8 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.server.BroadcastMessageEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.Recipe;
 
@@ -257,18 +255,26 @@ public class BukkitMCServer implements MCServer {
 	 */
 	private int bukkitBroadcastMessage(String message, Set<CommandSender> recipients) {
 
-		// Fire a BroadcastMessageEvent for this broadcast.
-		BroadcastMessageEvent broadcastMessageEvent = new BroadcastMessageEvent(message, recipients);
-		this.s.getPluginManager().callEvent(broadcastMessageEvent);
+		try {
+			// Fire a BroadcastMessageEvent for this broadcast.
+			// We have to use reflection to prevent the entire plugin from failing to load if not on MC 1.12+
+			Class broadcastMessageClass = Class.forName("org.bukkit.event.server.BroadcastMessageEvent");
+			Event broadcastMessageEvent = (Event) ReflectionUtils.newInstance(broadcastMessageClass,
+					new Class[]{String.class, Set.class},
+					new Object[]{message, recipients});
+			this.s.getPluginManager().callEvent(broadcastMessageEvent);
 
-		// Return if the event was cancelled.
-		if(broadcastMessageEvent.isCancelled()) {
-			return 0;
+			// Return if the event was cancelled.
+			if((Boolean) ReflectionUtils.invokeMethod(broadcastMessageEvent, "isCancelled")) {
+				return 0;
+			}
+
+			// Get the possibly modified message and recipients.
+			message = (String) ReflectionUtils.invokeMethod(broadcastMessageEvent, "getMessage");
+			recipients = (Set<CommandSender>) ReflectionUtils.invokeMethod(broadcastMessageEvent, "getRecipients"); // This returns the same reference, but breaks less likely.
+		} catch (ClassNotFoundException ex) {
+			// probably prior to 1.12
 		}
-
-		// Get the possibly modified message and recipients.
-		message = broadcastMessageEvent.getMessage();
-		recipients = broadcastMessageEvent.getRecipients(); // This returns the same reference, but breaks less likely.
 
 		// Perform the actual broadcast to all remaining recipients.
 		for(CommandSender recipient : recipients) {
@@ -439,47 +445,30 @@ public class BukkitMCServer implements MCServer {
 	}
 
 	@Override
-	public MCInventory createInventory(MCInventoryHolder holder, MCInventoryType type) {
-		InventoryHolder ih = null;
-
-		if(holder instanceof MCPlayer) {
-			ih = ((BukkitMCPlayer) holder)._Player();
-		} else if(holder instanceof MCHumanEntity) {
-			ih = ((BukkitMCHumanEntity) holder).asHumanEntity();
-		} else if(holder.getHandle() instanceof InventoryHolder) {
+	public MCInventory createInventory(MCInventoryHolder holder, MCInventoryType type, String title) {
+		InventoryHolder ih;
+		if(holder == null) {
+			ih = null;
+		} else {
 			ih = (InventoryHolder) holder.getHandle();
 		}
-
-		return new BukkitMCInventory(Bukkit.createInventory(ih, InventoryType.valueOf(type.name())));
-	}
-
-	@Override
-	public MCInventory createInventory(MCInventoryHolder holder, int size) {
-		InventoryHolder ih = null;
-
-		if(holder instanceof MCPlayer) {
-			ih = ((BukkitMCPlayer) holder)._Player();
-		} else if(holder instanceof MCHumanEntity) {
-			ih = ((BukkitMCHumanEntity) holder).asHumanEntity();
-		} else if(holder.getHandle() instanceof InventoryHolder) {
-			ih = (InventoryHolder) holder.getHandle();
+		if(title == null) {
+			return new BukkitMCInventory(Bukkit.createInventory(ih, InventoryType.valueOf(type.name())));
 		}
-
-		return new BukkitMCInventory(Bukkit.createInventory(ih, size));
+		return new BukkitMCInventory(Bukkit.createInventory(ih, InventoryType.valueOf(type.name()), title));
 	}
 
 	@Override
 	public MCInventory createInventory(MCInventoryHolder holder, int size, String title) {
-		InventoryHolder ih = null;
-
-		if(holder instanceof MCPlayer) {
-			ih = ((BukkitMCPlayer) holder)._Player();
-		} else if(holder instanceof MCHumanEntity) {
-			ih = ((BukkitMCHumanEntity) holder).asHumanEntity();
-		} else if(holder.getHandle() instanceof InventoryHolder) {
+		InventoryHolder ih;
+		if(holder == null) {
+			ih = null;
+		} else {
 			ih = (InventoryHolder) holder.getHandle();
 		}
-
+		if(title == null) {
+			return new BukkitMCInventory(Bukkit.createInventory(ih, size));
+		}
 		return new BukkitMCInventory(Bukkit.createInventory(ih, size, title));
 	}
 

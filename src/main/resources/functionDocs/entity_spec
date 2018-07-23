@@ -209,7 +209,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_SKELETON_TYPE%: The type of the skeleton (can be %SKELETON_TYPE%). (deprecated)
 |-
-| SKELTONHORSE, ZOMBIEHORSE
+| SKELTON_HORSE, ZOMBI_HORSE
 |
 * %KEY_HORSE_DOMESTICATION%: The domestication level of the horse (can't be higher than the maximum domestication level).
 * %KEY_HORSE_JUMP%: The jump strength (between 1.0 and 2.0).
@@ -254,7 +254,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_ZOMBIE_BABY%: Whether the zombie is a baby.
 * %KEY_ZOMBIE_VILLAGER%: Whether the zombie is a villager. (deprecated)
 |-
-| ZOMBIEVILLAGER
+| ZOMBIE_VILLAGER
 |
 * %KEY_ZOMBIE_BABY%: Whether the zombie is a baby.
 * %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%).

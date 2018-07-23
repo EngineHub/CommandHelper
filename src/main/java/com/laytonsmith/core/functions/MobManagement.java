@@ -20,7 +20,6 @@ import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 import com.laytonsmith.abstraction.enums.MCPigType;
 import com.laytonsmith.abstraction.enums.MCProfession;
-import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.abstraction.enums.MCWolfType;
 import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.annotations.api;
@@ -84,25 +83,28 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "array {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
-					+ " to the location of the player. An array of the entity IDs spawned is returned."
+			return "array {mobType, [qty], [location]} Spawns qty mob of one of the following types at location."
+					+ " qty defaults to 1, and location defaults to the location of the player."
+					+ " An array of the entity UUIDs spawned is returned."
 					+ " ---- mobType can be one of: " + StringUtils.Join(MCMobs.values(), ", ", ", or ", " or ") + "."
-					+ " Spelling matters, but capitalization doesn't. At this time, the function is limited to spawning a maximum of 50 at a time."
-					+ " Further, subtypes can be applied by specifying MOBTYPE:SUBTYPE, for example the sheep subtype can be any of the dye colors: "
-					+ StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or ") + ". COLOR defaults to white if not specified. For mobs with multiple"
-					+ " subtypes, separate each type with a \"-\", currently only zombies which, using ZOMBIE:TYPE1-TYPE2 can be any non-conflicting two of: "
-					+ StringUtils.Join(MCZombieType.values(), ", ", ", or ", " or ") + ", but default to normal zombies. Ocelots may be one of: "
-					+ StringUtils.Join(MCOcelotType.values(), ", ", ", or ", " or ") + ", defaulting to the wild variety. Villagers can have a profession as a subtype: "
-					+ StringUtils.Join(MCProfession.values(), ", ", ", or ", " or ") + ", defaulting to farmer if not specified. Skeletons can be "
-					+ StringUtils.Join(MCSkeletonType.values(), ", ", ", or ", " or ") + ". PigZombies' subtype represents their anger,"
-					+ " and accepts an integer, where 0 is neutral and 400 is the normal response to being attacked. Defaults to 0. Similarly, Slime"
-					+ " and MagmaCube size can be set by integer, otherwise will be a random natural size. If a material is specified as the subtype"
-					+ " for Endermen, they will hold that material, otherwise they will hold nothing. Creepers can be set to "
-					+ StringUtils.Join(MCCreeperType.values(), ", ", ", or ", " or ") + ", wolves can be " + StringUtils.Join(MCWolfType.values(), ", ", ", or ", " or ")
-					+ ", and pigs can be " + StringUtils.Join(MCPigType.values(), ", ", ", or ", " or ") + "."
-					+ " Horses can have three different subTypes, the variant: " + StringUtils.Join(MCHorse.MCHorseVariant.values(), ", ", ", or ", " or ") + ","
-					+ " the color: " + StringUtils.Join(MCHorse.MCHorseColor.values(), ", ", ", or ", " or ") + ","
-					+ " and the pattern: " + StringUtils.Join(MCHorse.MCHorsePattern.values(), ", ", ", or ", " or ") + "."
+					+ " Further, subtypes can be applied by specifying MOBTYPE:SUBTYPE,"
+					+ " for example the sheep subtype can be any of the dye colors: "
+					+ StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or ") + "."
+					+ " COLOR defaults to white if not specified."
+					+ " For mobs with multiple subtypes, separate each type with a \"-\"."
+					+ " Zombies can be any non-conflicting two of: " + StringUtils.Join(MCZombieType.values(), ", ", ", or ", " or ") + "."
+					+ " Ocelots may be one of: " + StringUtils.Join(MCOcelotType.values(), ", ", ", or ", " or ") + "."
+					+ " Villagers can have a profession as a subtype: " + StringUtils.Join(MCProfession.values(), ", ", ", or ", " or ")
+					+ ", defaulting to farmer if not specified. PigZombies' subtype represents their anger,"
+					+ " and accepts an integer, where 0 is neutral and 400 is the normal response to being attacked."
+					+ " Defaults to 0. Similarly, Slime and MagmaCube size can be set by integer,"
+					+ " otherwise will be a random natural size. If a material is specified as the subtype for Endermen,"
+					+ " they will hold that material, otherwise they will hold nothing."
+					+ " Creepers can be set to " + StringUtils.Join(MCCreeperType.values(), ", ", ", or ", " or ") + "."
+					+ " Wolves can be " + StringUtils.Join(MCWolfType.values(), ", ", ", or ", " or ") + "."
+					+ " Pigs can be " + StringUtils.Join(MCPigType.values(), ", ", ", or ", " or ") + "."
+					+ " Horses can have a color: " + StringUtils.Join(MCHorse.MCHorseColor.values(), ", ", ", or ", " or ") + ","
+					+ " and a pattern: " + StringUtils.Join(MCHorse.MCHorsePattern.values(), ", ", ", or ", " or ") + "."
 					+ " If qty is larger than " + spawn_mob.SPAWN_LIMIT + ", a RangeException will be thrown.";
 		}
 
@@ -159,7 +161,7 @@ public class MobManagement {
 			}
 
 			try {
-				return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll(" ", "")), secondary, qty, l, t);
+				return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll("[ _]", "")), secondary, qty, l, t);
 			} catch (IllegalArgumentException e) {
 				throw new CREFormatException("Invalid mob name: " + mob, t);
 			}
