@@ -100,10 +100,11 @@ public class ConfigRuntimeException extends RuntimeException {
 				return Reaction.REPORT; // Closure returned nothing -> REPORT.
 			} catch (FunctionReturnException retException) {
 				Construct ret = retException.getReturn();
-				if(ret instanceof CNull || Prefs.ScreamErrors() || !Static.getBoolean(ret, Target.UNKNOWN)) {
-					return Reaction.REPORT; // Closure returned null or false or scream-errors was set in the config.
+				if(ret instanceof CNull || Prefs.ScreamErrors()) {
+					return Reaction.REPORT; // Closure returned null or scream-errors was set in the config.
 				} else {
-					return Reaction.IGNORE; // Closure returned true -> IGNORE.
+					// Closure returned a boolean. TRUE -> IGNORE and FALSE -> FATAL.
+					return (Static.getBoolean(ret, Target.UNKNOWN) ? Reaction.IGNORE : Reaction.FATAL);
 				}
 			} catch (ConfigRuntimeException cre) {
 
@@ -168,8 +169,6 @@ public class ConfigRuntimeException extends RuntimeException {
 			ConfigRuntimeException.DoReport(e, env);
 		} else if(r == ConfigRuntimeException.Reaction.FATAL) {
 			ConfigRuntimeException.DoReport(e, env);
-			//Well, here goes nothing
-			throw e;
 		}
 	}
 
