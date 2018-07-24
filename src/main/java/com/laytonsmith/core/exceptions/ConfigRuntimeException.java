@@ -529,7 +529,7 @@ public class ConfigRuntimeException extends RuntimeException {
 				if(getDefinedAt().file() != null) {
 					name = getDefinedAt().file().getAbsolutePath();
 				}
-				element.set("file", getDefinedAt().file().getAbsolutePath());
+				element.set("file", name);
 			}
 			element.set("line", new CInt(getDefinedAt().line(), Target.UNKNOWN), Target.UNKNOWN);
 			return element;
