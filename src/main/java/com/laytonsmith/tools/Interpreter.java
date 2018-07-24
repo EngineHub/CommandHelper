@@ -850,7 +850,8 @@ public final class Interpreter {
 		if(null == OSUtils.GetOS()) {
 			StreamUtils.GetSystemErr().println("Cmdline MethodScript is only supported on Unix and Windows");
 			return;
-		} else switch(OSUtils.GetOS()) {
+		}
+		switch(OSUtils.GetOS()) {
 			case LINUX:
 			case MAC:
 				try {
@@ -883,7 +884,8 @@ public final class Interpreter {
 				} catch (IOException e) {
 					StreamUtils.GetSystemErr().println("Cannot install. You must run the command with sudo for it to succeed, however, did you do that?");
 					return;
-				}	break;
+				}
+				break;
 			case WINDOWS:
 				Path tmp = null;
 				try {
@@ -892,13 +894,13 @@ public final class Interpreter {
 					ZipReader zReader = new ZipReader(root);
 					tmp = Files.createTempDirectory("methodscript-installer", new FileAttribute[]{});
 					zReader.recursiveCopy(tmp.toFile(), false);
-					
+
 					// 2. Write the location of this jar to the registry
 					String me = ClassDiscovery.GetClassContainer(Interpreter.class).toExternalForm().substring(6);
 					String keyName = "Software\\MethodScript";
 					WinRegistry.createKey(WinRegistry.HKEY_CURRENT_USER, keyName);
 					WinRegistry.writeStringValue(WinRegistry.HKEY_CURRENT_USER, keyName, "JarLocation", me);
-					
+
 					// 3. Execute the setup.exe file
 					File setup = new File(tmp.toFile(), "setup.exe");
 					int setupResult = new CommandExecutor(new String[]{setup.getAbsolutePath()}).start().waitFor();
@@ -908,10 +910,11 @@ public final class Interpreter {
 					} else {
 						StreamUtils.GetSystemOut().println("Setup has begun. Finish the installation in the GUI.");
 					}
-				} catch(IOException | InterruptedException | IllegalAccessException | InvocationTargetException ex) {
+				} catch (IOException | InterruptedException | IllegalAccessException | InvocationTargetException ex) {
 					ex.printStackTrace(StreamUtils.GetSystemErr());
 					System.exit(1);
-				}	break;
+				}
+				break;
 		}
 		StreamUtils.GetSystemOut().println("MethodScript has successfully been installed on your system. Note that you may need to rerun the install command"
 				+ " if you change locations of the jar, or rename it. Be sure to put \"#!" + INTERPRETER_INSTALLATION_LOCATION + "\" at the top of all your scripts,"
@@ -924,7 +927,8 @@ public final class Interpreter {
 		if(null == OSUtils.GetOS()) {
 			StreamUtils.GetSystemErr().println("Sorry, cmdline functionality is currently only supported on unix systems! Check back soon though!");
 			return;
-		} else switch(OSUtils.GetOS()) {
+		}
+		switch(OSUtils.GetOS()) {
 			case LINUX:
 			case MAC:
 				try {
@@ -935,7 +939,8 @@ public final class Interpreter {
 				} catch (IOException e) {
 					StreamUtils.GetSystemErr().println("Cannot uninstall. You must run the command with sudo for it to succeed, however, did you do that?");
 					return;
-				}	break;
+				}
+				break;
 			case WINDOWS:
 				StreamUtils.GetSystemOut().println("To uninstall on windows, please uninstall from the Add or Remove Programs application.");
 				return;
