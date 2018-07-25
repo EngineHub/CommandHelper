@@ -86,8 +86,8 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @return
 	 */
 	public static Reaction GetReaction(ConfigRuntimeException e, Environment env) {
-		//If there is an exception handler, call it to see what it says.
-		Reaction reaction = Reaction.REPORT;
+
+		// If there is an exception handler, call it to see what it says.
 		if(env.getEnv(GlobalEnv.class).GetExceptionHandler() != null) {
 			CClosure c = env.getEnv(GlobalEnv.class).GetExceptionHandler();
 			CArray ex = ObjectGenerator.GetGenerator().exception(e, env, Target.UNKNOWN);
@@ -95,23 +95,26 @@ public class ConfigRuntimeException extends RuntimeException {
 				MCCommandSender sender = e.getEnv().getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				c.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
 			}
-			Construct ret = CNull.NULL;
 			try {
 				c.execute(new Construct[]{ex});
+				return Reaction.REPORT; // Closure returned nothing -> REPORT.
 			} catch (FunctionReturnException retException) {
-				ret = retException.getReturn();
-			}
-			if(ret instanceof CNull || Prefs.ScreamErrors()) {
-				reaction = Reaction.REPORT;
-			} else {
-				if(Static.getBoolean(ret, Target.UNKNOWN)) {
-					reaction = Reaction.IGNORE;
+				Construct ret = retException.getReturn();
+				if(ret instanceof CNull || Prefs.ScreamErrors()) {
+					return Reaction.REPORT; // Closure returned null or scream-errors was set in the config.
 				} else {
-					reaction = Reaction.FATAL;
+					// Closure returned a boolean. TRUE -> IGNORE and FALSE -> FATAL.
+					return (Static.getBoolean(ret, Target.UNKNOWN) ? Reaction.IGNORE : Reaction.FATAL);
 				}
+			} catch (ConfigRuntimeException cre) {
+
+				// A CRE occurred in the exception handler. Report both exceptions.
+				HandleUncaughtException(cre, env, Reaction.REPORT);
+				return Reaction.REPORT;
 			}
+		} else {
+			return Reaction.REPORT; // No exception handler set -> REPORT.
 		}
-		return reaction;
 	}
 
 	/**
@@ -166,8 +169,6 @@ public class ConfigRuntimeException extends RuntimeException {
 			ConfigRuntimeException.DoReport(e, env);
 		} else if(r == ConfigRuntimeException.Reaction.FATAL) {
 			ConfigRuntimeException.DoReport(e, env);
-			//Well, here goes nothing
-			throw e;
 		}
 	}
 
@@ -529,7 +530,7 @@ public class ConfigRuntimeException extends RuntimeException {
 				if(getDefinedAt().file() != null) {
 					name = getDefinedAt().file().getAbsolutePath();
 				}
-				element.set("file", getDefinedAt().file().getAbsolutePath());
+				element.set("file", name);
 			}
 			element.set("line", new CInt(getDefinedAt().line(), Target.UNKNOWN), Target.UNKNOWN);
 			return element;

@@ -339,7 +339,7 @@ public class ZipReader {
 		}
 		if(this.zipEntries == null) {
 			zipEntries = new ArrayList<>();
-			try (ZipInputStream zis = new ZipInputStream(new FileInputStream(topZip))){
+			try(ZipInputStream zis = new ZipInputStream(new FileInputStream(topZip))) {
 				ZipEntry entry;
 				while((entry = zis.getNextEntry()) != null) {
 					File f = new File(topZip, entry.getName());
@@ -440,8 +440,8 @@ public class ZipReader {
 			} else {
 				File newFile = new File(dstFolder, r.file.getName());
 				newFile.getParentFile().mkdir();
-				try (FileOutputStream fos = new FileOutputStream(newFile, false);
-						InputStream fis = r.getInputStream()){
+				try(FileOutputStream fos = new FileOutputStream(newFile, false);
+						InputStream fis = r.getInputStream()) {
 					StreamUtils.Copy(fis, fos);
 				}
 			}
