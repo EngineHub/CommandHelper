@@ -1,4 +1,4 @@
-package org.bstats.bukkit;
+package com.laytonsmith.commandhelper;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
