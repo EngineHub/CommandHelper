@@ -406,7 +406,7 @@ public class Main {
 				}
 				//Documentation generator
 				StreamUtils.GetSystemErr().print("Creating " + docs + " documentation...");
-				DocGen.functions(docs, api.Platforms.INTERPRETER_JAVA, true);
+				StreamUtils.GetSystemOut().println(DocGen.functions(docs, api.Platforms.INTERPRETER_JAVA, true));
 				StreamUtils.GetSystemErr().println("Done.");
 				System.exit(0);
 			} else if(mode == EXAMPLES_MODE) {
