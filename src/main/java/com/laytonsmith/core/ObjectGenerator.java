@@ -813,9 +813,11 @@ public class ObjectGenerator {
 						}
 					}
 				} else if(meta instanceof MCSkullMeta) {
-					Construct owner = ma.get("owner", t);
-					if(!(owner instanceof CNull)) {
-						((MCSkullMeta) meta).setOwner(owner.val());
+					if(ma.containsKey("owner")) {
+						Construct owner = ma.get("owner", t);
+						if(!(owner instanceof CNull)) {
+							((MCSkullMeta) meta).setOwner(owner.val());
+						}
 					}
 				} else if(meta instanceof MCEnchantmentStorageMeta) {
 					if(ma.containsKey("stored")) {
