@@ -3007,7 +3007,13 @@ public class ArrayHandling {
 				+ "// A collection of square sides\n"
 				+ "@squares = array(1, 4, 8);\n"
 				+ "@areas = array_map(@squares, @areaOfSquare);\n"
-				+ "msg(@areas);")
+				+ "msg(@areas);"),
+				new ExampleScript("Parsing a csv file with minimal code",
+				"string @file = 'a, b, c\\nz, y, x\\n1, 2, 3\\n99, 98, 97'; // Could be a read()\n"
+				+ "array @list = array_map(split('\\n', @file), closure(@line) {\n"
+				+ "        return(split(',', @line));\n"
+				+ "});\n"
+				+ "msg(@list);")
 			};
 		}
 

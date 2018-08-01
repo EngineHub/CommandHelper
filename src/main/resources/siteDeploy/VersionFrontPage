@@ -8,6 +8,14 @@
 * Write your own /tp, /time, or /warp
 * Do much more, from the simple to the complex, with zero Java code.
 
+'''MethodScript''' is the name of the programming language that CommandHelper uses, and there is a commandline version
+of MethodScript as well, that you can use outside of Minecraft. MethodScript is an imperative, dynamic, event driven,
+value-level, metaprogramming (reflective), structured (block-structured, semi-object-oriented, semi-class-based, 
+recursive), parallel, partially strongly typed language, and is an active work in progress.
+
+The developers of MethodScript do not recommend it (yet) for production or otherwise critical code, however,
+as a quick scripting language, or for use in Minecraft, it is highly recommended.
+
 Remember that [https://github.com/EngineHub/commandhelper CommandHelper is open source].
 
 == Installation ==
