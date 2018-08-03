@@ -17,6 +17,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CREPluginChannelException;
@@ -38,7 +39,8 @@ public class PluginMeta {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREPlayerOfflineException.class};
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class,
+					CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -60,10 +62,14 @@ public class PluginMeta {
 				offset = 1;
 				p = Static.GetPlayer(args[0], t);
 			}
-			String channel = args[0 + offset].val();
+			String channel = args[offset].val();
 			CByteArray ba = Static.getByteArray(args[1 + offset], t);
 			Static.AssertPlayerNonNull(p, t);
-			meta.fakeIncomingMessage(p, channel, ba.asByteArrayCopy());
+			try {
+				meta.fakeIncomingMessage(p, channel, ba.asByteArrayCopy());
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException(ex.getMessage(), t);
+			}
 			return CVoid.VOID;
 		}
 
@@ -96,7 +102,8 @@ public class PluginMeta {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREPlayerOfflineException.class};
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class,
+					CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -118,10 +125,14 @@ public class PluginMeta {
 				offset = 1;
 				p = Static.GetPlayer(args[0], t);
 			}
-			String channel = args[0 + offset].val();
+			String channel = args[offset].val();
 			CByteArray ba = Static.getByteArray(args[1 + offset], t);
 			Static.AssertPlayerNonNull(p, t);
-			p.sendPluginMessage(channel, ba.asByteArrayCopy());
+			try {
+				p.sendPluginMessage(channel, ba.asByteArrayCopy());
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException(ex.getMessage(), t);
+			}
 			return CVoid.VOID;
 		}
 
@@ -137,8 +148,10 @@ public class PluginMeta {
 
 		@Override
 		public String docs() {
-			return "void {[player,] channel, message} Sends a plugin message to the player. Channel should be a string (the"
-					+ " channel name) and message should be a byte_array primitive. Depending on the plugin, these parameters"
+			return "void {[player,] channel, message} Sends a plugin message to the player."
+					+ " Channel name should be a string that is all lower-case, no longer than 32 characters,"
+					+ " and contain a colon, or it will throw an IllegalArgumentException."
+					+ " The message should be a byte_array primitive. Depending on the plugin, these parameters"
 					+ " will vary. If message is null an empty byte_array is sent.";
 		}
 
@@ -154,7 +167,8 @@ public class PluginMeta {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPluginChannelException.class, CRENotFoundException.class};
+			return new Class[]{CREPluginChannelException.class, CRENotFoundException.class,
+					CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -177,7 +191,11 @@ public class PluginMeta {
 			String channel = args[0].toString();
 
 			if(!messenger.isIncomingChannelRegistered(channel)) {
-				messenger.registerIncomingPluginChannel(channel);
+				try {
+					messenger.registerIncomingPluginChannel(channel);
+				} catch (IllegalArgumentException ex) {
+					throw new CREIllegalArgumentException(ex.getMessage(), t);
+				}
 			} else {
 				throw new CREPluginChannelException("The channel '" + channel + "' is already registered.", t);
 			}
@@ -198,6 +216,8 @@ public class PluginMeta {
 		@Override
 		public String docs() {
 			return "void {channel} Registers a plugin channel for CommandHelper to listen on."
+					+ " Channel name should be a string that is all lower-case, no longer than 32 characters,"
+					+ " and contain a colon, or it will throw an IllegalArgumentException."
 					+ " Incoming messages can be inspected by binding to 'plugin_message_received'.";
 		}
 
@@ -212,7 +232,8 @@ public class PluginMeta {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPluginChannelException.class, CRENotFoundException.class};
+			return new Class[]{CREPluginChannelException.class, CRENotFoundException.class,
+					CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -235,7 +256,11 @@ public class PluginMeta {
 			String channel = args[0].toString();
 
 			if(messenger.isIncomingChannelRegistered(channel)) {
-				messenger.unregisterIncomingPluginChannel(channel);
+				try {
+					messenger.unregisterIncomingPluginChannel(channel);
+				} catch (IllegalArgumentException ex) {
+					throw new CREIllegalArgumentException(ex.getMessage(), t);
+				}
 			} else {
 				throw new CREPluginChannelException("The channel '" + channel + "' is not registered.", t);
 			}
@@ -269,7 +294,7 @@ public class PluginMeta {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRENotFoundException.class};
+			return new Class[]{CRENotFoundException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -289,7 +314,11 @@ public class PluginMeta {
 				throw new CRENotFoundException(
 						"Could not find the internal Messenger object (are you running in cmdline mode?)", t);
 			}
-			return CBoolean.get(messenger.isIncomingChannelRegistered(args[0].toString()));
+			try {
+				return CBoolean.get(messenger.isIncomingChannelRegistered(args[0].toString()));
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException(ex.getMessage(), t);
+			}
 		}
 
 		@Override
@@ -319,7 +348,7 @@ public class PluginMeta {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRENotFoundException.class};
+			return new Class[]{CRENotFoundException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
