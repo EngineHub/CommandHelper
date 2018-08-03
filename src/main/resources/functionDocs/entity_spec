@@ -19,7 +19,7 @@ array {entityID} Returns an associative array containing all the data of the giv
 * %KEY_AREAEFFECTCLOUD_SOURCE%: The source of the cloud. Can be living entity, dispenser location array, or null.
 * %KEY_AREAEFFECTCLOUD_WAITTIME%: The age of the cloud in ticks before effects can be applied.
 |-
-| ARROW
+| ARROW, TRIDENT
 | 
 * %KEY_ARROW_CRITICAL%: If this arrow is critical.
 * %KEY_ARROW_KNOCKBACK%: The knockback strength.
@@ -239,7 +239,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_WOLF_COLOR%: The collar color of the wolf (can be %DYE_COLOR%).
 * %KEY_WOLF_SITTING%: If the wolf is sitting.
 |- 
-| ZOMBIE
+| ZOMBIE, HUSK, ZOMBIE_VILLAGER, DROWNED
 | 
 * %KEY_ZOMBIE_BABY%: Whether the zombie is a baby.
 |-
