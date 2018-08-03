@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Vector3D;
+import com.laytonsmith.abstraction.entities.MCAgeable;
 import com.laytonsmith.abstraction.MCBannerMeta;
 import com.laytonsmith.abstraction.MCBlockStateMeta;
 import com.laytonsmith.abstraction.MCBookMeta;

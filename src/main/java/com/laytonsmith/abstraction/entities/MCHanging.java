@@ -1,5 +1,6 @@
-package com.laytonsmith.abstraction;
+package com.laytonsmith.abstraction.entities;
 
+import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 
 public interface MCHanging extends MCEntity {

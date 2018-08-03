@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCProjectile;
+import com.laytonsmith.abstraction.entities.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.enums.MCProjectileType;

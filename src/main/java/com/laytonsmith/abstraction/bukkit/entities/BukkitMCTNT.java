@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCTNT;
+import com.laytonsmith.abstraction.entities.MCTNT;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.TNTPrimed;
 

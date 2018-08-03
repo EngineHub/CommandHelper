@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.MCBossBar;
 import com.laytonsmith.abstraction.MCCommandMap;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
+import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemFactory;

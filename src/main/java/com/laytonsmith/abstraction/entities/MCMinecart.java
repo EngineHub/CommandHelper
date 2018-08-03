@@ -1,7 +1,6 @@
 package com.laytonsmith.abstraction.entities;
 
 import com.laytonsmith.abstraction.MCMaterialData;
-import com.laytonsmith.abstraction.MCVehicle;
 
 public interface MCMinecart extends MCVehicle {
 

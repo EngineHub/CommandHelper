@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import com.laytonsmith.abstraction.MCExperienceOrb;
+import com.laytonsmith.abstraction.entities.MCExperienceOrb;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
 

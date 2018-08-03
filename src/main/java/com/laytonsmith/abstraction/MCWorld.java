@@ -3,6 +3,8 @@ package com.laytonsmith.abstraction;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCFirework;
+import com.laytonsmith.abstraction.entities.MCItem;
+import com.laytonsmith.abstraction.entities.MCLightningStrike;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCEffect;

@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAnimalTamer;
-import com.laytonsmith.abstraction.MCTameable;
+import com.laytonsmith.abstraction.entities.MCTameable;
 import com.laytonsmith.abstraction.bukkit.BukkitMCAnimalTamer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;

@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
-import com.laytonsmith.abstraction.MCAgeable;
+import com.laytonsmith.abstraction.entities.MCAgeable;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;

@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import com.laytonsmith.abstraction.MCLightningStrike;
+import com.laytonsmith.abstraction.entities.MCLightningStrike;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LightningStrike;
 
