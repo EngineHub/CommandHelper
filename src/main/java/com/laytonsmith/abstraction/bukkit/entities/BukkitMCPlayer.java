@@ -250,17 +250,17 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		List<String> groupNames = new ArrayList<String>();
 		for(PermissionAttachmentInfo permAttach : p.getEffectivePermissions()) {
 			String perm = permAttach.getPermission();
-			if(!(perm.startsWith(Static.groupPrefix) && permAttach.getValue())) {
+			if(!(perm.startsWith(Static.GROUP_PREFIX) && permAttach.getValue())) {
 				continue;
 			}
-			groupNames.add(perm.substring(Static.groupPrefix.length(), perm.length()));
+			groupNames.add(perm.substring(Static.GROUP_PREFIX.length(), perm.length()));
 		}
 		return groupNames;
 	}
 
 	@Override
 	public boolean inGroup(String groupName) {
-		return p.hasPermission(Static.groupPrefix + groupName);
+		return p.hasPermission(Static.GROUP_PREFIX + groupName);
 	}
 
 	@Override
