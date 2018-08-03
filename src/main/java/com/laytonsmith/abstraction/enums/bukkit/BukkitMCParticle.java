@@ -1,34 +1,70 @@
 package com.laytonsmith.abstraction.enums.bukkit;
 
-import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.abstraction.enums.MCParticle;
-import com.laytonsmith.abstraction.enums.MCVersion;
-import com.laytonsmith.annotations.abstractionenum;
-import com.laytonsmith.core.Static;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.constructs.Target;
 import org.bukkit.Particle;
 
-@abstractionenum(
-		implementation = Implementation.Type.BUKKIT,
-		forAbstractEnum = MCParticle.class,
-		forConcreteEnum = Particle.class
-)
-public class BukkitMCParticle extends EnumConvertor<MCParticle, Particle> {
+import java.util.HashMap;
+import java.util.Map;
 
-	private static BukkitMCParticle instance;
+public class BukkitMCParticle extends MCParticle<Particle> {
 
-	public static BukkitMCParticle getConvertor() {
-		if(instance == null) {
-			instance = new BukkitMCParticle();
-		}
-		return instance;
+	private static final Map<Particle, MCParticle> BUKKIT_MAP = new HashMap<>();
+
+	public BukkitMCParticle(MCVanillaParticle vanillaParticle, Particle particle) {
+		super(vanillaParticle, particle);
 	}
 
 	@Override
-	protected Particle getConcreteEnumCustom(MCParticle abstracted) {
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9)) {
-			return null;
+	public String name() {
+		return getAbstracted() == MCVanillaParticle.UNKNOWN ? concreteName() : getAbstracted().name();
+	}
+
+	@Override
+	public String concreteName() {
+		Particle b = getConcrete();
+		if(b == null) {
+			return "null";
 		}
-		return super.getConcreteEnumCustom(abstracted);
+		return b.name();
+	}
+
+	public static MCParticle valueOfConcrete(Particle test) {
+		MCParticle type = BUKKIT_MAP.get(test);
+		if(type == null) {
+			return NULL;
+		}
+		return type;
+	}
+
+	// This way we don't take up extra memory on non-bukkit implementations
+	public static void build() {
+		NULL = new BukkitMCParticle(MCVanillaParticle.UNKNOWN, null);
+		for(MCVanillaParticle v : MCVanillaParticle.values()) {
+			if(v.existsInCurrent()) {
+				Particle type;
+				try {
+					type = getBukkitType(v);
+				} catch (IllegalArgumentException | NoSuchFieldError ex) {
+					CHLog.GetLogger().w(CHLog.Tags.RUNTIME, "Could not find a Bukkit Particle for " + v.name(), Target.UNKNOWN);
+					continue;
+				}
+				BukkitMCParticle wrapper = new BukkitMCParticle(v, type);
+				BUKKIT_MAP.put(type, wrapper);
+				MAP.put(v.name(), wrapper);
+			}
+		}
+		for(Particle b : Particle.values()) {
+			if(!BUKKIT_MAP.containsKey(b)) {
+				MAP.put(b.name(), new BukkitMCParticle(MCVanillaParticle.UNKNOWN, b));
+				BUKKIT_MAP.put(b, new BukkitMCParticle(MCVanillaParticle.UNKNOWN, b));
+			}
+		}
+	}
+
+	private static Particle getBukkitType(MCVanillaParticle v) {
+		// remap name changes
+		return Particle.valueOf(v.name());
 	}
 }

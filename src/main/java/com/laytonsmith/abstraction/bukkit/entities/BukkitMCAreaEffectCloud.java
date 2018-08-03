@@ -64,7 +64,7 @@ public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEff
 
 	@Override
 	public MCParticle getParticle() {
-		return BukkitMCParticle.getConvertor().getAbstractedEnum(aec.getParticle());
+		return BukkitMCParticle.valueOfConcrete(aec.getParticle());
 	}
 
 	@Override
@@ -135,7 +135,7 @@ public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEff
 
 	@Override
 	public void setParticle(MCParticle particle) {
-		aec.setParticle(BukkitMCParticle.getConvertor().getConcreteEnum(particle));
+		aec.setParticle(((BukkitMCParticle) particle).getConcrete());
 	}
 
 	@Override
