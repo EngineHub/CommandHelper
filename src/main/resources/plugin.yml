@@ -1,5 +1,6 @@
 name: CommandHelper
 main: com.laytonsmith.commandhelper.CommandHelperPlugin
+api-version: 1.13
 version: "${project.version}"
 commands:
     reloadaliases:

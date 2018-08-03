@@ -270,8 +270,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
 		if(new SimpleVersion(System.getProperty("java.version")).lt(new SimpleVersion("1.8"))) {
-			CHLog.GetLogger().w(CHLog.Tags.GENERAL, "You appear to be running a version of Java older than Java 8. You should have plans"
-					+ " to upgrade at some point, as " + Implementation.GetServerType().getBranding() + " may require it at some point.", Target.UNKNOWN);
+			CHLog.GetLogger().e(CHLog.Tags.GENERAL, "CommandHelper does not support a Java version older than 8!", Target.UNKNOWN);
 		}
 
 		self = this;
