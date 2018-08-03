@@ -650,11 +650,11 @@ public class Scoreboards {
 				} else {
 					dname = dis.get("displayname", t).val();
 				}
-				if(dname.length() > 32) {
-					throw new CRELengthException("Displayname can only be 32 characters but was "
-							+ dname.length(), t);
+				try {
+					o.setDisplayName(dname);
+				} catch (IllegalArgumentException ex) {
+					throw new CRELengthException(ex.getMessage(), t);
 				}
-				o.setDisplayName(dname);
 			}
 			return CVoid.VOID;
 		}
@@ -677,7 +677,7 @@ public class Scoreboards {
 					+ " with keys 'displayname' and/or 'slot', affecting their respective properties."
 					+ " Null name resets it to the actual name, and null slot removes it from"
 					+ " all displays. Slot can be one of: " + StringUtils.Join(MCDisplaySlot.values(), ", ", ", or ")
-					+ ". Displayname can be a max of 32 characters, otherwise it throws a LengthException. " + DEF_MSG;
+					+ ". " + DEF_MSG;
 		}
 
 		@Override
@@ -714,11 +714,11 @@ public class Scoreboards {
 				} else {
 					dname = dis.get("displayname", t).val();
 				}
-				if(dname.length() > 32) {
-					throw new CRELengthException("Displayname can only be 32 characters but was "
-							+ dname.length(), t);
+				try {
+					o.setDisplayName(dname);
+				} catch (IllegalArgumentException ex) {
+					throw new CRELengthException(ex.getMessage(), t);
 				}
-				o.setDisplayName(dname);
 			}
 			if(dis.containsKey("prefix")) {
 				String prefix;
@@ -727,11 +727,11 @@ public class Scoreboards {
 				} else {
 					prefix = dis.get("prefix", t).val();
 				}
-				if(prefix.length() > 16) {
-					throw new CRELengthException("Prefix can only be 16 characters but was "
-							+ prefix.length(), t);
+				try {
+					o.setPrefix(prefix);
+				} catch (IllegalArgumentException ex) {
+					throw new CRELengthException(ex.getMessage(), t);
 				}
-				o.setPrefix(prefix);
 			}
 			if(dis.containsKey("suffix")) {
 				String suffix;
@@ -740,11 +740,11 @@ public class Scoreboards {
 				} else {
 					suffix = dis.get("suffix", t).val();
 				}
-				if(suffix.length() > 16) {
-					throw new CRELengthException("Suffix can only be 16 characters but was "
-							+ suffix.length(), t);
+				try {
+					o.setSuffix(suffix);
+				} catch (IllegalArgumentException ex) {
+					throw new CRELengthException(ex.getMessage(), t);
 				}
-				o.setSuffix(suffix);
 			}
 			return CVoid.VOID;
 		}
@@ -767,8 +767,7 @@ public class Scoreboards {
 					+ " otherwise arg 2 should be an array with keys 'displayname', 'prefix',"
 					+ " and/or 'suffix', affecting their respective properties."
 					+ " Null name resets it to the actual name, and null prefix or suffix removes it from"
-					+ " all displays. Displayname can be a max of 32 characters,"
-					+ " prefix and suffix can only be 16, otherwise a LengthException is thrown. " + DEF_MSG;
+					+ " all displays. " + DEF_MSG;
 		}
 
 		@Override
@@ -1074,10 +1073,11 @@ public class Scoreboards {
 			if(o == null) {
 				throw new CREScoreboardException("The given objective does not exist.", t);
 			}
-			if(args[1].val().length() > 40) {
-				throw new CRELengthException("Player names can only be 40 characters.", t);
+			try {
+				o.getScore(args[1].val()).setScore(Static.getInt32(args[2], t));
+			} catch (IllegalArgumentException ex) {
+				throw new CRELengthException(ex.getMessage(), t);
 			}
-			o.getScore(args[1].val()).setScore(Static.getInt32(args[2], t));
 			return CVoid.VOID;
 		}
 
@@ -1094,7 +1094,8 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "void {objectiveName, name, int, [scoreboard]} Sets the player's score for the given objective."
-					+ " You can set scores for fake players with up to 40 characters. " + DEF_MSG;
+					+ " The name can be anything, not just player names. An LengthException is thrown if it's too long."
+					+ DEF_MSG;
 		}
 
 		@Override
