@@ -30,39 +30,21 @@ public class BukkitMCCreeper extends BukkitMCLivingEntity implements MCCreeper {
 
 	@Override
 	public int getMaxFuseTicks() {
-		try {
-			return creeper.getMaxFuseTicks();
-		} catch (NoSuchMethodError ex) {
-			// Probably prior to 1.12.2
-			return 30;
-		}
+		return creeper.getMaxFuseTicks();
 	}
 
 	@Override
 	public void setMaxFuseTicks(int ticks) {
-		try {
-			creeper.setMaxFuseTicks(ticks);
-		} catch (NoSuchMethodError ex) {
-			// Probably prior to 1.12.2
-		}
+		creeper.setMaxFuseTicks(ticks);
 	}
 
 	@Override
 	public int getExplosionRadius() {
-		try {
-			return creeper.getExplosionRadius();
-		} catch (NoSuchMethodError ex) {
-			// Probably prior to 1.12.2
-			return 3;
-		}
+		return creeper.getExplosionRadius();
 	}
 
 	@Override
 	public void setExplosionRadius(int radius) {
-		try {
-			creeper.setExplosionRadius(radius);
-		} catch (NoSuchMethodError ex) {
-			// Probably prior to 1.12.2
-		}
+		creeper.setExplosionRadius(radius);
 	}
 }

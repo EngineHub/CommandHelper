@@ -141,9 +141,7 @@ public class InventoryManagement {
 				for(int i = 100; i < 104; i++) {
 					ret.set(i, getInvSlot(m, i, t), t);
 				}
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-					ret.set(-106, getInvSlot(m, -106, t), t);
-				}
+				ret.set(-106, getInvSlot(m, -106, t), t);
 				return ret;
 			} else {
 				return getInvSlot(m, index, t);
@@ -600,14 +598,6 @@ public class InventoryManagement {
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
 			inv.clear();
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9)) {
-				// 1.9 clears armor and offhand too, but before then we need clear armor manually.
-				MCItemStack empty = StaticLayer.GetItemStack("AIR", 0);
-				inv.setBoots(empty);
-				inv.setLeggings(empty);
-				inv.setChestplate(empty);
-				inv.setHelmet(empty);
-			}
 			return CVoid.VOID;
 		}
 	}
@@ -686,9 +676,7 @@ public class InventoryManagement {
 			total += total(ca, is, inv.getLeggings(), t);
 			total += total(ca, is, inv.getChestplate(), t);
 			total += total(ca, is, inv.getHelmet(), t);
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-				total += total(ca, is, inv.getItemInOffHand(), t);
-			}
+			total += total(ca, is, inv.getItemInOffHand(), t);
 			return new CInt(total, t);
 		}
 
@@ -785,7 +773,7 @@ public class InventoryManagement {
 			if(IsMatch(ca, is, inv.getHelmet(), t)) {
 				ret.push(new CInt(103, t), t);
 			}
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9) && IsMatch(ca, is, inv.getItemInOffHand(), t)) {
+			if(IsMatch(ca, is, inv.getItemInOffHand(), t)) {
 				ret.push(new CInt(-106, t), t);
 			}
 			return ret;

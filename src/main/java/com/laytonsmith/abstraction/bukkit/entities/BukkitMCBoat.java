@@ -32,11 +32,7 @@ public class BukkitMCBoat extends BukkitMCVehicle implements MCBoat {
 
 	@Override
 	public void setWoodType(MCTreeSpecies type) {
-		try {
-			b.setWoodType(BukkitMCTreeSpecies.getConvertor().getConcreteEnum(type));
-		} catch (NoSuchMethodError ex) {
-			// probably prior to 1.9
-		}
+		b.setWoodType(BukkitMCTreeSpecies.getConvertor().getConcreteEnum(type));
 	}
 
 }

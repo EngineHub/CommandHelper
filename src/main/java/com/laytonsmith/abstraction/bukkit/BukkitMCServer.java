@@ -186,6 +186,11 @@ public class BukkitMCServer implements MCServer {
 	}
 
 	@Override
+	public MCEntity getEntity(UUID uuid) {
+		return BukkitConvertor.BukkitGetCorrectEntity(s.getEntity(uuid));
+	}
+
+	@Override
 	public MCWorld getWorld(String name) {
 		World w = s.getWorld(name);
 		if(w == null) {
@@ -562,11 +567,6 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public MCBossBar createBossBar(String title, MCBarColor color, MCBarStyle style) {
-		try {
-			return new BukkitMCBossBar(s.createBossBar(title, BarColor.valueOf(color.name()), BarStyle.valueOf(style.name())));
-		} catch (NoSuchMethodError ex) {
-			// Probably prior to 1.9
-			return null;
-		}
+		return new BukkitMCBossBar(s.createBossBar(title, BarColor.valueOf(color.name()), BarStyle.valueOf(style.name())));
 	}
 }

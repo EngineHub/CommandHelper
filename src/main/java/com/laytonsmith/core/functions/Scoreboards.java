@@ -194,13 +194,9 @@ public class Scoreboards {
 		CArray ops = CArray.GetAssociativeArray(t);
 		ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t);
 		ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t);
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-			ops.set("nametagvisibility", new CString(team.getNameTagVisibility().name(), t), t);
-		}
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-			ops.set("collisionrule", new CString(team.getOption(MCOption.COLLISION_RULE).name(), t), t);
-			ops.set("deathmessagevisibility", new CString(team.getOption(MCOption.DEATH_MESSAGE_VISIBILITY).name(), t), t);
-		}
+		ops.set("nametagvisibility", new CString(team.getOption(MCOption.NAME_TAG_VISIBILITY).name(), t), t);
+		ops.set("collisionrule", new CString(team.getOption(MCOption.COLLISION_RULE).name(), t), t);
+		ops.set("deathmessagevisibility", new CString(team.getOption(MCOption.DEATH_MESSAGE_VISIBILITY).name(), t), t);
 		to.set("options", ops, t);
 		CArray pl = new CArray(t);
 		for(String entry : team.getEntries()) {
@@ -796,8 +792,7 @@ public class Scoreboards {
 			if(team == null) {
 				throw new CREScoreboardException("No team by that name exists.", t);
 			}
-			if(args[1].val().length() > 40
-					|| (args[1].val().length() > 16 && Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8_7))) {
+			if(args[1].val().length() > 40) {
 				throw new CRELengthException("Player name is too long.", t);
 			}
 			team.addEntry(args[1].val());
@@ -817,7 +812,7 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "void {teamName, player, [scoreboard]} Adds a player to a team, given the team exists. This allows"
-					+ " you to add fake players with up to 40 characters. (16 characters prior to 1.8.7) The player"
+					+ " you to add fake players with up to 40 characters. The player"
 					+ " will be removed from any other team on the same scoreboard. " + DEF_MSG;
 		}
 
@@ -1162,37 +1157,47 @@ public class Scoreboards {
 				if(options.containsKey("friendlyinvisibles")) {
 					team.setCanSeeFriendlyInvisibles(Static.getBoolean(options.get("friendlyinvisibles", t), t));
 				}
-				if(options.containsKey("nametagvisibility") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-					MCNameTagVisibility visibility;
+				if(options.containsKey("nametagvisibility")) {
+					MCOptionStatus namevisibility;
 					try {
-						visibility = MCNameTagVisibility.valueOf(options.get("nametagvisibility", t).val().toUpperCase());
+						namevisibility = MCOptionStatus.valueOf(options.get("nametagvisibility", t).val().toUpperCase());
 					} catch (IllegalArgumentException iae) {
-						throw new CREFormatException("Unknown nametagvisibility: "
-								+ options.get("nametagvisibility", t).val(), t);
+						String name = options.get("nametagvisibility", t).val().toUpperCase();
+						if(name.startsWith("HIDE_")) {
+							name = name.substring(5);
+							try {
+								namevisibility = MCOptionStatus.valueOf(name);
+								CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Found old value for NameTagVisibility: \""
+										+ "HIDE_" + name + "\". This should be: \"" + name + "\"", t);
+							} catch (IllegalArgumentException ex) {
+								throw new CREFormatException("Unknown nametagvisibility: "
+										+ options.get("nametagvisibility", t).val(), t);
+							}
+						} else {
+							throw new CREFormatException("Unknown nametagvisibility: " + name, t);
+						}
 					}
-					team.setNameTagVisibility(visibility);
+					team.setOption(MCOption.NAME_TAG_VISIBILITY, namevisibility);
 				}
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-					if(options.containsKey("collisionrule")) {
-						MCOptionStatus collision;
-						try {
-							collision = MCOptionStatus.valueOf(options.get("collisionrule", t).val().toUpperCase());
-						} catch (IllegalArgumentException iae) {
-							throw new CREFormatException("Unknown collisionrule: "
-									+ options.get("collisionrule", t).val(), t);
-						}
-						team.setOption(MCOption.COLLISION_RULE, collision);
+				if(options.containsKey("collisionrule")) {
+					MCOptionStatus collision;
+					try {
+						collision = MCOptionStatus.valueOf(options.get("collisionrule", t).val().toUpperCase());
+					} catch (IllegalArgumentException iae) {
+						throw new CREFormatException("Unknown collisionrule: "
+								+ options.get("collisionrule", t).val(), t);
 					}
-					if(options.containsKey("deathmessagevisibility")) {
-						MCOptionStatus visibility;
-						try {
-							visibility = MCOptionStatus.valueOf(options.get("deathmessagevisibility", t).val().toUpperCase());
-						} catch (IllegalArgumentException iae) {
-							throw new CREFormatException("Unknown deathmessagevisibility: "
-									+ options.get("deathmessagevisibility", t).val(), t);
-						}
-						team.setOption(MCOption.DEATH_MESSAGE_VISIBILITY, visibility);
+					team.setOption(MCOption.COLLISION_RULE, collision);
+				}
+				if(options.containsKey("deathmessagevisibility")) {
+					MCOptionStatus deathvisibility;
+					try {
+						deathvisibility = MCOptionStatus.valueOf(options.get("deathmessagevisibility", t).val().toUpperCase());
+					} catch (IllegalArgumentException iae) {
+						throw new CREFormatException("Unknown deathmessagevisibility: "
+								+ options.get("deathmessagevisibility", t).val(), t);
 					}
+					team.setOption(MCOption.DEATH_MESSAGE_VISIBILITY, deathvisibility);
 				}
 			} else {
 				throw new CREFormatException("Expected arg 2 to be an array.", t);
@@ -1213,9 +1218,9 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "void {teamName, array, [scoreboard]} Sets various options about the team from an array. The keys"
-					+ " 'friendlyfire' and 'friendlyinvisibles' must be booleans. The keys 'collisionrule' and"
-					+ " 'deathmessagevisibility' must be one of " + StringUtils.Join(MCOptionStatus.values(), ", ", ", or ")
-					+ ". The key 'nametagvisibility' must be one of " + StringUtils.Join(MCNameTagVisibility.values(), ", ", ", or ")
+					+ " 'friendlyfire' and 'friendlyinvisibles' must be booleans. The keys 'collisionrule', "
+					+ " 'nametagvisibility', and 'deathmessagevisibility' must be one of "
+					+ StringUtils.Join(MCOptionStatus.values(), ", ", ", or ")
 					+ "." + DEF_MSG;
 		}
 

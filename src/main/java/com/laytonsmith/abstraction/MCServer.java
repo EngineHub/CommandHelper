@@ -25,6 +25,8 @@ public interface MCServer extends AbstractionObject {
 
 	MCPlayer getPlayer(UUID uuid);
 
+	MCEntity getEntity(UUID uuid);
+
 	MCWorld getWorld(String name);
 
 	List<MCWorld> getWorlds();

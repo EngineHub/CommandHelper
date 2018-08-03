@@ -3778,10 +3778,9 @@ public class PlayerManagement {
 		public String docs() {
 			return "void {[player], [listName]} Sets the player's list name. Colors are supported"
 					+ " and setting the name to null resets it."
-					+ " MineCraft versions prior to 1.8 have a limit of 16 characters for the name."
 					+ " In these versions, an IllegalArgumentException is thrown if the name specified is already"
 					+ " taken and a LengthException is thrown when the name is greater than 16 characters."
-					+ " In versions 1.8 and higher, specifying an already taken name will be silently ignored.";
+					+ " Specifying an already taken name will be silently ignored.";
 		}
 
 		@Override
@@ -5346,7 +5345,7 @@ public class PlayerManagement {
 		public String docs() {
 			return "int {[player], material} Gets the time left on the player's cooldown for the specified material."
 					+ " The material is the name found in item arrays. This returns an integer representing the"
-					+ " time in game ticks until items of this material can be used again by this player. (MC 1.11.2)";
+					+ " time in game ticks until items of this material can be used again by this player.";
 		}
 
 		@Override
@@ -5418,7 +5417,7 @@ public class PlayerManagement {
 		public String docs() {
 			return "int {[player], material, cooldown} Sets the player's cooldown time for the specified material."
 					+ " The material is the name found in item arrays. The cooldown must be a positive integer"
-					+ " representing game ticks. (MC 1.11.2)";
+					+ " representing game ticks.";
 		}
 
 		@Override

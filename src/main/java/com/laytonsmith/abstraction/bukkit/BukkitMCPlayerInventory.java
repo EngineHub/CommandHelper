@@ -45,11 +45,7 @@ public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlay
 
 	@Override
 	public void setItemInOffHand(MCItemStack stack) {
-		try {
-			this.i.setItemInOffHand(((BukkitMCItemStack) stack).__ItemStack());
-		} catch (NoSuchMethodError ex) {
-			// probably before 1.9
-		}
+		this.i.setItemInOffHand(((BukkitMCItemStack) stack).__ItemStack());
 	}
 
 	@Override

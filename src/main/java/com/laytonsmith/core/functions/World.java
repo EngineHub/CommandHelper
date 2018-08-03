@@ -2043,9 +2043,6 @@ public class World {
 			if(w == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
 			}
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
-				return CNull.NULL;
-			}
 			MCWorldBorder wb = w.getWorldBorder();
 			CArray ret = CArray.GetAssociativeArray(t);
 			ret.set("width", new CDouble(wb.getSize(), t), t);
@@ -2103,9 +2100,6 @@ public class World {
 			MCWorld w = Static.getServer().getWorld(args[0].val());
 			if(w == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
-			}
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
-				return CVoid.VOID;
 			}
 			MCWorldBorder wb = w.getWorldBorder();
 			Construct c = args[1];

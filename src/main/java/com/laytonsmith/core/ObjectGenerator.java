@@ -352,21 +352,15 @@ public class ObjectGenerator {
 			ma.set("enchants", enchants(meta.getEnchants(), t), t);
 			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
 
-			// Version specific ItemMeta
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-				Set<MCItemFlag> itemFlags = meta.getItemFlags();
-				CArray flagArray = new CArray(t);
-				if(itemFlags.size() > 0) {
-					for(MCItemFlag flag : itemFlags) {
-						flagArray.push(new CString(flag.name(), t), t);
-					}
-				}
-				ma.set("flags", flagArray, t);
-
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
-					ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t);
+			Set<MCItemFlag> itemFlags = meta.getItemFlags();
+			CArray flagArray = new CArray(t);
+			if(itemFlags.size() > 0) {
+				for(MCItemFlag flag : itemFlags) {
+					flagArray.push(new CString(flag.name(), t), t);
 				}
 			}
+			ma.set("flags", flagArray, t);
+			ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t);
 
 			// Specific ItemMeta
 			if(meta instanceof MCBlockStateMeta) {
@@ -504,13 +498,9 @@ public class ObjectGenerator {
 				MCPotionMeta potionmeta = (MCPotionMeta) meta;
 				CArray effects = potions(potionmeta.getCustomEffects(), t);
 				ma.set("potions", effects, t);
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-					MCPotionData potiondata = potionmeta.getBasePotionData();
-					if(potiondata != null) {
-						ma.set("base", potionData(potiondata, t), t);
-					}
-				} else if(effects.size() > 0) {
-					ma.set("main", ((CArray) effects.get(0, t)).get("id", t), t);
+				MCPotionData potiondata = potionmeta.getBasePotionData();
+				if(potiondata != null) {
+					ma.set("base", potionData(potiondata, t), t);
 				}
 			} else if(meta instanceof MCBannerMeta) {
 				MCBannerMeta bannermeta = (MCBannerMeta) meta;
@@ -598,27 +588,20 @@ public class ObjectGenerator {
 				if(ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
 					meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
 				}
-
-				// Version specific ItemMeta
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-					if(ma.containsKey("flags")) {
-						Construct flags = ma.get("flags", t);
-						if(flags instanceof CArray) {
-							CArray flagArray = (CArray) flags;
-							for(int i = 0; i < flagArray.size(); i++) {
-								Construct flag = flagArray.get(i, t);
-								meta.addItemFlags(MCItemFlag.valueOf(flag.getValue().toUpperCase()));
-							}
-						} else {
-							throw new CREFormatException("Itemflags was expected to be an array of flags.", t);
+				if(ma.containsKey("flags")) {
+					Construct flags = ma.get("flags", t);
+					if(flags instanceof CArray) {
+						CArray flagArray = (CArray) flags;
+						for(int i = 0; i < flagArray.size(); i++) {
+							Construct flag = flagArray.get(i, t);
+							meta.addItemFlags(MCItemFlag.valueOf(flag.getValue().toUpperCase()));
 						}
+					} else {
+						throw new CREFormatException("Itemflags was expected to be an array of flags.", t);
 					}
-
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
-						if(ma.containsKey("unbreakable")) {
-							meta.setUnbreakable(Static.getBoolean(ma.get("unbreakable", t), t));
-						}
-					}
+				}
+				if(ma.containsKey("unbreakable")) {
+					meta.setUnbreakable(Static.getBoolean(ma.get("unbreakable", t), t));
 				}
 
 				// Specific ItemMeta
@@ -844,16 +827,12 @@ public class ObjectGenerator {
 							throw new CREFormatException("Effects was expected to be an array of potion arrays.", t);
 						}
 					}
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-						if(ma.containsKey("base")) {
-							Construct potiondata = ma.get("base", t);
-							if(potiondata instanceof CArray) {
-								CArray pd = (CArray) potiondata;
-								((MCPotionMeta) meta).setBasePotionData(potionData((CArray) potiondata, t));
-							}
+					if(ma.containsKey("base")) {
+						Construct potiondata = ma.get("base", t);
+						if(potiondata instanceof CArray) {
+							CArray pd = (CArray) potiondata;
+							((MCPotionMeta) meta).setBasePotionData(potionData((CArray) potiondata, t));
 						}
-					} else if(ma.containsKey("main")) {
-						((MCPotionMeta) meta).setMainEffect(Static.getInt32(ma.get("main", t), t));
 					}
 				} else if(meta instanceof MCBannerMeta) {
 					if(ma.containsKey("basecolor")) {

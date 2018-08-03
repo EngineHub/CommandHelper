@@ -98,21 +98,15 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_FIREBALL_DIRECTION%: The direction the fireball is heading toward.
 |-
-| GUARDIAN
-|
-* %KEY_GUARDIAN_ELDER%: Whether the guardian is an elder guardian. (deprecated)
-|-
 | HORSE
 | 
 * %KEY_HORSE_ARMOR%: An item pertaining to the armor a horse has put on.
-* %KEY_HORSE_CHEST%: Whether the horse has a chest equipped. (deprecated)
 * %KEY_HORSE_COLOR%: The horse's color (can be %HORSE_COLOR%).
 * %KEY_HORSE_DOMESTICATION%: The domestication level of the horse (can't be higher than the maximum domestication level).
 * %KEY_HORSE_JUMP%: The jump strength (between 1.0 and 2.0).
 * %KEY_HORSE_MAXDOMESTICATION%: The maximum domestication level of the horse.
 * %KEY_HORSE_SADDLE%: An item pertaining to the saddle a horse has put on. Can be anything.
 * %KEY_HORSE_STYLE%: The horse's style (can be %HORSE_STYLE%).
-* %KEY_HORSE_VARIANT%: The horse's variant (can be %HORSE_VARIANT%). (deprecated)
 |-
 | HUSK
 |
@@ -205,11 +199,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |
 * %KEY_SHULKERBULLET_TARGET%: The UUID of the entity the bullet will head toward, or null if there is no target.
 |-
-| SKELETON
-| 
-* %KEY_SKELETON_TYPE%: The type of the skeleton (can be %SKELETON_TYPE%). (deprecated)
-|-
-| SKELTON_HORSE, ZOMBI_HORSE
+| SKELETON_HORSE, ZOMBIE_HORSE
 |
 * %KEY_HORSE_DOMESTICATION%: The domestication level of the horse (can't be higher than the maximum domestication level).
 * %KEY_HORSE_JUMP%: The jump strength (between 1.0 and 2.0).
@@ -252,7 +242,6 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | ZOMBIE
 | 
 * %KEY_ZOMBIE_BABY%: Whether the zombie is a baby.
-* %KEY_ZOMBIE_VILLAGER%: Whether the zombie is a villager. (deprecated)
 |-
 | ZOMBIE_VILLAGER
 |

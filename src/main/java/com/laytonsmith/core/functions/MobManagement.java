@@ -1450,7 +1450,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} If possible, makes the entity glide (MC 1.9)";
+			return "void {entityID, boolean} If possible, makes the entity glide.";
 		}
 
 		@Override
@@ -1479,7 +1479,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns true if the given entity is gliding (MC 1.9)";
+			return "boolean {entityID} Returns true if the given entity is gliding.";
 		}
 
 		@Override
@@ -1503,7 +1503,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns true if the given entity has AI (MC 1.9.2)";
+			return "boolean {entityID} Returns true if the given entity has AI.";
 		}
 
 		@Override
@@ -1527,7 +1527,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} enables or disables the entity AI (MC 1.9.2)";
+			return "void {entityID, boolean} enables or disables the entity AI.";
 		}
 
 		@Override

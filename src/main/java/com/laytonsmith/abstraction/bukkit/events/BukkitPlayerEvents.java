@@ -596,15 +596,10 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public MCEquipmentSlot getHand() {
-			try {
-				if(pie.getHand() == EquipmentSlot.HAND) {
-					return MCEquipmentSlot.WEAPON;
-				}
-				return MCEquipmentSlot.OFF_HAND;
-			} catch (NoSuchMethodError e) {
-				// before Bukkit 1.9
+			if(pie.getHand() == EquipmentSlot.HAND) {
 				return MCEquipmentSlot.WEAPON;
 			}
+			return MCEquipmentSlot.OFF_HAND;
 		}
 	}
 

@@ -71,9 +71,4 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 		return pm.removeCustomEffect(PotionEffectType.getById(id));
 	}
 
-	@Override
-	public boolean setMainEffect(int id) {
-		return pm.setMainEffect(PotionEffectType.getById(id));
-	}
-
 }

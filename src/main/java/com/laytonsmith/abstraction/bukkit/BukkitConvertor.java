@@ -184,16 +184,10 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCEnchantment GetEnchantmentByName(String name) {
 		Enchantment enchant = Enchantment.getByName(name);
-		if(enchant != null) {
-			return new BukkitMCEnchantment(enchant);
-		}
-		try {
-			//If they are looking it up by number, we can support that too
-			int i = Integer.valueOf(name);
-			return new BukkitMCEnchantment(Enchantment.getById(i));
-		} catch (NumberFormatException | NullPointerException e) {
+		if(enchant == null) {
 			return null;
 		}
+		return new BukkitMCEnchantment(enchant);
 	}
 
 	@Override
@@ -460,15 +454,7 @@ public class BukkitConvertor extends AbstractConvertor {
 			radius = 1;
 		}
 		Location l = (Location) location.getHandle();
-		Collection<Entity> near;
-		try {
-			near = l.getWorld().getNearbyEntities(l, radius, radius, radius);
-		} catch (NoSuchMethodError ex) {
-			// Probably before 1.8.3
-			Entity tempEntity = l.getWorld().spawnEntity(l, EntityType.ARROW);
-			near = tempEntity.getNearbyEntities(radius, radius, radius);
-			tempEntity.remove();
-		}
+		Collection<Entity> near = l.getWorld().getNearbyEntities(l, radius, radius, radius);
 		List<MCEntity> entities = new ArrayList<>();
 		for(Entity e : near) {
 			entities.add(BukkitGetCorrectEntity(e));
@@ -477,11 +463,10 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public static MCBlockState BukkitGetCorrectBlockState(BlockState bs) {
-		MCVersion version = Static.getServer().getMinecraftVersion();
-		if(version.gte(MCVersion.MC1_11) && bs instanceof ShulkerBox) {
+		if(bs instanceof ShulkerBox) {
 			return new BukkitMCShulkerBox((ShulkerBox) bs);
 		}
-		if(version.gte(MCVersion.MC1_9) && bs instanceof Banner) {
+		if(bs instanceof Banner) {
 			return new BukkitMCBanner((Banner) bs);
 		}
 		if(bs instanceof CreatureSpawner) {
@@ -514,12 +499,15 @@ public class BukkitConvertor extends AbstractConvertor {
 	public static MCItemMeta BukkitGetCorrectMeta(ItemMeta im) {
 		MCVersion version = Static.getServer().getMinecraftVersion();
 		if(version.gte(MCVersion.MC1_11_X) && im instanceof SpawnEggMeta) {
-			return new BukkitMCSpawnEggMeta((SpawnEggMeta) im);
+			if(version.lt(MCVersion.MC1_13)) {
+				return new BukkitMCSpawnEggMeta((SpawnEggMeta) im);
+			}
+			return new BukkitMCItemMeta(im);
 		}
-		if(version.gte(MCVersion.MC1_8_6) && im instanceof BlockStateMeta) {
+		if(im instanceof BlockStateMeta) {
 			return new BukkitMCBlockStateMeta((BlockStateMeta) im);
 		}
-		if(version.gte(MCVersion.MC1_8) && im instanceof BannerMeta) {
+		if(im instanceof BannerMeta) {
 			return new BukkitMCBannerMeta((BannerMeta) im);
 		}
 		if(im instanceof BookMeta) {

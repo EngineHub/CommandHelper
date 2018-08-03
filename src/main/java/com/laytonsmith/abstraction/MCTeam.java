@@ -1,6 +1,5 @@
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.abstraction.enums.MCNameTagVisibility;
 import com.laytonsmith.abstraction.enums.MCOption;
 import com.laytonsmith.abstraction.enums.MCOptionStatus;
 
@@ -17,8 +16,6 @@ public interface MCTeam {
 	String getDisplayName();
 
 	String getName();
-
-	MCNameTagVisibility getNameTagVisibility();
 
 	MCOptionStatus getOption(MCOption option);
 
@@ -41,8 +38,6 @@ public interface MCTeam {
 	void setCanSeeFriendlyInvisibles(boolean enabled);
 
 	void setDisplayName(String displayName);
-
-	void setNameTagVisibility(MCNameTagVisibility visibility);
 
 	void setOption(MCOption option, MCOptionStatus status);
 

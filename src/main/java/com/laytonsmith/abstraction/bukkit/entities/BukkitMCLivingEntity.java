@@ -1,6 +1,5 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCLivingEntity;
@@ -11,8 +10,6 @@ import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntityEquipment;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
-import com.laytonsmith.abstraction.enums.MCVersion;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import org.bukkit.block.Block;
@@ -28,8 +25,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource implements MCLivingEntity {
 
@@ -185,41 +180,18 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public boolean hasAI() {
-		try {
-			return le.hasAI();
-		} catch (NoSuchMethodError ex) {
-			// Probably before 1.9.2
-			return true;
-		}
+		return le.hasAI();
 	}
 
 	@Override
 	public void addEffect(int potionID, int strength, int ticks, boolean ambient, boolean particles, Target t) {
-		PotionEffect pe;
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
-			pe = new PotionEffect(PotionEffectType.getById(potionID), ticks, strength, ambient);
-		} else {
-			pe = new PotionEffect(PotionEffectType.getById(potionID), ticks, strength, ambient, particles);
-		}
-		try {
-			if(le != null) {
-				le.addPotionEffect(pe, true);
-			}
-		} catch (NullPointerException e) {
-			Logger.getLogger(BukkitMCLivingEntity.class.getName()).log(Level.SEVERE,
-					"Bukkit appears to have derped. This is a problem with Bukkit, not CommandHelper."
-					+ "The effect should have still been applied.", e);
-		}
+		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), ticks, strength, ambient, particles);
+		le.addPotionEffect(pe, true);
 	}
 
 	@Override
 	public int getMaxEffect() {
-		try {
-			PotionEffectType[] arr = (PotionEffectType[]) ReflectionUtils.get(PotionEffectType.class, "byId");
-			return arr.length - 1;
-		} catch (ReflectionUtils.ReflectionException e) {
-			return Integer.MAX_VALUE;
-		}
+		return PotionEffectType.values().length - 1;
 	}
 
 	@Override
@@ -247,12 +219,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public List<MCEffect> getEffects() {
 		List<MCEffect> effects = new ArrayList<>();
 		for(PotionEffect pe : le.getActivePotionEffects()) {
-			MCEffect e;
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
-				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(), true);
-			} else {
-				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(), pe.hasParticles());
-			}
+			MCEffect e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(), pe.hasParticles());
 			effects.add(e);
 		}
 		return effects;
@@ -369,29 +336,16 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public boolean isGliding() {
-		try {
-			return le.isGliding();
-		} catch (NoSuchMethodError ex) {
-			// Probably before 1.9
-			return false;
-		}
+		return le.isGliding();
 	}
 
 	@Override
 	public void setGliding(Boolean glide) {
-		try {
-			le.setGliding(glide);
-		} catch (NoSuchMethodError ex) {
-			// Probably before 1.9
-		}
+		le.setGliding(glide);
 	}
 
 	@Override
 	public void setAI(Boolean ai) {
-		try {
-			le.setAI(ai);
-		} catch (NoSuchMethodError ex) {
-			// Probably before 1.9.2
-		}
+		le.setAI(ai);
 	}
 }

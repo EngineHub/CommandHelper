@@ -235,26 +235,16 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCEntity getHitEntity() {
-			try {
-				return BukkitConvertor.BukkitGetCorrectEntity(phe.getHitEntity());
-			} catch (NoSuchMethodError ex) {
-				// Probably prior to 1.11
-				return null;
-			}
+			return BukkitConvertor.BukkitGetCorrectEntity(phe.getHitEntity());
 		}
 
 		@Override
 		public MCBlock getHitBlock() {
-			try {
-				Block blk = phe.getHitBlock();
-				if(blk == null) {
-					return null;
-				}
-				return new BukkitMCBlock(blk);
-			} catch (NoSuchMethodError ex) {
-				// Probably prior to 1.11
+			Block blk = phe.getHitBlock();
+			if(blk == null) {
 				return null;
 			}
+			return new BukkitMCBlock(blk);
 		}
 
 		public static BukkitMCProjectileHitEvent _instantiate(MCProjectile p) {
@@ -449,15 +439,10 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCEquipmentSlot getHand() {
-			try {
-				if(e.getHand() == EquipmentSlot.HAND) {
-					return MCEquipmentSlot.WEAPON;
-				}
-				return MCEquipmentSlot.OFF_HAND;
-			} catch (NoSuchMethodError e) {
-				// before Bukkit 1.9
+			if(e.getHand() == EquipmentSlot.HAND) {
 				return MCEquipmentSlot.WEAPON;
 			}
+			return MCEquipmentSlot.OFF_HAND;
 		}
 	}
 

@@ -863,14 +863,11 @@ public final class Static {
 			// This entity is not in the world yet, but it was injected by the event
 			return injectedEntity;
 		}
-		for(MCWorld w : getServer().getWorlds()) {
-			for(MCEntity e : w.getEntities()) {
-				if(e.getUniqueId().compareTo(id) == 0) {
-					return StaticLayer.GetCorrectEntity(e);
-				}
-			}
+		MCEntity ent = getServer().getEntity(id);
+		if(ent == null) {
+			throw new CREBadEntityException("That entity (UUID " + id + ") does not exist.", t);
 		}
-		throw new CREBadEntityException("That entity (UUID " + id + ") does not exist.", t);
+		return ent;
 	}
 
 	/**
@@ -888,19 +885,14 @@ public final class Static {
 			}
 			throw new CREBadEntityException("That entity (" + id + ") is not alive.", t);
 		}
-		for(MCWorld w : Static.getServer().getWorlds()) {
-			for(MCLivingEntity e : w.getLivingEntities()) {
-				if(e.getUniqueId().compareTo(id) == 0) {
-					try {
-						return (MCLivingEntity) StaticLayer.GetCorrectEntity(e);
-					} catch (ClassCastException cce) {
-						throw new CREBadEntityException("The entity found was misinterpreted by the converter, this is"
-								+ " a developer mistake, please file a ticket.", t);
-					}
-				}
-			}
+		MCEntity ent = getServer().getEntity(id);
+		if(ent == null) {
+			throw new CREBadEntityException("That entity (UUID " + id + ") does not exist.", t);
 		}
-		throw new CREBadEntityException("That entity (" + id + ") does not exist or is not alive.", t);
+		if(!(ent instanceof MCLivingEntity)) {
+			throw new CREBadEntityException("That entity (" + id + ") is not alive.", t);
+		}
+		return (MCLivingEntity) ent;
 	}
 
 	/**

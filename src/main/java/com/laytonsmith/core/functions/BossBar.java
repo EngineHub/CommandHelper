@@ -161,12 +161,10 @@ public class BossBar {
 				}
 			}
 			MCBossBar bar = StaticLayer.GetServer().createBossBar(title, color, style);
-			if(bar != null) {
+			if(bar != null) { // if not tests
 				bar.setVisible(visible);
 				bar.setProgress(percent);
 				BARS.put(id, bar);
-			} else {
-				throw new CREException("Boss bar functions require Bukkit 1.9 or later.", t);
 			}
 			return CVoid.VOID;
 		}

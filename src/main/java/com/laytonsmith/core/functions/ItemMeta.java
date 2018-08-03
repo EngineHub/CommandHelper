@@ -47,7 +47,7 @@ public class ItemMeta {
 			+ "<li>Books - \"title\" (string), author (string), \"pages\" (array of strings)</li>"
 			+ "<li>EnchantedBooks - \"stored\" (array of enchantment arrays (see Example))</li>"
 			+ "<li>Leather Armor - \"color\" (color array (see Example))</li>"
-			+ "<li>Player Skulls - \"owner\" (string) or \"owneruuid\" (string)</li>"
+			+ "<li>Player Skulls - \"owner\" (string)</li>"
 			+ "<li>Potions - \"potions\" (array of potion arrays), \"base\" (an array with the keys \"type\","
 			+ " \"extended\", and \"upgraded\")</li>"
 			+ "<li>Banners - \"basecolor\" (string), \"patterns\" (an array of pattern arrays, each with the keys"

@@ -39,12 +39,8 @@ public class CommandHelperServerListener implements Listener {
 
 		BukkitServerEvents.BukkitMCServerCommandEvent cce = new BukkitServerEvents.BukkitMCServerCommandEvent(event, sender);
 		EventUtils.TriggerListener(Driver.SERVER_COMMAND, "server_command", cce);
-		try {
-			if(event.isCancelled()) {
-				return;
-			}
-		} catch (NoSuchMethodError ex) {
-			// not cancellable before 1.8.8
+		if(event.isCancelled()) {
+			return;
 		}
 
 		boolean match = false;
