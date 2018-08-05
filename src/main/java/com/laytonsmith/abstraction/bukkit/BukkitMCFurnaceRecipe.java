@@ -16,6 +16,11 @@ public class BukkitMCFurnaceRecipe extends BukkitMCRecipe implements MCFurnaceRe
 	}
 
 	@Override
+	public String getKey() {
+		return fr.getKey().getKey();
+	}
+
+	@Override
 	public MCRecipeType getRecipeType() {
 		return MCRecipeType.FURNACE;
 	}

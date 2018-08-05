@@ -1292,7 +1292,9 @@ public class ObjectGenerator {
 		ret.set("type", new CString(r.getRecipeType().name(), t), t);
 		ret.set("result", item(r.getResult(), t), t);
 		if(r instanceof MCFurnaceRecipe) {
-			ret.set("input", item(((MCFurnaceRecipe) r).getInput(), t), t);
+			MCFurnaceRecipe furnace = (MCFurnaceRecipe) r;
+			ret.set("input", item(furnace.getInput(), t), t);
+			ret.set("key", furnace.getKey(), t);
 		} else if(r instanceof MCShapelessRecipe) {
 			MCShapelessRecipe shapeless = (MCShapelessRecipe) r;
 			CArray il = new CArray(t);
@@ -1300,9 +1302,7 @@ public class ObjectGenerator {
 				il.push(item(i, t), t);
 			}
 			ret.set("ingredients", il, t);
-			if(shapeless.getKey() != null) {
-				ret.set("key", shapeless.getKey(), t);
-			}
+			ret.set("key", shapeless.getKey(), t);
 		} else if(r instanceof MCShapedRecipe) {
 			MCShapedRecipe shaped = (MCShapedRecipe) r;
 			CArray shape = new CArray(t);
@@ -1315,9 +1315,7 @@ public class ObjectGenerator {
 			}
 			ret.set("shape", shape, t);
 			ret.set("ingredients", imap, t);
-			if(shaped.getKey() != null) {
-				ret.set("key", shaped.getKey(), t);
-			}
+			ret.set("key", shaped.getKey(), t);
 		}
 		return ret;
 	}

@@ -639,18 +639,25 @@ public class BukkitConvertor extends AbstractConvertor {
 		ItemStack is = ((BukkitMCItemStack) result).asItemStack();
 		switch(type) {
 			case FURNACE:
-				FurnaceRecipe recipe = new FurnaceRecipe(is, Material.PISTON_MOVING_PIECE);
-				return new BukkitMCFurnaceRecipe(recipe);
+				if(key != null) {
+					NamespacedKey nskey = new NamespacedKey(CommandHelperPlugin.self, key);
+					return new BukkitMCFurnaceRecipe(new FurnaceRecipe(nskey, is, Material.AIR, 0.0F, 200));
+				} else {
+					// deprecated in 1.13
+					return new BukkitMCFurnaceRecipe(new FurnaceRecipe(is, Material.AIR));
+				}
 			case SHAPED:
 				if(key != null) {
-					return new BukkitMCShapedRecipe(new ShapedRecipe(new NamespacedKey(CommandHelperPlugin.self, key), is));
+					NamespacedKey nskey = new NamespacedKey(CommandHelperPlugin.self, key);
+					return new BukkitMCShapedRecipe(new ShapedRecipe(nskey, is));
 				} else {
 					// deprecated in 1.12
 					return new BukkitMCShapedRecipe(new ShapedRecipe(is));
 				}
 			case SHAPELESS:
 				if(key != null) {
-					return new BukkitMCShapelessRecipe(new ShapelessRecipe(new NamespacedKey(CommandHelperPlugin.self, key), is));
+					NamespacedKey nskey = new NamespacedKey(CommandHelperPlugin.self, key);
+					return new BukkitMCShapelessRecipe(new ShapelessRecipe(nskey, is));
 				} else {
 					// deprecated in 1.12
 					return new BukkitMCShapelessRecipe(new ShapelessRecipe(is));
