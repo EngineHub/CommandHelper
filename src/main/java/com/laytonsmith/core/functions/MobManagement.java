@@ -26,9 +26,13 @@ import com.laytonsmith.abstraction.enums.MCWolfType;
 import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -57,8 +61,11 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
+import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MobManagement {
 
@@ -172,7 +179,7 @@ public class MobManagement {
 
 	@api(environments = {CommandHelperEnvironment.class})
 	@hide("Deprecated")
-	public static class tame_mob extends AbstractFunction {
+	public static class tame_mob extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -245,6 +252,18 @@ public class MobManagement {
 			} else {
 				throw new CREUntameableMobException("The specified entity is not tameable", t);
 			}
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function tame_mob() is deprecated for set_mob_owner().", t);
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
