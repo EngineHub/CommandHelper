@@ -184,8 +184,9 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	@Override
-	public void addEffect(int potionID, int strength, int ticks, boolean ambient, boolean particles, Target t) {
-		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), ticks, strength, ambient, particles);
+	public void addEffect(int id, int strength, int ticks, boolean ambient, boolean particles, boolean icon) {
+		PotionEffectType type = PotionEffectType.getById(id);
+		PotionEffect pe = new PotionEffect(type, ticks, strength, ambient, particles, icon);
 		le.addPotionEffect(pe, true);
 	}
 
@@ -219,7 +220,8 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public List<MCEffect> getEffects() {
 		List<MCEffect> effects = new ArrayList<>();
 		for(PotionEffect pe : le.getActivePotionEffects()) {
-			MCEffect e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(), pe.hasParticles());
+			MCEffect e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(),
+					pe.hasParticles(), pe.hasIcon());
 			effects.add(e);
 		}
 		return effects;

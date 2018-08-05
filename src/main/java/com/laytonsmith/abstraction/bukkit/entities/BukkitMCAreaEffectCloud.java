@@ -47,7 +47,7 @@ public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEff
 		List<MCLivingEntity.MCEffect> list = new ArrayList<>();
 		for(PotionEffect pe : aec.getCustomEffects()) {
 			list.add(new MCLivingEntity.MCEffect(pe.getType().getId(), pe.getAmplifier(),
-					pe.getDuration(), pe.isAmbient(), pe.hasParticles()));
+					pe.getDuration(), pe.isAmbient(), pe.hasParticles(), pe.hasIcon()));
 		}
 		return list;
 	}
@@ -103,8 +103,9 @@ public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEff
 
 	@Override
 	public void addCustomEffect(MCLivingEntity.MCEffect effect) {
-		PotionEffect pe = new PotionEffect(PotionEffectType.getById(effect.getPotionID()),
-				effect.getTicksRemaining(), effect.getStrength(), effect.isAmbient(), effect.hasParticles());
+		PotionEffectType type = PotionEffectType.getById(effect.getPotionID());
+		PotionEffect pe = new PotionEffect(type, effect.getTicksRemaining(), effect.getStrength(), effect.isAmbient(),
+				effect.hasParticles(), effect.showIcon());
 		aec.addCustomEffect(pe, true);
 	}
 

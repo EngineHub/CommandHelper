@@ -2108,14 +2108,15 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {player, potionID, strength, [seconds], [ambient], [particles]} Effect is 1-23."
+			return "boolean {player, potionID, strength, [seconds], [ambient], [particles], [icon]} Effect is 1-23."
 					+ " Seconds defaults to 30.0. If the potionID is out of range, a RangeException is thrown, because"
 					+ " out of range potion effects cause the client to crash, fairly hardcore. See"
 					+ " http://www.minecraftwiki.net/wiki/Potion_effects for a complete list of potions that can be"
 					+ " added. To remove an effect, set the seconds to 0. Strength is the number of levels to add to the"
 					+ " base power (effect level 1). Ambient takes a boolean of whether the particles should be less"
-					+ " noticeable. Particles takes a boolean of whether the particles should be visible at all. The"
-					+ " function returns true if the effect was added or removed as desired, and false if it wasn't"
+					+ " noticeable. Particles takes a boolean of whether the particles should be visible at all."
+					+ " Icon takes a boolean for whether or not to show the effect's icon on the player's screen."
+					+ " The function returns true if the effect was added or removed as desired, and false if it wasn't"
 					+ " (however, this currently only will happen if an effect is attempted to be removed, yet isn't"
 					+ " already on the player).";
 		}
@@ -2150,13 +2151,14 @@ public class PlayerManagement {
 			//otherwise the client crashes, and requires deletion of
 			//player data to fix.
 			if(effect < 1 || effect > m.getMaxEffect()) {
-				throw new CRERangeException("Invalid effect ID recieved, must be from 1-" + m.getMaxEffect(), t);
+				throw new CRERangeException("Invalid effect ID received, must be from 1-" + m.getMaxEffect(), t);
 			}
 
 			int strength = Static.getInt32(args[2], t);
 			double seconds = 30.0;
 			boolean ambient = false;
 			boolean particles = true;
+			boolean icon = true;
 			if(args.length >= 4) {
 				seconds = Static.getDouble(args[3], t);
 				if(seconds < 0.0) {
@@ -2171,11 +2173,14 @@ public class PlayerManagement {
 			if(args.length == 6) {
 				particles = Static.getBoolean(args[5], t);
 			}
+			if(args.length == 7) {
+				icon = Static.getBoolean(args[6], t);
+			}
 			Static.AssertPlayerNonNull(m, t);
 			if(seconds == 0.0) {
 				return CBoolean.get(m.removeEffect(effect));
 			} else {
-				m.addEffect(effect, strength, (int) (seconds * 20), ambient, particles, t);
+				m.addEffect(effect, strength, (int) (seconds * 20), ambient, particles, icon);
 				return CBoolean.TRUE;
 			}
 		}

@@ -822,7 +822,7 @@ public class ObjectGenerator {
 						if(effects instanceof CArray) {
 							for(MCLivingEntity.MCEffect e : potions((CArray) effects, t)) {
 								((MCPotionMeta) meta).addCustomEffect(e.getPotionID(), e.getStrength(),
-										e.getTicksRemaining(), e.isAmbient(), true, t);
+										e.getTicksRemaining(), e.isAmbient(), e.hasParticles(), e.showIcon(), true, t);
 							}
 						} else {
 							throw new CREFormatException("Effects was expected to be an array of potion arrays.", t);
@@ -1081,6 +1081,7 @@ public class ObjectGenerator {
 			effect.set("seconds", new CDouble(eff.getTicksRemaining() / 20.0, t), t);
 			effect.set("ambient", CBoolean.get(eff.isAmbient()), t);
 			effect.set("particles", CBoolean.get(eff.hasParticles()), t);
+			effect.set("icon", CBoolean.get(eff.showIcon()), t);
 			ea.push(effect, t);
 		}
 		return ea;
@@ -1096,6 +1097,7 @@ public class ObjectGenerator {
 				double seconds = 30.0;
 				boolean ambient = false;
 				boolean particles = true;
+				boolean icon = true;
 				if(effect.containsKey("id")) {
 					potionID = Static.getInt32(effect.get("id", t), t);
 				} else {
@@ -1118,7 +1120,10 @@ public class ObjectGenerator {
 				if(effect.containsKey("particles")) {
 					particles = Static.getBoolean(effect.get("particles", t), t);
 				}
-				ret.add(new MCLivingEntity.MCEffect(potionID, strength, (int) (seconds * 20), ambient, particles));
+				if(effect.containsKey("icon")) {
+					icon = Static.getBoolean(effect.get("icon", t), t);
+				}
+				ret.add(new MCLivingEntity.MCEffect(potionID, strength, (int) (seconds * 20), ambient, particles, icon));
 			} else {
 				throw new CREFormatException("Expected a potion array at index" + key, t);
 			}

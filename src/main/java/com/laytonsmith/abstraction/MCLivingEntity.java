@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
-	void addEffect(int potionID, int strength, int ticks, boolean ambient, boolean particles, Target t);
+	void addEffect(int potionID, int strength, int ticks, boolean ambient, boolean particles, boolean icon);
 
 	boolean removeEffect(int potionID);
 
@@ -118,6 +118,7 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 		private int ticksRemaining;
 		private boolean ambient;
 		private boolean particles;
+		private boolean icon;
 
 		public MCEffect(int potionID, int strength, int ticks, boolean ambient) {
 			this.potionID = potionID;
@@ -125,6 +126,7 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 			this.ticksRemaining = ticks;
 			this.ambient = ambient;
 			this.particles = true;
+			this.icon = true;
 		}
 
 		public MCEffect(int potionID, int strength, int ticks, boolean ambient, boolean particles) {
@@ -133,6 +135,16 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 			this.ticksRemaining = ticks;
 			this.ambient = ambient;
 			this.particles = particles;
+			this.icon = particles;
+		}
+
+		public MCEffect(int potionID, int strength, int ticks, boolean ambient, boolean particles, boolean icon) {
+			this.potionID = potionID;
+			this.strength = strength;
+			this.ticksRemaining = ticks;
+			this.ambient = ambient;
+			this.particles = particles;
+			this.icon = icon;
 		}
 
 		public int getPotionID() {
@@ -153,6 +165,10 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
 		public boolean hasParticles() {
 			return particles;
+		}
+
+		public boolean showIcon() {
+			return icon;
 		}
 	}
 }
