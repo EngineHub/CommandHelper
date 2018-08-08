@@ -528,15 +528,19 @@ public class ObjectGenerator {
 				} else {
 					ma.set("spawntype", new CString(spawntype.name(), t), t);
 				}
-			} else if(meta instanceof MCMapMeta && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
-				MCColor mapcolor = ((MCMapMeta) meta).getColor();
-				Construct color;
+			} else if(meta instanceof MCMapMeta) {
+				MCMapMeta mm = ((MCMapMeta) meta);
+				MCColor mapcolor = mm.getColor();
 				if(mapcolor == null) {
-					color = CNull.NULL;
+					ma.set("color", CNull.NULL, t);
 				} else {
-					color = color(mapcolor, t);
+					ma.set("color", color(mapcolor, t), t);
 				}
-				ma.set("color", color, t);
+				if(mm.hasMapId()) {
+					ma.set("mapid", new CInt(mm.getMapId(), t), t);
+				} else {
+					ma.set("mapid", CNull.NULL, t);
+				}
 			}
 			return ma;
 		}
@@ -866,6 +870,12 @@ public class ObjectGenerator {
 							((MCMapMeta) meta).setColor(color((CArray) ci, t));
 						} else if(!(ci instanceof CNull)) {
 							throw new CREFormatException("Color was expected to be an array.", t);
+						}
+					}
+					if(ma.containsKey("mapid")) {
+						Construct cid = ma.get("mapid", t);
+						if(!(cid instanceof CNull)) {
+							((MCMapMeta) meta).setMapId(Static.getInt32(cid, t));
 						}
 					}
 				}
