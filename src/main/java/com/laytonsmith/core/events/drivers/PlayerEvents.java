@@ -861,9 +861,9 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{block: <string match> The block type the player interacts with is this"
+			return "{block: <string match> The block type the player interacts with, or null if nothing"
 					+ " | button: <string match> left or right. If they left or right clicked |"
-					+ " itemname: <string match> The item type they are holding when they interacted |"
+					+ " itemname: <string match> The item type they are holding when they interacted, or null |"
 					+ " hand: <string match> The hand the player clicked with |"
 					+ " player: <macro> The player that triggered the event} "
 					+ "Fires when a player left or right clicks a block or the air"
@@ -940,23 +940,25 @@ public class PlayerEvents {
 				}
 
 				if(prefilter.containsKey("itemname")) {
-					String value = prefilter.get("itemname").val();
+					Construct item = prefilter.get("itemname");
 					MCMaterial mat = pie.getItem().getType();
-					if(mat != null && !mat.getName().equals(value) || mat == null && !value.equals("AIR")) {
+					if(mat == null) {
+						if(!(item instanceof CNull)) {
+							return false;
+						}
+					} else if(!mat.getName().equals(item.val())) {
 						return false;
 					}
 				}
 				if(prefilter.containsKey("block")) {
-					Construct value = prefilter.get("block");
+					Construct block = prefilter.get("block");
 					MCBlock b = pie.getClickedBlock();
-					if(value instanceof CNull) {
-						if(!b.isEmpty()) {
+					if(b.isEmpty()) {
+						if(!(block instanceof CNull)) {
 							return false;
 						}
-					} else {
-						if(!b.getType().getName().equals(value.val())) {
-							return false;
-						}
+					} else if(!b.getType().getName().equals(block.val())) {
+						return false;
 					}
 				}
 				Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
@@ -979,8 +981,8 @@ public class PlayerEvents {
 				Map<String, Construct> map = evaluate_helper(e);
 				MCAction a = pie.getAction();
 				map.put("action", new CString(a.name().toLowerCase(), Target.UNKNOWN));
-				MCMaterial block = pie.getClickedBlock().getType();
-				map.put("block", block == null ? CNull.NULL : new CString(block.getName(), Target.UNKNOWN));
+				MCBlock block = pie.getClickedBlock();
+				map.put("block", block.isEmpty() ? CNull.NULL : new CString(block.getType().getName(), Target.UNKNOWN));
 				if(a == MCAction.LEFT_CLICK_AIR || a == MCAction.LEFT_CLICK_BLOCK) {
 					map.put("button", new CString("left", Target.UNKNOWN));
 				} else {
