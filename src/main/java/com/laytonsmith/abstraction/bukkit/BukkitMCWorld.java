@@ -56,10 +56,13 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSoundCategory;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTreeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWorldType;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.FunctionReturnException;
 import org.bukkit.Chunk;
 import org.bukkit.Effect;
 import org.bukkit.FireworkEffect;
@@ -125,6 +128,7 @@ import org.bukkit.entity.Zombie;
 import org.bukkit.entity.ZombieHorse;
 import org.bukkit.entity.ZombieVillager;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.util.Consumer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -292,6 +296,29 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 		return BukkitConvertor.BukkitGetCorrectEntity(w.spawnEntity(
 				((BukkitMCLocation) l).asLocation(),
 				((BukkitMCEntityType) entType).getConcrete()));
+	}
+
+	@Override
+	public MCEntity spawn(MCLocation l, MCEntityType entType, final CClosure closure) {
+		EntityType type = (EntityType) entType.getConcrete();
+		Consumer<? extends Entity> consumer = (Consumer<Entity>) entity -> {
+			MCEntity temp = BukkitConvertor.BukkitGetCorrectEntity(entity);
+			Static.InjectEntity(temp);
+			try {
+				closure.execute(new CString(entity.getUniqueId().toString(), Target.UNKNOWN));
+			} catch (FunctionReturnException ex) {
+				// do nothing
+			} finally {
+				Static.UninjectEntity(temp);
+			}
+		};
+		Entity ent = this.spawn((Location) l.getHandle(), type.getEntityClass(), consumer);
+		return BukkitConvertor.BukkitGetCorrectEntity(ent);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends Entity> Entity spawn(Location location, Class<T> clazz, Consumer<? extends Entity> consumer) {
+		return w.spawn(location, clazz, (Consumer<T>) consumer);
 	}
 
 	@Override

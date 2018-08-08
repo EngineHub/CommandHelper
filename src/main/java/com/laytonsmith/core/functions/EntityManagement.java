@@ -94,6 +94,7 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -107,10 +108,10 @@ import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityTypeException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
-import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -1128,7 +1129,7 @@ public class EntityManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREFormatException.class, CREBadEntityException.class,
-				CREInvalidWorldException.class, CREPlayerOfflineException.class, CRENotFoundException.class};
+				CREInvalidWorldException.class, CREPlayerOfflineException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -1139,8 +1140,16 @@ public class EntityManagement {
 			MCEntityType entType;
 			MCLocation l;
 			MCEntity ent;
-			if(args.length == 3) {
+			CClosure consumer = null;
+			if(args.length >= 3) {
 				l = ObjectGenerator.GetGenerator().location(args[2], null, t);
+				if(args.length == 4) {
+					if(args[3] instanceof CClosure) {
+						consumer = (CClosure) args[3];
+					} else {
+						throw new CREIllegalArgumentException("Expected a closure as last argument for spawn_entity().", t);
+					}
+				}
 			} else {
 				if(cs instanceof MCPlayer) {
 					l = ((MCPlayer) cs).getLocation();
@@ -1157,15 +1166,11 @@ public class EntityManagement {
 			}
 			try {
 				entType = MCEntityType.valueOf(args[0].val().toUpperCase());
-				if(entType == null) {
-					throw new CRENotFoundException(
-							"Could not find the entity type internal object (are you running in cmdline mode?)", t);
-				}
 				if(!entType.isSpawnable()) {
-					throw new CREFormatException("Unspawnable entitytype: " + args[0].val(), t);
+					throw new CREFormatException("Unspawnable entity type: " + args[0].val(), t);
 				}
 			} catch (IllegalArgumentException iae) {
-				throw new CREFormatException("Unknown entitytype: " + args[0].val(), t);
+				throw new CREFormatException("Unknown entity type: " + args[0].val(), t);
 			}
 			for(int i = 0; i < qty; i++) {
 				switch(entType.getAbstracted()) {
@@ -1180,13 +1185,21 @@ public class EntityManagement {
 					case LEASH_HITCH:
 					case PAINTING:
 						try {
-							ent = l.getWorld().spawn(l.getBlock().getLocation(), entType);
+							if(consumer != null) {
+								ent = l.getWorld().spawn(l.getBlock().getLocation(), entType, consumer);
+							} else {
+								ent = l.getWorld().spawn(l.getBlock().getLocation(), entType);
+							}
 						} catch (NullPointerException | IllegalArgumentException ex) {
 							throw new CREFormatException("Unspawnable location for " + entType.getAbstracted().name(), t);
 						}
 						break;
 					default:
-						ent = l.getWorld().spawn(l, entType);
+						if(consumer != null) {
+							ent = l.getWorld().spawn(l, entType, consumer);
+						} else {
+							ent = l.getWorld().spawn(l, entType);
+						}
 				}
 				ret.push(new CString(ent.getUniqueId().toString(), t), t);
 			}
@@ -1211,13 +1224,15 @@ public class EntityManagement {
 					spawnable.add(type.name());
 				}
 			}
-			return "array {entityType, [qty], [location]} Spawns the specified number of entities of the given type"
-					+ " at the given location. Returns an array of entityIDs of what is spawned. Qty defaults to 1"
-					+ " and location defaults to the location of the commandsender, if it is a block or player."
-					+ " If the commandsender is console, location must be supplied. ---- Entitytype can be one of "
-					+ StringUtils.Join(spawnable, ", ", " or ", ", or ")
+			return "array {entityType, [qty], [location], [closure]} Spawns the specified number of entities of the"
+					+ " given type at the given location. Returns an array of entityIDs of what is spawned."
+					+ "  Qty defaults to 1 and location defaults to the location of the commandsender,"
+					+ " if it is a block or player. If the commandsender is console, location must be supplied."
+					+ " ---- Entitytype can be one of " + StringUtils.Join(spawnable, ", ", " or ", ", or ")
 					+ ". Falling_blocks will be sand by default, and dropped_items will be stone,"
-					+ " as these entities already have their own functions for spawning.";
+					+ " as these entities already have their own functions for spawning."
+					+ " A closure can be used as the last argument to modify the entity before adding it to the world."
+					+ " The entity's UUID is passed to the closure as the first parameter.";
 		}
 
 		@Override
