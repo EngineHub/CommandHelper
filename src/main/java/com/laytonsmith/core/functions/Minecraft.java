@@ -180,8 +180,8 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "string {item} Returns a modern material for the a legacy item id, notation, or array."
-					+ "If an invalid argument is passed in, null is returned."
+			return "string {item} Returns a modern material for the a legacy item id, name, notation, or array."
+					+ " If an invalid argument is passed in, null is returned."
 					+ " Given 1 or '1:0', returns 'STONE'."
 					+ " Given an item array with {name: STONE, data: 1}, returns 'GRANITE'.";
 		}
@@ -227,7 +227,16 @@ public class Minecraft {
 				return new CString(is.getType().getName(), t);
 			}
 			if(i == -1) {
-				i = Static.getInt32(args[0], t);
+				try {
+					i = Static.getInt32(args[0], t);
+				} catch (CRECastException ex) {
+					// possibly a material name
+					MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(args[0].val(), 0);
+					if(mat == null) {
+						return CNull.NULL;
+					}
+					return new CString(mat.getName(), t);
+				}
 			}
 			if(i2 == -1) {
 				i2 = 0;
