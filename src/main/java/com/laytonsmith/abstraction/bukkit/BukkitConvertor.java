@@ -220,13 +220,13 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(match != null) {
 			return new BukkitMCMaterial(match);
 		}
-		// Try legacy
-		match = Material.getMaterial(name, true);
+		// Try fuzzy match
+		match = Material.matchMaterial(name);
 		if(match != null) {
 			return new BukkitMCMaterial(match);
 		}
-		// Try fuzzy match
-		match = Material.matchMaterial(name);
+		// Try legacy
+		match = Material.getMaterial(name, true);
 		if(match != null) {
 			return new BukkitMCMaterial(match);
 		}

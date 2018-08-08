@@ -27,6 +27,7 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -46,17 +47,197 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Minecraft {
 
 	public static String docs() {
 		return "These functions provide a hook into game functionality.";
+	}
+
+	private static final SortedMap<String, Construct> DATA_VALUE_LOOKUP = new TreeMap<>();
+
+	static {
+		Properties p1 = new Properties();
+		try {
+			p1.load(Minecraft.class.getResourceAsStream("/data_values.txt"));
+			Enumeration e = p1.propertyNames();
+			while(e.hasMoreElements()) {
+				String name = e.nextElement().toString();
+				DATA_VALUE_LOOKUP.put(name, new CString(p1.getProperty(name), Target.UNKNOWN));
+			}
+		} catch (IOException ex) {
+			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
+
+	@api
+	public static class data_values extends AbstractFunction implements Optimizable {
+
+		@Override
+		public String getName() {
+			return "data_values";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			if(args[0] instanceof CInt) {
+				return new CInt(Static.getInt(args[0], t), t);
+			}
+			String c = args[0].val();
+			MCMaterial mat = StaticLayer.GetMaterial("LEGACY_" + c.toUpperCase());
+			if(mat != null) {
+				return new CInt(mat.getType(), t);
+			}
+			String changed = c;
+			if(changed.contains(":")) {
+				//Split on that, and reverse. Change wool:red to redwool
+				String split[] = changed.split(":");
+				if(split.length == 2) {
+					changed = split[1] + split[0];
+				}
+			}
+			//Remove anything that isn't a letter or a number
+			changed = changed.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+			//Do a lookup in the DataLookup table
+			if(DATA_VALUE_LOOKUP.containsKey(changed)) {
+				String split[] = DATA_VALUE_LOOKUP.get(changed).toString().split(":");
+				if(split[1].equals("0")) {
+					return new CInt(split[0], t);
+				}
+				return new CString(split[0] + ":" + split[1], t);
+			}
+			return CNull.NULL;
+		}
+
+		@Override
+		public String docs() {
+			return "int {var1} Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'."
+					+ " If the data value cannot be found, null is returned.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_0_1;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "data_values() is deprecated.", t);
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+	}
+
+	@api
+	public static class data_name extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "data_name";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {item} Returns a modern material for the a legacy item id, notation, or array."
+					+ "If an invalid argument is passed in, null is returned."
+					+ " Given 1 or '1:0', returns 'STONE'."
+					+ " Given an item array with {name: STONE, data: 1}, returns 'GRANITE'.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_0;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			int i = -1;
+			int i2 = -1;
+			if(args[0] instanceof CString) {
+				//We also accept item notation
+				if(args[0].val().contains(":")) {
+					String[] split = args[0].val().split(":");
+					try {
+						i = Integer.parseInt(split[0]);
+						i2 = Integer.parseInt(split[1]);
+					} catch (NumberFormatException e) {
+					} catch (ArrayIndexOutOfBoundsException e) {
+						throw new CREFormatException("Incorrect format for the item notation: " + args[0].val(), t);
+					}
+				}
+			} else if(args[0] instanceof CArray) {
+				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t, true);
+				return new CString(is.getType().getName(), t);
+			}
+			if(i == -1) {
+				i = Static.getInt32(args[0], t);
+			}
+			if(i2 == -1) {
+				i2 = 0;
+			}
+			try {
+				return new CString(StaticLayer.GetConvertor().GetMaterialFromLegacy(i, i2).getName(), t);
+			} catch (NullPointerException e) {
+				return CNull.NULL;
+			}
+		}
 	}
 
 	@api
