@@ -21,4 +21,20 @@ public class BukkitMCDyeColor extends EnumConvertor<MCDyeColor, DyeColor> {
 		}
 		return instance;
 	}
+
+	@Override
+	protected MCDyeColor getAbstractedEnumCustom(DyeColor concrete) {
+		if(concrete.equals(DyeColor.LIGHT_GRAY)) {
+			return MCDyeColor.SILVER;
+		}
+		return super.getAbstractedEnumCustom(concrete);
+	}
+
+	@Override
+	protected DyeColor getConcreteEnumCustom(MCDyeColor abstracted) {
+		if(abstracted.equals(MCDyeColor.SILVER)) {
+			return DyeColor.LIGHT_GRAY;
+		}
+		return super.getConcreteEnumCustom(abstracted);
+	}
 }
