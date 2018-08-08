@@ -947,9 +947,16 @@ public class PlayerEvents {
 					}
 				}
 				if(prefilter.containsKey("block")) {
-					String value = prefilter.get("block").val();
-					if(!pie.getClickedBlock().getType().getName().equals(value)) {
-						return false;
+					Construct value = prefilter.get("block");
+					MCBlock b = pie.getClickedBlock();
+					if(value instanceof CNull) {
+						if(!b.isEmpty()) {
+							return false;
+						}
+					} else {
+						if(!b.getType().getName().equals(value.val())) {
+							return false;
+						}
 					}
 				}
 				Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
