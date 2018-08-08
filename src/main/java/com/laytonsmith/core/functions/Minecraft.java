@@ -259,7 +259,8 @@ public class Minecraft {
 			try {
 				e = MCEffect.valueOf(preEff.toUpperCase());
 			} catch (IllegalArgumentException ex) {
-				throw new CREFormatException("The effect type " + args[1].val() + " is not valid", t);
+				CHLog.GetLogger().e(CHLog.Tags.GENERAL, "The effect type " + args[1].val() + " is not valid", t);
+				return CVoid.VOID;
 			}
 			if(e.equals(MCEffect.STEP_SOUND)) {
 				MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
@@ -348,7 +349,7 @@ public class Minecraft {
 				throw new CRERangeException(this.getName() + " expects the index to be between -1 and 16 (inclusive)", t);
 			}
 
-			ArrayList<Construct> retVals = new ArrayList<Construct>();
+			ArrayList<Construct> retVals = new ArrayList<>();
 
 			if(index == 0 || index == -1) {
 				//Server name

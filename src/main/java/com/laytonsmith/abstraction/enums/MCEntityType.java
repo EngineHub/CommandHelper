@@ -8,6 +8,7 @@ import com.laytonsmith.core.Static;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -16,8 +17,8 @@ import java.util.Set;
 public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MCVanillaEntityType, Concrete> {
 
 	// To be filled by the implementer
-	protected static Map<String, MCEntityType> mappings;
-	protected static Map<MCVanillaEntityType, MCEntityType> vanilla;
+	protected static final Map<String, MCEntityType> MAP = new HashMap<>();
+	protected static final Map<MCVanillaEntityType, MCEntityType> VANILLA_MAP = new HashMap<>();
 
 	@SuppressWarnings("checkstyle:staticvariablename") // Fixing this violation might break dependents.
 	public static MCEntityType NULL = null;
@@ -45,10 +46,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	}
 
 	public static MCEntityType valueOf(String test) throws IllegalArgumentException {
-		if(mappings == null) {
-			return null;
-		}
-		MCEntityType ret = mappings.get(test);
+		MCEntityType ret = MAP.get(test);
 		if(ret == null) {
 			throw new IllegalArgumentException("Unknown entity type: " + test);
 		}
@@ -56,10 +54,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	}
 
 	public static MCEntityType valueOfVanillaType(MCVanillaEntityType type) {
-		if(vanilla == null) {
-			return null;
-		}
-		return vanilla.get(type);
+		return VANILLA_MAP.get(type);
 	}
 
 	/**
@@ -73,7 +68,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 			}
 			return dummy;
 		}
-		return mappings.keySet();
+		return MAP.keySet();
 	}
 
 	/**
@@ -102,7 +97,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 			}
 			return dummy;
 		}
-		return mappings.values();
+		return MAP.values();
 	}
 
 	@MEnum("VanillaEntityType")

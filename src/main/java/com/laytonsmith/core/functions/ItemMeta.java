@@ -359,14 +359,14 @@ public class ItemMeta {
 				if(args[2] instanceof CArray) {
 					color = (CArray) args[2];
 				} else {
-					throw new CREFormatException("Expected an array but recieved " + args[2] + " instead.", t);
+					throw new CREFormatException("Expected an array but received " + args[2] + " instead.", t);
 				}
 			} else {
 				slot = Static.getInt32(args[0], t);
 				if(args[1] instanceof CArray) {
 					color = (CArray) args[1];
 				} else {
-					throw new CREFormatException("Expected an array but recieved " + args[1] + " instead.", t);
+					throw new CREFormatException("Expected an array but received " + args[1] + " instead.", t);
 				}
 			}
 			Static.AssertPlayerNonNull(p, t);

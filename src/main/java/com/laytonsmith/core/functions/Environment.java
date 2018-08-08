@@ -1380,7 +1380,7 @@ public class Environment {
 			float pitch = 1;
 
 			if(!(args[1] instanceof CArray)) {
-				throw new CREFormatException("An array was expected but recieved " + args[1], t);
+				throw new CREFormatException("An array was expected but received " + args[1], t);
 			}
 
 			CArray sa = (CArray) args[1];
@@ -1499,7 +1499,7 @@ public class Environment {
 			float pitch = 1;
 
 			if(!(args[1] instanceof CArray)) {
-				throw new CREFormatException("An array was expected but recieved " + args[1], t);
+				throw new CREFormatException("An array was expected but received " + args[1], t);
 			}
 
 			CArray sa = (CArray) args[1];
@@ -1699,7 +1699,7 @@ public class Environment {
 				throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(pl instanceof MCPlayer) {
+			if(pl != null) {
 				w = pl.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
@@ -1753,7 +1753,7 @@ public class Environment {
 				throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(pl instanceof MCPlayer) {
+			if(pl != null) {
 				w = pl.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
@@ -1841,7 +1841,7 @@ public class Environment {
 				throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(pl instanceof MCPlayer) {
+			if(pl != null) {
 				w = pl.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);

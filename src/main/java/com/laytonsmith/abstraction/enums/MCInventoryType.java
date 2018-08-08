@@ -6,15 +6,15 @@ import com.laytonsmith.annotations.MEnum;
 public enum MCInventoryType {
 	BREWING,
 	CHEST,
-	CRAFTING(false), // bukkit doesn't allow opening
-	CREATIVE(false), // bukkit doesn't allow opening
+	CRAFTING(false),
+	CREATIVE(false),
 	DISPENSER,
 	DROPPER,
 	ENCHANTING(false), // non-functional
 	ENDER_CHEST,
 	FURNACE,
 	HOPPER,
-	MERCHANT(false), // doesn't open
+	MERCHANT(false),
 	PLAYER,
 	WORKBENCH,
 	ANVIL,

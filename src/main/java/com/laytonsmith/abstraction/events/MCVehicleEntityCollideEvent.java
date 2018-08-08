@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.abstraction.MCEntity;
 
-public interface MCVehicleEnitityCollideEvent extends MCVehicleCollideEvent {
+public interface MCVehicleEntityCollideEvent extends MCVehicleCollideEvent {
 
 	MCEntity getEntity();
 

@@ -597,7 +597,7 @@ public class MobManagement {
 			int age = Static.getInt32(args[1], t);
 			boolean lock = false;
 			if(args.length == 3) {
-				lock = (boolean) Static.getBoolean(args[2], t);
+				lock = Static.getBoolean(args[2], t);
 			}
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
 			if(ent == null) {

@@ -1,5 +1,7 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.blocks.MCBlockData;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCSound;
@@ -109,7 +111,9 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 
 	String getHost();
 
-	void sendBlockChange(MCLocation loc, int material, byte data);
+	void sendBlockChange(MCLocation loc, MCMaterial material, byte data);
+
+	void sendBlockChange(MCLocation loc, MCBlockData data);
 
 	void sendSignTextChange(MCLocation loc, String[] lines);
 

@@ -873,7 +873,7 @@ public class ObjectGenerator {
 				throw new CREFormatException(ex.getMessage(), t, ex);
 			}
 		} else {
-			throw new CREFormatException("An array was expected but recieved " + c + " instead.", t);
+			throw new CREFormatException("An array was expected but received " + c + " instead.", t);
 		}
 		return meta;
 	}
@@ -1326,7 +1326,7 @@ public class ObjectGenerator {
 
 	public MCRecipe recipe(Construct c, Target t) {
 		if(!(c instanceof CArray)) {
-			throw new CRECastException("Expected array but recieved " + c.getCType().name(), t);
+			throw new CRECastException("Expected array but received " + c.getCType().name(), t);
 		}
 		CArray recipe = (CArray) c;
 

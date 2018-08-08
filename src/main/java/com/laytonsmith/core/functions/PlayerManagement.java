@@ -892,10 +892,10 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender m = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			String player = "";
-			int index = -1;
+			String player;
+			int index;
 			if(args.length == 0) {
-				player = (m instanceof MCPlayer ? ((MCPlayer) m).getName() : null);
+				player = m instanceof MCPlayer ? m.getName() : null;
 				index = -1;
 			} else if(args.length == 1) {
 				player = args[0].val();
@@ -911,7 +911,7 @@ public class PlayerManagement {
 			if(index < -1 || index > maxIndex) {
 				throw new CRERangeException(this.getName() + " expects the index to be between -1 and " + maxIndex, t);
 			}
-			ArrayList<Construct> retVals = new ArrayList<Construct>();
+			ArrayList<Construct> retVals = new ArrayList<>();
 			if(index == 0 || index == -1) {
 				//MCPlayer name
 				retVals.add(new CString(p.getName(), t));
@@ -1220,9 +1220,9 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {playerName, newDisplayName | newDisplayName} Sets a player's display name. If the second usage is used,"
-					+ " it sets the display name of the player running the command. See reset_display_name also. playerName, as well"
-					+ " as all CommandHelper commands expect the player's real name, not their display name.";
+			return "void {[playerName], newDisplayName} Sets a player's display name. If the first name isn't provided,"
+					+ " it sets the display name of the player running the command. See reset_display_name() also."
+					+ " All player functions expect the player's real name, not their display name.";
 		}
 
 		@Override
@@ -1247,20 +1247,17 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCPlayer MCPlayer = null;
+			MCPlayer player;
 			String name;
 			if(args.length == 1) {
-				if(p instanceof MCPlayer) {
-					MCPlayer = (MCPlayer) p;
-				}
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(player, t);
 				name = args[0].val();
 			} else {
-				MCPlayer = Static.GetPlayer(args[0], t);
+				player = Static.GetPlayer(args[0], t);
 				name = args[1].val();
 			}
-			Static.AssertPlayerNonNull(MCPlayer, t);
-			MCPlayer.setDisplayName(name);
+			player.setDisplayName(name);
 			return CVoid.VOID;
 		}
 	}
@@ -1280,8 +1277,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[playerName]} Resets a player's display name to their real name. If playerName isn't specified, defaults to the"
-					+ " player running the command.";
+			return "void {[playerName]} Resets a player's display name to their real name."
+					+ " If playerName isn't specified, defaults to the player running the command.";
 		}
 
 		@Override
@@ -1306,17 +1303,14 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCPlayer MCPlayer = null;
+			MCPlayer player;
 			if(args.length == 0) {
-				if(p instanceof MCPlayer) {
-					MCPlayer = (MCPlayer) p;
-				}
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(player, t);
 			} else {
-				MCPlayer = Static.GetPlayer(args[0], t);
+				player = Static.GetPlayer(args[0], t);
 			}
-			Static.AssertPlayerNonNull(MCPlayer, t);
-			MCPlayer.setDisplayName(MCPlayer.getName());
+			player.setDisplayName(player.getName());
 			return CVoid.VOID;
 		}
 	}
@@ -1420,14 +1414,13 @@ public class PlayerManagement {
 				//Either we are setting this MCPlayer's pitch and yaw, or we are setting the specified MCPlayer's F.
 				//Check to see if args[0] is a number
 				try {
-					Float.parseFloat(args[0].val());
+					yaw = (float) Static.getNumber(args[0], t);
+					pitch = (float) Static.getNumber(args[1], t);
 					//It's the yaw, pitch variation
 					if(p instanceof MCPlayer) {
 						toSet = (MCPlayer) p;
 					}
-					yaw = (float) Static.getNumber(args[0], t);
-					pitch = (float) Static.getNumber(args[1], t);
-				} catch (NumberFormatException e) {
+				} catch (CRECastException e) {
 					//It's the MCPlayer, F variation
 					toSet = Static.GetPlayer(args[0], t);
 					pitch = toSet.getLocation().getPitch();
@@ -1572,7 +1565,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			String mode = "";
+			String mode;
 			MCGameMode gm;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
@@ -1691,7 +1684,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			int xp = 0;
+			int xp;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -1752,7 +1745,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			int xp = 0;
+			int xp;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -1864,7 +1857,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			int level = 0;
+			int level;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -1977,7 +1970,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			int xp = 0;
+			int xp;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -2095,7 +2088,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			int level = 0;
+			int level;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -2595,13 +2588,7 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
-			boolean ret;
-			if(pl == null) {
-				ret = false;
-			} else {
-				ret = pl.isWhitelisted();
-			}
-			return CBoolean.get(ret);
+			return CBoolean.get(pl != null && pl.isWhitelisted());
 		}
 	}
 
@@ -2826,7 +2813,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			double speed = 0;
+			double speed;
 
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
@@ -2947,7 +2934,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			double speed = 0;
+			double speed;
 
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;

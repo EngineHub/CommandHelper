@@ -437,7 +437,7 @@ public class EntityManagement {
 			if(args[1] instanceof CArray) {
 				l = ObjectGenerator.GetGenerator().location((CArray) args[1], e.getWorld(), t);
 			} else {
-				throw new CREFormatException("An array was expected but recieved " + args[1], t);
+				throw new CREFormatException("An array was expected but received " + args[1], t);
 			}
 			return CBoolean.get(e.teleport(l));
 		}

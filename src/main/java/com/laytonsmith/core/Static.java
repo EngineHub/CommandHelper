@@ -16,7 +16,6 @@ import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.abstraction.entities.MCVehicle;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.typeof;
@@ -68,7 +67,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -861,26 +859,6 @@ public final class Static {
 	}
 
 	/**
-	 * Returns all vehicles from all maps.
-	 *
-	 * @return
-	 */
-	public static List<MCVehicle> getVehicles() {
-
-		List<MCVehicle> vehicles = new ArrayList<MCVehicle>();
-
-		for(MCWorld w : Static.getServer().getWorlds()) {
-			for(MCEntity e : w.getEntities()) {
-				MCEntity entity = StaticLayer.GetCorrectEntity(e);
-				if(entity instanceof MCVehicle) {
-					vehicles.add((MCVehicle) entity);
-				}
-			}
-		}
-		return vehicles;
-	}
-
-	/**
 	 * Returns the world with the specified name. If it does not exist, a ConfigRuntimeException is thrown.
 	 *
 	 * @param name
@@ -1185,7 +1163,6 @@ public final class Static {
 		if(p == null) {
 			throw new CREPlayerOfflineException("No player was specified!", t);
 		}
-		assert p != null;
 	}
 
 	public static long msToTicks(long ms) {
