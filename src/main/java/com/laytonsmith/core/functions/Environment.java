@@ -1388,7 +1388,9 @@ public class Environment {
 			try {
 				sound = MCSound.valueOf(sa.get("sound", t).val().toUpperCase());
 			} catch (IllegalArgumentException iae) {
-				throw new CREFormatException("Sound name '" + sa.get("sound", t).val() + "' is invalid.", t);
+				CHLog.GetLogger().e(CHLog.Tags.GENERAL, "Sound name '" + sa.get("sound", t).val()
+						+ "' is invalid.", t);
+				return CVoid.VOID;
 			}
 
 			if(sa.containsKey("category")) {
