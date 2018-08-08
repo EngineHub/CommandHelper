@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -14,6 +15,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
+import com.laytonsmith.abstraction.bukkit.BukkitMCColor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
@@ -532,10 +534,17 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	@Override
 	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
-		Particle type = Particle.valueOf(pa.name());
-		Location loc = ((BukkitMCLocation) l).asLocation();
-		if(data != null && type.getDataType().equals(ItemStack.class) && data instanceof MCItemStack) {
-			p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, ((MCItemStack) data).getHandle());
+		Particle type = (Particle) pa.getConcrete();
+		Location loc = (Location) l.getHandle();
+		if(data != null) {
+			if(data instanceof MCItemStack) {
+				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, ((MCItemStack) data).getHandle());
+			} else if(data instanceof MCBlockData) {
+				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, ((MCBlockData) data).getHandle());
+			} else if(data instanceof MCColor) {
+				Particle.DustOptions color = new Particle.DustOptions(BukkitMCColor.GetColor((MCColor) data), 1.0F);
+				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, color);
+			}
 		} else {
 			p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);
 		}

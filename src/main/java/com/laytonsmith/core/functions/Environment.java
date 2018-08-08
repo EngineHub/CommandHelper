@@ -15,6 +15,7 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
+import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCTone;
@@ -1197,6 +1198,153 @@ public class Environment {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+	}
+
+
+	@api
+	public static class spawn_particle extends AbstractFunction {
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public String getName() {
+			return "spawn_particle";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {location, particle[, players]} Spawns particles at the specified location. The players"
+					+ " parameter can be one player or an array of players. If none is given, all players within 32"
+					+ " meters will see the particle. The particle parameter can be a particle name or an associative"
+					+ " array defining the characteristics of the particle to be spawned. The array requires the"
+					+ " particle name under the key \"particle\"."
+					+ " ---- Possible particles: " + StringUtils.Join(MCParticle.types(), ", ", ", or ", " or ")
+					+ " \n\nSome particles have more specific keys and/or special behavior, but the common keys for the"
+					+ " particle array are \"count\" (usually the number of particles to be spawned), \"speed\""
+					+ " (usually the velocity of the particle), \"xoffset\", \"yoffset\", and \"zoffset\""
+					+ " (usually the ranges from center within which the particle may be offset on that axis)."
+					+ " The BLOCK_DUST, BLOCK_CRACK and FALLING_DUST particles can take a block type name parameter"
+					+ " under the key \"block\".\n\n"
+					+ " The ITEM_CRACK particle can take an item array under the key \"item\".\n\n"
+					+ " The REDSTONE particle can take a color array (or name)"
+					+ " under the key \"color\"."
+					+ " If a block, item or color is provided for a particle type that doesn't support it,"
+					+ " an IllegalArgumentException will be thrown.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CRECastException.class, CREFormatException.class,
+					CREPlayerOfflineException.class, CRELengthException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCParticle p;
+			int count = 0;
+			double offsetX = 0.0;
+			double offsetY = 0.0;
+			double offsetZ = 0.0;
+			double speed = 0.0;
+			Object data = null;
+
+			if(args[1] instanceof CArray) {
+				CArray pa = (CArray) args[1];
+				try {
+					p = MCParticle.valueOf(pa.get("particle", t).val().toUpperCase());
+				} catch (IllegalArgumentException ex) {
+					throw new CREIllegalArgumentException("Particle name '" + pa.get("particle", t).val()
+							+ "' is invalid.", t);
+				}
+
+				if(pa.containsKey("count")) {
+					count = Static.getInt32(pa.get("count", t), t);
+				}
+				if(pa.containsKey("xoffset")) {
+					offsetX = Static.getDouble(pa.get("xoffset", t), t) / 4.0D; // radius in approx. meters
+				}
+				if(pa.containsKey("yoffset")) {
+					offsetY = Static.getDouble(pa.get("yoffset", t), t) / 4.0D;
+				}
+				if(pa.containsKey("zoffset")) {
+					offsetZ = Static.getDouble(pa.get("zoffset", t), t) / 4.0D;
+				}
+				if(pa.containsKey("speed")) {
+					speed = Static.getDouble(pa.get("speed", t), t);
+				}
+
+				if(pa.containsKey("block")) {
+					String value = pa.get("block", t).val();
+					MCMaterial mat = StaticLayer.GetMaterial(value);
+					if(mat != null) {
+						try {
+							data = mat.createBlockData();
+						} catch (IllegalArgumentException ex) {
+							throw new CREIllegalArgumentException(value + " is not a block.", t);
+						}
+					} else {
+						throw new CREIllegalArgumentException("Could not find material from " + value, t);
+					}
+
+				} else if(pa.containsKey("item")) {
+					data = ObjectGenerator.GetGenerator().item(pa.get("item", t), t);
+
+				} else if(pa.containsKey("color")) {
+					Construct c = pa.get("color", t);
+					if(c instanceof CArray) {
+						data = ObjectGenerator.GetGenerator().color((CArray) c, t);
+					} else {
+						data = StaticLayer.GetConvertor().GetColor(c.val(), t);
+					}
+				}
+
+			} else {
+				try {
+					p = MCParticle.valueOf(args[1].val().toUpperCase());
+				} catch (IllegalArgumentException ex) {
+					throw new CREIllegalArgumentException("Particle name '" + args[1].val() + "' is invalid.", t);
+				}
+			}
+
+			try {
+				if(args.length == 3) {
+					MCPlayer player;
+					if(args[2] instanceof CArray) {
+						for(Construct playerName : ((CArray) args[2]).asList()) {
+							player = Static.GetPlayer(playerName, t);
+							player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
+						}
+					} else {
+						player = Static.GetPlayer(args[2], t);
+						player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
+					}
+				} else {
+					l.getWorld().spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
+				}
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException("Given unsupported data for particle type " + p.name(), t);
+			}
+			return CVoid.VOID;
 		}
 	}
 

@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCChunk;
+import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkEffect;
 import com.laytonsmith.abstraction.entities.MCItem;
@@ -340,10 +341,17 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 
 	@Override
 	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
-		Particle type = Particle.valueOf(pa.name());
-		Location loc = ((BukkitMCLocation) l).asLocation();
-		if(data != null && type.getDataType().equals(ItemStack.class) && data instanceof MCItemStack) {
-			w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, ((MCItemStack) data).getHandle());
+		Particle type = (Particle) pa.getConcrete();
+		Location loc = (Location) l.getHandle();
+		if(data != null) {
+			if(data instanceof MCItemStack) {
+				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, ((MCItemStack) data).getHandle());
+			} else if(data instanceof MCBlockData) {
+				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, ((MCBlockData) data).getHandle());
+			} else if(data instanceof MCColor) {
+				Particle.DustOptions color = new Particle.DustOptions(BukkitMCColor.GetColor((MCColor) data), 1.0F);
+				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, color);
+			}
 		} else {
 			w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);
 		}
