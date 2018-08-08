@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.enums.MCBarColor;
 import com.laytonsmith.abstraction.enums.MCBarStyle;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
@@ -162,4 +163,6 @@ public interface MCServer extends AbstractionObject {
 	String dispatchAndCaptureCommand(MCCommandSender commandSender, String cmd);
 
 	MCBossBar createBossBar(String title, MCBarColor color, MCBarStyle style);
+
+	MCBlockData createBlockData(String data);
 }

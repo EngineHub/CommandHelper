@@ -9,8 +9,6 @@ import java.util.Collection;
 
 public interface MCBlock extends MCMetadatable {
 
-	boolean isNull();
-
 	MCMaterial getType();
 
 	/**
@@ -19,9 +17,15 @@ public interface MCBlock extends MCMetadatable {
 	@Deprecated
 	int getTypeId();
 
+	/**
+	 * @deprecated Magic value
+	 */
+	@Deprecated
 	byte getData();
 
 	void setType(MCMaterial mat);
+
+	void setType(MCMaterial mat, boolean physics);
 
 	/**
 	 * @deprecated Magic value
@@ -29,6 +33,10 @@ public interface MCBlock extends MCMetadatable {
 	@Deprecated
 	void setTypeId(int idata);
 
+	/**
+	 * @deprecated Magic value
+	 */
+	@Deprecated
 	void setData(byte imeta);
 
 	/**
@@ -36,6 +44,10 @@ public interface MCBlock extends MCMetadatable {
 	 */
 	@Deprecated
 	void setTypeAndData(int type, byte data, boolean physics);
+
+	MCBlockData getBlockData();
+
+	void setBlockData(MCBlockData data, boolean physics);
 
 	MCBlockState getState();
 
@@ -88,4 +100,6 @@ public interface MCBlock extends MCMetadatable {
 	MCBlock getRelative(MCBlockFace face);
 
 	MCBlockFace getFace(MCBlock get);
+
+	boolean isEmpty();
 }

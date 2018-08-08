@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.core.constructs.Target;
 
 import java.util.HashSet;
@@ -53,11 +54,11 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
 	MCLivingEntity getTarget(Target t);
 
-	MCBlock getTargetBlock(HashSet<Short> transparent, int maxDistance);
+	MCBlock getTargetBlock(HashSet<MCMaterial> transparent, int maxDistance);
 
 	MCBlock getTargetSpace(int maxDistance);
 
-	List<MCBlock> getLineOfSight(HashSet<Short> transparent, int maxDistance);
+	List<MCBlock> getLineOfSight(HashSet<MCMaterial> transparent, int maxDistance);
 
 	boolean hasLineOfSight(MCEntity other);
 

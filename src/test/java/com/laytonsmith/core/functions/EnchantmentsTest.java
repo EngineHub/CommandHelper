@@ -65,9 +65,9 @@ public class EnchantmentsTest {
 	 * than the enchantments themselves.
 	 */
 	public void testGetEnchants() throws Exception {
-		SRun("assign(@a, get_enchants(311))\n"
+		SRun("assign(@a, get_enchants(array('name': 'DIAMOND_SWORD')))\n"
 				+ "array_push(@a, 'test')\n"
-				+ "assign(@b, get_enchants(311))\n"
+				+ "assign(@b, get_enchants(array('name': 'DIAMOND_SWORD')))\n"
 				+ "msg(@a)\n"
 				+ "msg(@b)\n", fakePlayer);
 		verify(fakePlayer).sendMessage("{test}");

@@ -4,18 +4,21 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
 import com.laytonsmith.abstraction.blocks.MCDispenser;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCreatureSpawner;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMetadatable;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -23,6 +26,7 @@ import org.bukkit.block.CommandBlock;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Command;
 
@@ -48,11 +52,6 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	}
 
 	@Override
-	public boolean isNull() {
-		return b == null;
-	}
-
-	@Override
 	public MCMaterial getType() {
 		Material type = b.getType();
 		return type == null ? null : new BukkitMCMaterial(type);
@@ -63,7 +62,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 		if(b == null) {
 			return 0;
 		}
-		return b.getTypeId();
+		return Bukkit.getUnsafe().toLegacy(b.getType()).getId();
 	}
 
 	@Override
@@ -77,18 +76,33 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	}
 
 	@Override
+	public void setType(MCMaterial mat, boolean physics) {
+		b.setType((Material) mat.getHandle(), physics);
+	}
+
+	@Override
 	public void setTypeId(int idata) {
-		b.setTypeId(idata);
+		b.setType(BukkitMCLegacyMaterial.getMaterial(idata));
 	}
 
 	@Override
 	public void setData(byte imeta) {
-		b.setData(imeta);
+		setTypeAndData(getTypeId(), imeta, true);
 	}
 
 	@Override
 	public void setTypeAndData(int type, byte data, boolean physics) {
-		b.setTypeIdAndData(type, data, physics);
+		b.setBlockData(BukkitMCLegacyMaterial.getBlockData(type, data), physics);
+	}
+
+	@Override
+	public MCBlockData getBlockData() {
+		return new BukkitMCBlockData(b.getBlockData());
+	}
+
+	@Override
+	public void setBlockData(MCBlockData data, boolean physics) {
+		b.setBlockData((BlockData) data.getHandle(), physics);
 	}
 
 	@Override
@@ -128,7 +142,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	@Override
 	public boolean isSign() {
 		Material type = b.getType();
-		return (type == Material.SIGN || type == Material.SIGN_POST || type == Material.WALL_SIGN);
+		return type == Material.SIGN || type == Material.WALL_SIGN;
 	}
 
 	@Override
@@ -153,7 +167,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
 	@Override
 	public Collection<MCItemStack> getDrops() {
-		Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
+		Collection<MCItemStack> collection = new ArrayList<>();
 		for(ItemStack is : b.getDrops()) {
 			collection.add(new BukkitMCItemStack(is));
 		}
@@ -162,7 +176,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
 	@Override
 	public Collection<MCItemStack> getDrops(MCItemStack tool) {
-		Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
+		Collection<MCItemStack> collection = new ArrayList<>();
 		for(ItemStack is : b.getDrops(((BukkitMCItemStack) tool).asItemStack())) {
 			collection.add(new BukkitMCItemStack(is));
 		}
@@ -233,5 +247,10 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	@Override
 	public MCBlockFace getFace(MCBlock block) {
 		return BukkitMCBlockFace.getConvertor().getAbstractedEnum(b.getFace(((BukkitMCBlock) block).b));
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return b == null || b.isEmpty();
 	}
 }

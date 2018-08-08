@@ -6,12 +6,14 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntityEquipment;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
@@ -105,21 +107,28 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	@Override
-	public List<MCBlock> getLineOfSight(HashSet<Short> transparent, int maxDistance) {
+	public List<MCBlock> getLineOfSight(HashSet<MCMaterial> transparent, int maxDistance) {
 		List<Block> lst = getLineOfSight(transparent, maxDistance, 512);
 		List<MCBlock> retn = new ArrayList<>();
 
 		for(Block b : lst) {
 			retn.add(new BukkitMCBlock(b));
 		}
-
 		return retn;
 	}
 
-	private List<Block> getLineOfSight(HashSet<Short> transparent, int maxDistance, int maxLength) {
+	private List<Block> getLineOfSight(HashSet<MCMaterial> transparent, int maxDistance, int maxLength) {
 		if(maxDistance > 512) {
 			maxDistance = 512;
 		}
+
+		HashSet<Material> ignored = new HashSet<>();
+		if(transparent != null) {
+			for(MCMaterial mat : transparent) {
+				ignored.add((Material) mat.getHandle());
+			}
+		}
+
 		ArrayList<Block> blocks = new ArrayList<>();
 		Iterator<Block> itr = new BlockIterator(le, maxDistance);
 
@@ -129,13 +138,13 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 			if(maxLength != 0 && blocks.size() > maxLength) {
 				blocks.remove(0);
 			}
-			int id = block.getTypeId();
 			if(transparent == null) {
-				if(id != 0) {
+				if(!block.isEmpty()) {
 					break;
 				}
 			} else {
-				if(!transparent.contains((short) id)) {
+				Material id = block.getType();
+				if(!ignored.contains(id)) {
 					break;
 				}
 			}
@@ -169,13 +178,9 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	@Override
-	public MCBlock getTargetBlock(HashSet<Short> b, int i) {
-		return new BukkitMCBlock(getFirstTargetBlock(b, i));
-	}
-
-	private Block getFirstTargetBlock(HashSet<Short> transparent, int maxDistance) {
-		List<Block> blocks = getLineOfSight(transparent, maxDistance, 1);
-		return blocks.get(0);
+	public MCBlock getTargetBlock(HashSet<MCMaterial> b, int i) {
+		List<Block> blocks = getLineOfSight(b, i, 1);
+		return new BukkitMCBlock(blocks.get(0));
 	}
 
 	@Override

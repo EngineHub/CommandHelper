@@ -5,8 +5,6 @@ import java.util.Map;
 
 public interface MCItemStack extends AbstractionObject {
 
-	MCMaterialData getData();
-
 	short getDurability();
 
 	/**
@@ -27,11 +25,7 @@ public interface MCItemStack extends AbstractionObject {
 
 	MCMaterial getType();
 
-	/**
-	 * @deprecated Magic value
-	 */
-	@Deprecated
-	void setTypeId(int type);
+	void setType(MCMaterial type);
 
 	int maxStackSize();
 
@@ -39,11 +33,11 @@ public interface MCItemStack extends AbstractionObject {
 
 	void setAmount(int amt);
 
-	void setData(int data);
-
 	boolean hasItemMeta();
 
 	MCItemMeta getItemMeta();
 
 	void setItemMeta(MCItemMeta im);
+
+	boolean isEmpty();
 }

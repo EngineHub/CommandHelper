@@ -5,9 +5,13 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
@@ -25,9 +29,14 @@ import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Enchantments {
 
@@ -44,50 +53,51 @@ public class Enchantments {
 	 */
 	public static String ConvertName(String wikiVersion) {
 		String lc = wikiVersion.toUpperCase().trim();
-		if(lc.equals("PROTECTION")) {
-			return "PROTECTION_ENVIRONMENTAL";
-		} else if(lc.equals("FIRE PROTECTION")) {
-			return "PROTECTION_FIRE";
-		} else if(lc.equals("FEATHER FALLING")) {
-			return "PROTECTION_FALL";
-		} else if(lc.equals("BLAST PROTECTION")) {
-			return "PROTECTION_EXPLOSIONS";
-		} else if(lc.equals("PROJECTILE PROTECTION")) {
-			return "PROTECTION_PROJECTILE";
-		} else if(lc.equals("RESPIRATION")) {
-			return "OXYGEN";
-		} else if(lc.equals("AQUA AFFINITY")) {
-			return "WATER_WORKER";
-		} else if(lc.equals("SHARPNESS")) {
-			return "DAMAGE_ALL";
-		} else if(lc.equals("SMITE")) {
-			return "DAMAGE_UNDEAD";
-		} else if(lc.equals("BANE OF ARTHROPODS")) {
-			return "DAMAGE_ARTHROPODS";
-		} else if(lc.equals("KNOCKBACK")) {
-			return "KNOCKBACK";
-		} else if(lc.equals("FIRE ASPECT")) {
-			return "FIRE_ASPECT";
-		} else if(lc.equals("LOOTING")) {
-			return "LOOT_BONUS_MOBS";
-		} else if(lc.equals("EFFICIENCY")) {
-			return "DIG_SPEED";
-		} else if(lc.equals("SILK TOUCH")) {
-			return "SILK_TOUCH";
-		} else if(lc.equals("UNBREAKING")) {
-			return "DURABILITY";
-		} else if(lc.equals("FORTUNE")) {
-			return "LOOT_BONUS_BLOCKS";
-		} else if(lc.equals("POWER")) {
-			return "ARROW_DAMAGE";
-		} else if(lc.equals("PUNCH")) {
-			return "ARROW_KNOCKBACK";
-		} else if(lc.equals("FLAME")) {
-			return "ARROW_FIRE";
-		} else if(lc.equals("INFINITY")) {
-			return "ARROW_INFINITE";
-		} else {
-			return wikiVersion;
+		switch(lc) {
+			case "PROTECTION":
+				return "PROTECTION_ENVIRONMENTAL";
+			case "FIRE PROTECTION":
+				return "PROTECTION_FIRE";
+			case "FEATHER FALLING":
+				return "PROTECTION_FALL";
+			case "BLAST PROTECTION":
+				return "PROTECTION_EXPLOSIONS";
+			case "PROJECTILE PROTECTION":
+				return "PROTECTION_PROJECTILE";
+			case "RESPIRATION":
+				return "OXYGEN";
+			case "AQUA AFFINITY":
+				return "WATER_WORKER";
+			case "SHARPNESS":
+				return "DAMAGE_ALL";
+			case "SMITE":
+				return "DAMAGE_UNDEAD";
+			case "BANE OF ARTHROPODS":
+				return "DAMAGE_ARTHROPODS";
+			case "KNOCKBACK":
+				return "KNOCKBACK";
+			case "FIRE ASPECT":
+				return "FIRE_ASPECT";
+			case "LOOTING":
+				return "LOOT_BONUS_MOBS";
+			case "EFFICIENCY":
+				return "DIG_SPEED";
+			case "SILK TOUCH":
+				return "SILK_TOUCH";
+			case "UNBREAKING":
+				return "DURABILITY";
+			case "FORTUNE":
+				return "LOOT_BONUS_BLOCKS";
+			case "POWER":
+				return "ARROW_DAMAGE";
+			case "PUNCH":
+				return "ARROW_KNOCKBACK";
+			case "FLAME":
+				return "ARROW_FIRE";
+			case "INFINITY":
+				return "ARROW_INFINITE";
+			default:
+				return wikiVersion;
 		}
 	}
 
@@ -106,21 +116,7 @@ public class Enchantments {
 		} catch (NumberFormatException e) {
 			//Maybe roman numeral?
 		}
-		int i = romanToWestern(lc);
-//		if(lc.equals("i")){
-//			i = 1;
-//		} else if(lc.equals("ii")){
-//			i = 2;
-//		} else if(lc.equals("iii")){
-//			i = 3;
-//		} else if(lc.equals("iv")){
-//			i = 4;
-//		} else if(lc.equals("v")){
-//			i = 5;
-//		} else {
-//			return romanNumeral;
-//		}
-		return Integer.toString(i);
+		return Integer.toString(romanToWestern(lc));
 	}
 
 	public static int romanToWestern(String roman) {
@@ -234,12 +230,7 @@ public class Enchantments {
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
-//			if(args[1 - offset] instanceof CNull) {
-//				is = m.getItemInHand();
-//			} else {
-//				int slot = Static.getInt32(args[1 - offset]);
-//				is = m.getInventory().getItem(slot);
-//			}
+
 			CArray enchantArray = new CArray(t);
 			if(!(args[2 - offset] instanceof CArray)) {
 				enchantArray.push(args[2 - offset], t);
@@ -326,12 +317,6 @@ public class Enchantments {
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
-//			if(args[1 - offset] instanceof CNull) {
-//				is = m.getItemInHand();
-//			} else {
-//				int slot = Static.getInt32(args[1 - offset]);
-//				is = m.getInventory().getItem(slot);
-//			}
 
 			CArray enchantArray = new CArray(t);
 			if(!(args[2 - offset] instanceof CArray) && !(args[2 - offset] instanceof CNull)) {
@@ -411,12 +396,7 @@ public class Enchantments {
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}
-//			if(slot instanceof CNull){
-//				is = m.getItemInHand();
-//			} else {
-//				int slotID = Static.getInt32(slot);
-//				is = m.getInventory().getItem(slotID);
-//			}
+
 			CArray enchants = new CArray(t);
 			CArray levels = new CArray(t);
 			for(Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {
@@ -431,7 +411,7 @@ public class Enchantments {
 	}
 
 	@api
-	public static class can_enchant_target extends AbstractFunction {
+	public static class can_enchant_target extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -445,7 +425,7 @@ public class Enchantments {
 
 		@Override
 		public String docs() {
-			return "boolean {name, item} Given an enchantment name and an item array or id,"
+			return "boolean {name, item} Given an enchantment name and an item array,"
 					+ " returns whether or not that item can be enchanted with that enchantment."
 					+ " Throws an EnchantmentException if the name is not a valid enchantment type.";
 		}
@@ -486,6 +466,21 @@ public class Enchantments {
 			} catch (NullPointerException e) {
 				throw new CREEnchantmentException(args[0].val().toUpperCase() + " is not a known enchantment type.", t);
 			}
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() == 2
+					&& (children.get(1).getData() instanceof CString || children.get(1).getData() instanceof CInt)) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -541,7 +536,7 @@ public class Enchantments {
 	}
 
 	@api
-	public static class get_enchants extends AbstractFunction {
+	public static class get_enchants extends AbstractFunction implements Optimizable {
 
 		private static final Map<String, CArray> CACHE = new HashMap<>();
 
@@ -557,7 +552,7 @@ public class Enchantments {
 
 		@Override
 		public String docs() {
-			return "array {item} Given an item array or id, returns the enchantments that can"
+			return "array {item} Given an item array, returns the enchantments that can"
 					+ " be validly added to this item. This may return an empty array.";
 		}
 
@@ -606,6 +601,21 @@ public class Enchantments {
 			}
 			CACHE.put(name, ca);
 			return ca.clone();
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() == 1
+					&& (children.get(0).getData() instanceof CString || children.get(0).getData() instanceof CInt)) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 

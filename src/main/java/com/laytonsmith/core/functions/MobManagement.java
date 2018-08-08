@@ -1349,7 +1349,7 @@ public class MobManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity entity = Static.getLivingEntity(args[0], t);
-			HashSet<Short> transparents = null;
+			HashSet<MCMaterial> transparents = null;
 			int maxDistance = 512;
 			if(args.length >= 2) {
 				CArray givenTransparents = Static.getArray(args[1], t);
@@ -1357,8 +1357,24 @@ public class MobManagement {
 					throw new CRECastException("The array must not be associative.", t);
 				}
 				transparents = new HashSet<>();
-				for(Construct blockID : givenTransparents.asList()) {
-					transparents.add(Static.getInt16(blockID, t));
+				for(Construct mat : givenTransparents.asList()) {
+					MCMaterial material = StaticLayer.GetMaterial(mat.val());
+					if(material != null) {
+						transparents.add(StaticLayer.GetMaterial(mat.val()));
+						continue;
+					}
+					try {
+						material = StaticLayer.GetConvertor().getMaterial(Static.getInt16(mat, t));
+						if(material != null) {
+							CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The id \"" + mat.val() + "\" is deprecated."
+									+ " Converted to \"" + material.getName() + "\"", t);
+							transparents.add(material);
+							continue;
+						}
+					} catch (CRECastException ex) {
+						// ignore and throw a more specific message
+					}
+					throw new CREFormatException("Could not find a material by the name \"" + mat.val() + "\"", t);
 				}
 			}
 			if(args.length == 3) {

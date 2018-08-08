@@ -3,6 +3,7 @@ package com.laytonsmith.core.events.drivers;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.entities.MCVehicle;
@@ -13,11 +14,13 @@ import com.laytonsmith.abstraction.enums.MCCollisionType;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.events.MCVehicleBlockCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleCollideEvent;
-import com.laytonsmith.abstraction.events.MCVehicleEnitityCollideEvent;
+import com.laytonsmith.abstraction.events.MCVehicleEntityCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEnterExitEvent;
 import com.laytonsmith.abstraction.events.MCVehicleMoveEvent;
 import com.laytonsmith.abstraction.events.MCVehicleDestroyEvent;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -219,6 +222,21 @@ public class VehicleEvents {
 		}
 
 		@Override
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Construct> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("hittype")) {
+				Construct type = prefilter.get("hittype");
+				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
+							+ " is deprecated in \"hittype\".", event.getTarget());
+					MCItemStack is = Static.ParseItemNotation(null, type.val(), 1, event.getTarget());
+					prefilter.put("hittype", new CString(is.getType().getName(), event.getTarget()));
+				}
+			}
+		}
+
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCVehicleCollideEvent) {
 				MCVehicleCollideEvent event = (MCVehicleCollideEvent) e;
@@ -230,11 +248,12 @@ public class VehicleEvents {
 				}
 				switch(event.getCollisionType()) {
 					case BLOCK:
-						Prefilters.match(prefilter, "hittype", Static.ParseItemNotation(((MCVehicleBlockCollideEvent) event)
-								.getBlock()), PrefilterType.ITEM_MATCH);
+						Prefilters.match(prefilter, "hittype",
+								((MCVehicleBlockCollideEvent) event).getBlock().getType().getName(),
+								PrefilterType.STRING_MATCH);
 						break;
 					case ENTITY:
-						Prefilters.match(prefilter, "hittype", ((MCVehicleEnitityCollideEvent) event)
+						Prefilters.match(prefilter, "hittype", ((MCVehicleEntityCollideEvent) event)
 								.getEntity().getType().name(), PrefilterType.MACRO);
 						break;
 					default:
@@ -271,7 +290,7 @@ public class VehicleEvents {
 								((MCVehicleBlockCollideEvent) e).getBlock().getLocation());
 						break;
 					case ENTITY:
-						MCVehicleEnitityCollideEvent vec = (MCVehicleEnitityCollideEvent) e;
+						MCVehicleEntityCollideEvent vec = (MCVehicleEntityCollideEvent) e;
 						entity = new CString(vec.getEntity().getUniqueId().toString(), t);
 						collide = !vec.isCollisionCancelled();
 						pickup = !vec.isPickupCancelled();
@@ -298,8 +317,8 @@ public class VehicleEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if(event instanceof MCVehicleEnitityCollideEvent) {
-				MCVehicleEnitityCollideEvent e = (MCVehicleEnitityCollideEvent) event;
+			if(event instanceof MCVehicleEntityCollideEvent) {
+				MCVehicleEntityCollideEvent e = (MCVehicleEntityCollideEvent) event;
 				if(key.equals("collide")) {
 					e.setCollisionCancelled(!Static.getBoolean(value, Target.UNKNOWN));
 					return true;

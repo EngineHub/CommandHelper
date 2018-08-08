@@ -13,15 +13,16 @@ import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCAbstractHorse;
 import com.laytonsmith.abstraction.entities.MCAreaEffectCloud;
 import com.laytonsmith.abstraction.entities.MCArmorStand;
@@ -1169,11 +1170,11 @@ public class EntityManagement {
 			for(int i = 0; i < qty; i++) {
 				switch(entType.getAbstracted()) {
 					case DROPPED_ITEM:
-						ent = l.getWorld().dropItem(l, StaticLayer.GetItemStack(1, qty));
+						ent = l.getWorld().dropItem(l, StaticLayer.GetItemStack("STONE", qty));
 						qty = 0;
 						break;
 					case FALLING_BLOCK:
-						ent = l.getWorld().spawnFallingBlock(l, 12, (byte) 0);
+						ent = l.getWorld().spawnFallingBlock(l, StaticLayer.GetMaterial("SAND").createBlockData());
 						break;
 					case ITEM_FRAME:
 					case LEASH_HITCH:
@@ -1765,12 +1766,8 @@ public class EntityManagement {
 					break;
 				case ENDERMAN:
 					MCEnderman enderman = (MCEnderman) entity;
-					MCMaterialData carried = enderman.getCarriedMaterial();
-					if(carried != null) {
-						specArray.set(entity_spec.KEY_ENDERMAN_CARRIED, new CString(carried.getMaterial().getName(), t), t);
-					} else {
-						specArray.set(entity_spec.KEY_ENDERMAN_CARRIED, CNull.NULL, t);
-					}
+					MCBlockData carried = enderman.getCarriedMaterial();
+					specArray.set(entity_spec.KEY_ENDERMAN_CARRIED, new CString(carried.getMaterial().getName(), t), t);
 					break;
 				case EVOKER_FANGS:
 					MCEvokerFangs fangs = (MCEvokerFangs) entity;
@@ -2401,7 +2398,8 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ENDERMAN_CARRIED:
-								enderman.setCarriedMaterial(ObjectGenerator.GetGenerator().material(specArray.get(index, t), t).getData());
+								MCMaterial mat = ObjectGenerator.GetGenerator().material(specArray.get(index, t), t);
+								enderman.setCarriedMaterial(mat.createBlockData());
 								break;
 							default:
 								throwException(index, t);
@@ -2610,7 +2608,8 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_MINECART_BLOCK:
-								minecart.setDisplayBlock(ObjectGenerator.GetGenerator().material(specArray.get(index, t), t).getData());
+								MCMaterial mat = ObjectGenerator.GetGenerator().material(specArray.get(index, t), t);
+								minecart.setDisplayBlock(mat.createBlockData());
 								break;
 							case entity_spec.KEY_MINECART_OFFSET:
 								minecart.setDisplayBlockOffset(Static.getInt32(specArray.get(index, t), t));
@@ -2639,7 +2638,8 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_MINECART_BLOCK:
-								commandminecart.setDisplayBlock(ObjectGenerator.GetGenerator().material(specArray.get(index, t), t).getData());
+								MCMaterial mat = ObjectGenerator.GetGenerator().material(specArray.get(index, t), t);
+								commandminecart.setDisplayBlock(mat.createBlockData());
 								break;
 							case entity_spec.KEY_MINECART_OFFSET:
 								commandminecart.setDisplayBlockOffset(Static.getInt32(specArray.get(index, t), t));
@@ -3553,7 +3553,7 @@ public class EntityManagement {
 				}
 				is = ObjectGenerator.GetGenerator().item(args[1], t);
 			}
-			if(is.getTypeId() == 0) {
+			if(is.isEmpty()) {
 				// can't drop air
 				return CNull.NULL;
 			}

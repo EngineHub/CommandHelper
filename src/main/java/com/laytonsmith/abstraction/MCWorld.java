@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.entities.MCItem;
@@ -128,7 +129,7 @@ public interface MCWorld extends MCMetadatable {
 
 	CArray spawnMob(MCMobs name, String subClass, int qty, MCLocation location, Target t);
 
-	MCFallingBlock spawnFallingBlock(MCLocation loc, int type, byte data);
+	MCFallingBlock spawnFallingBlock(MCLocation loc, MCBlockData data);
 
 	MCFirework launchFirework(MCLocation l, int strength, List<MCFireworkEffect> effects);
 

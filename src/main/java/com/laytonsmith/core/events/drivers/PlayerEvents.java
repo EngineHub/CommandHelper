@@ -8,8 +8,10 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCFishHook;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -44,6 +46,8 @@ import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -178,7 +182,7 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{item: <item match>}"
+			return "{itemname: <string match>}"
 					+ " Fires as a player is finishing eating/drinking an item."
 					+ " Cancelling the event will cause any effects to not be"
 					+ " applied and the item to not be taken from the player."
@@ -189,10 +193,22 @@ public class PlayerEvents {
 		}
 
 		@Override
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Construct> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("item")) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+						+ " is deprecated for \"itemname\".", event.getTarget());
+				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
+				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
+			}
+		}
+
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerItemConsumeEvent) {
 				MCPlayerItemConsumeEvent event = (MCPlayerItemConsumeEvent) e;
-				Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItem()), PrefilterType.ITEM_MATCH);
+				Prefilters.match(prefilter, "itemname", event.getItem().getType().getName(), PrefilterType.STRING_MATCH);
 				return true;
 			}
 			return false;
@@ -845,17 +861,18 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{block: <item match> If the block the player interacts with is this"
+			return "{block: <string match> The block type the player interacts with is this"
 					+ " | button: <string match> left or right. If they left or right clicked |"
-					+ " item: <item match> The item they are holding when they interacted |"
+					+ " itemname: <string match> The item type they are holding when they interacted |"
 					+ " hand: <string match> The hand the player clicked with |"
 					+ " player: <macro> The player that triggered the event} "
 					+ "Fires when a player left or right clicks a block or the air"
-					+ "{action: One of either: left_click_block, right_click_block, left_click_air, or right_click_air |"
-					+ "block: The id of the block they clicked, or 0 if they clicked the air. If they clicked the air, "
-					+ " neither facing or location will be present. |"
-					+ "player: The player associated with this event |"
-					+ "facing: The (lowercase) face of the block they clicked. (One of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ") + ") |"
+					+ "{action: One of either: left_click_block, right_click_block, left_click_air, or right_click_air"
+					+ " | block: The type of block they clicked, or null if they clicked air. If they clicked air,"
+					+ " neither facing nor location will be present."
+					+ " | item: The item array the player used to click, or null if not holding anything in that hand"
+					+ " | player: The player associated with this event"
+					+ " | facing: The (lowercase) face of the block they clicked. (One of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ") + ") |"
 					+ "location: The (x, y, z, world) location of the block they clicked |"
 					+ "hand: The hand used to click with, can be either main_hand or off_hand}"
 					+ "{}"
@@ -870,6 +887,38 @@ public class PlayerEvents {
 		@Override
 		public Driver driver() {
 			return Driver.PLAYER_INTERACT;
+		}
+
+		@Override
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilters
+			Map<String, Construct> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("item")) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+						+ " is deprecated for \"itemname\".", event.getTarget());
+				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
+				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
+			}
+			if(prefilter.containsKey("block")) {
+				Construct ctype = prefilter.get("block");
+				if(ctype instanceof CString && ctype.val().contains(":") || ArgumentValidation.isNumber(ctype)) {
+					int type;
+					String notation = ctype.val();
+					int separatorIndex = notation.indexOf(':');
+					if(separatorIndex != -1) {
+						type = Integer.parseInt(notation.substring(0, separatorIndex));
+					} else {
+						type = Integer.parseInt(notation);
+					}
+					MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(type, 0);
+					if(mat == null) {
+						throw new CREBindException("Invalid material '" + notation + "'", event.getTarget());
+					}
+					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The notation format in the \"block\" prefilter in "
+							+ getName() + " is deprecated. Converted to " + mat.getName(), event.getTarget());
+				}
+			}
 		}
 
 		@Override
@@ -890,8 +939,19 @@ public class PlayerEvents {
 					}
 				}
 
-				Prefilters.match(prefilter, "item", Static.ParseItemNotation(pie.getItem()), PrefilterType.ITEM_MATCH);
-				Prefilters.match(prefilter, "block", Static.ParseItemNotation(pie.getClickedBlock()), PrefilterType.ITEM_MATCH);
+				if(prefilter.containsKey("itemname")) {
+					String value = prefilter.get("itemname").val();
+					MCMaterial mat = pie.getItem().getType();
+					if(mat != null && !mat.getName().equals(value) || mat == null && !value.equals("AIR")) {
+						return false;
+					}
+				}
+				if(prefilter.containsKey("block")) {
+					String value = prefilter.get("block").val();
+					if(!pie.getClickedBlock().getType().getName().equals(value)) {
+						return false;
+					}
+				}
 				Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
 
 				if(pie.getHand() == MCEquipmentSlot.WEAPON) {
@@ -912,7 +972,8 @@ public class PlayerEvents {
 				Map<String, Construct> map = evaluate_helper(e);
 				MCAction a = pie.getAction();
 				map.put("action", new CString(a.name().toLowerCase(), Target.UNKNOWN));
-				map.put("block", new CString(Static.ParseItemNotation(pie.getClickedBlock()), Target.UNKNOWN));
+				MCMaterial block = pie.getClickedBlock().getType();
+				map.put("block", block == null ? CNull.NULL : new CString(block.getName(), Target.UNKNOWN));
 				if(a == MCAction.LEFT_CLICK_AIR || a == MCAction.LEFT_CLICK_BLOCK) {
 					map.put("button", new CString("left", Target.UNKNOWN));
 				} else {
@@ -923,7 +984,7 @@ public class PlayerEvents {
 					map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation(), false));
 				}
 				map.put("world", new CString(pie.getPlayer().getWorld().getName(), Target.UNKNOWN));
-				map.put("item", new CString(Static.ParseItemNotation(pie.getItem()), Target.UNKNOWN));
+				map.put("item", ObjectGenerator.GetGenerator().item(pie.getItem(), Target.UNKNOWN));
 				if(pie.getHand() == MCEquipmentSlot.WEAPON) {
 					map.put("hand", new CString("main_hand", Target.UNKNOWN));
 				} else {

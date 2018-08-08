@@ -17,6 +17,8 @@ import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockData;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.pluginmessages.BukkitMCMessenger;
 import com.laytonsmith.abstraction.enums.MCBarColor;
@@ -569,5 +571,10 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCBossBar createBossBar(String title, MCBarColor color, MCBarStyle style) {
 		return new BukkitMCBossBar(s.createBossBar(title, BarColor.valueOf(color.name()), BarStyle.valueOf(style.name())));
+	}
+
+	@Override
+	public MCBlockData createBlockData(String data) {
+		return new BukkitMCBlockData(s.createBlockData(data));
 	}
 }

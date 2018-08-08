@@ -1022,16 +1022,6 @@ public final class Interpreter {
 		}
 
 		@Override
-		public int LookupItemId(String materialName) {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
-		}
-
-		@Override
-		public String LookupMaterialName(int id) {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
-		}
-
-		@Override
 		public MCEntity GetCorrectEntity(MCEntity e) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
@@ -1083,6 +1073,16 @@ public final class Interpreter {
 
 		@Override
 		public MCMaterial getMaterial(int id) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCMaterial GetMaterialFromLegacy(String name, int data) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCMaterial GetMaterialFromLegacy(int id, int data) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 

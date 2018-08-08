@@ -693,16 +693,6 @@ public class StaticTest {
 		}
 
 		@Override
-		public int LookupItemId(String materialName) {
-			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		@Override
-		public String LookupMaterialName(int id) {
-			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		@Override
 		public MCItemStack GetItemStack(int type, int qty) {
 			Convertor c = new BukkitConvertor();
 			return c.GetItemStack(type, qty);
@@ -839,6 +829,16 @@ public class StaticTest {
 
 		@Override
 		public MCMaterial getMaterial(int id) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCMaterial GetMaterialFromLegacy(String name, int data) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCMaterial GetMaterialFromLegacy(int id, int data) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 

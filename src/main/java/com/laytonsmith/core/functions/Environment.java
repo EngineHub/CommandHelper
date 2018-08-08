@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
@@ -19,10 +20,15 @@ import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.enums.MCTreeType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
@@ -35,6 +41,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
@@ -42,7 +49,12 @@ import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
 public class Environment {
 
@@ -50,8 +62,233 @@ public class Environment {
 		return "Allows you to manipulate the environment around the player";
 	}
 
+	@api
+	public static class get_block extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_block";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {locationArray} Gets the type the block at the location.";
+		}
+
+		@Override
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args)
+				throws CancelCommandException, ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+			if(b == null) {
+				throw new CRENotFoundException(
+						"Could not find the block in " + this.getName() + " (are you running in cmdline mode?)", t);
+			}
+			return new CString(b.getType().getName(), t);
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CRENotFoundException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class set_block extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_block";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {locationArray, blockName, [physics]} Sets the block at the location."
+					+ " The physics boolean determines whether or not this causes a block update. Defaults to true.";
+		}
+
+		@Override
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args)
+				throws CancelCommandException, ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			boolean physics = true;
+			if(args.length == 3) {
+				physics = Static.getBoolean(args[2], t);
+			}
+			MCMaterial mat = StaticLayer.GetMaterial(args[1].val());
+			if(mat == null) {
+				throw new CREIllegalArgumentException("Cannot find the material \"" + args[1].val() + "\".", t);
+			}
+			loc.getBlock().setType(mat, physics);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class get_blockdata_string extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_blockdata_string";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {locationArray} Gets the block data at the location in a string format."
+					+ " Forward compatibility is not ensured.";
+		}
+
+		@Override
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args)
+				throws CancelCommandException, ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+			if(b == null) {
+				throw new CRENotFoundException("Could not find the block in " + this.getName() + " (cmdline mode?)", t);
+			}
+			return new CString(b.getBlockData().getAsString(), t);
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CRENotFoundException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class set_blockdata_string extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_blockdata_string";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {locationArray, data, [physics]} Sets the block at the location from a blockdata string."
+					+ " Forward compatibility is not ensured.";
+		}
+
+		@Override
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args)
+				throws CancelCommandException, ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+			if(b == null) {
+				throw new CRENotFoundException("Could not find the block in " + this.getName() + " (cmdline mode?)", t);
+			}
+			MCBlockData bd;
+			try {
+				bd = Static.getServer().createBlockData(args[1].val());
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException("Cannot create block data from string: " + args[1].val(), t);
+			}
+			boolean physics = true;
+			if(args.length == 3) {
+				physics = Static.getBoolean(args[2], t);
+			}
+			b.setBlockData(bd, physics);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CRENotFoundException.class, CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@hide("Deprecated in favor of get_block()")
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class get_block_at extends AbstractFunction {
+	public static class get_block_at extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -137,10 +374,22 @@ public class Environment {
 		public Boolean runAsync() {
 			return false;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function get_block_at() is deprecated. Use get_block().", t);
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
+	@hide("Deprecated in favor of set_block()")
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class set_block_at extends AbstractFunction {
+	public static class set_block_at extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -229,15 +478,12 @@ public class Environment {
 			} catch (NumberFormatException e) {
 				throw new CREFormatException("id must be formatted as such: 'x:y' where x and y are integers", t);
 			}
-			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
-			if(mat == null || !mat.isBlock()) {
-				throw new CRECastException("Not a block ID: " + data
-						+ ". Attempting to set an invalid id can corrupt chunks!", t);
-			}
-			try {
-				b.setTypeAndData(data, meta, physics);
-			} catch (IllegalArgumentException ex) {
-				throw new CREFormatException("Invalid block meta data: \"" + id + "\"", t);
+			if(b != null) {
+				try {
+					b.setTypeAndData(data, meta, physics);
+				} catch (IllegalArgumentException ex) {
+					throw new CREFormatException("Invalid block meta data: \"" + id + "\"", t);
+				}
 			}
 
 			return CVoid.VOID;
@@ -246,6 +492,17 @@ public class Environment {
 		@Override
 		public Boolean runAsync() {
 			return false;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function set_block_at() is deprecated. Use set_block().", t);
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 

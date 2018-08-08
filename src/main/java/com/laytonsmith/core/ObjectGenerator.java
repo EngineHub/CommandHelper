@@ -37,15 +37,17 @@ import com.laytonsmith.abstraction.MCSkullMeta;
 import com.laytonsmith.abstraction.MCSpawnEggMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.blocks.MCBanner;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
+import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.blocks.MCBanner;
 import com.laytonsmith.abstraction.blocks.MCBrewingStand;
 import com.laytonsmith.abstraction.blocks.MCChest;
 import com.laytonsmith.abstraction.blocks.MCDispenser;
 import com.laytonsmith.abstraction.blocks.MCDropper;
 import com.laytonsmith.abstraction.blocks.MCFurnace;
 import com.laytonsmith.abstraction.blocks.MCHopper;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCShulkerBox;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityType;
@@ -68,6 +70,7 @@ import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
@@ -225,17 +228,14 @@ public class ObjectGenerator {
 	 * @return An item array or CNull
 	 */
 	public Construct item(MCItemStack is, Target t) {
-		if(is == null || is.getAmount() == 0 || is.getTypeId() == 0) {
+		if(is.isEmpty()) {
 			return CNull.NULL;
 		}
 
-		MCMaterial mat = is.getType();
 		CArray ret = CArray.GetAssociativeArray(t);
-		ret.set("name", new CString(mat.getName(), t), t);
-		ret.set("type", new CInt(mat.getType(), t), t);
+		ret.set("name", new CString(is.getType().getName(), t), t);
 		ret.set("data", new CInt(is.getDurability(), t), t);
 		ret.set("qty", new CInt(is.getAmount(), t), t);
-		ret.set("enchants", enchants(is.getEnchantments(), t), t);
 		ret.set("meta", itemMeta(is, t), t);
 		return ret;
 	}
@@ -248,6 +248,10 @@ public class ObjectGenerator {
 	 * @return An abstract item stack
 	 */
 	public MCItemStack item(Construct i, Target t) {
+		return item(i, t, false);
+	}
+
+	public MCItemStack item(Construct i, Target t, boolean legacy) {
 		if(i instanceof CNull) {
 			return EmptyItem();
 		}
@@ -255,7 +259,8 @@ public class ObjectGenerator {
 			throw new CREFormatException("Expected an array!", t);
 		}
 		CArray item = (CArray) i;
-		MCMaterial mat;
+		String mat;
+		MCItemStack ret;
 		int data = 0;
 		int qty = 1;
 
@@ -267,7 +272,18 @@ public class ObjectGenerator {
 		}
 
 		if(item.containsKey("name")) {
-			mat = StaticLayer.GetConvertor().GetMaterial(item.get("name", t).val());
+			mat = item.get("name", t).val();
+			if(item.containsKey("data")) {
+				data = Static.getInt32(item.get("data", t), t);
+			}
+			if(legacy) {
+				// ensure accurate conversion by assuming string is a legacy name
+				ret = StaticLayer.GetItemStack(StaticLayer.GetConvertor().GetMaterialFromLegacy(mat, data), qty);
+			} else if(data > 0) {
+				ret = StaticLayer.GetItemStack(mat, data, qty);
+			} else {
+				ret = StaticLayer.GetItemStack(mat, qty);
+			}
 		} else if(item.containsKey("type")) {
 			Construct type = item.get("type", t);
 			if(type instanceof CString) {
@@ -282,33 +298,21 @@ public class ObjectGenerator {
 					type = new CString(type.val().substring(0, seperatorIndex), t);
 				}
 			}
-			mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(type, t));
+			if(item.containsKey("data")) {
+				data = Static.getInt32(item.get("data", t), t);
+			}
+			ret = StaticLayer.GetItemStack(Static.getInt32(type, t), data, qty);
+			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Converted \"" + type.val() + ":" + data + "\"" + " to "
+					+ ret.getType().getName(), t);
 		} else {
 			throw new CREFormatException("Could not find item name!", t);
 		}
-		if(mat == null) {
-			throw new CRENotFoundException("A material could not be found based on the given name.", t);
-		}
-		if(mat.getType() == 0) {
-			return EmptyItem();
-		}
 
-		if(item.containsKey("data")) {
-			data = Static.getInt32(item.get("data", t), t);
-		}
-
-		MCItemMeta meta = null;
 		if(item.containsKey("meta")) {
-			meta = itemMeta(item.get("meta", t), mat, t);
+			ret.setItemMeta(itemMeta(item.get("meta", t), ret.getType(), t));
 		}
 
-		// Create itemstack
-		MCItemStack ret = StaticLayer.GetItemStack(mat, data, qty);
-		if(meta != null) {
-			ret.setItemMeta(meta);
-		}
-
-		// Fallback to enchants in item array if not in meta
+		// Deprecated fallback to enchants in item array if not in meta
 		if(item.containsKey("enchants")) {
 			try {
 				Map<MCEnchantment, Integer> enchants = enchants((CArray) item.get("enchants", t), t);
@@ -324,7 +328,7 @@ public class ObjectGenerator {
 	}
 
 	private static MCItemStack EmptyItem() {
-		return StaticLayer.GetItemStack(0, 1);
+		return StaticLayer.GetItemStack("AIR", 1);
 	}
 
 	public Construct itemMeta(MCItemStack is, Target t) {
@@ -1372,6 +1376,7 @@ public class ObjectGenerator {
 					MCItemStack is;
 					Construct ingredient = shapedIngredients.get(key, t);
 					if(ingredient instanceof CString) {
+						CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "String ingredients may not be accurate.", t);
 						CString item = (CString) ingredient;
 						if(item.val().contains(":")) {
 							String[] split = item.val().split(":");
@@ -1380,11 +1385,12 @@ public class ObjectGenerator {
 							is = StaticLayer.GetItemStack(Integer.valueOf(item.val()), 1);
 						}
 					} else if(ingredient instanceof CInt) {
+						CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Integer ingredients may not be accurate.", t);
 						is = StaticLayer.GetItemStack(Static.getInt32(ingredient, t), 1);
 					} else if(ingredient instanceof CArray) {
 						is = item(ingredient, t);
 					} else if(ingredient instanceof CNull) {
-						is = StaticLayer.GetItemStack(0, 0);
+						is = StaticLayer.GetItemStack("AIR", 0);
 					} else {
 						throw new CREFormatException("Item was not found", t);
 					}
@@ -1400,6 +1406,7 @@ public class ObjectGenerator {
 				for(Construct ingredient : ingredients.asList()) {
 					MCItemStack is;
 					if(ingredient instanceof CString) {
+						CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "String ingredients may not be accurate.", t);
 						if(ingredient.val().contains(":")) {
 							String[] split = ingredient.val().split(":");
 							is = StaticLayer.GetItemStack(Integer.valueOf(split[0]), Integer.valueOf(split[1]), 1);

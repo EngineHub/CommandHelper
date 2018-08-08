@@ -11,7 +11,6 @@ import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
-import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCMetadatable;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -20,7 +19,6 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.entities.MCVehicle;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.CArray;
@@ -619,7 +617,7 @@ public final class Static {
 	 * @param qty
 	 * @throws CREFormatException If the notation is invalid.
 	 * @return
-	 * @deprecated Use {@link StaticLayer#GetItemStack(int, int, int)} instead.
+	 * @deprecated Use MCMaterial instead
 	 */
 	@Deprecated
 	public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, Target t) {
@@ -636,37 +634,10 @@ public final class Static {
 		} catch (NumberFormatException e) {
 			throw new CREFormatException("Invalid item notation: " + notation, t);
 		}
-		return StaticLayer.GetItemStack(type, data, qty);
-	}
-
-	/**
-	 * Works in reverse from the other ParseItemNotation
-	 *
-	 * @param is
-	 * @return
-	 */
-	public static String ParseItemNotation(MCItemStack is) {
-		if(is == null) {
-			return "0";
-		}
-		String append = null;
-		if(is.getDurability() != 0) {
-			append = Short.toString(is.getDurability());
-		} else {
-			MCMaterialData md = is.getData();
-			if(md != null) {
-				append = Integer.toString(md.getData());
-			}
-		}
-		return is.getTypeId() + (append == null ? "" : ":" + append);
-	}
-
-	public static String ParseItemNotation(MCBlock b) {
-		if(b == null || b.isNull()) {
-			return "0";
-		}
-		byte data = b.getData();
-		return b.getTypeId() + (data == 0 ? "" : ":" + Byte.toString(data));
+		MCItemStack is = StaticLayer.GetItemStack(type, data, qty);
+		CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Item notation is deprecated."
+				+ " Converting '" + notation + "' to '" + is.getType().getName() + "'.", t);
+		return is;
 	}
 
 	private static final Map<String, MCCommandSender> INJECTED_PLAYERS = new HashMap<>();

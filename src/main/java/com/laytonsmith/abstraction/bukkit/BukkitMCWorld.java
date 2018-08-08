@@ -13,6 +13,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldBorder;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFallingBlock;
@@ -68,6 +69,7 @@ import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.CaveSpider;
@@ -122,9 +124,7 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.entity.ZombieHorse;
 import org.bukkit.entity.ZombieVillager;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -734,10 +734,10 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 				} else if(e instanceof Enderman) {
 					Enderman en = (Enderman) e;
 					for(String type : subTypes) {
-						try {
-							MaterialData held = new MaterialData(Material.valueOf(type));
-							en.setCarriedMaterial(held);
-						} catch (IllegalArgumentException ex) {
+						Material mat = Material.getMaterial(type);
+						if(mat != null) {
+							en.setCarriedBlock(mat.createBlockData());
+						} else {
 							throw new CREFormatException(type + " is not a valid material", t);
 						}
 					}
@@ -848,9 +848,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public MCFallingBlock spawnFallingBlock(MCLocation loc, int type, byte data) {
-		Location mcloc = (Location) loc.getHandle();
-		return new BukkitMCFallingBlock(w.spawnFallingBlock(mcloc, type, data));
+	public MCFallingBlock spawnFallingBlock(MCLocation loc, MCBlockData data) {
+		return new BukkitMCFallingBlock(w.spawnFallingBlock((Location) loc.getHandle(), (BlockData) data.getHandle()));
 	}
 
 	@Override

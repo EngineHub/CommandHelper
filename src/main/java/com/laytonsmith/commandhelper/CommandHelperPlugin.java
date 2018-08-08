@@ -41,6 +41,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.AliasCore;
@@ -322,6 +323,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		BukkitMCEntityType.build();
 		BukkitMCBiomeType.build();
 		BukkitMCSound.build();
+		BukkitMCLegacyMaterial.build();
 
 		//Metrics
 		Metrics m = new Metrics(this);

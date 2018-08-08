@@ -1,11 +1,11 @@
 package com.laytonsmith.abstraction.entities;
 
 import com.laytonsmith.abstraction.MCLivingEntity;
-import com.laytonsmith.abstraction.MCMaterialData;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 
 public interface MCEnderman extends MCLivingEntity {
 
-	MCMaterialData getCarriedMaterial();
+	MCBlockData getCarriedMaterial();
 
-	void setCarriedMaterial(MCMaterialData held);
+	void setCarriedMaterial(MCBlockData held);
 }

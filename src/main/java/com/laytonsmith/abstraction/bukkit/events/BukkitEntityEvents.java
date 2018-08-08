@@ -3,6 +3,8 @@ package com.laytonsmith.abstraction.bukkit.events;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockData;
 import com.laytonsmith.abstraction.entities.MCHanging;
 import com.laytonsmith.abstraction.entities.MCItem;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -66,6 +68,7 @@ import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
 import com.laytonsmith.abstraction.events.MCProjectileLaunchEvent;
 import com.laytonsmith.annotations.abstraction;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -479,11 +482,11 @@ public class BukkitEntityEvents {
 
 		@Override
 		public void setItemStack(MCItemStack stack) {
-			BukkitMCItemStack s = (BukkitMCItemStack) stack;
-			if(s.getTypeId() == 0) {
+			ItemStack is = (ItemStack) stack.getHandle();
+			if(is == null || is.getType().equals(Material.AIR)) {
 				e.getItemDrop().remove();
 			} else {
-				e.getItemDrop().setItemStack(s.__ItemStack());
+				e.getItemDrop().setItemStack(is);
 			}
 		}
 
@@ -529,13 +532,13 @@ public class BukkitEntityEvents {
 
 		@Override
 		public void setItemStack(MCItemStack stack) {
-			BukkitMCItemStack s = (BukkitMCItemStack) stack;
+			ItemStack is = (ItemStack) stack.getHandle();
 			e.setCancelled(true);
 			e.getItem().remove();
-			if(s.getTypeId() == 0) {
+			if(is == null || is.getType().equals(Material.AIR)) {
 				return;
 			} else {
-				e.getPlayer().getInventory().addItem(s.asItemStack());
+				e.getPlayer().getInventory().addItem(is);
 				//and for added realism :)
 				e.getPlayer().getWorld().playSound(e.getItem().getLocation(),
 						((BukkitMCSound) MCSound.valueOf("ITEM_PICKUP")).getConcrete(), 1, 2);
@@ -716,8 +719,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public byte getData() {
-			return ecb.getData();
+		public MCBlockData getBlockData() {
+			return new BukkitMCBlockData(ecb.getBlockData());
 		}
 
 		@Override

@@ -55,11 +55,11 @@ public interface Convertor {
 
 	void Startup(CommandHelperPlugin chp);
 
-	int LookupItemId(String materialName);
-
-	String LookupMaterialName(int id);
-
 	MCMaterial getMaterial(int id);
+
+	MCMaterial GetMaterialFromLegacy(String name, int data);
+
+	MCMaterial GetMaterialFromLegacy(int id, int data);
 
 	MCMaterial GetMaterial(String name);
 

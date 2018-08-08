@@ -6,7 +6,6 @@ import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCVirtualInventoryHolder;
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
 import com.laytonsmith.abstraction.enums.MCInventoryAction;
@@ -21,6 +20,8 @@ import com.laytonsmith.abstraction.events.MCItemSwapEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -32,6 +33,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
+import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
@@ -65,7 +67,7 @@ public class InventoryEvents {
 					+ StringUtils.Join(MCSlotType.values(), ", ", ", or ")
 					+ " | clicktype: <macro> One of " + StringUtils.Join(MCClickType.values(), ", ", ", or ")
 					+ " | action: <macro> One of " + StringUtils.Join(MCInventoryAction.values(), ", ", ", or ")
-					+ " | slotitem: <item match> | player: <macro>}"
+					+ " | slotitem: <string match> | player: <macro>}"
 					+ " Fired when a player clicks a slot in any inventory. "
 					+ " {player: The player who clicked | viewers: everyone looking in this inventory"
 					+ " | leftclick: if this was a left click | keyboardclick: true/false if a key was pressed"
@@ -79,6 +81,20 @@ public class InventoryEvents {
 					+ " {}";
 		}
 
+		@Override
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilters
+			Map<String, Construct> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("slotitem")) {
+				Construct type = prefilter.get("slotitem");
+				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("slotitem").val(), 1, event.getTarget());
+					prefilter.put("slotitem", new CString(is.getType().getName(), event.getTarget()));
+					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The item notation format for the \"slotitem\" prefilter"
+							+ " in " + getName() + " is deprecated. Converted to " + is.getType().getName(), event.getTarget());
+				}
+			}
+		}
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
@@ -95,7 +111,7 @@ public class InventoryEvents {
 				Prefilters.match(prefilter, "player", e.getWhoClicked().getName(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "clicktype", e.getClickType().name(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "slottype", e.getSlotType().name(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "slotitem", Static.ParseItemNotation(e.getCurrentItem()), PrefilterType.ITEM_MATCH);
+				Prefilters.match(prefilter, "slotitem", e.getCurrentItem().getType().getName(), PrefilterType.STRING_MATCH);
 
 				return true;
 			}
@@ -175,13 +191,6 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public void cancel(BindableEvent o, boolean state) {
-			MCInventoryClickEvent ic = ((MCInventoryClickEvent) o);
-			ic.setCancelled(state);
-			StaticLayer.GetServer().getPlayer(ic.getWhoClicked().getName()).updateInventory();
-		}
-
-		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -201,7 +210,7 @@ public class InventoryEvents {
 			return "{virtual: <boolean> Whether or not this inventory is virtually stored in CH"
 					+ " | world: <macro> World name"
 					+ " | type: <string match> Can be " + StringUtils.Join(MCDragType.values(), ", ", ", or ")
-					+ " | cursoritem: <item match> item in hand, before event starts}"
+					+ " | cursoritem: <string match> old item type held by the cursor before event starts}"
 					+ "Fired when a player clicks (by left or right mouse button) a slot in an inventory and then drags"
 					+ " the mouse across slots. "
 					+ "{player: The player who clicked | newcursoritem: item on cursor, after event"
@@ -211,6 +220,21 @@ public class InventoryEvents {
 					+ " | inventorysize: number of slots in opened inventory}"
 					+ "{cursoritem: the item on the cursor, after event} "
 					+ "{} ";
+		}
+
+		@Override
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilters
+			Map<String, Construct> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("cursoritem")) {
+				Construct type = prefilter.get("cursoritem");
+				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("cursoritem").val(), 1, event.getTarget());
+					prefilter.put("cursoritem", new CString(is.getType().getName(), event.getTarget()));
+					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The item notation format for the \"cursoritem\" prefilter"
+							+ " in " + getName() + " is deprecated. Converted to " + is.getType().getName(), event.getTarget());
+				}
+			}
 		}
 
 		@Override
@@ -226,7 +250,7 @@ public class InventoryEvents {
 				}
 				Prefilters.match(prefilter, "world", e.getWhoClicked().getWorld().getName(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "type", e.getType().name(), PrefilterType.STRING_MATCH);
-				Prefilters.match(prefilter, "cursoritem", Static.ParseItemNotation(e.getOldCursor()), PrefilterType.ITEM_MATCH);
+				Prefilters.match(prefilter, "cursoritem", e.getOldCursor().getType().getName(), PrefilterType.STRING_MATCH);
 
 				return true;
 			}
@@ -301,13 +325,6 @@ public class InventoryEvents {
 				}
 			}
 			return false;
-		}
-
-		@Override
-		public void cancel(BindableEvent o, boolean state) {
-			MCInventoryDragEvent id = ((MCInventoryDragEvent) o);
-			id.setCancelled(state);
-			StaticLayer.GetServer().getPlayer(id.getWhoClicked().getName()).updateInventory();
 		}
 
 		@Override
@@ -774,7 +791,9 @@ public class InventoryEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro> | main_hand: <item match> | off_hand: <item match>}"
+			return "{player: <macro>"
+					+ " | main_hand: <string match> The type of item being swapped from the main hand"
+					+ " | off_hand: <string match> The type of item being swapped from the off hand}"
 					+ " Fires when a player swaps the items in their main and off hands."
 					+ " {player | main_hand: the item array in the main hand before swapping"
 					+ " | off_hand: the item in the off hand}"
@@ -783,13 +802,47 @@ public class InventoryEvents {
 		}
 
 		@Override
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilters
+			Map<String, Construct> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("main_hand")) {
+				Construct type = prefilter.get("main_hand");
+				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The item notation format in the \"main_hand\""
+							+ " prefilter in " + getName() + " is deprecated.", event.getTarget());
+					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("main_hand").val(), 1, event.getTarget());
+					prefilter.put("main_hand", new CString(is.getType().getName(), event.getTarget()));
+				}
+			}
+			if(prefilter.containsKey("off_hand")) {
+				Construct type = prefilter.get("off_hand");
+				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The item notation format in the \"off_hand\""
+							+ " prefilter in " + getName() + " is deprecated.", event.getTarget());
+					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("off_hand").val(), 1, event.getTarget());
+					prefilter.put("off_hand", new CString(is.getType().getName(), event.getTarget()));
+				}
+			}
+		}
+
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			if(event instanceof MCItemSwapEvent) {
 				MCItemSwapEvent e = (MCItemSwapEvent) event;
 
 				Prefilters.match(prefilter, "player", e.getPlayer().getName(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "main_hand", Static.ParseItemNotation(e.getMainHandItem()), PrefilterType.ITEM_MATCH);
-				Prefilters.match(prefilter, "off_hand", Static.ParseItemNotation(e.getOffHandItem()), PrefilterType.ITEM_MATCH);
+				if(prefilter.containsKey("main_hand")) {
+					String value = prefilter.get("main_hand").val();
+					if(!e.getMainHandItem().getType().getName().equals(value)) {
+						return false;
+					}
+				}
+				if(prefilter.containsKey("off_hand")) {
+					String value = prefilter.get("off_hand").val();
+					if(!e.getOffHandItem().getType().getName().equals(value)) {
+						return false;
+					}
+				}
 
 				return true;
 			}
@@ -930,7 +983,7 @@ public class InventoryEvents {
 						e.getInventory().setMatrix(repl);
 						return true;
 					} else {
-						throw new CRECastException("Expected an array but recieved " + value, Target.UNKNOWN);
+						throw new CRECastException("Expected an array but received " + value, Target.UNKNOWN);
 					}
 				}
 			} */

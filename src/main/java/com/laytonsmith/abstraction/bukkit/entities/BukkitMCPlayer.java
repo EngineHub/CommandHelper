@@ -11,6 +11,8 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlayerInventory;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
@@ -30,9 +32,11 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Note;
 import org.bukkit.Particle;
 import org.bukkit.Server;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -463,8 +467,13 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-	public void sendBlockChange(MCLocation loc, int material, byte data) {
-		p.sendBlockChange(((Location) loc.getHandle()), material, data);
+	public void sendBlockChange(MCLocation loc, MCMaterial material, byte data) {
+		p.sendBlockChange(((Location) loc.getHandle()), (Material) material.getHandle(), data);
+	}
+
+	@Override
+	public void sendBlockChange(MCLocation loc, MCBlockData data) {
+		p.sendBlockChange(((Location) loc.getHandle()), (BlockData) data.getHandle());
 	}
 
 	@Override

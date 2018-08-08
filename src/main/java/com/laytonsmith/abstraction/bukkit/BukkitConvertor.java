@@ -68,6 +68,7 @@ import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPatternShape;
@@ -197,18 +198,55 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCMaterial getMaterial(int id) {
-		Material mat = Material.getMaterial(id);
+		Material mat = BukkitMCLegacyMaterial.getMaterial(id);
 		return mat == null ? null : new BukkitMCMaterial(mat);
 	}
 
 	@Override
-	public MCItemStack GetItemStack(int type, int qty) {
-		return new BukkitMCItemStack(new ItemStack(type, qty));
+	public MCMaterial GetMaterialFromLegacy(String mat, int data) {
+		Material m = BukkitMCLegacyMaterial.getMaterial(mat, data);
+		return m == null ? null : new BukkitMCMaterial(m);
 	}
 
 	@Override
-	public MCItemStack GetItemStack(int type, int data, int qty) {
-		return new BukkitMCItemStack(new ItemStack(type, qty, (short) data));
+	public MCMaterial GetMaterialFromLegacy(int id, int data) {
+		Material m = BukkitMCLegacyMaterial.getMaterial(id, data);
+		return m == null ? null : new BukkitMCMaterial(m);
+	}
+
+	@Override
+	public MCMaterial GetMaterial(String name) {
+		// Fast match
+		Material match = Material.getMaterial(name);
+		if(match != null) {
+			return new BukkitMCMaterial(match);
+		}
+		// Try legacy
+		match = Material.getMaterial(name, true);
+		if(match != null) {
+			return new BukkitMCMaterial(match);
+		}
+		// Try fuzzy match
+		match = Material.matchMaterial(name);
+		if(match != null) {
+			return new BukkitMCMaterial(match);
+		}
+		return null;
+	}
+
+	@Override
+	public MCItemStack GetItemStack(int id, int qty) {
+		Material mat = BukkitMCLegacyMaterial.getMaterial(id);
+		if(mat == null) {
+			return new BukkitMCItemStack(new ItemStack(Material.AIR));
+		}
+		return new BukkitMCItemStack(new ItemStack(mat, qty));
+	}
+
+	@Override
+	public MCItemStack GetItemStack(int id, int data, int qty) {
+		Material mat = BukkitMCLegacyMaterial.getMaterial(id, data);
+		return new BukkitMCItemStack(new ItemStack(mat, qty, (short) data));
 	}
 
 	@Override
@@ -225,7 +263,10 @@ public class BukkitConvertor extends AbstractConvertor {
 	public MCItemStack GetItemStack(String type, int qty) {
 		Material mat = Material.getMaterial(type);
 		if(mat == null) {
-			return null;
+			mat = Material.getMaterial(type, true);
+			if(mat == null) {
+				return new BukkitMCItemStack(new ItemStack(Material.AIR));
+			}
 		}
 		return new BukkitMCItemStack(new ItemStack(mat, qty));
 	}
@@ -234,7 +275,13 @@ public class BukkitConvertor extends AbstractConvertor {
 	public MCItemStack GetItemStack(String type, int data, int qty) {
 		Material mat = Material.getMaterial(type);
 		if(mat == null) {
-			return null;
+			mat = BukkitMCLegacyMaterial.getMaterial(type, data);
+		} else if(mat.getMaxDurability() == 0) {
+			// only do this for non-damageable items with data values, which don't exist for modern materials
+			Material converted = BukkitMCLegacyMaterial.getMaterial(type, data);
+			if(converted != null) {
+				mat = converted;
+			}
 		}
 		return new BukkitMCItemStack(new ItemStack(mat, qty, (short) data));
 	}
@@ -269,21 +316,6 @@ public class BukkitConvertor extends AbstractConvertor {
 		chp.registerEvents(VEHICLE_LISTENER);
 		chp.registerEvents(WEATHER_LISTENER);
 		chp.registerEvents(WORLD_LISTENER);
-	}
-
-	@Override
-	public int LookupItemId(String materialName) {
-		Material mat = Material.matchMaterial(materialName);
-		if(mat != null) {
-			return mat.getId();
-		} else {
-			return -1;
-		}
-	}
-
-	@Override
-	public String LookupMaterialName(int id) {
-		return Material.getMaterial(id).toString();
 	}
 
 	@Override
@@ -709,19 +741,6 @@ public class BukkitConvertor extends AbstractConvertor {
 		} else {
 			return new BukkitMCCommandSender(sender);
 		}
-	}
-
-	@Override
-	public MCMaterial GetMaterial(String name) {
-		Material match = Material.getMaterial(name);
-		if(match == null) {
-			// Try harder
-			match = Material.matchMaterial(name);
-			if(match == null) {
-				return null;
-			}
-		}
-		return new BukkitMCMaterial(match);
 	}
 
 	@Override

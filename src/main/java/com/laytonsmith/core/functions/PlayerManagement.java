@@ -28,7 +28,10 @@ import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -61,9 +64,12 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -312,11 +318,7 @@ public class PlayerManagement {
 					+ (y1 - y2) * (y1 - y2)
 					+ (z1 - z2) * (z1 - z2));
 
-			if(distance <= dist) {
-				return true;
-			}
-
-			return false;
+			return distance <= dist;
 		}
 
 		@Override
@@ -575,27 +577,43 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			HashSet<Short> trans = null;
+			HashSet<MCMaterial> trans = null;
+			int transparentIndex = -1;
 			if(args.length == 1) {
 				if(args[0] instanceof CArray) {
-					CArray ta = (CArray) args[0];
-					trans = new HashSet<Short>();
-					for(int i = 0; i < ta.size(); i++) {
-						trans.add(Static.getInt16(ta.get(i, t), t));
-					}
+					transparentIndex = 0;
 				} else {
 					p = Static.GetPlayer(args[0], t);
 				}
 			} else if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				if(args[1] instanceof CArray) {
-					CArray ta = (CArray) args[1];
-					trans = new HashSet<Short>();
-					for(int i = 0; i < ta.size(); i++) {
-						trans.add(Static.getInt16(ta.get(i, t), t));
-					}
+					transparentIndex = 1;
 				} else {
 					throw new CREFormatException("An array was expected for argument 2 but received " + args[1], t);
+				}
+			}
+			if(transparentIndex >= 0) {
+				CArray ta = (CArray) args[transparentIndex];
+				trans = new HashSet<>();
+				for(Construct mat : ta.asList()) {
+					MCMaterial material = StaticLayer.GetMaterial(mat.val());
+					if(material != null) {
+						trans.add(StaticLayer.GetMaterial(mat.val()));
+						continue;
+					}
+					try {
+						material = StaticLayer.GetConvertor().getMaterial(Static.getInt16(mat, t));
+						if(material != null) {
+							CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The id \"" + mat.val() + "\" is deprecated."
+									+ " Converted to \"" + material.getName() + "\"", t);
+							trans.add(material);
+							continue;
+						}
+					} catch (CRECastException ex) {
+						// ignore and throw a more specific message
+					}
+					throw new CREFormatException("Could not find a material by the name \"" + mat.val() + "\"", t);
 				}
 			}
 			Static.AssertPlayerNonNull(p, t);
@@ -833,7 +851,7 @@ public class PlayerManagement {
 					+ "<li>3 - player's IP; Returns the IP address of this player.</li>"
 					+ "<li>4 - Display name; The name that is typically used when displayed on screen.</li>"
 					+ "<li>5 - player's health; The current health of the player, which will be an int from 0-20.</li>"
-					+ "<li>6 - Item in hand; The type and data for the item in the 0:0 format. (deprecated)</li>"
+					+ "<li>6 - Item in hand; The type of item in their main hand.</li>"
 					+ "<li>7 - World name; Gets the name of the world this player is in.</li>"
 					+ "<li>8 - Is Op; true or false if this player is an op.</li>"
 					+ "<li>9 - player groups; An array of the groups the player is in, by permission nodes.</li>"
@@ -946,7 +964,7 @@ public class PlayerManagement {
 			if(index == 6 || index == -1) {
 				//Item in hand
 				MCItemStack is = p.getItemInHand();
-				retVals.add(new CString(is.getTypeId() + ":" + is.getDurability(), t));
+				retVals.add(new CString(is.getType().getName(), t));
 			}
 			if(index == 7 || index == -1) {
 				//World name
@@ -4077,7 +4095,7 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class psend_block_change extends AbstractFunction {
+	public static class psend_block_change extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -4103,9 +4121,16 @@ public class PlayerManagement {
 				offset = 1;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0 + offset], p.getWorld(), t);
-			MCItemStack item = Static.ParseItemNotation(getName(), args[1 + offset].val(), 1, t);
-			p.sendBlockChange(loc, item.getType().getType(), (byte) item.getData().getData());
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
+			MCMaterial mat = StaticLayer.GetMaterial(args[1 + offset].val());
+			if(mat == null) {
+				mat = Static.ParseItemNotation(getName(), args[1 + offset].val(), 1, t).getType();
+			}
+			if(!mat.isBlock()) {
+				throw new CREIllegalArgumentException("The value \"" + args[1 + offset].val()
+						+ "\" is not a valid block material.", t);
+			}
+			p.sendBlockChange(loc, mat.createBlockData());
 			return CVoid.VOID;
 		}
 
@@ -4121,13 +4146,29 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], locationArray, itemID} Changes a block, but only temporarily, and only for the specified player."
-					+ " This can be used to \"fake\" blocks for a player. ItemID is in the 1[:1] data format.";
+			return "void {[player], locationArray, blockName} Changes a block temporarily for the specified player."
+					+ " This can be used to \"fake\" blocks for a player.";
 		}
 
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() < 2) {
+				return null;
+			}
+			if(children.get(children.size() - 1).getData().val().contains(":")) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The 1:1 format is deprecated in psend_block_change()", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 

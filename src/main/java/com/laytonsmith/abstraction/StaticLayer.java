@@ -117,26 +117,6 @@ public final class StaticLayer {
 	}
 
 	/**
-	 * Returns the data value of the specified material name, or -1 if none was found.
-	 *
-	 * @param materialName
-	 * @return
-	 */
-	public static int LookupItemId(String materialName) {
-		return convertor.LookupItemId(materialName);
-	}
-
-	/**
-	 * Returns the name of the material, given the material's ID.
-	 *
-	 * @param id
-	 * @return
-	 */
-	public static String LookupMaterialName(int id) {
-		return convertor.LookupMaterialName(id);
-	}
-
-	/**
 	 * Adds a runnable to the main thread, if required by this platform, if a multithreaded user code would be
 	 * dangerous.
 	 *
