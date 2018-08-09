@@ -511,6 +511,9 @@ public enum BukkitMCLegacyMaterial {
 	}
 
 	public static Material getMaterial(Material legacymat, int data) {
+		if(legacymat == null) {
+			return null;
+		}
 		if(legacymat.getMaxDurability() == 0) {
 			return Bukkit.getUnsafe().fromLegacy(new MaterialData(legacymat, (byte) data));
 		} else {
