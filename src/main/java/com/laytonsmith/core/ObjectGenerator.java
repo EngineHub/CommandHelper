@@ -276,9 +276,21 @@ public class ObjectGenerator {
 			if(item.containsKey("data")) {
 				data = Static.getInt32(item.get("data", t), t);
 			}
+
 			if(legacy) {
 				// ensure accurate conversion by assuming string is a legacy name
-				ret = StaticLayer.GetItemStack(StaticLayer.GetConvertor().GetMaterialFromLegacy(mat, data), qty);
+				MCMaterial material;
+				if(mat.equals("MAP")) {
+					// special handling, ignore data until later
+					material = StaticLayer.GetConvertor().GetMaterialFromLegacy(mat, 0);
+				} else {
+					material = StaticLayer.GetConvertor().GetMaterialFromLegacy(mat, data);
+				}
+				if(material == null) {
+					throw new CREFormatException("Could not convert legacy item from " + mat + ":" + data, t);
+				}
+				ret = StaticLayer.GetItemStack(material, qty);
+
 			} else if(data > 0) {
 				ret = StaticLayer.GetItemStack(mat, data, qty);
 			} else {
@@ -310,6 +322,15 @@ public class ObjectGenerator {
 
 		if(item.containsKey("meta")) {
 			ret.setItemMeta(itemMeta(item.get("meta", t), ret.getType(), t));
+		}
+
+		if(legacy) {
+			// convert legacy data to meta
+			if(ret.getType().getName().equals("FILLED_MAP")) {
+				MCMapMeta meta = (MCMapMeta) ret.getItemMeta();
+				meta.setMapId(data);
+				ret.setItemMeta(meta);
+			}
 		}
 
 		// Deprecated fallback to enchants in item array if not in meta
