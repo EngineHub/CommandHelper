@@ -332,13 +332,13 @@ public class MobManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
+			return new Integer[]{2};
 		}
 
 		@Override
 		public String docs() {
 			return "void {entityID, player} Sets the tameable mob to the specified player. Offline players are"
-					+ " supported, but this means that partial matches are NOT supported. You must type the players"
+					+ " supported, but this means that partial matches are NOT supported. You must type the player's"
 					+ " name exactly. Setting the player to null will untame the mob.";
 		}
 
