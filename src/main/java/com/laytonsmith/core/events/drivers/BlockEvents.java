@@ -411,7 +411,7 @@ public class BlockEvents {
 			}
 
 			if(prefilter.containsKey("block")) {
-				if(!event.getBlock().getType().getName().equals(prefilter.get("name").val())) {
+				if(!event.getBlock().getType().getName().equals(prefilter.get("block").val())) {
 					return false;
 				}
 			}
