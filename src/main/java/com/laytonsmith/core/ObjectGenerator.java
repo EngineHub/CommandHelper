@@ -424,10 +424,6 @@ public class ObjectGenerator {
 						patterns.push(pattern, t);
 					}
 					ma.set("patterns", patterns, t);
-					MCDyeColor dyeColor = banner.getBaseColor();
-					if(dyeColor != null) {
-						ma.set("basecolor", new CString(dyeColor.toString(), t), t);
-					}
 				} else if(bs instanceof MCCreatureSpawner) {
 					MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 					ma.set("spawntype", mccs.getSpawnedType().name());
@@ -680,16 +676,23 @@ public class ObjectGenerator {
 						}
 					} else if(bs instanceof MCBanner) {
 						MCBanner banner = (MCBanner) bs;
-						if(ma.containsKey("basecolor")) {
-							banner.setBaseColor(MCDyeColor.valueOf(ma.get("basecolor", t).val().toUpperCase()));
-						}
 						if(ma.containsKey("patterns")) {
 							CArray array = ArgumentValidation.getArray(ma.get("patterns", t), t);
 							for(String key : array.stringKeySet()) {
 								CArray pattern = ArgumentValidation.getArray(array.get(key, t), t);
 								MCPatternShape shape = MCPatternShape.valueOf(pattern.get("shape", t).val().toUpperCase());
-								MCDyeColor color = MCDyeColor.valueOf(pattern.get("color", t).val().toUpperCase());
-								banner.addPattern(StaticLayer.GetConvertor().GetPattern(color, shape));
+								String color = pattern.get("color", t).val().toUpperCase();
+								try {
+									MCDyeColor dyecolor = MCDyeColor.valueOf(color);
+									banner.addPattern(StaticLayer.GetConvertor().GetPattern(dyecolor, shape));
+								} catch (IllegalArgumentException ex) {
+									if(color.equals("SILVER")) {
+										// convert old DyeColor
+										banner.addPattern(StaticLayer.GetConvertor().GetPattern(MCDyeColor.LIGHT_GRAY, shape));
+									} else {
+										throw ex;
+									}
+								}
 							}
 						}
 						banner.update();

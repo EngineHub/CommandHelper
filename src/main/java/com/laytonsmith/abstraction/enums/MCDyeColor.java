@@ -12,7 +12,7 @@ public enum MCDyeColor {
 	LIME,
 	PINK,
 	GRAY,
-	SILVER,
+	LIGHT_GRAY,
 	CYAN,
 	PURPLE,
 	BLUE,
