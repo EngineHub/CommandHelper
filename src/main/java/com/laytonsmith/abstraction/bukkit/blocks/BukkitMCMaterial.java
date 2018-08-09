@@ -88,6 +88,16 @@ public class BukkitMCMaterial implements MCMaterial {
 	}
 
 	@Override
+	public float getHardness() {
+		return m.getHardness();
+	}
+
+	@Override
+	public float getBlastResistance() {
+		return m.getBlastResistance();
+	}
+
+	@Override
 	public Material getHandle() {
 		return m;
 	}
