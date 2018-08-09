@@ -265,11 +265,13 @@ public class Minecraft {
 		@Override
 		public String docs() {
 			return "array {itemArray} Converts old pre-1.13 item arrays to new item arrays."
-					+ " Almost all item arrays will be converted successfully just by passing them to a function that"
-					+ " accepts item arrays. However this function ensures best case accuracy."
-					+ " In addition, conversions may no longer be supported in future versions of Minecraft."
+					+ " Almost all item arrays will be converted successfully when passing them to a function that"
+					+ " accepts item arrays. However, if the array is missing the 'type' key, several item types"
+					+ " might not convert accurately due to name conflicts."
+					+ " This function offers convenience and ensures better conversion accuracy."
 					+ " Use this if you have item arrays stored in a database and want to convert them all at once."
-					+ " Passing new item arrays to this function is not supported.";
+					+ " Passing new item arrays to this function is not supported."
+					+ " Conversions may not be supported in far future versions of Minecraft.";
 		}
 
 		@Override

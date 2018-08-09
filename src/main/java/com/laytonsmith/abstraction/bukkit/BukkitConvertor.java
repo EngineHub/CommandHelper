@@ -245,6 +245,9 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCItemStack GetItemStack(int id, int data, int qty) {
 		Material mat = BukkitMCLegacyMaterial.getMaterial(id, data);
+		if(mat == null) {
+			return new BukkitMCItemStack(new ItemStack(Material.AIR));
+		}
 		return new BukkitMCItemStack(new ItemStack(mat, qty, (short) data));
 	}
 

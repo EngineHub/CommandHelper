@@ -493,7 +493,7 @@ public enum BukkitMCLegacyMaterial {
 	public static Material getMaterial(int id) {
 		BukkitMCLegacyMaterial legacy = BY_ID.get(id);
 		if(legacy == null) {
-			throw new IllegalArgumentException("Invalid material id: " + id);
+			return null;
 		}
 		return Material.getMaterial(legacy.name(), true);
 	}
@@ -501,30 +501,28 @@ public enum BukkitMCLegacyMaterial {
 	public static Material getMaterial(int id, int data) {
 		BukkitMCLegacyMaterial legacy = BY_ID.get(id);
 		if(legacy == null) {
-			throw new IllegalArgumentException("Invalid material id: " + id);
+			return null;
 		}
 		return getMaterial(legacy.name(), data);
 	}
 
 	public static Material getMaterial(String type, int data) {
-		Material mat = null;
-		try {
-			mat = Material.getMaterial("LEGACY_" + type);
-			if(mat.getMaxDurability() == 0) {
-				mat = Bukkit.getUnsafe().fromLegacy(new MaterialData(mat, (byte) data));
-			} else {
-				mat = Bukkit.getUnsafe().fromLegacy(mat);
-			}
-		} catch (NullPointerException ex) {
-			// probably tests
+		return getMaterial(Material.getMaterial("LEGACY_" + type), data);
+	}
+
+	public static Material getMaterial(Material legacymat, int data) {
+		if(legacymat.getMaxDurability() == 0) {
+			return Bukkit.getUnsafe().fromLegacy(new MaterialData(legacymat, (byte) data));
+		} else {
+			// ignore data when it's actually durability
+			return Bukkit.getUnsafe().fromLegacy(legacymat);
 		}
-		return mat;
 	}
 
 	public static BlockData getBlockData(int id, int data) {
 		BukkitMCLegacyMaterial legacy = BY_ID.get(id);
 		if(legacy == null) {
-			throw new IllegalArgumentException("Invalid material id: " + id);
+			return Material.AIR.createBlockData();
 		}
 		Material mat = Material.getMaterial("LEGACY_" + legacy.name());
 		return Bukkit.getUnsafe().fromLegacy(mat, (byte) data);

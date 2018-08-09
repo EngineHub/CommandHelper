@@ -260,7 +260,7 @@ public class ObjectGenerator {
 		}
 		CArray item = (CArray) i;
 		String mat;
-		MCItemStack ret;
+		MCItemStack ret = null;
 		int data = 0;
 		int qty = 1;
 
@@ -271,14 +271,15 @@ public class ObjectGenerator {
 			}
 		}
 
-		if(item.containsKey("name")) {
-			mat = item.get("name", t).val();
-			if(item.containsKey("data")) {
-				data = Static.getInt32(item.get("data", t), t);
-			}
+		if(item.containsKey("data")) {
+			data = Static.getInt32(item.get("data", t), t);
+		}
 
-			if(legacy) {
-				// ensure accurate conversion by assuming string is a legacy name
+		if(legacy || item.containsKey("type")) {
+			// Do legacy item conversion
+			if(item.containsKey("name")) {
+				mat = item.get("name", t).val();
+
 				MCMaterial material;
 				if(mat.equals("MAP")) {
 					// special handling, ignore data until later
@@ -290,33 +291,43 @@ public class ObjectGenerator {
 					throw new CREFormatException("Could not convert legacy item from " + mat + ":" + data, t);
 				}
 				ret = StaticLayer.GetItemStack(material, qty);
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Converted \"" + mat + ":" + data + "\"" + " to "
+						+ ret.getType().getName(), t);
+			} else {
+				Construct type = item.get("type", t);
+				if(type instanceof CString) {
+					int seperatorIndex = type.val().indexOf(':');
+					if(seperatorIndex != -1) {
+						try {
+							data = Integer.parseInt(type.val().substring(seperatorIndex + 1));
+						} catch (NumberFormatException e) {
+							throw new CRERangeException("The item data \"" + type.val().substring(seperatorIndex + 1)
+									+ "\" is not a valid integer.", t);
+						}
+						type = new CString(type.val().substring(0, seperatorIndex), t);
+					}
+				}
+				int id = Static.getInt32(type, t);
+				if(id == 358) {
+					// special map handling, ignore data until later
+					ret = StaticLayer.GetItemStack(id, 0, qty);
+				} else {
+					ret = StaticLayer.GetItemStack(id, data, qty);
+				}
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Converted \"" + type.val() + ":" + data + "\"" + " to "
+						+ ret.getType().getName(), t);
+			}
 
-			} else if(data > 0) {
+		} else if(item.containsKey("name")) {
+			mat = item.get("name", t).val();
+			if(data > 0) {
 				ret = StaticLayer.GetItemStack(mat, data, qty);
 			} else {
 				ret = StaticLayer.GetItemStack(mat, qty);
 			}
-		} else if(item.containsKey("type")) {
-			Construct type = item.get("type", t);
-			if(type instanceof CString) {
-				int seperatorIndex = type.val().indexOf(':');
-				if(seperatorIndex != -1) {
-					try {
-						data = Integer.parseInt(type.val().substring(seperatorIndex + 1));
-					} catch (NumberFormatException e) {
-						throw new CRERangeException("The item data \"" + type.val().substring(seperatorIndex + 1)
-								+ "\" is not a valid integer.", t);
-					}
-					type = new CString(type.val().substring(0, seperatorIndex), t);
-				}
-			}
-			if(item.containsKey("data")) {
-				data = Static.getInt32(item.get("data", t), t);
-			}
-			ret = StaticLayer.GetItemStack(Static.getInt32(type, t), data, qty);
-			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Converted \"" + type.val() + ":" + data + "\"" + " to "
-					+ ret.getType().getName(), t);
-		} else {
+		}
+
+		if(ret == null) {
 			throw new CREFormatException("Could not find item name!", t);
 		}
 
