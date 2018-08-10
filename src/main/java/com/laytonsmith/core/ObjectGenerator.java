@@ -1,7 +1,6 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Vector3D;
-import com.laytonsmith.abstraction.entities.MCAgeable;
 import com.laytonsmith.abstraction.MCBannerMeta;
 import com.laytonsmith.abstraction.MCBlockStateMeta;
 import com.laytonsmith.abstraction.MCBookMeta;
@@ -37,8 +36,6 @@ import com.laytonsmith.abstraction.MCSkullMeta;
 import com.laytonsmith.abstraction.MCSpawnEggMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.blocks.MCBlockData;
-import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCBanner;
@@ -70,7 +67,6 @@ import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
