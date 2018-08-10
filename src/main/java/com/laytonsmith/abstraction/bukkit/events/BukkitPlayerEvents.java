@@ -32,7 +32,6 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFishingState;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCGameMode;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause;
-import com.laytonsmith.abstraction.events.MCChatTabCompleteEvent;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
 import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
@@ -72,7 +71,6 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.event.player.PlayerEvent;
@@ -97,7 +95,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -833,31 +830,6 @@ public class BukkitPlayerEvents {
 		@Override
 		public MCGameMode getNewGameMode() {
 			return BukkitMCGameMode.getConvertor().getAbstractedEnum(gmc.getNewGameMode());
-		}
-	}
-
-	public static class BukkitMCChatTabCompleteEvent extends BukkitMCPlayerEvent implements MCChatTabCompleteEvent {
-
-		PlayerChatTabCompleteEvent tc;
-
-		public BukkitMCChatTabCompleteEvent(PlayerChatTabCompleteEvent event) {
-			super(event);
-			this.tc = event;
-		}
-
-		@Override
-		public String getChatMessage() {
-			return tc.getChatMessage();
-		}
-
-		@Override
-		public String getLastToken() {
-			return tc.getLastToken();
-		}
-
-		@Override
-		public Collection<String> getTabCompletions() {
-			return tc.getTabCompletions();
 		}
 	}
 

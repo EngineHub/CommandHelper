@@ -2,7 +2,6 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCChatTabCompleteEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCExpChangeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCGamemodeChangeEvent;
@@ -40,7 +39,6 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerFishEvent;
@@ -279,12 +277,6 @@ public class BukkitPlayerListener implements Listener {
 	public void onGamemodeChange(PlayerGameModeChangeEvent event) {
 		BukkitMCGamemodeChangeEvent e = new BukkitMCGamemodeChangeEvent(event);
 		EventUtils.TriggerListener(Driver.GAMEMODE_CHANGE, "gamemode_change", e);
-	}
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void onChatTab(PlayerChatTabCompleteEvent event) {
-		BukkitMCChatTabCompleteEvent e = new BukkitMCChatTabCompleteEvent(event);
-		EventUtils.TriggerListener(Driver.TAB_COMPLETE, "tab_complete_chat", e);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)

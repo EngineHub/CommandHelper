@@ -18,7 +18,6 @@ import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
-import com.laytonsmith.abstraction.events.MCChatTabCompleteEvent;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
 import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
@@ -2253,92 +2252,6 @@ public class PlayerEvents {
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			return false;
-		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
-	public static class tab_complete_chat extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "tab_complete_chat";
-		}
-
-		@Override
-		public String docs() {
-			return "{player: <macro>}"
-					+ " Fires when a player asks for a list of completions to the current word in their chat message."
-					+ " Setting the completions to an empty array is this event's equivalent of cancel()."
-					+ " {player: the player asking for completion | message: the full message they have typed"
-					+ " | last: the partial word completion is asked for | completions}"
-					+ " {completions: the list of completions to send, default is player names containing the last text}"
-					+ " {}";
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCChatTabCompleteEvent) {
-				Prefilters.match(prefilter, "player", ((MCChatTabCompleteEvent) e).getPlayer().getName(), PrefilterType.MACRO);
-				return true;
-			}
-			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new CREBindException("Unsupported Operation", Target.UNKNOWN);
-		}
-
-		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCChatTabCompleteEvent) {
-				MCChatTabCompleteEvent event = (MCChatTabCompleteEvent) e;
-				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = evaluate_helper(event);
-				ret.put("message", new CString(event.getChatMessage(), t));
-				ret.put("last", new CString(event.getLastToken(), t));
-				CArray completions = new CArray(t);
-				for(String c : event.getTabCompletions()) {
-					completions.push(new CString(c, t), t);
-				}
-				ret.put("completions", completions);
-				return ret;
-			} else {
-				throw new EventException("Could not convert to MCChatTabCompleteEvent.");
-			}
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if(event instanceof MCChatTabCompleteEvent) {
-				MCChatTabCompleteEvent e = (MCChatTabCompleteEvent) event;
-				if("completions".equals(key)) {
-					if(value instanceof CArray) {
-						e.getTabCompletions().clear();
-						if(((CArray) value).inAssociativeMode()) {
-							for(Construct k : ((CArray) value).keySet()) {
-								e.getTabCompletions().add(((CArray) value).get(k, value.getTarget()).val());
-							}
-						} else {
-							for(Construct v : ((CArray) value).asList()) {
-								e.getTabCompletions().add(v.val());
-							}
-						}
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.TAB_COMPLETE;
 		}
 
 		@Override
