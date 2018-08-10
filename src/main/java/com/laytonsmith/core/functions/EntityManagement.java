@@ -1213,7 +1213,7 @@ public class EntityManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2, 3};
+			return new Integer[]{1, 2, 3, 4};
 		}
 
 		@Override
@@ -1238,6 +1238,16 @@ public class EntityManagement {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Applying entity attributes before adding it to the world.",
+							"spawn_entity('ZOMBIE', 1, ptarget_space(),"
+							+ " closure(@id){ set_entity_spec(@id, array('baby': true)); set_entity_ai(@id, false); })",
+							"Creates a zombie, changes it to a baby zombie without AI, then adds it to the world."),
+			};
 		}
 	}
 
