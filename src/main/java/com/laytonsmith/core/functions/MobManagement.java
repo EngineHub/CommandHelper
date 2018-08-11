@@ -747,12 +747,11 @@ public class MobManagement {
 		}
 	}
 
-	//@api
+	@api
 	public static class get_mob_target extends EntityManagement.EntityGetterFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity le = Static.getLivingEntity(args[0], t);
 			if(le.getTarget(t) == null) {
 				return CNull.NULL;
@@ -769,7 +768,7 @@ public class MobManagement {
 		@Override
 		public String docs() {
 			return "entityID {entityID} Gets the mob's target if it has one, and returns the target's entityID."
-					+ " If there is no target, null is returned instead.";
+					+ " If there is no target, null is returned instead. Not all mobs will have a returnable target.";
 		}
 
 		@Override
@@ -778,7 +777,7 @@ public class MobManagement {
 		}
 	}
 
-	//@api
+	@api
 	public static class set_mob_target extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -804,8 +803,8 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, entityID} The first ID is the entity who is targetting, the second is the target."
-					+ " It can also be set to null to clear the current target.";
+			return "void {entityID, entityID} The first ID is the entity that is targeting, the second is the target."
+					+ " It can also be set to null to clear the current target. Not all mobs can have their target set.";
 		}
 
 		@Override

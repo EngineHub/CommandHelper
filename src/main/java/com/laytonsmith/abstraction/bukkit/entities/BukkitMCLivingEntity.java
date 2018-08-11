@@ -15,9 +15,9 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -291,10 +291,10 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public MCLivingEntity getTarget(Target t) {
-		if(!(le instanceof Creature)) {
-			throw new CREBadEntityException("This type of mob does not have a target API", t);
+		if(!(le instanceof Mob)) {
+			throw new CREBadEntityException("This type of entity does not have a target API", t);
 		}
-		LivingEntity target = ((Creature) le).getTarget();
+		LivingEntity target = ((Mob) le).getTarget();
 		if(target == null) {
 			return null;
 		}
@@ -303,13 +303,13 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public void setTarget(MCLivingEntity target, Target t) {
-		if(!(le instanceof Creature)) {
-			throw new CREBadEntityException("This type of mob does not have a target API", t);
+		if(!(le instanceof Mob)) {
+			throw new CREBadEntityException("This type of entity not have a target API", t);
 		}
 		if(target == null) {
-			((Creature) le).setTarget(null);
+			((Mob) le).setTarget(null);
 		} else {
-			((Creature) le).setTarget(((BukkitMCLivingEntity) target).asLivingEntity());
+			((Mob) le).setTarget(((BukkitMCLivingEntity) target).asLivingEntity());
 		}
 	}
 
