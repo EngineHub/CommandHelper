@@ -319,10 +319,13 @@ public class ObjectGenerator {
 			} else {
 				ret = StaticLayer.GetItemStack(mat, qty);
 			}
+
+		} else {
+			throw new CREFormatException("Could not find item name key in array!", t);
 		}
 
 		if(ret == null) {
-			throw new CREFormatException("Could not find item name!", t);
+			throw new CREFormatException("Could not find item material from \"" + mat + "\"", t);
 		}
 
 		if(item.containsKey("meta")) {
