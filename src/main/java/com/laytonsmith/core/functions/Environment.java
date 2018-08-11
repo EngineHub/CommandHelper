@@ -32,6 +32,8 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CEntry;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -764,7 +766,7 @@ public class Environment {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class set_biome extends AbstractFunction {
+	public static class set_biome extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -840,6 +842,29 @@ public class Environment {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 1) {
+				return null;
+			}
+			Construct c = children.get(children.size() - 1).getData();
+			if(c instanceof CString) {
+				try {
+					MCBiomeType.valueOf(c.val());
+				} catch (IllegalArgumentException ex) {
+					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, ex.getMessage(), t);
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -1349,7 +1374,7 @@ public class Environment {
 	}
 
 	@api
-	public static class play_sound extends AbstractFunction {
+	public static class play_sound extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1465,6 +1490,36 @@ public class Environment {
 			return CHVersion.V3_3_1;
 		}
 
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 2) {
+				return null;
+			}
+			ParseTree child = children.get(1);
+			if(child.getData() instanceof CFunction && child.getData().val().equals("array")) {
+				for(ParseTree node : child.getChildren()) {
+					if(node.getData() instanceof CFunction && node.getData().val().equals("centry")) {
+						children = node.getChildren();
+						if(children.get(0).getData().val().equals("sound")
+								&& children.get(1).getData() instanceof CString) {
+							try {
+								MCSound.valueOf(children.get(1).getData().val().toUpperCase());
+							} catch (IllegalArgumentException ex) {
+								CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, ex.getMessage(), t);
+							}
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api
