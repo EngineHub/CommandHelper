@@ -237,7 +237,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	public MCItemStack GetItemStack(int id, int qty) {
 		Material mat = BukkitMCLegacyMaterial.getMaterial(id);
 		if(mat == null) {
-			return new BukkitMCItemStack(new ItemStack(Material.AIR));
+			return null;
 		}
 		return new BukkitMCItemStack(new ItemStack(mat, qty));
 	}
@@ -246,7 +246,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	public MCItemStack GetItemStack(int id, int data, int qty) {
 		Material mat = BukkitMCLegacyMaterial.getMaterial(id, data);
 		if(mat == null) {
-			return new BukkitMCItemStack(new ItemStack(Material.AIR));
+			return null;
 		}
 		return new BukkitMCItemStack(new ItemStack(mat, qty, (short) data));
 	}
@@ -266,9 +266,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		Material mat = Material.getMaterial(type);
 		if(mat == null) {
 			mat = Material.getMaterial(type, true);
-			if(mat == null) {
-				return new BukkitMCItemStack(new ItemStack(Material.AIR));
-			}
+		}
+		if(mat == null) {
+			return null;
 		}
 		return new BukkitMCItemStack(new ItemStack(mat, qty));
 	}
@@ -284,6 +284,9 @@ public class BukkitConvertor extends AbstractConvertor {
 			if(converted != null) {
 				mat = converted;
 			}
+		}
+		if(mat == null) {
+			return null;
 		}
 		return new BukkitMCItemStack(new ItemStack(mat, qty, (short) data));
 	}

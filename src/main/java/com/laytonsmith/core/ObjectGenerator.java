@@ -273,22 +273,15 @@ public class ObjectGenerator {
 
 		if(legacy || item.containsKey("type")) {
 			// Do legacy item conversion
+			MCMaterial material;
 			if(item.containsKey("name")) {
 				mat = item.get("name", t).val();
-
-				MCMaterial material;
 				if(mat.equals("MAP")) {
 					// special handling, ignore data until later
 					material = StaticLayer.GetConvertor().GetMaterialFromLegacy(mat, 0);
 				} else {
 					material = StaticLayer.GetConvertor().GetMaterialFromLegacy(mat, data);
 				}
-				if(material == null) {
-					throw new CREFormatException("Could not convert legacy item from " + mat + ":" + data, t);
-				}
-				ret = StaticLayer.GetItemStack(material, qty);
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Converted \"" + mat + ":" + data + "\"" + " to "
-						+ ret.getType().getName(), t);
 			} else {
 				Construct type = item.get("type", t);
 				if(type instanceof CString) {
@@ -303,16 +296,21 @@ public class ObjectGenerator {
 						type = new CString(type.val().substring(0, seperatorIndex), t);
 					}
 				}
+				mat = type.val();
 				int id = Static.getInt32(type, t);
 				if(id == 358) {
 					// special map handling, ignore data until later
-					ret = StaticLayer.GetItemStack(id, 0, qty);
+					material = StaticLayer.GetConvertor().GetMaterialFromLegacy(id, 0);
 				} else {
-					ret = StaticLayer.GetItemStack(id, data, qty);
+					material = StaticLayer.GetConvertor().GetMaterialFromLegacy(id, data);
 				}
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Converted \"" + type.val() + ":" + data + "\"" + " to "
-						+ ret.getType().getName(), t);
 			}
+			if(material == null) {
+				throw new CREFormatException("Could not convert legacy item from " + mat + ":" + data, t);
+			}
+			ret = StaticLayer.GetItemStack(material, data, qty);
+			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Converted \"" + mat + ":" + data + "\"" + " to "
+					+ material.getName(), t);
 
 		} else if(item.containsKey("name")) {
 			mat = item.get("name", t).val();
