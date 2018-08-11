@@ -5,17 +5,20 @@ import com.laytonsmith.core.constructs.Construct.ConstructType;
 
 @MEnum("GameRule")
 public enum MCGameRule {
+	ANNOUNCEADVANCEMENTS("announceAdvancements"),
 	COMMANDBLOCKOUTPUT("commandBlockOutput"),
 	DISABLEELYTRAMOVEMENTCHECK("disableElytraMovementCheck"),
 	DODAYLIGHTCYCLE("doDaylightCycle"),
 	DOENTITYDROPS("doEntityDrops"),
 	DOFIRETICK("doFireTick"),
+	DOLIMITEDCRAFTING("doLimitedCrafting"),
 	DOMOBLOOT("doMobLoot"),
 	DOMOBSPAWNING("doMobSpawning"),
 	DOTILEDROPS("doTileDrops"),
 	DOWEATHERCYCLE("doWeatherCycle"),
 	KEEPINVENTORY("keepInventory"),
 	LOGADMINCOMMANDS("logAdminCommands"),
+	MAXCOMMANDCHAINLENGTH("maxCommandChainLength", ConstructType.INT),
 	MAXENTITYCRAMMING("maxEntityCramming", ConstructType.INT),
 	MOBGRIEFING("mobGriefing"),
 	NATURALREGENERATION("naturalRegeneration"),
