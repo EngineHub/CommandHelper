@@ -515,6 +515,10 @@ public enum BukkitMCLegacyMaterial {
 			return null;
 		}
 		if(legacymat.getMaxDurability() == 0) {
+			if(legacymat.equals(Material.LEGACY_ANVIL)) {
+				// special cases where we prioritize item conversion
+				return Bukkit.getUnsafe().fromLegacy(new MaterialData(legacymat, (byte) data), true);
+			}
 			return Bukkit.getUnsafe().fromLegacy(new MaterialData(legacymat, (byte) data));
 		} else {
 			// ignore data when it's actually durability
