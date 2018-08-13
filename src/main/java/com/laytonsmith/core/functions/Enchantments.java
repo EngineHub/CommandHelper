@@ -210,7 +210,7 @@ public class Enchantments {
 				levelArray = (CArray) args[3 - offset];
 			}
 			for(String key : enchantArray.stringKeySet()) {
-				MCEnchantment e = GetEnchantment(enchantArray.get(key, t).val(), t);
+				MCEnchantment e = GetEnchantment(enchantArray.get(key, t).val().replace(' ', '_'), t);
 				if(e.canEnchantItem(is)) {
 					int level = ConvertLevel(levelArray.get(key, t));
 					if(e.getMaxLevel() >= level && level > 0) {
@@ -372,7 +372,7 @@ public class Enchantments {
 				enchantArray = (CArray) args[2 - offset];
 			}
 			for(String key : enchantArray.stringKeySet()) {
-				MCEnchantment e = GetEnchantment(enchantArray.get(key, t).val(), t);
+				MCEnchantment e = GetEnchantment(enchantArray.get(key, t).val().replace(' ', '_'), t);
 				is.removeEnchantment(e);
 			}
 			return CVoid.VOID;
@@ -585,6 +585,7 @@ public class Enchantments {
 	}
 
 	@api
+	@hide("Deprecated for can_enchant_item()")
 	public static class can_enchant_target extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -599,7 +600,7 @@ public class Enchantments {
 
 		@Override
 		public String docs() {
-			return "boolean {name, item} Given an enchantment name and an item array,"
+			return "boolean {name, item} Given an enchantment name and an item type,"
 					+ " returns whether or not that item can be enchanted with that enchantment."
 					+ " Throws an EnchantmentException if the name is not a valid enchantment type.";
 		}
@@ -627,29 +628,70 @@ public class Enchantments {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEnchantment e = GetEnchantment(args[0].val(), t);
-			MCItemStack is;
-			if(args[1] instanceof CArray) {
-				is = ObjectGenerator.GetGenerator().item(args[1], t);
-			} else {
-				is = Static.ParseItemNotation(null, args[1].val(), 1, t);
-			}
+			MCEnchantment e = GetEnchantment(args[0].val().replace(' ', '_'), t);
+			MCItemStack is = Static.ParseItemNotation(null, args[1].val(), 1, t);
 			return CBoolean.get(e.canEnchantItem(is));
 		}
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() == 2
-					&& (children.get(1).getData() instanceof CString || children.get(1).getData() instanceof CInt)) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
-			}
+			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, getName() + " is deprecated for can_enchant_item()", t);
 			return null;
 		}
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+	}
+
+	@api
+	public static class can_enchant_item extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "can_enchant_item";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {name, item} Given an enchantment name and an item array,"
+					+ " returns whether or not that item can be enchanted with that enchantment."
+					+ " Throws an EnchantmentException if the name is not a valid enchantment type.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREEnchantmentException.class, CREFormatException.class, CRECastException.class,
+					CRERangeException.class, CRENotFoundException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEnchantment e = GetEnchantment(args[0].val(), t);
+			MCItemStack is = ObjectGenerator.GetGenerator().item(args[1], t);
+			return CBoolean.get(e.canEnchantItem(is));
 		}
 	}
 
@@ -694,7 +736,7 @@ public class Enchantments {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEnchantment e = GetEnchantment(args[0].val(), t);
+			MCEnchantment e = GetEnchantment(args[0].val().replace(' ', '_'), t);
 			return new CInt(e.getMaxLevel(), t);
 		}
 	}
