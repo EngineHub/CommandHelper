@@ -28,9 +28,11 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
 public class BukkitEntityListener implements Listener {
@@ -59,10 +61,12 @@ public class BukkitEntityListener implements Listener {
 		EventUtils.TriggerListener(Driver.ITEM_DROP, "item_drop", pdie);
 	}
 
-	@EventIdentifier(event = Driver.ITEM_PICKUP, className = "org.bukkit.event.player.PlayerPickupItemEvent")
+	@EventIdentifier(event = Driver.ITEM_PICKUP, className = "org.bukkit.event.entity.EntityPickupItemEvent")
 	public void onItemPickup(Event event) {
-		BukkitMCPlayerPickupItemEvent ppie = new BukkitMCPlayerPickupItemEvent(event);
-		EventUtils.TriggerListener(Driver.ITEM_PICKUP, "item_pickup", ppie);
+		if(((EntityEvent) event).getEntity() instanceof Player) {
+			BukkitMCPlayerPickupItemEvent ppie = new BukkitMCPlayerPickupItemEvent(event);
+			EventUtils.TriggerListener(Driver.ITEM_PICKUP, "item_pickup", ppie);
+		}
 	}
 
 	@EventIdentifier(event = Driver.ENTITY_DEATH, className = "org.bukkit.event.entity.EntityDeathEvent")

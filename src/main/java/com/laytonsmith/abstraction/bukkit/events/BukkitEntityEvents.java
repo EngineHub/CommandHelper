@@ -34,14 +34,12 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
-import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRegainReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRemoveCause;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
@@ -69,11 +67,13 @@ import com.laytonsmith.abstraction.events.MCProjectileLaunchEvent;
 import com.laytonsmith.annotations.abstraction;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -82,6 +82,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityPortalEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
@@ -98,7 +99,6 @@ import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -514,10 +514,10 @@ public class BukkitEntityEvents {
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCPlayerPickupItemEvent implements MCPlayerPickupItemEvent {
 
-		PlayerPickupItemEvent e;
+		EntityPickupItemEvent e;
 
 		public BukkitMCPlayerPickupItemEvent(Event e) {
-			this.e = (PlayerPickupItemEvent) e;
+			this.e = (EntityPickupItemEvent) e;
 		}
 
 		@Override
@@ -535,13 +535,11 @@ public class BukkitEntityEvents {
 			ItemStack is = (ItemStack) stack.getHandle();
 			e.setCancelled(true);
 			e.getItem().remove();
-			if(is == null || is.getType().equals(Material.AIR)) {
-				return;
-			} else {
-				e.getPlayer().getInventory().addItem(is);
+			if(is != null && is.getType().equals(Material.AIR)) {
+				((Player) e.getEntity()).getInventory().addItem(is);
 				//and for added realism :)
-				e.getPlayer().getWorld().playSound(e.getItem().getLocation(),
-						((BukkitMCSound) MCSound.valueOf("ITEM_PICKUP")).getConcrete(), 1, 2);
+				e.getEntity().getWorld().playSound(e.getItem().getLocation(),
+						Sound.ENTITY_ITEM_PICKUP, 1, 2);
 			}
 		}
 
@@ -557,7 +555,7 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCPlayer getPlayer() {
-			return new BukkitMCPlayer(e.getPlayer());
+			return new BukkitMCPlayer(e.getEntity());
 		}
 
 		@Override
