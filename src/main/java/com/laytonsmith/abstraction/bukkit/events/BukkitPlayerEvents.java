@@ -49,7 +49,6 @@ import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
 import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
 import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
 import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
-import com.laytonsmith.abstraction.events.MCPlayerPreLoginEvent;
 import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
 import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
 import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
@@ -84,7 +83,6 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
-import org.bukkit.event.player.PlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -395,51 +393,6 @@ public class BukkitPlayerEvents {
 		public String getHostname() {
 			return event.getHostname();
 		}
-	}
-
-	public static class BukkitMCPlayerPreLoginEvent implements MCPlayerPreLoginEvent {
-
-		PlayerPreLoginEvent event;
-
-		public BukkitMCPlayerPreLoginEvent(PlayerPreLoginEvent e) {
-			event = e;
-		}
-
-		@Override
-		public Object _GetObject() {
-			return event;
-		}
-
-		@Override
-		public String getName() {
-			return event.getName();
-		}
-
-		@Override
-		public String getKickMessage() {
-			return event.getKickMessage();
-		}
-
-		@Override
-		public void setKickMessage(String msg) {
-			event.setKickMessage(msg);
-		}
-
-		@Override
-		public String getResult() {
-			return event.getResult().toString();
-		}
-
-		@Override
-		public void setResult(String rst) {
-			event.setResult(PlayerPreLoginEvent.Result.valueOf(rst.toUpperCase()));
-		}
-
-		@Override
-		public String getIP() {
-			return event.getAddress().toString();
-		}
-
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)

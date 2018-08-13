@@ -34,7 +34,6 @@ import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
 import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
 import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
 import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
-import com.laytonsmith.abstraction.events.MCPlayerPreLoginEvent;
 import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
 import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
 import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
@@ -547,94 +546,6 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_prelogin extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "player_prelogin";
-		}
-
-		@Override
-		public String docs() {
-			return "{player: <string match>} "
-					+ "This event is called when a player is about to be authed. "
-					+ "This event only fires if your server is in online mode. "
-					+ "This event cannot be cancelled. Instead, you can deny them by setting "
-					+ "'result' to KICK_BANNED, KICK_WHITELIST, KICK_OTHER, or KICK_FULL. "
-					+ "The default for 'result' is ALLOWED. When setting 'result', you "
-					+ "can specify the kick message by modifying 'kickmsg'. "
-					+ "{player: The player's name | kickmsg: The default kick message | "
-					+ "ip: the player's IP address | result: the default response to their logging in}"
-					+ "{kickmsg|result}"
-					+ "{player|kickmsg|ip|result}";
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCPlayerPreLoginEvent) {
-				MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent) e;
-				if(prefilter.containsKey("player")) {
-					if(!event.getName().equals(prefilter.get("player").val())) {
-						return false;
-					}
-				}
-			}
-
-			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCPlayerPreLoginEvent) {
-				MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent) e;
-				Map<String, Construct> map = evaluate_helper(e);
-
-				map.put("player", new CString(event.getName(), Target.UNKNOWN));
-				map.put("ip", new CString(event.getIP(), Target.UNKNOWN));
-				map.put("result", new CString(event.getResult(), Target.UNKNOWN));
-				map.put("kickmsg", new CString(event.getKickMessage(), Target.UNKNOWN));
-
-				return map;
-			} else {
-				throw new EventException("Cannot convert e to PlayerPreLoginEvent");
-			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.PLAYER_PRELOGIN;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
-			if(e instanceof MCPlayerPreLoginEvent) {
-				MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent) e;
-				if(key.equals("result")) {
-					String[] possible = new String[]{"ALLOWED", "KICK_WHITELIST",
-						"KICK_BANNED", "KICK_FULL", "KICK_OTHER"};
-					if(Arrays.asList(possible).contains(value.val().toUpperCase())) {
-						event.setResult(value.val().toUpperCase());
-					}
-				} else if(key.equals("kickmsg")) {
-					event.setKickMessage(value.val());
-				}
-			}
-			return false;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-	}
-
-	@api
 	public static class player_login extends AbstractEvent {
 
 		@Override
@@ -660,16 +571,16 @@ public class PlayerEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCPlayerPreLoginEvent) {
-				MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent) e;
+			if(e instanceof MCPlayerLoginEvent) {
+				MCPlayerLoginEvent event = (MCPlayerLoginEvent) e;
 				if(prefilter.containsKey("player")) {
 					if(!event.getName().equals(prefilter.get("player").val())) {
 						return false;
 					}
 				}
+				return true;
 			}
-
-			return true;
+			return false;
 		}
 
 		@Override

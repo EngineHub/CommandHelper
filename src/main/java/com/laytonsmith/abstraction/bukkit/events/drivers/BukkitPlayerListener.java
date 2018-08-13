@@ -16,7 +16,6 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlay
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerLoginEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerMoveEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerPortalEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerPreLoginEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerQuitEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerRespawnEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerTeleportEvent;
@@ -50,7 +49,6 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
-import org.bukkit.event.player.PlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -95,12 +93,6 @@ public class BukkitPlayerListener implements Listener {
 	public void onPlayerLogin(PlayerLoginEvent e) {
 		BukkitMCPlayerLoginEvent ple = new BukkitMCPlayerLoginEvent(e);
 		EventUtils.TriggerListener(Driver.PLAYER_LOGIN, "player_login", ple);
-	}
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerPreLogin(PlayerPreLoginEvent e) {
-		BukkitMCPlayerPreLoginEvent pple = new BukkitMCPlayerPreLoginEvent(e);
-		EventUtils.TriggerListener(Driver.PLAYER_PRELOGIN, "player_prelogin", pple);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
