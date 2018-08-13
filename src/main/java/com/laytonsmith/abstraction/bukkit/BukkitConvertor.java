@@ -183,9 +183,12 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCEnchantment GetEnchantmentByName(String name) {
-		Enchantment enchant = Enchantment.getByName(name);
+		Enchantment enchant = Enchantment.getByKey(NamespacedKey.minecraft(name.toLowerCase()));
 		if(enchant == null) {
-			return null;
+			enchant = Enchantment.getByName(name.toUpperCase());
+			if(enchant == null) {
+				return null;
+			}
 		}
 		return new BukkitMCEnchantment(enchant);
 	}

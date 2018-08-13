@@ -1083,12 +1083,9 @@ public class ObjectGenerator {
 	}
 
 	public CArray enchants(Map<MCEnchantment, Integer> map, Target t) {
-		CArray ret = new CArray(t);
+		CArray ret = CArray.GetAssociativeArray(t);
 		for(Map.Entry<MCEnchantment, Integer> entry : map.entrySet()) {
-			CArray eObj = CArray.GetAssociativeArray(t);
-			eObj.set("etype", new CString(entry.getKey().getName(), t), t);
-			eObj.set("elevel", new CInt(entry.getValue(), t), t);
-			ret.push(eObj, t);
+			ret.set(entry.getKey().getKey(), new CInt(entry.getValue(), t), t);
 		}
 		return ret;
 	}
@@ -1096,10 +1093,18 @@ public class ObjectGenerator {
 	public Map<MCEnchantment, Integer> enchants(CArray enchantArray, Target t) {
 		Map<MCEnchantment, Integer> ret = new HashMap<>();
 		for(String key : enchantArray.stringKeySet()) {
-			try {
-				CArray ea = (CArray) enchantArray.get(key, t);
+			if(enchantArray.isAssociative()) {
+				MCEnchantment etype = StaticLayer.GetEnchantmentByName(key);
+				if(etype == null) {
+					throw new CREEnchantmentException("Unknown enchantment type: " + key, t);
+				}
+				int elevel = Static.getInt32(enchantArray.get(key, t), t);
+				ret.put(etype, elevel);
+			} else {
+				// legacy
+				CArray ea = Static.getArray(enchantArray.get(key, t), t);
 				String setype = ea.get("etype", t).val();
-				MCEnchantment etype = StaticLayer.GetConvertor().GetEnchantmentByName(setype);
+				MCEnchantment etype = StaticLayer.GetEnchantmentByName(setype);
 				int elevel = Static.getInt32(ea.get("elevel", t), t);
 				if(etype == null) {
 					if(setype.equals("SWEEPING")) {
@@ -1111,8 +1116,6 @@ public class ObjectGenerator {
 					}
 				}
 				ret.put(etype, elevel);
-			} catch (ClassCastException cce) {
-				throw new CREFormatException("Expected an array at index " + key, t);
 			}
 		}
 		return ret;

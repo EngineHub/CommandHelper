@@ -40,9 +40,9 @@ public class ItemMeta {
 	}
 
 	private static final String APPLICABLE_ITEM_META = "<ul>"
-			+ "<li>All items - \"display\" (string), \"lore\" (array of strings), \"enchants\" (An array of enchantment"
-			+ " arrays, which are associative arrays that look like: array(\"etype\": The type of enchantment, \"elevel\":"
-			+ " The strength of the enchantment)), \"repair\" (int, repair cost), \"unbreakable\" (boolean), \"flags\""
+			+ "<li>All items - \"display\" (string), \"lore\" (array of strings), \"enchants\" (An associative array of"
+			+ " enchantments with the type of enchantments as the key and the level as the value),"
+			+ " \"repair\" (int, repair cost), \"unbreakable\" (boolean), \"flags\""
 			+ " (array). Possible flags: " + StringUtils.Join(MCItemFlag.values(), ", ", " or ") + "</li>"
 			+ "<li>Books - \"title\" (string), author (string), \"pages\" (array of strings)</li>"
 			+ "<li>EnchantedBooks - \"stored\" (array of enchantment arrays (see Example))</li>"

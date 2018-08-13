@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -45,78 +46,39 @@ public class Enchantments {
 	}
 
 	/**
-	 * Converts the wiki version string to the bukkit version string. If the specified string isn't in the wiki, the
-	 * string is returned unchanged.
+	 * Takes a minecraft enchantment name and returns an MCEnchantment
 	 *
-	 * @param wikiVersion
+	 * @throws CREEnchantmentException
+	 * @param name
+	 * @param t
 	 * @return
 	 */
-	public static String ConvertName(String wikiVersion) {
-		String lc = wikiVersion.toUpperCase().trim();
-		switch(lc) {
-			case "PROTECTION":
-				return "PROTECTION_ENVIRONMENTAL";
-			case "FIRE PROTECTION":
-				return "PROTECTION_FIRE";
-			case "FEATHER FALLING":
-				return "PROTECTION_FALL";
-			case "BLAST PROTECTION":
-				return "PROTECTION_EXPLOSIONS";
-			case "PROJECTILE PROTECTION":
-				return "PROTECTION_PROJECTILE";
-			case "RESPIRATION":
-				return "OXYGEN";
-			case "AQUA AFFINITY":
-				return "WATER_WORKER";
-			case "SHARPNESS":
-				return "DAMAGE_ALL";
-			case "SMITE":
-				return "DAMAGE_UNDEAD";
-			case "BANE OF ARTHROPODS":
-				return "DAMAGE_ARTHROPODS";
-			case "KNOCKBACK":
-				return "KNOCKBACK";
-			case "FIRE ASPECT":
-				return "FIRE_ASPECT";
-			case "LOOTING":
-				return "LOOT_BONUS_MOBS";
-			case "EFFICIENCY":
-				return "DIG_SPEED";
-			case "SILK TOUCH":
-				return "SILK_TOUCH";
-			case "UNBREAKING":
-				return "DURABILITY";
-			case "FORTUNE":
-				return "LOOT_BONUS_BLOCKS";
-			case "POWER":
-				return "ARROW_DAMAGE";
-			case "PUNCH":
-				return "ARROW_KNOCKBACK";
-			case "FLAME":
-				return "ARROW_FIRE";
-			case "INFINITY":
-				return "ARROW_INFINITE";
-			default:
-				return wikiVersion;
+	public static MCEnchantment GetEnchantment(String name, Target t) {
+		MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
+		if(e == null) {
+			throw new CREEnchantmentException(name + " is not a valid enchantment type", t);
 		}
+		return e;
 	}
 
 	/**
 	 * Converts the roman numeral into an integer (as a string). If the value passed in is already an integer, it is
 	 * returned as is.
 	 *
-	 * @param romanNumeral
+	 * @param value
 	 * @return
 	 */
-	public static String ConvertLevel(String romanNumeral) {
-		String lc = romanNumeral.toLowerCase().trim();
+	public static int ConvertLevel(Construct value) {
+		if(value instanceof CInt) {
+			return (int) ((CInt) value).getInt();
+		}
+		String lc = value.val().toLowerCase().trim();
 		try {
-			Integer.parseInt(lc);
-			return lc;
+			return Integer.parseInt(lc);
 		} catch (NumberFormatException e) {
 			//Maybe roman numeral?
 		}
-		return Integer.toString(romanToWestern(lc));
+		return romanToWestern(lc);
 	}
 
 	public static int romanToWestern(String roman) {
@@ -174,6 +136,7 @@ public class Enchantments {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@hide("Deprecated for enchant_item().")
 	public static class enchant_inv extends AbstractFunction {
 
 		@Override
@@ -188,11 +151,13 @@ public class Enchantments {
 
 		@Override
 		public String docs() {
-			return "void {[player], slot, type, level} Adds an enchantment to an item in the player's inventory. Type can be a single string,"
-					+ " or an array of enchantment names. If slot is null, the currently selected slot is used. If the enchantment cannot be applied"
-					+ " to the specified item, an EnchantmentException is thrown, and if the level specified is not valid, a RangeException is thrown."
-					+ " If type is an array, level must also be an array, with equal number of values in it, with each int corresponding to the appropriate"
-					+ " type. You may use either the bukkit names for enchantments, or the name shown on the wiki: [http://www.minecraftwiki.net/wiki/Enchanting#Enchantment_Types],"
+			return "void {[player], slot, type, level} Adds an enchantment to an item in the player's inventory."
+					+ " Type can be a single string, or an array of enchantment names. If slot is null, the currently"
+					+ " selected slot is used. If the enchantment cannot be applied to the specified item,"
+					+ " an EnchantmentException is thrown, and if the level specified is not valid, a RangeException"
+					+ " is thrown. If type is an array, level must also be an array, with equal number of values in it,"
+					+ " with each int corresponding to the appropriate type. The minecraft names for enchantments may"
+					+ " be used: [http://www.minecraftwiki.net/wiki/Enchanting#Enchantment_Types],"
 					+ " and level may be a roman numeral as well.";
 		}
 
@@ -245,12 +210,9 @@ public class Enchantments {
 				levelArray = (CArray) args[3 - offset];
 			}
 			for(String key : enchantArray.stringKeySet()) {
-				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
-				if(e == null) {
-					throw new CREEnchantmentException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", t);
-				}
+				MCEnchantment e = GetEnchantment(enchantArray.get(key, t).val(), t);
 				if(e.canEnchantItem(is)) {
-					int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
+					int level = ConvertLevel(levelArray.get(key, t));
 					if(e.getMaxLevel() >= level && level > 0) {
 						is.addEnchantment(e, level);
 					} else {
@@ -265,6 +227,86 @@ public class Enchantments {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class enchant_item extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "enchant_item";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], slot, type, level | [player], slot, enchantsArray} Adds enchantments to an item in"
+					+ " the player's inventory. A single enchantment type and level can be specified or an"
+					+ " enchantment array may be given. If slot is null, the currently selected slot is used."
+					+ " If an enchantment cannot be applied to the specified item, an EnchantmentException is thrown."
+					+ " The enchantment array must have the enchantment as keys and levels as the values."
+					+ " (eg. array('unbreaking': 1)) The minecraft names for enchantments may"
+					+ " be used: [http://www.minecraftwiki.net/wiki/Enchanting#Enchantment_Types],"
+					+ " and the level parameter may be a roman numeral as well.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREEnchantmentException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			int offset = 0;
+			if(args.length == 4 || args.length == 3 && args[2] instanceof CArray) {
+				p = Static.GetPlayer(args[0].val(), t);
+				offset = 1;
+			} else {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			}
+			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : Static.getInt32(args[offset], t));
+			if(is == null) {
+				throw new CRECastException("There is no item at slot " + args[offset], t);
+			}
+
+			if(args[args.length - 1] instanceof CArray) {
+				CArray ca = (CArray) args[args.length - 1];
+				Map<MCEnchantment, Integer> enchants = ObjectGenerator.GetGenerator().enchants(ca, t);
+				for(Map.Entry<MCEnchantment, Integer> en : enchants.entrySet()) {
+					is.addUnsafeEnchantment(en.getKey(), en.getValue());
+				}
+			} else {
+				int level = ConvertLevel(args[offset + 2]);
+				if(level > 0) {
+					is.addUnsafeEnchantment(GetEnchantment(args[offset + 1].val(), t), level);
+				} else {
+					throw new CREEnchantmentException("Invalid enchantment level: " + args[offset + 2].val(), t);
+				}
+			}
+			return CVoid.VOID;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@hide("Deprecated for remove_item_enchant()")
 	public static class enchant_rm_inv extends AbstractFunction {
 
 		@Override
@@ -279,9 +321,10 @@ public class Enchantments {
 
 		@Override
 		public String docs() {
-			return "void {[player], slot, type} Removes an enchantment from an item. type may be a valid enchantment, or an array of enchantment names. It"
-					+ " can also be null, and all enchantments will be removed. If an enchantment is specified, and the item is not enchanted with that,"
-					+ " it is simply ignored.";
+			return "void {[player], slot, type} Removes an enchantment from an item."
+					+ " The type may be a valid enchantment, or an array of enchantment names."
+					+ " It can also be null, and all enchantments will be removed. If an enchantment is specified,"
+					+ " and the item is not enchanted with that, it is simply ignored.";
 		}
 
 		@Override
@@ -329,11 +372,7 @@ public class Enchantments {
 				enchantArray = (CArray) args[2 - offset];
 			}
 			for(String key : enchantArray.stringKeySet()) {
-				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
-				if(e == null) {
-					throw new CREEnchantmentException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid"
-							+ " enchantment type", t);
-				}
+				MCEnchantment e = GetEnchantment(enchantArray.get(key, t).val(), t);
 				is.removeEnchantment(e);
 			}
 			return CVoid.VOID;
@@ -341,6 +380,82 @@ public class Enchantments {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class remove_item_enchant extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "remove_item_enchant";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], slot, type} Removes an enchantment from an item."
+					+ " The type may be a valid enchantment, or an array of enchantment names."
+					+ " It can also be null, and all enchantments will be removed. If an enchantment is specified,"
+					+ " and the item is not enchanted with that, it is simply ignored.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREEnchantmentException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			int offset = 0;
+			if(args.length == 3) {
+				p = Static.GetPlayer(args[0].val(), t);
+				offset = 1;
+			} else {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			}
+
+			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : Static.getInt32(args[offset], t));
+			if(is == null) {
+				throw new CRECastException("There is no item at slot " + args[offset], t);
+			}
+
+			if(args[offset + 1] instanceof CArray) {
+				for(String name : ((CArray) args[offset + 1]).stringKeySet()) {
+					MCEnchantment e = GetEnchantment(name, t);
+					is.removeEnchantment(e);
+				}
+			} else if(args[offset + 1] instanceof CNull) {
+				for(MCEnchantment e : is.getEnchantments().keySet()) {
+					is.removeEnchantment(e);
+				}
+			} else {
+				MCEnchantment e = GetEnchantment(args[offset + 1].val(), t);
+				is.removeEnchantment(e);
+			}
+			return CVoid.VOID;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	@hide("Deprecated for get_item_enchants()")
 	public static class get_enchant_inv extends AbstractFunction {
 
 		@Override
@@ -410,6 +525,65 @@ public class Enchantments {
 		}
 	}
 
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_item_enchants extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_item_enchants";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "array {[player], slot} Returns an array of arrays of the enchantments and their levels on the given"
+					+ " item. For example: array('sharpness': 1, 'unbreaking': 3).";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPlayerOfflineException.class, CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			Construct slot;
+			if(args.length == 2) {
+				p = Static.GetPlayer(args[0].val(), t);
+				slot = args[1];
+			} else {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				slot = args[0];
+			}
+			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : Static.getInt32(slot, t));
+			if(is == null) {
+				throw new CRECastException("There is no item at slot " + slot, t);
+			}
+			return ObjectGenerator.GetGenerator().enchants(is.getEnchantments(), t);
+		}
+	}
+
 	@api
 	public static class can_enchant_target extends AbstractFunction implements Optimizable {
 
@@ -453,19 +627,14 @@ public class Enchantments {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			try {
-				String name = Enchantments.ConvertName(args[0].val());
-				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
-				MCItemStack is;
-				if(args[1] instanceof CArray) {
-					is = ObjectGenerator.GetGenerator().item(args[1], t);
-				} else {
-					is = Static.ParseItemNotation(null, args[1].val(), 1, t);
-				}
-				return CBoolean.get(e.canEnchantItem(is));
-			} catch (NullPointerException e) {
-				throw new CREEnchantmentException(args[0].val().toUpperCase() + " is not a known enchantment type.", t);
+			MCEnchantment e = GetEnchantment(args[0].val(), t);
+			MCItemStack is;
+			if(args[1] instanceof CArray) {
+				is = ObjectGenerator.GetGenerator().item(args[1], t);
+			} else {
+				is = Static.ParseItemNotation(null, args[1].val(), 1, t);
 			}
+			return CBoolean.get(e.canEnchantItem(is));
 		}
 
 		@Override
@@ -525,13 +694,8 @@ public class Enchantments {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			try {
-				String name = Enchantments.ConvertName(args[0].val());
-				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
-				return new CInt(e.getMaxLevel(), t);
-			} catch (NullPointerException e) {
-				throw new CREEnchantmentException(args[0].val().toUpperCase() + " is not a known enchantment type.", t);
-			}
+			MCEnchantment e = GetEnchantment(args[0].val(), t);
+			return new CInt(e.getMaxLevel(), t);
 		}
 	}
 
@@ -596,7 +760,7 @@ public class Enchantments {
 			CArray ca = new CArray(t);
 			for(MCEnchantment e : StaticLayer.GetEnchantmentValues()) {
 				if(e.canEnchantItem(is)) {
-					ca.push(new CString(e.getName(), t), t);
+					ca.push(new CString(e.getKey(), t), t);
 				}
 			}
 			CACHE.put(name, ca);
@@ -634,8 +798,7 @@ public class Enchantments {
 
 		@Override
 		public String docs() {
-			return "boolean {name} Returns true if this name is a valid enchantment type. Note"
-					+ " that either the bukkit names or the wiki names are valid.";
+			return "boolean {name} Returns true if this name is a valid enchantment type.";
 		}
 
 		@Override
@@ -661,9 +824,9 @@ public class Enchantments {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
-				MCEnchantment e = StaticLayer.GetEnchantmentByName(args[0].val());
+				GetEnchantment(args[0].val(), t);
 				return CBoolean.TRUE;
-			} catch (NullPointerException e) {
+			} catch (CREEnchantmentException e) {
 				return CBoolean.FALSE;
 			}
 		}
@@ -692,7 +855,7 @@ public class Enchantments {
 			MCEnchantment[] enchantments = StaticLayer.GetEnchantmentValues();
 			CArray ret = new CArray(t);
 			for(MCEnchantment e : enchantments) {
-				ret.push(new CString(e.getName(), t), t);
+				ret.push(new CString(e.getKey(), t), t);
 			}
 			return ret;
 		}

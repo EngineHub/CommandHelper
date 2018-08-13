@@ -7,4 +7,6 @@ public interface MCEnchantment extends AbstractionObject {
 	int getMaxLevel();
 
 	String getName();
+
+	String getKey();
 }
