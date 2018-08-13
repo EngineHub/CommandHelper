@@ -707,7 +707,6 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerJoinEvent) {
 				MCPlayerJoinEvent ple = (MCPlayerJoinEvent) e;
 				Map<String, Construct> map = evaluate_helper(e);
-				//map.put("player", new CString(ple.getPlayer().getName(), Target.UNKNOWN));
 				map.put("world", new CString(ple.getPlayer().getWorld().getName(), Target.UNKNOWN));
 				map.put("join_message", new CString(ple.getJoinMessage(), Target.UNKNOWN));
 				map.put("first_login", CBoolean.get(ple.getPlayer().isNewPlayer()));
@@ -973,10 +972,7 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerBedEvent) {
 				MCPlayerBedEvent bee = (MCPlayerBedEvent) e;
 				Map<String, Construct> map = evaluate_helper(e);
-
 				map.put("location", ObjectGenerator.GetGenerator().location(bee.getBed().getLocation(), false));
-				map.put("player", new CString(bee.getPlayer().getName(), Target.UNKNOWN));
-
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to an appropriate PlayerBedEvent.");
@@ -2436,9 +2432,7 @@ public class PlayerEvents {
 			if(event instanceof MCPlayerToggleFlightEvent) {
 				MCPlayerToggleFlightEvent ptfe = (MCPlayerToggleFlightEvent) event;
 				Map<String, Construct> mapEvent = evaluate_helper(event);
-				MCPlayer player = ptfe.getPlayer();
-				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
-				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(ptfe.getPlayer().getLocation()));
 				mapEvent.put("flying", CBoolean.get(ptfe.isFlying()));
 				return mapEvent;
 			} else {
@@ -2504,9 +2498,7 @@ public class PlayerEvents {
 			if(event instanceof MCPlayerToggleSneakEvent) {
 				MCPlayerToggleSneakEvent ptse = (MCPlayerToggleSneakEvent) event;
 				Map<String, Construct> mapEvent = evaluate_helper(event);
-				MCPlayer player = ptse.getPlayer();
-				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
-				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(ptse.getPlayer().getLocation()));
 				mapEvent.put("sneaking", CBoolean.get(ptse.isSneaking()));
 				return mapEvent;
 			} else {
@@ -2572,9 +2564,7 @@ public class PlayerEvents {
 			if(event instanceof MCPlayerToggleSprintEvent) {
 				MCPlayerToggleSprintEvent ptse = (MCPlayerToggleSprintEvent) event;
 				Map<String, Construct> mapEvent = evaluate_helper(event);
-				MCPlayer player = ptse.getPlayer();
-				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
-				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(ptse.getPlayer().getLocation()));
 				mapEvent.put("sprinting", CBoolean.get(ptse.isSprinting()));
 				return mapEvent;
 			} else {

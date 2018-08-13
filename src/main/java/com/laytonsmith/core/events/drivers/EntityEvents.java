@@ -954,7 +954,6 @@ public class EntityEvents {
 				MCPlayerInteractEntityEvent event = (MCPlayerInteractEntityEvent) e;
 				Map<String, Construct> map = evaluate_helper(e);
 
-				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("clicked", new CString(event.getEntity().getType().name(), Target.UNKNOWN));
 				map.put("id", new CString(event.getEntity().getUniqueId().toString(), Target.UNKNOWN));
 
@@ -1051,7 +1050,6 @@ public class EntityEvents {
 				MCPlayerInteractAtEntityEvent event = (MCPlayerInteractAtEntityEvent) e;
 				Map<String, Construct> map = evaluate_helper(e);
 
-				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("clicked", new CString(event.getEntity().getType().name(), Target.UNKNOWN));
 				map.put("id", new CString(event.getEntity().getUniqueId().toString(), Target.UNKNOWN));
 				map.put("position", ObjectGenerator.GetGenerator().vector(event.getClickedPosition(), Target.UNKNOWN));
@@ -1156,7 +1154,6 @@ public class EntityEvents {
 				MCPlayerDropItemEvent event = (MCPlayerDropItemEvent) e;
 				Map<String, Construct> map = evaluate_helper(e);
 
-				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("item", ObjectGenerator.GetGenerator().item(event.getItemDrop().getItemStack(), Target.UNKNOWN));
 				map.put("id", new CString(event.getItemDrop().getUniqueId().toString(), Target.UNKNOWN));
 
@@ -1239,13 +1236,9 @@ public class EntityEvents {
 			if(e instanceof MCPlayerPickupItemEvent) {
 				MCPlayerPickupItemEvent event = (MCPlayerPickupItemEvent) e;
 				Map<String, Construct> map = evaluate_helper(e);
-
-				//Fill in the event parameters
-				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("id", new CString(event.getItem().getUniqueId().toString(), Target.UNKNOWN));
 				map.put("item", ObjectGenerator.GetGenerator().item(event.getItem().getItemStack(), Target.UNKNOWN));
 				map.put("remaining", new CInt(event.getRemaining(), Target.UNKNOWN));
-
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to MCPlayerPickupItemEvent");
@@ -1458,7 +1451,7 @@ public class EntityEvents {
 						MCPlayer p = Static.GetPlayer(value.val(), value.getTarget());
 
 						if(p.isOnline()) {
-							ete.setTarget((MCEntity) p);
+							ete.setTarget(p);
 							return true;
 						}
 					}
