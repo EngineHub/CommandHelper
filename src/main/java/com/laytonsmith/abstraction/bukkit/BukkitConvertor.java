@@ -67,7 +67,6 @@ import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
@@ -77,7 +76,6 @@ import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -136,7 +134,6 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.inventory.meta.SpawnEggMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionData;
 import org.yaml.snakeyaml.Yaml;
@@ -537,13 +534,6 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public static MCItemMeta BukkitGetCorrectMeta(ItemMeta im) {
-		MCVersion version = Static.getServer().getMinecraftVersion();
-		if(version.gte(MCVersion.MC1_11_X) && im instanceof SpawnEggMeta) {
-			if(version.lt(MCVersion.MC1_13)) {
-				return new BukkitMCSpawnEggMeta((SpawnEggMeta) im);
-			}
-			return new BukkitMCItemMeta(im);
-		}
 		if(im instanceof BlockStateMeta) {
 			return new BukkitMCBlockStateMeta((BlockStateMeta) im);
 		}

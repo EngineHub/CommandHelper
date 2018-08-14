@@ -33,7 +33,6 @@ import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCShapedRecipe;
 import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
-import com.laytonsmith.abstraction.MCSpawnEggMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
@@ -256,7 +255,7 @@ public class ObjectGenerator {
 		}
 		CArray item = (CArray) i;
 		String mat;
-		MCItemStack ret = null;
+		MCItemStack ret;
 		int data = 0;
 		int qty = 1;
 
@@ -271,7 +270,9 @@ public class ObjectGenerator {
 			data = Static.getInt32(item.get("data", t), t);
 		}
 
-		if(legacy || item.containsKey("type")) {
+		legacy = legacy || item.containsKey("type");
+
+		if(legacy) {
 			// Do legacy item conversion
 			MCMaterial material;
 			if(item.containsKey("name")) {
@@ -308,6 +309,21 @@ public class ObjectGenerator {
 			if(material == null) {
 				throw new CREFormatException("Could not convert legacy item from " + mat + ":" + data, t);
 			}
+
+			// convert legacy meta to material
+			if(material.getName().equals("PIG_SPAWN_EGG") && item.containsKey("meta")) {
+				Construct meta = item.get("meta", t);
+				if(meta instanceof CArray && ((CArray) meta).containsKey("spawntype")) {
+					Construct spawntype = ((CArray) meta).get("spawntype", t);
+					if(!(spawntype instanceof CNull)) {
+						MCMaterial newmaterial = StaticLayer.GetMaterial(spawntype.val().toUpperCase() + "_SPAWN_EGG");
+						if(newmaterial != null) {
+							material = newmaterial;
+						}
+					}
+				}
+			}
+
 			ret = StaticLayer.GetItemStack(material, data, qty);
 			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Converted \"" + mat + ":" + data + "\"" + " to "
 					+ material.getName(), t);
@@ -545,13 +561,6 @@ public class ObjectGenerator {
 				MCDyeColor dyeColor = bannermeta.getBaseColor();
 				if(dyeColor != null) {
 					ma.set("basecolor", new CString(dyeColor.toString(), t), t);
-				}
-			} else if(meta instanceof MCSpawnEggMeta) {
-				MCEntityType spawntype = ((MCSpawnEggMeta) meta).getSpawnedType();
-				if(spawntype == null) {
-					ma.set("spawntype", CNull.NULL, t);
-				} else {
-					ma.set("spawntype", new CString(spawntype.name(), t), t);
 				}
 			} else if(meta instanceof MCMapMeta) {
 				MCMapMeta mm = ((MCMapMeta) meta);
@@ -886,13 +895,6 @@ public class ObjectGenerator {
 							MCPatternShape shape = MCPatternShape.valueOf(pattern.get("shape", t).val().toUpperCase());
 							MCDyeColor color = MCDyeColor.valueOf(pattern.get("color", t).val().toUpperCase());
 							((MCBannerMeta) meta).addPattern(StaticLayer.GetConvertor().GetPattern(color, shape));
-						}
-					}
-				} else if(meta instanceof MCSpawnEggMeta) {
-					if(ma.containsKey("spawntype")) {
-						Construct spawntype = ma.get("spawntype", t);
-						if(spawntype instanceof CString) {
-							((MCSpawnEggMeta) meta).setSpawnedType(MCEntityType.valueOf(spawntype.val().toUpperCase()));
 						}
 					}
 				} else if(meta instanceof MCMapMeta && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
