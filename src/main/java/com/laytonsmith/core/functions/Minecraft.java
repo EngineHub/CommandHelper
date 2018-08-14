@@ -391,7 +391,7 @@ public class Minecraft {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class make_effect extends AbstractFunction {
+	public static class make_effect extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -466,6 +466,30 @@ public class Minecraft {
 			}
 			l.getWorld().playEffect(l, e, data, radius);
 			return CVoid.VOID;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 2) {
+				return null;
+			}
+			Construct effect = children.get(1).getData();
+			if(effect instanceof CString) {
+				String effectName = effect.val().split(":")[0].toUpperCase();
+				try {
+					MCEffect.valueOf(effectName);
+				} catch (IllegalArgumentException ex) {
+					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The effect type " + effectName + " is not valid", t);
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
