@@ -2,7 +2,7 @@ package com.laytonsmith.tools.pnviewer;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
-import com.laytonsmith.PureUtilities.UI.TextDialog;
+import com.laytonsmith.Utilities.UI.TextDialog;
 import com.laytonsmith.PureUtilities.Common.AutoFlushObjectOutputStream;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;

@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.annotations.NonInheritImplements;
+import com.laytonsmith.PureUtilities.Common.Annotations.NonInheritImplements;
+
 
 /**
  * This class is for testing concepts

@@ -1,6 +1,6 @@
 package com.laytonsmith.tools.docgen.sitedeploy;
 
-import com.laytonsmith.PureUtilities.SSHWrapper;
+import com.laytonsmith.Utilities.SSHWrapper;
 import java.io.IOException;
 import java.io.InputStream;
 

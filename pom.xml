@@ -167,6 +167,13 @@
 			IMPORTANT: When adding a new non-test dependency, add the license that it uses in a comment
 			within the dependency
 		-->
+		
+		<!-- Pure Utilities -->
+		<dependency>
+			<groupId>com.laytonsmith</groupId>
+			<artifactId>pureutilities</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
 
 		<!-- Bukkit -->
 		<dependency>
@@ -525,6 +532,7 @@
 									<include>javax.activation:activation:jar:*</include>
 									<include>postgresql:postgresql:jar:*</include>
 									<include>org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:jar:*</include>
+									<include>com.laytonsmith:pureutilities:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -719,6 +727,12 @@
 										<include>**</include>
 									</includes>
 								</filter>
+								<filter>
+									<artifact>com.laytonsmith:pureutilities:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
 							</filters>
 						</configuration>
 					</execution>
@@ -738,7 +752,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>com.laytonsmith.PureUtilities.ClassLoading.Annotations.CacheAnnotations</mainClass>
+					<mainClass>com.laytonsmith.Utilities.CacheAnnotations</mainClass>
 					<arguments>
 						<argument>${basedir}/target/classes</argument>
 						<argument>${basedir}/target/classes</argument>
@@ -761,7 +775,7 @@
 				<configuration>
 					<outputDirectory>src/main/generated</outputDirectory>
 					<processors>
-						<processor>com.laytonsmith.PureUtilities.Common.Annotations.CheckOverrides</processor>
+						<processor>com.laytonsmith.Utilities.CheckOverrides</processor>
 						<processor>com.laytonsmith.core.extensions.ExtensionAnnotationProcessor</processor>
 						<processor>com.laytonsmith.core.MObjectAnnotationProcessor</processor>
 					</processors>

@@ -1,7 +1,7 @@
 package com.laytonsmith.persistence;
 
 import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.annotations.MustUseOverride;
+import com.laytonsmith.PureUtilities.Common.Annotations.MustUseOverride;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.SimpleDocumentation;
 import java.io.IOException;

@@ -2,7 +2,7 @@ package com.laytonsmith.persistence.io;
 
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.SSHWrapper;
+import com.laytonsmith.Utilities.SSHWrapper;
 import java.io.IOException;
 import java.net.URI;
 

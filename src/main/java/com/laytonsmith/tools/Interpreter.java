@@ -850,68 +850,72 @@ public final class Interpreter {
 		if(null == OSUtils.GetOS()) {
 			StreamUtils.GetSystemErr().println("Cmdline MethodScript is only supported on Unix and Windows");
 			return;
-		} else switch(OSUtils.GetOS()) {
-			case LINUX:
-			case MAC:
-				try {
-					URL jar = Interpreter.class.getProtectionDomain().getCodeSource().getLocation();
-					File exe = new File(INTERPRETER_INSTALLATION_LOCATION);
-					String bashScript = Static.GetStringResource("/interpreter-helpers/bash.sh");
+		} else {
+			switch(OSUtils.GetOS()) {
+				case LINUX:
+				case MAC:
 					try {
-						bashScript = bashScript.replaceAll("%%LOCATION%%", jar.toURI().getPath());
-					} catch (URISyntaxException ex) {
-						ex.printStackTrace();
-					}
-					exe.createNewFile();
-					if(!exe.canWrite()) {
-						throw new IOException();
-					}
-					FileUtil.write(bashScript, exe);
-					exe.setExecutable(true, false);
-					File manDir = new File("/usr/local/man/man1");
-					if(manDir.exists()) {
-						//Don't do this installation if the man pages aren't already there.
-						String manPage = Static.GetStringResource("/interpreter-helpers/manpage");
+						URL jar = Interpreter.class.getProtectionDomain().getCodeSource().getLocation();
+						File exe = new File(INTERPRETER_INSTALLATION_LOCATION);
+						String bashScript = Static.GetStringResource("/interpreter-helpers/bash.sh");
 						try {
-							manPage = DocGenTemplates.DoTemplateReplacement(manPage, DocGenTemplates.GetGenerators());
-							File manPageFile = new File(manDir, "mscript.1");
-							FileUtil.write(manPage, manPageFile);
-						} catch (DocGenTemplates.Generator.GenerateException ex) {
-							Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
+							bashScript = bashScript.replaceAll("%%LOCATION%%", jar.toURI().getPath());
+						} catch (URISyntaxException ex) {
+							ex.printStackTrace();
 						}
+						exe.createNewFile();
+						if(!exe.canWrite()) {
+							throw new IOException();
+						}
+						FileUtil.write(bashScript, exe);
+						exe.setExecutable(true, false);
+						File manDir = new File("/usr/local/man/man1");
+						if(manDir.exists()) {
+							//Don't do this installation if the man pages aren't already there.
+							String manPage = Static.GetStringResource("/interpreter-helpers/manpage");
+							try {
+								manPage = DocGenTemplates.DoTemplateReplacement(manPage, DocGenTemplates.GetGenerators());
+								File manPageFile = new File(manDir, "mscript.1");
+								FileUtil.write(manPage, manPageFile);
+							} catch (DocGenTemplates.Generator.GenerateException ex) {
+								Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
+							}
+						}
+					} catch (IOException e) {
+						StreamUtils.GetSystemErr().println("Cannot install. You must run the command with sudo for it to succeed, however, did you do that?");
+						return;
 					}
-				} catch (IOException e) {
-					StreamUtils.GetSystemErr().println("Cannot install. You must run the command with sudo for it to succeed, however, did you do that?");
-					return;
-				}	break;
-			case WINDOWS:
-				Path tmp = null;
-				try {
-					// 1. Unpack the csharp installer program in a temporary directory
-					File root = new File(Interpreter.class.getResource("/interpreter-helpers/csharp").toExternalForm());
-					ZipReader zReader = new ZipReader(root);
-					tmp = Files.createTempDirectory("methodscript-installer", new FileAttribute[]{});
-					zReader.recursiveCopy(tmp.toFile(), false);
-					
-					// 2. Write the location of this jar to the registry
-					String me = ClassDiscovery.GetClassContainer(Interpreter.class).toExternalForm().substring(6);
-					String keyName = "Software\\MethodScript";
-					WinRegistry.createKey(WinRegistry.HKEY_CURRENT_USER, keyName);
-					WinRegistry.writeStringValue(WinRegistry.HKEY_CURRENT_USER, keyName, "JarLocation", me);
-					
-					// 3. Execute the setup.exe file
-					File setup = new File(tmp.toFile(), "setup.exe");
-					int setupResult = new CommandExecutor(new String[]{setup.getAbsolutePath()}).start().waitFor();
-					if(setupResult != 0) {
-						StreamUtils.GetSystemErr().println("Setup failed to complete successfully (exit code " + setupResult + ")");
-						System.exit(setupResult);
-					} else {
-						StreamUtils.GetSystemOut().println("Setup has begun. Finish the installation in the GUI.");
+					break;
+				case WINDOWS:
+					Path tmp = null;
+					try {
+						// 1. Unpack the csharp installer program in a temporary directory
+						File root = new File(Interpreter.class.getResource("/interpreter-helpers/csharp").toExternalForm());
+						ZipReader zReader = new ZipReader(root);
+						tmp = Files.createTempDirectory("methodscript-installer", new FileAttribute[]{});
+						zReader.recursiveCopy(tmp.toFile(), false);
+
+						// 2. Write the location of this jar to the registry
+						String me = ClassDiscovery.GetClassContainer(Interpreter.class).toExternalForm().substring(6);
+						String keyName = "Software\\MethodScript";
+						WinRegistry.createKey(WinRegistry.HKEY_CURRENT_USER, keyName);
+						WinRegistry.writeStringValue(WinRegistry.HKEY_CURRENT_USER, keyName, "JarLocation", me);
+
+						// 3. Execute the setup.exe file
+						File setup = new File(tmp.toFile(), "setup.exe");
+						int setupResult = new CommandExecutor(new String[]{setup.getAbsolutePath()}).start().waitFor();
+						if(setupResult != 0) {
+							StreamUtils.GetSystemErr().println("Setup failed to complete successfully (exit code " + setupResult + ")");
+							System.exit(setupResult);
+						} else {
+							StreamUtils.GetSystemOut().println("Setup has begun. Finish the installation in the GUI.");
+						}
+					} catch (IOException | InterruptedException | IllegalAccessException | InvocationTargetException ex) {
+						ex.printStackTrace(StreamUtils.GetSystemErr());
+						System.exit(1);
 					}
-				} catch(IOException | InterruptedException | IllegalAccessException | InvocationTargetException ex) {
-					ex.printStackTrace(StreamUtils.GetSystemErr());
-					System.exit(1);
-				}	break;
+					break;
+			}
 		}
 		StreamUtils.GetSystemOut().println("MethodScript has successfully been installed on your system. Note that you may need to rerun the install command"
 				+ " if you change locations of the jar, or rename it. Be sure to put \"#!" + INTERPRETER_INSTALLATION_LOCATION + "\" at the top of all your scripts,"
@@ -924,24 +928,27 @@ public final class Interpreter {
 		if(null == OSUtils.GetOS()) {
 			StreamUtils.GetSystemErr().println("Sorry, cmdline functionality is currently only supported on unix systems! Check back soon though!");
 			return;
-		} else switch(OSUtils.GetOS()) {
-			case LINUX:
-			case MAC:
-				try {
-					File exe = new File(INTERPRETER_INSTALLATION_LOCATION);
-					if(!exe.delete()) {
-						throw new IOException();
+		} else {
+			switch(OSUtils.GetOS()) {
+				case LINUX:
+				case MAC:
+					try {
+						File exe = new File(INTERPRETER_INSTALLATION_LOCATION);
+						if(!exe.delete()) {
+							throw new IOException();
+						}
+					} catch (IOException e) {
+						StreamUtils.GetSystemErr().println("Cannot uninstall. You must run the command with sudo for it to succeed, however, did you do that?");
+						return;
 					}
-				} catch (IOException e) {
-					StreamUtils.GetSystemErr().println("Cannot uninstall. You must run the command with sudo for it to succeed, however, did you do that?");
+					break;
+				case WINDOWS:
+					StreamUtils.GetSystemOut().println("To uninstall on windows, please uninstall from the Add or Remove Programs application.");
 					return;
-				}	break;
-			case WINDOWS:
-				StreamUtils.GetSystemOut().println("To uninstall on windows, please uninstall from the Add or Remove Programs application.");
-				return;
-			default:
-				StreamUtils.GetSystemErr().println("Sorry, cmdline functionality is currently only supported on unix systems! Check back soon though!");
-				return;
+				default:
+					StreamUtils.GetSystemErr().println("Sorry, cmdline functionality is currently only supported on unix systems! Check back soon though!");
+					return;
+			}
 		}
 		StreamUtils.GetSystemOut().println("MethodScript has been uninstalled from this system.");
 	}
