@@ -1,8 +1,6 @@
 package com.laytonsmith.Utilities;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryURLCache;
 import com.laytonsmith.PureUtilities.Common.Annotations.AnnotationChecks;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
@@ -11,10 +9,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.functions.DummyFunction;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,24 +24,7 @@ import com.laytonsmith.core.natives.interfaces.MixedInterfaceRunner;
 public class CacheAnnotations {
 
 	public static void main(String[] args) throws Exception {
-		File outputDir = new File(args[0]);
-		File scanDir = new File(args[1]);
-		if(outputDir.toString().startsWith("-classpath") || outputDir.toString().startsWith("-Xdebug")) {
-			//This happens when running locally. I dunno what that is, but we
-			//can skip this step.
-			StreamUtils.GetSystemOut().println("Skipping annotation caching, running locally.");
-			return;
-		}
-		StreamUtils.GetSystemOut().println("-- Caching annotations --");
-		StreamUtils.GetSystemOut().println("Scanning for classes in " + scanDir.getAbsolutePath());
-		StreamUtils.GetSystemOut().println("Outputting file to directory " + outputDir.getAbsolutePath());
-		long start = System.currentTimeMillis();
-		URL cacheFile = new URL("file:" + scanDir.getCanonicalPath());
-		ClassDiscoveryURLCache cache = new ClassDiscoveryURLCache(cacheFile);
-		cache.writeDescriptor(new FileOutputStream(new File(outputDir, ClassDiscoveryCache.OUTPUT_FILENAME)));
-		StreamUtils.GetSystemOut().println("Done writing " + ClassDiscoveryCache.OUTPUT_FILENAME + ", which took " + (System.currentTimeMillis() - start) + " ms.");
-		ClassDiscovery.getDefaultInstance().addPreCache(cacheFile, cache);
-		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(cacheFile);
+		AnnotationChecks.main(args);
 		StreamUtils.GetSystemOut().println("-- Checking for custom compile errors --");
 		AnnotationChecks.checkForceImplementation();
 		AnnotationChecks.verifyExhaustiveVisitors();
