@@ -831,7 +831,7 @@ public final class Static {
 		}
 		MCEntity ent = getServer().getEntity(id);
 		if(ent == null) {
-			throw new CREBadEntityException("That entity (UUID " + id + ") does not exist.", t);
+			throw new CREBadEntityException("That entity (UUID: " + id + ") does not exist.", t);
 		}
 		return ent;
 	}
@@ -849,14 +849,14 @@ public final class Static {
 			if(injectedEntity instanceof MCLivingEntity) {
 				return (MCLivingEntity) injectedEntity;
 			}
-			throw new CREBadEntityException("That entity (" + id + ") is not alive.", t);
+			throw new CREBadEntityException("That entity (UUID: " + id + ") is not alive.", t);
 		}
 		MCEntity ent = getServer().getEntity(id);
 		if(ent == null) {
-			throw new CREBadEntityException("That entity (UUID " + id + ") does not exist.", t);
+			throw new CREBadEntityException("That entity (UUID: " + id + ") does not exist.", t);
 		}
 		if(!(ent instanceof MCLivingEntity)) {
-			throw new CREBadEntityException("That entity (" + id + ") is not alive.", t);
+			throw new CREBadEntityException("That entity (UUID: " + id + ") is not alive.", t);
 		}
 		return (MCLivingEntity) ent;
 	}
