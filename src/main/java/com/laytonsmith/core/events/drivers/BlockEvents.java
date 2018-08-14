@@ -288,7 +288,7 @@ public class BlockEvents {
 			CArray drops = new CArray(t);
 			Collection<MCItemStack> items = event.getDrops();
 			if(items == null) {
-				items = event.getBlock().getDrops(event.getPlayer().getItemInHand());
+				items = event.getBlock().getDrops(event.getPlayer().getInventory().getItemInMainHand());
 			}
 			for(MCItemStack stack : items) {
 				CArray item = (CArray) ObjectGenerator.GetGenerator().item(stack, t);

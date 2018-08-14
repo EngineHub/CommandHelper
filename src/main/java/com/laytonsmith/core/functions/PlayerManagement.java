@@ -963,7 +963,7 @@ public class PlayerManagement {
 			}
 			if(index == 6 || index == -1) {
 				//Item in hand
-				MCItemStack is = p.getItemInHand();
+				MCItemStack is = p.getInventory().getItemInMainHand();
 				retVals.add(new CString(is.getType().getName(), t));
 			}
 			if(index == 7 || index == -1) {

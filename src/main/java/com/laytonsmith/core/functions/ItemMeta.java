@@ -93,7 +93,7 @@ public class ItemMeta {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			if(slot instanceof CNull) {
-				is = p.getItemInHand();
+				is = p.getItemAt(null);
 			} else {
 				is = p.getItemAt(Static.getInt32(slot, t));
 			}
@@ -192,7 +192,7 @@ public class ItemMeta {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			if(slot instanceof CNull) {
-				is = p.getItemInHand();
+				is = p.getItemAt(null);
 			} else {
 				is = p.getItemAt(Static.getInt32(slot, t));
 			}

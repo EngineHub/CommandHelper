@@ -44,6 +44,11 @@ public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlay
 	}
 
 	@Override
+	public void setItemInMainHand(MCItemStack stack) {
+		this.i.setItemInMainHand(((BukkitMCItemStack) stack).__ItemStack());
+	}
+
+	@Override
 	public void setItemInOffHand(MCItemStack stack) {
 		this.i.setItemInOffHand(((BukkitMCItemStack) stack).__ItemStack());
 	}
@@ -66,6 +71,11 @@ public class BukkitMCPlayerInventory extends BukkitMCInventory implements MCPlay
 	@Override
 	public MCItemStack getBoots() {
 		return new BukkitMCItemStack(this.i.getBoots());
+	}
+
+	@Override
+	public MCItemStack getItemInMainHand() {
+		return new BukkitMCItemStack(this.i.getItemInMainHand());
 	}
 
 	@Override

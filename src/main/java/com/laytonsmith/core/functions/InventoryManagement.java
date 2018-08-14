@@ -154,15 +154,14 @@ public class InventoryManagement {
 		}
 
 		private Construct getInvSlot(MCPlayer m, Integer slot, Target t) {
-			if(slot == null) {
-				return ObjectGenerator.GetGenerator().item(m.getItemInHand(), t);
-			}
 			MCPlayerInventory inv = m.getInventory();
 			if(inv == null) {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
-
+			if(slot == null) {
+				return ObjectGenerator.GetGenerator().item(inv.getItemInMainHand(), t);
+			}
 			if(slot.equals(36)) {
 				slot = 100;
 			}
