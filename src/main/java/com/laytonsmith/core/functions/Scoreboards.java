@@ -676,6 +676,8 @@ public class Scoreboards {
 					+ " with keys 'displayname' and/or 'slot', affecting their respective properties."
 					+ " Null name resets it to the actual name, and null slot removes it from"
 					+ " all displays. Slot can be one of: " + StringUtils.Join(MCDisplaySlot.values(), ", ", ", or ")
+					+ " If the displayname is too long, a LengthException will be thrown."
+					+ " The max length may differ based on server implementation, but will probably be 128."
 					+ ". " + DEF_MSG;
 		}
 
@@ -765,6 +767,9 @@ public class Scoreboards {
 					+ " If arg 2 is not an array, it is assumed to be the displayname,"
 					+ " otherwise arg 2 should be an array with keys 'displayname', 'prefix',"
 					+ " and/or 'suffix', affecting their respective properties."
+					+ " If the prefix, suffix, or displayname is too long, a LengthException will be thrown."
+					+ " The max length may differ based on server implementation,"
+					+ " but will probably be 64, 64, 128 respectively."
 					+ " Null name resets it to the actual name, and null prefix or suffix removes it from"
 					+ " all displays. " + DEF_MSG;
 		}
@@ -1094,6 +1099,7 @@ public class Scoreboards {
 		public String docs() {
 			return "void {objectiveName, name, int, [scoreboard]} Sets the player's score for the given objective."
 					+ " The name can be anything, not just player names. An LengthException is thrown if it's too long."
+					+ " The max length may differ based on server implementation, but will probably be 128."
 					+ DEF_MSG;
 		}
 
