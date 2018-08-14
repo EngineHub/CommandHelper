@@ -1504,7 +1504,7 @@ public class Environment {
 						if(children.get(0).getData().val().equals("sound")
 								&& children.get(1).getData() instanceof CString) {
 							try {
-								MCSound.valueOf(children.get(1).getData().val().toUpperCase());
+								MCSound.MCVanillaSound.valueOf(children.get(1).getData().val().toUpperCase());
 							} catch (IllegalArgumentException ex) {
 								CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, ex.getMessage(), t);
 							}
