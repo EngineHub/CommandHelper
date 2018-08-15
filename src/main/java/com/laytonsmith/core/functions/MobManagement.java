@@ -75,6 +75,7 @@ public class MobManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@hide("Deprecated for spawn_entity().")
 	public static class spawn_mob extends AbstractFunction {
 
 		// The max amount of mobs that can be spawned at once by this function.

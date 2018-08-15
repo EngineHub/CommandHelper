@@ -1175,10 +1175,6 @@ public class EntityManagement {
 			}
 			for(int i = 0; i < qty; i++) {
 				switch(entType.getAbstracted()) {
-					case DROPPED_ITEM:
-						ent = l.getWorld().dropItem(l, StaticLayer.GetItemStack("STONE", qty));
-						qty = 0;
-						break;
 					case FALLING_BLOCK:
 						ent = l.getWorld().spawnFallingBlock(l, StaticLayer.GetMaterial("SAND").createBlockData());
 						break;
@@ -1229,11 +1225,11 @@ public class EntityManagement {
 					+ " given type at the given location. Returns an array of entityIDs of what is spawned."
 					+ "  Qty defaults to 1 and location defaults to the location of the commandsender,"
 					+ " if it is a block or player. If the commandsender is console, location must be supplied."
-					+ " ---- Entitytype can be one of " + StringUtils.Join(spawnable, ", ", " or ", ", or ")
-					+ ". Falling_blocks will be sand by default, and dropped_items will be stone,"
-					+ " as these entities already have their own functions for spawning."
+					+ " ---- Entitytype can be one of " + StringUtils.Join(spawnable, ", ", " or ", ", or ") + "."
+					+ " FALLING_BLOCK will be always be sand with this function (see {{function|spawn_falling_block}})."
+					+ " DROPPED_ITEM will be dirt by default (see {{function|drop_item}})."
 					+ " A closure can be used as the last argument to modify the entity before adding it to the world."
-					+ " The entity's UUID is passed to the closure as the first parameter.";
+					+ " The entity's UUID is passed to the closure. FALLING_BLOCK does not support closures.";
 		}
 
 		@Override
