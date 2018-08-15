@@ -33,6 +33,7 @@ import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCShapedRecipe;
 import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
+import com.laytonsmith.abstraction.MCTropicalFishBucketMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
@@ -45,6 +46,7 @@ import com.laytonsmith.abstraction.blocks.MCDropper;
 import com.laytonsmith.abstraction.blocks.MCFurnace;
 import com.laytonsmith.abstraction.blocks.MCHopper;
 import com.laytonsmith.abstraction.blocks.MCShulkerBox;
+import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
@@ -52,7 +54,6 @@ import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -558,10 +559,6 @@ public class ObjectGenerator {
 					patterns.push(pattern, t);
 				}
 				ma.set("patterns", patterns, t);
-				MCDyeColor dyeColor = bannermeta.getBaseColor();
-				if(dyeColor != null) {
-					ma.set("basecolor", new CString(dyeColor.toString(), t), t);
-				}
 			} else if(meta instanceof MCMapMeta) {
 				MCMapMeta mm = ((MCMapMeta) meta);
 				MCColor mapcolor = mm.getColor();
@@ -574,6 +571,17 @@ public class ObjectGenerator {
 					ma.set("mapid", new CInt(mm.getMapId(), t), t);
 				} else {
 					ma.set("mapid", CNull.NULL, t);
+				}
+			} else if(meta instanceof MCTropicalFishBucketMeta) {
+				MCTropicalFishBucketMeta fm = (MCTropicalFishBucketMeta) meta;
+				if(fm.hasVariant()) {
+					ma.set("fishcolor", new CString(fm.getBodyColor().name(), t), t);
+					ma.set("fishpatterncolor", new CString(fm.getPatternColor().name(), t), t);
+					ma.set("fishpattern", new CString(fm.getPattern().name(), t), t);
+				} else {
+					ma.set("fishcolor", CNull.NULL, t);
+					ma.set("fishpatterncolor", CNull.NULL, t);
+					ma.set("fishpattern", CNull.NULL, t);
 				}
 			}
 			return ma;
@@ -885,9 +893,6 @@ public class ObjectGenerator {
 						}
 					}
 				} else if(meta instanceof MCBannerMeta) {
-					if(ma.containsKey("basecolor")) {
-						((MCBannerMeta) meta).setBaseColor(MCDyeColor.valueOf(ma.get("basecolor", t).val().toUpperCase()));
-					}
 					if(ma.containsKey("patterns")) {
 						CArray array = ArgumentValidation.getArray(ma.get("patterns", t), t);
 						for(String key : array.stringKeySet()) {
@@ -897,7 +902,7 @@ public class ObjectGenerator {
 							((MCBannerMeta) meta).addPattern(StaticLayer.GetConvertor().GetPattern(color, shape));
 						}
 					}
-				} else if(meta instanceof MCMapMeta && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
+				} else if(meta instanceof MCMapMeta) {
 					if(ma.containsKey("color")) {
 						Construct ci = ma.get("color", t);
 						if(ci instanceof CArray) {
@@ -910,6 +915,28 @@ public class ObjectGenerator {
 						Construct cid = ma.get("mapid", t);
 						if(!(cid instanceof CNull)) {
 							((MCMapMeta) meta).setMapId(Static.getInt32(cid, t));
+						}
+					}
+				} else if(meta instanceof MCTropicalFishBucketMeta) {
+					if(ma.containsKey("fishpatterncolor")) {
+						Construct patterncolor = ma.get("fishpatterncolor", t);
+						if(!(patterncolor instanceof CNull)) {
+							MCDyeColor color = MCDyeColor.valueOf(patterncolor.val().toUpperCase());
+							((MCTropicalFishBucketMeta) meta).setPatternColor(color);
+						}
+					}
+					if(ma.containsKey("fishcolor")) {
+						Construct fishcolor = ma.get("fishcolor", t);
+						if(!(fishcolor instanceof CNull)) {
+							MCDyeColor color = MCDyeColor.valueOf(fishcolor.val().toUpperCase());
+							((MCTropicalFishBucketMeta) meta).setBodyColor(color);
+						}
+					}
+					if(ma.containsKey("fishpattern")) {
+						Construct pa = ma.get("fishpattern", t);
+						if(!(pa instanceof CNull)) {
+							MCTropicalFish.MCPattern pattern = MCTropicalFish.MCPattern.valueOf(pa.val().toUpperCase());
+							((MCTropicalFishBucketMeta) meta).setPattern(pattern);
 						}
 					}
 				}

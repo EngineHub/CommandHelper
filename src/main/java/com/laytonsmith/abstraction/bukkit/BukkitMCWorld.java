@@ -597,10 +597,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 				case SKELETON:
 					mobType = Skeleton.class;
 					if(!(subClass.isEmpty())) {
-						String type = "";
-						for(String st : subTypes) {
-							type = st;
-						}
+						String type = subTypes[subTypes.length - 1];
 						if(type.equals("WITHER")) {
 							mobType = WitherSkeleton.class;
 						} else if(type.equals("STRAY")) {

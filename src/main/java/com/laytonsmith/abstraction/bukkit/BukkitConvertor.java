@@ -134,6 +134,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.inventory.meta.TropicalFishBucketMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionData;
 import org.yaml.snakeyaml.Yaml;
@@ -563,6 +564,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if(im instanceof MapMeta) {
 			return new BukkitMCMapMeta((MapMeta) im);
+		}
+		if(im instanceof TropicalFishBucketMeta) {
+			return new BukkitMCTropicalFishBucketMeta((TropicalFishBucketMeta) im);
 		}
 		return new BukkitMCItemMeta(im);
 	}

@@ -224,6 +224,12 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_ARROW_CRITICAL%: If this arrow is critical.
 * %KEY_ARROW_KNOCKBACK%: The knockback strength.
 |-
+| TROPICAL_FISH
+|
+* %KEY_TROPICALFISH_COLOR%: The base color of the fish (can be %DYE_COLOR%).
+* %KEY_TROPICALFISH_PATTERNCOLOR%: The color of the pattern on the fish.
+* %KEY_TROPICALFISH_PATTERN%: The pattern type on the fish (can be %FISH_PATTERN%).
+|-
 | VILLAGER
 | 
 * %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%).

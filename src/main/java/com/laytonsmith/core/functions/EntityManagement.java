@@ -66,6 +66,7 @@ import com.laytonsmith.abstraction.entities.MCTNT;
 import com.laytonsmith.abstraction.entities.MCTameable;
 import com.laytonsmith.abstraction.entities.MCThrownPotion;
 import com.laytonsmith.abstraction.entities.MCTippedArrow;
+import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.entities.MCVillager;
 import com.laytonsmith.abstraction.entities.MCWitherSkull;
 import com.laytonsmith.abstraction.entities.MCWolf;
@@ -1678,6 +1679,7 @@ public class EntityManagement {
 			docs = docs.replace("%PARTICLE%", StringUtils.Join(MCParticle.types(), ", ", ", or ", " or "));
 			docs = docs.replace("%ENDERDRAGON_PHASE%", StringUtils.Join(MCEnderDragonPhase.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%TREE_SPECIES%", StringUtils.Join(MCTreeSpecies.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%FISH_PATTERN%", StringUtils.Join(MCTropicalFish.MCPattern.values(), ", ", ", or ", " or "));
 			for(Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -1962,6 +1964,12 @@ public class EntityManagement {
 					tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(tippedarrow.getBasePotionData(), t), t);
 					specArray.set(entity_spec.KEY_TIPPEDARROW_POTIONMETA, tippedmeta, t);
 					break;
+				case TROPICAL_FISH:
+					MCTropicalFish fish = (MCTropicalFish) entity;
+					specArray.set(entity_spec.KEY_TROPICALFISH_COLOR, new CString(fish.getBodyColor().name(), t), t);
+					specArray.set(entity_spec.KEY_TROPICALFISH_PATTERN, new CString(fish.getPattern().name(), t), t);
+					specArray.set(entity_spec.KEY_TROPICALFISH_PATTERNCOLOR, new CString(fish.getPatternColor().name(), t), t);
+					break;
 				case VILLAGER:
 					MCVillager villager = (MCVillager) entity;
 					specArray.set(entity_spec.KEY_VILLAGER_PROFESSION, new CString(villager.getProfession().name(), t), t);
@@ -2070,6 +2078,9 @@ public class EntityManagement {
 		private static final String KEY_SNOWMAN_DERP = "derp";
 		private static final String KEY_SPLASH_POTION_ITEM = "item";
 		private static final String KEY_TIPPEDARROW_POTIONMETA = "potionmeta";
+		private static final String KEY_TROPICALFISH_COLOR = "color";
+		private static final String KEY_TROPICALFISH_PATTERN = "pattern";
+		private static final String KEY_TROPICALFISH_PATTERNCOLOR = "patterncolor";
 		private static final String KEY_VILLAGER_PROFESSION = "profession";
 		private static final String KEY_WITHER_SKULL_CHARGED = "charged";
 		private static final String KEY_WOLF_ANGRY = "angry";
@@ -2936,6 +2947,36 @@ public class EntityManagement {
 									}
 								} else {
 									throw new CRECastException("TippedArrow potion meta must be an array", t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case TROPICAL_FISH:
+					MCTropicalFish fish = (MCTropicalFish) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_TROPICALFISH_COLOR:
+								try {
+									fish.setBodyColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid fish color: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							case entity_spec.KEY_TROPICALFISH_PATTERNCOLOR:
+								try {
+									fish.setPatternColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid fish pattern color: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							case entity_spec.KEY_TROPICALFISH_PATTERN:
+								try {
+									fish.setPattern(MCTropicalFish.MCPattern.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid fish pattern: " + specArray.get(index, t).val(), t);
 								}
 								break;
 							default:

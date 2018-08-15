@@ -45,7 +45,7 @@ public class ItemMeta {
 			+ " \"repair\" (int, repair cost), \"unbreakable\" (boolean), \"flags\""
 			+ " (array). Possible flags: " + StringUtils.Join(MCItemFlag.values(), ", ", " or ") + "</li>"
 			+ "<li>Books - \"title\" (string), author (string), \"pages\" (array of strings)</li>"
-			+ "<li>EnchantedBooks - \"stored\" (array of enchantment arrays (see Example))</li>"
+			+ "<li>EnchantedBooks - \"stored\" (associative array of enchantments (see Example))</li>"
 			+ "<li>Leather Armor - \"color\" (color array (see Example))</li>"
 			+ "<li>Player Skulls - \"owner\" (string)</li>"
 			+ "<li>Potions - \"potions\" (array of potion arrays), \"base\" (an array with the keys \"type\","
@@ -55,11 +55,13 @@ public class ItemMeta {
 			+ "<li>Fireworks - \"firework\" (array with strength (int), \"effects\" (array of effect arrays (see Example)))</li>"
 			+ "<li>Firework Charges - \"effect\" (single Firework effect array)</li>"
 			+ "<li>Storage Blocks - \"inventory\" (an array of item arrays)</li>"
-			+ "<li>Mob Eggs/Spawners - \"spawntype\" (an entity type)</li>"
+			+ "<li>Mob Spawners - \"spawntype\" (an entity type)</li>"
 			+ "<li>Furnace - \"burntime\" (int), \"cooktime\" (int), and in \"inventory\" these keys can exist if an"
 			+ " item exists in that slot: \"result\", \"fuel\", and \"smelting\".</li>"
 			+ "<li>Brewing Stand - \"brewtime\" (int), \"fuel\" (int), and in \"inventory\" these keys can exist if an"
 			+ " item exists in that slot: \"fuel\", \"ingredient\", \"leftbottle\", \"middlebottle\", and \"rightbottle\".</li>"
+			+ "<li>Tropical Fish Bucket - \"fishcolor\" (the base dye color of the fish), \"fishpatterncolor\" (the"
+			+ " color of the pattern on the fish), and \"fishpattern\" (the pattern type on the fish).</li>"
 			+ "</ul>";
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -137,7 +139,7 @@ public class ItemMeta {
 				"{author: Notch, display: null, enchants: {}, lore: null,"
 				+ " pages: {This is page 1, This is page 2}, title: Example Book}"),
 				new ExampleScript("Demonstrates an EnchantedBook", "msg(get_itemmeta(null))",
-				"{display: null, enchants: {}, lore: null, stored: {{elevel: 1, etype: ARROW_FIRE}}}"),
+				"{display: null, enchants: {}, lore: null, stored: {flame: 1}}"),
 				new ExampleScript("Demonstrates a piece of leather armor", "msg(get_itemmeta(null))",
 				"{color: {b: 106, g: 160, r: 64}, display: null, enchants: {}, lore: null}"),
 				new ExampleScript("Demonstrates a skull", "msg(get_itemmeta(null))",
@@ -238,7 +240,7 @@ public class ItemMeta {
 				"set_itemmeta(null, array(author: 'Writer', pages: array('Once upon a time', 'The end.'), title: 'Epic Story'))",
 				"This will write a very short story"),
 				new ExampleScript("Demonstrates an EnchantedBook",
-				"set_itemmeta(null, array(stored: array(array(elevel: 25, etype: DAMAGE_ALL), array(etype: DURABILITY, elevel: 3))))",
+				"set_itemmeta(null, array('stored': array('sharpness': 25, 'unbreaking': 3)))",
 				"This book now contains Unbreaking 3 and Sharpness 25"),
 				new ExampleScript("Demonstrates coloring leather armor",
 				"set_itemmeta(102, array(color: array(r: 50, b: 150, g: 100)))",
