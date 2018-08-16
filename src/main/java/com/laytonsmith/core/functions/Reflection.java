@@ -295,6 +295,9 @@ public class Reflection {
 				//and then it will never actually get called, so we handle it entirely in here.
 				return new ParseTree(new CString(docs(), t), null);
 			}
+			if(children.size() == 1) {
+				return null; // not enough arguments, so an exception will be thrown later
+			}
 			if(children.get(0).isConst()) {
 				//If it's a function, we can check to see if it actually exists,
 				//and make it a compile error if it doesn't, even if parameter 2 is dynamic

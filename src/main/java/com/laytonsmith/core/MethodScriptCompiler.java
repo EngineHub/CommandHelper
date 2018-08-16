@@ -1955,8 +1955,7 @@ public final class MethodScriptCompiler {
 				try {
 					f = (Function) FunctionList.getFunction(t.getData());
 				} catch (ConfigCompileException ex) {
-					compilerErrors.add(ex);
-					return;
+					continue;
 				}
 				Set<OptimizationOption> options = NO_OPTIMIZATIONS;
 				if(f instanceof Optimizable) {
