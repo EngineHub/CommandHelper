@@ -317,7 +317,15 @@ public class ObjectGenerator {
 				if(meta instanceof CArray && ((CArray) meta).containsKey("spawntype")) {
 					Construct spawntype = ((CArray) meta).get("spawntype", t);
 					if(!(spawntype instanceof CNull)) {
-						MCMaterial newmaterial = StaticLayer.GetMaterial(spawntype.val().toUpperCase() + "_SPAWN_EGG");
+						MCMaterial newmaterial;
+						String entityName = spawntype.val().toUpperCase();
+						if(entityName.equals("MUSHROOM_COW")) {
+							newmaterial = StaticLayer.GetMaterial("MOOSHROOM_SPAWN_EGG");
+						} else if(entityName.equals("PIG_ZOMBIE")) {
+							newmaterial = StaticLayer.GetMaterial("ZOMBIE_PIGMAN_SPAWN_EGG");
+						} else {
+							newmaterial = StaticLayer.GetMaterial(entityName + "_SPAWN_EGG");
+						}
 						if(newmaterial != null) {
 							material = newmaterial;
 						}
