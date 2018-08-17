@@ -118,7 +118,7 @@ public interface MCServer extends AbstractionObject {
 
 	List<MCOfflinePlayer> getOperators();
 
-	void banName(String name);
+	void banName(String name, String reason, String source);
 
 	void unbanName(String name);
 

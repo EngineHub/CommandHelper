@@ -2715,14 +2715,16 @@ public class PlayerManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3, 4};
 		}
 
 		@Override
 		public String docs() {
-			return "void {player, isBanned} Sets the ban flag of the specified player. Note that"
-					+ " this will work with offline players, but the name must be exact. At this"
-					+ " time, this function only works with the vanilla ban system. If you use"
+			return "void {player, isBanned, [reason], [source]} Sets the ban flag of the specified player."
+					+ " Note that this will work with offline players, but the name must be exact. When banning,"
+					+ " an optional reason message may be provided that the player will see when attempting to login."
+					+ " An optional source may also be provided that indicates who or what banned the player."
+					+ " At this time, this function only works with the vanilla ban system. If you use"
 					+ " a third party ban system, you should instead run the command for that"
 					+ " plugin instead." + UUID_WARNING;
 		}
@@ -2751,6 +2753,9 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String target = args[0].val();
 			boolean ban = Static.getBoolean(args[1], t);
+			String reason = "";
+			String source = "";
+
 			if(target.length() > 16) {
 				MCOfflinePlayer pl = Static.GetUser(target, t);
 				if(pl == null) {
@@ -2762,8 +2767,15 @@ public class PlayerManagement {
 					throw new CRENotFoundException(this.getName() + " could not get offline player's name", t);
 				}
 			}
+
 			if(ban) {
-				Static.getServer().banName(target);
+				if(args.length > 2) {
+					reason = args[2].val();
+					if(args.length == 4) {
+						source = args[3].val();
+					}
+				}
+				Static.getServer().banName(target, reason, source);
 			} else {
 				Static.getServer().unbanName(target);
 			}

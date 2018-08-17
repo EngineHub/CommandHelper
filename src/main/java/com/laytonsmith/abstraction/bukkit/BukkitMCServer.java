@@ -479,8 +479,8 @@ public class BukkitMCServer implements MCServer {
 	}
 
 	@Override
-	public void banName(String name) {
-		s.getBanList(BanList.Type.NAME).addBan(name, null, null, null);
+	public void banName(String name, String reason, String source) {
+		s.getBanList(BanList.Type.NAME).addBan(name, reason, null, source);
 	}
 
 	@Override
