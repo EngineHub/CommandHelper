@@ -355,4 +355,14 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public void setAI(Boolean ai) {
 		le.setAI(ai);
 	}
+
+	@Override
+	public boolean isCollidable() {
+		return le.isCollidable();
+	}
+
+	@Override
+	public void setCollidable(boolean collidable) {
+		le.setCollidable(collidable);
+	}
 }

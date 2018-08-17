@@ -1587,4 +1587,55 @@ public class MobManagement {
 			return CHVersion.V3_3_2;
 		}
 	}
+
+	@api
+	public static class is_mob_collidable extends EntityManagement.EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "is_mob_collidable";
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {entityID} Returns whether another entity, like an arrow, will collide with this mob.";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return CBoolean.GenerateCBoolean(Static.getLivingEntity(args[0], t).isCollidable(), t);
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+	}
+
+	@api
+	public static class set_mob_collidable extends EntityManagement.EntitySetterFunction {
+
+		@Override
+		public String getName() {
+			return "set_mob_collidable";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityID, boolean} Sets whether or not other entities will collide with this mob.";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCLivingEntity e = Static.getLivingEntity(args[0], t);
+			boolean collidable = Static.getBoolean(args[1], t);
+			e.setCollidable(collidable);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+	}
 }

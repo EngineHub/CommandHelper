@@ -106,6 +106,10 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
 	void setAI(Boolean ai);
 
+	boolean isCollidable();
+
+	void setCollidable(boolean collidable);
+
 	/**
 	 * Kills the entity. In some cases, this will be equivalent to setHealth(0), but may not be, so this method should
 	 * be used instead.
