@@ -2,9 +2,12 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCShapedRecipe;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 
@@ -53,7 +56,12 @@ public class BukkitMCShapedRecipe extends BukkitMCRecipe implements MCShapedReci
 
 	@Override
 	public void setIngredient(char key, MCItemStack ingredient) {
-		r.setIngredient(key, ((ItemStack) ingredient.getHandle()).getData());
+		r.setIngredient(key, ((ItemStack) ingredient.getHandle()).getType());
+	}
+
+	@Override
+	public void setIngredient(char key, MCMaterial mat) {
+		r.setIngredient(key, (Material) mat.getHandle());
 	}
 
 	@Override

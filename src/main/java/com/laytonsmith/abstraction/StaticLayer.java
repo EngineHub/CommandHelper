@@ -64,6 +64,14 @@ public final class StaticLayer {
 		return convertor.GetServerEventMixin();
 	}
 
+	public static MCMaterial GetMaterialFromLegacy(int type, int qty) {
+		return convertor.GetMaterialFromLegacy(type, qty);
+	}
+
+	public static MCMaterial GetMaterialFromLegacy(String name, int qty) {
+		return convertor.GetMaterialFromLegacy(name, qty);
+	}
+
 	public static MCItemStack GetItemStack(int type, int qty) {
 		return convertor.GetItemStack(type, qty);
 	}

@@ -1665,7 +1665,7 @@ public class EntityEvents {
 			// handle deprecated prefilter
 			Map<String, Construct> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("blockname")) {
-				MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(prefilter.get("blockname").val(), 0);
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("blockname").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"blockname\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
@@ -1680,7 +1680,7 @@ public class EntityEvents {
 					} else {
 						type = Integer.parseInt(notation);
 					}
-					MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(type, 0);
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, 0);
 					if(mat == null) {
 						throw new CREBindException("Cannot find material by the id '" + notation + "'", event.getTarget());
 					}

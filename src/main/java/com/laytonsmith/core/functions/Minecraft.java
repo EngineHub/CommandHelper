@@ -232,7 +232,7 @@ public class Minecraft {
 					i = Static.getInt32(args[0], t);
 				} catch (CRECastException ex) {
 					// possibly a material name
-					MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(args[0].val(), 0);
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(args[0].val(), 0);
 					if(mat == null) {
 						return CNull.NULL;
 					}
@@ -243,7 +243,7 @@ public class Minecraft {
 				i2 = 0;
 			}
 			try {
-				return new CString(StaticLayer.GetConvertor().GetMaterialFromLegacy(i, i2).getName(), t);
+				return new CString(StaticLayer.GetMaterialFromLegacy(i, i2).getName(), t);
 			} catch (NullPointerException e) {
 				return CNull.NULL;
 			}
@@ -360,7 +360,7 @@ public class Minecraft {
 			} catch (NumberFormatException e) {
 				throw new CREFormatException("Invalid item notation: " + id.val(), t);
 			}
-			MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(type, data);
+			MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, data);
 			if(mat == null) {
 				throw new CRENotFoundException("A material type could not be found based on the given id.", t);
 			}

@@ -216,7 +216,7 @@ public class BlockEvents {
 			// handle deprecated prefilter
 			Map<String, Construct> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("name")) {
-				MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(prefilter.get("name").val(), 0);
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
@@ -233,7 +233,7 @@ public class BlockEvents {
 					}
 					MCMaterial mat;
 					if(data > 0) {
-						mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(id, data);
+						mat = StaticLayer.GetMaterialFromLegacy(id, data);
 					} else {
 						mat = StaticLayer.GetConvertor().getMaterial(id);
 					}
@@ -366,7 +366,7 @@ public class BlockEvents {
 			// handle deprecated prefilter
 			Map<String, Construct> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("name")) {
-				MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(prefilter.get("name").val(), 0);
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
@@ -383,7 +383,7 @@ public class BlockEvents {
 					}
 					MCMaterial mat;
 					if(data > 0) {
-						mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(id, data);
+						mat = StaticLayer.GetMaterialFromLegacy(id, data);
 					} else {
 						mat = StaticLayer.GetConvertor().getMaterial(id);
 					}
@@ -473,7 +473,7 @@ public class BlockEvents {
 				return true;
 			} else if(key.equals("type")) {
 				if(value instanceof CInt) {
-					MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy((int) ((CInt) value).getInt(), 0);
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy((int) ((CInt) value).getInt(), 0);
 					event.getBlock().setType(mat);
 					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Mutable data key \"type\" in " + getName()
 							+ " is deprecated for \"block\". Converted to " + mat.getName(), value.getTarget());
@@ -520,7 +520,7 @@ public class BlockEvents {
 			// handle deprecated prefilter
 			Map<String, Construct> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("name")) {
-				MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(prefilter.get("name").val(), 0);
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
@@ -537,7 +537,7 @@ public class BlockEvents {
 					}
 					MCMaterial mat;
 					if(data > 0) {
-						mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(id, data);
+						mat = StaticLayer.GetMaterialFromLegacy(id, data);
 					} else {
 						mat = StaticLayer.GetConvertor().getMaterial(id);
 					}
@@ -711,7 +711,7 @@ public class BlockEvents {
 			// handle deprecated prefilter
 			Map<String, Construct> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("name")) {
-				MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(prefilter.get("name").val(), 0);
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
@@ -728,7 +728,7 @@ public class BlockEvents {
 					}
 					MCMaterial mat;
 					if(data > 0) {
-						mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(id, data);
+						mat = StaticLayer.GetMaterialFromLegacy(id, data);
 					} else {
 						mat = StaticLayer.GetConvertor().getMaterial(id);
 					}
@@ -741,7 +741,7 @@ public class BlockEvents {
 				}
 			}
 			if(prefilter.containsKey("toname")) {
-				MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(prefilter.get("toname").val(), 0);
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("toname").val(), 0);
 				prefilter.put("toblock", new CString(mat.getName(), event.getTarget()));
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"toname\" prefilter in " + getName()
 						+ " is deprecated for \"toblock\". Converted to " + mat.getName(), event.getTarget());
@@ -758,7 +758,7 @@ public class BlockEvents {
 					}
 					MCMaterial mat;
 					if(data > 0) {
-						mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(id, data);
+						mat = StaticLayer.GetMaterialFromLegacy(id, data);
 					} else {
 						mat = StaticLayer.GetConvertor().getMaterial(id);
 					}
@@ -847,7 +847,7 @@ public class BlockEvents {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
 						}
-						MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(name.val(), data);
+						MCMaterial mat = StaticLayer.GetMaterialFromLegacy(name.val(), data);
 						if(mat == null) {
 							throw new CREFormatException("Material name \"" + name.val() + "\" not found.", value.getTarget());
 						}
@@ -871,7 +871,7 @@ public class BlockEvents {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
 						}
-						MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(type, data);
+						MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, data);
 						if(mat == null) {
 							throw new CREFormatException("Material type \"" + type + "\" not found.", value.getTarget());
 						}
@@ -903,7 +903,7 @@ public class BlockEvents {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
 						}
-						MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(name.val(), data);
+						MCMaterial mat = StaticLayer.GetMaterialFromLegacy(name.val(), data);
 						if(mat == null) {
 							throw new CREFormatException("Material name \"" + name.val() + "\" not found.", value.getTarget());
 						}
@@ -927,7 +927,7 @@ public class BlockEvents {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
 						}
-						MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(type, data);
+						MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, data);
 						if(mat == null) {
 							throw new CREFormatException("Material type \"" + type + "\" not found.", value.getTarget());
 						}
@@ -1186,7 +1186,7 @@ public class BlockEvents {
 			// handle deprecated prefilter
 			Map<String, Construct> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("oldname")) {
-				MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(prefilter.get("oldname").val(), 0);
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("oldname").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"oldname\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
@@ -1203,7 +1203,7 @@ public class BlockEvents {
 					}
 					MCMaterial mat;
 					if(data > 0) {
-						mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(id, data);
+						mat = StaticLayer.GetMaterialFromLegacy(id, data);
 					} else {
 						mat = StaticLayer.GetConvertor().getMaterial(id);
 					}
@@ -1216,7 +1216,7 @@ public class BlockEvents {
 				}
 			}
 			if(prefilter.containsKey("newname")) {
-				MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(prefilter.get("newname").val(), 0);
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("newname").val(), 0);
 				prefilter.put("newblock", new CString(mat.getName(), event.getTarget()));
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"newname\" prefilter in " + getName()
 						+ " is deprecated for \"newblock\". Converted to " + mat.getName(), event.getTarget());
@@ -1233,7 +1233,7 @@ public class BlockEvents {
 					}
 					MCMaterial mat;
 					if(data > 0) {
-						mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(id, data);
+						mat = StaticLayer.GetMaterialFromLegacy(id, data);
 					} else {
 						mat = StaticLayer.GetConvertor().getMaterial(id);
 					}
@@ -1410,7 +1410,7 @@ public class BlockEvents {
 			// handle deprecated prefilter
 			Map<String, Construct> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("oldname")) {
-				MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(prefilter.get("oldname").val(), 0);
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("oldname").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"oldname\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());

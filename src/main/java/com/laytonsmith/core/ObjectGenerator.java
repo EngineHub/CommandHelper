@@ -280,9 +280,9 @@ public class ObjectGenerator {
 				mat = item.get("name", t).val();
 				if(mat.equals("MAP")) {
 					// special handling, ignore data until later
-					material = StaticLayer.GetConvertor().GetMaterialFromLegacy(mat, 0);
+					material = StaticLayer.GetMaterialFromLegacy(mat, 0);
 				} else {
-					material = StaticLayer.GetConvertor().GetMaterialFromLegacy(mat, data);
+					material = StaticLayer.GetMaterialFromLegacy(mat, data);
 				}
 			} else {
 				Construct type = item.get("type", t);
@@ -302,9 +302,9 @@ public class ObjectGenerator {
 				int id = Static.getInt32(type, t);
 				if(id == 358) {
 					// special map handling, ignore data until later
-					material = StaticLayer.GetConvertor().GetMaterialFromLegacy(id, 0);
+					material = StaticLayer.GetMaterialFromLegacy(id, 0);
 				} else {
-					material = StaticLayer.GetConvertor().GetMaterialFromLegacy(id, data);
+					material = StaticLayer.GetMaterialFromLegacy(id, data);
 				}
 			}
 			if(material == null) {
@@ -1455,28 +1455,32 @@ public class ObjectGenerator {
 					throw new CREFormatException("Ingredients array is invalid.", t);
 				}
 				for(String key : shapedIngredients.stringKeySet()) {
-					MCItemStack is;
+					MCMaterial mat = null;
 					Construct ingredient = shapedIngredients.get(key, t);
 					if(ingredient instanceof CString) {
-						CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "String ingredients may not be accurate.", t);
-						CString item = (CString) ingredient;
-						if(item.val().contains(":")) {
-							String[] split = item.val().split(":");
-							is = StaticLayer.GetItemStack(Integer.valueOf(split[0]), Integer.valueOf(split[1]), 1);
-						} else {
-							is = StaticLayer.GetItemStack(Integer.valueOf(item.val()), 1);
+						mat = StaticLayer.GetMaterial(ingredient.val());
+						if(mat == null) {
+							// maybe legacy item format
+							try {
+								if(ingredient.val().contains(":")) {
+									String[] split = ingredient.val().split(":");
+									mat = StaticLayer.GetMaterialFromLegacy(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
+								} else {
+									mat = StaticLayer.GetConvertor().getMaterial(Integer.valueOf(ingredient.val()));
+								}
+								CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Numeric item formats (eg. \"0:0\" are deprecated.", t);
+							} catch (NumberFormatException ex) {}
 						}
 					} else if(ingredient instanceof CInt) {
-						CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Integer ingredients may not be accurate.", t);
-						is = StaticLayer.GetItemStack(Static.getInt32(ingredient, t), 1);
+						mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(ingredient, t));
+						CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Numeric item ingredients are deprecated.", t);
 					} else if(ingredient instanceof CArray) {
-						is = item(ingredient, t);
-					} else if(ingredient instanceof CNull) {
-						is = StaticLayer.GetItemStack("AIR", 0);
-					} else {
-						throw new CREFormatException("Item was not found", t);
+						mat = item(ingredient, t).getType();
 					}
-					((MCShapedRecipe) ret).setIngredient(key.charAt(0), is);
+					if(mat == null) {
+						throw new CREFormatException("Ingredient is invalid: " + ingredient.val(), t);
+					}
+					((MCShapedRecipe) ret).setIngredient(key.charAt(0), mat);
 				}
 				return ret;
 
@@ -1486,27 +1490,45 @@ public class ObjectGenerator {
 					throw new CREFormatException("Ingredients array is invalid.", t);
 				}
 				for(Construct ingredient : ingredients.asList()) {
-					MCItemStack is;
 					if(ingredient instanceof CString) {
-						CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "String ingredients may not be accurate.", t);
-						if(ingredient.val().contains(":")) {
-							String[] split = ingredient.val().split(":");
-							is = StaticLayer.GetItemStack(Integer.valueOf(split[0]), Integer.valueOf(split[1]), 1);
-						} else {
-							is = StaticLayer.GetItemStack(Integer.valueOf(ingredient.val()), 1);
+						MCMaterial mat = StaticLayer.GetMaterial(ingredient.val());
+						if(mat == null) {
+							// maybe legacy item format
+							try {
+								if(ingredient.val().contains(":")) {
+									String[] split = ingredient.val().split(":");
+									mat = StaticLayer.GetMaterialFromLegacy(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
+								} else {
+									mat = StaticLayer.GetConvertor().getMaterial(Integer.valueOf(ingredient.val()));
+								}
+								CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Numeric item formats (eg. \"0:0\" are deprecated.", t);
+							} catch (NumberFormatException ex) {}
+							if(mat == null) {
+								throw new CREFormatException("Ingredient is invalid: " + ingredient.val(), t);
+							}
 						}
+						((MCShapelessRecipe) ret).addIngredient(mat);
 					} else if(ingredient instanceof CArray) {
-						is = item(ingredient, t);
+						((MCShapelessRecipe) ret).addIngredient(item(ingredient, t));
 					} else {
 						throw new CREFormatException("Item was not found", t);
 					}
-					((MCShapelessRecipe) ret).addIngredient(is);
 				}
 				return ret;
 
 			case FURNACE:
-				CArray is = Static.getArray(recipe.get("input", t), t);
-				((MCFurnaceRecipe) ret).setInput(item(is, t));
+				Construct input = recipe.get("input", t);
+				if(input instanceof CString) {
+					MCMaterial mat = StaticLayer.GetMaterial(input.val());
+					if(mat == null) {
+						throw new CREFormatException("Furnace input is invalid: " + input.val(), t);
+					}
+					((MCFurnaceRecipe) ret).setInput(mat);
+				} else if(input instanceof CArray) {
+					((MCFurnaceRecipe) ret).setInput(item(input, t));
+				} else {
+					throw new CREFormatException("Item was not found", t);
+				}
 				return ret;
 
 			default:

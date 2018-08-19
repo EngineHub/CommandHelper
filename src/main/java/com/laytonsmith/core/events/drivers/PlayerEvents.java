@@ -819,7 +819,7 @@ public class PlayerEvents {
 					} else {
 						type = Integer.parseInt(notation);
 					}
-					MCMaterial mat = StaticLayer.GetConvertor().GetMaterialFromLegacy(type, 0);
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, 0);
 					if(mat == null) {
 						throw new CREBindException("Invalid material '" + notation + "'", event.getTarget());
 					}

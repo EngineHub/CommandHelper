@@ -2770,9 +2770,9 @@ public class PlayerManagement {
 
 			if(ban) {
 				if(args.length > 2) {
-					reason = args[2].val();
+					reason = args[2].nval();
 					if(args.length == 4) {
-						source = args[3].val();
+						source = args[3].nval();
 					}
 				}
 				Static.getServer().banName(target, reason, source);

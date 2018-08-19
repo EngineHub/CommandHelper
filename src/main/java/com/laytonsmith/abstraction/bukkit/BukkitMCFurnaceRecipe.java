@@ -2,7 +2,9 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCFurnaceRecipe;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
+import org.bukkit.Material;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 
@@ -43,5 +45,10 @@ public class BukkitMCFurnaceRecipe extends BukkitMCRecipe implements MCFurnaceRe
 	@Override
 	public void setInput(MCItemStack input) {
 		fr.setInput(((ItemStack) input.getHandle()).getData());
+	}
+
+	@Override
+	public void setInput(MCMaterial mat) {
+		fr.setInput((Material) mat.getHandle());
 	}
 }
