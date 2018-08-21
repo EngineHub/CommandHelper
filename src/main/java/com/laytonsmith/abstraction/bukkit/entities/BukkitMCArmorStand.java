@@ -305,11 +305,13 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public ItemStack getItemInHand() {
 			return holder.getItemInHand();
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void setItemInHand(ItemStack itemStack) {
 			holder.setItemInHand(itemStack);
 		}
@@ -412,11 +414,13 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public float getItemInHandDropChance() {
 			return 0;
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void setItemInHandDropChance(float v) {
 
 		}

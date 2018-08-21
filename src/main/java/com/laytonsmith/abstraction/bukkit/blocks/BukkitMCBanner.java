@@ -3,8 +3,6 @@ package com.laytonsmith.abstraction.bukkit.blocks;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.blocks.MCBanner;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPattern;
-import com.laytonsmith.abstraction.enums.MCDyeColor;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import org.bukkit.block.Banner;
 import org.bukkit.block.banner.Pattern;
 
@@ -18,16 +16,6 @@ public class BukkitMCBanner extends BukkitMCBlockState implements MCBanner {
 	public BukkitMCBanner(Banner block) {
 		super(block);
 		b = block;
-	}
-
-	@Override
-	public MCDyeColor getBaseColor() {
-		return BukkitMCDyeColor.getConvertor().getAbstractedEnum(b.getBaseColor());
-	}
-
-	@Override
-	public void setBaseColor(MCDyeColor color) {
-		b.setBaseColor(BukkitMCDyeColor.getConvertor().getConcreteEnum(color));
 	}
 
 	@Override

@@ -31,18 +31,6 @@ public interface MCBlock extends MCMetadatable {
 	 * @deprecated Magic value
 	 */
 	@Deprecated
-	void setTypeId(int idata);
-
-	/**
-	 * @deprecated Magic value
-	 */
-	@Deprecated
-	void setData(byte imeta);
-
-	/**
-	 * @deprecated Magic value
-	 */
-	@Deprecated
 	void setTypeAndData(int type, byte data, boolean physics);
 
 	MCBlockData getBlockData();

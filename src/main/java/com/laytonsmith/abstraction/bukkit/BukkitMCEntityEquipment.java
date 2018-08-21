@@ -148,7 +148,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	// anything below this line, but they are here for flexibility and completion
 	@Override
 	public MCItemStack getWeapon() {
-		return new BukkitMCItemStack(ee.getItemInHand());
+		return new BukkitMCItemStack(ee.getItemInMainHand());
 	}
 
 	@Override
@@ -178,7 +178,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
 	@Override
 	public void setWeapon(MCItemStack stack) {
-		ee.setItemInHand(((BukkitMCItemStack) stack).asItemStack());
+		ee.setItemInMainHand(((BukkitMCItemStack) stack).asItemStack());
 	}
 
 	@Override
@@ -208,7 +208,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
 	@Override
 	public float getWeaponDropChance() {
-		return ee.getItemInHandDropChance();
+		return ee.getItemInMainHandDropChance();
 	}
 
 	@Override
@@ -238,7 +238,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
 	@Override
 	public void setWeaponDropChance(float chance) {
-		ee.setItemInHandDropChance(chance);
+		ee.setItemInMainHandDropChance(chance);
 	}
 
 	@Override

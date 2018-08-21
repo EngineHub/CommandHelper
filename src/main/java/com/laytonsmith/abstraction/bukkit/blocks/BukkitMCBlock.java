@@ -81,20 +81,6 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	}
 
 	@Override
-	public void setTypeId(int idata) {
-		Material mat = BukkitMCLegacyMaterial.getMaterial(idata);
-		if(mat == null) {
-			b.setType(Material.AIR);
-		}
-		b.setType(mat);
-	}
-
-	@Override
-	public void setData(byte imeta) {
-		setTypeAndData(getTypeId(), imeta, true);
-	}
-
-	@Override
 	public void setTypeAndData(int type, byte data, boolean physics) {
 		b.setBlockData(BukkitMCLegacyMaterial.getBlockData(type, data), physics);
 	}

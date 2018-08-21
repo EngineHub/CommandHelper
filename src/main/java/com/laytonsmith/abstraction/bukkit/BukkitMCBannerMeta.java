@@ -2,8 +2,6 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCBannerMeta;
 import com.laytonsmith.abstraction.MCPattern;
-import com.laytonsmith.abstraction.enums.MCDyeColor;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.inventory.meta.BannerMeta;
 
@@ -30,11 +28,6 @@ public class BukkitMCBannerMeta extends BukkitMCItemMeta implements MCBannerMeta
 	}
 
 	@Override
-	public MCDyeColor getBaseColor() {
-		return BukkitMCDyeColor.getConvertor().getAbstractedEnum(bm.getBaseColor());
-	}
-
-	@Override
 	public MCPattern getPattern(int i) {
 		return new BukkitMCPattern(bm.getPattern(i));
 	}
@@ -57,11 +50,6 @@ public class BukkitMCBannerMeta extends BukkitMCItemMeta implements MCBannerMeta
 	@Override
 	public void removePattern(int i) {
 		bm.removePattern(i);
-	}
-
-	@Override
-	public void setBaseColor(MCDyeColor color) {
-		bm.setBaseColor(BukkitMCDyeColor.getConvertor().getConcreteEnum(color));
 	}
 
 	@Override
