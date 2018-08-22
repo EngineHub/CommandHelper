@@ -64,7 +64,7 @@ public class BukkitMCCommandMap implements MCCommandMap {
 	@Override
 	public boolean unregister(MCCommand cmd) {
 		if(cmd.isRegistered()) {
-			((Map<String, Command>) ReflectionUtils.get(scm.getClass(), scm, "knownCommands")).remove(cmd.getName());
+			((Map<String, Command>) ReflectionUtils.invokeMethod(scm.getClass(), scm, "getKnownCommands")).remove(cmd.getName());
 			return cmd.unregister(this);
 		} else {
 			return false;
