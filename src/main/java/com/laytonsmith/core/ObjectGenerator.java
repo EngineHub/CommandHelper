@@ -52,6 +52,7 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
+import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.core.constructs.CArray;
@@ -886,7 +887,7 @@ public class ObjectGenerator {
 						Construct effects = ma.get("potions", t);
 						if(effects instanceof CArray) {
 							for(MCLivingEntity.MCEffect e : potions((CArray) effects, t)) {
-								((MCPotionMeta) meta).addCustomEffect(e.getPotionID(), e.getStrength(),
+								((MCPotionMeta) meta).addCustomEffect(e.getPotionEffectType(), e.getStrength(),
 										e.getTicksRemaining(), e.isAmbient(), e.hasParticles(), e.showIcon(), true, t);
 							}
 						} else {
@@ -1159,16 +1160,16 @@ public class ObjectGenerator {
 	}
 
 	public CArray potions(List<MCLivingEntity.MCEffect> effectList, Target t) {
-		CArray ea = new CArray(t);
+		CArray ea = CArray.GetAssociativeArray(t);
 		for(MCLivingEntity.MCEffect eff : effectList) {
 			CArray effect = CArray.GetAssociativeArray(t);
-			effect.set("id", new CInt(eff.getPotionID(), t), t);
+			effect.set("id", new CInt(eff.getPotionEffectType().getId(), t), t);
 			effect.set("strength", new CInt(eff.getStrength(), t), t);
 			effect.set("seconds", new CDouble(eff.getTicksRemaining() / 20.0, t), t);
 			effect.set("ambient", CBoolean.get(eff.isAmbient()), t);
 			effect.set("particles", CBoolean.get(eff.hasParticles()), t);
 			effect.set("icon", CBoolean.get(eff.showIcon()), t);
-			ea.push(effect, t);
+			ea.set(eff.getPotionEffectType().name().toLowerCase(), effect, t);
 		}
 		return ea;
 	}
@@ -1178,17 +1179,25 @@ public class ObjectGenerator {
 		for(String key : ea.stringKeySet()) {
 			if(ea.get(key, t) instanceof CArray) {
 				CArray effect = (CArray) ea.get(key, t);
-				int potionID = 0;
+				MCPotionEffectType type;
 				int strength = 0;
 				double seconds = 30.0;
 				boolean ambient = false;
 				boolean particles = true;
 				boolean icon = true;
-				if(effect.containsKey("id")) {
-					potionID = Static.getInt32(effect.get("id", t), t);
-				} else {
-					throw new CREFormatException("No potion ID was given at index " + key, t);
+
+				try {
+					if(ea.isAssociative()) {
+						type = MCPotionEffectType.valueOf(key.toUpperCase());
+					} else if(effect.containsKey("id")) {
+						type = MCPotionEffectType.getById(Static.getInt32(effect.get("id", t), t));
+					} else {
+						throw new CREFormatException("No potion type was given.", t);
+					}
+				} catch (IllegalArgumentException ex) {
+					throw new CREFormatException(ex.getMessage(), t);
 				}
+
 				if(effect.containsKey("strength")) {
 					strength = Static.getInt32(effect.get("strength", t), t);
 				}
@@ -1209,7 +1218,7 @@ public class ObjectGenerator {
 				if(effect.containsKey("icon")) {
 					icon = Static.getBoolean(effect.get("icon", t), t);
 				}
-				ret.add(new MCLivingEntity.MCEffect(potionID, strength, (int) (seconds * 20), ambient, particles, icon));
+				ret.add(new MCLivingEntity.MCEffect(type, strength, (int) (seconds * 20), ambient, particles, icon));
 			} else {
 				throw new CREFormatException("Expected a potion array at index" + key, t);
 			}

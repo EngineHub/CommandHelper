@@ -3,8 +3,9 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCLivingEntity.MCEffect;
 import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCPotionMeta;
+import com.laytonsmith.abstraction.enums.MCPotionEffectType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
@@ -33,12 +34,8 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 	}
 
 	@Override
-	public boolean addCustomEffect(int id, int strength, int ticks, boolean ambient, boolean particles, boolean icon, boolean force, Target t) {
-		int maxID = PotionEffectType.values().length;
-		if(id < 1 || id > maxID) {
-			throw new CRERangeException("Invalid effect ID, must be from 1-" + maxID, t);
-		}
-		PotionEffect pe = new PotionEffect(PotionEffectType.getById(id), ticks, strength, ambient, particles, icon);
+	public boolean addCustomEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient, boolean particles, boolean icon, boolean force, Target t) {
+		PotionEffect pe = new PotionEffect((PotionEffectType) type.getConcrete(), ticks, strength, ambient, particles, icon);
 		return pm.addCustomEffect(pe, force);
 	}
 
@@ -51,15 +48,15 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 	public List<MCEffect> getCustomEffects() {
 		List<MCEffect> list = new ArrayList<>();
 		for(PotionEffect pe : pm.getCustomEffects()) {
-			list.add(new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(),
-					pe.isAmbient(), pe.hasParticles(), pe.hasIcon()));
+			list.add(new MCEffect(BukkitMCPotionEffectType.valueOfConcrete(pe.getType()), pe.getAmplifier(),
+					pe.getDuration(), pe.isAmbient(), pe.hasParticles(), pe.hasIcon()));
 		}
 		return list;
 	}
 
 	@Override
-	public boolean hasCustomEffect(int id) {
-		return pm.hasCustomEffect(PotionEffectType.getById(id));
+	public boolean hasCustomEffect(MCPotionEffectType type) {
+		return pm.hasCustomEffect((PotionEffectType) type.getConcrete());
 	}
 
 	@Override
@@ -68,8 +65,8 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 	}
 
 	@Override
-	public boolean removeCustomEffect(int id) {
-		return pm.removeCustomEffect(PotionEffectType.getById(id));
+	public boolean removeCustomEffect(MCPotionEffectType type) {
+		return pm.removeCustomEffect((PotionEffectType) type.getConcrete());
 	}
 
 }

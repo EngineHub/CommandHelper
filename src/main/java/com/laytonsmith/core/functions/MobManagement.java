@@ -21,6 +21,7 @@ import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 import com.laytonsmith.abstraction.enums.MCPigType;
+import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCWolfType;
 import com.laytonsmith.abstraction.enums.MCZombieType;
@@ -652,7 +653,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "array {entityID} Returns an array of potion arrays showing"
+			return "array {entityID} Returns an array of potion effect arrays showing"
 					+ " the effects on this mob.";
 		}
 
@@ -660,7 +661,7 @@ public class MobManagement {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{new ExampleScript("Basic use",
 				"msg(get_mob_effects('091a595d-3d2f-4df4-b493-951dc4bed7f2'))",
-				"{{ambient: false, id: 1, seconds: 30.0, strength: 1}}")};
+				"{speed: {ambient: false, icon: true, id: 1, particles: true, seconds: 30.0, strength: 1}}")};
 		}
 
 		@Override
@@ -680,23 +681,22 @@ public class MobManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{3, 4, 5, 6};
+			return new Integer[]{2, 3, 4, 5, 6};
 		}
 
 		@Override
 		public String docs() {
-			return "boolean {entityId, potionID, strength, [seconds], [ambient], [particles], [icon]} Effect is 1-23."
-					+ " Seconds defaults to 30.0. If the potionID is out of range, a RangeException is thrown, because"
-					+ " out of range potion effects cause the client to crash, fairly hardcore. See"
-					+ " http://www.minecraftwiki.net/wiki/Potion_effects for a complete list of potions that can be"
-					+ " added. To remove an effect, set the seconds to 0. If seconds is less than 0 or greater than"
-					+ " 107374182 a RangeException is thrown. Strength is the number of levels to add to the"
-					+ " base power (effect level 1). Ambient takes a boolean of whether the particles should be less"
-					+ " noticeable. Particles takes a boolean of whether the particles should be visible at all."
+			return "boolean {entityId, potionEffect, [strength], [seconds], [ambient], [particles], [icon]}"
+					+ " Adds one, or modifies an existing, potion effect on a mob."
+					+ " The potionEffect can be " + StringUtils.Join(MCPotionEffectType.types(), ", ", ", or ", " or ")
+					+ ". It also accepts an integer corresponding to the effect id listed on the Minecraft wiki."
+					+ " Strength is an integer representing the power level of the effect, starting at 0."
+					+ " Seconds defaults to 30.0. To remove an effect, set the seconds to 0."
+					+ " If seconds is less than 0 or greater than 107374182 a RangeException is thrown."
+					+ " Ambient takes a boolean of whether the particles should be more transparent."
+					+ " Particles takes a boolean of whether the particles should be visible at all."
 					+ " Icon takes a boolean for whether or not to show the icon to the entity if it's a player."
-					+ " The function returns true if the effect was added or removed as desired, and false if it wasn't"
-					+ " (however, this currently only will happen if an effect is attempted to be removed, yet isn't"
-					+ " already on the mob).";
+					+ " The function returns whether or not the effect was modified.";
 		}
 
 		@Override
@@ -709,36 +709,56 @@ public class MobManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
 
-			int effect = Static.getInt32(args[1], t);
+			MCPotionEffectType type = null;
+			if(args[1] instanceof CString) {
+				try {
+					type = MCPotionEffectType.valueOf(args[1].val().toUpperCase());
+				} catch (IllegalArgumentException ex) {
+					// maybe it's a number id
+				}
+			}
+			if(type == null) {
+				try {
+					type = MCPotionEffectType.getById(Static.getInt32(args[1], t));
+				} catch (IllegalArgumentException ex) {
+					throw new CREFormatException("Invalid potion effect type: " + args[1].val(), t);
+				}
+			}
 
-			int strength = Static.getInt32(args[2], t);
+			int strength = 0;
 			double seconds = 30.0;
 			boolean ambient = false;
 			boolean particles = true;
 			boolean icon = true;
-			if(args.length >= 4) {
-				seconds = Static.getDouble(args[3], t);
-				if(seconds < 0.0) {
-					throw new CRERangeException("Seconds cannot be less than 0.0", t);
-				} else if(seconds * 20 > Integer.MAX_VALUE) {
-					throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
+			if(args.length >= 3) {
+				strength = Static.getInt32(args[2], t);
+
+				if(args.length >= 4) {
+					seconds = Static.getDouble(args[3], t);
+					if(seconds < 0.0) {
+						throw new CRERangeException("Seconds cannot be less than 0.0", t);
+					} else if(seconds * 20 > Integer.MAX_VALUE) {
+						throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
+					}
+
+					if(args.length >= 5) {
+						ambient = Static.getBoolean(args[4], t);
+
+						if(args.length >= 6) {
+							particles = Static.getBoolean(args[5], t);
+
+							if(args.length == 7) {
+								icon = Static.getBoolean(args[6], t);
+							}
+						}
+					}
 				}
-			}
-			if(args.length == 5) {
-				ambient = Static.getBoolean(args[4], t);
-			}
-			if(args.length == 6) {
-				particles = Static.getBoolean(args[5], t);
-			}
-			if(args.length == 7) {
-				icon = Static.getBoolean(args[6], t);
 			}
 
 			if(seconds == 0.0) {
-				return CBoolean.get(mob.removeEffect(effect));
+				return CBoolean.get(mob.removeEffect(type));
 			} else {
-				mob.addEffect(effect, strength, (int) (seconds * 20), ambient, particles, icon);
-				return CBoolean.TRUE;
+				return CBoolean.get(mob.addEffect(type, strength, (int) (seconds * 20), ambient, particles, icon));
 			}
 		}
 

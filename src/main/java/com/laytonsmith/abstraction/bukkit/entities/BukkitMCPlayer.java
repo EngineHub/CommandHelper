@@ -21,6 +21,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
+import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCWeather;
@@ -292,8 +293,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
-	public boolean removeEffect(int potionID) {
-		PotionEffectType t = PotionEffectType.getById(potionID);
+	public boolean removeEffect(MCPotionEffectType type) {
+		PotionEffectType t = (PotionEffectType) type.getConcrete();
 		boolean hasIt = false;
 		for(PotionEffect pe : p.getActivePotionEffects()) {
 			if(pe.getType() == t) {

@@ -11,6 +11,8 @@ import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntityEquipment;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.enums.MCPotionEffectType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import org.bukkit.Material;
@@ -189,20 +191,14 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	@Override
-	public void addEffect(int id, int strength, int ticks, boolean ambient, boolean particles, boolean icon) {
-		PotionEffectType type = PotionEffectType.getById(id);
-		PotionEffect pe = new PotionEffect(type, ticks, strength, ambient, particles, icon);
-		le.addPotionEffect(pe, true);
+	public boolean addEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient, boolean particles, boolean icon) {
+		PotionEffect pe = new PotionEffect((PotionEffectType) type.getConcrete(), ticks, strength, ambient, particles, icon);
+		return le.addPotionEffect(pe, true);
 	}
 
 	@Override
-	public int getMaxEffect() {
-		return PotionEffectType.values().length - 1;
-	}
-
-	@Override
-	public boolean removeEffect(int potionID) {
-		PotionEffectType t = PotionEffectType.getById(potionID);
+	public boolean removeEffect(MCPotionEffectType type) {
+		PotionEffectType t = (PotionEffectType) type.getConcrete();
 		boolean hasIt = false;
 		for(PotionEffect pe : le.getActivePotionEffects()) {
 			if(pe.getType() == t) {
@@ -225,8 +221,8 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public List<MCEffect> getEffects() {
 		List<MCEffect> effects = new ArrayList<>();
 		for(PotionEffect pe : le.getActivePotionEffects()) {
-			MCEffect e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(),
-					pe.hasParticles(), pe.hasIcon());
+			MCEffect e = new MCEffect(BukkitMCPotionEffectType.valueOfConcrete(pe.getType()), pe.getAmplifier(), pe.getDuration(),
+					pe.isAmbient(), pe.hasParticles(), pe.hasIcon());
 			effects.add(e);
 		}
 		return effects;

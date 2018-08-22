@@ -18,6 +18,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.enums.MCGameMode;
+import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCWeather;
@@ -2114,22 +2115,22 @@ public class PlayerManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{3, 4, 5, 6};
+			return new Integer[]{2, 3, 4, 5, 6};
 		}
 
 		@Override
 		public String docs() {
-			return "boolean {player, potionID, strength, [seconds], [ambient], [particles], [icon]} Effect is 1-23."
-					+ " Seconds defaults to 30.0. If the potionID is out of range, a RangeException is thrown, because"
-					+ " out of range potion effects cause the client to crash, fairly hardcore. See"
-					+ " http://www.minecraftwiki.net/wiki/Potion_effects for a complete list of potions that can be"
-					+ " added. To remove an effect, set the seconds to 0. Strength is the number of levels to add to the"
-					+ " base power (effect level 1). Ambient takes a boolean of whether the particles should be less"
-					+ " noticeable. Particles takes a boolean of whether the particles should be visible at all."
-					+ " Icon takes a boolean for whether or not to show the effect's icon on the player's screen."
-					+ " The function returns true if the effect was added or removed as desired, and false if it wasn't"
-					+ " (however, this currently only will happen if an effect is attempted to be removed, yet isn't"
-					+ " already on the player).";
+			return "boolean {player, potionEffect, [strength], [seconds], [ambient], [particles], [icon]}"
+					+ " Adds one, or modifies an existing, potion effect on a mob."
+					+ " The potionEffect can be " + StringUtils.Join(MCPotionEffectType.types(), ", ", ", or ", " or ")
+					+ ". It also accepts an integer corresponding to the effect id listed on the Minecraft wiki."
+					+ " Strength is an integer representing the power level of the effect, starting at 0."
+					+ " Seconds defaults to 30.0. To remove an effect, set the seconds to 0."
+					+ " If seconds is less than 0 or greater than 107374182 a RangeException is thrown."
+					+ " Ambient takes a boolean of whether the particles should be more transparent."
+					+ " Particles takes a boolean of whether the particles should be visible at all."
+					+ " Icon takes a boolean for whether or not to show the icon to the player."
+					+ " The function returns whether or not the effect was modified.";
 		}
 
 		@Override
@@ -2157,42 +2158,56 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = Static.GetPlayer(args[0].val(), t);
 
-			int effect = Static.getInt32(args[1], t);
-			//To work around a bug in bukkit/vanilla, if the effect is invalid, throw an exception
-			//otherwise the client crashes, and requires deletion of
-			//player data to fix.
-			if(effect < 1 || effect > m.getMaxEffect()) {
-				throw new CRERangeException("Invalid effect ID received, must be from 1-" + m.getMaxEffect(), t);
+			MCPotionEffectType type = null;
+			if(args[1] instanceof CString) {
+				try {
+					type = MCPotionEffectType.valueOf(args[1].val().toUpperCase());
+				} catch (IllegalArgumentException ex) {
+					// maybe it's a number id
+				}
+			}
+			if(type == null) {
+				try {
+					type = MCPotionEffectType.getById(Static.getInt32(args[1], t));
+				} catch (CRECastException | IllegalArgumentException ex) {
+					throw new CREFormatException("Invalid potion effect type: " + args[1].val(), t);
+				}
 			}
 
-			int strength = Static.getInt32(args[2], t);
+			int strength = 0;
 			double seconds = 30.0;
 			boolean ambient = false;
 			boolean particles = true;
 			boolean icon = true;
-			if(args.length >= 4) {
-				seconds = Static.getDouble(args[3], t);
-				if(seconds < 0.0) {
-					throw new CRERangeException("Seconds cannot be less than 0.0", t);
-				} else if(seconds * 20 > Integer.MAX_VALUE) {
-					throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
+			if(args.length >= 3) {
+				strength = Static.getInt32(args[2], t);
+
+				if(args.length >= 4) {
+					seconds = Static.getDouble(args[3], t);
+					if(seconds < 0.0) {
+						throw new CRERangeException("Seconds cannot be less than 0.0", t);
+					} else if(seconds * 20 > Integer.MAX_VALUE) {
+						throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
+					}
+
+					if(args.length >= 5) {
+						ambient = Static.getBoolean(args[4], t);
+
+						if(args.length >= 6) {
+							particles = Static.getBoolean(args[5], t);
+
+							if(args.length == 7) {
+								icon = Static.getBoolean(args[6], t);
+							}
+						}
+					}
 				}
 			}
-			if(args.length >= 5) {
-				ambient = Static.getBoolean(args[4], t);
-			}
-			if(args.length == 6) {
-				particles = Static.getBoolean(args[5], t);
-			}
-			if(args.length == 7) {
-				icon = Static.getBoolean(args[6], t);
-			}
-			Static.AssertPlayerNonNull(m, t);
+
 			if(seconds == 0.0) {
-				return CBoolean.get(m.removeEffect(effect));
+				return CBoolean.get(m.removeEffect(type));
 			} else {
-				m.addEffect(effect, strength, (int) (seconds * 20), ambient, particles, icon);
-				return CBoolean.TRUE;
+				return CBoolean.get(m.addEffect(type, strength, (int) (seconds * 20), ambient, particles, icon));
 			}
 		}
 
@@ -2200,13 +2215,13 @@ public class PlayerManagement {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Give player Notch nausea for 30 seconds",
-				"set_peffect('Notch', 9, 30)",
+				"set_peffect('Notch', 'NAUSEA')",
 				"The player will experience a wobbly screen."),
 				new ExampleScript("Make player ArenaPlayer unable to jump for 10 minutes",
-				"set_peffect('ArenaPlayer', 8, -16, 600)",
+				"set_peffect('ArenaPlayer', 'JUMP_BOOST', -16, 600)",
 				"From the player's perspective, they will not even leave the ground."),
 				new ExampleScript("Remove poison from yourself",
-				"set_peffect(player(), 19, 1, 0)",
+				"set_peffect(player(), 'POISON', 1, 0)",
 				"You are now unpoisoned. Note, it does not matter what you set strength to here.")
 			};
 		}
@@ -2252,10 +2267,11 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[player]} Returns an array of effects that are currently active on a given player."
-					+ " The array will be full of playerEffect objects, which contain three fields, \"id\","
-					+ " \"strength\", \"seconds\" remaining, whether the effect is \"ambient\", and whether"
-					+ " \"particles\" are enabled.";
+			return "array {[player]} Returns an array of potion effects that are currently active on a given player."
+					+ " The array can contain potion effect objects, with the key defining the type of potion effect."
+					+ " The arrays contain the following fields: \"id\","
+					+ " \"strength\", \"seconds\" remaining, whether the effect is \"ambient\", whether"
+					+ " \"particles\" are enabled, and whether the \"icon\" is shown to the player.";
 		}
 
 		@Override
