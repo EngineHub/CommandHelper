@@ -28,7 +28,6 @@ import org.bukkit.block.Dispenser;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Command;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -142,7 +141,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
 	@Override
 	public boolean isCommandBlock() {
-		return Command.class.isAssignableFrom(b.getType().getData());
+		return b.getState() instanceof CommandBlock;
 	}
 
 	@Override
