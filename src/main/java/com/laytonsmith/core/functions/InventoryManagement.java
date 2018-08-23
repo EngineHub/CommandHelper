@@ -656,6 +656,10 @@ public class InventoryManagement {
 				c = args[1];
 			}
 
+			if(c instanceof CNull) {
+				return new CInt(0, t);
+			}
+
 			if(c instanceof CArray) {
 				ca = (CArray) c;
 				is = ObjectGenerator.GetGenerator().item(ca, t);
@@ -758,7 +762,10 @@ public class InventoryManagement {
 				item = args[1];
 			}
 			MCItemStack is;
-			if(item instanceof CArray) {
+			if(item instanceof CNull) {
+				ca = null;
+				is = StaticLayer.GetItemStack("AIR", 1);
+			} else if(item instanceof CArray) {
 				ca = (CArray) item;
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
@@ -863,6 +870,9 @@ public class InventoryManagement {
 			int itemOffset = 0;
 
 			if(args.length == 2) {
+				if(args[1] instanceof CNull) {
+					return new CInt(0, t);
+				}
 				if(args[1] instanceof CArray) {
 					itemOffset = 1;
 				}
@@ -972,6 +982,9 @@ public class InventoryManagement {
 			CArray ca = null;
 
 			if(args.length == 2) {
+				if(args[1] instanceof CNull) {
+					return new CInt(0, t);
+				}
 				if(args[1] instanceof CArray) {
 					itemOffset = 1;
 				}
@@ -1092,6 +1105,9 @@ public class InventoryManagement {
 			int itemOffset = 0;
 
 			if(args.length == 2) {
+				if(args[1] instanceof CNull) {
+					return new CInt(0, t);
+				}
 				if(args[1] instanceof CArray) {
 					itemOffset = 1;
 				}
@@ -1198,6 +1214,9 @@ public class InventoryManagement {
 			CArray ca = null;
 
 			if(args.length == 2) {
+				if(args[1] instanceof CNull) {
+					return new CInt(0, t);
+				}
 				if(args[1] instanceof CArray) {
 					itemOffset = 1;
 				}
