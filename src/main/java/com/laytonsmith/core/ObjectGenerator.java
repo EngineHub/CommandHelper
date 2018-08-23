@@ -1546,11 +1546,11 @@ public class ObjectGenerator {
 	}
 
 	public MCMaterial material(String name, Target t) {
-		try {
-			return StaticLayer.GetMaterial(name.toUpperCase());
-		} catch (IllegalArgumentException exception) {
+		MCMaterial mat = StaticLayer.GetMaterial(name.toUpperCase());
+		if(mat == null) {
 			throw new CREFormatException("Unknown material type: " + name, t);
 		}
+		return mat;
 	}
 
 	public MCMaterial material(Construct name, Target t) {
