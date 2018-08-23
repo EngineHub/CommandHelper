@@ -110,7 +110,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public final ExecutionQueue executionQueue = new MethodScriptExecutionQueue("CommandHelperExecutionQueue", "default");
 	public PersistenceNetwork persistenceNetwork;
 	public Profiles profiles;
-	//public boolean firstLoad = true;
+	private boolean firstLoad = true;
 	public long interpreterUnlockedUntil = 0;
 	private Thread loadingThread;
 	/**
@@ -364,7 +364,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				CommandHelperFileLocations.getDefault().getLocalPackagesDirectory(),
 				CommandHelperFileLocations.getDefault().getPreferencesFile(),
 				new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), mainFile), this);
-		ac.reload(null, null, true);
+		ac.reload(null, null, this.firstLoad);
 
 		//Clear out our hostname cache
 		hostnameLookupCache = new ConcurrentHashMap<>();
@@ -396,7 +396,13 @@ public class CommandHelperPlugin extends JavaPlugin {
 		playerListener.loadGlobalAliases();
 		interpreterListener.reload();
 
+		firstLoad = false;
+
 		Static.getLogger().log(Level.INFO, "[CommandHelper] CommandHelper {0} enabled", getDescription().getVersion());
+	}
+
+	public boolean isFirstLoad() {
+		return this.firstLoad;
 	}
 
 	public static AliasCore getCore() {

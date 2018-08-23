@@ -6,6 +6,10 @@ import com.laytonsmith.abstraction.MCCommandMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.SimpleCommandMap;
 
@@ -52,12 +56,22 @@ public class BukkitMCCommandMap implements MCCommandMap {
 
 	@Override
 	public boolean register(String fallback, MCCommand cmd) {
-		return scm.register(fallback, ((BukkitMCCommand) cmd).cmd);
+		boolean success = scm.register(fallback, ((BukkitMCCommand) cmd).cmd);
+		if(!CommandHelperPlugin.self.isFirstLoad()) {
+			Server s = Bukkit.getServer();
+			ReflectionUtils.invokeMethod(s.getClass(), s, "syncCommands");
+		}
+		return success;
 	}
 
 	@Override
 	public boolean register(String label, String fallback, MCCommand cmd) {
-		return scm.register(label, fallback, ((BukkitMCCommand) cmd).cmd);
+		boolean success = scm.register(label, fallback, ((BukkitMCCommand) cmd).cmd);
+		if(!CommandHelperPlugin.self.isFirstLoad()) {
+			Server s = Bukkit.getServer();
+			ReflectionUtils.invokeMethod(s.getClass(), s, "syncCommands");
+		}
+		return success;
 	}
 
 	@SuppressWarnings("unchecked")
