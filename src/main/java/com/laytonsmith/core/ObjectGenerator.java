@@ -439,6 +439,7 @@ public class ObjectGenerator {
 					ma.set("inventory", box, t);
 				} else if(bs instanceof MCBanner) {
 					MCBanner banner = (MCBanner) bs;
+					ma.set("basecolor", banner.getBaseColor().name());
 					CArray patterns = new CArray(t, banner.numberOfPatterns());
 					for(MCPattern p : banner.getPatterns()) {
 						CArray pattern = CArray.GetAssociativeArray(t);
@@ -701,6 +702,10 @@ public class ObjectGenerator {
 						MCBanner banner = (MCBanner) bs;
 						if(ma.containsKey("patterns")) {
 							CArray array = ArgumentValidation.getArray(ma.get("patterns", t), t);
+							if(ma.containsKey("basecolor")) {
+								MCDyeColor base = MCDyeColor.valueOf(ma.get("basecolor", t).val().toUpperCase());
+								banner.setBaseColor(base);
+							}
 							for(String key : array.stringKeySet()) {
 								CArray pattern = ArgumentValidation.getArray(array.get(key, t), t);
 								MCPatternShape shape = MCPatternShape.valueOf(pattern.get("shape", t).val().toUpperCase());
@@ -907,8 +912,18 @@ public class ObjectGenerator {
 						for(String key : array.stringKeySet()) {
 							CArray pattern = ArgumentValidation.getArray(array.get(key, t), t);
 							MCPatternShape shape = MCPatternShape.valueOf(pattern.get("shape", t).val().toUpperCase());
-							MCDyeColor color = MCDyeColor.valueOf(pattern.get("color", t).val().toUpperCase());
-							((MCBannerMeta) meta).addPattern(StaticLayer.GetConvertor().GetPattern(color, shape));
+							String color = pattern.get("color", t).val().toUpperCase();
+							try {
+								MCDyeColor dyecolor = MCDyeColor.valueOf(color);
+								((MCBannerMeta) meta).addPattern(StaticLayer.GetConvertor().GetPattern(dyecolor, shape));
+							} catch (IllegalArgumentException ex) {
+								if(color.equals("SILVER")) {
+									// convert old DyeColor
+									((MCBannerMeta) meta).addPattern(StaticLayer.GetConvertor().GetPattern(MCDyeColor.LIGHT_GRAY, shape));
+								} else {
+									throw ex;
+								}
+							}
 						}
 					}
 				} else if(meta instanceof MCMapMeta) {
