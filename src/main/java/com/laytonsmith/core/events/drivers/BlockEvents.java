@@ -347,7 +347,7 @@ public class BlockEvents {
 					+ " | against: a block array of the block being placed against"
 					+ " | oldblock: the old block type that was replaced"
 					+ " | location: A locationArray for this block} "
-					+ "{name|type|data} "
+					+ "{name} "
 					+ "{}";
 		}
 

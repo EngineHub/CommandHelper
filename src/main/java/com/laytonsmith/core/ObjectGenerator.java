@@ -279,8 +279,8 @@ public class ObjectGenerator {
 			MCMaterial material;
 			if(item.containsKey("name")) {
 				mat = item.get("name", t).val();
-				if(mat.equals("MAP")) {
-					// special handling, ignore data until later
+				if(mat.equals("MAP") || mat.equals("POTION")) {
+					// special handling, ignore data here
 					material = StaticLayer.GetMaterialFromLegacy(mat, 0);
 				} else {
 					material = StaticLayer.GetMaterialFromLegacy(mat, data);
@@ -301,15 +301,16 @@ public class ObjectGenerator {
 				}
 				mat = type.val();
 				int id = Static.getInt32(type, t);
-				if(id == 358) {
-					// special map handling, ignore data until later
+				if(id == 358 || id == 373) {
+					// special map handling, ignore data here
 					material = StaticLayer.GetMaterialFromLegacy(id, 0);
 				} else {
 					material = StaticLayer.GetMaterialFromLegacy(id, data);
 				}
 			}
-			if(material == null) {
-				throw new CREFormatException("Could not convert legacy item from " + mat + ":" + data, t);
+			if(material == null || material.getName().equals("AIR")) {
+				throw new CREFormatException("Could not find legacy item material from \"" + mat + "\""
+						+ " with data \"" + data + "\"", t);
 			}
 
 			// convert legacy meta to material
@@ -335,8 +336,8 @@ public class ObjectGenerator {
 			}
 
 			ret = StaticLayer.GetItemStack(material, data, qty);
-			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Converted \"" + mat + ":" + data + "\"" + " to "
-					+ material.getName(), t);
+			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Converted \"" + mat + "\" with data \""
+					+ data + "\" to " + material.getName(), t);
 
 		} else if(item.containsKey("name")) {
 			mat = item.get("name", t).val();
@@ -352,6 +353,10 @@ public class ObjectGenerator {
 
 		if(ret == null) {
 			throw new CREFormatException("Could not find item material from \"" + mat + "\"", t);
+		}
+
+		if(ret.isEmpty()) {
+			return ret;
 		}
 
 		if(item.containsKey("meta")) {
