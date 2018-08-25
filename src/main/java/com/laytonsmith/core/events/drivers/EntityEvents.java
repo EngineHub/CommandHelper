@@ -1522,7 +1522,7 @@ public class EntityEvents {
 				ret.put("type", new CString(event.getEntity().getType().name(), t));
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
 				ret.put("portaltype", new CString(mat.getName(), t));
-				ret.put("block", new CInt(mat.getType(), t));
+				ret.put("block", new CInt(mat.getName(), t));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCPortalEnterEvent");
