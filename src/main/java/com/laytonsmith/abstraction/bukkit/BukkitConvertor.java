@@ -671,31 +671,14 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCRecipe GetNewRecipe(String key, MCRecipeType type, MCItemStack result) {
 		ItemStack is = ((BukkitMCItemStack) result).asItemStack();
+		NamespacedKey nskey = new NamespacedKey(CommandHelperPlugin.self, key);
 		switch(type) {
 			case FURNACE:
-				if(key != null) {
-					NamespacedKey nskey = new NamespacedKey(CommandHelperPlugin.self, key);
-					return new BukkitMCFurnaceRecipe(new FurnaceRecipe(nskey, is, Material.AIR, 0.0F, 200));
-				} else {
-					// deprecated in 1.13
-					return new BukkitMCFurnaceRecipe(new FurnaceRecipe(is, Material.AIR));
-				}
+				return new BukkitMCFurnaceRecipe(new FurnaceRecipe(nskey, is, Material.AIR, 0.0F, 200));
 			case SHAPED:
-				if(key != null) {
-					NamespacedKey nskey = new NamespacedKey(CommandHelperPlugin.self, key);
-					return new BukkitMCShapedRecipe(new ShapedRecipe(nskey, is));
-				} else {
-					// deprecated in 1.12
-					return new BukkitMCShapedRecipe(new ShapedRecipe(is));
-				}
+				return new BukkitMCShapedRecipe(new ShapedRecipe(nskey, is));
 			case SHAPELESS:
-				if(key != null) {
-					NamespacedKey nskey = new NamespacedKey(CommandHelperPlugin.self, key);
-					return new BukkitMCShapelessRecipe(new ShapelessRecipe(nskey, is));
-				} else {
-					// deprecated in 1.12
-					return new BukkitMCShapelessRecipe(new ShapelessRecipe(is));
-				}
+				return new BukkitMCShapelessRecipe(new ShapelessRecipe(nskey, is));
 		}
 		return null;
 	}

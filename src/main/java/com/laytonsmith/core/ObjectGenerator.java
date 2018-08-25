@@ -1441,10 +1441,7 @@ public class ObjectGenerator {
 		}
 		CArray recipe = (CArray) c;
 
-		String recipeKey = null;
-		if(recipe.containsKey("key")) {
-			recipeKey = recipe.get("key", t).val();
-		}
+		String recipeKey = recipe.get("key", t).val();
 
 		MCRecipeType recipeType;
 		try {
