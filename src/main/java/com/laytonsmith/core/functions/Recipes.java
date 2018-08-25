@@ -125,7 +125,7 @@ public class Recipes {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class};
 		}
 
 		@Override
@@ -142,7 +142,7 @@ public class Recipes {
 
 		@Override
 		public String getName() {
-			return "get_recipe_for";
+			return "get_recipes_for";
 		}
 
 		@Override
