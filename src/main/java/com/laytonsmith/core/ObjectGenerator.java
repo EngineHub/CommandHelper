@@ -444,7 +444,6 @@ public class ObjectGenerator {
 					ma.set("inventory", box, t);
 				} else if(bs instanceof MCBanner) {
 					MCBanner banner = (MCBanner) bs;
-					ma.set("basecolor", banner.getBaseColor().name());
 					CArray patterns = new CArray(t, banner.numberOfPatterns());
 					for(MCPattern p : banner.getPatterns()) {
 						CArray pattern = CArray.GetAssociativeArray(t);
@@ -705,12 +704,13 @@ public class ObjectGenerator {
 						}
 					} else if(bs instanceof MCBanner) {
 						MCBanner banner = (MCBanner) bs;
+						banner.setBaseColor(MCDyeColor.WHITE);
+						if(ma.containsKey("basecolor")) {
+							MCDyeColor base = MCDyeColor.valueOf(ma.get("basecolor", t).val().toUpperCase());
+							banner.addPattern(StaticLayer.GetConvertor().GetPattern(base, MCPatternShape.BASE));
+						}
 						if(ma.containsKey("patterns")) {
 							CArray array = ArgumentValidation.getArray(ma.get("patterns", t), t);
-							if(ma.containsKey("basecolor")) {
-								MCDyeColor base = MCDyeColor.valueOf(ma.get("basecolor", t).val().toUpperCase());
-								banner.setBaseColor(base);
-							}
 							for(String key : array.stringKeySet()) {
 								CArray pattern = ArgumentValidation.getArray(array.get(key, t), t);
 								MCPatternShape shape = MCPatternShape.valueOf(pattern.get("shape", t).val().toUpperCase());
@@ -728,7 +728,6 @@ public class ObjectGenerator {
 								}
 							}
 						}
-						banner.update();
 						bsm.setBlockState(banner);
 					} else if(bs instanceof MCCreatureSpawner) {
 						MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
