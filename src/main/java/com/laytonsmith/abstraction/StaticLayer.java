@@ -64,36 +64,20 @@ public final class StaticLayer {
 		return convertor.GetServerEventMixin();
 	}
 
-	public static MCMaterial GetMaterialFromLegacy(int type, int qty) {
-		return convertor.GetMaterialFromLegacy(type, qty);
+	public static MCMaterial GetMaterialFromLegacy(int type, int data) {
+		return convertor.GetMaterialFromLegacy(type, data);
 	}
 
-	public static MCMaterial GetMaterialFromLegacy(String name, int qty) {
-		return convertor.GetMaterialFromLegacy(name, qty);
-	}
-
-	public static MCItemStack GetItemStack(int type, int qty) {
-		return convertor.GetItemStack(type, qty);
-	}
-
-	public static MCItemStack GetItemStack(int type, int data, int qty) {
-		return convertor.GetItemStack(type, data, qty);
+	public static MCMaterial GetMaterialFromLegacy(String name, int data) {
+		return convertor.GetMaterialFromLegacy(name, data);
 	}
 
 	public static MCItemStack GetItemStack(String type, int qty) {
 		return convertor.GetItemStack(type, qty);
 	}
 
-	public static MCItemStack GetItemStack(String type, int data, int qty) {
-		return convertor.GetItemStack(type, data, qty);
-	}
-
 	public static MCItemStack GetItemStack(MCMaterial type, int qty) {
 		return convertor.GetItemStack(type, qty);
-	}
-
-	public static MCItemStack GetItemStack(MCMaterial type, int data, int qty) {
-		return convertor.GetItemStack(type, data, qty);
 	}
 
 	public static MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded) {

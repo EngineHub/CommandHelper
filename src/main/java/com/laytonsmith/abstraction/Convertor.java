@@ -39,23 +39,13 @@ public interface Convertor {
 
 	MCServer GetServer();
 
-	MCItemStack GetItemStack(int type, int qty);
-
-	MCItemStack GetItemStack(int type, int data, int qty);
-
 	MCItemStack GetItemStack(MCMaterial type, int qty);
 
-	MCItemStack GetItemStack(MCMaterial type, int data, int qty);
-
 	MCItemStack GetItemStack(String type, int qty);
-
-	MCItemStack GetItemStack(String type, int data, int qty);
 
 	MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded);
 
 	void Startup(CommandHelperPlugin chp);
-
-	MCMaterial getMaterial(int id);
 
 	MCMaterial GetMaterialFromLegacy(String name, int data);
 

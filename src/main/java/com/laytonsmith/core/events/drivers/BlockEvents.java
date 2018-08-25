@@ -231,12 +231,7 @@ public class BlockEvents {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
-					MCMaterial mat;
-					if(data > 0) {
-						mat = StaticLayer.GetMaterialFromLegacy(id, data);
-					} else {
-						mat = StaticLayer.GetConvertor().getMaterial(id);
-					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, data);
 					if(mat == null) {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}
@@ -381,12 +376,7 @@ public class BlockEvents {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
-					MCMaterial mat;
-					if(data > 0) {
-						mat = StaticLayer.GetMaterialFromLegacy(id, data);
-					} else {
-						mat = StaticLayer.GetConvertor().getMaterial(id);
-					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, data);
 					if(mat == null) {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}
@@ -535,12 +525,7 @@ public class BlockEvents {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
-					MCMaterial mat;
-					if(data > 0) {
-						mat = StaticLayer.GetMaterialFromLegacy(id, data);
-					} else {
-						mat = StaticLayer.GetConvertor().getMaterial(id);
-					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, data);
 					if(mat == null) {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}
@@ -726,12 +711,7 @@ public class BlockEvents {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
-					MCMaterial mat;
-					if(data > 0) {
-						mat = StaticLayer.GetMaterialFromLegacy(id, data);
-					} else {
-						mat = StaticLayer.GetConvertor().getMaterial(id);
-					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, data);
 					if(mat == null) {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}
@@ -756,12 +736,7 @@ public class BlockEvents {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
-					MCMaterial mat;
-					if(data > 0) {
-						mat = StaticLayer.GetMaterialFromLegacy(id, data);
-					} else {
-						mat = StaticLayer.GetConvertor().getMaterial(id);
-					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, data);
 					if(mat == null) {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}
@@ -1106,6 +1081,7 @@ public class BlockEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilter
 			Map<String, Construct> prefilter = event.getPrefilter();
@@ -1201,12 +1177,7 @@ public class BlockEvents {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
-					MCMaterial mat;
-					if(data > 0) {
-						mat = StaticLayer.GetMaterialFromLegacy(id, data);
-					} else {
-						mat = StaticLayer.GetConvertor().getMaterial(id);
-					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, data);
 					if(mat == null) {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}
@@ -1231,12 +1202,7 @@ public class BlockEvents {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
-					MCMaterial mat;
-					if(data > 0) {
-						mat = StaticLayer.GetMaterialFromLegacy(id, data);
-					} else {
-						mat = StaticLayer.GetConvertor().getMaterial(id);
-					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, data);
 					if(mat == null) {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}
@@ -1418,7 +1384,7 @@ public class BlockEvents {
 				Construct cid = prefilter.get("oldtype");
 				if(cid instanceof CInt) {
 					int id = (int) ((CInt) cid).getInt();
-					MCMaterial mat = StaticLayer.GetConvertor().getMaterial(id);
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, 0);
 					if(mat == null) {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}

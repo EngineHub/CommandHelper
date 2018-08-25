@@ -18,6 +18,7 @@ import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.CArray;
@@ -632,10 +633,11 @@ public final class Static {
 		} catch (NumberFormatException e) {
 			throw new CREFormatException("Invalid item notation: " + notation, t);
 		}
-		MCItemStack is = StaticLayer.GetItemStack(type, data, qty);
-		if(is == null) {
+		MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, data);
+		if(mat == null) {
 			throw new CREFormatException("Invalid item values: " + notation, t);
 		}
+		MCItemStack is = StaticLayer.GetItemStack(mat, qty);
 		CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Item notation is deprecated."
 				+ " Converting '" + notation + "' to '" + is.getType().getName() + "'.", t);
 		return is;

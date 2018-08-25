@@ -604,7 +604,7 @@ public class PlayerManagement {
 						continue;
 					}
 					try {
-						material = StaticLayer.GetConvertor().getMaterial(Static.getInt16(mat, t));
+						material = StaticLayer.GetMaterialFromLegacy(Static.getInt16(mat, t), 0);
 						if(material != null) {
 							CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The id \"" + mat.val() + "\" is deprecated."
 									+ " Converted to \"" + material.getName() + "\"", t);

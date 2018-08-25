@@ -37,27 +37,11 @@ public class BukkitMCItemStack implements MCItemStack {
 	}
 
 	@Override
-	public short getDurability() {
-		if(is == null) {
-			return 0;
-		}
-		return is.getDurability();
-	}
-
-	@Override
 	public int getTypeId() {
 		if(is == null) {
 			return 0;
 		}
 		return Bukkit.getUnsafe().toLegacy(is.getType()).getId();
-	}
-
-	@Override
-	public void setDurability(short data) {
-		if(is == null) {
-			return;
-		}
-		is.setDurability(data);
 	}
 
 	@Override

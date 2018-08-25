@@ -191,6 +191,7 @@ public class PlayerEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilter
 			Map<String, Construct> prefilter = event.getPrefilter();
@@ -799,6 +800,7 @@ public class PlayerEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilters
 			Map<String, Construct> prefilter = event.getPrefilter();

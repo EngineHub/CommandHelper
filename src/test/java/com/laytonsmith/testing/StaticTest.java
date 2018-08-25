@@ -693,39 +693,15 @@ public class StaticTest {
 		}
 
 		@Override
-		public MCItemStack GetItemStack(int type, int qty) {
-			Convertor c = new BukkitConvertor();
-			return c.GetItemStack(type, qty);
-		}
-
-		@Override
-		public MCItemStack GetItemStack(int type, int data, int qty) {
-			Convertor c = new BukkitConvertor();
-			return c.GetItemStack(type, data, qty);
-		}
-
-		@Override
 		public MCItemStack GetItemStack(MCMaterial type, int qty) {
 			Convertor c = new BukkitConvertor();
 			return c.GetItemStack(type, qty);
 		}
 
 		@Override
-		public MCItemStack GetItemStack(MCMaterial type, int data, int qty) {
-			Convertor c = new BukkitConvertor();
-			return c.GetItemStack(type, data, qty);
-		}
-
-		@Override
 		public MCItemStack GetItemStack(String type, int qty) {
 			Convertor c = new BukkitConvertor();
 			return c.GetItemStack(type, qty);
-		}
-
-		@Override
-		public MCItemStack GetItemStack(String type, int data, int qty) {
-			Convertor c = new BukkitConvertor();
-			return c.GetItemStack(type, data, qty);
 		}
 
 		@Override
@@ -824,11 +800,6 @@ public class StaticTest {
 
 		@Override
 		public MCPluginMeta GetPluginMeta() {
-			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		@Override
-		public MCMaterial getMaterial(int id) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 

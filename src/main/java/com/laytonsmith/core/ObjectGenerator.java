@@ -231,7 +231,6 @@ public class ObjectGenerator {
 
 		CArray ret = CArray.GetAssociativeArray(t);
 		ret.set("name", new CString(is.getType().getName(), t), t);
-		ret.set("data", new CInt(is.getDurability(), t), t);
 		ret.set("qty", new CInt(is.getAmount(), t), t);
 		ret.set("meta", itemMeta(is, t), t);
 		return ret;
@@ -268,14 +267,13 @@ public class ObjectGenerator {
 			}
 		}
 
-		if(item.containsKey("data")) {
-			data = Static.getInt32(item.get("data", t), t);
-		}
-
-		legacy = legacy || item.containsKey("type");
+		legacy = legacy || item.containsKey("type") || item.containsKey("data");
 
 		if(legacy) {
 			// Do legacy item conversion
+			if(item.containsKey("data")) {
+				data = Static.getInt32(item.get("data", t), t);
+			}
 			MCMaterial material;
 			if(item.containsKey("name")) {
 				mat = item.get("name", t).val();
@@ -335,20 +333,13 @@ public class ObjectGenerator {
 				}
 			}
 
-			ret = StaticLayer.GetItemStack(material, data, qty);
+			ret = StaticLayer.GetItemStack(material, qty);
 			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Converted \"" + mat + "\" with data \""
 					+ data + "\" to " + material.getName(), t);
 
-		} else if(item.containsKey("name")) {
-			mat = item.get("name", t).val();
-			if(data > 0) {
-				ret = StaticLayer.GetItemStack(mat, data, qty);
-			} else {
-				ret = StaticLayer.GetItemStack(mat, qty);
-			}
-
 		} else {
-			throw new CREFormatException("Could not find item name key in array!", t);
+			mat = item.get("name", t).val();
+			ret = StaticLayer.GetItemStack(mat, qty);
 		}
 
 		if(ret == null) {
@@ -368,6 +359,10 @@ public class ObjectGenerator {
 			if(ret.getType().getName().equals("FILLED_MAP")) {
 				MCMapMeta meta = (MCMapMeta) ret.getItemMeta();
 				meta.setMapId(data);
+				ret.setItemMeta(meta);
+			} else if(data > 0 && ret.getType().getMaxDurability() > 0) {
+				MCItemMeta meta = ret.getItemMeta();
+				meta.setDamage(data);
 				ret.setItemMeta(meta);
 			}
 		}
@@ -415,7 +410,6 @@ public class ObjectGenerator {
 			ma.set("display", display, t);
 			ma.set("lore", lore, t);
 			ma.set("enchants", enchants(meta.getEnchants(), t), t);
-			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
 
 			Set<MCItemFlag> itemFlags = meta.getItemFlags();
 			CArray flagArray = new CArray(t);
@@ -425,7 +419,12 @@ public class ObjectGenerator {
 				}
 			}
 			ma.set("flags", flagArray, t);
-			ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t);
+
+			if(is.getType().getMaxDurability() > 0) {
+				ma.set("damage", new CInt(meta.getDamage(), t), t);
+				ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t);
+				ma.set("repair", new CInt(meta.getRepairCost(), t), t);
+			}
 
 			// Specific ItemMeta
 			if(meta instanceof MCBlockStateMeta) {
@@ -650,9 +649,6 @@ public class ObjectGenerator {
 						throw new CREFormatException("Enchants field was expected to be an array of Enchantment arrays", t);
 					}
 				}
-				if(ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
-					meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
-				}
 				if(ma.containsKey("flags")) {
 					Construct flags = ma.get("flags", t);
 					if(flags instanceof CArray) {
@@ -665,8 +661,17 @@ public class ObjectGenerator {
 						throw new CREFormatException("Itemflags was expected to be an array of flags.", t);
 					}
 				}
-				if(ma.containsKey("unbreakable")) {
-					meta.setUnbreakable(Static.getBoolean(ma.get("unbreakable", t), t));
+
+				if(mat.getMaxDurability() > 0) {
+					if(ma.containsKey("damage")) {
+						meta.setDamage(Static.getInt32(ma.get("damage", t), t));
+					}
+					if(ma.containsKey("unbreakable")) {
+						meta.setUnbreakable(Static.getBoolean(ma.get("unbreakable", t), t));
+					}
+					if(ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
+						meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
+					}
 				}
 
 				// Specific ItemMeta
@@ -1491,13 +1496,13 @@ public class ObjectGenerator {
 									String[] split = ingredient.val().split(":");
 									mat = StaticLayer.GetMaterialFromLegacy(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
 								} else {
-									mat = StaticLayer.GetConvertor().getMaterial(Integer.valueOf(ingredient.val()));
+									mat = StaticLayer.GetMaterialFromLegacy(Integer.valueOf(ingredient.val()), 0);
 								}
 								CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Numeric item formats (eg. \"0:0\" are deprecated.", t);
 							} catch (NumberFormatException ex) {}
 						}
 					} else if(ingredient instanceof CInt) {
-						mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(ingredient, t));
+						mat = StaticLayer.GetMaterialFromLegacy(Static.getInt32(ingredient, t), 0);
 						CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Numeric item ingredients are deprecated.", t);
 					} else if(ingredient instanceof CArray) {
 						mat = item(ingredient, t).getType();
@@ -1524,7 +1529,7 @@ public class ObjectGenerator {
 									String[] split = ingredient.val().split(":");
 									mat = StaticLayer.GetMaterialFromLegacy(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
 								} else {
-									mat = StaticLayer.GetConvertor().getMaterial(Integer.valueOf(ingredient.val()));
+									mat = StaticLayer.GetMaterialFromLegacy(Integer.valueOf(ingredient.val()), 0);
 								}
 								CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Numeric item formats (eg. \"0:0\" are deprecated.", t);
 							} catch (NumberFormatException ex) {}

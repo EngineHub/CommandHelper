@@ -107,6 +107,7 @@ public class EntityEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilter
 			Map<String, Construct> prefilter = event.getPrefilter();
@@ -184,6 +185,7 @@ public class EntityEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilter
 			Map<String, Construct> prefilter = event.getPrefilter();
@@ -1123,6 +1125,7 @@ public class EntityEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilter
 			Map<String, Construct> prefilter = event.getPrefilter();
@@ -1200,6 +1203,7 @@ public class EntityEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilter
 			Map<String, Construct> prefilter = event.getPrefilter();
@@ -1566,6 +1570,7 @@ public class EntityEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilter
 			Map<String, Construct> prefilter = event.getPrefilter();

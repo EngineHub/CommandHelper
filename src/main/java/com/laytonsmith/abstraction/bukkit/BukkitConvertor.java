@@ -197,12 +197,6 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
-	public MCMaterial getMaterial(int id) {
-		Material mat = BukkitMCLegacyMaterial.getMaterial(id);
-		return mat == null ? null : new BukkitMCMaterial(mat);
-	}
-
-	@Override
 	public MCMaterial GetMaterialFromLegacy(String mat, int data) {
 		Material m = BukkitMCLegacyMaterial.getMaterial(mat, data);
 		return m == null ? null : new BukkitMCMaterial(m);
@@ -235,31 +229,8 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
-	public MCItemStack GetItemStack(int id, int qty) {
-		Material mat = BukkitMCLegacyMaterial.getMaterial(id);
-		if(mat == null) {
-			return null;
-		}
-		return new BukkitMCItemStack(new ItemStack(mat, qty));
-	}
-
-	@Override
-	public MCItemStack GetItemStack(int id, int data, int qty) {
-		Material mat = BukkitMCLegacyMaterial.getMaterial(id, data);
-		if(mat == null) {
-			return null;
-		}
-		return new BukkitMCItemStack(new ItemStack(mat, qty, (short) data));
-	}
-
-	@Override
 	public MCItemStack GetItemStack(MCMaterial type, int qty) {
 		return new BukkitMCItemStack(new ItemStack(((BukkitMCMaterial) type).getHandle(), qty));
-	}
-
-	@Override
-	public MCItemStack GetItemStack(MCMaterial type, int data, int qty) {
-		return new BukkitMCItemStack(new ItemStack(((BukkitMCMaterial) type).getHandle(), qty, (short) data));
 	}
 
 	@Override
@@ -272,24 +243,6 @@ public class BukkitConvertor extends AbstractConvertor {
 			return null;
 		}
 		return new BukkitMCItemStack(new ItemStack(mat, qty));
-	}
-
-	@Override
-	public MCItemStack GetItemStack(String type, int data, int qty) {
-		Material mat = Material.getMaterial(type);
-		if(mat == null) {
-			mat = BukkitMCLegacyMaterial.getMaterial(type, data);
-		} else if(mat.getMaxDurability() == 0) {
-			// only do this for non-damageable items with data values, which don't exist for modern materials
-			Material converted = BukkitMCLegacyMaterial.getMaterial(type, data);
-			if(converted != null) {
-				mat = converted;
-			}
-		}
-		if(mat == null) {
-			return null;
-		}
-		return new BukkitMCItemStack(new ItemStack(mat, qty, (short) data));
 	}
 
 	@Override

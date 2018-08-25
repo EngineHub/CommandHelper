@@ -66,7 +66,6 @@ public class InventoryManagement {
 
 	private static final String ITEM_OBJECT = " An item is an associative array with the following keys,"
 			+ " name: the string id of the item,"
-			+ " data: The damage if a damageable item (0 is undamaged; each item type has its own max durability),"
 			+ " qty: The number of items in their inventory,"
 			+ " meta: An array of item meta or null if none exists (see {{function|get_itemmeta}} for details).";
 
@@ -2775,7 +2774,7 @@ public class InventoryManagement {
 	}
 
 	private static final String ITEM_MATCHING = " ---- The item array also serves as a map for what to compare."
-			+ " If included in the array, the value for the key \"data\", as well as \"display\", \"lore\" and "
+			+ " If included in the array, the values for the keys \"display\", \"lore\" and "
 			+ " \"enchants\" from the meta array, will be compared to the items in the inventory."
 			+ " More keys may be added in the future.";
 
@@ -2790,9 +2789,6 @@ public class InventoryManagement {
 	 */
 	private static boolean IsMatch(CArray map, MCItemStack is, MCItemStack iis, Target t) {
 		if(!is.getType().equals(iis.getType())) {
-			return false;
-		}
-		if((map == null || map.containsKey("data")) && is.getDurability() != iis.getDurability()) {
 			return false;
 		}
 		if(map != null && map.containsKey("meta")) {

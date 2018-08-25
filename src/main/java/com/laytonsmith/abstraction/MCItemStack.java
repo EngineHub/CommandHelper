@@ -4,16 +4,11 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import java.util.Map;
 
 public interface MCItemStack extends AbstractionObject {
-
-	short getDurability();
-
 	/**
 	 * @deprecated Magic value
 	 */
 	@Deprecated
 	int getTypeId();
-
-	void setDurability(short data);
 
 	void addEnchantment(MCEnchantment e, int level);
 

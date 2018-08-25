@@ -7,6 +7,7 @@ import org.bukkit.material.MaterialData;
 
 import java.util.HashMap;
 
+@SuppressWarnings("deprecation")
 public enum BukkitMCLegacyMaterial {
 	AIR(0),
 	STONE(1),

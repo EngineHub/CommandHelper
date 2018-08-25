@@ -456,7 +456,7 @@ public class Minecraft {
 				return CVoid.VOID;
 			}
 			if(e.equals(MCEffect.STEP_SOUND)) {
-				MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(data, 0);
 				if(mat == null || !mat.isBlock()) {
 					throw new CREFormatException("This effect requires a valid BlockID", t);
 				}
@@ -1072,7 +1072,7 @@ public class Minecraft {
 			MCMaterial mat = StaticLayer.GetMaterial(args[0].val());
 			if(mat == null) {
 				try {
-					mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(args[0], t));
+					mat = StaticLayer.GetMaterialFromLegacy(Static.getInt32(args[0], t), 0);
 				} catch (CRECastException ex) {
 					throw new CREIllegalArgumentException("Unable to get the material from: " + args[0].val(), t);
 				}

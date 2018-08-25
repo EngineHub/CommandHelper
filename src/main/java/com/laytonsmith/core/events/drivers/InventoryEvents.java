@@ -82,6 +82,7 @@ public class InventoryEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilters
 			Map<String, Construct> prefilter = event.getPrefilter();
@@ -223,6 +224,7 @@ public class InventoryEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilters
 			Map<String, Construct> prefilter = event.getPrefilter();
@@ -802,6 +804,7 @@ public class InventoryEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilters
 			Map<String, Construct> prefilter = event.getPrefilter();
