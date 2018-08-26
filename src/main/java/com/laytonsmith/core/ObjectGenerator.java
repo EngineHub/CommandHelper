@@ -443,6 +443,7 @@ public class ObjectGenerator {
 					ma.set("inventory", box, t);
 				} else if(bs instanceof MCBanner) {
 					MCBanner banner = (MCBanner) bs;
+					ma.set("basecolor", banner.getBaseColor().name(), t);
 					CArray patterns = new CArray(t, banner.numberOfPatterns());
 					for(MCPattern p : banner.getPatterns()) {
 						CArray pattern = CArray.GetAssociativeArray(t);
@@ -709,10 +710,21 @@ public class ObjectGenerator {
 						}
 					} else if(bs instanceof MCBanner) {
 						MCBanner banner = (MCBanner) bs;
-						banner.setBaseColor(MCDyeColor.WHITE);
 						if(ma.containsKey("basecolor")) {
-							MCDyeColor base = MCDyeColor.valueOf(ma.get("basecolor", t).val().toUpperCase());
-							banner.addPattern(StaticLayer.GetConvertor().GetPattern(base, MCPatternShape.BASE));
+							String baseString = ma.get("basecolor", t).val().toUpperCase();
+							try {
+								MCDyeColor base = MCDyeColor.valueOf(baseString);
+								banner.setBaseColor(base);
+							} catch (IllegalArgumentException ex) {
+								if(baseString.equals("SILVER")) {
+									// convert old DyeColor
+									banner.setBaseColor(MCDyeColor.LIGHT_GRAY);
+								} else {
+									throw ex;
+								}
+							}
+						} else {
+							banner.setBaseColor(MCDyeColor.WHITE);
 						}
 						if(ma.containsKey("patterns")) {
 							CArray array = ArgumentValidation.getArray(ma.get("patterns", t), t);
