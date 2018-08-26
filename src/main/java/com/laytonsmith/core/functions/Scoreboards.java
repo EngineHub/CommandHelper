@@ -433,9 +433,9 @@ public class Scoreboards {
 			} else {
 				s = getBoard(args[0].val(), t);
 			}
-			CArray ret = new CArray(t);
+			CArray ret = CArray.GetAssociativeArray(t);
 			for(MCTeam team : s.getTeams()) {
-				ret.push(getTeam(team, t), t);
+				ret.set(team.getName(), getTeam(team, t), t);
 			}
 			return ret;
 		}
@@ -453,8 +453,9 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "array {[scoreboard]} Returns an array of arrays about the teams on the given scoreboard,"
-					+ " which defaults to '" + MAIN + "' if not given. The arrays contain the keys name,"
-					+ " displayname, prefix, suffix, size, options, and players.";
+					+ " which defaults to '" + MAIN + "' if not given. The array keys are the team names,"
+					+ " and each value is a team array containing the keys: name, displayname, prefix, suffix, size,"
+					+ " options, and players.";
 		}
 
 		@Override
