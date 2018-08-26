@@ -15,6 +15,8 @@ import org.bukkit.command.SimpleCommandMap;
 
 public class BukkitMCCommandMap implements MCCommandMap {
 
+	private static boolean synced = true;
+
 	SimpleCommandMap scm;
 
 	public BukkitMCCommandMap(SimpleCommandMap invokeMethod) {
@@ -26,9 +28,28 @@ public class BukkitMCCommandMap implements MCCommandMap {
 		return scm;
 	}
 
+	/**
+	 * Syncs the command list with players and other command senders that use the vanilla dispatcher.
+	 */
+	private static void SyncCommands() {
+		if(CommandHelperPlugin.self.isFirstLoad()) {
+			// Craftbukkit already syncs after plugins are enabled, so we don't have to.
+			return;
+		}
+		if(synced) {
+			Bukkit.getScheduler().runTask(CommandHelperPlugin.self, () -> {
+				Server s = Bukkit.getServer();
+				ReflectionUtils.invokeMethod(s.getClass(), s, "syncCommands");
+				synced = true;
+			});
+		}
+		synced = false;
+	}
+
 	@Override
 	public void clearCommands() {
 		scm.clearCommands();
+		SyncCommands();
 	}
 
 	@Override
@@ -57,20 +78,14 @@ public class BukkitMCCommandMap implements MCCommandMap {
 	@Override
 	public boolean register(String fallback, MCCommand cmd) {
 		boolean success = scm.register(fallback, ((BukkitMCCommand) cmd).cmd);
-		if(!CommandHelperPlugin.self.isFirstLoad()) {
-			Server s = Bukkit.getServer();
-			ReflectionUtils.invokeMethod(s.getClass(), s, "syncCommands");
-		}
+		SyncCommands();
 		return success;
 	}
 
 	@Override
 	public boolean register(String label, String fallback, MCCommand cmd) {
 		boolean success = scm.register(label, fallback, ((BukkitMCCommand) cmd).cmd);
-		if(!CommandHelperPlugin.self.isFirstLoad()) {
-			Server s = Bukkit.getServer();
-			ReflectionUtils.invokeMethod(s.getClass(), s, "syncCommands");
-		}
+		SyncCommands();
 		return success;
 	}
 
@@ -79,6 +94,7 @@ public class BukkitMCCommandMap implements MCCommandMap {
 	public boolean unregister(MCCommand cmd) {
 		if(cmd.isRegistered()) {
 			((Map<String, Command>) ReflectionUtils.invokeMethod(scm.getClass(), scm, "getKnownCommands")).remove(cmd.getName());
+			SyncCommands();
 			return cmd.unregister(this);
 		} else {
 			return false;
