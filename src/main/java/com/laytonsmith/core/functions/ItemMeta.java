@@ -41,7 +41,8 @@ public class ItemMeta {
 
 	private static final String APPLICABLE_ITEM_META = "<ul>"
 			+ "<li>All items - \"display\" (string), \"lore\" (array of strings), \"enchants\" (An associative array of"
-			+ " enchantments with the type of enchantments as the key and the level as the value),"
+			+ " enchantments with the vanilla name of enchantment as the key, and value being an enchantment array with"
+			+ " the key \"elevel\" for the level of the enchantment),"
 			+ " \"flags\" (array). Possible flags: " + StringUtils.Join(MCItemFlag.values(), ", ", " or ") + "</li>"
 			+ "<li>Damageable: \"damage\" on the item (0 is undamaged; each item type has its own max durability),"
 			+ " \"unbreakable\" (boolean) and \"repair\" (int, repair cost)</li>"

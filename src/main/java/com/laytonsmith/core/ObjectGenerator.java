@@ -410,6 +410,7 @@ public class ObjectGenerator {
 			ma.set("display", display, t);
 			ma.set("lore", lore, t);
 			ma.set("enchants", enchants(meta.getEnchants(), t), t);
+			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
 
 			Set<MCItemFlag> itemFlags = meta.getItemFlags();
 			CArray flagArray = new CArray(t);
@@ -423,7 +424,6 @@ public class ObjectGenerator {
 			if(is.getType().getMaxDurability() > 0) {
 				ma.set("damage", new CInt(meta.getDamage(), t), t);
 				ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t);
-				ma.set("repair", new CInt(meta.getRepairCost(), t), t);
 			}
 
 			// Specific ItemMeta
@@ -650,6 +650,9 @@ public class ObjectGenerator {
 						throw new CREFormatException("Enchants field was expected to be an array of Enchantment arrays", t);
 					}
 				}
+				if(ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
+					meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
+				}
 				if(ma.containsKey("flags")) {
 					Construct flags = ma.get("flags", t);
 					if(flags instanceof CArray) {
@@ -669,9 +672,6 @@ public class ObjectGenerator {
 					}
 					if(ma.containsKey("unbreakable")) {
 						meta.setUnbreakable(Static.getBoolean(ma.get("unbreakable", t), t));
-					}
-					if(ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
-						meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
 					}
 				}
 
@@ -1159,7 +1159,10 @@ public class ObjectGenerator {
 	public CArray enchants(Map<MCEnchantment, Integer> map, Target t) {
 		CArray ret = CArray.GetAssociativeArray(t);
 		for(Map.Entry<MCEnchantment, Integer> entry : map.entrySet()) {
-			ret.set(entry.getKey().getKey(), new CInt(entry.getValue(), t), t);
+			CArray enchant = CArray.GetAssociativeArray(t);
+			enchant.set("etype", new CString(entry.getKey().getName(), t), t);
+			enchant.set("elevel", new CInt(entry.getValue(), t), t);
+			ret.set(entry.getKey().getKey(), enchant, t);
 		}
 		return ret;
 	}
@@ -1167,30 +1170,34 @@ public class ObjectGenerator {
 	public Map<MCEnchantment, Integer> enchants(CArray enchantArray, Target t) {
 		Map<MCEnchantment, Integer> ret = new HashMap<>();
 		for(String key : enchantArray.stringKeySet()) {
+			MCEnchantment etype = null;
+			int elevel;
+
+			Construct value = enchantArray.get(key, t);
 			if(enchantArray.isAssociative()) {
-				MCEnchantment etype = StaticLayer.GetEnchantmentByName(key);
-				if(etype == null) {
-					throw new CREEnchantmentException("Unknown enchantment type: " + key, t);
+				etype = StaticLayer.GetEnchantmentByName(key);
+				if(etype != null && value instanceof CInt) {
+					ret.put(etype, Static.getInt32(value, t));
+					continue;
 				}
-				int elevel = Static.getInt32(enchantArray.get(key, t), t);
-				ret.put(etype, elevel);
-			} else {
-				// legacy
-				CArray ea = Static.getArray(enchantArray.get(key, t), t);
+			}
+
+			CArray ea = Static.getArray(value, t);
+			if(etype == null) {
 				String setype = ea.get("etype", t).val();
-				MCEnchantment etype = StaticLayer.GetEnchantmentByName(setype);
-				int elevel = Static.getInt32(ea.get("elevel", t), t);
+				etype = StaticLayer.GetEnchantmentByName(setype);
 				if(etype == null) {
 					if(setype.equals("SWEEPING")) {
 						// data from 1.11.2, changed in 1.12
 						etype = StaticLayer.GetEnchantmentByName("SWEEPING_EDGE");
 					}
 					if(etype == null) {
-						throw new CREEnchantmentException("Unknown enchantment type at " + key, t);
+						throw new CREEnchantmentException("Unknown enchantment type: " + setype, t);
 					}
 				}
-				ret.put(etype, elevel);
 			}
+			elevel = Static.getInt32(ea.get("elevel", t), t);
+			ret.put(etype, elevel);
 		}
 		return ret;
 	}
